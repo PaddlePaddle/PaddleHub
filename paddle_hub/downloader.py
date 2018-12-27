@@ -1,11 +1,108 @@
+# coding=utf-8
+from __future__ import print_function
+from __future__ import division
+from __future__ import print_function
+
 from urllib.request import urlretrieve
 from tqdm import tqdm
 
 import os
+import sys
+import hashlib
+import requests
 import tempfile
+import tarfile
 """
 tqdm prograss hook
 """
+
+__all__ = [
+    'MODULE_HOME',
+    'download',
+    'md5file',
+    'split',
+    'cluster_files_reader',
+    'convert',
+]
+
+MODULE_HOME = os.path.expanduser('~/.cache/paddle/module')
+
+
+# When running unit tests, there could be multiple processes that
+# trying to create MODULE_HOME directory simultaneously, so we cannot
+# use a if condition to check for the existence of the directory;
+# instead, we use the filesystem as the synchronization mechanism by
+# catching returned errors.
+def must_mkdirs(path):
+    try:
+        os.makedirs(MODULE_HOME)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise
+        pass
+
+
+def md5file(fname):
+    hash_md5 = hashlib.md5()
+    f = open(fname, "rb")
+    for chunk in iter(lambda: f.read(4096), b""):
+        hash_md5.update(chunk)
+    f.close()
+    return hash_md5.hexdigest()
+
+
+def download_and_uncompress(url, save_name=None):
+    module_name = url.split("/")[-2]
+    dirname = os.path.join(MODULE_HOME, module_name)
+    print("download to dir", dirname)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+    #TODO add download md5 file to verify file completeness
+
+    file_name = os.path.join(
+        dirname,
+        url.split('/')[-1] if save_name is None else save_name)
+
+    retry = 0
+    retry_limit = 3
+    while not (os.path.exists(file_name)):
+        if os.path.exists(file_name):
+            print("file md5", md5file(file_name))
+        if retry < retry_limit:
+            retry += 1
+        else:
+            raise RuntimeError(
+                "Cannot download {0} within retry limit {1}".format(
+                    url, retry_limit))
+        print("Cache file %s not found, downloading %s" % (file_name, url))
+        r = requests.get(url, stream=True)
+        total_length = r.headers.get('content-length')
+
+        if total_length is None:
+            with open(file_name, 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+        else:
+            with open(file_name, 'wb') as f:
+                dl = 0
+                total_length = int(total_length)
+                for data in r.iter_content(chunk_size=4096):
+                    dl += len(data)
+                    f.write(data)
+                    done = int(50 * dl / total_length)
+                    sys.stdout.write(
+                        "\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
+                    sys.stdout.flush()
+
+    print("file download completed!", file_name)
+    with tarfile.open(file_name, "r:gz") as tar:
+        file_names = tar.getnames()
+        print(file_names)
+        module_dir = os.path.join(dirname, file_names[0])
+        for file_name in file_names:
+            tar.extract(file_name, dirname)
+
+    return module_dir
 
 
 class TqdmProgress(tqdm):
@@ -72,6 +169,10 @@ class DownloadManager(object):
 
 
 if __name__ == "__main__":
-    link = "ftp://nj03-rp-m22nlp062.nj03.baidu.com//home/disk0/chenzeyu01/movie/movie_summary.txt"
-    dl = DownloadManager()
-    dl.download_and_uncompress(link, "./tmp")
+    link = "http://paddlehub.bj.bcebos.com/word2vec/word2vec-dim16-simple-example-1.tar.gz"
+
+    module_path = download_and_uncompress(link)
+    print("module path", module_path)
+
+    # dl = DownloadManager()
+    # dl.download_and_uncompress(link, "./tmp")
