@@ -1,3 +1,17 @@
+#   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # coding=utf-8
 from __future__ import print_function
 from __future__ import division
@@ -17,14 +31,11 @@ tqdm prograss hook
 """
 
 __all__ = [
-    'MODULE_HOME',
-    'download',
-    'md5file',
-    'split',
-    'cluster_files_reader',
-    'convert',
+    'MODULE_HOME', 'download', 'md5file', 'split', 'cluster_files_reader',
+    'convert', 'download_and_uncompress'
 ]
 
+# TODO(ZeyuChen) add environment varialble to set MODULE_HOME
 MODULE_HOME = os.path.expanduser('~/.cache/paddle/module')
 
 
@@ -58,8 +69,7 @@ def download_and_uncompress(url, save_name=None):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-    #TODO add download md5 file to verify file completeness
-
+    #TODO(ZeyuChen) add download md5 file to verify file completeness
     file_name = os.path.join(
         dirname,
         url.split('/')[-1] if save_name is None else save_name)
@@ -83,6 +93,7 @@ def download_and_uncompress(url, save_name=None):
             with open(file_name, 'wb') as f:
                 shutil.copyfileobj(r.raw, f)
         else:
+            #TODO(ZeyuChen) upgrade to tqdm process
             with open(file_name, 'wb') as f:
                 dl = 0
                 total_length = int(total_length)
@@ -95,6 +106,8 @@ def download_and_uncompress(url, save_name=None):
                     sys.stdout.flush()
 
     print("file download completed!", file_name)
+    #TODO(ZeyuChen) add md5 check error and file incompleted error, then raise
+    # them and catch them
     with tarfile.open(file_name, "r:gz") as tar:
         file_names = tar.getnames()
         print(file_names)
@@ -169,6 +182,7 @@ class DownloadManager(object):
 
 
 if __name__ == "__main__":
+    # TODO(ZeyuChen) add unit test
     link = "http://paddlehub.bj.bcebos.com/word2vec/word2vec-dim16-simple-example-1.tar.gz"
 
     module_path = download_and_uncompress(link)

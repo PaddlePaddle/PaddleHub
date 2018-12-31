@@ -5,4 +5,5 @@ from __future__ import print_function
 import paddle.fluid as fluid
 
 from paddle_hub.module import Module
-from paddle_hub.module import ModuleSpec
+from paddle_hub.module import ModuleDesc
+from paddle_hub.downloader import download_and_uncompress
