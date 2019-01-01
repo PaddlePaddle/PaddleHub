@@ -91,6 +91,8 @@ def parse_args():
 
 
 def remove_feed_fetch_op(program):
+    """ remove feed and fetch operator and variable for fine-tuning
+    """
     print("remove feed fetch op")
     block = program.global_block()
     need_to_remove_op_index = []
@@ -168,8 +170,10 @@ def train_net(train_reader,
     main_program = fluid.Program()
     startup_program = fluid.Program()
 
+    # use switch program to test fine-tuning
     fluid.framework.switch_main_program(module.get_inference_program())
 
+    # remove feed fetch operator and variable
     remove_feed_fetch_op(fluid.default_main_program())
 
     label = fluid.layers.data(name="label", shape=[1], dtype="int64")
