@@ -17,21 +17,19 @@ from __future__ import division
 from __future__ import print_function
 
 import paddle.fluid as fluid
-import paddle_hub as hub
 import numpy as np
 import tempfile
 import os
 
 from collections import defaultdict
-from paddle_hub.downloader import download_and_uncompress
+from downloader import download_and_uncompress
 
-__all__ = ["Module", "ModuleSpec"]
+__all__ = ["Module", "ModuleDesc"]
 
 
 class Module(object):
     def __init__(self, module_url):
         # donwload module
-        #module_dir = downloader.download_and_uncompress(module_url)
         module_dir = download_and_uncompress(module_url)
 
         # load paddle inference model
@@ -49,7 +47,9 @@ class Module(object):
         print(self.fetch_targets)
 
         # load assets
-        # self._load_assets(module_dir)
+        self.dict = defaultdict(int)
+        self.dict.setdefault(0)
+        self._load_assets(module_dir)
 
     #TODO(ZeyuChen): Need add register more signature to execute different
     # implmentation
@@ -60,7 +60,7 @@ class Module(object):
         # if it's NLP word embedding task, then do words preprocessing
         # if it's image classification or image feature task do the other works
 
-        # if it's 
+        # if it's
         word_ids_lod_tensor = self._process_input(inputs)
         np_words_id = np.array(word_ids_lod_tensor)
         print("word_ids_lod_tensor\n", np_words_id)
@@ -71,9 +71,9 @@ class Module(object):
             fetch_list=self.fetch_targets,
             return_numpy=False)  # return_numpy=Flase is important
 
-        print(self.feed_target_names)
-        print(self.fetch_targets)
-        # np_result = np.array(results[0])
+        print("module fetch_target_names", self.feed_target_names)
+        print("module fetch_targets", self.fetch_targets)
+        np_result = np.array(results[0])
 
         return np_result
 
@@ -128,8 +128,6 @@ class Module(object):
 
     # load assets folder
     def _load_assets(self, module_dir):
-        self.dict = defaultdict(int)
-        self.dict.setdefault(0)
         assets_dir = os.path.join(module_dir, "assets")
         tokens_path = os.path.join(assets_dir, "tokens.txt")
         word_id = 0
@@ -153,11 +151,6 @@ class Module(object):
             os.makedirs(path)
 
 
-class ModuleImpl(object):
-    def get_signature_name():
-        pass
-
-
 class ModuleDesc(object):
     def __init__(self):
         pass
@@ -165,22 +158,25 @@ class ModuleDesc(object):
     @staticmethod
     def _mkdir(path):
         if not os.path.exists(path):
-            print("mkdir", path)
             os.makedirs(path)
 
     @staticmethod
-    def save_dict(path, word_dict, dict_name="dict.txt"):
+    def save_dict(path, word_dict, dict_name):
+        """ Save dictionary for NLP module
+        """
         ModuleDesc._mkdir(path)
-        with open(os.path.join(path, "tokens.txt"), "w") as fo:
+        with open(os.path.join(path, dict_name), "w") as fo:
             print("tokens.txt path", os.path.join(path, "tokens.txt"))
             dict_str = "\n".join(word_dict)
             fo.write(dict_str)
 
     @staticmethod
-    def save_module_dict(module_path, word_dict):
+    def save_module_dict(module_path, word_dict, dict_name="dict.txt"):
+        """ Save dictionary for NLP module
+        """
         assets_path = os.path.join(module_path, "assets")
         print("save_module_dict", assets_path)
-        ModuleDesc.save_dict(assets_path, word_dict)
+        ModuleDesc.save_dict(assets_path, word_dict, dict_name)
         pass
 
 
