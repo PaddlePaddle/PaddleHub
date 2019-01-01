@@ -51,7 +51,16 @@ class Module(object):
         # load assets
         # self._load_assets(module_dir)
 
+    #TODO(ZeyuChen): Need add register more signature to execute different
+    # implmentation
     def __call__(self, inputs=None, signature=None):
+        """ Call default signature and return results
+        """
+        # TODO(ZeyuChen): add proto spec to check which task we need to run
+        # if it's NLP word embedding task, then do words preprocessing
+        # if it's image classification or image feature task do the other works
+
+        # if it's 
         word_ids_lod_tensor = self._process_input(inputs)
         np_words_id = np.array(word_ids_lod_tensor)
         print("word_ids_lod_tensor\n", np_words_id)
@@ -160,7 +169,7 @@ class ModuleDesc(object):
             os.makedirs(path)
 
     @staticmethod
-    def save_dict(path, word_dict):
+    def save_dict(path, word_dict, dict_name="dict.txt"):
         ModuleDesc._mkdir(path)
         with open(os.path.join(path, "tokens.txt"), "w") as fo:
             print("tokens.txt path", os.path.join(path, "tokens.txt"))
