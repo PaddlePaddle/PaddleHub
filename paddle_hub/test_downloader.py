@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import downloader as dl
 import unittest
+import downloader as dl
 
 
 class TestDownloader(unittest.TestCase):
     def test_download(self):
         link = "http://paddlehub.bj.bcebos.com/word2vec/word2vec-dim16-simple-example-1.tar.gz"
-        module_path = dl.
-        ownload_and_uncompress(link)
+        module_path = dl.download_and_uncompress(link)
 
 
 if __name__ == "__main__":

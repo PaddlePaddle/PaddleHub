@@ -26,14 +26,8 @@ import hashlib
 import requests
 import tempfile
 import tarfile
-"""
-tqdm prograss hook
-"""
 
-__all__ = [
-    'MODULE_HOME', 'download', 'md5file', 'split', 'cluster_files_reader',
-    'convert', 'download_and_uncompress'
-]
+__all__ = ['MODULE_HOME', 'download', 'md5file', 'download_and_uncompress']
 
 # TODO(ZeyuChen) add environment varialble to set MODULE_HOME
 MODULE_HOME = os.path.expanduser('~/.cache/paddle/module')
@@ -119,6 +113,9 @@ def download_and_uncompress(url, save_name=None):
 
 
 class TqdmProgress(tqdm):
+    """
+    tqdm prograss hook
+    """
     last_block = 0
 
     def update_to(self, block_num=1, block_size=1, total_size=None):
