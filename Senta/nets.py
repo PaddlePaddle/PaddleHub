@@ -28,8 +28,8 @@ def bow_net(data,
     fc_2 = fluid.layers.fc(
         input=fc_1, size=hid_dim2, act="tanh", name="bow_fc2")
     # softmax layer
-    prediction = fluid.layers.fc(input=[fc_2], size=class_dim, act="softmax",
-            name="fc_softmax")
+    prediction = fluid.layers.fc(
+        input=[fc_2], size=class_dim, act="softmax", name="fc_softmax")
     cost = fluid.layers.cross_entropy(input=prediction, label=label)
     avg_cost = fluid.layers.mean(x=cost)
     acc = fluid.layers.accuracy(input=prediction, label=label)

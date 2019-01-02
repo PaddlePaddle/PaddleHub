@@ -1,6 +1,9 @@
 # coding: utf-8
 import sys
+# NOTE: just hack for fast test
 sys.path.append("../")
+sys.path.append("../paddle_hub/")
+import os
 import time
 import unittest
 import contextlib
@@ -114,7 +117,7 @@ def remove_feed_fetch_op(program):
 
 def train_net(train_reader,
               word_dict,
-              network,
+              network_name,
               use_gpu,
               parallel,
               save_dirname,
@@ -124,39 +127,85 @@ def train_net(train_reader,
     """
     train network
     """
-    if network == "bilstm_net":
+    if network_name == "bilstm_net":
         network = bilstm_net
-    elif network == "bow_net":
+    elif network_name == "bow_net":
         network = bow_net
-    elif network == "cnn_net":
+    elif network_name == "cnn_net":
         network = cnn_net
-    elif network == "lstm_net":
+    elif network_name == "lstm_net":
         network = lstm_net
-    elif network == "gru_net":
+    elif network_name == "gru_net":
         network = gru_net
     else:
         print("unknown network type")
         return
-    # word seq data
-    # data = fluid.layers.data(
-    #     name="words", shape=[1], dtype="int64", lod_level=1)
 
-    # if not parallel:
-    #     # set network
-    #     cost, acc, pred, emb = network(data, label, len(word_dict) + 2)
-    # else:
-    #     places = fluid.layers.get_places(device_count=2)
-    #     pd = fluid.layers.ParallelDo(places)
-    #     with pd.do():
-    #         # set network
-    #         cost, acc, prediction, emb = network(
-    #             pd.read_input(data), pd.read_input(label),
-    #             len(word_dict) + 2)
-    #         pd.write_output(cost)
-    #         pd.write_output(acc)
-    #     cost, acc = pd()
-    #     cost = fluid.layers.mean(cost)
-    #     acc = fluid.layers.mean(acc)
+    label = fluid.layers.data(name="label", shape=[1], dtype="int64")
+    data = fluid.layers.data(
+        name="words", shape=[1], dtype="int64", lod_level=1)
+    cost, acc, pred, emb = network(data, label, len(word_dict) + 2)
+
+    # set optimizer
+    sgd_optimizer = fluid.optimizer.Adagrad(learning_rate=lr)
+    sgd_optimizer.minimize(cost)
+
+    # set place, executor, datafeeder
+    place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
+    exe = fluid.Executor(place)
+    feeder = fluid.DataFeeder(feed_list=["words", "label"], place=place)
+    exe.run(fluid.default_startup_program())
+    # start training...
+
+    for pass_id in range(pass_num):
+        data_size, data_count, total_acc, total_cost = 0, 0, 0.0, 0.0
+        for batch in train_reader():
+            avg_cost_np, avg_acc_np = exe.run(
+                fluid.default_main_program(),
+                feed=feeder.feed(batch),
+                fetch_list=[cost, acc],
+                return_numpy=True)
+            data_size = len(batch)
+            total_acc += data_size * avg_acc_np
+            total_cost += data_size * avg_cost_np
+            data_count += data_size
+        avg_cost = total_cost / data_count
+        avg_acc = total_acc / data_count
+        print("[train info]: pass_id: %d, avg_acc: %f, avg_cost: %f" %
+              (pass_id, avg_acc, avg_cost))
+
+    # save the model
+    module_path = os.path.join(save_dirname, network_name)
+    hub.ModuleDesc.save_module_dict(
+        module_path=module_path, word_dict=word_dict)
+    fluid.io.save_inference_model(module_path, ["words"], emb, exe)
+
+
+def retrain_net(train_reader,
+                word_dict,
+                network_name,
+                use_gpu,
+                parallel,
+                save_dirname,
+                lr=0.002,
+                batch_size=128,
+                pass_num=30):
+    """
+    train network
+    """
+    if network_name == "bilstm_net":
+        network = bilstm_net
+    elif network_name == "bow_net":
+        network = bow_net
+    elif network_name == "cnn_net":
+        network = cnn_net
+    elif network_name == "lstm_net":
+        network = lstm_net
+    elif network_name == "gru_net":
+        network = gru_net
+    else:
+        print("unknown network type")
+        return
 
     dict_dim = len(word_dict) + 2
     emb_dim = 128
@@ -164,7 +213,8 @@ def train_net(train_reader,
     hid_dim2 = 96
     class_dim = 2
 
-    module_link = "https://paddlehub.cdn.bcebos.com/senta/bow_module_3.tar.gz"
+    # module_link = "https://paddlehub.cdn.bcebos.com/senta/bow_module_3.tar.gz"
+    module_link = "./models/bow_net/"
     module = hub.Module(module_link)
 
     main_program = fluid.Program()
@@ -178,6 +228,7 @@ def train_net(train_reader,
 
     label = fluid.layers.data(name="label", shape=[1], dtype="int64")
     data = fluid.default_main_program().global_block().var("words")
+    #TODO(ZeyuChen): how to get output paramter according to proto config
     emb = module.get_module_output()
 
     # # # embedding layer
@@ -197,20 +248,6 @@ def train_net(train_reader,
     cost = fluid.layers.mean(
         fluid.layers.cross_entropy(input=pred, label=label))
     acc = fluid.layers.accuracy(input=pred, label=label)
-
-    # Original Senta BoW networks
-    # label = fluid.layers.data(name="label", shape=[1], dtype="int64")
-    # data = fluid.layers.data(
-    #     name="words", shape=[1], dtype="int64", lod_level=1)
-    # cost, acc, pred, emb = network(data, label, len(word_dict) + 2)
-
-    # print("new program")
-    # with open("program_senta.prototxt", "w") as fo:
-    #     fo.write(str(fluid.default_main_program()))
-    #     print("program_senta", fluid.default_main_program())
-    with open("senta_load_module.prototxt", "w") as fo:
-        fo.write(str(fluid.default_main_program()))
-        print("senta_load_module", fluid.default_main_program())
 
     # set optimizer
     sgd_optimizer = fluid.optimizer.Adagrad(learning_rate=lr)
@@ -246,8 +283,8 @@ def train_net(train_reader,
         # print("senta_load_module", fluid.default_main_program())
 
     # save the model
-    bow_module_path = save_dirname + "/" + "bow_module"
-    fluid.io.save_inference_model(bow_module_path, ["words"], emb, exe)
+    module_path = os.path.join(save_dirname, network_name + "_retrain")
+    fluid.io.save_inference_model(module_path, ["words"], emb, exe)
 
 
 def eval_net(test_reader, use_gpu, model_path=None):
@@ -339,9 +376,12 @@ def main(args):
                                                      args.word_dict_path,
                                                      args.batch_size, args.mode)
 
-        train_net(train_reader, word_dict, args.model_type, args.use_gpu,
-                  args.is_parallel, args.model_path, args.lr, args.batch_size,
-                  args.num_passes)
+        # train_net(train_reader, word_dict, args.model_type, args.use_gpu,
+        #           args.is_parallel, args.model_path, args.lr, args.batch_size,
+        #           args.num_passes)
+        retrain_net(train_reader, word_dict, args.model_type, args.use_gpu,
+                    args.is_parallel, args.model_path, args.lr, args.batch_size,
+                    args.num_passes)
 
     # eval mode
     elif args.mode == "eval":

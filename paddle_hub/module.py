@@ -19,18 +19,33 @@ from __future__ import print_function
 import paddle.fluid as fluid
 import numpy as np
 import tempfile
+import utils
 import os
 
 from collections import defaultdict
 from downloader import download_and_uncompress
 
 __all__ = ["Module", "ModuleDesc"]
+DICT_NAME = "dict.txt"
+ASSETS_PATH = "assets"
+
+
+def mkdir(path):
+    """ the same as the shell command mkdir -p "
+    """
+    if not os.path.exists(path):
+        os.makedirs(path)
 
 
 class Module(object):
     def __init__(self, module_url):
         # donwload module
-        module_dir = download_and_uncompress(module_url)
+        if module_url.startswith("http"):  # if it's remote url links
+            # if it's remote url link, then download and uncompress it
+            module_dir = download_and_uncompress(module_url)
+        else:
+            # otherwise it's local path, no need to deal with it
+            module_dir = module_url
 
         # load paddle inference model
         place = fluid.CPUPlace()
@@ -90,6 +105,7 @@ class Module(object):
     def get_module_output(self):
         for var in self.inference_program.list_vars():
             print(var)
+            # NOTE: just hack for load Senta's
             if var.name == "embedding_0.tmp_0":
                 return var
 
@@ -128,17 +144,22 @@ class Module(object):
 
     # load assets folder
     def _load_assets(self, module_dir):
-        assets_dir = os.path.join(module_dir, "assets")
-        tokens_path = os.path.join(assets_dir, "tokens.txt")
+        assets_dir = os.path.join(module_dir, ASSETS_PATH)
+        tokens_path = os.path.join(assets_dir, DICT_NAME)
         word_id = 0
 
         with open(tokens_path) as fi:
             words = fi.readlines()
-            words = map(str.strip, words)
-            for w in words:
-                self.dict[w] = word_id
-                word_id += 1
-                print(w, word_id)
+            #TODO(ZeyuChen) check whether word id is duplicated and valid
+            for line in fi:
+                w, w_id = line.split()
+                self.dict[w] = int(w_id)
+
+            # words = map(str.strip, words)
+            # for w in words:
+            #     self.dict[w] = word_id
+            #     word_id += 1
+            #     print(w, word_id)
 
     def add_module_feed_list(self, feed_list):
         self.feed_list = feed_list
@@ -146,35 +167,27 @@ class Module(object):
     def add_module_output_list(self, output_list):
         self.output_list = output_list
 
-    def _mkdir(self, path):
-        if not os.path.exists(path):
-            os.makedirs(path)
-
 
 class ModuleDesc(object):
     def __init__(self):
         pass
 
     @staticmethod
-    def _mkdir(path):
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-    @staticmethod
     def save_dict(path, word_dict, dict_name):
         """ Save dictionary for NLP module
         """
-        ModuleDesc._mkdir(path)
+        mkdir(path)
         with open(os.path.join(path, dict_name), "w") as fo:
-            print("tokens.txt path", os.path.join(path, "tokens.txt"))
-            dict_str = "\n".join(word_dict)
-            fo.write(dict_str)
+            print("tokens.txt path", os.path.join(path, DICT_NAME))
+            for w in word_dict:
+                w_id = word_dict[w]
+                fo.write("{}\t{}\n".format(w, w_id))
 
     @staticmethod
-    def save_module_dict(module_path, word_dict, dict_name="dict.txt"):
+    def save_module_dict(module_path, word_dict, dict_name=DICT_NAME):
         """ Save dictionary for NLP module
         """
-        assets_path = os.path.join(module_path, "assets")
+        assets_path = os.path.join(module_path, ASSETS_PATH)
         print("save_module_dict", assets_path)
         ModuleDesc.save_dict(assets_path, word_dict, dict_name)
         pass
