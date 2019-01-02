@@ -42,11 +42,12 @@ class Module(object):
         # donwload module
         if module_url.startswith("http"):
             # if it's remote url link, then download and uncompress it
-            module_name, module_dir = download_and_uncompress(module_url)
+            self.module_name, self.module_dir = download_and_uncompress(
+                module_url)
         else:
             # otherwise it's local path, no need to deal with it
-            module_dir = module_url
-            module_name = module_url.split()[-1]
+            self.module_dir = module_url
+            self.module_name = module_url.split()[-1]
 
         # load paddle inference model
         place = fluid.CPUPlace()
@@ -62,6 +63,8 @@ class Module(object):
         print("fetch_targets")
         print(self.fetch_targets)
 
+        config = ModuleConfig()
+        config.load(self.module_dir)
         # load assets
         # self.dict = defaultdict(int)
         # self.dict.setdefault(0)
@@ -144,20 +147,21 @@ class Module(object):
         return lod_tensor
 
     def _word_id_mapping(self, inputs):
-        return list(map(lambda x: self.dict[x], inputs))
+        word_dict = self.config.get_dict()
+        return list(map(lambda x: word_dict[x], inputs))
 
-    # load assets folder
-    def _load_assets(self, module_dir):
-        assets_dir = os.path.join(module_dir, ASSETS_NAME)
-        dict_path = os.path.join(assets_dir, DICT_NAME)
-        word_id = 0
+    # # load assets folder
+    # def _load_assets(self, module_dir):
+    #     assets_dir = os.path.join(module_dir, ASSETS_NAME)
+    #     dict_path = os.path.join(assets_dir, DICT_NAME)
+    #     word_id = 0
 
-        with open(dict_path) as fi:
-            words = fi.readlines()
-            #TODO(ZeyuChen) check whether word id is duplicated and valid
-            for line in fi:
-                w, w_id = line.split()
-                self.dict[w] = int(w_id)
+    #     with open(dict_path) as fi:
+    #         words = fi.readlines()
+    #         #TODO(ZeyuChen) check whether word id is duplicated and valid
+    #         for line in fi:
+    #             w, w_id = line.split()
+    #             self.dict[w] = int(w_id)
 
     def add_module_feed_list(self, feed_list):
         self.feed_list = feed_list
@@ -167,10 +171,12 @@ class Module(object):
 
 
 class ModuleConfig(object):
-    def __init__(self, module_dir):
+    def __init__(self, module_dir, module_name=None):
         # generate model desc protobuf
         self.module_dir = module_dir
-        self.desc = module_desc_pb3.ModuleDesc()
+        self.desc = module_desc_pb2.ModuleDesc()
+        if module_name == None:
+            module_name = module_dir.split("/")[-1]
         self.desc.name = module_name
         print("desc.name=", self.desc.name)
         self.desc.signature = "default"
@@ -178,7 +184,11 @@ class ModuleConfig(object):
         self.desc.contain_assets = True
         print("desc.signature=", self.desc.contain_assets)
 
-    def load(module_dir):
+        # init dict
+        self.dict = defaultdict(int)
+        self.dict.setdefault(0)
+
+    def load(self, module_dir):
         """load module config from module dir
         """
         #TODO(ZeyuChen): check module_desc.pb exsitance
@@ -187,9 +197,7 @@ class ModuleConfig(object):
 
         if self.desc.contain_assets:
             # load assets
-            self.dict = defaultdict(int)
-            self.dict.setdefault(0)
-            assets_dir = os.path.join(self.module_dir, assets_dir)
+            assets_dir = os.path.join(self.module_dir, ASSETS_NAME)
             dict_path = os.path.join(assets_dir, DICT_NAME)
             word_id = 0
 
@@ -200,27 +208,30 @@ class ModuleConfig(object):
                     w, w_id = line.split()
                     self.dict[w] = int(w_id)
 
-    def dump():
+    def dump(self):
         # save module_desc.proto first
-        pb_path = os.path.join(self.module, "module_desc.pb")
+        pb_path = os.path.join(self.module_dir, "module_desc.pb")
         with open(pb_path, "wb") as fo:
             fo.write(self.desc.SerializeToString())
 
         # save assets/dictionary
-        assets_dir = os.path.join(self.module_dir, assets_dir)
+        assets_dir = os.path.join(self.module_dir, ASSETS_NAME)
         mkdir(assets_dir)
         with open(os.path.join(assets_dir, DICT_NAME), "w") as fo:
-            for w in word_dict:
-                w_id = word_dict[w]
+            for w in self.dict:
+                w_id = self.dict[w]
                 fo.write("{}\t{}\n".format(w, w_id))
 
-    def save_dict(word_dict, dict_name=DICT_NAME):
+    def save_dict(self, word_dict, dict_name=DICT_NAME):
         """ Save dictionary for NLP module
         """
-        mkdir(path)
+        mkdir(self.module_dir)
         with open(os.path.join(self.module_dir, DICT_NAME), "w") as fo:
             for w in word_dict:
                 self.dict[w] = word_dict[w]
+
+    def get_dict(self):
+        return self.dict
 
 
 class ModuleUtils(object):
