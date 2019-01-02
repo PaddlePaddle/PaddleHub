@@ -6,4 +6,5 @@ import paddle.fluid as fluid
 
 from paddle_hub.module import Module
 from paddle_hub.module import ModuleConfig
+from paddle_hub.module import ModuleUtils
 from paddle_hub.downloader import download_and_uncompress

@@ -152,10 +152,12 @@ def train_net(train_reader,
               (pass_id, avg_acc, avg_cost))
 
     # save the model
-    module_path = os.path.join(save_dirname, network_name)
-    hub.ModuleDesc.save_module_dict(
-        module_path=module_path, word_dict=word_dict)
-    fluid.io.save_inference_model(module_path, ["words"], emb, exe)
+    module_dir = os.path.join(save_dirname, network_name)
+    fluid.io.save_inference_model(module_dir, ["words"], emb, exe)
+
+    config = hub.ModuleConfig(module_dir)
+    config.save_dict(word_dict=word_dict)
+    config.dump()
 
 
 def retrain_net(train_reader,
@@ -209,10 +211,7 @@ def retrain_net(train_reader,
     #TODO(ZeyuChen): how to get output paramter according to proto config
     emb = module.get_module_output()
 
-    print(
-        "adfjkajdlfjoqi jqiorejlmsfdlkjoi jqwierjoajsdklfjoi qjerijoajdfiqwjeor adfkalsf"
-    )
-    # # # embedding layer
+    # # embedding layer
     # emb = fluid.layers.embedding(input=data, size=[dict_dim, emb_dim])
     # #input=data, size=[dict_dim, emb_dim], param_attr="bow_embedding")
     # # bow layer
@@ -264,8 +263,8 @@ def retrain_net(train_reader,
         # print("senta_load_module", fluid.default_main_program())
 
     # save the model
-    module_path = os.path.join(save_dirname, network_name + "_retrain")
-    fluid.io.save_inference_model(module_path, ["words"], emb, exe)
+    module_dir = os.path.join(save_dirname, network_name + "_retrain")
+    fluid.io.save_inference_model(module_dir, ["words"], emb, exe)
 
 
 def eval_net(test_reader, use_gpu, model_path=None):

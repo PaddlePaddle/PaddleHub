@@ -46,15 +46,16 @@ class Module(object):
                 module_url)
         else:
             # otherwise it's local path, no need to deal with it
+            print("Module.__init__", module_url)
             self.module_dir = module_url
-            self.module_name = module_url.split()[-1]
+            self.module_name = module_url.split("/")[-1]
 
         # load paddle inference model
         place = fluid.CPUPlace()
         self.exe = fluid.Executor(fluid.CPUPlace())
         [self.inference_program, self.feed_target_names,
          self.fetch_targets] = fluid.io.load_inference_model(
-             dirname=module_dir, executor=self.exe)
+             dirname=self.module_dir, executor=self.exe)
 
         print("inference_program")
         print(self.inference_program)
@@ -63,8 +64,8 @@ class Module(object):
         print("fetch_targets")
         print(self.fetch_targets)
 
-        config = ModuleConfig()
-        config.load(self.module_dir)
+        config = ModuleConfig(self.module_dir)
+        config.load()
         # load assets
         # self.dict = defaultdict(int)
         # self.dict.setdefault(0)
@@ -188,11 +189,12 @@ class ModuleConfig(object):
         self.dict = defaultdict(int)
         self.dict.setdefault(0)
 
-    def load(self, module_dir):
+    def load(self):
         """load module config from module dir
         """
         #TODO(ZeyuChen): check module_desc.pb exsitance
-        with open(pb_file_path, "rb") as fi:
+        pb_path = os.path.join(self.module_dir, "module_desc.pb")
+        with open(pb_path, "rb") as fi:
             self.desc.ParseFromString(fi.read())
 
         if self.desc.contain_assets:
