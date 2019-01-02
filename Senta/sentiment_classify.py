@@ -20,7 +20,6 @@ from nets import cnn_net
 from nets import lstm_net
 from nets import bilstm_net
 from nets import gru_net
-
 logger = logging.getLogger("paddle-fluid")
 logger.setLevel(logging.INFO)
 
@@ -91,28 +90,6 @@ def parse_args():
         help="Whether to train the model in parallel.")
     args = parser.parse_args()
     return args
-
-
-def remove_feed_fetch_op(program):
-    """ remove feed and fetch operator and variable for fine-tuning
-    """
-    print("remove feed fetch op")
-    block = program.global_block()
-    need_to_remove_op_index = []
-    for i, op in enumerate(block.ops):
-        if op.type == "feed" or op.type == "fetch":
-            need_to_remove_op_index.append(i)
-
-    for index in need_to_remove_op_index[::-1]:
-        block._remove_op(index)
-
-    block._remove_var("feed")
-    block._remove_var("fetch")
-
-    program.desc.flush()
-    print("********************************")
-    print(program)
-    print("********************************")
 
 
 def train_net(train_reader,
@@ -224,6 +201,7 @@ def retrain_net(train_reader,
     fluid.framework.switch_main_program(module.get_inference_program())
 
     # remove feed fetch operator and variable
+    ModuleUtils.remove_feed_fetch_op(fluid.default_main_program())
     remove_feed_fetch_op(fluid.default_main_program())
 
     label = fluid.layers.data(name="label", shape=[1], dtype="int64")
@@ -231,6 +209,9 @@ def retrain_net(train_reader,
     #TODO(ZeyuChen): how to get output paramter according to proto config
     emb = module.get_module_output()
 
+    print(
+        "adfjkajdlfjoqi jqiorejlmsfdlkjoi jqwierjoajsdklfjoi qjerijoajdfiqwjeor adfkalsf"
+    )
     # # # embedding layer
     # emb = fluid.layers.embedding(input=data, size=[dict_dim, emb_dim])
     # #input=data, size=[dict_dim, emb_dim], param_attr="bow_embedding")
@@ -376,12 +357,9 @@ def main(args):
                                                      args.word_dict_path,
                                                      args.batch_size, args.mode)
 
-        # train_net(train_reader, word_dict, args.model_type, args.use_gpu,
-        #           args.is_parallel, args.model_path, args.lr, args.batch_size,
-        #           args.num_passes)
-        retrain_net(train_reader, word_dict, args.model_type, args.use_gpu,
-                    args.is_parallel, args.model_path, args.lr, args.batch_size,
-                    args.num_passes)
+        train_net(train_reader, word_dict, args.model_type, args.use_gpu,
+                  args.is_parallel, args.model_path, args.lr, args.batch_size,
+                  args.num_passes)
 
     # eval mode
     elif args.mode == "eval":

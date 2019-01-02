@@ -109,7 +109,7 @@ def download_and_uncompress(url, save_name=None):
         for file_name in file_names:
             tar.extract(file_name, dirname)
 
-    return module_dir
+    return module_name, module_dir
 
 
 class TqdmProgress(tqdm):

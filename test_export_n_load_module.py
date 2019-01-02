@@ -184,7 +184,7 @@ def train(use_cuda=False):
         dictionary.append(w)
 
     # save word dict to assets folder
-    hub.ModuleDesc.save_module_dict(
+    hub.ModuleConfig.save_module_dict(
         module_path=saved_model_path, word_dict=dictionary)
 
 
@@ -214,9 +214,9 @@ def test_save_module(use_cuda=False):
         np_result = np.array(results[0])
         print(np_result)
 
-        saved_module_path = "./test/word2vec_inference_module"
+        saved_module_dir = "./test/word2vec_inference_module"
         fluid.io.save_inference_model(
-            dirname=saved_module_path,
+            dirname=saved_module_dir,
             feeded_var_names=["words"],
             target_vars=[word_emb],
             executor=exe)
@@ -227,17 +227,19 @@ def test_save_module(use_cuda=False):
                 w = w.decode("ascii")
             dictionary.append(w)
         # save word dict to assets folder
-        hub.ModuleDesc.save_module_dict(
-            module_path=saved_module_path, word_dict=dictionary)
+        config = hub.ModuleConfig(saved_module_dir)
+        config.save_dict(word_dict=dictionary)
+
+        config.dump()
 
 
 def test_load_module(use_cuda=False):
     place = fluid.CUDAPlace(0) if use_cuda else fluid.CPUPlace()
     exe = fluid.Executor(fluid.CPUPlace())
-    saved_module_path = "./test/word2vec_inference_module"
+    saved_module_dir = "./test/word2vec_inference_module"
     [inference_program, feed_target_names,
      fetch_targets] = fluid.io.load_inference_model(
-         saved_module_path, executor=exe)
+         saved_module_dir, executor=exe)
 
     # Sequence input in Paddle must be LOD Tensor, so we need to convert them inside Module
     word_ids = [[1, 2, 3, 4, 5]]

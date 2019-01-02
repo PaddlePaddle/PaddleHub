@@ -19,15 +19,15 @@ from __future__ import print_function
 import paddle.fluid as fluid
 import numpy as np
 import tempfile
-import utils
 import os
+import module_desc_pb2
 
 from collections import defaultdict
 from downloader import download_and_uncompress
 
-__all__ = ["Module", "ModuleDesc"]
+__all__ = ["Module", "ModuleConfig", "ModuleUtils"]
 DICT_NAME = "dict.txt"
-ASSETS_PATH = "assets"
+ASSETS_NAME = "assets"
 
 
 def mkdir(path):
@@ -40,12 +40,13 @@ def mkdir(path):
 class Module(object):
     def __init__(self, module_url):
         # donwload module
-        if module_url.startswith("http"):  # if it's remote url links
+        if module_url.startswith("http"):
             # if it's remote url link, then download and uncompress it
-            module_dir = download_and_uncompress(module_url)
+            module_name, module_dir = download_and_uncompress(module_url)
         else:
             # otherwise it's local path, no need to deal with it
             module_dir = module_url
+            module_name = module_url.split()[-1]
 
         # load paddle inference model
         place = fluid.CPUPlace()
@@ -62,9 +63,9 @@ class Module(object):
         print(self.fetch_targets)
 
         # load assets
-        self.dict = defaultdict(int)
-        self.dict.setdefault(0)
-        self._load_assets(module_dir)
+        # self.dict = defaultdict(int)
+        # self.dict.setdefault(0)
+        # self._load_assets(module_dir)
 
     #TODO(ZeyuChen): Need add register more signature to execute different
     # implmentation
@@ -91,6 +92,9 @@ class Module(object):
         np_result = np.array(results[0])
 
         return np_result
+
+    def add_input_desc(var_name):
+        pass
 
     def get_vars(self):
         return self.inference_program.list_vars()
@@ -144,22 +148,16 @@ class Module(object):
 
     # load assets folder
     def _load_assets(self, module_dir):
-        assets_dir = os.path.join(module_dir, ASSETS_PATH)
-        tokens_path = os.path.join(assets_dir, DICT_NAME)
+        assets_dir = os.path.join(module_dir, ASSETS_NAME)
+        dict_path = os.path.join(assets_dir, DICT_NAME)
         word_id = 0
 
-        with open(tokens_path) as fi:
+        with open(dict_path) as fi:
             words = fi.readlines()
             #TODO(ZeyuChen) check whether word id is duplicated and valid
             for line in fi:
                 w, w_id = line.split()
                 self.dict[w] = int(w_id)
-
-            # words = map(str.strip, words)
-            # for w in words:
-            #     self.dict[w] = word_id
-            #     word_id += 1
-            #     print(w, word_id)
 
     def add_module_feed_list(self, feed_list):
         self.feed_list = feed_list
@@ -168,29 +166,88 @@ class Module(object):
         self.output_list = output_list
 
 
-class ModuleDesc(object):
-    def __init__(self):
-        pass
+class ModuleConfig(object):
+    def __init__(self, module_dir):
+        # generate model desc protobuf
+        self.module_dir = module_dir
+        self.desc = module_desc_pb3.ModuleDesc()
+        self.desc.name = module_name
+        print("desc.name=", self.desc.name)
+        self.desc.signature = "default"
+        print("desc.signature=", self.desc.signature)
+        self.desc.contain_assets = True
+        print("desc.signature=", self.desc.contain_assets)
 
-    @staticmethod
-    def save_dict(path, word_dict, dict_name):
-        """ Save dictionary for NLP module
+    def load(module_dir):
+        """load module config from module dir
         """
-        mkdir(path)
-        with open(os.path.join(path, dict_name), "w") as fo:
-            print("tokens.txt path", os.path.join(path, DICT_NAME))
+        #TODO(ZeyuChen): check module_desc.pb exsitance
+        with open(pb_file_path, "rb") as fi:
+            self.desc.ParseFromString(fi.read())
+
+        if self.desc.contain_assets:
+            # load assets
+            self.dict = defaultdict(int)
+            self.dict.setdefault(0)
+            assets_dir = os.path.join(self.module_dir, assets_dir)
+            dict_path = os.path.join(assets_dir, DICT_NAME)
+            word_id = 0
+
+            with open(dict_path) as fi:
+                words = fi.readlines()
+                #TODO(ZeyuChen) check whether word id is duplicated and valid
+                for line in fi:
+                    w, w_id = line.split()
+                    self.dict[w] = int(w_id)
+
+    def dump():
+        # save module_desc.proto first
+        pb_path = os.path.join(self.module, "module_desc.pb")
+        with open(pb_path, "wb") as fo:
+            fo.write(self.desc.SerializeToString())
+
+        # save assets/dictionary
+        assets_dir = os.path.join(self.module_dir, assets_dir)
+        mkdir(assets_dir)
+        with open(os.path.join(assets_dir, DICT_NAME), "w") as fo:
             for w in word_dict:
                 w_id = word_dict[w]
                 fo.write("{}\t{}\n".format(w, w_id))
 
-    @staticmethod
-    def save_module_dict(module_path, word_dict, dict_name=DICT_NAME):
+    def save_dict(word_dict, dict_name=DICT_NAME):
         """ Save dictionary for NLP module
         """
-        assets_path = os.path.join(module_path, ASSETS_PATH)
-        print("save_module_dict", assets_path)
-        ModuleDesc.save_dict(assets_path, word_dict, dict_name)
+        mkdir(path)
+        with open(os.path.join(self.module_dir, DICT_NAME), "w") as fo:
+            for w in word_dict:
+                self.dict[w] = word_dict[w]
+
+
+class ModuleUtils(object):
+    def __init__(self):
         pass
+
+    @staticmethod
+    def remove_feed_fetch_op(program):
+        """ remove feed and fetch operator and variable for fine-tuning
+        """
+        print("remove feed fetch op")
+        block = program.global_block()
+        need_to_remove_op_index = []
+        for i, op in enumerate(block.ops):
+            if op.type == "feed" or op.type == "fetch":
+                need_to_remove_op_index.append(i)
+
+        for index in need_to_remove_op_index[::-1]:
+            block._remove_op(index)
+
+        block._remove_var("feed")
+        block._remove_var("fetch")
+
+        program.desc.flush()
+        print("********************************")
+        print(program)
+        print("********************************")
 
 
 if __name__ == "__main__":

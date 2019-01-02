@@ -12,23 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // =============================================================================
+
 syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
 
 package paddle_hub;
 
-
 message InputDesc {
-}
+  string name = 1;
+};
 
 message OutputDesc {
-  bool return_numpy = 1;
-}
-// A Hub Module is stored in a directory with a file 'paddlehub_module.pb'
+  string name = 1;
+};
+
+// A Hub Module is stored in a directory with a file 'paddlehub.pb'
 // containing a serialized protocol message of this type. The further contents
 // of the directory depend on the storage format described by the message.
 message ModuleDesc {
   string name = 1; // PaddleHub module name
+  
+  repeated InputDesc input_desc = 2;
 
-  repeated string input_signature
-}
+  repeated OutputDesc output_desc = 3;
+
+  string signature = 4;
+
+  bool return_numpy = 5;
+
+  bool contain_assets = 6;
+};
 
