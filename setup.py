@@ -24,7 +24,7 @@ __version__ = "0.1.0-dev"
 REQUIRED_PACKAGES = [
     'numpy >= 1.12.0',
     'six >= 1.10.0',
-    'protobuf >= 3.4.0',
+    'protobuf >= 3.1.0',
 ]
 
 setup(
@@ -59,5 +59,4 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     license='Apache 2.0',
-    keywords=('paddlepaddle pretrained paddle-hub'),
-)
+    keywords=('paddlepaddle pretrained paddle-hub'), )
