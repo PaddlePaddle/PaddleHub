@@ -197,6 +197,12 @@ class ModuleConfig(object):
         self.dict = defaultdict(int)
         self.dict.setdefault(0)
 
+        # feed_list
+        self.feed_list = []
+
+        # fetch_list
+        self.fetch_list = []
+
     def load(self):
         """load module config from module dir
         """
@@ -219,7 +225,9 @@ class ModuleConfig(object):
                     self.dict[w] = int(w_id)
 
     def dump(self):
-        # save module_desc.proto first
+        """
+        save module_desc.proto first
+        """
         pb_path = os.path.join(self.module_dir, "module_desc.pb")
         with open(pb_path, "wb") as fo:
             fo.write(self.desc.SerializeToString())
@@ -231,6 +239,10 @@ class ModuleConfig(object):
             for w in self.dict:
                 w_id = self.dict[w]
                 fo.write("{}\t{}\n".format(w, w_id))
+
+    def register_input_var(self, var):
+        var_name = var.name()
+        self.feed_list.add(var_name)
 
     def save_dict(self, word_dict, dict_name=DICT_NAME):
         """ Save dictionary for NLP module

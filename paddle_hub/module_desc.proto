@@ -19,11 +19,11 @@ option optimize_for = LITE_RUNTIME;
 package paddle_hub;
 
 message InputDesc {
-  string name = 1;
+  repeated string name = 1;
 };
 
 message OutputDesc {
-  string name = 1;
+  repeated string name = 1;
 };
 
 // A Hub Module is stored in a directory with a file 'paddlehub.pb'
@@ -32,14 +32,14 @@ message OutputDesc {
 message ModuleDesc {
   string name = 1; // PaddleHub module name
   
-  repeated InputDesc input_desc = 2;
+  // signature to input description
+  map<string, InputDesc> sign2input = 2;
 
-  repeated OutputDesc output_desc = 3;
+  // signature to output description
+  map<string, OutputDesc> sign2output = 3;
 
-  string signature = 4;
+  bool return_numpy = 4;
 
-  bool return_numpy = 5;
-
-  bool contain_assets = 6;
+  bool contain_assets = 5;
 };
 
