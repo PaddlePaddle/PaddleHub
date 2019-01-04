@@ -64,9 +64,9 @@ def download_and_uncompress(url, save_name=None):
         os.makedirs(dirname)
 
     #TODO(ZeyuChen) add download md5 file to verify file completeness
-    file_name = os.path.join(dirname,
-                             url.split('/')[-1]
-                             if save_name is None else save_name)
+    file_name = os.path.join(
+        dirname,
+        url.split('/')[-1] if save_name is None else save_name)
 
     retry = 0
     retry_limit = 3
@@ -76,8 +76,9 @@ def download_and_uncompress(url, save_name=None):
         if retry < retry_limit:
             retry += 1
         else:
-            raise RuntimeError("Cannot download {0} within retry limit {1}".
-                               format(url, retry_limit))
+            raise RuntimeError(
+                "Cannot download {0} within retry limit {1}".format(
+                    url, retry_limit))
         print("Cache file %s not found, downloading %s" % (file_name, url))
         r = requests.get(url, stream=True)
         total_length = r.headers.get('content-length')
@@ -94,8 +95,8 @@ def download_and_uncompress(url, save_name=None):
                     dl += len(data)
                     f.write(data)
                     done = int(50 * dl / total_length)
-                    sys.stdout.write("\r[%s%s]" % ('=' * done,
-                                                   ' ' * (50 - done)))
+                    sys.stdout.write(
+                        "\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
                     sys.stdout.flush()
 
     print("file download completed!", file_name)
@@ -109,64 +110,6 @@ def download_and_uncompress(url, save_name=None):
             tar.extract(file_name, dirname)
 
     return module_name, module_dir
-
-
-class TqdmProgress(tqdm):
-    """
-    tqdm prograss hook
-    """
-    last_block = 0
-
-    def update_to(self, block_num=1, block_size=1, total_size=None):
-        if total_size is not None:
-            self.total = total_size
-        self.update((block_num - self.last_block) * block_size)
-        self.last_block = block_num
-
-
-class DownloadManager(object):
-    def __init__(self):
-        self.dst_path = tempfile.mkstemp()
-
-    def download(self, link, dst_path):
-        file_name = link.split("/")[-1]
-        if dst_path is not None:
-            self.dst_path = dst_path
-        if not os.path.exists(self.dst_path):
-            os.makedirs(self.dst_path)
-        file_path = os.path.join(self.dst_path, file_name)
-        print("download filepath", file_path)
-
-        with TqdmProgress(
-                unit='B',
-                unit_scale=True,
-                unit_divisor=1024,
-                miniters=1,
-                desc=file_name) as progress:
-            path, header = urlretrieve(
-                link,
-                filename=file_path,
-                reporthook=progress.update_to,
-                data=None)
-
-            return path
-
-    def _extract_file(self, tgz, tarinfo, dst_path, buffer_size=10 << 20):
-        """Extracts 'tarinfo' from 'tgz' and writes to 'dst_path'."""
-        src = tgz.extractfile(tarinfo)
-        dst = tf.gfile.GFile(dst_path, "wb")
-        while 1:
-            buf = src.read(buffer_size)
-            if not buf:
-                break
-            dst.write(buf)
-            self._log_progress(len(buf))
-        dst.close()
-        src.close()
-
-    def download_and_uncompress(self, link, dst_path):
-        file_name = self.download(link, dst_path)
-        print(file_name)
 
 
 if __name__ == "__main__":

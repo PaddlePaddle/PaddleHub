@@ -159,19 +159,6 @@ class Module(object):
         word_dict = self.config.get_dict()
         return list(map(lambda x: word_dict[x], inputs))
 
-    # # load assets folder
-    # def _load_assets(self, module_dir):
-    #     assets_dir = os.path.join(module_dir, ASSETS_NAME)
-    #     dict_path = os.path.join(assets_dir, DICT_NAME)
-    #     word_id = 0
-
-    #     with open(dict_path) as fi:
-    #         words = fi.readlines()
-    #         #TODO(ZeyuChen) check whether word id is duplicated and valid
-    #         for line in fi:
-    #             w, w_id = line.split()
-    #             self.dict[w] = int(w_id)
-
     def add_module_feed_list(self, feed_list):
         self.feed_list = feed_list
 
@@ -240,9 +227,13 @@ class ModuleConfig(object):
                 w_id = self.dict[w]
                 fo.write("{}\t{}\n".format(w, w_id))
 
-    def register_input_var(self, var):
+    def register_input_var(self, var, signature="default"):
         var_name = var.name()
-        self.feed_list.add(var_name)
+        self.desc.sign2input[signature].append(var_name)
+
+    def register_output_var(self, var, signature="default"):
+        var_name = var.name()
+        self.desc.sign2output[signature].append(var_name)
 
     def save_dict(self, word_dict, dict_name=DICT_NAME):
         """ Save dictionary for NLP module
