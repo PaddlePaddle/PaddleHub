@@ -49,11 +49,13 @@ class Module(object):
             # if it's remote url link, then download and uncompress it
             self.module_name, self.module_dir = download_and_uncompress(
                 module_url)
+            #TODO(ZeyuChen): check url link is valid url
         elif module_dir is not None:
             # otherwise it's local path, no need to deal with it
             self.module_dir = module_dir
             # use the path name as module name by default
             self.module_name = module_dir.split("/")[-1]
+            #TODO(ZeyuChen) add more check about loading module from local path
 
         # load paddle inference model
         place = fluid.CPUPlace()
