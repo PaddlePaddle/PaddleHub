@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 # coding=utf-8
+
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
@@ -64,9 +64,9 @@ def download_and_uncompress(url, save_name=None):
         os.makedirs(dirname)
 
     #TODO(ZeyuChen) add download md5 file to verify file completeness
-    file_name = os.path.join(
-        dirname,
-        url.split('/')[-1] if save_name is None else save_name)
+    file_name = os.path.join(dirname,
+                             url.split('/')[-1]
+                             if save_name is None else save_name)
 
     retry = 0
     retry_limit = 3
@@ -76,9 +76,8 @@ def download_and_uncompress(url, save_name=None):
         if retry < retry_limit:
             retry += 1
         else:
-            raise RuntimeError(
-                "Cannot download {0} within retry limit {1}".format(
-                    url, retry_limit))
+            raise RuntimeError("Cannot download {0} within retry limit {1}".
+                               format(url, retry_limit))
         print("Cache file %s not found, downloading %s" % (file_name, url))
         r = requests.get(url, stream=True)
         total_length = r.headers.get('content-length')
@@ -95,8 +94,8 @@ def download_and_uncompress(url, save_name=None):
                     dl += len(data)
                     f.write(data)
                     done = int(50 * dl / total_length)
-                    sys.stdout.write(
-                        "\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
+                    sys.stdout.write("\r[%s%s]" % ('=' * done,
+                                                   ' ' * (50 - done)))
                     sys.stdout.flush()
 
     print("file download completed!", file_name)
@@ -119,14 +118,6 @@ class TqdmProgress(tqdm):
     last_block = 0
 
     def update_to(self, block_num=1, block_size=1, total_size=None):
-        '''
-        block_num  : int, optional
-            到目前为止传输的块 [default: 1].
-        block_size : int, optional
-            每个块的大小 (in tqdm units) [default: 1].
-        total_size : int, optional
-            文件总大小 (in tqdm units). 如果[default: None]保持不变.
-        '''
         if total_size is not None:
             self.total = total_size
         self.update((block_num - self.last_block) * block_size)
