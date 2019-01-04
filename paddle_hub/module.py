@@ -38,16 +38,18 @@ def mkdir(path):
 
 
 class Module(object):
-    def __init__(self, module_url):
+    def __init__(self, module_url=None, module_dir=None):
+        if module_url == None and module_dir == None:
+            raise Exception("Module:module_url and module_dir are None!")
         # donwload module
-        if module_url.startswith("http"):
+        if module_url is not None and module_url.startswith("http"):
             # if it's remote url link, then download and uncompress it
             self.module_name, self.module_dir = download_and_uncompress(
                 module_url)
-        else:
+        elif module_dir is not None:
             # otherwise it's local path, no need to deal with it
-            print("Module.__init__", module_url)
             self.module_dir = module_url
+            # use the path name as module name by default
             self.module_name = module_url.split("/")[-1]
 
         # load paddle inference model

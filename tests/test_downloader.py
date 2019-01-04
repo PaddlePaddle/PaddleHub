@@ -13,19 +13,13 @@
 # limitations under the License.
 
 import unittest
+import paddle_hub as hub
 
-from module import *
 
-
-class TestModule(unittest.TestCase):
-    def test_word2vec_module_usage(self):
-        module_link = "http://paddlehub.cdn.bcebos.com/word2vec/w2v_saved_inference_module.tar.gz"
-        module = Module(module_link)
-        inputs = [["it", "is", "new"], ["hello", "world"]]
-        tensor = module._process_input(inputs)
-        print(tensor)
-        result = module(inputs)
-        print(result)
+class TestDownloader(unittest.TestCase):
+    def test_download(self):
+        link = "http://paddlehub.bj.bcebos.com/word2vec/word2vec-dim16-simple-example-2.tar.gz"
+        module_path = hub.download_and_uncompress(link)
 
 
 if __name__ == "__main__":

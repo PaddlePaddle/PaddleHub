@@ -1,8 +1,5 @@
 # coding: utf-8
 import sys
-# NOTE: just hack for fast test
-sys.path.append("../")
-sys.path.append("../paddle_hub/")
 import os
 import time
 import unittest

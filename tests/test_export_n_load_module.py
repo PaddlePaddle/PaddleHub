@@ -171,7 +171,7 @@ def train(use_cuda=False):
     fluid.io.save_persistables(
         executor=exe, dirname=model_dir + "_save_persistables")
 
-    saved_model_dir = "./tmp/w2v_saved_inference_model"
+    saved_model_dir = "./tmp/word2vec_inference_model"
     # save inference model including feed and fetch variable info
     fluid.io.save_inference_model(
         dirname=saved_model_dir,
@@ -205,7 +205,7 @@ def test_save_module(use_cuda=False):
         words, word_emb = module_fn()
         exe.run(startup_program)
         # load inference embedding parameters
-        saved_model_dir = "./tmp/w2v_saved_inference_model"
+        saved_model_dir = "./tmp/word2vec_inference_model"
         fluid.io.load_inference_model(executor=exe, dirname=saved_model_dir)
 
         feed_var_list = [main_program.global_block().var("words")]
