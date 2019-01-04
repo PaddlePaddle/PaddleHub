@@ -26,6 +26,12 @@ message OutputDesc {
   repeated string name = 1;
 };
 
+message Parameter {
+  string name = 1;
+  double learning_rate = 2;
+  bool trainable = 3;
+};
+
 // A Hub Module is stored in a directory with a file 'paddlehub.pb'
 // containing a serialized protocol message of this type. The further contents
 // of the directory depend on the storage format described by the message.
