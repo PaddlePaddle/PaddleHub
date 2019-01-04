@@ -41,6 +41,9 @@ class Module(object):
     def __init__(self, module_url=None, module_dir=None):
         if module_url == None and module_dir == None:
             raise Exception("Module:module_url and module_dir are None!")
+
+        self.module_dir = ""
+        self.module_name = ""
         # donwload module
         if module_url is not None and module_url.startswith("http"):
             # if it's remote url link, then download and uncompress it
@@ -48,9 +51,9 @@ class Module(object):
                 module_url)
         elif module_dir is not None:
             # otherwise it's local path, no need to deal with it
-            self.module_dir = module_url
+            self.module_dir = module_dir
             # use the path name as module name by default
-            self.module_name = module_url.split("/")[-1]
+            self.module_name = module_dir.split("/")[-1]
 
         # load paddle inference model
         place = fluid.CPUPlace()
@@ -66,8 +69,8 @@ class Module(object):
         print("fetch_targets")
         print(self.fetch_targets)
 
-        config = ModuleConfig(self.module_dir)
-        config.load()
+        self.config = ModuleConfig(self.module_dir)
+        self.config.load()
         # load assets
         # self.dict = defaultdict(int)
         # self.dict.setdefault(0)
@@ -266,8 +269,8 @@ class ModuleUtils(object):
 
 
 if __name__ == "__main__":
-    module_link = "http://paddlehub.cdn.bcebos.com/word2vec/w2v_saved_inference_module.tar.gz"
-    m = Module(module_link)
+    url = "http://paddlehub.cdn.bcebos.com/word2vec/word2vec-dim16-simple-example-2.tar.gz"
+    m = Module(module_url=url)
     inputs = [["it", "is", "new"], ["hello", "world"]]
     #tensor = m._process_input(inputs)
     #print(tensor)
