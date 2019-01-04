@@ -58,7 +58,6 @@ def module_fn(trainable=False):
         name="words", shape=[1], lod_level=1, dtype="int64")
 
     # create embedding
-    # emb_name = "{}:embedding".format(module_scope)
     emb_name = "embedding"
     emb_param_attr = fluid.ParamAttr(name=emb_name, trainable=trainable)
     word_emb = fluid.layers.embedding(
