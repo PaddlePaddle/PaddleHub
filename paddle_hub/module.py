@@ -20,10 +20,10 @@ import paddle.fluid as fluid
 import numpy as np
 import tempfile
 import os
-import module_desc_pb2
+import paddle_hub.module_desc_pb2
 
 from collections import defaultdict
-from downloader import download_and_uncompress
+from paddle_hub.downloader import download_and_uncompress
 
 __all__ = ["Module", "ModuleConfig", "ModuleUtils"]
 DICT_NAME = "dict.txt"
@@ -80,6 +80,7 @@ class Module(object):
 
     #TODO(ZeyuChen): Need add register more signature to execute different
     # implmentation
+
     def __call__(self, inputs=None, signature=None):
         """ Call default signature and return results
         """
