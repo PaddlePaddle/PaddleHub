@@ -189,7 +189,6 @@ def retrain_net(train_reader,
     hid_dim2 = 96
     class_dim = 2
 
-    # module_link = "https://paddlehub.cdn.bcebos.com/senta/bow_module_3.tar.gz"
     module_link = "./models/bow_net/"
     module = hub.Module(module_link)
 

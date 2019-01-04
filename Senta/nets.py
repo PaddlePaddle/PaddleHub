@@ -4,6 +4,7 @@ import numpy as np
 
 import paddle.fluid as fluid
 import paddle
+import paddle_hub as hub
 
 
 def bow_net(data,
