@@ -1,7 +1,10 @@
--   repo: https://github.com/pre-commit/mirrors-yapf.git
-    sha: v0.16.0
+-   repo: local
     hooks:
     -   id: yapf
+        name: yapf
+        entry: yapf
+        language: system
+        args: [-i, --style .style.yapf]
         files: \.py$
 
 -   repo: https://github.com/pre-commit/pre-commit-hooks
