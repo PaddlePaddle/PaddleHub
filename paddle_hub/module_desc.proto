@@ -18,13 +18,20 @@ option optimize_for = LITE_RUNTIME;
 
 package paddle_hub;
 
-message InputDesc {
-  repeated string name = 1;
+message FeedDesc {
+  string key = 1;
+  string var_name = 2;
 };
 
-message OutputDesc {
-  repeated string name = 1;
+message FetchDesc {
+  string key = 1;
+  string var_name = 2;
 };
+
+message ModuleVar {
+  repeated FetchDesc fetch_desc = 1;
+  repeated FeedDesc feed_desc = 2;
+}
 
 message Parameter {
   string name = 1;
@@ -39,10 +46,7 @@ message ModuleDesc {
   string name = 1; // PaddleHub module name
   
   // signature to input description
-  map<string, InputDesc> sign2input = 2;
-
-  // signature to output description
-  map<string, OutputDesc> sign2output = 3;
+  map<string, ModuleVar> sign2var = 2;
 
   bool return_numpy = 4;
 

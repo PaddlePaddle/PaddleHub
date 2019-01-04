@@ -17,27 +17,43 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package='paddle_hub',
     syntax='proto3',
     serialized_pb=_b(
-        '\n\x11module_desc.proto\x12\npaddle_hub\"\x19\n\tInputDesc\x12\x0c\n\x04name\x18\x01 \x03(\t\"\x1a\n\nOutputDesc\x12\x0c\n\x04name\x18\x01 \x03(\t\"C\n\tParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x15\n\rlearning_rate\x18\x02 \x01(\x01\x12\x11\n\ttrainable\x18\x03 \x01(\x08\"\xd8\x02\n\nModuleDesc\x12\x0c\n\x04name\x18\x01 \x01(\t\x12:\n\nsign2input\x18\x02 \x03(\x0b\x32&.paddle_hub.ModuleDesc.Sign2inputEntry\x12<\n\x0bsign2output\x18\x03 \x03(\x0b\x32\'.paddle_hub.ModuleDesc.Sign2outputEntry\x12\x14\n\x0creturn_numpy\x18\x04 \x01(\x08\x12\x16\n\x0e\x63ontain_assets\x18\x05 \x01(\x08\x1aH\n\x0fSign2inputEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.paddle_hub.InputDesc:\x02\x38\x01\x1aJ\n\x10Sign2outputEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12%\n\x05value\x18\x02 \x01(\x0b\x32\x16.paddle_hub.OutputDesc:\x02\x38\x01\x42\x02H\x03\x62\x06proto3'
+        '\n\x11module_desc.proto\x12\npaddle_hub\")\n\x08\x46\x65\x65\x64\x44\x65sc\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x10\n\x08var_name\x18\x02 \x01(\t\"*\n\tFetchDesc\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x10\n\x08var_name\x18\x02 \x01(\t\"_\n\tModuleVar\x12)\n\nfetch_desc\x18\x01 \x03(\x0b\x32\x15.paddle_hub.FetchDesc\x12\'\n\tfeed_desc\x18\x02 \x03(\x0b\x32\x14.paddle_hub.FeedDesc\"C\n\tParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x15\n\rlearning_rate\x18\x02 \x01(\x01\x12\x11\n\ttrainable\x18\x03 \x01(\x08\"\xc8\x01\n\nModuleDesc\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x08sign2var\x18\x02 \x03(\x0b\x32$.paddle_hub.ModuleDesc.Sign2varEntry\x12\x14\n\x0creturn_numpy\x18\x04 \x01(\x08\x12\x16\n\x0e\x63ontain_assets\x18\x05 \x01(\x08\x1a\x46\n\rSign2varEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.paddle_hub.ModuleVar:\x02\x38\x01\x42\x02H\x03\x62\x06proto3'
     ))
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-_INPUTDESC = _descriptor.Descriptor(
-    name='InputDesc',
-    full_name='paddle_hub.InputDesc',
+_FEEDDESC = _descriptor.Descriptor(
+    name='FeedDesc',
+    full_name='paddle_hub.FeedDesc',
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name='name',
-            full_name='paddle_hub.InputDesc.name',
+            name='key',
+            full_name='paddle_hub.FeedDesc.key',
             index=0,
             number=1,
             type=9,
             cpp_type=9,
-            label=3,
+            label=1,
             has_default_value=False,
-            default_value=[],
+            default_value=_b("").decode('utf-8'),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None),
+        _descriptor.FieldDescriptor(
+            name='var_name',
+            full_name='paddle_hub.FeedDesc.var_name',
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode('utf-8'),
             message_type=None,
             enum_type=None,
             containing_type=None,
@@ -54,23 +70,91 @@ _INPUTDESC = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=33,
-    serialized_end=58,
+    serialized_end=74,
 )
 
-_OUTPUTDESC = _descriptor.Descriptor(
-    name='OutputDesc',
-    full_name='paddle_hub.OutputDesc',
+_FETCHDESC = _descriptor.Descriptor(
+    name='FetchDesc',
+    full_name='paddle_hub.FetchDesc',
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name='name',
-            full_name='paddle_hub.OutputDesc.name',
+            name='key',
+            full_name='paddle_hub.FetchDesc.key',
             index=0,
             number=1,
             type=9,
             cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode('utf-8'),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None),
+        _descriptor.FieldDescriptor(
+            name='var_name',
+            full_name='paddle_hub.FetchDesc.var_name',
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode('utf-8'),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax='proto3',
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=76,
+    serialized_end=118,
+)
+
+_MODULEVAR = _descriptor.Descriptor(
+    name='ModuleVar',
+    full_name='paddle_hub.ModuleVar',
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name='fetch_desc',
+            full_name='paddle_hub.ModuleVar.fetch_desc',
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None),
+        _descriptor.FieldDescriptor(
+            name='feed_desc',
+            full_name='paddle_hub.ModuleVar.feed_desc',
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
             label=3,
             has_default_value=False,
             default_value=[],
@@ -89,8 +173,8 @@ _OUTPUTDESC = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=60,
-    serialized_end=86,
+    serialized_start=120,
+    serialized_end=215,
 )
 
 _PARAMETER = _descriptor.Descriptor(
@@ -157,20 +241,20 @@ _PARAMETER = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=88,
-    serialized_end=155,
+    serialized_start=217,
+    serialized_end=284,
 )
 
-_MODULEDESC_SIGN2INPUTENTRY = _descriptor.Descriptor(
-    name='Sign2inputEntry',
-    full_name='paddle_hub.ModuleDesc.Sign2inputEntry',
+_MODULEDESC_SIGN2VARENTRY = _descriptor.Descriptor(
+    name='Sign2varEntry',
+    full_name='paddle_hub.ModuleDesc.Sign2varEntry',
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name='key',
-            full_name='paddle_hub.ModuleDesc.Sign2inputEntry.key',
+            full_name='paddle_hub.ModuleDesc.Sign2varEntry.key',
             index=0,
             number=1,
             type=9,
@@ -186,7 +270,7 @@ _MODULEDESC_SIGN2INPUTENTRY = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='value',
-            full_name='paddle_hub.ModuleDesc.Sign2inputEntry.value',
+            full_name='paddle_hub.ModuleDesc.Sign2varEntry.value',
             index=1,
             number=2,
             type=11,
@@ -210,61 +294,8 @@ _MODULEDESC_SIGN2INPUTENTRY = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=354,
-    serialized_end=426,
-)
-
-_MODULEDESC_SIGN2OUTPUTENTRY = _descriptor.Descriptor(
-    name='Sign2outputEntry',
-    full_name='paddle_hub.ModuleDesc.Sign2outputEntry',
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name='key',
-            full_name='paddle_hub.ModuleDesc.Sign2outputEntry.key',
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=_b("").decode('utf-8'),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            options=None),
-        _descriptor.FieldDescriptor(
-            name='value',
-            full_name='paddle_hub.ModuleDesc.Sign2outputEntry.value',
-            index=1,
-            number=2,
-            type=11,
-            cpp_type=10,
-            label=1,
-            has_default_value=False,
-            default_value=None,
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            options=None),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(),
-                                      _b('8\001')),
-    is_extendable=False,
-    syntax='proto3',
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=428,
-    serialized_end=502,
+    serialized_start=417,
+    serialized_end=487,
 )
 
 _MODULEDESC = _descriptor.Descriptor(
@@ -291,8 +322,8 @@ _MODULEDESC = _descriptor.Descriptor(
             extension_scope=None,
             options=None),
         _descriptor.FieldDescriptor(
-            name='sign2input',
-            full_name='paddle_hub.ModuleDesc.sign2input',
+            name='sign2var',
+            full_name='paddle_hub.ModuleDesc.sign2var',
             index=1,
             number=2,
             type=11,
@@ -307,25 +338,9 @@ _MODULEDESC = _descriptor.Descriptor(
             extension_scope=None,
             options=None),
         _descriptor.FieldDescriptor(
-            name='sign2output',
-            full_name='paddle_hub.ModuleDesc.sign2output',
-            index=2,
-            number=3,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            options=None),
-        _descriptor.FieldDescriptor(
             name='return_numpy',
             full_name='paddle_hub.ModuleDesc.return_numpy',
-            index=3,
+            index=2,
             number=4,
             type=8,
             cpp_type=7,
@@ -341,7 +356,7 @@ _MODULEDESC = _descriptor.Descriptor(
         _descriptor.FieldDescriptor(
             name='contain_assets',
             full_name='paddle_hub.ModuleDesc.contain_assets',
-            index=4,
+            index=3,
             number=5,
             type=8,
             cpp_type=7,
@@ -357,8 +372,7 @@ _MODULEDESC = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[
-        _MODULEDESC_SIGN2INPUTENTRY,
-        _MODULEDESC_SIGN2OUTPUTENTRY,
+        _MODULEDESC_SIGN2VARENTRY,
     ],
     enum_types=[],
     options=None,
@@ -366,42 +380,50 @@ _MODULEDESC = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=158,
-    serialized_end=502,
+    serialized_start=287,
+    serialized_end=487,
 )
 
-_MODULEDESC_SIGN2INPUTENTRY.fields_by_name['value'].message_type = _INPUTDESC
-_MODULEDESC_SIGN2INPUTENTRY.containing_type = _MODULEDESC
-_MODULEDESC_SIGN2OUTPUTENTRY.fields_by_name['value'].message_type = _OUTPUTDESC
-_MODULEDESC_SIGN2OUTPUTENTRY.containing_type = _MODULEDESC
-_MODULEDESC.fields_by_name[
-    'sign2input'].message_type = _MODULEDESC_SIGN2INPUTENTRY
-_MODULEDESC.fields_by_name[
-    'sign2output'].message_type = _MODULEDESC_SIGN2OUTPUTENTRY
-DESCRIPTOR.message_types_by_name['InputDesc'] = _INPUTDESC
-DESCRIPTOR.message_types_by_name['OutputDesc'] = _OUTPUTDESC
+_MODULEVAR.fields_by_name['fetch_desc'].message_type = _FETCHDESC
+_MODULEVAR.fields_by_name['feed_desc'].message_type = _FEEDDESC
+_MODULEDESC_SIGN2VARENTRY.fields_by_name['value'].message_type = _MODULEVAR
+_MODULEDESC_SIGN2VARENTRY.containing_type = _MODULEDESC
+_MODULEDESC.fields_by_name['sign2var'].message_type = _MODULEDESC_SIGN2VARENTRY
+DESCRIPTOR.message_types_by_name['FeedDesc'] = _FEEDDESC
+DESCRIPTOR.message_types_by_name['FetchDesc'] = _FETCHDESC
+DESCRIPTOR.message_types_by_name['ModuleVar'] = _MODULEVAR
 DESCRIPTOR.message_types_by_name['Parameter'] = _PARAMETER
 DESCRIPTOR.message_types_by_name['ModuleDesc'] = _MODULEDESC
 
-InputDesc = _reflection.GeneratedProtocolMessageType(
-    'InputDesc',
+FeedDesc = _reflection.GeneratedProtocolMessageType(
+    'FeedDesc',
     (_message.Message, ),
     dict(
-        DESCRIPTOR=_INPUTDESC,
+        DESCRIPTOR=_FEEDDESC,
         __module__='module_desc_pb2'
-        # @@protoc_insertion_point(class_scope:paddle_hub.InputDesc)
+        # @@protoc_insertion_point(class_scope:paddle_hub.FeedDesc)
     ))
-_sym_db.RegisterMessage(InputDesc)
+_sym_db.RegisterMessage(FeedDesc)
 
-OutputDesc = _reflection.GeneratedProtocolMessageType(
-    'OutputDesc',
+FetchDesc = _reflection.GeneratedProtocolMessageType(
+    'FetchDesc',
     (_message.Message, ),
     dict(
-        DESCRIPTOR=_OUTPUTDESC,
+        DESCRIPTOR=_FETCHDESC,
         __module__='module_desc_pb2'
-        # @@protoc_insertion_point(class_scope:paddle_hub.OutputDesc)
+        # @@protoc_insertion_point(class_scope:paddle_hub.FetchDesc)
     ))
-_sym_db.RegisterMessage(OutputDesc)
+_sym_db.RegisterMessage(FetchDesc)
+
+ModuleVar = _reflection.GeneratedProtocolMessageType(
+    'ModuleVar',
+    (_message.Message, ),
+    dict(
+        DESCRIPTOR=_MODULEVAR,
+        __module__='module_desc_pb2'
+        # @@protoc_insertion_point(class_scope:paddle_hub.ModuleVar)
+    ))
+_sym_db.RegisterMessage(ModuleVar)
 
 Parameter = _reflection.GeneratedProtocolMessageType(
     'Parameter',
@@ -417,37 +439,25 @@ ModuleDesc = _reflection.GeneratedProtocolMessageType(
     'ModuleDesc',
     (_message.Message, ),
     dict(
-        Sign2inputEntry=_reflection.GeneratedProtocolMessageType(
-            'Sign2inputEntry',
+        Sign2varEntry=_reflection.GeneratedProtocolMessageType(
+            'Sign2varEntry',
             (_message.Message, ),
             dict(
-                DESCRIPTOR=_MODULEDESC_SIGN2INPUTENTRY,
+                DESCRIPTOR=_MODULEDESC_SIGN2VARENTRY,
                 __module__='module_desc_pb2'
-                # @@protoc_insertion_point(class_scope:paddle_hub.ModuleDesc.Sign2inputEntry)
-            )),
-        Sign2outputEntry=_reflection.GeneratedProtocolMessageType(
-            'Sign2outputEntry',
-            (_message.Message, ),
-            dict(
-                DESCRIPTOR=_MODULEDESC_SIGN2OUTPUTENTRY,
-                __module__='module_desc_pb2'
-                # @@protoc_insertion_point(class_scope:paddle_hub.ModuleDesc.Sign2outputEntry)
+                # @@protoc_insertion_point(class_scope:paddle_hub.ModuleDesc.Sign2varEntry)
             )),
         DESCRIPTOR=_MODULEDESC,
         __module__='module_desc_pb2'
         # @@protoc_insertion_point(class_scope:paddle_hub.ModuleDesc)
     ))
 _sym_db.RegisterMessage(ModuleDesc)
-_sym_db.RegisterMessage(ModuleDesc.Sign2inputEntry)
-_sym_db.RegisterMessage(ModuleDesc.Sign2outputEntry)
+_sym_db.RegisterMessage(ModuleDesc.Sign2varEntry)
 
 DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(),
                                                 _b('H\003'))
-_MODULEDESC_SIGN2INPUTENTRY.has_options = True
-_MODULEDESC_SIGN2INPUTENTRY._options = _descriptor._ParseOptions(
-    descriptor_pb2.MessageOptions(), _b('8\001'))
-_MODULEDESC_SIGN2OUTPUTENTRY.has_options = True
-_MODULEDESC_SIGN2OUTPUTENTRY._options = _descriptor._ParseOptions(
+_MODULEDESC_SIGN2VARENTRY.has_options = True
+_MODULEDESC_SIGN2VARENTRY._options = _descriptor._ParseOptions(
     descriptor_pb2.MessageOptions(), _b('8\001'))
 # @@protoc_insertion_point(module_scope)

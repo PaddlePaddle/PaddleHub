@@ -20,10 +20,10 @@ import paddle.fluid as fluid
 import numpy as np
 import tempfile
 import os
-import paddle_hub.module_desc_pb2
 
 from collections import defaultdict
 from paddle_hub.downloader import download_and_uncompress
+from paddle_hub import module_desc_pb2
 
 __all__ = ["Module", "ModuleConfig", "ModuleUtils"]
 DICT_NAME = "dict.txt"
@@ -80,7 +80,6 @@ class Module(object):
 
     #TODO(ZeyuChen): Need add register more signature to execute different
     # implmentation
-
     def __call__(self, inputs=None, signature=None):
         """ Call default signature and return results
         """
@@ -105,25 +104,22 @@ class Module(object):
 
         return np_result
 
-    def add_input_desc(var_name):
-        pass
-
     def get_vars(self):
         return self.inference_program.list_vars()
 
-    def get_input_vars(self):
+    def get_feed_var(self, key, signature="default"):
         for var in self.inference_program.list_vars():
-            print(var)
-            if var.name == "words":
+            if var.name == self.config.feed_var_name(key, signature):
                 return var
-        # return self.fetch_targets
 
-    def get_module_output(self):
+        raise Exception("Can't find input var {}".format(key))
+
+    def get_fetch_var(self, key, signature="default"):
         for var in self.inference_program.list_vars():
-            print(var)
-            # NOTE: just hack for load Senta's
-            if var.name == "embedding_0.tmp_0":
+            if var.name == self.config.fetch_var_name(key, signature):
                 return var
+
+        raise Exception("Can't find output var {}".format(key))
 
     def get_inference_program(self):
         return self.inference_program
@@ -159,12 +155,6 @@ class Module(object):
         word_dict = self.config.get_dict()
         return list(map(lambda x: word_dict[x], inputs))
 
-    def add_module_feed_list(self, feed_list):
-        self.feed_list = feed_list
-
-    def add_module_output_list(self, output_list):
-        self.output_list = output_list
-
 
 class ModuleConfig(object):
     def __init__(self, module_dir, module_name=None):
@@ -175,20 +165,12 @@ class ModuleConfig(object):
             module_name = module_dir.split("/")[-1]
         self.desc.name = module_name
         print("desc.name=", self.desc.name)
-        self.desc.signature = "default"
-        print("desc.signature=", self.desc.signature)
         self.desc.contain_assets = True
         print("desc.signature=", self.desc.contain_assets)
 
         # init dict
         self.dict = defaultdict(int)
         self.dict.setdefault(0)
-
-        # feed_list
-        self.feed_list = []
-
-        # fetch_list
-        self.fetch_list = []
 
     def load(self):
         """load module config from module dir
@@ -227,24 +209,44 @@ class ModuleConfig(object):
                 w_id = self.dict[w]
                 fo.write("{}\t{}\n".format(w, w_id))
 
-    def register_input_var(self, var, signature="default"):
-        var_name = var.name()
-        self.desc.sign2input[signature].append(var_name)
-
-    def register_output_var(self, var, signature="default"):
-        var_name = var.name()
-        self.desc.sign2output[signature].append(var_name)
-
     def save_dict(self, word_dict, dict_name=DICT_NAME):
         """ Save dictionary for NLP module
         """
-        mkdir(self.module_dir)
-        with open(os.path.join(self.module_dir, DICT_NAME), "w") as fo:
-            for w in word_dict:
-                self.dict[w] = word_dict[w]
+        for w in word_dict:
+            self.dict[w] = word_dict[w]
+        # mkdir(self.module_dir)
+        # with open(os.path.join(self.module_dir, DICT_NAME), "w") as fo:
+        #     for w in word_dict:
+        #         self.dict[w] = word_dict[w]
 
     def get_dict(self):
         return self.dict
+
+    def register_feed_signature(self, feed_desc, sign_name="default"):
+        #TODO(ZeyuChen) check fetch_desc key is valid and no duplicated
+        for k in feed_desc:
+            feed = self.desc.sign2var[sign_name].feed_desc.add()
+            feed.key = k
+            feed.var_name = feed_desc[k]
+
+    def register_fetch_signature(self, fetch_desc, sign_name="default"):
+        #TODO(ZeyuChen) check fetch_desc key is valid and no duplicated
+        for k in fetch_desc:
+            fetch = self.desc.sign2var[sign_name].fetch_desc.add()
+            fetch.key = k
+            fetch.var_name = fetch_desc[k]
+
+    def feed_var_name(self, key, sign_name="default"):
+        for desc in self.desc.sign2var[sign_name].feed_desc:
+            if desc.key == key:
+                return desc.var_name
+        raise Exception("feed variable {} not found".format(key))
+
+    def fetch_var_name(self, key, sign_name="default"):
+        for desc in self.desc.sign2var[sign_name].fetch_desc:
+            if desc.key == key:
+                return desc.var_name
+        raise Exception("fetch variable {} not found".format(key))
 
 
 class ModuleUtils(object):
@@ -269,9 +271,9 @@ class ModuleUtils(object):
         block._remove_var("fetch")
 
         program.desc.flush()
-        print("********************************")
-        print(program)
-        print("********************************")
+        # print("********************************")
+        # print(program)
+        # print("********************************")
 
 
 if __name__ == "__main__":
