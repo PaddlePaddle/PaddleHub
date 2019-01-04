@@ -1,0 +1,14 @@
+language: python
+
+sudo: required
+
+os:
+  - linux
+
+script:
+  - sh ./scripts/test_all_case.sh
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
