@@ -18,16 +18,19 @@ option optimize_for = LITE_RUNTIME;
 
 package paddle_hub;
 
+// Feed Variable Description
 message FeedDesc {
   string key = 1;
   string var_name = 2;
 };
 
+// Fetch Variable Description
 message FetchDesc {
   string key = 1;
   string var_name = 2;
 };
 
+// Module Variable
 message ModuleVar {
   repeated FetchDesc fetch_desc = 1;
   repeated FeedDesc feed_desc = 2;
@@ -43,9 +46,10 @@ message Parameter {
 // containing a serialized protocol message of this type. The further contents
 // of the directory depend on the storage format described by the message.
 message ModuleDesc {
+  // PaddleHub module name
   string name = 1; // PaddleHub module name
   
-  // signature to input description
+  // signature to module variable
   map<string, ModuleVar> sign2var = 2;
 
   bool return_numpy = 4;

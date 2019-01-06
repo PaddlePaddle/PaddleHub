@@ -38,6 +38,10 @@ def mkdir(path):
 
 
 class Module(object):
+    """
+    A module represents a
+    """
+
     def __init__(self, module_url=None, module_dir=None):
         if module_url == None and module_dir == None:
             raise Exception("Module:module_url and module_dir are None!")

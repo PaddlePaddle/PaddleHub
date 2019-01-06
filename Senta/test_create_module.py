@@ -257,11 +257,6 @@ def retrain_net(train_reader,
     data = module.get_feed_var("words")
     emb = module.get_fetch_var("emb")
 
-    # # data layer
-    # data = fluid.layers.data(
-    #     name="words", shape=[1], dtype="int64", lod_level=1)
-    # # embedding layer
-    # emb = fluid.layers.embedding(input=data, size=[dict_dim, emb_dim])
     # bow layer
     bow = fluid.layers.sequence_pool(input=emb, pool_type='sum')
     bow_tanh = fluid.layers.tanh(bow)
