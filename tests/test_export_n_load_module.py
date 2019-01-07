@@ -1,4 +1,3 @@
-# coding: utf-8
 #   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -163,6 +162,8 @@ def train(use_cuda=False):
         target_vars=[predict_word],
         executor=exe)
 
+    create
+
     dictionary = defaultdict(int)
     w_id = 0
     for w in word_dict:
@@ -218,13 +219,17 @@ def test_save_module(use_cuda=False):
         dictionary[w] = w_id
         w_id += 1
 
-    input_desc = {"words": words.name}
-    output_desc = {"emb": word_emb.name}
-    config = hub.ModuleConfig(saved_module_dir)
-    config.register_feed_signature(input_desc, sign_name="default")
-    config.register_fetch_signature(output_desc, sign_name="default")
-    config.save_dict(word_dict=dictionary)
-    config.dump()
+    signature = hub.create_singature(
+        "default", inputs=[data], outputs=[word_emb])
+    hub.create_module(
+        sign_arr=signature, program=main_program, path=save_module_dir)
+    # input_desc = {"words": words.name}
+    # output_desc = {"emb": word_emb.name}
+    # config = hub.ModuleConfig(saved_module_dir)
+    # config.register_feed_signature(input_desc, sign_name="default")
+    # config.register_fetch_signature(output_desc, sign_name="default")
+    # config.save_dict(word_dict=dictionary)
+    # config.dump()
 
 
 def test_load_module(use_cuda=False):
