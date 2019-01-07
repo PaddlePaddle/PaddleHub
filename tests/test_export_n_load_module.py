@@ -234,7 +234,7 @@ def test_load_module(use_cuda=False):
 
 
 if __name__ == "__main__":
-    use_cuda = True
+    use_cuda = False
     print("train...")
     train(use_cuda)
     print("save module...")
