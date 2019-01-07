@@ -30,9 +30,8 @@ def create_module(sign_arr, program, path=None, assets=None):
     assert sign_arr, "signarture array should not be None"
 
     if not path:
-        path = "."
+        path = os.path.join(".", "hub_module")
 
-    path = os.path.join(path, "hub_module")
     assert not os.path.exists(path), "path %s should not be existed" % path
 
     module = modulepb.ModuleDesc()
