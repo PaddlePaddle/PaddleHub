@@ -162,8 +162,6 @@ def train(use_cuda=False):
         target_vars=[predict_word],
         executor=exe)
 
-    create
-
     dictionary = defaultdict(int)
     w_id = 0
     for w in word_dict:
@@ -211,25 +209,18 @@ def test_save_module(use_cuda=False):
             target_vars=[word_emb],
             executor=exe)
 
-    dictionary = defaultdict(int)
-    w_id = 0
-    for w in word_dict:
-        if isinstance(w, bytes):
-            w = w.decode("ascii")
-        dictionary[w] = w_id
-        w_id += 1
+        dictionary = defaultdict(int)
+        w_id = 0
+        for w in word_dict:
+            if isinstance(w, bytes):
+                w = w.decode("ascii")
+            dictionary[w] = w_id
+            w_id += 1
 
-    signature = hub.create_singature(
-        "default", inputs=[data], outputs=[word_emb])
-    hub.create_module(
-        sign_arr=signature, program=main_program, path=save_module_dir)
-    # input_desc = {"words": words.name}
-    # output_desc = {"emb": word_emb.name}
-    # config = hub.ModuleConfig(saved_module_dir)
-    # config.register_feed_signature(input_desc, sign_name="default")
-    # config.register_fetch_signature(output_desc, sign_name="default")
-    # config.save_dict(word_dict=dictionary)
-    # config.dump()
+        signature = hub.create_signature(
+            "default", inputs=[words], outputs=[word_emb])
+        hub.create_module(
+            sign_arr=signature, program=main_program, path=saved_module_dir)
 
 
 def test_load_module(use_cuda=False):
@@ -243,7 +234,7 @@ def test_load_module(use_cuda=False):
 
 
 if __name__ == "__main__":
-    use_cuda = True
+    use_cuda = False
     print("train...")
     train(use_cuda)
     print("save module...")
