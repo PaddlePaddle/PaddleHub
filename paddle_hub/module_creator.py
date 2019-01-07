@@ -87,6 +87,6 @@ def create_module(sign_arr, program, path=None, assets=None):
 
     # save to dist
     data = module.SerializeToString()
-    metafile = os.path.join(path, "meta.pb")
+    metafile = os.path.join(path, "module_desc.pb")
     with open(metafile, "wb") as f:
         f.write(data)
