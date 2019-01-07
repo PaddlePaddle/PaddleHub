@@ -21,8 +21,8 @@ cd ${base_path}
 pip install -r requirements.txt
 
 # run all case list in the {listfile}
-cd ${test_case_path}
+cd -
 for test_file in `cat $listfile`
 do
-	python ${test_file}.py
+	python ${test_case_path}/${test_file}.py
 done

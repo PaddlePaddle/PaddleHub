@@ -9,8 +9,8 @@ os:
   - linux
 
 script:
-  - sh -x ./scripts/test_all_case.sh ./tests/tclist_all
-  - sh -x ./scripts/check_code_style.sh
+  - /bin/bash ./scripts/test_all_case.sh ./tests/tclist_all
+  - /bin/bash ./scripts/check_code_style.sh
 
 notifications:
   email:
