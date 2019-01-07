@@ -16,4 +16,4 @@
     -   id: trailing-whitespace
     -   id: detect-private-key
     -   id: check-symlinks
-    -   id: check-added-large-files
+      #    -   id: check-added-large-files
