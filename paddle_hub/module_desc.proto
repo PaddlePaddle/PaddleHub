@@ -51,6 +51,8 @@ message ModuleDesc {
   
   // signature to module variable
   map<string, ModuleVar> sign2var = 2;
+  
+  repeated Parameter parameters = 3;
 
   bool return_numpy = 4;
 
