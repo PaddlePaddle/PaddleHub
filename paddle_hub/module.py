@@ -79,10 +79,6 @@ class Module(object):
 
         self.config = ModuleConfig(self.module_dir)
         self.config.load()
-        # load assets
-        # self.dict = defaultdict(int)
-        # self.dict.setdefault(0)
-        # self._load_assets(module_dir)
 
     def _construct_feed_dict(self, inputs):
         """ Construct feed dict according to user's inputs and module config.
@@ -244,10 +240,6 @@ class ModuleConfig(object):
         """
         for w in word_dict:
             self.dict[w] = word_dict[w]
-        # mkdir(self.module_dir)
-        # with open(os.path.join(self.module_dir, DICT_NAME), "w") as fo:
-        #     for w in word_dict:
-        #         self.dict[w] = word_dict[w]
 
     def register_feed_signature(self, feed_desc, sign_name="default"):
         """ Register feed signature to the Module

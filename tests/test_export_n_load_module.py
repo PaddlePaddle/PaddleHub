@@ -53,12 +53,13 @@ print("imikolov simple dataset batch_size =", batch_size)
 
 
 def module_fn(trainable=False):
+    # Define module function for saving module
     # create word input
     words = fluid.layers.data(
         name="words", shape=[1], lod_level=1, dtype="int64")
 
     # create embedding
-    emb_name = "embedding"
+    emb_name = "w2v_emb"
     emb_param_attr = fluid.ParamAttr(name=emb_name, trainable=trainable)
     word_emb = fluid.layers.embedding(
         input=words,
@@ -133,11 +134,6 @@ def train(use_cuda=False):
     exe = fluid.Executor(place)
     exe.run(startup_program)  # initialization
 
-    # fluid.io.load_vars(
-    #     executor=exe,
-    #     dirname="./w2v_model",
-    #     vars=[main_program.global_block().var("embedding")])
-    # 也可使用predicate方式搜索变量
     step = 0
     for epoch in range(0, PASS_NUM):
         for mini_batch in batch_reader():
@@ -159,18 +155,7 @@ def train(use_cuda=False):
             if step % 100 == 0:
                 print("Epoch={} Step={} Cost={}".format(epoch, step, cost[0]))
 
-    model_dir = "./tmp/w2v_model"
-    # save part of model
-    var_list_to_saved = [main_program.global_block().var("embedding")]
-    print("saving model to %s" % model_dir)
-    fluid.io.save_vars(
-        executor=exe, dirname=model_dir + "_save_vars", vars=var_list_to_saved)
-
-    # save the whole model
-    fluid.io.save_persistables(
-        executor=exe, dirname=model_dir + "_save_persistables")
-
-    saved_model_dir = "./tmp/word2vec_inference_model"
+    saved_model_dir = "./tmp/word2vec_test_model"
     # save inference model including feed and fetch variable info
     fluid.io.save_inference_model(
         dirname=saved_model_dir,
@@ -187,7 +172,7 @@ def train(use_cuda=False):
         w_id += 1
 
     # save word dict to assets folder
-    config = hub.ModuleConfig(model_dir)
+    config = hub.ModuleConfig(saved_model_dir)
     config.save_dict(word_dict=dictionary)
     config.dump()
 
@@ -198,28 +183,27 @@ def test_save_module(use_cuda=False):
     exe = fluid.Executor(place)
     main_program = fluid.Program()
     startup_program = fluid.Program()
-    exe = fluid.Executor(place)
 
     with fluid.program_guard(main_program, startup_program):
         words, word_emb = module_fn()
         exe.run(startup_program)
         # load inference embedding parameters
-        saved_model_dir = "./tmp/word2vec_inference_model"
+        saved_model_dir = "./tmp/word2vec_test_model"
         fluid.io.load_inference_model(executor=exe, dirname=saved_model_dir)
 
-        feed_var_list = [main_program.global_block().var("words")]
-        feeder = fluid.DataFeeder(feed_list=feed_var_list, place=place)
-        results = exe.run(
-            main_program,
-            feed=feeder.feed([[[1, 2, 3, 4, 5]]]),
-            fetch_list=[word_emb],
-            return_numpy=False)
+        # feed_var_list = [main_program.global_block().var("words")]
+        # feeder = fluid.DataFeeder(feed_list=feed_var_list, place=place)
+        # results = exe.run(
+        #     main_program,
+        #     feed=feeder.feed([[[1, 2, 3, 4, 5]]]),
+        #     fetch_list=[word_emb],
+        #     return_numpy=False)
 
-        np_result = np.array(results[0])
-        print(np_result)
+        # np_result = np.array(results[0])
+        # print(np_result)
 
         # save module_dir
-        saved_module_dir = "./tmp/word2vec_inference_module"
+        saved_module_dir = "./tmp/word2vec_test_module"
         fluid.io.save_inference_model(
             dirname=saved_module_dir,
             feeded_var_names=["words"],
@@ -233,40 +217,31 @@ def test_save_module(use_cuda=False):
             w = w.decode("ascii")
         dictionary[w] = w_id
         w_id += 1
-    # save word dict to assets folder
-    config = hub.ModuleConfig(saved_module_dir)
-    config.save_dict(word_dict=dictionary)
 
+    input_desc = {"words": words.name}
+    output_desc = {"emb": word_emb.name}
+    config = hub.ModuleConfig(saved_module_dir)
+    config.register_feed_signature(input_desc, sign_name="default")
+    config.register_fetch_signature(output_desc, sign_name="default")
+    config.save_dict(word_dict=dictionary)
     config.dump()
 
 
 def test_load_module(use_cuda=False):
-    place = fluid.CUDAPlace(0) if use_cuda else fluid.CPUPlace()
-    exe = fluid.Executor(fluid.CPUPlace())
-    saved_module_dir = "./tmp/word2vec_inference_module"
-    [inference_program, feed_target_names,
-     fetch_targets] = fluid.io.load_inference_model(
-         saved_module_dir, executor=exe)
+    saved_module_dir = "./tmp/word2vec_test_module"
+    w2v_module = hub.Module(module_dir=saved_module_dir)
 
-    # Sequence input in Paddle must be LOD Tensor, so we need to convert them inside Module
-    word_ids = [[1, 2, 3, 4, 5]]
-    lod = [[5]]
-    word_ids_lod_tensor = fluid.create_lod_tensor(word_ids, lod, place)
-
-    results = exe.run(
-        inference_program,
-        feed={feed_target_names[0]: word_ids_lod_tensor},
-        fetch_list=fetch_targets,
-        return_numpy=False)
-
-    print(feed_target_names)
-    print(fetch_targets)
-    np_result = np.array(results[0])
-    print(np_result)
+    word_ids = [[1, 2, 3, 4, 5]]  # test sequence
+    word_ids_lod_tensor = w2v_module._preprocess_input(word_ids)
+    result = w2v_module({"words": word_ids_lod_tensor})
+    print(result)
 
 
 if __name__ == "__main__":
     use_cuda = True
+    print("train...")
     train(use_cuda)
+    print("save module...")
     test_save_module()
+    print("load module...")
     test_load_module()
