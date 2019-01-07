@@ -20,6 +20,7 @@ import paddle_hub.module_desc_pb2 as modulepb
 import paddle.fluid as fluid
 from paddle_hub.utils import to_list
 from paddle_hub.signature import Signature
+from paddle_hub.module import mkdir
 
 import os
 
@@ -31,13 +32,12 @@ def create_module(sign_arr, program, path=None, assets=None):
 
     if not path:
         path = os.path.join(".", "hub_module")
-
-    assert not os.path.exists(path), "path %s should not be existed" % path
+    # create module path for saving
+    mkdir(path)
 
     module = modulepb.ModuleDesc()
     program = program.clone()
 
-    os.makedirs(path)
     # TODO(wuzewu): save assets data
     if not assets:
         module.contain_assets = False

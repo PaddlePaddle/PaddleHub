@@ -92,7 +92,6 @@ def train():
 
     for epoch in range(0, PASS_NUM):
         for mini_batch in batch_reader():
-            # 定义输入变量
             feed_var_list = [
                 main_program.global_block().var("firstw"),
                 main_program.global_block().var("secondw"),
@@ -105,9 +104,9 @@ def train():
                 main_program,
                 feed=feeder.feed(mini_batch),
                 fetch_list=[avg_cost])
-            print("Cost = %f" % cost[0])
+        print("Epoch {} Cost = {}".format(epoch, cost[0]))
 
-    model_dir = "./w2v_model"
+    model_dir = "./tmp/w2v_model"
     var_list_to_saved = [main_program.global_block().var("embedding")]
     print("saving model to %s" % model_dir)
     fluid.io.save_vars(
