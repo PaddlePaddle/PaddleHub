@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package='paddle_hub',
     syntax='proto3',
     serialized_pb=_b(
-        '\n\x11module_desc.proto\x12\npaddle_hub\")\n\x08\x46\x65\x65\x64\x44\x65sc\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x10\n\x08var_name\x18\x02 \x01(\t\"*\n\tFetchDesc\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x10\n\x08var_name\x18\x02 \x01(\t\"_\n\tModuleVar\x12)\n\nfetch_desc\x18\x01 \x03(\x0b\x32\x15.paddle_hub.FetchDesc\x12\'\n\tfeed_desc\x18\x02 \x03(\x0b\x32\x14.paddle_hub.FeedDesc\"C\n\tParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x15\n\rlearning_rate\x18\x02 \x01(\x01\x12\x11\n\ttrainable\x18\x03 \x01(\x08\"\xc8\x01\n\nModuleDesc\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x08sign2var\x18\x02 \x03(\x0b\x32$.paddle_hub.ModuleDesc.Sign2varEntry\x12\x14\n\x0creturn_numpy\x18\x04 \x01(\x08\x12\x16\n\x0e\x63ontain_assets\x18\x05 \x01(\x08\x1a\x46\n\rSign2varEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.paddle_hub.ModuleVar:\x02\x38\x01\x42\x02H\x03\x62\x06proto3'
+        '\n\x11module_desc.proto\x12\npaddle_hub\")\n\x08\x46\x65\x65\x64\x44\x65sc\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x10\n\x08var_name\x18\x02 \x01(\t\"*\n\tFetchDesc\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x10\n\x08var_name\x18\x02 \x01(\t\"_\n\tModuleVar\x12)\n\nfetch_desc\x18\x01 \x03(\x0b\x32\x15.paddle_hub.FetchDesc\x12\'\n\tfeed_desc\x18\x02 \x03(\x0b\x32\x14.paddle_hub.FeedDesc\"C\n\tParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x15\n\rlearning_rate\x18\x02 \x01(\x01\x12\x11\n\ttrainable\x18\x03 \x01(\x08\"\xf3\x01\n\nModuleDesc\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x08sign2var\x18\x02 \x03(\x0b\x32$.paddle_hub.ModuleDesc.Sign2varEntry\x12)\n\nparameters\x18\x03 \x03(\x0b\x32\x15.paddle_hub.Parameter\x12\x14\n\x0creturn_numpy\x18\x04 \x01(\x08\x12\x16\n\x0e\x63ontain_assets\x18\x05 \x01(\x08\x1a\x46\n\rSign2varEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.paddle_hub.ModuleVar:\x02\x38\x01\x42\x02H\x03\x62\x06proto3'
     ))
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -294,8 +294,8 @@ _MODULEDESC_SIGN2VARENTRY = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=417,
-    serialized_end=487,
+    serialized_start=460,
+    serialized_end=530,
 )
 
 _MODULEDESC = _descriptor.Descriptor(
@@ -338,9 +338,25 @@ _MODULEDESC = _descriptor.Descriptor(
             extension_scope=None,
             options=None),
         _descriptor.FieldDescriptor(
+            name='parameters',
+            full_name='paddle_hub.ModuleDesc.parameters',
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None),
+        _descriptor.FieldDescriptor(
             name='return_numpy',
             full_name='paddle_hub.ModuleDesc.return_numpy',
-            index=2,
+            index=3,
             number=4,
             type=8,
             cpp_type=7,
@@ -356,7 +372,7 @@ _MODULEDESC = _descriptor.Descriptor(
         _descriptor.FieldDescriptor(
             name='contain_assets',
             full_name='paddle_hub.ModuleDesc.contain_assets',
-            index=3,
+            index=4,
             number=5,
             type=8,
             cpp_type=7,
@@ -381,7 +397,7 @@ _MODULEDESC = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=287,
-    serialized_end=487,
+    serialized_end=530,
 )
 
 _MODULEVAR.fields_by_name['fetch_desc'].message_type = _FETCHDESC
@@ -389,6 +405,7 @@ _MODULEVAR.fields_by_name['feed_desc'].message_type = _FEEDDESC
 _MODULEDESC_SIGN2VARENTRY.fields_by_name['value'].message_type = _MODULEVAR
 _MODULEDESC_SIGN2VARENTRY.containing_type = _MODULEDESC
 _MODULEDESC.fields_by_name['sign2var'].message_type = _MODULEDESC_SIGN2VARENTRY
+_MODULEDESC.fields_by_name['parameters'].message_type = _PARAMETER
 DESCRIPTOR.message_types_by_name['FeedDesc'] = _FEEDDESC
 DESCRIPTOR.message_types_by_name['FetchDesc'] = _FETCHDESC
 DESCRIPTOR.message_types_by_name['ModuleVar'] = _MODULEVAR
