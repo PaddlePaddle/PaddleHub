@@ -65,10 +65,12 @@ class Module(object):
 
         # load paddle inference model
         place = fluid.CPUPlace()
+        model_dir = os.path.join(self.module_dir, "model")
+        print("model_dir", model_dir)
         self.exe = fluid.Executor(fluid.CPUPlace())
         [self.inference_program, self.feed_target_names,
          self.fetch_targets] = fluid.io.load_inference_model(
-             dirname=self.module_dir, executor=self.exe)
+             dirname=model_dir, executor=self.exe)
 
         print("inference_program")
         print(self.inference_program)
@@ -128,6 +130,54 @@ class Module(object):
 
         raise Exception("Can't find input var {}".format(key))
 
+    def get_feed_var_by_index(self, index, signature="default"):
+        feed_vars = self.get_feed_vars(signature)
+        assert index < len(
+            feed_vars), "index out of range index {}, len {}".format(
+                index, len(feed_vars))
+        return feed_vars[index]
+
+    def get_fetch_var_by_index(self, index, signature="default"):
+        fetch_vars = self.get_fetch_vars(signature)
+        assert index < len(
+            fetch_vars), "index out of range index {}, len {}".format(
+                index, len(fetch_vars))
+        return fetch_vars[index]
+
+    def get_feed_vars(self, signature="default"):
+        """
+        Get feed variable according to variable key and signature
+        """
+        feed_vars = []
+        for feed_var in self.config.feed_var_names(signature):
+            find_var = False
+            for var in self.inference_program.list_vars():
+                if var.name == feed_var.var_name:
+                    feed_vars.append(var)
+                    find_var = True
+            if not find_var:
+                raise Exception("Can't find feed var {}".format(feed_var_name))
+
+        return feed_vars
+
+    def get_fetch_vars(self, signature="default"):
+        """
+        Get feed variable according to variable key and signature
+        """
+        fetch_vars = []
+        #TODO(ZeyuChen): use brute force to find variables, simple and easy to
+        #understand
+        for fetch_var in self.config.fetch_var_names(signature):
+            find_var = False
+            for var in self.inference_program.list_vars():
+                if var.name == fetch_var.var_name:
+                    fetch_vars.append(var)
+                    find_var = True
+            if not find_var:
+                raise Exception("Can't find feed var {}".format(fetch_var_name))
+
+        return fetch_vars
+
     def get_fetch_var(self, key, signature="default"):
         """
         Get fetch variable according to variable key and signature
@@ -135,8 +185,6 @@ class Module(object):
         for var in self.inference_program.list_vars():
             if var.name == self.config.fetch_var_name(key, signature):
                 return var
-
-        raise Exception("Can't find output var {}".format(key))
 
     def get_inference_program(self):
         return self.inference_program
@@ -202,6 +250,9 @@ class ModuleConfig(object):
         with open(pb_path, "rb") as fi:
             self.desc.ParseFromString(fi.read())
 
+        print("self.desc.sign2var",
+              self.desc.sign2var["default"].feed_desc[0].var_name)
+
         if self.desc.contain_assets:
             # load assets
             assets_dir = os.path.join(self.module_dir, ASSETS_NAME)
@@ -266,6 +317,12 @@ class ModuleConfig(object):
             fetch = self.desc.sign2var[sign_name].fetch_desc.add()
             fetch.key = k
             fetch.var_name = fetch_desc[k]
+
+    def feed_var_names(self, sign_name="default"):
+        return self.desc.sign2var[sign_name].feed_desc
+
+    def fetch_var_names(self, sign_name="default"):
+        return self.desc.sign2var[sign_name].fetch_desc
 
     def feed_var_name(self, key, sign_name="default"):
         """get module's feed/input variable name

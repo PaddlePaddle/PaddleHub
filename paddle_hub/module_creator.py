@@ -76,7 +76,7 @@ def create_module(sign_arr, program, path=None, assets=None):
     # save inference program
     exe = fluid.Executor(place=fluid.CPUPlace())
     model_path = os.path.join(path, "model")
-    os.makedirs(model_path)
+    mkdir(model_path)
     first_sign = sign_arr[0]
     fluid.io.save_inference_model(
         model_path,
@@ -84,7 +84,7 @@ def create_module(sign_arr, program, path=None, assets=None):
         target_vars=first_sign.get_outputs(),
         executor=exe)
 
-    # save to dist
+    # save to disk
     data = module.SerializeToString()
     metafile = os.path.join(path, "module_desc.pb")
     with open(metafile, "wb") as f:
