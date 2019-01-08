@@ -72,6 +72,9 @@ class Module(object):
          self.fetch_targets] = fluid.io.load_inference_model(
              dirname=model_dir, executor=self.exe)
 
+        # remove feed fetch operator and variable
+        ModuleUtils.remove_feed_fetch_op(self.inference_program)
+
         print("inference_program")
         print(self.inference_program)
         print("feed_target_names")

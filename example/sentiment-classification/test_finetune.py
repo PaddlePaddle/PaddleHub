@@ -145,8 +145,7 @@ def retrain_net(train_reader,
     fluid.framework.switch_main_program(module.get_inference_program())
 
     # remove feed fetch operator and variable
-    hub.ModuleUtils.remove_feed_fetch_op(fluid.default_main_program())
-    # remove_feed_fetch_op(fluid.default_main_program())
+    # hub.ModuleUtils.remove_feed_fetch_op(fluid.default_main_program())
 
     label = fluid.layers.data(name="label", shape=[1], dtype="int64")
     #data = fluid.default_main_program().global_block().var("words")
