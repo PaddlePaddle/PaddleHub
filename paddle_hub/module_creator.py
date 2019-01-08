@@ -82,6 +82,7 @@ def create_module(sign_arr, program, path=None, assets=None):
         model_path,
         feeded_var_names=[var.name for var in first_sign.get_inputs()],
         target_vars=first_sign.get_outputs(),
+        main_program=program,
         executor=exe)
 
     # save to disk

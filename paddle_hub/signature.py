@@ -48,6 +48,6 @@ class Signature:
         return self.outputs
 
 
-def create_signature(name="defalut", inputs=[], outputs=[]):
+def create_signature(name="default", inputs=[], outputs=[]):
 
     return Signature(name=name, inputs=inputs, outputs=outputs)
