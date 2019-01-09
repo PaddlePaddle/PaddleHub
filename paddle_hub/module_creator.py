@@ -46,6 +46,12 @@ def create_module(sign_arr, program, path=None, assets=None):
         module.contain_assets = True
         os.makedirs(os.path.join(path, "assets"))
 
+    # save the unique name object
+    generator = fluid.unique_name.generator
+    pklname = os.path.join(path, "uqn.pkl")
+    with open(pklname, "wb") as file:
+        pickle.dump(generator, file)
+
     # save fluid Parameter
     param_arr = []
     for param in program.global_block().iter_parameters():
