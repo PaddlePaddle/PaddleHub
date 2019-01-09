@@ -20,14 +20,12 @@ package paddle_hub;
 
 // Feed Variable Description
 message FeedDesc {
-  string key = 1;
-  string var_name = 2;
+  string var_name = 1;
 };
 
 // Fetch Variable Description
 message FetchDesc {
-  string key = 1;
-  string var_name = 2;
+  string var_name = 1;
 };
 
 // Module Variable

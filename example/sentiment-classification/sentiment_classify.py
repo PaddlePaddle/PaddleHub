@@ -204,16 +204,16 @@ def retrain_net(train_reader,
     # use switch program to test fine-tuning
     fluid.framework.switch_main_program(module.get_inference_program())
 
-    # remove feed fetch operator and variable
-    # hub.ModuleUtils.remove_feed_fetch_op(fluid.default_main_program())
-
     label = fluid.layers.data(name="label", shape=[1], dtype="int64")
     data = module.get_feed_var_by_index(0)
     #TODO(ZeyuChen): how to get output paramter according to proto config
     sent_emb = module.get_fetch_var_by_index(0)
 
+    fc_1 = fluid.layers.fc(
+        input=sent_emb, size=hid_dim, act="tanh", name="bow_fc1")
     fc_2 = fluid.layers.fc(
-        input=sent_emb, size=hid_dim2, act="tanh", name="bow_fc2")
+        input=fc_1, size=hid_dim2, act="tanh", name="bow_fc2")
+
     # softmax layer
     pred = fluid.layers.fc(input=[fc_2], size=class_dim, act="softmax")
     # print(fluid.default_main_program())
@@ -221,6 +221,9 @@ def retrain_net(train_reader,
         fluid.layers.cross_entropy(input=pred, label=label))
     acc = fluid.layers.accuracy(input=pred, label=label)
 
+    with open("./prototxt/bow_net.forward.program_desc.prototxt", "w") as fo:
+        program_desc = str(fluid.default_main_program())
+        fo.write(program_desc)
     # set optimizer
     sgd_optimizer = fluid.optimizer.Adagrad(learning_rate=lr)
     sgd_optimizer.minimize(cost)
@@ -228,6 +231,7 @@ def retrain_net(train_reader,
     with open("./prototxt/bow_net.finetune.program_desc.prototxt", "w") as fo:
         program_desc = str(fluid.default_main_program())
         fo.write(program_desc)
+
     # set place, executor, datafeeder
     place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
     exe = fluid.Executor(place)

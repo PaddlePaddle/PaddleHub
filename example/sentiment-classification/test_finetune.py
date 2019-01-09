@@ -141,21 +141,13 @@ def retrain_net(train_reader,
     main_program = fluid.Program()
     startup_program = fluid.Program()
 
-    # use switch program to test fine-tuning
-    fluid.framework.switch_main_program(module.get_inference_program())
-
-    # remove feed fetch operator and variable
-    # hub.ModuleUtils.remove_feed_fetch_op(fluid.default_main_program())
-
     label = fluid.layers.data(name="label", shape=[1], dtype="int64")
-    #data = fluid.default_main_program().global_block().var("words")
-    data = module.get_feed_var("words")
-    #TODO(ZeyuChen): how to get output paramter according to proto config
-    emb = module.get_fetch_var("emb")
+    data = module.get_feed_var_by_index(0)
+    emb = module.get_fetch_var_by_index(0)
 
+    emb2 = fluid.layers.embedding(input=data, size=[dict_dim, emb_dim])
     # # # embedding layer
     # emb = fluid.layers.embedding(input=data, size=[dict_dim, emb_dim])
-    # #input=data, size=[dict_dim, emb_dim], param_attr="bow_embedding")
     # # bow layer
     bow = fluid.layers.sequence_pool(input=emb, pool_type='sum')
     bow_tanh = fluid.layers.tanh(bow)

@@ -35,7 +35,7 @@ def bow_net(data,
     avg_cost = fluid.layers.mean(x=cost)
     acc = fluid.layers.accuracy(input=prediction, label=label)
 
-    return avg_cost, acc, prediction, bow_tanh
+    return avg_cost, acc, prediction, fc_1
 
 
 def cnn_net(data,

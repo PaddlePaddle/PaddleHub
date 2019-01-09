@@ -47,7 +47,7 @@ def data2tensor(data, place):
     """
     data2tensor
     """
-    input_seq = to_lodtensor(map(lambda x: x[0], data), place)
+    input_seq = to_lodtensor(list(map(lambda x: x[0], data)), place)
     return {"words": input_seq}
 
 
