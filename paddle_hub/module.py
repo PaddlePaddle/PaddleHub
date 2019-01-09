@@ -22,6 +22,7 @@ import paddle.fluid as fluid
 import numpy as np
 import tempfile
 import os
+import pickle
 
 from collections import defaultdict
 from paddle_hub.downloader import download_and_uncompress
@@ -88,21 +89,22 @@ class Module(object):
 
     def _process_parameter(self):
         global_block = self.inference_program.global_block()
-        for param in self.config.desc.parameters:
-            name = param.name
-            if name in global_block.vars:
-                var = global_block.vars[name]
-                global_block.create_parameter(
-                    name=name,
-                    trainable=param.trainable,
-                    shape=var.shape,
-                    dtype=var.dtype,
-                    optimize_attr={'learning_rate': param.learning_rate},
-                    type=var.type,
-                    lod_level=var.lod_level,
-                    error_clip=var.error_clip,
-                    stop_gradient=var.stop_gradient,
-                    is_data=var.is_data)
+        filepath = os.path.join(self.module_dir, "param.pkl")
+        with open(filepath, "rb") as file:
+            param_arr = pickle.load(file)
+        for param in param_arr:
+            if (param['name'] not in global_block.vars):
+                continue
+            var = global_block.var(param['name'])
+            global_block.create_parameter(
+                **param,
+                shape=var.shape,
+                dtype=var.dtype,
+                type=var.type,
+                lod_level=var.lod_level,
+                error_clip=var.error_clip,
+                stop_gradient=var.stop_gradient,
+                is_data=var.is_data)
 
     def _construct_feed_dict(self, inputs):
         """ Construct feed dict according to user's inputs and module config.

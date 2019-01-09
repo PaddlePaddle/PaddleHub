@@ -23,6 +23,7 @@ from paddle_hub.signature import Signature
 from paddle_hub.module import mkdir
 
 import os
+import pickle
 
 
 def create_module(sign_arr, program, path=None, assets=None):
@@ -46,11 +47,21 @@ def create_module(sign_arr, program, path=None, assets=None):
         os.makedirs(os.path.join(path, "assets"))
 
     # save fluid Parameter
+    param_arr = []
     for param in program.global_block().iter_parameters():
-        parameter = module.parameters.add()
-        parameter.name = param.name
-        parameter.learning_rate = param.optimize_attr["learning_rate"]
-        parameter.trainable = param.trainable
+        param_info = {
+            'name': param.name,
+            'regularizer': param.regularizer,
+            'gradient_clip_attr': param.gradient_clip_attr,
+            'trainable': param.trainable,
+            'optimize_attr': param.optimize_attr,
+            'do_model_average': param.do_model_average
+        }
+        param_arr.append(param_info)
+
+    pklname = os.path.join(path, "param.pkl")
+    with open(pklname, "wb") as file:
+        pickle.dump(param_arr, file)
 
     # save signarture info
     sign_map = module.sign2var
