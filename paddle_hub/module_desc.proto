@@ -36,12 +36,6 @@ message ModuleVar {
   repeated FeedDesc feed_desc = 2;
 }
 
-message Parameter {
-  string name = 1;
-  double learning_rate = 2;
-  bool trainable = 3;
-};
-
 // A Hub Module is stored in a directory with a file 'paddlehub.pb'
 // containing a serialized protocol message of this type. The further contents
 // of the directory depend on the storage format described by the message.
@@ -51,11 +45,9 @@ message ModuleDesc {
   
   // signature to module variable
   map<string, ModuleVar> sign2var = 2;
-  
-  repeated Parameter parameters = 3;
 
-  bool return_numpy = 4;
+  bool return_numpy = 3;
 
-  bool contain_assets = 5;
+  bool contain_assets = 4;
 };
 
