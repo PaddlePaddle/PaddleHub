@@ -52,7 +52,7 @@ def mkdir(path):
 
 class Module(object):
     """
-    A module represents a
+    Core object of PaddleHub
     """
 
     def __init__(self, module_url=None, module_dir=None):
@@ -85,12 +85,10 @@ class Module(object):
         # remove feed fetch operator and variable
         ModuleUtils.remove_feed_fetch_op(self.inference_program)
 
-        print("inference_program")
-        print(self.inference_program)
-        print("feed_target_names")
-        print(self.feed_target_names)
-        print("fetch_targets")
-        print(self.fetch_targets)
+        # print("inference_program")
+        # print(self.inference_program)
+        print("**feed_target_names**\n{}".format(self.feed_target_names))
+        print("**fetch_targets**\n{}".format(self.fetch_targets))
 
         self.config = ModuleConfig(self.module_dir)
         self.config.load()
@@ -105,7 +103,6 @@ class Module(object):
 
     def _process_parameter(self):
         global_block = self.inference_program.global_block()
-        filepath = os.path.join(self.module_dir, "param.pkl")
         param_path = ModuleConfig.meta_param_path(self.module_dir)
         with open(param_path, "rb") as file:
             param_arr = pickle.load(file)
@@ -122,16 +119,6 @@ class Module(object):
                 error_clip=var.error_clip,
                 stop_gradient=var.stop_gradient,
                 is_data=var.is_data)
-
-    def _construct_feed_dict(self, inputs):
-        """ Construct feed dict according to user's inputs and module config.
-        """
-        feed_dict = {}
-        for k in inputs:
-            if k in self.feed_target_names:
-                feed_dict[k] = inputs[k]
-
-        return feed_dict
 
     def __call__(self, sign_name="default", trainable=False):
         """ Call default signature and return results
@@ -153,77 +140,84 @@ class Module(object):
 
         return self.feed_target_names, self.fetch_targets, program
 
-    def get_vars(self):
-        """
-        Return variable list of the module program
-        """
-        return self.inference_program.list_vars()
+    # @deprecated
+    # def get_vars(self):
+    #     """
+    #     Return variable list of the module program
+    #     """
+    #     return self.inference_program.list_vars()
 
-    def get_feed_var(self, key, signature="default"):
-        """
-        Get feed variable according to variable key and signature
-        """
-        for var in self.inference_program.list_vars():
-            if var.name == self.config.feed_var_name(key, signature):
-                return var
+    # @deprecated
+    # def get_feed_var(self, key, signature="default"):
+    #     """
+    #     Get feed variable according to variable key and signature
+    #     """
+    #     for var in self.inference_program.list_vars():
+    #         if var.name == self.config.feed_var_name(key, signature):
+    #             return var
 
-        raise Exception("Can't find input var {}".format(key))
+    #     raise Exception("Can't find input var {}".format(key))
 
-    def get_feed_var_by_index(self, index, signature="default"):
-        feed_vars = self.get_feed_vars(signature)
-        assert index < len(
-            feed_vars), "index out of range index {}, len {}".format(
-                index, len(feed_vars))
-        return feed_vars[index]
+    # @deprecated
+    # def get_feed_var_by_index(self, index, signature="default"):
+    #     feed_vars = self.get_feed_vars(signature)
+    #     assert index < len(
+    #         feed_vars), "index out of range index {}, len {}".format(
+    #             index, len(feed_vars))
+    #     return feed_vars[index]
 
-    def get_fetch_var_by_index(self, index, signature="default"):
-        fetch_vars = self.get_fetch_vars(signature)
-        assert index < len(
-            fetch_vars), "index out of range index {}, len {}".format(
-                index, len(fetch_vars))
-        return fetch_vars[index]
+    # @deprecated
+    # def get_fetch_var_by_index(self, index, signature="default"):
+    #     fetch_vars = self.get_fetch_vars(signature)
+    #     assert index < len(
+    #         fetch_vars), "index out of range index {}, len {}".format(
+    #             index, len(fetch_vars))
+    #     return fetch_vars[index]
 
-    def get_feed_vars(self, signature="default"):
-        """
-        Get feed variable according to variable key and signature
-        """
-        feed_vars = []
-        for feed_var in self.config.feed_var_names(signature):
-            find_var = False
-            for var in self.inference_program.list_vars():
-                if var.name == feed_var.var_name:
-                    feed_vars.append(var)
-                    find_var = True
-            if not find_var:
-                raise Exception("Can't find feed var {}".format(feed_var_name))
+    # @deprecated
+    # def get_feed_vars(self, signature="default"):
+    #     """
+    #     Get feed variable according to variable key and signature
+    #     """
+    #     feed_vars = []
+    #     for feed_var in self.config.feed_var_names(signature):
+    #         find_var = False
+    #         for var in self.inference_program.list_vars():
+    #             if var.name == feed_var.var_name:
+    #                 feed_vars.append(var)
+    #                 find_var = True
+    #         if not find_var:
+    #             raise Exception("Can't find feed var {}".format(feed_var_name))
 
-        return feed_vars
+    #     return feed_vars
 
-    def get_fetch_vars(self, signature="default"):
-        """
-        Get feed variable according to variable key and signature
-        """
-        fetch_vars = []
-        #TODO(ZeyuChen): use brute force to find variables, simple and easy to
-        #understand
-        for fetch_var in self.config.fetch_var_names(signature):
-            find_var = False
-            for var in self.inference_program.list_vars():
-                if var.name == fetch_var.var_name:
-                    fetch_vars.append(var)
-                    find_var = True
-            if not find_var:
-                raise Exception("Can't find feed var {}".format(fetch_var_name))
+    # @deprecated
+    # def get_fetch_vars(self, signature="default"):
+    #     """
+    #     Get feed variable according to variable key and signature
+    #     """
+    #     fetch_vars = []
+    #     #TODO(ZeyuChen): use brute force to find variables, simple and easy to
+    #     #understand
+    #     for fetch_var in self.config.fetch_var_names(signature):
+    #         find_var = False
+    #         for var in self.inference_program.list_vars():
+    #             if var.name == fetch_var.var_name:
+    #                 fetch_vars.append(var)
+    #                 find_var = True
+    #         if not find_var:
+    #             raise Exception("Can't find feed var {}".format(fetch_var_name))
 
-        return fetch_vars
+    #     return fetch_vars
 
-    def get_fetch_var(self, key, signature="default"):
-        """
-        Get fetch variable according to variable key and signature
-        """
-        for var in self.inference_program.list_vars():
-            if var.name == self.config.fetch_var_name(key, signature):
-                return var
+    # @deprecated
+    # def get_fetch_var(self, key, signature="default"):
+    #     """
+    #     Get fetch variable according to variable key and signature
+    #     """
+    #     for var in self.inference_program.list_vars():
+    #         if var.name == self.config.fetch_var_name(key, signature):
+    #             return var
 
     def get_inference_program(self):
         return self.inference_program

@@ -29,7 +29,7 @@ EMBED_SIZE = 16
 HIDDEN_SIZE = 256
 N = 5
 BATCH_SIZE = 64
-PASS_NUM = 1
+PASS_NUM = 1000
 
 word_dict = paddle.dataset.imikolov.build_dict()
 dict_size = len(word_dict)
@@ -48,27 +48,6 @@ batch_reader = paddle.batch(mock_data, BATCH_SIZE)
 batch_size = 0
 for d in batch_reader():
     batch_size += 1
-print("imikolov simple dataset batch_size =", batch_size)
-
-
-def module_fn(trainable=False):
-    # Define module function for saving module
-    # create word input
-    words = fluid.layers.data(
-        name="words", shape=[1], lod_level=1, dtype="int64")
-
-    # create embedding
-    emb_name = "w2v_emb"
-    emb_param_attr = fluid.ParamAttr(name=emb_name, trainable=trainable)
-    word_emb = fluid.layers.embedding(
-        input=words,
-        size=[dict_size, EMBED_SIZE],
-        dtype='float32',
-        is_sparse=True,
-        param_attr=emb_param_attr)
-
-    # return feeder and fetch_list
-    return words, word_emb
 
 
 def word2vec(words, is_sparse, trainable=True):
@@ -101,19 +80,31 @@ def word2vec(words, is_sparse, trainable=True):
     concat_emb = fluid.layers.concat(
         input=[embed_first, embed_second, embed_third, embed_fourth], axis=1)
     hidden1 = fluid.layers.fc(input=concat_emb, size=HIDDEN_SIZE, act='sigmoid')
-    predict_word = fluid.layers.fc(input=hidden1, size=dict_size, act='softmax')
+    pred_prob = fluid.layers.fc(input=hidden1, size=dict_size, act='softmax')
 
     # declare later than predict word
     next_word = fluid.layers.data(name='nextw', shape=[1], dtype='int64')
 
-    cost = fluid.layers.cross_entropy(input=predict_word, label=next_word)
+    cost = fluid.layers.cross_entropy(input=pred_prob, label=next_word)
     avg_cost = fluid.layers.mean(cost)
 
-    return predict_word, avg_cost
+    return pred_prob, avg_cost
 
 
-def train(use_cuda=False):
-    place = fluid.CUDAPlace(0) if use_cuda else fluid.CPUPlace()
+def get_dictionary(word_dict):
+    dictionary = defaultdict(int)
+    w_id = 0
+    for w in word_dict:
+        if isinstance(w, bytes):
+            w = w.decode("ascii")
+        dictionary[w] = w_id
+        w_id += 1
+
+    return dictionary
+
+
+def test_create_w2v_module(use_gpu=False):
+    place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
 
     first_word = fluid.layers.data(name='firstw', shape=[1], dtype='int64')
     second_word = fluid.layers.data(name='secondw', shape=[1], dtype='int64')
@@ -122,12 +113,12 @@ def train(use_cuda=False):
     next_word = fluid.layers.data(name='nextw', shape=[1], dtype='int64')
 
     word_list = [first_word, second_word, third_word, forth_word, next_word]
-    predict_word, avg_cost = word2vec(word_list, is_sparse=True)
+    pred_prob, avg_cost = word2vec(word_list, is_sparse=True)
 
     main_program = fluid.default_main_program()
     startup_program = fluid.default_startup_program()
 
-    sgd_optimizer = fluid.optimizer.SGDOptimizer(learning_rate=1e-3)
+    sgd_optimizer = fluid.optimizer.SGDOptimizer(learning_rate=1e-2)
 
     sgd_optimizer.minimize(avg_cost)
     exe = fluid.Executor(place)
@@ -136,8 +127,6 @@ def train(use_cuda=False):
     step = 0
     for epoch in range(0, PASS_NUM):
         for mini_batch in batch_reader():
-            # print("mini_batch", mini_batch)
-            # 定义输入变量
             feed_var_list = [
                 main_program.global_block().var("firstw"),
                 main_program.global_block().var("secondw"),
@@ -154,90 +143,52 @@ def train(use_cuda=False):
             if step % 100 == 0:
                 print("Epoch={} Step={} Cost={}".format(epoch, step, cost[0]))
 
-    saved_model_dir = "./tmp/word2vec_test_model"
+    saved_module_dir = "./tmp/word2vec_test_module"
     # save inference model including feed and fetch variable info
-    fluid.io.save_inference_model(
-        dirname=saved_model_dir,
-        feeded_var_names=["firstw", "secondw", "thirdw", "fourthw"],
-        target_vars=[predict_word],
-        executor=exe)
+    dictionary = get_dictionary(word_dict)
 
-    dictionary = defaultdict(int)
-    w_id = 0
-    for w in word_dict:
-        if isinstance(w, bytes):
-            w = w.decode("ascii")
-        dictionary[w] = w_id
-        w_id += 1
-
-    # save word dict to assets folder
-    config = hub.ModuleConfig(saved_model_dir)
-    config.save_dict(word_dict=dictionary)
-    config.dump()
+    module_inputs = [
+        main_program.global_block().var("firstw"),
+        main_program.global_block().var("secondw"),
+        main_program.global_block().var("thirdw"),
+        main_program.global_block().var("fourthw"),
+    ]
+    signature = hub.create_signature(
+        "default", inputs=module_inputs, outputs=[pred_prob])
+    hub.create_module(
+        sign_arr=signature,
+        program=fluid.default_main_program(),
+        module_dir=saved_module_dir,
+        word_dict=dictionary)
 
 
-def test_save_module(use_cuda=False):
-    place = fluid.CUDAPlace(0) if use_cuda else fluid.CPUPlace()
-
-    exe = fluid.Executor(place)
-    main_program = fluid.Program()
-    startup_program = fluid.Program()
-
-    with fluid.program_guard(main_program, startup_program):
-        words, word_emb = module_fn()
-        exe.run(startup_program)
-        # load inference embedding parameters
-        saved_model_dir = "./tmp/word2vec_test_model"
-        fluid.io.load_inference_model(executor=exe, dirname=saved_model_dir)
-
-        # feed_var_list = [main_program.global_block().var("words")]
-        # feeder = fluid.DataFeeder(feed_list=feed_var_list, place=place)
-        # results = exe.run(
-        #     main_program,
-        #     feed=feeder.feed([[[1, 2, 3, 4, 5]]]),
-        #     fetch_list=[word_emb],
-        #     return_numpy=False)
-
-        # np_result = np.array(results[0])
-        # print(np_result)
-
-        # save module_dir
-        saved_module_dir = "./tmp/word2vec_test_module"
-        fluid.io.save_inference_model(
-            dirname=saved_module_dir,
-            feeded_var_names=["words"],
-            target_vars=[word_emb],
-            executor=exe)
-
-        dictionary = defaultdict(int)
-        w_id = 0
-        for w in word_dict:
-            if isinstance(w, bytes):
-                w = w.decode("ascii")
-            dictionary[w] = w_id
-            w_id += 1
-
-        signature = hub.create_signature(
-            "default", inputs=[words], outputs=[word_emb])
-        hub.create_module(
-            sign_arr=signature, program=main_program, path=saved_module_dir)
-
-
-def test_load_module(use_cuda=False):
+def test_load_w2v_module(use_gpu=False):
     saved_module_dir = "./tmp/word2vec_test_module"
     w2v_module = hub.Module(module_dir=saved_module_dir)
+    feed_list, fetch_list, program = w2v_module(
+        sign_name="default", trainable=False)
+    with fluid.program_guard(main_program=program):
+        pred_prob = fetch_list[0]
 
-    word_ids = [[1, 2, 3, 4, 5]]  # test sequence
-    word_ids_lod_tensor = w2v_module._preprocess_input(word_ids)
-    result = w2v_module({"words": word_ids_lod_tensor})
-    print(result)
+        pred_word = fluid.layers.argmax(x=pred_prob, axis=1)
+        # set place, executor, datafeeder
+        place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
+        exe = fluid.Executor(place)
+        feeder = fluid.DataFeeder(place=place, feed_list=feed_list)
+
+        word_ids = [[1, 2, 3, 4]]
+        result = exe.run(
+            fluid.default_main_program(),
+            feed=feeder.feed(word_ids),
+            fetch_list=[pred_word],
+            return_numpy=True)
+
+        print(result)
 
 
 if __name__ == "__main__":
-    use_cuda = False
-    print("train...")
-    train(use_cuda)
-    print("save module...")
-    test_save_module()
-    print("load module...")
-    test_load_module()
+    use_gpu = False
+    print("test create word2vec module")
+    test_create_w2v_module(use_gpu)
+    print("test load word2vec module")
+    test_load_w2v_module(use_gpu=False)
