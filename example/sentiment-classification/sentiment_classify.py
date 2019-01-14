@@ -160,18 +160,19 @@ def train_net(train_reader,
     hub.create_module(
         sign_arr=signature,
         program=fluid.default_main_program(),
-        path=module_dir)
+        module_dir=module_dir,
+        word_dict=word_dict)
 
 
-def retrain_net(train_reader,
-                word_dict,
-                network_name,
-                use_gpu,
-                parallel,
-                save_dirname,
-                lr=0.002,
-                batch_size=128,
-                pass_num=30):
+def finetune_net(train_reader,
+                 word_dict,
+                 network_name,
+                 use_gpu,
+                 parallel,
+                 save_dirname,
+                 lr=0.002,
+                 batch_size=128,
+                 pass_num=30):
     """
     train network
     """
@@ -198,73 +199,71 @@ def retrain_net(train_reader,
     module_dir = os.path.join(save_dirname, network_name)
     module = hub.Module(module_dir=module_dir)
 
-    main_program = fluid.Program()
-    startup_program = fluid.Program()
+    feed_list, fetch_list, program = module(sign_name="default", trainable=True)
+    with fluid.program_guard(main_program=program):
+        label = fluid.layers.data(name="label", shape=[1], dtype="int64")
+        # data = module.get_feed_var_by_index(0)
+        #TODO(ZeyuChen): how to get output paramter according to proto config
+        sent_emb = fetch_list[0]
+        # sent_emb = module.get_fetch_var_by_index(0)
 
-    # use switch program to test fine-tuning
-    fluid.framework.switch_main_program(module.get_inference_program())
+        fc_1 = fluid.layers.fc(
+            input=sent_emb, size=hid_dim, act="tanh", name="bow_fc1")
+        fc_2 = fluid.layers.fc(
+            input=fc_1, size=hid_dim2, act="tanh", name="bow_fc2")
 
-    label = fluid.layers.data(name="label", shape=[1], dtype="int64")
-    data = module.get_feed_var_by_index(0)
-    #TODO(ZeyuChen): how to get output paramter according to proto config
-    sent_emb = module.get_fetch_var_by_index(0)
+        # softmax layer
+        pred = fluid.layers.fc(input=[fc_2], size=class_dim, act="softmax")
+        # print(fluid.default_main_program())
+        cost = fluid.layers.mean(
+            fluid.layers.cross_entropy(input=pred, label=label))
+        acc = fluid.layers.accuracy(input=pred, label=label)
 
-    fc_1 = fluid.layers.fc(
-        input=sent_emb, size=hid_dim, act="tanh", name="bow_fc1")
-    fc_2 = fluid.layers.fc(
-        input=fc_1, size=hid_dim2, act="tanh", name="bow_fc2")
+        with open("./prototxt/bow_net.forward.program_desc.prototxt",
+                  "w") as fo:
+            program_desc = str(fluid.default_main_program())
+            fo.write(program_desc)
+        # set optimizer
+        sgd_optimizer = fluid.optimizer.Adagrad(learning_rate=lr)
+        sgd_optimizer.minimize(cost)
 
-    # softmax layer
-    pred = fluid.layers.fc(input=[fc_2], size=class_dim, act="softmax")
-    # print(fluid.default_main_program())
-    cost = fluid.layers.mean(
-        fluid.layers.cross_entropy(input=pred, label=label))
-    acc = fluid.layers.accuracy(input=pred, label=label)
+        with open("./prototxt/bow_net.finetune.program_desc.prototxt",
+                  "w") as fo:
+            program_desc = str(fluid.default_main_program())
+            fo.write(program_desc)
 
-    with open("./prototxt/bow_net.forward.program_desc.prototxt", "w") as fo:
-        program_desc = str(fluid.default_main_program())
-        fo.write(program_desc)
-    # set optimizer
-    sgd_optimizer = fluid.optimizer.Adagrad(learning_rate=lr)
-    sgd_optimizer.minimize(cost)
+        # set place, executor, datafeeder
+        place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
+        exe = fluid.Executor(place)
+        feeder = fluid.DataFeeder(feed_list=["words", "label"], place=place)
+        exe.run(fluid.default_startup_program())
+        # start training...
 
-    with open("./prototxt/bow_net.finetune.program_desc.prototxt", "w") as fo:
-        program_desc = str(fluid.default_main_program())
-        fo.write(program_desc)
+        for pass_id in range(pass_num):
+            data_size, data_count, total_acc, total_cost = 0, 0, 0.0, 0.0
+            for batch in train_reader():
+                avg_cost_np, avg_acc_np = exe.run(
+                    fluid.default_main_program(),
+                    feed=feeder.feed(batch),
+                    fetch_list=[cost, acc],
+                    return_numpy=True)
+                data_size = len(batch)
+                total_acc += data_size * avg_acc_np
+                total_cost += data_size * avg_cost_np
+                data_count += data_size
+            avg_cost = total_cost / data_count
+            avg_acc = total_acc / data_count
+            print("[train info]: pass_id: %d, avg_acc: %f, avg_cost: %f" %
+                  (pass_id, avg_acc, avg_cost))
 
-    # set place, executor, datafeeder
-    place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
-    exe = fluid.Executor(place)
-    feeder = fluid.DataFeeder(feed_list=["words", "label"], place=place)
-    exe.run(fluid.default_startup_program())
-    # start training...
-
-    for pass_id in range(pass_num):
-        data_size, data_count, total_acc, total_cost = 0, 0, 0.0, 0.0
-        for batch in train_reader():
-            avg_cost_np, avg_acc_np = exe.run(
-                fluid.default_main_program(),
-                feed=feeder.feed(batch),
-                fetch_list=[cost, acc],
-                return_numpy=True)
-            data_size = len(batch)
-            total_acc += data_size * avg_acc_np
-            total_cost += data_size * avg_cost_np
-            data_count += data_size
-        avg_cost = total_cost / data_count
-        avg_acc = total_acc / data_count
-        print("[train info]: pass_id: %d, avg_acc: %f, avg_cost: %f" %
-              (pass_id, avg_acc, avg_cost))
-
-    # save the model
-
-    module_dir = os.path.join(save_dirname, network_name)
-    signature = hub.create_signature(
-        "default", inputs=[data], outputs=[sent_emb])
-    hub.create_module(
-        sign_arr=signature,
-        program=fluid.default_main_program(),
-        path=module_dir)
+        # # save the model
+        # module_dir = os.path.join(save_dirname, network_name)
+        # signature = hub.create_signature(
+        #     "default", inputs=[data], outputs=[sent_emb])
+        # hub.create_module(
+        #     sign_arr=signature,
+        #     program=fluid.default_main_program(),
+        #     path=module_dir)
 
 
 def eval_net(test_reader, use_gpu, model_path=None):
@@ -367,9 +366,9 @@ def main(args):
                                                      args.word_dict_path,
                                                      args.batch_size, args.mode)
 
-        retrain_net(train_reader, word_dict, args.model_type, args.use_gpu,
-                    args.is_parallel, args.model_path, args.lr, args.batch_size,
-                    args.num_passes)
+        finetune_net(train_reader, word_dict, args.model_type, args.use_gpu,
+                     args.is_parallel, args.model_path, args.lr,
+                     args.batch_size, args.num_passes)
     # eval mode
     elif args.mode == "eval":
         # prepare_data to get word_dict, test_reader

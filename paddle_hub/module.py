@@ -27,11 +27,20 @@ import pickle
 from collections import defaultdict
 from paddle_hub.downloader import download_and_uncompress
 from paddle_hub import module_desc_pb2
-from paddle_hub.config import RunConfig, ParamTrainConfig
+from paddle_hub.signature import Signature
+from paddle_hub.utils import to_list
 
 __all__ = ["Module", "ModuleConfig", "ModuleUtils"]
-DICT_NAME = "dict.txt"
-ASSETS_NAME = "assets"
+
+# paddle hub module dir name
+ASSETS_DIRNAME = "assets"
+META_DIRNAME = "meta"
+MODEL_DIRNAME = "model"
+# paddle hub module serialze file name
+DICT_FILENAME = "vocab.txt"
+PARAM_FILENAME = "param.pkl"
+MODULE_DESC_PBNAME = "module_desc.pb"
+GENERATOR_FILENAME = "unique_name_generator.pkl"
 
 
 def mkdir(path):
@@ -67,8 +76,7 @@ class Module(object):
 
         # load paddle inference model
         place = fluid.CPUPlace()
-        model_dir = os.path.join(self.module_dir, "model")
-        print("model_dir", model_dir)
+        model_dir = os.path.join(self.module_dir, MODEL_DIRNAME)
         self.exe = fluid.Executor(fluid.CPUPlace())
         [self.inference_program, self.feed_target_names,
          self.fetch_targets] = fluid.io.load_inference_model(
@@ -91,14 +99,15 @@ class Module(object):
         self._process_uqn()
 
     def _process_uqn(self):
-        filepath = os.path.join(self.module_dir, "uqn.pkl")
-        with open(filepath, "rb") as file:
-            fluid.unique_name.switch(pickle.load(file))
+        name_generator_path = ModuleConfig.name_generator_path(self.module_dir)
+        with open(name_generator_path, "rb") as fi:
+            fluid.unique_name.switch(pickle.load(fi))
 
     def _process_parameter(self):
         global_block = self.inference_program.global_block()
         filepath = os.path.join(self.module_dir, "param.pkl")
-        with open(filepath, "rb") as file:
+        param_path = ModuleConfig.meta_param_path(self.module_dir)
+        with open(param_path, "rb") as file:
             param_arr = pickle.load(file)
         for param in param_arr:
             if (param['name'] not in global_block.vars):
@@ -124,7 +133,7 @@ class Module(object):
 
         return feed_dict
 
-    def __call__(self, sign_name="default", run_config=None):
+    def __call__(self, sign_name="default", trainable=False):
         """ Call default signature and return results
         """
 
@@ -137,16 +146,10 @@ class Module(object):
                 if op.has_attr("is_test"):
                     op._set_attr("is_test", is_test)
 
-        if not run_config:
-            run_config = RunConfig()
-
         program = self.get_inference_program().clone()
 
         _process_op_attr(program=program, is_test=False)
-        if run_config.param_train_config == ParamTrainConfig.PARAM_TRAIN_ALL:
-            _set_param_trainable(program=program, trainable=True)
-        elif run_config.param_train_config == ParamTrainConfig.PARAM_TRAIN_ALL:
-            _set_param_trainable(program=program, trainable=False)
+        _set_param_trainable(program=program, trainable=trainable)
 
         return self.feed_target_names, self.fetch_targets, program
 
@@ -282,78 +285,29 @@ class ModuleConfig(object):
         Load module config from module directory.
         """
         #TODO(ZeyuChen): check module_desc.pb exsitance
-        pb_path = os.path.join(self.module_dir, "module_desc.pb")
-        with open(pb_path, "rb") as fi:
+        with open(ModuleConfig.module_desc_path(self.module_dir), "rb") as fi:
             self.desc.ParseFromString(fi.read())
-
-
-#         print("self.desc.sign2var",
-#               self.desc.sign2var["default"].feed_desc[0].var_name)
 
         if self.desc.contain_assets:
             # load assets
-            assets_dir = os.path.join(self.module_dir, ASSETS_NAME)
-            dict_path = os.path.join(assets_dir, DICT_NAME)
             word_id = 0
-
-            with open(dict_path) as fi:
+            with open(ModuleConfig.assets_dict_path(self.module_dir)) as fi:
                 words = fi.readlines()
                 #TODO(ZeyuChen) check whether word id is duplicated and valid
                 for line in fi:
                     w, w_id = line.split()
                     self.dict[w] = int(w_id)
 
-    def dump(self):
-        """ Save Module configure file to disk.
-        """
-        pb_path = os.path.join(self.module_dir, "module_desc.pb")
-        with open(pb_path, "wb") as fo:
-            fo.write(self.desc.SerializeToString())
-
-        # save assets/dictionary
-        assets_dir = os.path.join(self.module_dir, ASSETS_NAME)
-        mkdir(assets_dir)
-        with open(os.path.join(assets_dir, DICT_NAME), "w") as fo:
-            for w in self.dict:
-                w_id = self.dict[w]
-                fo.write("{}\t{}\n".format(w, w_id))
-
     def return_numpy(self):
         """Return numpy or not according to the proto config.
         """
         return self.desc.return_numpy
 
-    def save_dict(self, word_dict, dict_name=DICT_NAME):
+    def save_dict(self, word_dict, dict_name=DICT_FILENAME):
         """ Save dictionary for NLP module
         """
         for w in word_dict:
             self.dict[w] = word_dict[w]
-
-    def register_feed_signature(self, feed_desc, sign_name="default"):
-        """ Register feed signature to the Module
-
-        Args:
-            fetch_desc: a dictionary of signature to input variable
-            sign_name: signature name, use "default" as default signature
-        """
-        #TODO(ZeyuChen) check fetch_desc key is valid and no duplicated
-        for k in feed_desc:
-            feed = self.desc.sign2var[sign_name].feed_desc.add()
-            feed.key = k
-            feed.var_name = feed_desc[k]
-
-    def register_fetch_signature(self, fetch_desc, sign_name="default"):
-        """ Register fetch signature to the Module
-
-        Args:
-            fetch_desc: a dictionary of signature to input variable
-            sign_name: signature name, use "default" as default signature
-        """
-        #TODO(ZeyuChen) check fetch_desc key is valid and no duplicated
-        for k in fetch_desc:
-            fetch = self.desc.sign2var[sign_name].fetch_desc.add()
-            fetch.key = k
-            fetch.var_name = fetch_desc[k]
 
     def feed_var_names(self, sign_name="default"):
         return self.desc.sign2var[sign_name].feed_desc
@@ -376,6 +330,119 @@ class ModuleConfig(object):
             if desc.key == key:
                 return desc.var_name
         raise Exception("fetch variable {} not found".format(key))
+
+    @staticmethod
+    def module_desc_path(module_dir):
+        return os.path.join(module_dir, MODULE_DESC_PBNAME)
+
+    @staticmethod
+    def name_generator_path(module_dir):
+        meta_path = os.path.join(module_dir, META_DIRNAME)
+        mkdir(meta_path)
+        return os.path.join(meta_path, GENERATOR_FILENAME)
+
+    @staticmethod
+    def assets_dict_path(module_dir):
+        assets_path = os.path.join(module_dir, ASSETS_DIRNAME)
+        mkdir(assets_path)
+        return os.path.join(assets_path, DICT_FILENAME)
+
+    @staticmethod
+    def meta_param_path(module_dir):
+        meta_path = os.path.join(module_dir, META_DIRNAME)
+        mkdir(meta_path)
+        return os.path.join(meta_path, PARAM_FILENAME)
+
+    @staticmethod
+    def meta_name_generator_path(module_dir):
+        meta_path = os.path.join(module_dir, META_DIRNAME)
+        mkdir(meta_path)
+        return os.path.join(meta_path, GENERATOR_FILENAME)
+
+
+def create_module(sign_arr, program, module_dir=None, word_dict=None):
+    """ Create a module from main program
+    """
+    assert isinstance(
+        program, fluid.Program), "program should be instance of fluid.Program"
+    assert sign_arr, "signature array should not be None"
+
+    if module_dir is None:
+        module_dir = os.path.join(".", "hub_module")
+    # create module path for saving
+    mkdir(module_dir)
+
+    module = module_desc_pb2.ModuleDesc()
+    program = program.clone()
+
+    if word_dict is None:
+        module.contain_assets = False
+    else:
+        module.contain_assets = True
+        with open(ModuleConfig.assets_dict_path(module_dir), "w") as fo:
+            for w in word_dict:
+                w_id = word_dict[w]
+                fo.write("{}\t{}\n".format(w, w_id))
+
+    # save the unique name generator object
+    generator = fluid.unique_name.generator
+    with open(ModuleConfig.name_generator_path(module_dir), "wb") as fo:
+        pickle.dump(generator, fo)
+
+    # save fluid Parameter
+    param_arr = []
+    for param in program.global_block().iter_parameters():
+        param_info = {
+            'name': param.name,
+            'regularizer': param.regularizer,
+            'gradient_clip_attr': param.gradient_clip_attr,
+            'trainable': param.trainable,
+            'optimize_attr': param.optimize_attr,
+            'do_model_average': param.do_model_average
+        }
+        param_arr.append(param_info)
+
+    with open(ModuleConfig.meta_param_path(module_dir), "wb") as fo:
+        pickle.dump(param_arr, fo)
+
+    # save signarture info
+    sign_map = module.sign2var
+    sign_arr = to_list(sign_arr)
+    for sign in sign_arr:
+        assert isinstance(sign,
+                          Signature), "sign_arr should be list of Signature"
+
+        if sign.get_name() in sign_map:
+            raise "Error! sign_arr contains repeat signatrue %s" % sign
+
+        var = sign_map[sign.get_name()]
+        feed_desc = var.feed_desc
+        fetch_desc = var.fetch_desc
+        for input in sign.get_inputs():
+            feed_var = feed_desc.add()
+            feed_var.var_name = input.name
+
+        for output in sign.get_outputs():
+            fetch_var = fetch_desc.add()
+            fetch_var.var_name = output.name
+
+    # save inference program
+    exe = fluid.Executor(place=fluid.CPUPlace())
+    model_dir = os.path.join(module_dir, "model")
+    mkdir(model_dir)
+    # TODO(ZeyuChen): here only deal with one signature
+    first_sign = sign_arr[0]
+    fluid.io.save_inference_model(
+        model_dir,
+        feeded_var_names=[var.name for var in first_sign.get_inputs()],
+        target_vars=first_sign.get_outputs(),
+        main_program=program,
+        executor=exe)
+
+    # save to disk
+    data = module.SerializeToString()
+    with open(ModuleConfig.module_desc_path(module_dir), "wb") as f:
+        f.write(data)
 
 
 class ModuleUtils(object):
@@ -400,6 +467,7 @@ class ModuleUtils(object):
         block._remove_var("fetch")
 
         program.desc.flush()
-        # print("********************************")
-        # print(program)
-        # print("********************************")
+
+    @staticmethod
+    def module_desc_path(module_dir):
+        pass

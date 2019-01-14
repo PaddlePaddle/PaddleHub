@@ -18,6 +18,9 @@ option optimize_for = LITE_RUNTIME;
 
 package paddle_hub;
 
+message Version { 
+  int64 version = 1;  
+}
 // Feed Variable Description
 message FeedDesc {
   string var_name = 1;
@@ -47,5 +50,7 @@ message ModuleDesc {
   bool return_numpy = 3;
 
   bool contain_assets = 4;
+
+  Version version = 5;
 };
 
