@@ -140,85 +140,6 @@ class Module(object):
 
         return self.feed_target_names, self.fetch_targets, program
 
-    # @deprecated
-    # def get_vars(self):
-    #     """
-    #     Return variable list of the module program
-    #     """
-    #     return self.inference_program.list_vars()
-
-    # @deprecated
-    # def get_feed_var(self, key, signature="default"):
-    #     """
-    #     Get feed variable according to variable key and signature
-    #     """
-    #     for var in self.inference_program.list_vars():
-    #         if var.name == self.config.feed_var_name(key, signature):
-    #             return var
-
-    #     raise Exception("Can't find input var {}".format(key))
-
-    # @deprecated
-    # def get_feed_var_by_index(self, index, signature="default"):
-    #     feed_vars = self.get_feed_vars(signature)
-    #     assert index < len(
-    #         feed_vars), "index out of range index {}, len {}".format(
-    #             index, len(feed_vars))
-    #     return feed_vars[index]
-
-    # @deprecated
-    # def get_fetch_var_by_index(self, index, signature="default"):
-    #     fetch_vars = self.get_fetch_vars(signature)
-    #     assert index < len(
-    #         fetch_vars), "index out of range index {}, len {}".format(
-    #             index, len(fetch_vars))
-    #     return fetch_vars[index]
-
-    # @deprecated
-    # def get_feed_vars(self, signature="default"):
-    #     """
-    #     Get feed variable according to variable key and signature
-    #     """
-    #     feed_vars = []
-    #     for feed_var in self.config.feed_var_names(signature):
-    #         find_var = False
-    #         for var in self.inference_program.list_vars():
-    #             if var.name == feed_var.var_name:
-    #                 feed_vars.append(var)
-    #                 find_var = True
-    #         if not find_var:
-    #             raise Exception("Can't find feed var {}".format(feed_var_name))
-
-    #     return feed_vars
-
-    # @deprecated
-    # def get_fetch_vars(self, signature="default"):
-    #     """
-    #     Get feed variable according to variable key and signature
-    #     """
-    #     fetch_vars = []
-    #     #TODO(ZeyuChen): use brute force to find variables, simple and easy to
-    #     #understand
-    #     for fetch_var in self.config.fetch_var_names(signature):
-    #         find_var = False
-    #         for var in self.inference_program.list_vars():
-    #             if var.name == fetch_var.var_name:
-    #                 fetch_vars.append(var)
-    #                 find_var = True
-    #         if not find_var:
-    #             raise Exception("Can't find feed var {}".format(fetch_var_name))
-
-    #     return fetch_vars
-
-    # @deprecated
-    # def get_fetch_var(self, key, signature="default"):
-    #     """
-    #     Get fetch variable according to variable key and signature
-    #     """
-    #     for var in self.inference_program.list_vars():
-    #         if var.name == self.config.fetch_var_name(key, signature):
-    #             return var
-
     def get_inference_program(self):
         return self.inference_program
 
@@ -302,28 +223,6 @@ class ModuleConfig(object):
         """
         for w in word_dict:
             self.dict[w] = word_dict[w]
-
-    def feed_var_names(self, sign_name="default"):
-        return self.desc.sign2var[sign_name].feed_desc
-
-    def fetch_var_names(self, sign_name="default"):
-        return self.desc.sign2var[sign_name].fetch_desc
-
-    def feed_var_name(self, key, sign_name="default"):
-        """get module's feed/input variable name
-        """
-        for desc in self.desc.sign2var[sign_name].feed_desc:
-            if desc.key == key:
-                return desc.var_name
-        raise Exception("feed variable {} not found".format(key))
-
-    def fetch_var_name(self, key, sign_name="default"):
-        """get module's fetch/output variable name
-        """
-        for desc in self.desc.sign2var[sign_name].fetch_desc:
-            if desc.key == key:
-                return desc.var_name
-        raise Exception("fetch variable {} not found".format(key))
 
     @staticmethod
     def module_desc_path(module_dir):
