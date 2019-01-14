@@ -132,11 +132,17 @@ class Module(object):
             for param in program.global_block().iter_parameters():
                 param.trainable = trainable
 
+        def _process_op_attr(program, is_test=False):
+            for op in program.global_block().ops:
+                if op.has_attr("is_test"):
+                    op._set_attr("is_test", is_test)
+
         if not run_config:
             run_config = RunConfig()
 
         program = self.get_inference_program().clone()
 
+        _process_op_attr(program=program, is_test=False)
         if run_config.param_train_config == ParamTrainConfig.PARAM_TRAIN_ALL:
             _set_param_trainable(program=program, trainable=True)
         elif run_config.param_train_config == ParamTrainConfig.PARAM_TRAIN_ALL:
