@@ -11,17 +11,5 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import paddle.fluid as fluid
-
-from paddle_hub.module import Module
-from paddle_hub.module import ModuleConfig
-from paddle_hub.module import ModuleUtils
-from paddle_hub.module import create_module
-from paddle_hub.downloader import download_and_uncompress
-from paddle_hub.signature import create_signature
-from paddle_hub.version import __version__
+""" Store PaddleHub version string """
+__version__ = "0.1.0-dev"

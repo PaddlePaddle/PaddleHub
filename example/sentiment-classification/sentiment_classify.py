@@ -199,71 +199,69 @@ def finetune_net(train_reader,
     module_dir = os.path.join(save_dirname, network_name)
     module = hub.Module(module_dir=module_dir)
 
-    feed_list, fetch_list, program = module(sign_name="default", trainable=True)
+    feed_list, fetch_list, program, generator = module(
+        sign_name="default", trainable=True)
     with fluid.program_guard(main_program=program):
-        label = fluid.layers.data(name="label", shape=[1], dtype="int64")
-        # data = module.get_feed_var_by_index(0)
-        #TODO(ZeyuChen): how to get output paramter according to proto config
-        sent_emb = fetch_list[0]
-        # sent_emb = module.get_fetch_var_by_index(0)
+        with fluid.unique_name.guard(generator):
+            label = fluid.layers.data(name="label", shape=[1], dtype="int64")
+            # data = module.get_feed_var_by_index(0)
+            #TODO(ZeyuChen): how to get output paramter according to proto config
+            sent_emb = fetch_list[0]
+            # sent_emb = module.get_fetch_var_by_index(0)
 
-        fc_1 = fluid.layers.fc(
-            input=sent_emb, size=hid_dim, act="tanh", name="bow_fc1")
-        fc_2 = fluid.layers.fc(
-            input=fc_1, size=hid_dim2, act="tanh", name="bow_fc2")
+            fc_1 = fluid.layers.fc(
+                input=sent_emb, size=hid_dim, act="tanh", name="bow_fc1")
+            fc_2 = fluid.layers.fc(
+                input=fc_1, size=hid_dim2, act="tanh", name="bow_fc2")
 
-        # softmax layer
-        pred = fluid.layers.fc(input=[fc_2], size=class_dim, act="softmax")
-        # print(fluid.default_main_program())
-        cost = fluid.layers.mean(
-            fluid.layers.cross_entropy(input=pred, label=label))
-        acc = fluid.layers.accuracy(input=pred, label=label)
+            # softmax layer
+            pred = fluid.layers.fc(input=[fc_2], size=class_dim, act="softmax")
+            # print(fluid.default_main_program())
+            cost = fluid.layers.mean(
+                fluid.layers.cross_entropy(input=pred, label=label))
+            acc = fluid.layers.accuracy(input=pred, label=label)
 
-        with open("./prototxt/bow_net.forward.program_desc.prototxt",
-                  "w") as fo:
-            program_desc = str(fluid.default_main_program())
-            fo.write(program_desc)
-        # set optimizer
-        sgd_optimizer = fluid.optimizer.Adagrad(learning_rate=lr)
-        sgd_optimizer.minimize(cost)
+            with open("./prototxt/bow_net.forward.program_desc.prototxt",
+                      "w") as fo:
+                program_desc = str(fluid.default_main_program())
+                fo.write(program_desc)
+            # set optimizer
+            sgd_optimizer = fluid.optimizer.Adagrad(learning_rate=lr)
+            sgd_optimizer.minimize(cost)
 
-        with open("./prototxt/bow_net.finetune.program_desc.prototxt",
-                  "w") as fo:
-            program_desc = str(fluid.default_main_program())
-            fo.write(program_desc)
+            with open("./prototxt/bow_net.finetune.program_desc.prototxt",
+                      "w") as fo:
+                program_desc = str(fluid.default_main_program())
+                fo.write(program_desc)
 
-        # set place, executor, datafeeder
-        place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
-        exe = fluid.Executor(place)
-        feeder = fluid.DataFeeder(feed_list=["words", "label"], place=place)
-        exe.run(fluid.default_startup_program())
-        # start training...
+            # set place, executor, datafeeder
+            place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
+            exe = fluid.Executor(place)
+            feeder = fluid.DataFeeder(feed_list=["words", "label"], place=place)
+            exe.run(fluid.default_startup_program())
+            # start training...
 
-        for pass_id in range(pass_num):
-            data_size, data_count, total_acc, total_cost = 0, 0, 0.0, 0.0
-            for batch in train_reader():
-                avg_cost_np, avg_acc_np = exe.run(
-                    fluid.default_main_program(),
-                    feed=feeder.feed(batch),
-                    fetch_list=[cost, acc],
-                    return_numpy=True)
-                data_size = len(batch)
-                total_acc += data_size * avg_acc_np
-                total_cost += data_size * avg_cost_np
-                data_count += data_size
-            avg_cost = total_cost / data_count
-            avg_acc = total_acc / data_count
-            print("[train info]: pass_id: %d, avg_acc: %f, avg_cost: %f" %
-                  (pass_id, avg_acc, avg_cost))
+            for pass_id in range(pass_num):
+                data_size, data_count, total_acc, total_cost = 0, 0, 0.0, 0.0
+                for batch in train_reader():
+                    avg_cost_np, avg_acc_np = exe.run(
+                        fluid.default_main_program(),
+                        feed=feeder.feed(batch),
+                        fetch_list=[cost, acc],
+                        return_numpy=True)
+                    data_size = len(batch)
+                    total_acc += data_size * avg_acc_np
+                    total_cost += data_size * avg_cost_np
+                    data_count += data_size
+                avg_cost = total_cost / data_count
+                avg_acc = total_acc / data_count
+                print("[train info]: pass_id: %d, avg_acc: %f, avg_cost: %f" %
+                      (pass_id, avg_acc, avg_cost))
 
-        # # save the model
-        # module_dir = os.path.join(save_dirname, network_name)
-        # signature = hub.create_signature(
-        #     "default", inputs=[data], outputs=[sent_emb])
-        # hub.create_module(
-        #     sign_arr=signature,
-        #     program=fluid.default_main_program(),
-        #     path=module_dir)
+            # save the model
+            model_dir = os.path.join(save_dirname, network_name + "_finetune")
+            fluid.io.save_persistables(
+                executor=exe, dirname=model_dir, main_program=None)
 
 
 def eval_net(test_reader, use_gpu, model_path=None):

@@ -56,7 +56,6 @@ def md5file(fname):
 def download_and_uncompress(url, save_name=None):
     module_name = url.split("/")[-2]
     dirname = os.path.join(MODULE_HOME, module_name)
-    print("download to dir", dirname)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
@@ -115,6 +114,3 @@ if __name__ == "__main__":
 
     module_path = download_and_uncompress(link)
     print("module path", module_path)
-
-    # dl = DownloadManager()
-    # dl.download_and_uncompress(link, "./tmp")

@@ -165,25 +165,25 @@ def test_create_w2v_module(use_gpu=False):
 def test_load_w2v_module(use_gpu=False):
     saved_module_dir = "./tmp/word2vec_test_module"
     w2v_module = hub.Module(module_dir=saved_module_dir)
-    feed_list, fetch_list, program = w2v_module(
+    feed_list, fetch_list, program, generator = w2v_module(
         sign_name="default", trainable=False)
     with fluid.program_guard(main_program=program):
-        pred_prob = fetch_list[0]
+        with fluid.unique_name.guard(generator):
+            pred_prob = fetch_list[0]
+            pred_word = fluid.layers.argmax(x=pred_prob, axis=1)
+            # set place, executor, datafeeder
+            place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
+            exe = fluid.Executor(place)
+            feeder = fluid.DataFeeder(place=place, feed_list=feed_list)
 
-        pred_word = fluid.layers.argmax(x=pred_prob, axis=1)
-        # set place, executor, datafeeder
-        place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
-        exe = fluid.Executor(place)
-        feeder = fluid.DataFeeder(place=place, feed_list=feed_list)
+            word_ids = [[1, 2, 3, 4]]
+            result = exe.run(
+                fluid.default_main_program(),
+                feed=feeder.feed(word_ids),
+                fetch_list=[pred_word],
+                return_numpy=True)
 
-        word_ids = [[1, 2, 3, 4]]
-        result = exe.run(
-            fluid.default_main_program(),
-            feed=feeder.feed(word_ids),
-            fetch_list=[pred_word],
-            return_numpy=True)
-
-        print(result)
+            print(result)
 
 
 if __name__ == "__main__":

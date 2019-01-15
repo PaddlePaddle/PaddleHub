@@ -29,6 +29,7 @@ from paddle_hub.downloader import download_and_uncompress
 from paddle_hub import module_desc_pb2
 from paddle_hub.signature import Signature
 from paddle_hub.utils import to_list
+from paddle_hub.version import __version__
 
 __all__ = ["Module", "ModuleConfig", "ModuleUtils"]
 
@@ -259,13 +260,14 @@ def create_module(sign_arr, program, module_dir=None, word_dict=None):
     # create module path for saving
     mkdir(module_dir)
 
-    module = module_desc_pb2.ModuleDesc()
+    module_desc = module_desc_pb2.ModuleDesc()
+    module_desc.version = __version__
     program = program.clone()
 
     if word_dict is None:
-        module.contain_assets = False
+        module_desc.contain_assets = False
     else:
-        module.contain_assets = True
+        module_desc.contain_assets = True
         with open(ModuleConfig.assets_dict_path(module_dir), "w") as fo:
             for w in word_dict:
                 w_id = word_dict[w]
@@ -301,7 +303,7 @@ def create_module(sign_arr, program, module_dir=None, word_dict=None):
         pickle.dump(param_arr, fo)
 
     # save signarture info
-    sign_map = module.sign2var
+    sign_map = module_desc.sign2var
     sign_arr = to_list(sign_arr)
     for sign in sign_arr:
         assert isinstance(sign,
@@ -335,10 +337,10 @@ def create_module(sign_arr, program, module_dir=None, word_dict=None):
             main_program=program,
             executor=exe)
 
-    # save to disk
-    data = module.SerializeToString()
+    # Serialize module_desc pb
+    module_pb = module_desc.SerializeToString()
     with open(ModuleConfig.module_desc_path(module_dir), "wb") as f:
-        f.write(data)
+        f.write(module_pb)
 
 
 class ModuleUtils(object):
@@ -363,7 +365,3 @@ class ModuleUtils(object):
         block._remove_var("fetch")
 
         program.desc.flush()
-
-    @staticmethod
-    def module_desc_path(module_dir):
-        pass
