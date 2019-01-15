@@ -111,7 +111,7 @@ class Module(object):
         model_dir = os.path.join(self.module_dir, MODEL_DIRNAME)
         self.exe = fluid.Executor(fluid.CPUPlace())
         self.inference_program, self.feed_target_names, self.fetch_targets = fluid.io.load_inference_model(
-            dirname=os.path.join(model_dir, sign_name, executor=self.exe))
+            dirname=os.path.join(model_dir, sign_name), executor=self.exe)
 
         # remove feed fetch operator and variable
         ModuleUtils.remove_feed_fetch_op(self.inference_program)
