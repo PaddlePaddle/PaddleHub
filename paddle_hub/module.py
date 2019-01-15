@@ -272,7 +272,15 @@ def create_module(sign_arr, program, module_dir=None, word_dict=None):
                 fo.write("{}\t{}\n".format(w, w_id))
 
     # save the unique name generator object
-    generator = fluid.unique_name.generator
+    var_name_arr = [
+        '_'.join(var.split('@')[0].split('.')[0].split('_')[0:-1])
+        for block in program.blocks for var in block.vars
+    ]
+    with fluid.unique_name.guard():
+        for var_name in var_name_arr:
+            fluid.unique_name.generate(var_name)
+        generator = fluid.unique_name.generator
+
     with open(ModuleConfig.name_generator_path(module_dir), "wb") as fo:
         pickle.dump(generator, fo)
 
