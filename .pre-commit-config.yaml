@@ -17,3 +17,11 @@
     -   id: detect-private-key
     -   id: check-symlinks
     -   id: check-added-large-files
+-   repo: local
+    hooks:
+    -   id: copyright_checker
+        name: copyright_checker
+        entry: python ./.copyright.hook
+        language: system
+        files: \.(c|cc|cxx|cpp|cu|h|hpp|hxx|proto|py)$
+        exclude: (?!.*third_party)^.*$
