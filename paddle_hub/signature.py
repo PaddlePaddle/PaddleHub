@@ -53,27 +53,6 @@ class Signature:
         self.feed_names = feed_names
         self.fetch_names = fetch_names
 
-
-#                 self.inputs_dict = {}
-#         for index, value in enumerate(inputs):
-#             self.inputs_dict[index] = value
-
-#         if feed_names:
-#             for index in range(len(feed_names)):
-#                 key = feed_names[index]
-#                 value = inputs[index]
-#                 self.inputs_dict[key] = value
-
-#         self.outputs_dict = {}
-#         for index, value in enumerate(outputs):
-#             self.outputs_dict[index] = value
-
-#         if feed_names:
-#             for index in range(len(fetch_names)):
-#                 key = fetch_names[index]
-#                 value = outputs[index]
-#                 self.outputs_dict[key] = value
-
     def get_name(self):
         return self.name
 
@@ -90,5 +69,14 @@ class Signature:
         return self.fetch_names
 
 
-def create_signature(name="default", inputs=[], outputs=[]):
-    return Signature(name=name, inputs=inputs, outputs=outputs)
+def create_signature(name="default",
+                     inputs=[],
+                     outputs=[],
+                     feed_names=None,
+                     fetch_names=None):
+    return Signature(
+        name=name,
+        inputs=inputs,
+        outputs=outputs,
+        feed_names=feed_names,
+        fetch_names=fetch_names)
