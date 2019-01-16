@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package='paddle_hub',
     syntax='proto3',
     serialized_pb=_b(
-        '\n\x11module_desc.proto\x12\npaddle_hub\"\x1c\n\x08\x46\x65\x65\x64\x44\x65sc\x12\x10\n\x08var_name\x18\x01 \x01(\t\"\x1d\n\tFetchDesc\x12\x10\n\x08var_name\x18\x01 \x01(\t\"_\n\tModuleVar\x12)\n\nfetch_desc\x18\x01 \x03(\x0b\x32\x15.paddle_hub.FetchDesc\x12\'\n\tfeed_desc\x18\x02 \x03(\x0b\x32\x14.paddle_hub.FeedDesc\"\xd9\x01\n\nModuleDesc\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x08sign2var\x18\x02 \x03(\x0b\x32$.paddle_hub.ModuleDesc.Sign2varEntry\x12\x14\n\x0creturn_numpy\x18\x03 \x01(\x08\x12\x16\n\x0e\x63ontain_assets\x18\x04 \x01(\x08\x12\x0f\n\x07version\x18\x05 \x01(\t\x1a\x46\n\rSign2varEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.paddle_hub.ModuleVar:\x02\x38\x01\x42\x02H\x03\x62\x06proto3'
+        '\n\x11module_desc.proto\x12\npaddle_hub\"+\n\x08\x46\x65\x65\x64\x44\x65sc\x12\x10\n\x08var_name\x18\x01 \x01(\t\x12\r\n\x05\x61lias\x18\x02 \x01(\t\",\n\tFetchDesc\x12\x10\n\x08var_name\x18\x01 \x01(\t\x12\r\n\x05\x61lias\x18\x02 \x01(\t\"_\n\tModuleVar\x12)\n\nfetch_desc\x18\x01 \x03(\x0b\x32\x15.paddle_hub.FetchDesc\x12\'\n\tfeed_desc\x18\x02 \x03(\x0b\x32\x14.paddle_hub.FeedDesc\"\xd9\x01\n\nModuleDesc\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x08sign2var\x18\x02 \x03(\x0b\x32$.paddle_hub.ModuleDesc.Sign2varEntry\x12\x14\n\x0creturn_numpy\x18\x03 \x01(\x08\x12\x16\n\x0e\x63ontain_assets\x18\x04 \x01(\x08\x12\x0f\n\x07version\x18\x05 \x01(\t\x1a\x46\n\rSign2varEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.paddle_hub.ModuleVar:\x02\x38\x01\x42\x02H\x03\x62\x06proto3'
     ))
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -44,6 +44,22 @@ _FEEDDESC = _descriptor.Descriptor(
             is_extension=False,
             extension_scope=None,
             options=None),
+        _descriptor.FieldDescriptor(
+            name='alias',
+            full_name='paddle_hub.FeedDesc.alias',
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode('utf-8'),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None),
     ],
     extensions=[],
     nested_types=[],
@@ -54,7 +70,7 @@ _FEEDDESC = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=33,
-    serialized_end=61,
+    serialized_end=76,
 )
 
 _FETCHDESC = _descriptor.Descriptor(
@@ -80,6 +96,22 @@ _FETCHDESC = _descriptor.Descriptor(
             is_extension=False,
             extension_scope=None,
             options=None),
+        _descriptor.FieldDescriptor(
+            name='alias',
+            full_name='paddle_hub.FetchDesc.alias',
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode('utf-8'),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None),
     ],
     extensions=[],
     nested_types=[],
@@ -89,8 +121,8 @@ _FETCHDESC = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=63,
-    serialized_end=92,
+    serialized_start=78,
+    serialized_end=122,
 )
 
 _MODULEVAR = _descriptor.Descriptor(
@@ -141,8 +173,8 @@ _MODULEVAR = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=94,
-    serialized_end=189,
+    serialized_start=124,
+    serialized_end=219,
 )
 
 _MODULEDESC_SIGN2VARENTRY = _descriptor.Descriptor(
@@ -194,8 +226,8 @@ _MODULEDESC_SIGN2VARENTRY = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=339,
-    serialized_end=409,
+    serialized_start=369,
+    serialized_end=439,
 )
 
 _MODULEDESC = _descriptor.Descriptor(
@@ -296,8 +328,8 @@ _MODULEDESC = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=192,
-    serialized_end=409,
+    serialized_start=222,
+    serialized_end=439,
 )
 
 _MODULEVAR.fields_by_name['fetch_desc'].message_type = _FETCHDESC

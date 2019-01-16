@@ -21,11 +21,13 @@ package paddle_hub;
 // Feed Variable Description
 message FeedDesc {
   string var_name = 1;
+  string alias = 2;
 };
 
 // Fetch Variable Description
 message FetchDesc {
   string var_name = 1;
+  string alias = 2;
 };
 
 // Module Variable

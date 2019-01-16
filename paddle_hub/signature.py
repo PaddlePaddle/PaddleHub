@@ -20,11 +20,24 @@ from paddle_hub.utils import to_list
 
 
 class Signature:
-    def __init__(self, name, inputs, outputs):
-        self.name = name
+    def __init__(self, name, inputs, outputs, feed_names=None,
+                 fetch_names=None):
         inputs = to_list(inputs)
         outputs = to_list(outputs)
 
+        if not feed_names:
+            feed_names = [""] * len(inputs)
+        feed_names = to_list(feed_names)
+        assert len(inputs) == len(
+            feed_names), "the length of feed_names must be same with inputs"
+
+        if not fetch_names:
+            fetch_names = [""] * len(outputs)
+        fetch_names = to_list(fetch_names)
+        assert len(outputs) == len(
+            fetch_names), "the length of fetch_names must be same with outputs"
+
+        self.name = name
         for item in inputs:
             assert isinstance(
                 item,
@@ -37,6 +50,29 @@ class Signature:
 
         self.inputs = inputs
         self.outputs = outputs
+        self.feed_names = feed_names
+        self.fetch_names = fetch_names
+
+
+#                 self.inputs_dict = {}
+#         for index, value in enumerate(inputs):
+#             self.inputs_dict[index] = value
+
+#         if feed_names:
+#             for index in range(len(feed_names)):
+#                 key = feed_names[index]
+#                 value = inputs[index]
+#                 self.inputs_dict[key] = value
+
+#         self.outputs_dict = {}
+#         for index, value in enumerate(outputs):
+#             self.outputs_dict[index] = value
+
+#         if feed_names:
+#             for index in range(len(fetch_names)):
+#                 key = fetch_names[index]
+#                 value = outputs[index]
+#                 self.outputs_dict[key] = value
 
     def get_name(self):
         return self.name
@@ -47,7 +83,12 @@ class Signature:
     def get_outputs(self):
         return self.outputs
 
+    def get_feed_names(self):
+        return self.feed_names
+
+    def get_fetch_names(self):
+        return self.fetch_names
+
 
 def create_signature(name="default", inputs=[], outputs=[]):
-
     return Signature(name=name, inputs=inputs, outputs=outputs)

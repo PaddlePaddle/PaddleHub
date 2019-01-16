@@ -107,6 +107,26 @@ class Module(object):
                 if op.has_attr("is_test"):
                     op._set_attr("is_test", is_test)
 
+        def _process_input_output_key(module_desc, signature):
+            signature = module_desc.sign2var[signature]
+
+            feed_dict = {}
+            fetch_dict = {}
+
+            for index, feed in enumerate(signature.feed_desc):
+                if feed.alias != "":
+                    feed_dict[feed.alias] = feed.var_name
+                feed_dict[index] = feed.var_name
+
+            for index, fetch in enumerate(signature.fetch_desc):
+                if fetch.alias != "":
+                    fetch_dict[fetch.alias] = fetch.var_name
+                fetch_dict[index] = fetch.var_name
+
+            return feed_dict, fetch_dict
+
+        self.config = ModuleConfig(self.module_dir)
+        self.config.load()
         # load paddle inference model
         place = fluid.CPUPlace()
         model_dir = os.path.join(self.module_dir, MODEL_DIRNAME)
@@ -114,15 +134,15 @@ class Module(object):
         self.inference_program, self.feed_target_names, self.fetch_targets = fluid.io.load_inference_model(
             dirname=os.path.join(model_dir, sign_name), executor=self.exe)
 
+        feed_dict, fetch_dict = _process_input_output_key(
+            self.config.desc, sign_name)
+
         # remove feed fetch operator and variable
         ModuleUtils.remove_feed_fetch_op(self.inference_program)
         # print("inference_program")
         # print(self.inference_program)
         print("**feed_target_names**\n{}".format(self.feed_target_names))
         print("**fetch_targets**\n{}".format(self.fetch_targets))
-
-        self.config = ModuleConfig(self.module_dir)
-        self.config.load()
         self._process_parameter()
         name_generator_path = ModuleConfig.name_generator_path(self.module_dir)
         with open(name_generator_path, "rb") as data:
@@ -133,7 +153,15 @@ class Module(object):
         _process_op_attr(program=program, is_test=False)
         _set_param_trainable(program=program, trainable=trainable)
 
-        return self.feed_target_names, self.fetch_targets, program, generator
+        for key, value in feed_dict.items():
+            var = program.global_block().var(value)
+            feed_dict[key] = var
+
+        for key, value in fetch_dict.items():
+            var = program.global_block().var(value)
+            fetch_dict[key] = var
+
+        return feed_dict, fetch_dict, program, generator
 
     def get_inference_program(self):
         return self.inference_program
@@ -315,13 +343,17 @@ def create_module(sign_arr, program, module_dir=None, word_dict=None):
         var = sign_map[sign.get_name()]
         feed_desc = var.feed_desc
         fetch_desc = var.fetch_desc
-        for input in sign.get_inputs():
+        feed_names = sign.get_feed_names()
+        fetch_names = sign.get_fetch_names()
+        for index, input in enumerate(sign.get_inputs()):
             feed_var = feed_desc.add()
             feed_var.var_name = input.name
+            feed_var.alias = feed_names[index]
 
-        for output in sign.get_outputs():
+        for index, output in enumerate(sign.get_outputs()):
             fetch_var = fetch_desc.add()
             fetch_var.var_name = output.name
+            fetch_var.alias = fetch_names[index]
 
     # save inference program
     exe = fluid.Executor(place=fluid.CPUPlace())
