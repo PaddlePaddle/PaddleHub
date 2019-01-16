@@ -1,7 +1,3 @@
-# coding: utf-8
-# this model is copy from paddle models repo as a demo for fine-tuning
-# for more detail, see https://github.com/PaddlePaddle/models/blob/develop/fluid/PaddleCV/image_classification/
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
