@@ -23,6 +23,8 @@ do
             data_dir=$OPTARG;;
         g)
             use_gpu=True;;
+        h)
+            hub_module_path=$OPTARG;;
         l)
             learning_rate=$OPTARG;;
         n)
