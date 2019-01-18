@@ -124,11 +124,6 @@ def train_net(train_reader,
     sgd_optimizer = fluid.optimizer.Adagrad(learning_rate=lr)
     sgd_optimizer.minimize(cost)
 
-    # write default main program
-    with open("./bow_net.backward.program_desc.prototxt", "w") as fo:
-        program_desc = str(fluid.default_main_program())
-        fo.write(program_desc)
-
     # set place, executor, datafeeder
     place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
     exe = fluid.Executor(place)
@@ -221,10 +216,10 @@ def finetune_net(train_reader,
                 fluid.layers.cross_entropy(input=pred, label=label))
             acc = fluid.layers.accuracy(input=pred, label=label)
 
-            with open("./prototxt/bow_net.forward.program_desc.prototxt",
-                      "w") as fo:
-                program_desc = str(fluid.default_main_program())
-                fo.write(program_desc)
+            # with open("./prototxt/bow_net.forward.program_desc.prototxt",
+            #           "w") as fo:
+            #     program_desc = str(fluid.default_main_program())
+            #     fo.write(program_desc)
             # set optimizer
             sgd_optimizer = fluid.optimizer.Adagrad(learning_rate=lr)
             sgd_optimizer.minimize(cost)
