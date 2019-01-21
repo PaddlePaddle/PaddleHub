@@ -194,7 +194,7 @@ class Module(object):
         return lod_tensor
 
     def _word_id_mapping(self, inputs):
-        word_dict = self.config.get_dict()
+        word_dict = self.config.get_assets_vocab()
         return list(map(lambda x: word_dict[x], inputs))
 
 
@@ -214,7 +214,7 @@ class ModuleConfig(object):
         self.dict = defaultdict(int)
         self.dict.setdefault(0)
 
-    def get_dict(self):
+    def get_assets_vocab(self):
         """ Return dictionary in Module"""
         return self.dict
 
