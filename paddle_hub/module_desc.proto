@@ -18,6 +18,26 @@ option optimize_for = LITE_RUNTIME;
 
 package paddle_hub;
 
+enum DataType {
+  INT = 0;
+  FLOAT = 1;
+  STRING = 2;
+  BOOLEAN = 3;
+  LIST = 4;
+  MAP = 5;
+}
+
+message FlexibleData {
+  DataType type = 1;
+  string name = 2;
+  int32 i = 3;
+  float f = 4;
+  bool b = 5;
+  string s = 6;
+  map<string, FlexibleData> m = 7;
+  map<int32, FlexibleData> l = 8;
+}
+
 // Feed Variable Description
 message FeedDesc {
   string var_name = 1;
@@ -41,6 +61,27 @@ message AuthInfo {
   string hub_version = 2;
 }
 
+message ParamAttr {
+  message Regularizer {
+    string type = 1;
+    float regularization_coeff = 2;
+  }
+  
+  message GradientClipAttr {
+    string type = 1;
+    float min = 2;
+    float max = 3;
+    float clip_norm = 4;
+    string group_name = 5;
+  }
+  
+  Regularizer regularizer = 1;
+  GradientClipAttr gradient_clip_attr = 2;
+  FlexibleData optimize_attr = 3;
+  bool trainable = 4;
+  bool do_model_average = 5;
+}
+
 // A Hub Module is stored in a directory with a file 'paddlehub.pb'
 // containing a serialized protocol message of this type. The further contents
 // of the directory depend on the storage format described by the message.
@@ -56,5 +97,7 @@ message ModuleDesc {
   bool contain_assets = 4;
 
   AuthInfo auth_info = 5;
+  
+  map<string, ParamAttr> param_attrs = 6;
 };
 
