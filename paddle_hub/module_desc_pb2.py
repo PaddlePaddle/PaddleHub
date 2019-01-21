@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package='paddle_hub',
     syntax='proto3',
     serialized_pb=_b(
-        '\n\x11module_desc.proto\x12\npaddle_hub\"+\n\x08\x46\x65\x65\x64\x44\x65sc\x12\x10\n\x08var_name\x18\x01 \x01(\t\x12\r\n\x05\x61lias\x18\x02 \x01(\t\",\n\tFetchDesc\x12\x10\n\x08var_name\x18\x01 \x01(\t\x12\r\n\x05\x61lias\x18\x02 \x01(\t\"_\n\tModuleVar\x12)\n\nfetch_desc\x18\x01 \x03(\x0b\x32\x15.paddle_hub.FetchDesc\x12\'\n\tfeed_desc\x18\x02 \x03(\x0b\x32\x14.paddle_hub.FeedDesc\"\xd9\x01\n\nModuleDesc\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x08sign2var\x18\x02 \x03(\x0b\x32$.paddle_hub.ModuleDesc.Sign2varEntry\x12\x14\n\x0creturn_numpy\x18\x03 \x01(\x08\x12\x16\n\x0e\x63ontain_assets\x18\x04 \x01(\x08\x12\x0f\n\x07version\x18\x05 \x01(\t\x1a\x46\n\rSign2varEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.paddle_hub.ModuleVar:\x02\x38\x01\x42\x02H\x03\x62\x06proto3'
+        '\n\x11module_desc.proto\x12\npaddle_hub\"+\n\x08\x46\x65\x65\x64\x44\x65sc\x12\x10\n\x08var_name\x18\x01 \x01(\t\x12\r\n\x05\x61lias\x18\x02 \x01(\t\",\n\tFetchDesc\x12\x10\n\x08var_name\x18\x01 \x01(\t\x12\r\n\x05\x61lias\x18\x02 \x01(\t\"_\n\tModuleVar\x12)\n\nfetch_desc\x18\x01 \x03(\x0b\x32\x15.paddle_hub.FetchDesc\x12\'\n\tfeed_desc\x18\x02 \x03(\x0b\x32\x14.paddle_hub.FeedDesc\"7\n\x08\x41uthInfo\x12\x16\n\x0epaddle_version\x18\x01 \x01(\t\x12\x13\n\x0bhub_version\x18\x02 \x01(\t\"\xf1\x01\n\nModuleDesc\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x08sign2var\x18\x02 \x03(\x0b\x32$.paddle_hub.ModuleDesc.Sign2varEntry\x12\x14\n\x0creturn_numpy\x18\x03 \x01(\x08\x12\x16\n\x0e\x63ontain_assets\x18\x04 \x01(\x08\x12\'\n\tauth_info\x18\x05 \x01(\x0b\x32\x14.paddle_hub.AuthInfo\x1a\x46\n\rSign2varEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x01(\x0b\x32\x15.paddle_hub.ModuleVar:\x02\x38\x01\x42\x02H\x03\x62\x06proto3'
     ))
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -177,6 +177,58 @@ _MODULEVAR = _descriptor.Descriptor(
     serialized_end=219,
 )
 
+_AUTHINFO = _descriptor.Descriptor(
+    name='AuthInfo',
+    full_name='paddle_hub.AuthInfo',
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name='paddle_version',
+            full_name='paddle_hub.AuthInfo.paddle_version',
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode('utf-8'),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None),
+        _descriptor.FieldDescriptor(
+            name='hub_version',
+            full_name='paddle_hub.AuthInfo.hub_version',
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b("").decode('utf-8'),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    options=None,
+    is_extendable=False,
+    syntax='proto3',
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=221,
+    serialized_end=276,
+)
+
 _MODULEDESC_SIGN2VARENTRY = _descriptor.Descriptor(
     name='Sign2varEntry',
     full_name='paddle_hub.ModuleDesc.Sign2varEntry',
@@ -226,8 +278,8 @@ _MODULEDESC_SIGN2VARENTRY = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=369,
-    serialized_end=439,
+    serialized_start=450,
+    serialized_end=520,
 )
 
 _MODULEDESC = _descriptor.Descriptor(
@@ -302,15 +354,15 @@ _MODULEDESC = _descriptor.Descriptor(
             extension_scope=None,
             options=None),
         _descriptor.FieldDescriptor(
-            name='version',
-            full_name='paddle_hub.ModuleDesc.version',
+            name='auth_info',
+            full_name='paddle_hub.ModuleDesc.auth_info',
             index=4,
             number=5,
-            type=9,
-            cpp_type=9,
+            type=11,
+            cpp_type=10,
             label=1,
             has_default_value=False,
-            default_value=_b("").decode('utf-8'),
+            default_value=None,
             message_type=None,
             enum_type=None,
             containing_type=None,
@@ -328,8 +380,8 @@ _MODULEDESC = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=222,
-    serialized_end=439,
+    serialized_start=279,
+    serialized_end=520,
 )
 
 _MODULEVAR.fields_by_name['fetch_desc'].message_type = _FETCHDESC
@@ -337,9 +389,11 @@ _MODULEVAR.fields_by_name['feed_desc'].message_type = _FEEDDESC
 _MODULEDESC_SIGN2VARENTRY.fields_by_name['value'].message_type = _MODULEVAR
 _MODULEDESC_SIGN2VARENTRY.containing_type = _MODULEDESC
 _MODULEDESC.fields_by_name['sign2var'].message_type = _MODULEDESC_SIGN2VARENTRY
+_MODULEDESC.fields_by_name['auth_info'].message_type = _AUTHINFO
 DESCRIPTOR.message_types_by_name['FeedDesc'] = _FEEDDESC
 DESCRIPTOR.message_types_by_name['FetchDesc'] = _FETCHDESC
 DESCRIPTOR.message_types_by_name['ModuleVar'] = _MODULEVAR
+DESCRIPTOR.message_types_by_name['AuthInfo'] = _AUTHINFO
 DESCRIPTOR.message_types_by_name['ModuleDesc'] = _MODULEDESC
 
 FeedDesc = _reflection.GeneratedProtocolMessageType(
@@ -371,6 +425,16 @@ ModuleVar = _reflection.GeneratedProtocolMessageType(
         # @@protoc_insertion_point(class_scope:paddle_hub.ModuleVar)
     ))
 _sym_db.RegisterMessage(ModuleVar)
+
+AuthInfo = _reflection.GeneratedProtocolMessageType(
+    'AuthInfo',
+    (_message.Message, ),
+    dict(
+        DESCRIPTOR=_AUTHINFO,
+        __module__='module_desc_pb2'
+        # @@protoc_insertion_point(class_scope:paddle_hub.AuthInfo)
+    ))
+_sym_db.RegisterMessage(AuthInfo)
 
 ModuleDesc = _reflection.GeneratedProtocolMessageType(
     'ModuleDesc',

@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import paddle
 import paddle.fluid as fluid
 import numpy as np
 import tempfile
@@ -27,6 +28,7 @@ import pickle
 from collections import defaultdict
 from paddle_hub.downloader import download_and_uncompress
 from paddle_hub import module_desc_pb2
+from paddle_hub.logger import logger
 from paddle_hub.signature import Signature
 from paddle_hub.utils import to_list
 from paddle_hub.version import __version__
@@ -303,7 +305,10 @@ def create_module(sign_arr, module_dir=None, word_dict=None):
 
     # create module pb
     module_desc = module_desc_pb2.ModuleDesc()
-    module_desc.version = __version__
+    module_desc.auth_info.hub_version = __version__
+    module_desc.auth_info.paddle_version = paddle.__version__
+    logger.info("hub version is %s" % __version__)
+    logger.info("paddle version is %s" % paddle.__version__)
     program = program.clone()
 
     # save asset

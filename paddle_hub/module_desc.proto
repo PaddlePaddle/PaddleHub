@@ -36,6 +36,11 @@ message ModuleVar {
   repeated FeedDesc feed_desc = 2;
 }
 
+message AuthInfo {
+  string paddle_version = 1;
+  string hub_version = 2;
+}
+
 // A Hub Module is stored in a directory with a file 'paddlehub.pb'
 // containing a serialized protocol message of this type. The further contents
 // of the directory depend on the storage format described by the message.
@@ -50,6 +55,6 @@ message ModuleDesc {
 
   bool contain_assets = 4;
 
-  string version = 5;
+  AuthInfo auth_info = 5;
 };
 
