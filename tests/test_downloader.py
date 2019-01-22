@@ -18,7 +18,7 @@ import paddle_hub as hub
 
 class TestDownloader(unittest.TestCase):
     def test_download(self):
-        link = "http://paddlehub.bj.bcebos.com/word2vec/word2vec-dim16-simple-example-2.tar.gz"
+        link = "https://paddlehub.cdn.bcebos.com/word2vec/word2vec_test_module.tar.gz"
         module_path = hub.download_and_uncompress(link)
 
 
