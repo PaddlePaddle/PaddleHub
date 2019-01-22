@@ -178,7 +178,7 @@ def test_load_w2v_module(use_gpu=False):
             feed_dict["firstw"], feed_dict["secondw"], feed_dict["thirdw"],
             feed_dict["fourthw"]
         ]
-        feeder = fluid.DataFeeder(place=place, feed_list=feed_names)
+        feeder = fluid.DataFeeder(place=place, feed_list=feed_vars)
 
         word_ids = [[1, 2, 3, 4]]
         result = exe.run(
