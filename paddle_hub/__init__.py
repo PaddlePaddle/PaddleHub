@@ -25,3 +25,4 @@ from paddle_hub.module import create_module
 from paddle_hub.downloader import download_and_uncompress
 from paddle_hub.signature import create_signature
 from paddle_hub.version import __version__
+connect_program = ModuleUtils.connect_program
