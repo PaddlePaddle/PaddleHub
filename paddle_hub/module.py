@@ -115,7 +115,7 @@ class Module(object):
                 clip = fluid.clip.GradientClipByNorm(
                     clip_norm=param_attr.gradient_clip_attr.clip_norm)
             elif param_attr.gradient_clip_attr.type == "GradientClipByGlobalNorm":
-                clip = fluid.clip.GradientClipByNorm(
+                clip = fluid.clip.GradientClipByGlobalNorm(
                     clip_norm=param_attr.gradient_clip_attr.clip_norm,
                     group_name=param_attr.gradient_clip_attr.group_name)
             else:
