@@ -30,7 +30,8 @@ from paddle_hub.downloader import download_and_uncompress
 from paddle_hub import module_desc_pb2
 from paddle_hub.logger import logger
 from paddle_hub.signature import Signature
-from paddle_hub.utils import to_list, get_variable_info, mkdir
+from paddle_hub.utils import to_list, mkdir
+from paddle_hub.paddle_helper import from_param_to_flexible_data, get_variable_info, from_flexible_data_to_param
 from paddle_hub.version import __version__
 
 __all__ = ["Module", "ModuleConfig", "ModuleUtils"]
@@ -73,48 +74,10 @@ class Module(object):
 
     def _process_parameter(self):
         global_block = self.inference_program.global_block()
-        param_attrs = self.config.desc.param_attrs
-        for key, param_attr in param_attrs.items():
-            param = {}
+        param_attrs = self.config.desc.extra_info.map.data['param_attrs']
+        for key, param_attr in param_attrs.map.data.items():
+            param = from_flexible_data_to_param(param_attr)
             param['name'] = HUB_VAR_PREFIX + key
-            param['trainable'] = param_attr.trainable
-            param['do_model_average'] = param_attr.do_model_average
-            param['optimize_attr'] = {}
-            param['optimize_attr'][
-                'learning_rate'] = param_attr.optimize_attr.m['learning_rate'].f
-
-            # TODO(wuzewu): recover the param attr with a more reliable way
-            if param_attr.regularizer.type == "L2DecayRegularizer":
-                regularizer = fluid.regularizer.L2DecayRegularizer(
-                    regularization_coeff=param_attr.regularizer.
-                    regularization_coeff)
-            elif param_attr.regularizer.type == "L1DecayRegularizer":
-                regularizer = fluid.regularizer.L1DecayRegularizer(
-                    regularization_coeff=param_attr.regularizer.
-                    regularization_coeff)
-            else:
-                regularizer = None
-            param['regularizer'] = regularizer
-
-            if param_attr.gradient_clip_attr.type == "ErrorClipByValue":
-                clip = fluid.clip.ErrorClipByValue(
-                    max=param_attr.gradient_clip_attr.max,
-                    min=param_attr.gradient_clip_attr.min)
-            elif param_attr.gradient_clip_attr.type == "GradientClipByValue":
-                clip = fluid.clip.GradientClipByValue(
-                    max=param_attr.gradient_clip_attr.max,
-                    min=param_attr.gradient_clip_attr.min)
-            elif param_attr.gradient_clip_attr.type == "GradientClipByNorm":
-                clip = fluid.clip.GradientClipByNorm(
-                    clip_norm=param_attr.gradient_clip_attr.clip_norm)
-            elif param_attr.gradient_clip_attr.type == "GradientClipByGlobalNorm":
-                clip = fluid.clip.GradientClipByGlobalNorm(
-                    clip_norm=param_attr.gradient_clip_attr.clip_norm,
-                    group_name=param_attr.gradient_clip_attr.group_name)
-            else:
-                clip = None
-            param['gradient_clip_attr'] = clip
-
             if (param['name'] not in global_block.vars):
                 continue
             var = global_block.var(param['name'])
@@ -341,46 +304,13 @@ def create_module(sign_arr, module_dir=None, word_dict=None, place=None):
                 fo.write("{}\t{}\n".format(w, w_id))
 
     # save fluid Parameter
-    param_attrs = module_desc.param_attrs
+    extra_info = module_desc.extra_info
+    extra_info.type = module_desc_pb2.MAP
+    param_attrs = extra_info.map.data['param_attrs']
+    param_attrs.type = module_desc_pb2.MAP
     for param in program.global_block().iter_parameters():
-        param_attr = param_attrs[param.name]
-        param_attr.trainable = param.trainable
-        if param.do_model_average:
-            param_attr.do_model_average = param.do_model_average
-        # TODO(wuzewu): add a func to transfer python dict to fexiable data
-        param_attr.optimize_attr.type = module_desc_pb2.MAP
-        param_attr.optimize_attr.m['learning_rate'].type = module_desc_pb2.FLOAT
-        param_attr.optimize_attr.m['learning_rate'].f = param.optimize_attr[
-            'learning_rate']
-        if param.regularizer:
-            if isinstance(param.regularizer,
-                          fluid.regularizer.L2DecayRegularizer):
-                param_attr.regularizer.type = "L2DecayRegularizer"
-            if isinstance(param.regularizer,
-                          fluid.regularizer.L1DecayRegularizer):
-                param_attr.regularizer.type = "L1DecayRegularizer"
-            param_attr.regularizer.regularization_coeff = param.regularizer.regularization_coeff
-
-        if param.gradient_clip_attr:
-            if isinstance(param.gradient_clip_attr,
-                          fluid.clip.ErrorClipByValue):
-                param_attr.gradient_clip_attr.max = param.gradient_clip_attr.max
-                param_attr.gradient_clip_attr.min = param.gradient_clip_attr.min
-                param_attr.gradient_clip_attr.type = "ErrorClipByValue"
-            if isinstance(param.gradient_clip_attr,
-                          fluid.clip.GradientClipByValue):
-                param_attr.gradient_clip_attr.max = param.gradient_clip_attr.max
-                param_attr.gradient_clip_attr.min = param.gradient_clip_attr.min
-                param_attr.gradient_clip_attr.type = "GradientClipByValue"
-            if isinstance(param.gradient_clip_attr,
-                          fluid.clip.GradientClipByNorm):
-                param_attr.gradient_clip_attr.clip_norm = param.gradient_clip_attr.clip_norm
-                param_attr.gradient_clip_attr.type = "GradientClipByNorm"
-            if isinstance(param.gradient_clip_attr,
-                          fluid.clip.GradientClipByGlobalNorm):
-                param_attr.gradient_clip_attr.clip_norm = param.gradient_clip_attr.clip_norm
-                param_attr.gradient_clip_attr.group_name = param.gradient_clip_attr.group_name
-                param_attr.gradient_clip_attr.type = "GradientClipByGlobalNorm"
+        param_attr = param_attrs.map.data[param.name]
+        from_param_to_flexible_data(param, param_attr)
 
     # save signarture info
     sign_map = module_desc.sign2var

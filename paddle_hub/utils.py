@@ -17,6 +17,8 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from paddle_hub import module_desc_pb2
+from paddle_hub.logger import logger
 import paddle
 import paddle.fluid as fluid
 import os
@@ -30,34 +32,95 @@ def to_list(input):
     return input
 
 
-def get_variable_info(var):
-    assert isinstance(
-        var,
-        fluid.framework.Variable), "var should be a fluid.framework.Variable"
-    var_info = {
-        'type': var.type,
-        'name': var.name,
-        'dtype': var.dtype,
-        'lod_level': var.lod_level,
-        'shape': var.shape,
-        'stop_gradient': var.stop_gradient,
-        'is_data': var.is_data,
-        'error_clip': var.error_clip
-    }
-    if isinstance(var, fluid.framework.Parameter):
-        var_info['trainable'] = var.trainable
-        var_info['optimize_attr'] = var.optimize_attr
-        var_info['regularizer'] = var.regularizer
-        var_info['gradient_clip_attr'] = var.gradient_clip_attr
-        var_info['do_model_average'] = var.do_model_average
-    else:
-        var_info['persistable'] = var.persistable
-
-    return var_info
-
-
 def mkdir(path):
     """ the same as the shell command mkdir -p "
     """
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def get_keyed_type_of_pyobj(pyobj):
+    if isinstance(pyobj, bool):
+        return module_desc_pb2.BOOLEAN
+    elif isinstance(pyobj, int):
+        return module_desc_pb2.INT
+    elif isinstance(pyobj, str):
+        return module_desc_pb2.STRING
+    elif isinstance(pyobj, float):
+        return module_desc_pb2.FLOAT
+    return module_desc_pb2.STRING
+
+
+def from_pyobj_to_flexible_data(pyobj, flexible_data):
+    if isinstance(pyobj, bool):
+        flexible_data.type = module_desc_pb2.BOOLEAN
+        flexible_data.b = pyobj
+    elif isinstance(pyobj, int):
+        flexible_data.type = module_desc_pb2.INT
+        flexible_data.i = pyobj
+    elif isinstance(pyobj, str):
+        flexible_data.type = module_desc_pb2.STRING
+        flexible_data.s = pyobj
+    elif isinstance(pyobj, float):
+        flexible_data.type = module_desc_pb2.FLOAT
+        flexible_data.f = pyobj
+    elif isinstance(pyobj, list) or isinstance(pyobj, tuple):
+        flexible_data.type = module_desc_pb2.LIST
+        for index, obj in enumerate(pyobj):
+            from_pyobj_to_flexible_data(obj,
+                                        flexible_data.list.data[str(index)])
+    elif isinstance(pyobj, set):
+        flexible_data.type = module_desc_pb2.SET
+        for index, obj in enumerate(list(pyobj)):
+            from_pyobj_to_flexible_data(obj, flexible_data.set.data[str(index)])
+    elif isinstance(pyobj, dict):
+        flexible_data.type = module_desc_pb2.MAP
+        for key, value in pyobj.items():
+            from_pyobj_to_flexible_data(value, flexible_data.map.data[str(key)])
+            flexible_data.map.keyType[str(key)] = get_keyed_type_of_pyobj(key)
+    elif isinstance(pyobj, type(None)):
+        flexible_data.type = module_desc_pb2.NONE
+    else:
+        flexible_data.type = module_desc_pb2.OBJECT
+        flexible_data.name = str(pyobj.__class__.__name__)
+        for key, value in pyobj.__dict__.items():
+            from_pyobj_to_flexible_data(value,
+                                        flexible_data.object.data[str(key)])
+            flexible_data.object.keyType[str(key)] = get_keyed_type_of_pyobj(
+                key)
+
+
+def from_flexible_data_to_pyobj(flexible_data):
+    if flexible_data.type == module_desc_pb2.BOOLEAN:
+        result = flexible_data.b
+    elif flexible_data.type == module_desc_pb2.INT:
+        result = flexible_data.i
+    elif flexible_data.type == module_desc_pb2.STRING:
+        result = flexible_data.s
+    elif flexible_data.type == module_desc_pb2.FLOAT:
+        result = flexible_data.f
+    elif flexible_data.type == module_desc_pb2.LIST:
+        result = []
+        for index in range(len(flexible_data.list.data)):
+            result.append(
+                from_flexible_data_to_pyobj(flexible_data.m.data(str(index))))
+    elif flexible_data.type == module_desc_pb2.SET:
+        result = set()
+        for index in range(len(flexible_data.set.data)):
+            result.add(
+                from_flexible_data_to_pyobj(flexible_data.m.data(str(index))))
+    elif flexible_data.type == module_desc_pb2.MAP:
+        result = {}
+        for key, value in flexible_data.map.data.items():
+            key = flexible_data.map.keyType[key]
+            result[key] = from_flexible_data_to_pyobj(value)
+    elif flexible_data.type == module_desc_pb2.NONE:
+        result = None
+    elif flexible_data.type == module_desc_pb2.OBJECT:
+        result = None
+        logger.warning("can't tran flexible_data to python object")
+    else:
+        result = None
+        logger.warning("unknown type of flexible_data")
+
+    return result
