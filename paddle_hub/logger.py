@@ -17,9 +17,87 @@ from __future__ import division
 from __future__ import print_function
 import logging
 
-log_level = logging.DEBUG
-logging.basicConfig(
-    format=
-    '[%(asctime)-15s] [%(levelname)8s] - %(message)s (%(filename)s:%(lineno)s)')
-logger = logging.getLogger('paddle-hub')
-logger.setLevel(log_level)
+
+class Logger:
+
+    PLACEHOLDER = '%'
+    NOLOG = "NOLOG"
+
+    def __init__(self, name=None):
+        logging.basicConfig(
+            format='[%(asctime)-15s] [%(levelname)8s] - %(message)s')
+
+        if not name:
+            name = "paddle-hub"
+
+        self.logger = logging.getLogger(name)
+        self.logLevel = "DEBUG"
+        self.logger.setLevel(self._get_logging_level())
+
+    def _is_no_log(self):
+        return self.getLevel() == Logger.NOLOG
+
+    def _get_logging_level(self):
+        return eval("logging.%s" % self.logLevel)
+
+    def setLevel(self, logLevel):
+        self.logLevel = logLevel.upper()
+        if not self._is_no_log():
+            _logging_level = eval("logging.%s" % self.logLevel)
+            self.logger.setLevel(_logging_level)
+
+    def getLevel(self):
+        return self.logLevel
+
+    def __call__(self, type, msg):
+        def _get_log_arr(msg):
+            ph = Logger.PLACEHOLDER
+            lrspace = 2
+            lc = rc = " " * lrspace
+            tbspace = 1
+            msgarr = str(msg).split("\n")
+            if len(msgarr) == 1:
+                return msgarr
+
+            maxlen = -1
+            for text in msgarr:
+                if len(text) > maxlen:
+                    maxlen = len(text)
+
+            result = [" ", ph * (maxlen + 2 + lrspace * 2)]
+            tbline = "%s%s%s" % (ph, " " * (maxlen + lrspace * 2), ph)
+            for index in range(tbspace):
+                result.append(tbline)
+            for text in msgarr:
+                text = "%s%s%s%s%s%s" % (ph, lc, text, rc, " " *
+                                         (maxlen - len(text)), ph)
+                result.append(text)
+            for index in range(tbspace):
+                result.append(tbline)
+            result.append(ph * (maxlen + 2 + lrspace * 2))
+            return result
+
+        if self._is_no_log():
+            return
+
+        func = eval("self.logger.%s" % type)
+        for msg in _get_log_arr(msg):
+            func(msg)
+
+    def debug(self, msg):
+        self("debug", msg)
+
+    def info(self, msg):
+        self("info", msg)
+
+    def error(self, msg):
+        self("error", msg)
+
+    def warning(self, msg):
+        self("warning", msg)
+
+    def critical(self, msg):
+        self("critical", msg)
+
+
+logger = Logger()

@@ -173,10 +173,8 @@ class Module(object):
 
         # remove feed fetch operator and variable
         ModuleUtils.remove_feed_fetch_op(self.inference_program)
-        # print("inference_program")
-        # print(self.inference_program)
-        print("**feed_target_names**\n{}".format(self.feed_target_names))
-        print("**fetch_targets**\n{}".format(self.fetch_targets))
+        logger.info("**feed_target_names**\n{}".format(self.feed_target_names))
+        logger.info("**fetch_targets**\n{}".format(self.fetch_targets))
         self._process_parameter()
 
         program = self.get_inference_program().clone()
@@ -519,7 +517,7 @@ class ModuleUtils(object):
     def remove_feed_fetch_op(program):
         """ remove feed and fetch operator and variable for fine-tuning
         """
-        print("remove feed fetch op")
+        logger.info("remove feed fetch op")
         block = program.global_block()
         need_to_remove_op_index = []
         for i, op in enumerate(block.ops):
