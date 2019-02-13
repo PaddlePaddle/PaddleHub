@@ -501,7 +501,7 @@ class ModuleUtils(object):
                 output_var = next_program.global_block().var(key)
                 var_info = copy.deepcopy(get_variable_info(output_var))
                 output_var = new_program.global_block().create_var(**var_info)
-                new_program.global_block()._prepend_op(
+                new_program.global_block().append_op(
                     type="assign",
                     inputs={'X': input_var},
                     outputs={'Out': output_var})
