@@ -53,3 +53,10 @@ def get_variable_info(var):
         var_info['persistable'] = var.persistable
 
     return var_info
+
+
+def mkdir(path):
+    """ the same as the shell command mkdir -p "
+    """
+    if not os.path.exists(path):
+        os.makedirs(path)

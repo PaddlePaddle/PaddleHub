@@ -30,7 +30,7 @@ from paddle_hub.downloader import download_and_uncompress
 from paddle_hub import module_desc_pb2
 from paddle_hub.logger import logger
 from paddle_hub.signature import Signature
-from paddle_hub.utils import to_list, get_variable_info
+from paddle_hub.utils import to_list, get_variable_info, mkdir
 from paddle_hub.version import __version__
 
 __all__ = ["Module", "ModuleConfig", "ModuleUtils"]
@@ -45,13 +45,6 @@ PARAM_FILENAME = "param.pkl"
 MODULE_DESC_PBNAME = "module_desc.pb"
 # paddle hub var prefix
 HUB_VAR_PREFIX = "@HUB@"
-
-
-def mkdir(path):
-    """ the same as the shell command mkdir -p "
-    """
-    if not os.path.exists(path):
-        os.makedirs(path)
 
 
 class Module(object):
