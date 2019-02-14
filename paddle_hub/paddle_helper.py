@@ -48,6 +48,12 @@ def get_variable_info(var):
 
 
 def from_param_to_flexible_data(param, flexible_data):
+    def paddle_obj_filter(pyobj):
+        return isinstance(pyobj, fluid.framework.Variable) or isinstance(
+            pyobj, fluid.framework.Block) or isinstance(
+                pyobj, fluid.framework.Program) or isinstance(
+                    pyobj, fluid.framework.Operator)
+
     flexible_data.type = module_desc_pb2.MAP
     from_pyobj_to_flexible_data(param.trainable,
                                 flexible_data.map.data['trainable'])
@@ -55,10 +61,14 @@ def from_param_to_flexible_data(param, flexible_data):
                                 flexible_data.map.data['do_model_average'])
     from_pyobj_to_flexible_data(param.optimize_attr,
                                 flexible_data.map.data['optimize_attr'])
-    from_pyobj_to_flexible_data(param.regularizer,
-                                flexible_data.map.data['regularizer'])
-    from_pyobj_to_flexible_data(param.gradient_clip_attr,
-                                flexible_data.map.data['gradient_clip_attr'])
+    from_pyobj_to_flexible_data(
+        param.regularizer,
+        flexible_data.map.data['regularizer'],
+        obj_filter=paddle_obj_filter)
+    from_pyobj_to_flexible_data(
+        param.gradient_clip_attr,
+        flexible_data.map.data['gradient_clip_attr'],
+        obj_filter=paddle_obj_filter)
 
 
 def from_flexible_data_to_param(flexible_data):
