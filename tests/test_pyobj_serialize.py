@@ -218,7 +218,7 @@ class TestSerializeAndDeSerialize(unittest.TestCase):
         output = from_flexible_data_to_pyobj(flexible_data)
         assert input == output, "dict convesion error"
 
-    def test_compound_object(self):
+    def test_convert_compound_object(self):
         input = {
             False: 1,
             '2': 3,
