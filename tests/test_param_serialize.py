@@ -33,8 +33,8 @@ class TestParamAttrSerializeAndDeSerialize(unittest.TestCase):
                     regularizer=fluid.regularizer.L1Decay(
                         regularization_coeff=1)))
             fc_w = [
-                param for param in fluid.default_main_program().global_block().
-                iter_parameters()
+                param for param in
+                fluid.default_main_program().global_block().iter_parameters()
             ][0]
             flexible_data = module_desc_pb2.FlexibleData()
             from_param_to_flexible_data(fc_w, flexible_data)
@@ -56,8 +56,8 @@ class TestParamAttrSerializeAndDeSerialize(unittest.TestCase):
                     regularizer=fluid.regularizer.L2Decay(
                         regularization_coeff=1.5)))
             fc_w = [
-                param for param in fluid.default_main_program().global_block().
-                iter_parameters()
+                param for param in
+                fluid.default_main_program().global_block().iter_parameters()
             ][0]
             flexible_data = module_desc_pb2.FlexibleData()
             from_param_to_flexible_data(fc_w, flexible_data)
@@ -78,8 +78,8 @@ class TestParamAttrSerializeAndDeSerialize(unittest.TestCase):
                     name="fc_w",
                     gradient_clip=fluid.clip.ErrorClipByValue(max=1)))
             fc_w = [
-                param for param in fluid.default_main_program().global_block().
-                iter_parameters()
+                param for param in
+                fluid.default_main_program().global_block().iter_parameters()
             ][0]
             flexible_data = module_desc_pb2.FlexibleData()
             from_param_to_flexible_data(fc_w, flexible_data)
@@ -102,8 +102,8 @@ class TestParamAttrSerializeAndDeSerialize(unittest.TestCase):
                     name="fc_w",
                     gradient_clip=fluid.clip.GradientClipByValue(max=1)))
             fc_w = [
-                param for param in fluid.default_main_program().global_block().
-                iter_parameters()
+                param for param in
+                fluid.default_main_program().global_block().iter_parameters()
             ][0]
             flexible_data = module_desc_pb2.FlexibleData()
             from_param_to_flexible_data(fc_w, flexible_data)
@@ -126,8 +126,8 @@ class TestParamAttrSerializeAndDeSerialize(unittest.TestCase):
                     name="fc_w",
                     gradient_clip=fluid.clip.GradientClipByNorm(clip_norm=1)))
             fc_w = [
-                param for param in fluid.default_main_program().global_block().
-                iter_parameters()
+                param for param in
+                fluid.default_main_program().global_block().iter_parameters()
             ][0]
             flexible_data = module_desc_pb2.FlexibleData()
             from_param_to_flexible_data(fc_w, flexible_data)
@@ -149,8 +149,8 @@ class TestParamAttrSerializeAndDeSerialize(unittest.TestCase):
                     gradient_clip=fluid.clip.GradientClipByGlobalNorm(
                         clip_norm=1)))
             fc_w = [
-                param for param in fluid.default_main_program().global_block().
-                iter_parameters()
+                param for param in
+                fluid.default_main_program().global_block().iter_parameters()
             ][0]
             flexible_data = module_desc_pb2.FlexibleData()
             from_param_to_flexible_data(fc_w, flexible_data)
@@ -171,8 +171,8 @@ class TestParamAttrSerializeAndDeSerialize(unittest.TestCase):
                 size=10,
                 param_attr=fluid.ParamAttr(name="fc_w", trainable=False))
             fc_w = [
-                param for param in fluid.default_main_program().global_block().
-                iter_parameters()
+                param for param in
+                fluid.default_main_program().global_block().iter_parameters()
             ][0]
             flexible_data = module_desc_pb2.FlexibleData()
             from_param_to_flexible_data(fc_w, flexible_data)
@@ -191,8 +191,8 @@ class TestParamAttrSerializeAndDeSerialize(unittest.TestCase):
                 size=10,
                 param_attr=fluid.ParamAttr(name="fc_w", do_model_average=True))
             fc_w = [
-                param for param in fluid.default_main_program().global_block().
-                iter_parameters()
+                param for param in
+                fluid.default_main_program().global_block().iter_parameters()
             ][0]
             flexible_data = module_desc_pb2.FlexibleData()
             from_param_to_flexible_data(fc_w, flexible_data)
@@ -211,8 +211,8 @@ class TestParamAttrSerializeAndDeSerialize(unittest.TestCase):
                 size=10,
                 param_attr=fluid.ParamAttr(name="fc_w", learning_rate=5))
             fc_w = [
-                param for param in fluid.default_main_program().global_block().
-                iter_parameters()
+                param for param in
+                fluid.default_main_program().global_block().iter_parameters()
             ][0]
             flexible_data = module_desc_pb2.FlexibleData()
             from_param_to_flexible_data(fc_w, flexible_data)
