@@ -53,7 +53,7 @@ def get_keyed_type_of_pyobj(pyobj):
 
 def get_pykey(key, keyed_type):
     if keyed_type == module_desc_pb2.BOOLEAN:
-        return bool(key)
+        return key == "True"
     elif keyed_type == module_desc_pb2.INT:
         return int(key)
     elif keyed_type == module_desc_pb2.STRING:
@@ -125,12 +125,13 @@ def from_flexible_data_to_pyobj(flexible_data):
         result = []
         for index in range(len(flexible_data.list.data)):
             result.append(
-                from_flexible_data_to_pyobj(flexible_data.m.data(str(index))))
+                from_flexible_data_to_pyobj(
+                    flexible_data.list.data[str(index)]))
     elif flexible_data.type == module_desc_pb2.SET:
         result = set()
         for index in range(len(flexible_data.set.data)):
             result.add(
-                from_flexible_data_to_pyobj(flexible_data.m.data(str(index))))
+                from_flexible_data_to_pyobj(flexible_data.set.data[str(index)]))
     elif flexible_data.type == module_desc_pb2.MAP:
         result = {}
         for key, value in flexible_data.map.data.items():
