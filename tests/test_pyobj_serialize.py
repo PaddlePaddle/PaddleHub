@@ -24,6 +24,7 @@ from paddle_hub.logger import logger
 
 def _compare_float(a, b):
     error_value = 1.0e-9
+    logger.debug("a is %f and b is %f" % (a, b))
     # if python version < 3.5
     if sys.version_info < (3, 5):
         return abs(a - b) < error_value
