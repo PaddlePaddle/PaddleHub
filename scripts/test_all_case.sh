@@ -22,7 +22,8 @@ pip install -r requirements.txt
 
 # run all case list in the {listfile}
 cd -
-for test_file in `cat $listfile`
+for test_file in `cat $listfile | grep -v ^#`
 do
+    echo "run test case ${test_file}"
 	python ${test_case_path}/${test_file}.py
 done

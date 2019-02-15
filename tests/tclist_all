@@ -1,5 +1,7 @@
 test_downloader
 test_export_n_load_module
-test_module
+#test_module
 test_train_w2v
 test_pyobj_serialize
+test_signature
+test_param_serialize
