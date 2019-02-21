@@ -66,7 +66,6 @@ def get_pykey(key, keyed_type):
 #TODO(wuzewu): solving the problem of circular references
 def from_pyobj_to_flexible_data(pyobj, flexible_data, obj_filter=None):
     if obj_filter and obj_filter(pyobj):
-        logger.info("filter python object")
         return
     if isinstance(pyobj, bool):
         flexible_data.type = module_desc_pb2.BOOLEAN
