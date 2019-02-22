@@ -39,7 +39,7 @@ message FlexibleData {
   DataType type = 1;
   string name = 2;
   int64 i = 3;
-  float f = 4;
+  double f = 4;
   bool b = 5;
   string s = 6;
   KVData map = 7;
