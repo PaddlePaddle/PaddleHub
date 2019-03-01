@@ -1,4 +1,4 @@
-#   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ def download_and_uncompress(url, save_name=None):
         for file_name in file_names:
             tar.extract(file_name, dirname)
 
-    return module_name, module_dir
+    return module_dir
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-#   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle.fluid.framework import Variable
-from paddle_hub.utils import to_list
+from paddle_hub.tools.utils import to_list
 
 
 class Signature:
@@ -52,21 +52,6 @@ class Signature:
         self.outputs = outputs
         self.feed_names = feed_names
         self.fetch_names = fetch_names
-
-    def get_name(self):
-        return self.name
-
-    def get_inputs(self):
-        return self.inputs
-
-    def get_outputs(self):
-        return self.outputs
-
-    def get_feed_names(self):
-        return self.feed_names
-
-    def get_fetch_names(self):
-        return self.fetch_names
 
 
 def create_signature(name="default",

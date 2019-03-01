@@ -1,4 +1,4 @@
-#   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import paddle.fluid as fluid
-
-from paddle_hub.module import Module
-from paddle_hub.module import ModuleConfig
-from paddle_hub.module import ModuleUtils
-from paddle_hub.module import create_module
-from paddle_hub.downloader import download_and_uncompress
-from paddle_hub.signature import create_signature
-from paddle_hub.version import __version__
-connect_program = ModuleUtils.connect_program
+from . import module
+from . import tools
+from . import data_process
+from .module.module import Module, create_module
+from .module.signature import Signature, create_signature
+from .tools.logger import logger
+from .tools.paddle_helper import connect_program

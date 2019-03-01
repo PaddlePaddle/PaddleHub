@@ -1,4 +1,4 @@
-#   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from paddle_hub import module_desc_pb2
-from paddle_hub.logger import logger
+from paddle_hub.module import module_desc_pb2
+from paddle_hub.tools.logger import logger
 import paddle
 import paddle.fluid as fluid
 import os

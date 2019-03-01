@@ -1,4 +1,4 @@
-#   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from paddle_hub import module_desc_pb2
-from paddle_hub.utils import from_pyobj_to_flexible_data, from_flexible_data_to_pyobj
-from paddle_hub.logger import logger
+from paddle_hub.module import module_desc_pb2
+from paddle_hub.tools.utils import from_pyobj_to_flexible_data, from_flexible_data_to_pyobj
+from paddle_hub.tools.logger import logger
 import paddle
 import paddle.fluid as fluid
+import copy
 
 
 def get_variable_info(var):
@@ -116,3 +117,110 @@ def from_flexible_data_to_param(flexible_data):
                 (clip_type, clip_norm, group_name))
 
     return param
+
+
+def connect_program(pre_program, next_program, input_dict=None):
+    def _copy_vars_and_ops_in_blocks(from_block, to_block):
+        for var in from_block.vars:
+            var = from_block.var(var)
+            var_info = copy.deepcopy(get_variable_info(var))
+            if isinstance(var, fluid.framework.Parameter):
+                to_block.create_parameter(**var_info)
+            else:
+                to_block.create_var(**var_info)
+
+        for op in from_block.ops:
+            op_info = {
+                'type': op.type,
+                'inputs': {
+                    input: [block.var(var) for var in op.input(input)]
+                    for input in op.input_names
+                },
+                'outputs': {
+                    output: [block.var(var) for var in op.output(output)]
+                    for output in op.output_names
+                },
+                'attrs': copy.deepcopy(op.all_attrs())
+            }
+            to_block.append_op(**op_info)
+
+    assert isinstance(pre_program,
+                      fluid.Program), "pre_program should be fluid.Program"
+    assert isinstance(next_program,
+                      fluid.Program), "next_program should be fluid.Program"
+    new_program = pre_program.clone()
+    if input_dict:
+        assert isinstance(
+            input_dict,
+            dict), "the input_dict should be a dict with string-Variable pair"
+        for key, var in input_dict.items():
+            assert isinstance(
+                var, fluid.framework.Variable
+            ), "the input_dict should be a dict with string-Variable pair"
+            var_info = copy.deepcopy(get_variable_info(var))
+            input_var = new_program.global_block().create_var(**var_info)
+            output_var = next_program.global_block().var(key)
+            var_info = copy.deepcopy(get_variable_info(output_var))
+            output_var = new_program.global_block().create_var(**var_info)
+            new_program.global_block().append_op(
+                type="assign",
+                inputs={'X': input_var},
+                outputs={'Out': output_var})
+
+    block_map = {0: 0}
+    logger.info("start to connect program")
+    for index, block in enumerate(next_program.blocks):
+        if block.idx == 0:
+            _copy_vars_and_ops_in_blocks(block, new_program.global_block())
+        else:
+            block_map[index] = len(new_program.blocks)
+            logger.info(
+                "block_%d in next_program merge into block_%d in pre_program" %
+                (index, block_map[index]))
+            new_block = new_program._create_block(
+                parent_idx=block_map[block.parent_idx])
+            _copy_vars_and_ops_in_blocks(block, new_block)
+    logger.info("end of connect program")
+    return new_program
+
+
+def remove_feed_fetch_op(program):
+    """ remove feed and fetch operator and variable for fine-tuning
+    """
+    logger.info("remove feed fetch op")
+    block = program.global_block()
+    need_to_remove_op_index = []
+    for i, op in enumerate(block.ops):
+        if op.type == "feed" or op.type == "fetch":
+            need_to_remove_op_index.append(i)
+
+    for index in need_to_remove_op_index[::-1]:
+        block._remove_op(index)
+
+    need_to_remove_var = []
+    for var in block.vars:
+        if var.endswith("feed"):
+            need_to_remove_var.append(var)
+        if var.endswith("fetch"):
+            need_to_remove_var.append(var)
+
+    for var in need_to_remove_var:
+        block._remove_var(var)
+
+    program.desc.flush()
+
+
+def set_parameter_trainable(program, trainable=True):
+    for param in program.global_block().iter_parameters():
+        param.trainable = trainable
+
+
+def set_parameter_regularization(program, regularization):
+    pass
+
+
+def set_op_attr(program, is_test=False):
+    for block in program.blocks:
+        for op in block.ops:
+            if op.has_attr("is_test"):
+                op._set_attr("is_test", is_test)

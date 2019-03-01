@@ -1,4 +1,4 @@
-#   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
 import logging
+import math
 
 
 class Logger:
@@ -50,7 +51,7 @@ class Logger:
         return self.logLevel
 
     def __call__(self, type, msg):
-        def _get_log_arr(msg):
+        def _get_log_arr(msg, len_limit=30):
             ph = Logger.PLACEHOLDER
             lrspace = 2
             lc = rc = " " * lrspace
@@ -58,6 +59,22 @@ class Logger:
             msgarr = str(msg).split("\n")
             if len(msgarr) == 1:
                 return msgarr
+
+            temp_arr = msgarr
+            msgarr = []
+            for text in temp_arr:
+                if len(text) > len_limit:
+                    for i in range(math.ceil(len(text) / len_limit)):
+                        if i == 0:
+                            msgarr.append(text[0:len_limit])
+                        else:
+                            fr = len_limit + (len_limit - 4) * (i - 1)
+                            to = len_limit + (len_limit - 4) * i
+                            if to > len(text):
+                                to = len(text)
+                            msgarr.append("===>" + text[fr:to])
+                else:
+                    msgarr.append(text)
 
             maxlen = -1
             for text in msgarr:

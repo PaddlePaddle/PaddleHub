@@ -16,7 +16,7 @@
 syntax = "proto3";
 option optimize_for = LITE_RUNTIME;
 
-package paddle_hub;
+package paddle_hub_module;
 
 enum DataType {
   NONE = 0;
@@ -72,7 +72,7 @@ message AuthInfo {
   string hub_version = 2;
 }
 
-// A Hub Module is stored in a directory with a file 'paddlehub.pb'
+// A Hub Module is stored in a directory with a file 'module_desc.pb'
 // containing a serialized protocol message of this type. The further contents
 // of the directory depend on the storage format described by the message.
 message ModuleDesc {
