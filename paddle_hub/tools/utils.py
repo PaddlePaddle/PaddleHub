@@ -146,3 +146,30 @@ def from_flexible_data_to_pyobj(flexible_data):
         logger.warning("unknown type of flexible_data")
 
     return result
+
+
+def check_path(path):
+    pass
+
+
+def check_url(url):
+    pass
+
+
+def get_file_ext(file_path):
+    return os.path.splitext(file_path)[-1]
+
+
+def is_csv_file(file_path):
+    return get_file_ext(file_path) == ".csv"
+
+
+def is_yaml_file(file_path):
+    return get_file_ext(file_path) == ".yml"
+
+
+if __name__ == "__main__":
+    print(is_yaml_file("test.yml"))
+    print(is_csv_file("test.yml"))
+    print(is_yaml_file("test.csv"))
+    print(is_csv_file("test.csv"))
