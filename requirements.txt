@@ -2,3 +2,4 @@ paddlepaddle >= 1.2.0
 pre-commit
 protobuf >= 3.1.0
 yapf == 0.26.0
+pyyaml
