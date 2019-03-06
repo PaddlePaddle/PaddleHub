@@ -58,15 +58,6 @@ PROCESSOR_NAME = "processor"
 HUB_VAR_PREFIX = "@HUB@"
 
 
-class ModuleWrapper:
-    def __init__(self, module, name):
-        self.module = module
-        self.name = name
-
-    def __call__(self, data, config):
-        return self.module(self.name, data, config)
-
-
 class ModuleHelper:
     def __init__(self, module_dir):
         self.module_dir = module_dir
@@ -238,14 +229,6 @@ class Module:
         self.type = module_info.get('type', 'UNKNOWN')
         self.version = module_info.get('version', 'UNKNOWN')
         self.name = module_info.get('name', 'UNKNOWN')
-
-
-#         self.author = module_info['author'] if 'author' in module_info else "UNKNOWN"
-#         self.author_email = module_info['author_email'] if 'author_email' in module_info else "UNKNOWN"
-#         self.summary = module_info['summary'] if 'summary' in module_info else "UNKNOWN"
-#         self.type = module_info['type'] if 'type' in module_info else "UNKNOWN"
-#         self.version = module_info['version'] if 'version' in module_info else "UNKNOWN"
-#         self.name = module_info['name'] if 'name' in module_info else "UNKNOWN"
 
     def _generate_sign_attr(self):
         self._check_signatures()
