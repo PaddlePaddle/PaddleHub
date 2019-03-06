@@ -24,6 +24,7 @@ from paddle_hub.module.signature import Signature, create_signature
 from paddle_hub.data.reader import yaml_reader
 from paddle_hub import version
 from paddle_hub.module.base_processor import BaseProcessor
+from shutil import copyfile
 import os
 import functools
 import paddle
@@ -102,6 +103,7 @@ class Module:
         self.default_signature = None
         self.module_info = None
         self.processor = None
+        self.assets = []
         if url:
             self._init_with_url(url=url)
         elif module_dir:
@@ -111,6 +113,10 @@ class Module:
             assert issubclass(
                 processor, BaseProcessor
             ), "processor should be sub class of hub.BaseProcessor"
+            if assets:
+                self.assets = utils.to_list(assets)
+                for asset in assets:
+                    utils.check_path(assets)
             self.processor = processor
             self._generate_module_info(module_info)
             self._init_with_signature(signatures=signatures)
@@ -140,6 +146,20 @@ class Module:
         processor_name = self.helper.processor_name()
         self.processor = __import__(processor_name).Processor(module=self)
 
+    def _dump_assets(self):
+        utils.mkdir(self.helper.assets_path())
+        for asset in self.assets:
+            filename = os.path.basename(asset)
+            newfile = os.path.join(self.helper.assets_path(), filename)
+            copyfile(asset, newfile)
+
+    def _load_assets(self):
+        assets_path = self.helper.assets_path()
+        self.assets = []
+        for file in os.listdir(assets_path):
+            filepath = os.path.join(self.helper.assets_path(), file)
+            self.assets.append(filepath)
+
     def _init_with_module_file(self, module_dir):
         self.helper = ModuleHelper(module_dir)
         with open(self.helper.module_desc_path(), "rb") as fi:
@@ -151,6 +171,7 @@ class Module:
         self._recovery_parameter(self.program)
         self._recover_variable_info(self.program)
         self._load_processor()
+        self._load_assets()
         self._recover_from_desc()
         self._generate_sign_attr()
 
@@ -475,3 +496,6 @@ class Module:
 
         # create processor file
         self._dump_processor()
+
+        # create assets
+        self._dump_assets()
