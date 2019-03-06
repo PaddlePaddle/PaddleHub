@@ -12,13 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import module
-from . import tools
-from . import data
-from .paddle_extend import regularizer
-from .module.module import Module, create_module
-from .module.base_processor import BaseProcessor
-from .module.signature import Signature, create_signature
-from .tools.logger import logger
-from .tools.paddle_helper import connect_program
-from .data.type import DataType
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+
+class BaseProcessor:
+    def __init__(self):
+        pass
+
+    def reader(self, sign_name, data_dict):
+        raise NotImplementedError("BaseProcessor' reader should not be call!")
+
+    def postprocess(self, sign_name, data_out, config):
+        raise NotImplementedError(
+            "BaseProcessor' postprocess should not be call!")
+
+    def data_format(self, sign_name):
+        raise NotImplementedError(
+            "BaseProcessor' data_format should not be call!")
