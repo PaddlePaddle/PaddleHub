@@ -15,7 +15,6 @@
 from . import module
 from . import tools
 from . import data
-from .paddle_extend import regularizer
 from .module.module import Module, create_module
 from .module.base_processor import BaseProcessor
 from .module.signature import Signature, create_signature
