@@ -61,6 +61,7 @@ def from_param_to_flexible_data(param, flexible_data):
                                 flexible_data.map.data['trainable'])
     from_pyobj_to_flexible_data(param.do_model_average,
                                 flexible_data.map.data['do_model_average'])
+    #TODO(wuzewu): don't save learning rate
     from_pyobj_to_flexible_data(param.optimize_attr,
                                 flexible_data.map.data['optimize_attr'])
     from_pyobj_to_flexible_data(
@@ -215,8 +216,14 @@ def set_parameter_trainable(program, trainable=True):
         param.trainable = trainable
 
 
-def set_parameter_regularization(program, regularization):
-    pass
+def set_parameter_regularizer(program, regularizer):
+    for param in program.global_block().iter_parameters():
+        param.regularizer = regularizer
+
+
+def set_parameter_learning_rate(program, learning_rate):
+    for param in program.global_block().iter_parameters():
+        param.optimize_attr['learning_rate'] = learning_rate
 
 
 def set_op_attr(program, is_test=False):
