@@ -96,7 +96,7 @@ class RunCommand(BaseCommand):
         module(
             sign_name=self.args.signature,
             data=input_data,
-            config=yaml_config['config'])
+            **yaml_config['config'])
 
 
 command = RunCommand.instance()
