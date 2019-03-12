@@ -65,6 +65,8 @@ class DataType(Enum):
 
         if data_type == DataType.IMAGE:
             return ImageReader
+        elif data_type == DataType.TEXT:
+            return TextReader
         else:
             type_str = DataType.str(data_type)
             logger.critical(
@@ -78,3 +80,9 @@ class ImageReader:
         utils.check_path(path)
         image = Image.open(path)
         return image
+
+
+class TextReader:
+    @classmethod
+    def read(cls, text):
+        return text
