@@ -82,7 +82,8 @@ class RunCommand(BaseCommand):
         assert len(input_data_format) == len(expect_data_format)
         for key, value in expect_data_format.items():
             assert key in input_data_format
-            assert value == hub.DataType.type(input_data_format[key]['type'])
+            assert value['type'] == hub.DataType.type(
+                input_data_format[key]['type'])
 
         # get data dict
         origin_data = csv_reader.read(self.args.dataset)
@@ -93,10 +94,11 @@ class RunCommand(BaseCommand):
                 map(type_reader.read, origin_data[value['key']]))
 
         # run module with data
-        module(
-            sign_name=self.args.signature,
-            data=input_data,
-            **yaml_config['config'])
+        print(
+            module(
+                sign_name=self.args.signature,
+                data=input_data,
+                **yaml_config['config']))
 
 
 command = RunCommand.instance()
