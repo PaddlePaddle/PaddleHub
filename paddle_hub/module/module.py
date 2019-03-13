@@ -222,13 +222,13 @@ class Module:
             if not utils.is_yaml_file(module_info):
                 logger.critical("module info file should in yaml format")
                 exit(1)
-            module_info = yaml_reader.read(module_info)
-        self.author = module_info.get('author', 'UNKNOWN')
-        self.author_email = module_info.get('author_email', 'UNKNOWN')
-        self.summary = module_info.get('summary', 'UNKNOWN')
-        self.type = module_info.get('type', 'UNKNOWN')
-        self.version = module_info.get('version', 'UNKNOWN')
-        self.name = module_info.get('name', 'UNKNOWN')
+            self.module_info = yaml_reader.read(module_info)
+        self.author = self.module_info.get('author', 'UNKNOWN')
+        self.author_email = self.module_info.get('author_email', 'UNKNOWN')
+        self.summary = self.module_info.get('summary', 'UNKNOWN')
+        self.type = self.module_info.get('type', 'UNKNOWN')
+        self.version = self.module_info.get('version', 'UNKNOWN')
+        self.name = self.module_info.get('name', 'UNKNOWN')
 
     def _generate_sign_attr(self):
         self._check_signatures()
