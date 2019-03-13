@@ -18,13 +18,14 @@ from __future__ import print_function
 
 
 class BaseProcessor:
-    def __init__(self):
+    def __init__(self, module):
         pass
 
-    def reader(self, sign_name, data_dict):
-        raise NotImplementedError("BaseProcessor' reader should not be call!")
+    def preprocess(self, sign_name, data_dict):
+        raise NotImplementedError(
+            "BaseProcessor' preprocess should not be call!")
 
-    def postprocess(self, sign_name, data_out, config):
+    def postprocess(self, sign_name, data_out, data_info, **kwargs):
         raise NotImplementedError(
             "BaseProcessor' postprocess should not be call!")
 
