@@ -17,7 +17,7 @@ from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools import utils
 from paddle_hub.tools.logger import logger
-from paddle_hub.tools import downloader
+from paddle_hub.tools.downloader import default_downloader
 from paddle_hub.tools import paddle_helper
 from paddle_hub.module import module_desc_pb2
 from paddle_hub.module.signature import Signature, create_signature
@@ -116,7 +116,8 @@ class Module:
 
     def _init_with_url(self, url):
         utils.check_url_valid(url)
-        module_dir = downloader.download_and_uncompress(module_url)
+        module_dir = default_downloader.download_file_and_uncompress(
+            module_url, save_path=".")
         self._init_with_module_file(module_dir)
 
     def _dump_processor(self):
