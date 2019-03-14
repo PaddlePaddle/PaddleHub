@@ -15,19 +15,33 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
 
 
 class HelpCommand(BaseCommand):
-    def __init__(self):
-        super(HelpCommand, self).__init__()
+    name = "help"
 
-    def help(self):
-        pass
+    def __init__(self, name):
+        super(HelpCommand, self).__init__(name)
+        self.show_in_help = True
+        self.description = "Show help for commands."
+
+    def get_all_commands(self):
+        return BaseCommand.command_dict
 
     def exec(self, argv):
-        pass
+        hub_command = BaseCommand.command_dict["hub"]
+        help_text = "\n"
+        help_text += "Usage:\n"
+        help_text += "%s <command> [options]\n" % hub_command.name
+        help_text += "\n"
+        help_text += "Commands:\n"
+        for command_name, command in self.get_all_commands().items():
+            if not command.show_in_help or not command.description:
+                continue
+            help_text += "  %-15s\t\t%s\n" % (command.name, command.description)
+
+        print(help_text)
 
 
 command = HelpCommand.instance()

@@ -17,19 +17,27 @@ from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
-from paddle_hub import version
+from paddle_hub.tools import utils
+from paddle_hub.tools.downloader import default_downloader
+from paddle_hub.module.manager import default_manager
 
 
-class VersionCommand(BaseCommand):
-    name = "version"
+class ListCommand(BaseCommand):
+    name = "list"
 
     def __init__(self, name):
-        super(VersionCommand, self).__init__(name)
+        super(ListCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Get the paddle hub version"
+        self.description = "List all module install in current environment."
 
     def exec(self, argv):
-        print("hub %s" % version.hub_version)
+        all_modules = default_manager.all_modules()
+        list_text = "\n"
+        list_text += "  %-20s\t\t%s\n" % ("ModuleName", "ModulePath")
+        list_text += "  %-20s\t\t%s\n" % ("--", "--")
+        for module_name, module_dir in all_modules.items():
+            list_text += "  %-20s\t\t%s\n" % (module_name, module_dir)
+        print(list_text)
 
 
-command = VersionCommand.instance()
+command = ListCommand.instance()

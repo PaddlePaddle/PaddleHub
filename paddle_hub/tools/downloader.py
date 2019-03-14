@@ -30,7 +30,9 @@ from paddle_hub.data.reader import csv_reader
 __all__ = ['MODULE_HOME', 'downloader', 'md5file', 'Downloader']
 
 # TODO(ZeyuChen) add environment varialble to set MODULE_HOME
-MODULE_HOME = os.path.expanduser('~/.hub/module')
+MODULE_HOME = os.path.expanduser('~')
+MODULE_HOME = os.path.join(MODULE_HOME, ".hub")
+MODULE_HOME = os.path.join(MODULE_HOME, "modules")
 
 
 # When running unit tests, there could be multiple processes that

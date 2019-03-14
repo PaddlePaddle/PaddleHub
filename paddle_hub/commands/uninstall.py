@@ -17,19 +17,21 @@ from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
-from paddle_hub import version
+from paddle_hub.tools import utils
+from paddle_hub.module.manager import default_manager
 
 
-class VersionCommand(BaseCommand):
-    name = "version"
+class UninstallCommand(BaseCommand):
+    name = "uninstall"
 
     def __init__(self, name):
-        super(VersionCommand, self).__init__(name)
+        super(UninstallCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Get the paddle hub version"
+        self.description = "Uninstall the specify module from current environment."
 
     def exec(self, argv):
-        print("hub %s" % version.hub_version)
+        module_name = argv[1]
+        default_manager.uninstall_module(module_name=module_name)
 
 
-command = VersionCommand.instance()
+command = UninstallCommand.instance()

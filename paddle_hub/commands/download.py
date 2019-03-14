@@ -23,8 +23,12 @@ from paddle_hub.module.manager import default_manager
 
 
 class DownloadCommand(BaseCommand):
-    def __init__(self):
-        super(DownloadCommand, self).__init__()
+    name = "download"
+
+    def __init__(self, name):
+        super(DownloadCommand, self).__init__(name)
+        self.show_in_help = True
+        self.description = "Download a paddle hub module."
         # yapf: disable
         self.add_arg('--output_path',  str,  ".",   "path to save the module, default in current directory" )
         self.add_arg('--uncompress',   bool, False,  "uncompress the download package or not" )
@@ -35,13 +39,23 @@ class DownloadCommand(BaseCommand):
 
     def exec(self, argv):
         module_name = argv[1]
+        module_version = None if "==" not in module_name else module_name.split(
+            "==")[1]
+        module_name = module_name if "==" not in module_name else module_name.split(
+            "==")[0]
         self.args = self.parser.parse_args(argv[2:])
         if not self.args.output_path:
             self.args.output_path = "."
         utils.check_path(self.args.output_path)
 
-        url = default_downloader.get_module_url(module_name)
-        assert url, "can't found module %s" % module_name
+        url = default_downloader.get_module_url(
+            module_name, version=module_version)
+        if not url:
+            tips = "can't found module %s" % module_name
+            if module_version:
+                tips += " with version %s" % module_version
+            print(tips)
+            return
 
         self.print_args()
         if self.args.uncompress:

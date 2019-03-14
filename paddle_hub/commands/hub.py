@@ -26,8 +26,11 @@ import sys
 
 
 class HubCommand(BaseCommand):
-    def __init__(self):
-        super(HubCommand, self).__init__()
+    name = "hub"
+
+    def __init__(self, name):
+        super(HubCommand, self).__init__(name)
+        self.show_in_help = False
         # yapf: disable
         self.add_arg('command',  str, None,  "command to run" )
         # yapf: enable
@@ -51,6 +54,7 @@ class HubCommand(BaseCommand):
         command(argv[2:])
 
 
+command = HubCommand.instance()
+
 if __name__ == "__main__":
-    hub_command = HubCommand.instance()
-    hub_command.exec(sys.argv)
+    command.exec(sys.argv)

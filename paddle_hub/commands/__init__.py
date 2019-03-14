@@ -12,4 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import *
+from . import hub
+from . import download
+from . import run
+from . import show
+from . import version
+from . import list
+from . import install
+from . import uninstall
+from . import help

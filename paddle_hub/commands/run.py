@@ -24,8 +24,12 @@ from paddle_hub.tools.arg_helper import add_argument, print_arguments
 
 
 class RunCommand(BaseCommand):
-    def __init__(self):
-        super(RunCommand, self).__init__()
+    name = "run"
+
+    def __init__(self, name):
+        super(RunCommand, self).__init__(name)
+        self.show_in_help = True
+        self.description = "Run the specify module"
         # yapf: disable
         self.add_arg('--config',    str, None,  "config file in yaml format" )
         self.add_arg('--dataset',   str, None,  "dataset be used" )

@@ -21,18 +21,29 @@ import argparse
 
 
 class BaseCommand:
+    command_dict = {}
+
     @classmethod
     def instance(cls):
+        if cls.name in BaseCommand.command_dict:
+            command = BaseCommand.command_dict[cls.name]
+            assert command.__class__.__name__ == cls.__name__, "already has a command %s with type %s" % (
+                cls.name, command.__class__)
+            return command
         if not hasattr(cls, '_instance'):
-            cls._instance = cls()
+            cls._instance = cls(cls.name)
+        BaseCommand.command_dict[cls.name] = cls._instance
         return cls._instance
 
-    def __init__(self):
+    def __init__(self, name):
         assert not hasattr(
             self.__class__,
             '_instance'), 'Please use `instance()` to get Command object!'
         self.parser = argparse.ArgumentParser(description=__doc__)
         self.args = None
+        self.name = name
+        self.show_in_help = True
+        self.description = ""
 
     def add_arg(self, argument, type="str", default=None, help=None):
         add_argument(

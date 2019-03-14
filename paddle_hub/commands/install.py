@@ -17,19 +17,30 @@ from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
-from paddle_hub import version
+from paddle_hub.tools import utils
+from paddle_hub.module.manager import default_manager
 
 
-class VersionCommand(BaseCommand):
-    name = "version"
+class InstallCommand(BaseCommand):
+    name = "install"
 
     def __init__(self, name):
-        super(VersionCommand, self).__init__(name)
+        super(InstallCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Get the paddle hub version"
+        self.description = "Install the specify module to current environment."
+        #TODO(wuzewu): add --upgrade option
+
+    def help(self):
+        self.parser.print_help()
 
     def exec(self, argv):
-        print("hub %s" % version.hub_version)
+        module_name = argv[1]
+        module_version = None if "==" not in module_name else module_name.split(
+            "==")[1]
+        module_name = module_name if "==" not in module_name else module_name.split(
+            "==")[0]
+        default_manager.install_module(
+            module_name=module_name, module_version=module_version)
 
 
-command = VersionCommand.instance()
+command = InstallCommand.instance()

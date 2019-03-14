@@ -17,17 +17,36 @@ from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
+from paddle_hub.module.manager import default_manager
+from paddle_hub.module.module import Module
 
 
 class ShowCommand(BaseCommand):
-    def __init__(self):
-        super(ShowCommand, self).__init__()
+    name = "show"
 
-    def help(self):
-        pass
+    def __init__(self, name):
+        super(ShowCommand, self).__init__(name)
+        self.show_in_help = True
+        self.description = "Show the specify module's info"
 
     def exec(self, argv):
-        pass
+        module_name = argv[1]
+        self.args = self.parser.parse_args(argv[2:])
+
+        module_dir = default_manager.search_module(module_name)
+        if not module_dir:
+            return
+
+        module = Module(module_dir=module_dir)
+        show_text = "Name:%s\n" % module.name
+        show_text += "Version:%s\n" % module.version
+        show_text += "Summary:\n"
+        show_text += "  %s\n" % module.summary
+        show_text += "Author:%s\n" % module.author
+        show_text += "Author-Email:%s\n" % module.author_email
+        show_text += "Location:%s\n" % module_dir
+        #TODO(wuzewu): add more signature info
+        print(show_text)
 
 
 command = ShowCommand.instance()
