@@ -26,6 +26,7 @@ from paddle_hub import version
 from paddle_hub.module.base_processor import BaseProcessor
 from shutil import copyfile
 import os
+import sys
 import functools
 import paddle
 import paddle.fluid as fluid
@@ -35,7 +36,7 @@ __all__ = ['Module', 'create_module']
 
 def create_module(sign_arr,
                   module_dir,
-                  processor,
+                  processor=None,
                   assets=None,
                   module_info=None,
                   exe=None):
@@ -100,10 +101,10 @@ class Module:
         elif module_dir:
             self._init_with_module_file(module_dir=module_dir)
         elif signatures:
-            assert processor, "lack of module processor"
-            assert issubclass(
-                processor, BaseProcessor
-            ), "processor should be sub class of hub.BaseProcessor"
+            if processor:
+                assert issubclass(
+                    processor, BaseProcessor
+                ), "processor should be sub class of hub.BaseProcessor"
             if assets:
                 self.assets = utils.to_list(assets)
                 for asset in assets:
@@ -132,11 +133,13 @@ class Module:
             file.write(pycode)
 
     def _load_processor(self):
-        import sys
         processor_path = self.helper.processor_path()
-        sys.path.append(processor_path)
-        processor_name = self.helper.processor_name()
-        self.processor = __import__(processor_name).Processor(module=self)
+        if os.path.exists(processor_path):
+            sys.path.append(processor_path)
+            processor_name = self.helper.processor_name()
+            self.processor = __import__(processor_name).Processor(module=self)
+        else:
+            self.processor = None
 
     def _dump_assets(self):
         utils.mkdir(self.helper.assets_path())
@@ -332,6 +335,8 @@ class Module:
                                           module_info.map.data['summary'])
 
     def __call__(self, sign_name, data, **kwargs):
+        self.check_processor()
+
         def _get_reader_and_feeder(data_format, data, place):
             def _reader():
                 nonlocal process_data
@@ -373,6 +378,9 @@ class Module:
                 index += len(batch)
 
         return result
+
+    def check_processor(self):
+        assert self.processor, "this module couldn't be call"
 
     def context(self,
                 sign_name,
@@ -459,9 +467,6 @@ class Module:
         logger.info("proto version is %s" % version.proto_version)
         logger.info("paddle version is %s" % paddle.__version__)
 
-        for asset in self.assets:
-            pass
-
         feeded_var_names = [
             input.name for key, sign in self.signatures.items()
             for input in sign.inputs
@@ -520,7 +525,8 @@ class Module:
             f.write(module_pb)
 
         # create processor file
-        self._dump_processor()
+        if self.processor:
+            self._dump_processor()
 
         # create assets
         self._dump_assets()

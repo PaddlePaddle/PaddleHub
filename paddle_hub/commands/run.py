@@ -76,6 +76,8 @@ class RunCommand(BaseCommand):
         if not self.args.signature:
             self.args.signature = module.default_signature().name
 
+        # module processor check
+        module.check_processor()
         # data_format check
         expect_data_format = module.processor.data_format(self.args.signature)
         input_data_format = yaml_config['input_data']
