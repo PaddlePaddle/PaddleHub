@@ -25,6 +25,7 @@ import tempfile
 import tarfile
 from paddle_hub.tools import utils
 from paddle_hub.tools.logger import logger
+from paddle_hub.data.reader import csv_reader
 
 __all__ = ['MODULE_HOME', 'downloader', 'md5file', 'Downloader']
 
@@ -58,6 +59,7 @@ def md5file(fname):
 class Downloader:
     def __init__(self, module_home=None):
         self.module_home = module_home if module_home else MODULE_HOME
+        self.module_list_file = []
 
     def download_file(self, url, save_path=None, save_name=None, retry_limit=3):
         module_name = url.split("/")[-2]
@@ -126,6 +128,35 @@ class Downloader:
             save_name=save_name,
             retry_limit=retry_limit)
         return self.uncompress(file, delete_file=delete_file)
+
+    def get_module_url(self, module_name, version=None):
+        if not self.module_list_file:
+            #TODO(wuzewu): download file in tmp directory
+            self.module_list_file = self.download_file(
+                url="https://paddlehub.bj.bcebos.com/module_file_list.csv")
+            self.module_list_file = csv_reader.read(self.module_list_file)
+
+        module_index_list = [
+            index
+            for index, module in enumerate(self.module_list_file['module_name'])
+            if module == module_name
+        ]
+        module_version_list = [
+            self.module_list_file['version'][index]
+            for index in module_index_list
+        ]
+        #TODO(wuzewu): version sort method
+        module_version_list = sorted(module_version_list)
+        if not version:
+            if not module_version_list:
+                return None
+            version = module_version_list[-1]
+
+        for index in module_index_list:
+            if self.module_list_file['version'][index] == version:
+                return self.module_list_file['url'][index]
+
+        return None
 
 
 default_downloader = Downloader()

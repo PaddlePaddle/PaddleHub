@@ -17,6 +17,7 @@ from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
 import six
+import distutils.util
 
 
 def add_argument(argument, type, default, help, argparser, **kwargs):
