@@ -20,4 +20,5 @@ from . import version
 from . import list
 from . import install
 from . import uninstall
+from . import search
 from . import help

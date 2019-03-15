@@ -131,6 +131,23 @@ class Downloader:
             retry_limit=retry_limit)
         return self.uncompress(file, delete_file=delete_file)
 
+    def search_module(self, module_name):
+        if not self.module_list_file:
+            #TODO(wuzewu): download file in tmp directory
+            self.module_list_file = self.download_file(
+                url="https://paddlehub.bj.bcebos.com/module_file_list.csv")
+            self.module_list_file = csv_reader.read(self.module_list_file)
+
+        match_module_index_list = [
+            index
+            for index, module in enumerate(self.module_list_file['module_name'])
+            if module_name in module
+        ]
+
+        return [(self.module_list_file['module_name'][index],
+                 self.module_list_file['version'][index])
+                for index in match_module_index_list]
+
     def get_module_url(self, module_name, version=None):
         if not self.module_list_file:
             #TODO(wuzewu): download file in tmp directory
