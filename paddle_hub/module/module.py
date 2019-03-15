@@ -20,7 +20,9 @@ from paddle_hub.tools.logger import logger
 from paddle_hub.tools.downloader import default_downloader
 from paddle_hub.tools import paddle_helper
 from paddle_hub.module import module_desc_pb2
+from paddle_hub.module import check_info_pb2
 from paddle_hub.module.signature import Signature, create_signature
+from paddle_hub.module.checker import ModuleChecker
 from paddle_hub.data.reader import yaml_reader
 from paddle_hub import version
 from paddle_hub.module.base_processor import BaseProcessor
@@ -156,6 +158,11 @@ class Module:
             self.assets.append(filepath)
 
     def _init_with_module_file(self, module_dir):
+        checker = ModuleChecker(module_dir)
+        if not checker.check():
+            logger.error("module check fail")
+            exit(1)
+
         self.helper = ModuleHelper(module_dir)
         with open(self.helper.module_desc_path(), "rb") as fi:
             self.desc.ParseFromString(fi.read())
@@ -464,7 +471,7 @@ class Module:
         # create module pb
         module_desc = module_desc_pb2.ModuleDesc()
         logger.info("hub version is %s" % version.hub_version)
-        logger.info("proto version is %s" % version.proto_version)
+        logger.info("module proto version is %s" % version.module_proto_version)
         logger.info("paddle version is %s" % paddle.__version__)
 
         feeded_var_names = [
@@ -530,3 +537,7 @@ class Module:
 
         # create assets
         self._dump_assets()
+
+        # create check info
+        checker = ModuleChecker(self.helper.module_dir)
+        checker.generate_check_info()
