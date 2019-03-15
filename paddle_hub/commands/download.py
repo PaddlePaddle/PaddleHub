@@ -38,12 +38,12 @@ class DownloadCommand(BaseCommand):
         self.parser.print_help()
 
     def exec(self, argv):
-        module_name = argv[1]
+        module_name = argv[0]
         module_version = None if "==" not in module_name else module_name.split(
             "==")[1]
         module_name = module_name if "==" not in module_name else module_name.split(
             "==")[0]
-        self.args = self.parser.parse_args(argv[2:])
+        self.args = self.parser.parse_args(argv[1:])
         if not self.args.output_path:
             self.args.output_path = "."
         utils.check_path(self.args.output_path)

@@ -30,7 +30,7 @@ class UninstallCommand(BaseCommand):
         self.description = "Uninstall the specify module from current environment."
 
     def exec(self, argv):
-        module_name = argv[1]
+        module_name = argv[0]
         default_manager.uninstall_module(module_name=module_name)
 
 

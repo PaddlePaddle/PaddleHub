@@ -38,20 +38,12 @@ class HubCommand(BaseCommand):
     def exec(self, argv):
         args = self.parser.parse_args(argv[1:2])
 
-        command_dict = {
-            'show': show.command.exec,
-            'run': run.command.exec,
-            'download': download.command.exec,
-            'help': help.command.exec,
-            'version': version.command.exec
-        }
-
-        if not args.command in command_dict:
+        if not args.command in BaseCommand.command_dict:
             logger.critical("command %s not supported!" % args.command)
             exit(1)
 
-        command = command_dict[args.command]
-        command(argv[2:])
+        command = BaseCommand.command_dict[args.command]
+        command.exec(argv[2:])
 
 
 command = HubCommand.instance()

@@ -19,6 +19,7 @@ from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
 from paddle_hub.module.manager import default_manager
 from paddle_hub.module.module import Module
+import os
 
 
 class ShowCommand(BaseCommand):
@@ -30,11 +31,13 @@ class ShowCommand(BaseCommand):
         self.description = "Show the specify module's info"
 
     def exec(self, argv):
-        module_name = argv[1]
-        self.args = self.parser.parse_args(argv[2:])
+        module_name = argv[0]
 
+        cwd = os.getcwd()
         module_dir = default_manager.search_module(module_name)
-        if not module_dir:
+        module_dir = os.path.join(cwd,
+                                  module_name) if not module_dir else module_dir
+        if not module_dir or not os.path.exists(module_dir):
             return
 
         module = Module(module_dir=module_dir)

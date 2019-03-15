@@ -34,7 +34,7 @@ class InstallCommand(BaseCommand):
         self.parser.print_help()
 
     def exec(self, argv):
-        module_name = argv[1]
+        module_name = argv[0]
         module_version = None if "==" not in module_name else module_name.split(
             "==")[1]
         module_name = module_name if "==" not in module_name else module_name.split(
