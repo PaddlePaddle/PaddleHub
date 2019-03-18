@@ -17,7 +17,7 @@ from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
-from paddle_hub.module.manager import default_manager
+from paddle_hub.module.manager import default_module_manager
 from paddle_hub.module.module import Module
 import os
 
@@ -34,7 +34,7 @@ class ShowCommand(BaseCommand):
         module_name = argv[0]
 
         cwd = os.getcwd()
-        module_dir = default_manager.search_module(module_name)
+        module_dir = default_module_manager.search_module(module_name)
         module_dir = os.path.join(cwd,
                                   module_name) if not module_dir else module_dir
         if not module_dir or not os.path.exists(module_dir):

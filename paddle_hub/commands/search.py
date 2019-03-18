@@ -18,8 +18,7 @@ from __future__ import print_function
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
 from paddle_hub.tools import utils
-from paddle_hub.tools.downloader import default_downloader
-from paddle_hub.module.manager import default_manager
+from paddle_hub.hub_server import default_hub_server
 
 
 class SearchCommand(BaseCommand):
@@ -32,7 +31,7 @@ class SearchCommand(BaseCommand):
 
     def exec(self, argv):
         module_name = argv[0]
-        module_list = default_downloader.search_module(module_name)
+        module_list = default_hub_server.search_module(module_name)
         text = "\n"
         text += "  %-20s\t\t%s\n" % ("ModuleName", "ModuleVersion")
         text += "  %-20s\t\t%s\n" % ("--", "--")

@@ -18,7 +18,7 @@ from __future__ import print_function
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
 from paddle_hub.tools import utils
-from paddle_hub.module.manager import default_manager
+from paddle_hub.module.manager import default_module_manager
 
 
 class UninstallCommand(BaseCommand):
@@ -31,7 +31,7 @@ class UninstallCommand(BaseCommand):
 
     def exec(self, argv):
         module_name = argv[0]
-        default_manager.uninstall_module(module_name=module_name)
+        default_module_manager.uninstall_module(module_name=module_name)
 
 
 command = UninstallCommand.instance()

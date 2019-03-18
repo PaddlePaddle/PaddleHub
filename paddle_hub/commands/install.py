@@ -18,7 +18,7 @@ from __future__ import print_function
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
 from paddle_hub.tools import utils
-from paddle_hub.module.manager import default_manager
+from paddle_hub.module.manager import default_module_manager
 
 
 class InstallCommand(BaseCommand):
@@ -39,7 +39,7 @@ class InstallCommand(BaseCommand):
             "==")[1]
         module_name = module_name if "==" not in module_name else module_name.split(
             "==")[0]
-        default_manager.install_module(
+        default_module_manager.install_module(
             module_name=module_name, module_version=module_version)
 
 

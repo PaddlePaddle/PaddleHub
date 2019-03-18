@@ -19,7 +19,7 @@ from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
 from paddle_hub.tools import utils
 from paddle_hub.tools.downloader import default_downloader
-from paddle_hub.module.manager import default_manager
+from paddle_hub.module.manager import default_module_manager
 
 
 class ListCommand(BaseCommand):
@@ -31,7 +31,7 @@ class ListCommand(BaseCommand):
         self.description = "List all module install in current environment."
 
     def exec(self, argv):
-        all_modules = default_manager.all_modules()
+        all_modules = default_module_manager.all_modules()
         list_text = "\n"
         list_text += "  %-20s\t\t%s\n" % ("ModuleName", "ModulePath")
         list_text += "  %-20s\t\t%s\n" % ("--", "--")

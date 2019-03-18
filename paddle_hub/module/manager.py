@@ -16,16 +16,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools import utils
-from paddle_hub.tools.downloader import MODULE_HOME, default_downloader
+from paddle_hub.tools.downloader import default_downloader
+import paddle_hub as hub
 import os
 import shutil
 
 
 class LocalModuleManager:
-    def __init__(self, base_path=None):
-        self.base_path = base_path if base_path else os.path.expanduser('~')
-        utils.check_path(self.base_path)
-        self.local_modules_dir = MODULE_HOME
+    def __init__(self, module_home=None):
+        self.local_modules_dir = module_home if module_home else hub.MODULE_HOME
         self.modules_dict = {}
         if not os.path.exists(self.local_modules_dir):
             utils.mkdir(self.local_modules_dir)
@@ -61,7 +60,7 @@ class LocalModuleManager:
             module_dir = self.modules_dict[module_name]
             print("module %s already install in %s" % (module_name, module_dir))
             return
-        url = default_downloader.get_module_url(
+        url = hub.default_hub_server.get_module_url(
             module_name, version=module_version)
         #TODO(wuzewu): add compatibility check
         if not url:
@@ -71,7 +70,8 @@ class LocalModuleManager:
             print(tips)
             return
 
-        default_downloader.download_file_and_uncompress(url=url)
+        default_downloader.download_file_and_uncompress(
+            url=url, save_path=hub.MODULE_HOME, save_name=module_name)
 
     def uninstall_module(self, module_name):
         self.all_modules(update=True)
@@ -84,4 +84,4 @@ class LocalModuleManager:
         print("Successfully uninstalled %s" % module_name)
 
 
-default_manager = LocalModuleManager()
+default_module_manager = LocalModuleManager()

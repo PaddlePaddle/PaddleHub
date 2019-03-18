@@ -19,7 +19,7 @@ from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
 from paddle_hub.tools import utils
 from paddle_hub.tools.downloader import default_downloader
-from paddle_hub.module.manager import default_manager
+from paddle_hub.hub_server import default_hub_server
 
 
 class DownloadCommand(BaseCommand):
@@ -48,7 +48,7 @@ class DownloadCommand(BaseCommand):
             self.args.output_path = "."
         utils.check_path(self.args.output_path)
 
-        url = default_downloader.get_module_url(
+        url = default_hub_server.get_module_url(
             module_name, version=module_version)
         if not url:
             tips = "can't found module %s" % module_name
