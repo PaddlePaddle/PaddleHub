@@ -81,7 +81,3 @@ class HubServer:
 
 
 default_hub_server = HubServer()
-
-if __name__ == "__main__":
-    print(default_hub_server.search_module("ssd"))
-    print(default_hub_server.get_module_url("ssd_mobilenet_pascal"))

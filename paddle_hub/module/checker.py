@@ -164,15 +164,3 @@ class ModuleChecker:
                         logger.error("file type error %s" % file_path)
                         return False
         return True
-
-
-if __name__ == "__main__":
-    #     check_info = check_info_pb2.CheckInfo()
-    #     check_info.paddle_version = "1"
-    #     check_info.hub_version = "1"
-    #     check_info.module_proto_version = "1"
-    #     with open(os.path.join(".", CHECK_INFO_PB_FILENAME), "wb") as fi:
-    #         fi.write(check_info.SerializeToString())
-    check_info = ModuleChecker(
-        "/home/wuzewu/code/PaddleHub/demo/object-detection/hub_module_ssd")
-    print(check_info.check())

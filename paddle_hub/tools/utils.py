@@ -22,6 +22,7 @@ from paddle_hub.tools.logger import logger
 import paddle
 import paddle.fluid as fluid
 import os
+import hashlib
 
 
 def to_list(input):
@@ -37,6 +38,23 @@ def mkdir(path):
     """
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def md5_of_file(file):
+    md5 = hashlib.md5()
+    with open(file, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            md5.update(chunk)
+
+    return md5.hexdigest()
+
+
+def md5(text):
+    if isinstance(text, str):
+        text = text.encode("utf8")
+    md5 = hashlib.md5()
+    md5.update(text)
+    return md5.hexdigest()
 
 
 def get_keyed_type_of_pyobj(pyobj):
