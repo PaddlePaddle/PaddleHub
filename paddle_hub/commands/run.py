@@ -15,12 +15,14 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand, ENTRY
-from paddle_hub.data.reader import csv_reader, yaml_reader
+from paddle_hub.io.reader import csv_reader, yaml_reader
 from paddle_hub.module.manager import default_module_manager
 from paddle_hub.tools import utils
 from paddle_hub.tools.arg_helper import add_argument, print_arguments
+
 import paddle_hub as hub
 import argparse
 import os
