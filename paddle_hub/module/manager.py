@@ -69,7 +69,7 @@ class LocalModuleManager:
                 tips += " with version %s" % module_version
             return False, tips, None
 
-        module_dir = default_downloader.download_file_and_uncompress(
+        result, tips, module_dir = default_downloader.download_file_and_uncompress(
             url=url, save_path=hub.MODULE_HOME, save_name=module_name)
         if module_dir:
             tips = "Successfully installed %s" % module_name
