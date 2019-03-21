@@ -26,7 +26,7 @@ import tempfile
 import tarfile
 from paddle_hub.tools import utils
 from paddle_hub.tools.logger import logger
-from paddle_hub.data.reader import csv_reader
+from paddle_hub.io.reader import csv_reader
 
 __all__ = ['Downloader']
 

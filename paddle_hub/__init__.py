@@ -17,12 +17,12 @@ from .dir import MODULE_HOME
 from .dir import CACHE_HOME
 from . import module
 from . import tools
-from . import data
+from . import io
 from .module.module import Module, create_module
 from .module.base_processor import BaseProcessor
 from .module.signature import Signature, create_signature
 from .module.manager import default_module_manager
 from .tools.logger import logger
 from .tools.paddle_helper import connect_program
-from .data.type import DataType
+from .io.type import DataType
 from .hub_server import default_hub_server
