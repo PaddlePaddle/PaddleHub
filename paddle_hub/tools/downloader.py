@@ -77,9 +77,13 @@ class Downloader:
                         f.write(data)
                         if print_progress:
                             done = int(50 * dl / total_length)
-                            sys.stdout.write(
-                                "\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
+                            sys.stdout.write("\r%s : [%-50s]%.2f%%" %
+                                             (save_name, '=' * done,
+                                              float(dl / total_length * 100)))
                             sys.stdout.flush()
+                if print_progress:
+                    sys.stdout.write("\n")
+                    sys.stdout.flush()
 
         tips = "file %s download completed!" % (file_name)
         return True, tips, file_name
@@ -102,12 +106,14 @@ class Downloader:
                                      save_path,
                                      save_name=None,
                                      retry_limit=3,
-                                     delete_file=True):
+                                     delete_file=True,
+                                     print_progress=False):
         result, tips_1, file = self.download_file(
             url=url,
             save_path=save_path,
             save_name=save_name,
-            retry_limit=retry_limit)
+            retry_limit=retry_limit,
+            print_progress=print_progress)
         if not result:
             return result, tips_1, file
         result, tips_2, file = self.uncompress(file, delete_file=delete_file)

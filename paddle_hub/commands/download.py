@@ -64,13 +64,12 @@ class DownloadCommand(BaseCommand):
             print(tips)
             return True
 
-        self.print_args()
         if self.args.uncompress:
             result, tips, file = default_downloader.download_file_and_uncompress(
-                url=url, save_path=self.args.output_path)
+                url=url, save_path=self.args.output_path, print_progress=True)
         else:
             result, tips, file = default_downloader.download_file(
-                url=url, save_path=self.args.output_path)
+                url=url, save_path=self.args.output_path, print_progress=True)
         print(tips)
         return True
 
