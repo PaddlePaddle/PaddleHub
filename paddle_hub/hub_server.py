@@ -74,8 +74,10 @@ class HubServer:
 
     def request(self):
         file_url = self.server_url + MODULE_LIST_FILE
-        self.module_list_file = default_downloader.download_file(
+        result, tips, self.module_list_file = default_downloader.download_file(
             file_url, save_path=hub.CACHE_HOME)
+        if not result:
+            return False
         self.module_list_file = csv_reader.read(self.module_list_file)
         return True
 

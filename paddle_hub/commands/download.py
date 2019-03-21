@@ -59,11 +59,13 @@ class DownloadCommand(BaseCommand):
 
         self.print_args()
         if self.args.uncompress:
-            default_downloader.download_file_and_uncompress(
+            result, tips, file = default_downloader.download_file_and_uncompress(
                 url=url, save_path=self.args.output_path)
         else:
-            default_downloader.download_file(
+            result, tips, file = default_downloader.download_file(
                 url=url, save_path=self.args.output_path)
+        print(tips)
+        return result
 
 
 command = DownloadCommand.instance()

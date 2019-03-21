@@ -41,7 +41,12 @@ def md5file(fname):
 
 
 class Downloader:
-    def download_file(self, url, save_path, save_name=None, retry_limit=3):
+    def download_file(self,
+                      url,
+                      save_path,
+                      save_name=None,
+                      retry_limit=3,
+                      print_progress=False):
         if not os.path.exists(save_path):
             utils.mkdir(save_path)
         save_name = url.split('/')[-1] if save_name is None else save_name
@@ -53,11 +58,9 @@ class Downloader:
             if retry_times < retry_limit:
                 retry_times += 1
             else:
-                raise RuntimeError(
-                    "Cannot download {0} within retry limit {1}".format(
-                        url, retry_limit))
-            logger.info(
-                "Cache file %s not found, downloading %s" % (file_name, url))
+                tips = "Cannot download {0} within retry limit {1}".format(
+                    url, retry_limit)
+                return False, tips, None
             r = requests.get(url, stream=True)
             total_length = r.headers.get('content-length')
 
@@ -72,13 +75,14 @@ class Downloader:
                     for data in r.iter_content(chunk_size=4096):
                         dl += len(data)
                         f.write(data)
-                        done = int(50 * dl / total_length)
-                        sys.stdout.write(
-                            "\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
-                        sys.stdout.flush()
+                        if print_progress:
+                            done = int(50 * dl / total_length)
+                            sys.stdout.write(
+                                "\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
+                            sys.stdout.flush()
 
-        logger.info("file %s download completed!" % (file_name))
-        return file_name
+        tips = "file %s download completed!" % (file_name)
+        return True, tips, file_name
 
     def uncompress(self, file, dirname=None, delete_file=False):
         dirname = os.path.dirname(file) if dirname is None else dirname
@@ -91,7 +95,7 @@ class Downloader:
         if delete_file:
             os.remove(file)
 
-        return module_dir
+        return True, "file %s uncompress completed!" % file, module_dir
 
     def download_file_and_uncompress(self,
                                      url,
@@ -99,17 +103,21 @@ class Downloader:
                                      save_name=None,
                                      retry_limit=3,
                                      delete_file=True):
-        file = self.download_file(
+        result, tips_1, file = self.download_file(
             url=url,
             save_path=save_path,
             save_name=save_name,
             retry_limit=retry_limit)
-        file = self.uncompress(file, delete_file=delete_file)
+        if not result:
+            return result, tips_1, file
+        result, tips_2, file = self.uncompress(file, delete_file=delete_file)
+        if not result:
+            return result, tips_2, file
         if save_name:
             save_name = os.path.join(save_path, save_name)
             shutil.move(file, save_name)
-            return save_name
-        return file
+            return result, "%s\n%s" % (tips_1, tips_2), save_name
+        return result, "%s\n%s" % (tips_1, tips_2), file
 
 
 default_downloader = Downloader()
