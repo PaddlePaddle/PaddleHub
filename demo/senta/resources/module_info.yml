@@ -1,0 +1,5 @@
+name: senta
+type: nlp/sentiment_analysis
+author: paddlepaddle
+author-email: paddle-dev@baidu.com
+version: 1.0.0
