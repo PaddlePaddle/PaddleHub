@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import hub
 from . import download
 from . import run
 from . import show
@@ -22,3 +21,4 @@ from . import install
 from . import uninstall
 from . import search
 from . import help
+from . import hub

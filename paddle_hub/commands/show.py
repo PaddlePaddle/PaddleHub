@@ -16,10 +16,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
-from paddle_hub.commands.base_command import BaseCommand
+from paddle_hub.commands.base_command import BaseCommand, ENTRY
 from paddle_hub.module.manager import default_module_manager
 from paddle_hub.module.module import Module
 import os
+import argparse
 
 
 class ShowCommand(BaseCommand):
@@ -29,8 +30,18 @@ class ShowCommand(BaseCommand):
         super(ShowCommand, self).__init__(name)
         self.show_in_help = True
         self.description = "Show the specify module's info"
+        self.parser = self.parser = argparse.ArgumentParser(
+            description=self.__class__.__doc__,
+            prog='%s %s <module_name/module_dir>' % (ENTRY, name),
+            usage='%(prog)s',
+            add_help=False)
 
     def exec(self, argv):
+        if not argv:
+            print("ERROR: Please specify a module\n")
+            self.help()
+            return False
+
         module_name = argv[0]
 
         cwd = os.getcwd()
@@ -38,7 +49,7 @@ class ShowCommand(BaseCommand):
         module_dir = os.path.join(cwd,
                                   module_name) if not module_dir else module_dir
         if not module_dir or not os.path.exists(module_dir):
-            return
+            return True
 
         module = Module(module_dir=module_dir)
         show_text = "Name:%s\n" % module.name
@@ -50,6 +61,7 @@ class ShowCommand(BaseCommand):
         show_text += "Location:%s\n" % module_dir
         #TODO(wuzewu): add more signature info
         print(show_text)
+        return True
 
 
 command = ShowCommand.instance()
