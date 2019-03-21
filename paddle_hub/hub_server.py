@@ -19,9 +19,11 @@ from paddle_hub.tools import utils
 from paddle_hub.tools.downloader import default_downloader
 from paddle_hub.data.reader import csv_reader
 import os
+import time
 import paddle_hub as hub
 
-MODULE_LIST_FILE = "module_file_list.csv"
+MODULE_LIST_FILE = "module_list_file.csv"
+CACHE_TIME = 60 * 10
 
 
 class HubServer:
@@ -30,10 +32,33 @@ class HubServer:
             server_url = "https://paddlehub.bj.bcebos.com/"
         utils.check_url(server_url)
         self.server_url = server_url
-        self.module_file_list = []
+        self._load_module_list_file_if_valid()
+
+    def module_list_file_path(self):
+        return os.path.join(hub.CACHE_HOME, MODULE_LIST_FILE)
+
+    def _load_module_list_file_if_valid(self):
+        self.module_list_file = {}
+        if not os.path.exists(self.module_list_file_path()):
+            return False
+        file_create_time = os.path.getctime(self.module_list_file_path())
+        now_time = time.time()
+
+        # if file is out of date, remove it
+        if now_time - file_create_time >= CACHE_TIME:
+            os.remove(self.module_list_file_path())
+            return False
+        self.module_list_file = csv_reader.read(self.module_list_file_path())
+
+        # if file do not contain necessary data, remove it
+        if not "version" in self.module_list_file or not "module_name" in self.module_list_file:
+            self.module_list_file = {}
+            os.remove(self.module_list_file_path())
+            return False
+        return True
 
     def search_module(self, module_key, update=False):
-        if update or not self.module_file_list:
+        if update or not self.module_list_file:
             self.request()
 
         match_module_index_list = [
@@ -47,7 +72,7 @@ class HubServer:
                 for index in match_module_index_list]
 
     def get_module_url(self, module_name, version=None, update=False):
-        if update or not self.module_file_list:
+        if update or not self.module_list_file:
             self.request()
 
         module_index_list = [
@@ -78,8 +103,7 @@ class HubServer:
             file_url, save_path=hub.CACHE_HOME)
         if not result:
             return False
-        self.module_list_file = csv_reader.read(self.module_list_file)
-        return True
+        return self._load_module_list_file_if_valid()
 
 
 default_hub_server = HubServer()
