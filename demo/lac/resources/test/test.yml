@@ -1,0 +1,4 @@
+input_data:
+  text:
+    type : TEXT
+    key : TEXT_INPUT

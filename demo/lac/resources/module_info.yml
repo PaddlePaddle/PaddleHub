@@ -1,0 +1,5 @@
+name: lac
+type: nlp/lexical_analysis
+author: paddlepaddle
+author_email: paddle-dev@baidu.com
+version: 1.0.0
