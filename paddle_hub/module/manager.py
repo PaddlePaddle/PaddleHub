@@ -58,8 +58,8 @@ class LocalModuleManager:
         self.all_modules(update=True)
         if module_name in self.modules_dict:
             module_dir = self.modules_dict[module_name]
-            print("module %s already install in %s" % (module_name, module_dir))
-            return
+            tips = "module %s already install in %s" % (module_name, module_dir)
+            return True, tips, module_dir
         url = hub.default_hub_server.get_module_url(
             module_name, version=module_version)
         #TODO(wuzewu): add compatibility check
@@ -67,21 +67,27 @@ class LocalModuleManager:
             tips = "can't found module %s" % module_name
             if module_version:
                 tips += " with version %s" % module_version
-            print(tips)
-            return
+            return False, tips, None
 
-        default_downloader.download_file_and_uncompress(
+        module_dir = default_downloader.download_file_and_uncompress(
             url=url, save_path=hub.MODULE_HOME, save_name=module_name)
+        if module_dir:
+            tips = "Successfully installed %s" % module_name
+            if module_version:
+                tips += "-%s" % module_version
+            return True, tips, module_dir
+        tips = "Download %s-%s failed" % (module_name, module_version)
+        return False, tips, module_dir
 
     def uninstall_module(self, module_name):
         self.all_modules(update=True)
         if not module_name in self.modules_dict:
-            print("%s is not installed" % module_name)
-            return
-
+            tips = "%s is not installed" % module_name
+            return True, tips
+        tips = "Successfully uninstalled %s" % module_name
         module_dir = self.modules_dict[module_name]
         shutil.rmtree(module_dir)
-        print("Successfully uninstalled %s" % module_name)
+        return True, tips
 
 
 default_module_manager = LocalModuleManager()
