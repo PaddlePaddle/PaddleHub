@@ -23,7 +23,7 @@ from paddle_hub.module import module_desc_pb2
 from paddle_hub.module import check_info_pb2
 from paddle_hub.module.signature import Signature, create_signature
 from paddle_hub.module.checker import ModuleChecker
-from paddle_hub.data.reader import yaml_reader
+from paddle_hub.io.reader import yaml_reader
 from paddle_hub import version
 from paddle_hub.module.base_processor import BaseProcessor
 from shutil import copyfile
