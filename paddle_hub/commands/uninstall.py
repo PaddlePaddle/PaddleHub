@@ -16,9 +16,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
-from paddle_hub.commands.base_command import BaseCommand
+from paddle_hub.commands.base_command import BaseCommand, ENTRY
 from paddle_hub.tools import utils
 from paddle_hub.module.manager import default_module_manager
+import argparse
 
 
 class UninstallCommand(BaseCommand):
@@ -28,13 +29,22 @@ class UninstallCommand(BaseCommand):
         super(UninstallCommand, self).__init__(name)
         self.show_in_help = True
         self.description = "Uninstall the specify module from current environment."
+        self.parser = self.parser = argparse.ArgumentParser(
+            description=self.__class__.__doc__,
+            prog='%s %s <module_name>' % (ENTRY, name),
+            usage='%(prog)s',
+            add_help=False)
 
     def exec(self, argv):
+        if not argv:
+            print("ERROR: Please specify a module\n")
+            self.help()
+            return False
         module_name = argv[0]
         result, tips = default_module_manager.uninstall_module(
             module_name=module_name)
         print(tips)
-        return result
+        return True
 
 
 command = UninstallCommand.instance()

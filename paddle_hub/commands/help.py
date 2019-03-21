@@ -42,6 +42,7 @@ class HelpCommand(BaseCommand):
             help_text += "  %-15s\t\t%s\n" % (command.name, command.description)
 
         print(help_text)
+        return True
 
 
 command = HelpCommand.instance()

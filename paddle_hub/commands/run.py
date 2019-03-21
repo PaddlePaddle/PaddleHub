@@ -16,11 +16,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
-from paddle_hub.commands.base_command import BaseCommand
-import paddle_hub as hub
+from paddle_hub.commands.base_command import BaseCommand, ENTRY
 from paddle_hub.data.reader import csv_reader, yaml_reader
+from paddle_hub.module.manager import default_module_manager
 from paddle_hub.tools import utils
 from paddle_hub.tools.arg_helper import add_argument, print_arguments
+import paddle_hub as hub
+import argparse
+import os
 
 
 class RunCommand(BaseCommand):
@@ -30,51 +33,59 @@ class RunCommand(BaseCommand):
         super(RunCommand, self).__init__(name)
         self.show_in_help = True
         self.description = "Run the specify module"
+        self.parser = self.parser = argparse.ArgumentParser(
+            description=self.__class__.__doc__,
+            prog='%s %s <module>' % (ENTRY, name),
+            usage='%(prog)s [options]')
         # yapf: disable
         self.add_arg('--config',    str, None,  "config file in yaml format" )
         self.add_arg('--dataset',   str, None,  "dataset be used" )
-        self.add_arg('--module',    str, None,  "module to run" )
         self.add_arg('--signature', str, None,  "signature to run" )
         # yapf: enable
 
-    def _check_module(self):
-        if not self.args.module:
-            logger.critical("lack of module")
-            self.help()
-            exit(1)
-
     def _check_dataset(self):
         if not self.args.dataset:
-            logger.critical("lack of dataset file")
+            print("Error! Lack of dataset file")
             self.help()
             exit(1)
         if not utils.is_csv_file(self.args.dataset):
-            logger.critical("dataset file should in csv format")
+            print("Error! Dataset file should in csv format")
             self.help()
             exit(1)
 
     def _check_config(self):
         if not self.args.config:
-            logger.critical("lack of config file")
+            print("Error! Lack of config file")
             self.help()
             exit(1)
         if not utils.is_yaml_file(self.args.config):
-            logger.critical("config file should in yaml format")
+            print("Error! Config file should in yaml format")
             self.help()
             exit(1)
 
-    def help(self):
-        self.parser.print_help()
-
     def exec(self, argv):
-        self.args = self.parser.parse_args(argv)
-        self.print_args()
-
-        self._check_module()
+        if not argv:
+            print("ERROR: Please specify a key\n")
+            self.help()
+            return False
+        module_name = argv[0]
+        self.args = self.parser.parse_args(argv[1:])
         self._check_dataset()
         self._check_config()
 
-        module = hub.Module(module_dir=self.args.module)
+        module_dir = default_module_manager.search_module(module_name)
+        if not module_dir:
+            if os.path.exists(module_name):
+                module_dir = module_name
+            else:
+                print("Install Module %s" % module_name)
+                result, tips, module_dir = default_module_manager.install_module(
+                    module_name)
+                print(tips)
+                if not result:
+                    return False
+
+        module = hub.Module(module_dir=module_dir)
         yaml_config = yaml_reader.read(self.args.config)
 
         if not self.args.signature:

@@ -16,8 +16,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.arg_helper import add_argument, print_arguments
-from paddle_hub.tools.logger import logger
 import argparse
+
+ENTRY = "hub"
 
 
 class BaseCommand:
@@ -39,11 +40,13 @@ class BaseCommand:
         assert not hasattr(
             self.__class__,
             '_instance'), 'Please use `instance()` to get Command object!'
-        self.parser = argparse.ArgumentParser(description=__doc__)
         self.args = None
         self.name = name
         self.show_in_help = True
         self.description = ""
+
+    def help(self):
+        self.parser.print_help()
 
     def add_arg(self, argument, type="str", default=None, help=None):
         add_argument(

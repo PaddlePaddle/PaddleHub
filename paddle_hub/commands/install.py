@@ -16,9 +16,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
-from paddle_hub.commands.base_command import BaseCommand
+from paddle_hub.commands.base_command import BaseCommand, ENTRY
 from paddle_hub.tools import utils
 from paddle_hub.module.manager import default_module_manager
+import argparse
 
 
 class InstallCommand(BaseCommand):
@@ -28,12 +29,18 @@ class InstallCommand(BaseCommand):
         super(InstallCommand, self).__init__(name)
         self.show_in_help = True
         self.description = "Install the specify module to current environment."
+        self.parser = self.parser = argparse.ArgumentParser(
+            description=self.__class__.__doc__,
+            prog='%s %s <module_name>' % (ENTRY, name),
+            usage='%(prog)s',
+            add_help=False)
         #TODO(wuzewu): add --upgrade option
 
-    def help(self):
-        self.parser.print_help()
-
     def exec(self, argv):
+        if not argv:
+            print("ERROR: Please specify a module\n")
+            self.help()
+            return False
         module_name = argv[0]
         module_version = None if "==" not in module_name else module_name.split(
             "==")[1]
@@ -42,7 +49,7 @@ class InstallCommand(BaseCommand):
         result, tips, module_dir = default_module_manager.install_module(
             module_name=module_name, module_version=module_version)
         print(tips)
-        return result
+        return True
 
 
 command = InstallCommand.instance()

@@ -16,9 +16,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
-from paddle_hub.commands.base_command import BaseCommand
+from paddle_hub.commands.base_command import BaseCommand, ENTRY
 from paddle_hub.tools import utils
 from paddle_hub.hub_server import default_hub_server
+import argparse
 
 
 class SearchCommand(BaseCommand):
@@ -28,8 +29,18 @@ class SearchCommand(BaseCommand):
         super(SearchCommand, self).__init__(name)
         self.show_in_help = True
         self.description = "Search a paddle hub module with keyword."
+        self.parser = self.parser = argparse.ArgumentParser(
+            description=self.__class__.__doc__,
+            prog='%s %s <key>' % (ENTRY, name),
+            usage='%(prog)s',
+            add_help=False)
 
     def exec(self, argv):
+        if not argv:
+            print("ERROR: Please specify a key\n")
+            self.help()
+            return False
+
         module_name = argv[0]
         module_list = default_hub_server.search_module(module_name)
         text = "\n"
@@ -38,6 +49,7 @@ class SearchCommand(BaseCommand):
         for module_name, module_version in module_list:
             text += "  %-20s\t\t%s\n" % (module_name, module_version)
         print(text)
+        return True
 
 
 command = SearchCommand.instance()

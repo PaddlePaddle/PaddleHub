@@ -16,10 +16,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle_hub.tools.logger import logger
-from paddle_hub.commands.base_command import BaseCommand
+from paddle_hub.commands.base_command import BaseCommand, ENTRY
 from paddle_hub.tools import utils
 from paddle_hub.tools.downloader import default_downloader
 from paddle_hub.hub_server import default_hub_server
+import argparse
 
 
 class DownloadCommand(BaseCommand):
@@ -29,15 +30,21 @@ class DownloadCommand(BaseCommand):
         super(DownloadCommand, self).__init__(name)
         self.show_in_help = True
         self.description = "Download a paddle hub module."
+        self.parser = self.parser = argparse.ArgumentParser(
+            description=self.__class__.__doc__,
+            prog='%s %s <module_name>' % (ENTRY, name),
+            usage='%(prog)s [options]',
+            add_help=False)
         # yapf: disable
-        self.add_arg('--output_path',  str,  ".",   "path to save the module, default in current directory" )
+        self.add_arg('--output_path',  str,  ".",   "path to save the module" )
         self.add_arg('--uncompress',   bool, False,  "uncompress the download package or not" )
         # yapf: enable
 
-    def help(self):
-        self.parser.print_help()
-
     def exec(self, argv):
+        if not argv:
+            print("ERROR: Please specify a module\n")
+            self.help()
+            return False
         module_name = argv[0]
         module_version = None if "==" not in module_name else module_name.split(
             "==")[1]
@@ -55,7 +62,7 @@ class DownloadCommand(BaseCommand):
             if module_version:
                 tips += " with version %s" % module_version
             print(tips)
-            return
+            return True
 
         self.print_args()
         if self.args.uncompress:
@@ -65,7 +72,7 @@ class DownloadCommand(BaseCommand):
             result, tips, file = default_downloader.download_file(
                 url=url, save_path=self.args.output_path)
         print(tips)
-        return result
+        return True
 
 
 command = DownloadCommand.instance()

@@ -38,6 +38,7 @@ class ListCommand(BaseCommand):
         for module_name, module_dir in all_modules.items():
             list_text += "  %-20s\t\t%s\n" % (module_name, module_dir)
         print(list_text)
+        return True
 
 
 command = ListCommand.instance()

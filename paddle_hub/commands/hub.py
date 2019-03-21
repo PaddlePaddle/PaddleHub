@@ -31,22 +31,24 @@ class HubCommand(BaseCommand):
     def __init__(self, name):
         super(HubCommand, self).__init__(name)
         self.show_in_help = False
-        # yapf: disable
-        self.add_arg('command',  str, None,  "command to run" )
-        # yapf: enable
 
     def exec(self, argv):
-        args = self.parser.parse_args(argv[1:2])
-
-        if not args.command in BaseCommand.command_dict:
-            logger.critical("command %s not supported!" % args.command)
+        if not argv:
+            help.command.exec(argv)
             exit(1)
+            return False
+        sub_command = argv[0]
+        if not sub_command in BaseCommand.command_dict:
+            print("ERROR: unknown command '%s'" % sub_command)
+            help.command.exec(argv)
+            exit(1)
+            return False
 
-        command = BaseCommand.command_dict[args.command]
-        command.exec(argv[2:])
+        command = BaseCommand.command_dict[sub_command]
+        return command.exec(argv[1:])
 
 
 command = HubCommand.instance()
 
 if __name__ == "__main__":
-    command.exec(sys.argv)
+    command.exec(sys.argv[1:])
