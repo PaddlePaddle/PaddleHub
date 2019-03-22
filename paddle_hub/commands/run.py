@@ -108,9 +108,7 @@ class RunCommand(BaseCommand):
         origin_data = csv_reader.read(self.args.dataset)
         input_data = {}
         for key, value in yaml_config['input_data'].items():
-            type_reader = hub.DataType.type_reader(value['type'])
-            input_data[key] = list(
-                map(type_reader.read, origin_data[value['key']]))
+            input_data[key] = origin_data[value['key']]
 
         # run module with data
         config = yaml_config.get("config", {})

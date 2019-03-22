@@ -55,34 +55,3 @@ class DataType(Enum):
     def is_valid_type(cls, data_type):
         data_type = DataType.type(data_type)
         return data_type in DataType
-
-    @classmethod
-    def type_reader(cls, data_type):
-        data_type = DataType.type(data_type)
-        if not DataType.is_valid_type(data_type):
-            logger.critical("invalid data type %s" % data_type)
-            exit(1)
-
-        if data_type == DataType.IMAGE:
-            return ImageReader
-        elif data_type == DataType.TEXT:
-            return TextReader
-        else:
-            type_str = DataType.str(data_type)
-            logger.critical(
-                "data type %s not supported for the time being" % type_str)
-            exit(1)
-
-
-class ImageReader:
-    @classmethod
-    def read(cls, path):
-        utils.check_path(path)
-        image = Image.open(path)
-        return image
-
-
-class TextReader:
-    @classmethod
-    def read(cls, text):
-        return text
