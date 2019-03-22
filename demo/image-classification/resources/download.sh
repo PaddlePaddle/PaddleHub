@@ -31,5 +31,5 @@ then
     wget http://paddle-imagenet-models-name.bj.bcebos.com/${model}
 fi
 unzip ${model}
-# rm ${model}
+rm ${model}
 rm -rf __MACOSX

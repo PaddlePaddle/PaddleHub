@@ -1,0 +1,5 @@
+name: Resnet50
+type: CV/classification
+author: paddlepaddle
+author-email: paddle-dev@baidu.com
+version: 1.0.0
