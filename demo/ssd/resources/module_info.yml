@@ -1,0 +1,5 @@
+name: ssd_mobilenet_v1_pascalvoc
+type: CV/object-detection
+author: paddlepaddle
+author_email: paddle-dev@baidu.com
+version: 1.0.0
