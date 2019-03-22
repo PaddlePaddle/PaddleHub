@@ -113,11 +113,8 @@ class RunCommand(BaseCommand):
                 map(type_reader.read, origin_data[value['key']]))
 
         # run module with data
-        print(
-            module(
-                sign_name=self.args.signature,
-                data=input_data,
-                **yaml_config['config']))
+        config = yaml_config.get("config", {})
+        print(module(sign_name=self.args.signature, data=input_data, **config))
 
 
 command = RunCommand.instance()
