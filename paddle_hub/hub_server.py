@@ -51,7 +51,7 @@ class HubServer:
         self.module_list_file = csv_reader.read(self.module_list_file_path())
 
         # if file do not contain necessary data, remove it
-        if not "version" in self.module_list_file or not "module_name" in self.module_list_file:
+        if "version" not in self.module_list_file or "module_name" not in self.module_list_file:
             self.module_list_file = {}
             os.remove(self.module_list_file_path())
             return False
