@@ -11,9 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import os
 
 USER_HOME = os.path.expanduser('~')
 HUB_HOME = os.path.join(USER_HOME, ".hub")
 MODULE_HOME = os.path.join(HUB_HOME, "modules")
 CACHE_HOME = os.path.join(HUB_HOME, "cache")
+DATA_HOME = os.path.join(HUB_HOME, "dataset")
