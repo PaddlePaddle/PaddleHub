@@ -120,9 +120,9 @@ class Module:
             raise "Error! HubModule Can't init with nothing"
 
     def _init_with_url(self, url):
-        utils.check_url_valid(url)
-        module_dir = default_downloader.download_file_and_uncompress(
-            module_url, save_path=".")
+        utils.check_url(url)
+        result, _, module_dir = default_downloader.download_file_and_uncompress(
+            url, save_path=".")
         self._init_with_module_file(module_dir)
 
     def _dump_processor(self):
@@ -439,6 +439,9 @@ class Module:
             key = signature.fetch_names[index]
             if key:
                 fetch_dict[key] = program.global_block().var(var.name)
+
+        for param in self.program.global_block().iter_parameters():
+            logger.debug("%s %s" % (param.name, param.optimize_attr))
 
         return feed_dict, fetch_dict, program
 
