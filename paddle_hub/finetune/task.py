@@ -21,6 +21,7 @@ import multiprocessing
 
 from paddle_hub.tools.logger import logger
 from paddle_hub.finetune.optimization import bert_optimization
+from paddle_hub.finetune.config import FinetuneConfig
 
 __all__ = ['append_mlp_classifier']
 

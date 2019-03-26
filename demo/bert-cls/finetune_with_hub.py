@@ -18,7 +18,6 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import collections
 import time
 import argparse
 import numpy as np
@@ -29,20 +28,13 @@ import paddle.fluid as fluid
 import paddle_hub as hub
 
 import reader.cls as reader
-from model.bert import BertConfig
-from model.classifier import create_model_with_hub, create_model
 from utils.args import ArgumentGroup, print_arguments
-from utils.init import init_pretraining_params, init_checkpoint
+from paddle_hub.finetune.config import FinetuneConfig
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 model_g = ArgumentGroup(parser, "model", "model configuration and paths.")
 model_g.add_arg("bert_config_path",         str,  None,           "Path to the json file for bert model config.")
-model_g.add_arg("init_checkpoint",          str,  None,           "Init checkpoint to resume training from.")
-model_g.add_arg("init_pretraining_params",  str,  None,
-                "Init pre-training params which preforms fine-tuning from. If the "
-                 "arg 'init_checkpoint' has been set, this argument wouldn't be valid.")
-model_g.add_arg("checkpoints",              str,  "checkpoints",  "Path to save checkpoints.")
 
 train_g = ArgumentGroup(parser, "training", "training options.")
 train_g.add_arg("epoch",             int,    3,       "Number of epoches for fine-tuning.")
@@ -52,9 +44,7 @@ train_g.add_arg("lr_scheduler",      str,    "linear_warmup_decay",
 train_g.add_arg("weight_decay",      float,  0.01,    "Weight decay rate for L2 regularizer.")
 train_g.add_arg("warmup_proportion", float,  0.1,
                 "Proportion of training steps to perform linear learning rate warmup for.")
-train_g.add_arg("save_steps",        int,    10000,   "The steps interval to save checkpoints.")
 train_g.add_arg("validation_steps",  int,    1000,    "The steps interval to evaluate model performance.")
-train_g.add_arg("use_fp16",          bool,   False,   "Whether to use fp16 mixed precision training.")
 train_g.add_arg("loss_scaling",      float,  1.0,
                 "Loss scaling factor for mixed precision training, only valid when use_fp16 is enabled.")
 
@@ -76,10 +66,6 @@ data_g.add_arg("random_seed",   int,  0,     "Random seed.")
 
 run_type_g = ArgumentGroup(parser, "run_type", "running type options.")
 run_type_g.add_arg("use_cuda",                     bool,   True,  "If set, use GPU for training.")
-run_type_g.add_arg("use_fast_executor",            bool,   False, "If set, use fast parallel executor (in experiment).")
-run_type_g.add_arg("num_iteration_per_drop_scope", int,    1,     "Ihe iteration intervals to clean up temporary variables.")
-run_type_g.add_arg("task_name",                    str,    None,
-                   "The name of task to perform fine-tuning, should be in {'xnli', 'mnli', 'cola', 'mrpc'}.")
 
 args = parser.parse_args()
 # yapf: enable.
@@ -121,17 +107,11 @@ def test_hub_api(args, config):
         hub.finetune_and_eval(task, feed_list, processor, config)
 
 
-FinetuneConfig = collections.namedtuple('FinetuneConfig', [
-    'stat_interval', 'eval_interval', 'use_cuda', 'learning_rate',
-    'weight_decay', 'in_tokens', 'epoch', 'batch_size', 'max_seq_len',
-    'warmup_proportion'
-])
-
 if __name__ == '__main__':
     print_arguments(args)
     config = FinetuneConfig(
-        stat_interval=10,
-        eval_interval=100,
+        stat_interval=args.skip_steps,
+        eval_interval=args.validation_steps,
         use_cuda=True,
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
