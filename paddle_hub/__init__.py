@@ -26,3 +26,4 @@ from .tools.logger import logger
 from .tools.paddle_helper import connect_program
 from .io.type import DataType
 from .hub_server import default_hub_server
+from .finetune.task import append_mlp_classifier
