@@ -202,7 +202,7 @@ class Module:
             self.signatures[sign.name] = sign
 
     def _recovery_parameter(self, program):
-        global_block = self.program.global_block()
+        global_block = program.global_block()
         param_attrs = self.desc.extra_info.map.data['param_attrs']
         for key, param_attr in param_attrs.map.data.items():
             param = paddle_helper.from_flexible_data_to_param(param_attr)
@@ -440,7 +440,7 @@ class Module:
             if key:
                 fetch_dict[key] = program.global_block().var(var.name)
 
-        for param in self.program.global_block().iter_parameters():
+        for param in program.global_block().iter_parameters():
             logger.debug("%s %s" % (param.name, param.optimize_attr))
 
         return feed_dict, fetch_dict, program
