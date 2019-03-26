@@ -59,17 +59,13 @@ def append_mlp_classifier(feature, label, num_classes=2, hidden_units=None):
         "num_example": num_example
     }
 
-    task = Task("text_classification", graph_var_dict)
+    task = Task("text_classification", graph_var_dict,
+                fluid.default_main_program(), fluid.default_startup_program())
 
     return task
 
 
-def finetune_and_eval(train_program,
-                      startup_program,
-                      task,
-                      feed_list,
-                      data_processor,
-                      config=None):
+def finetune_and_eval(task, feed_list, data_processor, config=None):
     if config.use_cuda:
         place = fluid.CUDAPlace(int(os.getenv('FLAGS_selected_gpus', '0')))
         dev_count = fluid.core.get_cuda_device_count()
@@ -109,6 +105,9 @@ def finetune_and_eval(train_program,
 
     warmup_steps = int(max_train_steps * config.warmup_proportion)
 
+    # obtain main program from Task class
+    train_program = task.main_program()
+    startup_program = task.startup_program()
     # clone test program before optimize
     test_program = train_program.clone(for_test=True)
 
@@ -207,12 +206,21 @@ def finetune_and_eval(train_program,
 
 
 class Task(object):
-    def __init__(self, task_type, graph_var_dict):
+    def __init__(self, task_type, graph_var_dict, main_program,
+                 startup_program):
         self.task_type = task_type
         self.graph_var_dict = graph_var_dict
+        self._main_program = main_program
+        self._startup_program = startup_program
 
     def variable(self, var_name):
         if var_name in self.graph_var_dict:
             return self.graph_var_dict[var_name]
 
         raise KeyError("var_name {} not in task graph".format(var_name))
+
+    def main_program(self):
+        return self._main_program
+
+    def startup_program(self):
+        return self._startup_program
