@@ -15,11 +15,13 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
+import os
+import shutil
+
 from paddle_hub.tools import utils
 from paddle_hub.tools.downloader import default_downloader
 import paddle_hub as hub
-import os
-import shutil
 
 
 class LocalModuleManager:
@@ -69,8 +71,11 @@ class LocalModuleManager:
                 tips += " with version %s" % module_version
             return False, tips, None
 
-        result, tips, module_dir = default_downloader.download_file_and_uncompress(
-            url=url, save_path=hub.MODULE_HOME, save_name=module_name)
+        result, tips, module_zip_file = default_downloader.download_file(
+            url=url, save_path=hub.CACHE_HOME, save_name=module_name)
+        result, tips, module_dir = default_downloader.uncompress(
+            file=module_zip_file, dirname=hub.MODULE_HOME, delete_file=True)
+
         if module_dir:
             tips = "Successfully installed %s" % module_name
             if module_version:
