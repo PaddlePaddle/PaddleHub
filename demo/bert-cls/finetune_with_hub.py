@@ -70,8 +70,21 @@ run_type_g.add_arg("use_cuda",                     bool,   True,  "If set, use G
 args = parser.parse_args()
 # yapf: enable.
 
-
-def test_hub_api(args, config):
+if __name__ == '__main__':
+    print_arguments(args)
+    config = FinetuneConfig(
+        log_interval=10,
+        eval_interval=100,
+        save_ckpt_interval=200,
+        use_cuda=True,
+        checkpoint_dir="./bert_cls_ckpt",
+        learning_rate=args.learning_rate,
+        num_epoch=args.epoch,
+        batch_size=args.batch_size,
+        max_seq_len=args.max_seq_len,
+        weight_decay=args.weight_decay,
+        in_tokens=args.in_tokens,
+        warmup_proportion=args.warmup_proportion)
 
     processor = reader.ChnsenticorpProcessor(
         data_dir=args.data_dir,
@@ -86,38 +99,28 @@ def test_hub_api(args, config):
     # loading paddlehub BERT
     module = hub.Module(module_dir="./chinese_L-12_H-768_A-12.hub_module")
 
+    # bert's input tensor, output tensor and forward graph
+    # If you want to fine-tune the pretrain model parameter, please set
+    # trainable to True
     input_dict, output_dict, train_program = module.context(
         sign_name="pooled_output", trainable=True)
 
-    startup_program = fluid.Program()
-    with fluid.program_guard(train_program, startup_program):
+    with fluid.program_guard(train_program):
         label = fluid.layers.data(name="label", shape=[1], dtype='int64')
 
         pooled_output = output_dict["pooled_output"]
 
-        # setup feed list for data feeder
+        # Setup feed list for data feeder
+        # Must feed all the tensor of bert's module need
         feed_list = [
             input_dict["src_ids"].name, input_dict["pos_ids"].name,
             input_dict["sent_ids"].name, input_dict["input_mask"].name,
             label.name
         ]
+        # Define a classfication finetune task by PaddleHub's API
         cls_task = hub.append_mlp_classifier(
             pooled_output, label, num_classes=num_labels)
 
+        # Finetune and evaluate by PaddleHub's API
+        # will finish training, evaluation, testing, save model automatically
         hub.finetune_and_eval(cls_task, feed_list, processor, config)
-
-
-if __name__ == '__main__':
-    print_arguments(args)
-    config = FinetuneConfig(
-        stat_interval=args.skip_steps,
-        eval_interval=args.validation_steps,
-        use_cuda=True,
-        learning_rate=args.learning_rate,
-        weight_decay=args.weight_decay,
-        in_tokens=args.in_tokens,
-        epoch=args.epoch,
-        batch_size=args.batch_size,
-        max_seq_len=args.max_seq_len,
-        warmup_proportion=args.warmup_proportion)
-    test_hub_api(args, config)

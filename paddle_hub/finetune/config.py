@@ -14,8 +14,20 @@
 
 import collections
 
-FinetuneConfig = collections.namedtuple('FinetuneConfig', [
-    'stat_interval', 'eval_interval', 'use_cuda', 'learning_rate',
-    'weight_decay', 'in_tokens', 'epoch', 'batch_size', 'max_seq_len',
-    'warmup_proportion'
-])
+FinetuneConfig = collections.namedtuple(
+    'FinetuneConfig',
+    [
+        'log_interval',  # print training log every n step
+        'eval_interval',  # evalution the model every n steps
+        'save_ckpt_interval',  # save the model checkpoint every n steps
+        'use_cuda',  # use gpu or not
+        'learning_rate',
+        'checkpoint_dir',  # model checkpoint directory
+        'num_epoch',  # number of finetune epoch
+        'batch_size',
+        # for bert parameter
+        'max_seq_len',  # for bert
+        'weight_decay',  # for bert
+        'warmup_proportion',  # for bert
+        'in_tokens'  # for bert
+    ])

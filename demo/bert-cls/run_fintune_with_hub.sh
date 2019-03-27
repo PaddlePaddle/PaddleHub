@@ -7,8 +7,8 @@ DATA_PATH=chnsenticorp_data
 rm -rf $CKPT_PATH
 python -u finetune_with_hub.py \
                    --use_cuda true \
-                   --batch_size 4096 \
-                   --in_tokens true \
+                   --batch_size 32 \
+                   --in_tokens false \
                    --data_dir ${DATA_PATH} \
                    --vocab_path ${BERT_BASE_PATH}/vocab.txt \
                    --weight_decay  0.01 \
