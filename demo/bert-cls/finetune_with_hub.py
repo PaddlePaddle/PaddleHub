@@ -101,10 +101,10 @@ def test_hub_api(args, config):
             input_dict["sent_ids"].name, input_dict["input_mask"].name,
             label.name
         ]
-        task = hub.append_mlp_classifier(
+        cls_task = hub.append_mlp_classifier(
             pooled_output, label, num_classes=num_labels)
 
-        hub.finetune_and_eval(task, feed_list, processor, config)
+        hub.finetune_and_eval(cls_task, feed_list, processor, config)
 
 
 if __name__ == '__main__':
