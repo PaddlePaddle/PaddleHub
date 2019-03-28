@@ -30,6 +30,7 @@ class Task(object):
         self.graph_var_dict = graph_var_dict
         self._main_program = main_program
         self._startup_program = startup_program
+        self._inference_program = main_program.clone(for_test=True)
 
     def variable(self, var_name):
         if var_name in self.graph_var_dict:
@@ -42,3 +43,6 @@ class Task(object):
 
     def startup_program(self):
         return self._startup_program
+
+    def inference_program(self):
+        return self._inference_program
