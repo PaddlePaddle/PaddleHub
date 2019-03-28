@@ -20,15 +20,18 @@ from __future__ import print_function
 import shutil
 import os
 import sys
+import time
 import hashlib
 import requests
 import tempfile
 import tarfile
+
 from paddle_hub.tools import utils
 from paddle_hub.tools.logger import logger
 from paddle_hub.io.reader import csv_reader
 
 __all__ = ['Downloader']
+FLUSH_INTERVAL = 0.1
 
 
 def md5file(fname):
@@ -46,12 +49,17 @@ class Downloader:
                       save_path,
                       save_name=None,
                       retry_limit=3,
-                      print_progress=False):
+                      print_progress=False,
+                      replace=False):
         if not os.path.exists(save_path):
             utils.mkdir(save_path)
         save_name = url.split('/')[-1] if save_name is None else save_name
         file_name = os.path.join(save_path, save_name)
         retry_times = 0
+
+        if replace and os.path.exists(file_name):
+            os.remove(file_name)
+
         while not (os.path.exists(file_name)):
             if os.path.exists(file_name):
                 logger.info("file md5", md5file(file_name))
@@ -72,17 +80,23 @@ class Downloader:
                 with open(file_name, 'wb') as f:
                     dl = 0
                     total_length = int(total_length)
+                    starttime = time.time()
                     for data in r.iter_content(chunk_size=4096):
                         dl += len(data)
                         f.write(data)
                         if print_progress:
                             done = int(50 * dl / total_length)
-                            sys.stdout.write("\r%s : [%-50s]%.2f%%" %
-                                             (save_name, '=' * done,
-                                              float(dl / total_length * 100)))
-                            sys.stdout.flush()
+                            if time.time() - starttime >= FLUSH_INTERVAL:
+                                sys.stdout.write(
+                                    "\r%s : [%-50s]%.2f%%" %
+                                    (save_name, '=' * done,
+                                     float(dl / total_length * 100)))
+                                starttime = time.time()
+                                sys.stdout.flush()
                 if print_progress:
-                    sys.stdout.write("\n")
+                    sys.stdout.write(
+                        "\r%s : [%-50s]%.2f%%\n" %
+                        (save_name, '=' * done, float(dl / total_length * 100)))
                     sys.stdout.flush()
 
         tips = "file %s download completed!" % (file_name)
@@ -107,13 +121,15 @@ class Downloader:
                                      save_name=None,
                                      retry_limit=3,
                                      delete_file=True,
-                                     print_progress=False):
+                                     print_progress=False,
+                                     replace=False):
         result, tips_1, file = self.download_file(
             url=url,
             save_path=save_path,
             save_name=save_name,
             retry_limit=retry_limit,
-            print_progress=print_progress)
+            print_progress=print_progress,
+            replace=replace)
         if not result:
             return result, tips_1, file
         result, tips_2, file = self.uncompress(file, delete_file=delete_file)
