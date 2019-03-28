@@ -27,8 +27,8 @@ class DataProcessor(object):
                  data_dir,
                  vocab_path,
                  max_seq_len,
-                 do_lower_case,
-                 in_tokens,
+                 do_lower_case=True,
+                 in_tokens=False,
                  random_seed=None):
         self.data_dir = data_dir
         self.max_seq_len = max_seq_len
@@ -83,7 +83,7 @@ class DataProcessor(object):
                             voc_size=-1,
                             mask_id=-1,
                             return_input_mask=True,
-                            return_max_len=False,
+                            return_max_len=True,
                             return_num_token=False):
         return prepare_batch_data(
             batch_data,
@@ -93,9 +93,9 @@ class DataProcessor(object):
             cls_id=self.vocab["[CLS]"],
             sep_id=self.vocab["[SEP]"],
             mask_id=-1,
-            return_input_mask=True,
-            return_max_len=False,
-            return_num_token=False)
+            return_input_mask=return_input_mask,
+            return_max_len=True,
+            return_num_token=return_num_token)
 
     @classmethod
     def _read_tsv(cls, input_file, quotechar=None):
@@ -188,7 +188,7 @@ class DataProcessor(object):
                     voc_size=-1,
                     mask_id=-1,
                     return_input_mask=True,
-                    return_max_len=False,
+                    return_max_len=True,
                     return_num_token=False)
                 yield batch_data
 

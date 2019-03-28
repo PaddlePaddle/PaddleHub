@@ -78,6 +78,10 @@ def _finetune_model(task,
             logger.info(
                 "Memory optimization done! Time elapsed %f sec" % time_used)
 
+        lower_mem, upper_mem, unit = fluid.contrib.memory_usage(
+            program=main_program, batch_size=batch_size)
+        logger.info("Theoretical memory usage in training: %.3f - %.3f %s" %
+                    (lower_mem, upper_mem, unit)),
         # initilize all parameters
         exe.run(fluid.default_startup_program())
         step = 0

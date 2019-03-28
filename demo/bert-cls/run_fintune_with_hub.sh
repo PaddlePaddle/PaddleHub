@@ -1,8 +1,6 @@
 export CUDA_VISIBLE_DEVICES=2
 
-BERT_BASE_PATH="chinese_L-12_H-768_A-12"
-TASK_NAME='chnsenticorp'
-DATA_PATH=chnsenticorp_data
+DATA_PATH=./chnsenticorp_data
 
 rm -rf $CKPT_PATH
 python -u finetune_with_hub.py \
@@ -10,7 +8,6 @@ python -u finetune_with_hub.py \
                    --batch_size 32 \
                    --in_tokens false \
                    --data_dir ${DATA_PATH} \
-                   --vocab_path ${BERT_BASE_PATH}/vocab.txt \
                    --weight_decay  0.01 \
                    --warmup_proportion 0.0 \
                    --validation_steps 50 \
