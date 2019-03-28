@@ -89,9 +89,13 @@ if __name__ == '__main__':
         optimizer=None,
         warmup_proportion=args.warmup_proportion)
 
+    module = hub.Module(
+        module_dir="./hub_module/chinese_L-12_H-768_A-12.hub_module")
+
+    print("vocab_path = {}".format(module.get_vocab_path()))
     processor = reader.ChnsenticorpProcessor(
         data_dir=args.data_dir,
-        vocab_path=args.vocab_path,
+        vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len,
         do_lower_case=args.do_lower_case,
         in_tokens=args.in_tokens,
@@ -100,7 +104,6 @@ if __name__ == '__main__':
     num_labels = len(processor.get_labels())
 
     # loading paddlehub BERT
-    module = hub.Module(module_dir="./chinese_L-12_H-768_A-12.hub_module")
 
     # bert's input tensor, output tensor and forward graph
     # If you want to fine-tune the pretrain model parameter, please set

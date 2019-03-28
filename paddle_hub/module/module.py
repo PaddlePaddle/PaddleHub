@@ -98,7 +98,6 @@ class Module:
         self.default_signature = None
         self.module_info = None
         self.processor = None
-        self.assets = []
         self.name = "temp"
         if url:
             self._init_with_url(url=url)
@@ -111,8 +110,8 @@ class Module:
                 ), "processor should be sub class of hub.BaseProcessor"
             if assets:
                 self.assets = utils.to_list(assets)
-                for asset in assets:
-                    utils.check_path(assets)
+                # for asset in assets:
+                #     utils.check_path(assets)
             self.processor = processor
             self._generate_module_info(module_info)
             self._init_with_signature(signatures=signatures)
@@ -253,6 +252,12 @@ class Module:
         for sign in self.signatures:
             self.__dict__[sign] = functools.partial(
                 self.__call__, sign_name=sign)
+
+    def get_vocab_path(self):
+        for assets_file in self.assets:
+            print(assets_file)
+            if "vocab.txt" in assets_file:
+                return assets_file
 
     def _recover_from_desc(self):
         # recover signature
