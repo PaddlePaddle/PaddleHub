@@ -29,5 +29,7 @@ FinetuneConfig = collections.namedtuple(
         'max_seq_len',  # for bert
         'weight_decay',  # for bert
         'warmup_proportion',  # for bert
-        'in_tokens'  # for bert
+        'in_tokens',  # for bert
+        'strategy',
+        'with_memory_optimization'
     ])
