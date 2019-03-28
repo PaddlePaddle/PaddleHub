@@ -80,8 +80,9 @@ def from_flexible_data_to_param(flexible_data):
         flexible_data.map.data['trainable'])
     param['do_model_average'] = from_flexible_data_to_pyobj(
         flexible_data.map.data['do_model_average'])
-    param['optimize_attr'] = from_flexible_data_to_pyobj(
-        flexible_data.map.data['optimize_attr'])
+    # do not recover learning rate
+    #param['optimize_attr'] = from_flexible_data_to_pyobj(
+    #    flexible_data.map.data['optimize_attr'])
     if flexible_data.map.data['regularizer'].type != module_desc_pb2.NONE:
         regularizer_type = flexible_data.map.data['regularizer'].name
         regularization_coeff = from_flexible_data_to_pyobj(
