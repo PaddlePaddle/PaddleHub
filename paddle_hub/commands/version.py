@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
 from paddle_hub import version
@@ -26,7 +27,7 @@ class VersionCommand(BaseCommand):
     def __init__(self, name):
         super(VersionCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Get the paddle hub version"
+        self.description = "Get the paddle hub version."
 
     def exec(self, argv):
         print("hub %s" % version.hub_version)

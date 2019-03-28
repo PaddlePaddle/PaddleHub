@@ -11,15 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
+import argparse
+
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand, ENTRY
 from paddle_hub.tools import utils
 from paddle_hub.module.manager import default_module_manager
-import argparse
 
 
 class InstallCommand(BaseCommand):
@@ -28,7 +29,7 @@ class InstallCommand(BaseCommand):
     def __init__(self, name):
         super(InstallCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Install the specify module to current environment."
+        self.description = "Install the specific module to current environment."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <module_name>' % (ENTRY, name),

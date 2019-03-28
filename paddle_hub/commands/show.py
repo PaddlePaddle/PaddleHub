@@ -15,12 +15,14 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
+import os
+import argparse
+
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand, ENTRY
 from paddle_hub.module.manager import default_module_manager
 from paddle_hub.module.module import Module
-import os
-import argparse
 
 
 class ShowCommand(BaseCommand):
@@ -29,7 +31,7 @@ class ShowCommand(BaseCommand):
     def __init__(self, name):
         super(ShowCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Show the specify module's info"
+        self.description = "Show the specify module's info."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <module_name/module_dir>' % (ENTRY, name),
@@ -59,7 +61,6 @@ class ShowCommand(BaseCommand):
         show_text += "Author:%s\n" % module.author
         show_text += "Author-Email:%s\n" % module.author_email
         show_text += "Location:%s\n" % module_dir
-        #TODO(wuzewu): add more signature info
         print(show_text)
         return True
 

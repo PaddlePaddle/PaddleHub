@@ -50,5 +50,10 @@ class HubCommand(BaseCommand):
 
 command = HubCommand.instance()
 
+
+def main():
+    command.exec(sys.argv[1:])
+
+
 if __name__ == "__main__":
     command.exec(sys.argv[1:])

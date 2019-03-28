@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 from paddle_hub.tools.logger import logger
 from paddle_hub.commands.base_command import BaseCommand
 from paddle_hub.tools import utils
@@ -28,7 +29,7 @@ class ListCommand(BaseCommand):
     def __init__(self, name):
         super(ListCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "List all module install in current environment."
+        self.description = "List all modules install in current environment."
 
     def exec(self, argv):
         all_modules = default_module_manager.all_modules()

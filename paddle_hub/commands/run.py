@@ -34,7 +34,7 @@ class RunCommand(BaseCommand):
     def __init__(self, name):
         super(RunCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Run the specify module"
+        self.description = "Run the specific module."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <module>' % (ENTRY, name),
