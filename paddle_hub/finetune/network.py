@@ -19,7 +19,6 @@ import time
 import numpy as np
 import multiprocessing
 
-from paddle_hub.finetune.optimization import bert_optimization
 from .task import Task
 
 __all__ = ['append_mlp_classifier']

@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=6
+export CUDA_VISIBLE_DEVICES=2
 
 BERT_BASE_PATH="chinese_L-12_H-768_A-12"
 TASK_NAME='chnsenticorp'

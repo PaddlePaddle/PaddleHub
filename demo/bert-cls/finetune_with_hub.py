@@ -83,7 +83,10 @@ if __name__ == '__main__':
         batch_size=args.batch_size,
         max_seq_len=args.max_seq_len,
         weight_decay=args.weight_decay,
-        in_tokens=args.in_tokens,
+        finetune_strategy="bert_finetune",
+        with_memory_optimization=True,
+        in_tokens=True,
+        optimizer=None,
         warmup_proportion=args.warmup_proportion)
 
     processor = reader.ChnsenticorpProcessor(
@@ -123,4 +126,8 @@ if __name__ == '__main__':
 
         # Finetune and evaluate by PaddleHub's API
         # will finish training, evaluation, testing, save model automatically
-        hub.finetune_and_eval(cls_task, feed_list, processor, config)
+        hub.finetune_and_eval(
+            task=cls_task,
+            data_processor=processor,
+            feed_list=feed_list,
+            config=config)

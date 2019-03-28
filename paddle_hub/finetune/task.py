@@ -19,9 +19,6 @@ import time
 import numpy as np
 import multiprocessing
 
-from paddle_hub.finetune.optimization import bert_optimization
-from paddle_hub.finetune.config import FinetuneConfig
-
 
 class Task(object):
     def __init__(self, task_type, graph_var_dict, main_program,

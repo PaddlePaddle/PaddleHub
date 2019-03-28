@@ -23,17 +23,7 @@ import paddle
 import paddle.fluid as fluid
 
 from paddle_hub.tools.logger import logger
-
-
-def optimizer_config_for_strategy(strategy, parameters, data_processor,
-                                  dev_count):
-    # basic configuration
-    learning_rate = 1e-4
-    optimizer = fluid.optimizer.Adam(learning_rate)
-    regularizer = fluid.regularizer.L2DecayRegularizer(
-        regularization_coeff=1e-4)
-
-    return optimizer
+from paddle_hub.finetune.optimization import bert_finetune
 
 
 def _finetune_model(task,
@@ -51,12 +41,10 @@ def _finetune_model(task,
     learning_rate = config.learning_rate
     use_cuda = config.use_cuda
     batch_size = config.batch_size
-    strategy = config.strategy
     with_memory_optimization = config.with_memory_optimization
     checkpoint_dir = config.checkpoint_dir
 
     with fluid.program_guard(main_program, startup_program):
-
         if use_cuda:
             place = fluid.CUDAPlace(0)
             dev_count = fluid.core.get_cuda_device_count()
@@ -65,17 +53,20 @@ def _finetune_model(task,
             dev_count = int(
                 os.environ.get('CPU_NUM', multiprocessing.cpu_count()))
 
-        optimizer = optimizer_config_for_strategy(
-            strategy=strategy,
-            parameters=None,
-            data_processor=data_processor,
-            dev_count=dev_count)
-        data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
         exe = fluid.Executor(place=place)
-        optimizer.minimize(loss)
+        data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
+
+        if config.finetune_strategy == "bert_finetune":
+            scheduled_lr = bert_finetune(task, main_program, data_processor,
+                                         config, dev_count)
+        elif config.optimizer == "adam":
+            optimzier = fluid.optimizer.Adam(learning_rate=config.learning_rate)
+            optimizer.minimize(loss)
+        #TODO: add more finetune strategy
 
         if with_memory_optimization:
-            logger.info("Memory optimize start")
+            logger.info("Memory optimization start...")
+            optimize_time_begin = time.time()
             fluid.memory_optimize(
                 input_program=fluid.default_main_program(),
                 skip_opt_set=[
@@ -83,7 +74,9 @@ def _finetune_model(task,
                     loss.name,
                     accuracy.name
                 ])
-            logger.info("Memory optimize end")
+            time_used = time.time() - optimize_time_begin
+            logger.info(
+                "Memory optimization done! Time elapsed %f sec" % time_used)
 
         # initilize all parameters
         exe.run(fluid.default_startup_program())
@@ -91,13 +84,12 @@ def _finetune_model(task,
         logger.info("Finetune start")
         train_time_begin = time.time()
         for index in range(epoch):
-            train_reader = paddle.batch(
-                data_processor.data_generator(phase='train'),
-                batch_size=batch_size)
+            train_reader = data_processor.data_generator(
+                batch_size=batch_size, phase='train')
             size = accuracy_sum = loss_sum = 0
             for batch in train_reader():
                 loss_v, accuracy_v = exe.run(
-                    feed=data_feeder.feed(batch),
+                    feed=data_feeder.feed([batch]),
                     fetch_list=[loss.name, accuracy.name])
                 step += 1
                 size += len(batch)
@@ -106,16 +98,16 @@ def _finetune_model(task,
 
                 if step % config.log_interval == 0:
                     train_time_used = time.time() - train_time_begin
-                    perf = train_time_used / config.log_interval
+                    speed = config.log_interval / train_time_used
                     train_time_begin = time.time()
                     logger.info(
                         "step %d: loss=%.5f acc=%.5f [step/sec: %.2f]" %
-                        (step, loss_sum / size, accuracy_sum / size, perf))
+                        (step, loss_sum / size, accuracy_sum / size, speed))
                     size = accuracy_sum = loss_sum = 0
 
                 if step % config.save_ckpt_interval == 0:
-                    model_save_dir = os.path.join(
-                        checkpoint_dir, "model_parameters_in_step%d" % step)
+                    model_save_dir = os.path.join(checkpoint_dir,
+                                                  "step_%d" % step)
                     fluid.io.save_persistables(exe, dirname=model_save_dir)
 
                 if eval_model and step % config.eval_interval == 0:
@@ -123,7 +115,7 @@ def _finetune_model(task,
         # eval before end
         if eval_model:
             eval(task, data_processor, feed_list, config)
-        logger.info("Finetune end")
+        logger.info("Finetune finished")
 
 
 def save_model_and_checkpoint(task, save_dir):
@@ -150,22 +142,22 @@ def eval(task, data_processor, feed_list, config=None):
     accuracy = task.variable("accuracy")
     use_cuda = config.use_cuda
     batch_size = config.batch_size
-    logger.info("[Evaluation] start")
     with fluid.program_guard(inference_program):
         place = fluid.CUDAPlace(0) if use_cuda else fluid.CPUPlace()
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
         exe = fluid.Executor(place=place)
         size = accuracy_sum = loss_sum = 0
-        test_reader = paddle.batch(
-            data_processor.data_generator(phase='test'), batch_size=batch_size)
+        test_reader = data_processor.data_generator(
+            batch_size=batch_size, phase='test')
         eval_time_begin = time.time()
         for index, batch in enumerate(test_reader()):
             loss_v, accuracy_v, = exe.run(
-                feed=data_feeder.feed(batch), fetch_list=[loss, accuracy.name])
+                feed=data_feeder.feed([batch]),
+                fetch_list=[loss, accuracy.name])
             size += len(batch)
             accuracy_sum += accuracy_v * len(batch)
             loss_sum += loss_v * len(batch)
         eval_time_used = time.time() - eval_time_begin
-        perf = eval_time_used / index
+        eval_speed = index / eval_time_used
     logger.info("[Evaluation] loss=%.5f acc=%.5f [step/sec: %.2f]" %
-                (loss_sum / size, accuracy_sum / size, perf))
+                (loss_sum / size, accuracy_sum / size, eval_speed))
