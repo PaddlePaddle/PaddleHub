@@ -72,7 +72,10 @@ class LocalModuleManager:
             return False, tips, None
 
         result, tips, module_zip_file = default_downloader.download_file(
-            url=url, save_path=hub.CACHE_HOME, save_name=module_name)
+            url=url,
+            save_path=hub.CACHE_HOME,
+            save_name=module_name,
+            replace=True)
         result, tips, module_dir = default_downloader.uncompress(
             file=module_zip_file, dirname=hub.MODULE_HOME, delete_file=True)
 
