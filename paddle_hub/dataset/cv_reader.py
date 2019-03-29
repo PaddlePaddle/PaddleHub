@@ -16,6 +16,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import paddle
 import numpy as np
 from PIL import Image
 
@@ -50,7 +51,7 @@ class ImageClassificationReader:
         if self.image_width <= 0 or self.image_height <= 0:
             raise ValueError("Image width and height should not be negative.")
 
-    def data_generator(self, phase, shuffle=False):
+    def data_generator(self, batch_size, phase="train", shuffle=False):
         if phase == "train":
             data = self.dataset.train_data(shuffle)
         elif phase == "test":
@@ -81,4 +82,4 @@ class ImageClassificationReader:
                 image = image[color_mode_dict[self.color_mode], :, :]
                 yield ((image, label))
 
-        return _data_reader
+        return paddle.batch(_data_reader, batch_size=batch_size)

@@ -24,6 +24,9 @@ import paddle.fluid as fluid
 
 from paddle_hub.tools.logger import logger
 from paddle_hub.finetune.optimization import bert_finetune
+from paddle_hub.finetune.checkpoint import load_checkpoint, save_checkpoint
+
+CKPT_FILE = "ckpt.meta"
 
 
 def _finetune_model(task,
@@ -40,9 +43,9 @@ def _finetune_model(task,
     batch_size = config.batch_size
     learning_rate = config.learning_rate
     use_cuda = config.use_cuda
-    batch_size = config.batch_size
     with_memory_optimization = config.with_memory_optimization
     checkpoint_dir = config.checkpoint_dir
+    checkpoint_path = os.path.join(checkpoint_dir, CKPT_FILE)
 
     with fluid.program_guard(main_program, startup_program):
         if use_cuda:
@@ -60,7 +63,7 @@ def _finetune_model(task,
             scheduled_lr = bert_finetune(task, main_program, data_processor,
                                          config, dev_count)
         elif config.optimizer == "adam":
-            optimzier = fluid.optimizer.Adam(learning_rate=config.learning_rate)
+            optimizer = fluid.optimizer.Adam(learning_rate=config.learning_rate)
             optimizer.minimize(loss)
         #TODO: add more finetune strategy
 
@@ -82,18 +85,23 @@ def _finetune_model(task,
             program=main_program, batch_size=batch_size)
         logger.info("Theoretical memory usage in training: %.3f - %.3f %s" %
                     (lower_mem, upper_mem, unit)),
-        # initilize all parameters
-        exe.run(fluid.default_startup_program())
-        step = 0
+        # initilize
+        if os.path.exists(checkpoint_path):
+            last_epoch, step, last_model_dir = load_checkpoint(checkpoint_path)
+            fluid.io.load_persistables(exe, last_model_dir)
+        else:
+            exe.run(fluid.default_startup_program())
+            step = 0
+            last_epoch = 0
         logger.info("Finetune start")
         train_time_begin = time.time()
-        for index in range(epoch):
+        for index in range(last_epoch, epoch):
             train_reader = data_processor.data_generator(
                 batch_size=batch_size, phase='train')
             size = accuracy_sum = loss_sum = 0
             for batch in train_reader():
                 loss_v, accuracy_v = exe.run(
-                    feed=data_feeder.feed([batch]),
+                    feed=data_feeder.feed(batch),
                     fetch_list=[loss.name, accuracy.name])
                 step += 1
                 size += len(batch)
@@ -111,27 +119,36 @@ def _finetune_model(task,
 
                 if step % config.save_ckpt_interval == 0:
                     model_save_dir = os.path.join(checkpoint_dir,
-                                                  "step_%d" % step)
+                                                  "model_in_step_%d" % step)
                     fluid.io.save_persistables(exe, dirname=model_save_dir)
+                    save_checkpoint(
+                        checkpoint_path,
+                        last_epoch=index,
+                        last_step=step,
+                        last_model_dir=model_save_dir)
 
                 if eval_model and step % config.eval_interval == 0:
-                    eval(task, data_processor, feed_list, config)
+                    eval(
+                        task,
+                        data_processor,
+                        feed_list,
+                        phase="validate",
+                        config=config)
+        # update model and checkpoint
+        model_save_dir = os.path.join(checkpoint_dir, "model_latest")
+        fluid.io.save_persistables(exe, dirname=model_save_dir)
+        save_checkpoint(
+            checkpoint_path,
+            last_epoch=epoch + 1,
+            last_step=step,
+            last_model_dir=model_save_dir)
         # eval before end
         if eval_model:
-            eval(task, data_processor, feed_list, config)
+            eval(task, data_processor, feed_list, phase="test", config=config)
         logger.info("Finetune finished")
 
 
-def save_model_and_checkpoint(task, save_dir):
-    pass
-
-
-def finetune_and_eval(
-        task,
-        data_processor,
-        feed_list,
-        config=None,
-):
+def finetune_and_eval(task, data_processor, feed_list, config=None):
     _finetune_model(task, data_processor, feed_list, config, eval_model=True)
 
 
@@ -139,7 +156,7 @@ def finetune(task, data_processor, feed_list, config=None):
     _finetune_model(task, data_processor, feed_list, config, eval_model=False)
 
 
-def eval(task, data_processor, feed_list, config=None):
+def eval(task, data_processor, feed_list, phase="test", config=None):
     inference_program = task.inference_program()
     main_program = task.main_program()
     loss = task.variable("loss")
@@ -152,12 +169,11 @@ def eval(task, data_processor, feed_list, config=None):
         exe = fluid.Executor(place=place)
         size = accuracy_sum = loss_sum = 0
         test_reader = data_processor.data_generator(
-            batch_size=batch_size, phase='test')
+            batch_size=batch_size, phase=phase)
         eval_time_begin = time.time()
         for index, batch in enumerate(test_reader()):
             loss_v, accuracy_v, = exe.run(
-                feed=data_feeder.feed([batch]),
-                fetch_list=[loss, accuracy.name])
+                feed=data_feeder.feed(batch), fetch_list=[loss, accuracy.name])
             size += len(batch)
             accuracy_sum += accuracy_v * len(batch)
             loss_sum += loss_v * len(batch)
