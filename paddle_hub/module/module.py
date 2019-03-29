@@ -255,7 +255,6 @@ class Module:
 
     def get_vocab_path(self):
         for assets_file in self.assets:
-            print(assets_file)
             if "vocab.txt" in assets_file:
                 return assets_file
 

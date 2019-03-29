@@ -109,9 +109,10 @@ class DataProcessor(object):
 
     def get_num_examples(self, phase):
         """Get number of examples for train, dev or test."""
-        if phase not in ['train', 'dev', 'test']:
+        if phase not in ['train', 'validate', 'test']:
             raise ValueError(
-                "Unknown phase, which should be in ['train', 'dev', 'test'].")
+                "Unknown phase, which should be in ['train', 'validate, 'test']."
+            )
         return self.num_examples[phase]
 
     def get_train_progress(self):
@@ -131,9 +132,9 @@ class DataProcessor(object):
         if phase == 'train':
             examples = self.get_train_examples(self.data_dir)
             self.num_examples['train'] = len(examples)
-        elif phase == 'dev':
+        elif phase == 'validate':
             examples = self.get_dev_examples(self.data_dir)
-            self.num_examples['dev'] = len(examples)
+            self.num_examples['validate'] = len(examples)
         elif phase == 'test':
             examples = self.get_test_examples(self.data_dir)
             self.num_examples['test'] = len(examples)
@@ -190,7 +191,7 @@ class DataProcessor(object):
                     return_input_mask=True,
                     return_max_len=True,
                     return_num_token=False)
-                yield batch_data
+                yield [batch_data]
 
         return wrapper
 
@@ -439,6 +440,41 @@ class ColaProcessor(DataProcessor):
 
 
 class ChnsenticorpProcessor(DataProcessor):
+    """Processor for the Chnsenticorp data set."""
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, "train.tsv")), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, "dev.tsv")), "dev")
+
+    def get_test_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, "test.tsv")), "test")
+
+    def get_labels(self):
+        """See base class."""
+        return ["0", "1"]
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            guid = "%s-%s" % (set_type, i)
+            text_a = tokenization.convert_to_unicode(line[1])
+            label = tokenization.convert_to_unicode(line[0])
+            examples.append(
+                InputExample(
+                    guid=guid, text_a=text_a, text_b=None, label=label))
+        return examples
+
+
+class BERTClassifyReader(DataProcessor):
     """Processor for the Chnsenticorp data set."""
 
     def get_train_examples(self, data_dir):
