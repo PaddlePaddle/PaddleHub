@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle_hub.module import module_desc_pb2
-from paddle_hub.tools.logger import logger
+from paddle_hub.common.logger import logger
 import paddle
 import paddle.fluid as fluid
 import os

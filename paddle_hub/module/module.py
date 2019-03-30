@@ -15,10 +15,10 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from paddle_hub.tools import utils
-from paddle_hub.tools.logger import logger
-from paddle_hub.tools.downloader import default_downloader
-from paddle_hub.tools import paddle_helper
+from paddle_hub.common import utils
+from paddle_hub.common.logger import logger
+from paddle_hub.common.downloader import default_downloader
+from paddle_hub.common import paddle_helper
 from paddle_hub.module import module_desc_pb2
 from paddle_hub.module import check_info_pb2
 from paddle_hub.module.signature import Signature, create_signature
@@ -458,7 +458,6 @@ class Module(object):
         # TODO(ZeyuChen) encapsulate into a funtion
         # update BERT/ERNIE's input tensor's sequence length to max_seq_len
         if self.name.startswith("bert") or self.name.startswith("ernie"):
-            print("module_name", self.name)
             MAX_SEQ_LENGTH = 512
             if max_seq_len > MAX_SEQ_LENGTH or max_seq_len <= 0:
                 raise ValueError(

@@ -15,8 +15,8 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from paddle_hub.tools import utils
-from paddle_hub.tools.downloader import default_downloader
+from paddle_hub.common import utils
+from paddle_hub.common.downloader import default_downloader
 from paddle_hub.io.reader import csv_reader
 import os
 import time

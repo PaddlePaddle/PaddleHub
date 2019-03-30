@@ -14,8 +14,8 @@
 
 from enum import Enum
 from PIL import Image
-from paddle_hub.tools.logger import logger
-from paddle_hub.tools import utils
+from paddle_hub.common.logger import logger
+from paddle_hub.common import utils
 
 
 class DataType(Enum):

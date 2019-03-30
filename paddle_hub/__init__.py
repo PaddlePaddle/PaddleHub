@@ -11,21 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from .dir import USER_HOME
-from .dir import HUB_HOME
-from .dir import MODULE_HOME
-from .dir import CACHE_HOME
 from . import module
-from . import tools
+from . import common
 from . import io
+
+from .common.dir import USER_HOME
+from .common.dir import HUB_HOME
+from .common.dir import MODULE_HOME
+from .common.dir import CACHE_HOME
+from .common.logger import logger
+from .common.paddle_helper import connect_program
+from .common.hub_server import default_hub_server
+
 from .module.module import Module, create_module
 from .module.base_processor import BaseProcessor
 from .module.signature import Signature, create_signature
 from .module.manager import default_module_manager
-from .tools.logger import logger
-from .tools.paddle_helper import connect_program
+
 from .io.type import DataType
-from .hub_server import default_hub_server
+
 from .finetune.network import append_mlp_classifier
 from .finetune.finetune import finetune_and_eval
 from .finetune.config import FinetuneConfig

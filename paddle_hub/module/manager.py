@@ -19,8 +19,8 @@ from __future__ import print_function
 import os
 import shutil
 
-from paddle_hub.tools import utils
-from paddle_hub.tools.downloader import default_downloader
+from paddle_hub.common import utils
+from paddle_hub.common.downloader import default_downloader
 import paddle_hub as hub
 
 

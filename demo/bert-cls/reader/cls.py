@@ -93,6 +93,7 @@ class DataProcessor(object):
             batch_data,
             total_token_num,
             voc_size=-1,
+            max_seq_len=self.max_seq_len,
             pad_id=self.vocab["[PAD]"],
             cls_id=self.vocab["[CLS]"],
             sep_id=self.vocab["[SEP]"],

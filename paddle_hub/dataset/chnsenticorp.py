@@ -22,7 +22,21 @@ from collections import namedtuple
 DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/chnsenticorp_data.tar.gz"
 
 
-class ChnSentiCorp(object):
+class HubDataset(object):
+    def get_train_examples(self):
+        raise NotImplementedError()
+
+    def get_dev_examples(self):
+        raise NotImplementedError()
+
+    def get_test_examples(self):
+        raise NotImplementedError()
+
+    def get_val_examples(self):
+        return self.get_dev_examples()
+
+
+class ChnSentiCorp(HubDataset):
     def __init__(self):
         ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
             url=DATA_URL, save_path=DATA_HOME, print_progress=True)

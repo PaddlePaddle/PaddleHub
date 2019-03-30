@@ -23,7 +23,7 @@ import paddle
 import paddle.fluid as fluid
 from visualdl import LogWriter
 
-from paddle_hub.tools.logger import logger
+from paddle_hub.common.logger import logger
 from paddle_hub.finetune.optimization import bert_finetune
 from paddle_hub.finetune.checkpoint import load_checkpoint, save_checkpoint
 

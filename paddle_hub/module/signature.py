@@ -16,7 +16,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from paddle.fluid.framework import Variable
-from paddle_hub.tools.utils import to_list
+from paddle_hub.common.utils import to_list
 
 
 class Signature:

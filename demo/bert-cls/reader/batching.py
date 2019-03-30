@@ -77,6 +77,7 @@ def mask(batch_tokens, total_token_num, vocab_size, CLS=1, SEP=2, MASK=3):
 def prepare_batch_data(insts,
                        total_token_num,
                        voc_size=0,
+                       max_seq_len=128,
                        pad_id=None,
                        cls_id=None,
                        sep_id=None,
@@ -115,15 +116,17 @@ def prepare_batch_data(insts,
         out = batch_src_ids
     # Second step: padding
     src_id, self_input_mask = pad_batch_data(
-        out, pad_idx=pad_id, return_input_mask=True)
+        out, pad_idx=pad_id, max_seq_len=max_seq_len, return_input_mask=True)
     pos_id = pad_batch_data(
         batch_pos_ids,
         pad_idx=pad_id,
+        max_seq_len=max_seq_len,
         return_pos=False,
         return_input_mask=False)
     sent_id = pad_batch_data(
         batch_sent_ids,
         pad_idx=pad_id,
+        max_seq_len=max_seq_len,
         return_pos=False,
         return_input_mask=False)
 
@@ -139,6 +142,7 @@ def prepare_batch_data(insts,
 
 def pad_batch_data(insts,
                    pad_idx=0,
+                   max_seq_len=128,
                    return_pos=False,
                    return_input_mask=False,
                    return_max_len=False,
@@ -149,7 +153,7 @@ def pad_batch_data(insts,
     """
     return_list = []
     #max_len = max(len(inst) for inst in insts)
-    max_len = 50
+    max_len = max_seq_len
     # Any token included in dict can be used to pad, since the paddings' loss
     # will be masked out by weights and make no effect on parameter gradients.
 

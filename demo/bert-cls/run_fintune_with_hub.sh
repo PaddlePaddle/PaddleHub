@@ -15,5 +15,5 @@ python -u finetune_with_hub.py \
                    --checkpoint_dir $CKPT_DIR \
                    --warmup_proportion 0.0 \
                    --epoch 3 \
-                   --max_seq_len 50 \
+                   --max_seq_len 128 \
                    --learning_rate 5e-5

@@ -15,9 +15,9 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from paddle_hub.module import module_desc_pb2
-from paddle_hub.tools.utils import from_pyobj_to_flexible_data, from_flexible_data_to_pyobj
-from paddle_hub.tools.logger import logger
+from ..module import module_desc_pb2
+from .utils import from_pyobj_to_flexible_data, from_flexible_data_to_pyobj
+from .logger import logger
 import paddle
 import paddle.fluid as fluid
 import copy
