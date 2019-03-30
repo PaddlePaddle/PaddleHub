@@ -21,6 +21,7 @@ import time
 
 import paddle
 import paddle.fluid as fluid
+from visualdl import LogWriter
 
 from paddle_hub.tools.logger import logger
 from paddle_hub.finetune.optimization import bert_finetune
@@ -46,6 +47,8 @@ def _finetune_model(task,
     with_memory_optimization = config.with_memory_optimization
     checkpoint_dir = config.checkpoint_dir
     checkpoint_path = os.path.join(checkpoint_dir, CKPT_FILE)
+    log_writter = LogWriter(
+        os.path.join(checkpoint_dir, "vdllog"), sync_cycle=10)
 
     with fluid.program_guard(main_program, startup_program):
         if use_cuda:
@@ -93,7 +96,17 @@ def _finetune_model(task,
             exe.run(fluid.default_startup_program())
             step = 0
             last_epoch = 0
+        best_eval_acc = 0
         logger.info("Finetune start")
+
+        # add visualdl scalar
+        with log_writter.mode("train") as logw:
+            train_loss_scalar = logw.scalar(tag="loss[train]")
+            train_acc_scalar = logw.scalar(tag="accuracy[train]")
+        with log_writter.mode("evaluate") as logw:
+            eval_loss_scalar = logw.scalar(tag="loss[evaluate]")
+            eval_acc_scalar = logw.scalar(tag="accuracy[evaluate]")
+
         train_time_begin = time.time()
         for index in range(last_epoch, epoch):
             train_reader = data_processor.data_generator(
@@ -108,6 +121,7 @@ def _finetune_model(task,
                 accuracy_sum += accuracy_v * len(batch)
                 loss_sum += loss_v * len(batch)
 
+                # print log
                 if step % config.log_interval == 0:
                     train_time_used = time.time() - train_time_begin
                     speed = config.log_interval / train_time_used
@@ -115,6 +129,13 @@ def _finetune_model(task,
                     logger.info(
                         "step %d: loss=%.5f acc=%.5f [step/sec: %.2f]" %
                         (step, loss_sum / size, accuracy_sum / size, speed))
+
+                    # record visualdl log
+                    record_step = step
+                    train_loss_scalar.add_record(record_step, loss_sum / size)
+                    train_acc_scalar.add_record(record_step,
+                                                accuracy_sum / size)
+
                     size = accuracy_sum = loss_sum = 0
 
                 if step % config.save_ckpt_interval == 0:
@@ -128,12 +149,21 @@ def _finetune_model(task,
                         last_model_dir=model_save_dir)
 
                 if eval_model and step % config.eval_interval == 0:
-                    eval(
+                    eval_loss, eval_acc, eval_perf = evaluate(
                         task,
                         data_processor,
                         feed_list,
                         phase="validate",
                         config=config)
+                    record_step = step
+                    eval_loss_scalar.add_record(record_step, eval_loss)
+                    eval_acc_scalar.add_record(record_step, eval_acc)
+                    if eval_acc > best_eval_acc:
+                        best_eval_acc = eval_acc
+                        model_save_dir = os.path.join(checkpoint_dir,
+                                                      "model_best")
+                        fluid.io.save_persistables(exe, dirname=model_save_dir)
+
         # update model and checkpoint
         model_save_dir = os.path.join(checkpoint_dir, "model_latest")
         fluid.io.save_persistables(exe, dirname=model_save_dir)
@@ -144,7 +174,8 @@ def _finetune_model(task,
             last_model_dir=model_save_dir)
         # eval before end
         if eval_model:
-            eval(task, data_processor, feed_list, phase="test", config=config)
+            evaluate(
+                task, data_processor, feed_list, phase="test", config=config)
         logger.info("Finetune finished")
 
 
@@ -156,7 +187,7 @@ def finetune(task, data_processor, feed_list, config=None):
     _finetune_model(task, data_processor, feed_list, config, eval_model=False)
 
 
-def eval(task, data_processor, feed_list, phase="test", config=None):
+def evaluate(task, data_processor, feed_list, phase="test", config=None):
     inference_program = task.inference_program()
     main_program = task.main_program()
     loss = task.variable("loss")
@@ -181,3 +212,5 @@ def eval(task, data_processor, feed_list, phase="test", config=None):
         eval_speed = index / eval_time_used
     logger.info("[Evaluation] loss=%.5f acc=%.5f [step/sec: %.2f]" %
                 (loss_sum / size, accuracy_sum / size, eval_speed))
+
+    return loss_sum / size, accuracy_sum / size, eval_speed
