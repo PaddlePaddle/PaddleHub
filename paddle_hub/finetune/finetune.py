@@ -41,8 +41,7 @@ def _get_running_device_info(config):
     return place, dev_count
 
 
-def _finetune_model(task, data_processor, feed_list, config=None,
-                    do_eval=False):
+def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
     main_program = task.main_program()
     startup_program = task.startup_program()
     loss = task.variable("loss")
@@ -52,10 +51,9 @@ def _finetune_model(task, data_processor, feed_list, config=None,
     batch_size = config.batch_size
     learning_rate = config.learning_rate
     with_memory_optimization = config.with_memory_optimization
-    checkpoint_dir = config.checkpoint_dir
-    checkpoint_path = os.path.join(checkpoint_dir, CKPT_FILE)
+    checkpoint_path = os.path.join(config.checkpoint_dir, CKPT_FILE)
     log_writter = LogWriter(
-        os.path.join(checkpoint_dir, "vdllog"), sync_cycle=10)
+        os.path.join(config.checkpoint_dir, "vdllog"), sync_cycle=10)
 
     place, dev_count = _get_running_device_info(config)
     with fluid.program_guard(main_program, startup_program):
@@ -64,7 +62,7 @@ def _finetune_model(task, data_processor, feed_list, config=None,
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
 
         if config.finetune_strategy == "bert_finetune":
-            scheduled_lr = bert_finetune(task, main_program, data_processor,
+            scheduled_lr = bert_finetune(task, main_program, data_reader,
                                          config, dev_count)
         elif config.optimizer == "adam":
             optimizer = fluid.optimizer.Adam(learning_rate=config.learning_rate)
@@ -112,7 +110,7 @@ def _finetune_model(task, data_processor, feed_list, config=None,
             eval_acc_scalar = logw.scalar(tag="accuracy[evaluate]")
 
         for epoch in range(last_epoch, num_epoch + 1):
-            train_reader = data_processor.data_generator(
+            train_reader = data_reader.data_generator(
                 batch_size=batch_size, phase='train')
             num_trained_examples = acc_sum = loss_sum = 0
             for batch in train_reader():
@@ -144,7 +142,7 @@ def _finetune_model(task, data_processor, feed_list, config=None,
 
                 if global_step % config.save_ckpt_interval == 0:
                     model_saved_dir = os.path.join(
-                        checkpoint_dir, "model_in_step_%d" % global_step)
+                        config.checkpoint_dir, "model_in_step_%d" % global_step)
                     fluid.io.save_persistables(exe, dirname=model_saved_dir)
                     # NOTE: current saved checkpoint machanism is not completed,
                     # it can't restore dataset training status
@@ -157,7 +155,7 @@ def _finetune_model(task, data_processor, feed_list, config=None,
                 if do_eval and global_step % config.eval_interval == 0:
                     eval_loss, eval_acc, eval_perf = evaluate(
                         task,
-                        data_processor,
+                        data_reader,
                         feed_list,
                         phase="val",
                         config=config)
@@ -165,7 +163,7 @@ def _finetune_model(task, data_processor, feed_list, config=None,
                     eval_acc_scalar.add_record(global_step, eval_acc)
                     if eval_acc > best_eval_acc:
                         best_eval_acc = eval_acc
-                        model_saved_dir = os.path.join(checkpoint_dir,
+                        model_saved_dir = os.path.join(config.checkpoint_dir,
                                                        "best_model")
                         logger.info(
                             "best model saved to %s [best accuracy=%.5f]" %
@@ -173,7 +171,7 @@ def _finetune_model(task, data_processor, feed_list, config=None,
                         fluid.io.save_persistables(exe, dirname=model_saved_dir)
 
         # update model and checkpoint
-        model_saved_dir = os.path.join(checkpoint_dir, "final_model")
+        model_saved_dir = os.path.join(config.checkpoint_dir, "final_model")
         fluid.io.save_persistables(exe, dirname=model_saved_dir)
         # NOTE: current saved checkpoint machanism is not completed, it can't
         # resotre dataset training status
@@ -184,20 +182,19 @@ def _finetune_model(task, data_processor, feed_list, config=None,
             last_model_dir=model_saved_dir)
 
         if do_eval:
-            evaluate(
-                task, data_processor, feed_list, phase="test", config=config)
+            evaluate(task, data_reader, feed_list, phase="test", config=config)
         logger.info("PaddleHub finetune finished.")
 
 
-def finetune_and_eval(task, data_processor, feed_list, config=None):
-    _finetune_model(task, data_processor, feed_list, config, do_eval=True)
+def finetune_and_eval(task, data_reader, feed_list, config=None):
+    _finetune_model(task, data_reader, feed_list, config, do_eval=True)
 
 
-def finetune(task, data_processor, feed_list, config=None):
-    _finetune_model(task, data_processor, feed_list, config, do_eval=False)
+def finetune(task, data_reader, feed_list, config=None):
+    _finetune_model(task, data_reader, feed_list, config, do_eval=False)
 
 
-def evaluate(task, data_processor, feed_list, phase="test", config=None):
+def evaluate(task, data_reader, feed_list, phase="test", config=None):
     inference_program = task.inference_program()
     main_program = task.main_program()
     loss = task.variable("loss")
@@ -208,7 +205,7 @@ def evaluate(task, data_processor, feed_list, phase="test", config=None):
     with fluid.program_guard(inference_program):
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
         num_eval_examples = acc_sum = loss_sum = 0
-        test_reader = data_processor.data_generator(
+        test_reader = data_reader.data_generator(
             batch_size=batch_size, phase=phase)
         eval_time_begin = time.time()
         eval_step = 0

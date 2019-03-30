@@ -37,6 +37,11 @@ import paddle.fluid as fluid
 __all__ = ['Module', 'create_module']
 
 
+def set_max_seq_len(program, input_dict):
+    """ Set """
+    pass
+
+
 def create_module(sign_arr,
                   module_dir,
                   processor=None,
@@ -62,7 +67,7 @@ PROCESSOR_NAME = "processor"
 HUB_VAR_PREFIX = "@HUB_%s@"
 
 
-class ModuleHelper:
+class ModuleHelper(object):
     def __init__(self, module_dir):
         self.module_dir = module_dir
 
@@ -82,7 +87,7 @@ class ModuleHelper:
         return os.path.join(self.module_dir, ASSETS_DIRNAME)
 
 
-class Module:
+class Module(object):
     def __init__(self,
                  url=None,
                  module_dir=None,
@@ -116,7 +121,7 @@ class Module:
             self._generate_module_info(module_info)
             self._init_with_signature(signatures=signatures)
         else:
-            raise "Error! HubModule Can't init with nothing"
+            raise "Error! HubModule can't init with nothing"
 
     def _init_with_url(self, url):
         utils.check_url(url)
@@ -405,7 +410,13 @@ class Module:
                 for_test=False,
                 trainable=False,
                 regularizer=None,
+                max_seq_len=128,
                 learning_rate=1e-3):
+        """
+        Args:
+            max_seq_len(int): maximum sequence length, this option is only
+            available for BERT/ERNIE module
+        """
 
         assert sign_name in self.signatures, "module did not have a signature with name %s" % sign_name
         signature = self.signatures[sign_name]
@@ -444,11 +455,32 @@ class Module:
             if key:
                 fetch_dict[key] = program.global_block().var(var.name)
 
+        # TODO(ZeyuChen) encapsulate into a funtion
+        # update BERT/ERNIE's input tensor's sequence length to max_seq_len
+        if self.name.startswith("bert") or self.name.startswith("ernie"):
+            print("module_name", self.name)
+            MAX_SEQ_LENGTH = 512
+            if max_seq_len > MAX_SEQ_LENGTH or max_seq_len <= 0:
+                raise ValueError(
+                    "max_seq_len({}) should be in the range of [1, {}]".format(
+                        MAX_SEQ_LENGTH))
+            logger.info(
+                "update maximum sequence length of input tensor to {}".format(
+                    max_seq_len))
+            for tensor_name in [
+                    "input_ids", "position_ids", "segment_ids", "input_mask"
+            ]:
+                seq_tensor_shape = [-1, max_seq_len, 1]
+                logger.info("The shape of input tensor[{}] set to {}".format(
+                    tensor_name, seq_tensor_shape))
+                program.global_block().var(
+                    feed_dict[tensor_name].name).desc.set_shape(
+                        seq_tensor_shape)
+
         # record num parameters loaded by paddlehub
         num_param_loaded = 0
         for param in program.global_block().iter_parameters():
             num_param_loaded += 1
-            # logger.debug("%s %s" % (param.name, param.optimize_attr))
         logger.info(
             "%d pretrained paramaters loaded by PaddleHub" % num_param_loaded)
 

@@ -27,6 +27,7 @@ import paddle.fluid as fluid
 import paddle_hub as hub
 
 import reader.cls as reader
+import reader.task_reader as task_reader
 from utils.args import ArgumentGroup, print_arguments
 from paddle_hub.finetune.config import FinetuneConfig
 
@@ -36,6 +37,7 @@ parser = argparse.ArgumentParser(__doc__)
 train_g = ArgumentGroup(parser, "training", "training options.")
 train_g.add_arg("epoch",             int,    3,       "Number of epoches for fine-tuning.")
 train_g.add_arg("learning_rate",     float,  5e-5,    "Learning rate used to train with warmup.")
+train_g.add_arg("hub_module_dir",    str,  None,    "PaddleHub module directory")
 train_g.add_arg("lr_scheduler",      str,    "linear_warmup_decay", "scheduler of learning rate.", choices=['linear_warmup_decay', 'noam_decay'])
 train_g.add_arg("weight_decay",      float,  0.01,    "Weight decay rate for L2 regularizer.")
 train_g.add_arg("warmup_proportion", float,  0.1,
@@ -43,12 +45,10 @@ train_g.add_arg("warmup_proportion", float,  0.1,
 
 data_g = ArgumentGroup(parser, "data", "Data paths, vocab paths and data processing options")
 data_g.add_arg("data_dir",      str,  None,  "Path to training data.")
+data_g.add_arg("checkpoint_dir", str,  None,  "Directory to model checkpoint")
 data_g.add_arg("vocab_path",    str,  None,  "Vocabulary path.")
 data_g.add_arg("max_seq_len",   int,  512,   "Number of words of the longest seqence.")
 data_g.add_arg("batch_size",    int,  32,    "Total examples' number in batch for training. see also --in_tokens.")
-data_g.add_arg("in_tokens",     bool, False,
-              "If set, the batch size will be the maximum number of tokens in one batch. "
-              "Otherwise, it will be the maximum number of examples in one batch.")
 
 args = parser.parse_args()
 # yapf: enable.
@@ -60,7 +60,7 @@ if __name__ == '__main__':
         eval_interval=100,
         save_ckpt_interval=200,
         use_cuda=True,
-        checkpoint_dir="./bert_cls_ckpt",
+        checkpoint_dir=args.checkpoint_dir,
         learning_rate=args.learning_rate,
         num_epoch=args.epoch,
         batch_size=args.batch_size,
@@ -72,34 +72,31 @@ if __name__ == '__main__':
         optimizer=None,
         warmup_proportion=args.warmup_proportion)
 
-    # loading paddlehub BERT
-    # module = hub.Module(
-    #     module_dir="./hub_module/chinese_L-12_H-768_A-12.hub_module")
-    module = hub.Module(module_dir="./hub_module/ernie-stable.hub_module")
+    # loading Paddlehub BERT
+    module = hub.Module(module_dir=args.hub_module_dir)
 
-    processor = reader.BERTClassifyReader(
+    reader = reader.BERTClassifyReader(
         data_dir=args.data_dir,
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
 
-    num_labels = len(processor.get_labels())
+    num_labels = len(reader.get_labels())
 
-    # bert's input tensor, output tensor and forward graph
-    # If you want to fine-tune the pretrain model parameter, please set
-    # trainable to True
-    input_dict, output_dict, train_program = module.context(
-        sign_name="pooled_output", trainable=True)
+    input_dict, output_dict, program = module.context(
+        sign_name="tokens", trainable=True, max_seq_len=args.max_seq_len)
 
-    with fluid.program_guard(train_program):
+    with fluid.program_guard(program):
         label = fluid.layers.data(name="label", shape=[1], dtype='int64')
 
+        # Use "pooled_output" for classification tasks on an entire sentence.
+        # Use "sequence_outputs" for token-level output.
         pooled_output = output_dict["pooled_output"]
 
         # Setup feed list for data feeder
         # Must feed all the tensor of bert's module need
         feed_list = [
-            input_dict["src_ids"].name, input_dict["pos_ids"].name,
-            input_dict["sent_ids"].name, input_dict["input_mask"].name,
+            input_dict["input_ids"].name, input_dict["position_ids"].name,
+            input_dict["segment_ids"].name, input_dict["input_mask"].name,
             label.name
         ]
         # Define a classfication finetune task by PaddleHub's API
@@ -110,6 +107,6 @@ if __name__ == '__main__':
         # will finish training, evaluation, testing, save model automatically
         hub.finetune_and_eval(
             task=cls_task,
-            data_processor=processor,
+            data_reader=reader,
             feed_list=feed_list,
             config=config)

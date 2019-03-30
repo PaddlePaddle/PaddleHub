@@ -148,7 +148,8 @@ def pad_batch_data(insts,
     corresponding position data and input mask.
     """
     return_list = []
-    max_len = max(len(inst) for inst in insts)
+    #max_len = max(len(inst) for inst in insts)
+    max_len = 50
     # Any token included in dict can be used to pad, since the paddings' loss
     # will be masked out by weights and make no effect on parameter gradients.
 
