@@ -73,9 +73,9 @@ if __name__ == '__main__':
         warmup_proportion=args.warmup_proportion)
 
     # loading paddlehub BERT
-    module = hub.Module(
-        module_dir="./hub_module/chinese_L-12_H-768_A-12.hub_module")
-    # module = hub.Module(module_dir="./hub_module/ernie-stable.hub_module")
+    # module = hub.Module(
+    #     module_dir="./hub_module/chinese_L-12_H-768_A-12.hub_module")
+    module = hub.Module(module_dir="./hub_module/ernie-stable.hub_module")
 
     processor = reader.BERTClassifyReader(
         data_dir=args.data_dir,

@@ -51,6 +51,10 @@ class DataProcessor(object):
         """Gets a collection of `InputExample`s for the dev set."""
         raise NotImplementedError()
 
+    def get_val_examples(self, data_dir):
+        """Gets a collection of `InputExample`s for the val set."""
+        raise NotImplementedError()
+
     def get_test_examples(self, data_dir):
         """Gets a collection of `InputExample`s for prediction."""
         raise NotImplementedError()
@@ -109,9 +113,9 @@ class DataProcessor(object):
 
     def get_num_examples(self, phase):
         """Get number of examples for train, dev or test."""
-        if phase not in ['train', 'validate', 'test']:
+        if phase not in ['train', 'val', 'dev', 'test']:
             raise ValueError(
-                "Unknown phase, which should be in ['train', 'validate, 'test']."
+                "Unknown phase, which should be in ['train', 'val'/'dev', 'test']."
             )
         return self.num_examples[phase]
 
@@ -132,9 +136,9 @@ class DataProcessor(object):
         if phase == 'train':
             examples = self.get_train_examples(self.data_dir)
             self.num_examples['train'] = len(examples)
-        elif phase == 'validate':
+        elif phase == 'val' or phase == 'dev':
             examples = self.get_dev_examples(self.data_dir)
-            self.num_examples['validate'] = len(examples)
+            self.num_examples['dev'] = len(examples)
         elif phase == 'test':
             examples = self.get_test_examples(self.data_dir)
             self.num_examples['test'] = len(examples)

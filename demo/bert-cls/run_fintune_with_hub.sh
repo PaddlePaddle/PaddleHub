@@ -2,7 +2,7 @@ export CUDA_VISIBLE_DEVICES=5
 
 DATA_PATH=./chnsenticorp_data
 
-rm -rf $CKPT_PATH
+rm -rf ./bert_cls_ckpt
 python -u finetune_with_hub.py \
                    --batch_size 32 \
                    --in_tokens false \

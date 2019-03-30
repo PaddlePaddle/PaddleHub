@@ -444,8 +444,13 @@ class Module:
             if key:
                 fetch_dict[key] = program.global_block().var(var.name)
 
+        # record num parameters loaded by paddlehub
+        num_param_loaded = 0
         for param in program.global_block().iter_parameters():
-            logger.debug("%s %s" % (param.name, param.optimize_attr))
+            num_param_loaded += 1
+            # logger.debug("%s %s" % (param.name, param.optimize_attr))
+        logger.info(
+            "%d pretrained paramaters loaded by PaddleHub" % num_param_loaded)
 
         return feed_dict, fetch_dict, program
 
@@ -490,9 +495,10 @@ class Module:
 
         # create module pb
         module_desc = module_desc_pb2.ModuleDesc()
-        logger.info("hub version is %s" % version.hub_version)
-        logger.info("module proto version is %s" % version.module_proto_version)
-        logger.info("paddle version is %s" % paddle.__version__)
+        logger.info("PaddleHub version = %s" % version.hub_version)
+        logger.info("PaddleHub Module proto version = %s" %
+                    version.module_proto_version)
+        logger.info("Paddle version = %s" % paddle.__version__)
 
         feeded_var_names = [
             input.name for key, sign in self.signatures.items()
