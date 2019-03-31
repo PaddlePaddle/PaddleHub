@@ -58,7 +58,7 @@ if __name__ == '__main__':
     config = FinetuneConfig(
         log_interval=10,
         eval_interval=100,
-        save_ckpt_interval=200,
+        save_ckpt_interval=50,
         use_cuda=True,
         checkpoint_dir=args.checkpoint_dir,
         learning_rate=args.learning_rate,
@@ -67,8 +67,7 @@ if __name__ == '__main__':
         max_seq_len=args.max_seq_len,
         weight_decay=args.weight_decay,
         finetune_strategy="bert_finetune",
-        with_memory_optimization=True,
-        in_tokens=False,
+        enable_memory_optim=True,
         optimizer=None,
         warmup_proportion=args.warmup_proportion)
 

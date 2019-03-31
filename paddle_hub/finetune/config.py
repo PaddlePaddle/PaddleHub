@@ -14,24 +14,93 @@
 
 import collections
 
-FinetuneConfig = collections.namedtuple(
-    'FinetuneConfig',
-    [
-        'log_interval',  # print training log every n step
-        'eval_interval',  # evalution the model every n steps
-        'save_ckpt_interval',  # save the model checkpoint every n steps
-        'use_cuda',  # use gpu or not
-        'learning_rate',
-        'checkpoint_dir',  # model checkpoint directory
-        'num_epoch',  # number of finetune epoch
-        'batch_size',
-        # for bert parameter
-        'max_seq_len',  # for bert
-        'weight_decay',  # for bert
-        'warmup_proportion',  # for bert
-        'in_tokens',  # for bert
-        'finetune_strategy',
-        'with_memory_optimization',
-        # learning rate scheduler
-        'optimizer'
-    ])
+
+class FinetuneConfig(object):
+    """ This class specifies the configurations for PaddleHub to finetune """
+
+    def __init__(self,
+                 log_interval=10,
+                 eval_interval=100,
+                 save_ckpt_interval=None,
+                 use_cuda=False,
+                 learning_rate=1e-4,
+                 checkpoint_dir=None,
+                 num_epoch=10,
+                 batch_size=None,
+                 max_seq_len=128,
+                 weight_decay=None,
+                 warmup_proportion=0.0,
+                 finetune_strategy=None,
+                 enable_memory_optim=True,
+                 optimizer="adam"):
+        """ Construct finetune Config """
+        self._log_interval = log_interval
+        self._eval_interval = eval_interval
+        self._save_ckpt_interval = save_ckpt_interval
+        self._use_cuda = use_cuda
+        self._learning_rate = learning_rate
+        self._checkpoint_dir = checkpoint_dir
+        self._num_epoch = num_epoch
+        self._batch_size = batch_size
+        self._max_seq_len = max_seq_len
+        self._weight_decay = weight_decay
+        self._warmup_proportion = warmup_proportion
+        self._finetune_strategy = finetune_strategy
+        self._enable_memory_optim = enable_memory_optim
+        self._optimizer = optimizer
+
+    @property
+    def log_interval(self):
+        return self._log_interval
+
+    @property
+    def eval_interval(self):
+        return self._eval_interval
+
+    @property
+    def save_ckpt_interval(self):
+        return self._save_ckpt_interval
+
+    @property
+    def use_cuda(self):
+        return self._use_cuda
+
+    @property
+    def learning_rate(self):
+        return self._learning_rate
+
+    @property
+    def checkpoint_dir(self):
+        return self._checkpoint_dir
+
+    @property
+    def num_epoch(self):
+        return self._num_epoch
+
+    @property
+    def batch_size(self):
+        return self._batch_size
+
+    @property
+    def max_seq_len(self):
+        return self._max_seq_len
+
+    @property
+    def weight_decay(self):
+        return self._weight_decay
+
+    @property
+    def warmup_proportion(self):
+        return self._warmup_proportion
+
+    @property
+    def finetune_strategy(self):
+        return self._finetune_strategy
+
+    @property
+    def enable_memory_optim(self):
+        return self._enable_memory_optim
+
+    @property
+    def optimier(self):
+        return self._optimizer

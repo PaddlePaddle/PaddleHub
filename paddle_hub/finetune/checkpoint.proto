@@ -1,4 +1,4 @@
-// Copyright 2018 The Paddle Authors. All Rights Reserved.
+// Copyright 2019 The Paddle Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ option optimize_for = LITE_RUNTIME;
 package paddle_hub_finetune_checkpoint;
 
 message CheckPoint {
-  int64 last_epoch = 1;
-  int64 last_step = 2;
-  string last_model_dir = 3;
+  int64 current_epoch = 1;
+  int64 global_step = 2;
+  string latest_model_dir = 3;
 }

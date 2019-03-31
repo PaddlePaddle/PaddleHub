@@ -16,20 +16,50 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+
+import paddle.fluid as fluid
+
 from paddle_hub.finetune import checkpoint_pb2
+from paddle_hub.common.logger import logger
+
+CKPT_FILE_NAME = "ckpt.meta"
 
 
-def load_checkpoint(checkpoint_path):
+def load_checkpoint(checkpoint_dir, exe):
+    ckpt_meta_path = os.path.join(checkpoint_dir, CKPT_FILE_NAME)
+    logger.info("Try loading checkpoint from {}".format(ckpt_meta_path))
+    if os.path.exists(ckpt_meta_path):
+        ckpt = checkpoint_pb2.CheckPoint()
+        with open(ckpt_meta_path, "rb") as f:
+            ckpt.ParseFromString(f.read())
+
+        fluid.io.load_persistables(exe, ckpt.latest_model_dir)
+
+        logger.info("Checkpoint loaded. current_epoch={},"
+                    "global_step={}".format(ckpt_meta_path, current_epoch,
+                                            global_step))
+        return ckpt.current_epoch, ckpt.global_step
+    else:
+        current_epoch = 1
+        global_step = 0
+        latest_model_dir = None
+        logger.info("Checkpoint not found, start training from scratch...")
+        exe.run(fluid.default_startup_program())
+
+        return current_epoch, global_step
+
+
+def save_checkpoint(checkpoint_dir, current_epoch, global_step, exe):
+    ckpt_meta_path = os.path.join(checkpoint_dir, CKPT_FILE_NAME)
     ckpt = checkpoint_pb2.CheckPoint()
-    with open(checkpoint_path, "rb") as file:
-        ckpt.ParseFromString(file.read())
-    return ckpt.last_epoch, ckpt.last_step, ckpt.last_model_dir
 
+    model_saved_dir = os.path.join(checkpoint_dir, "step_%d" % global_step)
+    logger.info("Saving model checkpoint to {}".format(model_saved_dir))
+    fluid.io.save_persistables(exe, dirname=model_saved_dir)
 
-def save_checkpoint(checkpoint_path, last_epoch, last_step, last_model_dir):
-    ckpt = checkpoint_pb2.CheckPoint()
-    ckpt.last_epoch = last_epoch
-    ckpt.last_step = last_step
-    ckpt.last_model_dir = last_model_dir
-    with open(checkpoint_path, "wb") as file:
-        file.write(ckpt.SerializeToString())
+    ckpt.current_epoch = current_epoch
+    ckpt.global_step = global_step
+    ckpt.latest_model_dir = model_saved_dir
+    with open(ckpt_meta_path, "wb") as f:
+        f.write(ckpt.SerializeToString())

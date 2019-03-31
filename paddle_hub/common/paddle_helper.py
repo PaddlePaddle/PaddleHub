@@ -171,7 +171,7 @@ def connect_program(pre_program, next_program, input_dict=None, inplace=True):
                 outputs={'Out': output_var})
 
     block_map = {0: 0}
-    logger.info("start to connect program")
+    logger.info("Connect program's input tensor")
     for index, block in enumerate(next_program.blocks):
         if block.idx == 0:
             _copy_vars_and_ops_in_blocks(block, output_program.global_block())
@@ -183,14 +183,13 @@ def connect_program(pre_program, next_program, input_dict=None, inplace=True):
             new_block = output_program._create_block(
                 parent_idx=block_map[block.parent_idx])
             _copy_vars_and_ops_in_blocks(block, new_block)
-    logger.info("end of connect program")
+    logger.info("Connect program's input tensor done")
     return output_program
 
 
 def remove_feed_fetch_op(program):
     """ remove feed and fetch operator and variable for fine-tuning
     """
-    logger.info("remove feed fetch op")
     block = program.global_block()
     need_to_remove_op_index = []
     for i, op in enumerate(block.ops):

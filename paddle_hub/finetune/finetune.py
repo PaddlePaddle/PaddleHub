@@ -27,8 +27,6 @@ from paddle_hub.common.logger import logger
 from paddle_hub.finetune.optimization import bert_finetune
 from paddle_hub.finetune.checkpoint import load_checkpoint, save_checkpoint
 
-CKPT_FILE = "ckpt.meta"
-
 
 def _get_running_device_info(config):
     if config.use_cuda:
@@ -41,6 +39,27 @@ def _get_running_device_info(config):
     return place, dev_count
 
 
+def _do_memory_optimization(task, config):
+
+    if config.enable_memory_optim:
+        logger.info("Memory optimization start...")
+        task_var_name = task.metric_variable_names()
+        logger.info(
+            "Skip memory optimization on variables: {}".format(task_var_name))
+        optimize_time_begin = time.time()
+        fluid.memory_optimize(
+            input_program=fluid.default_main_program(),
+            # skip memory optimization on task metric variables
+            skip_opt_set=task_var_name)
+        time_used = time.time() - optimize_time_begin
+        logger.info("Memory optimization done! Time elapsed %f sec" % time_used)
+
+    lower_mem, upper_mem, unit = fluid.contrib.memory_usage(
+        program=fluid.default_main_program(), batch_size=config.batch_size)
+    logger.info("Theoretical memory usage in training: %.3f - %.3f %s" %
+                (lower_mem, upper_mem, unit)),
+
+
 def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
     main_program = task.main_program()
     startup_program = task.startup_program()
@@ -50,14 +69,11 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
     num_epoch = config.num_epoch
     batch_size = config.batch_size
     learning_rate = config.learning_rate
-    with_memory_optimization = config.with_memory_optimization
-    checkpoint_path = os.path.join(config.checkpoint_dir, CKPT_FILE)
     log_writter = LogWriter(
         os.path.join(config.checkpoint_dir, "vdllog"), sync_cycle=10)
 
     place, dev_count = _get_running_device_info(config)
     with fluid.program_guard(main_program, startup_program):
-
         exe = fluid.Executor(place=place)
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
 
@@ -69,33 +85,10 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
             optimizer.minimize(loss)
         #TODO: add more finetune strategy
 
-        if with_memory_optimization:
-            logger.info("Memory optimization start...")
-            optimize_time_begin = time.time()
-            fluid.memory_optimize(
-                input_program=fluid.default_main_program(),
-                skip_opt_set=[
-                    # skip task graph variable memory optimization
-                    loss.name,
-                    accuracy.name
-                ])
-            time_used = time.time() - optimize_time_begin
-            logger.info(
-                "Memory optimization done! Time elapsed %f sec" % time_used)
+        _do_memory_optimization(task, config)
 
-        lower_mem, upper_mem, unit = fluid.contrib.memory_usage(
-            program=main_program, batch_size=batch_size)
-        logger.info("Theoretical memory usage in training: %.3f - %.3f %s" %
-                    (lower_mem, upper_mem, unit)),
-        # initilize
-        if os.path.exists(checkpoint_path):
-            last_epoch, global_step, last_model_dir = load_checkpoint(
-                checkpoint_path)
-            fluid.io.load_persistables(exe, last_model_dir)
-        else:
-            exe.run(fluid.default_startup_program())
-            global_step = 0
-            last_epoch = 1
+        # Try to restore model training checkpoint
+        current_epoch, global_step = load_checkpoint(config.checkpoint_dir, exe)
 
         best_eval_acc = 0.0
         train_time_used = 0
@@ -109,7 +102,7 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
             eval_loss_scalar = logw.scalar(tag="loss[evaluate]")
             eval_acc_scalar = logw.scalar(tag="accuracy[evaluate]")
 
-        for epoch in range(last_epoch, num_epoch + 1):
+        for epoch in range(current_epoch, num_epoch + 1):
             train_reader = data_reader.data_generator(
                 batch_size=batch_size, phase='train')
             num_trained_examples = acc_sum = loss_sum = 0
@@ -141,16 +134,16 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
                     num_trained_examples = acc_sum = loss_sum = 0
 
                 if global_step % config.save_ckpt_interval == 0:
-                    model_saved_dir = os.path.join(
-                        config.checkpoint_dir, "model_in_step_%d" % global_step)
+                    model_saved_dir = os.path.join(config.checkpoint_dir,
+                                                   "step_%d" % global_step)
                     fluid.io.save_persistables(exe, dirname=model_saved_dir)
                     # NOTE: current saved checkpoint machanism is not completed,
                     # it can't restore dataset training status
                     save_checkpoint(
-                        checkpoint_path,
-                        last_epoch=epoch,
-                        last_step=global_step,
-                        last_model_dir=model_saved_dir)
+                        checkpoint_dir=config.checkpoint_dir,
+                        current_epoch=epoch,
+                        global_step=global_step,
+                        exe=exe)
 
                 if do_eval and global_step % config.eval_interval == 0:
                     eval_loss, eval_acc, eval_perf = evaluate(
@@ -176,10 +169,10 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
         # NOTE: current saved checkpoint machanism is not completed, it can't
         # resotre dataset training status
         save_checkpoint(
-            checkpoint_path,
-            last_epoch=num_epoch + 1,
-            last_step=global_step,
-            last_model_dir=model_saved_dir)
+            checkpoint_dir=config.checkpoint_dir,
+            current_epoch=num_epoch + 1,
+            global_step=global_step,
+            exe=exe)
 
         if do_eval:
             evaluate(task, data_reader, feed_list, phase="test", config=config)

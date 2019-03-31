@@ -43,3 +43,10 @@ class Task(object):
 
     def inference_program(self):
         return self._inference_program
+
+    def metric_variable_names(self):
+        metric_variable_names = []
+        for var_name in self.graph_var_dict:
+            metric_variable_names.append(var_name)
+
+        return metric_variable_names

@@ -464,7 +464,7 @@ class Module(object):
                     "max_seq_len({}) should be in the range of [1, {}]".format(
                         MAX_SEQ_LENGTH))
             logger.info(
-                "update maximum sequence length of input tensor to {}".format(
+                "Set maximum sequence length of input tensor to {}".format(
                     max_seq_len))
             for tensor_name in [
                     "input_ids", "position_ids", "segment_ids", "input_mask"
