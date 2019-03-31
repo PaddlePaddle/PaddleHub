@@ -37,8 +37,7 @@ def load_checkpoint(checkpoint_dir, exe):
         fluid.io.load_persistables(exe, ckpt.latest_model_dir)
 
         logger.info("Checkpoint loaded. current_epoch={},"
-                    "global_step={}".format(ckpt_meta_path, current_epoch,
-                                            global_step))
+                    "global_step={}".format(current_epoch, global_step))
         return ckpt.current_epoch, ckpt.global_step
     else:
         current_epoch = 1
