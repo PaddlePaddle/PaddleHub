@@ -40,7 +40,6 @@ def _get_running_device_info(config):
 
 
 def _do_memory_optimization(task, config):
-
     if config.enable_memory_optim:
         logger.info("Memory optimization start...")
         task_var_name = task.metric_variable_names()
@@ -56,7 +55,7 @@ def _do_memory_optimization(task, config):
 
     lower_mem, upper_mem, unit = fluid.contrib.memory_usage(
         program=fluid.default_main_program(), batch_size=config.batch_size)
-    logger.info("Theoretical memory usage in training: %.3f - %.3f %s" %
+    logger.info("Theoretical memory usage in training: %.2f - %.2f %s" %
                 (lower_mem, upper_mem, unit)),
 
 
@@ -102,6 +101,7 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
             eval_loss_scalar = logw.scalar(tag="loss[evaluate]")
             eval_acc_scalar = logw.scalar(tag="accuracy[evaluate]")
 
+        # Finetune loop
         for epoch in range(current_epoch, num_epoch + 1):
             train_reader = data_reader.data_generator(
                 batch_size=batch_size, phase='train')
@@ -134,9 +134,6 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
                     num_trained_examples = acc_sum = loss_sum = 0
 
                 if global_step % config.save_ckpt_interval == 0:
-                    model_saved_dir = os.path.join(config.checkpoint_dir,
-                                                   "step_%d" % global_step)
-                    fluid.io.save_persistables(exe, dirname=model_saved_dir)
                     # NOTE: current saved checkpoint machanism is not completed,
                     # it can't restore dataset training status
                     save_checkpoint(
@@ -163,9 +160,6 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
                             (model_saved_dir, best_eval_acc))
                         fluid.io.save_persistables(exe, dirname=model_saved_dir)
 
-        # update model and checkpoint
-        model_saved_dir = os.path.join(config.checkpoint_dir, "final_model")
-        fluid.io.save_persistables(exe, dirname=model_saved_dir)
         # NOTE: current saved checkpoint machanism is not completed, it can't
         # resotre dataset training status
         save_checkpoint(
@@ -188,6 +182,7 @@ def finetune(task, data_reader, feed_list, config=None):
 
 
 def evaluate(task, data_reader, feed_list, phase="test", config=None):
+    logger.info("Evaluation on {} dataset start".format(phase))
     inference_program = task.inference_program()
     main_program = task.main_program()
     loss = task.variable("loss")
@@ -216,7 +211,8 @@ def evaluate(task, data_reader, feed_list, phase="test", config=None):
         avg_loss = loss_sum / num_eval_examples
         avg_acc = acc_sum / num_eval_examples
         eval_speed = eval_step / eval_time_used
-    logger.info("[evaluation on %s set] loss=%.5f acc=%.5f [step/sec: %.2f]" %
-                (phase, avg_loss, avg_acc, eval_speed))
+    logger.info(
+        "[%s dataset evaluation result] loss=%.5f acc=%.5f [step/sec: %.2f]" %
+        (phase, avg_loss, avg_acc, eval_speed))
 
     return avg_loss, avg_acc, eval_speed

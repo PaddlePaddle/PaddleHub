@@ -36,14 +36,17 @@ def load_checkpoint(checkpoint_dir, exe):
 
         fluid.io.load_persistables(exe, ckpt.latest_model_dir)
 
-        logger.info("Checkpoint loaded. current_epoch={},"
-                    "global_step={}".format(current_epoch, global_step))
+        logger.info("PaddleHub model checkpoint loaded. current_epoch={}, "
+                    "global_step={}".format(ckpt.current_epoch,
+                                            ckpt.global_step))
         return ckpt.current_epoch, ckpt.global_step
     else:
         current_epoch = 1
         global_step = 0
         latest_model_dir = None
-        logger.info("Checkpoint not found, start training from scratch...")
+        logger.info(
+            "PaddleHub model checkpoint not found, start training from scratch..."
+        )
         exe.run(fluid.default_startup_program())
 
         return current_epoch, global_step

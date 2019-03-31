@@ -19,8 +19,7 @@ import logging
 import math
 
 
-class Logger:
-
+class Logger(object):
     PLACEHOLDER = '%'
     NOLOG = "NOLOG"
 
@@ -29,7 +28,7 @@ class Logger:
             format='[%(asctime)-15s] [%(levelname)8s] - %(message)s')
 
         if not name:
-            name = "paddle-hub"
+            name = "PaddleHub"
 
         self.logger = logging.getLogger(name)
         self.logLevel = "DEBUG"

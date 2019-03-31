@@ -188,7 +188,3 @@ def pad_batch_data(insts,
         return_list += [num_token]
 
     return return_list if len(return_list) > 1 else return_list[0]
-
-
-if __name__ == "__main__":
-    pass

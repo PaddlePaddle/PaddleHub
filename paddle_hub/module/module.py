@@ -104,6 +104,7 @@ class Module(object):
         self.module_info = None
         self.processor = None
         self.name = "temp"
+        # TODO(wuzewu): print more module loading info log
         if url:
             self._init_with_url(url=url)
         elif module_dir:

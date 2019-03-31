@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from paddle_hub.tools.downloader import default_downloader
-from paddle_hub.dir import DATA_HOME
+from paddle_hub.common.downloader import default_downloader
+from paddle_hub.common.dir import DATA_HOME
 
 import os
 import csv
@@ -28,7 +28,6 @@ class MSRA_NER(object):
         ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
             url=DATA_URL, save_path=DATA_HOME, print_progress=True)
 
-        print(self.dataset_dir)
         self._load_label_map()
         self._load_train_examples()
 
@@ -43,6 +42,10 @@ class MSRA_NER(object):
 
     def get_train_examples(self):
         return self.train_examples
+
+    def get_labels(self):
+        """See base class."""
+        return ["0", "1"]
 
     def _read_tsv(self, input_file, quotechar=None):
         """Reads a tab separated value file."""

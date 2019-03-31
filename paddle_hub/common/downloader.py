@@ -88,7 +88,7 @@ class Downloader:
                             done = int(50 * dl / total_length)
                             if time.time() - starttime >= FLUSH_INTERVAL:
                                 sys.stdout.write(
-                                    "\r%s : [%-50s]%.2f%%" %
+                                    "\r%s : [%-50s] %.2f%%" %
                                     (save_name, '=' * done,
                                      float(dl / total_length * 100)))
                                 starttime = time.time()

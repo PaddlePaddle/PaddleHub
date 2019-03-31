@@ -12,31 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from paddle_hub.tools.downloader import default_downloader
-from paddle_hub.dir import DATA_HOME
+from paddle_hub.common.downloader import default_downloader
+from paddle_hub.common.dir import DATA_HOME
 
 import os
 import csv
+
+from paddle_hub.dataset import InputExample
+from paddle_hub.dataset import HubDataset
 from collections import namedtuple
 
 DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/chnsenticorp_data.tar.gz"
 
 
-class HubDataset(object):
-    def get_train_examples(self):
-        raise NotImplementedError()
-
-    def get_dev_examples(self):
-        raise NotImplementedError()
-
-    def get_test_examples(self):
-        raise NotImplementedError()
-
-    def get_val_examples(self):
-        return self.get_dev_examples()
-
-
 class ChnSentiCorp(HubDataset):
+    """
+    ChnSentiCorp (by Tan Songbo at ICT of Chinese Academy of Sciences, and for
+    opinion mining)
+    """
+
     def __init__(self):
         ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
             url=DATA_URL, save_path=DATA_HOME, print_progress=True)
@@ -66,15 +60,20 @@ class ChnSentiCorp(HubDataset):
     def get_test_examples(self):
         return self.test_examples
 
+    def get_labels(self):
+        """See base class."""
+        return ["0", "1"]
+
     def _read_tsv(self, input_file, quotechar=None):
         """Reads a tab separated value file."""
         with open(input_file, "r") as f:
             reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
-            Example = namedtuple('Example', ["label", "text_a"])
-
             examples = []
+            seq_id = 0
             for line in reader:
-                example = Example(*line)
+                example = InputExample(
+                    guid=seq_id, label=line[0], text_a=line[1])
+                seq_id += 1
                 examples.append(example)
 
             return examples
@@ -82,5 +81,5 @@ class ChnSentiCorp(HubDataset):
 
 if __name__ == "__main__":
     ds = ChnSentiCorp()
-    for e in ds.get_train_example():
+    for e in ds.get_train_examples():
         print(e)

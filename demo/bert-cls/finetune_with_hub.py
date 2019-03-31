@@ -26,56 +26,42 @@ import paddle
 import paddle.fluid as fluid
 import paddle_hub as hub
 
-import reader.cls as reader
-import reader.task_reader as task_reader
-from utils.args import ArgumentGroup, print_arguments
-from paddle_hub.finetune.config import FinetuneConfig
-
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
-
-train_g = ArgumentGroup(parser, "training", "training options.")
-train_g.add_arg("epoch",             int,    3,       "Number of epoches for fine-tuning.")
-train_g.add_arg("learning_rate",     float,  5e-5,    "Learning rate used to train with warmup.")
-train_g.add_arg("hub_module_dir",    str,  None,    "PaddleHub module directory")
-train_g.add_arg("lr_scheduler",      str,    "linear_warmup_decay", "scheduler of learning rate.", choices=['linear_warmup_decay', 'noam_decay'])
-train_g.add_arg("weight_decay",      float,  0.01,    "Weight decay rate for L2 regularizer.")
-train_g.add_arg("warmup_proportion", float,  0.1,
-                "Proportion of training steps to perform linear learning rate warmup for.")
-
-data_g = ArgumentGroup(parser, "data", "Data paths, vocab paths and data processing options")
-data_g.add_arg("data_dir",      str,  None,  "Path to training data.")
-data_g.add_arg("checkpoint_dir", str,  None,  "Directory to model checkpoint")
-data_g.add_arg("vocab_path",    str,  None,  "Vocabulary path.")
-data_g.add_arg("max_seq_len",   int,  512,   "Number of words of the longest seqence.")
-data_g.add_arg("batch_size",    int,  32,    "Total examples' number in batch for training. see also --in_tokens.")
+parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
+parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
+parser.add_argument("--hub_module_dir", type=str, default=None, help="PaddleHub module directory")
+parser.add_argument("--lr_scheduler", type=str, default="linear_warmup_decay",
+        help="scheduler of learning rate.", choices=['linear_warmup_decay', 'noam_decay'])
+parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
+parser.add_argument("--data_dir", type=str, default=None, help="Path to training data.")
+parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
+parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
+parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
 
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    print_arguments(args)
-    config = FinetuneConfig(
+    config = hub.FinetuneConfig(
         log_interval=10,
         eval_interval=100,
-        save_ckpt_interval=50,
-        use_cuda=True,
+        save_ckpt_interval=200,
         checkpoint_dir=args.checkpoint_dir,
         learning_rate=args.learning_rate,
-        num_epoch=args.epoch,
+        num_epoch=args.num_epoch,
         batch_size=args.batch_size,
         max_seq_len=args.max_seq_len,
         weight_decay=args.weight_decay,
-        finetune_strategy="bert_finetune",
-        enable_memory_optim=True,
-        optimizer=None,
-        warmup_proportion=args.warmup_proportion)
+        finetune_strategy="bert_finetune")
 
     # loading Paddlehub BERT
     module = hub.Module(module_dir=args.hub_module_dir)
 
-    reader = reader.BERTClassifyReader(
-        data_dir=args.data_dir,
+    # Use BERTTokenizeReader to tokenize the dataset according to model's
+    # vocabulary
+    reader = hub.reader.BERTTokenizeReader(
+        dataset=hub.dataset.ChnSentiCorp(),  # download chnsenticorp dataset
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
 
