@@ -21,20 +21,6 @@ import numpy as np
 import paddle.fluid as fluid
 
 
-def bert_finetune(task, main_program, data_processor, config, dev_count):
-    # calculate wamrup step
-    num_train_examples = data_processor.get_num_examples(phase='train')
-    max_train_steps = config.num_epoch * num_train_examples // config.batch_size // dev_count
-    warmup_steps = int(max_train_steps * config.warmup_proportion)
-
-    loss = task.variable("loss")
-    scheduled_lr = adam_weight_decay_optimizer_with_linear_warmup(
-        loss, warmup_steps, max_train_steps, config.learning_rate, main_program,
-        config.weight_decay)
-
-    return scheduled_lr
-
-
 def adam_weight_decay_optimization(loss,
                                    warmup_steps,
                                    num_train_steps,
