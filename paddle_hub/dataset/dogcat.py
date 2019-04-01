@@ -25,7 +25,7 @@ from paddle_hub.dataset.base_cv_dataset import ImageClassificationDataset
 class DogCatDataset(ImageClassificationDataset):
     def __init__(self):
         super(DogCatDataset, self).__init__()
-        dataset_path = os.path.join(hub.dir.DATA_HOME, "dog-cat")
+        dataset_path = os.path.join(hub.common.dir.DATA_HOME, "dog-cat")
         self.base_path = self._download_dataset(
             dataset_path=dataset_path,
             url="https://paddlehub-dataset.bj.bcebos.com/dog-cat.tar.gz")

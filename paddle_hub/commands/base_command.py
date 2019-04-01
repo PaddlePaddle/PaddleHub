@@ -15,7 +15,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from paddle_hub.tools.arg_helper import add_argument, print_arguments
+from paddle_hub.common.arg_helper import add_argument, print_arguments
 import argparse
 
 ENTRY = "hub"

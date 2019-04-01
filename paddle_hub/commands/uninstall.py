@@ -18,9 +18,9 @@ from __future__ import print_function
 
 import argparse
 
-from paddle_hub.tools.logger import logger
+from paddle_hub.common.logger import logger
 from paddle_hub.commands.base_command import BaseCommand, ENTRY
-from paddle_hub.tools import utils
+from paddle_hub.common import utils
 from paddle_hub.module.manager import default_module_manager
 
 

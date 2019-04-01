@@ -19,7 +19,7 @@ from __future__ import print_function
 import os
 
 import paddle_hub as hub
-from paddle_hub.tools.downloader import default_downloader
+from paddle_hub.common.downloader import default_downloader
 
 
 class ImageClassificationDataset:

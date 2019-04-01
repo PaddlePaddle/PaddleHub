@@ -57,7 +57,7 @@ class ImageClassificationReader:
         elif phase == "test":
             shuffle = False
             data = self.dataset.test_data(shuffle)
-        elif phase == "validate":
+        elif phase == "val" or phase == "dev":
             shuffle = False
             data = self.dataset.validate_data(shuffle)
 

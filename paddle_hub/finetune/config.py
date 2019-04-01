@@ -102,5 +102,5 @@ class FinetuneConfig(object):
         return self._enable_memory_optim
 
     @property
-    def optimier(self):
+    def optimizer(self):
         return self._optimizer

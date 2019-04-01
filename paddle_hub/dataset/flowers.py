@@ -25,7 +25,7 @@ from paddle_hub.dataset.base_cv_dataset import ImageClassificationDataset
 class FlowersDataset(ImageClassificationDataset):
     def __init__(self):
         super(FlowersDataset, self).__init__()
-        dataset_path = os.path.join(hub.dir.DATA_HOME, "flower_photos")
+        dataset_path = os.path.join(hub.common.dir.DATA_HOME, "flower_photos")
         self.base_path = self._download_dataset(
             dataset_path=dataset_path,
             url="https://paddlehub-dataset.bj.bcebos.com/flower_photos.tar.gz")
