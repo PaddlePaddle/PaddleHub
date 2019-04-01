@@ -8,7 +8,7 @@
 ## 安装
 
 ```
-pip install -update paddlehub
+pip install paddlehub
 
 ```
 
