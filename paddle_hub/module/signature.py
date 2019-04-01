@@ -20,8 +20,13 @@ from paddle_hub.common.utils import to_list
 
 
 class Signature:
-    def __init__(self, name, inputs, outputs, feed_names=None,
-                 fetch_names=None):
+    def __init__(self,
+                 name,
+                 inputs,
+                 outputs,
+                 feed_names=None,
+                 fetch_names=None,
+                 for_predict=False):
         inputs = to_list(inputs)
         outputs = to_list(outputs)
 
@@ -52,16 +57,19 @@ class Signature:
         self.outputs = outputs
         self.feed_names = feed_names
         self.fetch_names = fetch_names
+        self.for_predict = for_predict
 
 
 def create_signature(name="default",
                      inputs=[],
                      outputs=[],
                      feed_names=None,
-                     fetch_names=None):
+                     fetch_names=None,
+                     for_predict=False):
     return Signature(
         name=name,
         inputs=inputs,
         outputs=outputs,
         feed_names=feed_names,
-        fetch_names=fetch_names)
+        fetch_names=fetch_names,
+        for_predict=for_predict)

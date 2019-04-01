@@ -224,6 +224,8 @@ class Module(object):
         for sign in signatures:
             if sign.name in self.signatures:
                 raise "Error! signature array contains repeat signatrue %s" % sign
+            if self.default_signature is None and sign.for_predict:
+                self.default_signature = sign
             self.signatures[sign.name] = sign
 
     def _recovery_parameter(self, program):
@@ -308,6 +310,12 @@ class Module(object):
                 feed_names=feed_names,
                 fetch_names=fetch_names)
 
+        # recover default signature
+        default_signature_name = utils.from_flexible_data_to_pyobj(
+            self.desc.extra_info.map.data['default_signature'])
+        self.default_signature = self.signatures[
+            default_signature_name] if default_signature_name else None
+
         # recover module info
         module_info = self.desc.extra_info.map.data['module_info']
         self.name = utils.from_flexible_data_to_pyobj(
@@ -361,6 +369,11 @@ class Module(object):
                 fetch_var = fetch_desc.add()
                 fetch_var.var_name = self.get_var_name_with_prefix(output.name)
                 fetch_var.alias = fetch_names[index]
+
+        # save default signature
+        utils.from_pyobj_to_flexible_data(
+            self.default_signature.name if self.default_signature else None,
+            extra_info.map.data['default_signature'])
 
         # save module info
         module_info = extra_info.map.data['module_info']
@@ -511,15 +524,6 @@ class Module(object):
 
     def get_var_name_with_prefix(self, var_name):
         return self.get_name_prefix() + var_name
-
-    def parameters(self):
-        pass
-
-    def parameter_attrs(self):
-        pass
-
-    def default_signature(self):
-        return self.default_signature
 
     def _check_signatures(self):
         assert self.signatures, "signature array should not be None"

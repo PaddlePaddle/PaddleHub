@@ -48,7 +48,7 @@ def create_module(args):
     # create paddle hub module
     assets = ["resources/label_list.txt"]
     sign1 = hub.create_signature(
-        "classification", inputs=[image], outputs=[predition])
+        "classification", inputs=[image], outputs=[predition], for_predict=True)
     sign2 = hub.create_signature(
         "feature_map", inputs=[image], outputs=[feature_map])
     hub.create_module(

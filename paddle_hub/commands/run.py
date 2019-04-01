@@ -42,28 +42,9 @@ class RunCommand(BaseCommand):
         # yapf: disable
         self.add_arg('--config',    str, None,  "config file in yaml format" )
         self.add_arg('--dataset',   str, None,  "dataset be used" )
+        self.add_arg('--data',      str, None,  "data be used" )
         self.add_arg('--signature', str, None,  "signature to run" )
         # yapf: enable
-
-    def _check_dataset(self):
-        if not self.args.dataset:
-            print("Error! Lack of dataset file")
-            self.help()
-            exit(1)
-        if not utils.is_csv_file(self.args.dataset):
-            print("Error! Dataset file should in csv format")
-            self.help()
-            exit(1)
-
-    def _check_config(self):
-        if not self.args.config:
-            print("Error! Lack of config file")
-            self.help()
-            exit(1)
-        if not utils.is_yaml_file(self.args.config):
-            print("Error! Config file should in yaml format")
-            self.help()
-            exit(1)
 
     def exec(self, argv):
         if not argv:
@@ -72,8 +53,6 @@ class RunCommand(BaseCommand):
             return False
         module_name = argv[0]
         self.args = self.parser.parse_args(argv[1:])
-        self._check_dataset()
-        self._check_config()
 
         module_dir = default_module_manager.search_module(module_name)
         if not module_dir:
@@ -88,30 +67,52 @@ class RunCommand(BaseCommand):
                     return False
 
         module = hub.Module(module_dir=module_dir)
-        yaml_config = yaml_reader.read(self.args.config)
+        if not module.default_signature:
+            print("ERROR! Module %s is not callable" % module_name)
 
         if not self.args.signature:
-            self.args.signature = module.default_signature().name
-
+            self.args.signature = module.default_signature.name
         # module processor check
         module.check_processor()
-        # data_format check
         expect_data_format = module.processor.data_format(self.args.signature)
-        input_data_format = yaml_config['input_data']
-        assert len(input_data_format) == len(expect_data_format)
-        for key, value in expect_data_format.items():
-            assert key in input_data_format
-            assert value['type'] == hub.DataType.type(
-                input_data_format[key]['type'])
 
         # get data dict
-        origin_data = csv_reader.read(self.args.dataset)
-        input_data = {}
-        for key, value in yaml_config['input_data'].items():
-            input_data[key] = origin_data[value['key']]
+        if self.args.data:
+            input_data_key = list(expect_data_format.keys())[0]
+            origin_data = {input_data_key: [self.args.data]}
+        elif self.args.dataset:
+            origin_data = csv_reader.read(self.args.dataset)
+        else:
+            print("ERROR! Please specify data to predict")
+            self.help()
+            exit(1)
 
+        # data_format check
+        if not self.args.config:
+            assert len(expect_data_format) == 1
+            origin_data_key = list(origin_data.keys())[0]
+            input_data_key = list(expect_data_format.keys())[0]
+            input_data = {input_data_key: origin_data[origin_data_key]}
+            config = {}
+        else:
+            yaml_config = yaml_reader.read(self.args.config)
+            if len(expect_data_format) == 1:
+                origin_data_key = list(origin_data.keys())[0]
+                input_data_key = list(expect_data_format.keys())[0]
+                input_data = {input_data_key: origin_data[origin_data_key]}
+            else:
+                input_data_format = yaml_config['input_data']
+                assert len(input_data_format) == len(expect_data_format)
+                for key, value in expect_data_format.items():
+                    assert key in input_data_format
+                    assert value['type'] == hub.DataType.type(
+                        input_data_format[key]['type'])
+
+                input_data = {}
+                for key, value in yaml_config['input_data'].items():
+                    input_data[key] = origin_data[value['key']]
+            config = yaml_config.get("config", {})
         # run module with data
-        config = yaml_config.get("config", {})
         print(module(sign_name=self.args.signature, data=input_data, **config))
 
 

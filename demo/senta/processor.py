@@ -1,12 +1,11 @@
-import paddle
-import paddle.fluid as fluid
-import paddle_hub as hub
-import numpy as np
 import os
 import io
-from paddle_hub import BaseProcessor
-from paddle_hub.hub_server import default_hub_server
-from paddle_hub.module.manager import default_module_manager
+
+import paddle
+import paddle.fluid as fluid
+import numpy as np
+
+import paddle_hub as hub
 
 
 def load_vocab(file_path):
@@ -37,17 +36,17 @@ def get_predict_label(pos_prob):
     return label, key
 
 
-class Processor(BaseProcessor):
+class Processor(hub.BaseProcessor):
     def __init__(self, module):
         self.module = module
         assets_path = self.module.helper.assets_path()
         word_dict_path = os.path.join(assets_path, "train.vocab")
         self.word_dict = load_vocab(word_dict_path)
-        path = default_module_manager.search_module("lac")
+        path = hub.default_module_manager.search_module("lac")
         if path:
             self.lac = hub.Module(module_dir=path)
         else:
-            result, _, path = default_module_manager.install_module("lac")
+            result, _, path = hub.default_module_manager.install_module("lac")
             assert path, "can't found necessary module lac"
             self.lac = hub.Module(module_dir=path)
 

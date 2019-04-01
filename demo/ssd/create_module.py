@@ -41,10 +41,14 @@ def create_module():
 
     assets = ["resources/label_list.txt"]
     sign = hub.create_signature(
-        "object_detection", inputs=[image], outputs=[nmsed_out])
+        "object_detection",
+        inputs=[image],
+        outputs=[nmsed_out],
+        for_predict=True)
     hub.create_module(
         sign_arr=[sign],
         module_dir="hub_module_ssd",
+        module_info="resources/module_info.yml",
         exe=exe,
         processor=processor.Processor,
         assets=assets)

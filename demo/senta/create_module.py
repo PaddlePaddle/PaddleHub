@@ -42,7 +42,10 @@ def create_module():
 
     # create a module
     sign = hub.create_signature(
-        name="sentiment_classify", inputs=[data], outputs=[pred])
+        name="sentiment_classify",
+        inputs=[data],
+        outputs=[pred],
+        for_predict=True)
     hub.create_module(
         sign_arr=[sign],
         module_dir="hub_module_senta",

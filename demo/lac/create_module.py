@@ -37,7 +37,10 @@ def create_module():
 
     # create a module and save as hub_module_lac
     sign = hub.create_signature(
-        name="lexical_analysis", inputs=[word], outputs=[crf_decode])
+        name="lexical_analysis",
+        inputs=[word],
+        outputs=[crf_decode],
+        for_predict=True)
     hub.create_module(
         sign_arr=[sign],
         module_dir="hub_module_lac",
