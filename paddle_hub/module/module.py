@@ -108,7 +108,6 @@ class Module(object):
         self.default_signature = None
         self.module_info = None
         self.processor = None
-        self.name = "temp"
         # TODO(wuzewu): print more module loading info log
         if name:
             self._init_with_name(name=name)
@@ -202,14 +201,15 @@ class Module(object):
         exe = fluid.Executor(fluid.CPUPlace())
         self.program, _, _ = fluid.io.load_inference_model(
             self.helper.model_path(), executor=exe)
-        self._recovery_parameter(self.program)
-        self._recover_variable_info(self.program)
         self._load_processor()
         self._load_assets()
         self._recover_from_desc()
         self._generate_sign_attr()
+        self._recovery_parameter(self.program)
+        self._recover_variable_info(self.program)
 
     def _init_with_signature(self, signatures):
+        self.name_prefix = HUB_VAR_PREFIX % self.name
         self._process_signatures(signatures)
         self._check_signatures()
         self._generate_desc()
@@ -331,6 +331,10 @@ class Module(object):
         self.summary = utils.from_flexible_data_to_pyobj(
             module_info.map.data['summary'])
 
+        # recover name prefix
+        self.name_prefix = utils.from_flexible_data_to_pyobj(
+            self.desc.extra_info.map.data["name_prefix"])
+
     def _generate_desc(self):
         # save fluid Parameter
         extra_info = self.desc.extra_info
@@ -374,6 +378,10 @@ class Module(object):
         utils.from_pyobj_to_flexible_data(
             self.default_signature.name if self.default_signature else None,
             extra_info.map.data['default_signature'])
+
+        # save name prefix
+        utils.from_pyobj_to_flexible_data(
+            self.name_prefix, self.desc.extra_info.map.data["name_prefix"])
 
         # save module info
         module_info = extra_info.map.data['module_info']
@@ -520,7 +528,7 @@ class Module(object):
         return feed_dict, fetch_dict, program
 
     def get_name_prefix(self):
-        return HUB_VAR_PREFIX % self.name
+        return self.name_prefix
 
     def get_var_name_with_prefix(self, var_name):
         return self.get_name_prefix() + var_name
