@@ -21,12 +21,13 @@ import shutil
 
 from paddle_hub.common import utils
 from paddle_hub.common.downloader import default_downloader
+from paddle_hub.common.dir import MODULE_HOME
 import paddle_hub as hub
 
 
 class LocalModuleManager:
     def __init__(self, module_home=None):
-        self.local_modules_dir = module_home if module_home else hub.MODULE_HOME
+        self.local_modules_dir = module_home if module_home else MODULE_HOME
         self.modules_dict = {}
         if not os.path.exists(self.local_modules_dir):
             utils.mkdir(self.local_modules_dir)
@@ -77,7 +78,11 @@ class LocalModuleManager:
             save_name=module_name,
             replace=True)
         result, tips, module_dir = default_downloader.uncompress(
-            file=module_zip_file, dirname=hub.MODULE_HOME, delete_file=True)
+            file=module_zip_file, dirname=MODULE_HOME, delete_file=True)
+
+        save_path = os.path.join(MODULE_HOME, module_name)
+        shutil.move(module_dir, save_path)
+        module_dir = save_path
 
         if module_dir:
             tips = "Successfully installed %s" % module_name

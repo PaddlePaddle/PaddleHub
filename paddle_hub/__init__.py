@@ -37,3 +37,4 @@ from .finetune.config import FinetuneConfig
 from .finetune.task import Task
 
 from .reader import BERTTokenizeReader
+from .reader.cv_reader import ImageClassificationReader

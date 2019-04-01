@@ -15,24 +15,28 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from paddle_hub.common import utils
-from paddle_hub.common.logger import logger
-from paddle_hub.common.downloader import default_downloader
-from paddle_hub.common import paddle_helper
-from paddle_hub.module import module_desc_pb2
-from paddle_hub.module import check_info_pb2
-from paddle_hub.module.signature import Signature, create_signature
-from paddle_hub.module.checker import ModuleChecker
-from paddle_hub.io.reader import yaml_reader
-from paddle_hub import version
-from paddle_hub.module.base_processor import BaseProcessor
-from shutil import copyfile
+
 import os
 import time
 import sys
 import functools
+from shutil import copyfile
+
 import paddle
 import paddle.fluid as fluid
+
+from paddle_hub.common import utils
+from paddle_hub.common import paddle_helper
+from paddle_hub.common.logger import logger
+from paddle_hub.common.downloader import default_downloader
+from paddle_hub.module import module_desc_pb2
+from paddle_hub.module import check_info_pb2
+from paddle_hub.module.signature import Signature, create_signature
+from paddle_hub.module.checker import ModuleChecker
+from paddle_hub.module.manager import default_module_manager
+from paddle_hub.module.base_processor import BaseProcessor
+from paddle_hub.io.reader import yaml_reader
+from paddle_hub import version
 
 __all__ = ['Module', 'create_module']
 
@@ -89,6 +93,7 @@ class ModuleHelper(object):
 
 class Module(object):
     def __init__(self,
+                 key=None,
                  url=None,
                  module_dir=None,
                  signatures=None,
@@ -105,7 +110,9 @@ class Module(object):
         self.processor = None
         self.name = "temp"
         # TODO(wuzewu): print more module loading info log
-        if url:
+        if key:
+            self._init_with_key(key=key)
+        elif url:
             self._init_with_url(url=url)
         elif module_dir:
             self._init_with_module_file(module_dir=module_dir)
@@ -124,10 +131,23 @@ class Module(object):
         else:
             raise "Error! HubModule can't init with nothing"
 
+    def _init_with_key(self, key):
+        logger.info("Try installing module %s" % key)
+        result, tips, module_dir = default_module_manager.install_module(
+            module_name=key)
+        if not result:
+            logger.error(tips)
+            exit(1)
+        logger.info(tips)
+        self._init_with_module_file(module_dir)
+
     def _init_with_url(self, url):
         utils.check_url(url)
-        result, _, module_dir = default_downloader.download_file_and_uncompress(
+        result, tips, module_dir = default_downloader.download_file_and_uncompress(
             url, save_path=".")
+        if not result:
+            logger.error(tips)
+            exit(1)
         self._init_with_module_file(module_dir)
 
     def _dump_processor(self):
