@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
+from .strategy import DefaultStrategy
 
 
 class FinetuneConfig(object):
@@ -30,8 +30,8 @@ class FinetuneConfig(object):
                  max_seq_len=128,
                  weight_decay=None,
                  warmup_proportion=0.0,
-                 finetune_strategy=None,
                  enable_memory_optim=True,
+                 strategy=None,
                  optimizer="adam"):
         """ Construct finetune Config """
         self._log_interval = log_interval
@@ -43,9 +43,10 @@ class FinetuneConfig(object):
         self._num_epoch = num_epoch
         self._batch_size = batch_size
         self._max_seq_len = max_seq_len
-        self._weight_decay = weight_decay
-        self._warmup_proportion = warmup_proportion
-        self._finetune_strategy = finetune_strategy
+        if strategy is None:
+            self._strategy = DefaultStrategy()
+        else:
+            self._strategy = strategy
         self._enable_memory_optim = enable_memory_optim
         self._optimizer = optimizer
 
@@ -94,8 +95,8 @@ class FinetuneConfig(object):
         return self._warmup_proportion
 
     @property
-    def finetune_strategy(self):
-        return self._finetune_strategy
+    def strategy(self):
+        return self._strategy
 
     @property
     def enable_memory_optim(self):

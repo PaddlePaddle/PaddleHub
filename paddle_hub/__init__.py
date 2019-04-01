@@ -15,6 +15,7 @@ from . import module
 from . import common
 from . import io
 from . import dataset
+from . import finetune
 
 from .common.dir import USER_HOME
 from .common.dir import HUB_HOME
@@ -35,6 +36,8 @@ from .finetune.network import append_mlp_classifier
 from .finetune.finetune import finetune_and_eval
 from .finetune.config import FinetuneConfig
 from .finetune.task import Task
+from .finetune.strategy import BERTFinetuneStrategy
+from .finetune.strategy import DefaultStrategy
 
 from .reader import BERTTokenizeReader
 from .reader.cv_reader import ImageClassificationReader
