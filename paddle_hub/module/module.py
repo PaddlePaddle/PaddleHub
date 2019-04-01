@@ -93,7 +93,7 @@ class ModuleHelper(object):
 
 class Module(object):
     def __init__(self,
-                 key=None,
+                 name=None,
                  url=None,
                  module_dir=None,
                  signatures=None,
@@ -110,8 +110,8 @@ class Module(object):
         self.processor = None
         self.name = "temp"
         # TODO(wuzewu): print more module loading info log
-        if key:
-            self._init_with_key(key=key)
+        if name:
+            self._init_with_name(name=name)
         elif url:
             self._init_with_url(url=url)
         elif module_dir:
@@ -131,10 +131,10 @@ class Module(object):
         else:
             raise "Error! HubModule can't init with nothing"
 
-    def _init_with_key(self, key):
-        logger.info("Try installing module %s" % key)
+    def _init_with_name(self, name):
+        logger.info("Try installing module %s" % name)
         result, tips, module_dir = default_module_manager.install_module(
-            module_name=key)
+            module_name=name)
         if not result:
             logger.error(tips)
             exit(1)
