@@ -15,7 +15,7 @@ def train():
         img = input_dict[0]
         feature_map = output_dict[0]
 
-        config = hub.FinetuneConfig(
+        config = hub.RunConfig(
             use_cuda=True,
             num_epoch=10,
             batch_size=32,

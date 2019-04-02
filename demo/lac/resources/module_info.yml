@@ -2,4 +2,5 @@ name: lac
 type: nlp/lexical_analysis
 author: paddlepaddle
 author_email: paddle-dev@baidu.com
+summary: "'Lexical Analysis of Chinese', which abbreviated as LAC, is a model used to process lexical analysis. People can use LAC to process Chinese text segmentation, part-of-speech tagging and named entity recognition"
 version: 1.0.0

@@ -1,5 +1,6 @@
 name: Resnet50
 type: CV/classification
 author: paddlepaddle
-author-email: paddle-dev@baidu.com
+author_email: paddle-dev@baidu.com
+summary: "Resnet50 is a model used to image classfication, we trained this model on ImageNet-2012 dataset."
 version: 1.0.0

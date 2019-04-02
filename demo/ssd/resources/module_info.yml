@@ -2,4 +2,5 @@ name: ssd_mobilenet_v1_pascalvoc
 type: CV/object-detection
 author: paddlepaddle
 author_email: paddle-dev@baidu.com
+summary: "SSD(Single Shot MultiBox Detector) is a object detection model use to detect target category and location in a image picture. This model is trained with PASCAL VOC dataset, and therefore provides 20 categories of recognition capability, which mentioned below : aeroplane,bicycle,bird,boat,bottle,bus,car,cat,chair,cow,diningtable,dog,horse,motorbike,person,pottedplant,sheep,sofa,train,tvmonitor"
 version: 1.0.0

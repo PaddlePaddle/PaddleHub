@@ -52,14 +52,14 @@ class Processor(hub.BaseProcessor):
 
     def preprocess(self, sign_name, data_dict):
         result = {'text': []}
-        processed = self.lac.segment(data=data_dict)
+        processed = self.lac.lexical_analysis(data=data_dict)
         unk_id = len(self.word_dict)
         for index, data in enumerate(processed):
             result_i = {'processed': []}
             result_i['origin'] = data_dict['text'][index]
-            for result_dict in data:
-                if result_dict['word'] in self.word_dict:
-                    _index = self.word_dict[result_dict['word']]
+            for word in data['word']:
+                if word in self.word_dict:
+                    _index = self.word_dict[word]
                 else:
                     _index = unk_id
                 result_i['processed'].append(_index)
