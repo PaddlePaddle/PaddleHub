@@ -19,6 +19,20 @@ import paddle.fluid as fluid
 from .optimization import adam_weight_decay_optimization
 
 
+def get_pretrained_parameter(main_program, start_program):
+    pretrained_parameters = []
+    global_block = main_program.global_block()
+    for op in global_block.ops[::-1]:
+        for input_arg in op.input_arg_names:
+            var = global_block.var(input_arg)
+            if isinstance(
+                    var, fluid.framework.Parameter
+            ) and input_arg not in start_program.global_block().vars:
+                pretrained_parameters.append(var)
+
+    return pretrained_parameters
+
+
 class DefaultStrategy(object):
     def __init__(self, learning_rate=1e-4, optimizer_name="adam"):
         self.learning_rate = learning_rate
@@ -96,3 +110,39 @@ class BERTFinetuneStrategy(DefaultStrategy):
     # TODO complete __str__()
     def __str__(self):
         return "BERTFintuneStrategy"
+
+
+class DefaultFinetuneStrategy(DefaultStrategy):
+    def __init__(self,
+                 learning_rate=1e-4,
+                 optimizer_name="adam",
+                 regularization_coeff=1e-3):
+        super(DefaultFinetuneStrategy, self).__init__(
+            learning_rate=learning_rate, optimizer_name=optimizer_name)
+        self.learning_rate = learning_rate
+        self._optimizer_name = optimizer_name
+        self.regularization_coeff = regularization_coeff
+
+    def execute(self, loss):
+        if self._optimizer_name.lower() == "adam":
+            self.optimizer = fluid.optimizer.Adam(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "sgd":
+            self.optimizer = fluid.optimizer.SGD(
+                learning_rate=self.learning_rate)
+
+        # get pretrained parameters
+        program = loss.block.program
+        global_block = program.global_block()
+        pretrained_params = get_pretrained_parameter(
+            program, fluid.default_startup_program())
+
+        # set parameter attrs
+        for index, param in enumerate(pretrained_params):
+            param.regularizer = fluid.regularizer.L2Decay(
+                regularization_coeff=self.regularization_coeff)
+
+        if self.optimizer is not None:
+            self.optimizer.minimize(loss)
+        else:
+            raise ValueError("DefaultFinetuneStrategy's optimizer is None")

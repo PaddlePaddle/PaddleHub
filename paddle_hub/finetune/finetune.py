@@ -69,7 +69,6 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
 
     num_epoch = config.num_epoch
     batch_size = config.batch_size
-    learning_rate = config.learning_rate
     log_writter = LogWriter(
         os.path.join(config.checkpoint_dir, "vdllog"), sync_cycle=10)
 
@@ -82,7 +81,7 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
         if isinstance(config.strategy, hub.BERTFinetuneStrategy):
             scheduled_lr = config.strategy.execute(loss, main_program,
                                                    data_reader, config)
-        elif isinstance(config.optimizer, hub.DefaultStrategy):
+        elif isinstance(config.strategy, hub.DefaultStrategy):
             config.strategy.execute(loss)
         #TODO: add more finetune strategy
 
@@ -135,7 +134,7 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
                     train_time_used = 0
                     num_trained_examples = acc_sum = loss_sum = 0
 
-                if global_step % config.save_ckpt_interval == 0:
+                if config.save_ckpt_interval and global_step % config.save_ckpt_interval == 0:
                     # NOTE: current saved checkpoint machanism is not completed,
                     # it can't restore dataset training status
                     save_checkpoint(

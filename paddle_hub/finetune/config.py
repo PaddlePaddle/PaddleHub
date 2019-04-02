@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 from .strategy import DefaultStrategy
+from paddle_hub.common.utils import md5
 
 
 class FinetuneConfig(object):
@@ -33,17 +36,18 @@ class FinetuneConfig(object):
         self._eval_interval = eval_interval
         self._save_ckpt_interval = save_ckpt_interval
         self._use_cuda = use_cuda
-        self._learning_rate = learning_rate
         self._checkpoint_dir = checkpoint_dir
         self._num_epoch = num_epoch
         self._batch_size = batch_size
-        self._max_seq_len = max_seq_len
         if strategy is None:
             self._strategy = DefaultStrategy()
         else:
             self._strategy = strategy
         self._enable_memory_optim = enable_memory_optim
-        self._optimizer = optimizer
+        if checkpoint_dir is None:
+            self._checkpoint_dir = "hub_cpkt_" + md5(str(time.time()))[0:20]
+        else:
+            self._checkpoint_dir = checkpoint_dir
 
     @property
     def log_interval(self):
@@ -60,10 +64,6 @@ class FinetuneConfig(object):
     @property
     def use_cuda(self):
         return self._use_cuda
-
-    @property
-    def learning_rate(self):
-        return self._learning_rate
 
     @property
     def checkpoint_dir(self):
