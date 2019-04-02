@@ -34,6 +34,7 @@ hub run lac --input_file test.csv
 ```
 其中test.csv的格式为
 ```
+TITLE
 今天是个好日子
 天气预报说今天要下雨
 下一班地铁马上就要到了
@@ -51,6 +52,7 @@ hub run ssd_mobilenet_pascal --input_file test.csv
 ```
 其中test.csv的格式为
 ```
+TITLE
 cat.jpg
 dog.jpg
 person.jpg
