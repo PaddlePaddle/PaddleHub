@@ -38,21 +38,49 @@ class RunCommand(BaseCommand):
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <module>' % (ENTRY, name),
-            usage='%(prog)s [options]')
+            usage='%(prog)s',
+            add_help=False)
+
+    def parse_args_with_module(self, module, argv):
+        module_type = module.type.lower()
         # yapf: disable
-        self.add_arg('--config',    str, None,  "config file in yaml format" )
-        self.add_arg('--dataset',   str, None,  "dataset be used" )
-        self.add_arg('--data',      str, None,  "data be used" )
-        self.add_arg('--signature', str, None,  "signature to run" )
+        if module_type.startswith("cv"):
+            self.add_arg('--config',        str, None,  "config file in yaml format" )
+            self.add_arg('--signature',     str, None,  "signature to run" )
+            self.add_arg('--input_path',    str, None,  "path of image to predict" )
+            self.add_arg('--input_file',    str, None,  "file contain paths of images" )
+            self.args = self.parser.parse_args(argv[1:])
+            self.args.data = self.args.input_path
+            self.args.dataset = self.args.input_file
+        elif module_type.startswith("nlp"):
+            self.add_arg('--config',        str, None,  "config file in yaml format" )
+            self.add_arg('--signature',     str, None,  "signature to run" )
+            self.add_arg('--input_text',    str, None,  "text to predict" )
+            self.add_arg('--input_file',    str, None,  "file contain texts" )
+            self.args = self.parser.parse_args(argv)
+            self.args.data = self.args.input_text
+            self.args.dataset = self.args.input_file
         # yapf: enable
+
+    def demo_with_module(self, module):
+        module_type = module.type.lower()
+        entry = hub.commands.base_command.ENTRY
+        if module_type.startswith("cv"):
+            demo = "%s %s %s --input_path <IMAGE_PATH>" % (entry, self.name,
+                                                           module.name)
+        elif module_type.startswith("nlp"):
+            demo = "%s %s %s --input_text \"TEXT_TO_PREDICT\"" % (
+                entry, self.name, module.name)
+        else:
+            demo = "%s %s %s" % (entry, self.name, module.name)
+        return demo
 
     def exec(self, argv):
         if not argv:
-            print("ERROR: Please specify a key\n")
+            print("ERROR: Please specify a module name.\n")
             self.help()
             return False
         module_name = argv[0]
-        self.args = self.parser.parse_args(argv[1:])
 
         module_dir = default_module_manager.search_module(module_name)
         if not module_dir:
@@ -67,8 +95,11 @@ class RunCommand(BaseCommand):
                     return False
 
         module = hub.Module(module_dir=module_dir)
+        self.parse_args_with_module(module, argv[1:])
+
         if not module.default_signature:
-            print("ERROR! Module %s is not callable" % module_name)
+            print("ERROR! Module %s is not callable." % module_name)
+            return False
 
         if not self.args.signature:
             self.args.signature = module.default_signature.name
@@ -83,9 +114,10 @@ class RunCommand(BaseCommand):
         elif self.args.dataset:
             origin_data = csv_reader.read(self.args.dataset)
         else:
-            print("ERROR! Please specify data to predict")
-            self.help()
-            exit(1)
+            print("ERROR! Please specify data to predict.\n")
+            print("Summary:\n    %s" % module.summary)
+            print("Example:\n    %s" % self.demo_with_module(module))
+            return False
 
         # data_format check
         if not self.args.config:
