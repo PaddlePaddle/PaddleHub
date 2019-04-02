@@ -26,7 +26,6 @@ import paddle_hub as hub
 from visualdl import LogWriter
 
 from paddle_hub.common.logger import logger
-from paddle_hub.finetune.optimization import bert_finetune
 from paddle_hub.finetune.strategy import BERTFinetuneStrategy, DefaultStrategy
 from paddle_hub.finetune.checkpoint import load_checkpoint, save_checkpoint
 
