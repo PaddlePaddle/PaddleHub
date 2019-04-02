@@ -23,16 +23,11 @@ class FinetuneConfig(object):
                  eval_interval=100,
                  save_ckpt_interval=None,
                  use_cuda=False,
-                 learning_rate=1e-4,
                  checkpoint_dir=None,
                  num_epoch=10,
                  batch_size=None,
-                 max_seq_len=128,
-                 weight_decay=None,
-                 warmup_proportion=0.0,
                  enable_memory_optim=True,
-                 strategy=None,
-                 optimizer="adam"):
+                 strategy=None):
         """ Construct finetune Config """
         self._log_interval = log_interval
         self._eval_interval = eval_interval
@@ -83,25 +78,9 @@ class FinetuneConfig(object):
         return self._batch_size
 
     @property
-    def max_seq_len(self):
-        return self._max_seq_len
-
-    @property
-    def weight_decay(self):
-        return self._weight_decay
-
-    @property
-    def warmup_proportion(self):
-        return self._warmup_proportion
-
-    @property
     def strategy(self):
         return self._strategy
 
     @property
     def enable_memory_optim(self):
         return self._enable_memory_optim
-
-    @property
-    def optimizer(self):
-        return self._optimizer

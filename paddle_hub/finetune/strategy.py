@@ -37,6 +37,10 @@ class DefaultStrategy(object):
         else:
             raise ValueError("DefaultStrategy's optimizer is None")
 
+    # TODO complete __str__()
+    def __str__(self):
+        return "DefaultStrategy"
+
 
 class BERTFinetuneStrategy(DefaultStrategy):
     def __init__(self,
@@ -88,3 +92,7 @@ class BERTFinetuneStrategy(DefaultStrategy):
                 os.environ.get('CPU_NUM', multiprocessing.cpu_count()))
 
         return dev_count
+
+    # TODO complete __str__()
+    def __str__(self):
+        return "BERTFintuneStrategy"
