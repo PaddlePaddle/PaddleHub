@@ -191,7 +191,7 @@ class Module(object):
     def _init_with_module_file(self, module_dir):
         checker = ModuleChecker(module_dir)
         if not checker.check():
-            logger.error("module check fail")
+            logger.error("Module init failed on {}".format(module_dir))
             exit(1)
 
         self.helper = ModuleHelper(module_dir)
@@ -205,7 +205,7 @@ class Module(object):
         self._load_assets()
         self._recover_from_desc()
         self._generate_sign_attr()
-        self._recovery_parameter(self.program)
+        self._restore_parameter(self.program)
         self._recover_variable_info(self.program)
 
     def _init_with_signature(self, signatures):
@@ -228,7 +228,7 @@ class Module(object):
                 self.default_signature = sign
             self.signatures[sign.name] = sign
 
-    def _recovery_parameter(self, program):
+    def _restore_parameter(self, program):
         global_block = program.global_block()
         param_attrs = self.desc.extra_info.map.data['param_attrs']
         for key, param_attr in param_attrs.map.data.items():
@@ -477,7 +477,7 @@ class Module(object):
             if regularizer != "Default":
                 paddle_helper.set_parameter_regularizer(program, regularizer)
 
-            self._recovery_parameter(program)
+            self._restore_parameter(program)
 
         self._recover_variable_info(program)
 

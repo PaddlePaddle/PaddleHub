@@ -18,13 +18,16 @@ from __future__ import print_function
 
 import os
 import time
+import multiprocessing
 
 import paddle
 import paddle.fluid as fluid
+import paddle_hub as hub
 from visualdl import LogWriter
 
 from paddle_hub.common.logger import logger
 from paddle_hub.finetune.optimization import bert_finetune
+from paddle_hub.finetune.strategy import BERTFinetuneStrategy, DefaultStrategy
 from paddle_hub.finetune.checkpoint import load_checkpoint, save_checkpoint
 
 
@@ -76,12 +79,12 @@ def _finetune_model(task, data_reader, feed_list, config=None, do_eval=False):
         exe = fluid.Executor(place=place)
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
 
-        if config.finetune_strategy == "bert_finetune":
-            scheduled_lr = bert_finetune(task, main_program, data_reader,
-                                         config, dev_count)
-        elif config.optimizer == "adam":
-            optimizer = fluid.optimizer.Adam(learning_rate=config.learning_rate)
-            optimizer.minimize(loss)
+        # select strategy
+        if isinstance(config.strategy, hub.BERTFinetuneStrategy):
+            scheduled_lr = config.strategy.execute(loss, main_program,
+                                                   data_reader, config)
+        elif isinstance(config.optimizer, hub.DefaultStrategy):
+            config.strategy.execute(loss)
         #TODO: add more finetune strategy
 
         _do_memory_optimization(task, config)

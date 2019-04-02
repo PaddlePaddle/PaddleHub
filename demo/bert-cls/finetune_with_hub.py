@@ -43,6 +43,7 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
+    strategy = hub.BERTFinetuneStrategy(weight_decay=args.weight_decay)
     config = hub.FinetuneConfig(
         log_interval=10,
         eval_interval=100,
@@ -51,9 +52,7 @@ if __name__ == '__main__':
         learning_rate=args.learning_rate,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
-        max_seq_len=args.max_seq_len,
-        weight_decay=args.weight_decay,
-        finetune_strategy="bert_finetune")
+        strategy=strategy)
 
     # loading Paddlehub BERT
     module = hub.Module(module_dir=args.hub_module_dir)
