@@ -16,7 +16,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from ..module import module_desc_pb2
-from .utils import from_pyobj_to_flexible_data, from_flexible_data_to_pyobj
+from .utils import from_pyobj_to_module_attr, from_module_attr_to_pyobj
 from .logger import logger
 import paddle
 import paddle.fluid as fluid
@@ -49,70 +49,70 @@ def get_variable_info(var):
     return var_info
 
 
-def from_param_to_flexible_data(param, flexible_data):
+def from_param_to_module_attr(param, module_attr):
     def paddle_obj_filter(pyobj):
         return isinstance(pyobj, fluid.framework.Variable) or isinstance(
             pyobj, fluid.framework.Block) or isinstance(
                 pyobj, fluid.framework.Program) or isinstance(
                     pyobj, fluid.framework.Operator)
 
-    flexible_data.type = module_desc_pb2.MAP
-    from_pyobj_to_flexible_data(param.trainable,
-                                flexible_data.map.data['trainable'])
-    from_pyobj_to_flexible_data(param.do_model_average,
-                                flexible_data.map.data['do_model_average'])
+    module_attr.type = module_desc_pb2.MAP
+    from_pyobj_to_module_attr(param.trainable,
+                              module_attr.map.data['trainable'])
+    from_pyobj_to_module_attr(param.do_model_average,
+                              module_attr.map.data['do_model_average'])
     #TODO(wuzewu): don't save learning rate
-    from_pyobj_to_flexible_data(param.optimize_attr,
-                                flexible_data.map.data['optimize_attr'])
-    from_pyobj_to_flexible_data(
+    from_pyobj_to_module_attr(param.optimize_attr,
+                              module_attr.map.data['optimize_attr'])
+    from_pyobj_to_module_attr(
         param.regularizer,
-        flexible_data.map.data['regularizer'],
+        module_attr.map.data['regularizer'],
         obj_filter=paddle_obj_filter)
-    from_pyobj_to_flexible_data(
+    from_pyobj_to_module_attr(
         param.gradient_clip_attr,
-        flexible_data.map.data['gradient_clip_attr'],
+        module_attr.map.data['gradient_clip_attr'],
         obj_filter=paddle_obj_filter)
 
 
-def from_flexible_data_to_param(flexible_data):
+def from_module_attr_to_param(module_attr):
     param = {'gradient_clip_attr': None, 'regularizer': None}
-    param['trainable'] = from_flexible_data_to_pyobj(
-        flexible_data.map.data['trainable'])
-    param['do_model_average'] = from_flexible_data_to_pyobj(
-        flexible_data.map.data['do_model_average'])
+    param['trainable'] = from_module_attr_to_pyobj(
+        module_attr.map.data['trainable'])
+    param['do_model_average'] = from_module_attr_to_pyobj(
+        module_attr.map.data['do_model_average'])
     # do not recover learning rate
-    #param['optimize_attr'] = from_flexible_data_to_pyobj(
-    #    flexible_data.map.data['optimize_attr'])
-    if flexible_data.map.data['regularizer'].type != module_desc_pb2.NONE:
-        regularizer_type = flexible_data.map.data['regularizer'].name
-        regularization_coeff = from_flexible_data_to_pyobj(
-            flexible_data.map.data['regularizer'].object.
+    #param['optimize_attr'] = from_module_attr_to_pyobj(
+    #    module_attr.map.data['optimize_attr'])
+    if module_attr.map.data['regularizer'].type != module_desc_pb2.NONE:
+        regularizer_type = module_attr.map.data['regularizer'].name
+        regularization_coeff = from_module_attr_to_pyobj(
+            module_attr.map.data['regularizer'].object.
             data['_regularization_coeff'])
         param['regularizer'] = eval(
             "fluid.regularizer.%s(regularization_coeff = %f)" %
             (regularizer_type, regularization_coeff))
 
-    if flexible_data.map.data['gradient_clip_attr'].type != module_desc_pb2.NONE:
-        clip_type = flexible_data.map.data['gradient_clip_attr'].name
+    if module_attr.map.data['gradient_clip_attr'].type != module_desc_pb2.NONE:
+        clip_type = module_attr.map.data['gradient_clip_attr'].name
         if clip_type == "ErrorClipByValue" or clip_type == "GradientClipByValue":
-            max = from_flexible_data_to_pyobj(
-                flexible_data.map.data['gradient_clip_attr'].object.data['max'])
-            min = from_flexible_data_to_pyobj(
-                flexible_data.map.data['gradient_clip_attr'].object.data['min'])
+            max = from_module_attr_to_pyobj(
+                module_attr.map.data['gradient_clip_attr'].object.data['max'])
+            min = from_module_attr_to_pyobj(
+                module_attr.map.data['gradient_clip_attr'].object.data['min'])
             param['gradient_clip_attr'] = eval(
                 "fluid.clip.%s(max = %f, min = %f)" % (clip_type, max, min))
         if clip_type == "GradientClipByNorm":
-            clip_norm = from_flexible_data_to_pyobj(
-                flexible_data.map.data['gradient_clip_attr'].object.
+            clip_norm = from_module_attr_to_pyobj(
+                module_attr.map.data['gradient_clip_attr'].object.
                 data['clip_norm'])
             param['gradient_clip_attr'] = eval(
                 "fluid.clip.%s(clip_norm = %f)" % (clip_type, clip_norm))
         if clip_type == "GradientClipByGlobalNorm":
-            clip_norm = from_flexible_data_to_pyobj(
-                flexible_data.map.data['gradient_clip_attr'].object.
+            clip_norm = from_module_attr_to_pyobj(
+                module_attr.map.data['gradient_clip_attr'].object.
                 data['clip_norm'])
-            group_name = from_flexible_data_to_pyobj(
-                flexible_data.map.data['gradient_clip_attr'].object.
+            group_name = from_module_attr_to_pyobj(
+                module_attr.map.data['gradient_clip_attr'].object.
                 data['group_name'])
             param['gradient_clip_attr'] = eval(
                 "fluid.clip.%s(clip_norm = %f, group_name = \"%s\")" %

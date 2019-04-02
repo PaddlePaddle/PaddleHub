@@ -161,15 +161,15 @@ class Module(object):
         utils.mkdir(processor_path)
         with open(output_file, "w") as file:
             file.write(pycode)
-        utils.from_pyobj_to_flexible_data(
-            processor_name, self.desc.extra_info.map.data['processor_info'])
+        utils.from_pyobj_to_module_attr(
+            processor_name, self.desc.attr.map.data['processor_info'])
 
     def _load_processor(self):
         processor_path = self.helper.processor_path()
         if os.path.exists(processor_path):
             sys.path.append(processor_path)
-            processor_name = utils.from_flexible_data_to_pyobj(
-                self.desc.extra_info.map.data['processor_info'])
+            processor_name = utils.from_module_attr_to_pyobj(
+                self.desc.attr.map.data['processor_info'])
             self.processor = __import__(processor_name).Processor(module=self)
         else:
             self.processor = None
@@ -230,9 +230,9 @@ class Module(object):
 
     def _restore_parameter(self, program):
         global_block = program.global_block()
-        param_attrs = self.desc.extra_info.map.data['param_attrs']
+        param_attrs = self.desc.attr.map.data['param_attrs']
         for key, param_attr in param_attrs.map.data.items():
-            param = paddle_helper.from_flexible_data_to_param(param_attr)
+            param = paddle_helper.from_module_attr_to_param(param_attr)
             param['name'] = self.get_var_name_with_prefix(key)
             if (param['name'] not in global_block.vars):
                 continue
@@ -248,11 +248,11 @@ class Module(object):
                 is_data=var.is_data)
 
     def _recover_variable_info(self, program):
-        var_infos = self.desc.extra_info.map.data['var_infos']
+        var_infos = self.desc.attr.map.data['var_infos']
         for var_info in var_infos.map.data:
-            idx = utils.from_flexible_data_to_pyobj(
+            idx = utils.from_module_attr_to_pyobj(
                 var_infos.map.data[var_info].map.data['block_id'])
-            stop_gradient = utils.from_flexible_data_to_pyobj(
+            stop_gradient = utils.from_module_attr_to_pyobj(
                 var_infos.map.data[var_info].map.data['stop_gradient'])
             block = program.blocks[idx]
             var_name = self.get_var_name_with_prefix(var_info)
@@ -311,51 +311,51 @@ class Module(object):
                 fetch_names=fetch_names)
 
         # recover default signature
-        default_signature_name = utils.from_flexible_data_to_pyobj(
-            self.desc.extra_info.map.data['default_signature'])
+        default_signature_name = utils.from_module_attr_to_pyobj(
+            self.desc.attr.map.data['default_signature'])
         self.default_signature = self.signatures[
             default_signature_name] if default_signature_name else None
 
         # recover module info
-        module_info = self.desc.extra_info.map.data['module_info']
-        self.name = utils.from_flexible_data_to_pyobj(
+        module_info = self.desc.attr.map.data['module_info']
+        self.name = utils.from_module_attr_to_pyobj(
             module_info.map.data['name'])
-        self.author = utils.from_flexible_data_to_pyobj(
+        self.author = utils.from_module_attr_to_pyobj(
             module_info.map.data['author'])
-        self.author_email = utils.from_flexible_data_to_pyobj(
+        self.author_email = utils.from_module_attr_to_pyobj(
             module_info.map.data['author_email'])
-        self.version = utils.from_flexible_data_to_pyobj(
+        self.version = utils.from_module_attr_to_pyobj(
             module_info.map.data['version'])
-        self.type = utils.from_flexible_data_to_pyobj(
+        self.type = utils.from_module_attr_to_pyobj(
             module_info.map.data['type'])
-        self.summary = utils.from_flexible_data_to_pyobj(
+        self.summary = utils.from_module_attr_to_pyobj(
             module_info.map.data['summary'])
 
         # recover name prefix
-        self.name_prefix = utils.from_flexible_data_to_pyobj(
-            self.desc.extra_info.map.data["name_prefix"])
+        self.name_prefix = utils.from_module_attr_to_pyobj(
+            self.desc.attr.map.data["name_prefix"])
 
     def _generate_desc(self):
         # save fluid Parameter
-        extra_info = self.desc.extra_info
-        extra_info.type = module_desc_pb2.MAP
-        param_attrs = extra_info.map.data['param_attrs']
+        attr = self.desc.attr
+        attr.type = module_desc_pb2.MAP
+        param_attrs = attr.map.data['param_attrs']
         param_attrs.type = module_desc_pb2.MAP
         for param in self.program.global_block().iter_parameters():
             param_attr = param_attrs.map.data[param.name]
-            paddle_helper.from_param_to_flexible_data(param, param_attr)
+            paddle_helper.from_param_to_module_attr(param, param_attr)
 
         # save Variable Info
-        var_infos = extra_info.map.data['var_infos']
+        var_infos = attr.map.data['var_infos']
         var_infos.type = module_desc_pb2.MAP
         for block in self.program.blocks:
             for var in block.vars.values():
                 var_info = var_infos.map.data[var.name]
                 var_info.type = module_desc_pb2.MAP
-                utils.from_pyobj_to_flexible_data(
+                utils.from_pyobj_to_module_attr(
                     var.stop_gradient, var_info.map.data['stop_gradient'])
-                utils.from_pyobj_to_flexible_data(block.idx,
-                                                  var_info.map.data['block_id'])
+                utils.from_pyobj_to_module_attr(block.idx,
+                                                var_info.map.data['block_id'])
 
         # save signarture info
         for key, sign in self.signatures.items():
@@ -375,29 +375,27 @@ class Module(object):
                 fetch_var.alias = fetch_names[index]
 
         # save default signature
-        utils.from_pyobj_to_flexible_data(
+        utils.from_pyobj_to_module_attr(
             self.default_signature.name if self.default_signature else None,
-            extra_info.map.data['default_signature'])
+            attr.map.data['default_signature'])
 
         # save name prefix
-        utils.from_pyobj_to_flexible_data(
-            self.name_prefix, self.desc.extra_info.map.data["name_prefix"])
+        utils.from_pyobj_to_module_attr(self.name_prefix,
+                                        self.desc.attr.map.data["name_prefix"])
 
         # save module info
-        module_info = extra_info.map.data['module_info']
+        module_info = attr.map.data['module_info']
         module_info.type = module_desc_pb2.MAP
-        utils.from_pyobj_to_flexible_data(self.name,
-                                          module_info.map.data['name'])
-        utils.from_pyobj_to_flexible_data(self.version,
-                                          module_info.map.data['version'])
-        utils.from_pyobj_to_flexible_data(self.author,
-                                          module_info.map.data['author'])
-        utils.from_pyobj_to_flexible_data(self.author_email,
-                                          module_info.map.data['author_email'])
-        utils.from_pyobj_to_flexible_data(self.type,
-                                          module_info.map.data['type'])
-        utils.from_pyobj_to_flexible_data(self.summary,
-                                          module_info.map.data['summary'])
+        utils.from_pyobj_to_module_attr(self.name, module_info.map.data['name'])
+        utils.from_pyobj_to_module_attr(self.version,
+                                        module_info.map.data['version'])
+        utils.from_pyobj_to_module_attr(self.author,
+                                        module_info.map.data['author'])
+        utils.from_pyobj_to_module_attr(self.author_email,
+                                        module_info.map.data['author_email'])
+        utils.from_pyobj_to_module_attr(self.type, module_info.map.data['type'])
+        utils.from_pyobj_to_module_attr(self.summary,
+                                        module_info.map.data['summary'])
 
     def __call__(self, sign_name, data, **kwargs):
         self.check_processor()

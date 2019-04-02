@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package='paddle_hub_module',
     syntax='proto3',
     serialized_pb=_b(
-        '\n\x11module_desc.proto\x12\x11paddle_hub_module\"\x8f\x02\n\x06KVData\x12\x37\n\x07keyType\x18\x01 \x03(\x0b\x32&.paddle_hub_module.KVData.KeyTypeEntry\x12\x31\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32#.paddle_hub_module.KVData.DataEntry\x1aK\n\x0cKeyTypeEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12*\n\x05value\x18\x02 \x01(\x0e\x32\x1b.paddle_hub_module.DataType:\x02\x38\x01\x1aL\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12.\n\x05value\x18\x02 \x01(\x0b\x32\x1f.paddle_hub_module.FlexibleData:\x02\x38\x01\"\xa5\x02\n\x0c\x46lexibleData\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.paddle_hub_module.DataType\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\t\n\x01i\x18\x03 \x01(\x03\x12\t\n\x01\x66\x18\x04 \x01(\x01\x12\t\n\x01\x62\x18\x05 \x01(\x08\x12\t\n\x01s\x18\x06 \x01(\t\x12&\n\x03map\x18\x07 \x01(\x0b\x32\x19.paddle_hub_module.KVData\x12\'\n\x04list\x18\x08 \x01(\x0b\x32\x19.paddle_hub_module.KVData\x12&\n\x03set\x18\t \x01(\x0b\x32\x19.paddle_hub_module.KVData\x12)\n\x06object\x18\n \x01(\x0b\x32\x19.paddle_hub_module.KVData\x12\x0c\n\x04info\x18\x0b \x01(\t\"+\n\x08\x46\x65\x65\x64\x44\x65sc\x12\x10\n\x08var_name\x18\x01 \x01(\t\x12\r\n\x05\x61lias\x18\x02 \x01(\t\",\n\tFetchDesc\x12\x10\n\x08var_name\x18\x01 \x01(\t\x12\r\n\x05\x61lias\x18\x02 \x01(\t\"m\n\tModuleVar\x12\x30\n\nfetch_desc\x18\x01 \x03(\x0b\x32\x1c.paddle_hub_module.FetchDesc\x12.\n\tfeed_desc\x18\x02 \x03(\x0b\x32\x1b.paddle_hub_module.FeedDesc\"7\n\x08\x41uthInfo\x12\x16\n\x0epaddle_version\x18\x01 \x01(\t\x12\x13\n\x0bhub_version\x18\x02 \x01(\t\"\xbb\x02\n\nModuleDesc\x12\x0c\n\x04name\x18\x01 \x01(\t\x12=\n\x08sign2var\x18\x02 \x03(\x0b\x32+.paddle_hub_module.ModuleDesc.Sign2varEntry\x12\x14\n\x0creturn_numpy\x18\x03 \x01(\x08\x12\x16\n\x0e\x63ontain_assets\x18\x04 \x01(\x08\x12.\n\tauth_info\x18\x05 \x01(\x0b\x32\x1b.paddle_hub_module.AuthInfo\x12\x33\n\nextra_info\x18\x06 \x01(\x0b\x32\x1f.paddle_hub_module.FlexibleData\x1aM\n\rSign2varEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12+\n\x05value\x18\x02 \x01(\x0b\x32\x1c.paddle_hub_module.ModuleVar:\x02\x38\x01*i\n\x08\x44\x61taType\x12\x08\n\x04NONE\x10\x00\x12\x07\n\x03INT\x10\x01\x12\t\n\x05\x46LOAT\x10\x02\x12\n\n\x06STRING\x10\x03\x12\x0b\n\x07\x42OOLEAN\x10\x04\x12\x08\n\x04LIST\x10\x05\x12\x07\n\x03MAP\x10\x06\x12\x07\n\x03SET\x10\x07\x12\n\n\x06OBJECT\x10\x08\x42\x02H\x03\x62\x06proto3'
+        '\n\x11module_desc.proto\x12\x11paddle_hub_module\"\x8e\x02\n\x06KVData\x12\x38\n\x08key_type\x18\x01 \x03(\x0b\x32&.paddle_hub_module.KVData.KeyTypeEntry\x12\x31\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32#.paddle_hub_module.KVData.DataEntry\x1aK\n\x0cKeyTypeEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12*\n\x05value\x18\x02 \x01(\x0e\x32\x1b.paddle_hub_module.DataType:\x02\x38\x01\x1aJ\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12,\n\x05value\x18\x02 \x01(\x0b\x32\x1d.paddle_hub_module.ModuleAttr:\x02\x38\x01\"\xa3\x02\n\nModuleAttr\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.paddle_hub_module.DataType\x12\t\n\x01i\x18\x02 \x01(\x03\x12\t\n\x01\x66\x18\x03 \x01(\x01\x12\t\n\x01\x62\x18\x04 \x01(\x08\x12\t\n\x01s\x18\x05 \x01(\t\x12&\n\x03map\x18\x06 \x01(\x0b\x32\x19.paddle_hub_module.KVData\x12\'\n\x04list\x18\x07 \x01(\x0b\x32\x19.paddle_hub_module.KVData\x12&\n\x03set\x18\x08 \x01(\x0b\x32\x19.paddle_hub_module.KVData\x12)\n\x06object\x18\t \x01(\x0b\x32\x19.paddle_hub_module.KVData\x12\x0c\n\x04name\x18\n \x01(\t\x12\x0c\n\x04info\x18\x0b \x01(\t\"+\n\x08\x46\x65\x65\x64\x44\x65sc\x12\x10\n\x08var_name\x18\x01 \x01(\t\x12\r\n\x05\x61lias\x18\x02 \x01(\t\",\n\tFetchDesc\x12\x10\n\x08var_name\x18\x01 \x01(\t\x12\r\n\x05\x61lias\x18\x02 \x01(\t\"m\n\tModuleVar\x12\x30\n\nfetch_desc\x18\x01 \x03(\x0b\x32\x1c.paddle_hub_module.FetchDesc\x12.\n\tfeed_desc\x18\x02 \x03(\x0b\x32\x1b.paddle_hub_module.FeedDesc\"7\n\x08\x41uthInfo\x12\x16\n\x0epaddle_version\x18\x01 \x01(\t\x12\x13\n\x0bhub_version\x18\x02 \x01(\t\"\xc7\x01\n\nModuleDesc\x12=\n\x08sign2var\x18\x02 \x03(\x0b\x32+.paddle_hub_module.ModuleDesc.Sign2varEntry\x12+\n\x04\x61ttr\x18\x03 \x01(\x0b\x32\x1d.paddle_hub_module.ModuleAttr\x1aM\n\rSign2varEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12+\n\x05value\x18\x02 \x01(\x0b\x32\x1c.paddle_hub_module.ModuleVar:\x02\x38\x01*i\n\x08\x44\x61taType\x12\x08\n\x04NONE\x10\x00\x12\x07\n\x03INT\x10\x01\x12\t\n\x05\x46LOAT\x10\x02\x12\n\n\x06STRING\x10\x03\x12\x0b\n\x07\x42OOLEAN\x10\x04\x12\x08\n\x04LIST\x10\x05\x12\x07\n\x03MAP\x10\x06\x12\x07\n\x03SET\x10\x07\x12\n\n\x06OBJECT\x10\x08\x42\x02H\x03\x62\x06proto3'
     ))
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -49,8 +49,8 @@ _DATATYPE = _descriptor.EnumDescriptor(
     ],
     containing_type=None,
     options=None,
-    serialized_start=1187,
-    serialized_end=1292,
+    serialized_start=1068,
+    serialized_end=1173,
 )
 _sym_db.RegisterEnumDescriptor(_DATATYPE)
 
@@ -114,8 +114,8 @@ _KVDATA_KEYTYPEENTRY = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=159,
-    serialized_end=234,
+    serialized_start=160,
+    serialized_end=235,
 )
 
 _KVDATA_DATAENTRY = _descriptor.Descriptor(
@@ -167,8 +167,8 @@ _KVDATA_DATAENTRY = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=236,
-    serialized_end=312,
+    serialized_start=237,
+    serialized_end=311,
 )
 
 _KVDATA = _descriptor.Descriptor(
@@ -179,8 +179,8 @@ _KVDATA = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name='keyType',
-            full_name='paddle_hub_module.KVData.keyType',
+            name='key_type',
+            full_name='paddle_hub_module.KVData.key_type',
             index=0,
             number=1,
             type=11,
@@ -223,19 +223,19 @@ _KVDATA = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=41,
-    serialized_end=312,
+    serialized_end=311,
 )
 
-_FLEXIBLEDATA = _descriptor.Descriptor(
-    name='FlexibleData',
-    full_name='paddle_hub_module.FlexibleData',
+_MODULEATTR = _descriptor.Descriptor(
+    name='ModuleAttr',
+    full_name='paddle_hub_module.ModuleAttr',
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name='type',
-            full_name='paddle_hub_module.FlexibleData.type',
+            full_name='paddle_hub_module.ModuleAttr.type',
             index=0,
             number=1,
             type=14,
@@ -250,26 +250,10 @@ _FLEXIBLEDATA = _descriptor.Descriptor(
             extension_scope=None,
             options=None),
         _descriptor.FieldDescriptor(
-            name='name',
-            full_name='paddle_hub_module.FlexibleData.name',
+            name='i',
+            full_name='paddle_hub_module.ModuleAttr.i',
             index=1,
             number=2,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=_b("").decode('utf-8'),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            options=None),
-        _descriptor.FieldDescriptor(
-            name='i',
-            full_name='paddle_hub_module.FlexibleData.i',
-            index=2,
-            number=3,
             type=3,
             cpp_type=2,
             label=1,
@@ -283,9 +267,9 @@ _FLEXIBLEDATA = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='f',
-            full_name='paddle_hub_module.FlexibleData.f',
-            index=3,
-            number=4,
+            full_name='paddle_hub_module.ModuleAttr.f',
+            index=2,
+            number=3,
             type=1,
             cpp_type=5,
             label=1,
@@ -299,9 +283,9 @@ _FLEXIBLEDATA = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='b',
-            full_name='paddle_hub_module.FlexibleData.b',
-            index=4,
-            number=5,
+            full_name='paddle_hub_module.ModuleAttr.b',
+            index=3,
+            number=4,
             type=8,
             cpp_type=7,
             label=1,
@@ -315,9 +299,9 @@ _FLEXIBLEDATA = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='s',
-            full_name='paddle_hub_module.FlexibleData.s',
-            index=5,
-            number=6,
+            full_name='paddle_hub_module.ModuleAttr.s',
+            index=4,
+            number=5,
             type=9,
             cpp_type=9,
             label=1,
@@ -331,7 +315,23 @@ _FLEXIBLEDATA = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='map',
-            full_name='paddle_hub_module.FlexibleData.map',
+            full_name='paddle_hub_module.ModuleAttr.map',
+            index=5,
+            number=6,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            options=None),
+        _descriptor.FieldDescriptor(
+            name='list',
+            full_name='paddle_hub_module.ModuleAttr.list',
             index=6,
             number=7,
             type=11,
@@ -346,8 +346,8 @@ _FLEXIBLEDATA = _descriptor.Descriptor(
             extension_scope=None,
             options=None),
         _descriptor.FieldDescriptor(
-            name='list',
-            full_name='paddle_hub_module.FlexibleData.list',
+            name='set',
+            full_name='paddle_hub_module.ModuleAttr.set',
             index=7,
             number=8,
             type=11,
@@ -362,8 +362,8 @@ _FLEXIBLEDATA = _descriptor.Descriptor(
             extension_scope=None,
             options=None),
         _descriptor.FieldDescriptor(
-            name='set',
-            full_name='paddle_hub_module.FlexibleData.set',
+            name='object',
+            full_name='paddle_hub_module.ModuleAttr.object',
             index=8,
             number=9,
             type=11,
@@ -378,15 +378,15 @@ _FLEXIBLEDATA = _descriptor.Descriptor(
             extension_scope=None,
             options=None),
         _descriptor.FieldDescriptor(
-            name='object',
-            full_name='paddle_hub_module.FlexibleData.object',
+            name='name',
+            full_name='paddle_hub_module.ModuleAttr.name',
             index=9,
             number=10,
-            type=11,
-            cpp_type=10,
+            type=9,
+            cpp_type=9,
             label=1,
             has_default_value=False,
-            default_value=None,
+            default_value=_b("").decode('utf-8'),
             message_type=None,
             enum_type=None,
             containing_type=None,
@@ -395,7 +395,7 @@ _FLEXIBLEDATA = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='info',
-            full_name='paddle_hub_module.FlexibleData.info',
+            full_name='paddle_hub_module.ModuleAttr.info',
             index=10,
             number=11,
             type=9,
@@ -418,8 +418,8 @@ _FLEXIBLEDATA = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=315,
-    serialized_end=608,
+    serialized_start=314,
+    serialized_end=605,
 )
 
 _FEEDDESC = _descriptor.Descriptor(
@@ -470,8 +470,8 @@ _FEEDDESC = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=610,
-    serialized_end=653,
+    serialized_start=607,
+    serialized_end=650,
 )
 
 _FETCHDESC = _descriptor.Descriptor(
@@ -522,8 +522,8 @@ _FETCHDESC = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=655,
-    serialized_end=699,
+    serialized_start=652,
+    serialized_end=696,
 )
 
 _MODULEVAR = _descriptor.Descriptor(
@@ -574,8 +574,8 @@ _MODULEVAR = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=701,
-    serialized_end=810,
+    serialized_start=698,
+    serialized_end=807,
 )
 
 _AUTHINFO = _descriptor.Descriptor(
@@ -626,8 +626,8 @@ _AUTHINFO = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=812,
-    serialized_end=867,
+    serialized_start=809,
+    serialized_end=864,
 )
 
 _MODULEDESC_SIGN2VARENTRY = _descriptor.Descriptor(
@@ -679,8 +679,8 @@ _MODULEDESC_SIGN2VARENTRY = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1108,
-    serialized_end=1185,
+    serialized_start=989,
+    serialized_end=1066,
 )
 
 _MODULEDESC = _descriptor.Descriptor(
@@ -691,25 +691,9 @@ _MODULEDESC = _descriptor.Descriptor(
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
-            name='name',
-            full_name='paddle_hub_module.ModuleDesc.name',
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=_b("").decode('utf-8'),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            options=None),
-        _descriptor.FieldDescriptor(
             name='sign2var',
             full_name='paddle_hub_module.ModuleDesc.sign2var',
-            index=1,
+            index=0,
             number=2,
             type=11,
             cpp_type=10,
@@ -723,58 +707,10 @@ _MODULEDESC = _descriptor.Descriptor(
             extension_scope=None,
             options=None),
         _descriptor.FieldDescriptor(
-            name='return_numpy',
-            full_name='paddle_hub_module.ModuleDesc.return_numpy',
-            index=2,
+            name='attr',
+            full_name='paddle_hub_module.ModuleDesc.attr',
+            index=1,
             number=3,
-            type=8,
-            cpp_type=7,
-            label=1,
-            has_default_value=False,
-            default_value=False,
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            options=None),
-        _descriptor.FieldDescriptor(
-            name='contain_assets',
-            full_name='paddle_hub_module.ModuleDesc.contain_assets',
-            index=3,
-            number=4,
-            type=8,
-            cpp_type=7,
-            label=1,
-            has_default_value=False,
-            default_value=False,
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            options=None),
-        _descriptor.FieldDescriptor(
-            name='auth_info',
-            full_name='paddle_hub_module.ModuleDesc.auth_info',
-            index=4,
-            number=5,
-            type=11,
-            cpp_type=10,
-            label=1,
-            has_default_value=False,
-            default_value=None,
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            options=None),
-        _descriptor.FieldDescriptor(
-            name='extra_info',
-            full_name='paddle_hub_module.ModuleDesc.extra_info',
-            index=5,
-            number=6,
             type=11,
             cpp_type=10,
             label=1,
@@ -797,30 +733,29 @@ _MODULEDESC = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=870,
-    serialized_end=1185,
+    serialized_start=867,
+    serialized_end=1066,
 )
 
 _KVDATA_KEYTYPEENTRY.fields_by_name['value'].enum_type = _DATATYPE
 _KVDATA_KEYTYPEENTRY.containing_type = _KVDATA
-_KVDATA_DATAENTRY.fields_by_name['value'].message_type = _FLEXIBLEDATA
+_KVDATA_DATAENTRY.fields_by_name['value'].message_type = _MODULEATTR
 _KVDATA_DATAENTRY.containing_type = _KVDATA
-_KVDATA.fields_by_name['keyType'].message_type = _KVDATA_KEYTYPEENTRY
+_KVDATA.fields_by_name['key_type'].message_type = _KVDATA_KEYTYPEENTRY
 _KVDATA.fields_by_name['data'].message_type = _KVDATA_DATAENTRY
-_FLEXIBLEDATA.fields_by_name['type'].enum_type = _DATATYPE
-_FLEXIBLEDATA.fields_by_name['map'].message_type = _KVDATA
-_FLEXIBLEDATA.fields_by_name['list'].message_type = _KVDATA
-_FLEXIBLEDATA.fields_by_name['set'].message_type = _KVDATA
-_FLEXIBLEDATA.fields_by_name['object'].message_type = _KVDATA
+_MODULEATTR.fields_by_name['type'].enum_type = _DATATYPE
+_MODULEATTR.fields_by_name['map'].message_type = _KVDATA
+_MODULEATTR.fields_by_name['list'].message_type = _KVDATA
+_MODULEATTR.fields_by_name['set'].message_type = _KVDATA
+_MODULEATTR.fields_by_name['object'].message_type = _KVDATA
 _MODULEVAR.fields_by_name['fetch_desc'].message_type = _FETCHDESC
 _MODULEVAR.fields_by_name['feed_desc'].message_type = _FEEDDESC
 _MODULEDESC_SIGN2VARENTRY.fields_by_name['value'].message_type = _MODULEVAR
 _MODULEDESC_SIGN2VARENTRY.containing_type = _MODULEDESC
 _MODULEDESC.fields_by_name['sign2var'].message_type = _MODULEDESC_SIGN2VARENTRY
-_MODULEDESC.fields_by_name['auth_info'].message_type = _AUTHINFO
-_MODULEDESC.fields_by_name['extra_info'].message_type = _FLEXIBLEDATA
+_MODULEDESC.fields_by_name['attr'].message_type = _MODULEATTR
 DESCRIPTOR.message_types_by_name['KVData'] = _KVDATA
-DESCRIPTOR.message_types_by_name['FlexibleData'] = _FLEXIBLEDATA
+DESCRIPTOR.message_types_by_name['ModuleAttr'] = _MODULEATTR
 DESCRIPTOR.message_types_by_name['FeedDesc'] = _FEEDDESC
 DESCRIPTOR.message_types_by_name['FetchDesc'] = _FETCHDESC
 DESCRIPTOR.message_types_by_name['ModuleVar'] = _MODULEVAR
@@ -856,15 +791,15 @@ _sym_db.RegisterMessage(KVData)
 _sym_db.RegisterMessage(KVData.KeyTypeEntry)
 _sym_db.RegisterMessage(KVData.DataEntry)
 
-FlexibleData = _reflection.GeneratedProtocolMessageType(
-    'FlexibleData',
+ModuleAttr = _reflection.GeneratedProtocolMessageType(
+    'ModuleAttr',
     (_message.Message, ),
     dict(
-        DESCRIPTOR=_FLEXIBLEDATA,
+        DESCRIPTOR=_MODULEATTR,
         __module__='module_desc_pb2'
-        # @@protoc_insertion_point(class_scope:paddle_hub_module.FlexibleData)
+        # @@protoc_insertion_point(class_scope:paddle_hub_module.ModuleAttr)
     ))
-_sym_db.RegisterMessage(FlexibleData)
+_sym_db.RegisterMessage(ModuleAttr)
 
 FeedDesc = _reflection.GeneratedProtocolMessageType(
     'FeedDesc',

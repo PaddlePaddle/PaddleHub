@@ -82,86 +82,84 @@ def get_pykey(key, keyed_type):
 
 
 #TODO(wuzewu): solving the problem of circular references
-def from_pyobj_to_flexible_data(pyobj, flexible_data, obj_filter=None):
+def from_pyobj_to_module_attr(pyobj, module_attr, obj_filter=None):
     if obj_filter and obj_filter(pyobj):
         return
     if isinstance(pyobj, bool):
-        flexible_data.type = module_desc_pb2.BOOLEAN
-        flexible_data.b = pyobj
+        module_attr.type = module_desc_pb2.BOOLEAN
+        module_attr.b = pyobj
     elif isinstance(pyobj, int):
-        flexible_data.type = module_desc_pb2.INT
-        flexible_data.i = pyobj
+        module_attr.type = module_desc_pb2.INT
+        module_attr.i = pyobj
     elif isinstance(pyobj, str):
-        flexible_data.type = module_desc_pb2.STRING
-        flexible_data.s = pyobj
+        module_attr.type = module_desc_pb2.STRING
+        module_attr.s = pyobj
     elif isinstance(pyobj, float):
-        flexible_data.type = module_desc_pb2.FLOAT
-        flexible_data.f = pyobj
+        module_attr.type = module_desc_pb2.FLOAT
+        module_attr.f = pyobj
     elif isinstance(pyobj, list) or isinstance(pyobj, tuple):
-        flexible_data.type = module_desc_pb2.LIST
+        module_attr.type = module_desc_pb2.LIST
         for index, obj in enumerate(pyobj):
-            from_pyobj_to_flexible_data(
-                obj, flexible_data.list.data[str(index)], obj_filter)
+            from_pyobj_to_module_attr(obj, module_attr.list.data[str(index)],
+                                      obj_filter)
     elif isinstance(pyobj, set):
-        flexible_data.type = module_desc_pb2.SET
+        module_attr.type = module_desc_pb2.SET
         for index, obj in enumerate(list(pyobj)):
-            from_pyobj_to_flexible_data(obj, flexible_data.set.data[str(index)],
-                                        obj_filter)
+            from_pyobj_to_module_attr(obj, module_attr.set.data[str(index)],
+                                      obj_filter)
     elif isinstance(pyobj, dict):
-        flexible_data.type = module_desc_pb2.MAP
+        module_attr.type = module_desc_pb2.MAP
         for key, value in pyobj.items():
-            from_pyobj_to_flexible_data(value, flexible_data.map.data[str(key)],
-                                        obj_filter)
-            flexible_data.map.keyType[str(key)] = get_keyed_type_of_pyobj(key)
+            from_pyobj_to_module_attr(value, module_attr.map.data[str(key)],
+                                      obj_filter)
+            module_attr.map.key_type[str(key)] = get_keyed_type_of_pyobj(key)
     elif isinstance(pyobj, type(None)):
-        flexible_data.type = module_desc_pb2.NONE
+        module_attr.type = module_desc_pb2.NONE
     else:
-        flexible_data.type = module_desc_pb2.OBJECT
-        flexible_data.name = str(pyobj.__class__.__name__)
+        module_attr.type = module_desc_pb2.OBJECT
+        module_attr.name = str(pyobj.__class__.__name__)
         if not hasattr(pyobj, "__dict__"):
             logger.warning(
-                "python obj %s has not __dict__ attr" % flexible_data.name)
+                "python obj %s has not __dict__ attr" % module_attr.name)
             return
         for key, value in pyobj.__dict__.items():
-            from_pyobj_to_flexible_data(
-                value, flexible_data.object.data[str(key)], obj_filter)
-            flexible_data.object.keyType[str(key)] = get_keyed_type_of_pyobj(
-                key)
+            from_pyobj_to_module_attr(value, module_attr.object.data[str(key)],
+                                      obj_filter)
+            module_attr.object.key_type[str(key)] = get_keyed_type_of_pyobj(key)
 
 
-def from_flexible_data_to_pyobj(flexible_data):
-    if flexible_data.type == module_desc_pb2.BOOLEAN:
-        result = flexible_data.b
-    elif flexible_data.type == module_desc_pb2.INT:
-        result = flexible_data.i
-    elif flexible_data.type == module_desc_pb2.STRING:
-        result = flexible_data.s
-    elif flexible_data.type == module_desc_pb2.FLOAT:
-        result = flexible_data.f
-    elif flexible_data.type == module_desc_pb2.LIST:
+def from_module_attr_to_pyobj(module_attr):
+    if module_attr.type == module_desc_pb2.BOOLEAN:
+        result = module_attr.b
+    elif module_attr.type == module_desc_pb2.INT:
+        result = module_attr.i
+    elif module_attr.type == module_desc_pb2.STRING:
+        result = module_attr.s
+    elif module_attr.type == module_desc_pb2.FLOAT:
+        result = module_attr.f
+    elif module_attr.type == module_desc_pb2.LIST:
         result = []
-        for index in range(len(flexible_data.list.data)):
+        for index in range(len(module_attr.list.data)):
             result.append(
-                from_flexible_data_to_pyobj(
-                    flexible_data.list.data[str(index)]))
-    elif flexible_data.type == module_desc_pb2.SET:
+                from_module_attr_to_pyobj(module_attr.list.data[str(index)]))
+    elif module_attr.type == module_desc_pb2.SET:
         result = set()
-        for index in range(len(flexible_data.set.data)):
+        for index in range(len(module_attr.set.data)):
             result.add(
-                from_flexible_data_to_pyobj(flexible_data.set.data[str(index)]))
-    elif flexible_data.type == module_desc_pb2.MAP:
+                from_module_attr_to_pyobj(module_attr.set.data[str(index)]))
+    elif module_attr.type == module_desc_pb2.MAP:
         result = {}
-        for key, value in flexible_data.map.data.items():
-            key = get_pykey(key, flexible_data.map.keyType[key])
-            result[key] = from_flexible_data_to_pyobj(value)
-    elif flexible_data.type == module_desc_pb2.NONE:
+        for key, value in module_attr.map.data.items():
+            key = get_pykey(key, module_attr.map.key_type[key])
+            result[key] = from_module_attr_to_pyobj(value)
+    elif module_attr.type == module_desc_pb2.NONE:
         result = None
-    elif flexible_data.type == module_desc_pb2.OBJECT:
+    elif module_attr.type == module_desc_pb2.OBJECT:
         result = None
-        logger.warning("can't tran flexible_data to python object")
+        logger.warning("can't tran module attr to python object")
     else:
         result = None
-        logger.warning("unknown type of flexible_data")
+        logger.warning("unknown type of module attr")
 
     return result
 

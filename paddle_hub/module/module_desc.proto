@@ -31,22 +31,25 @@ enum DataType {
 }
 
 message KVData {
-  map<string, DataType> keyType = 1;
-  map<string, FlexibleData> data = 2;
+  map<string, DataType> key_type = 1;
+  map<string, ModuleAttr> data = 2;
 }
 
-message FlexibleData {
+message ModuleAttr {
+  // Basic type
   DataType type = 1;
-  string name = 2;
-  int64 i = 3;
-  double f = 4;
-  bool b = 5;
-  string s = 6;
-  KVData map = 7;
-  KVData list = 8;
-  KVData set = 9;
-  KVData object = 10;
+  int64 i = 2;
+  double f = 3;
+  bool b = 4;
+  string s = 5;
+  KVData map = 6;
+  KVData list = 7;
+  KVData set = 8;
+  KVData object = 9;
+  // 
+  string name = 10;
   string info = 11;
+
 }
 
 // Feed Variable Description
@@ -76,18 +79,9 @@ message AuthInfo {
 // containing a serialized protocol message of this type. The further contents
 // of the directory depend on the storage format described by the message.
 message ModuleDesc {
-  // PaddleHub module name
-  string name = 1; // PaddleHub module name
-  
   // signature to module variable
   map<string, ModuleVar> sign2var = 2;
 
-  bool return_numpy = 3;
-
-  bool contain_assets = 4;
-
-  AuthInfo auth_info = 5;
-  
-  FlexibleData extra_info = 6;
+  ModuleAttr attr = 3;
 };
 
