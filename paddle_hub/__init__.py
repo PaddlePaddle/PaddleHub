@@ -34,7 +34,7 @@ from .io.type import DataType
 
 from .finetune.network import append_mlp_classifier
 from .finetune.finetune import finetune_and_eval
-from .finetune.config import FinetuneConfig
+from .finetune.config import RunConfig
 from .finetune.task import Task
 from .finetune.strategy import BERTFinetuneStrategy
 from .finetune.strategy import DefaultStrategy

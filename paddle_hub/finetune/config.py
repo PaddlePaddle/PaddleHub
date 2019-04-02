@@ -15,10 +15,12 @@
 import time
 
 from .strategy import DefaultStrategy
-from paddle_hub.common.utils import md5
+from datetime import datetime
+
+from paddle_hub.common.logger import logger
 
 
-class FinetuneConfig(object):
+class RunConfig(object):
     """ This class specifies the configurations for PaddleHub to finetune """
 
     def __init__(self,
@@ -45,9 +47,13 @@ class FinetuneConfig(object):
             self._strategy = strategy
         self._enable_memory_optim = enable_memory_optim
         if checkpoint_dir is None:
-            self._checkpoint_dir = "hub_cpkt_" + md5(str(time.time()))[0:20]
+
+            now = int(time.time())
+            time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(now))
+            self._checkpoint_dir = "ckpt_" + time_str
         else:
             self._checkpoint_dir = checkpoint_dir
+        logger.info("Checkpoint dir: {}".format(self._checkpoint_dir))
 
     @property
     def log_interval(self):
