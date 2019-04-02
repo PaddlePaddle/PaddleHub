@@ -49,7 +49,7 @@ class RunCommand(BaseCommand):
             self.add_arg('--signature',     str, None,  "signature to run" )
             self.add_arg('--input_path',    str, None,  "path of image to predict" )
             self.add_arg('--input_file',    str, None,  "file contain paths of images" )
-            self.args = self.parser.parse_args(argv[1:])
+            self.args = self.parser.parse_args(argv)
             self.args.data = self.args.input_path
             self.args.dataset = self.args.input_file
         elif module_type.startswith("nlp"):
