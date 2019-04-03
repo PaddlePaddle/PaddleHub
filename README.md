@@ -17,12 +17,12 @@ PaddleHub旨在为PaddlePaddle提供一个简明易用的预训练模型管理�
 ![图片](https://paddlehub.bj.bcebos.com/resources/cmd_demo.JPG)
 
 想了解PaddleHub已经发布的模型，请查看[模型列表](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/released_module_list.md)
-# 安装
+## 安装
 paddle hub直接通过pip进行安装（python3以上），使用如下命令来安装paddle hub
 ```
 pip install paddlehub
 ```
-# 快速体验
+## 快速体验
 通过下面的命令，来体验下paddle hub的魅力
 ```
 #使用lac进行分词
@@ -30,7 +30,7 @@ hub run lac --input_text "今天是个好日子"
 #使用senta进行情感分析
 hub run senta --input_text "今天是个好日子"
 ```
-# 深入了解Paddle Hub
+## 深入了解Paddle Hub
 * [命令行功能](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/command_line_introduction.md)
 * [Transfer Learning](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/transfer_learning_turtorial.md)
 * API
