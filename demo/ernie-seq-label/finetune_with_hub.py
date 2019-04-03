@@ -32,10 +32,10 @@ parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches 
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--hub_module_dir", type=str, default=None, help="PaddleHub module directory")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
-parser.add_argument("--data_dir", type=str, default=None, help="Path to training data.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
+
 args = parser.parse_args()
 # yapf: enable.
 
@@ -46,16 +46,17 @@ if __name__ == '__main__':
         warmup_strategy="linear_warmup_decay",
     )
     config = hub.RunConfig(
+        eval_interval=100,
         use_cuda=True,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
         strategy=strategy)
 
-    # loading Paddlehub BERT
-    module = hub.Module(module_dir=args.hub_module_dir)
+    # loading Paddlehub ERNIE
+    module = hub.Module(name="ernie")
 
-    reader = hub.reader.ClassifyReader(
-        dataset=hub.dataset.ChnSentiCorp(),  # download chnsenticorp dataset
+    reader = hub.reader.SequenceLabelReader(
+        dataset=hub.dataset.MSRA_NER(),
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
 
@@ -65,27 +66,32 @@ if __name__ == '__main__':
         sign_name="tokens", trainable=True, max_seq_len=args.max_seq_len)
 
     with fluid.program_guard(program):
-        label = fluid.layers.data(name="label", shape=[1], dtype='int64')
+        label = fluid.layers.data(
+            name="label", shape=[args.max_seq_len, 1], dtype='int64')
+        seq_len = fluid.layers.data(name="seq_len", shape=[1], dtype='int64')
 
         # Use "pooled_output" for classification tasks on an entire sentence.
-        # Use "sequence_outputs" for token-level output.
-        pooled_output = output_dict["pooled_output"]
+        # Use "sequence_output" for token-level output.
+        sequence_output = output_dict["sequence_output"]
 
         # Setup feed list for data feeder
         # Must feed all the tensor of bert's module need
         feed_list = [
             input_dict["input_ids"].name, input_dict["position_ids"].name,
             input_dict["segment_ids"].name, input_dict["input_mask"].name,
-            label.name
+            label.name, seq_len
         ]
         # Define a classfication finetune task by PaddleHub's API
-        cls_task = hub.append_mlp_classifier(
-            pooled_output, label, num_classes=num_labels)
+        seq_label_task = hub.append_sequence_labeler(
+            feature=sequence_output,
+            labels=label,
+            seq_len=seq_len,
+            num_classes=num_labels)
 
         # Finetune and evaluate by PaddleHub's API
         # will finish training, evaluation, testing, save model automatically
         hub.finetune_and_eval(
-            task=cls_task,
+            task=seq_label_task,
             data_reader=reader,
             feed_list=feed_list,
             config=config)

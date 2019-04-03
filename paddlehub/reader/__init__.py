@@ -13,3 +13,5 @@
 # limitations under the License.
 
 from .nlp_reader import BERTTokenizeReader
+from .task_reader import ClassifyReader
+from .task_reader import SequenceLabelReader

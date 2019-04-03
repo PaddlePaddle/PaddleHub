@@ -33,6 +33,7 @@ from .module.manager import default_module_manager
 from .io.type import DataType
 
 from .finetune.network import append_mlp_classifier
+from .finetune.network import append_sequence_labeler
 from .finetune.finetune import finetune_and_eval
 from .finetune.config import RunConfig
 from .finetune.task import Task

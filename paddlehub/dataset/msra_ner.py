@@ -30,6 +30,8 @@ class MSRA_NER(object):
 
         self._load_label_map()
         self._load_train_examples()
+        self._load_test_examples()
+        self._load_dev_examples()
 
     def _load_label_map(self):
         self.label_map_file = os.path.join(self.dataset_dir, "label_map.json")
@@ -40,12 +42,28 @@ class MSRA_NER(object):
         train_file = os.path.join(self.dataset_dir, "train.tsv")
         self.train_examples = self._read_tsv(train_file)
 
+    def _load_dev_examples(self):
+        self.dev_file = os.path.join(self.dataset_dir, "dev.tsv")
+        self.dev_examples = self._read_tsv(self.dev_file)
+
+    def _load_test_examples(self):
+        self.test_file = os.path.join(self.dataset_dir, "test.tsv")
+        self.test_examples = self._read_tsv(self.test_file)
+
     def get_train_examples(self):
         return self.train_examples
 
+    def get_dev_examples(self):
+        return self.dev_examples
+
+    def get_test_examples(self):
+        return self.test_examples
+
     def get_labels(self):
-        """See base class."""
-        return ["0", "1"]
+        return ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
+
+    def get_label_map(self):
+        return self.label_map
 
     def _read_tsv(self, input_file, quotechar=None):
         """Reads a tab separated value file."""

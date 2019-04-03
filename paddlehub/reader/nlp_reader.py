@@ -83,20 +83,16 @@ class BERTTokenizeReader(object):
     def generate_batch_data(self,
                             batch_data,
                             total_token_num,
-                            voc_size=-1,
-                            mask_id=-1,
                             return_input_mask=True,
                             return_max_len=False,
                             return_num_token=False):
         return prepare_batch_data(
             batch_data,
             total_token_num,
-            voc_size=-1,
             max_seq_len=self.max_seq_len,
             pad_id=self.vocab["[PAD]"],
             cls_id=self.vocab["[CLS]"],
             sep_id=self.vocab["[SEP]"],
-            mask_id=-1,
             return_input_mask=return_input_mask,
             return_max_len=return_max_len,
             return_num_token=return_num_token)
@@ -166,8 +162,6 @@ class BERTTokenizeReader(object):
                 batch_data = self.generate_batch_data(
                     batch_data,
                     total_token_num,
-                    voc_size=-1,
-                    mask_id=-1,
                     return_input_mask=True,
                     return_max_len=True,
                     return_num_token=False)

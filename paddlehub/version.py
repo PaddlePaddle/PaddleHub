@@ -11,6 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Store PaddleHub version string """
+""" PaddleHub version string """
 hub_version = "0.3.1.alpha"
 module_proto_version = "0.1.0"
