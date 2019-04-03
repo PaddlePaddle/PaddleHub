@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=develop)](https://travis-ci.org/PaddlePaddle/PaddleHub)
+[![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
+
 # PaddleHub
 PaddleHub旨在为PaddlePaddle提供一个简明易用的预训练模型管理框架。
 使用PaddleHub，你可以：
@@ -7,7 +10,7 @@ PaddleHub旨在为PaddlePaddle提供一个简明易用的预训练模型管理�
 3. 以命令行或者python代码调用的方式，使用预训练模型进行预测
 
 除此之外，我们还提供了预训练模型的本地管理机制（类似于pip），用户可以通过命令行来管理本地的预训练模型
-![图片](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/cmd_demo.JPG)
+![图片](https://paddlehub.bj.bcebos.com/resources/cmd_demo.JPG)
 
 想了解PaddleHub已经发布的模型，请查看[模型列表](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/released_module_list.md)
 # 安装
