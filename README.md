@@ -1,7 +1,11 @@
+# PaddleHub
+
+
 [![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=develop)](https://travis-ci.org/PaddlePaddle/PaddleHub)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 
-# PaddleHub
+
+
 PaddleHub旨在为PaddlePaddle提供一个简明易用的预训练模型管理框架。
 使用PaddleHub，你可以：
 
@@ -30,3 +34,10 @@ hub run senta --input_text "今天是个好日子"
 * [命令行功能](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/command_line_introduction.md)
 * [Transfer Learning](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/transfer_learning_turtorial.md)
 * API
+
+## 答疑
+
+欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交
+
+## 版权和许可证
+PaddleHUB由[Apache-2.0 license](LICENSE)提供
