@@ -1,10 +1,11 @@
-import paddle_hub as hub
 import paddle
 import paddle.fluid as fluid
 
+import paddlehub as hub
+
 
 def train():
-    resnet_module = hub.Module(name="resnet50_imagenet")
+    resnet_module = hub.Module(module_dir="hub_module_ResNet50")
     input_dict, output_dict, program = resnet_module.context(
         sign_name="feature_map", trainable=True)
     dataset = hub.dataset.Flowers()

@@ -1,8 +1,8 @@
 import paddle
-import paddle_hub as hub
+import paddlehub as hub
 import numpy as np
 import os
-from paddle_hub import BaseProcessor
+from paddlehub import BaseProcessor
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont

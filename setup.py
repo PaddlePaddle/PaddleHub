@@ -18,14 +18,14 @@ from __future__ import print_function
 
 from setuptools import find_packages
 from setuptools import setup
-from paddle_hub.version import hub_version
+from paddlehub.version import hub_version
 
 REQUIRED_PACKAGES = [
     'numpy >= 1.12.0', 'six >= 1.10.0', 'protobuf >= 3.1.0', 'pyyaml', 'numpy'
 ]
 
 setup(
-    name='paddle_hub',
+    name='paddlehub',
     version=hub_version.replace('-', ''),
     description=('PaddleHub is a library to foster the publication, '
                  'discovery, and consumption of reusable parts of machine '
@@ -56,5 +56,5 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     license='Apache 2.0',
-    keywords=('paddlepaddle pretrained paddle-hub'),
-    entry_points={'console_scripts': ['hub=paddle_hub.commands.hub:main']})
+    keywords=('paddlepaddle pretrained paddlehub'),
+    entry_points={'console_scripts': ['hub=paddlehub.commands.hub:main']})

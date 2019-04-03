@@ -20,7 +20,7 @@ http://ftp.cs.wisc.edu/machine-learning/shavlik-group/torrey.handbook09.pdf
 ## CV教程
 以猫狗分类为例子，我们可以快速的使用一个通过ImageNet训练过的ResNet进行finetune
 ```python
-import paddle_hub as hub
+import paddlehub as hub
 import paddle
 import paddle.fluid as fluid
 

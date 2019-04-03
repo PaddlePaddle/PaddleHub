@@ -13,11 +13,11 @@
 # limitations under the License.
 
 import unittest
-import paddle_hub as hub
+import paddlehub as hub
 import paddle.fluid as fluid
-from paddle_hub.paddle_helper import from_param_to_flexible_data, from_flexible_data_to_param
-from paddle_hub import module_desc_pb2
-from paddle_hub.logger import logger
+from paddlehub.paddle_helper import from_param_to_flexible_data, from_flexible_data_to_param
+from paddlehub import module_desc_pb2
+from paddlehub.logger import logger
 
 
 class TestParamAttrSerializeAndDeSerialize(unittest.TestCase):

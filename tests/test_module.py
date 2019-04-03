@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import unittest
-import paddle_hub as hub
+import paddlehub as hub
 import paddle.fluid as fluid
 
 

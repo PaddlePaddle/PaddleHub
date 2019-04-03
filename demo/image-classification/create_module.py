@@ -1,13 +1,16 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 import os
 import functools
 import argparse
+
 import paddle
 import paddle.fluid as fluid
+
 import nets
-import paddle_hub as hub
+import paddlehub as hub
 import processor
 from utility import add_arguments, print_arguments
 parser = argparse.ArgumentParser(description=__doc__)

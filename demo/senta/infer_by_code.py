@@ -1,5 +1,5 @@
 import os
-import paddle_hub as hub
+import paddlehub as hub
 
 
 def infer_with_input_text():

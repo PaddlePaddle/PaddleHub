@@ -19,7 +19,7 @@ from __future__ import print_function
 import numpy as np
 import paddle.fluid as fluid
 import paddle
-import paddle_hub as hub
+import paddlehub as hub
 import unittest
 import os
 

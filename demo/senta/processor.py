@@ -5,7 +5,7 @@ import paddle
 import paddle.fluid as fluid
 import numpy as np
 
-import paddle_hub as hub
+import paddlehub as hub
 
 
 def load_vocab(file_path):

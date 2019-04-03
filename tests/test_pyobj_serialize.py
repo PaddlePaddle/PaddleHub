@@ -15,11 +15,11 @@
 import sys
 import math
 import unittest
-import paddle_hub as hub
+import paddlehub as hub
 import paddle.fluid as fluid
-from paddle_hub.utils import from_pyobj_to_flexible_data, from_flexible_data_to_pyobj, get_pykey
-from paddle_hub import module_desc_pb2
-from paddle_hub.logger import logger
+from paddlehub.utils import from_pyobj_to_flexible_data, from_flexible_data_to_pyobj, get_pykey
+from paddlehub import module_desc_pb2
+from paddlehub.logger import logger
 
 
 def _compare_float(a, b):

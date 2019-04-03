@@ -24,7 +24,7 @@ import numpy as np
 
 import paddle
 import paddle.fluid as fluid
-import paddle_hub as hub
+import paddlehub as hub
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)

@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import processor
-import paddle_hub as hub
+import paddlehub as hub
 import paddle
 import paddle.fluid as fluid
 from mobilenet_ssd import mobile_net

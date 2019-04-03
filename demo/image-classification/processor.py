@@ -1,9 +1,11 @@
-import paddle
-import paddle_hub as hub
-import numpy as np
 import os
-from paddle_hub import BaseProcessor
+
+import paddle
+import numpy as np
 from PIL import Image
+
+from paddlehub import BaseProcessor
+import paddlehub as hub
 
 DATA_DIM = 224
 img_mean = np.array([0.485, 0.456, 0.406]).reshape((3, 1, 1))

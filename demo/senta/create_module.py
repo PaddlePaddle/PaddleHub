@@ -3,7 +3,7 @@ import paddle.fluid as fluid
 import processor
 import numpy as np
 import nets
-import paddle_hub as hub
+import paddlehub as hub
 
 
 def load_vocab(file_path):

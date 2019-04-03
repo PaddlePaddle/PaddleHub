@@ -2,7 +2,7 @@ import numpy as np
 import paddle
 import paddle.fluid as fluid
 import reader
-import paddle_hub as hub
+import paddlehub as hub
 import processor
 import os
 from network import lex_net

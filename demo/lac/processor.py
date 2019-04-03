@@ -1,10 +1,10 @@
 import paddle
 import paddle.fluid as fluid
-import paddle_hub as hub
+import paddlehub as hub
 import numpy as np
 import os
 import io
-from paddle_hub import BaseProcessor
+from paddlehub import BaseProcessor
 
 
 class Processor(BaseProcessor):

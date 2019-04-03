@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import unittest
-import paddle_hub as hub
+import paddlehub as hub
 import paddle.fluid as fluid
-from paddle_hub import create_signature
+from paddlehub import create_signature
 
 
 class TestSignature(unittest.TestCase):

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import unittest
-import paddle_hub as hub
+import paddlehub as hub
 
 
 class TestDownloader(unittest.TestCase):

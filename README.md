@@ -16,7 +16,7 @@ PaddleHub旨在为PaddlePaddle提供一个简明易用的预训练模型管理�
 # 安装
 paddle hub直接通过pip进行安装（python3以上），使用如下命令来安装paddle hub
 ```
-pip install paddle_hub
+pip install paddlehub
 ```
 # 快速体验
 通过下面的命令，来体验下paddle hub的魅力
