@@ -9,9 +9,13 @@ Transfer Learning是属于机器学习的一个子研究领域，该研究领域
 * 应对于普适化需求的模型，在特定应用上表现不尽如人意
 
 目前在深度学习领域已经取得了较大的发展，本文让用户了解如何快速使用PaddleHub进行迁移学习。 更多关于Transfer Learning的知识，请参考：
+
 http://cs231n.github.io/transfer-learning/
+
 https://papers.nips.cc/paper/5347-how-transferable-are-features-in-deep-neural-networks.pdf
+
 http://ftp.cs.wisc.edu/machine-learning/shavlik-group/torrey.handbook09.pdf
+
 ## PaddleHub中的迁移学习
 ## CV教程
 以猫狗分类为例子，我们可以快速的使用一个通过ImageNet训练过的ResNet进行finetune
