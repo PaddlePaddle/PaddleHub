@@ -30,7 +30,7 @@ class UninstallCommand(BaseCommand):
     def __init__(self, name):
         super(UninstallCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Uninstall the specific module from current environment."
+        self.description = "Uninstall PaddleHub module."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <module_name>' % (ENTRY, name),

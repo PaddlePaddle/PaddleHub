@@ -31,7 +31,7 @@ class DownloadCommand(BaseCommand):
     def __init__(self, name):
         super(DownloadCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Download a baidu NLP model."
+        self.description = "Download PaddlePaddle pretrained model files."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <module_name>' % (ENTRY, name),

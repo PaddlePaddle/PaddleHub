@@ -29,7 +29,7 @@ class ListCommand(BaseCommand):
     def __init__(self, name):
         super(ListCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "List all modules install in current environment."
+        self.description = "List all installed PaddleHub modules."
 
     def exec(self, argv):
         all_modules = default_module_manager.all_modules()

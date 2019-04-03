@@ -32,7 +32,7 @@ class ShowCommand(BaseCommand):
     def __init__(self, name):
         super(ShowCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Show the specify module's info."
+        self.description = "Show the information of PaddleHub module."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <module_name/module_dir>' % (ENTRY, name),

@@ -30,7 +30,7 @@ class SearchCommand(BaseCommand):
     def __init__(self, name):
         super(SearchCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Search a paddle hub module with keyword."
+        self.description = "Search PaddleHub pretrained model through model keywords"
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <key>' % (ENTRY, name),
@@ -39,7 +39,7 @@ class SearchCommand(BaseCommand):
 
     def exec(self, argv):
         if not argv:
-            print("ERROR: Please specify a key\n")
+            print("ERROR: Please specify module name.\n")
             self.help()
             return False
 

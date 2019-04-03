@@ -29,7 +29,7 @@ class InstallCommand(BaseCommand):
     def __init__(self, name):
         super(InstallCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Install the specific module to current environment."
+        self.description = "Install PaddleHub module."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <module_name>' % (ENTRY, name),

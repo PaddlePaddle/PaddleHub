@@ -27,7 +27,7 @@ class VersionCommand(BaseCommand):
     def __init__(self, name):
         super(VersionCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Get the paddle hub version."
+        self.description = "Show PaddleHub's version."
 
     def exec(self, argv):
         print("hub %s" % version.hub_version)
