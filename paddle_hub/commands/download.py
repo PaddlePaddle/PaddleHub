@@ -29,38 +29,38 @@ class DownloadCommand(BaseCommand):
     def __init__(self, name):
         super(DownloadCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Download a paddle hub module."
+        self.description = "Download a baidu NLP model."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <module_name>' % (ENTRY, name),
             usage='%(prog)s [options]',
             add_help=False)
         # yapf: disable
-        self.add_arg('--output_path',  str,  ".",   "path to save the module" )
+        self.add_arg('--output_path',  str,  ".",   "path to save the model" )
         self.add_arg('--uncompress',   bool, False,  "uncompress the download package or not" )
         # yapf: enable
 
     def exec(self, argv):
         if not argv:
-            print("ERROR: Please specify a module\n")
+            print("ERROR: Please specify a model name\n")
             self.help()
             return False
-        module_name = argv[0]
-        module_version = None if "==" not in module_name else module_name.split(
+        model_name = argv[0]
+        model_version = None if "==" not in model_name else model_name.split(
             "==")[1]
-        module_name = module_name if "==" not in module_name else module_name.split(
+        model_name = model_name if "==" not in model_name else model_name.split(
             "==")[0]
         self.args = self.parser.parse_args(argv[1:])
         if not self.args.output_path:
             self.args.output_path = "."
         utils.check_path(self.args.output_path)
 
-        url = default_hub_server.get_module_url(
-            module_name, version=module_version)
+        url = default_hub_server.get_model_url(
+            model_name, version=model_version)
         if not url:
-            tips = "can't found module %s" % module_name
-            if module_version:
-                tips += " with version %s" % module_version
+            tips = "can't found model %s" % model_name
+            if model_version:
+                tips += " with version %s" % model_version
             print(tips)
             return True
 

@@ -115,7 +115,7 @@ class RunCommand(BaseCommand):
             origin_data = csv_reader.read(self.args.dataset)
         else:
             print("ERROR! Please specify data to predict.\n")
-            print("Summary:\n    %s" % module.summary)
+            print("Summary:\n    %s\n" % module.summary)
             print("Example:\n    %s" % self.demo_with_module(module))
             return False
 

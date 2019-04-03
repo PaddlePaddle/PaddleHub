@@ -23,6 +23,7 @@ from paddle_hub.common.logger import logger
 from paddle_hub.commands.base_command import BaseCommand, ENTRY
 from paddle_hub.module.manager import default_module_manager
 from paddle_hub.module.module import Module
+from paddle_hub.io.reader import yaml_reader
 
 
 class ShowCommand(BaseCommand):
@@ -40,11 +41,25 @@ class ShowCommand(BaseCommand):
 
     def exec(self, argv):
         if not argv:
-            print("ERROR: Please specify a module\n")
+            print("ERROR: Please specify a module or a model\n")
             self.help()
             return False
 
         module_name = argv[0]
+
+        # nlp model
+        model_info = os.path.join(module_name, "info.yml")
+        if os.path.exists(model_info):
+            model_info = yaml_reader.read(model_info)
+            show_text = "Name:%s\n" % model_info['name']
+            show_text += "Type:%s\n" % model_info['type']
+            show_text += "Version:%s\n" % model_info['version']
+            show_text += "Summary:\n"
+            show_text += "  %s\n" % model_info['description']
+            show_text += "Author:%s\n" % model_info['author']
+            show_text += "Author-Email:%s\n" % model_info['author_email']
+            print(show_text)
+            return True
 
         cwd = os.getcwd()
         module_dir = default_module_manager.search_module(module_name)
