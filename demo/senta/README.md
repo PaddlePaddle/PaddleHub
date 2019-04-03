@@ -1,9 +1,9 @@
-## 关于LAC
-https://github.com/baidu/lac
+## 关于senta
+https://github.com/baidu/Senta
 
 ## 创建Module
-本目录包含了创建一个基于LAC预训练模型的Module的脚本。
-通过以下脚本来一键创建一个LAC Module
+本目录包含了创建一个基于senta预训练模型的Module的脚本。
+通过以下脚本来一键创建一个senta Module
 ```shell
 sh create_module.sh
 ```

@@ -1,9 +1,9 @@
-## 关于LAC
-https://github.com/baidu/lac
+## 关于SSD
+https://github.com/PaddlePaddle/models/tree/develop/fluid/PaddleCV/object_detection
 
 ## 创建Module
-本目录包含了创建一个基于LAC预训练模型的Module的脚本。
-通过以下脚本来一键创建一个LAC Module
+本目录包含了创建一个基于POSCAL VOC数据集预训练的SSD模型的Module的脚本。
+通过以下脚本来一键创建一个SSD Module
 ```shell
 sh create_module.sh
 ```

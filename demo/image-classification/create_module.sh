@@ -2,9 +2,6 @@
 set -o nounset
 set -o errexit
 
-script_path=$(cd `dirname $0`; pwd)
-cd $script_path
-
 model_name="ResNet50"
 
 while getopts "m:" options
@@ -18,4 +15,24 @@ do
 	esac
 done
 
+script_path=$(cd `dirname $0`; pwd)
+module_path=hub_module_${model_name}
+
+if [ -d $script_path/$module_path ]
+then
+    echo "$module_path already existed!"
+    exit 0
+fi
+
+cd $script_path/resources/
+
+if [ ! -d ${model_name}_pretrained ]
+then
+    sh download.sh $model_name
+fi
+
+cd $script_path/
+
 python create_module.py --pretrained_model=resources/${model_name}_pretrained --model ${model_name}
+
+echo "Successfully create $module_path"

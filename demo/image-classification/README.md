@@ -1,9 +1,9 @@
-## 关于LAC
-https://github.com/baidu/lac
+## 关于图像分类
+https://github.com/PaddlePaddle/models/tree/develop/fluid/PaddleCV/image_classification
 
 ## 创建Module
-本目录包含了创建一个基于LAC预训练模型的Module的脚本。
-通过以下脚本来一键创建一个LAC Module
+本目录包含了创建一个基于ImageNet 2012数据集预训练的图像分类模型(ResNet/MobileNet)的Module的脚本。
+通过以下脚本来一键创建一个ResNet50 Module
 ```shell
 sh create_module.sh
 ```
@@ -25,3 +25,11 @@ sh infer.sh
 ```shell
 python infer_by_code.py
 ```
+
+## 对预训练模型进行Finetune
+通过以下命令进行Finetune
+```shell
+sh finetune.sh
+```
+
+更多关于Finetune的资料，请查看[基于PaddleHub的迁移学习](https://github.com/PaddlePaddle/PaddleHub/blob/develop/docs/transfer_learning_turtorial.md)
