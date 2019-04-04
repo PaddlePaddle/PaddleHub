@@ -85,7 +85,7 @@ if __name__ == '__main__':
             input_dict["segment_ids"].name, input_dict["input_mask"].name,
             label.name, seq_len
         ]
-        # Define a classfication finetune task by PaddleHub's API
+        # Define a sequence labeling finetune task by PaddleHub's API
         seq_label_task = hub.create_seq_labeling_task(
             feature=sequence_output,
             labels=label,
