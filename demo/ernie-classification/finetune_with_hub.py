@@ -40,11 +40,14 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
+    # Select a finetune strategy
     strategy = hub.BERTFinetuneStrategy(
         weight_decay=args.weight_decay,
         learning_rate=args.learning_rate,
         warmup_strategy="linear_warmup_decay",
     )
+
+    # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         use_cuda=True,
         num_epoch=args.num_epoch,
@@ -54,6 +57,7 @@ if __name__ == '__main__':
     # loading Paddlehub BERT
     module = hub.Module(name="ernie")
 
+    # Sentence classification  dataset reader
     reader = hub.reader.ClassifyReader(
         dataset=hub.dataset.ChnSentiCorp(),  # download chnsenticorp dataset
         vocab_path=module.get_vocab_path(),

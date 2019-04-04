@@ -40,11 +40,14 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
+    # Select a finetune strategy
     strategy = hub.BERTFinetuneStrategy(
         weight_decay=args.weight_decay,
         learning_rate=args.learning_rate,
         warmup_strategy="linear_warmup_decay",
     )
+
+    # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         eval_interval=100,
         use_cuda=True,
@@ -55,6 +58,7 @@ if __name__ == '__main__':
     # loading Paddlehub ERNIE
     module = hub.Module(name="ernie")
 
+    # Sequence Label dataset reader
     reader = hub.reader.SequenceLabelReader(
         dataset=hub.dataset.MSRA_NER(),
         vocab_path=module.get_vocab_path(),
