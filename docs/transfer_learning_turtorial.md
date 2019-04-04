@@ -1,4 +1,5 @@
 # Transfer Learning
+
 ## 简述
 Transfer Learning是属于机器学习的一个子研究领域，该研究领域的目标在于利用数据、任务、或模型之间的相似性，将在旧领域学习过的知识，迁移应用于新领域中
 
@@ -17,7 +18,10 @@ https://papers.nips.cc/paper/5347-how-transferable-are-features-in-deep-neural-n
 http://ftp.cs.wisc.edu/machine-learning/shavlik-group/torrey.handbook09.pdf
 
 ## PaddleHub中的迁移学习
-## CV教程
+PaddleHub 提供了基于PaddlePaddle框架的高阶Finetune API, 对常见的预训练模型迁移学习任务进行了抽象，帮助用户使用最少的代码快速完成迁移学习。
+教程会包含CV领域的图像分类迁移，和NLP文本分类迁移两种任务。
+
+### CV教程
 以猫狗分类为例子，我们可以快速的使用一个通过ImageNet训练过的ResNet进行finetune
 ```python
 import paddlehub as hub
@@ -45,8 +49,8 @@ def train():
 
         feed_list = [img.name, label.name]
 
-		# 构造多分类模型
-        task = hub.append_mlp_classifier(
+	# 构造多分类模型任务
+        task = hub.create_img_classfiication_task(
             feature=feature_map, label=label, num_classes=dataset.num_labels)
 
         # finetune
