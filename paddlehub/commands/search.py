@@ -22,6 +22,7 @@ from paddlehub.common.logger import logger
 from paddlehub.common import utils
 from paddlehub.common.hub_server import default_hub_server
 from paddlehub.commands.base_command import BaseCommand, ENTRY
+from paddlehub.commands.cml_utils import TablePrinter
 
 
 class SearchCommand(BaseCommand):
@@ -43,15 +44,23 @@ class SearchCommand(BaseCommand):
             self.help()
             return False
 
-        module_name = argv[0]
-        module_list = default_hub_server.search_module(module_name)
-        text = "\n"
-        text += color_bold_text(
-            "red", "  %-20s\t\t%s\n" % ("ModuleName", "ModuleVersion"))
-        text += "  %-20s\t\t%s\n" % ("--", "--")
-        for module_name, module_version in module_list:
-            text += "  %-20s\t\t%s\n" % (module_name, module_version)
-        print(text)
+        resource_name = argv[0]
+        resource_list = default_hub_server.search_resource(resource_name)
+        tp = TablePrinter(
+            titles=["ResourceName", "Type", "Version", "Summary"],
+            placeholders=[25, 10, 10, 35])
+        for resource_name, resource_type, resource_version, resource_summary in resource_list:
+            if resource_type == "Module":
+                colors = ["yellow", None, None, None]
+            else:
+                colors = ["light_red", None, None, None]
+            tp.add_line(
+                contents=[
+                    resource_name, resource_version, resource_type,
+                    resource_summary
+                ],
+                colors=colors)
+        print(tp.get_text())
         return True
 
 
