@@ -54,7 +54,7 @@ class SearchCommand(BaseCommand):
                 colors = ["light_red", None, None, None]
             tp.add_line(
                 contents=[
-                    resource_name, resource_version, resource_type,
+                    resource_name, resource_type, resource_version,
                     resource_summary
                 ],
                 colors=colors)
