@@ -27,8 +27,7 @@ import numpy as np
 from paddlehub.common.logger import logger
 from paddlehub.finetune.strategy import BERTFinetuneStrategy, DefaultStrategy
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
-from paddlehub.finetune.evaluate import evaluate_cls_task,
-evaluate_seq_labeling_task
+from paddlehub.finetune.evaluate import evaluate_cls_task, evaluate_seq_labeling_task
 from visualdl import LogWriter
 import paddlehub as hub
 
