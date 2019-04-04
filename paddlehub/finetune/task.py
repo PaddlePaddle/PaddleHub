@@ -148,7 +148,7 @@ def create_img_classification_task(feature,
     return task
 
 
-def create_seq_labeling_task(feature, labels, seq_len, num_classes=None):
+def create_seq_labeling_task(feature, labels, seq_len, num_classes):
     logits = fluid.layers.fc(
         input=feature,
         size=num_classes,

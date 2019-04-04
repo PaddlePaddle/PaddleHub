@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Finetuning on classification tasks."""
+"""Finetuning on sequence labeling task."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -40,11 +40,14 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
+    # Select a finetune strategy
     strategy = hub.BERTFinetuneStrategy(
         weight_decay=args.weight_decay,
         learning_rate=args.learning_rate,
         warmup_strategy="linear_warmup_decay",
     )
+
+    # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         eval_interval=100,
         use_cuda=True,
@@ -52,9 +55,10 @@ if __name__ == '__main__':
         batch_size=args.batch_size,
         strategy=strategy)
 
-    # loading Paddlehub ERNIE
+    # loading Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
 
+    # Sequence Label dataset reader
     reader = hub.reader.SequenceLabelReader(
         dataset=hub.dataset.MSRA_NER(),
         vocab_path=module.get_vocab_path(),
@@ -75,13 +79,13 @@ if __name__ == '__main__':
         sequence_output = output_dict["sequence_output"]
 
         # Setup feed list for data feeder
-        # Must feed all the tensor of bert's module need
+        # Must feed all the tensor of ERNIE's module need
         feed_list = [
             input_dict["input_ids"].name, input_dict["position_ids"].name,
             input_dict["segment_ids"].name, input_dict["input_mask"].name,
             label.name, seq_len
         ]
-        # Define a classfication finetune task by PaddleHub's API
+        # Define a sequence labeling finetune task by PaddleHub's API
         seq_label_task = hub.create_seq_labeling_task(
             feature=sequence_output,
             labels=label,

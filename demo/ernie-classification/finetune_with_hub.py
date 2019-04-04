@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Finetuning on classification tasks."""
+"""Finetuning on classification task """
 
 from __future__ import absolute_import
 from __future__ import division
@@ -40,20 +40,24 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
+    # Select a finetune strategy
     strategy = hub.BERTFinetuneStrategy(
         weight_decay=args.weight_decay,
         learning_rate=args.learning_rate,
         warmup_strategy="linear_warmup_decay",
     )
+
+    # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         use_cuda=True,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
         strategy=strategy)
 
-    # loading Paddlehub BERT
+    # loading Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
 
+    # Sentence classification  dataset reader
     reader = hub.reader.ClassifyReader(
         dataset=hub.dataset.ChnSentiCorp(),  # download chnsenticorp dataset
         vocab_path=module.get_vocab_path(),
@@ -72,7 +76,7 @@ if __name__ == '__main__':
         pooled_output = output_dict["pooled_output"]
 
         # Setup feed list for data feeder
-        # Must feed all the tensor of bert's module need
+        # Must feed all the tensor of ERNIE's module need
         feed_list = [
             input_dict["input_ids"].name, input_dict["position_ids"].name,
             input_dict["segment_ids"].name, input_dict["input_mask"].name,
