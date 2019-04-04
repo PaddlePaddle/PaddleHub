@@ -74,6 +74,7 @@ class TablePrinter:
         max_lines = 0
         marks = [False] * len(contents)
         colors = [None] * len(contents) if colors is None else colors
+        offset = [0] * len(contents)
         for index, content in enumerate(contents):
             content_length = int(len(content) / self.placeholders[index])
             if content_length > 0:
@@ -82,12 +83,11 @@ class TablePrinter:
                 max_lines = content_length
 
         line = ''
-        offset = 0
         for cnt in range(max_lines + 1):
             line += '|'
             for index, content in enumerate(contents):
                 length = self.placeholders[index]
-                split_text = content[offset:offset + length]
+                split_text = content[offset[index]:offset[index] + length]
                 if colors[index] and split_text:
                     split_text = colorful_text(colors[index], split_text)
                     _ph = 11
@@ -97,8 +97,8 @@ class TablePrinter:
                 line += (
                     "{0:%s%d}|" % (align, self.placeholders[index] + 2 + _ph)
                 ).format(split_text)
+                offset[index] += length
             line += '\n'
-            offset += length
 
         self.text += line
 
