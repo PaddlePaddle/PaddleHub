@@ -32,11 +32,12 @@ from .module.manager import default_module_manager
 
 from .io.type import DataType
 
-from .finetune.network import append_mlp_classifier
-from .finetune.network import append_sequence_labeler
+from .finetune.task import Task
+from .finetune.task import create_seq_labeling_task
+from .finetune.task import create_text_classification_task
+from .finetune.task import create_img_classification_task
 from .finetune.finetune import finetune_and_eval
 from .finetune.config import RunConfig
-from .finetune.task import Task
 from .finetune.strategy import BERTFinetuneStrategy
 from .finetune.strategy import DefaultStrategy
 

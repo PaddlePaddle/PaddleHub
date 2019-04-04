@@ -82,13 +82,13 @@ if __name__ == '__main__':
             label.name, seq_len
         ]
         # Define a classfication finetune task by PaddleHub's API
-        seq_label_task = hub.append_sequence_labeler(
+        seq_label_task = hub.create_seq_labeling_task(
             feature=sequence_output,
             labels=label,
             seq_len=seq_len,
             num_classes=num_labels)
 
-        # Finetune and evaluate by PaddleHub's API
+        # Finetune and evaluate model by PaddleHub's API
         # will finish training, evaluation, testing, save model automatically
         hub.finetune_and_eval(
             task=seq_label_task,

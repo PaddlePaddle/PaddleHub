@@ -79,7 +79,7 @@ if __name__ == '__main__':
             label.name
         ]
         # Define a classfication finetune task by PaddleHub's API
-        cls_task = hub.append_mlp_classifier(
+        cls_task = hub.create_text_classification_task(
             pooled_output, label, num_classes=num_labels)
 
         # Finetune and evaluate by PaddleHub's API
