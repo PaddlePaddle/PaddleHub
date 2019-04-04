@@ -40,9 +40,7 @@ class SearchCommand(BaseCommand):
 
     def exec(self, argv):
         if not argv:
-            print("ERROR: Please specify module name.\n")
-            self.help()
-            return False
+            argv = ['.*']
 
         resource_name = argv[0]
         resource_list = default_hub_server.search_resource(resource_name)

@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import os
 import time
+import re
 
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
@@ -68,13 +69,16 @@ class HubServer:
         if update or not self.resource_list_file:
             self.request()
 
-        match_resource_index_list = [
-            index
-            for index, resource in enumerate(self.resource_list_file['name'])
-            if resource_key in resource and (
-                resource_type is None
-                or self.resource_list_file['type'][index] == resource_type)
-        ]
+        match_resource_index_list = []
+        for index, resource in enumerate(self.resource_list_file['name']):
+            try:
+                is_match = re.match(resource_key, resource)
+                if is_match and (resource_type is None
+                                 or self.resource_list_file['type'][index] ==
+                                 resource_type):
+                    match_resource_index_list.append(index)
+            except:
+                pass
 
         return [(self.resource_list_file['name'][index],
                  self.resource_list_file['type'][index],
