@@ -21,6 +21,7 @@ from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.module.manager import default_module_manager
 from paddlehub.commands.base_command import BaseCommand
+from paddlehub.commands.cml_utils import TablePrinter
 
 
 class ListCommand(BaseCommand):
@@ -33,12 +34,10 @@ class ListCommand(BaseCommand):
 
     def exec(self, argv):
         all_modules = default_module_manager.all_modules()
-        list_text = "\n"
-        list_text += "  %-20s\t\t%s\n" % ("ModuleName", "ModulePath")
-        list_text += "  %-20s\t\t%s\n" % ("--", "--")
+        tp = TablePrinter(titles=["ModuleName", "Path"], placeholders=[25, 50])
         for module_name, module_dir in all_modules.items():
-            list_text += "  %-20s\t\t%s\n" % (module_name, module_dir)
-        print(list_text)
+            tp.add_line(contents=[module_name, module_dir])
+        print(tp.get_text())
         return True
 
 
