@@ -42,7 +42,11 @@ class BaseReader(object):
 
         np.random.seed(random_seed)
 
-        self.label_map = self.dataset.get_label_map()
+        # generate label map
+        self.label_map = {}
+        for index, label in enumerate(self.dataset.get_labels()):
+            self.label_map[label] = index
+        print("Dataset label map = {}".format(self.label_map))
 
         self.current_example = 0
         self.current_epoch = 0

@@ -52,7 +52,7 @@ if __name__ == '__main__':
         strategy=strategy)
 
     # loading Paddlehub BERT
-    module = hub.Module(module_dir=args.hub_module_dir)
+    module = hub.Module(name="ernie")
 
     reader = hub.reader.ClassifyReader(
         dataset=hub.dataset.ChnSentiCorp(),  # download chnsenticorp dataset
