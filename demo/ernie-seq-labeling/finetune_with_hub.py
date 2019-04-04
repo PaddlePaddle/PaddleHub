@@ -55,7 +55,7 @@ if __name__ == '__main__':
         batch_size=args.batch_size,
         strategy=strategy)
 
-    # loading Paddlehub ERNIE
+    # loading Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
 
     # Sequence Label dataset reader
@@ -79,7 +79,7 @@ if __name__ == '__main__':
         sequence_output = output_dict["sequence_output"]
 
         # Setup feed list for data feeder
-        # Must feed all the tensor of bert's module need
+        # Must feed all the tensor of ERNIE's module need
         feed_list = [
             input_dict["input_ids"].name, input_dict["position_ids"].name,
             input_dict["segment_ids"].name, input_dict["input_mask"].name,

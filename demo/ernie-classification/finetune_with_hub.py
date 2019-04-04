@@ -54,7 +54,7 @@ if __name__ == '__main__':
         batch_size=args.batch_size,
         strategy=strategy)
 
-    # loading Paddlehub BERT
+    # loading Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
 
     # Sentence classification  dataset reader
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         pooled_output = output_dict["pooled_output"]
 
         # Setup feed list for data feeder
-        # Must feed all the tensor of bert's module need
+        # Must feed all the tensor of ERNIE's module need
         feed_list = [
             input_dict["input_ids"].name, input_dict["position_ids"].name,
             input_dict["segment_ids"].name, input_dict["input_mask"].name,
