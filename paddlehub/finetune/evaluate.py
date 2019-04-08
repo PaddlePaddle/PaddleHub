@@ -16,6 +16,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import time
+
 import paddle.fluid as fluid
 import paddlehub as hub
 from paddlehub.common.logger import logger
