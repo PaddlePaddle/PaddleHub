@@ -12,6 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import paddle.fluid as fluid
+import paddlehub as hub
+from paddlehub.common.logger import logger
+
 
 def evaluate_cls_task(task, data_reader, feed_list, phase="test", config=None):
     logger.info("Evaluation on {} dataset start".format(phase))
@@ -20,7 +28,7 @@ def evaluate_cls_task(task, data_reader, feed_list, phase="test", config=None):
     loss = task.variable("loss")
     accuracy = task.variable("accuracy")
     batch_size = config.batch_size
-    place, dev_count = _get_running_device_info(config)
+    place, dev_count = hub.common.get_running_device_info(config)
     exe = fluid.Executor(place=place)
     with fluid.program_guard(inference_program):
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
@@ -64,7 +72,7 @@ def evaluate_seq_labeling_task(task,
     logger.info("Evaluation on {} dataset start".format(phase))
     inference_program = task.inference_program()
     batch_size = config.batch_size
-    place, dev_count = _get_running_device_info(config)
+    place, dev_count = hub.common.get_running_device_info(config)
     exe = fluid.Executor(place=place)
     num_labels = len(data_reader.get_labels())
     with fluid.program_guard(inference_program):

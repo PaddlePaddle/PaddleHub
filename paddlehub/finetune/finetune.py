@@ -18,10 +18,10 @@ from __future__ import print_function
 
 import os
 import time
-import multiprocessing
 
 import paddle
 import paddle.fluid as fluid
+import paddlehub as hub
 import numpy as np
 
 from paddlehub.common.logger import logger
@@ -29,18 +29,6 @@ from paddlehub.finetune.strategy import BERTFinetuneStrategy, DefaultStrategy
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
 from paddlehub.finetune.evaluate import evaluate_cls_task, evaluate_seq_labeling_task
 from visualdl import LogWriter
-import paddlehub as hub
-
-
-def _get_running_device_info(config):
-    if config.use_cuda:
-        place = fluid.CUDAPlace(0)
-        dev_count = fluid.core.get_cuda_device_count()
-    else:
-        place = fluid.CPUPlace()
-        dev_count = int(os.environ.get('CPU_NUM', multiprocessing.cpu_count()))
-
-    return place, dev_count
 
 
 def _do_memory_optimization(task, config):
@@ -80,7 +68,7 @@ def _finetune_seq_label_task(task,
     num_epoch = config.num_epoch
     batch_size = config.batch_size
 
-    place, dev_count = _get_running_device_info(config)
+    place, dev_count = hub.common.get_running_device_info(config)
     with fluid.program_guard(main_program, startup_program):
         exe = fluid.Executor(place=place)
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
@@ -177,7 +165,7 @@ def _finetune_cls_task(task, data_reader, feed_list, config=None,
     log_writter = LogWriter(
         os.path.join(config.checkpoint_dir, "vdllog"), sync_cycle=10)
 
-    place, dev_count = _get_running_device_info(config)
+    place, dev_count = hub.common.get_running_device_info(config)
     with fluid.program_guard(main_program, startup_program):
         exe = fluid.Executor(place=place)
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)

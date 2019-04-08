@@ -40,6 +40,3 @@ from .finetune.finetune import finetune_and_eval
 from .finetune.config import RunConfig
 from .finetune.strategy import BERTFinetuneStrategy
 from .finetune.strategy import DefaultStrategy
-
-from .reader import BERTTokenizeReader
-from .reader.cv_reader import ImageClassificationReader

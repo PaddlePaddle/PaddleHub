@@ -17,6 +17,8 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import time
+import multiprocessing
 import hashlib
 
 import paddle
@@ -183,6 +185,17 @@ def is_csv_file(file_path):
 
 def is_yaml_file(file_path):
     return get_file_ext(file_path) == ".yml"
+
+
+def get_running_device_info(config):
+    if config.use_cuda:
+        place = fluid.CUDAPlace(0)
+        dev_count = fluid.core.get_cuda_device_count()
+    else:
+        place = fluid.CPUPlace()
+        dev_count = int(os.environ.get('CPU_NUM', multiprocessing.cpu_count()))
+
+    return place, dev_count
 
 
 if __name__ == "__main__":

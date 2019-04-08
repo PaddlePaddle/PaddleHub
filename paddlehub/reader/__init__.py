@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .nlp_reader import BERTTokenizeReader
-from .task_reader import ClassifyReader
-from .task_reader import SequenceLabelReader
+from .nlp_reader import ClassifyReader
+from .nlp_reader import SequenceLabelReader
+from .cv_reader import ImageClassificationReader
