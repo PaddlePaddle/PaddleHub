@@ -16,7 +16,7 @@
 syntax = "proto3";
 option optimize_for = LITE_RUNTIME;
 
-package paddle_hub_check_info;
+package paddlehub.module.checkinfo;
 
 enum FILE_TYPE {
   FILE=0;

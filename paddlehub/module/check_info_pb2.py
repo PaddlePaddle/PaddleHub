@@ -15,16 +15,16 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name='check_info.proto',
-    package='paddle_hub_check_info',
+    package='paddlehub.module.checkinfo',
     syntax='proto3',
     serialized_pb=_b(
-        '\n\x10\x63heck_info.proto\x12\x15paddle_hub_check_info\"\x80\x01\n\x08\x46ileInfo\x12\x11\n\tfile_name\x18\x01 \x01(\t\x12.\n\x04type\x18\x02 \x01(\x0e\x32 .paddle_hub_check_info.FILE_TYPE\x12\x0f\n\x07is_need\x18\x03 \x01(\x08\x12\x0b\n\x03md5\x18\x04 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\"\x7f\n\x08Requires\x12\x39\n\x0crequire_type\x18\x01 \x01(\x0e\x32#.paddle_hub_check_info.REQUIRE_TYPE\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x12\n\ngreat_than\x18\x03 \x01(\x08\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\"\xbe\x01\n\tCheckInfo\x12\x16\n\x0epaddle_version\x18\x01 \x01(\t\x12\x13\n\x0bhub_version\x18\x02 \x01(\t\x12\x1c\n\x14module_proto_version\x18\x03 \x01(\t\x12\x33\n\nfile_infos\x18\x04 \x03(\x0b\x32\x1f.paddle_hub_check_info.FileInfo\x12\x31\n\x08requires\x18\x05 \x03(\x0b\x32\x1f.paddle_hub_check_info.Requires*\x1e\n\tFILE_TYPE\x12\x08\n\x04\x46ILE\x10\x00\x12\x07\n\x03\x44IR\x10\x01*[\n\x0cREQUIRE_TYPE\x12\x12\n\x0ePYTHON_PACKAGE\x10\x00\x12\x0e\n\nHUB_MODULE\x10\x01\x12\n\n\x06SYSTEM\x10\x02\x12\x0b\n\x07\x43OMMAND\x10\x03\x12\x0e\n\nPY_VERSION\x10\x04\x42\x02H\x03\x62\x06proto3'
+        '\n\x10\x63heck_info.proto\x12\x1apaddlehub.module.checkinfo\"\x85\x01\n\x08\x46ileInfo\x12\x11\n\tfile_name\x18\x01 \x01(\t\x12\x33\n\x04type\x18\x02 \x01(\x0e\x32%.paddlehub.module.checkinfo.FILE_TYPE\x12\x0f\n\x07is_need\x18\x03 \x01(\x08\x12\x0b\n\x03md5\x18\x04 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\"\x84\x01\n\x08Requires\x12>\n\x0crequire_type\x18\x01 \x01(\x0e\x32(.paddlehub.module.checkinfo.REQUIRE_TYPE\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x12\n\ngreat_than\x18\x03 \x01(\x08\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\"\xc8\x01\n\tCheckInfo\x12\x16\n\x0epaddle_version\x18\x01 \x01(\t\x12\x13\n\x0bhub_version\x18\x02 \x01(\t\x12\x1c\n\x14module_proto_version\x18\x03 \x01(\t\x12\x38\n\nfile_infos\x18\x04 \x03(\x0b\x32$.paddlehub.module.checkinfo.FileInfo\x12\x36\n\x08requires\x18\x05 \x03(\x0b\x32$.paddlehub.module.checkinfo.Requires*\x1e\n\tFILE_TYPE\x12\x08\n\x04\x46ILE\x10\x00\x12\x07\n\x03\x44IR\x10\x01*[\n\x0cREQUIRE_TYPE\x12\x12\n\x0ePYTHON_PACKAGE\x10\x00\x12\x0e\n\nHUB_MODULE\x10\x01\x12\n\n\x06SYSTEM\x10\x02\x12\x0b\n\x07\x43OMMAND\x10\x03\x12\x0e\n\nPY_VERSION\x10\x04\x42\x02H\x03\x62\x06proto3'
     ))
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 _FILE_TYPE = _descriptor.EnumDescriptor(
     name='FILE_TYPE',
-    full_name='paddle_hub_check_info.FILE_TYPE',
+    full_name='paddlehub.module.checkinfo.FILE_TYPE',
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -35,15 +35,15 @@ _FILE_TYPE = _descriptor.EnumDescriptor(
     ],
     containing_type=None,
     options=None,
-    serialized_start=496,
-    serialized_end=526,
+    serialized_start=522,
+    serialized_end=552,
 )
 _sym_db.RegisterEnumDescriptor(_FILE_TYPE)
 
 FILE_TYPE = enum_type_wrapper.EnumTypeWrapper(_FILE_TYPE)
 _REQUIRE_TYPE = _descriptor.EnumDescriptor(
     name='REQUIRE_TYPE',
-    full_name='paddle_hub_check_info.REQUIRE_TYPE',
+    full_name='paddlehub.module.checkinfo.REQUIRE_TYPE',
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -60,8 +60,8 @@ _REQUIRE_TYPE = _descriptor.EnumDescriptor(
     ],
     containing_type=None,
     options=None,
-    serialized_start=528,
-    serialized_end=619,
+    serialized_start=554,
+    serialized_end=645,
 )
 _sym_db.RegisterEnumDescriptor(_REQUIRE_TYPE)
 
@@ -76,14 +76,14 @@ PY_VERSION = 4
 
 _FILEINFO = _descriptor.Descriptor(
     name='FileInfo',
-    full_name='paddle_hub_check_info.FileInfo',
+    full_name='paddlehub.module.checkinfo.FileInfo',
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name='file_name',
-            full_name='paddle_hub_check_info.FileInfo.file_name',
+            full_name='paddlehub.module.checkinfo.FileInfo.file_name',
             index=0,
             number=1,
             type=9,
@@ -99,7 +99,7 @@ _FILEINFO = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='type',
-            full_name='paddle_hub_check_info.FileInfo.type',
+            full_name='paddlehub.module.checkinfo.FileInfo.type',
             index=1,
             number=2,
             type=14,
@@ -115,7 +115,7 @@ _FILEINFO = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='is_need',
-            full_name='paddle_hub_check_info.FileInfo.is_need',
+            full_name='paddlehub.module.checkinfo.FileInfo.is_need',
             index=2,
             number=3,
             type=8,
@@ -131,7 +131,7 @@ _FILEINFO = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='md5',
-            full_name='paddle_hub_check_info.FileInfo.md5',
+            full_name='paddlehub.module.checkinfo.FileInfo.md5',
             index=3,
             number=4,
             type=9,
@@ -147,7 +147,7 @@ _FILEINFO = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='description',
-            full_name='paddle_hub_check_info.FileInfo.description',
+            full_name='paddlehub.module.checkinfo.FileInfo.description',
             index=4,
             number=5,
             type=9,
@@ -170,20 +170,20 @@ _FILEINFO = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=44,
-    serialized_end=172,
+    serialized_start=49,
+    serialized_end=182,
 )
 
 _REQUIRES = _descriptor.Descriptor(
     name='Requires',
-    full_name='paddle_hub_check_info.Requires',
+    full_name='paddlehub.module.checkinfo.Requires',
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name='require_type',
-            full_name='paddle_hub_check_info.Requires.require_type',
+            full_name='paddlehub.module.checkinfo.Requires.require_type',
             index=0,
             number=1,
             type=14,
@@ -199,7 +199,7 @@ _REQUIRES = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='version',
-            full_name='paddle_hub_check_info.Requires.version',
+            full_name='paddlehub.module.checkinfo.Requires.version',
             index=1,
             number=2,
             type=9,
@@ -215,7 +215,7 @@ _REQUIRES = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='great_than',
-            full_name='paddle_hub_check_info.Requires.great_than',
+            full_name='paddlehub.module.checkinfo.Requires.great_than',
             index=2,
             number=3,
             type=8,
@@ -231,7 +231,7 @@ _REQUIRES = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='description',
-            full_name='paddle_hub_check_info.Requires.description',
+            full_name='paddlehub.module.checkinfo.Requires.description',
             index=3,
             number=4,
             type=9,
@@ -254,20 +254,20 @@ _REQUIRES = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=174,
-    serialized_end=301,
+    serialized_start=185,
+    serialized_end=317,
 )
 
 _CHECKINFO = _descriptor.Descriptor(
     name='CheckInfo',
-    full_name='paddle_hub_check_info.CheckInfo',
+    full_name='paddlehub.module.checkinfo.CheckInfo',
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name='paddle_version',
-            full_name='paddle_hub_check_info.CheckInfo.paddle_version',
+            full_name='paddlehub.module.checkinfo.CheckInfo.paddle_version',
             index=0,
             number=1,
             type=9,
@@ -283,7 +283,7 @@ _CHECKINFO = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='hub_version',
-            full_name='paddle_hub_check_info.CheckInfo.hub_version',
+            full_name='paddlehub.module.checkinfo.CheckInfo.hub_version',
             index=1,
             number=2,
             type=9,
@@ -299,7 +299,8 @@ _CHECKINFO = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='module_proto_version',
-            full_name='paddle_hub_check_info.CheckInfo.module_proto_version',
+            full_name=
+            'paddlehub.module.checkinfo.CheckInfo.module_proto_version',
             index=2,
             number=3,
             type=9,
@@ -315,7 +316,7 @@ _CHECKINFO = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='file_infos',
-            full_name='paddle_hub_check_info.CheckInfo.file_infos',
+            full_name='paddlehub.module.checkinfo.CheckInfo.file_infos',
             index=3,
             number=4,
             type=11,
@@ -331,7 +332,7 @@ _CHECKINFO = _descriptor.Descriptor(
             options=None),
         _descriptor.FieldDescriptor(
             name='requires',
-            full_name='paddle_hub_check_info.CheckInfo.requires',
+            full_name='paddlehub.module.checkinfo.CheckInfo.requires',
             index=4,
             number=5,
             type=11,
@@ -354,8 +355,8 @@ _CHECKINFO = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=304,
-    serialized_end=494,
+    serialized_start=320,
+    serialized_end=520,
 )
 
 _FILEINFO.fields_by_name['type'].enum_type = _FILE_TYPE
@@ -374,7 +375,7 @@ FileInfo = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_FILEINFO,
         __module__='check_info_pb2'
-        # @@protoc_insertion_point(class_scope:paddle_hub_check_info.FileInfo)
+        # @@protoc_insertion_point(class_scope:paddlehub.module.checkinfo.FileInfo)
     ))
 _sym_db.RegisterMessage(FileInfo)
 
@@ -384,7 +385,7 @@ Requires = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_REQUIRES,
         __module__='check_info_pb2'
-        # @@protoc_insertion_point(class_scope:paddle_hub_check_info.Requires)
+        # @@protoc_insertion_point(class_scope:paddlehub.module.checkinfo.Requires)
     ))
 _sym_db.RegisterMessage(Requires)
 
@@ -394,7 +395,7 @@ CheckInfo = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_CHECKINFO,
         __module__='check_info_pb2'
-        # @@protoc_insertion_point(class_scope:paddle_hub_check_info.CheckInfo)
+        # @@protoc_insertion_point(class_scope:paddlehub.module.checkinfo.CheckInfo)
     ))
 _sym_db.RegisterMessage(CheckInfo)
 

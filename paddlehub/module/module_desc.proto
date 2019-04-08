@@ -16,7 +16,7 @@
 syntax = "proto3";
 option optimize_for = LITE_RUNTIME;
 
-package paddle_hub_module;
+package paddlehub.module.desc;
 
 enum DataType {
   NONE = 0;
@@ -68,11 +68,6 @@ message FetchDesc {
 message ModuleVar {
   repeated FetchDesc fetch_desc = 1;
   repeated FeedDesc feed_desc = 2;
-}
-
-message AuthInfo {
-  string paddle_version = 1;
-  string hub_version = 2;
 }
 
 // A Hub Module is stored in a directory with a file 'module_desc.pb'

@@ -16,7 +16,7 @@
 syntax = "proto3";
 option optimize_for = LITE_RUNTIME;
 
-package paddle_hub_finetune_checkpoint;
+package paddlehub.task.checkpoint;
 
 message CheckPoint {
   int64 current_epoch = 1;
