@@ -124,13 +124,13 @@ def _finetune_seq_label_task(task,
                         exe=exe)
 
                 if do_eval and global_step % config.eval_interval == 0:
-                    evaluate_seq_label_task(
+                    evaluate_seq_labeling_task(
                         task,
                         data_reader,
                         feed_list,
                         phase="test",
                         config=config)
-                    evaluate_seq_label_task(
+                    evaluate_seq_labeling_task(
                         task,
                         data_reader,
                         feed_list,
@@ -146,9 +146,9 @@ def _finetune_seq_label_task(task,
             exe=exe)
 
         if do_eval:
-            evaluate_seq_label_task(
+            evaluate_seq_labeling_task(
                 task, data_reader, feed_list, phase="dev", config=config)
-            evaluate_seq_label_task(
+            evaluate_seq_labeling_task(
                 task, data_reader, feed_list, phase="test", config=config)
         logger.info("PaddleHub finetune finished.")
 

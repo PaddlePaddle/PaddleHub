@@ -20,6 +20,8 @@ import time
 
 import paddle.fluid as fluid
 import paddlehub as hub
+import numpy as np
+
 from paddlehub.common.logger import logger
 
 
