@@ -45,8 +45,20 @@ def colorful_text(color, text):
 
 
 class TablePrinter:
-    def __init__(self, titles, placeholders):
+    def __init__(self,
+                 titles,
+                 placeholders,
+                 title_colors=None,
+                 title_aligns=None):
         self.titles = titles
+        if title_colors is None:
+            self.title_colors = ["light_green"] * len(self.titles)
+        else:
+            self.title_colors = title_colors
+        if title_aligns is None:
+            self.title_aligns = ["^"] * len(self.titles)
+        else:
+            self.title_aligns = title_aligns
         self.placeholders = placeholders
         self.text = "\n"
         self.add_title()
@@ -62,16 +74,22 @@ class TablePrinter:
         self.add_horizontal_line()
         title_text = "|"
         for index, title in enumerate(self.titles):
-            title = colorful_text("light_green", title)
-            _ph = 11
-            title_text += (
-                "{0:^%d}|" % (self.placeholders[index] + 2 + _ph)).format(title)
+            if self.title_colors[index]:
+                title = colorful_text(self.title_colors[index], title)
+                _ph = 11
+            else:
+                _ph = 0
+            title_text += ("{0:%s%d}|" %
+                           (self.title_aligns[index],
+                            self.placeholders[index] + 2 + _ph)).format(title)
         title_text += '\n'
         self.text += title_text
 
-    def add_line(self, contents, colors=None):
+    def add_line(self, contents, colors=None, aligns=None):
         self.add_horizontal_line()
         max_lines = 0
+        if aligns is None:
+            aligns = [None] * len(contents)
         marks = [False] * len(contents)
         colors = [None] * len(contents) if colors is None else colors
         offset = [0] * len(contents)
@@ -93,7 +111,12 @@ class TablePrinter:
                     _ph = 11
                 else:
                     _ph = 0
-                align = "<" if marks[index] else "^"
+
+                if aligns[index] is None:
+                    align = "<" if marks[index] else "^"
+                else:
+                    align = aligns[index]
+
                 line += (
                     "{0:%s%d}|" % (align, self.placeholders[index] + 2 + _ph)
                 ).format(split_text)

@@ -21,6 +21,7 @@ import argparse
 
 from paddlehub.common.logger import logger
 from paddlehub.commands.base_command import BaseCommand, ENTRY
+from paddlehub.commands.cml_utils import TablePrinter
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.module import Module
 from paddlehub.io.reader import yaml_reader
@@ -39,6 +40,66 @@ class ShowCommand(BaseCommand):
             usage='%(prog)s',
             add_help=False)
 
+    def show_model_info(self, model_info_file):
+        model_info = yaml_reader.read(model_info_file)
+        tp = TablePrinter(
+            titles=["ModelName", model_info['name']],
+            placeholders=[15, 50],
+            title_colors=["yellow", None],
+            title_aligns=["^", "<"])
+        tp.add_line(
+            contents=["Type", model_info['type']],
+            colors=["yellow", None],
+            aligns=["^", "<"])
+        tp.add_line(
+            contents=["Version", model_info['version']],
+            colors=["yellow", None],
+            aligns=["^", "<"])
+        tp.add_line(
+            contents=["Summary", model_info['description']],
+            colors=["yellow", None],
+            aligns=["^", "<"])
+        tp.add_line(
+            contents=["Author", model_info['author']],
+            colors=["yellow", None],
+            aligns=["^", "<"])
+        tp.add_line(
+            contents=["Author-Email", model_info['author_email']],
+            colors=["yellow", None],
+            aligns=["^", "<"])
+        print(tp.get_text())
+        return True
+
+    def show_module_info(self, module_dir):
+        module = Module(module_dir=module_dir)
+        tp = TablePrinter(
+            titles=["ModuleName", module.name],
+            placeholders=[15, 50],
+            title_colors=["light_red", None],
+            title_aligns=["^", "<"])
+        tp.add_line(
+            contents=["Version", module.version],
+            colors=["light_red", None],
+            aligns=["^", "<"])
+        tp.add_line(
+            contents=["Summary", module.summary],
+            colors=["light_red", None],
+            aligns=["^", "<"])
+        tp.add_line(
+            contents=["Author", module.author],
+            colors=["light_red", None],
+            aligns=["^", "<"])
+        tp.add_line(
+            contents=["Author-Email", module.author_email],
+            colors=["light_red", None],
+            aligns=["^", "<"])
+        tp.add_line(
+            contents=["Location", module_dir],
+            colors=["light_red", None],
+            aligns=["^", "<"])
+        print(tp.get_text())
+        return True
+
     def exec(self, argv):
         if not argv:
             print("ERROR: Please specify a module or a model\n")
@@ -48,17 +109,9 @@ class ShowCommand(BaseCommand):
         module_name = argv[0]
 
         # nlp model
-        model_info = os.path.join(module_name, "info.yml")
-        if os.path.exists(model_info):
-            model_info = yaml_reader.read(model_info)
-            show_text = "Name:%s\n" % model_info['name']
-            show_text += "Type:%s\n" % model_info['type']
-            show_text += "Version:%s\n" % model_info['version']
-            show_text += "Summary:\n"
-            show_text += "  %s\n" % model_info['description']
-            show_text += "Author:%s\n" % model_info['author']
-            show_text += "Author-Email:%s\n" % model_info['author_email']
-            print(show_text)
+        model_info_file = os.path.join(module_name, "info.yml")
+        if os.path.exists(model_info_file):
+            self.show_model_info(model_info_file)
             return True
 
         cwd = os.getcwd()
@@ -68,15 +121,7 @@ class ShowCommand(BaseCommand):
         if not module_dir or not os.path.exists(module_dir):
             return True
 
-        module = Module(module_dir=module_dir)
-        show_text = "Name:%s\n" % module.name
-        show_text += "Version:%s\n" % module.version
-        show_text += "Summary:\n"
-        show_text += "  %s\n" % module.summary
-        show_text += "Author:%s\n" % module.author
-        show_text += "Author-Email:%s\n" % module.author_email
-        show_text += "Location:%s\n" % module_dir
-        print(show_text)
+        self.show_module_info(module_dir)
         return True
 
 
