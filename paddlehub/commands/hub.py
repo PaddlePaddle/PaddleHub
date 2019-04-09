@@ -35,6 +35,8 @@ class HubCommand(BaseCommand):
         self.show_in_help = False
 
     def exec(self, argv):
+        logger.setLevel("NOLOG")
+
         if not argv:
             help.command.exec(argv)
             exit(1)
