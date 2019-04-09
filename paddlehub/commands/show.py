@@ -24,7 +24,7 @@ from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.commands.cml_utils import TablePrinter
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.module import Module
-from paddlehub.io.reader import yaml_reader
+from paddlehub.io.parser import yaml_parser
 
 
 class ShowCommand(BaseCommand):
@@ -41,7 +41,7 @@ class ShowCommand(BaseCommand):
             add_help=False)
 
     def show_model_info(self, model_info_file):
-        model_info = yaml_reader.read(model_info_file)
+        model_info = yaml_parser.parse(model_info_file)
         tp = TablePrinter(
             titles=["ModelName", model_info['name']],
             placeholders=[15, 50],
