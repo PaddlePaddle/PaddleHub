@@ -15,5 +15,6 @@
 from .dataset import InputExample, HubDataset
 from .chnsenticorp import ChnSentiCorp
 from .msra_ner import MSRA_NER
+from .nlpcc_dbqa import NLPCC_DBQA
 from .dogcat import DogCatDataset as DogCat
 from .flowers import FlowersDataset as Flowers

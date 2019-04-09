@@ -1,7 +1,7 @@
 export CUDA_VISIBLE_DEVICES=3
 
-CKPT_DIR="./ckpt"
-python -u finetune_with_hub.py \
+CKPT_DIR="./ckpt_sentiment_cls"
+python -u sentiment_cls.py \
                    --batch_size 32 \
                    --weight_decay  0.01 \
                    --checkpoint_dir $CKPT_DIR \

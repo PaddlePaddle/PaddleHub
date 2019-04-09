@@ -18,6 +18,7 @@ import numpy as np
 from collections import namedtuple
 
 from paddlehub.reader import tokenization
+from paddlehub.common.logger import logger
 from .batching import pad_batch_data
 
 
@@ -46,7 +47,7 @@ class BaseReader(object):
         self.label_map = {}
         for index, label in enumerate(self.dataset.get_labels()):
             self.label_map[label] = index
-        print("Dataset label map = {}".format(self.label_map))
+        logger.info("Dataset label map = {}".format(self.label_map))
 
         self.current_example = 0
         self.current_epoch = 0
@@ -154,6 +155,9 @@ class BaseReader(object):
         position_ids = list(range(len(token_ids)))
 
         if self.label_map:
+            if example.label not in self.label_map:
+                raise KeyError(
+                    "example.label = {%s} not in label" % example.label)
             label_id = self.label_map[example.label]
         else:
             label_id = example.label
