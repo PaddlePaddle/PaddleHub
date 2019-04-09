@@ -22,7 +22,7 @@ import re
 
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
-from paddlehub.io.reader import yaml_reader
+from paddlehub.io.parser import yaml_parser
 import paddlehub as hub
 
 RESOURCE_LIST_FILE = "resource_list_file.yml"
@@ -51,7 +51,7 @@ class HubServer:
         if now_time - file_create_time >= CACHE_TIME:
             os.remove(self.resource_list_file_path())
             return False
-        for resource in yaml_reader.read(
+        for resource in yaml_parser.parse(
                 self.resource_list_file_path())['resource_list']:
             for key in resource:
                 if key not in self.resource_list_file:

@@ -31,8 +31,8 @@ def infer_with_input_file():
     key = list(data_format.keys())[0]
 
     # parse input file
-    test_csv = os.path.join("resources", "test", "test.csv")
-    test_text = hub.io.reader.csv_reader.read(test_csv)["TEXT_INPUT"]
+    test_file = os.path.join("resources", "test", "test.txt")
+    test_text = hub.io.parser.txt_parser.parse(test_file)
 
     # set input dict
     input_dict = {key: test_text}

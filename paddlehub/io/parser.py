@@ -15,14 +15,14 @@
 import yaml
 
 
-class CSVReader:
+class CSVFileParser:
     def __init__(self):
         pass
 
     def _check(self):
         pass
 
-    def read(self, csv_file):
+    def parse(self, csv_file):
         with open(csv_file, "r") as file:
             content = file.read()
         content = content.split('\n')
@@ -42,18 +42,32 @@ class CSVReader:
         return self.content
 
 
-class YAMLReader:
+class YAMLFileParser:
     def __init__(self):
         pass
 
     def _check(self):
         pass
 
-    def read(self, yaml_file):
+    def parse(self, yaml_file):
         with open(yaml_file, "r") as file:
             content = file.read()
         return yaml.load(content)
 
 
-yaml_reader = YAMLReader()
-csv_reader = CSVReader()
+class TextFileParser:
+    def __init__(self):
+        pass
+
+    def _check(self):
+        pass
+
+    def parse(self, yaml_file):
+        with open(yaml_file, "r") as file:
+            contents = file.read().split("\n")
+        return [content for content in contents if content]
+
+
+csv_parser = CSVFileParser()
+yaml_parser = YAMLFileParser()
+txt_parser = TextFileParser()

@@ -21,7 +21,7 @@ import os
 
 from paddlehub.common.logger import logger
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.io.reader import csv_reader, yaml_reader
+from paddlehub.io.parser import yaml_parser, txt_parser
 from paddlehub.module.manager import default_module_manager
 from paddlehub.common import utils
 from paddlehub.common.arg_helper import add_argument, print_arguments
@@ -112,7 +112,8 @@ class RunCommand(BaseCommand):
             input_data_key = list(expect_data_format.keys())[0]
             origin_data = {input_data_key: [self.args.data]}
         elif self.args.dataset:
-            origin_data = csv_reader.read(self.args.dataset)
+            input_data_key = list(expect_data_format.keys())[0]
+            origin_data = {input_data_key: txt_parser.parse(self.args.dataset)}
         else:
             print("ERROR! Please specify data to predict.\n")
             print("Summary:\n    %s\n" % module.summary)
@@ -127,7 +128,7 @@ class RunCommand(BaseCommand):
             input_data = {input_data_key: origin_data[origin_data_key]}
             config = {}
         else:
-            yaml_config = yaml_reader.read(self.args.config)
+            yaml_config = yaml_parser.parse(self.args.config)
             if len(expect_data_format) == 1:
                 origin_data_key = list(origin_data.keys())[0]
                 input_data_key = list(expect_data_format.keys())[0]

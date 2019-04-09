@@ -35,7 +35,7 @@ from paddlehub.module.signature import Signature, create_signature
 from paddlehub.module.checker import ModuleChecker
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.base_processor import BaseProcessor
-from paddlehub.io.reader import yaml_reader
+from paddlehub.io.parser import yaml_parser
 from paddlehub import version
 
 __all__ = ['Module', 'create_module']
@@ -267,7 +267,7 @@ class Module(object):
             if not utils.is_yaml_file(module_info):
                 logger.critical("module info file should in yaml format")
                 exit(1)
-            self.module_info = yaml_reader.read(module_info)
+            self.module_info = yaml_parser.parse(module_info)
         self.author = self.module_info.get('author', 'UNKNOWN')
         self.author_email = self.module_info.get('author_email', 'UNKNOWN')
         self.summary = self.module_info.get('summary', 'UNKNOWN')

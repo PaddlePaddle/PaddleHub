@@ -28,7 +28,6 @@ import tarfile
 
 from paddlehub.common import utils
 from paddlehub.common.logger import logger
-from paddlehub.io.reader import csv_reader
 
 __all__ = ['Downloader']
 FLUSH_INTERVAL = 0.1
