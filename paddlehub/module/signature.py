@@ -47,13 +47,11 @@ class Signature:
         self.name = name
         for item in inputs:
             assert isinstance(
-                item,
-                Variable), "the item of inputs list shoule be paddle Variable"
+                item, Variable), "the item of inputs list shoule be Variable"
 
         for item in outputs:
             assert isinstance(
-                item,
-                Variable), "the item of outputs list shoule be paddle Variable"
+                item, Variable), "the item of outputs list shoule be Variable"
 
         self.inputs = inputs
         self.outputs = outputs

@@ -154,16 +154,16 @@ class ModuleChecker:
             if not os.path.exists(file_path):
                 if file_info.is_need:
                     logger.error(
-                        "module lack of necessary file [%s]" % file_path)
+                        "Module incompleted! Missing file [%s]" % file_path)
                     return False
             else:
                 if file_type == check_info_pb2.FILE:
                     if not os.path.isfile(file_path):
-                        logger.error("file type error %s" % file_path)
+                        logger.error("File type error %s" % file_path)
                         return False
 
                 if file_type == check_info_pb2.DIR:
                     if not os.path.isdir(file_path):
-                        logger.error("file type error %s" % file_path)
+                        logger.error("File type error %s" % file_path)
                         return False
         return True

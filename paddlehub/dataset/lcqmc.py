@@ -24,7 +24,7 @@ from paddlehub.common.logger import logger
 DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/lcqmc.tar.gz"
 
 
-class NLPCC_DBQA(HubDataset):
+class LCQMC(HubDataset):
     def __init__(self):
         self.dataset_dir = os.path.join(DATA_HOME, "lcqmc")
         if not os.path.exists(self.dataset_dir):
@@ -79,6 +79,6 @@ class NLPCC_DBQA(HubDataset):
 
 
 if __name__ == "__main__":
-    ds = NLPCC_DBQA()
+    ds = LCQMC()
     for e in ds.get_train_examples():
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

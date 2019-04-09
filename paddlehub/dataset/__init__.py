@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# NLP Dataset
 from .dataset import InputExample, HubDataset
 from .chnsenticorp import ChnSentiCorp
 from .msra_ner import MSRA_NER
 from .nlpcc_dbqa import NLPCC_DBQA
+from .lcqmc import LCQMC
+
+# CV Dataset
 from .dogcat import DogCatDataset as DogCat
 from .flowers import FlowersDataset as Flowers
