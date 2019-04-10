@@ -58,7 +58,7 @@ class HubServer:
                     self.resource_list_file[key] = []
                 self.resource_list_file[key].append(resource[key])
 
-        # if file do not contain necessary data, remove it
+        # if file format is invalid, remove it
         if "version" not in self.resource_list_file or "name" not in self.resource_list_file:
             self.resource_list_file = {}
             os.remove(self.resource_list_file_path())
@@ -68,6 +68,9 @@ class HubServer:
     def search_resource(self, resource_key, resource_type=None, update=False):
         if update or not self.resource_list_file:
             self.request()
+
+        if not self._load_resource_list_file_if_valid():
+            return None
 
         match_resource_index_list = []
         for index, resource in enumerate(self.resource_list_file['name']):
@@ -101,6 +104,9 @@ class HubServer:
                          update=False):
         if update or not self.resource_list_file:
             self.request()
+
+        if not self._load_resource_list_file_if_valid():
+            return None
 
         resource_index_list = [
             index
@@ -146,7 +152,7 @@ class HubServer:
             file_url, save_path=hub.CACHE_HOME)
         if not result:
             return False
-        return self._load_resource_list_file_if_valid()
+        return True
 
 
 default_hub_server = HubServer()
