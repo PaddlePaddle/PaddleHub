@@ -18,7 +18,6 @@ from __future__ import print_function
 
 import argparse
 
-from paddlehub.common.logger import logger
 from paddlehub.common import utils
 from paddlehub.common.hub_server import default_hub_server
 from paddlehub.commands.base_command import BaseCommand, ENTRY

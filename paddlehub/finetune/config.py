@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 from datetime import datetime
+import time
+
 from paddlehub.finetune.strategy import DefaultStrategy
 from paddlehub.common.logger import logger
 

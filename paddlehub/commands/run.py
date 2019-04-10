@@ -19,7 +19,6 @@ from __future__ import print_function
 import argparse
 import os
 
-from paddlehub.common.logger import logger
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.io.parser import yaml_parser, txt_parser
 from paddlehub.module.manager import default_module_manager

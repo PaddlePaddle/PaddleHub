@@ -19,7 +19,6 @@ from __future__ import print_function
 import argparse
 import os
 
-from paddlehub.common.logger import logger
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.hub_server import default_hub_server

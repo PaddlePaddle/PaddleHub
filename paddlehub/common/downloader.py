@@ -23,7 +23,6 @@ import sys
 import time
 import hashlib
 import requests
-import tempfile
 import tarfile
 
 from paddlehub.common import utils

@@ -16,9 +16,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import copy
+
 import paddle
 import paddle.fluid as fluid
-import copy
 
 from paddlehub.module import module_desc_pb2
 from paddlehub.common.utils import from_pyobj_to_module_attr, from_module_attr_to_pyobj

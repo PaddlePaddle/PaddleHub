@@ -21,14 +21,14 @@ import time
 
 import paddle
 import paddle.fluid as fluid
-import paddlehub as hub
 import numpy as np
+from visualdl import LogWriter
 
 from paddlehub.common.logger import logger
 from paddlehub.finetune.strategy import BERTFinetuneStrategy, DefaultStrategy
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
 from paddlehub.finetune.evaluate import evaluate_cls_task, evaluate_seq_labeling_task
-from visualdl import LogWriter
+import paddlehub as hub
 
 
 def _do_memory_optimization(task, config):

@@ -19,10 +19,10 @@ from __future__ import print_function
 import time
 
 import paddle.fluid as fluid
-import paddlehub as hub
 import numpy as np
 
 from paddlehub.common.logger import logger
+import paddlehub as hub
 
 
 def evaluate_cls_task(task, data_reader, feed_list, phase="test", config=None):

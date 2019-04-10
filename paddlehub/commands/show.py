@@ -19,7 +19,6 @@ from __future__ import print_function
 import os
 import argparse
 
-from paddlehub.common.logger import logger
 from paddlehub.common import utils
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.commands.cml_utils import TablePrinter

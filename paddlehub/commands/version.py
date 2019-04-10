@@ -16,7 +16,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from paddlehub.common.logger import logger
 from paddlehub import version
 from paddlehub.commands.base_command import BaseCommand
 
