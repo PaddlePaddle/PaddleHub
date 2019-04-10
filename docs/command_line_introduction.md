@@ -30,11 +30,10 @@ hub run lac --input_text "今天是个好日子"
 ```
 ```shell
 #多文本分析
-hub run lac --input_file test.csv
+hub run lac --input_file test.txt
 ```
-其中test.csv的格式为
+其中test.txt的格式为
 ```
-TITLE
 今天是个好日子
 天气预报说今天要下雨
 下一班地铁马上就要到了
@@ -44,15 +43,14 @@ TITLE
 输入数据通过--input_path或者--input_file指定。以SSD（目标检测）为例子，可以通过以下两个命令实现单张图片和多张图片的预测
 ```shell
 #单张照片预测
-hub run ssd_mobilenet_pascal --input_text test.jpg
+hub run ssd_mobilenet_pascal --input_path test.jpg
 ```
 ```shell
 #多文本分析
-hub run ssd_mobilenet_pascal --input_file test.csv
+hub run ssd_mobilenet_pascal --input_file test.txt
 ```
-其中test.csv的格式为
+其中test.txt的格式为
 ```
-TITLE
 cat.jpg
 dog.jpg
 person.jpg
