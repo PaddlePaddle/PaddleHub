@@ -117,9 +117,10 @@ class Module(object):
             self._init_with_module_file(module_dir=module_dir)
         elif signatures:
             if processor:
-                assert issubclass(
-                    processor, BaseProcessor
-                ), "processor should be sub class of hub.BaseProcessor"
+                if not issubclass(processor, BaseProcessor):
+                    raise TypeError(
+                        "processor shoule be an instance of paddlehub.BaseProcessor"
+                    )
             if assets:
                 self.assets = utils.to_list(assets)
                 # for asset in assets:
@@ -446,7 +447,8 @@ class Module(object):
         return result
 
     def check_processor(self):
-        assert self.processor, "this module couldn't be call"
+        if not self.processor:
+            raise ValueError("This Module is not callable!")
 
     def context(self,
                 sign_name,
@@ -461,7 +463,9 @@ class Module(object):
             available for BERT/ERNIE module
         """
 
-        assert sign_name in self.signatures, "module did not have a signature with name %s" % sign_name
+        if sign_name not in self.signatures:
+            raise KeyError(
+                "Module did not have a signature with name %s" % sign_name)
         signature = self.signatures[sign_name]
 
         program = self.program.clone(for_test=for_test)
@@ -535,19 +539,28 @@ class Module(object):
         return self.get_name_prefix() + var_name
 
     def _check_signatures(self):
-        assert self.signatures, "Signature array should not be None"
+        if not self.signatures:
+            raise ValueError("Signatures should not be None")
 
         for key, sign in self.signatures.items():
-            assert isinstance(sign,
-                              Signature), "sign_arr should be list of Signature"
+            if not isinstance(sign, Signature):
+                raise TypeError(
+                    "Item in Signatures shoule be an instance of paddlehub.Signature"
+                )
 
             for input in sign.inputs:
                 _tmp_program = input.block.program
-                assert self.program == _tmp_program, "all the variable should come from the same program"
+                if not self.program == _tmp_program:
+                    raise ValueError(
+                        "All input and outputs variables in signature should come from the same Program"
+                    )
 
             for output in sign.outputs:
                 _tmp_program = output.block.program
-                assert self.program == _tmp_program, "all the variable should come from the same program"
+                if not self.program == _tmp_program:
+                    raise ValueError(
+                        "All input and outputs variables in signature should come from the same Program"
+                    )
 
     def serialize_to_path(self, path=None, exe=None):
         self._check_signatures()

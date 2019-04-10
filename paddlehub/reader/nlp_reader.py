@@ -300,7 +300,8 @@ class SequenceLabelReader(BaseReader):
         return return_list
 
     def _reseg_token_label(self, tokens, labels, tokenizer):
-        assert len(tokens) == len(labels)
+        if len(tokens) != len(labels):
+            raise ValueError("The length of tokens must be same with labels")
         ret_tokens = []
         ret_labels = []
         for token, label in zip(tokens, labels):
@@ -316,7 +317,8 @@ class SequenceLabelReader(BaseReader):
                 sub_label = "I-" + label[2:]
             ret_labels.extend([sub_label] * (len(sub_token) - 1))
 
-        assert len(ret_tokens) == len(ret_labels)
+        if len(ret_tokens) != len(labels):
+            raise ValueError("The length of ret_tokens can't match with labels")
         return ret_tokens, ret_labels
 
     def _convert_example_to_record(self, example, max_seq_length, tokenizer):

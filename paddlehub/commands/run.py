@@ -122,7 +122,10 @@ class RunCommand(BaseCommand):
 
         # data_format check
         if not self.args.config:
-            assert len(expect_data_format) == 1
+            if len(expect_data_format) != 1:
+                raise RuntimeError(
+                    "Module requires %d inputs, please use config file to specify mappings for data and inputs."
+                    % len(expect_data_format))
             origin_data_key = list(origin_data.keys())[0]
             input_data_key = list(expect_data_format.keys())[0]
             input_data = {input_data_key: origin_data[origin_data_key]}
@@ -135,11 +138,22 @@ class RunCommand(BaseCommand):
                 input_data = {input_data_key: origin_data[origin_data_key]}
             else:
                 input_data_format = yaml_config['input_data']
-                assert len(input_data_format) == len(expect_data_format)
+                if len(input_data_format) != len(expect_data_format):
+                    raise ValueError(
+                        "Module requires %d inputs, but the input file gives %d."
+                        % (len(expect_data_format), len(input_data_format)))
                 for key, value in expect_data_format.items():
-                    assert key in input_data_format
-                    assert value['type'] == hub.DataType.type(
-                        input_data_format[key]['type'])
+                    if key not in input_data_format:
+                        raise KeyError(
+                            "Input file gives an unexpected input %s" % key)
+
+                    if value['type'] != hub.DataType.type(
+                            input_data_format[key]['type']):
+                        raise TypeError(
+                            "Module expect Type %s for %s, but the input file gives %s"
+                            % (value['type'], key,
+                               hub.DataType.type(
+                                   input_data_format[key]['type'])))
 
                 input_data = {}
                 for key, value in yaml_config['input_data'].items():

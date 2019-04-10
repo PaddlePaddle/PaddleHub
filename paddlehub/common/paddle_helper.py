@@ -26,9 +26,9 @@ from paddlehub.common.logger import logger
 
 
 def get_variable_info(var):
-    assert isinstance(
-        var,
-        fluid.framework.Variable), "var should be a fluid.framework.Variable"
+    if not isinstance(var, fluid.framework.Variable):
+        raise TypeError("var shoule be an instance of fluid.framework.Variable")
+
     var_info = {
         'type': var.type,
         'name': var.name,
@@ -148,20 +148,26 @@ def connect_program(pre_program, next_program, input_dict=None, inplace=True):
             }
             to_block.append_op(**op_info)
 
-    assert isinstance(pre_program,
-                      fluid.Program), "pre_program should be fluid.Program"
-    assert isinstance(next_program,
-                      fluid.Program), "next_program should be fluid.Program"
+    if not isinstance(pre_program, fluid.Program):
+        raise TypeError("pre_program shoule be an instance of fluid.Program")
+
+    if not isinstance(next_program, fluid.Program):
+        raise TypeError("next_program shoule be an instance of fluid.Program")
+
     output_program = pre_program if inplace else pre_program.clone(
         for_test=False)
     if input_dict:
-        assert isinstance(
-            input_dict,
-            dict), "the input_dict should be a dict with string-Variable pair"
+        if not isinstance(input_dict, dict):
+            raise TypeError(
+                "input_dict shoule be a python dict like {str:fluid.framework.Variable}"
+            )
+
         for key, var in input_dict.items():
-            assert isinstance(
-                var, fluid.framework.Variable
-            ), "the input_dict should be a dict with string-Variable pair"
+            if not isinstance(var, fluid.framework.Variable):
+                raise TypeError(
+                    "input_dict shoule be a python dict like {str:fluid.framework.Variable}"
+                )
+
             var_info = copy.deepcopy(get_variable_info(var))
             input_var = output_program.global_block().create_var(**var_info)
             output_var = next_program.global_block().var(key)

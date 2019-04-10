@@ -35,23 +35,29 @@ class Signature:
         if not feed_names:
             feed_names = [""] * len(inputs)
         feed_names = to_list(feed_names)
-        assert len(inputs) == len(
-            feed_names), "the length of feed_names must be same with inputs"
+        if len(inputs) != len(feed_names):
+            raise ValueError(
+                "The length of feed_names must be same with inputs")
 
         if not fetch_names:
             fetch_names = [""] * len(outputs)
         fetch_names = to_list(fetch_names)
-        assert len(outputs) == len(
-            fetch_names), "the length of fetch_names must be same with outputs"
+        if len(outputs) != len(fetch_names):
+            raise ValueError(
+                "the length of fetch_names must be same with outputs")
 
         self.name = name
         for item in inputs:
-            assert isinstance(
-                item, Variable), "the item of inputs list shoule be Variable"
+            if not isinstance(item, Variable):
+                raise TypeError(
+                    "Item in inputs list shoule be an instance of fluid.framework.Variable"
+                )
 
         for item in outputs:
-            assert isinstance(
-                item, Variable), "the item of outputs list shoule be Variable"
+            if not isinstance(item, Variable):
+                raise TypeError(
+                    "Item in outputs list shoule be an instance of fluid.framework.Variable"
+                )
 
         self.inputs = inputs
         self.outputs = outputs
