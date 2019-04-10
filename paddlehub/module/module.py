@@ -128,7 +128,7 @@ class Module(object):
             self._generate_module_info(module_info)
             self._init_with_signature(signatures=signatures)
         else:
-            raise "Error! HubModule can't init with nothing"
+            raise ValueError("Error! Module initialized parameter is empty")
 
     def _init_with_name(self, name):
         logger.info("Try installing module %s" % name)
@@ -191,7 +191,8 @@ class Module(object):
     def _init_with_module_file(self, module_dir):
         checker = ModuleChecker(module_dir)
         if not checker.check():
-            logger.error("Module init failed on {}".format(module_dir))
+            logger.error(
+                "Module initialization failed on {}".format(module_dir))
             exit(1)
 
         self.helper = ModuleHelper(module_dir)
@@ -223,7 +224,9 @@ class Module(object):
         self.program = signatures[0].inputs[0].block.program
         for sign in signatures:
             if sign.name in self.signatures:
-                raise "Error! signature array contains repeat signatrue %s" % sign
+                raise ValueError(
+                    "Error! Signature array contains duplicated signatrues %s" %
+                    sign)
             if self.default_signature is None and sign.for_predict:
                 self.default_signature = sign
             self.signatures[sign.name] = sign
@@ -265,7 +268,7 @@ class Module(object):
             self.module_info = {}
         else:
             if not utils.is_yaml_file(module_info):
-                logger.critical("module info file should in yaml format")
+                logger.critical("Module info file should be yaml format")
                 exit(1)
             self.module_info = yaml_parser.parse(module_info)
         self.author = self.module_info.get('author', 'UNKNOWN')
@@ -532,7 +535,7 @@ class Module(object):
         return self.get_name_prefix() + var_name
 
     def _check_signatures(self):
-        assert self.signatures, "signature array should not be None"
+        assert self.signatures, "Signature array should not be None"
 
         for key, sign in self.signatures.items():
             assert isinstance(sign,

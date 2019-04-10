@@ -16,12 +16,12 @@ from collections import namedtuple
 import os
 import csv
 
-from paddlehub.dataset import InputExample
-from paddlehub.dataset import HubDataset
+from paddlehub.dataset import InputExample, HubDataset
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import DATA_HOME
+from paddlehub.common.logger import logger
 
-DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/chnsenticorp_data.tar.gz"
+DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/chnsenticorp.tar.gz"
 
 
 class ChnSentiCorp(HubDataset):
@@ -31,8 +31,12 @@ class ChnSentiCorp(HubDataset):
     """
 
     def __init__(self):
-        ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
-            url=DATA_URL, save_path=DATA_HOME, print_progress=True)
+        self.dataset_dir = os.path.join(DATA_HOME, "chnsenticorp")
+        if not os.path.exists(self.dataset_dir):
+            ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
+                url=DATA_URL, save_path=DATA_HOME, print_progress=True)
+        else:
+            logger.info("Dataset {} already cached.".format(self.dataset_dir))
 
         self._load_train_examples()
         self._load_test_examples()
@@ -69,6 +73,7 @@ class ChnSentiCorp(HubDataset):
             reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
             examples = []
             seq_id = 0
+            header = next(reader)  # skip header
             for line in reader:
                 example = InputExample(
                     guid=seq_id, label=line[0], text_a=line[1])
@@ -81,4 +86,4 @@ class ChnSentiCorp(HubDataset):
 if __name__ == "__main__":
     ds = ChnSentiCorp()
     for e in ds.get_train_examples():
-        print(e)
+        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

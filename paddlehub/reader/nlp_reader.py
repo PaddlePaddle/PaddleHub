@@ -18,6 +18,7 @@ import numpy as np
 from collections import namedtuple
 
 from paddlehub.reader import tokenization
+from paddlehub.common.logger import logger
 from .batching import pad_batch_data
 
 
@@ -46,17 +47,11 @@ class BaseReader(object):
         self.label_map = {}
         for index, label in enumerate(self.dataset.get_labels()):
             self.label_map[label] = index
-        print("Dataset label map = {}".format(self.label_map))
+        logger.info("Dataset label map = {}".format(self.label_map))
 
         self.current_example = 0
         self.current_epoch = 0
         self.num_examples = 0
-
-        # if label_map_config:
-        #     with open(label_map_config) as f:
-        #         self.label_map = json.load(f)
-        # else:
-        #     self.label_map = None
 
         self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
 
@@ -160,24 +155,13 @@ class BaseReader(object):
         position_ids = list(range(len(token_ids)))
 
         if self.label_map:
+            if example.label not in self.label_map:
+                raise KeyError(
+                    "example.label = {%s} not in label" % example.label)
             label_id = self.label_map[example.label]
         else:
             label_id = example.label
 
-        # Record = namedtuple(
-        #     'Record',
-        #     ['token_ids', 'text_type_ids', 'position_ids', 'label_id', 'qid'])
-
-        # qid = None
-        # if "qid" in example._fields:
-        #     qid = example.qid
-
-        # record = Record(
-        #     token_ids=token_ids,
-        #     text_type_ids=text_type_ids,
-        #     position_ids=position_ids,
-        #     label_id=label_id,
-        #     qid=qid)
         Record = namedtuple(
             'Record',
             ['token_ids', 'text_type_ids', 'position_ids', 'label_id'])
@@ -210,10 +194,6 @@ class BaseReader(object):
 
         if batch_records:
             yield self._pad_batch_records(batch_records)
-
-    # def get_num_examples(self, input_file):
-    #     examples = self._read_tsv(input_file)
-    #     return len(examples)
 
     def get_num_examples(self, phase):
         """Get number of examples for train, dev or test."""

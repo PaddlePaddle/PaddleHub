@@ -22,7 +22,6 @@ class InputExample(object):
 
     def __init__(self, guid, text_a, text_b=None, label=None):
         """Constructs a InputExample.
-
     Args:
       guid: Unique id for the example.
       text_a: string. The untokenized text of the first sequence. For single

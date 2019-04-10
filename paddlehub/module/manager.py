@@ -61,13 +61,14 @@ class LocalModuleManager:
         self.all_modules(update=True)
         if module_name in self.modules_dict:
             module_dir = self.modules_dict[module_name]
-            tips = "module %s already install in %s" % (module_name, module_dir)
+            tips = "Module %s already installed in %s" % (module_name,
+                                                          module_dir)
             return True, tips, module_dir
         url = hub.default_hub_server.get_module_url(
             module_name, version=module_version)
         #TODO(wuzewu): add compatibility check
         if not url:
-            tips = "can't found module %s" % module_name
+            tips = "Can't find module %s" % module_name
             if module_version:
                 tips += " with version %s" % module_version
             return False, tips, None

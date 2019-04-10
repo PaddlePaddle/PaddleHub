@@ -109,8 +109,15 @@ def create_img_classification_task(feature,
                                    num_classes,
                                    hidden_units=None):
     """
-    Append a multi-layer perceptron classifier for binary classification base
-    on input feature
+    Create the transfer learning task for image classification.
+    Args:
+        feature:
+
+    Return:
+        Task
+
+    Raise:
+        None
     """
     cls_feats = feature
     # append fully connected layer according to hidden_units

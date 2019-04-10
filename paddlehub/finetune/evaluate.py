@@ -48,6 +48,8 @@ def evaluate_cls_task(task, data_reader, feed_list, phase="test", config=None):
                 feed=data_feeder.feed(batch),
                 fetch_list=[loss.name, accuracy.name])
             num_eval_examples += num_batch_examples
+            if num_eval_examples % 10000 == 0:
+                logger.info("{} examples evaluated.".format(num_eval_examples))
             acc_sum += accuracy_v * num_batch_examples
             loss_sum += loss_v * num_batch_examples
         eval_time_used = time.time() - eval_time_begin

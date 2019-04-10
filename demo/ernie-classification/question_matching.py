@@ -49,10 +49,11 @@ if __name__ == '__main__':
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
-        eval_interval=10,
+        eval_interval=100,
         use_cuda=True,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
+        checkpoint_dir=args.checkpoint_dir,
         strategy=strategy)
 
     # loading Paddlehub ERNIE pretrained model
@@ -60,7 +61,7 @@ if __name__ == '__main__':
 
     # Sentence classification  dataset reader
     reader = hub.reader.ClassifyReader(
-        dataset=hub.dataset.ChnSentiCorp(),  # download chnsenticorp dataset
+        dataset=hub.dataset.LCQMC(),  # download LCQMC dataset
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
 
