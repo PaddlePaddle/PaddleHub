@@ -29,11 +29,12 @@ def draw_bounding_box_on_image(image_path, data_list, save_path):
         if image.mode == 'RGB':
             draw.text((left, top), data['label'], (255, 255, 0))
 
-    image_name = image_path.split('/')[-1]
+    image_name = os.path.split(image_path)[-1]
     if not os.path.exists(save_path):
         os.mkdir(save_path)
     save_path = os.path.join(save_path, image_name)
-    print("image with bbox drawed saved as {}".format(save_path))
+    print("image with bbox drawed saved as {}".format(
+        os.path.abspath(save_path)))
     image.save(save_path)
 
 
