@@ -21,7 +21,8 @@ from setuptools import setup
 from paddlehub.version import hub_version
 
 REQUIRED_PACKAGES = [
-    'numpy >= 1.12.0', 'six >= 1.10.0', 'protobuf >= 3.1.0', 'pyyaml', 'numpy'
+    'numpy >= 1.12.0', 'six >= 1.10.0', 'protobuf >= 3.1.0', 'pyyaml', 'Pillow',
+    "visualdl >= 1.3.0"
 ]
 
 setup(
