@@ -34,7 +34,12 @@ class ListCommand(BaseCommand):
 
     def exec(self, argv):
         all_modules = default_module_manager.all_modules()
-        tp = TablePrinter(titles=["ModuleName", "Path"], placeholders=[25, 50])
+        if utils.is_windows():
+            placeholders = [20, 40]
+        else:
+            placeholders = [25, 50]
+        tp = TablePrinter(
+            titles=["ModuleName", "Path"], placeholders=placeholders)
         for module_name, module_dir in all_modules.items():
             tp.add_line(contents=[module_name, module_dir])
         print(tp.get_text())

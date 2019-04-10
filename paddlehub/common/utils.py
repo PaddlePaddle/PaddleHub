@@ -20,12 +20,21 @@ import os
 import time
 import multiprocessing
 import hashlib
+import platform
 
 import paddle
 import paddle.fluid as fluid
 
 from paddlehub.module import module_desc_pb2
 from paddlehub.common.logger import logger
+
+
+def get_platform():
+    return platform.platform()
+
+
+def is_windows():
+    return get_platform().lower().startswith("windows")
 
 
 def to_list(input):

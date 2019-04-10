@@ -44,9 +44,13 @@ class SearchCommand(BaseCommand):
 
         resource_name = argv[0]
         resource_list = default_hub_server.search_resource(resource_name)
+        if utils.is_windows():
+            placeholders = [20, 8, 8, 20]
+        else:
+            placeholders = [30, 8, 8, 25]
         tp = TablePrinter(
             titles=["ResourceName", "Type", "Version", "Summary"],
-            placeholders=[30, 8, 8, 25])
+            placeholders=placeholders)
         for resource_name, resource_type, resource_version, resource_summary in resource_list:
             if resource_type == "Module":
                 colors = ["yellow", None, None, None]

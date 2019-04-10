@@ -16,7 +16,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-color_dict = {
+from paddlehub.common.utils import is_windows
+
+linux_color_dict = {
     "white": "\033[1;37m%s\033[0m",
     "black": "\033[30m%s\033[0m",
     "dark_gray": "\033[1;30m%s\033[0m",
@@ -35,13 +37,28 @@ color_dict = {
     "yellow": "\033[1;33m%s\033[0m"
 }
 
+windows_color_dict = {key: "%s" for key in linux_color_dict}
+
+
+def get_color_dict():
+    if is_windows():
+        return windows_color_dict
+    return linux_color_dict
+
 
 def colorful_text(color, text):
+    color_dict = get_color_dict()
     if color not in color_dict:
         color = color_dict['blue']
     else:
         color = color_dict[color]
     return color % text
+
+
+def get_ph_value():
+    if is_windows():
+        return 0
+    return 11
 
 
 class TablePrinter:
@@ -76,7 +93,7 @@ class TablePrinter:
         for index, title in enumerate(self.titles):
             if self.title_colors[index]:
                 title = colorful_text(self.title_colors[index], title)
-                _ph = 11
+                _ph = get_ph_value()
             else:
                 _ph = 0
             title_text += ("{0:%s%d}|" %
@@ -108,7 +125,7 @@ class TablePrinter:
                 split_text = content[offset[index]:offset[index] + length]
                 if colors[index] and split_text:
                     split_text = colorful_text(colors[index], split_text)
-                    _ph = 11
+                    _ph = get_ph_value()
                 else:
                     _ph = 0
 

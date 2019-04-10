@@ -20,6 +20,7 @@ import os
 import argparse
 
 from paddlehub.common.logger import logger
+from paddlehub.common import utils
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.commands.cml_utils import TablePrinter
 from paddlehub.module.manager import default_module_manager
@@ -42,9 +43,13 @@ class ShowCommand(BaseCommand):
 
     def show_model_info(self, model_info_file):
         model_info = yaml_parser.parse(model_info_file)
+        if utils.is_windows():
+            placeholders = [15, 40]
+        else:
+            placeholders = [15, 50]
         tp = TablePrinter(
             titles=["ModelName", model_info['name']],
-            placeholders=[15, 50],
+            placeholders=placeholders,
             title_colors=["yellow", None],
             title_aligns=["^", "<"])
         tp.add_line(
@@ -72,9 +77,13 @@ class ShowCommand(BaseCommand):
 
     def show_module_info(self, module_dir):
         module = Module(module_dir=module_dir)
+        if utils.is_windows():
+            placeholders = [15, 40]
+        else:
+            placeholders = [15, 50]
         tp = TablePrinter(
             titles=["ModuleName", module.name],
-            placeholders=[15, 50],
+            placeholders=placeholders,
             title_colors=["light_red", None],
             title_aligns=["^", "<"])
         tp.add_line(
