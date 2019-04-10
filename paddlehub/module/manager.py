@@ -64,8 +64,10 @@ class LocalModuleManager:
             tips = "Module %s already installed in %s" % (module_name,
                                                           module_dir)
             return True, tips, module_dir
-        url = hub.default_hub_server.get_module_url(
+        search_result = hub.default_hub_server.get_module_url(
             module_name, version=module_version)
+        url = search_result.get('url', None)
+        md5_value = search_result.get('md5', None)
         #TODO(wuzewu): add compatibility check
         if not url:
             tips = "Can't find module %s" % module_name

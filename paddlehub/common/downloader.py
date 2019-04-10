@@ -32,14 +32,18 @@ from paddlehub.common.logger import logger
 __all__ = ['Downloader']
 FLUSH_INTERVAL = 0.1
 
+lasttime = time.time()
 
-def md5file(fname):
-    hash_md5 = hashlib.md5()
-    f = open(fname, "rb")
-    for chunk in iter(lambda: f.read(4096), b""):
-        hash_md5.update(chunk)
-    f.close()
-    return hash_md5.hexdigest()
+
+def progress(str, end=False):
+    global lasttime
+    if end:
+        str += "\n"
+        lasttime = 0
+    if time.time() - lasttime >= FLUSH_INTERVAL:
+        sys.stdout.write("\r%s" % str)
+        lasttime = time.time()
+        sys.stdout.flush()
 
 
 class Downloader:
@@ -85,30 +89,37 @@ class Downloader:
                         f.write(data)
                         if print_progress:
                             done = int(50 * dl / total_length)
-                            if time.time() - starttime >= FLUSH_INTERVAL:
-                                sys.stdout.write(
-                                    "\r%s : [%-50s] %.2f%%" %
-                                    (save_name, '=' * done,
-                                     float(dl / total_length * 100)))
-                                starttime = time.time()
-                                sys.stdout.flush()
+                            progress("%s : [%-50s] %.2f%%" %
+                                     (save_name, '=' * done,
+                                      float(dl / total_length * 100)))
                 if print_progress:
-                    sys.stdout.write(
-                        "\r%s : [%-50s]%.2f%%\n" %
-                        (save_name, '=' * done, float(dl / total_length * 100)))
-                    sys.stdout.flush()
+                    progress(
+                        "%s : [%-50s] %.2f%%" % (save_name, '=' * 50, 100),
+                        end=True)
 
         tips = "file %s download completed!" % (file_name)
         return True, tips, file_name
 
-    def uncompress(self, file, dirname=None, delete_file=False):
+    def uncompress(self,
+                   file,
+                   dirname=None,
+                   delete_file=False,
+                   print_progress=False):
         dirname = os.path.dirname(file) if dirname is None else dirname
         with tarfile.open(file, "r:gz") as tar:
             file_names = tar.getnames()
+            size = len(file_names) - 1
             module_dir = os.path.join(dirname, file_names[0])
-            for file_name in file_names:
+            for index, file_name in enumerate(file_names):
+                if print_progress:
+                    done = int(50 * float(index) / size)
+                    progress("%s : [%-50s] %.2f%%" %
+                             (file, '=' * done, float(index / size * 100)))
                 tar.extract(file_name, dirname)
 
+            if print_progress:
+                progress(
+                    "%s : [%-50s] %.2f%%" % (file, '=' * 50, 100), end=True)
         if delete_file:
             os.remove(file)
 
@@ -131,7 +142,8 @@ class Downloader:
             replace=replace)
         if not result:
             return result, tips_1, file
-        result, tips_2, file = self.uncompress(file, delete_file=delete_file)
+        result, tips_2, file = self.uncompress(
+            file, delete_file=delete_file, print_progress=print_progress)
         if not result:
             return result, tips_2, file
         if save_name:

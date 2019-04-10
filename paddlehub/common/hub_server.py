@@ -106,7 +106,7 @@ class HubServer:
             self.request()
 
         if not self._load_resource_list_file_if_valid():
-            return None
+            return {}
 
         resource_index_list = [
             index
@@ -123,14 +123,17 @@ class HubServer:
         resource_version_list = sorted(resource_version_list)
         if not version:
             if not resource_version_list:
-                return None
+                return {}
             version = resource_version_list[-1]
 
         for index in resource_index_list:
             if self.resource_list_file['version'][index] == version:
-                return self.resource_list_file['url'][index]
+                return {
+                    'url': self.resource_list_file['url'][index],
+                    'md5': self.resource_list_file['md5'][index]
+                }
 
-        return None
+        return {}
 
     def get_module_url(self, module_name, version=None, update=False):
         return self.get_resource_url(

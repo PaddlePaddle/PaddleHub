@@ -17,6 +17,7 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+import os
 
 from paddlehub.common.logger import logger
 from paddlehub.common import utils
@@ -57,8 +58,10 @@ class DownloadCommand(BaseCommand):
             self.args.output_path = "."
         utils.check_path(self.args.output_path)
 
-        url = default_hub_server.get_model_url(
+        search_result = default_hub_server.get_model_url(
             model_name, version=model_version)
+        url = search_result.get('url', None)
+        except_md5_value = search_result.get('md5', None)
         if not url:
             tips = "can't found model %s" % model_name
             if model_version:
@@ -66,13 +69,34 @@ class DownloadCommand(BaseCommand):
             print(tips)
             return True
 
-        if self.args.uncompress:
-            result, tips, file = default_downloader.download_file_and_uncompress(
-                url=url, save_path=self.args.output_path, print_progress=True)
-        else:
+        need_to_download_file = True
+        file_name = os.path.basename(url)
+        file = os.path.join(self.args.output_path, file_name)
+        if os.path.exists(file):
+            print("File %s already existed\nWait to check the MD5 value" %
+                  file_name)
+            file_md5_value = utils.md5_of_file(file)
+            if except_md5_value == file_md5_value:
+                print("MD5 check pass.")
+                need_to_download_file = False
+            else:
+                print("MD5 check failed!\nDelete invalid file.")
+                os.remove(file)
+
+        if need_to_download_file:
             result, tips, file = default_downloader.download_file(
                 url=url, save_path=self.args.output_path, print_progress=True)
-        print(tips)
+            if not result:
+                print(tips)
+                return False
+
+        if self.args.uncompress:
+            result, tips, file = default_downloader.uncompress(
+                file=file,
+                dirname=self.args.output_path,
+                delete_file=False,
+                print_progress=True)
+            print(tips)
         return True
 
 
