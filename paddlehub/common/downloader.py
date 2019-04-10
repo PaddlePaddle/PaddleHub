@@ -84,20 +84,20 @@ class Downloader:
                     dl = 0
                     total_length = int(total_length)
                     starttime = time.time()
+                    if print_progress:
+                        print("Download %s" % save_name)
                     for data in r.iter_content(chunk_size=4096):
                         dl += len(data)
                         f.write(data)
                         if print_progress:
                             done = int(50 * dl / total_length)
-                            progress("%s : [%-50s] %.2f%%" %
-                                     (save_name, '=' * done,
-                                      float(dl / total_length * 100)))
+                            progress(
+                                "[%-50s] %.2f%%" %
+                                ('=' * done, float(dl / total_length * 100)))
                 if print_progress:
-                    progress(
-                        "%s : [%-50s] %.2f%%" % (save_name, '=' * 50, 100),
-                        end=True)
+                    progress("[%-50s] %.2f%%" % ('=' * 50, 100), end=True)
 
-        tips = "file %s download completed!" % (file_name)
+        tips = "File %s download completed!" % (file_name)
         return True, tips, file_name
 
     def uncompress(self,
@@ -106,6 +106,8 @@ class Downloader:
                    delete_file=False,
                    print_progress=False):
         dirname = os.path.dirname(file) if dirname is None else dirname
+        if print_progress:
+            print("Uncompress %s" % file)
         with tarfile.open(file, "r:gz") as tar:
             file_names = tar.getnames()
             size = len(file_names) - 1
@@ -113,17 +115,16 @@ class Downloader:
             for index, file_name in enumerate(file_names):
                 if print_progress:
                     done = int(50 * float(index) / size)
-                    progress("%s : [%-50s] %.2f%%" %
-                             (file, '=' * done, float(index / size * 100)))
+                    progress("[%-50s] %.2f%%" % ('=' * done,
+                                                 float(index / size * 100)))
                 tar.extract(file_name, dirname)
 
             if print_progress:
-                progress(
-                    "%s : [%-50s] %.2f%%" % (file, '=' * 50, 100), end=True)
+                progress("[%-50s] %.2f%%" % ('=' * 50, 100), end=True)
         if delete_file:
             os.remove(file)
 
-        return True, "file %s uncompress completed!" % file, module_dir
+        return True, "File %s uncompress completed!" % file, module_dir
 
     def download_file_and_uncompress(self,
                                      url,
