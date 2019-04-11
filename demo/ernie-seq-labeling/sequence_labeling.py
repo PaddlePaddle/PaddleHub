@@ -13,15 +13,6 @@
 # limitations under the License.
 """Finetuning on sequence labeling task."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import os
-import time
-import argparse
-import numpy as np
-
 import paddle
 import paddle.fluid as fluid
 import paddlehub as hub
@@ -46,9 +37,8 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Step2: Download dataset and use SequenceLabelReader to read dataset
-    dataset = hub.dataset.MSRA_NER()
     reader = hub.reader.SequenceLabelReader(
-        dataset=dataset,
+        dataset=hub.dataset.MSRA_NER(),
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
 
@@ -60,7 +50,6 @@ if __name__ == '__main__':
             name="label", shape=[args.max_seq_len, 1], dtype='int64')
         seq_len = fluid.layers.data(name="seq_len", shape=[1], dtype='int64')
 
-        # Use "pooled_output" for classification tasks on an entire sentence.
         # Use "sequence_output" for token-level output.
         sequence_output = outputs["sequence_output"]
 
@@ -93,6 +82,7 @@ if __name__ == '__main__':
             batch_size=args.batch_size,
             checkpoint_dir=args.checkpoint_dir,
             strategy=strategy)
+
         # Finetune and evaluate model by PaddleHub's API
         # will finish training, evaluation, testing, save model automatically
         hub.finetune_and_eval(

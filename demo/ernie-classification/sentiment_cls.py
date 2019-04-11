@@ -13,16 +13,8 @@
 # limitations under the License.
 """Finetuning on classification task """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import os
-import time
 import argparse
-import numpy as np
 
-import paddle
 import paddle.fluid as fluid
 import paddlehub as hub
 
@@ -46,12 +38,10 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Step2: Download dataset and use ClassifyReader to read dataset
-    dataset = hub.dataset.ChnSentiCorp()
     reader = hub.reader.ClassifyReader(
-        dataset=dataset,
+        dataset=hub.dataset.ChnSentiCorp(),
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
-    num_labels = len(reader.get_labels())
 
     # Step3: construct transfer learning network
     with fluid.program_guard(program):
@@ -69,7 +59,7 @@ if __name__ == '__main__':
         ]
         # Define a classfication finetune task by PaddleHub's API
         cls_task = hub.create_text_classification_task(
-            pooled_output, label, num_classes=num_labels)
+            pooled_output, label, num_classes=reader.get_num_labels())
 
         # Step4: Select finetune strategy, setup config and finetune
         strategy = hub.BERTFinetuneStrategy(

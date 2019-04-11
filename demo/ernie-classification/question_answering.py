@@ -13,16 +13,8 @@
 # limitations under the License.
 """Finetuning on classification task """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import os
-import time
 import argparse
-import numpy as np
 
-import paddle
 import paddle.fluid as fluid
 import paddlehub as hub
 
@@ -46,9 +38,8 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Step2: Download dataset and use ClassifyReader to read dataset
-    dataset = hub.dataset.NLPCC_DBQA()
     reader = hub.reader.ClassifyReader(
-        dataset=dataset,
+        dataset=hub.dataset.NLPCC_DBQA(),
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
     num_labels = len(reader.get_labels())
