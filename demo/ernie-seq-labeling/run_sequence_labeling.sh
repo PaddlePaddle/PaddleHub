@@ -1,8 +1,8 @@
 export CUDA_VISIBLE_DEVICES=0
 
-CKPT_DIR="./ckpt"
+CKPT_DIR="./ckpt_sequence_labeling"
 
-python -u finetune_with_hub.py \
+python -u sequence_labeling.py \
                    --batch_size 16 \
                    --weight_decay  0.01 \
                    --checkpoint_dir $CKPT_DIR \
