@@ -34,7 +34,7 @@ class DownloadCommand(BaseCommand):
         self.description = "Download PaddlePaddle pretrained model files."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
-            prog='%s %s <module_name>' % (ENTRY, name),
+            prog='%s %s <model_name>' % (ENTRY, name),
             usage='%(prog)s [options]',
             add_help=False)
         # yapf: disable
