@@ -89,6 +89,8 @@ def _finetune_seq_label_task(task,
         train_time_used = 0
         logger.info("PaddleHub finetune start")
 
+        exe.run(fluid.default_startup_program())
+
         # Finetune loop
         for epoch in range(current_epoch, num_epoch + 1):
             train_reader = data_reader.data_generator(
@@ -194,6 +196,8 @@ def _finetune_cls_task(task, data_reader, feed_list, config=None,
         with log_writter.mode("evaluate") as logw:
             eval_loss_scalar = logw.scalar(tag="loss[evaluate]")
             eval_acc_scalar = logw.scalar(tag="accuracy[evaluate]")
+
+        exe.run(fluid.default_startup_program())
 
         # Finetune loop
         for epoch in range(current_epoch, num_epoch + 1):
