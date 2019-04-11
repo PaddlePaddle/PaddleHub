@@ -46,7 +46,7 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Step2: Download dataset and use SequenceLabelReader to read dataset
-    dataset = hub.dataset.MSRA_NER(),
+    dataset = hub.dataset.MSRA_NER()
     reader = hub.reader.SequenceLabelReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
@@ -91,6 +91,7 @@ if __name__ == '__main__':
             use_cuda=True,
             num_epoch=args.num_epoch,
             batch_size=args.batch_size,
+            checkpoint_dir=args.checkpoint_dir,
             strategy=strategy)
         # Finetune and evaluate model by PaddleHub's API
         # will finish training, evaluation, testing, save model automatically

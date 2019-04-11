@@ -29,6 +29,12 @@ DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/nlpcc-dbqa.tar.gz"
 
 
 class NLPCC_DBQA(HubDataset):
+    """
+    Please refer to
+    http://tcci.ccf.org.cn/conference/2017/dldoc/taskgline05.pdf
+    for more information
+    """
+
     def __init__(self):
         self.dataset_dir = os.path.join(DATA_HOME, "nlpcc-dbqa")
         if not os.path.exists(self.dataset_dir):

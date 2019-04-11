@@ -68,7 +68,6 @@ class ChnSentiCorp(HubDataset):
         return self.test_examples
 
     def get_labels(self):
-        """See base class."""
         return ["0", "1"]
 
     def _read_tsv(self, input_file, quotechar=None):
