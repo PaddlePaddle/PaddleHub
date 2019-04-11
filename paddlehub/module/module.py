@@ -119,7 +119,7 @@ class Module(object):
             if processor:
                 if not issubclass(processor, BaseProcessor):
                     raise TypeError(
-                        "processor shoule be an instance of paddlehub.BaseProcessor"
+                        "Processor shoule be an instance of paddlehub.BaseProcessor"
                     )
             if assets:
                 self.assets = utils.to_list(assets)
@@ -129,10 +129,10 @@ class Module(object):
             self._generate_module_info(module_info)
             self._init_with_signature(signatures=signatures)
         else:
-            raise ValueError("Error! Module initialized parameter is empty")
+            raise ValueError("Module initialized parameter is empty")
 
     def _init_with_name(self, name):
-        logger.info("Try installing module %s" % name)
+        logger.info("Installing %s module" % name)
         result, tips, module_dir = default_module_manager.install_module(
             module_name=name)
         if not result:
