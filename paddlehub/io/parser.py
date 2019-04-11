@@ -19,7 +19,7 @@ from __future__ import print_function
 import yaml
 
 
-class CSVFileParser:
+class CSVFileParser(object):
     def __init__(self):
         pass
 
@@ -46,7 +46,7 @@ class CSVFileParser:
         return self.content
 
 
-class YAMLFileParser:
+class YAMLFileParser(object):
     def __init__(self):
         pass
 
@@ -59,7 +59,7 @@ class YAMLFileParser:
         return yaml.load(content, Loader=yaml.BaseLoader)
 
 
-class TextFileParser:
+class TextFileParser(object):
     def __init__(self):
         pass
 

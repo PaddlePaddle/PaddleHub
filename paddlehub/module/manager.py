@@ -25,7 +25,7 @@ from paddlehub.common.dir import MODULE_HOME
 import paddlehub as hub
 
 
-class LocalModuleManager:
+class LocalModuleManager(object):
     def __init__(self, module_home=None):
         self.local_modules_dir = module_home if module_home else MODULE_HOME
         self.modules_dict = {}

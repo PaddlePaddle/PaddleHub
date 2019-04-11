@@ -17,7 +17,7 @@ from __future__ import division
 from __future__ import print_function
 
 
-class BaseProcessor:
+class BaseProcessor(object):
     def __init__(self, module):
         pass
 

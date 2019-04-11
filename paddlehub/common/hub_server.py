@@ -29,7 +29,7 @@ RESOURCE_LIST_FILE = "resource_list_file.yml"
 CACHE_TIME = 60 * 10
 
 
-class HubServer:
+class HubServer(object):
     def __init__(self, server_url=None):
         if not server_url:
             server_url = "https://paddlehub.bj.bcebos.com/"

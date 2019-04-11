@@ -61,7 +61,7 @@ def get_ph_value():
     return 11
 
 
-class TablePrinter:
+class TablePrinter(object):
     def __init__(self,
                  titles,
                  placeholders,

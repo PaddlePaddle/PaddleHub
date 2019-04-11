@@ -29,7 +29,7 @@ CHECK_INFO_PB_FILENAME = "check_info.pb"
 FILE_SEP = "/"
 
 
-class ModuleChecker:
+class ModuleChecker(object):
     def __init__(self, module_path):
         self.module_path = module_path
 

@@ -45,7 +45,7 @@ def progress(str, end=False):
         sys.stdout.flush()
 
 
-class Downloader:
+class Downloader(object):
     def download_file(self,
                       url,
                       save_path,

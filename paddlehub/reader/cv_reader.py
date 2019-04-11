@@ -32,7 +32,7 @@ color_mode_dict = {
 }
 
 
-class ImageClassificationReader:
+class ImageClassificationReader(object):
     def __init__(self,
                  image_width,
                  image_height,

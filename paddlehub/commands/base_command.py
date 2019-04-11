@@ -23,7 +23,7 @@ from paddlehub.common.arg_helper import add_argument, print_arguments
 ENTRY = "hub"
 
 
-class BaseCommand:
+class BaseCommand(object):
     command_dict = {}
 
     @classmethod

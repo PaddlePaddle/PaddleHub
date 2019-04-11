@@ -22,7 +22,7 @@ import paddlehub as hub
 from paddlehub.common.downloader import default_downloader
 
 
-class ImageClassificationDataset:
+class ImageClassificationDataset(object):
     def __init__(self):
         self.base_path = None
         self.train_list_file = None

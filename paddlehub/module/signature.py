@@ -21,7 +21,7 @@ from paddle.fluid.framework import Variable
 from paddlehub.common.utils import to_list
 
 
-class Signature:
+class Signature(object):
     def __init__(self,
                  name,
                  inputs,
