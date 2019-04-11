@@ -21,4 +21,5 @@ from . import install
 from . import uninstall
 from . import search
 from . import help
+from . import clear
 from . import hub
