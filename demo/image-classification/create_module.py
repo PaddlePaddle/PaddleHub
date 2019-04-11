@@ -59,7 +59,14 @@ def create_module(args):
         module_dir=args.model + ".hub_module",
         module_info="resources/module_info.yml",
         processor=processor.Processor,
-        assets=assets)
+        assets=assets,
+        extra_info={
+            'excepted_image_width': 224,
+            'excepted_image_height': 224,
+            'pretrained_images_mean': [0.485, 0.456, 0.406],
+            'pretrained_images_std': [0.229, 0.224, 0.225],
+            'image_channel_order': 'RGB'
+        })
 
 
 def main():
