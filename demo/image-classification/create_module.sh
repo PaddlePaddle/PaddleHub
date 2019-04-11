@@ -16,7 +16,7 @@ do
 done
 
 script_path=$(cd `dirname $0`; pwd)
-module_path=hub_module_${model_name}
+module_path=${model_name}.hub_module
 
 if [ -d $script_path/$module_path ]
 then

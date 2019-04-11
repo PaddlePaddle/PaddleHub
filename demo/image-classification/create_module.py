@@ -56,7 +56,7 @@ def create_module(args):
         "feature_map", inputs=[image], outputs=[feature_map])
     hub.create_module(
         sign_arr=[sign1, sign2],
-        module_dir="hub_module_" + args.model,
+        module_dir=args.model + ".hub_module",
         module_info="resources/module_info.yml",
         processor=processor.Processor,
         assets=assets)

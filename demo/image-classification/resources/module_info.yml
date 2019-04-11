@@ -1,4 +1,4 @@
-name: Resnet50
+name: resnet_v2_50_imagenet
 type: CV/classification
 author: paddlepaddle
 author_email: paddle-dev@baidu.com

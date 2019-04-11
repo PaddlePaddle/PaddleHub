@@ -34,7 +34,7 @@ class ImageClassificationDataset(object):
         if not os.path.exists(dataset_path):
             result, tips, dataset_path = default_downloader.download_file_and_uncompress(
                 url=url,
-                save_path=hub.dir.DATA_HOME,
+                save_path=hub.common.dir.DATA_HOME,
                 print_progress=True,
                 replace=True)
             if not result:

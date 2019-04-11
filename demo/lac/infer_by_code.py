@@ -4,7 +4,7 @@ import paddlehub as hub
 
 def infer_with_input_text():
     # get lac module
-    lac = hub.Module(module_dir="hub_module_lac")
+    lac = hub.Module(module_dir="lac.hub_module")
 
     test_text = ["今天是个好日子", "天气预报说今天要下雨", "下一班地铁马上就要到了"]
 
@@ -24,7 +24,7 @@ def infer_with_input_text():
 
 def infer_with_input_file():
     # get lac module
-    lac = hub.Module(module_dir="hub_module_lac")
+    lac = hub.Module(module_dir="lac.hub_module")
 
     # get the input keys for signature 'lexical_analysis'
     data_format = lac.processor.data_format(sign_name='lexical_analysis')

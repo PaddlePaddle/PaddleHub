@@ -35,7 +35,7 @@ def create_module():
     # assets
     assets = [word_dict_path, label_dict_path, word_rep_dict_path]
 
-    # create a module and save as hub_module_lac
+    # create a module and save as lac.hub_module
     sign = hub.create_signature(
         name="lexical_analysis",
         inputs=[word],
@@ -43,7 +43,7 @@ def create_module():
         for_predict=True)
     hub.create_module(
         sign_arr=[sign],
-        module_dir="hub_module_lac",
+        module_dir="lac.hub_module",
         exe=exe,
         module_info="resources/module_info.yml",
         processor=processor.Processor,
