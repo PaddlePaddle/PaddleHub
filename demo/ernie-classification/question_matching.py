@@ -68,7 +68,7 @@ if __name__ == '__main__':
     num_labels = len(reader.get_labels())
 
     input_dict, output_dict, program = module.context(
-        sign_name="tokens", trainable=True, max_seq_len=args.max_seq_len)
+        trainable=True, max_seq_len=args.max_seq_len)
 
     with fluid.program_guard(program):
         label = fluid.layers.data(name="label", shape=[1], dtype='int64')
