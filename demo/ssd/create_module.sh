@@ -3,7 +3,7 @@ set -o nounset
 set -o errexit
 
 script_path=$(cd `dirname $0`; pwd)
-module_path=hub_module_ssd
+module_path=ssd_mobilenet_v1_pascal.hub_module
 
 if [ -d $script_path/$module_path ]
 then

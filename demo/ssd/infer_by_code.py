@@ -4,7 +4,7 @@ import paddlehub as hub
 
 def infer_with_input_text():
     # get ssd module
-    ssd = hub.Module(module_dir="hub_module_ssd")
+    ssd = hub.Module(module_dir="ssd_mobilenet_v1_pascal.hub_module")
 
     test_img_path = os.path.join("resources", "test", "test_img_bird.jpg")
 
@@ -23,7 +23,7 @@ def infer_with_input_text():
 
 def infer_with_input_file():
     # get ssd module
-    ssd = hub.Module(module_dir="hub_module_ssd")
+    ssd = hub.Module(module_dir="ssd_mobilenet_v1_pascal.hub_module")
 
     # get the input keys for signature 'object_detection'
     data_format = ssd.processor.data_format(sign_name='object_detection')

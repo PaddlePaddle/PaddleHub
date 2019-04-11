@@ -29,6 +29,27 @@ from paddlehub.module import module_desc_pb2
 from paddlehub.common.logger import logger
 
 
+def version_compare(version1, version2):
+    version1 = version1.split(".")
+    version2 = version2.split(".")
+    num = min(len(version1), len(version2))
+    for index in range(num):
+        try:
+            vn1 = int(version1[index])
+        except:
+            vn1 = 0
+        try:
+            vn2 = int(version2[index])
+        except:
+            vn2 = 0
+
+        if vn1 > vn2:
+            return True
+        elif vn1 < vn2:
+            return False
+    return len(version1) > len(version2)
+
+
 def get_platform():
     return platform.platform()
 
@@ -205,10 +226,3 @@ def get_running_device_info(config):
         dev_count = int(os.environ.get('CPU_NUM', multiprocessing.cpu_count()))
 
     return place, dev_count
-
-
-if __name__ == "__main__":
-    print(is_yaml_file("test.yml"))
-    print(is_csv_file("test.yml"))
-    print(is_yaml_file("test.csv"))
-    print(is_csv_file("test.csv"))

@@ -191,10 +191,7 @@ class Module(object):
 
     def _init_with_module_file(self, module_dir):
         checker = ModuleChecker(module_dir)
-        if not checker.check():
-            logger.error(
-                "Module initialization failed on {}".format(module_dir))
-            exit(1)
+        checker.check()
 
         self.helper = ModuleHelper(module_dir)
         with open(self.helper.module_desc_path(), "rb") as fi:

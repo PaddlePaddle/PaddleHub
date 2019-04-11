@@ -47,7 +47,7 @@ def create_module():
         for_predict=True)
     hub.create_module(
         sign_arr=[sign],
-        module_dir="hub_module_ssd",
+        module_dir="ssd_mobilenet_v1_pascal.hub_module",
         module_info="resources/module_info.yml",
         exe=exe,
         processor=processor.Processor,

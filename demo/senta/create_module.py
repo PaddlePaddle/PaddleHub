@@ -48,7 +48,7 @@ def create_module():
         for_predict=True)
     hub.create_module(
         sign_arr=[sign],
-        module_dir="hub_module_senta",
+        module_dir="senta.hub_module",
         exe=exe,
         module_info="resources/module_info.yml",
         processor=processor.Processor,
