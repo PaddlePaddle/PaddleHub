@@ -75,7 +75,7 @@ class HubServer(object):
         match_resource_index_list = []
         for index, resource in enumerate(self.resource_list_file['name']):
             try:
-                is_match = re.match(resource_key, resource)
+                is_match = re.search(resource_key, resource)
                 if is_match and (resource_type is None
                                  or self.resource_list_file['type'][index] ==
                                  resource_type):

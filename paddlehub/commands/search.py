@@ -30,7 +30,7 @@ class SearchCommand(BaseCommand):
     def __init__(self, name):
         super(SearchCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Search PaddleHub pretrained model through model keywords"
+        self.description = "Search PaddleHub pretrained model through model keywords."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <key>' % (ENTRY, name),
