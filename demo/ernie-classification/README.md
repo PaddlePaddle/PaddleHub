@@ -58,23 +58,23 @@ module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
 
 ### Step2: 准备数据集并使用ClassifyReader读取数据
 ```python
-with fluid.program_guard(program):
-    label = fluid.layers.data(name="label", shape=[1], dtype='int64')
-
-    pooled_output = outputs["pooled_output"]
-
-    feed_list = [
-        inputs["input_ids"].name, inputs["position_ids"].name,
-        inputs["segment_ids"].name, inputs["input_mask"].name, label.name
-    ]
-
-    cls_task = hub.create_text_classification_task(
-        pooled_output, label, num_classes=reader.get_num_labels())
+reader = hub.reader.ClassifyReader(
+    dataset=hub.dataset.ChnSentiCorp(),
+    vocab_path=module.get_vocab_path(),
+    max_seq_len=128)
 ```
+`hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下.paddlehub/dataset目录
+
+`module.get_vaocab_path()` 会返回ERNIE/BERT模型对应的词表
+
+`max_seq_len`需要与Step1中context接口传入的序列长度保持一致
+
+ClassifyReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
+
 
 ### Step3: 构建网络并创建分类迁移任务
 ```python
-with fluid.program_guard(program):
+with fluid.program_guard(program): # NOTE: 必须使用fluid.program_guard接口传入Module返回的预训练模型program
     label = fluid.layers.data(name="label", shape=[1], dtype='int64')
 
     pooled_output = outputs["pooled_output"]
@@ -85,8 +85,13 @@ with fluid.program_guard(program):
     ]
 
     cls_task = hub.create_text_classification_task(
-        pooled_output, label, num_classes=reader.get_num_labels())
+        feature=pooled_output, label=label, num_classes=reader.get_num_labels())
 ```
+**NOTE:** 基于预训练模型的迁移学习网络搭建，必须在`with fluid.program_gurad()`作用域内组件网络
+1. `outputs["pooled_output"]`返回了ERNIE/BERT模型对应的[CLS]向量,可以用于句子或句对的特征表达。
+2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor，以及label，与ClassifyReader返回的结果一致。
+3. `create_text_classification_task`通过输入特征，label与迁移的类别数，可以生成适用于文本分类的迁移任务`cls_task`
+
 ### Step4：选择优化策略并开始Finetune
 
 ```python
@@ -100,3 +105,4 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 
 hub.finetune_and_eval(task=cls_task, data_reader=reader, feed_list=feed_list, config=config)
 ```
+针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略。用户可以通过配置学习率，权重
