@@ -40,35 +40,21 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Select a finetune strategy
-    strategy = hub.BERTFinetuneStrategy(
-        weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate,
-        warmup_strategy="linear_warmup_decay",
-    )
-
-    # Setup runing config for PaddleHub Finetune API
-    config = hub.RunConfig(
-        eval_interval=100,
-        use_cuda=True,
-        num_epoch=args.num_epoch,
-        batch_size=args.batch_size,
-        strategy=strategy)
-
-    # loading Paddlehub ERNIE pretrained model
+    # Step1: load Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
+    inputs, outputs, program = module.context(
+        trainable=True, max_seq_len=args.max_seq_len)
 
-    # Sequence Label dataset reader
+    # Step2: Download dataset and use SequenceLabelReader to read dataset
+    dataset = hub.dataset.MSRA_NER(),
     reader = hub.reader.SequenceLabelReader(
-        dataset=hub.dataset.MSRA_NER(),
+        dataset=dataset,
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
 
     num_labels = len(reader.get_labels())
 
-    input_dict, output_dict, program = module.context(
-        sign_name="tokens", trainable=True, max_seq_len=args.max_seq_len)
-
+    # Step3: construct transfer learning network
     with fluid.program_guard(program):
         label = fluid.layers.data(
             name="label", shape=[args.max_seq_len, 1], dtype='int64')
@@ -76,14 +62,15 @@ if __name__ == '__main__':
 
         # Use "pooled_output" for classification tasks on an entire sentence.
         # Use "sequence_output" for token-level output.
-        sequence_output = output_dict["sequence_output"]
+        sequence_output = outputs["sequence_output"]
 
         # Setup feed list for data feeder
         # Must feed all the tensor of ERNIE's module need
+        # Compared to classification task, we need add seq_len tensor to feedlist
         feed_list = [
-            input_dict["input_ids"].name, input_dict["position_ids"].name,
-            input_dict["segment_ids"].name, input_dict["input_mask"].name,
-            label.name, seq_len
+            inputs["input_ids"].name, inputs["position_ids"].name,
+            inputs["segment_ids"].name, inputs["input_mask"].name, label.name,
+            seq_len
         ]
         # Define a sequence labeling finetune task by PaddleHub's API
         seq_label_task = hub.create_seq_labeling_task(
@@ -92,6 +79,19 @@ if __name__ == '__main__':
             seq_len=seq_len,
             num_classes=num_labels)
 
+        # Select a finetune strategy
+        strategy = hub.BERTFinetuneStrategy(
+            weight_decay=args.weight_decay,
+            learning_rate=args.learning_rate,
+            warmup_strategy="linear_warmup_decay",
+        )
+
+        # Setup runing config for PaddleHub Finetune API
+        config = hub.RunConfig(
+            use_cuda=True,
+            num_epoch=args.num_epoch,
+            batch_size=args.batch_size,
+            strategy=strategy)
         # Finetune and evaluate model by PaddleHub's API
         # will finish training, evaluation, testing, save model automatically
         hub.finetune_and_eval(

@@ -23,12 +23,12 @@ class BaseProcessor(object):
 
     def preprocess(self, sign_name, data_dict):
         raise NotImplementedError(
-            "BaseProcessor' preprocess should not be call!")
+            "BaseProcessor' preprocess should not be called!")
 
     def postprocess(self, sign_name, data_out, data_info, **kwargs):
         raise NotImplementedError(
-            "BaseProcessor' postprocess should not be call!")
+            "BaseProcessor' postprocess should not be called!")
 
     def data_format(self, sign_name):
         raise NotImplementedError(
-            "BaseProcessor' data_format should not be call!")
+            "BaseProcessor' data_format should not be called!")
