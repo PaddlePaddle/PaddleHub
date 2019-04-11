@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=5
 
 CKPT_DIR="./ckpt_sentiment_cls"
 python -u sentiment_cls.py \

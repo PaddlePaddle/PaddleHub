@@ -22,7 +22,6 @@ import paddlehub as hub
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
-parser.add_argument("--hub_module_dir", type=str, default=None, help="PaddleHub module directory")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
 parser.add_argument("--data_dir", type=str, default=None, help="Path to training data.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
