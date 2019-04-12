@@ -31,7 +31,8 @@ $ pip install paddlehub
 
 ## 快速体验
 
-通过下面的命令，快速体验下PaddleHub的一键预测功能：
+如果安装成功，执行下面的命令，可以快速体验PaddleHub的一键预测功能
+
 ```bash
 # 使用百度LAC词法分析工具进行分词
 $ hub run lac --input_text "今天是个好日子"
@@ -40,7 +41,7 @@ $ hub run lac --input_text "今天是个好日子"
 $ hub run senta --input_text "今天是个好日子"
 ```
 
-想了解PaddleHub已经发布的模型，请使用`hub search`命令：
+想了解更多PaddleHub已经发布的模型，请使用`hub search`命令查看所有已发布的模型。
 
 ```bash
 $ hub search
