@@ -44,7 +44,7 @@ PaddleHub为Module/Model（关于Model和Module的区别，请查看下方的介
 
 ## `version`
 
-显示版本信息
+显示PaddleHub版本信息
 
 ## `clear`
 
