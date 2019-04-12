@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=develop)](https://travis-ci.org/PaddlePaddle/PaddleHub)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 
-PaddleHub是基于PaddlePaddle框架开发的预训练模型管理工具，可以借助预训练模型更便捷的完成迁移学习工作。
+PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借助预训练模型更便捷地开展迁移学习工作。
 
 ## 特性
 
