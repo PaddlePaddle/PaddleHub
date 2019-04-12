@@ -41,14 +41,14 @@ inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 如果想尝试BERT模型，例如BERT中文模型，只需要更换Module中的参数即可.
 PaddleHub除了ERNIE，还提供以下BERT模型:
 
-BERT模型名                         | PaddleHub Module name
+BERT模型名                         | PaddleHub Module
 ---------------------------------- | :------:
-BERT-Base, Uncased                 | bert_uncased_L-12_H-768_A-12
-BERT-Large, Uncased                | bert_uncased_L-24_H-1024_A-16
-BERT-Base, Cased                   | bert_cased_L-12_H-768_A-12
-BERT-Large, Cased                  | bert_cased_L-24_H-1024_A-16
-BERT-Base, Multilingual Cased      | bert_multi_cased_L-12_H-768_A-12
-BERT-Base, Chinese                 | bert_chinese_L-12_H-768_A-12
+BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
+BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
+BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
+BERT-Large, Cased                  | `hub.Module(name='bert_cased_L-24_H-1024_A-16')`
+BERT-Base, Multilingual Cased      | `hub.Module(nane='bert_multi_cased_L-12_H-768_A-12')`
+BERT-Base, Chinese                 | `hub.Module(name='bert_chinese_L-12_H-768_A-12')`
 
 
 ```python
