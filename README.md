@@ -17,7 +17,12 @@ PaddleHub是基于PaddlePaddle框架开发的预训练模型管理工具，可�
 想了解PaddleHub已经发布的模型，请查看[模型列表](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/released_module_list.md)
 
 ## 安装
-Paddle Hub可直接通过pip进行安装（python3+），请使用如下命令来安装Paddle Hub
+
+**依赖**
+* Python>=3.5
+* PaddlePaddle>=1.3.1
+
+推荐使用pip来安装PaddleHub
 
 ```
 pip install paddlehub
