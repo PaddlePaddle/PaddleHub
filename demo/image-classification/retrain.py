@@ -10,7 +10,11 @@ def train():
         sign_name="feature_map", trainable=True)
     dataset = hub.dataset.Flowers()
     data_reader = hub.reader.ImageClassificationReader(
-        image_width=224, image_height=224, dataset=dataset)
+        image_width=resnet_module.get_excepted_image_width(),
+        image_height=resnet_module.get_excepted_image_height(),
+        images_mean=resnet_module.get_pretrained_images_mean(),
+        images_std=resnet_module.get_pretrained_images_std(),
+        dataset=dataset)
     with fluid.program_guard(program):
         label = fluid.layers.data(name="label", dtype="int64", shape=[1])
         img = input_dict[0]
@@ -20,6 +24,7 @@ def train():
             use_cuda=True,
             num_epoch=10,
             batch_size=32,
+            enable_memory_optim=False,
             strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
         feed_list = [img.name, label.name]
