@@ -63,7 +63,7 @@ reader = hub.reader.ClassifyReader(
     vocab_path=module.get_vocab_path(),
     max_seq_len=128)
 ```
-`hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下.paddlehub/dataset目录
+`hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
 `module.get_vaocab_path()` 会返回ERNIE/BERT模型对应的词表
 
