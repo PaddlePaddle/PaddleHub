@@ -14,6 +14,7 @@ PaddleHub是基于PaddlePaddle框架开发的预训练模型管理工具，可�
 2. 通过hub download命令，快速地获取PaddlePaddle生态下的所有预训练模型；
 3. 使用PaddleHub Finetune API对通过少量代码完成迁移学习；更多Demo可参考
    [ERNIE文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/ernie-classification)
+   [图像分类迁移](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/image-classification)
 
 
 ## 安装
