@@ -34,14 +34,13 @@ class DownloadCommand(BaseCommand):
         self.description = "Download PaddlePaddle pretrained model/module files."
         self.parser = self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
-            prog='%s %s <module_name or model_name>' % (ENTRY, name),
-            prog='%s %s <model_name>' % (ENTRY, name),
+            prog='%s %s <module_name/model_name>' % (ENTRY, name),
             usage='%(prog)s [options]',
             add_help=False)
         # yapf: disable
-        self.add_arg('--type', str, "All",  "choice: Model/Module/All)")
+        self.add_arg('--type',         str,  "All", "choice: Model/Module/All)")
         self.add_arg('--output_path',  str,  ".",   "path to save the model/module" )
-        self.add_arg('--uncompress',   bool, False,  "uncompress the download package or not" )
+        self.add_arg('--uncompress',   bool, False, "uncompress the download package or not" )
         # yapf: enable
 
     def exec(self, argv):
@@ -53,12 +52,8 @@ class DownloadCommand(BaseCommand):
         mod_version = None if "==" not in mod_name else mod_name.split("==")[1]
         mod_name = mod_name if "==" not in mod_name else mod_name.split("==")[0]
         self.args = self.parser.parse_args(argv[1:])
-        if not self.args.output_path:
-            self.args.output_path = "."
         utils.check_path(self.args.output_path)
-        if not self.args.type:
-            self.args.type = "Module"
-        self.args.type = utils.check_type(self.args.type)
+        self.args.type = self.check_type(self.args.type)
 
         if self.args.type in ["Module", "Model"]:
             search_result = default_hub_server.get_resource_url(
@@ -71,10 +66,9 @@ class DownloadCommand(BaseCommand):
                     mod_name, resource_type="Model", version=mod_version)
 
         url = search_result.get('url', None)
-        print(search_result)
         except_md5_value = search_result.get('md5', None)
         if not url:
-            tips = "can't found %s %s" % (self.args.type, mod_name)
+            tips = "can't found %s" % mod_name
             if mod_version:
                 tips += " with version %s" % mod_version
             print(tips)
@@ -109,6 +103,16 @@ class DownloadCommand(BaseCommand):
                 print_progress=True)
             print(tips)
         return True
+
+    def check_type(self, type):
+        type = type.lower()
+        if type == "model":
+            type = "Model"
+        elif type == "module":
+            type = "Module"
+        else:
+            type = "All"
+        return type
 
 
 command = DownloadCommand.instance()
