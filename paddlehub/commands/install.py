@@ -39,7 +39,7 @@ class InstallCommand(BaseCommand):
 
     def exec(self, argv):
         if not argv:
-            print("ERROR: Please specify a module\n")
+            print("ERROR: Please specify a module name.\n")
             self.help()
             return False
         module_name = argv[0]

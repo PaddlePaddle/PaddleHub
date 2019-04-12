@@ -44,7 +44,7 @@ class DownloadCommand(BaseCommand):
 
     def exec(self, argv):
         if not argv:
-            print("ERROR: Please specify a model name\n")
+            print("ERROR: Please provide the model name\n")
             self.help()
             return False
         model_name = argv[0]
@@ -62,7 +62,7 @@ class DownloadCommand(BaseCommand):
         url = search_result.get('url', None)
         except_md5_value = search_result.get('md5', None)
         if not url:
-            tips = "can't found model %s" % model_name
+            tips = "Can't found model %s" % model_name
             if model_version:
                 tips += " with version %s" % model_version
             print(tips)
