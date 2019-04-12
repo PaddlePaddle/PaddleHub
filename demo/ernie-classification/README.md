@@ -95,7 +95,7 @@ with fluid.program_guard(program): # NOTE: 必须使用fluid.program_guard接口
 ### Step4：选择优化策略并开始Finetune
 
 ```python
-strategy = hub.BERTFinetuneStrategy(
+strategy = hub.AdamWeightDecayStrategy(
     weight_decay=0.01,
     learning_rate=5e-5,
     warmup_strategy="linear_warmup_decay",

@@ -62,7 +62,7 @@ if __name__ == '__main__':
             pooled_output, label, num_classes=num_labels)
 
         # Step4: Select finetune strategy, setup config and finetune
-        strategy = hub.BERTFinetuneStrategy(
+        strategy = hub.AdamWeightDecayStrategy(
             weight_decay=args.weight_decay,
             learning_rate=args.learning_rate,
             warmup_strategy="linear_warmup_decay",

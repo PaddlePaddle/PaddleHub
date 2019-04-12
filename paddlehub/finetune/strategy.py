@@ -61,7 +61,7 @@ class DefaultStrategy(object):
         return "DefaultStrategy"
 
 
-class BERTFinetuneStrategy(DefaultStrategy):
+class AdamWeightDecayStrategy(DefaultStrategy):
     def __init__(self,
                  learning_rate=1e-4,
                  warmup_strategy="linear_warmup_decay",
@@ -114,7 +114,7 @@ class BERTFinetuneStrategy(DefaultStrategy):
 
     # TODO complete __str__()
     def __str__(self):
-        return "BERTFintuneStrategy"
+        return "AdamWeightDecayStrategy"
 
 
 class DefaultFinetuneStrategy(DefaultStrategy):

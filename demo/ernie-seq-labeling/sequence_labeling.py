@@ -69,7 +69,7 @@ if __name__ == '__main__':
             num_classes=num_labels)
 
         # Select a finetune strategy
-        strategy = hub.BERTFinetuneStrategy(
+        strategy = hub.AdamWeightDecayStrategy(
             weight_decay=args.weight_decay,
             learning_rate=args.learning_rate,
             warmup_strategy="linear_warmup_decay",

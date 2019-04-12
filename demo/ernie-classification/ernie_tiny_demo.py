@@ -21,7 +21,7 @@ with fluid.program_guard(program):
         feature=pooled_output, label=label, num_classes=reader.get_num_labels())
 
 # Step4
-strategy = hub.BERTFinetuneStrategy(
+strategy = hub.AdamWeightDecayStrategy(
     learning_rate=5e-5,
     warmup_proportion=0.1,
     warmup_strategy="linear_warmup_decay",
