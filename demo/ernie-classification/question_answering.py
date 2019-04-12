@@ -13,16 +13,8 @@
 # limitations under the License.
 """Finetuning on classification task """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import os
-import time
 import argparse
-import numpy as np
 
-import paddle
 import paddle.fluid as fluid
 import paddlehub as hub
 
@@ -30,7 +22,6 @@ import paddlehub as hub
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
-parser.add_argument("--hub_module_dir", type=str, default=None, help="PaddleHub module directory")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
 parser.add_argument("--data_dir", type=str, default=None, help="Path to training data.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
@@ -46,9 +37,8 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Step2: Download dataset and use ClassifyReader to read dataset
-    dataset = hub.dataset.NLPCC_DBQA()
     reader = hub.reader.ClassifyReader(
-        dataset=dataset,
+        dataset=hub.dataset.NLPCC_DBQA(),
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
     num_labels = len(reader.get_labels())

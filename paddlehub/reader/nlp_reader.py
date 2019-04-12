@@ -80,6 +80,9 @@ class BaseReader(object):
         """Gets the list of labels for this data set."""
         return self.dataset.get_labels()
 
+    def get_num_labels(self):
+        return len(self.dataset.get_labels())
+
     def get_train_progress(self):
         """Gets progress for training phase."""
         return self.current_example, self.current_epoch
