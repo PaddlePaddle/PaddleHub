@@ -205,6 +205,16 @@ def check_url(url):
     pass
 
 
+def check_type(type):
+    if type in ["model", "Model", "MODEL"]:
+        type = "Model"
+    elif type in ["module", "Module", "MODULE"]:
+        type = "Module"
+    else:
+        type = "All"
+    return type
+
+
 def get_file_ext(file_path):
     return os.path.splitext(file_path)[-1]
 
