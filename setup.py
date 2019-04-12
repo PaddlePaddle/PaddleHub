@@ -28,9 +28,9 @@ REQUIRED_PACKAGES = [
 setup(
     name='paddlehub',
     version=hub_version.replace('-', ''),
-    description=('PaddleHub is a library to foster the publication, '
-                 'discovery, and consumption of reusable parts of machine '
-                 'learning models.'),
+    description=
+    ('A toolkit to manage reusable pretrained models of PaddlePaddle and help users doing transfer learning more efficiently.'
+     ),
     long_description='',
     url='https://github.com/PaddlePaddle/PaddleHub',
     author='PaddlePaddle Author',
