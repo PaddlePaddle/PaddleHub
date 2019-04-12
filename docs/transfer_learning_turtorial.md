@@ -1,7 +1,7 @@
-# Transfer Learning
+# PaddleHub Finetune API与迁移学习
 
 ## 简述
-Transfer Learning是属于机器学习的一个子研究领域，该研究领域的目标在于利用数据、任务、或模型之间的相似性，将在旧领域学习过的知识，迁移应用于新领域中
+迁移学习(Transfer Learning)是属于机器学习的一个子研究领域，该研究领域的目标在于利用数据、任务、或模型之间的相似性，将在旧领域学习过的知识，迁移应用于新领域中
 
 基于以下几个原因，迁移学习吸引了很多研究者投身其中：
 
@@ -18,17 +18,18 @@ https://papers.nips.cc/paper/5347-how-transferable-are-features-in-deep-neural-n
 http://ftp.cs.wisc.edu/machine-learning/shavlik-group/torrey.handbook09.pdf
 
 ## PaddleHub中的迁移学习
-PaddleHub 提供了基于PaddlePaddle框架的高阶Finetune API, 对常见的预训练模型迁移学习任务进行了抽象，帮助用户使用最少的代码快速完成迁移学习。
+
+PaddleHub提供了基于PaddlePaddle框架的Finetune API, 对常见的预训练模型迁移学习任务进行了抽象，帮助用户使用最少的代码快速完成迁移学习。
 教程会包含CV领域的图像分类迁移，和NLP文本分类迁移两种任务。
 
 ### CV教程
 以猫狗分类为例子，我们可以快速的使用一个通过ImageNet训练过的ResNet进行finetune
+
 ```python
 import paddlehub as hub
-import paddle
 import paddle.fluid as fluid
 
-def train():
+if __name__ == "__main__":
     resnet_module = hub.Module(name="resnet50_imagenet")
     input_dict, output_dict, program = resnet_module.context(
         sign_name="feature_map", trainable=True)
@@ -40,12 +41,12 @@ def train():
         img = input_dict["img"]
         feature_map = output_dict["feature_map"]
 
-		# 运行配置
+	# 运行配置
         config = hub.RunConfig(
             use_cuda=True,
             num_epoch=10,
             batch_size=32,
-            strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
+            strategy=hub.DefaultFinetuneStrategy())
 
         feed_list = [img.name, label.name]
 
@@ -56,9 +57,5 @@ def train():
         # finetune
         hub.finetune_and_eval(
             task, feed_list=feed_list, data_reader=data_reader, config=config)
-
-
-if __name__ == "__main__":
-    train()
 
 ```
