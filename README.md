@@ -42,7 +42,7 @@ hub run senta --input_text "今天是个好日子"
 
 ## 深入了解Paddle Hub
 * [命令行功能](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/command_line_introduction.md)
-* [Transfer Learning](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/transfer_learning_turtorial.md)
+* [Finetune API与迁移学习](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/transfer_learning_turtorial.md)
 * API
 
 ## 答疑
