@@ -33,10 +33,10 @@ pip install paddlehub
 
 通过下面的命令，快速体验下PaddleHub的命令行hub run功能
 ```bash
-#使用Baidu LAC词法分析工具进行分词
+# 使用百度LAC词法分析工具进行分词
 hub run lac --input_text "今天是个好日子"
 
-#使用Senta情感分析模型对句子进行预测
+# 使用百度Senta情感分析模型对句子进行预测
 hub run senta --input_text "今天是个好日子"
 ```
 
