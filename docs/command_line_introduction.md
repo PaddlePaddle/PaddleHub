@@ -1,4 +1,5 @@
-# 命令行
+# PaddleHub 命令行介绍
+
 PaddleHub为Module/Model（关于Model和Module的区别，请查看下方的介绍）的管理和使用提供了命令行工具，目前命令行支持以下10个命令：
 
 ## `install`
