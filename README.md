@@ -9,16 +9,17 @@ PaddleHub是基于PaddlePaddle框架开发的预训练模型管理工具，可�
 ## 特性
 
 通过PaddleHub，您可以：
-
-1. 通过hub download命令，快速地获取PaddlePaddle生态下的所有预训练模型；
-2. 使用PaddleHub Finetune API对通过少量代码完成迁移学习；
-3. 通过hub run命令或者Python编程的方式，快速使用预训练模型进行预测；
+ 
+1. 通过hub run命令，快速使用预训练模型进行预测；
+2. 通过hub download命令，快速地获取PaddlePaddle生态下的所有预训练模型；
+3. 使用PaddleHub Finetune API对通过少量代码完成迁移学习；
+   [ERNIE文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/ernie-classification)
 
 想了解PaddleHub已经发布的模型，请查看[模型列表](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/released_module_list.md)
 
 ## 安装
 
-**依赖**
+**环境依赖**
 * Python>=3.5
 * PaddlePaddle>=1.3.1
 
@@ -29,11 +30,13 @@ pip install paddlehub
 ```
 
 ## 快速体验
-通过下面的命令，来体验下paddle hub的魅力
-```
-#使用lac进行分词
+
+通过下面的命令，快速体验下PaddleHub的命令行hub run功能
+```bash
+#使用Baidu LAC词法分析工具进行分词
 hub run lac --input_text "今天是个好日子"
-#使用senta进行情感分析
+
+#使用Senta情感分析模型对句子进行预测
 hub run senta --input_text "今天是个好日子"
 ```
 
