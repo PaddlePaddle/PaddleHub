@@ -80,4 +80,4 @@ if __name__ == '__main__':
         for index, batch in enumerate(test_reader()):
             probs_v = exe.run(
                 feed=data_feeder.feed(batch), fetch_list=[probs.name])
-            print(test_examples[index], probs_v[0][0])
+            print("%s\tpredict=%s" % (test_examples[index], probs_v[0][0]))
