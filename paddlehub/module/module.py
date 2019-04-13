@@ -40,19 +40,14 @@ from paddlehub import version
 
 __all__ = ['Module', 'create_module']
 
-# paddle hub module dir name
+# PaddleHub module dir name
 ASSETS_DIRNAME = "assets"
 MODEL_DIRNAME = "model"
 MODULE_DESC_PBNAME = "module_desc.pb"
 PYTHON_DIR = "python"
 PROCESSOR_NAME = "processor"
-# paddle hub var prefix
+# PaddleHub var prefix
 HUB_VAR_PREFIX = "@HUB_%s@"
-
-
-def set_max_seq_len(program, input_dict):
-    """ Set """
-    pass
 
 
 def create_module(sign_arr,
