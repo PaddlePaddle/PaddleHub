@@ -28,7 +28,7 @@
 
 ## 代码步骤
 
-使用PaddleHub Finetune API进行Finetune可以分为一下4个步骤
+使用PaddleHub Finetune API进行Finetune可以分为4个步骤
 
 ### Step1: 加载预训练模型
 
@@ -38,8 +38,8 @@ inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
 
-如果想尝试BERT模型，例如BERT中文模型，只需要更换Module中的参数即可.
-PaddleHub除了ERNIE，还提供以下BERT模型:
+如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
+PaddleHub还提供以下BERT模型, 对应的加载示例如下表：
 
 BERT模型名                         | PaddleHub Module
 ---------------------------------- | :------:
@@ -106,3 +106,19 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 hub.finetune_and_eval(task=cls_task, data_reader=reader, feed_list=feed_list, config=config)
 ```
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略。用户可以通过配置学习率，权重
+
+## 模型预测
+
+通过Finetune完成模型训练后，在对应的ckpt目录下，会自动保存验证集上效果最好的模型。
+配置脚本参数
+```
+CKPT_DIR="./ckpt_sentiment_cls/best_model"
+python -u cls_predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
+```
+其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
+
+参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果。如需了解更多预测步骤，请参考`cls_predict.py`
+
+```
+text=新机拿到手就有硬件问题，而且等了6天才到货，第二天就返修，到现在还没得到处理意见！	label=0 [0.99088985 0.00911012]
+```
