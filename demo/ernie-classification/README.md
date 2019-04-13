@@ -120,5 +120,5 @@ python -u cls_predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果。如需了解更多预测步骤，请参考`cls_predict.py`
 
 ```
-text=新机拿到手就有硬件问题，而且等了6天才到货，第二天就返修，到现在还没得到处理意见！	label=0 [0.99088985 0.00911012]
+text=风扇确实够响的，尤其是到晚上周围安静下来。风扇频频开启，发热量有些惊人	label=0	predict=[0.99244046 0.00755955]
 ```
