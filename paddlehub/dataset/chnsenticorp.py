@@ -70,6 +70,13 @@ class ChnSentiCorp(HubDataset):
     def get_labels(self):
         return ["0", "1"]
 
+    @property
+    def num_labels(self):
+        """
+        Return the number of labels in the dataset.
+        """
+        return len(self.get_labels())
+
     def _read_tsv(self, input_file, quotechar=None):
         """Reads a tab separated value file."""
         with open(input_file, "r") as f:

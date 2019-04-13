@@ -6,10 +6,9 @@ module = hub.Module(name="ernie")
 inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 
 # Step2
+dataset = hub.dataset.ChnSentiCorp()
 reader = hub.reader.ClassifyReader(
-    dataset=hub.dataset.ChnSentiCorp(),
-    vocab_path=module.get_vocab_path(),
-    max_seq_len=128)
+    dataset=dataset, vocab_path=module.get_vocab_path(), max_seq_len=128)
 
 # Step3
 with fluid.program_guard(program):
@@ -18,7 +17,7 @@ with fluid.program_guard(program):
     pooled_output = outputs["pooled_output"]
 
     cls_task = hub.create_text_classification_task(
-        feature=pooled_output, label=label, num_classes=reader.get_num_labels())
+        feature=pooled_output, label=label, num_classes=dataset.num_labels)
 
 # Step4
 strategy = hub.AdamWeightDecayStrategy(

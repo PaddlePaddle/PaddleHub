@@ -79,6 +79,13 @@ class MSRA_NER(HubDataset):
     def get_labels(self):
         return ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
 
+    @property
+    def num_labels(self):
+        """
+        Return the number of labels in the dataset.
+        """
+        return len(self.get_labels())
+
     def get_label_map(self):
         return self.label_map
 

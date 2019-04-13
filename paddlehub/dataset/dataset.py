@@ -40,6 +40,13 @@ class InputExample(object):
         self.text_b = text_b
         self.label = label
 
+    def __str__(self):
+        if self.text_b is None:
+            return "text={}\tlabel={}".format(self.text_a, self.label)
+        else:
+            return "text_a={}\ttext_b{},label={}".format(
+                self.text_a, self.text_b, label)
+
 
 class HubDataset(object):
     def get_train_examples(self):
@@ -55,4 +62,7 @@ class HubDataset(object):
         return self.get_dev_examples()
 
     def get_labels(self):
+        raise NotImplementedError()
+
+    def num_labels(self):
         raise NotImplementedError()

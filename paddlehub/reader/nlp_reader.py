@@ -80,9 +80,6 @@ class BaseReader(object):
         """Gets the list of labels for this data set."""
         return self.dataset.get_labels()
 
-    def get_num_labels(self):
-        return len(self.dataset.get_labels())
-
     def get_train_progress(self):
         """Gets progress for training phase."""
         return self.current_example, self.current_epoch
@@ -211,7 +208,7 @@ class BaseReader(object):
             )
         return self.num_examples[phase]
 
-    def data_generator(self, batch_size, phase='train', shuffle=True):
+    def data_generator(self, batch_size=1, phase='train', shuffle=True):
 
         if phase == 'train':
             examples = self.get_train_examples()

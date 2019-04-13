@@ -37,8 +37,9 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Step2: Download dataset and use ClassifyReader to read dataset
+    dataset = hub.dataset.ChnSentiCorp()
     reader = hub.reader.ClassifyReader(
-        dataset=hub.dataset.ChnSentiCorp(),
+        dataset=dataset,
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
 
@@ -58,7 +59,9 @@ if __name__ == '__main__':
         ]
         # Define a classfication finetune task by PaddleHub's API
         cls_task = hub.create_text_classification_task(
-            pooled_output, label, num_classes=reader.get_num_labels())
+            feature=pooled_output,
+            label=label,
+            num_classes=dataset.num_labels())
 
         # Step4: Select finetune strategy, setup config and finetune
         strategy = hub.AdamWeightDecayStrategy(
