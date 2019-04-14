@@ -34,9 +34,9 @@ from .module.manager import default_module_manager
 from .io.type import DataType
 
 from .finetune.task import Task
-from .finetune.task import create_seq_labeling_task
-from .finetune.task import create_text_classification_task
-from .finetune.task import create_img_classification_task
+from .finetune.task import create_seq_label_task
+from .finetune.task import create_text_cls_task
+from .finetune.task import create_img_cls_task
 from .finetune.finetune import finetune_and_eval
 from .finetune.config import RunConfig
 from .finetune.strategy import AdamWeightDecayStrategy

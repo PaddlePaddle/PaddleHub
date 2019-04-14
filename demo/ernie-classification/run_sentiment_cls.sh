@@ -3,6 +3,7 @@ export CUDA_VISIBLE_DEVICES=5
 CKPT_DIR="./ckpt_sentiment_cls"
 python -u sentiment_cls.py \
                    --batch_size 32 \
+                   --use_gpu=False \
                    --weight_decay  0.01 \
                    --checkpoint_dir $CKPT_DIR \
                    --num_epoch 3 \

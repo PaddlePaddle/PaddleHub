@@ -14,6 +14,7 @@
 """Finetuning on classification task """
 
 import argparse
+import ast
 
 import paddle.fluid as fluid
 import paddlehub as hub
@@ -21,6 +22,7 @@ import paddlehub as hub
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
 parser.add_argument("--data_dir", type=str, default=None, help="Path to training data.")
@@ -70,8 +72,9 @@ if __name__ == '__main__':
         )
 
         # Setup runing config for PaddleHub Finetune API
+        print(args.use_gpu)
         config = hub.RunConfig(
-            use_cuda=True,
+            use_cuda=args.use_gpu,
             num_epoch=args.num_epoch,
             batch_size=args.batch_size,
             checkpoint_dir=args.checkpoint_dir,

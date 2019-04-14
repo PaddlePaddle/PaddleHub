@@ -20,11 +20,7 @@ with fluid.program_guard(program):
         feature=pooled_output, label=label, num_classes=dataset.num_labels)
 
 # Step4
-strategy = hub.AdamWeightDecayStrategy(
-    learning_rate=5e-5,
-    warmup_proportion=0.1,
-    warmup_strategy="linear_warmup_decay",
-    weight_decay=0.01)
+strategy = hub.AdamWeightDecayStrategy(learning_rate=5e-5, weight_decay=0.01)
 
 config = hub.RunConfig(
     use_cuda=True, num_epoch=3, batch_size=32, strategy=strategy)

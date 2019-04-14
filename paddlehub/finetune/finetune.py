@@ -45,10 +45,10 @@ def _do_memory_optimization(task, config):
         time_used = time.time() - optimize_time_begin
         logger.info("Memory optimization done! Time elapsed %f sec" % time_used)
 
-    lower_mem, upper_mem, unit = fluid.contrib.memory_usage(
-        program=fluid.default_main_program(), batch_size=config.batch_size)
-    logger.info("Theoretical memory usage in training: %.2f - %.2f %s" %
-                (lower_mem, upper_mem, unit)),
+    # lower_mem, upper_mem, unit = fluid.contrib.memory_usage(
+    #     program=task.main_program(), batch_size=config.batch_size)
+    # logger.info("Theoretical memory usage in training: %.2f - %.2f %s" %
+    #             (lower_mem, upper_mem, unit)),
 
 
 def _finetune_seq_label_task(task,

@@ -62,10 +62,7 @@ class Task(object):
         return metric_variable_names
 
 
-def create_text_classification_task(feature,
-                                    label,
-                                    num_classes,
-                                    hidden_units=None):
+def create_text_cls_task(feature, label, num_classes, hidden_units=None):
     """
     Append a multi-layer perceptron classifier for binary classification base
     on input feature
@@ -108,10 +105,7 @@ def create_text_classification_task(feature,
     return task
 
 
-def create_img_classification_task(feature,
-                                   label,
-                                   num_classes,
-                                   hidden_units=None):
+def create_img_cls_task(feature, label, num_classes, hidden_units=None):
     """
     Create the transfer learning task for image classification.
     Args:
@@ -153,13 +147,13 @@ def create_img_classification_task(feature,
         "num_example": num_example
     }
 
-    task = Task("text_classification", graph_var_dict,
+    task = Task("image_classification", graph_var_dict,
                 fluid.default_main_program(), fluid.default_startup_program())
 
     return task
 
 
-def create_seq_labeling_task(feature, labels, seq_len, num_classes):
+def create_seq_label_task(feature, labels, seq_len, num_classes):
     logits = fluid.layers.fc(
         input=feature,
         size=num_classes,

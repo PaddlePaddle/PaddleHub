@@ -1,13 +1,9 @@
-import paddle
 import paddle.fluid as fluid
-
 import paddlehub as hub
 
-
-def train():
+if __name__ == "__main__":
     resnet_module = hub.Module(module_dir="ResNet50.hub_module")
-    input_dict, output_dict, program = resnet_module.context(
-        sign_name="feature_map", trainable=True)
+    input_dict, output_dict, program = resnet_module.context(trainable=True)
     dataset = hub.dataset.Flowers()
     data_reader = hub.reader.ImageClassificationReader(
         image_width=resnet_module.get_excepted_image_width(),
@@ -29,11 +25,7 @@ def train():
 
         feed_list = [img.name, label.name]
 
-        task = hub.create_img_classification_task(
+        task = hub.create_img_cls_task(
             feature=feature_map, label=label, num_classes=dataset.num_labels)
         hub.finetune_and_eval(
             task, feed_list=feed_list, data_reader=data_reader, config=config)
-
-
-if __name__ == "__main__":
-    train()
