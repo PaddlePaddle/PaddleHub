@@ -133,7 +133,7 @@ hub.finetune_and_eval(task=cls_task, data_reader=reader, feed_list=feed_list, co
 * `eval_interval`: 模型评估的间隔，默认每100个step评估一次验证集
 * `save_ckpt_interval`: 模型保存间隔，请根据任务大小配置，默认只保存验证集效果最好的模型和训练结束的模型
 * `use_cuda`: 是否使用GPU训练，默认为False
-* `checkpoint_dir`: 模型checkpoint保存路径
+* `checkpoint_dir`: 模型checkpoint保存路径, 若用户没有指定，程序会自动生成
 * `num_epoch`: finetune的轮数
 * `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size
 * `enable_memory_optim`: 是否使用内存优化， 默认为True

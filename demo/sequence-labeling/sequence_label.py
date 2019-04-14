@@ -14,6 +14,7 @@
 """Finetuning on sequence labeling task."""
 
 import argparse
+import ast
 
 import paddle.fluid as fluid
 import paddlehub as hub

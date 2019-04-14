@@ -57,6 +57,7 @@ def evaluate_cls_task(task, data_reader, feed_list, phase="test", config=None):
         avg_loss = loss_sum / num_eval_examples
         avg_acc = acc_sum / num_eval_examples
         eval_speed = eval_step / eval_time_used
+
     logger.info(
         "[%s dataset evaluation result] loss=%.5f acc=%.5f [step/sec: %.2f]" %
         (phase, avg_loss, avg_acc, eval_speed))
@@ -64,11 +65,11 @@ def evaluate_cls_task(task, data_reader, feed_list, phase="test", config=None):
     return avg_loss, avg_acc, eval_speed
 
 
-def evaluate_seq_labeling_task(task,
-                               data_reader,
-                               feed_list,
-                               phase="test",
-                               config=None):
+def evaluate_seq_label_task(task,
+                            data_reader,
+                            feed_list,
+                            phase="test",
+                            config=None):
     fetch_list = [
         task.variable("labels").name,
         task.variable("infers").name,

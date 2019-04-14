@@ -27,7 +27,7 @@ from visualdl import LogWriter
 from paddlehub.common.logger import logger
 from paddlehub.finetune.strategy import AdamWeightDecayStrategy, DefaultStrategy
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
-from paddlehub.finetune.evaluate import evaluate_cls_task, evaluate_seq_labeling_task
+from paddlehub.finetune.evaluate import evaluate_cls_task, evaluate_seq_label_task
 import paddlehub as hub
 
 
@@ -126,13 +126,13 @@ def _finetune_seq_label_task(task,
                         exe=exe)
 
                 if do_eval and global_step % config.eval_interval == 0:
-                    evaluate_seq_labeling_task(
+                    evaluate_seq_label_task(
                         task,
                         data_reader,
                         feed_list,
                         phase="test",
                         config=config)
-                    evaluate_seq_labeling_task(
+                    evaluate_seq_label_task(
                         task,
                         data_reader,
                         feed_list,
@@ -148,9 +148,9 @@ def _finetune_seq_label_task(task,
             exe=exe)
 
         if do_eval:
-            evaluate_seq_labeling_task(
+            evaluate_seq_label_task(
                 task, data_reader, feed_list, phase="dev", config=config)
-            evaluate_seq_labeling_task(
+            evaluate_seq_label_task(
                 task, data_reader, feed_list, phase="test", config=config)
         logger.info("PaddleHub finetune finished.")
 
@@ -164,8 +164,8 @@ def _finetune_cls_task(task, data_reader, feed_list, config=None,
 
     num_epoch = config.num_epoch
     batch_size = config.batch_size
-    log_writter = LogWriter(
-        os.path.join(config.checkpoint_dir, "vdllog"), sync_cycle=10)
+    log_writer = LogWriter(
+        os.path.join(config.checkpoint_dir, "vdllog"), sync_cycle=1)
 
     place, dev_count = hub.common.get_running_device_info(config)
     with fluid.program_guard(main_program, startup_program):
@@ -190,10 +190,10 @@ def _finetune_cls_task(task, data_reader, feed_list, config=None,
         logger.info("PaddleHub finetune start")
 
         # add visualdl scalar
-        with log_writter.mode("train") as logw:
+        with log_writer.mode("train") as logw:
             train_loss_scalar = logw.scalar(tag="loss[train]")
             train_acc_scalar = logw.scalar(tag="accuracy[train]")
-        with log_writter.mode("evaluate") as logw:
+        with log_writer.mode("evaluate") as logw:
             eval_loss_scalar = logw.scalar(tag="loss[evaluate]")
             eval_acc_scalar = logw.scalar(tag="accuracy[evaluate]")
 
@@ -276,8 +276,7 @@ def finetune_and_eval(task, data_reader, feed_list, config=None):
     if task.task_type == "sequence_labeling":
         _finetune_seq_label_task(
             task, data_reader, feed_list, config, do_eval=True)
-    # if it's image_classification and text classificaiton
-    else:
+    elif task.task_type == "image_classification" or task.task_type == "text_classification":
         _finetune_cls_task(task, data_reader, feed_list, config, do_eval=True)
 
 
