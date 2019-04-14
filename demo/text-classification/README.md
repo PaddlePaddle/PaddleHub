@@ -1,6 +1,6 @@
 # Text Classification
 
-本示例将展示如何使用PaddleHub Finetune API借助ERNIE模型完成分类任务。
+本示例将展示如何使用PaddleHub Finetune API以及[ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE)预训练模型完成分类任务。
 其中分类任务可以分为两大类：
 
 * 单句分类
@@ -70,7 +70,7 @@ reader = hub.reader.ClassifyReader(
     max_seq_len=128)
 ```
 
-其中数据集的准备代码可以参考 https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/chnsenticorp.py
+其中数据集的准备代码可以参考 [chnsenticorp.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/chnsenticorp.py)
 
 `hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
@@ -131,22 +131,21 @@ hub.finetune_and_eval(task=cls_task, data_reader=reader, feed_list=feed_list, co
 
 * `log_interval`: 进度日志打印间隔，默认每10个step打印一次
 * `eval_interval`: 模型评估的间隔，默认每100个step评估一次验证集
-* `save_ckpt_interval`: 模型保存间隔，请根据任务大小配置，默认只保存验证集效果最好的模型
+* `save_ckpt_interval`: 模型保存间隔，请根据任务大小配置，默认只保存验证集效果最好的模型和训练结束的模型
 * `use_cuda`: 是否使用GPU训练，默认为False
 * `checkpoint_dir`: 模型checkpoint保存路径
 * `num_epoch`: finetune的轮数
 * `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size
 * `enable_memory_optim`: 是否使用内存优化， 默认为True
 * `strategy`: Finetune优化策略
-```
 
 ## 模型预测
 
 通过Finetune完成模型训练后，在对应的ckpt目录下，会自动保存验证集上效果最好的模型。
 配置脚本参数
 ```
-CKPT_DIR="./ckpt_sentiment_cls/best_model"
-python -u cls_predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
+CKPT_DIR=".ckpt_chnsentiment/best_model"
+python cls_predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
 其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
 
