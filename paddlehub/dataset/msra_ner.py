@@ -26,7 +26,7 @@ from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
 
-DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/msra_ner.tar.gz"
+_DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/msra_ner.tar.gz"
 
 
 class MSRA_NER(HubDataset):
@@ -41,19 +41,13 @@ class MSRA_NER(HubDataset):
         self.dataset_dir = os.path.join(DATA_HOME, "msra_ner")
         if not os.path.exists(self.dataset_dir):
             ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
-                url=DATA_URL, save_path=DATA_HOME, print_progress=True)
+                url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
         else:
             logger.info("Dataset {} already cached.".format(self.dataset_dir))
 
-        self._load_label_map()
         self._load_train_examples()
         self._load_test_examples()
         self._load_dev_examples()
-
-    def _load_label_map(self):
-        self.label_map_file = os.path.join(self.dataset_dir, "label_map.json")
-        with open(self.label_map_file) as fi:
-            self.label_map = json.load(fi)
 
     def _load_train_examples(self):
         train_file = os.path.join(self.dataset_dir, "train.tsv")

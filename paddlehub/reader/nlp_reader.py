@@ -76,10 +76,6 @@ class BaseReader(object):
         """Gets a collection of `InputExample`s for prediction."""
         return self.dataset.get_test_examples()
 
-    def get_labels(self):
-        """Gets the list of labels for this data set."""
-        return self.dataset.get_labels()
-
     def get_train_progress(self):
         """Gets progress for training phase."""
         return self.current_example, self.current_epoch

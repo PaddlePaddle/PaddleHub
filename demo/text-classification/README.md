@@ -27,7 +27,7 @@
 
 # 任务相关
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型
---dataset: 有三个参数可选，分别代表3个不同的分类任务; 分别是 chnsenticorp, lcqmc, nlpcc_dbqa 
+--dataset: 有三个参数可选，分别代表3个不同的分类任务; 分别是 chnsenticorp, lcqmc, nlpcc_dbqa
 ```
 
 ## 代码步骤
@@ -78,18 +78,18 @@ reader = hub.reader.ClassifyReader(
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致
 
-ClassifyReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`. 
+ClassifyReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
 
 **NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
 
 ### Step3: 构建网络并创建分类迁移任务
 ```python
 # NOTE: 必须使用fluid.program_guard接口传入Module返回的预训练模型program
-with fluid.program_guard(program): 
+with fluid.program_guard(program):
     label = fluid.layers.data(name="label", shape=[1], dtype='int64')
 
     pooled_output = outputs["pooled_output"]
-    
+
     # feed_list的Tensor顺序不可以调整
     feed_list = [
         inputs["input_ids"].name, inputs["position_ids"].name,
@@ -149,8 +149,10 @@ python cls_predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
 其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
 
-参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果。如需了解更多预测步骤，请参考`cls_predict.py`
+参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
+如需了解更多预测步骤，请参考`cls_predict.py`
 
 ```
 text=键盘缝隙大进灰，装系统自己不会装，屏幕有点窄玩游戏人物有点变形	label=0	predict=0
+accuracy = 0.954267
 ```

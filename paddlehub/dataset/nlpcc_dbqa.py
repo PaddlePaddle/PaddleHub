@@ -25,7 +25,7 @@ from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
 
-DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/nlpcc-dbqa.tar.gz"
+_DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/nlpcc-dbqa.tar.gz"
 
 
 class NLPCC_DBQA(HubDataset):
@@ -39,7 +39,7 @@ class NLPCC_DBQA(HubDataset):
         self.dataset_dir = os.path.join(DATA_HOME, "nlpcc-dbqa")
         if not os.path.exists(self.dataset_dir):
             ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
-                url=DATA_URL, save_path=DATA_HOME, print_progress=True)
+                url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
         else:
             logger.info("Dataset {} already cached.".format(self.dataset_dir))
 

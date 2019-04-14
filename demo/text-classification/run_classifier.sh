@@ -15,5 +15,5 @@ python -u text_classifier.py \
                    --checkpoint_dir=${CKPT_DIR} \
                    --learning_rate=5e-5 \
                    --weight_decay=0.01 \
-                   --max_seq_len=128
-                   --num_epoch=3 \
+                   --max_seq_len=128 \
+                   --num_epoch=3
