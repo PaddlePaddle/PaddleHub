@@ -57,6 +57,11 @@ if __name__ == '__main__':
 
         # Setup feed list for data feeder
         # Must feed all the tensor of ERNIE's module need
+        feed_list = [
+            input_dict["input_ids"].name, input_dict["position_ids"].name,
+            input_dict["segment_ids"].name, input_dict["input_mask"].name,
+            label.name
+        ]
 
         # Define a classfication finetune task by PaddleHub's API
         cls_task = hub.create_text_classification_task(
@@ -65,19 +70,26 @@ if __name__ == '__main__':
         # classificatin probability tensor
         probs = cls_task.variable("probs")
 
+        pred = fluid.layers.argmax(probs, axis=1)
+
         # load best model checkpoint
         fluid.io.load_persistables(exe, args.checkpoint_dir)
 
-        feed_list = [
-            input_dict["input_ids"].name, input_dict["position_ids"].name,
-            input_dict["segment_ids"].name, input_dict["input_mask"].name,
-            label.name
-        ]
+        inference_program = program.clone(for_test=True)
 
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
         test_reader = reader.data_generator(phase='test', shuffle=False)
         test_examples = dataset.get_test_examples()
+        total = 0
+        correct = 0
         for index, batch in enumerate(test_reader()):
-            probs_v = exe.run(
-                feed=data_feeder.feed(batch), fetch_list=[probs.name])
-            print("%s\tpredict=%s" % (test_examples[index], probs_v[0][0]))
+            pred_v = exe.run(
+                feed=data_feeder.feed(batch),
+                fetch_list=[pred.name],
+                program=inference_program)
+            total += 1
+            if (pred_v[0][0] == int(test_examples[index].label)):
+                correct += 1
+                acc = 1.0 * correct / total
+            print("%s\tpredict=%s" % (test_examples[index], pred_v[0][0]))
+        print("accuracy = %f" % acc)
