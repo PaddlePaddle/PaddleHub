@@ -12,15 +12,14 @@ PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借�
 
 1. 通过命令行，无需编写代码，一键使用预训练模型进行预测；
 2. 通过hub download命令，快速地获取PaddlePaddle生态下的所有预训练模型；
-3. 借助PaddleHub Finetune API，使用少量代码完成迁移学习；更多Demo可参考
-   [ERNIE文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/text-classification)
-   [图像分类迁移](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/image-classification)
+3. 借助PaddleHub Finetune API，使用少量代码完成迁移学习；
+   - 更多Demo可参考 [ERNIE文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/text-classification) [图像分类迁移](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/image-classification)
 
 ## 安装
 
 **环境依赖**
 * Python>=3.5
-* PaddlePaddle>=1.3.1
+* PaddlePaddle>=1.3.2
 
 pip安装方式如下：
 
