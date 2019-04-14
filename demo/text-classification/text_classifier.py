@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     # Step2: Download dataset and use ClassifyReader to read dataset
     dataset = None
-    if args.dataset.lower() == "senticorp":
+    if args.dataset.lower() == "chnsenticorp":
         dataset = hub.dataset.ChnSentiCorp()
     elif args.dataset.lower() == "nlpcc_dbqa":
         dataset = hub.dataset.NLPCC_DBQA()

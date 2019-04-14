@@ -1,7 +1,7 @@
 export CUDA_VISIBLE_DEVICES=5
 
-# User can select senticorp, nlpcc_dbqa, lcqmc for different task
-DATASET="senticorp"
+# User can select chnsenticorp, nlpcc_dbqa, lcqmc for different task
+DATASET="chnsenticorp"
 CKPT_DIR="./ckpt_${DATASET}"
 # Recommending hyper parameters for difference task
 # ChnSentiCorp: batch_size=24, weight_decay=0.01, num_epoch=3, max_seq_len=128, lr=5e-5
