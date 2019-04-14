@@ -1,9 +1,8 @@
 # PaddleHub
 
-
 [![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=develop)](https://travis-ci.org/PaddlePaddle/PaddleHub)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases) 
+[![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
 
 PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借助预训练模型更便捷地开展迁移学习工作。
 
@@ -14,9 +13,8 @@ PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借�
 1. 通过命令行，无需编写代码，一键使用预训练模型进行预测；
 2. 通过hub download命令，快速地获取PaddlePaddle生态下的所有预训练模型；
 3. 借助PaddleHub Finetune API，使用少量代码完成迁移学习；更多Demo可参考
-   [ERNIE文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/ernie-classification)
+   [ERNIE文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/text-classification)
    [图像分类迁移](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/image-classification)
-
 
 ## 安装
 
