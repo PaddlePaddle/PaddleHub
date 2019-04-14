@@ -1,9 +1,9 @@
 ---
 name: 'Issue: 其他（Others）'
 about: Describe this issue template's purpose here.
-title: "[OTHERS]"
+title: "[Issue]"
 labels: ''
-assignees: ''
+assignees: ZeyuChen
 
 ---
 
