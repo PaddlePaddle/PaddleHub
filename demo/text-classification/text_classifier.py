@@ -23,8 +23,10 @@ import paddlehub as hub
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--dataset", type=str, default="senticorp", help="Directory to model checkpoint")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
+parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--data_dir", type=str, default=None, help="Path to training data.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
@@ -40,7 +42,16 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Step2: Download dataset and use ClassifyReader to read dataset
-    dataset = hub.dataset.ChnSentiCorp()
+    dataset = None
+    if args.dataset.lower() == "senticorp":
+        dataset = hub.dataset.ChnSentiCorp()
+    elif args.dataset.lower() == "nlpcc_dbqa":
+        dataset = hub.dataset.NLPCC_DBQA()
+    elif args.dataset.lower() == "lcqmc":
+        dataset = hub.dataset.LCQMC()
+    else:
+        raise ValueError("%s dataset is not defined" % args.dataset)
+
     reader = hub.reader.ClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
@@ -72,7 +83,6 @@ if __name__ == '__main__':
         )
 
         # Setup runing config for PaddleHub Finetune API
-        print(args.use_gpu)
         config = hub.RunConfig(
             use_cuda=args.use_gpu,
             num_epoch=args.num_epoch,

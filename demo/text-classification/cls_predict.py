@@ -64,7 +64,7 @@ if __name__ == '__main__':
         ]
 
         # Define a classfication finetune task by PaddleHub's API
-        cls_task = hub.create_text_classification_task(
+        cls_task = hub.create_text_cls_task(
             feature=pooled_output, label=label, num_classes=dataset.num_labels)
 
         # classificatin probability tensor

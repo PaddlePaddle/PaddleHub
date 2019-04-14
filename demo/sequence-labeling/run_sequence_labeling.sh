@@ -1,8 +1,7 @@
-export CUDA_VISIBLE_DEVICES=6
+export CUDA_VISIBLE_DEVICES=0
 
 CKPT_DIR="./ckpt_sequence_labeling"
-
-python -u sequence_labeling.py \
+python -u sequence_label.py \
                    --batch_size 16 \
                    --weight_decay  0.01 \
                    --checkpoint_dir $CKPT_DIR \
