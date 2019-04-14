@@ -81,7 +81,8 @@ def evaluate_seq_label_task(task,
     batch_size = config.batch_size
     place, dev_count = hub.common.get_running_device_info(config)
     exe = fluid.Executor(place=place)
-    num_labels = len(data_reader.get_labels())
+    # calculate the num of label from probs variable shape
+    num_labels = task.variable("probs").shape[1]
     with fluid.program_guard(inference_program):
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
         num_eval_examples = acc_sum = loss_sum = 0
@@ -109,6 +110,8 @@ def evaluate_seq_label_task(task,
         logger.info(
             "[%s evaluation] F1-Score=%f, precision=%f, recall=%f [step/sec: %.2f]"
             % (phase, f1, precision, recall, eval_speed))
+
+    return f1, precision, recall
 
 
 # Sequence label evaluation functions

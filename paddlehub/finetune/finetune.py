@@ -67,6 +67,8 @@ def _finetune_seq_label_task(task,
 
     num_epoch = config.num_epoch
     batch_size = config.batch_size
+    log_writer = LogWriter(
+        os.path.join(config.checkpoint_dir, "vdllog"), sync_cycle=1)
 
     place, dev_count = hub.common.get_running_device_info(config)
     with fluid.program_guard(main_program, startup_program):
@@ -86,10 +88,19 @@ def _finetune_seq_label_task(task,
         # Try to restore model training checkpoint
         current_epoch, global_step = load_checkpoint(config.checkpoint_dir, exe)
 
+        best_eval_f1 = 0.0
         train_time_used = 0
         logger.info("PaddleHub finetune start")
 
         exe.run(fluid.default_startup_program())
+
+        # add visualdl scalar
+        with log_writer.mode("train") as logw:
+            train_loss_scalar = logw.scalar(tag="Loss [train]")
+        with log_writer.mode("evaluate") as logw:
+            eval_f1_scalar = logw.scalar(tag="F1 [eval]")
+            eval_precision_scalar = logw.scalar(tag="Precision [eval]")
+            eval_recall_scalar = logw.scalar(tag="Recall [eval]")
 
         # Finetune loop
         for epoch in range(current_epoch, num_epoch + 1):
@@ -112,9 +123,11 @@ def _finetune_seq_label_task(task,
                     speed = config.log_interval / train_time_used
                     logger.info("step %d: loss=%.5f [step/sec: %.2f]" %
                                 (global_step, avg_loss, speed))
+                    train_loss_scalar.add_record(global_step, avg_loss)
 
                     train_time_used = 0
-                    num_trained_examples = loss_sum = 0
+                    num_trained_examples = 0
+                    loss_sum = 0
 
                 if config.save_ckpt_interval and global_step % config.save_ckpt_interval == 0:
                     # NOTE: current saved checkpoint machanism is not completed,
@@ -126,18 +139,22 @@ def _finetune_seq_label_task(task,
                         exe=exe)
 
                 if do_eval and global_step % config.eval_interval == 0:
-                    evaluate_seq_label_task(
-                        task,
-                        data_reader,
-                        feed_list,
-                        phase="test",
-                        config=config)
-                    evaluate_seq_label_task(
+                    f1, precision, recall = evaluate_seq_label_task(
                         task,
                         data_reader,
                         feed_list,
                         phase="dev",
                         config=config)
+                    eval_f1_scalar.add_record(global_step, f1)
+                    eval_precision_scalar.add_record(global_step, precision)
+                    eval_recall_scalar.add_record(global_step, recall)
+                    if f1 > best_eval_f1:
+                        best_eval_f1 = f1
+                        model_saved_dir = os.path.join(config.checkpoint_dir,
+                                                       "best_model")
+                        logger.info("best model saved to %s [best F1=%.5f]" %
+                                    (model_saved_dir, best_eval_f1))
+                        fluid.io.save_persistables(exe, dirname=model_saved_dir)
 
         # NOTE: current saved checkpoint machanism is not completed, it can't
         # resotre dataset training status
@@ -147,6 +164,7 @@ def _finetune_seq_label_task(task,
             global_step=global_step,
             exe=exe)
 
+        # Final evaluation
         if do_eval:
             evaluate_seq_label_task(
                 task, data_reader, feed_list, phase="dev", config=config)
@@ -191,11 +209,11 @@ def _finetune_cls_task(task, data_reader, feed_list, config=None,
 
         # add visualdl scalar
         with log_writer.mode("train") as logw:
-            train_loss_scalar = logw.scalar(tag="loss[train]")
-            train_acc_scalar = logw.scalar(tag="accuracy[train]")
+            train_loss_scalar = logw.scalar(tag="Loss [train]")
+            train_acc_scalar = logw.scalar(tag="Accuracy [train]")
         with log_writer.mode("evaluate") as logw:
-            eval_loss_scalar = logw.scalar(tag="loss[evaluate]")
-            eval_acc_scalar = logw.scalar(tag="accuracy[evaluate]")
+            eval_loss_scalar = logw.scalar(tag="Loss [eval]")
+            eval_acc_scalar = logw.scalar(tag="Accuracy [eval]")
 
         exe.run(fluid.default_startup_program())
 
@@ -266,7 +284,10 @@ def _finetune_cls_task(task, data_reader, feed_list, config=None,
             global_step=global_step,
             exe=exe)
 
+        # Final evaluation
         if do_eval:
+            evaluate_cls_task(
+                task, data_reader, feed_list, phase="dev", config=config)
             evaluate_cls_task(
                 task, data_reader, feed_list, phase="test", config=config)
         logger.info("PaddleHub finetune finished.")
