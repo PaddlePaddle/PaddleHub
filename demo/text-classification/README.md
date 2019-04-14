@@ -43,10 +43,11 @@ inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
 
 如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
-PaddleHub还提供以下BERT模型, 对应的加载示例如下表：
+PaddleHub还提供BERT模型可供选择, 所有模型对应的加载示例如下：
 
-BERT模型名                         | PaddleHub Module
+   模型名                           | PaddleHub Module
 ---------------------------------- | :------:
+ERNIE, Chinese                     | `hub.Module(name='ernie')`
 BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
 BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
 BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
@@ -68,6 +69,9 @@ reader = hub.reader.ClassifyReader(
     vocab_path=module.get_vocab_path(),
     max_seq_len=128)
 ```
+
+其中数据集的准备代码可以参考 https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/chnsenticorp.py
+
 `hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
 `module.get_vaocab_path()` 会返回预训练模型对应的词表
@@ -123,7 +127,18 @@ hub.finetune_and_eval(task=cls_task, data_reader=reader, feed_list=feed_list, co
 `warmup_strategy`: 有两种策略可选(1) `linear_warmup_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
 
 #### 运行配置
-RunConfig
+`RunConfig` 主要控制Finetune的训练，包含以下可控制的参数:
+
+* `log_interval`: 进度日志打印间隔，默认每10个step打印一次
+* `eval_interval`: 模型评估的间隔，默认每100个step评估一次验证集
+* `save_ckpt_interval`: 模型保存间隔，请根据任务大小配置，默认只保存验证集效果最好的模型
+* `use_cuda`: 是否使用GPU训练，默认为False
+* `checkpoint_dir`: 模型checkpoint保存路径
+* `num_epoch`: finetune的轮数
+* `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size
+* `enable_memory_optim`: 是否使用内存优化， 默认为True
+* `strategy`: Finetune优化策略
+```
 
 ## 模型预测
 
@@ -138,5 +153,5 @@ python -u cls_predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果。如需了解更多预测步骤，请参考`cls_predict.py`
 
 ```
-text=键盘缝隙大进灰，装系统自己不会装~~屏幕有点窄玩游戏人物有点变形	label=0	predict=0
+text=键盘缝隙大进灰，装系统自己不会装，屏幕有点窄玩游戏人物有点变形	label=0	predict=0
 ```
