@@ -139,6 +139,12 @@ hub.finetune_and_eval(task=cls_task, data_reader=reader, feed_list=feed_list, co
 * `enable_memory_optim`: 是否使用内存优化， 默认为True
 * `strategy`: Finetune优化策略
 
+## VisualDL 可视化
+```bash
+$ visualdl --logdir $CKPT_DIR/vdllog -t 0.0.0.0
+```
+用浏览器打开http://localhost:8040 即可看到训练过程中指标的变化情况
+
 ## 模型预测
 
 通过Finetune完成模型训练后，在对应的ckpt目录下，会自动保存验证集上效果最好的模型。
