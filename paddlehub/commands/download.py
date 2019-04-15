@@ -74,7 +74,6 @@ class DownloadCommand(BaseCommand):
 
         need_to_download_file = True
         file_name = os.path.basename(url)
-        utils.check_path(self.args.output_path)
         file = os.path.join(self.args.output_path, file_name)
         if os.path.exists(file):
             print("File %s already existed\nWait to check the MD5 value" %
@@ -103,15 +102,15 @@ class DownloadCommand(BaseCommand):
             print(tips)
         return True
 
-    def check_type(self, type):
-        type = type.lower()
-        if type == "module":
-            type = "Module"
-        elif type == "model":
-            type = "Model"
+    def check_type(self, mod_type):
+        mod_type = mod_type.lower()
+        if mod_type == "module":
+            mod_type = "Module"
+        elif mod_type == "model":
+            mod_type = "Model"
         else:
-            type = "All"
-        return type
+            mod_type = "All"
+        return mod_type
 
 
 command = DownloadCommand.instance()
