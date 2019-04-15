@@ -12,7 +12,7 @@ PaddleHub为Module/Model（关于Model和Module的区别，请查看下方的介
 
 ## `show`
 
-用于查看Module的属性，包括Module的名字、版本、描述、作者等信息
+用于查看本地已安装Module/Model的属性，包括其名字、版本、描述、作者等信息
 
 ## `download`
 
