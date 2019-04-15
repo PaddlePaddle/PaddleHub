@@ -97,7 +97,7 @@ class DownloadCommand(BaseCommand):
             result, tips, file = default_downloader.uncompress(
                 file=file,
                 dirname=self.args.output_path,
-                delete_file=True,
+                delete_file=False,
                 print_progress=True)
             print(tips)
         return True

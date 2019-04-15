@@ -192,11 +192,7 @@ class Module(object):
 
     def _init_with_module_file(self, module_dir):
         checker = ModuleChecker(module_dir)
-        if checker.check() == False:
-            print(
-                "ERROR! %s is  a model. The command is only for the module type but not the model type."
-                % module_dir)
-            sys.exit(0)
+        checker.check()
 
         self.helper = ModuleHelper(module_dir)
         with open(self.helper.module_desc_path(), "rb") as fi:
