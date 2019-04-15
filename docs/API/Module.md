@@ -3,7 +3,7 @@
 ----
 在PaddleHub中，Module代表了一个`可执行`的模型。这里的可执行指的是，Module可以直接通过命令行`hub run ${MODULE_NAME}`执行预测，或者通过context接口获取上下文后进行finetune。
 
-### \_\_init\_\_(self, name, module_dir)
+### `\_\_init\_\_(self, name=None, module_dir=None)`
 在生成一个Module时，支持通过名称、url或者路径创建Module
 > ### 参数
 > * name: 模块名称
