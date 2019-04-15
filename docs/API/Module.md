@@ -7,7 +7,6 @@
 在生成一个Module时，支持通过名称、url或者路径创建Module
 > ### 参数
 > * name: 模块名称
-> * url:  模块的url
 > * module_dir: 模块路径
 >
 > ### 返回
