@@ -90,7 +90,6 @@ class ModuleHelper(object):
 class Module(object):
     def __init__(self,
                  name=None,
-                 url=None,
                  module_dir=None,
                  signatures=None,
                  module_info=None,
@@ -112,8 +111,6 @@ class Module(object):
         # TODO(wuzewu): print more module loading info log
         if name:
             self._init_with_name(name=name)
-        elif url:
-            self._init_with_url(url=url)
         elif module_dir:
             self._init_with_module_file(module_dir=module_dir)
         elif signatures:
