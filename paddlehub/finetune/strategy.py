@@ -64,23 +64,23 @@ class DefaultStrategy(object):
 class AdamWeightDecayStrategy(DefaultStrategy):
     def __init__(self,
                  learning_rate=1e-4,
-                 warmup_strategy="linear_warmup_decay",
+                 lr_scheduler="linear_warmup_decay",
                  warmup_proportion=0.0,
                  weight_decay=0.01,
                  optimizer_name=None):
         super().__init__(
             learning_rate=learning_rate, optimizer_name=optimizer_name)
         # check strategy correctness
-        if warmup_strategy not in ["linear_warmup_decay", "noam_decay"]:
-            raise ValueError("warmup strategy {} is not setup "
-                             "correctly".format(warmup_strategy))
-        self._warmup_strategy = warmup_strategy
+        if lr_scheduler not in ["linear_warmup_decay", "noam_decay"]:
+            raise ValueError("lr_scheduler {} is not setup "
+                             "correctly".format(lr_scheduler))
+        self._lr_scheduler = lr_scheduler
         self._warmup_proportion = warmup_proportion
         self._weight_decay = weight_decay
 
     @property
-    def warmup_strategy(self):
-        return self._warmup_strategy
+    def lr_scheduler(self):
+        return self._lr_scheduler
 
     @property
     def warmup_proportion(self):
@@ -99,7 +99,7 @@ class AdamWeightDecayStrategy(DefaultStrategy):
 
         scheduled_lr = adam_weight_decay_optimization(
             loss, warmup_steps, max_train_steps, self.learning_rate,
-            main_program, self.weight_decay, self.warmup_strategy)
+            main_program, self.weight_decay, self.lr_scheduler)
 
         return scheduled_lr
 
