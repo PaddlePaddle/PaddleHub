@@ -143,9 +143,9 @@ hub.finetune_and_eval(task=cls_task, data_reader=reader, feed_list=feed_list, co
 
 Finetune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
 ```bash
-$ visualdl --logdir $CKPT_DIR/vdllog -t 0.0.0.0
+$ visualdl --logdir $CKPT_DIR/vdllog -t ${HOST_IP}
 ```
-用浏览器打开http://localhost:8040 即可看到训练过程中指标的变化情况
+${HOST_IP}为本地IP地址，用浏览器打开http://localhost:8040 即可看到训练过程中指标的变化情况
 TODO: 新增截图
 
 ## 模型预测
@@ -154,12 +154,12 @@ TODO: 新增截图
 配置脚本参数
 ```
 CKPT_DIR=".ckpt_chnsentiment/best_model"
-python cls_predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
+python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
 其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
 
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
-如需了解更多预测步骤，请参考`cls_predict.py`
+如需了解更多预测步骤，请参考`predict.py`
 
 ```
 text=键盘缝隙大进灰，装系统自己不会装，屏幕有点窄玩游戏人物有点变形	label=0	predict=0
