@@ -68,6 +68,7 @@ class LocalModuleManager(object):
             module_name, version=module_version)
         url = search_result.get('url', None)
         md5_value = search_result.get('md5', None)
+        installed_module_version = search_result.get('version', None)
         #TODO(wuzewu): add compatibility check
         if not url:
             tips = "Can't find module %s" % module_name
@@ -89,8 +90,8 @@ class LocalModuleManager(object):
 
         if module_dir:
             tips = "Successfully installed %s" % module_name
-            if module_version:
-                tips += "-%s" % module_version
+            if installed_module_version:
+                tips += "-%s" % installed_module_version
             return True, tips, module_dir
         tips = "Download %s-%s failed" % (module_name, module_version)
         return False, tips, module_dir

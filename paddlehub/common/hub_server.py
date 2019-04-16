@@ -130,7 +130,8 @@ class HubServer(object):
             if self.resource_list_file['version'][index] == version:
                 return {
                     'url': self.resource_list_file['url'][index],
-                    'md5': self.resource_list_file['md5'][index]
+                    'md5': self.resource_list_file['md5'][index],
+                    'version': version
                 }
 
         return {}
