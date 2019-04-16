@@ -48,7 +48,7 @@ $ hub search
 ## 深入了解PaddleHub
 * [命令行功能](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/command_line_introduction.md)
 * [Finetune API与迁移学习](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/turtorial/transfer_learning_turtorial.md)
-* API
+* [API](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API_list.md)
 
 ## 答疑
 
