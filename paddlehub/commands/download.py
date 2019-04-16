@@ -60,9 +60,11 @@ class DownloadCommand(BaseCommand):
         else:
             search_result = default_hub_server.get_resource_url(
                 mod_name, resource_type="Module", version=mod_version)
+            self.args.type = "Module"
             if search_result == {}:
                 search_result = default_hub_server.get_resource_url(
                     mod_name, resource_type="Model", version=mod_version)
+                self.args.type = "Model"
         url = search_result.get('url', None)
         except_md5_value = search_result.get('md5', None)
         if not url:
@@ -100,6 +102,8 @@ class DownloadCommand(BaseCommand):
                 delete_file=False,
                 print_progress=True)
             print(tips)
+            if self.args.type == "Model":
+                os.rename(file, "./" + mod_name)
         return True
 
     def check_type(self, mod_type):
