@@ -73,7 +73,7 @@ if __name__ == '__main__':
         strategy = hub.AdamWeightDecayStrategy(
             weight_decay=args.weight_decay,
             learning_rate=args.learning_rate,
-            warmup_strategy="linear_warmup_decay",
+            lr_scheduler="linear_warmup_decay",
         )
 
         # Setup runing config for PaddleHub Finetune API
