@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import argparse
 import os
+import sys
 
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.io.parser import yaml_parser, txt_parser
@@ -93,7 +94,14 @@ class RunCommand(BaseCommand):
                 if not result:
                     return False
 
-        module = hub.Module(module_dir=module_dir)
+        try:
+            module = hub.Module(module_dir=module_dir)
+        except:
+            print(
+                "ERROR! %s is  a model. The command is only for the module type but not the model type."
+                % module_name)
+            sys.exit(0)
+
         self.parse_args_with_module(module, argv[1:])
 
         if not module.default_signature:
