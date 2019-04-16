@@ -159,7 +159,7 @@ python cls_predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
 
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
-如需了解更多预测步骤，请参考`cls_predict.py`
+如需了解更多预测步骤，请参考`predict.py`
 
 ```
 text=键盘缝隙大进灰，装系统自己不会装，屏幕有点窄玩游戏人物有点变形	label=0	predict=0
