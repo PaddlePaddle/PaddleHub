@@ -154,7 +154,7 @@ TODO: 新增截图
 配置脚本参数
 ```
 CKPT_DIR=".ckpt_chnsentiment/best_model"
-python cls_predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
+python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
 其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
 
