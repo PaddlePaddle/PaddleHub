@@ -19,7 +19,6 @@ from __future__ import print_function
 import argparse
 import os
 
-from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.hub_server import default_hub_server
 from paddlehub.commands.base_command import BaseCommand, ENTRY
@@ -66,10 +65,18 @@ class DownloadCommand(BaseCommand):
         url = search_result.get('url', None)
         except_md5_value = search_result.get('md5', None)
         if not url:
-            tips = "Can't found model/module %s" % mod_name
-            if model_version:
+            tips = "PaddleHub can't find model/module %s" % mod_name
+            if mod_version:
                 tips += " with version %s" % mod_version
             print(tips)
+
+            print("Tips: The followed models/modules can be downloaded: ")
+            resource_list = default_hub_server.search_resource(".*")
+            resource_names = [
+                resource_name for resource_name, resource_type,
+                resource_version, resource_summary in resource_list
+            ]
+            print("\n".join(resource_names))
             return True
 
         need_to_download_file = True
