@@ -34,30 +34,30 @@ class HubCommand(BaseCommand):
         super(HubCommand, self).__init__(name)
         self.show_in_help = False
 
-    def exec(self, argv):
+    def execute(self, argv):
         logger.setLevel("NOLOG")
 
         if not argv:
-            help.command.exec(argv)
+            help.command.execute(argv)
             exit(1)
             return False
         sub_command = argv[0]
         if not sub_command in BaseCommand.command_dict:
             print("ERROR: unknown command '%s'" % sub_command)
-            help.command.exec(argv)
+            help.command.execute(argv)
             exit(1)
             return False
 
         command = BaseCommand.command_dict[sub_command]
-        return command.exec(argv[1:])
+        return command.execute(argv[1:])
 
 
 command = HubCommand.instance()
 
 
 def main():
-    command.exec(sys.argv[1:])
+    command.execute(sys.argv[1:])
 
 
 if __name__ == "__main__":
-    command.exec(sys.argv[1:])
+    command.execute(sys.argv[1:])

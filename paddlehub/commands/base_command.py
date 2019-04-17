@@ -62,5 +62,5 @@ class BaseCommand(object):
     def print_args(self):
         print_arguments(self.args)
 
-    def exec(self, argv):
+    def execute(self, argv):
         raise NotImplementedError("Base Command should not be execute!")

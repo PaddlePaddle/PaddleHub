@@ -28,7 +28,7 @@ class VersionCommand(BaseCommand):
         self.show_in_help = True
         self.description = "Show PaddleHub's version."
 
-    def exec(self, argv):
+    def execute(self, argv):
         print("hub %s" % version.hub_version)
         return True
 

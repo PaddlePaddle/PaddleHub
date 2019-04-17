@@ -75,7 +75,7 @@ class RunCommand(BaseCommand):
             demo = "%s %s %s" % (entry, self.name, module.name)
         return demo
 
-    def exec(self, argv):
+    def execute(self, argv):
         if not argv:
             print("ERROR: Please specify a module name.\n")
             self.help()

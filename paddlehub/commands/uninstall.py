@@ -36,7 +36,7 @@ class UninstallCommand(BaseCommand):
             usage='%(prog)s',
             add_help=False)
 
-    def exec(self, argv):
+    def execute(self, argv):
         if not argv:
             print("ERROR: Please specify a module\n")
             self.help()

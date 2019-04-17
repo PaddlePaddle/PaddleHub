@@ -30,7 +30,7 @@ class HelpCommand(BaseCommand):
     def get_all_commands(self):
         return BaseCommand.command_dict
 
-    def exec(self, argv):
+    def execute(self, argv):
         hub_command = BaseCommand.command_dict["hub"]
         help_text = "\n"
         help_text += "Usage:\n"

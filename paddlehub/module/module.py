@@ -239,14 +239,14 @@ class Module(object):
                 continue
             var = global_block.var(param['name'])
             global_block.create_parameter(
-                **param,
                 shape=var.shape,
                 dtype=var.dtype,
                 type=var.type,
                 lod_level=var.lod_level,
                 error_clip=var.error_clip,
                 stop_gradient=var.stop_gradient,
-                is_data=var.is_data)
+                is_data=var.is_data,
+                **param)
 
     def _recover_variable_info(self, program):
         var_infos = self.desc.attr.map.data['var_infos']
@@ -422,8 +422,7 @@ class Module(object):
         self.check_processor()
 
         def _get_reader_and_feeder(data_format, data, place):
-            def _reader():
-                nonlocal process_data
+            def _reader(process_data):
                 for item in zip(*process_data):
                     yield item
 
@@ -433,7 +432,7 @@ class Module(object):
                 process_data.append([value['processed'] for value in data[key]])
                 feed_name_list.append(data_format[key]['feed_key'])
             feeder = fluid.DataFeeder(feed_list=feed_name_list, place=place)
-            return _reader, feeder
+            return functools.partial(_reader, process_data=process_data), feeder
 
         feed_dict, fetch_dict, program = self.context(sign_name, for_test=True)
         #TODO(wuzewu): more option

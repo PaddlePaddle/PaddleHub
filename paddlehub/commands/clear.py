@@ -54,7 +54,7 @@ class ClearCommand(BaseCommand):
     def cache_dir(self):
         return CACHE_HOME
 
-    def exec(self, argv):
+    def execute(self, argv):
         result = True
         total_file_size = 0
         total_file_count = 0

@@ -37,7 +37,7 @@ class SearchCommand(BaseCommand):
             usage='%(prog)s',
             add_help=False)
 
-    def exec(self, argv):
+    def execute(self, argv):
         if not argv:
             argv = ['.*']
 

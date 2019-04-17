@@ -37,7 +37,7 @@ class InstallCommand(BaseCommand):
             add_help=False)
         #TODO(wuzewu): add --upgrade option
 
-    def exec(self, argv):
+    def execute(self, argv):
         if not argv:
             print("ERROR: Please specify a module name.\n")
             self.help()

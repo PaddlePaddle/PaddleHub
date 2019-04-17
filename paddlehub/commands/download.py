@@ -43,7 +43,7 @@ class DownloadCommand(BaseCommand):
         self.add_arg('--uncompress',   bool, False,  "uncompress the download package or not" )
         # yapf: enable
 
-    def exec(self, argv):
+    def execute(self, argv):
         if not argv:
             print("ERROR: Please provide the model/module name\n")
             self.help()

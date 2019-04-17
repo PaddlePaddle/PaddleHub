@@ -31,7 +31,7 @@ class ListCommand(BaseCommand):
         self.show_in_help = True
         self.description = "List all installed PaddleHub modules."
 
-    def exec(self, argv):
+    def execute(self, argv):
         all_modules = default_module_manager.all_modules()
         if utils.is_windows():
             placeholders = [20, 40]

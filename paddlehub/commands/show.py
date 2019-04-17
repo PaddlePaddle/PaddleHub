@@ -108,7 +108,7 @@ class ShowCommand(BaseCommand):
         print(tp.get_text())
         return True
 
-    def exec(self, argv):
+    def execute(self, argv):
         if not argv:
             print("ERROR: Please specify a module or a model\n")
             self.help()
