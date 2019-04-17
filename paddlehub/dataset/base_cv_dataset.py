@@ -52,7 +52,13 @@ class ImageClassificationDataset(object):
                         break
                     line = line.strip()
                     items = line.split(" ")
-                    image_path = os.path.join(self.base_path, items[0])
+                    if os.path.isabs(items[0]):
+                        image_path = items[0]
+                    else:
+                        if self.base_path is None:
+                            image_path = items[0]
+                        else:
+                            image_path = os.path.join(self.base_path, items[0])
                     label = items[1]
                     data.append((image_path, items[1]))
 
