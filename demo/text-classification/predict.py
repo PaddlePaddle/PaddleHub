@@ -17,10 +17,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import argparse
+import ast
+import numpy as np
 import os
 import time
-import argparse
-import numpy as np
 
 import paddle
 import paddle.fluid as fluid
@@ -30,6 +31,7 @@ import paddlehub as hub
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -46,7 +48,7 @@ if __name__ == '__main__':
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
 
-    place = fluid.CUDAPlace(0)
+    place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
     exe = fluid.Executor(place)
     with fluid.program_guard(program):
         label = fluid.layers.data(name="label", shape=[1], dtype='int64')
