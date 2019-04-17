@@ -18,7 +18,7 @@ PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借�
 ## 安装
 
 **环境依赖**
-* Python>=3.5
+* Python>=2.7
 * PaddlePaddle>=1.3.2
 
 pip安装方式如下：
@@ -29,7 +29,7 @@ $ pip install paddlehub
 
 ## 快速体验
 
-如果安装成功，执行下面的命令，可以快速体验PaddleHub的一键预测功能
+安装成功后，执行下面的命令，可以快速体验PaddleHub的一键预测功能
 
 ```bash
 # 使用百度LAC词法分析工具进行分词
@@ -52,7 +52,8 @@ $ hub search
 
 ## 答疑
 
-欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交
+当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/blob/develop/docs/FAQ.md)查找解决方案。
+如果在FAQ中没有找到解决方案，欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交
 
 ## 版权和许可证
 PaddleHub由[Apache-2.0 license](LICENSE)提供
