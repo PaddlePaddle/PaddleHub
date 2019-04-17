@@ -98,14 +98,14 @@ class RunCommand(BaseCommand):
             module = hub.Module(module_dir=module_dir)
         except:
             print(
-                "ERROR! %s is  a model. The command is only for the module type but not the model type."
+                "ERROR! %s is  a model. The command run is only for the module type but not the model type."
                 % module_name)
             sys.exit(0)
 
         self.parse_args_with_module(module, argv[1:])
 
         if not module.default_signature:
-            print("ERROR! Module %s is not callable." % module_name)
+            print("ERROR! Module %s is not able to predict." % module_name)
             return False
 
         if not self.args.signature:
