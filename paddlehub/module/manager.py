@@ -79,9 +79,13 @@ class LocalModuleManager(object):
             url=url,
             save_path=hub.CACHE_HOME,
             save_name=module_name,
-            replace=True)
+            replace=True,
+            print_progress=True)
         result, tips, module_dir = default_downloader.uncompress(
-            file=module_zip_file, dirname=MODULE_HOME, delete_file=True)
+            file=module_zip_file,
+            dirname=MODULE_HOME,
+            delete_file=True,
+            print_progress=True)
 
         save_path = os.path.join(MODULE_HOME, module_name)
         shutil.move(module_dir, save_path)
