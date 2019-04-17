@@ -68,9 +68,10 @@ class DownloadCommand(BaseCommand):
         url = search_result.get('url', None)
         except_md5_value = search_result.get('md5', None)
         if not url:
-            tips = "Can't found model/module %s" % mod_name
-            if model_version:
+            tips = "PaddleHub can't find model/module named %s" % mod_name
+            if mod_version:
                 tips += " with version %s" % mod_version
+            tips += ". Please use the 'hub search' command to find the correct model/module name."
             print(tips)
             return True
 
