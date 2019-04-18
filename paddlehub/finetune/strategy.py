@@ -47,6 +47,30 @@ class DefaultStrategy(object):
         if self._optimizer_name.lower() == "sgd":
             self.optimizer = fluid.optimizer.SGD(
                 learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "adagrad":
+            self.optimizer = fluid.optimizer.Adagrad(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "adamax":
+            self.optimizer = fluid.optimizer.Adamax(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "decayedadagrad":
+            self.optimizer = fluid.optimizer.DecayedAdagrad(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "ftrl":
+            self.optimizer = fluid.optimizer.Ftrl(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "larsmomentum":
+            self.optimizer = fluid.optimizer.LarsMomentum(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "momentum":
+            self.optimizer = fluid.optimizer.Momentum(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "decayedadagrad":
+            self.optimizer = fluid.optimizer.DecayedAdagrad(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "rmsprop":
+            self.optimizer = fluid.optimizer.RMSPropOptimizer(
+                learning_rate=self.learning_rate)
         else:
             self.optimizer = fluid.optimizer.Adam(
                 learning_rate=self.learning_rate)
@@ -131,6 +155,30 @@ class DefaultFinetuneStrategy(DefaultStrategy):
     def execute(self, loss):
         if self._optimizer_name.lower() == "sgd":
             self.optimizer = fluid.optimizer.SGD(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "adagrad":
+            self.optimizer = fluid.optimizer.Adagrad(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "adamax":
+            self.optimizer = fluid.optimizer.Adamax(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "decayedadagrad":
+            self.optimizer = fluid.optimizer.DecayedAdagrad(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "ftrl":
+            self.optimizer = fluid.optimizer.Ftrl(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "larsmomentum":
+            self.optimizer = fluid.optimizer.LarsMomentum(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "momentum":
+            self.optimizer = fluid.optimizer.Momentum(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "decayedadagrad":
+            self.optimizer = fluid.optimizer.DecayedAdagrad(
+                learning_rate=self.learning_rate)
+        elif self._optimizer_name.lower() == "rmsprop":
+            self.optimizer = fluid.optimizer.RMSPropOptimizer(
                 learning_rate=self.learning_rate)
         else:
             self.optimizer = fluid.optimizer.Adam(
