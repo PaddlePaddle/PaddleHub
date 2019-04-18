@@ -70,7 +70,11 @@ class ImageClassificationReader(object):
         if self.image_width <= 0 or self.image_height <= 0:
             raise ValueError("Image width and height should not be negative.")
 
-    def data_generator(self, batch_size, phase="train", shuffle=False):
+    def data_generator(self,
+                       batch_size,
+                       phase="train",
+                       shuffle=False,
+                       data=None):
         if phase == "train":
             data = self.dataset.train_data(shuffle)
         elif phase == "test":
@@ -79,30 +83,41 @@ class ImageClassificationReader(object):
         elif phase == "val" or phase == "dev":
             shuffle = False
             data = self.dataset.validate_data(shuffle)
+        elif phase == "predict":
+            data = data
+
+        def preprocess(image_path):
+            image = Image.open(image_path)
+            image = image_augmentation.image_resize(image, self.image_width,
+                                                    self.image_height)
+            if self.data_augmentation:
+                image = image_augmentation.image_random_process(
+                    image, enable_resize=False)
+
+            # only support RGB
+            image = image.convert('RGB')
+
+            # HWC to CHW
+            image = np.array(image).astype('float32')
+            if len(image.shape) == 3:
+                image = np.swapaxes(image, 1, 2)
+                image = np.swapaxes(image, 1, 0)
+
+            # standardization
+            image /= 255
+            image -= self.images_mean
+            image /= self.images_std
+            image = image[channel_order_dict[self.channel_order], :, :]
+            return image
 
         def _data_reader():
-            for image_path, label in data:
-                image = Image.open(image_path)
-                image = image_augmentation.image_resize(image, self.image_width,
-                                                        self.image_height)
-                if self.data_augmentation:
-                    image = image_augmentation.image_random_process(
-                        image, enable_resize=False)
-
-                # only support RGB
-                image = image.convert('RGB')
-
-                # HWC to CHW
-                image = np.array(image).astype('float32')
-                if len(image.shape) == 3:
-                    image = np.swapaxes(image, 1, 2)
-                    image = np.swapaxes(image, 1, 0)
-
-                # standardization
-                image /= 255
-                image -= self.images_mean
-                image /= self.images_std
-                image = image[channel_order_dict[self.channel_order], :, :]
-                yield ((image, label))
+            if phase == "predict":
+                for image_path in data:
+                    image = preprocess(image_path)
+                    yield (image, )
+            else:
+                for image_path, label in data:
+                    image = preprocess(image_path)
+                    yield (image, label)
 
         return paddle.batch(_data_reader, batch_size=batch_size)

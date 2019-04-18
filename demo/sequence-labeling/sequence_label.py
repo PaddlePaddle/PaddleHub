@@ -46,48 +46,44 @@ if __name__ == '__main__':
         max_seq_len=args.max_seq_len)
 
     # Step3: construct transfer learning network
-    with fluid.program_guard(program):
-        label = fluid.layers.data(
-            name="label", shape=[args.max_seq_len, 1], dtype='int64')
-        seq_len = fluid.layers.data(name="seq_len", shape=[1], dtype='int64')
+    # Use "sequence_output" for token-level output.
+    sequence_output = outputs["sequence_output"]
 
-        # Use "sequence_output" for token-level output.
-        sequence_output = outputs["sequence_output"]
+    # Define a sequence labeling finetune task by PaddleHub's API
+    seq_label_task = hub.create_seq_label_task(
+        feature=sequence_output,
+        max_seq_len=args.max_seq_len,
+        num_classes=dataset.num_labels)
 
-        # Setup feed list for data feeder
-        # Must feed all the tensor of ERNIE's module need
-        # Compared to classification task, we need add seq_len tensor to feedlist
-        feed_list = [
-            inputs["input_ids"].name, inputs["position_ids"].name,
-            inputs["segment_ids"].name, inputs["input_mask"].name, label.name,
-            seq_len
-        ]
-        # Define a sequence labeling finetune task by PaddleHub's API
-        seq_label_task = hub.create_seq_label_task(
-            feature=sequence_output,
-            labels=label,
-            seq_len=seq_len,
-            num_classes=dataset.num_labels)
+    # Setup feed list for data feeder
+    # Must feed all the tensor of ERNIE's module need
+    # Compared to classification task, we need add seq_len tensor to feedlist
+    feed_list = [
+        inputs["input_ids"].name, inputs["position_ids"].name,
+        inputs["segment_ids"].name, inputs["input_mask"].name,
+        seq_label_task.variable('label').name,
+        seq_label_task.variable('seq_len').name
+    ]
 
-        # Select a finetune strategy
-        strategy = hub.AdamWeightDecayStrategy(
-            weight_decay=args.weight_decay,
-            learning_rate=args.learning_rate,
-            lr_scheduler="linear_warmup_decay",
-        )
+    # Select a finetune strategy
+    strategy = hub.AdamWeightDecayStrategy(
+        weight_decay=args.weight_decay,
+        learning_rate=args.learning_rate,
+        lr_scheduler="linear_warmup_decay",
+    )
 
-        # Setup runing config for PaddleHub Finetune API
-        config = hub.RunConfig(
-            use_cuda=args.use_gpu,
-            num_epoch=args.num_epoch,
-            batch_size=args.batch_size,
-            checkpoint_dir=args.checkpoint_dir,
-            strategy=strategy)
+    # Setup runing config for PaddleHub Finetune API
+    config = hub.RunConfig(
+        use_cuda=args.use_gpu,
+        num_epoch=args.num_epoch,
+        batch_size=args.batch_size,
+        checkpoint_dir=args.checkpoint_dir,
+        strategy=strategy)
 
-        # Finetune and evaluate model by PaddleHub's API
-        # will finish training, evaluation, testing, save model automatically
-        hub.finetune_and_eval(
-            task=seq_label_task,
-            data_reader=reader,
-            feed_list=feed_list,
-            config=config)
+    # Finetune and evaluate model by PaddleHub's API
+    # will finish training, evaluation, testing, save model automatically
+    hub.finetune_and_eval(
+        task=seq_label_task,
+        data_reader=reader,
+        feed_list=feed_list,
+        config=config)
