@@ -44,11 +44,11 @@ class DefaultStrategy(object):
         self._optimizer_name = optimizer_name
 
     def execute(self, loss):
-        if self.optimizer.lower() == "adam":
-            self.optimizer = fluid.optimizer.Adam(
-                learning_rate=self.learning_rate)
-        elif self.optimizer.lower() == "sgd":
+        if self._optimizer_name.lower() == "sgd":
             self.optimizer = fluid.optimizer.SGD(
+                learning_rate=self.learning_rate)
+        else:
+            self.optimizer = fluid.optimizer.Adam(
                 learning_rate=self.learning_rate)
 
         if self.optimizer is not None:
@@ -129,11 +129,11 @@ class DefaultFinetuneStrategy(DefaultStrategy):
         self.regularization_coeff = regularization_coeff
 
     def execute(self, loss):
-        if self._optimizer_name.lower() == "adam":
-            self.optimizer = fluid.optimizer.Adam(
-                learning_rate=self.learning_rate)
-        elif self._optimizer_name.lower() == "sgd":
+        if self._optimizer_name.lower() == "sgd":
             self.optimizer = fluid.optimizer.SGD(
+                learning_rate=self.learning_rate)
+        else:
+            self.optimizer = fluid.optimizer.Adam(
                 learning_rate=self.learning_rate)
 
         # get pretrained parameters
