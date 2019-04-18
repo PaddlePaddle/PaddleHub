@@ -33,7 +33,7 @@ class RunConfig(object):
                  use_cuda=False,
                  checkpoint_dir=None,
                  num_epoch=10,
-                 batch_size=None,
+                 batch_size=8,
                  enable_memory_optim=True,
                  strategy=None):
         """ Construct finetune Config """
