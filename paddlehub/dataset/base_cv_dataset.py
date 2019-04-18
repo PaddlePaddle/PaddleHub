@@ -54,15 +54,16 @@ class ImageClassificationDataset(object):
                         break
                     line = line.strip()
                     items = line.split(" ")
-                    if os.path.isabs(items[0]):
-                        image_path = items[0]
+                    if len(items) > 2:
+                        image_path = " ".join(items[0:-1])
                     else:
-                        if self.base_path is None:
-                            image_path = items[0]
-                        else:
-                            image_path = os.path.join(self.base_path, items[0])
-                    label = items[1]
-                    data.append((image_path, items[1]))
+                        image_path = items[0]
+                    if not os.path.isabs(image_path):
+                        if self.base_path is not None:
+                            image_path = os.path.join(self.base_path,
+                                                      image_path)
+                    label = items[-1]
+                    data.append((image_path, items[-1]))
 
             if shuffle:
                 np.random.shuffle(data)
