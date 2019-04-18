@@ -1,6 +1,0 @@
-name: senta
-type: nlp/sentiment_analysis
-author: paddlepaddle
-author_email: paddle-dev@baidu.com
-summary: "Senta is a model used to analyse sentiment tendency of Chinese sentences. We divide sentiment tendencies into three levels, score 2 means positive, score 1 means neuter, and score 0 means negative"
-version: 1.0.0

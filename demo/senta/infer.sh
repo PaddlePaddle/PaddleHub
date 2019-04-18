@@ -1,1 +1,1 @@
-python ../../paddlehub/commands/hub.py run senta.hub_module/ --signature sentiment_classify --config resources/test/test.yml  --input_file resources/test/test.txt
+python ../../paddlehub/commands/hub.py run senta --input_file test/test.txt

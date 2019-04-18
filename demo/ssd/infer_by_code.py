@@ -2,11 +2,11 @@ import os
 import paddlehub as hub
 
 
-def infer_with_input_text():
+def infer_with_input_path():
     # get ssd module
-    ssd = hub.Module(module_dir="ssd_mobilenet_v1_pascal.hub_module")
+    ssd = hub.Module(name="ssd_mobilenet_v1_pascal")
 
-    test_img_path = os.path.join("resources", "test", "test_img_bird.jpg")
+    test_img_path = os.path.join("test", "test_img_bird.jpg")
 
     # get the input keys for signature 'object_detection'
     data_format = ssd.processor.data_format(sign_name='object_detection')
@@ -23,14 +23,14 @@ def infer_with_input_text():
 
 def infer_with_input_file():
     # get ssd module
-    ssd = hub.Module(module_dir="ssd_mobilenet_v1_pascal.hub_module")
+    ssd = hub.Module(name="ssd_mobilenet_v1_pascal")
 
     # get the input keys for signature 'object_detection'
     data_format = ssd.processor.data_format(sign_name='object_detection')
     key = list(data_format.keys())[0]
 
     # parse input file
-    test_file = os.path.join("resources", "test", "test.txt")
+    test_file = os.path.join("test", "test.txt")
     test_images = hub.io.parser.txt_parser.parse(test_file)
 
     # set input dict

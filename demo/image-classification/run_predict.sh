@@ -22,4 +22,4 @@ done
 
 export CUDA_VISIBLE_DEVICES=${cuda_visible_devices}
 
-python -u img_classifier.py --target predict --use_gpu ${use_gpu} --checkpoint_dir ${checkpoint_dir} --module ${module}
+python -u predict.py --use_gpu ${use_gpu} --checkpoint_dir ${checkpoint_dir} --module ${module}
