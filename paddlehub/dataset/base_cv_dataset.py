@@ -74,7 +74,8 @@ class ImageClassificationDataset(object):
 
     def label_dict(self):
         if not self.label_list:
-            with open(self.label_list_file, "r") as file:
+            with open(os.path.join(self.base_path, self.label_list_file),
+                      "r") as file:
                 self.label_list = file.read().split("\n")
         return {index: key for index, key in enumerate(self.label_list)}
 
