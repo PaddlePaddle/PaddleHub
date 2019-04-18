@@ -28,7 +28,9 @@ class ImageClassificationDataset(object):
         self.train_list_file = None
         self.test_list_file = None
         self.validate_list_file = None
+        self.label_list_file = None
         self.num_labels = 0
+        self.label_list = []
 
     def _download_dataset(self, dataset_path, url):
         if not os.path.exists(dataset_path):
@@ -69,6 +71,12 @@ class ImageClassificationDataset(object):
                 yield item
 
         return _base_reader()
+
+    def label_dict(self):
+        if not self.label_list:
+            with open(self.label_list_file, "r") as file:
+                self.label_list = file.read().split("\n")
+        return {index: key for index, key in enumerate(self.label_list)}
 
     def train_data(self, shuffle=True):
         train_data_path = os.path.join(self.base_path, self.train_list_file)
