@@ -111,7 +111,7 @@ strategy = hub.AdamWeightDecayStrategy(
     learning_rate=5e-5,
     weight_decay=0.01,
     warmup_proportion=0.0,
-    lr_scheduler="linear_warmup_decay",
+    lr_scheduler="linear_decay",
 )
 
 config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strategy)
@@ -124,7 +124,7 @@ hub.finetune_and_eval(task=cls_task, data_reader=reader, feed_list=feed_list, co
 `learning_rate`: Finetune过程中的最大学习率;
 `weight_decay`: 模型的正则项参数，默认0.01，如果模型有过拟合倾向，可适当调高这一参数;
 `warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate;
-`lr_scheduler`: 有两种策略可选(1) `linear_warmup_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
+`lr_scheduler`: 有两种策略可选(1) `linear_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
 
 #### 运行配置
 `RunConfig` 主要控制Finetune的训练，包含以下可控制的参数:

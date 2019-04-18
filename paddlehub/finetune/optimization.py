@@ -27,18 +27,18 @@ def adam_weight_decay_optimization(loss,
                                    learning_rate,
                                    main_program,
                                    weight_decay,
-                                   scheduler='linear_warmup_decay'):
+                                   scheduler='linear_decay'):
     if warmup_steps > 0:
         if scheduler == 'noam_decay':
             scheduled_lr = fluid.layers.learning_rate_scheduler\
              .noam_decay(1/(warmup_steps *(learning_rate ** 2)),
                          warmup_steps)
-        elif scheduler == 'linear_warmup_decay':
+        elif scheduler == 'linear_decay':
             scheduled_lr = linear_warmup_decay(learning_rate, warmup_steps,
                                                num_train_steps)
         else:
             raise ValueError("Unkown learning rate scheduler, should be "
-                             "'noam_decay' or 'linear_warmup_decay'")
+                             "'noam_decay' or 'linear_decay'")
         optimizer = fluid.optimizer.Adam(learning_rate=scheduled_lr)
     else:
         optimizer = fluid.optimizer.Adam(learning_rate=learning_rate)
