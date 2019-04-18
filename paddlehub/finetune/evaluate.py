@@ -27,14 +27,14 @@ import paddlehub as hub
 
 def evaluate_cls_task(task, data_reader, feed_list, phase="test", config=None):
     logger.info("Evaluation on {} dataset start".format(phase))
-    inference_program = task.inference_program()
+    test_program = task.test_program()
     main_program = task.main_program()
     loss = task.variable("loss")
     accuracy = task.variable("accuracy")
     batch_size = config.batch_size
     place, dev_count = hub.common.get_running_device_info(config)
     exe = fluid.Executor(place=place)
-    with fluid.program_guard(inference_program):
+    with fluid.program_guard(test_program):
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
         num_eval_examples = acc_sum = loss_sum = 0
         test_reader = data_reader.data_generator(
@@ -77,13 +77,13 @@ def evaluate_seq_label_task(task,
         task.variable("loss").name
     ]
     logger.info("Evaluation on {} dataset start".format(phase))
-    inference_program = task.inference_program()
+    test_program = task.test_program()
     batch_size = config.batch_size
     place, dev_count = hub.common.get_running_device_info(config)
     exe = fluid.Executor(place=place)
     # calculate the num of label from probs variable shape
     num_labels = task.variable("probs").shape[1]
-    with fluid.program_guard(inference_program):
+    with fluid.program_guard(test_program):
         data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
         num_eval_examples = acc_sum = loss_sum = 0
         test_reader = data_reader.data_generator(

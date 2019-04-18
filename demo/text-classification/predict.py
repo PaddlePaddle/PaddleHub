@@ -51,23 +51,21 @@ if __name__ == '__main__':
     place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
     exe = fluid.Executor(place)
     with fluid.program_guard(program):
-        label = fluid.layers.data(name="label", shape=[1], dtype='int64')
-
         # Use "pooled_output" for classification tasks on an entire sentence.
         # Use "sequence_outputs" for token-level output.
         pooled_output = output_dict["pooled_output"]
+
+        # Define a classfication finetune task by PaddleHub's API
+        cls_task = hub.create_text_cls_task(
+            feature=pooled_output, num_classes=dataset.num_labels)
 
         # Setup feed list for data feeder
         # Must feed all the tensor of ERNIE's module need
         feed_list = [
             input_dict["input_ids"].name, input_dict["position_ids"].name,
             input_dict["segment_ids"].name, input_dict["input_mask"].name,
-            label.name
+            cls_task.variable('label').name
         ]
-
-        # Define a classfication finetune task by PaddleHub's API
-        cls_task = hub.create_text_cls_task(
-            feature=pooled_output, label=label, num_classes=dataset.num_labels)
 
         # classificatin probability tensor
         probs = cls_task.variable("probs")
