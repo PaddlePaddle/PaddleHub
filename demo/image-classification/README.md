@@ -34,8 +34,8 @@ $ pip install --upgrade paddlepaddle
 --num_epoch: finetune迭代的轮数。默认为1
 --module: 使用哪个Module作为finetune的特征提取器，脚本支持{resnet50/resnet101/resnet152/mobilenet/nasnet/pnasnet}等模型。默认为resnet50
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型。默认为paddlehub_finetune_ckpt
---dataset: 使用什么数据集进行finetune, 脚本支持分别是{flowers/dogcat}。默认为flowers
---use_gpu: 使用使用GPU进行训练，如果机器支持GPU且安装了GPU版本的PaddlePaddle，我们建议您打开这个开关。默认关闭
+--dataset: 使用什么数据集进行finetune, 脚本支持分别是{flowers/dogcat/stanforddogs/indoor67/food101}。默认为flowers
+--use_gpu: 是否使用GPU进行训练，如果机器支持GPU且安装了GPU版本的PaddlePaddle，我们建议您打开这个开关。默认关闭
 ```
 
 ## 进行预测

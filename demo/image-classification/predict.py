@@ -25,10 +25,18 @@ module_map = {
 
 def predict(args):
 
-    if args.dataset == "dogcat":
-        dataset = hub.dataset.DogCat()
-    elif args.dataset == "flowers":
+    if args.dataset.lower() == "flowers":
         dataset = hub.dataset.Flowers()
+    elif args.dataset.lower() == "dogcat":
+        dataset = hub.dataset.DogCat()
+    elif args.dataset.lower() == "indoor67":
+        dataset = hub.dataset.Indoor67()
+    elif args.dataset.lower() == "food101":
+        dataset = hub.dataset.Food101()
+    elif args.dataset.lower() == "stanforddogs":
+        dataset = hub.dataset.StanfordDogs()
+    else:
+        raise ValueError("%s dataset is not defined" % args.dataset)
 
     label_map = dataset.label_dict()
     num_labels = len(label_map)

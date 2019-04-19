@@ -29,7 +29,19 @@ def finetune(args):
     module = hub.Module(name=args.module)
     input_dict, output_dict, program = module.context(trainable=True)
 
-    dataset = hub.dataset.Flowers()
+    if args.dataset.lower() == "flowers":
+        dataset = hub.dataset.Flowers()
+    elif args.dataset.lower() == "dogcat":
+        dataset = hub.dataset.DogCat()
+    elif args.dataset.lower() == "indoor67":
+        dataset = hub.dataset.Indoor67()
+    elif args.dataset.lower() == "food101":
+        dataset = hub.dataset.Food101()
+    elif args.dataset.lower() == "stanforddogs":
+        dataset = hub.dataset.StanfordDogs()
+    else:
+        raise ValueError("%s dataset is not defined" % args.dataset)
+
     data_reader = hub.reader.ImageClassificationReader(
         image_width=module.get_expected_image_width(),
         image_height=module.get_expected_image_height(),
