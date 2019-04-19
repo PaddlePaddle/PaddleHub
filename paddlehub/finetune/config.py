@@ -30,10 +30,10 @@ class RunConfig(object):
                  log_interval=10,
                  eval_interval=100,
                  save_ckpt_interval=None,
-                 use_cuda=False,
+                 use_cuda=True,
                  checkpoint_dir=None,
-                 num_epoch=10,
-                 batch_size=None,
+                 num_epoch=1,
+                 batch_size=32,
                  enable_memory_optim=True,
                  strategy=None):
         """ Construct finetune Config """

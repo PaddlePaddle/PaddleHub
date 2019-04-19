@@ -469,7 +469,7 @@ class Module(object):
     def context(self,
                 sign_name=None,
                 for_test=False,
-                trainable=False,
+                trainable=True,
                 regularizer=None,
                 max_seq_len=128,
                 learning_rate=1e-3):
