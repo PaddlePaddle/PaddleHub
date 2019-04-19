@@ -16,14 +16,26 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import platform
+
 from setuptools import find_packages
 from setuptools import setup
 from paddlehub.version import hub_version
+
+
+def python_version():
+    return [int(v) for v in platform.python_version().split(".")]
+
+
+max_version, mid_version, min_version = python_version()
 
 REQUIRED_PACKAGES = [
     'numpy >= 1.12.0', 'six >= 1.10.0', 'protobuf >= 3.1.0', 'pyyaml', 'Pillow',
     "visualdl >= 1.3.0"
 ]
+
+if max_version < 3:
+    REQUIRED_PACKAGES += ["enum"]
 
 setup(
     name='paddlehub',
