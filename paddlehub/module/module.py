@@ -108,6 +108,13 @@ class Module(object):
         if not isinstance(self.extra_info, dict):
             raise TypeError(
                 "The extra_info should be an instance of python dict")
+
+        # cache data
+        self.last_call_name = None
+        self.cache_feed_dict = None
+        self.cache_fetch_dict = None
+        self.cache_program = None
+
         # TODO(wuzewu): print more module loading info log
         if name:
             self._init_with_name(name=name)
@@ -434,7 +441,14 @@ class Module(object):
             feeder = fluid.DataFeeder(feed_list=feed_name_list, place=place)
             return functools.partial(_reader, process_data=process_data), feeder
 
-        feed_dict, fetch_dict, program = self.context(sign_name, for_test=True)
+        if self.last_call_name != sign_name:
+            self.last_call_name = sign_name
+            self.cache_feed_dict, self.cache_fetch_dict, self.cache_program = self.context(
+                sign_name, for_test=True)
+        feed_dict = self.cache_feed_dict
+        fetch_dict = self.cache_fetch_dict
+        program = self.cache_program
+
         #TODO(wuzewu): more option
         fetch_list = list(set([value for key, value in fetch_dict.items()]))
         with fluid.program_guard(program):
