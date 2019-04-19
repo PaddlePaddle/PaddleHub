@@ -22,3 +22,6 @@ from .lcqmc import LCQMC
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat
 from .flowers import FlowersDataset as Flowers
+from .stanford_dogs import StanfordDogsDataset as StanfordDogs
+from .food101 import Food101Dataset as Food101
+from .indoor67 import Indoor67Dataset as Indoor67

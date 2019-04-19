@@ -1,0 +1,3 @@
+test/test_img_sheep.jpg
+test/test_img_cat.jpg
+test/test_img_bird.jpg

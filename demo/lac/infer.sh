@@ -1,1 +1,1 @@
-python ../../paddlehub/commands/hub.py run lac.hub_module/ --signature lexical_analysis --config resources/test/test.yml  --input_file resources/test/test.txt
+python ../../paddlehub/commands/hub.py run lac --input_file test/test.txt

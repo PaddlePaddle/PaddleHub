@@ -28,7 +28,9 @@ class ImageClassificationDataset(object):
         self.train_list_file = None
         self.test_list_file = None
         self.validate_list_file = None
+        self.label_list_file = None
         self.num_labels = 0
+        self.label_list = []
 
     def _download_dataset(self, dataset_path, url):
         if not os.path.exists(dataset_path):
@@ -52,15 +54,16 @@ class ImageClassificationDataset(object):
                         break
                     line = line.strip()
                     items = line.split(" ")
-                    if os.path.isabs(items[0]):
-                        image_path = items[0]
+                    if len(items) > 2:
+                        image_path = " ".join(items[0:-1])
                     else:
-                        if self.base_path is None:
-                            image_path = items[0]
-                        else:
-                            image_path = os.path.join(self.base_path, items[0])
-                    label = items[1]
-                    data.append((image_path, items[1]))
+                        image_path = items[0]
+                    if not os.path.isabs(image_path):
+                        if self.base_path is not None:
+                            image_path = os.path.join(self.base_path,
+                                                      image_path)
+                    label = items[-1]
+                    data.append((image_path, items[-1]))
 
             if shuffle:
                 np.random.shuffle(data)
@@ -69,6 +72,13 @@ class ImageClassificationDataset(object):
                 yield item
 
         return _base_reader()
+
+    def label_dict(self):
+        if not self.label_list:
+            with open(os.path.join(self.base_path, self.label_list_file),
+                      "r") as file:
+                self.label_list = file.read().split("\n")
+        return {index: key for index, key in enumerate(self.label_list)}
 
     def train_data(self, shuffle=True):
         train_data_path = os.path.join(self.base_path, self.train_list_file)

@@ -22,15 +22,17 @@ import paddlehub as hub
 from paddlehub.dataset.base_cv_dataset import ImageClassificationDataset
 
 
-class DogCatDataset(ImageClassificationDataset):
+class StanfordDogsDataset(ImageClassificationDataset):
     def __init__(self):
-        super(DogCatDataset, self).__init__()
-        dataset_path = os.path.join(hub.common.dir.DATA_HOME, "dog-cat")
+        super(StanfordDogsDataset, self).__init__()
+        dataset_path = os.path.join(hub.common.dir.DATA_HOME,
+                                    "StanfordDogs-120")
         self.base_path = self._download_dataset(
             dataset_path=dataset_path,
-            url="https://paddlehub-dataset.bj.bcebos.com/dog-cat.tar.gz")
+            url="https://paddlehub-dataset.bj.bcebos.com/StanfordDogs-120.tar.gz"
+        )
         self.train_list_file = "train_list.txt"
         self.test_list_file = "test_list.txt"
         self.validate_list_file = "validate_list.txt"
         self.label_list_file = "label_list.txt"
-        self.num_labels = 2
+        self.num_labels = 120

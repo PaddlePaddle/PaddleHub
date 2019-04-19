@@ -28,4 +28,4 @@ done
 
 export CUDA_VISIBLE_DEVICES=${cuda_visible_devices}
 
-python -u img_classifier.py --target finetune --use_gpu ${use_gpu} --batch_size ${batch_size} --checkpoint_dir ${checkpoint_dir} --num_epoch ${num_epoch} --module ${module}
+python -u img_classifier.py --use_gpu ${use_gpu} --batch_size ${batch_size} --checkpoint_dir ${checkpoint_dir} --num_epoch ${num_epoch} --module ${module}

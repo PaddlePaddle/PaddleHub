@@ -1,3 +1,0 @@
-./resources/test/test_img_sheep.jpg
-./resources/test/test_img_cat.jpg
-./resources/test/test_img_bird.jpg

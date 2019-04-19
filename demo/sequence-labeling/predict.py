@@ -53,12 +53,14 @@ if __name__ == '__main__':
     place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
     exe = fluid.Executor(place)
     with fluid.program_guard(program):
-        label = fluid.layers.data(
-            name="label", shape=[args.max_seq_len, 1], dtype='int64')
-        seq_len = fluid.layers.data(name="seq_len", shape=[1], dtype='int64')
-
         # Use "sequence_outputs" for token-level output.
         sequence_output = output_dict["sequence_output"]
+
+        # Define a classfication finetune task by PaddleHub's API
+        seq_label_task = hub.create_seq_label_task(
+            feature=sequence_output,
+            num_classes=dataset.num_labels,
+            max_seq_len=args.max_seq_len)
 
         # Setup feed list for data feeder
         # Must feed all the tensor of ERNIE's module need
@@ -66,15 +68,9 @@ if __name__ == '__main__':
         feed_list = [
             input_dict["input_ids"].name, input_dict["position_ids"].name,
             input_dict["segment_ids"].name, input_dict["input_mask"].name,
-            label.name, seq_len
+            seq_label_task.variable('label').name,
+            seq_label_task.variable('seq_len').name
         ]
-
-        # Define a classfication finetune task by PaddleHub's API
-        seq_label_task = hub.create_seq_label_task(
-            feature=sequence_output,
-            labels=label,
-            num_classes=dataset.num_labels,
-            seq_len=seq_len)
 
         fetch_list = [
             seq_label_task.variable("labels").name,

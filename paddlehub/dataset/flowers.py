@@ -32,4 +32,5 @@ class FlowersDataset(ImageClassificationDataset):
         self.train_list_file = "train_list.txt"
         self.test_list_file = "test_list.txt"
         self.validate_list_file = "validate_list.txt"
+        self.label_list_file = "label_list.txt"
         self.num_labels = 5

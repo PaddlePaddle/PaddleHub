@@ -16,7 +16,7 @@ PaddleHub为Module/Model（关于Model和Module的区别，请查看下方的介
 
 ## `download`
 
-用于下载百度提供的预训练Model
+用于下载百度提供的Module/Model
 
 `选项`
 > `--output_path`：用于指定存放下载文件的目录，默认为当前目录
