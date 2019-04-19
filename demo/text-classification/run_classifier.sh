@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=3
 
 # User can select chnsenticorp, nlpcc_dbqa, lcqmc for different task
 DATASET="chnsenticorp"
