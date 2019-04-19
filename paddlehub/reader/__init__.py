@@ -14,5 +14,5 @@
 
 from .nlp_reader import ClassifyReader
 from .nlp_reader import SequenceLabelReader
-from .nlp_reader import TextClassificationReader
+from .nlp_reader import LACTokenizeReader
 from .cv_reader import ImageClassificationReader

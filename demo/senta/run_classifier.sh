@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=2
 
 # User can select chnsenticorp, nlpcc_dbqa, lcqmc for different task
 DATASET="chnsenticorp"
@@ -8,4 +8,4 @@ python -u text_classifier.py \
                    --batch_size=24 \
                    --use_gpu=True \
                    --checkpoint_dir=${CKPT_DIR} \
-                   --num_epoch=3
+                   --num_epoch=10

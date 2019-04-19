@@ -58,7 +58,6 @@ class BaseReader(object):
 
         self.current_example = 0
         self.current_epoch = 0
-        self.num_examples = 0
 
         self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
 
@@ -383,17 +382,46 @@ class ExtractEmbeddingReader(BaseReader):
         return return_list
 
 
-class TextClassificationReader(object):
-    def __init__(self, dataset, vocab_path, do_lower_case=False):
-
+class LACTokenizeReader(object):
+    def __init__(self, dataset, vocab_path):
         self.dataset = dataset
-        self.tokenizer = tokenization.FullTokenizer(
-            vocab_file=vocab_path, do_lower_case=do_lower_case)
-        self.vocab = self.tokenizer.vocab
         self.lac = hub.Module(name="lac")
+        self.tokenizer = tokenization.FullTokenizer(
+            vocab_file=vocab_path, do_lower_case=False)
+        self.vocab = self.tokenizer.vocab
         self.feed_key = list(
             self.lac.processor.data_format(
                 sign_name="lexical_analysis").keys())[0]
+
+        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
+
+    def get_num_examples(self, phase):
+        """Get number of examples for train, dev or test."""
+        if phase not in ['train', 'val', 'dev', 'test']:
+            raise ValueError(
+                "Unknown phase, which should be in ['train', 'val'/'dev', 'test']."
+            )
+        return self.num_examples[phase]
+
+    def get_train_examples(self):
+        """Gets a collection of `InputExample`s for the train set."""
+        return self.dataset.get_train_examples()
+
+    def get_dev_examples(self):
+        """Gets a collection of `InputExample`s for the dev set."""
+        return self.dataset.get_dev_examples()
+
+    def get_val_examples(self):
+        """Gets a collection of `InputExample`s for the val set."""
+        return self.dataset.get_val_examples()
+
+    def get_test_examples(self):
+        """Gets a collection of `InputExample`s for prediction."""
+        return self.dataset.get_test_examples()
+
+    def get_train_progress(self):
+        """Gets progress for training phase."""
+        return self.current_example, self.current_epoch
 
     def data_generator(self,
                        batch_size=1,
@@ -402,14 +430,20 @@ class TextClassificationReader(object):
                        data=None):
         if phase == "train":
             data = self.dataset.get_train_examples()
+            self.num_examples['train'] = len(data)
         elif phase == "test":
             shuffle = False
             data = self.dataset.get_test_examples()
+            self.num_examples['train'] = len(data)
         elif phase == "val" or phase == "dev":
             shuffle = False
             data = self.dataset.get_dev_examples()
+            self.num_examples['test'] = len(data)
         elif phase == "predict":
             data = data
+        else:
+            raise ValueError(
+                "Unknown phase, which should be in ['train', 'dev', 'test'].")
 
         def preprocess(text):
             data_dict = {self.feed_key: [text]}
