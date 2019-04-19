@@ -382,7 +382,7 @@ class ExtractEmbeddingReader(BaseReader):
         return return_list
 
 
-class LACTokenizeReader(object):
+class LACClassifyReader(object):
     def __init__(self, dataset, vocab_path):
         self.dataset = dataset
         self.lac = hub.Module(name="lac")

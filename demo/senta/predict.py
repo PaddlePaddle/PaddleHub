@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     # Sentence classification  dataset reader
     dataset = hub.dataset.ChnSentiCorp()
-    reader = hub.reader.TextClassificationReader(
+    reader = hub.reader.LACClassifyReader(
         dataset=dataset, vocab_path=module.get_vocab_path())
 
     place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()

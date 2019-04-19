@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # Step2: Download dataset and use TextClassificationReader to read dataset
     dataset = hub.dataset.ChnSentiCorp()
 
-    reader = hub.reader.LACTokenizeReader(
+    reader = hub.reader.LACClassifyReader(
         dataset=dataset, vocab_path=module.get_vocab_path())
 
     sent_feature = outputs["sequence_output"]
