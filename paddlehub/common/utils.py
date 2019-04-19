@@ -24,6 +24,7 @@ import platform
 
 import paddle
 import paddle.fluid as fluid
+import six
 
 from paddlehub.module import module_desc_pb2
 from paddlehub.common.logger import logger
@@ -121,10 +122,13 @@ def from_pyobj_to_module_attr(pyobj, module_attr, obj_filter=None):
     if isinstance(pyobj, bool):
         module_attr.type = module_desc_pb2.BOOLEAN
         module_attr.b = pyobj
-    elif isinstance(pyobj, int):
+    elif isinstance(pyobj, six.integer_types):
         module_attr.type = module_desc_pb2.INT
         module_attr.i = pyobj
-    elif isinstance(pyobj, str):
+    elif isinstance(pyobj, six.text_type):
+        module_attr.type = module_desc_pb2.STRING
+        module_attr.s = pyobj
+    elif isinstance(pyobj, six.binary_type):
         module_attr.type = module_desc_pb2.STRING
         module_attr.s = pyobj
     elif isinstance(pyobj, float):
