@@ -3,6 +3,8 @@
 * [Task](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API/Task.md)
 * [RunConfig](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API/RunConfig.md)
 * [Strategy](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API/Strategy.md)
+* [Dataset](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API/Dataset.md)
+* [Reader](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API/Reader.md)
 
 # 接口
 * [create_seq_label_task](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API/create_seq_label_task.md)

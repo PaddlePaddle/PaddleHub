@@ -23,7 +23,7 @@ $ pip install --upgrade paddlepaddle
 
 在安装过程中如果遇到问题，您可以到[Paddle官方网站](http://www.paddlepaddle.org/)上查看解决方案。
 
-## 开始Finetune
+## 开始Fine-tune
 
 在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用进行finetune。
 

@@ -4,7 +4,7 @@
 
 ## `method paddlehub.finetune.task.finetune_and_eval(task, data_reader, feed_list, config=None):`
 
-对一个Task进行finetune，并且定期进行性能评估。在finetune的过程中，接口会定期的保存checkpoint（模型和运行数据），当运行被中断时，通过RunConfig指定上一次运行的checkpoint目录，可以直接从上一次运行的最后一次评估中恢复状态继续运行
+对一个Task进行finetune，并且定期进行验证集评估。在finetune的过程中，接口会定期的保存checkpoint（模型和运行数据），当运行被中断时，通过RunConfig指定上一次运行的checkpoint目录，可以直接从上一次运行的最后一次评估中恢复状态继续运行
 > ### 参数
 > * task: 需要执行的Task
 >

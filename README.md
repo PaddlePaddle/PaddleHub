@@ -21,17 +21,24 @@ PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借�
 * Python>=2.7
 * PaddlePaddle>=1.3.2
 
+*NOTE:* PaddleHub推荐在Python 3环境下进行使用
+
 pip安装方式如下：
 
-```bash
+```shell
 $ pip install paddlehub
+```
+
+*NOTE:* 若出现找不到paddlehub错误，请尝试指定pypi源进行安装
+```shell
+$ pip install -i https://pypi.org/simple/ paddlehub
 ```
 
 ## 快速体验
 
 安装成功后，执行下面的命令，可以快速体验PaddleHub的一键预测功能
 
-```bash
+```shell
 # 使用百度LAC词法分析工具进行分词
 $ hub run lac --input_text "今天是个好日子"
 
@@ -41,7 +48,7 @@ $ hub run senta --input_text "今天是个好日子"
 
 想了解更多PaddleHub已经发布的模型，请使用`hub search`命令查看所有已发布的模型。
 
-```bash
+```shell
 $ hub search
 ```
 
