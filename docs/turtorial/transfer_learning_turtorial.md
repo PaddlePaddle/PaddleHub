@@ -19,8 +19,9 @@ http://ftp.cs.wisc.edu/machine-learning/shavlik-group/torrey.handbook09.pdf
 
 ## PaddleHub中的迁移学习
 
-PaddleHub提供了基于PaddlePaddle框架的Finetune API, 对常见的预训练模型迁移学习任务进行了抽象，帮助用户使用最少的代码快速完成迁移学习。
-教程会包含CV领域的图像分类迁移，和NLP文本分类迁移两种任务。
+PaddleHub提供了基于PaddlePaddle框架实现的Finetune API, 重点针对大规模预训练模型的Fine-tuning任务做了高阶的抽象，帮助用户使用最少的代码快速、稳定地完成预训练模型的fine-tuning。
+
+教程会涵盖CV领域的图像分类迁移，和NLP文本分类迁移两种任务。
 
 * [CV教程](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/turtorial/cv_finetune_turtorial.md)
 * [NLP教程]()
