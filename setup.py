@@ -30,8 +30,12 @@ def python_version():
 max_version, mid_version, min_version = python_version()
 
 REQUIRED_PACKAGES = [
-    'numpy >= 1.12.0', 'six >= 1.10.0', 'protobuf >= 3.1.0', 'pyyaml', 'Pillow',
-    "visualdl >= 1.3.0"
+    'numpy >= 1.12.0',
+    'six >= 1.10.0',
+    'protobuf >= 3.1.0',
+    'pyyaml',
+    'Pillow',
+    "visualdl >= 1.3.0",
 ]
 
 if max_version < 3:
@@ -41,7 +45,7 @@ setup(
     name='paddlehub',
     version=hub_version.replace('-', ''),
     description=
-    ('A toolkit to manage reusable pretrained models of PaddlePaddle and help users doing transfer learning more efficiently.'
+    ('A toolkit to manage pretrained models of PaddlePaddle and get started with transfer learning more efficiently.'
      ),
     long_description='',
     url='https://github.com/PaddlePaddle/PaddleHub',
@@ -69,5 +73,5 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     license='Apache 2.0',
-    keywords=('paddlepaddle pretrained paddlehub'),
+    keywords=('paddlehub paddlepaddle fine-tune transfer-learning'),
     entry_points={'console_scripts': ['hub=paddlehub.commands.hub:main']})
