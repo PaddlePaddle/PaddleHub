@@ -1,6 +1,6 @@
 # PaddleHub 文本分类
 
-本示例将展示如何使用PaddleHub Finetune API以及[ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE)预训练模型完成分类任务。
+本示例将展示如何使用PaddleHub Finetune API以及Transformer类预训练模型完成分类任务。
 其中分类任务可以分为两大类：
 
 * 单句分类
