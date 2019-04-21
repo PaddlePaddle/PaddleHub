@@ -1,6 +1,6 @@
-# 在PaddleHub中进行Finetune
+# 图像分类Fine-tune
 
-Finetune是[迁移学习](https://github.com/PaddlePaddle/PaddleHub/blob/develop/docs/transfer_learning_turtorial.md)中使用得最多的技巧。
+Fine-tune是[迁移学习](https://github.com/PaddlePaddle/PaddleHub/blob/develop/docs/transfer_learning_turtorial.md)中使用得最多的技巧。
 
 其主要理念在于，通过对预训练模型进行结构和参数的`微调`来实现模型迁移，从而达到迁移学习的目的。
 
@@ -47,7 +47,7 @@ import paddlehub as hub
 import paddle.fluid as fluid
 ```
 
-接下来我们要在PaddleHub中选择合适的预训练模型来Finetune，由于猫狗分类是一个图像分类任务，因此我们使用经典的resnet50作为预训练模型（PaddleHub提供了丰富的预训练模型，我们建议您尝试不同的预训练模型来获得更好的性能）
+接下来我们要在PaddleHub中选择合适的预训练模型来Finetune，由于猫狗分类是一个图像分类任务，因此我们使用经典的resnet50作为预训练模型。PaddleHub提供了丰富的图像分类预训练模型，包括了最新的神经网络架构搜索类的NASNet，我们推荐您尝试不同的预训练模型来获得更好的性能。
 
 ```python
 module_map = {
