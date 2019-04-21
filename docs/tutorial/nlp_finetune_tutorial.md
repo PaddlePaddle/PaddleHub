@@ -1,238 +1,93 @@
-# 文本分类迁移
+# 如何使用PaddleHub完成文本分类迁移
 
-文本分类迁移是NLP在迁移学习中最常见的一个任务
-## 一、准备工作
+文本分类迁移是NLP迁移学习中最常见的一个任务之一。教程以情感分析任务为例子，介绍下如何使用PaddleHub+Fine-tune API快速完成文本分类迁移任务。
 
-在开始进行finetune前，我们需要完成以下几个工作准备
+## 教程前置条件
+
+* 已完成PaddlePaddle和PaddleHub的安装
+* 对BERT/ERNIE等Transformer类模型有基本的了解
 
 
-### 1. 安装PaddlePaddle
+## ERNIE介绍
 
-PaddleHub是基于PaddlePaddle的预训练模型管理框架，使用PaddleHub前需要先安装PaddlePaddle，如果您本地已经安装了cpu或者gpu版本的PaddlePaddle，那么可以跳过以下安装步骤。
+ERNIE是百度开放的基于Transformer知识增强的语义表示模型（Enhanced Representation from kNowledge IntEgration）ERNIE预训练模型结合Fine-tuning，可以在中文情感分析任务上可以得到非常不错的效果。更多的介绍可以参考[ERNIE](https://github.com/PaddlePaddle/LARK/tree/develop/ERNIE)
 
-```shell
-# 安装cpu版本的PaddlePaddle
-$ pip install paddlepaddle
-```
+## 快速开始
 
-我们推荐您使用大于1.3.0版本的PaddlePaddle，如果您本地版本较低，使用如下命令进行升级
-```shell
-$ pip install --upgrade paddlepaddle
-```
-
-在安装过程中如果遇到问题，您可以到[Paddle官方网站](http://www.paddlepaddle.org/)上查看解决方案
-
-### 2. 安装PaddleHub
-
-通过以下命令来安装PaddleHub
-
-```shell
-$ pip install paddlehub
-```
-
-如果在安装过程中遇到问题，您可以查看下[FAQ](https://github.com/PaddlePaddle/PaddleHub/blob/develop/docs/FAQ.md)来查找问题解决方案，如果无法解决，请在issue中反馈问题，我们会尽快分析解决
-
-## 二、挑选合适的模型
-
-首先导入必要的python包
-
+### 准备环境
 ```python
-# -*- coding: utf8 -*-
-import paddlehub as hub
 import paddle.fluid as fluid
+import paddlehub as hub
 ```
+### 加载预训练模型
 
-接下来我们要在PaddleHub中选择合适的预训练模型来Finetune，由于猫狗分类是一个图像分类任务，因此我们使用经典的resnet50作为预训练模型。PaddleHub提供了丰富的图像分类预训练模型，包括了最新的神经网络架构搜索类的NASNet，我们推荐您尝试不同的预训练模型来获得更好的性能。
+通过PaddleHub，只需要一行代码，即可以获取到PaddlePaddle生态下的预训练模型。
 
 ```python
-module_map = {
-    "resnet50": "resnet_v2_50_imagenet",
-    "resnet101": "resnet_v2_101_imagenet",
-    "resnet152": "resnet_v2_152_imagenet",
-    "mobilenet": "mobilenet_v2_imagenet",
-    "nasnet": "nasnet_imagenet",
-    "pnasnet": "pnasnet_imagenet"
-}
-
-module_name = module_map["resnet50"]
-cv_classifer_module = hub.Module(name = module_name)
+module = hub.Module(name="ernie") 
+inputs, outputs, program = module.context(trainable="True", max_seq_len=128)
 ```
 
-## 三、数据准备
+* 通过`hub.Module(name="ernie")`PaddleHub会自动下载并加载ERNIE模型。
+* `module.context`接口中，`trainable=True`则预训练模型的参数可以被训练，`trainble=False`则讲预训练模型参数不可修改，仅作为特征提取器使用。
+* `max_seq_len`是ERNIE/BERT模型特有的参数，控制模型最大的序列识别长度，这一参数与任务相关，如果显存有限，切任务文本长度较短，可以适当调低这一参数。如果处理文本序列的unicode字符长度超过`max_seq_len`，则模型会对序列进行截断。通常来说，128是一个性能均衡的默认值。
 
-接着需要加载图片数据集。我们需要自己切分数据集，将数据集且分为训练集、验证集和测试集。
+#### ERNIE的输入输出结构
 
-同时使用三个文本文件来记录对应的图片路径和标签
-```
-├─data: 数据目录
-  ├─train_list.txt：训练集数据列表
-  ├─test_list.txt：测试集数据列表
-  ├─validate_list：验证集数据列表
-  └─……
-```
-每个文件的格式如下
-```
-图片1路径 图片1标签
-图片2路径 图片2标签
-……
+ERNIE模型与BERT在结构上类似，如下图所示：
+![ERNIE结构图](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/develop/docs/imgs/ERNIE_input_output.png)
+
+ERNIE的在PaddleHub中的的输入有4个Tensor，分别是：
+* `input_ids`: 文本序列后切词的ID；
+* `position_ids`: 文本序列的位置ID；
+* `segment_ids`: 文本序列的类型；
+* `input_mask`: 序列的mask信息，主要用于对padding的标识；
+
+前三个输入与BERT模型的论文输入对应，第四个输入为padding所需的标识信息。更多细节信息可参考论文[BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805)
+
+ERNIE的输出的话有两类，分别是
+
+* `pooled_output`: 句子粒度特征，对应的shape为`[batch_size, hidden_size]`，可用于句子分类或句对分类任务。
+* `sequence_output`: 词粒度的特征，对应的shape为`[batch_size, max_seq_len, hidden_size]`, 可用于序列标注任务。
+
+通过以下代码即可获取到对应特征的Tensor，可用于后续的组网工作。
+```python
+pooled_output = outputs["pooled_output"]
+sequence_output = outputs["sequence_output"]
 ```
 
-使用如下的方式进行加载数据，生成数据集对象
+### 准备数据及数据预处理
 
 ```python
-# 使用本地数据集
-class mydataset(hub.ImageClassificationDataset):
-    self.base_path = "data"
-    self.train_list_file = "train_list.txt"
-    self.test_list_file = "test_list.txt"
-    self.validate_list_file = "validate_list.txt"
-    self.num_labels = 2
-
-dataset = mydataset()
+ds = hub.dataset.ChnSentiCorp()
+reader = hub.reader.ClassifyReader(dataset=ds, vocab_path=module.get_vocab_path(), max_seq_len=128)
 ```
 
-如果想要快速体验finetune的流程，可以直接加载paddlehub提供的猫狗分类数据集
+通过`hub.dataset.ChnSentiCorp()`会自动获取数据集，可以通过以下代码查看训练集中的文本与标注：
+```python
+ds = hub.dataset.ChnSentiCorp()
+for e in ds.get_train_examples():
+	print(e.text_a, e.label)
+```
+
+*TODO*: dataset一接口介绍，用户如何拓展使用自定义数据集
+
+
+`ClassifyReader`是专门ERNIE/BERT模型的数据预处理器，会根据模型词典，进行字粒度的切词，其中英文以词粒度进行分割，而中文和其他字符采用unicode为单位的字粒度切词。因此与传统的中文分词器有所区别，详细代码可以参考 [tokenization.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/reader/tokenization.py)
+
+`ClassifyReader`的参数有三个：
+
+* `dataset`: 传入PaddleHub Dataset;
+* `vocab_path`: 传入ERNIE/BERT模型对应的词表文件路径;
+* `max_seq_len`: ERNIE模型的最大序列长度，若序列长度不足，会通过padding方式补到`max_seq_len`, 若序列长度大于该值，则会以截断方式让序列长度为`max_seq_len`;
+
+
+### 创建迁移学习网络
 
 ```python
-# 直接用PaddleHub提供的数据集
-dataset = hub.dataset.DogCat()
+task = hub.create_text_cls_task(feature=pooled_output, num_classes=ds.num_labels)
 ```
 
-接着生成一个图像分类的reader，reader负责将dataset的数据进行预处理，接着以特定格式组织并输入给模型进行训练。
+### 配置优化策略
 
-当我们生成一个图像分类的reader时，需要指定输入图片的大小
-
-```python
-data_reader = hub.reader.ImageClassificationReader(
-    image_width=cv_classifer_module.get_expected_image_width(),
-    image_height=cv_classifer_module.get_expected_image_height(),
-    images_mean=cv_classifer_module.get_pretrained_images_mean(),
-    images_std=cv_classifer_module.get_pretrained_images_std(),
-    dataset=dataset)
-```
-
-## 四、组建Finetune Task
-
-有了合适的预训练模型和准备要迁移的数据集后，我们开始组建一个Task。
-
-由于猫狗分类是一个二分类的任务，而我们下载的cv_classifer_module是在ImageNet数据集上训练的千分类模型，所以我们需要对模型进行简单的微调，把模型改造为一个二分类模型：
-
-1. 获取cv_classifer_module的上下文环境，包括输入和输出的变量，以及Paddle Program
-2. 从输出变量中找到特征图提取层feature_map
-3. 在feature_map后面接入一个全连接层，生成Task
-
-```python
-input_dict, output_dict, program = cv_classifer_module.context(trainable=True)
-
-img = input_dict["image"]
-feature_map = output_dict["feature_map"]
-
-task = hub.create_img_cls_task(
-    feature=feature_map, num_classes=dataset.num_labels)
-
-feed_list = [img.name, task.variable("label").name]
-```
-
-## 五、选择运行时配置
-
-在进行Finetune前，我们可以设置一些运行时的配置，例如如下代码中的配置，表示：
-
-`epoch`：要求Finetune的任务只遍历10次训练集
-
-`batch_size`：每次训练的时候，给模型输入的每批数据大小为32，模型训练时能够并行处理批数据，因此batch_size越大，训练的效率越高，但是同时带来了内存的负荷，过大的batch_size可能导致内存不足而无法训练，因此选择一个合适的batch_size是很重要的一步。
-
-`log_interval`：每隔10 step打印一次训练日志
-
-`eval_interval`：每隔50 step在验证集上进行一次性能评估。
-
-`checkpoint_dir`：将训练的参数和数据保存到cv_finetune_turtorial_demo目录中
-
-更多运行配置，请查看[RunConfig](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API/RunConfig.md)
-
-```python
-config = hub.RunConfig(
-    num_epoch=10,
-    checkpoint_dir="cv_finetune_turtorial_demo",
-    batch_size=32,
-    log_interval=10,
-    eval_interval=50)
-```
-
-## 六、开始Finetune
-
-我们选择`finetune_and_eval`接口来进行模型训练，这个接口在finetune的过程中，会周期性的进行模型效果的评估，以便我们了解整个训练过程的性能变化。如果您并不关心中间过程数据，那么可以使用`finetune`接口来替代
-
-```python
-hub.finetune_and_eval(
-    task, feed_list=feed_list, data_reader=data_reader, config=config)
-```
-
-## 七、查看训练过程的效果
-
-训练过程中的性能数据会被记录到本地，我们可以通过visualdl来可视化这些数据
-
-我们在shell中输入以下命令来启动visualdl，其中`${HOST_IP}`为本机IP，需要用户自行指定
-```shell
-$ visualdl --logdir ./cv_finetune_turtorial_demo --host ${HOST_IP} --port 8989
-```
-
-启动服务后，我们使用浏览器访问`${HOST_IP}:8989`，可以看到训练以及预测的loss曲线和accuracy曲线
-![img](https://paddlehub.bj.bcebos.com/resources/cv_turtorial_vdl_log.JPG)
-
-## 八、使用模型进行预测
-
-当Finetune完成后，我们使用模型来进行预测，整个预测流程大致可以分为以下几步：
-1. 构建网络
-2. 生成预测数据的Reader
-3. 切换到预测的Program
-4. 加载预训练好的参数
-5. 运行Program进行预测
-
-`注意`：预测所用的测试图片请自行准备
-
-完整代码如下：
-```python
-import os
-import numpy as np
-
-# Step 1: build Program
-input_dict, output_dict, program = cv_classifer_module.context(trainable=True)
-img = input_dict["image"]
-feature_map = output_dict["feature_map"]
-task = hub.create_img_cls_task(
-    feature=feature_map, num_classes=dataset.num_labels)
-feed_list = [img.name]
-
-# Step 2: create data reader
-data = [
-    "test_img_dog.jpg",
-    "test_img_cat.jpg"
-]
-
-data_reader = hub.reader.ImageClassificationReader(
-    image_width=cv_classifer_module.get_expected_image_width(),
-    image_height=cv_classifer_module.get_expected_image_height(),
-    images_mean=cv_classifer_module.get_pretrained_images_mean(),
-    images_std=cv_classifer_module.get_pretrained_images_std(),
-    dataset=None)
-
-predict_reader = data_reader.data_generator(
-    phase="predict", batch_size=1, data=data)
-
-# Step 3: switch to inference program
-with fluid.program_guard(task.inference_program()):
-    # Step 4: load pretrained parameters
-    place = fluid.CPUPlace()
-    exe = fluid.Executor(place)
-    pretrained_model_dir = os.path.join("cv_finetune_turtorial_demo", "best_model")
-    fluid.io.load_persistables(exe, pretrained_model_dir)
-    feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
-    # Step 5: predict
-    for index, batch in enumerate(predict_reader()):
-        result, = exe.run(
-            feed=feeder.feed(batch), fetch_list=[task.variable('probs')])
-        predict_result = np.argsort(result[0])[::-1][0]
-        print("input %i is %s, and the predict result is %s" %
-              (index+1, data[index], predict_result))
-
-```
+适用于ERNIE模型的优化策略为`AdamWeightDecayStrategy`
