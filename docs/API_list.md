@@ -12,3 +12,7 @@
 * [create_img_cls_task](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API/create_img_cls_task.md)
 * [finetune_and_eval](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API/finetune_and_eval.md)
 * [finetune](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API/finetune.md)
+
+# PaddleHub Fine-tune API 全景图
+
+![Fine-tune API Figure](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/imgs/finetune_api_figure.png)
