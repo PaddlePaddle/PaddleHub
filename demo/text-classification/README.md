@@ -85,19 +85,17 @@ ClassifyReader中的`data_generator`会自动按照模型对应词表对数据�
 ### Step3: 构建网络并创建分类迁移任务
 ```python
 # NOTE: 必须使用fluid.program_guard接口传入Module返回的预训练模型program
-with fluid.program_guard(program):
-    label = fluid.layers.data(name="label", shape=[1], dtype='int64')
 
-    pooled_output = outputs["pooled_output"]
+pooled_output = outputs["pooled_output"]
 
-    # feed_list的Tensor顺序不可以调整
-    feed_list = [
-        inputs["input_ids"].name, inputs["position_ids"].name,
-        inputs["segment_ids"].name, inputs["input_mask"].name, label.name
-    ]
+# feed_list的Tensor顺序不可以调整
+feed_list = [
+    inputs["input_ids"].name, inputs["position_ids"].name,
+    inputs["segment_ids"].name, inputs["input_mask"].name, label.name
+]
 
-    cls_task = hub.create_text_cls_task(
-        feature=pooled_output, label=label, num_classes=reader.get_num_labels())
+cls_task = hub.create_text_cls_task(
+    feature=pooled_output, num_classes=dataset.num_labels)
 ```
 **NOTE:** 基于预训练模型的迁移学习网络搭建，必须在`with fluid.program_gurad()`作用域内组件网络
 1. `outputs["pooled_output"]`返回了ERNIE/BERT模型对应的[CLS]向量,可以用于句子或句对的特征表达。
