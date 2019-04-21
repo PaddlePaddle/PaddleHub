@@ -199,46 +199,45 @@ $ visualdl --logdir ./cv_finetune_turtorial_demo --host ${HOST_IP} --port 8989
 ```python
 import os
 import numpy as np
-def predict():
-    # Step 1: build Program
-    input_dict, output_dict, program = cv_classifer_module.context(trainable=True)
-    img = input_dict["image"]
-    feature_map = output_dict["feature_map"]
-    task = hub.create_img_cls_task(
-        feature=feature_map, num_classes=dataset.num_labels)
-    feed_list = [img.name]
 
-    # Step 2: create data reader
-    data = [
-        "test_img_dog.jpg",
-        "test_img_cat.jpg"
-    ]
+# Step 1: build Program
+input_dict, output_dict, program = cv_classifer_module.context(trainable=True)
+img = input_dict["image"]
+feature_map = output_dict["feature_map"]
+task = hub.create_img_cls_task(
+    feature=feature_map, num_classes=dataset.num_labels)
+feed_list = [img.name]
 
-    data_reader = hub.reader.ImageClassificationReader(
-        image_width=cv_classifer_module.get_expected_image_width(),
-        image_height=cv_classifer_module.get_expected_image_height(),
-        images_mean=cv_classifer_module.get_pretrained_images_mean(),
-        images_std=cv_classifer_module.get_pretrained_images_std(),
-        dataset=None)
+# Step 2: create data reader
+data = [
+    "test_img_dog.jpg",
+    "test_img_cat.jpg"
+]
 
-    predict_reader = data_reader.data_generator(
-        phase="predict", batch_size=1, data=data)
+data_reader = hub.reader.ImageClassificationReader(
+    image_width=cv_classifer_module.get_expected_image_width(),
+    image_height=cv_classifer_module.get_expected_image_height(),
+    images_mean=cv_classifer_module.get_pretrained_images_mean(),
+    images_std=cv_classifer_module.get_pretrained_images_std(),
+    dataset=None)
 
-    # Step 3: switch to inference program
-    with fluid.program_guard(task.inference_program()):
-        # Step 4: load pretrained parameters
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
-        pretrained_model_dir = os.path.join("cv_finetune_turtorial_demo", "best_model")
-        fluid.io.load_persistables(exe, pretrained_model_dir)
-        feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
-        # Step 5: predict
-        for index, batch in enumerate(predict_reader()):
-            result, = exe.run(
-                feed=feeder.feed(batch), fetch_list=[task.variable('probs')])
-            predict_result = np.argsort(result[0])[::-1][0]
-            print("input %i is %s, and the predict result is %s" %
-                  (index+1, data[index], predict_result))
+predict_reader = data_reader.data_generator(
+    phase="predict", batch_size=1, data=data)
 
-predict()
+# Step 3: switch to inference program
+with fluid.program_guard(task.inference_program()):
+    # Step 4: load pretrained parameters
+    place = fluid.CPUPlace()
+    exe = fluid.Executor(place)
+    pretrained_model_dir = os.path.join("cv_finetune_turtorial_demo", "best_model")
+    fluid.io.load_persistables(exe, pretrained_model_dir)
+    feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
+    # Step 5: predict
+    for index, batch in enumerate(predict_reader()):
+        result, = exe.run(
+            feed=feeder.feed(batch), fetch_list=[task.variable('probs')])
+        predict_result = np.argsort(result[0])[::-1][0]
+        print("input %i is %s, and the predict result is %s" %
+              (index+1, data[index], predict_result))
+
 ```
