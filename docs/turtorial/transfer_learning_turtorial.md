@@ -23,5 +23,5 @@ PaddleHub提供了基于PaddlePaddle框架实现的Finetune API, 重点针对大
 
 教程会涵盖CV领域的图像分类迁移，和NLP文本分类迁移两种任务。
 
-* [CV教程](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/turtorial/cv_finetune_turtorial.md)
-* [NLP教程]()
+* [CV教程](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/turtorial/cv_finetune_tutorial.md)
+* [NLP教程](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/turtorial/nlp_finetune_tutorial.md)
