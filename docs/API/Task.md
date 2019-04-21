@@ -1,7 +1,7 @@
 ----
 # Task
 ----
-在PaddleHub中，Task代表了一个finetune的任务。任务中包含了执行该任务相关的program以及和任务相关的一些度量指标（如准确率accuracy、F1分数）、损失等
+在PaddleHub中，Task代表了一个fine-tune的任务。任务中包含了执行该任务相关的program以及和任务相关的一些度量指标（如分类准确率accuracy、precision, recall, F1-score等）、m模型损失等。
 
 ## `class paddlehub.finetune.Task(task_type, graph_var_dict, main_program, startup_program)`
 > ### 参数
