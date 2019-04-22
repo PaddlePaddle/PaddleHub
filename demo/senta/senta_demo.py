@@ -4,7 +4,7 @@ import paddlehub as hub
 
 if __name__ == "__main__":
     # Load Senta-BiLSTM module
-    senta = hub.Module(name="senta")
+    senta = hub.Module(name="senta_bilstm")
 
     test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
 
