@@ -36,7 +36,6 @@ class BaseReader(object):
                  label_map_config=None,
                  max_seq_len=512,
                  do_lower_case=True,
-                 in_tokens=False,
                  random_seed=None):
         self.max_seq_len = max_seq_len
         self.tokenizer = tokenization.FullTokenizer(
@@ -46,7 +45,7 @@ class BaseReader(object):
         self.pad_id = self.vocab["[PAD]"]
         self.cls_id = self.vocab["[CLS]"]
         self.sep_id = self.vocab["[SEP]"]
-        self.in_tokens = in_tokens
+        self.in_tokens = False
 
         np.random.seed(random_seed)
 
@@ -350,36 +349,6 @@ class SequenceLabelReader(BaseReader):
             position_ids=position_ids,
             label_ids=label_ids)
         return record
-
-
-class ExtractEmbeddingReader(BaseReader):
-    def _pad_batch_records(self, batch_records):
-        batch_token_ids = [record.token_ids for record in batch_records]
-        batch_text_type_ids = [record.text_type_ids for record in batch_records]
-        batch_position_ids = [record.position_ids for record in batch_records]
-
-        # padding
-        padded_token_ids, input_mask, seq_lens = pad_batch_data(
-            batch_token_ids,
-            pad_idx=self.pad_id,
-            max_seq_len=self.max_seq_len,
-            return_input_mask=True,
-            return_seq_lens=True)
-        padded_text_type_ids = pad_batch_data(
-            batch_text_type_ids,
-            pad_idx=self.pad_id,
-            max_seq_len=self.max_seq_len)
-        padded_position_ids = pad_batch_data(
-            batch_position_ids,
-            pad_idx=self.pad_id,
-            max_seq_len=self.max_seq_len)
-
-        return_list = [
-            padded_token_ids, padded_text_type_ids, padded_position_ids,
-            input_mask, seq_lens
-        ]
-
-        return return_list
 
 
 class LACClassifyReader(object):
