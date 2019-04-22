@@ -84,7 +84,7 @@ class Downloader(object):
                     total_length = int(total_length)
                     starttime = time.time()
                     if print_progress:
-                        print("Download %s" % save_name)
+                        print("Downloading %s" % save_name)
                     for data in r.iter_content(chunk_size=4096):
                         dl += len(data)
                         f.write(data)
