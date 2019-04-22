@@ -54,7 +54,7 @@ $ hub search
 ```
 
 ## 深入了解PaddleHub
-* [命令行功能](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8E%A5%E5%8F%A3)
+* [命令行工具](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 * [Finetune API与迁移学习](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
 * [API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Fine-tune-API)
 
