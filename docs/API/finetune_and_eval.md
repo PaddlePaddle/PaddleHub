@@ -27,14 +27,14 @@
 >     image_width=resnet_module.get_excepted_image_width(),
 >     image_height=resnet_module.get_excepted_image_height(),
 >     dataset=dataset)
-> label = fluid.layers.data(name="label", dtype="int64", shape=[1])
-> img = input_dict[0]
-> feature_map = output_dict[0]
+> img = input_dict["image"]
+> 
+> feature_map = output_dict["feature_map"]
 >
 > feed_list = [img.name, label.name]
 >
 > task = hub.create_img_cls_task(
->     feature=feature_map, label=label, num_classes=dataset.num_labels)
+>     feature=feature_map, num_classes=dataset.num_labels)
 > hub.finetune_and_eval(
 >     task, feed_list=feed_list, data_reader=data_reader)
 > ```
