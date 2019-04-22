@@ -14,6 +14,7 @@ PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借�
 2. 通过hub download命令，快速地获取PaddlePaddle生态下的所有预训练模型；
 3. 借助PaddleHub Finetune API，使用少量代码完成迁移学习；
    - 更多Demo可参考 [ERNIE文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/text-classification) [图像分类迁移](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/image-classification)
+   - 完整教程可参考 [文本分类迁移教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB%E8%BF%81%E7%A7%BB%E6%95%99%E7%A8%8B)  [图像分类迁移教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB%E8%BF%81%E7%A7%BB%E6%95%99%E7%A8%8B)
 
 ## 安装
 
@@ -53,13 +54,13 @@ $ hub search
 ```
 
 ## 深入了解PaddleHub
-* [命令行功能](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/command_line_introduction.md)
-* [Finetune API与迁移学习](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/tutorial/transfer_learning_tutorial.md)
-* [API](https://github.com/PaddlePaddle/PaddleHub/tree/develop/docs/API_list.md)
+* [命令行功能](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8E%A5%E5%8F%A3)
+* [Finetune API与迁移学习](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
+* [API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Fine-tune-API)
 
 ## 答疑
 
-当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/blob/develop/docs/FAQ.md)查找解决方案。
+当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-FAQ)查找解决方案。
 如果在FAQ中没有找到解决方案，欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交
 
 ## 版权和许可证
