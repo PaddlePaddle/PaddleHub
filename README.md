@@ -43,7 +43,7 @@ $ hub run senta_bilstm --input_text "今天是个好日子"
 $ wget --no-check-certificate https://paddlehub.bj.bcebos.com/resources/test_img_bird.jpg
 $ hub run ssd_mobilenet_v1_pascal --input_path test_img_bird.jpg
 ```
-<div align="center">![img](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/develop/docs/imgs/test_img_bird_output.jpg)</div>
+<div align="center"> ![img](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/develop/docs/imgs/test_img_bird_output.jpg) </div>
 
 想了解更多PaddleHub已经发布的模型，请使用`hub search`命令查看所有已发布的模型。
 
