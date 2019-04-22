@@ -1,5 +1,0 @@
-----
-# Reader
-----
-
-PaddleHub
