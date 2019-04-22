@@ -28,11 +28,6 @@ pip安装方式如下：
 $ pip install paddlehub
 ```
 
-**NOTE:** 若出现找不到PaddleHub的错误，请尝试指定pypi源进行安装
-```shell
-$ pip install -i https://pypi.org/simple/ paddlehub
-```
-
 ## 快速体验
 
 安装成功后，执行下面的命令，可以快速体验PaddleHub的一键预测功能
