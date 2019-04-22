@@ -21,7 +21,7 @@ PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借�
 * Python>=2.7
 * PaddlePaddle>=1.3.2
 
-*NOTE:* PaddleHub推荐在Python 3环境下进行使用
+**NOTE:** PaddleHub推荐在Python 3环境下进行使用
 
 pip安装方式如下：
 
@@ -29,7 +29,7 @@ pip安装方式如下：
 $ pip install paddlehub
 ```
 
-*NOTE:* 若出现找不到paddlehub错误，请尝试指定pypi源进行安装
+**NOTE:** 若出现找不到PaddleHub的错误，请尝试指定pypi源进行安装
 ```shell
 $ pip install -i https://pypi.org/simple/ paddlehub
 ```
