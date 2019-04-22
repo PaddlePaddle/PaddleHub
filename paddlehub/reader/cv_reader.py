@@ -92,7 +92,7 @@ class ImageClassificationReader(object):
                                                     self.image_height)
             if self.data_augmentation:
                 image = image_augmentation.image_random_process(
-                    image, enable_resize=False)
+                    image, enable_resize=False, enable_crop=False)
 
             # only support RGB
             image = image.convert('RGB')
