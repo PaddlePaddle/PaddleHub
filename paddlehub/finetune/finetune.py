@@ -299,7 +299,3 @@ def finetune_and_eval(task, data_reader, feed_list, config=None):
             task, data_reader, feed_list, config, do_eval=True)
     elif task.task_type == "image_classification" or task.task_type == "text_classification":
         _finetune_cls_task(task, data_reader, feed_list, config, do_eval=True)
-
-
-def finetune(task, data_reader, feed_list, config=None):
-    _finetune_cls_task(task, data_reader, feed_list, config, do_eval=False)
