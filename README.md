@@ -38,6 +38,7 @@ $ hub run lac --input_text "今天是个好日子"
 
 # 使用百度Senta情感分析模型对句子进行预测
 $ hub run senta_bilstm --input_text "今天是个好日子"
+
 # 使用SSD检测模型对图片进行目标检测
 $ wget --no-check-certificate https://paddlehub.bj.bcebos.com/resources/test_img_bird.jpg
 $ hub run ssd_mobilenet_v1_pascal --input_path test_img_bird.jpg
