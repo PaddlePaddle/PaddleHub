@@ -11,6 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+#coding:utf-8
+import six
+
 from . import module
 from . import common
 from . import io
@@ -41,3 +45,8 @@ from .finetune.finetune import finetune_and_eval
 from .finetune.config import RunConfig
 from .finetune.strategy import AdamWeightDecayStrategy
 from .finetune.strategy import DefaultStrategy
+
+if six.PY2:
+    import sys
+    reload(sys)
+    sys.setdefaultencoding("UTF-8")
