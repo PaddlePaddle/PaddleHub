@@ -20,6 +20,8 @@ import argparse
 import os
 import sys
 
+import six
+
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.io.parser import yaml_parser, txt_parser
 from paddlehub.module.manager import default_module_manager
@@ -167,7 +169,12 @@ class RunCommand(BaseCommand):
                     input_data[key] = origin_data[value['key']]
             config = yaml_config.get("config", {})
         # run module with data
-        print(module(sign_name=self.args.signature, data=input_data, **config))
+        results = module(
+            sign_name=self.args.signature, data=input_data, **config)
+        if six.PY2:
+            print(repr(results).decode('string_escape'))
+        else:
+            print(results)
 
 
 command = RunCommand.instance()
