@@ -135,7 +135,7 @@ Finetune API训练过程中会自动对关键训练指标进行打点，启动�
 $ visualdl --logdir $CKPT_DIR/vdllog -t ${HOST_IP}
 ```
 其中${HOST_IP}为本机IP地址，如本机IP地址为192.168.0.1，用浏览器打开192.168.0.1:8040，其中8040为端口号，即可看到训练过程中指标的变化情况
-file:///Users/zhangxuefei/Library/Caches/BaiduMacHi/Share/images/9f470242644a7abd82263714dc38a563.png
+![img](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/develop/docs/imgs/seq_label_finetune_vdl.png)
 
 ## 模型预测
 
