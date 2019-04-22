@@ -22,8 +22,6 @@ PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借�
 * Python>=2.7
 * PaddlePaddle>=1.4.0
 
-**NOTE:** PaddleHub推荐在Python 3环境下进行使用
-
 pip安装方式如下：
 
 ```shell
