@@ -17,6 +17,7 @@ from __future__ import division
 from __future__ import print_function
 
 from collections import namedtuple
+import codecs
 import os
 import csv
 
@@ -81,7 +82,7 @@ class NLPCC_DBQA(HubDataset):
 
     def _read_tsv(self, input_file, quotechar=None):
         """Reads a tab separated value file."""
-        with open(input_file, "r") as f:
+        with codecs.open(input_file, "r", encoding="UTF-8") as f:
             reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
             examples = []
             seq_id = 0
