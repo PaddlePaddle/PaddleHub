@@ -19,7 +19,7 @@ PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借�
 ## 安装
 
 **环境依赖**
-* Python==2.7 or Python>=3.5 
+* Python==2.7 or Python>=3.5
 * PaddlePaddle>=1.4.0
 
 pip安装方式如下：
@@ -38,7 +38,11 @@ $ hub run lac --input_text "今天是个好日子"
 
 # 使用百度Senta情感分析模型对句子进行预测
 $ hub run senta_bilstm --input_text "今天是个好日子"
+# 使用SSD检测模型对图片进行目标检测
+$ wget --no-check-certificate https://paddlehub.bj.bcebos.com/resources/test_img_bird.jpg
+$ hub run ssd_mobilenet_v1_pascal --input_path test_img_bird.jpg
 ```
+![img](https://github.com/PaddlePaddle/PaddleHub/blob/develop/docs/imgs/test_img_bird_outpyut.png)
 
 想了解更多PaddleHub已经发布的模型，请使用`hub search`命令查看所有已发布的模型。
 
