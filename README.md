@@ -44,7 +44,7 @@ $ pip install -i https://pypi.org/simple/ paddlehub
 $ hub run lac --input_text "今天是个好日子"
 
 # 使用百度Senta情感分析模型对句子进行预测
-$ hub run senta --input_text "今天是个好日子"
+$ hub run senta_bilstm --input_text "今天是个好日子"
 ```
 
 想了解更多PaddleHub已经发布的模型，请使用`hub search`命令查看所有已发布的模型。
