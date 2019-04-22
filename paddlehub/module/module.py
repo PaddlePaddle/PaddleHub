@@ -527,15 +527,11 @@ class Module(object):
         paddle_helper.remove_feed_fetch_op(program)
 
         if not for_test:
-            if trainable != "Default":
-                paddle_helper.set_parameter_trainable(program, trainable)
+            paddle_helper.set_parameter_trainable(program, trainable)
 
-            if learning_rate != "Default":
-                paddle_helper.set_parameter_learning_rate(
-                    program, learning_rate)
+            paddle_helper.set_parameter_learning_rate(program, learning_rate)
 
-            if regularizer != "Default":
-                paddle_helper.set_parameter_regularizer(program, regularizer)
+            paddle_helper.set_parameter_regularizer(program, regularizer)
 
             self._restore_parameter(program)
 
