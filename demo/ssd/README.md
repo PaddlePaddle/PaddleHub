@@ -27,18 +27,18 @@ $ pip install --upgrade paddlepaddle
 
 ## 命令行方式预测
 
-`infer.sh`给出了使用命令行调用Module预测的示例脚本
+`cli_demo.sh`给出了使用命令行调用Module预测的示例脚本
 通过以下命令试验下效果
 
 ```shell
-$ sh infer.sh
+$ sh cli_demo.sh
 ```
 
 ## 通过python API预测
 
-`infer_by_code.py`给出了使用python API调用Module预测的示例代码
+`ssd_demo.py`给出了使用python API调用Module预测的示例代码
 通过以下命令试验下效果
 
 ```shell
-python infer_by_code.py
+python ssd_demo.py
 ```

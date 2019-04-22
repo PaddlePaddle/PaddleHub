@@ -10,7 +10,7 @@ CKPT_DIR="./ckpt_${DATASET}"
 
 python -u text_classifier.py \
                    --batch_size=24 \
-                   --use_gpu=True \
+                   --use_gpu=False \
                    --dataset=${DATASET} \
                    --checkpoint_dir=${CKPT_DIR} \
                    --learning_rate=5e-5 \
