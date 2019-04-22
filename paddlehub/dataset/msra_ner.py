@@ -17,8 +17,10 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import codecs
 import csv
 import json
+import six
 from collections import namedtuple
 
 from paddlehub.dataset import InputExample, HubDataset
@@ -85,7 +87,7 @@ class MSRA_NER(HubDataset):
 
     def _read_tsv(self, input_file, quotechar=None):
         """Reads a tab separated value file."""
-        with open(input_file, "r") as f:
+        with codecs.open(input_file, "r", encoding="UTF-8") as f:
             reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
             examples = []
             seq_id = 0
