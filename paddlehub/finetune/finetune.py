@@ -25,6 +25,8 @@ import numpy as np
 from visualdl import LogWriter
 
 from paddlehub.common.logger import logger
+from paddlehub.common.utils import mkdir
+from paddlehub.finetune.config import RunConfig
 from paddlehub.finetune.strategy import AdamWeightDecayStrategy, DefaultStrategy
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
 from paddlehub.finetune.evaluate import evaluate_cls_task, evaluate_seq_label_task
@@ -294,6 +296,12 @@ def _finetune_cls_task(task, data_reader, feed_list, config=None,
 
 
 def finetune_and_eval(task, data_reader, feed_list, config=None):
+    if config is None:
+        config = RunConfig()
+
+    if not os.path.exists(config.checkpoint_dir):
+        mkdir(config.checkpoint_dir)
+
     if task.task_type == "sequence_labeling":
         _finetune_seq_label_task(
             task, data_reader, feed_list, config, do_eval=True)
