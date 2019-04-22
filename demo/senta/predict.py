@@ -21,7 +21,7 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     # loading Paddlehub senta pretrained model
-    module = hub.Module(name="senta")
+    module = hub.Module(name="senta_bilstm")
     inputs, outputs, program = module.context(trainable=True)
 
     # Sentence classification  dataset reader
@@ -32,13 +32,11 @@ if __name__ == '__main__':
     place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
     exe = fluid.Executor(place)
     with fluid.program_guard(program):
-        # Use "sequence_output" for classification tasks on an entire sentence.
-        # Use "sequence_outputs" for token-level output.
-        sequence_output = outputs["sequence_output"]
+        sent_feature = outputs["sentence_feature"]
 
         # Define a classfication finetune task by PaddleHub's API
         cls_task = hub.create_text_cls_task(
-            feature=sequence_output, num_classes=dataset.num_labels)
+            feature=sent_feature, num_classes=dataset.num_labels)
 
         # Setup feed list for data feeder
         # Must feed all the tensor of senta's module need
@@ -69,4 +67,4 @@ if __name__ == '__main__':
                 correct += 1
                 acc = 1.0 * correct / total
             print("%s\tpredict=%s" % (test_examples[index], pred_v[0][0]))
-        print("accuracy = %f" % acc)
+    print("accuracy = %f" % acc)

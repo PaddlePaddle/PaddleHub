@@ -15,7 +15,7 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     # Step1: load Paddlehub senta pretrained model
-    module = hub.Module(name="senta")
+    module = hub.Module(name="senta_bilstm")
     inputs, outputs, program = module.context(trainable=True)
 
     # Step2: Download dataset and use TextClassificationReader to read dataset
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     reader = hub.reader.LACClassifyReader(
         dataset=dataset, vocab_path=module.get_vocab_path())
 
-    sent_feature = outputs["sequence_output"]
+    sent_feature = outputs["sentence_feature"]
 
     # Define a classfication finetune task by PaddleHub's API
     cls_task = hub.create_text_cls_task(
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     feed_list = [inputs["words"].name, cls_task.variable('label').name]
 
     strategy = hub.finetune.strategy.AdamWeightDecayStrategy(
-        learning_rate=1e-3, weight_decay=0.01, warmup_proportion=0.01)
+        learning_rate=1e-4, weight_decay=0.01, warmup_proportion=0.05)
 
     config = hub.RunConfig(
         use_cuda=args.use_gpu,
