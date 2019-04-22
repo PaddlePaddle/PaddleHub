@@ -91,7 +91,7 @@ class AdamWeightDecayStrategy(DefaultStrategy):
                  lr_scheduler="linear_decay",
                  warmup_proportion=0.0,
                  weight_decay=0.01,
-                 optimizer_name=None):
+                 optimizer_name="adam"):
         super(AdamWeightDecayStrategy, self).__init__(
             learning_rate=learning_rate, optimizer_name=optimizer_name)
         # check strategy correctness
