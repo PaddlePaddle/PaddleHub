@@ -27,6 +27,7 @@
 >     image_width=resnet_module.get_excepted_image_width(),
 >     image_height=resnet_module.get_excepted_image_height(),
 >     dataset=dataset)
+
 > img = input_dict["image"]
 > 
 > feature_map = output_dict["feature_map"]
@@ -36,5 +37,5 @@
 > task = hub.create_img_cls_task(
 >     feature=feature_map, num_classes=dataset.num_labels)
 > hub.finetune_and_eval(
->     task, feed_list=feed_list, data_reader=data_reader)
+>     task=task, feed_list=feed_list, data_reader=data_reader)
 > ```
