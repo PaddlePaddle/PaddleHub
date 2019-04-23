@@ -16,8 +16,7 @@
 
 ## 图像分类
 
-该样例展示了PaddleHub如何将ResNet50、ResNet101、ResNet152、MobileNet、NasNet以及PNasNet作为预训练模型在Flowers、DogCat、Indoor67、Food101、StanfordDogs等数据集上
-进行图像分类的FineTune和预测。
+该样例展示了PaddleHub如何将ResNet50、ResNet101、ResNet152、MobileNet、NasNet以及PNasNet作为预训练模型在Flowers、DogCat、Indoor67、Food101、StanfordDogs等数据集上进行图像分类的FineTune和预测。
 
 ## 中文词法分析
 
