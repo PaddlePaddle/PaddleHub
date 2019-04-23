@@ -45,7 +45,7 @@ setup(
     name='paddlehub',
     version=hub_version.replace('-', ''),
     description=
-    ('A toolkit to manage pretrained models of PaddlePaddle and get started with transfer learning more efficiently.'
+    ('A toolkit for managing pretrained models of PaddlePaddle and helping user getting started with transfer learning more efficiently.'
      ),
     long_description='',
     url='https://github.com/PaddlePaddle/PaddleHub',
