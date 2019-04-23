@@ -84,8 +84,6 @@ ClassifyReader中的`data_generator`会自动按照模型对应词表对数据�
 
 ### Step3: 构建网络并创建分类迁移任务
 ```python
-# NOTE: 必须使用fluid.program_guard接口传入Module返回的预训练模型program
-
 pooled_output = outputs["pooled_output"]
 
 # feed_list的Tensor顺序不可以调整
