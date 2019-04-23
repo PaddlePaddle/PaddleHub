@@ -89,7 +89,7 @@ seq_label_task = hub.create_seq_label_task(
     num_classes=dataset.num_labels)
 ```
 
-**NOTE:** 
+**NOTE:**
 1. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达。
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与SequenceLabelReader返回的结果一致。
 3. `create_seq_label_task`通过输入特征，迁移的类别数，可以生成适用于文本分类的迁移任务`seq_label_task`
