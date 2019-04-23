@@ -60,8 +60,7 @@ reader = hub.reader.SequenceLabelReader(
     max_seq_len=128)
 ```
 
-其中数据集的准备代码可以参考 [msra_ner.py]
-(https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/msra_ner.py)
+其中数据集的准备代码可以参考 [msra_ner.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/msra_ner.py)
 
 `hub.dataset.MSRA_NER()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
