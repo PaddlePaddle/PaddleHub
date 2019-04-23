@@ -60,7 +60,8 @@ reader = hub.reader.SequenceLabelReader(
     max_seq_len=128)
 ```
 
-其中数据集的准备代码可以参考 [msra_ner.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/msra_ner.py)
+其中数据集的准备代码可以参考 [msra_ner.py]
+(https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/msra_ner.py)
 
 `hub.dataset.MSRA_NER()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
@@ -88,7 +89,7 @@ seq_label_task = hub.create_seq_label_task(
     max_seq_len=args.max_seq_len,
     num_classes=dataset.num_labels)
 ```
-**NOTE:** 
+**NOTE:**
 1. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达。
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与SequenceLabelReader返回的结果一致。
 3. `create_seq_label_task`通过输入特征，迁移的类别数，可以生成适用于文本分类的迁移任务`seq_label_task`
