@@ -2,7 +2,7 @@
 
 ## 关于
 
-本示例将展示如何使用PaddleHub Finetune API以及[图像分类](https://github.com/PaddlePaddle/models/tree/develop/fluid/PaddleCV/image_classification)预训练模型完成分类任务。
+本示例将展示如何使用PaddleHub Finetune API以及[图像分类](https://github.com/PaddlePaddle/models/tree/develop/PaddleCV/image_classification)预训练模型完成分类任务。
 
 ## 准备工作
 
