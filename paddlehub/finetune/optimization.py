@@ -19,6 +19,8 @@ from __future__ import print_function
 
 import numpy as np
 import paddle.fluid as fluid
+import paddle.fluid.layers.learning_rate_scheduler as lr_scheduler
+from paddle.fluid.layers import control_flow
 
 
 def adam_weight_decay_optimization(loss,
@@ -35,7 +37,7 @@ def adam_weight_decay_optimization(loss,
                          warmup_steps)
         elif scheduler == 'linear_decay':
             scheduled_lr = linear_warmup_decay(learning_rate, warmup_steps,
-                                               num_train_steps)
+                                               main_program)
         else:
             raise ValueError("Unkown learning rate scheduler, should be "
                              "'noam_decay' or 'linear_decay'")
@@ -76,3 +78,26 @@ def adam_weight_decay_optimization(loss,
                 fluid.layers.assign(output=param, input=updated_param)
 
     return scheduled_lr
+
+
+def linear_warmup_decay(init_lr, num_warmup_steps, main_program):
+    with main_program._lr_schedule_guard():
+        global_step = lr_scheduler._decay_step_counter()
+
+        lr = fluid.layers.create_global_var(
+            shape=[1],
+            value=0.0,
+            dtype='float32',
+            persistable=True,
+            name="learning_rate")
+
+        with control_flow.Switch() as switch:
+            with switch.case(global_step < num_warmup_steps):
+                decayed_lr = init_lr * global_step * 1.0 / num_warmup_steps
+                fluid.layers.assign(decayed_lr, lr)
+            with switch.default():
+                last_value_var = fluid.layers.fill_constant(
+                    shape=[1], dtype='float32', value=float(init_lr))
+                fluid.layers.assign(last_value_var, lr)
+
+        return lr
