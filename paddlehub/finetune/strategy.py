@@ -89,7 +89,7 @@ class AdamWeightDecayStrategy(DefaultStrategy):
     def __init__(self,
                  learning_rate=1e-4,
                  lr_scheduler="linear_decay",
-                 warmup_proportion=0.0,
+                 warmup_proportion=0.1,
                  weight_decay=0.01,
                  optimizer_name="adam"):
         super(AdamWeightDecayStrategy, self).__init__(
@@ -117,6 +117,13 @@ class AdamWeightDecayStrategy(DefaultStrategy):
     def execute(self, loss, main_program, data_reader, config):
         # calculate wamrup step
         dev_count = self._get_dev_count(config)
+        num_train_examples = data_reader.get_num_examples(phase='train')
+        data_reader.data_generator(
+            batch_size=config.batch_size, phase='train', shuffle=True)
+        data_reader.data_generator(
+            batch_size=config.batch_size, phase='val', shuffle=False)
+        data_reader.data_generator(
+            batch_size=config.batch_size, phase='dev', shuffle=False)
         num_train_examples = data_reader.get_num_examples(phase='train')
         max_train_steps = config.num_epoch * num_train_examples // config.batch_size // dev_count
         warmup_steps = int(max_train_steps * self.warmup_proportion)
