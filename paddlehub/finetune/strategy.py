@@ -117,7 +117,6 @@ class AdamWeightDecayStrategy(DefaultStrategy):
     def execute(self, loss, main_program, data_reader, config):
         # calculate wamrup step
         dev_count = self._get_dev_count(config)
-        num_train_examples = data_reader.get_num_examples(phase='train')
         data_reader.data_generator(
             batch_size=config.batch_size, phase='train', shuffle=True)
         data_reader.data_generator(
