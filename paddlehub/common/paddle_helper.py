@@ -25,15 +25,33 @@ from paddlehub.module import module_desc_pb2
 from paddlehub.common.utils import from_pyobj_to_module_attr, from_module_attr_to_pyobj
 from paddlehub.common.logger import logger
 
+dtype_map = {
+    fluid.core.VarDesc.VarType.FP32: "float32",
+    fluid.core.VarDesc.VarType.FP64: "float64",
+    fluid.core.VarDesc.VarType.FP16: "float16",
+    fluid.core.VarDesc.VarType.INT32: "int32",
+    fluid.core.VarDesc.VarType.INT16: "int16",
+    fluid.core.VarDesc.VarType.INT64: "int64",
+    fluid.core.VarDesc.VarType.BOOL: "bool",
+    fluid.core.VarDesc.VarType.INT16: "int16",
+    fluid.core.VarDesc.VarType.UINT8: "uint8",
+    fluid.core.VarDesc.VarType.INT8: "int8",
+}
+
+
+def convert_dtype_to_string(dtype):
+    if dtype in dtype_map:
+        return dtype_map[dtype]
+    raise TypeError("dtype shoule in %s" % list(dtype_map.keys()))
+
 
 def get_variable_info(var):
     if not isinstance(var, fluid.framework.Variable):
         raise TypeError("var shoule be an instance of fluid.framework.Variable")
 
     var_info = {
-        'type': var.type,
         'name': var.name,
-        'dtype': var.dtype,
+        'dtype': convert_dtype_to_string(var.dtype),
         'lod_level': var.lod_level,
         'shape': var.shape,
         'stop_gradient': var.stop_gradient,
