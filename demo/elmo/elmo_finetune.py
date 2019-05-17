@@ -1,0 +1,149 @@
+import argparse
+import ast
+import io
+import numpy as np
+
+from paddle.fluid.framework import switch_main_program
+import paddle.fluid as fluid
+import paddlehub as hub
+
+# yapf: disable
+parser = argparse.ArgumentParser(__doc__)
+parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
+parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
+parser.add_argument("--learning_rate", type=float, default=1e-4, help="Learning rate used to train with warmup.")
+parser.add_argument("--weight_decay", type=float, default=5, help="Weight decay rate for L2 regularizer.")
+parser.add_argument("--warmup_proportion", type=float, default=0.05, help="Warmup proportion params for warmup strategy")
+args = parser.parse_args()
+# yapf: enable.
+
+if __name__ == '__main__':
+    # Step1: load Paddlehub elmo pretrained model
+    module = hub.Module(name="elmo.hub_module")
+    inputs, outputs, program = module.context(trainable=True)
+
+    # Step2: Download dataset and use TextClassificationReader to read dataset
+    dataset = hub.dataset.ChnSentiCorp()
+
+    reader = hub.reader.LACClassifyReader(
+        dataset=dataset, vocab_path=module.get_vocab_path())
+    word_dict_len = len(reader.vocab)
+
+    word_ids = inputs["word_ids"]
+    elmo_embedding = outputs["elmo_embed"]
+
+    #Step3: switch program and build network
+    #choose the net which you would like: bow, cnn, gru, bilstm, lstm
+    switch_main_program(program)
+
+    #################### embedding layer
+    word_embed_dims = 128
+    word_embedding = fluid.layers.embedding(
+        input=word_ids,
+        size=[word_dict_len, word_embed_dims],
+        param_attr=fluid.ParamAttr(
+            learning_rate=30,
+            initializer=fluid.initializer.Uniform(low=-0.1, high=0.1)))
+    # add elmo embedding
+    input_feature = fluid.layers.concat(
+        input=[elmo_embedding, word_embedding], axis=1)
+    ####################
+
+    #     #################### bow_net
+    #     hid_dim=128
+    #     hid_dim2=96
+    #     bow = fluid.layers.sequence_pool(input=input_feature, pool_type='sum')
+    #     bow_tanh = fluid.layers.tanh(bow)
+    #     fc_1 = fluid.layers.fc(input=bow_tanh, size=hid_dim, act="tanh")
+    #     fc = fluid.layers.fc(input=fc_1, size=hid_dim2, act="tanh")
+    #     ########################
+
+    #     ######################## cnn_net
+    #     win_size = 3
+    #     hid_dim = 128
+    #     hid_dim2 = 96
+    #     conv_3 = fluid.nets.sequence_conv_pool(
+    #         input=input_feature,
+    #         num_filters=hid_dim,
+    #         filter_size=win_size,
+    #         act="relu",
+    #         pool_type="max")
+    #     fc = fluid.layers.fc(input=conv_3, size=hid_dim2)
+    #     ########################
+
+    ######################## gru_net
+    hid_dim = 128
+    hid_dim2 = 96
+    fc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 3)
+    gru_h = fluid.layers.dynamic_gru(input=fc0, size=hid_dim, is_reverse=False)
+    gru_max = fluid.layers.sequence_pool(input=gru_h, pool_type='max')
+    gru_max_tanh = fluid.layers.tanh(gru_max)
+    fc = fluid.layers.fc(input=gru_max_tanh, size=hid_dim2, act='tanh')
+    ########################
+
+    #     ######################## bilstm_net
+    #     # bi-lstm layer
+    #     hid_dim=128
+    #     hid_dim2=96
+
+    #     fc0 = fluid.layers.fc(input=word_embedding, size=hid_dim * 4)
+    #     rfc0 = fluid.layers.fc(input=word_embedding, size=hid_dim * 4)
+
+    #     lstm_h, c = fluid.layers.dynamic_lstm(
+    #         input=fc0, size=hid_dim * 4, is_reverse=False)
+    #     rlstm_h, c = fluid.layers.dynamic_lstm(
+    #         input=rfc0, size=hid_dim * 4, is_reverse=True)
+
+    #     # extract last layer
+    #     lstm_last = fluid.layers.sequence_last_step(input=lstm_h)
+    #     rlstm_last = fluid.layers.sequence_last_step(input=rlstm_h)
+
+    #     lstm_last_tanh = fluid.layers.tanh(lstm_last)
+    #     rlstm_last_tanh = fluid.layers.tanh(rlstm_last)
+
+    #     # concat layer
+    #     lstm_concat = fluid.layers.concat(input=[lstm_last, rlstm_last], axis=1)
+    #     # full connect layer
+    #     fc = fluid.layers.fc(input=lstm_concat, size=hid_dim2, act='tanh')
+    #     ########################
+
+    #     ######################## lstm_net
+    #     hid_dim=128
+    #     hid_dim2=96
+    #     fc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 4)
+    #     lstm_h, c = fluid.layers.dynamic_lstm(
+    #         input=fc0, size=hid_dim * 4, is_reverse=False)
+    #     lstm_max = fluid.layers.sequence_pool(input=lstm_h, pool_type='max')
+    #     lstm_max_tanh = fluid.layers.tanh(lstm_max)
+    #     fc = fluid.layers.fc(input=lstm_max_tanh, size=hid_dim2, act='tanh')
+    #     #########################
+
+    # Define a classfication finetune task by PaddleHub's API
+    elmo_task = hub.create_text_cls_task(
+        feature=fc, num_classes=dataset.num_labels)
+
+    # Setup feed list for data feeder
+    # Must feed all the tensor of senta's module need
+    feed_list = [inputs["word_ids"].name, elmo_task.variable("label").name]
+
+    # Step4: Select finetune strategy, setup config and finetune
+    strategy = hub.AdamWeightDecayStrategy(
+        weight_decay=args.weight_decay,
+        learning_rate=args.learning_rate,
+        lr_scheduler="linear_decay",
+        warmup_proportion=args.warmup_proportion)
+
+    # Setup runing config for PaddleHub Finetune API
+    config = hub.RunConfig(
+        use_cuda=args.use_gpu,
+        num_epoch=args.num_epoch,
+        batch_size=args.batch_size,
+        checkpoint_dir=args.checkpoint_dir,
+        strategy=strategy)
+
+    # Finetune and evaluate by PaddleHub's API
+    # will finish training, evaluation, testing, save model automatically
+    hub.finetune_and_eval(
+        task=elmo_task, data_reader=reader, feed_list=feed_list, config=config)
