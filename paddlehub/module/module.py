@@ -205,6 +205,10 @@ class Module(object):
         exe = fluid.Executor(fluid.CPUPlace())
         self.program, _, _ = fluid.io.load_inference_model(
             self.helper.model_path(), executor=exe)
+        for block in self.program.blocks:
+            for op in block.ops:
+                if "op_callstack" in op.all_attrs():
+                    op._set_attr("op_callstack", [""])
         self._load_processor()
         self._load_assets()
         self._recover_from_desc()
@@ -642,6 +646,12 @@ class Module(object):
 
         # save inference program
         program = self.program.clone()
+
+        for block in program.blocks:
+            for op in block.ops:
+                if "op_callstack" in op.all_attrs():
+                    op._set_attr("op_callstack", [""])
+
         if not exe:
             place = fluid.CPUPlace()
             exe = fluid.Executor(place=place)
