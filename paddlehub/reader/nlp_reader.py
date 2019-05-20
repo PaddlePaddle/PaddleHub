@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import csv
 import json
+import platform
 import six
 from collections import namedtuple
 
@@ -28,6 +29,12 @@ from paddlehub.reader import tokenization
 from paddlehub.common.logger import logger
 from .batching import pad_batch_data
 import paddlehub as hub
+
+
+def get_encoding():
+    if platform.platform().lower().startswith("windows"):
+        return "gbk"
+    return "utf8"
 
 
 class BaseReader(object):
@@ -419,13 +426,10 @@ class LACClassifyReader(object):
         def preprocess(text):
             data_dict = {self.feed_key: [text]}
             processed = self.lac.lexical_analysis(data=data_dict)
-            if six.PY2:
-                processed[0]['tag'] = [
-                    tag.decode("utf8") for tag in processed[0]['tag']
-                ]
-                processed[0]['word'] = [
-                    word.decode("utf8") for word in processed[0]['word']
-                ]
+            for data in processed:
+                for index, word in enumerate(data['word']):
+                    if six.PY2 and type(word) == str:
+                        data['word'][index] = word.decode(get_encoding())
             processed = [
                 self.vocab[word] for word in processed[0]['word']
                 if word in self.vocab
