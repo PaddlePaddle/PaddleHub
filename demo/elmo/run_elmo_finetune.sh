@@ -1,8 +1,6 @@
 export CUDA_VISIBLE_DEVICES=0
 
-CKPT_DIR="./ckpt_chnsenticorp"
-
-python -u text_classifier.py \
+python -u elmo_finetune.py \
                    --batch_size=32 \
                    --use_gpu=True \
                    --checkpoint_dir="./ckpt_chnsenticorp" \
