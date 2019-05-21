@@ -88,8 +88,8 @@ if __name__ == '__main__':
     #     hid_dim=128
     #     hid_dim2=96
 
-    #     fc0 = fluid.layers.fc(input=word_embedding, size=hid_dim * 4)
-    #     rfc0 = fluid.layers.fc(input=word_embedding, size=hid_dim * 4)
+    #     fc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 4)
+    #     rfc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 4)
 
     #     lstm_h, c = fluid.layers.dynamic_lstm(
     #         input=fc0, size=hid_dim * 4, is_reverse=False)
