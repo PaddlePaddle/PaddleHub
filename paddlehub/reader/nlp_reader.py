@@ -18,6 +18,8 @@ from __future__ import print_function
 
 import csv
 import json
+import platform
+import six
 from collections import namedtuple
 
 import paddle
@@ -27,6 +29,12 @@ from paddlehub.reader import tokenization
 from paddlehub.common.logger import logger
 from .batching import pad_batch_data
 import paddlehub as hub
+
+
+def get_encoding():
+    if platform.platform().lower().startswith("windows"):
+        return "gbk"
+    return "utf8"
 
 
 class BaseReader(object):
@@ -398,16 +406,17 @@ class LACClassifyReader(object):
                        shuffle=False,
                        data=None):
         if phase == "train":
+            shuffle = True
             data = self.dataset.get_train_examples()
             self.num_examples['train'] = len(data)
         elif phase == "test":
             shuffle = False
             data = self.dataset.get_test_examples()
-            self.num_examples['train'] = len(data)
+            self.num_examples['test'] = len(data)
         elif phase == "val" or phase == "dev":
             shuffle = False
             data = self.dataset.get_dev_examples()
-            self.num_examples['test'] = len(data)
+            self.num_examples['dev'] = len(data)
         elif phase == "predict":
             data = data
         else:
@@ -417,20 +426,35 @@ class LACClassifyReader(object):
         def preprocess(text):
             data_dict = {self.feed_key: [text]}
             processed = self.lac.lexical_analysis(data=data_dict)
+            for data in processed:
+                for index, word in enumerate(data['word']):
+                    if six.PY2 and type(word) == str:
+                        data['word'][index] = word.decode(get_encoding())
             processed = [
                 self.vocab[word] for word in processed[0]['word']
                 if word in self.vocab
             ]
+            if len(processed) == 0:
+                logger.warning(
+                    "The words in text %s can't be found in the vocabulary." %
+                    (text))
             return processed
 
         def _data_reader():
+            if shuffle:
+                np.random.shuffle(data)
+
             if phase == "predict":
                 for text in data:
                     text = preprocess(text)
+                    if not text:
+                        continue
                     yield (text, )
             else:
                 for item in data:
                     text = preprocess(item.text_a)
+                    if not text:
+                        continue
                     yield (text, item.label)
 
         return paddle.batch(_data_reader, batch_size=batch_size)
