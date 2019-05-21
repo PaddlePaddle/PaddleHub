@@ -98,7 +98,7 @@ def lstm_net(program, input_feature, hid_dim=128, hid_dim2=96):
 
 if __name__ == '__main__':
     # Step1: load Paddlehub elmo pretrained model
-    module = hub.Module(name="elmo.hub_module")
+    module = hub.Module(name="elmo")
     inputs, outputs, program = module.context(trainable=True)
 
     # Step2: Download dataset and use TextClassificationReader to read dataset
