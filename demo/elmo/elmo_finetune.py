@@ -19,6 +19,83 @@ parser.add_argument("--warmup_proportion", type=float, default=0.05, help="Warmu
 args = parser.parse_args()
 # yapf: enable.
 
+
+def bow_net(program, input_feature, hid_dim=128, hid_dim2=96):
+    switch_main_program(program)
+
+    bow = fluid.layers.sequence_pool(input=input_feature, pool_type='sum')
+    bow_tanh = fluid.layers.tanh(bow)
+    fc_1 = fluid.layers.fc(input=bow_tanh, size=hid_dim, act="tanh")
+    fc = fluid.layers.fc(input=fc_1, size=hid_dim2, act="tanh")
+
+    return fc
+
+
+def cnn_net(program, input_feature, win_size=3, hid_dim=128, hid_dim2=96):
+    switch_main_program(program)
+
+    conv_3 = fluid.nets.sequence_conv_pool(
+        input=input_feature,
+        num_filters=hid_dim,
+        filter_size=win_size,
+        act="relu",
+        pool_type="max")
+    fc = fluid.layers.fc(input=conv_3, size=hid_dim2)
+
+    return fc
+
+
+def gru_net(program, input_feature, hid_dim=128, hid_dim2=96):
+    switch_main_program(program)
+
+    fc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 3)
+    gru_h = fluid.layers.dynamic_gru(input=fc0, size=hid_dim, is_reverse=False)
+    gru_max = fluid.layers.sequence_pool(input=gru_h, pool_type='max')
+    gru_max_tanh = fluid.layers.tanh(gru_max)
+    fc = fluid.layers.fc(input=gru_max_tanh, size=hid_dim2, act='tanh')
+
+    return fc
+
+
+def bilstm_net(program, input_feature, hid_dim=128, hid_dim2=96):
+    switch_main_program(program)
+
+    fc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 4)
+    rfc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 4)
+
+    lstm_h, c = fluid.layers.dynamic_lstm(
+        input=fc0, size=hid_dim * 4, is_reverse=False)
+    rlstm_h, c = fluid.layers.dynamic_lstm(
+        input=rfc0, size=hid_dim * 4, is_reverse=True)
+
+    # extract last step
+    lstm_last = fluid.layers.sequence_last_step(input=lstm_h)
+    rlstm_last = fluid.layers.sequence_last_step(input=rlstm_h)
+
+    lstm_last_tanh = fluid.layers.tanh(lstm_last)
+    rlstm_last_tanh = fluid.layers.tanh(rlstm_last)
+
+    # concat layer
+    lstm_concat = fluid.layers.concat(input=[lstm_last, rlstm_last], axis=1)
+    # full connect layer
+    fc = fluid.layers.fc(input=lstm_concat, size=hid_dim2, act='tanh')
+
+    return fc
+
+
+def lstm_net(program, input_feature, hid_dim=128, hid_dim2=96):
+    switch_main_program(program)
+
+    fc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 4)
+    lstm_h, c = fluid.layers.dynamic_lstm(
+        input=fc0, size=hid_dim * 4, is_reverse=False)
+    lstm_max = fluid.layers.sequence_pool(input=lstm_h, pool_type='max')
+    lstm_max_tanh = fluid.layers.tanh(lstm_max)
+    fc = fluid.layers.fc(input=lstm_max_tanh, size=hid_dim2, act='tanh')
+
+    return fc
+
+
 if __name__ == '__main__':
     # Step1: load Paddlehub elmo pretrained model
     module = hub.Module(name="elmo.hub_module")
@@ -38,7 +115,7 @@ if __name__ == '__main__':
     #choose the net which you would like: bow, cnn, gru, bilstm, lstm
     switch_main_program(program)
 
-    #################### embedding layer
+    # embedding layer
     word_embed_dims = 128
     word_embedding = fluid.layers.embedding(
         input=word_ids,
@@ -49,76 +126,10 @@ if __name__ == '__main__':
     # add elmo embedding
     input_feature = fluid.layers.concat(
         input=[elmo_embedding, word_embedding], axis=1)
-    ####################
 
-    #     #################### bow_net
-    #     hid_dim=128
-    #     hid_dim2=96
-    #     bow = fluid.layers.sequence_pool(input=input_feature, pool_type='sum')
-    #     bow_tanh = fluid.layers.tanh(bow)
-    #     fc_1 = fluid.layers.fc(input=bow_tanh, size=hid_dim, act="tanh")
-    #     fc = fluid.layers.fc(input=fc_1, size=hid_dim2, act="tanh")
-    #     ########################
-
-    #     ######################## cnn_net
-    #     win_size = 3
-    #     hid_dim = 128
-    #     hid_dim2 = 96
-    #     conv_3 = fluid.nets.sequence_conv_pool(
-    #         input=input_feature,
-    #         num_filters=hid_dim,
-    #         filter_size=win_size,
-    #         act="relu",
-    #         pool_type="max")
-    #     fc = fluid.layers.fc(input=conv_3, size=hid_dim2)
-    #     ########################
-
-    ######################## gru_net
-    hid_dim = 128
-    hid_dim2 = 96
-    fc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 3)
-    gru_h = fluid.layers.dynamic_gru(input=fc0, size=hid_dim, is_reverse=False)
-    gru_max = fluid.layers.sequence_pool(input=gru_h, pool_type='max')
-    gru_max_tanh = fluid.layers.tanh(gru_max)
-    fc = fluid.layers.fc(input=gru_max_tanh, size=hid_dim2, act='tanh')
-    ########################
-
-    #     ######################## bilstm_net
-    #     # bi-lstm layer
-    #     hid_dim=128
-    #     hid_dim2=96
-
-    #     fc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 4)
-    #     rfc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 4)
-
-    #     lstm_h, c = fluid.layers.dynamic_lstm(
-    #         input=fc0, size=hid_dim * 4, is_reverse=False)
-    #     rlstm_h, c = fluid.layers.dynamic_lstm(
-    #         input=rfc0, size=hid_dim * 4, is_reverse=True)
-
-    #     # extract last layer
-    #     lstm_last = fluid.layers.sequence_last_step(input=lstm_h)
-    #     rlstm_last = fluid.layers.sequence_last_step(input=rlstm_h)
-
-    #     lstm_last_tanh = fluid.layers.tanh(lstm_last)
-    #     rlstm_last_tanh = fluid.layers.tanh(rlstm_last)
-
-    #     # concat layer
-    #     lstm_concat = fluid.layers.concat(input=[lstm_last, rlstm_last], axis=1)
-    #     # full connect layer
-    #     fc = fluid.layers.fc(input=lstm_concat, size=hid_dim2, act='tanh')
-    #     ########################
-
-    #     ######################## lstm_net
-    #     hid_dim=128
-    #     hid_dim2=96
-    #     fc0 = fluid.layers.fc(input=input_feature, size=hid_dim * 4)
-    #     lstm_h, c = fluid.layers.dynamic_lstm(
-    #         input=fc0, size=hid_dim * 4, is_reverse=False)
-    #     lstm_max = fluid.layers.sequence_pool(input=lstm_h, pool_type='max')
-    #     lstm_max_tanh = fluid.layers.tanh(lstm_max)
-    #     fc = fluid.layers.fc(input=lstm_max_tanh, size=hid_dim2, act='tanh')
-    #     #########################
+    #choose the net which you would like: bow, cnn, gru, bilstm, lstm
+    #we recommend you to choose the gru_net
+    fc = gru_net(program, input_feature)
 
     # Define a classfication finetune task by PaddleHub's API
     elmo_task = hub.create_text_cls_task(
