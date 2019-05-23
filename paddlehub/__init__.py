@@ -15,6 +15,11 @@
 
 import six
 
+if six.PY2:
+    import sys
+    reload(sys)
+    sys.setdefaultencoding("UTF-8")
+
 from . import module
 from . import common
 from . import io

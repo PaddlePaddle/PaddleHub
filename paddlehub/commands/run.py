@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+import json
 import os
 import sys
 
@@ -173,7 +174,7 @@ class RunCommand(BaseCommand):
         results = module(
             sign_name=self.args.signature, data=input_data, **config)
         if six.PY2:
-            print(repr(results).decode('string_escape'))
+            print(json.dumps(results, encoding="utf8", ensure_ascii=False))
         else:
             print(results)
 
