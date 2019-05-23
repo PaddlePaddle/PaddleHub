@@ -21,7 +21,6 @@ from collections import namedtuple
 import codecs
 import os
 import csv
-import six
 
 from paddlehub.dataset import InputExample, HubDataset
 from paddlehub.common.downloader import default_downloader

@@ -21,7 +21,6 @@ import os
 import codecs
 import csv
 import json
-import six
 from collections import namedtuple
 
 from paddlehub.dataset import InputExample, HubDataset
