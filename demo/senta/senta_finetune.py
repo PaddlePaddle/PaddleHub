@@ -8,7 +8,7 @@ import paddlehub as hub
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
 args = parser.parse_args()
