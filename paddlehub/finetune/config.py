@@ -29,6 +29,7 @@ class RunConfig(object):
     def __init__(self,
                  log_interval=10,
                  eval_interval=100,
+                 use_pyreader=False,
                  save_ckpt_interval=None,
                  use_cuda=True,
                  checkpoint_dir=None,
@@ -44,6 +45,7 @@ class RunConfig(object):
         self._checkpoint_dir = checkpoint_dir
         self._num_epoch = num_epoch
         self._batch_size = batch_size
+        self._use_pyreader = use_pyreader
         if strategy is None:
             self._strategy = DefaultStrategy()
         else:
@@ -93,3 +95,7 @@ class RunConfig(object):
     @property
     def enable_memory_optim(self):
         return self._enable_memory_optim
+
+    @property
+    def use_pyreader(self):
+        return self._use_pyreader
