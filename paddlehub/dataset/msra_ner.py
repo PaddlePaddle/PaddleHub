@@ -94,6 +94,9 @@ class MSRA_NER(HubDataset):
             seq_id = 0
             header = next(reader)  # skip header
             for line in reader:
+                if six.PY2:
+                    line[0] = line[0].encode("UTF-8")
+                    line[1] = line[1].encode("UTF-8")
                 example = InputExample(
                     guid=seq_id, label=line[1], text_a=line[0])
                 seq_id += 1

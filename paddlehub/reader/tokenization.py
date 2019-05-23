@@ -73,6 +73,8 @@ def load_vocab(vocab_file):
     vocab = collections.OrderedDict()
     fin = codecs.open(vocab_file, "r", "UTF-8")
     for num, line in enumerate(fin):
+        if six.PY2:
+            line = line.encode("UTF-8")
         items = convert_to_unicode(line.strip()).split("\t")
         if len(items) > 2:
             break

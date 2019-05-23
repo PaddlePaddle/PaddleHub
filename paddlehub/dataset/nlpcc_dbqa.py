@@ -21,6 +21,7 @@ from collections import namedtuple
 import codecs
 import os
 import csv
+import six
 
 from paddlehub.dataset import InputExample, HubDataset
 from paddlehub.common.downloader import default_downloader
@@ -89,6 +90,10 @@ class NLPCC_DBQA(HubDataset):
             seq_id = 0
             header = next(reader)  # skip header
             for line in reader:
+                if six.PY2:
+                    line[1] = line[1].encode("UTF-8")
+                    line[2] = line[2].encode("UTF-8")
+                    line[3] = line[3].encode("UTF-8")
                 example = InputExample(
                     guid=seq_id, label=line[3], text_a=line[1], text_b=line[2])
                 seq_id += 1
