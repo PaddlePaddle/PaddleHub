@@ -1,3 +1,4 @@
+#coding:utf-8
 #   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -30,8 +31,12 @@ def python_version():
 max_version, mid_version, min_version = python_version()
 
 REQUIRED_PACKAGES = [
-    'numpy >= 1.12.0', 'six >= 1.10.0', 'protobuf >= 3.1.0', 'pyyaml', 'Pillow',
-    "visualdl >= 1.3.0", "chardet == 3.0.4"
+    'numpy >= 1.12.0',
+    'six >= 1.10.0',
+    'protobuf >= 3.1.0',
+    'pyyaml',
+    'Pillow',
+    "visualdl >= 1.3.0",
 ]
 
 if max_version < 3:

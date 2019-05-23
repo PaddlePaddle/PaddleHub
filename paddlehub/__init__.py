@@ -1,3 +1,4 @@
+#coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -11,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-#coding:utf-8
 
 import six
 
@@ -47,8 +46,3 @@ from .finetune.config import RunConfig
 from .finetune.strategy import AdamWeightDecayStrategy
 from .finetune.strategy import DefaultStrategy
 from .finetune.strategy import DefaultFinetuneStrategy
-
-if six.PY2:
-    import sys
-    reload(sys)
-    sys.setdefaultencoding("UTF-8")
