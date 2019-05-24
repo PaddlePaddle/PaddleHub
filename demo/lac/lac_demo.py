@@ -1,5 +1,10 @@
 #coding:utf-8
+from __future__ import print_function
+
+import json
 import os
+import six
+
 import paddlehub as hub
 
 if __name__ == "__main__":
@@ -13,5 +18,11 @@ if __name__ == "__main__":
     # execute predict and print the result
     results = lac.lexical_analysis(data=inputs)
     for result in results:
-        print(result['word'])
-        print(result['tag'])
+        if six.PY2:
+            print(json.dumps(
+                result['word'], encoding="utf8", ensure_ascii=False))
+            print(json.dumps(
+                result['tag'], encoding="utf8", ensure_ascii=False))
+        else:
+            print(result['word'])
+            print(result['tag'])
