@@ -1,3 +1,4 @@
+#coding:utf-8
 #   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -20,7 +21,6 @@ import os
 import codecs
 import csv
 import json
-import six
 from collections import namedtuple
 
 from paddlehub.dataset import InputExample, HubDataset
