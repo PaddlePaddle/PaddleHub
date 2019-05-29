@@ -21,7 +21,6 @@ import json
 import numpy as np
 import platform
 import six
-import random
 from collections import namedtuple
 
 import paddle
@@ -255,10 +254,8 @@ class BaseReader(object):
             seq_id = 0
 
             for item in data:
-                if self.label_map:
-                    label = random.choice(list(self.label_map.keys()))
-                else:
-                    label = "0"
+                # set label in order to run the program
+                label = "0"
                 if len(item) == 1:
                     item_i = InputExample(
                         guid=seq_id, text_a=item[0], label=label)
@@ -292,73 +289,34 @@ class BaseReader(object):
 
 class ClassifyReader(BaseReader):
     def _pad_batch_records(self, batch_records, phase=None):
+        batch_token_ids = [record.token_ids for record in batch_records]
+        batch_text_type_ids = [record.text_type_ids for record in batch_records]
+        batch_position_ids = [record.position_ids for record in batch_records]
+
+        padded_token_ids, input_mask = pad_batch_data(
+            batch_token_ids,
+            max_seq_len=self.max_seq_len,
+            pad_idx=self.pad_id,
+            return_input_mask=True)
+        padded_text_type_ids = pad_batch_data(
+            batch_text_type_ids,
+            max_seq_len=self.max_seq_len,
+            pad_idx=self.pad_id)
+        padded_position_ids = pad_batch_data(
+            batch_position_ids,
+            max_seq_len=self.max_seq_len,
+            pad_idx=self.pad_id)
+
         if phase != "predict":
-            batch_token_ids = [record.token_ids for record in batch_records]
-            batch_text_type_ids = [
-                record.text_type_ids for record in batch_records
-            ]
-            batch_position_ids = [
-                record.position_ids for record in batch_records
-            ]
             batch_labels = [record.label_id for record in batch_records]
             batch_labels = np.array(batch_labels).astype("int64").reshape(
                 [-1, 1])
-
-            # if batch_records[0].qid:
-            #     batch_qids = [record.qid for record in batch_records]
-            #     batch_qids = np.array(batch_qids).astype("int64").reshape([-1, 1])
-            # else:
-            #     batch_qids = np.array([]).astype("int64").reshape([-1, 1])
-
-            # padding
-            padded_token_ids, input_mask = pad_batch_data(
-                batch_token_ids,
-                max_seq_len=self.max_seq_len,
-                pad_idx=self.pad_id,
-                return_input_mask=True)
-            padded_text_type_ids = pad_batch_data(
-                batch_text_type_ids,
-                max_seq_len=self.max_seq_len,
-                pad_idx=self.pad_id)
-            padded_position_ids = pad_batch_data(
-                batch_position_ids,
-                max_seq_len=self.max_seq_len,
-                pad_idx=self.pad_id)
 
             return_list = [
                 padded_token_ids, padded_position_ids, padded_text_type_ids,
                 input_mask, batch_labels
             ]
         else:
-            batch_token_ids = [record.token_ids for record in batch_records]
-            batch_text_type_ids = [
-                record.text_type_ids for record in batch_records
-            ]
-            batch_position_ids = [
-                record.position_ids for record in batch_records
-            ]
-
-            # if batch_records[0].qid:
-            #     batch_qids = [record.qid for record in batch_records]
-            #     batch_qids = np.array(batch_qids).astype("int64").reshape([-1, 1])
-            # else:
-            #     batch_qids = np.array([]).astype("int64").reshape([-1, 1])
-
-            # padding
-            padded_token_ids, input_mask = pad_batch_data(
-                batch_token_ids,
-                max_seq_len=self.max_seq_len,
-                pad_idx=self.pad_id,
-                return_input_mask=True)
-            padded_text_type_ids = pad_batch_data(
-                batch_text_type_ids,
-                max_seq_len=self.max_seq_len,
-                pad_idx=self.pad_id)
-            padded_position_ids = pad_batch_data(
-                batch_position_ids,
-                max_seq_len=self.max_seq_len,
-                pad_idx=self.pad_id)
-
             return_list = [
                 padded_token_ids, padded_position_ids, padded_text_type_ids,
                 input_mask
@@ -369,31 +327,28 @@ class ClassifyReader(BaseReader):
 
 class SequenceLabelReader(BaseReader):
     def _pad_batch_records(self, batch_records, phase=None):
-        if phase != "predict":
-            batch_token_ids = [record.token_ids for record in batch_records]
-            batch_text_type_ids = [
-                record.text_type_ids for record in batch_records
-            ]
-            batch_position_ids = [
-                record.position_ids for record in batch_records
-            ]
-            batch_label_ids = [record.label_ids for record in batch_records]
+        batch_token_ids = [record.token_ids for record in batch_records]
+        batch_text_type_ids = [record.text_type_ids for record in batch_records]
+        batch_position_ids = [record.position_ids for record in batch_records]
 
-            # padding
-            padded_token_ids, input_mask, batch_seq_lens = pad_batch_data(
-                batch_token_ids,
-                pad_idx=self.pad_id,
-                max_seq_len=self.max_seq_len,
-                return_input_mask=True,
-                return_seq_lens=True)
-            padded_text_type_ids = pad_batch_data(
-                batch_text_type_ids,
-                max_seq_len=self.max_seq_len,
-                pad_idx=self.pad_id)
-            padded_position_ids = pad_batch_data(
-                batch_position_ids,
-                max_seq_len=self.max_seq_len,
-                pad_idx=self.pad_id)
+        # padding
+        padded_token_ids, input_mask, batch_seq_lens = pad_batch_data(
+            batch_token_ids,
+            pad_idx=self.pad_id,
+            max_seq_len=self.max_seq_len,
+            return_input_mask=True,
+            return_seq_lens=True)
+        padded_text_type_ids = pad_batch_data(
+            batch_text_type_ids,
+            max_seq_len=self.max_seq_len,
+            pad_idx=self.pad_id)
+        padded_position_ids = pad_batch_data(
+            batch_position_ids,
+            max_seq_len=self.max_seq_len,
+            pad_idx=self.pad_id)
+
+        if phase != "predict":
+            batch_label_ids = [record.label_ids for record in batch_records]
             padded_label_ids = pad_batch_data(
                 batch_label_ids,
                 max_seq_len=self.max_seq_len,
@@ -404,30 +359,6 @@ class SequenceLabelReader(BaseReader):
                 input_mask, padded_label_ids, batch_seq_lens
             ]
         else:
-            batch_token_ids = [record.token_ids for record in batch_records]
-            batch_text_type_ids = [
-                record.text_type_ids for record in batch_records
-            ]
-            batch_position_ids = [
-                record.position_ids for record in batch_records
-            ]
-
-            # padding
-            padded_token_ids, input_mask, batch_seq_lens = pad_batch_data(
-                batch_token_ids,
-                pad_idx=self.pad_id,
-                max_seq_len=self.max_seq_len,
-                return_input_mask=True,
-                return_seq_lens=True)
-            padded_text_type_ids = pad_batch_data(
-                batch_text_type_ids,
-                max_seq_len=self.max_seq_len,
-                pad_idx=self.pad_id)
-            padded_position_ids = pad_batch_data(
-                batch_position_ids,
-                max_seq_len=self.max_seq_len,
-                pad_idx=self.pad_id)
-
             return_list = [
                 padded_token_ids, padded_position_ids, padded_text_type_ids,
                 input_mask, batch_seq_lens
@@ -475,8 +406,10 @@ class SequenceLabelReader(BaseReader):
                                    max_seq_length,
                                    tokenizer,
                                    phase=None):
+
+        tokens = tokenization.convert_to_unicode(example.text_a).split(u"")
+
         if phase != "predict":
-            tokens = tokenization.convert_to_unicode(example.text_a).split(u"")
             labels = tokenization.convert_to_unicode(example.label).split(u"")
             tokens, labels = self._reseg_token_label(
                 tokens=tokens, labels=labels, tokenizer=tokenizer, phase=phase)
@@ -503,7 +436,6 @@ class SequenceLabelReader(BaseReader):
                 position_ids=position_ids,
                 label_ids=label_ids)
         else:
-            tokens = tokenization.convert_to_unicode(example.text_a).split(u"")
             tokens = self._reseg_token_label(
                 tokens=tokens, tokenizer=tokenizer, phase=phase)
 
@@ -514,7 +446,6 @@ class SequenceLabelReader(BaseReader):
             token_ids = tokenizer.convert_tokens_to_ids(tokens)
             position_ids = list(range(len(token_ids)))
             text_type_ids = [0] * len(token_ids)
-            no_entity_id = len(self.label_map) - 1
 
             Record = namedtuple('Record',
                                 ['token_ids', 'text_type_ids', 'position_ids'])
