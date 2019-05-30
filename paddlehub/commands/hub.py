@@ -58,7 +58,13 @@ command = HubCommand.instance()
 
 
 def main():
-    command.execute(sys.argv[1:])
+    argv = []
+    for item in sys.argv:
+        if six.PY2:
+            argv.append(item.decode(sys.stdin.encoding).decode("utf8"))
+        else:
+            argv.append(item)
+    command.execute(argv[1:])
 
 
 if __name__ == "__main__":
