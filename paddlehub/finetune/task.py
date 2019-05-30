@@ -128,10 +128,11 @@ class BasicTask(object):
         # run environment
         self._phases = []
         self._envs = {}
+        self._predict_data = None
 
-    def init_if_necessary(self):
+    def init_if_necessary(self, load_best_model=False):
         if not self._load_checkpoint:
-            self.load_checkpoint()
+            self.load_checkpoint(load_best_model=load_best_model)
             self._load_checkpoint = True
 
     @contextlib.contextmanager
@@ -158,6 +159,11 @@ class BasicTask(object):
                     self.env.label = self._add_label()
                     self.env.loss = self._add_loss()
                     self.env.metrics = self._add_metrics()
+
+        if self.is_predict_phase or self.is_test_phase:
+            self.env.main_program = self.env.main_program.clone(for_test=True)
+            hub.common.paddle_helper.set_op_attr(
+                self.env.main_program, is_test=True)
 
         if self.config.use_pyreader:
             t_program = fluid.Program()
@@ -291,8 +297,12 @@ class BasicTask(object):
 
     @property
     def reader(self):
+        if self.is_predict_phase:
+            data = self._predict_data
+        else:
+            data = None
         self.env.reader = self._base_data_reader.data_generator(
-            batch_size=self.config.batch_size, phase=self.phase)
+            batch_size=self.config.batch_size, phase=self.phase, data=data)
         return self.env.reader
 
     @property
@@ -315,8 +325,6 @@ class BasicTask(object):
 
     @property
     def output(self):
-        if self.is_predict_phase:
-            raise RuntimeError()
         if not self.env.is_inititalized:
             self._build_env()
         return self.env.output
@@ -412,7 +420,8 @@ class BasicTask(object):
             self.config.checkpoint_dir,
             self.exe,
             main_program=self.main_program,
-            startup_program=self._base_startup_program)
+            startup_program=self._base_startup_program,
+            load_best_model=load_best_model)
 
         if load_best_model:
             model_saved_dir = os.path.join(self.config.checkpoint_dir,
@@ -454,10 +463,12 @@ class BasicTask(object):
             self._eval_end_event(run_states)
 
     def predict(self, data, load_best_model=True):
-        with self.phase_guard(phase=phase):
-            self.init_if_necessary()
-            for run_state in self._run():
-                yield run_state.run_results
+        with self.phase_guard(phase="predict"):
+            self._predict_data = data
+            self.init_if_necessary(load_best_model=load_best_model)
+            run_states = self._run()
+            self._predict_data = None
+        return [run_state.run_results for run_state in run_states]
 
     def _run(self, do_eval=False):
         with fluid.program_guard(self.main_program, self.startup_program):

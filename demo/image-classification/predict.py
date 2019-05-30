@@ -8,7 +8,7 @@ import numpy as np
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--use_gpu",        type=bool,  default=False,                      help="Whether use GPU for predict.")
+parser.add_argument("--use_gpu",        type=bool,  default=True,                       help="Whether use GPU for predict.")
 parser.add_argument("--checkpoint_dir", type=str,   default="paddlehub_finetune_ckpt",  help="Path to save log data.")
 parser.add_argument("--batch_size",     type=int,   default=16,                         help="Total examples' number in batch for training.")
 parser.add_argument("--module",         type=str,   default="resnet50",                 help="Module used as a feature extractor.")
@@ -70,15 +70,17 @@ def predict(args):
 
     data = ["./test/test_img_daisy.jpg", "./test/test_img_roses.jpg"]
     label_map = dataset.label_dict()
-    for result in task.predict(data=data):
-        result = np.argmax(result, axis=2)
-        index = 0
-        for batch in result:
-            for predict_result in batch:
-                index += 1
-                predict_result = label_map[predict_result]
-                print("input %i is %s, and the predict result is %s" %
-                      (index, data[index - 1], predict_result))
+    index = 0
+    # get classification result
+    results = task.predict(data=data)
+    for batch_result in results:
+        # get predict index
+        batch_result = np.argmax(batch_result, axis=2)[0]
+        for result in batch_result:
+            index += 1
+            result = label_map[result]
+            print("input %i is %s, and the predict result is %s" %
+                  (index, data[index - 1], result))
 
 
 if __name__ == "__main__":
