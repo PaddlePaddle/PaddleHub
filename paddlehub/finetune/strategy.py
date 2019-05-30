@@ -75,7 +75,7 @@ class DefaultStrategy(object):
             self.optimizer = fluid.optimizer.Adam(
                 learning_rate=self.learning_rate)
 
-    def execute(self, loss):
+    def execute(self, loss, data_reader, config):
         if self.optimizer is not None:
             self.optimizer.minimize(loss)
         else:
@@ -115,7 +115,8 @@ class AdamWeightDecayStrategy(DefaultStrategy):
     def weight_decay(self):
         return self._weight_decay
 
-    def execute(self, loss, main_program, data_reader, config):
+    def execute(self, loss, data_reader, config):
+        main_program = loss.block.program
         # calculate wamrup step
         dev_count = self._get_dev_count(config)
         data_reader.data_generator(
@@ -159,7 +160,7 @@ class DefaultFinetuneStrategy(DefaultStrategy):
         self._optimizer_name = optimizer_name
         self.regularization_coeff = regularization_coeff
 
-    def execute(self, loss):
+    def execute(self, loss, data_reader, config):
         # get pretrained parameters
         program = loss.block.program
         global_block = program.global_block()
@@ -188,7 +189,7 @@ class L2SPFinetuneStrategy(DefaultStrategy):
         self._optimizer_name = optimizer_name
         self.regularization_coeff = regularization_coeff
 
-    def execute(self, loss):
+    def execute(self, loss, data_reader, config):
         # get pretrained parameters
         program = loss.block.program
         global_block = program.global_block()
