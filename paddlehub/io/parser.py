@@ -58,7 +58,6 @@ class YAMLFileParser(object):
 
     def parse(self, yaml_file):
         with codecs.open(yaml_file, "r", sys.stdin.encoding) as file:
-            print("come to here")
             content = file.read()
         return yaml.load(content, Loader=yaml.BaseLoader)
 
