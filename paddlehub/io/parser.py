@@ -30,7 +30,7 @@ class CSVFileParser(object):
         pass
 
     def parse(self, csv_file):
-        with codecs.open(txt_file, "r", sys.stdin.encoding) as file:
+        with codecs.open(csv_file, "r", sys.stdin.encoding) as file:
             content = file.read()
         content = content.split('\n')
         self.title = content[0].split(',')
@@ -57,7 +57,8 @@ class YAMLFileParser(object):
         pass
 
     def parse(self, yaml_file):
-        with codecs.open(txt_file, "r", sys.stdin.encoding) as file:
+        with codecs.open(yaml_file, "r", sys.stdin.encoding) as file:
+            print("come to here")
             content = file.read()
         return yaml.load(content, Loader=yaml.BaseLoader)
 
