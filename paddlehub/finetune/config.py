@@ -31,6 +31,7 @@ class RunConfig(object):
                  log_interval=10,
                  eval_interval=100,
                  use_pyreader=False,
+                 use_data_parallel=True,
                  save_ckpt_interval=None,
                  use_cuda=True,
                  checkpoint_dir=None,
@@ -47,6 +48,7 @@ class RunConfig(object):
         self._num_epoch = num_epoch
         self._batch_size = batch_size
         self._use_pyreader = use_pyreader
+        self._use_data_parallel = use_data_parallel
         if strategy is None:
             self._strategy = DefaultStrategy()
         else:
@@ -100,3 +102,7 @@ class RunConfig(object):
     @property
     def use_pyreader(self):
         return self._use_pyreader
+
+    @property
+    def use_data_parallel(self):
+        return self._use_data_parallel

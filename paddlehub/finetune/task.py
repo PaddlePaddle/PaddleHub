@@ -222,14 +222,19 @@ class BasicTask(object):
         else:
             share_vars_from = self._base_compile_program
 
-        self.env.main_program_compiled = fluid.CompiledProgram(
-            self.env.main_program).with_data_parallel(
-                loss_name=loss_name,
-                share_vars_from=share_vars_from,
-                build_strategy=self.build_strategy)
+        if not self.config.use_data_parallel:
+            if self.config.enable_memory_optim:
+                fluid.memory_optimize(self.env.main_program)
+            self.env.main_program_compiled = self.env.main_program
+        else:
+            self.env.main_program_compiled = fluid.CompiledProgram(
+                self.env.main_program).with_data_parallel(
+                    loss_name=loss_name,
+                    share_vars_from=share_vars_from,
+                    build_strategy=self.build_strategy)
 
-        if self._base_compile_program is None:
-            self._base_compile_program = self.env.main_program_compiled
+            if self._base_compile_program is None:
+                self._base_compile_program = self.env.main_program_compiled
 
         self.exe.run(self.env.startup_program)
         self._build_env_end_event()
@@ -422,15 +427,6 @@ class BasicTask(object):
             main_program=self.main_program,
             startup_program=self._base_startup_program,
             load_best_model=load_best_model)
-
-        if load_best_model:
-            model_saved_dir = os.path.join(self.config.checkpoint_dir,
-                                           "best_model")
-            if os.path.exists(model_saved_dir):
-                fluid.io.load_persistables(
-                    executor=self.exe,
-                    dirname=model_saved_dir,
-                    main_program=self.main_program)
 
     def finetune_and_eval(self):
         self.finetune(do_eval=True)

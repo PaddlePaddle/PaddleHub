@@ -41,14 +41,22 @@ def load_checkpoint(checkpoint_dir,
             ckpt.ParseFromString(f.read())
     current_epoch = 1
     global_step = 0
-
+    pretrained_model = ""
     best_model_path = os.path.join(checkpoint_dir, "best_model")
+
+    def if_exist(var):
+        return os.path.exists(os.path.join(pretrained_model, var.name))
+
     if load_best_model and os.path.exists(best_model_path):
-        fluid.io.load_persistables(exe, best_model_path, main_program)
+        pretrained_model = best_model_path
+        fluid.io.load_vars(
+            exe, best_model_path, main_program, predicate=if_exist)
         logger.info("PaddleHub model best model loaded.")
         return current_epoch, global_step
     elif ckpt.latest_model_dir:
-        fluid.io.load_persistables(exe, ckpt.latest_model_dir, main_program)
+        pretrained_model = ckpt.latest_model_dir
+        fluid.io.load_vars(
+            exe, ckpt.latest_model_dir, main_program, predicate=if_exist)
 
         logger.info("PaddleHub model checkpoint loaded. current_epoch={}, "
                     "global_step={}".format(ckpt.current_epoch,
