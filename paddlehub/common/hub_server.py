@@ -20,9 +20,13 @@ from __future__ import print_function
 import os
 import time
 import re
+import requests
+import json
+import yaml
 
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
+from paddlehub.common.server_config import default_server_config
 from paddlehub.io.parser import yaml_parser
 import paddlehub as hub
 
@@ -31,11 +35,20 @@ CACHE_TIME = 60 * 10
 
 
 class HubServer(object):
-    def __init__(self, server_url=None):
-        if not server_url:
-            server_url = "https://paddlehub.bj.bcebos.com/"
-        utils.check_url(server_url)
-        self.server_url = server_url
+    def __init__(self, config_file_path=None):
+        if not config_file_path:
+            config_file_path = hub.CONF_HOME + '/config.json'
+        if not os.path.exists(hub.CONF_HOME):
+            utils.mkdir(hub.CONF_HOME)
+        if not os.path.exists(config_file_path):
+            with open(config_file_path, 'w+') as fp:
+                fp.write(json.dumps(default_server_config))
+
+        with open(config_file_path) as fp:
+            self.config = json.load(fp)
+
+        utils.check_url(self.config['server_url'])
+        self.server_url = self.config['server_url']
         self._load_resource_list_file_if_valid()
 
     def resource_list_file_path(self):
@@ -67,6 +80,18 @@ class HubServer(object):
         return True
 
     def search_resource(self, resource_key, resource_type=None, update=False):
+        try:
+            payload = {'word': resource_key}
+            if resource_type:
+                payload['type'] = resource_type
+            r = requests.get(self.server_url + '/' + 'search', params=payload)
+            r = json.loads(r.text)
+            if r['status'] == 0 and len(r['data']) > 0:
+                return [(item['name'], item['type'], item['version'], item['summary'])
+                        for item in r['data']]
+        except:
+            pass
+
         if update or not self.resource_list_file:
             self.request()
 
@@ -103,6 +128,19 @@ class HubServer(object):
                          resource_type=None,
                          version=None,
                          update=False):
+        try:
+            payload = {'word': resource_name}
+            if resource_type:
+                payload['type'] = resource_type
+            if version:
+                payload['version'] = version
+            r = requests.get(self.server_url + '/' + 'search', params=payload)
+            r = json.loads(r.text)
+            if r['status'] == 0 and len(r['data']) > 0:
+                return r['data'][0]
+        except:
+            pass
+
         if update or not self.resource_list_file:
             self.request()
 
@@ -152,7 +190,18 @@ class HubServer(object):
             update=update)
 
     def request(self):
-        file_url = self.server_url + RESOURCE_LIST_FILE
+        if not os.path.exists(hub.CACHE_HOME):
+            utils.mkdir(hub.CACHE_HOME)
+        try:
+            r = requests.get(self.server_url + '/' + 'search')
+            data = json.loads(r.text)
+            with open(hub.CACHE_HOME + '/' + RESOURCE_LIST_FILE, 'w+') as fp:
+                yaml.safe_dump({'resource_list' : data['data']}, fp)
+            return True
+        except:
+            pass
+
+        file_url = self.config['resource_storage_server_url'] + RESOURCE_LIST_FILE
         result, tips, self.resource_list_file = default_downloader.download_file(
             file_url, save_path=hub.CACHE_HOME)
         if not result:

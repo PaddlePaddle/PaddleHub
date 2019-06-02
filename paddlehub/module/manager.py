@@ -23,6 +23,7 @@ import shutil
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import MODULE_HOME
+from paddlehub.module import module_desc_pb2
 import paddlehub as hub
 
 
@@ -38,7 +39,17 @@ class LocalModuleManager(object):
 
     def check_module_valid(self, module_path):
         #TODO(wuzewu): code
-        return True
+        info = {}
+        try:
+            desc_pb_path = os.path.join(module_path, 'module_desc.pb')
+            if os.path.exists(desc_pb_path) and os.path.isfile(desc_pb_path):
+                desc = module_desc_pb2.ModuleDesc()
+                with open(desc_pb_path, "rb") as fp:
+                    desc.ParseFromString(fp.read())
+                info['version'] = desc.attr.map.data["module_info"].map.data["version"].s
+        except:
+            return False, None
+        return True, info
 
     def all_modules(self, update=False):
         if not update and self.modules_dict:
@@ -46,32 +57,38 @@ class LocalModuleManager(object):
         self.modules_dict = {}
         for sub_dir_name in os.listdir(self.local_modules_dir):
             sub_dir_path = os.path.join(self.local_modules_dir, sub_dir_name)
-            if os.path.isdir(sub_dir_path) and self.check_module_valid(
-                    sub_dir_path):
+            if os.path.isdir(sub_dir_path):
                 #TODO(wuzewu): get module name
-                module_name = sub_dir_name
-                self.modules_dict[module_name] = sub_dir_path
-
+                valid, info = self.check_module_valid(sub_dir_path)
+                if valid:
+                    module_name = sub_dir_name
+                    self.modules_dict[module_name] = (sub_dir_path, info['version'])
         return self.modules_dict
 
-    def search_module(self, module_name, update=False):
+    def search_module(self, module_name, module_version=None, update=False):
         self.all_modules(update=update)
         return self.modules_dict.get(module_name, None)
 
     def install_module(self, module_name, module_version=None, upgrade=False):
         self.all_modules(update=True)
-        if module_name in self.modules_dict:
-            module_dir = self.modules_dict[module_name]
-            tips = "Module %s already installed in %s" % (module_name,
-                                                          module_dir)
-            return True, tips, module_dir
+        module_info = self.modules_dict.get(module_name, None)
+        if module_info:
+            if not module_version or module_version == self.modules_dict[module_name][1]:
+                module_dir = self.modules_dict[module_name][0]
+                module_tag = module_name if not module_version else '%s-%s' % (
+                        module_name, module_version)
+                tips = "Module %s already installed in %s" % (module_tag,
+                        module_dir)
+                return True, tips, module_dir
+
         search_result = hub.default_hub_server.get_module_url(
             module_name, version=module_version)
         url = search_result.get('url', None)
         md5_value = search_result.get('md5', None)
         installed_module_version = search_result.get('version', None)
         #TODO(wuzewu): add compatibility check
-        if not url:
+        if not url or (module_version is not None and
+                installed_module_version != module_version):
             tips = "Can't find module %s" % module_name
             if module_version:
                 tips += " with version %s" % module_version
@@ -89,11 +106,12 @@ class LocalModuleManager(object):
             delete_file=True,
             print_progress=True)
 
-        save_path = os.path.join(MODULE_HOME, module_name)
-        shutil.move(module_dir, save_path)
-        module_dir = save_path
-
         if module_dir:
+            save_path = os.path.join(MODULE_HOME, module_name)
+            if os.path.exists(save_path):
+                shutil.rmtree(save_path)
+            shutil.move(module_dir, save_path)
+            module_dir = save_path
             tips = "Successfully installed %s" % module_name
             if installed_module_version:
                 tips += "-%s" % installed_module_version
@@ -101,13 +119,18 @@ class LocalModuleManager(object):
         tips = "Download %s-%s failed" % (module_name, module_version)
         return False, tips, module_dir
 
-    def uninstall_module(self, module_name):
+    def uninstall_module(self, module_name, module_version=None):
         self.all_modules(update=True)
         if not module_name in self.modules_dict:
             tips = "%s is not installed" % module_name
             return True, tips
+        if module_version and module_version != self.modules_dict[module_name][1]:
+            tips = "%s-%s is not installed" % (module_name, module_version)
+            return True, tips
         tips = "Successfully uninstalled %s" % module_name
-        module_dir = self.modules_dict[module_name]
+        if module_version:
+            tips += '-%s' % module_version
+        module_dir = self.modules_dict[module_name][0]
         shutil.rmtree(module_dir)
         return True, tips
 
