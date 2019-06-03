@@ -83,7 +83,7 @@ if __name__ == '__main__':
         num_classes=dataset.num_labels,
         config=config)
     
-    # test data
+    # Data to be prdicted
     data = [
         ["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"],
         ["交通方便；环境很好；服务态度很好 房间较小"],
