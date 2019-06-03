@@ -37,7 +37,7 @@ CACHE_TIME = 60 * 10
 class HubServer(object):
     def __init__(self, config_file_path=None):
         if not config_file_path:
-            config_file_path = hub.CONF_HOME + '/config.json'
+            config_file_path = os.path.join(hub.CONF_HOME, 'config.json')
         if not os.path.exists(hub.CONF_HOME):
             utils.mkdir(hub.CONF_HOME)
         if not os.path.exists(config_file_path):
@@ -195,7 +195,8 @@ class HubServer(object):
         try:
             r = requests.get(self.server_url + '/' + 'search')
             data = json.loads(r.text)
-            with open(hub.CACHE_HOME + '/' + RESOURCE_LIST_FILE, 'w+') as fp:
+            cache_path = os.path.join(hub.CACHE_HOME, RESOURCE_LIST_FILE)
+            with open(cache_path, 'w+') as fp:
                 yaml.safe_dump({'resource_list' : data['data']}, fp)
             return True
         except:
