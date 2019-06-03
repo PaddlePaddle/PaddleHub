@@ -31,10 +31,10 @@ from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--checkpoint_dir", type=str, default="./ckpt_sequence_label", help="Directory to model checkpoint")
-parser.add_argument("--max_seq_len", type=int, default=128, help="Number of words of the longest seqence.")
-parser.add_argument("--batch_size",     type=int,   default=16, help="Total examples' number in batch for training.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
+parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
+parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 args = parser.parse_args()
 # yapf: enable.
 
