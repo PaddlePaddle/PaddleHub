@@ -459,13 +459,22 @@ class Module(object):
         with fluid.program_guard(program):
             result = []
             index = 0
-            place = fluid.CPUPlace()
+            if "PADDLEHUB_CUDA_ENABLE" in os.environ:
+                place = fluid.CUDAPlace(0)
+            else:
+                place = fluid.CPUPlace()
+
+            if "PADDLEHUB_BATCH_SIZE" in os.environ:
+                batch_size = os.environ["PADDLEHUB_BATCH_SIZE"]
+            else:
+                batch_size = 1
+
             exe = fluid.Executor(place=place)
             data = self.processor.preprocess(
                 sign_name=sign_name, data_dict=data)
             data_format = self.processor.data_format(sign_name=sign_name)
             reader, feeder = _get_reader_and_feeder(data_format, data, place)
-            reader = paddle.batch(reader, batch_size=2)
+            reader = paddle.batch(reader, batch_size=batch_size)
             for batch in reader():
                 data_out = exe.run(
                     feed=feeder.feed(batch),
