@@ -742,6 +742,14 @@ class SequenceLabelTask(BasicTask):
             bias_attr=fluid.ParamAttr(
                 name="cls_seq_label_out_b",
                 initializer=fluid.initializer.Constant(0.)))
+        
+        self.ret_infers = fluid.layers.reshape(
+            x=fluid.layers.argmax(self.logits, axis=2), shape=[-1, 1])
+        ret_infers = fluid.layers.assign(self.ret_infers)
+        
+        self.seq_len = fluid.layers.data(
+            name="seq_len", shape=[1], dtype='int64')
+        seq_len = fluid.layers.assign(self.seq_len)
 
         logits = self.logits
         logits = fluid.layers.flatten(logits, axis=2)
@@ -761,13 +769,8 @@ class SequenceLabelTask(BasicTask):
         return loss
 
     def _add_metrics(self):
-        ret_labels = fluid.layers.reshape(x=self.label, shape=[-1, 1])
-        ret_infers = fluid.layers.reshape(
-            x=fluid.layers.argmax(self.logits, axis=2), shape=[-1, 1])
-        self.seq_len = fluid.layers.data(
-            name="seq_len", shape=[1], dtype='int64')
-        seq_len = fluid.layers.assign(self.seq_len)
-        return [ret_labels, ret_infers, seq_len]
+        self.ret_labels = fluid.layers.reshape(x=self.label, shape=[-1, 1])
+        return [self.ret_labels, self.ret_infers, self.seq_len]
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
@@ -834,4 +837,15 @@ class SequenceLabelTask(BasicTask):
         feed_list = [varname for varname in self._base_feed_list]
         if self.is_train_phase or self.is_test_phase:
             feed_list += [self.label.name, self.seq_len.name]
+        else:
+            feed_list += [self.seq_len.name]
         return feed_list
+
+    @property
+    def fetch_list(self):
+        if self.is_train_phase or self.is_test_phase:
+            return [metric.name for metric in self.metrics] + [self.loss.name]
+        elif self.is_predict_phase:
+            return [self.ret_infers.name] + [self.seq_len.name]
+        return [self.output.name]
+    

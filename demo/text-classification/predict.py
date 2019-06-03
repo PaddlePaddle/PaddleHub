@@ -31,6 +31,7 @@ import paddlehub as hub
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
+parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 args = parser.parse_args()
@@ -39,7 +40,7 @@ args = parser.parse_args()
 if __name__ == '__main__':
     # loading Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
-    input_dict, output_dict, program = module.context(
+    inputs, outputs, program = module.context(
         max_seq_len=args.max_seq_len)
 
     # Sentence classification  dataset reader
@@ -51,46 +52,51 @@ if __name__ == '__main__':
 
     place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
     exe = fluid.Executor(place)
-    with fluid.program_guard(program):
-        # Use "pooled_output" for classification tasks on an entire sentence.
-        # Use "sequence_outputs" for token-level output.
-        pooled_output = output_dict["pooled_output"]
+    
+    # Construct transfer learning network
+    # Use "pooled_output" for classification tasks on an entire sentence.
+    # Use "sequence_output" for token-level output.
+    pooled_output = outputs["pooled_output"]
+    
+    # Setup feed list for data feeder
+    # Must feed all the tensor of ERNIE's module need
+    feed_list = [
+        inputs["input_ids"].name,
+        inputs["position_ids"].name,
+        inputs["segment_ids"].name,
+        inputs["input_mask"].name,
+    ]
+    
+    # Setup runing config for PaddleHub Finetune API
+    config = hub.RunConfig(
+        use_cuda=args.use_gpu,
+        batch_size=args.batch_size,
+        enable_memory_optim=False,
+        checkpoint_dir=args.checkpoint_dir,
+        strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
-        # Define a classfication finetune task by PaddleHub's API
-        cls_task = hub.create_text_cls_task(
-            feature=pooled_output, num_classes=dataset.num_labels)
-
-        # Setup feed list for data feeder
-        # Must feed all the tensor of ERNIE's module need
-        feed_list = [
-            input_dict["input_ids"].name, input_dict["position_ids"].name,
-            input_dict["segment_ids"].name, input_dict["input_mask"].name,
-            cls_task.variable('label').name
-        ]
-
-        # classificatin probability tensor
-        probs = cls_task.variable("probs")
-
-        pred = fluid.layers.argmax(probs, axis=1)
-
-        # load best model checkpoint
-        fluid.io.load_persistables(exe, args.checkpoint_dir)
-
-        inference_program = program.clone(for_test=True)
-
-        data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
-        test_reader = reader.data_generator(phase='test', shuffle=False)
-        test_examples = dataset.get_test_examples()
-        total = 0
-        correct = 0
-        for index, batch in enumerate(test_reader()):
-            pred_v = exe.run(
-                feed=data_feeder.feed(batch),
-                fetch_list=[pred.name],
-                program=inference_program)
-            total += 1
-            if (pred_v[0][0] == int(test_examples[index].label)):
-                correct += 1
-                acc = 1.0 * correct / total
-            print("%s\tpredict=%s" % (test_examples[index], pred_v[0][0]))
-        print("accuracy = %f" % acc)
+    # Define a classfication finetune task by PaddleHub's API
+    cls_task = hub.TextClassifierTask(
+        data_reader=reader,
+        feature=pooled_output,
+        feed_list=feed_list, 
+        num_classes=dataset.num_labels,
+        config=config)
+    
+    # test data
+    data = [
+        ["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"],
+        ["交通方便；环境很好；服务态度很好 房间较小"],
+        ["还稍微重了点，可能是硬盘大的原故，还要再轻半斤就好了。其他要进一步验证。贴的几种膜气泡较多，用不了多久就要更换了，屏幕膜稍好点，但比没有要强多了。建议配赠几张膜让用用户自己贴。"],
+        ["前台接待太差，酒店有A B楼之分，本人check－in后，前台未告诉B楼在何处，并且B楼无明显指示；房间太小，根本不像4星级设施，下次不会再选择入住此店啦"],
+        ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]
+    ]
+    
+    index = 0
+    results = cls_task.predict(data=data)
+    for batch_result in results:
+        # get predict index
+        batch_result = np.argmax(batch_result, axis=2)[0]
+        for result in batch_result:
+            print("%s\tpredict=%s" % (data[index][0], result))
+            index += 1

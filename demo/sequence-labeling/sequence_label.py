@@ -34,36 +34,28 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Step1: load Paddlehub ERNIE pretrained model
+    # Load Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Step2: Download dataset and use SequenceLabelReader to read dataset
+    # Download dataset and use SequenceLabelReader to read dataset
     dataset = hub.dataset.MSRA_NER()
     reader = hub.reader.SequenceLabelReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len)
 
-    # Step3: construct transfer learning network
+    # Construct transfer learning network
     # Use "sequence_output" for token-level output.
     sequence_output = outputs["sequence_output"]
-
-    # Define a sequence labeling finetune task by PaddleHub's API
-    seq_label_task = hub.create_seq_label_task(
-        feature=sequence_output,
-        max_seq_len=args.max_seq_len,
-        num_classes=dataset.num_labels)
 
     # Setup feed list for data feeder
     # Must feed all the tensor of ERNIE's module need
     # Compared to classification task, we need add seq_len tensor to feedlist
     feed_list = [
         inputs["input_ids"].name, inputs["position_ids"].name,
-        inputs["segment_ids"].name, inputs["input_mask"].name,
-        seq_label_task.variable('label').name,
-        seq_label_task.variable('seq_len').name
+        inputs["segment_ids"].name, inputs["input_mask"].name
     ]
 
     # Select a finetune strategy
@@ -81,10 +73,15 @@ if __name__ == '__main__':
         checkpoint_dir=args.checkpoint_dir,
         strategy=strategy)
 
+    # Define a sequence labeling finetune task by PaddleHub's API
+    seq_label_task = hub.SequenceLabelTask(
+        data_reader=reader,
+        feature=sequence_output,
+        feed_list=feed_list,
+        max_seq_len=args.max_seq_len,
+        num_classes=dataset.num_labels,
+        config=config)
+
     # Finetune and evaluate model by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically
-    hub.finetune_and_eval(
-        task=seq_label_task,
-        data_reader=reader,
-        feed_list=feed_list,
-        config=config)
+    seq_label_task.finetune_and_eval()
