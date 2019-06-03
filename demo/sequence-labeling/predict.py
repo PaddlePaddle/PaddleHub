@@ -33,6 +33,7 @@ from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
+parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 args = parser.parse_args()
 # yapf: enable.
@@ -40,8 +41,7 @@ args = parser.parse_args()
 if __name__ == '__main__':
     # loading Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
-    input_dict, output_dict, program = module.context(
-        max_seq_len=args.max_seq_len)
+    inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
 
     # Sentence labeling dataset reader
     dataset = hub.dataset.MSRA_NER()
@@ -53,70 +53,61 @@ if __name__ == '__main__':
 
     place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
     exe = fluid.Executor(place)
-    with fluid.program_guard(program):
-        # Use "sequence_outputs" for token-level output.
-        sequence_output = output_dict["sequence_output"]
 
-        # Define a classfication finetune task by PaddleHub's API
-        seq_label_task = hub.create_seq_label_task(
-            feature=sequence_output,
-            num_classes=dataset.num_labels,
-            max_seq_len=args.max_seq_len)
+    # Construct transfer learning network
+    # Use "sequence_output" for token-level output.
+    sequence_output = outputs["sequence_output"]
 
-        # Setup feed list for data feeder
-        # Must feed all the tensor of ERNIE's module need
-        # Compared to classification task, we need add seq_len tensor to feedlist
-        feed_list = [
-            input_dict["input_ids"].name, input_dict["position_ids"].name,
-            input_dict["segment_ids"].name, input_dict["input_mask"].name,
-            seq_label_task.variable('label').name,
-            seq_label_task.variable('seq_len').name
-        ]
+    # Setup feed list for data feeder
+    # Must feed all the tensor of ERNIE's module need
+    feed_list = [
+        inputs["input_ids"].name,
+        inputs["position_ids"].name,
+        inputs["segment_ids"].name,
+        inputs["input_mask"].name,
+    ]
 
-        fetch_list = [
-            seq_label_task.variable("labels").name,
-            seq_label_task.variable("infers").name,
-            seq_label_task.variable("seq_len").name
-        ]
+    # Setup runing config for PaddleHub Finetune API
+    config = hub.RunConfig(
+        use_cuda=args.use_gpu,
+        batch_size=args.batch_size,
+        enable_memory_optim=False,
+        checkpoint_dir=args.checkpoint_dir,
+        strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
-        # classification probability tensor
-        probs = seq_label_task.variable("probs")
+    # Define a sequence labeling finetune task by PaddleHub's API
+    seq_label_task = hub.SequenceLabelTask(
+        data_reader=reader,
+        feature=sequence_output,
+        feed_list=feed_list,
+        max_seq_len=args.max_seq_len,
+        num_classes=dataset.num_labels,
+        config=config)
 
-        # load best model checkpoint
-        fluid.io.load_persistables(exe, args.checkpoint_dir)
+    # test data
+    data = [
+        ["我们变而以书会友，以书结缘，把欧美、港台流行的食品类图谱、画册、工具书汇集一堂。"],
+        ["为了跟踪国际最新食品工艺、流行趋势，大量搜集海外专业书刊资料是提高技艺的捷径。"],
+        ["其中线装古籍逾千册；民国出版物几百种；珍本四册、稀见本四百余册，出版时间跨越三百余年。"],
+        ["有的古木交柯，春机荣欣，从诗人句中得之，而入画中，观之令人心驰。"],
+        ["不过重在晋趣，略增明人气息，妙在集古有道、不露痕迹罢了。"],
+    ]
 
-        inference_program = program.clone(for_test=True)
+    results = seq_label_task.predict(data=data)[0]
+    np_infers = results[0]
+    np_lens = results[1]
 
-        # calculate the num of label from probs variable shape
-        num_labels = seq_label_task.variable("probs").shape[1]
+    for index, text in enumerate(data):
+        labels = np_infers.reshape([-1]).astype(
+            np.int32).tolist()[args.max_seq_len * index:args.max_seq_len *
+                               (index + 1)]
+        label_str = ""
+        count = 0
+        for label_val in labels:
+            label_str += inv_label_map[label_val]
+            count += 1
+            if count == (np_lens[index]):
+                break
 
-        data_feeder = fluid.DataFeeder(feed_list=feed_list, place=place)
-        test_reader = reader.data_generator(phase='test', shuffle=False)
-        test_examples = dataset.get_test_examples()
-        total_label, total_infer, total_correct = 0.0, 0.0, 0.0
-        for index, batch in enumerate(test_reader()):
-            np_labels, np_infers, np_lens = exe.run(
-                feed=data_feeder.feed(batch),
-                fetch_list=fetch_list,
-                program=inference_program)
-            label_num, infer_num, correct_num = chunk_eval(
-                np_labels, np_infers, np_lens, num_labels)
-
-            total_infer += infer_num
-            total_label += label_num
-            total_correct += correct_num
-
-            labels = np_labels.reshape([-1]).astype(np.int32).tolist()
-            label_str = ""
-            count = 0
-            for label_val in labels:
-                label_str += inv_label_map[label_val]
-                count += 1
-                if count == np_lens:
-                    break
-
-            print("%s\tpredict=%s" % (test_examples[index], label_str))
-
-        precision, recall, f1 = calculate_f1(total_label, total_infer,
-                                             total_correct)
-        print("F1-Score=%f, precision=%f, recall=%f " % (f1, precision, recall))
+        # Drop the label results of CLS and SEP Token
+        print("%s\tpredict=%s" % (text[0], label_str[1:-1]))
