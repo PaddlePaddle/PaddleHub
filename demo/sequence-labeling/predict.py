@@ -31,10 +31,10 @@ from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
-parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
-parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--checkpoint_dir", type=str, default="./ckpt_sequence_label", help="Directory to model checkpoint")
+parser.add_argument("--max_seq_len", type=int, default=128, help="Number of words of the longest seqence.")
+parser.add_argument("--batch_size",     type=int,   default=16, help="Total examples' number in batch for training.")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -93,21 +93,25 @@ if __name__ == '__main__':
         ["不过重在晋趣，略增明人气息，妙在集古有道、不露痕迹罢了。"],
     ]
 
-    results = seq_label_task.predict(data=data)[0]
-    np_infers = results[0]
-    np_lens = results[1]
+    results = seq_label_task.predict(data=data)
 
-    for index, text in enumerate(data):
-        labels = np_infers.reshape([-1]).astype(
-            np.int32).tolist()[args.max_seq_len * index:args.max_seq_len *
-                               (index + 1)]
-        label_str = ""
-        count = 0
-        for label_val in labels:
-            label_str += inv_label_map[label_val]
-            count += 1
-            if count == (np_lens[index]):
-                break
+    for num_batch, batch_results in enumerate(results):
+        infers = batch_results[0].reshape([-1]).astype(np.int32).tolist()
+        np_lens = batch_results[1]
 
-        # Drop the label results of CLS and SEP Token
-        print("%s\tpredict=%s" % (text[0], label_str[1:-1]))
+        for index, np_len in enumerate(np_lens):
+            labels = infers[index * args.max_seq_len:(index + 1) *
+                            args.max_seq_len]
+
+            label_str = ""
+            count = 0
+            for label_val in labels:
+                label_str += inv_label_map[label_val]
+                count += 1
+                if count == np_len:
+                    break
+
+            # Drop the label results of CLS and SEP Token
+            print(
+                "%s\tpredict=%s" %
+                (data[num_batch * args.batch_size + index][0], label_str[1:-1]))
