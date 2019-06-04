@@ -34,6 +34,7 @@ parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory 
 parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--use_pyreader", type=bool, default=False, help="Whether use pyreader to feed data.")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -68,6 +69,8 @@ if __name__ == '__main__':
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
+        use_data_parallel=False,
+        use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,
         batch_size=args.batch_size,
         enable_memory_optim=False,

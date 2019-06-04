@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 
 # User can select chnsenticorp, nlpcc_dbqa, lcqmc for different task
 DATASET="chnsenticorp"
@@ -16,4 +16,6 @@ python -u text_classifier.py \
                    --learning_rate=5e-5 \
                    --weight_decay=0.01 \
                    --max_seq_len=128 \
-                   --num_epoch=3
+                   --num_epoch=3 \
+                   --use_pyreader=True \
+                   --use_data_parallel=True \
