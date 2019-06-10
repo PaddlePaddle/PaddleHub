@@ -30,8 +30,8 @@ parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
-parser.add_argument("--use_pyreader", type=bool, default=False, help="Whether use pyreader to feed data.")
-parser.add_argument("--use_data_parallel", type=bool, default=False, help="Whether use data parallel.")
+parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
+parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
 args = parser.parse_args()
 # yapf: enable.
 
