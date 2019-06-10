@@ -22,6 +22,7 @@ import numpy as np
 import paddle.fluid as fluid
 import paddle.fluid.layers.learning_rate_scheduler as lr_scheduler
 from paddle.fluid.layers import control_flow
+from paddlehub.common.logger import logger
 
 
 def adam_weight_decay_optimization(loss,
@@ -31,21 +32,30 @@ def adam_weight_decay_optimization(loss,
                                    main_program,
                                    weight_decay,
                                    scheduler='linear_decay'):
-    if warmup_steps > 0:
-        if scheduler == 'noam_decay':
+    if scheduler == 'noam_decay':
+        if warmup_steps > 0:
             scheduled_lr = fluid.layers.learning_rate_scheduler\
              .noam_decay(1/(warmup_steps *(learning_rate ** 2)),
                          warmup_steps)
-        elif scheduler == 'linear_decay':
-            scheduled_lr = linear_warmup_decay(learning_rate, warmup_steps,
-                                               main_program)
         else:
-            raise ValueError("Unkown learning rate scheduler, should be "
-                             "'noam_decay' or 'linear_decay'")
-        optimizer = fluid.optimizer.Adam(learning_rate=scheduled_lr)
+            logger.warning(
+                "Noam decay learning rate scheduler should have positive \
+            warmup steps, using constant learning rate instead!")
+
+            scheduled_lr = fluid.layers.create_global_var(
+                shape=[1],
+                value=learning_rate,
+                dtype='float32',
+                persistable=True,
+                name="learning_rate")
+    elif scheduler == 'linear_decay':
+        scheduled_lr = linear_warmup_decay(learning_rate, num_train_steps,
+                                           warmup_steps, main_program)
     else:
-        optimizer = fluid.optimizer.Adam(learning_rate=learning_rate)
-        scheduled_lr = learning_rate
+        raise ValueError("Unkown learning rate scheduler, should be "
+                         "'noam_decay' or 'linear_decay'")
+
+    optimizer = fluid.optimizer.Adam(learning_rate=scheduled_lr)
 
     clip_norm_thres = 1.0
     fluid.clip.set_gradient_clip(
@@ -81,13 +91,14 @@ def adam_weight_decay_optimization(loss,
     return scheduled_lr
 
 
-def linear_warmup_decay(init_lr, num_warmup_steps, main_program):
+def linear_warmup_decay(init_lr, num_train_steps, num_warmup_steps,
+                        main_program):
     with main_program._lr_schedule_guard():
         global_step = lr_scheduler._decay_step_counter()
 
         lr = fluid.layers.create_global_var(
             shape=[1],
-            value=0.0,
+            value=init_lr,
             dtype='float32',
             persistable=True,
             name="learning_rate")
@@ -97,8 +108,12 @@ def linear_warmup_decay(init_lr, num_warmup_steps, main_program):
                 decayed_lr = init_lr * global_step * 1.0 / num_warmup_steps
                 fluid.layers.assign(decayed_lr, lr)
             with switch.default():
-                last_value_var = fluid.layers.fill_constant(
-                    shape=[1], dtype='float32', value=float(init_lr))
-                fluid.layers.assign(last_value_var, lr)
+                decayed_lr = lr_scheduler.polynomial_decay(
+                    learning_rate=init_lr,
+                    decay_steps=num_train_steps,
+                    end_learning_rate=0.0,
+                    power=1.0,
+                    cycle=False)
+                fluid.layers.assign(decayed_lr, lr)
 
         return lr
