@@ -554,10 +554,10 @@ class BasicTask(object):
 
 class ClassifierTask(BasicTask):
     def __init__(self,
-                 data_reader,
                  feature,
                  num_classes,
                  feed_list,
+                 data_reader,
                  startup_program=None,
                  config=None,
                  hidden_units=None):
@@ -662,10 +662,10 @@ ImageClassifierTask = ClassifierTask
 
 class TextClassifierTask(ClassifierTask):
     def __init__(self,
-                 data_reader,
                  feature,
                  num_classes,
                  feed_list,
+                 data_reader,
                  startup_program=None,
                  config=None,
                  hidden_units=None):
@@ -711,8 +711,8 @@ class SequenceLabelTask(BasicTask):
             feature,
             max_seq_len,
             num_classes,
-            data_reader,
             feed_list,
+            data_reader,
             startup_program=None,
             config=None,
     ):
