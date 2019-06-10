@@ -31,6 +31,7 @@ from .common.dir import USER_HOME
 from .common.dir import HUB_HOME
 from .common.dir import MODULE_HOME
 from .common.dir import CACHE_HOME
+from .common.dir import CONF_HOME
 from .common.logger import logger
 from .common.paddle_helper import connect_program
 from .common.hub_server import default_hub_server

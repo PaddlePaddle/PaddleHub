@@ -36,6 +36,7 @@ REQUIRED_PACKAGES = [
     'protobuf >= 3.1.0',
     'pyyaml',
     'Pillow',
+    'requests',
     "visualdl >= 1.3.0",
 ]
 

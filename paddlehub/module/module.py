@@ -96,7 +96,8 @@ class Module(object):
                  module_info=None,
                  assets=None,
                  processor=None,
-                 extra_info=None):
+                 extra_info=None,
+                 version=None):
         self.desc = module_desc_pb2.ModuleDesc()
         self.program = None
         self.assets = []
@@ -118,7 +119,7 @@ class Module(object):
 
         # TODO(wuzewu): print more module loading info log
         if name:
-            self._init_with_name(name=name)
+            self._init_with_name(name=name, version=version)
         elif module_dir:
             self._init_with_module_file(module_dir=module_dir)
         elif signatures:
@@ -137,10 +138,13 @@ class Module(object):
         else:
             raise ValueError("Module initialized parameter is empty")
 
-    def _init_with_name(self, name):
-        logger.info("Installing %s module" % name)
+    def _init_with_name(self, name, version=None):
+        log_msg = "Installing %s module" % name
+        if version:
+            log_msg += "-%s" % version
+        logger.info(log_msg)
         result, tips, module_dir = default_module_manager.install_module(
-            module_name=name)
+            module_name=name, module_version=version)
         if not result:
             logger.error(tips)
             exit(1)
@@ -459,13 +463,22 @@ class Module(object):
         with fluid.program_guard(program):
             result = []
             index = 0
-            place = fluid.CPUPlace()
+            if "PADDLEHUB_CUDA_ENABLE" in os.environ:
+                place = fluid.CUDAPlace(0)
+            else:
+                place = fluid.CPUPlace()
+
+            if "PADDLEHUB_BATCH_SIZE" in os.environ:
+                batch_size = os.environ["PADDLEHUB_BATCH_SIZE"]
+            else:
+                batch_size = 1
+
             exe = fluid.Executor(place=place)
             data = self.processor.preprocess(
                 sign_name=sign_name, data_dict=data)
             data_format = self.processor.data_format(sign_name=sign_name)
             reader, feeder = _get_reader_and_feeder(data_format, data, place)
-            reader = paddle.batch(reader, batch_size=2)
+            reader = paddle.batch(reader, batch_size=batch_size)
             for batch in reader():
                 data_out = exe.run(
                     feed=feeder.feed(batch),

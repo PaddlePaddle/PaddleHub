@@ -7,4 +7,6 @@ python -u sequence_label.py \
                    --num_epoch 3 \
                    --checkpoint_dir $CKPT_DIR \
                    --max_seq_len 256 \
-                   --learning_rate 5e-5
+                   --learning_rate 5e-5 \
+                   --use_pyreader True \
+                   --use_data_parallel True

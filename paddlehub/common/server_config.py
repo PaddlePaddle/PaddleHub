@@ -1,4 +1,3 @@
-#coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -13,12 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
-# TODO: Change dir.py's filename, this naming rule is not qualified
-USER_HOME = os.path.expanduser('~')
-HUB_HOME = os.path.join(USER_HOME, ".paddlehub")
-MODULE_HOME = os.path.join(HUB_HOME, "modules")
-CACHE_HOME = os.path.join(HUB_HOME, "cache")
-DATA_HOME = os.path.join(HUB_HOME, "dataset")
-CONF_HOME = os.path.join(HUB_HOME, "conf")
+default_server_config = {
+    "server_url" : "http://hub.paddlepaddle.org:8888",
+    "resource_storage_server_url" : "https//bj.bcebos.com/paddlehub"
+}

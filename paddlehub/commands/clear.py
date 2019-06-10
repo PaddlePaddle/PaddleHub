@@ -50,7 +50,7 @@ class ClearCommand(BaseCommand):
     def __init__(self, name):
         super(ClearCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Clear all cache data."
+        self.description = "Clear all cached data."
 
     def cache_dir(self):
         return CACHE_HOME
