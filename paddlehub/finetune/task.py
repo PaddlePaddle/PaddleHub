@@ -110,8 +110,17 @@ class BasicTask(object):
 
         # run config
         self.config = config if config else RunConfig()
-        self.place, self.device_count = hub.common.get_running_device_info(
-            self.config)
+        self.place = self.places[0]
+        self.device_count = len(self.places)
+
+        if self.config.batch_size < self.device_count:
+            logger.warning(
+                "Batch size({}) is less than the count of devices({}), which is not allowed in current Paddle versions"
+                .format(self.config.batch_size, self.device_count))
+            logger.warning("Batch size automatically adjusted to {}".format(
+                self.device_count))
+            self.config._batch_size = self.device_count
+
         self.exe = fluid.Executor(place=self.place)
         self.build_strategy = fluid.BuildStrategy()
         if self.config.enable_memory_optim:
@@ -238,6 +247,12 @@ class BasicTask(object):
 
         self.exe.run(self.env.startup_program)
         self._build_env_end_event()
+
+    @property
+    def places(self):
+        if self.config.use_cuda:
+            return fluid.framework.cuda_places()
+        return fluid.framework.cpu_places()
 
     @property
     def is_train_phase(self):
@@ -481,6 +496,9 @@ class BasicTask(object):
         period_run_states = []
 
         for run_step, batch in enumerate(self.reader(), start=1):
+            if self.config.use_data_parallel and len(batch) < self.device_count:
+                continue
+
             step_run_state = RunState(len(self.fetch_list))
             step_run_state.run_step = 1
             num_batch_examples = len(batch)
@@ -554,10 +572,10 @@ class BasicTask(object):
 
 class ClassifierTask(BasicTask):
     def __init__(self,
-                 data_reader,
                  feature,
                  num_classes,
                  feed_list,
+                 data_reader,
                  startup_program=None,
                  config=None,
                  hidden_units=None):
@@ -662,10 +680,10 @@ ImageClassifierTask = ClassifierTask
 
 class TextClassifierTask(ClassifierTask):
     def __init__(self,
-                 data_reader,
                  feature,
                  num_classes,
                  feed_list,
+                 data_reader,
                  startup_program=None,
                  config=None,
                  hidden_units=None):
@@ -711,8 +729,8 @@ class SequenceLabelTask(BasicTask):
             feature,
             max_seq_len,
             num_classes,
-            data_reader,
             feed_list,
+            data_reader,
             startup_program=None,
             config=None,
     ):
@@ -743,6 +761,14 @@ class SequenceLabelTask(BasicTask):
                 name="cls_seq_label_out_b",
                 initializer=fluid.initializer.Constant(0.)))
 
+        self.ret_infers = fluid.layers.reshape(
+            x=fluid.layers.argmax(self.logits, axis=2), shape=[-1, 1])
+        ret_infers = fluid.layers.assign(self.ret_infers)
+
+        self.seq_len = fluid.layers.data(
+            name="seq_len", shape=[1], dtype='int64')
+        seq_len = fluid.layers.assign(self.seq_len)
+
         logits = self.logits
         logits = fluid.layers.flatten(logits, axis=2)
         logits = fluid.layers.softmax(logits)
@@ -761,13 +787,8 @@ class SequenceLabelTask(BasicTask):
         return loss
 
     def _add_metrics(self):
-        ret_labels = fluid.layers.reshape(x=self.label, shape=[-1, 1])
-        ret_infers = fluid.layers.reshape(
-            x=fluid.layers.argmax(self.logits, axis=2), shape=[-1, 1])
-        self.seq_len = fluid.layers.data(
-            name="seq_len", shape=[1], dtype='int64')
-        seq_len = fluid.layers.assign(self.seq_len)
-        return [ret_labels, ret_infers, seq_len]
+        self.ret_labels = fluid.layers.reshape(x=self.label, shape=[-1, 1])
+        return [self.ret_labels, self.ret_infers, self.seq_len]
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
@@ -834,4 +855,14 @@ class SequenceLabelTask(BasicTask):
         feed_list = [varname for varname in self._base_feed_list]
         if self.is_train_phase or self.is_test_phase:
             feed_list += [self.label.name, self.seq_len.name]
+        else:
+            feed_list += [self.seq_len.name]
         return feed_list
+
+    @property
+    def fetch_list(self):
+        if self.is_train_phase or self.is_test_phase:
+            return [metric.name for metric in self.metrics] + [self.loss.name]
+        elif self.is_predict_phase:
+            return [self.ret_infers.name] + [self.seq_len.name]
+        return [self.output.name]

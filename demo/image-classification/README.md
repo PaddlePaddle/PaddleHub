@@ -36,6 +36,8 @@ $ pip install --upgrade paddlepaddle
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型。默认为paddlehub_finetune_ckpt
 --dataset: 使用什么数据集进行finetune, 脚本支持分别是{flowers/dogcat/stanforddogs/indoor67/food101}。默认为flowers
 --use_gpu: 是否使用GPU进行训练，如果机器支持GPU且安装了GPU版本的PaddlePaddle，我们建议您打开这个开关。默认关闭
+--use_data_parallel: 是否使用数据并行，打开该开关时，会将数据分散到不同的卡上进行训练（CPU下会分布到不同线程）。默认关闭
+--use_pyreader: 是否使用pyreader进行数据喂入。默认关闭
 ```
 
 ## 进行预测
@@ -51,6 +53,7 @@ $ pip install --upgrade paddlepaddle
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型。默认为paddlehub_finetune_ckpt
 --dataset: 使用什么数据集进行finetune, 脚本支持分别是{flowers/dogcat}。默认为flowers
 --use_gpu: 使用使用GPU进行训练，如果本机支持GPU且安装了GPU版本的PaddlePaddle，我们建议您打开这个开关。默认关闭
+--use_pyreader: 是否使用pyreader进行数据喂入。默认关闭
 ```
 
 `注意`：进行预测时，所选择的module，checkpoint_dir，dataset必须和finetune所用的一样
