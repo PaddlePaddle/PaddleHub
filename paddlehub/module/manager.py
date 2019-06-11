@@ -79,7 +79,7 @@ class LocalModuleManager(object):
                         module_name, module_version)
                 tips = "Module %s already installed in %s" % (module_tag,
                         module_dir)
-                return True, tips, module_dir
+                return True, tips, self.modules_dict[module_name]
 
         search_result = hub.default_hub_server.get_module_url(
             module_name, version=module_version)
@@ -115,7 +115,7 @@ class LocalModuleManager(object):
             tips = "Successfully installed %s" % module_name
             if installed_module_version:
                 tips += "-%s" % installed_module_version
-            return True, tips, module_dir
+            return True, tips, (module_dir, installed_module_version)
         tips = "Download %s-%s failed" % (module_name, module_version)
         return False, tips, module_dir
 

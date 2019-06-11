@@ -121,7 +121,7 @@ class Module(object):
         if name:
             self._init_with_name(name=name, version=version)
         elif module_dir:
-            self._init_with_module_file(module_dir=module_dir)
+            self._init_with_module_file(module_dir=module_dir[0])
         elif signatures:
             if processor:
                 if not issubclass(processor, BaseProcessor):
@@ -149,7 +149,7 @@ class Module(object):
             logger.error(tips)
             exit(1)
         logger.info(tips)
-        self._init_with_module_file(module_dir)
+        self._init_with_module_file(module_dir[0])
 
     def _init_with_url(self, url):
         utils.check_url(url)

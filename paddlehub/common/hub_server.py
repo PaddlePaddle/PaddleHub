@@ -24,6 +24,7 @@ import requests
 import json
 import yaml
 
+from random import randint
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.server_config import default_server_config
@@ -46,10 +47,18 @@ class HubServer(object):
 
         with open(config_file_path) as fp:
             self.config = json.load(fp)
-
+        
         utils.check_url(self.config['server_url'])
         self.server_url = self.config['server_url']
         self._load_resource_list_file_if_valid()
+
+    def get_server_url(self):
+        HS_ENV = os.environ.get('HUB_SERVER')
+        if HS_ENV:
+            HUB_SERVERS = HS_ENV.split(';')
+            return HUB_SERVERS[uniform(0, len(self.server_url))]
+        return self.server_url[uniform(0, len(self.server_url))]
+
 
     def resource_list_file_path(self):
         return os.path.join(hub.CACHE_HOME, RESOURCE_LIST_FILE)
@@ -84,7 +93,7 @@ class HubServer(object):
             payload = {'word': resource_key}
             if resource_type:
                 payload['type'] = resource_type
-            r = requests.get(self.server_url + '/' + 'search', params=payload)
+            r = requests.get(self.get_server_url() + '/' + 'search', params=payload)
             r = json.loads(r.text)
             if r['status'] == 0 and len(r['data']) > 0:
                 return [(item['name'], item['type'], item['version'], item['summary'])
@@ -134,7 +143,7 @@ class HubServer(object):
                 payload['type'] = resource_type
             if version:
                 payload['version'] = version
-            r = requests.get(self.server_url + '/' + 'search', params=payload)
+            r = requests.get(self.get_server_url() + '/' + 'search', params=payload)
             r = json.loads(r.text)
             if r['status'] == 0 and len(r['data']) > 0:
                 return r['data'][0]
@@ -193,7 +202,7 @@ class HubServer(object):
         if not os.path.exists(hub.CACHE_HOME):
             utils.mkdir(hub.CACHE_HOME)
         try:
-            r = requests.get(self.server_url + '/' + 'search')
+            r = requests.get(self.get_server_url() + '/' + 'search')
             data = json.loads(r.text)
             cache_path = os.path.join(hub.CACHE_HOME, RESOURCE_LIST_FILE)
             with open(cache_path, 'w+') as fp:
