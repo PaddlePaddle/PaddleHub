@@ -38,7 +38,7 @@ from paddlehub.finetune.config import RunConfig
 
 __all__ = [
     "ClassifierTask", "ImageClassifierTask", "TextClassifierTask",
-    "SequenceLabelTask"
+    "SequenceLabelTask", "MultiLabelClassifierTask"
 ]
 
 
@@ -859,10 +859,152 @@ class SequenceLabelTask(BasicTask):
             feed_list += [self.seq_len.name]
         return feed_list
 
+
+class MultiLabelClassifierTask(ClassifierTask):
+    def __init__(self,
+                 data_reader,
+                 feature,
+                 num_classes,
+                 feed_list,
+                 startup_program=None,
+                 config=None,
+                 hidden_units=None):
+
+        main_program = feature.block.program
+
+        super(MultiLabelClassifierTask, self).__init__(
+            data_reader=data_reader,
+            feature=feature,
+            num_classes=num_classes,
+            feed_list=feed_list,
+            startup_program=startup_program,
+            config=config,
+            hidden_units=hidden_units)
+
+        self.best_avg_auc = -1
+
+    def _build_net(self):
+        cls_feats = fluid.layers.dropout(
+            x=self.feature,
+            dropout_prob=0.1,
+            dropout_implementation="upscale_in_train")
+
+        if self.hidden_units is not None:
+            for n_hidden in self.hidden_units:
+                cls_feats = fluid.layers.fc(
+                    input=cls_feats, size=n_hidden, act="relu")
+
+        probs = []
+        for i in range(self.num_classes):
+            probs.append(
+                fluid.layers.fc(
+                    input=cls_feats,
+                    size=2,
+                    param_attr=fluid.ParamAttr(
+                        name="cls_out_w_%d" % i,
+                        initializer=fluid.initializer.TruncatedNormal(
+                            scale=0.02)),
+                    bias_attr=fluid.ParamAttr(
+                        name="cls_out_b_%d" % i,
+                        initializer=fluid.initializer.Constant(0.)),
+                    act="softmax"))
+
+        return probs
+
+    def _add_label(self):
+        label = fluid.layers.data(
+            name="label", shape=[self.num_classes], dtype='int64')
+        return label
+
+    def _add_loss(self):
+        label_split = fluid.layers.split(self.label, self.num_classes, dim=-1)
+        total_loss = fluid.layers.fill_constant(
+            shape=[1], value=0.0, dtype='float64')
+        for index, probs in enumerate(self.output):
+            ce_loss = fluid.layers.cross_entropy(
+                input=probs, label=label_split[index])
+            total_loss += fluid.layers.reduce_sum(ce_loss)
+        loss = fluid.layers.mean(x=total_loss)
+        return loss
+
+    def _add_metrics(self):
+        label_split = fluid.layers.split(self.label, self.num_classes, dim=-1)
+        # metrics change to auc of every class
+        eval_list = []
+        for index, probs in enumerate(self.output):
+            current_auc, _, _ = fluid.layers.auc(
+                input=probs, label=label_split[index])
+            eval_list.append(current_auc)
+        return eval_list
+
+    def _build_env_end_event(self):
+        with self.log_writer.mode(self.phase) as logw:
+            self.env.loss_scalar = logw.scalar(
+                tag="Loss [{}]".format(self.phase))
+            self.env.auc_scalar_list = []
+            for i in range(self.num_classes):
+                self.env.auc_scalar_list.append(
+                    logw.scalar(tag="AUC_{} [{}]".format(i, "train")))
+            self.env.avg_auc_scalar = logw.scalar(
+                tag="Average auc [{}]".format(self.phase))
+
+    def _calculate_metrics(self, run_states):
+        loss_sum = acc_sum = run_examples = 0
+        run_step = run_time_used = 0
+        for run_state in run_states:
+            run_examples += run_state.run_examples
+            run_step += run_state.run_step
+            loss_sum += np.mean(
+                run_state.run_results[-1]) * run_state.run_examples
+        auc_list = run_states[-1].run_results[:-1]
+
+        run_time_used = time.time() - run_states[0].run_time_begin
+        avg_loss = loss_sum / (run_examples * self.num_classes)
+        run_speed = run_step / run_time_used
+
+        return avg_loss, auc_list, run_speed
+
+    def _log_interval_event(self, run_states):
+        avg_loss, auc_list, run_speed = self._calculate_metrics(run_states)
+        if self.is_train_phase:
+            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
+                auc_scalar.add_record(self.current_step, auc_list[index])
+        self.env.loss_scalar.add_record(self.current_step, avg_loss)
+        avg_auc = np.mean(auc_list)
+        self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
+        logger.info("step %d: loss=%.5f avg_auc=%.5f [step/sec: %.2f]" %
+                    (self.current_step, avg_loss, avg_auc, run_speed))
+        for index, auc in enumerate(auc_list):
+            logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
+
+    def _eval_end_event(self, run_states):
+        eval_loss, auc_list, run_speed = self._calculate_metrics(run_states)
+        if self.is_train_phase:
+            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
+                auc_scalar.add_record(self.current_step, auc_list[index])
+        avg_auc = np.mean(auc_list)
+        logger.info(
+            "[%s dataset evaluation result] loss=%.5f avg_auc=%.5f [step/sec: %.2f]"
+            % (self.phase, eval_loss, avg_auc, run_speed))
+        for index, auc in enumerate(auc_list):
+            logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
+        if self.phase in ["dev", "val"] and avg_auc > self.best_avg_auc:
+            self.env.loss_scalar.add_record(self.current_step, eval_loss)
+            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
+                auc_scalar.add_record(self.current_step, auc_list[index])
+            self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
+            self.best_avg_auc = avg_auc
+            model_saved_dir = os.path.join(self.config.checkpoint_dir,
+                                           "best_model")
+            logger.info("best model saved to %s [best average auc=%.5f]" %
+                        (model_saved_dir, self.best_avg_auc))
+            save_result = fluid.io.save_persistables(
+                executor=self.exe,
+                dirname=model_saved_dir,
+                main_program=self.main_program)
+
     @property
     def fetch_list(self):
         if self.is_train_phase or self.is_test_phase:
             return [metric.name for metric in self.metrics] + [self.loss.name]
-        elif self.is_predict_phase:
-            return [self.ret_infers.name] + [self.seq_len.name]
-        return [self.output.name]
+        return self.output
