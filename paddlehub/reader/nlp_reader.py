@@ -553,5 +553,113 @@ class LACClassifyReader(object):
         return paddle.batch(_data_reader, batch_size=batch_size)
 
 
+class MultiLabelClassifyReader(BaseReader):
+    def _pad_batch_records(self, batch_records, phase=None):
+        batch_token_ids = [record.token_ids for record in batch_records]
+        batch_text_type_ids = [record.text_type_ids for record in batch_records]
+        batch_position_ids = [record.position_ids for record in batch_records]
+
+        # padding
+        padded_token_ids, input_mask = pad_batch_data(
+            batch_token_ids,
+            pad_idx=self.pad_id,
+            max_seq_len=self.max_seq_len,
+            return_input_mask=True)
+        padded_text_type_ids = pad_batch_data(
+            batch_text_type_ids,
+            max_seq_len=self.max_seq_len,
+            pad_idx=self.pad_id)
+        padded_position_ids = pad_batch_data(
+            batch_position_ids,
+            max_seq_len=self.max_seq_len,
+            pad_idx=self.pad_id)
+
+        if phase != "predict":
+            batch_labels_ids = [record.label_ids for record in batch_records]
+            num_label = len(self.dataset.get_labels())
+            batch_labels = np.array(batch_labels_ids).astype("int64").reshape(
+                [-1, num_label])
+
+            return_list = [
+                padded_token_ids, padded_position_ids, padded_text_type_ids,
+                input_mask, batch_labels
+            ]
+        else:
+            return_list = [
+                padded_token_ids, padded_position_ids, padded_text_type_ids,
+                input_mask
+            ]
+        return return_list
+
+    def _convert_example_to_record(self,
+                                   example,
+                                   max_seq_length,
+                                   tokenizer,
+                                   phase=None):
+        """Converts a single `Example` into a single `Record`."""
+
+        text_a = tokenization.convert_to_unicode(example.text_a)
+        tokens_a = tokenizer.tokenize(text_a)
+        tokens_b = None
+        if example.text_b is not None:
+            #if "text_b" in example._fields:
+            text_b = tokenization.convert_to_unicode(example.text_b)
+            tokens_b = tokenizer.tokenize(text_b)
+
+        if tokens_b:
+            # Modifies `tokens_a` and `tokens_b` in place so that the total
+            # length is less than the specified length.
+            # Account for [CLS], [SEP], [SEP] with "- 3"
+            self._truncate_seq_pair(tokens_a, tokens_b, max_seq_length - 3)
+        else:
+            # Account for [CLS] and [SEP] with "- 2"
+            if len(tokens_a) > max_seq_length - 2:
+                tokens_a = tokens_a[0:(max_seq_length - 2)]
+
+        tokens = []
+        text_type_ids = []
+        tokens.append("[CLS]")
+        text_type_ids.append(0)
+        for token in tokens_a:
+            tokens.append(token)
+            text_type_ids.append(0)
+        tokens.append("[SEP]")
+        text_type_ids.append(0)
+
+        if tokens_b:
+            for token in tokens_b:
+                tokens.append(token)
+                text_type_ids.append(1)
+            tokens.append("[SEP]")
+            text_type_ids.append(1)
+
+        token_ids = tokenizer.convert_tokens_to_ids(tokens)
+        position_ids = list(range(len(token_ids)))
+
+        label_ids = []
+        for label in example.label:
+            label_ids.append(int(label))
+
+        if phase != "predict":
+            Record = namedtuple(
+                'Record',
+                ['token_ids', 'text_type_ids', 'position_ids', 'label_ids'])
+
+            record = Record(
+                token_ids=token_ids,
+                text_type_ids=text_type_ids,
+                position_ids=position_ids,
+                label_ids=label_ids)
+        else:
+            Record = namedtuple('Record',
+                                ['token_ids', 'text_type_ids', 'position_ids'])
+            record = Record(
+                token_ids=token_ids,
+                text_type_ids=text_type_ids,
+                position_ids=position_ids)
+
+        return record
+
+
 if __name__ == '__main__':
     pass
