@@ -859,6 +859,14 @@ class SequenceLabelTask(BasicTask):
             feed_list += [self.seq_len.name]
         return feed_list
 
+    @property
+    def fetch_list(self):
+        if self.is_train_phase or self.is_test_phase:
+            return [metric.name for metric in self.metrics] + [self.loss.name]
+        elif self.is_predict_phase:
+            return [self.ret_infers.name] + [self.seq_len.name]
+        return [self.output.name]
+
 
 class MultiLabelClassifierTask(ClassifierTask):
     def __init__(self,
