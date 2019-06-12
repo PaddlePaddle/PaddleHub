@@ -47,7 +47,7 @@ class HubServer(object):
 
         with open(config_file_path) as fp:
             self.config = json.load(fp)
-        
+
         utils.check_url(self.config['server_url'])
         self.server_url = self.config['server_url']
         self._load_resource_list_file_if_valid()
@@ -58,7 +58,6 @@ class HubServer(object):
             HUB_SERVERS = HS_ENV.split(';')
             return HUB_SERVERS[uniform(0, len(self.server_url))]
         return self.server_url[uniform(0, len(self.server_url))]
-
 
     def resource_list_file_path(self):
         return os.path.join(hub.CACHE_HOME, RESOURCE_LIST_FILE)
@@ -93,11 +92,12 @@ class HubServer(object):
             payload = {'word': resource_key}
             if resource_type:
                 payload['type'] = resource_type
-            r = requests.get(self.get_server_url() + '/' + 'search', params=payload)
+            r = requests.get(
+                self.get_server_url() + '/' + 'search', params=payload)
             r = json.loads(r.text)
             if r['status'] == 0 and len(r['data']) > 0:
-                return [(item['name'], item['type'], item['version'], item['summary'])
-                        for item in r['data']]
+                return [(item['name'], item['type'], item['version'],
+                         item['summary']) for item in r['data']]
         except:
             pass
 
@@ -143,7 +143,8 @@ class HubServer(object):
                 payload['type'] = resource_type
             if version:
                 payload['version'] = version
-            r = requests.get(self.get_server_url() + '/' + 'search', params=payload)
+            r = requests.get(
+                self.get_server_url() + '/' + 'search', params=payload)
             r = json.loads(r.text)
             if r['status'] == 0 and len(r['data']) > 0:
                 return r['data'][0]
@@ -206,12 +207,13 @@ class HubServer(object):
             data = json.loads(r.text)
             cache_path = os.path.join(hub.CACHE_HOME, RESOURCE_LIST_FILE)
             with open(cache_path, 'w+') as fp:
-                yaml.safe_dump({'resource_list' : data['data']}, fp)
+                yaml.safe_dump({'resource_list': data['data']}, fp)
             return True
         except:
             pass
 
-        file_url = self.config['resource_storage_server_url'] + RESOURCE_LIST_FILE
+        file_url = self.config[
+            'resource_storage_server_url'] + RESOURCE_LIST_FILE
         result, tips, self.resource_list_file = default_downloader.download_file(
             file_url, save_path=hub.CACHE_HOME)
         if not result:
