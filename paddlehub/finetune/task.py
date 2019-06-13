@@ -386,16 +386,21 @@ class BasicTask(object):
     def _build_env_end_event(self):
         pass
 
+    def _calculate_metrics(self, run_states):
+        return 0
+
     def _eval_start_event(self):
         logger.info("Evaluation on {} dataset start".format(self.phase))
 
     def _eval_end_event(self, run_states):
+        run_speed = self._calculate_metrics(run_states)
         logger.info("[%s dataset evaluation result] [step/sec: %.2f]" %
-                    (self.phase, run_states.run_speed))
+                    (self.phase, run_speed))
 
     def _log_interval_event(self, run_states):
-        logger.info("step %d: [step/sec: %.2f]" % (self.current_step,
-                                                   run_states.run_speed))
+        run_speed = self._calculate_metrics(run_states)
+        logger.info(
+            "step %d: [step/sec: %.2f]" % (self.current_step, run_speed))
 
     def _save_ckpt_interval_event(self):
         self.save_checkpoint(self.current_epoch, self.current_step)
