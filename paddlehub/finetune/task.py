@@ -391,11 +391,11 @@ class BasicTask(object):
 
     def _eval_end_event(self, run_states):
         logger.info("[%s dataset evaluation result] [step/sec: %.2f]" %
-                    (self.phase, run_state.run_speed))
+                    (self.phase, run_states.run_speed))
 
     def _log_interval_event(self, run_states):
         logger.info("step %d: [step/sec: %.2f]" % (self.current_step,
-                                                   run_state.run_speed))
+                                                   run_states.run_speed))
 
     def _save_ckpt_interval_event(self):
         self.save_checkpoint(self.current_epoch, self.current_step)
