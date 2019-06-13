@@ -448,6 +448,9 @@ class BasicTask(object):
             startup_program=self._base_startup_program,
             load_best_model=load_best_model)
 
+        if self.is_predict_phase or self.is_test_phase:
+            self.env.current_step = 0
+
     def finetune_and_eval(self):
         self.finetune(do_eval=True)
 
@@ -518,8 +521,8 @@ class BasicTask(object):
             step_run_state.run_examples += num_batch_examples
             step_run_state.update()
             period_run_states += [step_run_state]
+            self.env.current_step += 1
             if self.is_train_phase:
-                self.env.current_step += 1
                 if self.current_step % self.config.log_interval == 0:
                     self._log_interval_event(period_run_states)
                     global_run_states += period_run_states
@@ -554,8 +557,8 @@ class BasicTask(object):
                 step_run_state.run_examples += num_batch_examples
                 step_run_state.update()
                 period_run_states += [step_run_state]
+                self.env.current_step += 1
                 if self.is_train_phase:
-                    self.env.current_step += 1
                     if self.current_step % self.config.log_interval == 0:
                         self._log_interval_event(period_run_states)
                         global_run_states += period_run_states
@@ -631,10 +634,11 @@ class ClassifierTask(BasicTask):
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
-            self.env.loss_scalar = logw.scalar(
-                tag="Loss [{}]".format(self.phase))
-            self.env.acc_scalar = logw.scalar(
-                tag="Accuracy [{}]".format(self.phase))
+            if self.phase != "predict":
+                self.env.loss_scalar = logw.scalar(
+                    tag="Loss [{}]".format(self.phase))
+                self.env.acc_scalar = logw.scalar(
+                    tag="Accuracy [{}]".format(self.phase))
 
     def _calculate_metrics(self, run_states):
         loss_sum = acc_sum = run_examples = 0
@@ -797,13 +801,19 @@ class SequenceLabelTask(BasicTask):
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
-            self.env.loss_scalar = logw.scalar(
-                tag="Loss [{}]".format(self.phase))
-            self.env.f1_scalar = logw.scalar(tag="F1 [{}]".format(self.phase))
-            self.env.precision_scalar = logw.scalar(
-                tag="Precision [{}]".format(self.phase))
-            self.env.recall_scalar = logw.scalar(
-                tag="Recall [{}]".format(self.phase))
+            if self.phase == "train":
+                self.env.loss_scalar = logw.scalar(
+                    tag="Loss [{}]".format(self.phase))
+
+            if self.phase in ["dev", "test", "val"]:
+                self.env.loss_scalar = logw.scalar(
+                    tag="Loss [{}]".format(self.phase))
+                self.env.f1_scalar = logw.scalar(
+                    tag="F1 [{}]".format(self.phase))
+                self.env.precision_scalar = logw.scalar(
+                    tag="Precision [{}]".format(self.phase))
+                self.env.recall_scalar = logw.scalar(
+                    tag="Recall [{}]".format(self.phase))
 
     def _calculate_metrics(self, run_states):
         total_infer = total_label = total_correct = loss_sum = 0
@@ -953,14 +963,16 @@ class MultiLabelClassifierTask(ClassifierTask):
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
-            self.env.loss_scalar = logw.scalar(
-                tag="Loss [{}]".format(self.phase))
-            self.env.auc_scalar_list = []
-            for i in range(self.num_classes):
-                self.env.auc_scalar_list.append(
-                    logw.scalar(tag="AUC_{} [{}]".format(i, "train")))
-            self.env.avg_auc_scalar = logw.scalar(
-                tag="Average auc [{}]".format(self.phase))
+            if self.phase != "predict":
+                self.env.loss_scalar = logw.scalar(
+                    tag="Loss [{}]".format(self.phase))
+                if self.phase == 'train':
+                    self.env.auc_scalar_list = []
+                    for i in range(self.num_classes):
+                        self.env.auc_scalar_list.append(
+                            logw.scalar(tag="AUC_{} [{}]".format(i, "train")))
+                self.env.avg_auc_scalar = logw.scalar(
+                    tag="Average auc [{}]".format(self.phase))
 
     def _calculate_metrics(self, run_states):
         loss_sum = acc_sum = run_examples = 0
@@ -980,16 +992,16 @@ class MultiLabelClassifierTask(ClassifierTask):
 
     def _log_interval_event(self, run_states):
         avg_loss, auc_list, run_speed = self._calculate_metrics(run_states)
-        if self.is_train_phase:
-            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
-                auc_scalar.add_record(self.current_step, auc_list[index])
+
         self.env.loss_scalar.add_record(self.current_step, avg_loss)
         avg_auc = np.mean(auc_list)
         self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
         logger.info("step %d: loss=%.5f avg_auc=%.5f [step/sec: %.2f]" %
                     (self.current_step, avg_loss, avg_auc, run_speed))
-        for index, auc in enumerate(auc_list):
-            logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
+        if self.is_train_phase:
+            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
+                auc_scalar.add_record(self.current_step, auc_list[index][0])
+                logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
 
     def _eval_end_event(self, run_states):
         eval_loss, auc_list, run_speed = self._calculate_metrics(run_states)
