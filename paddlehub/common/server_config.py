@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 HUB_SERVERS = ["http://hub.paddlepaddle.org:8888"]
 default_server_config = {
-    "server_url" : HUB_SERVERS,
-    "resource_storage_server_url" : "https://bj.bcebos.com/paddlehub/"
+    "server_url": HUB_SERVERS,
+    "resource_storage_server_url": "https://bj.bcebos.com/paddlehub/"
 }

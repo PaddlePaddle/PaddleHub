@@ -46,7 +46,8 @@ class LocalModuleManager(object):
                 desc = module_desc_pb2.ModuleDesc()
                 with open(desc_pb_path, "rb") as fp:
                     desc.ParseFromString(fp.read())
-                info['version'] = desc.attr.map.data["module_info"].map.data["version"].s
+                info['version'] = desc.attr.map.data["module_info"].map.data[
+                    "version"].s
         except:
             return False, None
         return True, info
@@ -62,7 +63,8 @@ class LocalModuleManager(object):
                 valid, info = self.check_module_valid(sub_dir_path)
                 if valid:
                     module_name = sub_dir_name
-                    self.modules_dict[module_name] = (sub_dir_path, info['version'])
+                    self.modules_dict[module_name] = (sub_dir_path,
+                                                      info['version'])
         return self.modules_dict
 
     def search_module(self, module_name, module_version=None, update=False):
@@ -73,12 +75,13 @@ class LocalModuleManager(object):
         self.all_modules(update=True)
         module_info = self.modules_dict.get(module_name, None)
         if module_info:
-            if not module_version or module_version == self.modules_dict[module_name][1]:
+            if not module_version or module_version == self.modules_dict[
+                    module_name][1]:
                 module_dir = self.modules_dict[module_name][0]
                 module_tag = module_name if not module_version else '%s-%s' % (
-                        module_name, module_version)
+                    module_name, module_version)
                 tips = "Module %s already installed in %s" % (module_tag,
-                        module_dir)
+                                                              module_dir)
                 return True, tips, self.modules_dict[module_name]
 
         search_result = hub.default_hub_server.get_module_url(
@@ -87,8 +90,8 @@ class LocalModuleManager(object):
         md5_value = search_result.get('md5', None)
         installed_module_version = search_result.get('version', None)
         #TODO(wuzewu): add compatibility check
-        if not url or (module_version is not None and
-                installed_module_version != module_version):
+        if not url or (module_version is not None
+                       and installed_module_version != module_version):
             tips = "Can't find module %s" % module_name
             if module_version:
                 tips += " with version %s" % module_version
@@ -124,7 +127,8 @@ class LocalModuleManager(object):
         if not module_name in self.modules_dict:
             tips = "%s is not installed" % module_name
             return True, tips
-        if module_version and module_version != self.modules_dict[module_name][1]:
+        if module_version and module_version != self.modules_dict[module_name][
+                1]:
             tips = "%s-%s is not installed" % (module_name, module_version)
             return True, tips
         tips = "Successfully uninstalled %s" % module_name
