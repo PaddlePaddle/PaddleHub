@@ -389,11 +389,11 @@ class BasicTask(object):
     def _eval_start_event(self):
         logger.info("Evaluation on {} dataset start".format(self.phase))
 
-    def _eval_end_event(self, run_state):
+    def _eval_end_event(self, run_states):
         logger.info("[%s dataset evaluation result] [step/sec: %.2f]" %
                     (self.phase, run_state.run_speed))
 
-    def _log_interval_event(self, run_state):
+    def _log_interval_event(self, run_states):
         logger.info("step %d: [step/sec: %.2f]" % (self.current_step,
                                                    run_state.run_speed))
 
@@ -661,9 +661,9 @@ class ClassifierTask(BasicTask):
         logger.info(
             "[%s dataset evaluation result] loss=%.5f acc=%.5f [step/sec: %.2f]"
             % (self.phase, eval_loss, eval_acc, run_speed))
+        self.env.loss_scalar.add_record(self.current_step, eval_loss)
+        self.env.acc_scalar.add_record(self.current_step, eval_acc)
         if self.phase in ["dev", "val"] and eval_acc > self.best_accuracy:
-            self.env.loss_scalar.add_record(self.current_step, eval_loss)
-            self.env.acc_scalar.add_record(self.current_step, eval_acc)
             self.best_accuracy = eval_acc
             model_saved_dir = os.path.join(self.config.checkpoint_dir,
                                            "best_model")
@@ -834,6 +834,7 @@ class SequenceLabelTask(BasicTask):
     def _eval_end_event(self, run_states):
         precision, recall, f1, avg_loss, run_speed = self._calculate_metrics(
             run_states)
+        self.env.loss_scalar.add_record(self.current_step, avg_loss)
         self.env.f1_scalar.add_record(self.current_step, f1)
         self.env.precision_scalar.add_record(self.current_step, precision)
         self.env.recall_scalar.add_record(self.current_step, recall)
@@ -987,20 +988,15 @@ class MultiLabelClassifierTask(ClassifierTask):
 
     def _eval_end_event(self, run_states):
         eval_loss, auc_list, run_speed = self._calculate_metrics(run_states)
-        if self.is_train_phase:
-            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
-                auc_scalar.add_record(self.current_step, auc_list[index])
         avg_auc = np.mean(auc_list)
         logger.info(
             "[%s dataset evaluation result] loss=%.5f avg_auc=%.5f [step/sec: %.2f]"
             % (self.phase, eval_loss, avg_auc, run_speed))
         for index, auc in enumerate(auc_list):
             logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
+        self.env.loss_scalar.add_record(self.current_step, eval_loss)
+        self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
         if self.phase in ["dev", "val"] and avg_auc > self.best_avg_auc:
-            self.env.loss_scalar.add_record(self.current_step, eval_loss)
-            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
-                auc_scalar.add_record(self.current_step, auc_list[index])
-            self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
             self.best_avg_auc = avg_auc
             model_saved_dir = os.path.join(self.config.checkpoint_dir,
                                            "best_model")
