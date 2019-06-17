@@ -387,7 +387,7 @@ class BasicTask(object):
         pass
 
     def _calculate_metrics(self, run_states):
-        return 0
+        raise NotImplementedError
 
     def _eval_start_event(self):
         logger.info("Evaluation on {} dataset start".format(self.phase))
@@ -963,10 +963,10 @@ class MultiLabelClassifierTask(ClassifierTask):
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
-            if self.phase != "predict":
+            if not self.is_predict_phase:
                 self.env.loss_scalar = logw.scalar(
                     tag="Loss [{}]".format(self.phase))
-                if self.phase == 'train':
+                if self.is_train_phase:
                     self.env.auc_scalar_list = []
                     for i in range(self.num_classes):
                         self.env.auc_scalar_list.append(
@@ -998,10 +998,9 @@ class MultiLabelClassifierTask(ClassifierTask):
         self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
         logger.info("step %d: loss=%.5f avg_auc=%.5f [step/sec: %.2f]" %
                     (self.current_step, avg_loss, avg_auc, run_speed))
-        if self.is_train_phase:
-            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
-                auc_scalar.add_record(self.current_step, auc_list[index][0])
-                logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
+        for index, auc_scalar in enumerate(self.env.auc_scalar_list):
+            auc_scalar.add_record(self.current_step, auc_list[index][0])
+            logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
 
     def _eval_end_event(self, run_states):
         eval_loss, auc_list, run_speed = self._calculate_metrics(run_states)
