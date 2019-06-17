@@ -637,7 +637,7 @@ class ClassifierTask(BasicTask):
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
-            if self.phase != "predict":
+            if not self.is_predict_phase:
                 self.env.loss_scalar = logw.scalar(
                     tag="Loss [{}]".format(self.phase))
                 self.env.acc_scalar = logw.scalar(
@@ -805,11 +805,11 @@ class SequenceLabelTask(BasicTask):
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
-            if self.phase == "train":
+            if self.is_train_phase:
                 self.env.loss_scalar = logw.scalar(
                     tag="Loss [{}]".format(self.phase))
 
-            if self.phase in ["dev", "test", "val"]:
+            if self.phase in ["dev", "val"]:
                 self.env.loss_scalar = logw.scalar(
                     tag="Loss [{}]".format(self.phase))
                 self.env.f1_scalar = logw.scalar(
