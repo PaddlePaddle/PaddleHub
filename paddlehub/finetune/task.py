@@ -113,7 +113,7 @@ class BasicTask(object):
         self.place = self.places[0]
         self.device_count = len(self.places)
 
-        if self.config.batch_size < self.device_count:
+        if self.config.use_data_parallel and self.config.batch_size < self.device_count:
             logger.warning(
                 "Batch size({}) is less than the count of devices({}), which is not allowed in current Paddle versions"
                 .format(self.config.batch_size, self.device_count))
