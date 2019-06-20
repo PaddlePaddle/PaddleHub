@@ -30,7 +30,7 @@ def add_argument(argument, type, default, help, argparser, **kwargs):
         argument,
         default=default,
         type=type,
-        help=help + ' Default: %(default)s.',
+        help=help + ' Default: %(default)s.' if help else help,
         **kwargs)
 
 
