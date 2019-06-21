@@ -140,7 +140,7 @@ cls_task.finetune_and_eval()
 **NOTE:**
 1. `outputs["pooled_output"]`返回了ERNIE/BERT模型对应的[CLS]向量,可以用于句子或句对的特征表达。
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与ClassifyReader返回的结果一致。
-3. `create_text_cls_task`通过输入特征，label与迁移的类别数，可以生成适用于文本分类的迁移任务`cls_task`
+3. `hub.TextClassifierTask`通过输入特征，label与迁移的类别数，可以生成适用于文本分类的迁移任务`TextClassifierTask`
 
 ## VisualDL 可视化
 
