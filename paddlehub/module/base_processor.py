@@ -22,6 +22,9 @@ class BaseProcessor(object):
     def __init__(self, module):
         pass
 
+    def configs(self):
+        return []
+
     def preprocess(self, sign_name, data_dict):
         raise NotImplementedError(
             "BaseProcessor' preprocess should not be called!")

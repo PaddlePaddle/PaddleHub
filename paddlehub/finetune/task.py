@@ -30,7 +30,7 @@ from visualdl import LogWriter
 
 import paddlehub as hub
 from paddlehub.common.paddle_helper import dtype_map, clone_program
-from paddlehub.common.utils import mkdir
+from paddlehub.common.utils import mkdir, to_list
 from paddlehub.common.logger import logger
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
 from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
@@ -110,7 +110,7 @@ class BasicTask(object):
         else:
             self._base_startup_program = clone_program(
                 startup_program, for_test=False)
-        self._load_checkpoint = False
+        self.is_checkpoint_loaded = False
         self._base_compile_program = None
 
         # run config
@@ -118,13 +118,14 @@ class BasicTask(object):
         self.place = self.places[0]
         self.device_count = len(self.places)
 
-        if self.config.batch_size < self.device_count:
-            logger.warning(
-                "Batch size({}) is less than the count of devices({}), which is not allowed in current Paddle versions"
-                .format(self.config.batch_size, self.device_count))
-            logger.warning("Batch size automatically adjusted to {}".format(
-                self.device_count))
-            self.config._batch_size = self.device_count
+        if self.config.use_data_parallel:
+            if not self.config.use_pyreader and self.config.batch_size < self.device_count:
+                logger.warning(
+                    "Batch size({}) is less than the count of devices({}), which is not allowed in current Paddle versions"
+                    .format(self.config.batch_size, self.device_count))
+                logger.warning("Batch size automatically adjusted to {}".format(
+                    self.device_count))
+                self.config._batch_size = self.device_count
 
         self.exe = fluid.Executor(place=self.place)
         self.build_strategy = fluid.BuildStrategy()
@@ -144,18 +145,28 @@ class BasicTask(object):
         self._envs = {}
         self._predict_data = None
 
-    def init_if_necessary(self, load_best_model=False):
-        if not self._load_checkpoint:
-            self.load_checkpoint(load_best_model=load_best_model)
-            self._load_checkpoint = True
+        # set default phase
+        self.enter_phase("train")
 
     @contextlib.contextmanager
     def phase_guard(self, phase):
+        self.enter_phase(phase)
+        yield
+        self.exit_phase()
+
+    def enter_phase(self, phase):
         if phase not in ["train", "val", "dev", "test", "predict", "inference"]:
             raise RuntimeError()
         self._phases.append(phase)
-        yield
+
+    def exit_phase(self):
         self._phases = self._phases[:-1]
+
+    def init_if_necessary(self):
+        if not self.is_checkpoint_loaded:
+            self.is_checkpoint_loaded = True
+            if not self.load_checkpoint():
+                self.exe.run(self._base_startup_program)
 
     def _build_env(self):
         if self.env.is_inititalized:
@@ -170,7 +181,7 @@ class BasicTask(object):
         with fluid.program_guard(self.env.main_program,
                                  self._base_startup_program):
             with fluid.unique_name.guard(self.env.UNG):
-                self.env.output = self._build_net()
+                self.env.outputs = self._build_net()
                 if self.is_train_phase or self.is_test_phase:
                     self.env.label = self._add_label()
                     self.env.loss = self._add_loss()
@@ -194,6 +205,7 @@ class BasicTask(object):
 
                 feed_var_list = self.feed_var_list
                 py_vars = fluid.layers.read_file(self.env.py_reader)
+                py_vars = to_list(py_vars)
                 input_dict = {
                     feed_var_list[index].name: py_var
                     for index, py_var in enumerate(py_vars)
@@ -207,14 +219,19 @@ class BasicTask(object):
 
             self.env.main_program = t_program
 
-            self.env.loss = self.env.main_program.global_block().vars[
-                self.env.loss.name]
-            self.env.output = self.env.main_program.global_block().vars[
-                self.env.output.name]
-            metrics_name = [var.name for var in self.env.metrics]
-            self.env.metrics = [
+            if not self.is_predict_phase:
+                self.env.loss = self.env.main_program.global_block().vars[
+                    self.env.loss.name]
+                metrics_name = [var.name for var in self.env.metrics]
+                self.env.metrics = [
+                    self.env.main_program.global_block().vars[name]
+                    for name in metrics_name
+                ]
+
+            outputs_name = [var.name for var in self.env.outputs]
+            self.env.outputs = [
                 self.env.main_program.global_block().vars[name]
-                for name in metrics_name
+                for name in outputs_name
             ]
 
         if self.config.enable_memory_optim:
@@ -235,15 +252,15 @@ class BasicTask(object):
         else:
             loss_name = None
 
-        if self._base_compile_program is None:
+        if self._base_compiled_program is None:
             share_vars_from = None
         else:
-            share_vars_from = self._base_compile_program
+            share_vars_from = self._base_compiled_program
 
         if not self.config.use_data_parallel:
             if self.config.enable_memory_optim:
                 fluid.memory_optimize(self.env.main_program)
-            self.env.main_program_compiled = self.env.main_program
+            self.env.main_program_compiled = None
         else:
             self.env.main_program_compiled = fluid.CompiledProgram(
                 self.env.main_program).with_data_parallel(
@@ -251,8 +268,8 @@ class BasicTask(object):
                     share_vars_from=share_vars_from,
                     build_strategy=self.build_strategy)
 
-            if self._base_compile_program is None:
-                self._base_compile_program = self.env.main_program_compiled
+            if self._base_compiled_program is None:
+                self._base_compiled_program = self.env.main_program_compiled
 
         self.exe.run(self.env.startup_program)
         self._build_env_end_event()
@@ -325,6 +342,12 @@ class BasicTask(object):
         return self.env.main_program_compiled
 
     @property
+    def main_program_to_be_run(self):
+        if self.config.use_data_parallel:
+            return self.main_program_compiled
+        return self.main_program
+
+    @property
     def reader(self):
         if self.is_predict_phase:
             data = self._predict_data
@@ -353,10 +376,10 @@ class BasicTask(object):
         return self.env.label
 
     @property
-    def output(self):
+    def outputs(self):
         if not self.env.is_inititalized:
             self._build_env()
-        return self.env.output
+        return self.env.outputs
 
     @property
     def metrics(self):
@@ -387,7 +410,7 @@ class BasicTask(object):
     def fetch_list(self):
         if self.is_train_phase or self.is_test_phase:
             return [metric.name for metric in self.metrics] + [self.loss.name]
-        return [self.output.name]
+        return [output.name for output in self.outputs]
 
     def _build_env_start_event(self):
         pass
@@ -395,16 +418,21 @@ class BasicTask(object):
     def _build_env_end_event(self):
         pass
 
+    def _calculate_metrics(self, run_states):
+        raise NotImplementedError
+
     def _eval_start_event(self):
         logger.info("Evaluation on {} dataset start".format(self.phase))
 
-    def _eval_end_event(self, run_state):
+    def _eval_end_event(self, run_states):
+        run_speed = self._calculate_metrics(run_states)
         logger.info("[%s dataset evaluation result] [step/sec: %.2f]" %
-                    (self.phase, run_state.run_speed))
+                    (self.phase, run_speed))
 
-    def _log_interval_event(self, run_state):
-        logger.info("step %d: [step/sec: %.2f]" % (self.current_step,
-                                                   run_state.run_speed))
+    def _log_interval_event(self, run_states):
+        run_speed = self._calculate_metrics(run_states)
+        logger.info(
+            "step %d: [step/sec: %.2f]" % (self.current_step, run_speed))
 
     def _save_ckpt_interval_event(self):
         self.save_checkpoint(self.current_epoch, self.current_step)
@@ -444,13 +472,25 @@ class BasicTask(object):
             exe=self.exe,
             main_program=self.main_program)
 
-    def load_checkpoint(self, load_best_model=False):
-        self.env.current_epoch, self.env.current_step = load_checkpoint(
+    def load_checkpoint(self):
+        is_load_successful, self.env.current_epoch, self.env.current_step = load_checkpoint(
             self.config.checkpoint_dir,
             self.exe,
-            main_program=self.main_program,
-            startup_program=self._base_startup_program,
-            load_best_model=load_best_model)
+            main_program=self.main_program)
+
+        return is_load_successful
+
+    def load_parameters(self, dirname):
+        def if_exist(var):
+            path = os.path.join(dirname, var.name)
+            return os.path.exists(path)
+
+        fluid.io.load_vars(
+            self.exe, dirname, self.main_program, predicate=if_exist)
+
+    def save_parameters(self, dirname):
+        fluid.io.save_params(
+            self.exe, dirname=dirname, main_program=self.main_program)
 
     def finetune_and_eval(self):
         self.finetune(do_eval=True)
@@ -484,8 +524,12 @@ class BasicTask(object):
 
     def predict(self, data, load_best_model=True):
         with self.phase_guard(phase="predict"):
+            self.init_if_necessary()
+            if load_best_model:
+                best_model_path = os.path.join(self.config.checkpoint_dir,
+                                               "best_model")
+                self.load_parameters(best_model_path)
             self._predict_data = data
-            self.init_if_necessary(load_best_model=load_best_model)
             run_states = self._run()
             self._predict_data = None
         return [run_state.run_results for run_state in run_states]
@@ -513,7 +557,7 @@ class BasicTask(object):
             num_batch_examples = len(batch)
 
             fetch_result = self.exe.run(
-                self.main_program_compiled,
+                self.main_program_to_be_run,
                 feed=data_feeder.feed(batch),
                 fetch_list=self.fetch_list)
 
@@ -522,8 +566,8 @@ class BasicTask(object):
             step_run_state.run_examples += num_batch_examples
             step_run_state.update()
             period_run_states += [step_run_state]
+            self.env.current_step += 1
             if self.is_train_phase:
-                self.env.current_step += 1
                 if self.current_step % self.config.log_interval == 0:
                     self._log_interval_event(period_run_states)
                     global_run_states += period_run_states
@@ -541,41 +585,56 @@ class BasicTask(object):
         return global_run_states
 
     def _run_with_py_reader(self, do_eval=False):
-        global_run_states = []
-        period_run_states = []
-        self.py_reader.decorate_paddle_reader(self.reader)
-        self.py_reader.start()
-        try:
-            while True:
-                num_batch_examples = self.config.batch_size
-                step_run_state = RunState(len(self.fetch_list))
-                step_run_state.run_step = 1
-                fetch_result = self.exe.run(
-                    self.main_program_compiled, fetch_list=self.fetch_list)
+        flag = False
+        while True:
+            global_run_states = []
+            period_run_states = []
+            self.py_reader.decorate_paddle_reader(self.reader)
+            self.py_reader.start()
+            try:
+                while True:
+                    num_batch_examples = self.config.batch_size * self.device_count
+                    step_run_state = RunState(len(self.fetch_list))
+                    step_run_state.run_step = 1
+                    fetch_result = self.exe.run(
+                        self.main_program_to_be_run, fetch_list=self.fetch_list)
 
-                for index, result in enumerate(fetch_result):
-                    step_run_state.run_results[index] = result
-                step_run_state.run_examples += num_batch_examples
-                step_run_state.update()
-                period_run_states += [step_run_state]
-                if self.is_train_phase:
+                    for index, result in enumerate(fetch_result):
+                        step_run_state.run_results[index] = result
+                    step_run_state.run_examples += num_batch_examples
+                    step_run_state.update()
+                    period_run_states += [step_run_state]
                     self.env.current_step += 1
-                    if self.current_step % self.config.log_interval == 0:
-                        self._log_interval_event(period_run_states)
-                        global_run_states += period_run_states
-                        period_run_states = []
+                    if self.is_train_phase:
+                        if self.current_step % self.config.log_interval == 0:
+                            self._log_interval_event(period_run_states)
+                            global_run_states += period_run_states
+                            period_run_states = []
 
-                    if self.config.save_ckpt_interval and self.current_step % self.config.save_ckpt_interval == 0:
-                        self._save_ckpt_interval_event()
+                        if self.config.save_ckpt_interval and self.current_step % self.config.save_ckpt_interval == 0:
+                            self._save_ckpt_interval_event()
 
-                    if do_eval and self.current_step % self.config.eval_interval == 0:
-                        self._eval_interval_event()
+                        if do_eval and self.current_step % self.config.eval_interval == 0:
+                            self._eval_interval_event()
 
-                self._run_step_event(step_run_state)
-        except fluid.core.EOFException:
-            self.py_reader.reset()
+                    self._run_step_event(step_run_state)
+            except fluid.core.EOFException:
+                global_run_states += period_run_states
+                self.py_reader.reset()
+                '''
+                When opening use_data_parallel and use_pyreader, if the amount of data is too small,
+                the reader will have thrown EOF Exception when not fetching to the running result.
+                In this case, temporarily close the use_data_parallel to get the result.
+                '''
+                if flag:
+                    self.config._use_data_parallel = use_data_parallel_backup
+                elif len(global_run_states) == 0:
+                    flag = True
+                    use_data_parallel_backup = self.config.use_data_parallel
+                    self.config._use_data_parallel = False
+                    continue
+                break
 
-        global_run_states += period_run_states
         return global_run_states
 
 
@@ -620,25 +679,26 @@ class ClassifierTask(BasicTask):
                 name="cls_out_b", initializer=fluid.initializer.Constant(0.)),
             act="softmax")
 
-        return logits
+        return [logits]
 
     def _add_label(self):
         return fluid.layers.data(name="label", dtype="int64", shape=[1])
 
     def _add_loss(self):
         ce_loss = fluid.layers.cross_entropy(
-            input=self.output, label=self.label)
+            input=self.outputs[0], label=self.label)
         return fluid.layers.mean(x=ce_loss)
 
     def _add_metrics(self):
-        return [fluid.layers.accuracy(input=self.output, label=self.label)]
+        return [fluid.layers.accuracy(input=self.outputs[0], label=self.label)]
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
-            self.env.loss_scalar = logw.scalar(
-                tag="Loss [{}]".format(self.phase))
-            self.env.acc_scalar = logw.scalar(
-                tag="Accuracy [{}]".format(self.phase))
+            if not self.is_predict_phase:
+                self.env.loss_scalar = logw.scalar(
+                    tag="Loss [{}]".format(self.phase))
+                self.env.acc_scalar = logw.scalar(
+                    tag="Accuracy [{}]".format(self.phase))
 
     def _calculate_metrics(self, run_states):
         loss_sum = acc_sum = run_examples = 0
@@ -670,9 +730,9 @@ class ClassifierTask(BasicTask):
         logger.info(
             "[%s dataset evaluation result] loss=%.5f acc=%.5f [step/sec: %.2f]"
             % (self.phase, eval_loss, eval_acc, run_speed))
+        self.env.loss_scalar.add_record(self.current_step, eval_loss)
+        self.env.acc_scalar.add_record(self.current_step, eval_acc)
         if self.phase in ["dev", "val"] and eval_acc > self.best_accuracy:
-            self.env.loss_scalar.add_record(self.current_step, eval_loss)
-            self.env.acc_scalar.add_record(self.current_step, eval_acc)
             self.best_accuracy = eval_acc
             model_saved_dir = os.path.join(self.config.checkpoint_dir,
                                            "best_model")
@@ -729,7 +789,7 @@ class TextClassifierTask(ClassifierTask):
                 name="cls_out_b", initializer=fluid.initializer.Constant(0.)),
             act="softmax")
 
-        return logits
+        return [logits]
 
 
 class SequenceLabelTask(BasicTask):
@@ -782,7 +842,7 @@ class SequenceLabelTask(BasicTask):
         logits = fluid.layers.flatten(logits, axis=2)
         logits = fluid.layers.softmax(logits)
         self.num_labels = logits.shape[1]
-        return logits
+        return [logits]
 
     def _add_label(self):
         label = fluid.layers.data(
@@ -791,7 +851,8 @@ class SequenceLabelTask(BasicTask):
 
     def _add_loss(self):
         labels = fluid.layers.flatten(self.label, axis=2)
-        ce_loss = fluid.layers.cross_entropy(input=self.output, label=labels)
+        ce_loss = fluid.layers.cross_entropy(
+            input=self.outputs[0], label=labels)
         loss = fluid.layers.mean(x=ce_loss)
         return loss
 
@@ -801,13 +862,19 @@ class SequenceLabelTask(BasicTask):
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
-            self.env.loss_scalar = logw.scalar(
-                tag="Loss [{}]".format(self.phase))
-            self.env.f1_scalar = logw.scalar(tag="F1 [{}]".format(self.phase))
-            self.env.precision_scalar = logw.scalar(
-                tag="Precision [{}]".format(self.phase))
-            self.env.recall_scalar = logw.scalar(
-                tag="Recall [{}]".format(self.phase))
+            if self.is_train_phase:
+                self.env.loss_scalar = logw.scalar(
+                    tag="Loss [{}]".format(self.phase))
+
+            if self.phase in ["dev", "val"]:
+                self.env.loss_scalar = logw.scalar(
+                    tag="Loss [{}]".format(self.phase))
+                self.env.f1_scalar = logw.scalar(
+                    tag="F1 [{}]".format(self.phase))
+                self.env.precision_scalar = logw.scalar(
+                    tag="Precision [{}]".format(self.phase))
+                self.env.recall_scalar = logw.scalar(
+                    tag="Recall [{}]".format(self.phase))
 
     def _calculate_metrics(self, run_states):
         total_infer = total_label = total_correct = loss_sum = 0
@@ -843,6 +910,7 @@ class SequenceLabelTask(BasicTask):
     def _eval_end_event(self, run_states):
         precision, recall, f1, avg_loss, run_speed = self._calculate_metrics(
             run_states)
+        self.env.loss_scalar.add_record(self.current_step, avg_loss)
         self.env.f1_scalar.add_record(self.current_step, f1)
         self.env.precision_scalar.add_record(self.current_step, precision)
         self.env.recall_scalar.add_record(self.current_step, recall)
@@ -874,7 +942,7 @@ class SequenceLabelTask(BasicTask):
             return [metric.name for metric in self.metrics] + [self.loss.name]
         elif self.is_predict_phase:
             return [self.ret_infers.name] + [self.seq_len.name]
-        return [self.output.name]
+        return [output.name for output in self.outputs]
 
 
 class MultiLabelClassifierTask(ClassifierTask):
@@ -937,7 +1005,7 @@ class MultiLabelClassifierTask(ClassifierTask):
         label_split = fluid.layers.split(self.label, self.num_classes, dim=-1)
         total_loss = fluid.layers.fill_constant(
             shape=[1], value=0.0, dtype='float64')
-        for index, probs in enumerate(self.output):
+        for index, probs in enumerate(self.outputs):
             ce_loss = fluid.layers.cross_entropy(
                 input=probs, label=label_split[index])
             total_loss += fluid.layers.reduce_sum(ce_loss)
@@ -948,7 +1016,7 @@ class MultiLabelClassifierTask(ClassifierTask):
         label_split = fluid.layers.split(self.label, self.num_classes, dim=-1)
         # metrics change to auc of every class
         eval_list = []
-        for index, probs in enumerate(self.output):
+        for index, probs in enumerate(self.outputs):
             current_auc, _, _ = fluid.layers.auc(
                 input=probs, label=label_split[index])
             eval_list.append(current_auc)
@@ -956,14 +1024,16 @@ class MultiLabelClassifierTask(ClassifierTask):
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
-            self.env.loss_scalar = logw.scalar(
-                tag="Loss [{}]".format(self.phase))
-            self.env.auc_scalar_list = []
-            for i in range(self.num_classes):
-                self.env.auc_scalar_list.append(
-                    logw.scalar(tag="AUC_{} [{}]".format(i, "train")))
-            self.env.avg_auc_scalar = logw.scalar(
-                tag="Average auc [{}]".format(self.phase))
+            if not self.is_predict_phase:
+                self.env.loss_scalar = logw.scalar(
+                    tag="Loss [{}]".format(self.phase))
+                if self.is_train_phase:
+                    self.env.auc_scalar_list = []
+                    for i in range(self.num_classes):
+                        self.env.auc_scalar_list.append(
+                            logw.scalar(tag="AUC_{} [{}]".format(i, "train")))
+                self.env.avg_auc_scalar = logw.scalar(
+                    tag="Average auc [{}]".format(self.phase))
 
     def _calculate_metrics(self, run_states):
         loss_sum = acc_sum = run_examples = 0
@@ -983,33 +1053,27 @@ class MultiLabelClassifierTask(ClassifierTask):
 
     def _log_interval_event(self, run_states):
         avg_loss, auc_list, run_speed = self._calculate_metrics(run_states)
-        if self.is_train_phase:
-            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
-                auc_scalar.add_record(self.current_step, auc_list[index])
+
         self.env.loss_scalar.add_record(self.current_step, avg_loss)
         avg_auc = np.mean(auc_list)
         self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
         logger.info("step %d: loss=%.5f avg_auc=%.5f [step/sec: %.2f]" %
                     (self.current_step, avg_loss, avg_auc, run_speed))
-        for index, auc in enumerate(auc_list):
+        for index, auc_scalar in enumerate(self.env.auc_scalar_list):
+            auc_scalar.add_record(self.current_step, auc_list[index][0])
             logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
 
     def _eval_end_event(self, run_states):
         eval_loss, auc_list, run_speed = self._calculate_metrics(run_states)
-        if self.is_train_phase:
-            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
-                auc_scalar.add_record(self.current_step, auc_list[index])
         avg_auc = np.mean(auc_list)
         logger.info(
             "[%s dataset evaluation result] loss=%.5f avg_auc=%.5f [step/sec: %.2f]"
             % (self.phase, eval_loss, avg_auc, run_speed))
         for index, auc in enumerate(auc_list):
             logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
+        self.env.loss_scalar.add_record(self.current_step, eval_loss)
+        self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
         if self.phase in ["dev", "val"] and avg_auc > self.best_avg_auc:
-            self.env.loss_scalar.add_record(self.current_step, eval_loss)
-            for index, auc_scalar in enumerate(self.env.auc_scalar_list):
-                auc_scalar.add_record(self.current_step, auc_list[index])
-            self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
             self.best_avg_auc = avg_auc
             model_saved_dir = os.path.join(self.config.checkpoint_dir,
                                            "best_model")
@@ -1024,4 +1088,4 @@ class MultiLabelClassifierTask(ClassifierTask):
     def fetch_list(self):
         if self.is_train_phase or self.is_test_phase:
             return [metric.name for metric in self.metrics] + [self.loss.name]
-        return self.output
+        return self.outputs

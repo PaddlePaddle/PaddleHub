@@ -27,11 +27,7 @@ from paddlehub.common.logger import logger
 CKPT_FILE_NAME = "ckpt.meta"
 
 
-def load_checkpoint(checkpoint_dir,
-                    exe,
-                    main_program=fluid.default_main_program(),
-                    startup_program=fluid.default_startup_program(),
-                    load_best_model=False):
+def load_checkpoint(checkpoint_dir, exe, main_program):
 
     ckpt_meta_path = os.path.join(checkpoint_dir, CKPT_FILE_NAME)
     ckpt = checkpoint_pb2.CheckPoint()
@@ -41,33 +37,23 @@ def load_checkpoint(checkpoint_dir,
             ckpt.ParseFromString(f.read())
     current_epoch = 1
     global_step = 0
-    pretrained_model = ""
-    best_model_path = os.path.join(checkpoint_dir, "best_model")
 
     def if_exist(var):
-        return os.path.exists(os.path.join(pretrained_model, var.name))
+        return os.path.exists(os.path.join(ckpt.latest_model_dir, var.name))
 
-    if load_best_model and os.path.exists(best_model_path):
-        pretrained_model = best_model_path
-        fluid.io.load_vars(
-            exe, best_model_path, main_program, predicate=if_exist)
-        logger.info("PaddleHub model best model loaded.")
-        return current_epoch, global_step
-    elif ckpt.latest_model_dir:
-        pretrained_model = ckpt.latest_model_dir
+    if ckpt.latest_model_dir:
         fluid.io.load_vars(
             exe, ckpt.latest_model_dir, main_program, predicate=if_exist)
 
         logger.info("PaddleHub model checkpoint loaded. current_epoch={}, "
                     "global_step={}".format(ckpt.current_epoch,
                                             ckpt.global_step))
-        return ckpt.current_epoch, ckpt.global_step
+        return True, ckpt.current_epoch, ckpt.global_step
 
     logger.info(
         "PaddleHub model checkpoint not found, start training from scratch...")
-    exe.run(startup_program)
 
-    return current_epoch, global_step
+    return False, current_epoch, global_step
 
 
 def save_checkpoint(checkpoint_dir,

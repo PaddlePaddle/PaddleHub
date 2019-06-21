@@ -31,7 +31,7 @@ class RunConfig(object):
                  log_interval=10,
                  eval_interval=100,
                  use_pyreader=False,
-                 use_data_parallel=True,
+                 use_data_parallel=False,
                  save_ckpt_interval=None,
                  use_cuda=True,
                  checkpoint_dir=None,

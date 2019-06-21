@@ -72,29 +72,7 @@ SequenceLabelReader中的`data_generator`会自动按照模型对应词表对数
 
 **NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
 
-### Step3: 构建网络并创建分类迁移任务
-```python
-
-sequence_output = outputs["sequence_output"]
-
-# feed_list的Tensor顺序不可以调整
-feed_list = [
-    inputs["input_ids"].name, inputs["position_ids"].name,
-    inputs["segment_ids"].name, inputs["input_mask"].name, label.name
-]
-
-seq_label_task = hub.create_seq_label_task(
-    feature=sequence_output,
-    max_seq_len=args.max_seq_len,
-    num_classes=dataset.num_labels)
-```
-
-**NOTE:**
-1. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达。
-2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与SequenceLabelReader返回的结果一致。
-3. `create_seq_label_task`通过输入特征，迁移的类别数，可以生成适用于文本分类的迁移任务`seq_label_task`
-
-### Step4：选择优化策略并开始Finetune
+### Step3：选择优化策略和运行配置
 
 ```python
 strategy = hub.AdamWeightDecayStrategy(
@@ -105,8 +83,6 @@ strategy = hub.AdamWeightDecayStrategy(
 )
 
 config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strategy)
-
-hub.finetune_and_eval(task=cls_task, data_reader=reader, feed_list=feed_list, config=config)
 ```
 #### 优化策略
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`
@@ -128,6 +104,33 @@ hub.finetune_and_eval(task=cls_task, data_reader=reader, feed_list=feed_list, co
 * `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size
 * `enable_memory_optim`: 是否使用内存优化， 默认为True
 * `strategy`: Finetune优化策略
+
+### Step4: 构建网络并创建序列标注迁移任务进行Finetune
+```python
+
+sequence_output = outputs["sequence_output"]
+
+# feed_list的Tensor顺序不可以调整
+feed_list = [
+    inputs["input_ids"].name, inputs["position_ids"].name,
+    inputs["segment_ids"].name, inputs["input_mask"].name, label.name
+]
+
+seq_label_task = hub.SequenceLabelTask(
+    data_reader=reader,
+    feature=sequence_output,
+    feed_list=feed_list,
+    max_seq_len=args.max_seq_len,
+    num_classes=dataset.num_labels,
+    config=config)
+
+seq_label_task.finetune_and_eval()
+```
+
+**NOTE:**
+1. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达。
+2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与SequenceLabelReader返回的结果一致。
+3. `hub.SequenceLabelTask`通过输入特征，迁移的类别数，可以生成适用于序列标注的迁移任务`SequenceLabelTask`
 
 ## VisualDL 可视化
 
