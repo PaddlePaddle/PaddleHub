@@ -29,7 +29,7 @@ import paddle.fluid as fluid
 from visualdl import LogWriter
 
 import paddlehub as hub
-from paddlehub.common.paddle_helper import dtype_map
+from paddlehub.common.paddle_helper import dtype_map, clone_program
 from paddlehub.common.utils import mkdir
 from paddlehub.common.logger import logger
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
@@ -98,13 +98,18 @@ class BasicTask(object):
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
         if main_program is None:
-            self._base_main_program = fluid.default_main_program().clone()
+            self._base_main_program = clone_program(
+                fluid.default_main_program(), for_test=False)
+
         else:
-            self._base_main_program = main_program.clone()
+            self._base_main_program = clone_program(
+                main_program, for_test=False)
         if startup_program is None:
-            self._base_startup_program = fluid.default_startup_program().clone()
+            self._base_startup_program = clone_program(
+                fluid.default_startup_program(), for_test=False)
         else:
-            self._base_startup_program = startup_program.clone()
+            self._base_startup_program = clone_program(
+                startup_program, for_test=False)
         self._load_checkpoint = False
         self._base_compile_program = None
 
@@ -158,7 +163,9 @@ class BasicTask(object):
 
         self._build_env_start_event()
         self.env.is_inititalized = True
-        self.env.main_program = self._base_main_program.clone()
+        self.env.main_program = clone_program(
+            self._base_main_program, for_test=False)
+
         self.env.startup_program = fluid.Program()
         with fluid.program_guard(self.env.main_program,
                                  self._base_startup_program):
@@ -170,7 +177,8 @@ class BasicTask(object):
                     self.env.metrics = self._add_metrics()
 
         if self.is_predict_phase or self.is_test_phase:
-            self.env.main_program = self.env.main_program.clone(for_test=True)
+            self.env.main_program = clone_program(
+                self.env.main_program, for_test=True)
             hub.common.paddle_helper.set_op_attr(
                 self.env.main_program, is_test=True)
 
@@ -198,6 +206,7 @@ class BasicTask(object):
                     need_log=False)
 
             self.env.main_program = t_program
+
             self.env.loss = self.env.main_program.global_block().vars[
                 self.env.loss.name]
             self.env.output = self.env.main_program.global_block().vars[

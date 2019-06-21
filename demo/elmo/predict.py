@@ -10,10 +10,9 @@ import paddlehub as hub
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
-parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
+parser.add_argument("--batch_size", type=int, default=1, help="Total examples' number in batch for training.")
 parser.add_argument("--learning_rate", type=float, default=1e-4, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=5, help="Weight decay rate for L2 regularizer.")
 parser.add_argument("--warmup_proportion", type=float, default=0.05, help="Warmup proportion params for warmup strategy")
@@ -148,7 +147,6 @@ if __name__ == '__main__':
     config = hub.RunConfig(
         use_cuda=args.use_gpu,
         use_data_parallel=True,
-        num_epoch=args.num_epoch,
         batch_size=args.batch_size,
         checkpoint_dir=args.checkpoint_dir,
         strategy=strategy)
@@ -161,6 +159,19 @@ if __name__ == '__main__':
         num_classes=dataset.num_labels,
         config=config)
 
-    # Finetune and evaluate by PaddleHub's API
-    # will finish training, evaluation, testing, save model automatically
-    elmo_task.finetune_and_eval()
+    # Data to be prdicted
+    data = [
+        "这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般", "交通方便；环境很好；服务态度很好 房间较小",
+        "还稍微重了点，可能是硬盘大的原故，还要再轻半斤就好了。其他要进一步验证。贴的几种膜气泡较多，用不了多久就要更换了，屏幕膜稍好点，但比没有要强多了。建议配赠几张膜让用用户自己贴。",
+        "前台接待太差，酒店有A B楼之分，本人check－in后，前台未告诉B楼在何处，并且B楼无明显指示；房间太小，根本不像4星级设施，下次不会再选择入住此店啦",
+        "19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"
+    ]
+
+    index = 0
+    results = elmo_task.predict(data=data)
+    for batch_result in results:
+        # get predict index
+        batch_result = np.argmax(batch_result, axis=2)[0]
+        for result in batch_result:
+            print("%s\tpredict=%s" % (data[index], result))
+            index += 1
