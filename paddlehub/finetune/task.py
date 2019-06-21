@@ -218,7 +218,6 @@ class BasicTask(object):
                     need_log=False)
 
             self.env.main_program = t_program
-
             if not self.is_predict_phase:
                 self.env.loss = self.env.main_program.global_block().vars[
                     self.env.loss.name]
