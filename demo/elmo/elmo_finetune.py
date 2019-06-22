@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
     # Choose the net which you would like: bow, cnn, gru, bilstm, lstm
     # We recommend you to choose the gru_net
-    fc = gru_net(fluid.default_main_program(), input_feature)
+    fc = gru_net(program, input_feature)
 
     # Setup feed list for data feeder
     # Must feed all the tensor of senta's module need
