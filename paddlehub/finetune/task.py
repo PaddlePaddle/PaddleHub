@@ -111,7 +111,7 @@ class BasicTask(object):
             self._base_startup_program = clone_program(
                 startup_program, for_test=False)
         self.is_checkpoint_loaded = False
-        self._base_compile_program = None
+        self._base_compiled_program = None
 
         # run config
         self.config = config if config else RunConfig()
