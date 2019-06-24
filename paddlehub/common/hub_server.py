@@ -23,6 +23,7 @@ import re
 import requests
 import json
 import yaml
+import random
 
 from random import randint
 from paddlehub.common import utils
@@ -53,11 +54,12 @@ class HubServer(object):
         self._load_resource_list_file_if_valid()
 
     def get_server_url(self):
+        random.seed(int(time.time()))
         HS_ENV = os.environ.get('HUB_SERVER')
         if HS_ENV:
             HUB_SERVERS = HS_ENV.split(';')
-            return HUB_SERVERS[uniform(0, len(self.server_url))]
-        return self.server_url[uniform(0, len(self.server_url))]
+            return HUB_SERVERS[random.randint(0, len(HUB_SERVERS) - 1)]
+        return self.server_url[random.randint(0, len(self.server_url) - 1)]
 
     def resource_list_file_path(self):
         return os.path.join(hub.CACHE_HOME, RESOURCE_LIST_FILE)
@@ -99,7 +101,10 @@ class HubServer(object):
                 return [(item['name'], item['type'], item['version'],
                          item['summary']) for item in r['data']]
         except:
-            pass
+            if self.config.get('debug', False):
+                raise
+            else:
+                pass
 
         if update or not self.resource_list_file:
             self.request()
@@ -149,7 +154,10 @@ class HubServer(object):
             if r['status'] == 0 and len(r['data']) > 0:
                 return r['data'][0]
         except:
-            pass
+            if self.config.get('debug', False):
+                raise
+            else:
+                pass
 
         if update or not self.resource_list_file:
             self.request()
@@ -210,7 +218,10 @@ class HubServer(object):
                 yaml.safe_dump({'resource_list': data['data']}, fp)
             return True
         except:
-            pass
+            if self.config.get('debug', False):
+                raise
+            else:
+                pass
 
         file_url = self.config[
             'resource_storage_server_url'] + RESOURCE_LIST_FILE
