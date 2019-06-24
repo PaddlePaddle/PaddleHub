@@ -417,6 +417,18 @@ class BasicTask(object):
     def _build_env_end_event(self):
         pass
 
+    def _finetune_start_event(self):
+        logger.info("PaddleHub finetune start")
+
+    def _finetune_end_event(self, run_states):
+        logger.info("PaddleHub finetune finished.")
+
+    def _predict_start_event(self):
+        logger.info("PaddleHub predict start")
+
+    def _predict_end_event(self, run_states):
+        logger.info("PaddleHub predict finished.")
+
     def _eval_start_event(self):
         logger.info("Evaluation on {} dataset start".format(self.phase))
 
@@ -439,12 +451,6 @@ class BasicTask(object):
     def _run_step_event(self, run_state):
         if self.is_predict_phase:
             yield run_state.run_results
-
-    def _finetune_start_event(self):
-        logger.info("PaddleHub finetune start")
-
-    def _finetune_end_event(self, run_state):
-        logger.info("PaddleHub finetune finished.")
 
     def _build_net(self):
         raise NotImplementedError
@@ -529,7 +535,9 @@ class BasicTask(object):
                                                "best_model")
                 self.load_parameters(best_model_path)
             self._predict_data = data
+            self._predict_start_event()
             run_states = self._run()
+            self._predict_end_event(run_states)
             self._predict_data = None
         return [run_state.run_results for run_state in run_states]
 
