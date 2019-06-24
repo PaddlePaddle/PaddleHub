@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import six
 import sys
+import requests
 
 from paddlehub.common.logger import logger
 from paddlehub.commands.base_command import BaseCommand
@@ -27,6 +28,7 @@ from paddlehub.commands import help
 from paddlehub.commands import version
 from paddlehub.commands import run
 from paddlehub.commands import download
+from paddlehub.commands import stats
 
 
 class HubCommand(BaseCommand):
@@ -49,7 +51,7 @@ class HubCommand(BaseCommand):
             help.command.execute(argv)
             exit(1)
             return False
-
+        stats.hub_stat(argv)
         command = BaseCommand.command_dict[sub_command]
         return command.execute(argv[1:])
 
