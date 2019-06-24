@@ -266,3 +266,13 @@ def set_op_attr(program, is_test=False):
         for op in block.ops:
             if op.has_attr("is_test"):
                 op._set_attr("is_test", is_test)
+
+
+def clone_program(origin_program, for_test=False):
+    dest_program = origin_program.clone(for_test=for_test)
+    if not for_test:
+        for name, var in origin_program.global_block().vars.items():
+            dest_program.global_block(
+            ).vars[name].stop_gradient = var.stop_gradient
+
+    return dest_program
