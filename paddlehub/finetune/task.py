@@ -417,9 +417,6 @@ class BasicTask(object):
     def _build_env_end_event(self):
         pass
 
-    def _calculate_metrics(self, run_states):
-        raise NotImplementedError
-
     def _eval_start_event(self):
         logger.info("Evaluation on {} dataset start".format(self.phase))
 
@@ -459,6 +456,9 @@ class BasicTask(object):
         raise NotImplementedError
 
     def _add_metrics(self):
+        raise NotImplementedError
+
+    def _calculate_metrics(self, run_states):
         raise NotImplementedError
 
     # NOTE: current saved checkpoint machanism is not completed,
@@ -946,10 +946,10 @@ class SequenceLabelTask(BasicTask):
 
 class MultiLabelClassifierTask(ClassifierTask):
     def __init__(self,
-                 data_reader,
                  feature,
                  num_classes,
                  feed_list,
+                 data_reader,
                  startup_program=None,
                  config=None,
                  hidden_units=None):
