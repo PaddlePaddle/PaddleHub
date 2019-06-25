@@ -74,7 +74,7 @@ class RunEnv(object):
         self.py_reader = None
         self.reader = None
         self.loss = None
-        self.label = None
+        self.labels = None
         self.metrics = None
         self.is_inititalized = False
         self.UNG = copy.deepcopy(fluid.unique_name.generator)
@@ -183,7 +183,7 @@ class BasicTask(object):
             with fluid.unique_name.guard(self.env.UNG):
                 self.env.outputs = self._build_net()
                 if self.is_train_phase or self.is_test_phase:
-                    self.env.label = self._add_label()
+                    self.env.labels = self._add_label()
                     self.env.loss = self._add_loss()
                     self.env.metrics = self._add_metrics()
 
@@ -366,13 +366,13 @@ class BasicTask(object):
         return self.env.loss
 
     @property
-    def label(self):
+    def labels(self):
         if self.is_predict_phase:
             raise RuntimeError()
 
         if not self.env.is_inititalized:
             self._build_env()
-        return self.env.label
+        return self.env.labels
 
     @property
     def outputs(self):
@@ -397,7 +397,7 @@ class BasicTask(object):
     def feed_list(self):
         feed_list = [varname for varname in self._base_feed_list]
         if self.is_train_phase or self.is_test_phase:
-            feed_list += [self.label.name]
+            feed_list += [label.name for label in self.labels]
         return feed_list
 
     @property
@@ -689,15 +689,17 @@ class ClassifierTask(BasicTask):
         return [logits]
 
     def _add_label(self):
-        return fluid.layers.data(name="label", dtype="int64", shape=[1])
+        return [fluid.layers.data(name="label", dtype="int64", shape=[1])]
 
     def _add_loss(self):
         ce_loss = fluid.layers.cross_entropy(
-            input=self.outputs[0], label=self.label)
+            input=self.outputs[0], label=self.labels[0])
         return fluid.layers.mean(x=ce_loss)
 
     def _add_metrics(self):
-        return [fluid.layers.accuracy(input=self.outputs[0], label=self.label)]
+        return [
+            fluid.layers.accuracy(input=self.outputs[0], label=self.labels[0])
+        ]
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
@@ -854,17 +856,17 @@ class SequenceLabelTask(BasicTask):
     def _add_label(self):
         label = fluid.layers.data(
             name="label", shape=[self.max_seq_len, 1], dtype='int64')
-        return label
+        return [label]
 
     def _add_loss(self):
-        labels = fluid.layers.flatten(self.label, axis=2)
+        labels = fluid.layers.flatten(self.labels[0], axis=2)
         ce_loss = fluid.layers.cross_entropy(
             input=self.outputs[0], label=labels)
         loss = fluid.layers.mean(x=ce_loss)
         return loss
 
     def _add_metrics(self):
-        self.ret_labels = fluid.layers.reshape(x=self.label, shape=[-1, 1])
+        self.ret_labels = fluid.layers.reshape(x=self.labels[0], shape=[-1, 1])
         return [self.ret_labels, self.ret_infers, self.seq_len]
 
     def _build_env_end_event(self):
@@ -938,7 +940,7 @@ class SequenceLabelTask(BasicTask):
     def feed_list(self):
         feed_list = [varname for varname in self._base_feed_list]
         if self.is_train_phase or self.is_test_phase:
-            feed_list += [self.label.name, self.seq_len.name]
+            feed_list += [self.labels[0].name, self.seq_len.name]
         else:
             feed_list += [self.seq_len.name]
         return feed_list
@@ -1006,10 +1008,11 @@ class MultiLabelClassifierTask(ClassifierTask):
     def _add_label(self):
         label = fluid.layers.data(
             name="label", shape=[self.num_classes], dtype='int64')
-        return label
+        return [label]
 
     def _add_loss(self):
-        label_split = fluid.layers.split(self.label, self.num_classes, dim=-1)
+        label_split = fluid.layers.split(
+            self.labels[0], self.num_classes, dim=-1)
         total_loss = fluid.layers.fill_constant(
             shape=[1], value=0.0, dtype='float64')
         for index, probs in enumerate(self.outputs):
@@ -1020,7 +1023,8 @@ class MultiLabelClassifierTask(ClassifierTask):
         return loss
 
     def _add_metrics(self):
-        label_split = fluid.layers.split(self.label, self.num_classes, dim=-1)
+        label_split = fluid.layers.split(
+            self.labels[0], self.num_classes, dim=-1)
         # metrics change to auc of every class
         eval_list = []
         for index, probs in enumerate(self.outputs):
