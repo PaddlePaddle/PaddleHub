@@ -34,7 +34,7 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Step1: load Paddlehub ERNIE pretrained model
+    # Step1: load Paddlehub BERT pretrained model
     module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
 
     inputs, outputs, program = module.context(
