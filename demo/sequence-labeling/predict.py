@@ -107,12 +107,8 @@ if __name__ == '__main__':
 
             labels = np_labels.reshape([-1]).astype(np.int32).tolist()
             label_str = ""
-            count = 0
-            for label_val in labels:
-                label_str += inv_label_map[label_val]
-                count += 1
-                if count == np_lens:
-                    break
+            for i in range(1, np_lens-1):
+                label_str += inv_label_map[labels[i]]
 
             print("%s\tpredict=%s" % (test_examples[index], label_str))
 
