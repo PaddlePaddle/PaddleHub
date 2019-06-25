@@ -13,8 +13,16 @@
 # limitations under the License.
 
 HUB_SERVERS = ["http://gzbh-aip-paddlehub01.gzbh.baidu.com:8889/paddlehub"]
+
+STAT_SERVERS = [
+    "http://gzbh-aip-paddlehub01.gzbh.baidu.com:8889/paddlehub/stat",
+    "http://gzbh-aip-paddlehub02.gzbh.baidu.com:8889/paddlehub/stat"
+]
+
 default_server_config = {
     "server_url": HUB_SERVERS,
-    "resource_storage_server_url": "https://bj.bcebos.com/paddlehub/",
+    "resource_storage_server_url": "https://bj.bcebos.com/paddlehub-data/",
     "debug": False
 }
+
+default_stat_config = {"server_list": STAT_SERVERS}

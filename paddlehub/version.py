@@ -13,5 +13,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ PaddleHub version string """
-hub_version = "0.5.1"
+hub_version = "0.6.5"
 module_proto_version = "1.0.0"

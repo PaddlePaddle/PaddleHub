@@ -14,15 +14,21 @@
 # limitations under the License.
 import os
 import requests
+import time
 
+from random import randint, seed
 from paddlehub import version
+from paddlehub.common.server_config import default_stat_config
 
 
 def get_stat_server():
-    stat_srv = os.environ.get('HUB_SERVER_STAT_SRV')
-    if not stat_srv:
-        stat_srv = 'http://hub.paddlepaddle.org:8888/paddlehub/stat'
-    return stat_srv
+    seed(int(time.time()))
+    stat_env = os.environ.get('HUB_SERVER_STAT_SRV')
+    if stat_env:
+        server_list = stat_env.split(';')
+    else:
+        server_list = default_stat_config
+    return server_list[randint(0, len(server_list) - 1)]
 
 
 def hub_stat(argv):

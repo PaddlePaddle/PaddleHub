@@ -21,6 +21,7 @@ import os
 import shutil
 
 from paddlehub.common import utils
+from paddlehub.common import stats
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import MODULE_HOME
 from paddlehub.module import module_desc_pb2
@@ -80,6 +81,7 @@ class LocalModuleManager(object):
                 module_dir = self.modules_dict[module_name][0]
                 module_tag = module_name if not module_version else '%s-%s' % (
                     module_name, module_version)
+                stats.hub_stat(['installed', module_tag])
                 tips = "Module %s already installed in %s" % (module_tag,
                                                               module_dir)
                 return True, tips, self.modules_dict[module_name]
@@ -95,6 +97,7 @@ class LocalModuleManager(object):
             tips = "Can't find module %s" % module_name
             if module_version:
                 tips += " with version %s" % module_version
+            stats.hub_stat(['install fail', module_tag])
             return False, tips, None
 
         result, tips, module_zip_file = default_downloader.download_file(
@@ -116,6 +119,7 @@ class LocalModuleManager(object):
             shutil.move(module_dir, save_path)
             module_dir = save_path
             tips = "Successfully installed %s" % module_name
+            stats.hub_stat(['install', module_name, url])
             if installed_module_version:
                 tips += "-%s" % installed_module_version
             return True, tips, (module_dir, installed_module_version)
@@ -131,6 +135,7 @@ class LocalModuleManager(object):
                 1]:
             tips = "%s-%s is not installed" % (module_name, module_version)
             return True, tips
+        stats.hub_stat(['uninstall', module_name])
         tips = "Successfully uninstalled %s" % module_name
         if module_version:
             tips += '-%s' % module_version
