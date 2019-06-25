@@ -30,7 +30,7 @@ class Food101Dataset(ImageClassificationDataset):
                                     "images")
         self.base_path = self._download_dataset(
             dataset_path=dataset_path,
-            url="https://paddlehub-dataset.bj.bcebos.com/Food101.tar.gz")
+            url="https://bj.bcebos.com/paddlehub-dataset/Food101.tar.gz")
         self.train_list_file = "train_list.txt"
         self.test_list_file = "test_list.txt"
         self.validate_list_file = "validate_list.txt"

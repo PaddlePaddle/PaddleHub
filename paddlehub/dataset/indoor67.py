@@ -29,7 +29,7 @@ class Indoor67Dataset(ImageClassificationDataset):
         dataset_path = os.path.join(hub.common.dir.DATA_HOME, "Indoor67")
         self.base_path = self._download_dataset(
             dataset_path=dataset_path,
-            url="https://paddlehub-dataset.bj.bcebos.com/Indoor67.tar.gz")
+            url="https://bj.bcebos.com/paddlehub-dataset/Indoor67.tar.gz")
         self.train_list_file = "train_list.txt"
         self.test_list_file = "test_list.txt"
         self.validate_list_file = "validate_list.txt"

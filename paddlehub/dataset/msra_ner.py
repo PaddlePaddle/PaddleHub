@@ -28,7 +28,7 @@ from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
 
-_DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/msra_ner.tar.gz"
+_DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/msra_ner.tar.gz"
 
 
 class MSRA_NER(HubDataset):

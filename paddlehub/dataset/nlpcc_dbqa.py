@@ -27,7 +27,7 @@ from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
 
-_DATA_URL = "https://paddlehub-dataset.bj.bcebos.com/nlpcc-dbqa.tar.gz"
+_DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/nlpcc-dbqa.tar.gz"
 
 
 class NLPCC_DBQA(HubDataset):

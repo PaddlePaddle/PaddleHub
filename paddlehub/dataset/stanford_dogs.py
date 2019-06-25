@@ -30,7 +30,7 @@ class StanfordDogsDataset(ImageClassificationDataset):
                                     "StanfordDogs-120")
         self.base_path = self._download_dataset(
             dataset_path=dataset_path,
-            url="https://paddlehub-dataset.bj.bcebos.com/StanfordDogs-120.tar.gz"
+            url="https://bj.bcebos.com/paddlehub-dataset/StanfordDogs-120.tar.gz"
         )
         self.train_list_file = "train_list.txt"
         self.test_list_file = "test_list.txt"
