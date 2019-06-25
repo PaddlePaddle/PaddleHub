@@ -96,7 +96,8 @@ if __name__ == '__main__':
         ["不过重在晋趣，略增明人气息，妙在集古有道、不露痕迹罢了。"],
     ]
 
-    results = seq_label_task.predict(data=data)
+    run_states = seq_label_task.predict(data=data)
+    results = [run_state.run_results for run_state in run_states]
 
     for num_batch, batch_results in enumerate(results):
         infers = batch_results[0].reshape([-1]).astype(np.int32).tolist()

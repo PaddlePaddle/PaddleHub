@@ -99,7 +99,8 @@ if __name__ == '__main__':
     ]
 
     index = 0
-    results = multi_label_cls_task.predict(data=data)
+    run_states = multi_label_cls_task.predict(data=data)
+    results = [run_state.run_results for run_state in run_states]
     for result in results:
         # get predict index
         label_ids = []

@@ -498,7 +498,7 @@ class BasicTask(object):
             self.exe, dirname=dirname, main_program=self.main_program)
 
     def finetune_and_eval(self):
-        self.finetune(do_eval=True)
+        return self.finetune(do_eval=True)
 
     def finetune(self, do_eval=False):
         # Start to finetune
@@ -519,6 +519,7 @@ class BasicTask(object):
                 self.eval(phase="test")
 
             self._finetune_end_event(run_states)
+            return run_states
 
     def eval(self, phase="dev"):
         with self.phase_guard(phase=phase):
@@ -526,6 +527,7 @@ class BasicTask(object):
             self._eval_start_event()
             run_states = self._run()
             self._eval_end_event(run_states)
+            return run_states
 
     def predict(self, data, load_best_model=True):
         with self.phase_guard(phase="predict"):
@@ -539,7 +541,7 @@ class BasicTask(object):
             run_states = self._run()
             self._predict_end_event(run_states)
             self._predict_data = None
-        return [run_state.run_results for run_state in run_states]
+        return run_states
 
     def _run(self, do_eval=False):
         with fluid.program_guard(self.main_program, self.startup_program):

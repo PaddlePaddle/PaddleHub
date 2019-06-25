@@ -76,7 +76,8 @@ def predict(args):
     label_map = dataset.label_dict()
     index = 0
     # get classification result
-    results = task.predict(data=data)
+    run_states = task.predict(data=data)
+    results = [run_state.run_results for run_state in run_states]
     for batch_result in results:
         # get predict index
         batch_result = np.argmax(batch_result, axis=2)[0]

@@ -97,7 +97,8 @@ if __name__ == '__main__':
     ]
 
     index = 0
-    results = cls_task.predict(data=data)
+    run_states = cls_task.predict(data=data)
+    results = [run_state.run_results for run_state in run_states]
     for batch_result in results:
         # get predict index
         batch_result = np.argmax(batch_result, axis=2)[0]
