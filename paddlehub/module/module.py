@@ -434,7 +434,7 @@ class Module(object):
         for key, value in self.extra_info.items():
             utils.from_pyobj_to_module_attr(value, extra_info.map.data[key])
 
-    def __call__(self, sign_name, data, **kwargs):
+    def __call__(self, sign_name, data, use_gpu=False, batch_size=1, **kwargs):
         self.check_processor()
 
         def _get_reader_and_feeder(data_format, data, place):
@@ -463,15 +463,13 @@ class Module(object):
         with fluid.program_guard(program):
             result = []
             index = 0
-            if "PADDLEHUB_CUDA_ENABLE" in os.environ:
-                place = fluid.CUDAPlace(0)
-            else:
-                place = fluid.CPUPlace()
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                use_gpu = False
 
-            if "PADDLEHUB_BATCH_SIZE" in os.environ:
-                batch_size = os.environ["PADDLEHUB_BATCH_SIZE"]
-            else:
-                batch_size = 1
+            place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
 
             exe = fluid.Executor(place=place)
             data = self.processor.preprocess(

@@ -16,7 +16,7 @@ if __name__ == "__main__":
     inputs = {"text": test_text}
 
     # execute predict and print the result
-    results = lac.lexical_analysis(data=inputs)
+    results = lac.lexical_analysis(data=inputs, use_gpu=True, batch_size=10)
     for result in results:
         if six.PY2:
             print(

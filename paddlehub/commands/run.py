@@ -21,6 +21,7 @@ import argparse
 import json
 import os
 import sys
+import ast
 
 import six
 import pandas
@@ -79,6 +80,18 @@ class RunCommand(BaseCommand):
                 type=config['type'],
                 default=config['default'],
                 help=config['help'])
+
+        self.arg_config_group.add_argument(
+            '--use_gpu',
+            type=ast.literal_eval,
+            default=False,
+            help="whether use GPU for prediction")
+
+        self.arg_config_group.add_argument(
+            '--batch_size',
+            type=int,
+            default=1,
+            help="batch size for prediction")
 
         self.arg_config_group.add_argument(
             '--config',
@@ -224,7 +237,11 @@ class RunCommand(BaseCommand):
             return False
 
         results = self.module(
-            sign_name=self.module.default_signature.name, data=data, **config)
+            sign_name=self.module.default_signature.name,
+            data=data,
+            use_gpu=self.args.use_gpu,
+            batch_size=self.args.batch_size,
+            **config)
 
         if six.PY2:
             try:
