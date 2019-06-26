@@ -31,14 +31,8 @@ def python_version():
 max_version, mid_version, min_version = python_version()
 
 REQUIRED_PACKAGES = [
-    'numpy >= 1.12.0',
-    'six >= 1.10.0',
-    'pandas',
-    'protobuf >= 3.1.0',
-    'pyyaml',
-    'Pillow',
-    'requests',
-    "visualdl >= 1.3.0",
+    'numpy >= 1.12.0', 'six >= 1.10.0', 'pandas', 'protobuf >= 3.1.0', 'pyyaml',
+    'Pillow', 'requests', "visualdl >= 1.3.0", "pyahocorasick"
 ]
 
 if max_version < 3:
