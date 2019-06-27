@@ -88,15 +88,18 @@ class LocalModuleManager(object):
 
         search_result = hub.default_hub_server.get_module_url(
             module_name, version=module_version)
+        name = search_result.get('name', None)
         url = search_result.get('url', None)
         md5_value = search_result.get('md5', None)
         installed_module_version = search_result.get('version', None)
         #TODO(wuzewu): add compatibility check
-        if not url or (module_version is not None
-                       and installed_module_version != module_version):
+        if not url or (module_version is not None and installed_module_version
+                       != module_version) or (name != module_name):
             tips = "Can't find module %s" % module_name
             if module_version:
                 tips += " with version %s" % module_version
+            module_tag = module_name if not module_version else '%s-%s' % (
+                module_name, module_version)
             stats.hub_stat(['install fail', module_tag])
             return False, tips, None
 
