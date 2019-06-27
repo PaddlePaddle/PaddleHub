@@ -276,8 +276,13 @@ class BasicTask(object):
     @property
     def places(self):
         if self.config.use_cuda:
-            return fluid.framework.cuda_places()
-        return fluid.framework.cpu_places()
+            _places = fluid.framework.cuda_places()
+        else:
+            _places = fluid.framework.cpu_places()
+
+        if not self.config.use_data_parallel:
+            return [_places[0]]
+        return _places
 
     @property
     def is_train_phase(self):
