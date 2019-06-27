@@ -59,7 +59,7 @@ class RunCommand(BaseCommand):
         module_dir = default_module_manager.search_module(module_name)
         if not module_dir:
             if os.path.exists(module_name):
-                module_dir = module_name
+                module_dir = (module_name, None)
             else:
                 print("Install Module %s" % module_name)
                 result, tips, module_dir = default_module_manager.install_module(
