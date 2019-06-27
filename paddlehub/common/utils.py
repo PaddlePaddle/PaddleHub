@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import sys
 import os
 import time
 import multiprocessing
@@ -231,3 +232,29 @@ def get_running_device_info(config):
         dev_count = int(os.environ.get('CPU_NUM', multiprocessing.cpu_count()))
 
     return place, dev_count
+
+
+def get_platform_default_encoding():
+    if platform.platform().lower().startswith("windows"):
+        return "gbk"
+    return "utf8"
+
+
+def sys_stdin_encoding():
+    encoding = sys.stdin.encoding
+    if encoding is None:
+        encoding = sys.getdefaultencoding()
+
+    if encoding is None:
+        encoding = get_platform_default_encoding()
+    return encoding
+
+
+def sys_stdout_encoding():
+    encoding = sys.stdout.encoding
+    if encoding is None:
+        encoding = sys.getdefaultencoding()
+
+    if encoding is None:
+        encoding = get_platform_default_encoding()
+    return encoding

@@ -21,6 +21,8 @@ import codecs
 import sys
 import yaml
 
+from paddlehub.common.utils import sys_stdin_encoding
+
 
 class CSVFileParser(object):
     def __init__(self):
@@ -30,7 +32,7 @@ class CSVFileParser(object):
         pass
 
     def parse(self, csv_file):
-        with codecs.open(csv_file, "r", sys.stdin.encoding) as file:
+        with codecs.open(csv_file, "r", sys_stdin_encoding()) as file:
             content = file.read()
         content = content.split('\n')
         self.title = content[0].split(',')
@@ -57,7 +59,7 @@ class YAMLFileParser(object):
         pass
 
     def parse(self, yaml_file):
-        with codecs.open(yaml_file, "r", sys.stdin.encoding) as file:
+        with codecs.open(yaml_file, "r", sys_stdin_encoding()) as file:
             content = file.read()
         return yaml.load(content, Loader=yaml.BaseLoader)
 
@@ -70,7 +72,7 @@ class TextFileParser(object):
         pass
 
     def parse(self, txt_file):
-        with codecs.open(txt_file, "r", sys.stdin.encoding) as file:
+        with codecs.open(txt_file, "r", sys_stdin_encoding()) as file:
             contents = []
             for line in file:
                 line = line.strip()

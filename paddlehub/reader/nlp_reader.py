@@ -29,6 +29,7 @@ import paddle
 
 from paddlehub.reader import tokenization
 from paddlehub.common.logger import logger
+from paddlehub.common.utils import sys_stdout_encoding
 from paddlehub.dataset.dataset import InputExample
 from .batching import pad_batch_data
 import paddlehub as hub
@@ -527,7 +528,7 @@ class LACClassifyReader(object):
             ]
             if len(processed) == 0:
                 if six.PY2:
-                    text = text.encode(sys.stdout.encoding)
+                    text = text.encode(sys_stdout_encoding())
                 logger.warning(
                     "The words in text %s can't be found in the vocabulary." %
                     (text))
