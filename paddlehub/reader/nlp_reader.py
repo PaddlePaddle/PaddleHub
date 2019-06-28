@@ -382,7 +382,7 @@ class SequenceLabelReader(BaseReader):
                     sub_label = "I-" + label[2:]
                 ret_labels.extend([sub_label] * (len(sub_token) - 1))
 
-            if len(ret_tokens) != len(labels):
+            if len(ret_tokens) != len(ret_labels):
                 raise ValueError(
                     "The length of ret_tokens can't match with labels")
             return ret_tokens, ret_labels
