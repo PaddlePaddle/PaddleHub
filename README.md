@@ -14,7 +14,7 @@ PaddleHub是基于PaddlePaddle开发的预训练模型管理工具，可以借�
 2. 通过hub download命令，快速地获取PaddlePaddle生态下的所有预训练模型；
 3. 借助PaddleHub Finetune API，使用少量代码完成迁移学习；
    - 更多Demo可参考 [ERNIE文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/demo/text-classification) [图像分类迁移](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/demo/image-classification)
-   - 完整教程可参考 [文本分类迁移教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB%E8%BF%81%E7%A7%BB%E6%95%99%E7%A8%8B)  [图像分类迁移教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB%E8%BF%81%E7%A7%BB%E6%95%99%E7%A8%8B)
+   - 完整教程可参考 [文本分类迁移教程](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/turtorial/nlp_tl_turtorial.md)  [图像分类迁移教程](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/turtorial/cv_tl_turtorial.md)
 
 ## 安装
 
@@ -43,7 +43,7 @@ $ hub run senta_bilstm --input_text "今天是个好日子"
 $ wget --no-check-certificate https://paddlehub.bj.bcebos.com/resources/test_img_bird.jpg
 $ hub run ssd_mobilenet_v1_pascal --input_path test_img_bird.jpg
 ```
-![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/develop/docs/imgs/test_img_bird_output.jpg)
+![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v0.5.0/docs/imgs/test_img_bird_output.jpg)
 
 想了解更多PaddleHub已经发布的模型，请使用`hub search`命令查看所有已发布的模型。
 
@@ -52,10 +52,10 @@ $ hub search
 ```
 
 ## 深入了解PaddleHub
-* [PaddleHub Wiki](https://github.com/PaddlePaddle/PaddleHub/wiki)
-* [命令行工具](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
-* [Finetune API与迁移学习](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
-* [API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
+* [PaddleHub 介绍](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/home.md)
+* [命令行工具](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/turtorial/cmd_tool.md)
+* [Finetune API与迁移学习](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/turtorial/paddlehub_tl.md)
+* [API](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/api/finetune_api.md)
 
 ## 答疑
 
