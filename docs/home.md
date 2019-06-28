@@ -25,6 +25,6 @@ PaddleHub主要包括两个功能：
 
 * [PaddleHub Fine-tune API](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/api/finetune_api.md)
 
-* [PaddleHub文本分类迁移教程](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/turtorial/cv_tl_turtorial.md)
+* [PaddleHub文本分类迁移教程](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/turtorial/nlp_tl_turtorial.md)
 
-* [PaddleHub图像分类迁移教程](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/turtorial/nlp_tl_turtorial.md)
+* [PaddleHub图像分类迁移教程](https://github.com/PaddlePaddle/PaddleHub/tree/release/v0.5.0/docs/turtorial/cv_tl_turtorial.md)
