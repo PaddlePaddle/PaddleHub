@@ -47,8 +47,8 @@ $ hub run senta_bilstm --input_text "今天是个好日子"
 ```shell
 $ wget --no-check-certificate https://paddlehub.bj.bcebos.com/resources/test_object_detection.jpg
 $ hub run ssd_mobilenet_v1_pascal --input_path test_object_detection.jpg
-$ hub run yolov3 --input_path test_object_detection.jpg
-$ hub run faster_rcnn --input_path test_object_detection.jpg
+$ hub run yolov3_coco2017 --input_path test_object_detection.jpg
+$ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 ```
 ![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.0.0/docs/imgs/object_detection_result.png)
 
