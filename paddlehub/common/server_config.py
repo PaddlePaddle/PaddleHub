@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HUB_SERVERS = ["http://gzbh-aip-paddlehub01.gzbh.baidu.com:8889/paddlehub"]
+HUB_SERVERS = ["http://paddlepaddle.org.cn/paddlehub"]
 
 STAT_SERVERS = [
-    "http://gzbh-aip-paddlehub01.gzbh.baidu.com:8889/paddlehub/stat",
-    "http://gzbh-aip-paddlehub02.gzbh.baidu.com:8889/paddlehub/stat"
+    "http://paddlepaddle.org.cn/paddlehub/stat",
+    "http://paddlepaddle.org.cn/paddlehub/stat"
 ]
 
 default_server_config = {
