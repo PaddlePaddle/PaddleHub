@@ -64,14 +64,6 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 [命令行工具](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
-## 在线体验
-
-我们与百度AIPE部门合作，提供了Finetune demo的在线运行环境，您可以在上面快速体验如何使用PaddleHub进行迁移学习
-
-* 基于ERNIE模型的文本分类任务 [ernie_text_cls]()
-* 基于ERNIE模型的序列标注任务 [ernie_seq_label]()
-* 基于ResNet50的图像分类任务 [resnet_img_cls]()
-
 ## 答疑
 
 当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-FAQ)查找解决方案。
