@@ -60,7 +60,7 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 [迁移学习](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
 
-[自定义Task](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API自定义Task)
+[自定义Task](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
 [命令行工具](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
