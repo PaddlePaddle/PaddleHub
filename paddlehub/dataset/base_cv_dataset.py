@@ -19,6 +19,8 @@ from __future__ import print_function
 
 import os
 
+import numpy as np
+
 import paddlehub as hub
 from paddlehub.common.downloader import default_downloader
 
