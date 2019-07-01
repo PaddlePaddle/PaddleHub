@@ -10,7 +10,7 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 2. 借助PaddleHub Finetune API，结合Paddle的预训练模型，使用少量代码完成迁移学习
 3. 借助PaddleHub Python API或者命令行，一键使用预训练模型进行预测
 
-[**PaddleHub官方网站**](http://www.paddlepaddle.org.cn/hub)
+**PaddleHub官方网站**：http://hub.paddlepaddle.org.cn 
 
 ## 安装
 **环境依赖**
