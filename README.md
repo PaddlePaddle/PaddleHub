@@ -52,7 +52,7 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 ```
 ![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.0.0/docs/imgs/object_detection_result.png)
 
-除了上述三大类模型外，PaddleHub还发布了语言模型、语义模型、图像分类与特征提取、生成模型等业界主流模型，更多PaddleHub已经发布的模型，请前往[官网](http://www.paddlepaddle.org.cn/hub)查看
+除了上述三大类模型外，PaddleHub还发布了语言模型、语义模型、图像分类与特征提取、生成模型等业界主流模型，更多PaddleHub已经发布的模型，请前往 http://hub.paddlepaddle.org.cn 查看
 
 ## 教程
 
