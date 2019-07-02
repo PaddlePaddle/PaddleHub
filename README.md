@@ -17,16 +17,19 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 * PaddleHub引入『**模型即软件**』的设计理念，支持通过Python API或者命令行工具，一键完成预训练模型地预测，更方便的应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
-## 安装
-**环境依赖**
+## 环境依赖
 * Python==2.7 or Python>=3.5
 * PaddlePaddle>=1.4.0
 
+除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络
+
+## 安装
 pip安装方式如下：
 
 ```shell
 $ pip install paddlehub
 ```
+
 ## 快速体验
 安装成功后，执行下面的命令，可以快速体验PaddleHub无需代码、一键预测的命令行功能：
 
@@ -66,6 +69,24 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 [迁移学习](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
 
 [自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
+
+## 在线体验
+我们在AI Studio和AIBook上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
+* ERNIE文本分类:
+  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79380) 
+  * [AIBook](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_txt_cls)
+* ERNIE序列标注:
+  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79377) 
+  * [AIBook](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_seq_label)
+* ELMo文本分类:
+  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79400) 
+  * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/elmo_txt_cls)
+* senta情感分类:
+  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79398) 
+  * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/senta_bilstm)
+* 图像分类: 
+  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79378) 
+  * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/img_cls)
 
 ## 答疑
 
