@@ -6,11 +6,16 @@
 
 PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习工具，可以结合预训练模型更便捷地开展迁移学习工作。通过PaddleHub，您可以：
 
-1. 便捷地获取PaddlePaddle生态下的所有预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、语言模型、视频分类、图像生成八类主流模型
-2. 借助PaddleHub Fine-tune API，结合Paddle的预训练模型，使用少量代码完成迁移学习
-3. 借助PaddleHub Python API或者命令行，一键使用预训练模型进行预测
-
-**PaddleHub官方网站**：http://hub.paddlepaddle.org.cn 
+* 便捷地获取PaddlePaddle生态下的所有预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、语言模型、视频分类、图像生成八类主流模型
+  * 查看模型：http://hub.paddlepaddle.org.cn 
+* 借助PaddleHub Fine-tune API，结合Paddle的预训练模型，使用少量代码完成迁移学习
+  * [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/text-classification)
+  * [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/sequence-labeling)
+  * [多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/multi-label-classification)
+  * [图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/image-classification)
+  * [问答系统](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/qa_classification)
+* 借助PaddleHub Python API或者命令行，一键使用预训练模型进行预测
+  * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
 ## 安装
 **环境依赖**
@@ -60,9 +65,7 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 [迁移学习](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
 
-[自定义Task](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
-
-[命令行工具](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
+[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
 ## 答疑
 
