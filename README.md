@@ -13,7 +13,7 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
   * [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/sequence-labeling)
   * [多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/multi-label-classification)
   * [图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/image-classification)
-  * [问答系统](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/qa_classification)
+  * [检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/qa_classification)
 * PaddleHub引入『**模型即软件**』的设计理念，支持通过Python API或者命令行工具，一键完成预训练模型地预测，更方便的应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
