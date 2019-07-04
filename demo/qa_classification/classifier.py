@@ -38,7 +38,7 @@ args = parser.parse_args()
 if __name__ == '__main__':
     # Load Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
-    # module = hub.Module(name="bert_multi_cased_L-12_H-768_A-12")
+    # module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
