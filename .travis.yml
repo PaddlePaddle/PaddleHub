@@ -1,15 +1,10 @@
 language: python
 
-python:
-  - "3.6"
+before_install: pip install flake8
 
-sudo: required
+before_script: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-os:
-  - linux
-
-script:
-  - /bin/bash ./scripts/check_code_style.sh
+script: /bin/bash ./scripts/check_code_style.sh
 
 notifications:
   email:
