@@ -1,4 +1,4 @@
-# PaddleHub 文本分类
+# PaddleHub 多标签分类
 
 本示例将展示如何使用PaddleHub Finetune API以及BERT预训练模型在Toxic完成多标签分类任务。
 
