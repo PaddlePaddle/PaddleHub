@@ -46,11 +46,11 @@ reader = hub.reader.MultiLabelClassifyReader(
 
 `hub.dataset.Toxic()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
-`module.get_vaocab_path()` 会返回预训练模型对应的词表
+`module.get_vocab_path()` 会返回预训练模型对应的词表
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致
 
-MultiLabelClassifyReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
+MultiLabelClassifyReader中的`data_generator`会自动按照模型对应词表对数据进行tokenize，以迭代器的方式返回BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
 
 **NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
 
