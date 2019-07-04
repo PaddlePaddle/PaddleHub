@@ -1,4 +1,4 @@
-# PaddleHub 文本分类
+# PaddleHub 检索式问答任务
 
 本示例将展示如何使用PaddleHub Finetune API以及Transformer类预训练模型在NLPCC-DBQA数据集上完成检索式问答任务。
 
