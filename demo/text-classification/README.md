@@ -74,7 +74,7 @@ reader = hub.reader.ClassifyReader(
 
 `hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
-`module.get_vaocab_path()` 会返回预训练模型对应的词表
+`module.get_vocab_path()` 会返回预训练模型对应的词表
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致
 
