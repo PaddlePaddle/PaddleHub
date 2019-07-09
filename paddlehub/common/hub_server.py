@@ -26,7 +26,7 @@ import yaml
 import random
 
 from random import randint
-from paddlehub.common import utils
+from paddlehub.common import utils, srv_utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.server_config import default_server_config
 from paddlehub.io.parser import yaml_parser
@@ -95,9 +95,8 @@ class HubServer(object):
             payload = {'word': resource_key}
             if resource_type:
                 payload['type'] = resource_type
-            r = requests.get(
-                self.get_server_url() + '/' + 'search', params=payload)
-            r = json.loads(r.text)
+            api_url = srv_utils.uri_path(self.get_server_url(), 'search')
+            r = srv_utils.hub_request(api_url, payload)
             if r['status'] == 0 and len(r['data']) > 0:
                 return [(item['name'], item['type'], item['version'],
                          item['summary']) for item in r['data']]
@@ -149,9 +148,8 @@ class HubServer(object):
                 payload['type'] = resource_type
             if version:
                 payload['version'] = version
-            r = requests.get(
-                self.get_server_url() + '/' + 'search', params=payload)
-            r = json.loads(r.text)
+            api_url = srv_utils.uri_path(self.get_server_url(), 'search')
+            r = srv_utils.hub_request(api_url, payload)
             if r['status'] == 0 and len(r['data']) > 0:
                 return r['data'][0]
         except:
