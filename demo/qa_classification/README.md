@@ -1,18 +1,10 @@
-# PaddleHub 文本分类
+# PaddleHub 检索式问答任务
 
-本示例将展示如何使用PaddleHub Finetune API以及Transformer类预训练模型完成分类任务。
-其中分类任务可以分为两大类：
-
-* **单句分类**
-  - 中文情感分析任务 ChnSentiCorp
-
-* **句对分类**
-  - 语义相似度 LCQMC
-  - 检索式问答任务 NLPCC-DBQA
+本示例将展示如何使用PaddleHub Finetune API以及Transformer类预训练模型在NLPCC-DBQA数据集上完成检索式问答任务。
 
 ## 如何开始Finetune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用ERNIE对ChnSentiCorp数据集进行Finetune。**由于ERNIE模型计算量较大，建议在GPU上使用，且显存需要大于14GB**
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用ERNIE对NLPCC-DBQA数据集进行Finetune。**由于ERNIE模型计算量较大，建议在GPU上使用，且显存需要大于14GB**
 
 其中脚本参数说明如下：
 
@@ -27,7 +19,6 @@
 
 # 任务相关
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型
---dataset: 有三个参数可选，分别代表3个不同的分类任务; 分别是 chnsenticorp, lcqmc, nlpcc_dbqa
 ```
 
 ## 代码步骤
@@ -63,16 +54,16 @@ module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
 
 ### Step2: 准备数据集并使用ClassifyReader读取数据
 ```python
-dataset = hub.dataset.ChnSentiCorp()
+dataset = hub.dataset.NLPCC_DBQA()
 reader = hub.reader.ClassifyReader(
     dataset=dataset,
     vocab_path=module.get_vocab_path(),
     max_seq_len=128)
 ```
 
-其中数据集的准备代码可以参考 [chnsenticorp.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/chnsenticorp.py)
+其中数据集的准备代码可以参考 [nlpcc_dbqa.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.0.0/paddlehub/dataset/nlpcc_dbqa.py)
 
-`hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
+`hub.dataset.NLPCC_DBQA())` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
 `module.get_vocab_path()` 会返回预训练模型对应的词表
 
@@ -92,16 +83,16 @@ strategy = hub.AdamWeightDecayStrategy(
     lr_scheduler="linear_decay",
 )
 
-config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strategy)
+config = hub.RunConfig(use_cuda=True, use_data_parallel=True, use_pyreader=True, num_epoch=3, batch_size=32, strategy=strategy)
 ```
 
 #### 优化策略
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`
 
-`learning_rate`: Finetune过程中的最大学习率;
-`weight_decay`: 模型的正则项参数，默认0.01，如果模型有过拟合倾向，可适当调高这一参数;
-`warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate;
-`lr_scheduler`: 有两种策略可选(1) `linear_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
+* `learning_rate`: Finetune过程中的最大学习率;
+* `weight_decay`: 模型的正则项参数，默认0.01，如果模型有过拟合倾向，可适当调高这一参数;
+* `warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate;
+* `lr_scheduler`: 有两种策略可选(1) `linear_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
 
 #### 运行配置
 `RunConfig` 主要控制Finetune的训练，包含以下可控制的参数:
@@ -110,6 +101,8 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 * `eval_interval`: 模型评估的间隔，默认每100个step评估一次验证集
 * `save_ckpt_interval`: 模型保存间隔，请根据任务大小配置，默认只保存验证集效果最好的模型和训练结束的模型
 * `use_cuda`: 是否使用GPU训练，默认为False
+* `use_pyreader`: 是否使用pyreader，默认False。
+* `use_data_parallel`: 是否使用并行计算，默认False。打开该功能依赖nccl库。
 * `checkpoint_dir`: 模型checkpoint保存路径, 若用户没有指定，程序会自动生成
 * `num_epoch`: finetune的轮数
 * `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size
@@ -155,15 +148,10 @@ $ visualdl --logdir $CKPT_DIR/vdllog -t ${HOST_IP}
 通过Finetune完成模型训练后，在对应的ckpt目录下，会自动保存验证集上效果最好的模型。
 配置脚本参数
 ```
-CKPT_DIR=".ckpt_chnsentiment/best_model"
+CKPT_DIR="./ckpt_qa"
 python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
 其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
 
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
 如需了解更多预测步骤，请参考`predict.py`
-
-```
-text=键盘缝隙大进灰，装系统自己不会装，屏幕有点窄玩游戏人物有点变形	label=0	predict=0
-accuracy = 0.954267
-```
