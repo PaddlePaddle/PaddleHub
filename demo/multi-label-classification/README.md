@@ -136,4 +136,3 @@ python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
 如需了解更多预测步骤，请参考`predict.py`
-
