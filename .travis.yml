@@ -11,6 +11,7 @@ env:
 script:
   - if [[ $TRAVIS_PYTHON_VERSION != 2.7 ]]; then /bin/bash ./scripts/check_code_style.sh; fi
   - pip install paddlepaddle; /bin/bash ./scripts/test_cml.sh
+  - /bin/bash ./scripts/test_all_module.sh
 
 notifications:
   email:
