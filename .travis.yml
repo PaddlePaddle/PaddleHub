@@ -5,9 +5,12 @@ python:
   - '3.5'
   - '3.6'
 
+env:
+  - PYTHONPATH=${PWD}
+
 script:
   - if [[ $TRAVIS_PYTHON_VERSION != 2.7 ]]; then /bin/bash ./scripts/check_code_style.sh; fi
-  - /bin/bash ./scripts/test_cml.sh
+  - echo $PYTHONPATH; /bin/bash ./scripts/test_cml.sh
 
 notifications:
   email:
