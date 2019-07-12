@@ -44,7 +44,7 @@
 
 该样例展示了PaddleHub
 >* 如何将ERNIE和BERT作为预训练模型在ChnSentiCorp、LCQMC和NLPCC-DBQA等数据集上完成文本分类的FineTune和预测。  
->* 如何将ELMo预训练得到的中文word embedding加载，完成在ChnSentiCorp数据集上文本分类的FineTune和预测。 
+>* 如何将ELMo预训练得到的中文word embedding加载，完成在ChnSentiCorp数据集上文本分类的FineTune和预测。
 
 ## 多标签分类
 

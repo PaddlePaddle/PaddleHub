@@ -17,7 +17,7 @@ import six
 
 if six.PY2:
     import sys
-    reload(sys)
+    reload(sys)  # noqa
     sys.setdefaultencoding("UTF-8")
 
 from . import module
