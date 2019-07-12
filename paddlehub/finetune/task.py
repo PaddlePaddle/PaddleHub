@@ -600,6 +600,7 @@ class BasicTask(object):
 
     def _run_with_py_reader(self, do_eval=False):
         flag = False
+        use_data_parallel_backup = self.config.use_data_parallel
         while True:
             global_run_states = []
             period_run_states = []
@@ -644,7 +645,6 @@ class BasicTask(object):
                     self.config._use_data_parallel = use_data_parallel_backup
                 elif len(global_run_states) == 0:
                     flag = True
-                    use_data_parallel_backup = self.config.use_data_parallel
                     self.config._use_data_parallel = False
                     continue
                 break

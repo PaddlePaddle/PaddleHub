@@ -64,8 +64,6 @@ class Downloader(object):
             os.remove(file_name)
 
         while not (os.path.exists(file_name)):
-            if os.path.exists(file_name):
-                logger.info("file md5", md5file(file_name))
             if retry_times < retry_limit:
                 retry_times += 1
             else:
