@@ -1,3 +1,4 @@
+#coding:utf-8
 import paddlehub as hub
 
 simnet_bow = hub.Module(name="simnet_bow")

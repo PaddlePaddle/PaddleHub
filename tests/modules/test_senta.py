@@ -1,3 +1,4 @@
+#coding:utf-8
 import paddlehub as hub
 
 senta = hub.Module(name="senta_bilstm")
