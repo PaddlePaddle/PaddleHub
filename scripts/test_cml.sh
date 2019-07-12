@@ -3,6 +3,7 @@ set -o errexit
 base_path=$(cd `dirname $0`; pwd)
 cd $base_path
 
+shopt -s expand_aliases
 alias hub="python $base_path/../paddlehub/commands/hub.py "$@""
 
 # test install command
