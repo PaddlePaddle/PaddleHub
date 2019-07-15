@@ -20,7 +20,7 @@ from .msra_ner import MSRA_NER
 from .nlpcc_dbqa import NLPCC_DBQA
 from .lcqmc import LCQMC
 from .toxic import Toxic
-from .squad import SQUAD
+from .squad import SQAUD
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat
