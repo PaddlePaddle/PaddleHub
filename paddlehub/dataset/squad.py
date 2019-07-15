@@ -66,7 +66,7 @@ class SquadExample(object):
         return s
 
 
-class SQAUD(object):
+class SQUAD(object):
     """A single set of features of data."""
 
     def __init__(self, version_2_with_negative=False):
@@ -212,7 +212,7 @@ class SQAUD(object):
 
 
 if __name__ == "__main__":
-    ds = SQAUD(version_2_with_negative=True)
+    ds = SQUAD(version_2_with_negative=True)
     examples = ds.get_dev_examples()
     for index, e in enumerate(examples):
         if index < 10:
