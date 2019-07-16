@@ -66,23 +66,20 @@ class SquadExample(object):
         return s
 
 
-class SQAUD(object):
+class SQUAD(object):
     """A single set of features of data."""
 
-    def __init__(self, version_2_with_negative=False, is_training=True):
-        self.dataset_dir = os.path.join(DATA_HOME, "squad")
+    def __init__(self, version_2_with_negative=False):
+        self.dataset_dir = os.path.join(DATA_HOME, "squad_data")
         if not os.path.exists(self.dataset_dir):
             ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
                 url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
         else:
             logger.info("Dataset {} already cached.".format(self.dataset_dir))
 
-        self._load_train_examples(
-            version_2_with_negative=False, is_training=True)
-        self._load_test_examples(
-            version_2_with_negative=False, is_training=False)
-        self._load_dev_examples(
-            version_2_with_negative=False, is_training=False)
+        self._load_train_examples(version_2_with_negative, is_training=True)
+        self._load_test_examples(version_2_with_negative, is_training=False)
+        self._load_dev_examples(version_2_with_negative, is_training=False)
 
     def _load_train_examples(self,
                              version_2_with_negative=False,
@@ -214,6 +211,8 @@ class SQAUD(object):
 
 
 if __name__ == "__main__":
-    ds = SQAUD(version_2_with_negative=False, is_training=True)
-    for e in ds.get_train_examples():
-        print(e)
+    ds = SQUAD(version_2_with_negative=True)
+    examples = ds.get_dev_examples()
+    for index, e in enumerate(examples):
+        if index < 10:
+            print(e)
