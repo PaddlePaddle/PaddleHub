@@ -763,13 +763,17 @@ class ReadingComprehensionReader(object):
         elif phase == 'test':
             shuffle = False
             examples = self.get_test_examples()
-            self.num_examples['test'] = len(examples)
+            if examples:
+                self.num_examples['test'] = len(examples)
+            else:
+                logger.info("The dataset has no test set.")
         elif phase == 'predit':
             shuffle = False
             examples = data
         else:
             raise ValueError(
-                "Unknown phase, which should be in ['train', 'predict'].")
+                "Unknown phase, which should be in ['train', 'dev', 'test', 'predict']."
+            )
 
         def batch_reader(features, batch_size, in_tokens):
             batch, total_token_num, max_len = [], 0, 0

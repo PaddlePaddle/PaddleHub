@@ -78,7 +78,6 @@ class SQUAD(object):
             logger.info("Dataset {} already cached.".format(self.dataset_dir))
 
         self._load_train_examples(version_2_with_negative, is_training=True)
-        self._load_test_examples(version_2_with_negative, is_training=False)
         self._load_dev_examples(version_2_with_negative, is_training=False)
 
     def _load_train_examples(self,
@@ -103,17 +102,6 @@ class SQUAD(object):
         self.dev_examples = self._read_json(dev_file, is_training,
                                             version_2_with_negative)
 
-    def _load_test_examples(self,
-                            version_2_with_negative=False,
-                            is_training=False):
-        if not version_2_with_negative:
-            test_file = os.path.join(self.dataset_dir, "dev-v1.1.json")
-        else:
-            test_file = os.path.join(self.dataset_dir, "dev-v2.0.json")
-
-        self.test_examples = self._read_json(test_file, is_training,
-                                             version_2_with_negative)
-
     def get_train_examples(self):
         return self.train_examples
 
@@ -121,7 +109,7 @@ class SQUAD(object):
         return self.dev_examples
 
     def get_test_examples(self):
-        return self.test_examples
+        return None
 
     def _read_json(self, input_file, is_training,
                    version_2_with_negative=False):
