@@ -27,7 +27,6 @@ def prepare_batch_data(insts,
                        pad_id=None,
                        cls_id=None,
                        sep_id=None,
-                       mask_id=None,
                        return_input_mask=True,
                        return_max_len=True,
                        return_num_token=False):
