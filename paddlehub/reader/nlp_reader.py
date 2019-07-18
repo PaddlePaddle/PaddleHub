@@ -252,7 +252,7 @@ class BaseReader(object):
 
             for item in data:
                 # set label in order to run the program
-                label = "0"
+                label = self.label_map.keys()[0]
                 if len(item) == 1:
                     item_i = InputExample(
                         guid=seq_id, text_a=item[0], label=label)
