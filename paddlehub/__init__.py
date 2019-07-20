@@ -48,6 +48,7 @@ from .finetune.task import TextClassifierTask
 from .finetune.task import ImageClassifierTask
 from .finetune.task import SequenceLabelTask
 from .finetune.task import MultiLabelClassifierTask
+from .finetune.task import ReadingComprehensionTask
 from .finetune.config import RunConfig
 from .finetune.strategy import AdamWeightDecayStrategy
 from .finetune.strategy import DefaultStrategy

@@ -122,9 +122,9 @@ class AdamWeightDecayStrategy(DefaultStrategy):
         data_reader.data_generator(
             batch_size=config.batch_size, phase='train', shuffle=True)
         data_reader.data_generator(
-            batch_size=config.batch_size, phase='val', shuffle=False)
-        data_reader.data_generator(
             batch_size=config.batch_size, phase='dev', shuffle=False)
+        data_reader.data_generator(
+            batch_size=config.batch_size, phase='test', shuffle=False)
         num_train_examples = data_reader.get_num_examples(phase='train')
         max_train_steps = config.num_epoch * num_train_examples // config.batch_size // dev_count
         warmup_steps = int(max_train_steps * self.warmup_proportion)
