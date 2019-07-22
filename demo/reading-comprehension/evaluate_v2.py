@@ -99,10 +99,10 @@ def apply_no_ans_threshold(scores, na_probs, qid_to_has_ans, na_prob_thresh):
     new_scores = {}
     for qid, s in scores.items():
         pred_na = na_probs[qid] > na_prob_thresh
-    if pred_na:
-        new_scores[qid] = float(not qid_to_has_ans[qid])
-    else:
-        new_scores[qid] = s
+        if pred_na:
+            new_scores[qid] = float(not qid_to_has_ans[qid])
+        else:
+            new_scores[qid] = s
     return new_scores
 
 
@@ -126,3 +126,38 @@ def make_eval_dict(exact_scores, f1_scores, qid_list=None):
 def merge_eval(main_eval, new_eval, prefix):
     for k in new_eval:
         main_eval['%s_%s' % (prefix, k)] = new_eval[k]
+
+
+def find_all_best_thresh(main_eval, preds, exact_raw, f1_raw, na_probs,
+                         qid_to_has_ans):
+    best_exact, exact_thresh = find_best_thresh(preds, exact_raw, na_probs,
+                                                qid_to_has_ans)
+    best_f1, f1_thresh = find_best_thresh(preds, f1_raw, na_probs,
+                                          qid_to_has_ans)
+    main_eval['best_exact'] = best_exact
+    main_eval['best_exact_thresh'] = exact_thresh
+    main_eval['best_f1'] = best_f1
+    main_eval['best_f1_thresh'] = f1_thresh
+
+
+def find_best_thresh(preds, scores, na_probs, qid_to_has_ans):
+    num_no_ans = sum(1 for k in qid_to_has_ans if not qid_to_has_ans[k])
+    cur_score = num_no_ans
+    best_score = cur_score
+    best_thresh = 0.0
+    qid_list = sorted(na_probs, key=lambda k: na_probs[k])
+    for i, qid in enumerate(qid_list):
+        if qid not in scores:
+            continue
+        if qid_to_has_ans[qid]:
+            diff = scores[qid]
+        else:
+            if preds[qid]:
+                diff = -1
+            else:
+                diff = 0
+        cur_score += diff
+        if cur_score > best_score:
+            best_score = cur_score
+            best_thresh = na_probs[qid]
+    return 100.0 * best_score / len(scores), best_thresh
