@@ -10,6 +10,6 @@ python -u reading_comprehension.py \
                    --warmup_proportion=0.1 \
                    --num_epoch=2 \
                    --max_seq_len=128 \
-                   --use_pyreader=False \
+                   --use_pyreader=True \
                    --use_data_parallel=True \
                    --version_2_with_negative=False
