@@ -20,6 +20,8 @@ import ast
 import paddle.fluid as fluid
 import paddlehub as hub
 
+hub.common.logger.logger.setLevel("INFO")
+
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=1, help="Number of epoches for fine-tuning.")
@@ -37,8 +39,8 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub ERNIE pretrained model
-    module = hub.Module(name="bert_cased_L-12_H-768_A-12")
+    # Load Paddlehub bert_uncased_L-12_H-768_A-12 pretrained model
+    module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
 
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
@@ -76,7 +78,7 @@ if __name__ == '__main__':
         log_interval=10,
         use_pyreader=args.use_pyreader,
         use_data_parallel=args.use_data_parallel,
-        save_ckpt_interval=100,
+        save_ckpt_interval=1000,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,

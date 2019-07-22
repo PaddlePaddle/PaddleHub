@@ -36,6 +36,8 @@ import paddlehub as hub
 import evaluate_v1
 import evaluate_v2
 
+hub.common.logger.logger.setLevel("INFO")
+
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=1, help="Number of epoches for fine-tuning.")
@@ -102,10 +104,7 @@ def write_predictions(
         null_start_logit = 0  # the start logit at the slice with min null score
         null_end_logit = 0  # the end logit at the slice with min null score
         for (feature_index, feature) in enumerate(features):
-            try:
-                result = unique_id_to_result[feature.unique_id]
-            except:
-                continue
+            result = unique_id_to_result[feature.unique_id]
             start_indexes = get_best_indexes(result.start_logits, n_best_size)
             end_indexes = get_best_indexes(result.end_logits, n_best_size)
             # if we could have irrelevant answers, get the min score of irrelevant
@@ -389,8 +388,8 @@ def compute_softmax(scores):
 
 
 if __name__ == '__main__':
-    # Load Paddlehub ERNIE pretrained model
-    module = hub.Module(name="bert_cased_L-12_H-768_A-12")
+    # Load Paddlehub bert_uncased_L-12_H-768_A-12 pretrained model
+    module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     # module = hub.Module(module_dir=["./bert_uncased_L-12_H-768_A-12.hub_module"])
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
