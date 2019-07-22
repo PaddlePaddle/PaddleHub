@@ -520,9 +520,9 @@ class BasicTask(object):
                 self.save_checkpoint()
 
                 # Final evaluation
-                if not self._base_data_reader.get_dev_examples():
+                if self._base_data_reader.get_dev_examples() != []:
                     self.eval(phase="dev")
-                if not self._base_data_reader.get_test_examples():
+                if self._base_data_reader.get_test_examples() != []:
                     self.eval(phase="test")
 
             self._finetune_end_event(run_states)
@@ -1175,8 +1175,10 @@ class ReadingComprehensionTask(BasicTask):
 
         start_loss = fluid.layers.softmax_with_cross_entropy(
             logits=start_logits, label=start_positions)
+        start_loss = fluid.layers.mean(x=start_loss)
         end_loss = fluid.layers.softmax_with_cross_entropy(
             logits=end_logits, label=end_positions)
+        end_loss = fluid.layers.mean(x=end_loss)
         total_loss = (start_loss + end_loss) / 2.0
         return total_loss
 

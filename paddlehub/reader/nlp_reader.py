@@ -744,12 +744,9 @@ class ReadingComprehensionReader(object):
         return self.num_examples[phase]
 
     def data_generator(self,
-                       batch_size,
+                       batch_size=1,
                        phase='train',
                        shuffle=False,
-                       dev_count=1,
-                       version_2_with_negative=False,
-                       epoch=1,
                        data=None):
         if phase == 'train':
             shuffle = True
@@ -952,35 +949,35 @@ class ReadingComprehensionReader(object):
                     end_position = 0
 
                 if example_index < 3:
-                    logger.info("*** Example ***")
-                    logger.info("unique_id: %s" % (unique_id))
-                    logger.info("example_index: %s" % (example_index))
-                    logger.info("doc_span_index: %s" % (doc_span_index))
-                    logger.info("tokens: %s" % " ".join(
+                    logger.debug("*** Example ***")
+                    logger.debug("unique_id: %s" % (unique_id))
+                    logger.debug("example_index: %s" % (example_index))
+                    logger.debug("doc_span_index: %s" % (doc_span_index))
+                    logger.debug("tokens: %s" % " ".join(
                         [tokenization.printable_text(x) for x in tokens]))
-                    logger.info("token_to_orig_map: %s" % " ".join([
+                    logger.debug("token_to_orig_map: %s" % " ".join([
                         "%d:%d" % (x, y)
                         for (x, y) in six.iteritems(token_to_orig_map)
                     ]))
-                    logger.info("token_is_max_context: %s" % " ".join([
+                    logger.debug("token_is_max_context: %s" % " ".join([
                         "%d:%s" % (x, y)
                         for (x, y) in six.iteritems(token_is_max_context)
                     ]))
-                    logger.info(
+                    logger.debug(
                         "input_ids: %s" % " ".join([str(x) for x in input_ids]))
-                    logger.info("input_mask: %s" % " ".join(
+                    logger.debug("input_mask: %s" % " ".join(
                         [str(x) for x in input_mask]))
-                    logger.info("segment_ids: %s" % " ".join(
+                    logger.debug("segment_ids: %s" % " ".join(
                         [str(x) for x in segment_ids]))
                     if is_training and example.is_impossible:
-                        logger.info("impossible example")
+                        logger.debug("impossible example")
                     if is_training and not example.is_impossible:
                         answer_text = " ".join(
                             tokens[start_position:(end_position + 1)])
-                        logger.info("start_position: %d" % (start_position))
-                        logger.info("end_position: %d" % (end_position))
-                        logger.info("answer: %s" %
-                                    (tokenization.printable_text(answer_text)))
+                        logger.debug("start_position: %d" % (start_position))
+                        logger.debug("end_position: %d" % (end_position))
+                        logger.debug("answer: %s" %
+                                     (tokenization.printable_text(answer_text)))
 
                 feature = SquadInputFeatures(
                     unique_id=unique_id,
