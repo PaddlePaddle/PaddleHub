@@ -105,7 +105,6 @@ def write_predictions(
             try:
                 result = unique_id_to_result[feature.unique_id]
             except:
-                print(feature.unique_id)
                 continue
             start_indexes = get_best_indexes(result.start_logits, n_best_size)
             end_indexes = get_best_indexes(result.end_logits, n_best_size)
@@ -447,6 +446,7 @@ if __name__ == '__main__':
 
     # Data to be predicted
     data = dataset.predict_examples
+
     features = reader.convert_examples_to_features(
         examples=data, is_training=False)
     run_states = reading_comprehension_task.predict(data=data)
@@ -484,6 +484,7 @@ if __name__ == '__main__':
         output_null_log_odds_file,
         max_answer_length=args.max_answer_length,
         n_best_size=args.n_best_size,
+        version_2_with_negative=args.version_2_with_negative,
         null_score_diff_threshold=args.null_score_diff_threshold)
 
     with io.open(dataset.predict_file, 'r', encoding="utf8") as dataset_file:
@@ -494,7 +495,6 @@ if __name__ == '__main__':
             output_prediction_file, 'r', encoding="utf8") as prediction_file:
         predictions = json.load(prediction_file)
 
-    print(args.version_2_with_negative)
     if not args.version_2_with_negative:
         print(json.dumps(evaluate_v1.evaluate(dataset, predictions)))
     else:

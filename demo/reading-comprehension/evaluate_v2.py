@@ -86,7 +86,7 @@ def get_raw_scores(dataset, preds):
                 if qid not in preds:
                     print('Missing prediction for %s' % qid)
                     continue
-                    a_pred = preds[qid]
+                a_pred = preds[qid]
                 # Take max over all gold answers
                 exact_scores[qid] = max(
                     compute_exact(a, a_pred) for a in gold_answers)

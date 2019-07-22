@@ -520,8 +520,10 @@ class BasicTask(object):
                 self.save_checkpoint()
 
                 # Final evaluation
-                self.eval(phase="dev")
-                self.eval(phase="test")
+                if not self._base_data_reader.get_dev_examples():
+                    self.eval(phase="dev")
+                if not self._base_data_reader.get_test_examples():
+                    self.eval(phase="test")
 
             self._finetune_end_event(run_states)
             return run_states
