@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Finetuning on classification task """
-
 import argparse
 import ast
 
@@ -24,7 +23,7 @@ import paddlehub as hub
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
-parser.add_argument("--dataset", type=str, default="chnsenticorp", help="Directory to model checkpoint", choices=["chnsenticorp", "nlpcc_dbqa", "lcqmc"])
+parser.add_argument("--dataset", type=str, default="chnsenticorp", help="Directory to model checkpoint")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
 parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
@@ -41,8 +40,8 @@ if __name__ == '__main__':
     # Load Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
     # module = hub.Module(name="bert_multi_cased_L-12_H-768_A-12")
-    inputs, outputs, program = module.context(
-        trainable=True, max_seq_len=args.max_seq_len)
+    inputs, outputs, program = module.context(trainable=True,
+                                              max_seq_len=args.max_seq_len)
 
     # Download dataset and use ClassifyReader to read dataset
     dataset = None
@@ -52,13 +51,28 @@ if __name__ == '__main__':
         dataset = hub.dataset.NLPCC_DBQA()
     elif args.dataset.lower() == "lcqmc":
         dataset = hub.dataset.LCQMC()
+    elif args.dataset.lower() == "mrpc":
+        dataset = hub.dataset.GLUE("MRPC")
+    elif args.dataset.lower() == "qqp":
+        dataset = hub.dataset.GLUE("QQP")
+    elif args.dataset.lower() == "sst-2":
+        dataset = hub.dataset.GLUE("SST-2")
+    elif args.dataset.lower() == "cola":
+        dataset = hub.dataset.GLUE("CoLA")
+    elif args.dataset.lower() == "qnli":
+        dataset = hub.dataset.GLUE("QNLI")
+    elif args.dataset.lower() == "rte":
+        dataset = hub.dataset.GLUE("RTE")
+    elif args.dataset.lower() == "mnli":
+        dataset = hub.dataset.GLUE("MNLI")
+    elif args.dataset.lower().startwith("xnli"):
+        dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
 
-    reader = hub.reader.ClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+    reader = hub.reader.ClassifyReader(dataset=dataset,
+                                       vocab_path=module.get_vocab_path(),
+                                       max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
@@ -75,28 +89,25 @@ if __name__ == '__main__':
     ]
 
     # Select finetune strategy, setup config and finetune
-    strategy = hub.AdamWeightDecayStrategy(
-        weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate,
-        lr_scheduler="linear_decay")
+    strategy = hub.AdamWeightDecayStrategy(weight_decay=args.weight_decay,
+                                           learning_rate=args.learning_rate,
+                                           lr_scheduler="linear_decay")
 
     # Setup runing config for PaddleHub Finetune API
-    config = hub.RunConfig(
-        use_data_parallel=args.use_data_parallel,
-        use_pyreader=args.use_pyreader,
-        use_cuda=args.use_gpu,
-        num_epoch=args.num_epoch,
-        batch_size=args.batch_size,
-        checkpoint_dir=args.checkpoint_dir,
-        strategy=strategy)
+    config = hub.RunConfig(use_data_parallel=args.use_data_parallel,
+                           use_pyreader=args.use_pyreader,
+                           use_cuda=args.use_gpu,
+                           num_epoch=args.num_epoch,
+                           batch_size=args.batch_size,
+                           checkpoint_dir=args.checkpoint_dir,
+                           strategy=strategy)
 
     # Define a classfication finetune task by PaddleHub's API
-    cls_task = hub.TextClassifierTask(
-        data_reader=reader,
-        feature=pooled_output,
-        feed_list=feed_list,
-        num_classes=dataset.num_labels,
-        config=config)
+    cls_task = hub.TextClassifierTask(data_reader=reader,
+                                      feature=pooled_output,
+                                      feed_list=feed_list,
+                                      num_classes=dataset.num_labels,
+                                      config=config)
 
     # Finetune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically

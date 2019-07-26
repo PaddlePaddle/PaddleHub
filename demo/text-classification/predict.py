@@ -35,6 +35,7 @@ parser.add_argument("--batch_size",     type=int,   default=1, help="Total examp
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
+parser.add_argument("--dataset", type=str, default="chnsenticorp", help="Directory to model checkpoint")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -44,11 +45,35 @@ if __name__ == '__main__':
     inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
 
     # Sentence classification  dataset reader
-    dataset = hub.dataset.ChnSentiCorp()
-    reader = hub.reader.ClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+    dataset = None
+    if args.dataset.lower() == "chnsenticorp":
+        dataset = hub.dataset.ChnSentiCorp()
+    elif args.dataset.lower() == "nlpcc_dbqa":
+        dataset = hub.dataset.NLPCC_DBQA()
+    elif args.dataset.lower() == "lcqmc":
+        dataset = hub.dataset.LCQMC()
+    elif args.dataset.lower() == "mrpc":
+        dataset = hub.dataset.GLUE("MRPC")
+    elif args.dataset.lower() == "qqp":
+        dataset = hub.dataset.GLUE("QQP")
+    elif args.dataset.lower() == "sst-2":
+        dataset = hub.dataset.GLUE("SST-2")
+    elif args.dataset.lower() == "cola":
+        dataset = hub.dataset.GLUE("CoLA")
+    elif args.dataset.lower() == "qnli":
+        dataset = hub.dataset.GLUE("QNLI")
+    elif args.dataset.lower() == "rte":
+        dataset = hub.dataset.GLUE("RTE")
+    elif args.dataset.lower() == "mnli":
+        dataset = hub.dataset.GLUE("MNLI")
+    elif args.dataset.lower().startwith("xnli"):
+        dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
+    else:
+        raise ValueError("%s dataset is not defined" % args.dataset)
+
+    reader = hub.reader.ClassifyReader(dataset=dataset,
+                                       vocab_path=module.get_vocab_path(),
+                                       max_seq_len=args.max_seq_len)
 
     place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
     exe = fluid.Executor(place)
@@ -78,15 +103,15 @@ if __name__ == '__main__':
         strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
     # Define a classfication finetune task by PaddleHub's API
-    cls_task = hub.TextClassifierTask(
-        data_reader=reader,
-        feature=pooled_output,
-        feed_list=feed_list,
-        num_classes=dataset.num_labels,
-        config=config)
+    cls_task = hub.TextClassifierTask(data_reader=reader,
+                                      feature=pooled_output,
+                                      feed_list=feed_list,
+                                      num_classes=dataset.num_labels,
+                                      config=config)
 
     # Data to be prdicted
-    data = [
+
+    data = [  # TODO: 兼容不同的数据集
         ["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
         [
             "还稍微重了点，可能是硬盘大的原故，还要再轻半斤就好了。其他要进一步验证。贴的几种膜气泡较多，用不了多久就要更换了，屏幕膜稍好点，但比没有要强多了。建议配赠几张膜让用用户自己贴。"
