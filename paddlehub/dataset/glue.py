@@ -20,7 +20,6 @@ from __future__ import print_function
 import os
 import codecs
 import csv
-import json
 from collections import namedtuple
 
 from paddlehub.dataset import InputExample, HubDataset
@@ -42,7 +41,6 @@ class GLUE(HubDataset):
         # sub_dataset : CoLA, MNLI, MRPC, QNLI, QQP, RTE, SST-2, STS-B
         self.sub_dataset = sub_dataset
         self.dataset_dir = os.path.join(DATA_HOME, "glue_data")
-        print(self.dataset_dir)
 
         if not os.path.exists(self.dataset_dir):
             ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
@@ -107,7 +105,7 @@ class GLUE(HubDataset):
 
     def _read_tsv(self, input_file, quotechar=None, wo_label=False):
         """Reads a tab separated value file."""
-        with codecs.open(input_file, "r", encoding="UTF-8") as f:
+        with open(input_file, "r", encoding="UTF-8") as f:
             reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
             examples = []
             seq_id = 0
