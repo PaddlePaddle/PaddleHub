@@ -21,6 +21,8 @@ from .nlpcc_dbqa import NLPCC_DBQA
 from .lcqmc import LCQMC
 from .toxic import Toxic
 from .squad import SQUAD
+from .xnli import XNLI
+from .glue import GLUE
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat
