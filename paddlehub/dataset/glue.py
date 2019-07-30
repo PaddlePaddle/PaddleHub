@@ -39,6 +39,12 @@ class GLUE(HubDataset):
 
     def __init__(self, sub_dataset='SST-2'):
         # sub_dataset : CoLA, MNLI, MRPC, QNLI, QQP, RTE, SST-2, STS-B
+        if sub_dataset not in [
+                'CoLA', 'MNLI', 'MRPC', 'QNLI', 'QQP', 'RTE', 'SST-2', 'STS-B'
+        ]:
+            raise Exception(
+                "The dataset \"" + sub_dataset +
+                "\" is not in GLUE benchmark. Please confirm the data set.")
         self.sub_dataset = sub_dataset
         self.dataset_dir = os.path.join(DATA_HOME, "glue_data")
 
@@ -94,7 +100,8 @@ class GLUE(HubDataset):
         elif self.sub_dataset in ['MNLI']:
             return ["neutral", "contradiction", "entailment"]
         elif self.sub_dataset in ['STS-B']:
-            raise ("Developing")
+            # TODO: STS-B is a regression task under development.
+            raise Exception("Developing")
 
     @property
     def num_labels(self):

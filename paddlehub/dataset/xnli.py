@@ -40,6 +40,12 @@ class XNLI(HubDataset):
     """
 
     def __init__(self, language='zh'):
+        if language not in [
+                "ar", "bg", "de", "el", "en", "es", "fr", "hi", "ru", "sw",
+                "th", "tr", "ur", "vi", "zh"
+        ]:
+            raise Exception("The language \"" + language +
+                            "\" is not in XNLI. Please confirm the language.")
         self.language = language
         self.dataset_dir = os.path.join(DATA_HOME, "XNLI-lan")
 
