@@ -23,6 +23,11 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 
 除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络
 
+## 答疑
+
+当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-FAQ)查找解决方案。
+如果在FAQ中没有找到解决方案，欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交给我们，我们会第一时间进行跟进
+
 ## 安装
 pip安装方式如下：
 
@@ -87,11 +92,6 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 * 图像分类: 
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79378) 
   * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/img_cls)
-
-## 答疑
-
-当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-FAQ)查找解决方案。
-如果在FAQ中没有找到解决方案，欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交给我们，我们会第一时间进行跟进
 
 ## 版权和许可证
 PaddleHub由[Apache-2.0 license](LICENSE)提供
