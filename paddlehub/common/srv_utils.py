@@ -29,7 +29,7 @@ def get_stat_server():
     if stat_env:
         server_list = stat_env.split(';')
     else:
-        server_list = default_stat_config
+        server_list = default_stat_config['server_list']
     return server_list[randint(0, len(server_list) - 1)]
 
 
