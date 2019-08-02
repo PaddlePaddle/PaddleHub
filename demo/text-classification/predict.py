@@ -35,7 +35,7 @@ parser.add_argument("--batch_size",     type=int,   default=1, help="Total examp
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
-parser.add_argument("--dataset", type=str, default="chnsenticorp", help="Directory to model checkpoint")
+parser.add_argument("--dataset", type=str, default="chnsenticorp", help="Directory to dataset")
 args = parser.parse_args()
 # yapf: enable.
 
