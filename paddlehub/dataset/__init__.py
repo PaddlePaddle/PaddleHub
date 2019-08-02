@@ -20,6 +20,8 @@ from .msra_ner import MSRA_NER
 from .nlpcc_dbqa import NLPCC_DBQA
 from .lcqmc import LCQMC
 from .toxic import Toxic
+from .xnli import XNLI
+from .glue import GLUE
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat

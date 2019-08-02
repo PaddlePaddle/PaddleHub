@@ -16,7 +16,6 @@
 
 import argparse
 import ast
-
 import paddle.fluid as fluid
 import paddlehub as hub
 
@@ -24,7 +23,7 @@ import paddlehub as hub
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
-parser.add_argument("--dataset", type=str, default="chnsenticorp", help="Directory to model checkpoint", choices=["chnsenticorp", "nlpcc_dbqa", "lcqmc"])
+parser.add_argument("--dataset", type=str, default="chnsenticorp", help="Directory to dataset")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
 parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
@@ -38,23 +37,46 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
-    # module = hub.Module(name="bert_multi_cased_L-12_H-768_A-12")
-    inputs, outputs, program = module.context(
-        trainable=True, max_seq_len=args.max_seq_len)
-
-    # Download dataset and use ClassifyReader to read dataset
     dataset = None
+    # Download dataset and use ClassifyReader to read dataset
     if args.dataset.lower() == "chnsenticorp":
         dataset = hub.dataset.ChnSentiCorp()
+        module = hub.Module(name="ernie")
     elif args.dataset.lower() == "nlpcc_dbqa":
         dataset = hub.dataset.NLPCC_DBQA()
+        module = hub.Module(name="ernie")
     elif args.dataset.lower() == "lcqmc":
         dataset = hub.dataset.LCQMC()
+        module = hub.Module(name="ernie")
+    elif args.dataset.lower() == "mrpc":
+        dataset = hub.dataset.GLUE("MRPC")
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "qqp":
+        dataset = hub.dataset.GLUE("QQP")
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "sst-2":
+        dataset = hub.dataset.GLUE("SST-2")
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "cola":
+        dataset = hub.dataset.GLUE("CoLA")
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "qnli":
+        dataset = hub.dataset.GLUE("QNLI")
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "rte":
+        dataset = hub.dataset.GLUE("RTE")
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "mnli":
+        dataset = hub.dataset.GLUE("MNLI")
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower().startswith("xnli"):
+        dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
+        module = hub.Module(name="bert_multi_cased_L-12_H-768_A-12")
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
 
+    inputs, outputs, program = module.context(
+        trainable=True, max_seq_len=args.max_seq_len)
     reader = hub.reader.ClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
