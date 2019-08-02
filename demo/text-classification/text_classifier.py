@@ -16,7 +16,6 @@
 
 import argparse
 import ast
-
 import paddle.fluid as fluid
 import paddlehub as hub
 
@@ -76,11 +75,12 @@ if __name__ == '__main__':
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
 
-    inputs, outputs, program = module.context(trainable=True,
-                                              max_seq_len=args.max_seq_len)
-    reader = hub.reader.ClassifyReader(dataset=dataset,
-                                       vocab_path=module.get_vocab_path(),
-                                       max_seq_len=args.max_seq_len)
+    inputs, outputs, program = module.context(
+        trainable=True, max_seq_len=args.max_seq_len)
+    reader = hub.reader.ClassifyReader(
+        dataset=dataset,
+        vocab_path=module.get_vocab_path(),
+        max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
@@ -97,25 +97,28 @@ if __name__ == '__main__':
     ]
 
     # Select finetune strategy, setup config and finetune
-    strategy = hub.AdamWeightDecayStrategy(weight_decay=args.weight_decay,
-                                           learning_rate=args.learning_rate,
-                                           lr_scheduler="linear_decay")
+    strategy = hub.AdamWeightDecayStrategy(
+        weight_decay=args.weight_decay,
+        learning_rate=args.learning_rate,
+        lr_scheduler="linear_decay")
 
     # Setup runing config for PaddleHub Finetune API
-    config = hub.RunConfig(use_data_parallel=args.use_data_parallel,
-                           use_pyreader=args.use_pyreader,
-                           use_cuda=args.use_gpu,
-                           num_epoch=args.num_epoch,
-                           batch_size=args.batch_size,
-                           checkpoint_dir=args.checkpoint_dir,
-                           strategy=strategy)
+    config = hub.RunConfig(
+        use_data_parallel=args.use_data_parallel,
+        use_pyreader=args.use_pyreader,
+        use_cuda=args.use_gpu,
+        num_epoch=args.num_epoch,
+        batch_size=args.batch_size,
+        checkpoint_dir=args.checkpoint_dir,
+        strategy=strategy)
 
     # Define a classfication finetune task by PaddleHub's API
-    cls_task = hub.TextClassifierTask(data_reader=reader,
-                                      feature=pooled_output,
-                                      feed_list=feed_list,
-                                      num_classes=dataset.num_labels,
-                                      config=config)
+    cls_task = hub.TextClassifierTask(
+        data_reader=reader,
+        feature=pooled_output,
+        feed_list=feed_list,
+        num_classes=dataset.num_labels,
+        config=config)
 
     # Finetune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically

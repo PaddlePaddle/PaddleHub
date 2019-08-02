@@ -23,7 +23,6 @@ import ast
 import numpy as np
 import os
 import time
-
 import paddle
 import paddle.fluid as fluid
 import paddlehub as hub
@@ -78,11 +77,12 @@ if __name__ == '__main__':
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
 
-    inputs, outputs, program = module.context(trainable=True,
-                                              max_seq_len=args.max_seq_len)
-    reader = hub.reader.ClassifyReader(dataset=dataset,
-                                       vocab_path=module.get_vocab_path(),
-                                       max_seq_len=args.max_seq_len)
+    inputs, outputs, program = module.context(
+        trainable=True, max_seq_len=args.max_seq_len)
+    reader = hub.reader.ClassifyReader(
+        dataset=dataset,
+        vocab_path=module.get_vocab_path(),
+        max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
@@ -109,11 +109,12 @@ if __name__ == '__main__':
         strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
     # Define a classfication finetune task by PaddleHub's API
-    cls_task = hub.TextClassifierTask(data_reader=reader,
-                                      feature=pooled_output,
-                                      feed_list=feed_list,
-                                      num_classes=dataset.num_labels,
-                                      config=config)
+    cls_task = hub.TextClassifierTask(
+        data_reader=reader,
+        feature=pooled_output,
+        feed_list=feed_list,
+        num_classes=dataset.num_labels,
+        config=config)
 
     # Data to be prdicted
     data = [[d.text_a, d.text_b] for d in dataset.get_dev_examples()[:3]]

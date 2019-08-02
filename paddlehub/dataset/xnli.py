@@ -37,6 +37,7 @@ class XNLI(HubDataset):
     https://arxiv.org/pdf/1809.05053.pdf
     for more information
     """
+
     def __init__(self, language='zh'):
         if language not in [
                 "ar", "bg", "de", "el", "en", "es", "fr", "hi", "ru", "sw",
@@ -100,10 +101,8 @@ class XNLI(HubDataset):
             seq_id = 0
             header = next(reader)  # skip header
             for line in reader:
-                example = InputExample(guid=seq_id,
-                                       label=line[2],
-                                       text_a=line[0],
-                                       text_b=line[1])
+                example = InputExample(
+                    guid=seq_id, label=line[2], text_a=line[0], text_b=line[1])
                 seq_id += 1
                 examples.append(example)
 
