@@ -26,3 +26,4 @@ python -u text_classifier.py \
                    --num_epoch=3 \
                    --use_pyreader=True \
                    --use_data_parallel=True \
+                   --use_taskid=False \
