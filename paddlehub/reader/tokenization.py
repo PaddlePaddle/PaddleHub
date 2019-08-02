@@ -18,8 +18,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import codecs
 import collections
+import io
 import unicodedata
 
 import six
@@ -71,7 +71,7 @@ def printable_text(text):
 def load_vocab(vocab_file):
     """Loads a vocabulary file into a dictionary."""
     vocab = collections.OrderedDict()
-    fin = codecs.open(vocab_file, "r", "UTF-8")
+    fin = io.open(vocab_file, "r", "UTF-8")
     for num, line in enumerate(fin):
         items = convert_to_unicode(line.strip()).split("\t")
         if len(items) > 2:
