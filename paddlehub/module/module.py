@@ -581,7 +581,8 @@ class Module(object):
                 "Set maximum sequence length of input tensor to {}".format(
                     max_seq_len))
             for tensor_name in [
-                    "input_ids", "position_ids", "segment_ids", "input_mask"
+                    "input_ids", "position_ids", "segment_ids", "input_mask",
+                    "task_ids"
             ]:
                 seq_tensor_shape = [-1, max_seq_len, 1]
                 logger.info("The shape of input tensor[{}] set to {}".format(

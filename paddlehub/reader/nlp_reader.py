@@ -690,8 +690,11 @@ class MultiLabelClassifyReader(BaseReader):
         position_ids = list(range(len(token_ids)))
 
         label_ids = []
-        for label in example.label:
-            label_ids.append(int(label))
+        if phase == "predict":
+            label_ids = [0, 0, 0, 0, 0, 0]
+        else:
+            for label in example.label:
+                label_ids.append(self.label_map[label])
 
         if phase != "predict":
             Record = namedtuple(
