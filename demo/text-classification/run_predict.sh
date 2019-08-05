@@ -15,4 +15,4 @@ CKPT_DIR="./ckpt_${DATASET}"
 #       sw: Swahili     th: Thai           tr: Turkish
 #       ur: Urdu        vi: Vietnamese     zh: Chinese (Simplified)
 
-python -u predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128 --use_gpu False --dataset=${DATASET} ----use_taskid False
+python -u predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128 --use_gpu False --dataset=${DATASET} --use_taskid False
