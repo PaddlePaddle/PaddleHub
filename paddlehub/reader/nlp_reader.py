@@ -332,6 +332,8 @@ class ClassifyReader(BaseReader):
             ]
 
             if self.use_task_id:
+                padded_task_ids = np.ones_like(
+                    padded_token_ids, dtype="int64") * self.task_id
                 return_list = [
                     padded_token_ids, padded_position_ids, padded_text_type_ids,
                     input_mask, padded_task_ids

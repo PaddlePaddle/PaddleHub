@@ -84,18 +84,6 @@ class GLUE(HubDataset):
                                              "test.tsv")
         self.predict_examples = self._read_tsv(self.predict_file, wo_label=True)
 
-    def get_train_examples(self):
-        return self.train_examples
-
-    def get_dev_examples(self):
-        return self.dev_examples
-
-    def get_test_examples(self):
-        return self.test_examples
-
-    def get_predict_examples(self):
-        return self.predict_examples
-
     def get_labels(self):
         """See base class."""
         if self.sub_dataset in ['MRPC', 'QQP', 'SST-2', 'CoLA']:
