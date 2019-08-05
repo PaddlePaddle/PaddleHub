@@ -696,7 +696,7 @@ class MultiLabelClassifyReader(BaseReader):
             label_ids = [0, 0, 0, 0, 0, 0]
         else:
             for label in example.label:
-                label_ids.append(self.label_map[label])
+                label_ids.append(int(label))
 
         if phase != "predict":
             Record = namedtuple(
