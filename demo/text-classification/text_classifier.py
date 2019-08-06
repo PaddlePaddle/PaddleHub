@@ -16,24 +16,24 @@
 
 import argparse
 import ast
-
 import paddle.fluid as fluid
 import paddlehub as hub
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
-parser.add_argument("--dataset", type=str, default="chnsenticorp", help="Directory to model checkpoint")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--dataset", type=str, default="chnsenticorp", help="The choice of dataset")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
-parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
+parser.add_argument("--warmup_proportion", type=float, default=0.1, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--data_dir", type=str, default=None, help="Path to training data.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
+parser.add_argument("--use_taskid", type=ast.literal_eval, default=False, help="Whether to use taskid ,if yes to use ernie v2.")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -51,25 +51,46 @@ if __name__ == '__main__':
         module = hub.Module(name="ernie")
     elif args.dataset.lower() == "mrpc":
         dataset = hub.dataset.GLUE("MRPC")
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     elif args.dataset.lower() == "qqp":
         dataset = hub.dataset.GLUE("QQP")
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     elif args.dataset.lower() == "sst-2":
         dataset = hub.dataset.GLUE("SST-2")
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     elif args.dataset.lower() == "cola":
         dataset = hub.dataset.GLUE("CoLA")
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     elif args.dataset.lower() == "qnli":
         dataset = hub.dataset.GLUE("QNLI")
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     elif args.dataset.lower() == "rte":
         dataset = hub.dataset.GLUE("RTE")
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     elif args.dataset.lower() == "mnli":
         dataset = hub.dataset.GLUE("MNLI")
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     elif args.dataset.lower().startswith("xnli"):
         dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
         module = hub.Module(name="bert_multi_cased_L-12_H-768_A-12")
@@ -81,7 +102,8 @@ if __name__ == '__main__':
     reader = hub.reader.ClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+        max_seq_len=args.max_seq_len,
+        use_task_id=args.use_taskid)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
@@ -97,6 +119,14 @@ if __name__ == '__main__':
         inputs["input_mask"].name,
     ]
 
+    if args.use_taskid:
+        feed_list = [
+            inputs["input_ids"].name,
+            inputs["position_ids"].name,
+            inputs["segment_ids"].name,
+            inputs["input_mask"].name,
+            inputs["task_ids"].name,
+        ]
     # Select finetune strategy, setup config and finetune
     strategy = hub.AdamWeightDecayStrategy(
         weight_decay=args.weight_decay,

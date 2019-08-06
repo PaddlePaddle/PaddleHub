@@ -36,39 +36,51 @@ parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory 
 parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
 parser.add_argument("--max_seq_len", type=int, default=128, help="Number of words of the longest seqence.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--use_taskid", type=ast.literal_eval, default=False, help="Whether to user ernie v2 , if not to use bert.")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # loading Paddlehub ERNIE pretrained model
-    module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
-    inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
+    # Load Paddlehub BERT pretrained model
+    if args.use_taskid:
+        module = hub.Module(name="ernie_eng_base.hub_module")
 
-    # Sentence classification  dataset reader
+        inputs, outputs, program = module.context(
+            trainable=True, max_seq_len=args.max_seq_len)
+
+        # Setup feed list for data feeder
+        feed_list = [
+            inputs["input_ids"].name, inputs["position_ids"].name,
+            inputs["segment_ids"].name, inputs["input_mask"].name,
+            inputs["task_ids"].name
+        ]
+    else:
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+
+        inputs, outputs, program = module.context(
+            trainable=True, max_seq_len=args.max_seq_len)
+
+        # Setup feed list for data feeder
+        feed_list = [
+            inputs["input_ids"].name,
+            inputs["position_ids"].name,
+            inputs["segment_ids"].name,
+            inputs["input_mask"].name,
+        ]
+
+    # Download dataset and use MultiLabelReader to read dataset
     dataset = hub.dataset.Toxic()
-    num_label = len(dataset.get_labels())
 
     reader = hub.reader.MultiLabelClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
-
-    place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
-    exe = fluid.Executor(place)
+        max_seq_len=args.max_seq_len,
+        use_task_id=args.use_taskid)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
     pooled_output = outputs["pooled_output"]
-
-    # Setup feed list for data feeder
-    # Must feed all the tensor of ERNIE's module need
-    feed_list = [
-        inputs["input_ids"].name,
-        inputs["position_ids"].name,
-        inputs["segment_ids"].name,
-        inputs["input_mask"].name,
-    ]
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
@@ -104,7 +116,7 @@ if __name__ == '__main__':
     for result in results:
         # get predict index
         label_ids = []
-        for i in range(num_label):
+        for i in range(dataset.num_labels):
             label_val = np.argmax(result[i])
             label_ids.append(label_val)
         print("%s\tpredict=%s" % (data[index][0], label_ids))

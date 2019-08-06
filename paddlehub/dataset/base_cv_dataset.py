@@ -35,6 +35,10 @@ class ImageClassificationDataset(object):
         self.num_labels = 0
         self.label_list = []
 
+        self.train_examples = []
+        self.dev_examples = []
+        self.test_examples = []
+
     def _download_dataset(self, dataset_path, url):
         if not os.path.exists(dataset_path):
             result, tips, dataset_path = default_downloader.download_file_and_uncompress(
@@ -47,7 +51,7 @@ class ImageClassificationDataset(object):
                 exit()
         return dataset_path
 
-    def _parse_data(self, data_path, shuffle=False):
+    def _parse_data(self, data_path, shuffle=False, phase=None):
         def _base_reader():
             data = []
             with open(data_path, "r") as file:
@@ -68,6 +72,13 @@ class ImageClassificationDataset(object):
                     label = items[-1]
                     data.append((image_path, items[-1]))
 
+            if phase == 'train':
+                self.train_examples = data
+            elif phase == 'dev':
+                self.dev_examples = data
+            elif phase == 'test':
+                self.test_examples = data
+
             if shuffle:
                 np.random.shuffle(data)
 
@@ -85,13 +96,22 @@ class ImageClassificationDataset(object):
 
     def train_data(self, shuffle=True):
         train_data_path = os.path.join(self.base_path, self.train_list_file)
-        return self._parse_data(train_data_path, shuffle)
+        return self._parse_data(train_data_path, shuffle, phase='train')
 
     def test_data(self, shuffle=False):
         test_data_path = os.path.join(self.base_path, self.test_list_file)
-        return self._parse_data(test_data_path, shuffle)
+        return self._parse_data(test_data_path, shuffle, phase='dev')
 
     def validate_data(self, shuffle=False):
         validate_data_path = os.path.join(self.base_path,
                                           self.validate_list_file)
-        return self._parse_data(validate_data_path, shuffle)
+        return self._parse_data(validate_data_path, shuffle, phase='test')
+
+    def get_train_examples(self):
+        return self.train_examples
+
+    def get_dev_examples(self):
+        return self.dev_examples
+
+    def get_test_examples(self):
+        return self.test_examples

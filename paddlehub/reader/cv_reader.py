@@ -122,3 +122,12 @@ class ImageClassificationReader(object):
                     yield (image, label)
 
         return paddle.batch(_data_reader, batch_size=batch_size)
+
+    def get_train_examples(self):
+        return self.dataset.train_examples
+
+    def get_dev_examples(self):
+        return self.dataset.dev_examples
+
+    def get_test_examples(self):
+        return self.dataset.test_examples

@@ -18,9 +18,8 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import codecs
 import csv
-from collections import namedtuple
+import io
 
 from paddlehub.dataset import InputExample, HubDataset
 from paddlehub.common.downloader import default_downloader
@@ -43,8 +42,8 @@ class GLUE(HubDataset):
                 'CoLA', 'MNLI', 'MRPC', 'QNLI', 'QQP', 'RTE', 'SST-2', 'STS-B'
         ]:
             raise Exception(
-                "The dataset \"" + sub_dataset +
-                "\" is not in GLUE benchmark. Please confirm the data set.")
+                sub_dataset +
+                " is not in GLUE benchmark. Please confirm the data set")
         self.sub_dataset = sub_dataset
         self.dataset_dir = os.path.join(DATA_HOME, "glue_data")
 
@@ -56,8 +55,8 @@ class GLUE(HubDataset):
 
         self._load_train_examples()
         self._load_dev_examples()
+        self._load_test_examples()
         self._load_predict_examples()
-        self.test_examples = []
 
     def _load_train_examples(self):
         self.train_file = os.path.join(self.dataset_dir, self.sub_dataset,
@@ -72,6 +71,9 @@ class GLUE(HubDataset):
             self.dev_file = os.path.join(self.dataset_dir, self.sub_dataset,
                                          "dev.tsv")
         self.dev_examples = self._read_tsv(self.dev_file)
+
+    def _load_test_examples(self):
+        self.test_examples = []
 
     def _load_predict_examples(self):
         if self.sub_dataset == 'MNLI':
@@ -91,6 +93,9 @@ class GLUE(HubDataset):
     def get_test_examples(self):
         return self.test_examples
 
+    def get_predict_examples(self):
+        return self.predict_examples
+
     def get_labels(self):
         """See base class."""
         if self.sub_dataset in ['MRPC', 'QQP', 'SST-2', 'CoLA']:
@@ -100,8 +105,7 @@ class GLUE(HubDataset):
         elif self.sub_dataset in ['MNLI']:
             return ["neutral", "contradiction", "entailment"]
         elif self.sub_dataset in ['STS-B']:
-            # TODO: STS-B is a regression task under development.
-            raise Exception("Developing")
+            return Exception("No category labels for regreesion tasks")
 
     @property
     def num_labels(self):
@@ -112,18 +116,19 @@ class GLUE(HubDataset):
 
     def _read_tsv(self, input_file, quotechar=None, wo_label=False):
         """Reads a tab separated value file."""
-        with open(input_file, "r", encoding="UTF-8") as f:
+        with io.open(input_file, "r", encoding="UTF-8") as f:
             reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
             examples = []
             seq_id = 0
-            header = next(reader)  # skip header
+            if self.sub_dataset != 'CoLA' or wo_label:
+                header = next(reader)  # skip header
             if self.sub_dataset in [
                     'MRPC',
             ]:
                 if wo_label:
-                    label_index, text_a_index, text_b_index = [None, -1, -2]
+                    label_index, text_a_index, text_b_index = [None, -2, -1]
                 else:
-                    label_index, text_a_index, text_b_index = [0, -1, -2]
+                    label_index, text_a_index, text_b_index = [0, -2, -1]
             elif self.sub_dataset in [
                     'QNLI',
             ]:
@@ -156,9 +161,9 @@ class GLUE(HubDataset):
                     'MNLI',
             ]:
                 if wo_label:
-                    label_index, text_a_index, text_b_index = [None, -1, -2]
+                    label_index, text_a_index, text_b_index = [None, 8, 9]
                 else:
-                    label_index, text_a_index, text_b_index = [-1, -4, -5]
+                    label_index, text_a_index, text_b_index = [-1, 8, 9]
             elif self.sub_dataset in ['CoLA']:
                 if wo_label:
                     label_index, text_a_index, text_b_index = [None, 1, None]
@@ -166,9 +171,9 @@ class GLUE(HubDataset):
                     label_index, text_a_index, text_b_index = [1, 3, None]
             elif self.sub_dataset in ['STS-B']:
                 if wo_label:
-                    label_index, text_a_index, text_b_index = [None, -1, -2]
+                    label_index, text_a_index, text_b_index = [None, -2, -1]
                 else:
-                    label_index, text_a_index, text_b_index = [-1, -2, -3]
+                    label_index, text_a_index, text_b_index = [-1, -3, -2]
 
             for line in reader:
                 try:
@@ -187,7 +192,20 @@ class GLUE(HubDataset):
 
 
 if __name__ == "__main__":
-    ds = GLUE(sub_dataset='SST-2')
-    for e in ds.get_train_examples()[:3]:
-        print(e)
-    labels = set()
+    for sub_dataset in [
+            'CoLA', 'MNLI', 'MRPC', 'QNLI', 'QQP', 'RTE', 'SST-2', 'STS-B'
+    ]:
+        print(sub_dataset)
+        ds = GLUE(sub_dataset=sub_dataset)
+        for e in ds.get_train_examples()[:2]:
+            print(e)
+        print()
+        for e in ds.get_dev_examples()[:2]:
+            print(e)
+        print()
+        for e in ds.get_test_examples()[:2]:
+            print(e)
+        print()
+        for e in ds.get_predict_examples()[:2]:
+            print(e)
+        print()

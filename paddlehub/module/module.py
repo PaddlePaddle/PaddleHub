@@ -580,9 +580,22 @@ class Module(object):
             logger.info(
                 "Set maximum sequence length of input tensor to {}".format(
                     max_seq_len))
-            for tensor_name in [
+            if self.name.startswith("ernie_v2"):
+                feed_list = [
+                    "input_ids", "position_ids", "segment_ids", "input_mask",
+                    "task_ids"
+                ]
+                logger.warning(
+                    "%s will exploite task_id, the arguement use_taskid of Reader class must be True."
+                    % self.name)
+            else:
+                feed_list = [
                     "input_ids", "position_ids", "segment_ids", "input_mask"
-            ]:
+                ]
+                logger.warning(
+                    "%s has no task_id, the arguement use_taskid of Reader class must be False."
+                    % self.name)
+            for tensor_name in feed_list:
                 seq_tensor_shape = [-1, max_seq_len, 1]
                 logger.info("The shape of input tensor[{}] set to {}".format(
                     tensor_name, seq_tensor_shape))

@@ -23,35 +23,90 @@ import ast
 import numpy as np
 import os
 import time
-
 import paddle
 import paddle.fluid as fluid
 import paddlehub as hub
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
+parser.add_argument("--checkpoint_dir", type=str, default="ckpt_20190802182531", help="Directory to model checkpoint")
 parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
+parser.add_argument("--dataset", type=str, default="chnsenticorp", help="The choice of dataset")
+parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
+parser.add_argument("--use_taskid", type=ast.literal_eval, default=False, help="Whether to use taskid ,if yes to use ernie v2.")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # loading Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
-    inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
+    dataset = None
+    # Download dataset and use ClassifyReader to read dataset
+    if args.dataset.lower() == "chnsenticorp":
+        dataset = hub.dataset.ChnSentiCorp()
+        module = hub.Module(name="ernie")
+    elif args.dataset.lower() == "nlpcc_dbqa":
+        dataset = hub.dataset.NLPCC_DBQA()
+        module = hub.Module(name="ernie")
+    elif args.dataset.lower() == "lcqmc":
+        dataset = hub.dataset.LCQMC()
+        module = hub.Module(name="ernie")
+    elif args.dataset.lower() == "mrpc":
+        dataset = hub.dataset.GLUE("MRPC")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "qqp":
+        dataset = hub.dataset.GLUE("QQP")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "sst-2":
+        dataset = hub.dataset.GLUE("SST-2")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "cola":
+        dataset = hub.dataset.GLUE("CoLA")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "qnli":
+        dataset = hub.dataset.GLUE("QNLI")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "rte":
+        dataset = hub.dataset.GLUE("RTE")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower() == "mnli":
+        dataset = hub.dataset.GLUE("MNLI")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset.lower().startswith("xnli"):
+        dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
+        module = hub.Module(name="bert_multi_cased_L-12_H-768_A-12")
+    else:
+        raise ValueError("%s dataset is not defined" % args.dataset)
 
-    # Sentence classification  dataset reader
-    dataset = hub.dataset.ChnSentiCorp()
+    inputs, outputs, program = module.context(
+        trainable=True, max_seq_len=args.max_seq_len)
     reader = hub.reader.ClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
-
-    place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()
-    exe = fluid.Executor(place)
+        max_seq_len=args.max_seq_len,
+        use_task_id=args.use_taskid)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
@@ -66,6 +121,15 @@ if __name__ == '__main__':
         inputs["segment_ids"].name,
         inputs["input_mask"].name,
     ]
+
+    if args.use_taskid:
+        feed_list = [
+            inputs["input_ids"].name,
+            inputs["position_ids"].name,
+            inputs["segment_ids"].name,
+            inputs["input_mask"].name,
+            inputs["task_ids"].name,
+        ]
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
@@ -86,15 +150,7 @@ if __name__ == '__main__':
         config=config)
 
     # Data to be prdicted
-    data = [
-        ["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
-        [
-            "还稍微重了点，可能是硬盘大的原故，还要再轻半斤就好了。其他要进一步验证。贴的几种膜气泡较多，用不了多久就要更换了，屏幕膜稍好点，但比没有要强多了。建议配赠几张膜让用用户自己贴。"
-        ],
-        [
-            "前台接待太差，酒店有A B楼之分，本人check－in后，前台未告诉B楼在何处，并且B楼无明显指示；房间太小，根本不像4星级设施，下次不会再选择入住此店啦"
-        ], ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]
-    ]
+    data = [[d.text_a, d.text_b] for d in dataset.get_dev_examples()[:3]]
 
     index = 0
     run_states = cls_task.predict(data=data)

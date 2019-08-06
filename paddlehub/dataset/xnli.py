@@ -19,8 +19,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from collections import namedtuple
-import codecs
+import io
 import os
 import csv
 
@@ -44,8 +43,9 @@ class XNLI(HubDataset):
                 "ar", "bg", "de", "el", "en", "es", "fr", "hi", "ru", "sw",
                 "th", "tr", "ur", "vi", "zh"
         ]:
-            raise Exception("The language \"" + language +
-                            "\" is not in XNLI. Please confirm the language.")
+
+            raise Exception(language +
+                            "is not in XNLI. Please confirm the language")
         self.language = language
         self.dataset_dir = os.path.join(DATA_HOME, "XNLI-lan")
 
@@ -96,7 +96,7 @@ class XNLI(HubDataset):
 
     def _read_tsv(self, input_file, quotechar=None):
         """Reads a tab separated value file."""
-        with codecs.open(input_file, "r", encoding="UTF-8") as f:
+        with io.open(input_file, "r", encoding="UTF-8") as f:
             reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
             examples = []
             seq_id = 0
