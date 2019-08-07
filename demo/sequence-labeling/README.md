@@ -113,7 +113,7 @@ sequence_output = outputs["sequence_output"]
 # feed_list的Tensor顺序不可以调整
 feed_list = [
     inputs["input_ids"].name, inputs["position_ids"].name,
-    inputs["segment_ids"].name, inputs["input_mask"].name, label.name
+    inputs["segment_ids"].name, inputs["input_mask"].name
 ]
 
 seq_label_task = hub.SequenceLabelTask(
