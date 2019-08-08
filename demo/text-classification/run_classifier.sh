@@ -9,13 +9,18 @@ CKPT_DIR="./ckpt_${DATASET}"
 # ChnSentiCorp: batch_size=24, weight_decay=0.01, num_epoch=3, max_seq_len=128, lr=5e-5
 # NLPCC_DBQA: batch_size=8, weight_decay=0.01, num_epoch=3, max_seq_len=512, lr=2e-5
 # LCQMC: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=2e-5
-# MNLI: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
 # QQP: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
 # QNLI: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
 # SST-2: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
 # CoLA: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
-# MRPC: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
+# MRPC: batch_size=32, weight_decay=0.01, num_epoch=3, max_seq_len=128, lr=5e-5
 # RTE: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=3e-5
+# MNLI: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
+#       Specify the matched/mismatched dev and test dataset  with an underscore.
+#       mnli_m or mnli: dev and test in matched dataset.
+#       mnli_mm: dev and test in mismatched dataset.
+#      The difference can be seen in https://www.nyu.edu/projects/bowman/multinli/paper.pdf.
+#       If you are not sure which one to pick, just use mnli or mnli_m.
 # XNLI: batch_size=32, weight_decay=0, num_epoch=2, max_seq_len=128, lr=5e-5
 #       Specify the language with an underscore like xnli_zh.
 #       ar- Arabic      bg- Bulgarian      de- German

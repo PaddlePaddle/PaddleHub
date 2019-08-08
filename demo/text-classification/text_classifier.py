@@ -97,8 +97,15 @@ if __name__ == '__main__':
         else:
             module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
         metrics_choices = ["acc"]
-    elif args.dataset.lower() == "mnli":
-        dataset = hub.dataset.GLUE("MNLI")
+    elif args.dataset.lower() == "mnli" or args.dataset.lower() == "mnli":
+        dataset = hub.dataset.GLUE("MNLI_m")
+        if args.use_taskid:
+            module = hub.Module(name="ernie_v2_eng_base")
+        else:
+            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        metrics_choices = ["acc"]
+    elif args.dataset.lower() == "mnli_mm":
+        dataset = hub.dataset.GLUE("MNLI_mm")
         if args.use_taskid:
             module = hub.Module(name="ernie_v2_eng_base")
         else:

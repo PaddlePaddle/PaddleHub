@@ -3,7 +3,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 # User can select chnsenticorp, nlpcc_dbqa, lcqmc and so on for different task
 # Support ChnSentiCorp	NLPCC_DBQA	LCQMC	MRPC	QQP	SST-2
-#         CoLA	QNLI	RTE	MNLI	XNLI
+#         CoLA	QNLI	RTE	MNLI (or MNLI_m) 	MNLI_mm）	XNLI
 # for XNLI: Specify the language with an underscore like xnli_zh.
 #       ar: Arabic      bg: Bulgarian      de: German
 #       el: Greek       en: English        es: Spanish
@@ -11,7 +11,7 @@ export CUDA_VISIBLE_DEVICES=0
 #       sw: Swahili     th: Thai           tr: Turkish
 #       ur: Urdu        vi: Vietnamese     zh: Chinese (Simplified)
 DATASET="rte"
-CKPT_DIR="./ckpt_${DATASET}_lr3"
+CKPT_DIR="./ckpt_${DATASET}"
 
 python -u predict.py --checkpoint_dir=$CKPT_DIR \
                             --max_seq_len=128 \
