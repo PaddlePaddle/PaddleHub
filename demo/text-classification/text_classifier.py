@@ -26,7 +26,7 @@ parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whet
 parser.add_argument("--dataset", type=str, default="chnsenticorp", help="The choice of dataset")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
-parser.add_argument("--warmup_proportion", type=float, default=0.1, help="Warmup proportion params for warmup strategy")
+parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--data_dir", type=str, default=None, help="Path to training data.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
@@ -39,63 +39,82 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     dataset = None
+    metrics_choices = []
     # Download dataset and use ClassifyReader to read dataset
     if args.dataset.lower() == "chnsenticorp":
         dataset = hub.dataset.ChnSentiCorp()
         module = hub.Module(name="ernie")
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == "nlpcc_dbqa":
         dataset = hub.dataset.NLPCC_DBQA()
         module = hub.Module(name="ernie")
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == "lcqmc":
         dataset = hub.dataset.LCQMC()
         module = hub.Module(name="ernie")
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == "mrpc":
         dataset = hub.dataset.GLUE("MRPC")
         if args.use_taskid:
             module = hub.Module(name="ernie_v2_eng_base")
         else:
             module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        metrics_choices = [
+            "f1", "acc"
+        ]  # The first metric will be choose to eval. Ref: task.py:792
     elif args.dataset.lower() == "qqp":
         dataset = hub.dataset.GLUE("QQP")
         if args.use_taskid:
             module = hub.Module(name="ernie_v2_eng_base")
         else:
             module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        metrics_choices = ["f1", "acc"]
     elif args.dataset.lower() == "sst-2":
         dataset = hub.dataset.GLUE("SST-2")
         if args.use_taskid:
             module = hub.Module(name="ernie_v2_eng_base")
         else:
             module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == "cola":
         dataset = hub.dataset.GLUE("CoLA")
         if args.use_taskid:
             module = hub.Module(name="ernie_v2_eng_base")
         else:
             module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        metrics_choices = ["matthews", "acc"]
     elif args.dataset.lower() == "qnli":
         dataset = hub.dataset.GLUE("QNLI")
         if args.use_taskid:
             module = hub.Module(name="ernie_v2_eng_base")
         else:
             module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == "rte":
         dataset = hub.dataset.GLUE("RTE")
         if args.use_taskid:
             module = hub.Module(name="ernie_v2_eng_base")
         else:
             module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == "mnli":
         dataset = hub.dataset.GLUE("MNLI")
         if args.use_taskid:
             module = hub.Module(name="ernie_v2_eng_base")
         else:
             module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        metrics_choices = ["acc"]
     elif args.dataset.lower().startswith("xnli"):
         dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
         module = hub.Module(name="bert_multi_cased_L-12_H-768_A-12")
+        metrics_choices = ["acc"]
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
+
+    support_metrics = ["acc", "f1", "matthews"]
+    for metric in metrics_choices:
+        if metric not in support_metrics:
+            raise ValueError("\"%s\" metric is not defined" % metric)
 
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
@@ -149,7 +168,8 @@ if __name__ == '__main__':
         feature=pooled_output,
         feed_list=feed_list,
         num_classes=dataset.num_labels,
-        config=config)
+        config=config,
+        metrics_choices=metrics_choices)
 
     # Finetune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically

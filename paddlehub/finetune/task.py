@@ -33,12 +33,14 @@ from paddlehub.common.paddle_helper import dtype_map, clone_program
 from paddlehub.common.utils import mkdir, to_list
 from paddlehub.common.logger import logger
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
-from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
+from paddlehub.finetune.evaluate import chunk_eval, calculate_f1, calculate_f1_np, matthews_corrcoef
 from paddlehub.finetune.config import RunConfig
+from scipy.stats import spearmanr
 
 __all__ = [
     "ClassifierTask", "ImageClassifierTask", "TextClassifierTask",
-    "SequenceLabelTask", "MultiLabelClassifierTask", "ReadingComprehensionTask"
+    "SequenceLabelTask", "MultiLabelClassifierTask", "ReadingComprehensionTask",
+    "RegressionTask"
 ]
 
 
@@ -92,11 +94,15 @@ class BasicTask(object):
                  data_reader,
                  main_program=None,
                  startup_program=None,
-                 config=None):
+                 config=None,
+                 metrics_choices="acc"):
 
         # base item
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
+        if isinstance(metrics_choices, str):
+            metrics_choices = [metrics_choices]
+        self.metrics_choices = metrics_choices
         if main_program is None:
             self._base_main_program = clone_program(
                 fluid.default_main_program(), for_test=False)
@@ -661,7 +667,8 @@ class ClassifierTask(BasicTask):
                  data_reader,
                  startup_program=None,
                  config=None,
-                 hidden_units=None):
+                 hidden_units=None,
+                 metrics_choices="acc"):
 
         main_program = feature.block.program
 
@@ -670,12 +677,13 @@ class ClassifierTask(BasicTask):
             main_program=main_program,
             feed_list=feed_list,
             startup_program=startup_program,
-            config=config)
+            config=config,
+            metrics_choices=metrics_choices)
 
         self.feature = feature
         self.num_classes = num_classes
         self.hidden_units = hidden_units
-        self.best_accuracy = -1
+        self.best_score = -1
 
     def _build_net(self):
         cls_feats = self.feature
@@ -694,6 +702,9 @@ class ClassifierTask(BasicTask):
                 name="cls_out_b", initializer=fluid.initializer.Constant(0.)),
             act="softmax")
 
+        self.ret_infers = fluid.layers.reshape(
+            x=fluid.layers.argmax(logits, axis=1), shape=[-1, 1])
+
         return [logits]
 
     def _add_label(self):
@@ -705,56 +716,89 @@ class ClassifierTask(BasicTask):
         return fluid.layers.mean(x=ce_loss)
 
     def _add_metrics(self):
-        return [
-            fluid.layers.accuracy(input=self.outputs[0], label=self.labels[0])
-        ]
+        acc = fluid.layers.accuracy(input=self.outputs[0], label=self.labels[0])
+        return [self.labels[0], self.ret_infers, acc]
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
             if not self.is_predict_phase:
+                self.env.score_scalar = {}
                 self.env.loss_scalar = logw.scalar(
                     tag="Loss [{}]".format(self.phase))
-                self.env.acc_scalar = logw.scalar(
-                    tag="Accuracy [{}]".format(self.phase))
+                for choice in self.metrics_choices:
+                    self.env.score_scalar[choice] = logw.scalar(
+                        tag="{} [{}]".format(choice, self.phase))
 
     def _calculate_metrics(self, run_states):
         loss_sum = acc_sum = run_examples = 0
         run_step = run_time_used = 0
+        all_labels = np.array([])
+        all_infers = np.array([])
+
         for run_state in run_states:
             run_examples += run_state.run_examples
             run_step += run_state.run_step
             loss_sum += np.mean(
                 run_state.run_results[-1]) * run_state.run_examples
             acc_sum += np.mean(
-                run_state.run_results[0]) * run_state.run_examples
+                run_state.run_results[2]) * run_state.run_examples
+            np_labels = run_state.run_results[0]
+            np_infers = run_state.run_results[1]
+            all_labels = np.hstack((all_labels, np_labels.reshape([-1])))
+            all_infers = np.hstack((all_infers, np_infers.reshape([-1])))
 
         run_time_used = time.time() - run_states[0].run_time_begin
         avg_loss = loss_sum / run_examples
-        avg_acc = acc_sum / run_examples
         run_speed = run_step / run_time_used
 
-        return avg_loss, avg_acc, run_speed
+        scores = {}
+        if "acc" in self.metrics_choices:
+            avg_acc = acc_sum / run_examples
+            scores["acc"] = avg_acc
+
+        if "f1" in self.metrics_choices:
+            f1 = calculate_f1_np(all_infers, all_labels)
+            scores["f1"] = f1
+
+        if "matthews" in self.metrics_choices:
+            matthews = matthews_corrcoef(all_infers, all_labels)
+            scores["matthews"] = matthews
+
+        return avg_loss, scores, run_speed
 
     def _log_interval_event(self, run_states):
-        avg_loss, avg_acc, run_speed = self._calculate_metrics(run_states)
+        avg_loss, scores, run_speed = self._calculate_metrics(run_states)
         self.env.loss_scalar.add_record(self.current_step, avg_loss)
-        self.env.acc_scalar.add_record(self.current_step, avg_acc)
-        logger.info("step %d: loss=%.5f acc=%.5f [step/sec: %.2f]" %
-                    (self.current_step, avg_loss, avg_acc, run_speed))
+        log_scores = ""
+        for choice in self.metrics_choices:
+            self.env.score_scalar[choice].add_record(self.current_step,
+                                                     scores[choice])
+            log_scores += "{}={} ".format(choice, scores[choice])
+
+        logger.info("step %d: loss=%.5f %s[step/sec: %.2f]" %
+                    (self.current_step, avg_loss, log_scores, run_speed))
 
     def _eval_end_event(self, run_states):
-        eval_loss, eval_acc, run_speed = self._calculate_metrics(run_states)
-        logger.info(
-            "[%s dataset evaluation result] loss=%.5f acc=%.5f [step/sec: %.2f]"
-            % (self.phase, eval_loss, eval_acc, run_speed))
+        eval_loss, eval_scores, run_speed = self._calculate_metrics(run_states)
         self.env.loss_scalar.add_record(self.current_step, eval_loss)
-        self.env.acc_scalar.add_record(self.current_step, eval_acc)
-        if self.phase in ["dev", "val"] and eval_acc > self.best_accuracy:
-            self.best_accuracy = eval_acc
+        log_scores = ""
+        for choice in self.metrics_choices:
+            self.env.score_scalar[choice].add_record(self.current_step,
+                                                     eval_scores[choice])
+            log_scores += "{}={} ".format(choice, eval_scores[choice])
+        logger.info(
+            "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
+            (self.phase, eval_loss, log_scores, run_speed))
+
+        eval_metric = eval_scores[
+            self.metrics_choices[0]]  # The first metric will be choose to eval
+        if self.phase in ["dev", "val"] and eval_metric > self.best_score:
+            self.best_score = eval_metric
             model_saved_dir = os.path.join(self.config.checkpoint_dir,
                                            "best_model")
-            logger.info("best model saved to %s [best accuracy=%.5f]" %
-                        (model_saved_dir, self.best_accuracy))
+            logger.info(
+                "best model saved to %s [best %s=%.5f]" %
+                (model_saved_dir, self.metrics_choices[0], self.best_score))
             save_result = fluid.io.save_persistables(
                 executor=self.exe,
                 dirname=model_saved_dir,
@@ -772,9 +816,8 @@ class TextClassifierTask(ClassifierTask):
                  data_reader,
                  startup_program=None,
                  config=None,
-                 hidden_units=None):
-
-        main_program = feature.block.program
+                 hidden_units=None,
+                 metrics_choices="acc"):
 
         super(TextClassifierTask, self).__init__(
             data_reader=data_reader,
@@ -783,7 +826,8 @@ class TextClassifierTask(ClassifierTask):
             feed_list=feed_list,
             startup_program=startup_program,
             config=config,
-            hidden_units=hidden_units)
+            hidden_units=hidden_units,
+            metrics_choices=metrics_choices)
 
     def _build_net(self):
         cls_feats = fluid.layers.dropout(
@@ -806,20 +850,22 @@ class TextClassifierTask(ClassifierTask):
                 name="cls_out_b", initializer=fluid.initializer.Constant(0.)),
             act="softmax")
 
+        self.ret_infers = fluid.layers.reshape(
+            x=fluid.layers.argmax(logits, axis=1), shape=[-1, 1])
+
         return [logits]
 
 
 class SequenceLabelTask(BasicTask):
-    def __init__(
-            self,
-            feature,
-            max_seq_len,
-            num_classes,
-            feed_list,
-            data_reader,
-            startup_program=None,
-            config=None,
-    ):
+    def __init__(self,
+                 feature,
+                 max_seq_len,
+                 num_classes,
+                 feed_list,
+                 data_reader,
+                 startup_program=None,
+                 config=None,
+                 metrics_choices="f1"):
 
         main_program = feature.block.program
 
@@ -828,7 +874,8 @@ class SequenceLabelTask(BasicTask):
             main_program=main_program,
             feed_list=feed_list,
             startup_program=startup_program,
-            config=config)
+            config=config,
+            metrics_choices=metrics_choices)
 
         self.feature = feature
         self.max_seq_len = max_seq_len
@@ -970,7 +1017,8 @@ class MultiLabelClassifierTask(ClassifierTask):
                  data_reader,
                  startup_program=None,
                  config=None,
-                 hidden_units=None):
+                 hidden_units=None,
+                 metrics_choices="acc"):
 
         main_program = feature.block.program
 
@@ -981,7 +1029,8 @@ class MultiLabelClassifierTask(ClassifierTask):
             feed_list=feed_list,
             startup_program=startup_program,
             config=config,
-            hidden_units=hidden_units)
+            hidden_units=hidden_units,
+            metrics_choices=metrics_choices)
 
         self.best_avg_auc = -1
 
@@ -1110,15 +1159,126 @@ class MultiLabelClassifierTask(ClassifierTask):
         return self.outputs
 
 
+class RegressionTask(BasicTask):
+    def __init__(self,
+                 feature,
+                 feed_list,
+                 data_reader,
+                 startup_program=None,
+                 config=None,
+                 hidden_units=None,
+                 metrics_choices="spearman"):
+
+        main_program = feature.block.program
+
+        super(RegressionTask, self).__init__(
+            data_reader=data_reader,
+            main_program=main_program,
+            feed_list=feed_list,
+            startup_program=startup_program,
+            config=config,
+            metrics_choices=metrics_choices)
+
+        self.feature = feature
+        self.hidden_units = hidden_units
+        self.best_coefficient = -1
+
+    def _build_net(self):
+        cls_feats = fluid.layers.dropout(
+            x=self.feature,
+            dropout_prob=0.1,
+            dropout_implementation="upscale_in_train")
+
+        if self.hidden_units is not None:
+            for n_hidden in self.hidden_units:
+                cls_feats = fluid.layers.fc(
+                    input=cls_feats, size=n_hidden, act="relu")
+
+        logits = fluid.layers.fc(
+            input=cls_feats,
+            size=1,
+            param_attr=fluid.ParamAttr(
+                name="cls_out_w",
+                initializer=fluid.initializer.TruncatedNormal(scale=0.02)),
+            bias_attr=fluid.ParamAttr(
+                name="cls_out_b", initializer=fluid.initializer.Constant(0.)),
+            act=None)
+
+        return [logits]
+
+    def _add_label(self):
+        return [fluid.layers.data(name="label", dtype="float32", shape=[1])]
+
+    def _add_loss(self):
+        cost = fluid.layers.square_error_cost(
+            input=self.outputs[0], label=self.labels[0])
+        return fluid.layers.mean(x=cost)
+
+    def _add_metrics(self):
+        return [self.labels[0], self.outputs[0]]
+
+    def _build_env_end_event(self):
+        with self.log_writer.mode(self.phase) as logw:
+            if not self.is_predict_phase:
+                self.env.loss_scalar = logw.scalar(
+                    tag="Loss [{}]".format(self.phase))
+                self.env.coe_scalar = logw.scalar(
+                    tag="correlation coefficient [{}]".format(self.phase))
+
+    def _calculate_metrics(self, run_states):
+        loss_sum = run_examples = 0
+        run_step = run_time_used = 0
+        all_labels = np.array([])
+        all_infers = np.array([])
+        for run_state in run_states:
+            run_examples += run_state.run_examples
+            run_step += run_state.run_step
+            loss_sum += np.mean(
+                run_state.run_results[-1]) * run_state.run_examples
+            np_labels = run_state.run_results[0]
+            np_infers = run_state.run_results[1]
+            all_labels = np.hstack((all_labels, np_labels.reshape([-1])))
+            all_infers = np.hstack((all_infers, np_infers.reshape([-1])))
+
+        run_time_used = time.time() - run_states[0].run_time_begin
+        avg_loss = loss_sum / run_examples
+        run_speed = run_step / run_time_used
+        spearman_correlations = spearmanr(all_labels, all_infers)[0]
+        return avg_loss, spearman_correlations, run_speed
+
+    def _log_interval_event(self, run_states):
+        avg_loss, spearman, run_speed = self._calculate_metrics(run_states)
+        self.env.loss_scalar.add_record(self.current_step, avg_loss)
+        logger.info(
+            "step %d: loss=%.5f spearman correlations=%.5f  [step/sec: %.2f]" %
+            (self.current_step, avg_loss, spearman, run_speed))
+
+    def _eval_end_event(self, run_states):
+        eval_loss, spearman, run_speed = self._calculate_metrics(run_states)
+        logger.info(
+            "[%s dataset evaluation result] loss=%.5f spearman correlations=%.5f [step/sec: %.2f]"
+            % (self.phase, eval_loss, spearman, run_speed))
+        self.env.loss_scalar.add_record(self.current_step, eval_loss)
+        if self.phase in ["dev", "val"] and spearman > self.best_coefficient:
+            self.best_coefficient = spearman
+            model_saved_dir = os.path.join(self.config.checkpoint_dir,
+                                           "best_model")
+            logger.info("best model saved to %s [best coefficient=%.5f]" %
+                        (model_saved_dir, self.best_coefficient))
+            save_result = fluid.io.save_persistables(
+                executor=self.exe,
+                dirname=model_saved_dir,
+                main_program=self.main_program)
+
+
 class ReadingComprehensionTask(BasicTask):
-    def __init__(
-            self,
-            feature,
-            feed_list,
-            data_reader,
-            startup_program=None,
-            config=None,
-    ):
+    def __init__(self,
+                 feature,
+                 feed_list,
+                 data_reader,
+                 startup_program=None,
+                 config=None,
+                 metrics_choices=None):
 
         main_program = feature.block.program
 
@@ -1127,7 +1287,8 @@ class ReadingComprehensionTask(BasicTask):
             main_program=main_program,
             feed_list=feed_list,
             startup_program=startup_program,
-            config=config)
+            config=config,
+            metrics_choices=metrics_choices)
 
         self.feature = feature
 

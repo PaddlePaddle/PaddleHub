@@ -28,30 +28,45 @@ CKPT_FILE_NAME = "ckpt.meta"
 
 
 def load_checkpoint(checkpoint_dir, exe, main_program):
+    current_epoch = 1
+    global_step = 0
 
     ckpt_meta_path = os.path.join(checkpoint_dir, CKPT_FILE_NAME)
     ckpt = checkpoint_pb2.CheckPoint()
+
     logger.info("Try loading checkpoint from {}".format(ckpt_meta_path))
     if os.path.exists(ckpt_meta_path):
         with open(ckpt_meta_path, "rb") as f:
             ckpt.ParseFromString(f.read())
-    current_epoch = 1
-    global_step = 0
+        if ckpt.latest_model_dir:
 
-    def if_exist(var):
-        return os.path.exists(os.path.join(ckpt.latest_model_dir, var.name))
+            def if_exist(var):
+                return os.path.exists(
+                    os.path.join(ckpt.latest_model_dir, var.name))
 
-    if ckpt.latest_model_dir:
-        fluid.io.load_vars(
-            exe, ckpt.latest_model_dir, main_program, predicate=if_exist)
+            fluid.io.load_vars(
+                exe, ckpt.latest_model_dir, main_program, predicate=if_exist)
 
-        logger.info("PaddleHub model checkpoint loaded. current_epoch={}, "
-                    "global_step={}".format(ckpt.current_epoch,
-                                            ckpt.global_step))
-        return True, ckpt.current_epoch, ckpt.global_step
+            logger.info("PaddleHub model checkpoint loaded. current_epoch={}, "
+                        "global_step={}".format(ckpt.current_epoch,
+                                                ckpt.global_step))
+            return True, ckpt.current_epoch, ckpt.global_step
+    else:
+        logger.info(
+            "Failed, trying loading variables from {}".format(checkpoint_dir))
+        if os.path.exists(os.path.join(checkpoint_dir, "label")):
 
-    logger.info(
-        "PaddleHub model checkpoint not found, start training from scratch...")
+            def if_exist(var):
+                return os.path.exists(os.path.join(checkpoint_dir, var.name))
+
+            fluid.io.load_vars(
+                exe, checkpoint_dir, main_program, predicate=if_exist)
+            logger.info(
+                "PaddleHub model variables loaded, start training from scratch..."
+            )
+            return True, current_epoch, global_step
+
+    logger.info("Failed again, start training from scratch...")
 
     return False, current_epoch, global_step
 

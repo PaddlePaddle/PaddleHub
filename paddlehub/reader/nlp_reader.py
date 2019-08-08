@@ -202,6 +202,9 @@ class BaseReader(object):
 
         return record
 
+    def _pad_batch_records(self, batch_records, phase):
+        raise NotImplementedError
+
     def _prepare_batch_data(self, examples, batch_size, phase=None):
         """generate batch records"""
         batch_records, max_len = [], 0
@@ -747,6 +750,127 @@ class SquadInputFeatures(object):
         self.start_position = start_position
         self.end_position = end_position
         self.is_impossible = is_impossible
+
+
+class RegressionReader(BaseReader):
+    def __init__(self,
+                 dataset,
+                 vocab_path,
+                 label_map_config=None,
+                 max_seq_len=128,
+                 do_lower_case=True,
+                 random_seed=None):
+        self.max_seq_len = max_seq_len
+        self.tokenizer = tokenization.FullTokenizer(
+            vocab_file=vocab_path, do_lower_case=do_lower_case)
+        self.vocab = self.tokenizer.vocab
+        self.dataset = dataset
+        self.pad_id = self.vocab["[PAD]"]
+        self.cls_id = self.vocab["[CLS]"]
+        self.sep_id = self.vocab["[SEP]"]
+        self.in_tokens = False
+
+        np.random.seed(random_seed)
+
+        # generate label map
+        self.label_map = {}  # Unlike BaseReader, it's not filled
+
+        self.current_example = 0
+        self.current_epoch = 0
+
+        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
+
+    def _pad_batch_records(self, batch_records, phase=None):
+        batch_token_ids = [record.token_ids for record in batch_records]
+        batch_text_type_ids = [record.text_type_ids for record in batch_records]
+        batch_position_ids = [record.position_ids for record in batch_records]
+
+        padded_token_ids, input_mask = pad_batch_data(
+            batch_token_ids,
+            max_seq_len=self.max_seq_len,
+            pad_idx=self.pad_id,
+            return_input_mask=True)
+        padded_text_type_ids = pad_batch_data(
+            batch_text_type_ids,
+            max_seq_len=self.max_seq_len,
+            pad_idx=self.pad_id)
+        padded_position_ids = pad_batch_data(
+            batch_position_ids,
+            max_seq_len=self.max_seq_len,
+            pad_idx=self.pad_id)
+
+        if phase != "predict":
+            batch_labels = [record.label_id for record in batch_records]
+            # the only diff with ClassifyReader: astype("float32")
+            batch_labels = np.array(batch_labels).astype("float32").reshape(
+                [-1, 1])
+
+            return_list = [
+                padded_token_ids, padded_position_ids, padded_text_type_ids,
+                input_mask, batch_labels
+            ]
+        else:
+            return_list = [
+                padded_token_ids, padded_position_ids, padded_text_type_ids,
+                input_mask
+            ]
+
+        return return_list
+
+    def data_generator(self,
+                       batch_size=1,
+                       phase='train',
+                       shuffle=True,
+                       data=None):
+        if phase == 'train':
+            shuffle = True
+            examples = self.get_train_examples()
+            self.num_examples['train'] = len(examples)
+        elif phase == 'val' or phase == 'dev':
+            shuffle = False
+            examples = self.get_dev_examples()
+            self.num_examples['dev'] = len(examples)
+        elif phase == 'test':
+            shuffle = False
+            examples = self.get_test_examples()
+            self.num_examples['test'] = len(examples)
+        elif phase == 'predict':
+            shuffle = False
+            examples = []
+            seq_id = 0
+
+            for item in data:
+                # set label in order to run the program
+                label = -1  # different from BaseReader
+                if len(item) == 1:
+                    item_i = InputExample(
+                        guid=seq_id, text_a=item[0], label=label)
+                elif len(item) == 2:
+                    item_i = InputExample(
+                        guid=seq_id,
+                        text_a=item[0],
+                        text_b=item[1],
+                        label=label)
+                else:
+                    raise ValueError(
+                        "The length of input_text is out of handling, which must be 1 or 2!"
+                    )
+                examples.append(item_i)
+                seq_id += 1
+        else:
+            raise ValueError(
+                "Unknown phase, which should be in ['train', 'dev', 'test', 'predict']."
+            )
+
+        def wrapper():
+            if shuffle:
+                np.random.shuffle(examples)
+
+            for batch_data in self._prepare_batch_data(
+                    examples, batch_size, phase=phase):
+                yield [batch_data]
+
+        return wrapper
 
 
 class ReadingComprehensionReader(object):
