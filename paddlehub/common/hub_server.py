@@ -151,6 +151,9 @@ class HubServer(object):
             api_url = srv_utils.uri_path(self.get_server_url(), 'search')
             r = srv_utils.hub_request(api_url, payload)
             if r['status'] == 0 and len(r['data']) > 0:
+                for item in r['data']:
+                    if resource_name.lower() == item['name'].lower():
+                        return item
                 return r['data'][0]
         except:
             if self.config.get('debug', False):
