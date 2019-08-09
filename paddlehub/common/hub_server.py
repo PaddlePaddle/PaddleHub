@@ -156,6 +156,9 @@ class HubServer(object):
             api_url = srv_utils.uri_path(self.get_server_url(), 'search')
             r = srv_utils.hub_request(api_url, payload)
             if r['status'] == 0 and len(r['data']) > 0:
+                for item in r['data']:
+                    if resource_name.lower() == item['name'].lower():
+                        return item
                 return r['data'][0]
         except:
             if self.config.get('debug', False):
@@ -226,11 +229,14 @@ class HubServer(object):
                 raise
             else:
                 pass
-        file_url = self.config[
-            'resource_storage_server_url'] + RESOURCE_LIST_FILE
-        result, tips, self.resource_list_file = default_downloader.download_file(
-            file_url, save_path=hub.CACHE_HOME, replace=True)
-        if not result:
+        try:
+            file_url = self.config[
+                'resource_storage_server_url'] + RESOURCE_LIST_FILE
+            result, tips, self.resource_list_file = default_downloader.download_file(
+                file_url, save_path=hub.CACHE_HOME, replace=True)
+            if not result:
+                return False
+        except:
             return False
         return True
 
