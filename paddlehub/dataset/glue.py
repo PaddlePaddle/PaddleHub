@@ -39,11 +39,16 @@ class GLUE(HubDataset):
     def __init__(self, sub_dataset='SST-2'):
         # sub_dataset : CoLA, MNLI, MRPC, QNLI, QQP, RTE, SST-2, STS-B
         if sub_dataset not in [
-                'CoLA', 'MNLI', 'MRPC', 'QNLI', 'QQP', 'RTE', 'SST-2', 'STS-B'
+                'CoLA', 'MNLI', 'MNLI_m', 'MNLI_mm', 'MRPC', 'QNLI', 'QQP',
+                'RTE', 'SST-2', 'STS-B'
         ]:
             raise Exception(
                 sub_dataset +
                 " is not in GLUE benchmark. Please confirm the data set")
+        self.mismatch = False
+        if sub_dataset == 'MNLI_mm':
+            sub_dataset = 'MNLI'
+            self.mismatch = True
         self.sub_dataset = sub_dataset
         self.dataset_dir = os.path.join(DATA_HOME, "glue_data")
 
@@ -64,9 +69,12 @@ class GLUE(HubDataset):
         self.train_examples = self._read_tsv(self.train_file)
 
     def _load_dev_examples(self):
-        if self.sub_dataset == 'MNLI':
+        if self.sub_dataset == 'MNLI' and not self.mismatch:
             self.dev_file = os.path.join(self.dataset_dir, self.sub_dataset,
                                          "dev_matched.tsv")
+        elif self.sub_dataset == 'MNLI' and self.mismatch:
+            self.dev_file = os.path.join(self.dataset_dir, self.sub_dataset,
+                                         "dev_mismatched.tsv")
         else:
             self.dev_file = os.path.join(self.dataset_dir, self.sub_dataset,
                                          "dev.tsv")
@@ -76,9 +84,12 @@ class GLUE(HubDataset):
         self.test_examples = []
 
     def _load_predict_examples(self):
-        if self.sub_dataset == 'MNLI':
+        if self.sub_dataset == 'MNLI' and not self.mismatch:
             self.predict_file = os.path.join(self.dataset_dir, self.sub_dataset,
                                              "test_matched.tsv")
+        elif self.sub_dataset == 'MNLI' and self.mismatch:
+            self.predict_file = os.path.join(self.dataset_dir, self.sub_dataset,
+                                             "test_mismatched.tsv")
         else:
             self.predict_file = os.path.join(self.dataset_dir, self.sub_dataset,
                                              "test.tsv")
