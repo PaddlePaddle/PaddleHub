@@ -717,7 +717,15 @@ class ClassifierTask(BasicTask):
 
     def _add_metrics(self):
         acc = fluid.layers.accuracy(input=self.outputs[0], label=self.labels[0])
-        return [self.labels[0], self.ret_infers, acc]
+        return [acc]
+
+    @property
+    def fetch_list(self):
+        if self.is_train_phase or self.is_test_phase:
+            return [self.labels[0].name, self.ret_infers.name
+                    ] + [metric.name
+                         for metric in self.metrics] + [self.loss.name]
+        return [output.name for output in self.outputs]
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:
@@ -1215,7 +1223,15 @@ class RegressionTask(BasicTask):
         return fluid.layers.mean(x=cost)
 
     def _add_metrics(self):
-        return [self.labels[0], self.outputs[0]]
+        return []
+
+    @property
+    def fetch_list(self):
+        if self.is_train_phase or self.is_test_phase:
+            return [self.labels[0].name, self.outputs[0].name
+                    ] + [metric.name
+                         for metric in self.metrics] + [self.loss.name]
+        return [output.name for output in self.outputs]
 
     def _build_env_end_event(self):
         with self.log_writer.mode(self.phase) as logw:

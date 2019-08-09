@@ -30,7 +30,7 @@ CKPT_DIR="./ckpt_${DATASET}"
 #       ur- Urdu        vi- Vietnamese     zh- Chinese (Simplified)
 
 python -u text_classifier.py \
-                   --batch_size=32 \
+                   --batch_size=24 \
                    --use_gpu=True \
                    --dataset=${DATASET} \
                    --checkpoint_dir=${CKPT_DIR} \

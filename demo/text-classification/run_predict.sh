@@ -10,7 +10,7 @@ export CUDA_VISIBLE_DEVICES=0
 #       fr: French      hi: Hindi          ru: Russian
 #       sw: Swahili     th: Thai           tr: Turkish
 #       ur: Urdu        vi: Vietnamese     zh: Chinese (Simplified)
-DATASET="rte"
+DATASET="ChnSentiCorp"
 CKPT_DIR="./ckpt_${DATASET}"
 
 python -u predict.py --checkpoint_dir=$CKPT_DIR \
