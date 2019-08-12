@@ -31,12 +31,14 @@ def python_version():
 max_version, mid_version, min_version = python_version()
 
 REQUIRED_PACKAGES = [
-    'numpy >= 1.12.0', 'six >= 1.10.0', 'pandas', 'protobuf >= 3.1.0', 'pyyaml',
-    'Pillow', 'requests', "visualdl >= 1.3.0"
+    'six >= 1.10.0', 'protobuf >= 3.1.0', 'pyyaml', 'Pillow', 'requests',
+    "visualdl >= 1.3.0"
 ]
 
 if max_version < 3:
-    REQUIRED_PACKAGES += ["enum"]
+    REQUIRED_PACKAGES += ["enum", "numpy == 1.16.0", "pandas == 0.24.0"]
+else:
+    REQUIRED_PACKAGES += ["numpy >= 1.12.0", "pandas"]
 
 setup(
     name='paddlehub',
