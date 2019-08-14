@@ -108,14 +108,14 @@ class BasicTask(object):
                 fluid.default_main_program(), for_test=False)
 
         else:
-            self._base_main_program = clone_program(
-                main_program, for_test=False)
+            self._base_main_program = clone_program(main_program,
+                                                    for_test=False)
         if startup_program is None:
             self._base_startup_program = clone_program(
                 fluid.default_startup_program(), for_test=False)
         else:
-            self._base_startup_program = clone_program(
-                startup_program, for_test=False)
+            self._base_startup_program = clone_program(startup_program,
+                                                       for_test=False)
         self.is_checkpoint_loaded = False
         self._base_compiled_program = None
 
@@ -151,6 +151,9 @@ class BasicTask(object):
         self._envs = {}
         self._predict_data = None
 
+        # accelerate predict
+        self.hasloaded = False
+
         # set default phase
         self.enter_phase("train")
 
@@ -180,8 +183,8 @@ class BasicTask(object):
 
         self._build_env_start_event()
         self.env.is_inititalized = True
-        self.env.main_program = clone_program(
-            self._base_main_program, for_test=False)
+        self.env.main_program = clone_program(self._base_main_program,
+                                              for_test=False)
 
         self.env.startup_program = fluid.Program()
         with fluid.program_guard(self.env.main_program,
@@ -194,10 +197,10 @@ class BasicTask(object):
                     self.env.metrics = self._add_metrics()
 
         if self.is_predict_phase or self.is_test_phase:
-            self.env.main_program = clone_program(
-                self.env.main_program, for_test=True)
-            hub.common.paddle_helper.set_op_attr(
-                self.env.main_program, is_test=True)
+            self.env.main_program = clone_program(self.env.main_program,
+                                                  for_test=True)
+            hub.common.paddle_helper.set_op_attr(self.env.main_program,
+                                                 is_test=True)
 
         if self.config.use_pyreader:
             t_program = fluid.Program()
@@ -217,11 +220,10 @@ class BasicTask(object):
                     for index, py_var in enumerate(py_vars)
                 }
 
-                hub.connect_program(
-                    pre_program=t_program,
-                    next_program=self.env.main_program,
-                    input_dict=input_dict,
-                    need_log=False)
+                hub.connect_program(pre_program=t_program,
+                                    next_program=self.env.main_program,
+                                    input_dict=input_dict,
+                                    need_log=False)
 
             self.env.main_program = t_program
             if not self.is_predict_phase:
@@ -248,8 +250,9 @@ class BasicTask(object):
             with fluid.program_guard(self.env.main_program,
                                      self._base_startup_program):
                 with fluid.unique_name.guard(self.env.UNG):
-                    self.config.strategy.execute(
-                        self.loss, self._base_data_reader, self.config)
+                    self.config.strategy.execute(self.loss,
+                                                 self._base_data_reader,
+                                                 self.config)
 
         if self.is_train_phase:
             loss_name = self.env.loss.name
@@ -450,8 +453,8 @@ class BasicTask(object):
 
     def _log_interval_event(self, run_states):
         run_speed = self._calculate_metrics(run_states)
-        logger.info(
-            "step %d: [step/sec: %.2f]" % (self.current_step, run_speed))
+        logger.info("step %d: [step/sec: %.2f]" %
+                    (self.current_step, run_speed))
 
     def _save_ckpt_interval_event(self):
         self.save_checkpoint()
@@ -481,12 +484,11 @@ class BasicTask(object):
     # NOTE: current saved checkpoint machanism is not completed,
     # it can't restore dataset training status
     def save_checkpoint(self):
-        save_checkpoint(
-            checkpoint_dir=self.config.checkpoint_dir,
-            current_epoch=self.current_epoch,
-            global_step=self.current_step,
-            exe=self.exe,
-            main_program=self.main_program)
+        save_checkpoint(checkpoint_dir=self.config.checkpoint_dir,
+                        current_epoch=self.current_epoch,
+                        global_step=self.current_step,
+                        exe=self.exe,
+                        main_program=self.main_program)
 
     def load_checkpoint(self):
         is_load_successful, self.env.current_epoch, self.env.current_step = load_checkpoint(
@@ -501,12 +503,15 @@ class BasicTask(object):
             path = os.path.join(dirname, var.name)
             return os.path.exists(path)
 
-        fluid.io.load_vars(
-            self.exe, dirname, self.main_program, predicate=if_exist)
+        fluid.io.load_vars(self.exe,
+                           dirname,
+                           self.main_program,
+                           predicate=if_exist)
 
     def save_parameters(self, dirname):
-        fluid.io.save_params(
-            self.exe, dirname=dirname, main_program=self.main_program)
+        fluid.io.save_params(self.exe,
+                             dirname=dirname,
+                             main_program=self.main_program)
 
     def finetune_and_eval(self):
         return self.finetune(do_eval=True)
@@ -544,11 +549,12 @@ class BasicTask(object):
 
     def predict(self, data, load_best_model=True):
         with self.phase_guard(phase="predict"):
-            self.init_if_necessary()
-            if load_best_model:
-                best_model_path = os.path.join(self.config.checkpoint_dir,
-                                               "best_model")
-                self.load_parameters(best_model_path)
+            if not self.hasloaded:
+                self.init_if_necessary()
+                if load_best_model:
+                    best_model_path = os.path.join(self.config.checkpoint_dir,
+                                                   "best_model")
+                    self.load_parameters(best_model_path)
             self._predict_data = data
             self._predict_start_event()
             run_states = self._run()
@@ -564,8 +570,8 @@ class BasicTask(object):
 
     def _run_with_data_feeder(self, do_eval=False):
 
-        data_feeder = fluid.DataFeeder(
-            feed_list=self.feed_list, place=self.place)
+        data_feeder = fluid.DataFeeder(feed_list=self.feed_list,
+                                       place=self.place)
 
         global_run_states = []
         period_run_states = []
@@ -577,10 +583,9 @@ class BasicTask(object):
             step_run_state.run_step = 1
             num_batch_examples = len(batch)
 
-            fetch_result = self.exe.run(
-                self.main_program_to_be_run,
-                feed=data_feeder.feed(batch),
-                fetch_list=self.fetch_list)
+            fetch_result = self.exe.run(self.main_program_to_be_run,
+                                        feed=data_feeder.feed(batch),
+                                        fetch_list=self.fetch_list)
 
             for index, result in enumerate(fetch_result):
                 step_run_state.run_results[index] = result
@@ -618,8 +623,8 @@ class BasicTask(object):
                     num_batch_examples = self.config.batch_size * self.device_count
                     step_run_state = RunState(len(self.fetch_list))
                     step_run_state.run_step = 1
-                    fetch_result = self.exe.run(
-                        self.main_program_to_be_run, fetch_list=self.fetch_list)
+                    fetch_result = self.exe.run(self.main_program_to_be_run,
+                                                fetch_list=self.fetch_list)
 
                     for index, result in enumerate(fetch_result):
                         step_run_state.run_results[index] = result
@@ -672,13 +677,12 @@ class ClassifierTask(BasicTask):
 
         main_program = feature.block.program
 
-        super(ClassifierTask, self).__init__(
-            data_reader=data_reader,
-            main_program=main_program,
-            feed_list=feed_list,
-            startup_program=startup_program,
-            config=config,
-            metrics_choices=metrics_choices)
+        super(ClassifierTask, self).__init__(data_reader=data_reader,
+                                             main_program=main_program,
+                                             feed_list=feed_list,
+                                             startup_program=startup_program,
+                                             config=config,
+                                             metrics_choices=metrics_choices)
 
         self.feature = feature
         self.num_classes = num_classes
@@ -689,8 +693,9 @@ class ClassifierTask(BasicTask):
         cls_feats = self.feature
         if self.hidden_units is not None:
             for n_hidden in self.hidden_units:
-                cls_feats = fluid.layers.fc(
-                    input=cls_feats, size=n_hidden, act="relu")
+                cls_feats = fluid.layers.fc(input=cls_feats,
+                                            size=n_hidden,
+                                            act="relu")
 
         logits = fluid.layers.fc(
             input=cls_feats,
@@ -702,8 +707,9 @@ class ClassifierTask(BasicTask):
                 name="cls_out_b", initializer=fluid.initializer.Constant(0.)),
             act="softmax")
 
-        self.ret_infers = fluid.layers.reshape(
-            x=fluid.layers.argmax(logits, axis=1), shape=[-1, 1])
+        self.ret_infers = fluid.layers.reshape(x=fluid.layers.argmax(logits,
+                                                                     axis=1),
+                                               shape=[-1, 1])
 
         return [logits]
 
@@ -711,8 +717,8 @@ class ClassifierTask(BasicTask):
         return [fluid.layers.data(name="label", dtype="int64", shape=[1])]
 
     def _add_loss(self):
-        ce_loss = fluid.layers.cross_entropy(
-            input=self.outputs[0], label=self.labels[0])
+        ce_loss = fluid.layers.cross_entropy(input=self.outputs[0],
+                                             label=self.labels[0])
         return fluid.layers.mean(x=ce_loss)
 
     def _add_metrics(self):
@@ -827,15 +833,15 @@ class TextClassifierTask(ClassifierTask):
                  hidden_units=None,
                  metrics_choices="acc"):
 
-        super(TextClassifierTask, self).__init__(
-            data_reader=data_reader,
-            feature=feature,
-            num_classes=num_classes,
-            feed_list=feed_list,
-            startup_program=startup_program,
-            config=config,
-            hidden_units=hidden_units,
-            metrics_choices=metrics_choices)
+        super(TextClassifierTask,
+              self).__init__(data_reader=data_reader,
+                             feature=feature,
+                             num_classes=num_classes,
+                             feed_list=feed_list,
+                             startup_program=startup_program,
+                             config=config,
+                             hidden_units=hidden_units,
+                             metrics_choices=metrics_choices)
 
     def _build_net(self):
         cls_feats = fluid.layers.dropout(
@@ -845,8 +851,9 @@ class TextClassifierTask(ClassifierTask):
 
         if self.hidden_units is not None:
             for n_hidden in self.hidden_units:
-                cls_feats = fluid.layers.fc(
-                    input=cls_feats, size=n_hidden, act="relu")
+                cls_feats = fluid.layers.fc(input=cls_feats,
+                                            size=n_hidden,
+                                            act="relu")
 
         logits = fluid.layers.fc(
             input=cls_feats,
@@ -858,8 +865,9 @@ class TextClassifierTask(ClassifierTask):
                 name="cls_out_b", initializer=fluid.initializer.Constant(0.)),
             act="softmax")
 
-        self.ret_infers = fluid.layers.reshape(
-            x=fluid.layers.argmax(logits, axis=1), shape=[-1, 1])
+        self.ret_infers = fluid.layers.reshape(x=fluid.layers.argmax(logits,
+                                                                     axis=1),
+                                               shape=[-1, 1])
 
         return [logits]
 
@@ -877,13 +885,12 @@ class SequenceLabelTask(BasicTask):
 
         main_program = feature.block.program
 
-        super(SequenceLabelTask, self).__init__(
-            data_reader=data_reader,
-            main_program=main_program,
-            feed_list=feed_list,
-            startup_program=startup_program,
-            config=config,
-            metrics_choices=metrics_choices)
+        super(SequenceLabelTask, self).__init__(data_reader=data_reader,
+                                                main_program=main_program,
+                                                feed_list=feed_list,
+                                                startup_program=startup_program,
+                                                config=config,
+                                                metrics_choices=metrics_choices)
 
         self.feature = feature
         self.max_seq_len = max_seq_len
@@ -902,12 +909,14 @@ class SequenceLabelTask(BasicTask):
                 name="cls_seq_label_out_b",
                 initializer=fluid.initializer.Constant(0.)))
 
-        self.ret_infers = fluid.layers.reshape(
-            x=fluid.layers.argmax(self.logits, axis=2), shape=[-1, 1])
+        self.ret_infers = fluid.layers.reshape(x=fluid.layers.argmax(
+            self.logits, axis=2),
+                                               shape=[-1, 1])
         ret_infers = fluid.layers.assign(self.ret_infers)
 
-        self.seq_len = fluid.layers.data(
-            name="seq_len", shape=[1], dtype='int64')
+        self.seq_len = fluid.layers.data(name="seq_len",
+                                         shape=[1],
+                                         dtype='int64')
         seq_len = fluid.layers.assign(self.seq_len)
 
         logits = self.logits
@@ -917,14 +926,15 @@ class SequenceLabelTask(BasicTask):
         return [logits]
 
     def _add_label(self):
-        label = fluid.layers.data(
-            name="label", shape=[self.max_seq_len, 1], dtype='int64')
+        label = fluid.layers.data(name="label",
+                                  shape=[self.max_seq_len, 1],
+                                  dtype='int64')
         return [label]
 
     def _add_loss(self):
         labels = fluid.layers.flatten(self.labels[0], axis=2)
-        ce_loss = fluid.layers.cross_entropy(
-            input=self.outputs[0], label=labels)
+        ce_loss = fluid.layers.cross_entropy(input=self.outputs[0],
+                                             label=labels)
         loss = fluid.layers.mean(x=ce_loss)
         return loss
 
@@ -1030,15 +1040,15 @@ class MultiLabelClassifierTask(ClassifierTask):
 
         main_program = feature.block.program
 
-        super(MultiLabelClassifierTask, self).__init__(
-            data_reader=data_reader,
-            feature=feature,
-            num_classes=num_classes,
-            feed_list=feed_list,
-            startup_program=startup_program,
-            config=config,
-            hidden_units=hidden_units,
-            metrics_choices=metrics_choices)
+        super(MultiLabelClassifierTask,
+              self).__init__(data_reader=data_reader,
+                             feature=feature,
+                             num_classes=num_classes,
+                             feed_list=feed_list,
+                             startup_program=startup_program,
+                             config=config,
+                             hidden_units=hidden_units,
+                             metrics_choices=metrics_choices)
 
         self.best_avg_auc = -1
 
@@ -1050,8 +1060,9 @@ class MultiLabelClassifierTask(ClassifierTask):
 
         if self.hidden_units is not None:
             for n_hidden in self.hidden_units:
-                cls_feats = fluid.layers.fc(
-                    input=cls_feats, size=n_hidden, act="relu")
+                cls_feats = fluid.layers.fc(input=cls_feats,
+                                            size=n_hidden,
+                                            act="relu")
 
         probs = []
         for i in range(self.num_classes):
@@ -1071,30 +1082,34 @@ class MultiLabelClassifierTask(ClassifierTask):
         return probs
 
     def _add_label(self):
-        label = fluid.layers.data(
-            name="label", shape=[self.num_classes], dtype='int64')
+        label = fluid.layers.data(name="label",
+                                  shape=[self.num_classes],
+                                  dtype='int64')
         return [label]
 
     def _add_loss(self):
-        label_split = fluid.layers.split(
-            self.labels[0], self.num_classes, dim=-1)
-        total_loss = fluid.layers.fill_constant(
-            shape=[1], value=0.0, dtype='float64')
+        label_split = fluid.layers.split(self.labels[0],
+                                         self.num_classes,
+                                         dim=-1)
+        total_loss = fluid.layers.fill_constant(shape=[1],
+                                                value=0.0,
+                                                dtype='float64')
         for index, probs in enumerate(self.outputs):
-            ce_loss = fluid.layers.cross_entropy(
-                input=probs, label=label_split[index])
+            ce_loss = fluid.layers.cross_entropy(input=probs,
+                                                 label=label_split[index])
             total_loss += fluid.layers.reduce_sum(ce_loss)
         loss = fluid.layers.mean(x=total_loss)
         return loss
 
     def _add_metrics(self):
-        label_split = fluid.layers.split(
-            self.labels[0], self.num_classes, dim=-1)
+        label_split = fluid.layers.split(self.labels[0],
+                                         self.num_classes,
+                                         dim=-1)
         # metrics change to auc of every class
         eval_list = []
         for index, probs in enumerate(self.outputs):
-            current_auc, _, _ = fluid.layers.auc(
-                input=probs, label=label_split[index])
+            current_auc, _, _ = fluid.layers.auc(input=probs,
+                                                 label=label_split[index])
             eval_list.append(current_auc)
         return eval_list
 
@@ -1179,13 +1194,12 @@ class RegressionTask(BasicTask):
 
         main_program = feature.block.program
 
-        super(RegressionTask, self).__init__(
-            data_reader=data_reader,
-            main_program=main_program,
-            feed_list=feed_list,
-            startup_program=startup_program,
-            config=config,
-            metrics_choices=metrics_choices)
+        super(RegressionTask, self).__init__(data_reader=data_reader,
+                                             main_program=main_program,
+                                             feed_list=feed_list,
+                                             startup_program=startup_program,
+                                             config=config,
+                                             metrics_choices=metrics_choices)
 
         self.feature = feature
         self.hidden_units = hidden_units
@@ -1199,8 +1213,9 @@ class RegressionTask(BasicTask):
 
         if self.hidden_units is not None:
             for n_hidden in self.hidden_units:
-                cls_feats = fluid.layers.fc(
-                    input=cls_feats, size=n_hidden, act="relu")
+                cls_feats = fluid.layers.fc(input=cls_feats,
+                                            size=n_hidden,
+                                            act="relu")
 
         logits = fluid.layers.fc(
             input=cls_feats,
@@ -1218,8 +1233,8 @@ class RegressionTask(BasicTask):
         return [fluid.layers.data(name="label", dtype="float32", shape=[1])]
 
     def _add_loss(self):
-        cost = fluid.layers.square_error_cost(
-            input=self.outputs[0], label=self.labels[0])
+        cost = fluid.layers.square_error_cost(input=self.outputs[0],
+                                              label=self.labels[0])
         return fluid.layers.mean(x=cost)
 
     def _add_metrics(self):
@@ -1298,23 +1313,22 @@ class ReadingComprehensionTask(BasicTask):
 
         main_program = feature.block.program
 
-        super(ReadingComprehensionTask, self).__init__(
-            data_reader=data_reader,
-            main_program=main_program,
-            feed_list=feed_list,
-            startup_program=startup_program,
-            config=config,
-            metrics_choices=metrics_choices)
+        super(ReadingComprehensionTask,
+              self).__init__(data_reader=data_reader,
+                             main_program=main_program,
+                             feed_list=feed_list,
+                             startup_program=startup_program,
+                             config=config,
+                             metrics_choices=metrics_choices)
 
         self.feature = feature
 
     def _build_net(self):
         if self.is_predict_phase:
-            self.unique_id = fluid.layers.data(
-                name="start_positions",
-                shape=[-1, 1],
-                lod_level=0,
-                dtype="int64")
+            self.unique_id = fluid.layers.data(name="start_positions",
+                                               shape=[-1, 1],
+                                               lod_level=0,
+                                               dtype="int64")
 
         logits = fluid.layers.fc(
             input=self.feature,
@@ -1337,10 +1351,14 @@ class ReadingComprehensionTask(BasicTask):
         return [start_logits, end_logits, num_seqs]
 
     def _add_label(self):
-        start_positions = fluid.layers.data(
-            name="start_positions", shape=[-1, 1], lod_level=0, dtype="int64")
-        end_positions = fluid.layers.data(
-            name="end_positions", shape=[-1, 1], lod_level=0, dtype="int64")
+        start_positions = fluid.layers.data(name="start_positions",
+                                            shape=[-1, 1],
+                                            lod_level=0,
+                                            dtype="int64")
+        end_positions = fluid.layers.data(name="end_positions",
+                                          shape=[-1, 1],
+                                          lod_level=0,
+                                          dtype="int64")
         return [start_positions, end_positions]
 
     def _add_loss(self):
@@ -1353,8 +1371,8 @@ class ReadingComprehensionTask(BasicTask):
         start_loss = fluid.layers.softmax_with_cross_entropy(
             logits=start_logits, label=start_positions)
         start_loss = fluid.layers.mean(x=start_loss)
-        end_loss = fluid.layers.softmax_with_cross_entropy(
-            logits=end_logits, label=end_positions)
+        end_loss = fluid.layers.softmax_with_cross_entropy(logits=end_logits,
+                                                           label=end_positions)
         end_loss = fluid.layers.mean(x=end_loss)
         total_loss = (start_loss + end_loss) / 2.0
         return total_loss
