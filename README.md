@@ -163,7 +163,7 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 ### PaddleHub v1.1.1
 
-* PaddleHub支持离线运行Module
+* PaddleHub支持离线运行
 * 修复python2安装PaddleHub失败问题
 
 ### PaddleHub v1.1.0
