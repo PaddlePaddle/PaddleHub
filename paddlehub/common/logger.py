@@ -26,13 +26,16 @@ class Logger(object):
     NOLOG = "NOLOG"
 
     def __init__(self, name=None):
-        logging.basicConfig(
-            format='[%(asctime)-15s] [%(levelname)8s] - %(message)s')
-
         if not name:
             name = "PaddleHub"
-
         self.logger = logging.getLogger(name)
+
+        self.handler = logging.StreamHandler()
+        self.format = logging.Formatter(
+            '[%(asctime)-15s] [%(levelname)8s] - %(message)s')
+        self.handler.setFormatter(self.format)
+
+        self.logger.addHandler(self.handler)
         self.logLevel = "DEBUG"
         self.logger.setLevel(self._get_logging_level())
 

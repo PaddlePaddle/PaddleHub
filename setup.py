@@ -36,7 +36,7 @@ REQUIRED_PACKAGES = [
 ]
 
 if max_version < 3:
-    REQUIRED_PACKAGES += ["enum", "numpy == 1.16.0", "pandas == 0.24.0"]
+    REQUIRED_PACKAGES += ["numpy == 1.16.0", "pandas == 0.24.0"]
 else:
     REQUIRED_PACKAGES += ["numpy", "pandas"]
 
