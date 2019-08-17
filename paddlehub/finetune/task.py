@@ -95,14 +95,23 @@ class BasicTask(object):
                  main_program=None,
                  startup_program=None,
                  config=None,
-                 metrics_choices="acc"):
+                 metrics_choices="default"):
 
         # base item
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
-        if isinstance(metrics_choices, str):
-            metrics_choices = [metrics_choices]
-        self.metrics_choices = metrics_choices
+
+        # metrics item
+        self.best_score = -1
+        if metrics_choices == "default":
+            metrics_choices = ["acc"]
+        elif metrics_choices == None:
+            metrics_choices = []
+        if isinstance(metrics_choices, list):
+            self.metrics_choices = metrics_choices
+        else:
+            self.metrics_choices = [metrics_choices]
+
         if main_program is None:
             self._base_main_program = clone_program(
                 fluid.default_main_program(), for_test=False)
@@ -429,7 +438,11 @@ class BasicTask(object):
         pass
 
     def _build_env_end_event(self):
-        pass
+        with self.log_writer.mode(self.phase) as logw:
+            if not self.is_predict_phase:
+                self.env.loss_scalar = logw.scalar(
+                    tag="Loss [{}]".format(self.phase))
+                self.env.score_scalar = {}
 
     def _finetune_start_event(self):
         logger.info("PaddleHub finetune start")
@@ -447,14 +460,53 @@ class BasicTask(object):
         logger.info("Evaluation on {} dataset start".format(self.phase))
 
     def _eval_end_event(self, run_states):
-        run_speed = self._calculate_metrics(run_states)
-        logger.info("[%s dataset evaluation result] [step/sec: %.2f]" %
-                    (self.phase, run_speed))
+        eval_scores, eval_loss, run_speed = self._calculate_metrics(run_states)
+        self.env.loss_scalar.add_record(self.current_step, eval_loss)
+        log_scores = ""
+        for metric in eval_scores:
+            if metric not in self.env.score_scalar:
+                with self.log_writer.mode(self.phase) as logw:
+                    self.env.score_scalar[metric] = logw.scalar(
+                        tag="{} [{}]".format(metric, self.phase))
+            self.env.score_scalar[metric].add_record(self.current_step,
+                                                     eval_scores[metric])
+            log_scores += "%s=%.3f " % (metric, eval_scores[metric])
+        logger.info(
+            "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
+            (self.phase, eval_loss, log_scores, run_speed))
+        try:
+            # The first metric will be chose to eval
+            main_metric, main_value = list(eval_scores.items())[0]
+            if self.phase in ["dev", "val"] and main_value > self.best_score:
+                self.best_score = main_value
+                model_saved_dir = os.path.join(self.config.checkpoint_dir,
+                                               "best_model")
+                logger.info("best model saved to %s [best %s=%.5f]" %
+                            (model_saved_dir, main_metric, main_value))
+                save_result = fluid.io.save_persistables(
+                    executor=self.exe,
+                    dirname=model_saved_dir,
+                    main_program=self.main_program)
+        except:
+            logger.warning(
+                "The program will only finetune and not eval unless the metrics_choices is a list contains at least one metric."
+            )
 
     def _log_interval_event(self, run_states):
-        run_speed = self._calculate_metrics(run_states)
-        logger.info("step %d: [step/sec: %.2f]" %
-                    (self.current_step, run_speed))
+        scores, avg_loss, run_speed = self._calculate_metrics(run_states)
+        self.env.loss_scalar.add_record(self.current_step, avg_loss)
+        log_scores = ""
+        for metric in scores:
+            if metric not in self.env.score_scalar:
+                with self.log_writer.mode(self.phase) as logw:
+                    self.env.score_scalar[metric] = logw.scalar(
+                        tag="{} [{}]".format(metric, self.phase))
+            self.env.score_scalar[metric].add_record(self.current_step,
+                                                     scores[metric])
+            log_scores += "%s=%.3f " % (metric, scores[metric])
+        logger.info(
+            "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
+            (self.phase, avg_loss, log_scores, run_speed))
 
     def _save_ckpt_interval_event(self):
         self.save_checkpoint()
@@ -476,9 +528,14 @@ class BasicTask(object):
         raise NotImplementedError
 
     def _add_metrics(self):
+        # Some metrics like acc, auc can be calculated by fluid.layers
+        # The others can be calculated in _calculate_metrics function
         raise NotImplementedError
 
     def _calculate_metrics(self, run_states):
+        # NOTE: if you want to customize the metrics
+        # you should make sure that the first parameter returned is a dict
+        # The first key will be used as main metrics to update the best model
         raise NotImplementedError
 
     # NOTE: current saved checkpoint machanism is not completed,
@@ -673,10 +730,11 @@ class ClassifierTask(BasicTask):
                  startup_program=None,
                  config=None,
                  hidden_units=None,
-                 metrics_choices="acc"):
+                 metrics_choices="default"):
+        if metrics_choices == "default":
+            metrics_choices = ["acc"]
 
         main_program = feature.block.program
-
         super(ClassifierTask, self).__init__(data_reader=data_reader,
                                              main_program=main_program,
                                              feed_list=feed_list,
@@ -687,7 +745,6 @@ class ClassifierTask(BasicTask):
         self.feature = feature
         self.num_classes = num_classes
         self.hidden_units = hidden_units
-        self.best_score = -1
 
     def _build_net(self):
         cls_feats = self.feature
@@ -733,16 +790,6 @@ class ClassifierTask(BasicTask):
                          for metric in self.metrics] + [self.loss.name]
         return [output.name for output in self.outputs]
 
-    def _build_env_end_event(self):
-        with self.log_writer.mode(self.phase) as logw:
-            if not self.is_predict_phase:
-                self.env.score_scalar = {}
-                self.env.loss_scalar = logw.scalar(
-                    tag="Loss [{}]".format(self.phase))
-                for choice in self.metrics_choices:
-                    self.env.score_scalar[choice] = logw.scalar(
-                        tag="{} [{}]".format(choice, self.phase))
-
     def _calculate_metrics(self, run_states):
         loss_sum = acc_sum = run_examples = 0
         run_step = run_time_used = 0
@@ -765,58 +812,23 @@ class ClassifierTask(BasicTask):
         avg_loss = loss_sum / run_examples
         run_speed = run_step / run_time_used
 
+        # The first key will be used as main metrics to update the best model
         scores = {}
-        if "acc" in self.metrics_choices:
-            avg_acc = acc_sum / run_examples
-            scores["acc"] = avg_acc
 
-        if "f1" in self.metrics_choices:
-            f1 = calculate_f1_np(all_infers, all_labels)
-            scores["f1"] = f1
+        for metric in self.metrics_choices:
+            if metric == "acc":
+                avg_acc = acc_sum / run_examples
+                scores["acc"] = avg_acc
+            elif metric == "f1":
+                f1 = calculate_f1_np(all_infers, all_labels)
+                scores["f1"] = f1
+            elif metric == "matthews":
+                matthews = matthews_corrcoef(all_infers, all_labels)
+                scores["matthews"] = matthews
+            else:
+                raise ValueError("Not Support Metric: \"%s\"" % metric)
 
-        if "matthews" in self.metrics_choices:
-            matthews = matthews_corrcoef(all_infers, all_labels)
-            scores["matthews"] = matthews
-
-        return avg_loss, scores, run_speed
-
-    def _log_interval_event(self, run_states):
-        avg_loss, scores, run_speed = self._calculate_metrics(run_states)
-        self.env.loss_scalar.add_record(self.current_step, avg_loss)
-        log_scores = ""
-        for choice in self.metrics_choices:
-            self.env.score_scalar[choice].add_record(self.current_step,
-                                                     scores[choice])
-            log_scores += "{}={} ".format(choice, scores[choice])
-
-        logger.info("step %d: loss=%.5f %s[step/sec: %.2f]" %
-                    (self.current_step, avg_loss, log_scores, run_speed))
-
-    def _eval_end_event(self, run_states):
-        eval_loss, eval_scores, run_speed = self._calculate_metrics(run_states)
-        self.env.loss_scalar.add_record(self.current_step, eval_loss)
-        log_scores = ""
-        for choice in self.metrics_choices:
-            self.env.score_scalar[choice].add_record(self.current_step,
-                                                     eval_scores[choice])
-            log_scores += "{}={} ".format(choice, eval_scores[choice])
-        logger.info(
-            "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
-            (self.phase, eval_loss, log_scores, run_speed))
-
-        eval_metric = eval_scores[
-            self.metrics_choices[0]]  # The first metric will be choose to eval
-        if self.phase in ["dev", "val"] and eval_metric > self.best_score:
-            self.best_score = eval_metric
-            model_saved_dir = os.path.join(self.config.checkpoint_dir,
-                                           "best_model")
-            logger.info(
-                "best model saved to %s [best %s=%.5f]" %
-                (model_saved_dir, self.metrics_choices[0], self.best_score))
-            save_result = fluid.io.save_persistables(
-                executor=self.exe,
-                dirname=model_saved_dir,
-                main_program=self.main_program)
+        return scores, avg_loss, run_speed
 
 
 ImageClassifierTask = ClassifierTask
@@ -831,8 +843,10 @@ class TextClassifierTask(ClassifierTask):
                  startup_program=None,
                  config=None,
                  hidden_units=None,
-                 metrics_choices="acc"):
+                 metrics_choices="default"):
 
+        if metrics_choices == "default":
+            metrics_choices = ["acc"]
         super(TextClassifierTask,
               self).__init__(data_reader=data_reader,
                              feature=feature,
@@ -881,21 +895,20 @@ class SequenceLabelTask(BasicTask):
                  data_reader,
                  startup_program=None,
                  config=None,
-                 metrics_choices="f1"):
+                 metrics_choices="default"):
+        if metrics_choices == "default":
+            metrics_choices = ["f1", "precision", "recall"]
 
         main_program = feature.block.program
-
         super(SequenceLabelTask, self).__init__(data_reader=data_reader,
                                                 main_program=main_program,
                                                 feed_list=feed_list,
                                                 startup_program=startup_program,
                                                 config=config,
                                                 metrics_choices=metrics_choices)
-
         self.feature = feature
         self.max_seq_len = max_seq_len
         self.num_classes = num_classes
-        self.best_f1 = -1
 
     def _build_net(self):
         self.logits = fluid.layers.fc(
@@ -942,22 +955,6 @@ class SequenceLabelTask(BasicTask):
         self.ret_labels = fluid.layers.reshape(x=self.labels[0], shape=[-1, 1])
         return [self.ret_labels, self.ret_infers, self.seq_len]
 
-    def _build_env_end_event(self):
-        with self.log_writer.mode(self.phase) as logw:
-            if self.is_train_phase:
-                self.env.loss_scalar = logw.scalar(
-                    tag="Loss [{}]".format(self.phase))
-
-            if self.phase in ["dev", "val"]:
-                self.env.loss_scalar = logw.scalar(
-                    tag="Loss [{}]".format(self.phase))
-                self.env.f1_scalar = logw.scalar(
-                    tag="F1 [{}]".format(self.phase))
-                self.env.precision_scalar = logw.scalar(
-                    tag="Precision [{}]".format(self.phase))
-                self.env.recall_scalar = logw.scalar(
-                    tag="Recall [{}]".format(self.phase))
-
     def _calculate_metrics(self, run_states):
         total_infer = total_label = total_correct = loss_sum = 0
         run_step = run_time_used = run_examples = 0
@@ -978,36 +975,23 @@ class SequenceLabelTask(BasicTask):
         run_time_used = time.time() - run_states[0].run_time_begin
         run_speed = run_step / run_time_used
         avg_loss = loss_sum / run_examples
+
         precision, recall, f1 = calculate_f1(total_label, total_infer,
                                              total_correct)
-        return precision, recall, f1, avg_loss, run_speed
+        # The first key will be used as main metrics to update the best model
+        scores = {}
 
-    def _log_interval_event(self, run_states):
-        precision, recall, f1, avg_loss, run_speed = self._calculate_metrics(
-            run_states)
-        self.env.loss_scalar.add_record(self.current_step, avg_loss)
-        logger.info("step %d: loss=%.5f [step/sec: %.2f]" %
-                    (self.current_step, avg_loss, run_speed))
+        for metric in self.metrics_choices:
+            if metric == "precision":
+                scores["precision"] = precision
+            elif metric == "recall":
+                scores["recall"] = recall
+            elif metric == "f1":
+                scores["f1"] = f1
+            else:
+                raise ValueError("Not Support Metric: \"%s\"" % metric)
 
-    def _eval_end_event(self, run_states):
-        precision, recall, f1, avg_loss, run_speed = self._calculate_metrics(
-            run_states)
-        self.env.loss_scalar.add_record(self.current_step, avg_loss)
-        self.env.f1_scalar.add_record(self.current_step, f1)
-        self.env.precision_scalar.add_record(self.current_step, precision)
-        self.env.recall_scalar.add_record(self.current_step, recall)
-        logger.info("[%s dataset evaluation result] [step/sec: %.2f]" %
-                    (self.phase, run_speed))
-        logger.info(
-            "[%s evaluation] F1-Score=%f, precision=%f, recall=%f [step/sec: %.2f]"
-            % (self.phase, f1, precision, recall, run_speed))
-        if self.phase in ["dev", "val"] and f1 > self.best_f1:
-            self.best_f1 = f1
-            model_saved_dir = os.path.join(self.config.checkpoint_dir,
-                                           "best_model")
-            logger.info("best model saved to %s [best F1=%.5f]" %
-                        (model_saved_dir, self.best_f1))
-            fluid.io.save_persistables(self.exe, dirname=model_saved_dir)
+        return scores, avg_loss, run_speed
 
     @property
     def feed_list(self):
@@ -1036,10 +1020,11 @@ class MultiLabelClassifierTask(ClassifierTask):
                  startup_program=None,
                  config=None,
                  hidden_units=None,
-                 metrics_choices="acc"):
+                 metrics_choices="default"):
+        if metrics_choices == "default":
+            metrics_choices = ["auc"]
 
         main_program = feature.block.program
-
         super(MultiLabelClassifierTask,
               self).__init__(data_reader=data_reader,
                              feature=feature,
@@ -1049,8 +1034,7 @@ class MultiLabelClassifierTask(ClassifierTask):
                              config=config,
                              hidden_units=hidden_units,
                              metrics_choices=metrics_choices)
-
-        self.best_avg_auc = -1
+        self.class_name = list(data_reader.label_map.keys())
 
     def _build_net(self):
         cls_feats = fluid.layers.dropout(
@@ -1113,19 +1097,6 @@ class MultiLabelClassifierTask(ClassifierTask):
             eval_list.append(current_auc)
         return eval_list
 
-    def _build_env_end_event(self):
-        with self.log_writer.mode(self.phase) as logw:
-            if not self.is_predict_phase:
-                self.env.loss_scalar = logw.scalar(
-                    tag="Loss [{}]".format(self.phase))
-                if self.is_train_phase:
-                    self.env.auc_scalar_list = []
-                    for i in range(self.num_classes):
-                        self.env.auc_scalar_list.append(
-                            logw.scalar(tag="AUC_{} [{}]".format(i, "train")))
-                self.env.avg_auc_scalar = logw.scalar(
-                    tag="Average auc [{}]".format(self.phase))
-
     def _calculate_metrics(self, run_states):
         loss_sum = acc_sum = run_examples = 0
         run_step = run_time_used = 0
@@ -1140,40 +1111,18 @@ class MultiLabelClassifierTask(ClassifierTask):
         avg_loss = loss_sum / (run_examples * self.num_classes)
         run_speed = run_step / run_time_used
 
-        return avg_loss, auc_list, run_speed
-
-    def _log_interval_event(self, run_states):
-        avg_loss, auc_list, run_speed = self._calculate_metrics(run_states)
-
-        self.env.loss_scalar.add_record(self.current_step, avg_loss)
-        avg_auc = np.mean(auc_list)
-        self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
-        logger.info("step %d: loss=%.5f avg_auc=%.5f [step/sec: %.2f]" %
-                    (self.current_step, avg_loss, avg_auc, run_speed))
-        for index, auc_scalar in enumerate(self.env.auc_scalar_list):
-            auc_scalar.add_record(self.current_step, auc_list[index][0])
-            logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
-
-    def _eval_end_event(self, run_states):
-        eval_loss, auc_list, run_speed = self._calculate_metrics(run_states)
-        avg_auc = np.mean(auc_list)
-        logger.info(
-            "[%s dataset evaluation result] loss=%.5f avg_auc=%.5f [step/sec: %.2f]"
-            % (self.phase, eval_loss, avg_auc, run_speed))
-        for index, auc in enumerate(auc_list):
-            logger.info("label_%d_auc = %.5f" % (index, auc_list[index][0]))
-        self.env.loss_scalar.add_record(self.current_step, eval_loss)
-        self.env.avg_auc_scalar.add_record(self.current_step, avg_auc)
-        if self.phase in ["dev", "val"] and avg_auc > self.best_avg_auc:
-            self.best_avg_auc = avg_auc
-            model_saved_dir = os.path.join(self.config.checkpoint_dir,
-                                           "best_model")
-            logger.info("best model saved to %s [best average auc=%.5f]" %
-                        (model_saved_dir, self.best_avg_auc))
-            save_result = fluid.io.save_persistables(
-                executor=self.exe,
-                dirname=model_saved_dir,
-                main_program=self.main_program)
+        # The first key will be used as main metrics to update the best model
+        scores = {}
+        for metric in self.metrics_choices:
+            if metric == "auc":
+                scores["auc"] = np.mean(auc_list)
+                # NOTE: for MultiLabelClassifierTask, the metrics will be used to evaluate all the label
+                #      and their mean value will also be reported.
+                for index, auc in enumerate(auc_list):
+                    scores["auc_" + self.class_name[index]] = auc_list[index][0]
+            else:
+                raise ValueError("Not Support Metric: \"%s\"" % metric)
+        return scores, avg_loss, run_speed
 
     @property
     def fetch_list(self):
@@ -1190,20 +1139,19 @@ class RegressionTask(BasicTask):
                  startup_program=None,
                  config=None,
                  hidden_units=None,
-                 metrics_choices="spearman"):
+                 metrics_choices="default"):
+        if metrics_choices == "default":
+            metrics_choices = ["spearman"]
 
         main_program = feature.block.program
-
         super(RegressionTask, self).__init__(data_reader=data_reader,
                                              main_program=main_program,
                                              feed_list=feed_list,
                                              startup_program=startup_program,
                                              config=config,
                                              metrics_choices=metrics_choices)
-
         self.feature = feature
         self.hidden_units = hidden_units
-        self.best_coefficient = -1
 
     def _build_net(self):
         cls_feats = fluid.layers.dropout(
@@ -1248,14 +1196,6 @@ class RegressionTask(BasicTask):
                          for metric in self.metrics] + [self.loss.name]
         return [output.name for output in self.outputs]
 
-    def _build_env_end_event(self):
-        with self.log_writer.mode(self.phase) as logw:
-            if not self.is_predict_phase:
-                self.env.loss_scalar = logw.scalar(
-                    tag="Loss [{}]".format(self.phase))
-                self.env.coe_scalar = logw.scalar(
-                    tag="correlation coefficient [{}]".format(self.phase))
-
     def _calculate_metrics(self, run_states):
         loss_sum = run_examples = 0
         run_step = run_time_used = 0
@@ -1274,32 +1214,17 @@ class RegressionTask(BasicTask):
         run_time_used = time.time() - run_states[0].run_time_begin
         avg_loss = loss_sum / run_examples
         run_speed = run_step / run_time_used
-        spearman_correlations = spearmanr(all_labels, all_infers)[0]
-        return avg_loss, spearman_correlations, run_speed
 
-    def _log_interval_event(self, run_states):
-        avg_loss, spearman, run_speed = self._calculate_metrics(run_states)
-        self.env.loss_scalar.add_record(self.current_step, avg_loss)
-        logger.info(
-            "step %d: loss=%.5f spearman correlations=%.5f  [step/sec: %.2f]" %
-            (self.current_step, avg_loss, spearman, run_speed))
+        # The first key will be used as main metrics to update the best model
+        scores = {}
 
-    def _eval_end_event(self, run_states):
-        eval_loss, spearman, run_speed = self._calculate_metrics(run_states)
-        logger.info(
-            "[%s dataset evaluation result] loss=%.5f spearman correlations=%.5f [step/sec: %.2f]"
-            % (self.phase, eval_loss, spearman, run_speed))
-        self.env.loss_scalar.add_record(self.current_step, eval_loss)
-        if self.phase in ["dev", "val"] and spearman > self.best_coefficient:
-            self.best_coefficient = spearman
-            model_saved_dir = os.path.join(self.config.checkpoint_dir,
-                                           "best_model")
-            logger.info("best model saved to %s [best coefficient=%.5f]" %
-                        (model_saved_dir, self.best_coefficient))
-            save_result = fluid.io.save_persistables(
-                executor=self.exe,
-                dirname=model_saved_dir,
-                main_program=self.main_program)
+        for metric in self.metrics_choices:
+            if metric == "spearman":
+                spearman_correlations = spearmanr(all_labels, all_infers)[0]
+                scores["spearman"] = spearman_correlations
+            else:
+                raise ValueError("Not Support Metric: \"%s\"" % metric)
+        return scores, avg_loss, run_speed
 
 
 class ReadingComprehensionTask(BasicTask):
@@ -1312,7 +1237,6 @@ class ReadingComprehensionTask(BasicTask):
                  metrics_choices=None):
 
         main_program = feature.block.program
-
         super(ReadingComprehensionTask,
               self).__init__(data_reader=data_reader,
                              main_program=main_program,
@@ -1320,7 +1244,6 @@ class ReadingComprehensionTask(BasicTask):
                              startup_program=startup_program,
                              config=config,
                              metrics_choices=metrics_choices)
-
         self.feature = feature
 
     def _build_net(self):
@@ -1380,12 +1303,6 @@ class ReadingComprehensionTask(BasicTask):
     def _add_metrics(self):
         return []
 
-    def _build_env_end_event(self):
-        with self.log_writer.mode(self.phase) as logw:
-            if self.is_train_phase:
-                self.env.loss_scalar = logw.scalar(
-                    tag="Loss [{}]".format(self.phase))
-
     @property
     def feed_list(self):
         feed_list = [varname for varname in self._base_feed_list]
@@ -1418,10 +1335,6 @@ class ReadingComprehensionTask(BasicTask):
         run_time_used = time.time() - run_states[0].run_time_begin
         run_speed = run_step / run_time_used
         avg_loss = np.sum(total_cost) / np.sum(total_num_seqs)
-        return avg_loss, run_speed
 
-    def _log_interval_event(self, run_states):
-        avg_loss, run_speed = self._calculate_metrics(run_states)
-        self.env.loss_scalar.add_record(self.current_step, avg_loss)
-        logger.info("step %d: loss=%.5f [step/sec: %.2f]" %
-                    (self.current_step, avg_loss, run_speed))
+        scores = {}
+        return scores, avg_loss, run_speed
