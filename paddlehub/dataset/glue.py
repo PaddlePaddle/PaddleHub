@@ -35,7 +35,6 @@ class GLUE(HubDataset):
     https://gluebenchmark.com
     for more information
     """
-
     def __init__(self, sub_dataset='SST-2'):
         # sub_dataset : CoLA, MNLI, MRPC, QNLI, QQP, RTE, SST-2, STS-B
         if sub_dataset not in [
@@ -49,6 +48,8 @@ class GLUE(HubDataset):
         if sub_dataset == 'MNLI_mm':
             sub_dataset = 'MNLI'
             self.mismatch = True
+        elif sub_dataset == 'MNLI_m':
+            sub_dataset = 'MNLI'
         self.sub_dataset = sub_dataset
         self.dataset_dir = os.path.join(DATA_HOME, "glue_data")
 
@@ -188,13 +189,12 @@ class GLUE(HubDataset):
 
             for line in reader:
                 try:
-                    example = InputExample(
-                        guid=seq_id,
-                        text_a=line[text_a_index],
-                        text_b=line[text_b_index]
-                        if text_b_index is not None else None,
-                        label=line[label_index]
-                        if label_index is not None else None)
+                    example = InputExample(guid=seq_id,
+                                           text_a=line[text_a_index],
+                                           text_b=line[text_b_index] if
+                                           text_b_index is not None else None,
+                                           label=line[label_index]
+                                           if label_index is not None else None)
                     seq_id += 1
                     examples.append(example)
                 except:
