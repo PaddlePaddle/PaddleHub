@@ -489,7 +489,7 @@ class BasicTask(object):
                     main_program=self.main_program)
         except:
             logger.warning(
-                "The program will only finetune and not eval unless the metrics_choices is a list contains at least one metric."
+                "The program will only finetune and not eval unless the _calculate_metrics function return at least one metric."
             )
 
     def _log_interval_event(self, run_states):

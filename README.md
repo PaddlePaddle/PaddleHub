@@ -75,7 +75,6 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 [自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
-
 ## 在线体验
 我们在AI Studio和AIBook上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
 * ERNIE文本分类:
