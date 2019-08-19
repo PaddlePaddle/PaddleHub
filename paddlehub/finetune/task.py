@@ -470,7 +470,7 @@ class BasicTask(object):
                         tag="{} [{}]".format(metric, self.phase))
             self.env.score_scalar[metric].add_record(self.current_step,
                                                      eval_scores[metric])
-            log_scores += "%s=%.3f " % (metric, eval_scores[metric])
+            log_scores += "%s=%.5f " % (metric, eval_scores[metric])
         logger.info(
             "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
             (self.phase, eval_loss, log_scores, run_speed))
@@ -503,7 +503,7 @@ class BasicTask(object):
                         tag="{} [{}]".format(metric, self.phase))
             self.env.score_scalar[metric].add_record(self.current_step,
                                                      scores[metric])
-            log_scores += "%s=%.3f " % (metric, scores[metric])
+            log_scores += "%s=%.5f " % (metric, scores[metric])
         logger.info(
             "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
             (self.phase, avg_loss, log_scores, run_speed))
