@@ -40,18 +40,19 @@ class LocalModuleManager(object):
 
     def check_module_valid(self, module_path):
         #TODO(wuzewu): code
-        info = {}
         try:
             desc_pb_path = os.path.join(module_path, 'module_desc.pb')
             if os.path.exists(desc_pb_path) and os.path.isfile(desc_pb_path):
+                info = {}
                 desc = module_desc_pb2.ModuleDesc()
                 with open(desc_pb_path, "rb") as fp:
                     desc.ParseFromString(fp.read())
                 info['version'] = desc.attr.map.data["module_info"].map.data[
                     "version"].s
+                return True, info
         except:
-            return False, None
-        return True, info
+            pass
+        return False, None
 
     def all_modules(self, update=False):
         if not update and self.modules_dict:
