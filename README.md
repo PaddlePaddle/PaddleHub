@@ -88,7 +88,6 @@ PaddleHub 1.1.1版本已支持离线运行Module
 
 参考[PaddleHub Finetune适配自定义数据集完成Finetune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
 
-
 ## 答疑
 
 当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-FAQ)查找解决方案。
@@ -168,10 +167,10 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 ### PaddleHub v1.1.0
 
-* PaddleHub 新增 ERNIE 2.0 
+* PaddleHub 新增 ERNIE 2.0
   * 升级Reader， 支持自动传送数据给Ernie 1.0/2.0
   * 新增数据集GLUE(MRPC、QQP、SST-2、CoLA、QNLI、RTE、MNLI)
-  
+
 ### PaddleHub v1.0.1
 
 * 安装模型时自动选择与paddlepaddle版本适配的模型
@@ -199,7 +198,7 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
   * 简化finetune、evaluate、predict等使用逻辑，提升易用性
   * 增加事件回调功能，方便用户快速实现自定义迁移学习任务
   * 新增多标签分类Fine-tune任务
-  
+
 ### PaddleHub v0.5.0
 
 正式发布PaddleHub预训练模型管理工具，旨在帮助用户更高效的管理模型并开展迁移学习的工作。
@@ -210,7 +209,7 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
                 目前版本支持以下模型：词法分析LAC；情感分析Senta；目标检测SSD；图像分类ResNet, MobileNet, NASNet等。
 
 * 迁移学习: 提供了基于预训练模型的Finetune API，用户通过少量代码即可完成迁移学习，包括BERT/ERNIE文本分类、序列标注、图像分类迁移等。
-  
+
 
 ## 版权和许可证
 PaddleHub由[Apache-2.0 license](LICENSE)提供
