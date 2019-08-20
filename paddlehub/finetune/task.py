@@ -504,9 +504,8 @@ class BasicTask(object):
             self.env.score_scalar[metric].add_record(self.current_step,
                                                      scores[metric])
             log_scores += "%s=%.5f " % (metric, scores[metric])
-        logger.info(
-            "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
-            (self.phase, avg_loss, log_scores, run_speed))
+        logger.info("step %d: loss=%.5f %s[step/sec: %.2f]" %
+                    (self.current_step, avg_loss, log_scores, run_speed))
 
     def _save_ckpt_interval_event(self):
         self.save_checkpoint()
@@ -819,6 +818,10 @@ class ClassifierTask(BasicTask):
                 scores["acc"] = avg_acc
             elif metric == "f1":
                 f1 = calculate_f1_np(all_infers, all_labels)
+                if self.phase in ["dev", "val"]:
+                    print("all_infers=" + str(all_infers))
+                    print("all_labels=" + str(all_labels))
+                    print("f1=" + str(f1))
                 scores["f1"] = f1
             elif metric == "matthews":
                 matthews = matthews_corrcoef(all_infers, all_labels)

@@ -138,8 +138,8 @@ def calculate_f1_np(preds, labels):
     tn = np.sum((labels == 0) & (preds == 0))
     fp = np.sum((labels == 0) & (preds == 1))
     fn = np.sum((labels == 1) & (preds == 0))
-    p = tp / (tp + fp)
-    r = tp / (tp + fn)
+    p = tp / (tp + fp) if (tp + fp) else 0
+    r = tp / (tp + fn) if (tp + fn) else 0
     f1 = (2 * p * r) / (p + r) if p + r else 0
     return f1
 
