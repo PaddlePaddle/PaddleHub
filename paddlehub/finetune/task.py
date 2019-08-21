@@ -103,7 +103,7 @@ class BasicTask(object):
         self._base_feed_list = feed_list
 
         # metrics item
-        self.best_score = -1
+        self.best_score = -999
         if metrics_choices == "default":
             metrics_choices = ["acc"]
         elif metrics_choices == None:
@@ -188,6 +188,20 @@ class BasicTask(object):
             self.is_checkpoint_loaded = True
             self.is_best_model_loaded = False
 
+    def init_if_load_best_model(self):
+        if not self.is_best_model_loaded:
+            best_model_path = os.path.join(self.config.checkpoint_dir,
+                                           "best_model")
+            logger.info("Load the best model from %s" % best_model_path)
+            if os.path.exists(best_model_path):
+                self.load_parameters(best_model_path)
+                self.is_checkpoint_loaded = False
+                self.is_best_model_loaded = True
+            else:
+                self.init_if_necessary()
+        else:
+            logger.info("The best model has been loaded")
+
     def _build_env(self):
         if self.env.is_inititalized:
             return
@@ -267,15 +281,10 @@ class BasicTask(object):
 
         if self.is_train_phase:
             loss_name = self.env.loss.name
-            share_vars_from = None
-        elif self.is_test_phase:
-            loss_name = None
-            share_vars_from = self._base_compiled_program
-        elif self.is_predict_phase:
-            share_vars_from = None
-            loss_name = None
         else:
-            raise Exception("Phase Error: %s" % self.phase)
+            loss_name = None
+
+        share_vars_from = self._base_compiled_program
 
         if not self.config.use_data_parallel:
             if self.config.enable_memory_optim:
@@ -287,9 +296,6 @@ class BasicTask(object):
                     loss_name=loss_name,
                     share_vars_from=share_vars_from,
                     build_strategy=self.build_strategy)
-
-            if self._base_compiled_program is None:
-                self._base_compiled_program = self.env.main_program_compiled
 
         self.exe.run(self.env.startup_program)
         self._build_env_end_event()
@@ -369,6 +375,8 @@ class BasicTask(object):
     @property
     def main_program_to_be_run(self):
         if self.config.use_data_parallel:
+            if self._base_compiled_program is None:
+                self._base_compiled_program = self.env.main_program_compiled
             return self.main_program_compiled
         return self.main_program
 
@@ -477,23 +485,27 @@ class BasicTask(object):
         logger.info(
             "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
             (self.phase, eval_loss, log_scores, run_speed))
-        try:
+
+        eval_scores_items = eval_scores.items()
+        if len(eval_scores_items):
             # The first metric will be chose to eval
-            main_metric, main_value = list(eval_scores.items())[0]
-            if self.phase in ["dev", "val"] and main_value > self.best_score:
-                self.best_score = main_value
-                model_saved_dir = os.path.join(self.config.checkpoint_dir,
-                                               "best_model")
-                logger.info("best model saved to %s [best %s=%.5f]" %
-                            (model_saved_dir, main_metric, main_value))
-                save_result = fluid.io.save_persistables(
-                    executor=self.exe,
-                    dirname=model_saved_dir,
-                    main_program=self.main_program)
-        except:
+            main_metric, main_value = list(eval_scores_items)[0]
+        else:
             logger.warning(
-                "The program will only finetune and not eval unless the _calculate_metrics function return at least one metric."
+                "None of metrics has been implemented, loss will be used to evaluate."
             )
+            # The larger, the better
+            main_metric, main_value = "negative loss", -eval_loss
+        if self.phase in ["dev", "val"] and main_value > self.best_score:
+            self.best_score = main_value
+            model_saved_dir = os.path.join(self.config.checkpoint_dir,
+                                           "best_model")
+            logger.info("best model saved to %s [best %s=%.5f]" %
+                        (model_saved_dir, main_metric, main_value))
+            save_result = fluid.io.save_persistables(
+                executor=self.exe,
+                dirname=model_saved_dir,
+                main_program=self.main_program)
 
     def _log_interval_event(self, run_states):
         scores, avg_loss, run_speed = self._calculate_metrics(run_states)
@@ -596,9 +608,15 @@ class BasicTask(object):
             self._finetune_end_event(run_states)
             return run_states
 
-    def eval(self, phase="dev"):
+    def eval(self, phase="dev", load_best_model=False):
+        # Warning: DO NOT use eval(load_best_model=True) in finetune_and_eval
+        # It will cause trainer unable to continue training from checkpoint after eval
+        # More important, The model should evaluate current performance during training.
         with self.phase_guard(phase=phase):
-            self.init_if_necessary()
+            if load_best_model:
+                self.init_if_load_best_model()
+            else:
+                self.init_if_necessary()
             self._eval_start_event()
             run_states = self._run()
             self._eval_end_event(run_states)
@@ -607,15 +625,7 @@ class BasicTask(object):
     def predict(self, data, load_best_model=True):
         with self.phase_guard(phase="predict"):
             if load_best_model:
-                if not self.is_best_model_loaded:
-                    best_model_path = os.path.join(self.config.checkpoint_dir,
-                                                   "best_model")
-                    logger.info("Load the best model from %s" % best_model_path)
-                    self.load_parameters(best_model_path)
-                    self.is_checkpoint_loaded = False
-                    self.is_best_model_loaded = True
-                else:
-                    logger.info("The best model has been loaded")
+                self.init_if_load_best_model()
             else:
                 self.init_if_necessary()
             self._predict_data = data
@@ -1331,6 +1341,5 @@ class ReadingComprehensionTask(BasicTask):
         avg_loss = np.sum(total_cost) / np.sum(total_num_seqs)
 
         scores = OrderedDict()
-        # If none of metrics has been implemented, you can use loss to evaluate simply.
-        scores["metric_loss"] = avg_loss
+        # If none of metrics has been implemented, loss will be used to evaluate.
         return scores, avg_loss, run_speed
