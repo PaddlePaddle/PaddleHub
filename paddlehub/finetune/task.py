@@ -23,6 +23,7 @@ import contextlib
 import time
 import multiprocessing
 import copy
+from collections import OrderedDict
 
 import numpy as np
 import paddle.fluid as fluid
@@ -161,7 +162,7 @@ class BasicTask(object):
         self._predict_data = None
 
         # accelerate predict
-        self.hasloaded = False
+        self.is_best_model_loaded = False
 
         # set default phase
         self.enter_phase("train")
@@ -182,9 +183,10 @@ class BasicTask(object):
 
     def init_if_necessary(self):
         if not self.is_checkpoint_loaded:
-            self.is_checkpoint_loaded = True
             if not self.load_checkpoint():
                 self.exe.run(self._base_startup_program)
+            self.is_checkpoint_loaded = True
+            self.is_best_model_loaded = False
 
     def _build_env(self):
         if self.env.is_inititalized:
@@ -266,13 +268,14 @@ class BasicTask(object):
         if self.is_train_phase:
             loss_name = self.env.loss.name
             share_vars_from = None
-        else:
+        elif self.is_test_phase:
             loss_name = None
-
-        if self._base_compiled_program is None:
-            share_vars_from = None
-        else:
             share_vars_from = self._base_compiled_program
+        elif self.is_predict_phase:
+            share_vars_from = None
+            loss_name = None
+        else:
+            raise Exception("Phase Error: %s" % self.phase)
 
         if not self.config.use_data_parallel:
             if self.config.enable_memory_optim:
@@ -583,7 +586,7 @@ class BasicTask(object):
 
                 # Save checkpoint after finetune
                 self.save_checkpoint()
-
+                self.is_checkpoint_loaded = False
                 # Final evaluation
                 if self._base_data_reader.get_dev_examples() != []:
                     self.eval(phase="dev")
@@ -603,12 +606,18 @@ class BasicTask(object):
 
     def predict(self, data, load_best_model=True):
         with self.phase_guard(phase="predict"):
-            if not self.hasloaded:
-                self.init_if_necessary()
-                if load_best_model:
+            if load_best_model:
+                if not self.is_best_model_loaded:
                     best_model_path = os.path.join(self.config.checkpoint_dir,
                                                    "best_model")
+                    logger.info("Load the best model from %s" % best_model_path)
                     self.load_parameters(best_model_path)
+                    self.is_checkpoint_loaded = False
+                    self.is_best_model_loaded = True
+                else:
+                    logger.info("The best model has been loaded")
+            else:
+                self.init_if_necessary()
             self._predict_data = data
             self._predict_start_event()
             run_states = self._run()
@@ -810,7 +819,7 @@ class ClassifierTask(BasicTask):
         run_speed = run_step / run_time_used
 
         # The first key will be used as main metrics to update the best model
-        scores = {}
+        scores = OrderedDict()
 
         for metric in self.metrics_choices:
             if metric == "acc":
@@ -818,10 +827,6 @@ class ClassifierTask(BasicTask):
                 scores["acc"] = avg_acc
             elif metric == "f1":
                 f1 = calculate_f1_np(all_infers, all_labels)
-                if self.phase in ["dev", "val"]:
-                    print("all_infers=" + str(all_infers))
-                    print("all_labels=" + str(all_labels))
-                    print("f1=" + str(f1))
                 scores["f1"] = f1
             elif metric == "matthews":
                 matthews = matthews_corrcoef(all_infers, all_labels)
@@ -976,7 +981,7 @@ class SequenceLabelTask(BasicTask):
         precision, recall, f1 = calculate_f1(total_label, total_infer,
                                              total_correct)
         # The first key will be used as main metrics to update the best model
-        scores = {}
+        scores = OrderedDict()
 
         for metric in self.metrics_choices:
             if metric == "precision":
@@ -1104,7 +1109,7 @@ class MultiLabelClassifierTask(ClassifierTask):
         run_speed = run_step / run_time_used
 
         # The first key will be used as main metrics to update the best model
-        scores = {}
+        scores = OrderedDict()
         for metric in self.metrics_choices:
             if metric == "auc":
                 scores["auc"] = np.mean(auc_list)
@@ -1208,7 +1213,7 @@ class RegressionTask(BasicTask):
         run_speed = run_step / run_time_used
 
         # The first key will be used as main metrics to update the best model
-        scores = {}
+        scores = OrderedDict()
 
         for metric in self.metrics_choices:
             if metric == "spearman":
@@ -1325,5 +1330,7 @@ class ReadingComprehensionTask(BasicTask):
         run_speed = run_step / run_time_used
         avg_loss = np.sum(total_cost) / np.sum(total_num_seqs)
 
-        scores = {}
+        scores = OrderedDict()
+        # If none of metrics has been implemented, you can use loss to evaluate simply.
+        scores["metric_loss"] = avg_loss
         return scores, avg_loss, run_speed
