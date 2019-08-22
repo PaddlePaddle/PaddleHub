@@ -12,3 +12,4 @@ requests
 pandas
 #[py2]pandas == 0.24.0
 flake8
+cma == 2.7.0
