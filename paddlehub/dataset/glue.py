@@ -49,6 +49,8 @@ class GLUE(HubDataset):
         if sub_dataset == 'MNLI_mm':
             sub_dataset = 'MNLI'
             self.mismatch = True
+        elif sub_dataset == 'MNLI_m':
+            sub_dataset = 'MNLI'
         self.sub_dataset = sub_dataset
         self.dataset_dir = os.path.join(DATA_HOME, "glue_data")
 
