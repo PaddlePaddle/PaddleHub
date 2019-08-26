@@ -22,11 +22,11 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 * 便捷地获取PaddlePaddle生态下的所有预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、语言模型、视频分类、图像生成八类主流模型。
   * 更多详情可查看官网：https://www.paddlepaddle.org.cn/hub
 * 通过PaddleHub Fine-tune API，结合少量代码即可完成**大规模预训练模型**的迁移学习，具体Demo可参考以下链接：
-  * [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/text-classification)
-  * [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/sequence-labeling)
-  * [多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/multi-label-classification)
-  * [图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/image-classification)
-  * [检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.0.0/demo/qa_classification)
+  * [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.1.0/demo/text-classification)
+  * [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.1.0/demo/sequence-labeling)
+  * [多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.1.0/demo/multi-label-classification)
+  * [图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.1.0/demo/image-classification)
+  * [检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.1.0/demo/qa_classification)
 * PaddleHub引入『**模型即软件**』的设计理念，支持通过Python API或者命令行工具，一键完成预训练模型地预测，更方便的应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
@@ -73,7 +73,7 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 ```
 ![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.0.0/docs/imgs/object_detection_result.png)
 
-除了上述三类模型外，PaddleHub还发布了语言模型、语义模型、图像分类、生成模型、视频分类等业界主流模型，更多PaddleHub已经发布的模型，请前往 http://hub.paddlepaddle.org.cn 查看
+除了上述三类模型外，PaddleHub还发布了语言模型、语义模型、图像分类、生成模型、视频分类等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
 
 同时，我们在AI Studio和AIBook上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
 * ERNIE文本分类:
@@ -194,7 +194,7 @@ PaddleHub 1.1.1版本已支持离线运行Module
 
 ### PaddleHub v1.0.0
 
-* 全新发布[PaddleHub官网](http://hub.paddlepaddle.org.cn)，易用性全面提升
+* 全新发布[PaddleHub官网](https://www.paddlepaddle.org.cn/hub)，易用性全面提升
 * 新增29个预训练模型，覆盖文本、图像、视频三大领域；目前官方提供40个预训练模型
 * Fine-tune API升级，灵活性与性能全面提升
   
