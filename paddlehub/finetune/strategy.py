@@ -192,8 +192,8 @@ class CombinedStrategy(DefaultStrategy):
                  scheduler=None,
                  regularization=None,
                  clip=None):
-        super(CombinedStrategy, self).__init__(optimizer_name=optimizer_name,
-                                               learning_rate=learning_rate)
+        super(CombinedStrategy, self).__init__(
+            optimizer_name=optimizer_name, learning_rate=learning_rate)
 
         # init set
         self.scheduler = {
@@ -276,11 +276,12 @@ class CombinedStrategy(DefaultStrategy):
             self.check_assign(self.clip, name, value)
 
     def scheduler_handler(self, max_train_steps):
-        scheduled_lr = fluid.layers.create_global_var(shape=[1],
-                                                      value=self.learning_rate,
-                                                      dtype='float32',
-                                                      persistable=True,
-                                                      name="learning_rate")
+        scheduled_lr = fluid.layers.create_global_var(
+            shape=[1],
+            value=self.learning_rate,
+            dtype='float32',
+            persistable=True,
+            name="learning_rate")
 
         if not self.scheduler["slanted_triangle"]["cut_fraction"]:
             warmup_steps = int(max_train_steps * self.scheduler["warmup"])
@@ -330,15 +331,14 @@ class CombinedStrategy(DefaultStrategy):
                                                        (ratio - 1)) / ratio
                     fluid.layers.assign(decayed_lr, scheduled_lr)
                 with switch.default():
-                    pct = 1 - (global_step - cut_step) / (max_train_steps -
-                                                          cut_step)
+                    pct = 1 - (global_step - cut_step) / (
+                        max_train_steps - cut_step)
                     decayed_lr = self.learning_rate * (1 + pct *
                                                        (ratio - 1)) / ratio
                     fluid.layers.assign(decayed_lr, scheduled_lr)
 
-        super(CombinedStrategy,
-              self).__init__(optimizer_name=self._optimizer_name,
-                             learning_rate=scheduled_lr)
+        super(CombinedStrategy, self).__init__(
+            optimizer_name=self._optimizer_name, learning_rate=scheduled_lr)
 
         if self.scheduler["discriminative"]["blocks"]:
             _block_layers = math.ceil(
@@ -359,8 +359,8 @@ class CombinedStrategy(DefaultStrategy):
                 clip=fluid.clip.GradientClipByGlobalNorm(
                     clip_norm=self.clip["GlobalNorm"]))
         elif self.clip["Norm"]:
-            fluid.clip.set_gradient_clip(clip=fluid.clip.GradientClipByNorm(
-                clip_norm=self.clip["Norm"]))
+            fluid.clip.set_gradient_clip(
+                clip=fluid.clip.GradientClipByNorm(clip_norm=self.clip["Norm"]))
 
     def regularization_handler(self, loss, scheduled_lr):
         if self.regularization["L2"]:
@@ -401,9 +401,8 @@ class CombinedStrategy(DefaultStrategy):
         self.config = config
         dev_count = self._get_dev_count(config)
 
-        data_reader.data_generator(batch_size=config.batch_size,
-                                   phase='train',
-                                   shuffle=True)
+        data_reader.data_generator(
+            batch_size=config.batch_size, phase='train', shuffle=True)
         num_train_examples = len(data_reader.get_train_examples())
 
         _in_tokens = data_reader.in_tokens
@@ -416,8 +415,8 @@ class CombinedStrategy(DefaultStrategy):
         if self.scheduler["discriminative"] or self.scheduler[
                 "gradual_unfreeze"]:
             self.depth_params_dict = get_depth_parameter(self.main_program)
-            self.sorted_depth = sorted(self.depth_params_dict.keys(),
-                                       reverse=True)
+            self.sorted_depth = sorted(
+                self.depth_params_dict.keys(), reverse=True)
             self.max_depth = len(self.sorted_depth)
 
         logger.info(self.__str__())
@@ -483,12 +482,12 @@ class AdamWeightDecayStrategy(CombinedStrategy):
         scheduler = {lr_scheduler: True, "warmup": warmup_proportion}
         regularization = {"weight_decay": weight_decay}
         clip = {"GlobalNorm": 1.0}
-        super(AdamWeightDecayStrategy,
-              self).__init__(optimizer_name=optimizer_name,
-                             learning_rate=learning_rate,
-                             scheduler=scheduler,
-                             regularization=regularization,
-                             clip=clip)
+        super(AdamWeightDecayStrategy, self).__init__(
+            optimizer_name=optimizer_name,
+            learning_rate=learning_rate,
+            scheduler=scheduler,
+            regularization=regularization,
+            clip=clip)
 
 
 class L2SPFinetuneStrategy(CombinedStrategy):
@@ -499,12 +498,12 @@ class L2SPFinetuneStrategy(CombinedStrategy):
         scheduler = {}
         regularization = {"L2SP": regularization_coeff}
         clip = {}
-        super(L2SPFinetuneStrategy,
-              self).__init__(optimizer_name=optimizer_name,
-                             learning_rate=learning_rate,
-                             scheduler=scheduler,
-                             regularization=regularization,
-                             clip=clip)
+        super(L2SPFinetuneStrategy, self).__init__(
+            optimizer_name=optimizer_name,
+            learning_rate=learning_rate,
+            scheduler=scheduler,
+            regularization=regularization,
+            clip=clip)
 
 
 class DefaultFinetuneStrategy(CombinedStrategy):
@@ -516,12 +515,12 @@ class DefaultFinetuneStrategy(CombinedStrategy):
         regularization = {"L2": regularization_coeff}
         clip = {}
 
-        super(DefaultFinetuneStrategy,
-              self).__init__(optimizer_name=optimizer_name,
-                             learning_rate=learning_rate,
-                             scheduler=scheduler,
-                             regularization=regularization,
-                             clip=clip)
+        super(DefaultFinetuneStrategy, self).__init__(
+            optimizer_name=optimizer_name,
+            learning_rate=learning_rate,
+            scheduler=scheduler,
+            regularization=regularization,
+            clip=clip)
 
 
 class ULMFiTStrategy(CombinedStrategy):
@@ -544,8 +543,9 @@ class ULMFiTStrategy(CombinedStrategy):
             scheduler["discriminative"] = {"blocks": 3, "factor": 2.6}
         regularization = {"weight_decay": weight_decay}
         clip = {"GlobalNorm": 1.0}
-        super(ULMFiTStrategy, self).__init__(optimizer_name=optimizer_name,
-                                             learning_rate=learning_rate,
-                                             scheduler=scheduler,
-                                             regularization=regularization,
-                                             clip=clip)
+        super(ULMFiTStrategy, self).__init__(
+            optimizer_name=optimizer_name,
+            learning_rate=learning_rate,
+            scheduler=scheduler,
+            regularization=regularization,
+            clip=clip)
