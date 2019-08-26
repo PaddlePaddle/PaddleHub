@@ -208,4 +208,6 @@ PaddleHub 1.1.1版本已支持离线运行Module
                 目前版本支持以下模型：词法分析LAC；情感分析Senta；目标检测SSD；图像分类ResNet, MobileNet, NASNet等。
 
 * 迁移学习: 提供了基于预训练模型的Finetune API，用户通过少量代码即可完成迁移学习，包括BERT/ERNIE文本分类、序列标注、图像分类迁移等。
-  
+
+## 版权和许可证
+PaddleHub由[Apache-2.0 license](LICENSE)提供
