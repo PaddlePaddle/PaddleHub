@@ -138,7 +138,7 @@ $ hub uninstall ernie
 
 **原因**
 
-PaddleHub中的预训练模型和预置数据集都需要通过服务端进行下载，因此Paddle Hub默认用户访问外网权限。
+PaddleHub中的预训练模型和预置数据集都需要通过服务端进行下载，因此PaddleHub默认用户访问外网权限。
 可以通过以下命令确认是否可以访问外网。
 
 ```python
