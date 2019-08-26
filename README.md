@@ -125,9 +125,7 @@ print(res)
 # the common result is like this:
 # <Response [200]>
 ```
-**Note**
-
-PaddleHub 1.1.1版本已支持离线运行Module
+**Note：** PaddleHub 1.1.1版本已支持离线运行Module
 
 **Q:** 利用PaddleHub Finetune如何适配自定义数据集
 
