@@ -31,7 +31,7 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 * [更新历史](https://github.com/paddlepaddle/paddlehub#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
 
 
-## PaddleHub安装
+## 安装
 
 ### 环境依赖
 * Python==2.7 or Python>=3.5
@@ -80,23 +80,23 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 同时，我们在AI Studio和AIBook上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
 * ERNIE文本分类:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79380)
-  * [AIBook](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_txt_cls)
+  * [AI Book](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_txt_cls)
 * ERNIE序列标注:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79377)
-  * [AIBook](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_seq_label)
+  * [AI Book](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_seq_label)
 * ELMo文本分类:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79400)
-  * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/elmo_txt_cls)
+  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/elmo_txt_cls)
 * senta情感分类:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79398)
-  * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/senta_bilstm)
+  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/senta_bilstm)
 * 图像分类:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79378)
-  * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/img_cls)
+  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/img_cls)
 
 ## 教程
 
-[API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
+[Fine-tune API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
 
 [迁移学习](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
 
@@ -211,5 +211,3 @@ PaddleHub 1.1.1版本已支持离线运行Module
 
 * 迁移学习: 提供了基于预训练模型的Finetune API，用户通过少量代码即可完成迁移学习，包括BERT/ERNIE文本分类、序列标注、图像分类迁移等。
 
-## 版权和许可证
-PaddleHub由[Apache-2.0 license](LICENSE)提供
