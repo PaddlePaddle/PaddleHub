@@ -56,3 +56,5 @@ from .finetune.config import RunConfig
 from .finetune.strategy import AdamWeightDecayStrategy
 from .finetune.strategy import DefaultStrategy
 from .finetune.strategy import DefaultFinetuneStrategy
+from .finetune.strategy import L2SPFinetuneStrategy
+from .finetune.strategy import ULMFiTStrategy
