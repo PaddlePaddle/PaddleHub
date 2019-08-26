@@ -7,11 +7,9 @@
 * [安装](https://github.com/paddlepaddle/paddlehub#%E5%AE%89%E8%A3%85)
 * [快速体验](https://github.com/paddlepaddle/paddlehub#%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C)
 * [教程](https://github.com/paddlepaddle/paddlehub#%E6%95%99%E7%A8%8B)
-* [在线体验](https://github.com/paddlepaddle/paddlehub#%E5%9C%A8%E7%BA%BF%E4%BD%93%E9%AA%8C)
 * [FAQ](https://github.com/paddlepaddle/paddlehub#faq)
 * [用户交流群](https://github.com/paddlepaddle/paddlehub#%E7%94%A8%E6%88%B7%E4%BA%A4%E6%B5%81%E7%BE%A4)
 * [更新历史](https://github.com/paddlepaddle/paddlehub#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
-* [版权和许可证](https://github.com/paddlepaddle/paddlehub#%E7%89%88%E6%9D%83%E5%92%8C%E8%AE%B8%E5%8F%AF%E8%AF%81)
 
 ## 简介
 
@@ -77,16 +75,7 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 除了上述三类模型外，PaddleHub还发布了语言模型、语义模型、图像分类、生成模型、视频分类等业界主流模型，更多PaddleHub已经发布的模型，请前往 http://hub.paddlepaddle.org.cn 查看
 
-## 教程
-
-[API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
-
-[迁移学习](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
-
-[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
-
-## 在线体验
-我们在AI Studio和AIBook上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
+同时，我们在AI Studio和AIBook上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
 * ERNIE文本分类:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79380)
   * [AIBook](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_txt_cls)
@@ -102,6 +91,14 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 * 图像分类:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79378)
   * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/img_cls)
+
+## 教程
+
+[API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
+
+[迁移学习](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
+
+[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
 ## FAQ
 
@@ -212,8 +209,3 @@ PaddleHub 1.1.1版本已支持离线运行Module
 
 * 迁移学习: 提供了基于预训练模型的Finetune API，用户通过少量代码即可完成迁移学习，包括BERT/ERNIE文本分类、序列标注、图像分类迁移等。
   
-
-
-
-## 版权和许可证
-PaddleHub由[Apache-2.0 license](LICENSE)提供
