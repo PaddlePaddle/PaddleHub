@@ -1,15 +1,5 @@
 # PaddleHub
 
-## 目录
-
-* [简介](https://github.com/paddlepaddle/paddlehub#%E7%AE%80%E4%BB%8B)
-* [环境依赖](https://github.com/paddlepaddle/paddlehub#%E7%8E%AF%E5%A2%83%E4%BE%9D%E8%B5%96)
-* [安装](https://github.com/paddlepaddle/paddlehub#%E5%AE%89%E8%A3%85)
-* [快速体验](https://github.com/paddlepaddle/paddlehub#%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C)
-* [教程](https://github.com/paddlepaddle/paddlehub#%E6%95%99%E7%A8%8B)
-* [FAQ](https://github.com/paddlepaddle/paddlehub#faq)
-* [用户交流群](https://github.com/paddlepaddle/paddlehub#%E7%94%A8%E6%88%B7%E4%BA%A4%E6%B5%81%E7%BE%A4)
-* [更新历史](https://github.com/paddlepaddle/paddlehub#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
 
 ## 简介
 
@@ -30,13 +20,25 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 * PaddleHub引入『**模型即软件**』的设计理念，支持通过Python API或者命令行工具，一键完成预训练模型地预测，更方便的应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
-## 环境依赖
+
+## 目录
+
+* [安装](https://github.com/paddlepaddle/paddlehub#%E5%AE%89%E8%A3%85)
+* [快速体验](https://github.com/paddlepaddle/paddlehub#%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C)
+* [教程](https://github.com/paddlepaddle/paddlehub#%E6%95%99%E7%A8%8B)
+* [FAQ](https://github.com/paddlepaddle/paddlehub#faq)
+* [用户交流群](https://github.com/paddlepaddle/paddlehub#%E7%94%A8%E6%88%B7%E4%BA%A4%E6%B5%81%E7%BE%A4)
+* [更新历史](https://github.com/paddlepaddle/paddlehub#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
+
+
+## PaddleHub安装
+
+### 环境依赖
 * Python==2.7 or Python>=3.5
 * PaddlePaddle>=1.4.0
 
 除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络
 
-## 安装
 pip安装方式如下：
 
 ```shell
