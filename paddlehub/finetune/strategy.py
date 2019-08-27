@@ -318,7 +318,7 @@ class CombinedStrategy(DefaultStrategy):
                     "noam_decay"] or self.scheduler["linear_decay"]:
                 logger.warning(
                     "You are using slanted_triangle learning rate "
-                    "which will make warmup, noam_decay, linear_decay lose ability"
+                    "which will make warmup, noam_decay and linear_decay unable"
                 )
             cut_step = int(max_train_steps *
                            self.scheduler["slanted_triangle"]["cut_fraction"])
@@ -401,8 +401,13 @@ class CombinedStrategy(DefaultStrategy):
         self.config = config
         dev_count = self._get_dev_count(config)
 
+        # self.num_examples = {'train': -1, 'dev': -1, 'test': -1} before data_generator
         data_reader.data_generator(
             batch_size=config.batch_size, phase='train', shuffle=True)
+        data_reader.data_generator(
+            batch_size=config.batch_size, phase='dev', shuffle=False)
+        data_reader.data_generator(
+            batch_size=config.batch_size, phase='test', shuffle=False)
         num_train_examples = len(data_reader.get_train_examples())
 
         _in_tokens = data_reader.in_tokens
