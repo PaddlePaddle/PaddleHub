@@ -58,3 +58,4 @@ from .finetune.strategy import DefaultStrategy
 from .finetune.strategy import DefaultFinetuneStrategy
 from .finetune.strategy import L2SPFinetuneStrategy
 from .finetune.strategy import ULMFiTStrategy
+from .finetune.strategy import CombinedStrategy

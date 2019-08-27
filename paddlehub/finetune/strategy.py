@@ -237,25 +237,25 @@ class CombinedStrategy(DefaultStrategy):
         self.epoch = 0
         self.main_program = None
 
-    def check_assign(self, dictory, key, value):
-        if key not in dictory:
+    def check_assign(self, dictionary, key, value):
+        if key not in dictionary:
             raise ValueError("Invalid parameter: %s" % key)
-        if isinstance(value, dict) and isinstance(dictory[key], dict):
-            sub_dict = dictory[key]
+        if isinstance(value, dict) and isinstance(dictionary[key], dict):
+            sub_dict = dictionary[key]
             for sub_name in value:
                 self.check_assign(sub_dict, sub_name, value[sub_name])
-        elif isinstance(dictory[key],
-                        type(value)) or (isinstance(dictory[key], float)
+        elif isinstance(dictionary[key],
+                        type(value)) or (isinstance(dictionary[key], float)
                                          and isinstance(value, (float, int))):
-            dictory[key] = value
+            dictionary[key] = value
         else:
-            if isinstance(dictory[key], dict):
+            if isinstance(dictionary[key], dict):
                 raise ValueError(
                     "The type of parameter %s should be a dict with keys: %s" %
-                    (key, dictory[key].keys()))
+                    (key, dictionary[key].keys()))
             else:
                 raise ValueError("The type of parameter %s should be %s" %
-                                 (key, type(dictory[key])))
+                                 (key, type(dictionary[key])))
 
     def add_scheduler(self, name="warmup", value=0, **values):
         if values:
@@ -372,7 +372,7 @@ class CombinedStrategy(DefaultStrategy):
             self.main_program, fluid.default_startup_program())
 
         if self.regularization["L2SP"]:
-            #TODO: 只能单任务运行L2SP
+            #TODO: L2SP can only run in one process now
             for index, param in enumerate(pretrained_params):
                 param.regularizer = L2SPDecayRegularizer(
                     regularization_coeff=self.regularization["L2SP"])
@@ -529,7 +529,7 @@ class ULMFiTStrategy(CombinedStrategy):
                  warmup_proportion=0.1,
                  weight_decay=0.01,
                  optimizer_name="adam",
-                 freeze=False,
+                 unfreeze=False,
                  dis=False,
                  slanted=False):
 
@@ -537,7 +537,7 @@ class ULMFiTStrategy(CombinedStrategy):
             scheduler = {"slanted_triangle": {"cut_fraction": 0.1, "ratio": 32}}
         else:
             scheduler = {}
-        if freeze:
+        if unfreeze:
             scheduler["gradual_unfreeze"] = True
         if dis:
             scheduler["discriminative"] = {"blocks": 3, "factor": 2.6}

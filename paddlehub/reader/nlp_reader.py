@@ -43,7 +43,8 @@ class BaseReader(object):
                  max_seq_len=512,
                  do_lower_case=True,
                  random_seed=None,
-                 use_task_id=False):
+                 use_task_id=False,
+                 in_tokens=False):
         self.max_seq_len = max_seq_len
         self.tokenizer = tokenization.FullTokenizer(
             vocab_file=vocab_path, do_lower_case=do_lower_case)
@@ -52,7 +53,7 @@ class BaseReader(object):
         self.pad_id = self.vocab["[PAD]"]
         self.cls_id = self.vocab["[CLS]"]
         self.sep_id = self.vocab["[SEP]"]
-        self.in_tokens = False
+        self.in_tokens = in_tokens
         self.use_task_id = use_task_id
 
         if self.use_task_id:
@@ -497,7 +498,7 @@ class SequenceLabelReader(BaseReader):
 
 
 class LACClassifyReader(object):
-    def __init__(self, dataset, vocab_path):
+    def __init__(self, dataset, vocab_path, in_tokens=False):
         self.dataset = dataset
         self.lac = hub.Module(name="lac")
         self.tokenizer = tokenization.FullTokenizer(
@@ -508,6 +509,7 @@ class LACClassifyReader(object):
                 sign_name="lexical_analysis").keys())[0]
 
         self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
+        self.in_tokens = in_tokens
 
     def get_num_examples(self, phase):
         """Get number of examples for train, dev or test."""
