@@ -587,6 +587,7 @@ class BasicTask(object):
             run_states = []
             if self.current_epoch <= self.config.num_epoch:
                 while self.current_epoch <= self.config.num_epoch:
+                    self.config.strategy.step()
                     run_states = self._run(do_eval=do_eval)
                     self.env.current_epoch += 1
 
