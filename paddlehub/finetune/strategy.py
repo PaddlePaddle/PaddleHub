@@ -305,7 +305,7 @@ class CombinedStrategy(DefaultStrategy):
                                 decayed_lr = self.learning_rate * global_step * 1.0 / warmup_steps
                                 fluid.layers.assign(decayed_lr, scheduled_lr)
                         if self.scheduler["linear_decay"]:
-                            with switch.default():
+                            with switch.case(global_step >= warmup_steps):
                                 decayed_lr = lr_scheduler.polynomial_decay(
                                     learning_rate=self.learning_rate,
                                     decay_steps=max_train_steps,
