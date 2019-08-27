@@ -531,23 +531,26 @@ class DefaultFinetuneStrategy(CombinedStrategy):
 class ULMFiTStrategy(CombinedStrategy):
     def __init__(self,
                  learning_rate=1e-4,
-                 warmup_proportion=0.1,
-                 weight_decay=0.01,
                  optimizer_name="adam",
-                 unfreeze=False,
-                 dis=False,
-                 slanted=False):
+                 gradual_unfreeze=False,
+                 cut_fraction=0.1,
+                 ratio=32,
+                 blocks=3,
+                 factor=2.6):
 
-        if slanted:
-            scheduler = {"slanted_triangle": {"cut_fraction": 0.1, "ratio": 32}}
-        else:
-            scheduler = {}
-        if unfreeze:
-            scheduler["gradual_unfreeze"] = True
-        if dis:
-            scheduler["discriminative"] = {"blocks": 3, "factor": 2.6}
-        regularization = {"weight_decay": weight_decay}
-        clip = {"GlobalNorm": 1.0}
+        scheduler = {
+            "slanted_triangle": {
+                "cut_fraction": cut_fraction,
+                "ratio": ratio
+            },
+            "gradual_unfreeze": gradual_unfreeze,
+            "discriminative": {
+                "blocks": blocks,
+                "factor": factor
+            }
+        }
+        regularization = {}
+        clip = {}
         super(ULMFiTStrategy, self).__init__(
             optimizer_name=optimizer_name,
             learning_rate=learning_rate,
