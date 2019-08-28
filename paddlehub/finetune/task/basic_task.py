@@ -270,7 +270,7 @@ class BasicTask(object):
             with fluid.program_guard(self.env.main_program,
                                      self._base_startup_program):
                 with fluid.unique_name.guard(self.env.UNG):
-                    self.config.strategy.execute(
+                    self.scheduled_lr, self.max_train_steps = self.config.strategy.execute(
                         self.loss, self._base_data_reader, self.config)
 
         if self.is_train_phase:
@@ -513,8 +513,9 @@ class BasicTask(object):
             self.env.score_scalar[metric].add_record(self.current_step,
                                                      scores[metric])
             log_scores += "%s=%.5f " % (metric, scores[metric])
-        logger.info("step %d: loss=%.5f %s[step/sec: %.2f]" %
-                    (self.current_step, avg_loss, log_scores, run_speed))
+        logger.info("step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
+                    (self.current_step, self.max_train_steps, avg_loss,
+                     log_scores, run_speed))
 
     def _save_ckpt_interval_event(self):
         self.save_checkpoint()
@@ -553,11 +554,12 @@ class BasicTask(object):
             checkpoint_dir=self.config.checkpoint_dir,
             current_epoch=self.current_epoch,
             global_step=self.current_step,
+            best_score=self.best_score,
             exe=self.exe,
             main_program=self.main_program)
 
     def load_checkpoint(self):
-        is_load_successful, self.env.current_epoch, self.env.current_step = load_checkpoint(
+        is_load_successful, self.env.current_epoch, self.env.current_step, self.best_score = load_checkpoint(
             self.config.checkpoint_dir,
             self.exe,
             main_program=self.main_program)
@@ -598,7 +600,7 @@ class BasicTask(object):
                 if self._base_data_reader.get_dev_examples() != []:
                     self.eval(phase="dev")
                 if self._base_data_reader.get_test_examples() != []:
-                    self.eval(phase="test")
+                    self.eval(phase="test", load_best_model=True)
 
             self._finetune_end_event(run_states)
             return run_states

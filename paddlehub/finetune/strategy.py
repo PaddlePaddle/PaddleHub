@@ -198,7 +198,10 @@ class CombinedStrategy(DefaultStrategy):
         # init set
         self.scheduler = {
             "warmup": 0.0,
-            "linear_decay": False,
+            "linear_decay": {
+                "start_point": 1.0,
+                "end_learning_rate": 0,
+            },
             "noam_decay": False,
             "discriminative": {
                 "blocks": 0,
@@ -217,7 +220,7 @@ class CombinedStrategy(DefaultStrategy):
             "weight_decay": 0.0,
         }
 
-        self.clip = {"GlobalNorm": 1.0, "Norm": 1.0}
+        self.clip = {"GlobalNorm": 0.0, "Norm": 0.0}
 
         if scheduler == None:
             scheduler = {}
@@ -285,6 +288,13 @@ class CombinedStrategy(DefaultStrategy):
 
         if not self.scheduler["slanted_triangle"]["cut_fraction"]:
             warmup_steps = int(max_train_steps * self.scheduler["warmup"])
+            linear_decay_start = int(
+                max_train_steps * self.scheduler["linear_decay"]["start_point"])
+            if linear_decay_start < warmup_steps:
+                logger.warning(
+                    "linear decay can not start during warmup process,"
+                    "it will start after warmup ends!")
+                linear_decay_start = warmup_steps
             if self.scheduler["noam_decay"]:
                 if warmup_steps > 0:
                     scheduled_lr = fluid.layers.learning_rate_scheduler \
@@ -296,7 +306,7 @@ class CombinedStrategy(DefaultStrategy):
                         warmup steps, using constant learning rate instead!")
 
             if not self.scheduler["noam_decay"] and \
-                    (warmup_steps > 0 or self.scheduler["linear_decay"]):
+                    (warmup_steps > 0 or self.scheduler["linear_decay"]["start_point"]<1):
                 with self.main_program._lr_schedule_guard():
                     global_step = lr_scheduler._decay_step_counter()
                     with control_flow.Switch() as switch:
@@ -304,18 +314,20 @@ class CombinedStrategy(DefaultStrategy):
                             with switch.case(global_step < warmup_steps):
                                 decayed_lr = self.learning_rate * global_step * 1.0 / warmup_steps
                                 fluid.layers.assign(decayed_lr, scheduled_lr)
-                        if self.scheduler["linear_decay"]:
-                            with switch.case(global_step >= warmup_steps):
+                        if self.scheduler["linear_decay"]["start_point"] < 1:
+                            with switch.case(global_step >= linear_decay_start):
                                 decayed_lr = lr_scheduler.polynomial_decay(
                                     learning_rate=self.learning_rate,
                                     decay_steps=max_train_steps,
-                                    end_learning_rate=0.0,
+                                    end_learning_rate=self.scheduler[
+                                        "linear_decay"]["end_learning_rate"],
                                     power=1.0,
                                     cycle=False)
                                 fluid.layers.assign(decayed_lr, scheduled_lr)
         else:
             if self.scheduler["warmup"] or self.scheduler[
-                    "noam_decay"] or self.scheduler["linear_decay"]:
+                    "noam_decay"] or self.scheduler["linear_decay"][
+                        "start_point"] < 1:
                 logger.warning(
                     "You are using slanted_triangle learning rate "
                     "which will make warmup, noam_decay and linear_decay unable"
@@ -434,7 +446,7 @@ class CombinedStrategy(DefaultStrategy):
         # handle regularization
         self.regularization_handler(loss, scheduled_lr)
 
-        return scheduled_lr
+        return scheduled_lr, max_train_steps
 
     def _get_dev_count(self, config):
         if config.use_cuda:
@@ -481,10 +493,17 @@ class AdamWeightDecayStrategy(CombinedStrategy):
                  warmup_proportion=0.1,
                  weight_decay=0.01,
                  optimizer_name="adam"):
-        if lr_scheduler not in ["linear_decay", "noam_decay"]:
+        scheduler = {"warmup": warmup_proportion}
+        if lr_scheduler == "noam_decay":
+            scheduler["noam_decay"] = True
+        elif lr_scheduler == "linear_decay":
+            scheduler["linear_decay"] = {
+                "start_point": 1 - warmup_proportion,
+                "end_learning_rate": 0,
+            }
+        else:
             raise ValueError("lr_scheduler {} is not setup "
                              "correctly".format(lr_scheduler))
-        scheduler = {lr_scheduler: True, "warmup": warmup_proportion}
         regularization = {"weight_decay": weight_decay}
         clip = {"GlobalNorm": 1.0}
         super(AdamWeightDecayStrategy, self).__init__(

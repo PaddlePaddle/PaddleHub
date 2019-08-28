@@ -37,6 +37,7 @@ def load_checkpoint(checkpoint_dir, exe, main_program):
             ckpt.ParseFromString(f.read())
     current_epoch = 1
     global_step = 0
+    best_score = -999
 
     def if_exist(var):
         return os.path.exists(os.path.join(ckpt.latest_model_dir, var.name))
@@ -46,19 +47,19 @@ def load_checkpoint(checkpoint_dir, exe, main_program):
             exe, ckpt.latest_model_dir, main_program, predicate=if_exist)
 
         logger.info("PaddleHub model checkpoint loaded. current_epoch={}, "
-                    "global_step={}".format(ckpt.current_epoch,
-                                            ckpt.global_step))
-        return True, ckpt.current_epoch, ckpt.global_step
+                    "global_step={}, best_score={}".format(
+                        ckpt.current_epoch, ckpt.global_step, ckpt.best_score))
+        return True, ckpt.current_epoch, ckpt.global_step, ckpt.best_score
 
-    logger.info(
-        "PaddleHub model checkpoint not found, start training from scratch...")
+    logger.info("PaddleHub model checkpoint not found, start from scratch...")
 
-    return False, current_epoch, global_step
+    return False, current_epoch, global_step, best_score
 
 
 def save_checkpoint(checkpoint_dir,
                     current_epoch,
                     global_step,
+                    best_score,
                     exe,
                     main_program=fluid.default_main_program()):
 
@@ -73,5 +74,6 @@ def save_checkpoint(checkpoint_dir,
     ckpt.current_epoch = current_epoch
     ckpt.global_step = global_step
     ckpt.latest_model_dir = model_saved_dir
+    ckpt.best_score = best_score
     with open(ckpt_meta_path, "wb") as f:
         f.write(ckpt.SerializeToString())
