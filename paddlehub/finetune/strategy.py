@@ -200,7 +200,7 @@ class CombinedStrategy(DefaultStrategy):
             "warmup": 0.0,
             "linear_decay": {
                 "start_point": 1.0,
-                "end_learning_rate": 0,
+                "end_learning_rate": 0.0,
             },
             "noam_decay": False,
             "discriminative": {
