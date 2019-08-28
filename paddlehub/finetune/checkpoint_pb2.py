@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax='proto3',
     serialized_options=_b('H\003'),
     serialized_pb=_b(
-        '\n\x10\x63heckpoint.proto\x12\x19paddlehub.task.checkpoint\"f\n\nCheckPoint\x12\x15\n\rcurrent_epoch\x18\x01 \x01(\x03\x12\x13\n\x0bglobal_step\x18\x02 \x01(\x03\x12\x12\n\nbest_score\x18\x03 \x01(\x03\x12\x18\n\x10latest_model_dir\x18\x04 \x01(\tB\x02H\x03\x62\x06proto3'
+        '\n\x10\x63heckpoint.proto\x12\x19paddlehub.task.checkpoint\"f\n\nCheckPoint\x12\x15\n\rcurrent_epoch\x18\x01 \x01(\x03\x12\x13\n\x0bglobal_step\x18\x02 \x01(\x03\x12\x12\n\nbest_score\x18\x03 \x01(\x01\x12\x18\n\x10latest_model_dir\x18\x04 \x01(\tB\x02H\x03\x62\x06proto3'
     ))
 
 _CHECKPOINT = _descriptor.Descriptor(
@@ -67,11 +67,11 @@ _CHECKPOINT = _descriptor.Descriptor(
             full_name='paddlehub.task.checkpoint.CheckPoint.best_score',
             index=2,
             number=3,
-            type=3,
-            cpp_type=2,
+            type=1,
+            cpp_type=5,
             label=1,
             has_default_value=False,
-            default_value=0,
+            default_value=float(0),
             message_type=None,
             enum_type=None,
             containing_type=None,
