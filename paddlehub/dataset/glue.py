@@ -200,7 +200,7 @@ class GLUE(HubDataset):
                     seq_id += 1
                     examples.append(example)
                 except:
-                    print("[Discard Incorrect Data] " + "\t".join(line))
+                    logger.info("[Discard Incorrect Data] " + "\t".join(line))
             return examples
 
 
