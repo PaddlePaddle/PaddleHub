@@ -77,7 +77,6 @@ class Downloader(object):
                 with open(file_name, 'wb') as f:
                     shutil.copyfileobj(r.raw, f)
             else:
-                #TODO(ZeyuChen) upgrade to tqdm process
                 with open(file_name, 'wb') as f:
                     dl = 0
                     total_length = int(total_length)

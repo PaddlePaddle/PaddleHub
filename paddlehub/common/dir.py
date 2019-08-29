@@ -15,7 +15,6 @@
 
 import os
 
-# TODO: Change dir.py's filename, this naming rule is not qualified
 USER_HOME = os.path.expanduser('~')
 HUB_HOME = os.path.join(USER_HOME, ".paddlehub")
 MODULE_HOME = os.path.join(HUB_HOME, "modules")

@@ -183,7 +183,6 @@ class HubServer(object):
             self.resource_list_file['version'][index]
             for index in resource_index_list
         ]
-        #TODO(wuzewu): version sort method
         resource_version_list = sorted(resource_version_list)
         if not version:
             if not resource_version_list:
