@@ -46,11 +46,17 @@ def load_checkpoint(checkpoint_dir, exe, main_program):
         fluid.io.load_vars(
             exe, ckpt.latest_model_dir, main_program, predicate=if_exist)
 
+        # Compatible with older versions without best_score in checkpoint_pb2
+        try:
+            best_score = ckpt.best_score
+        except:
+            best_score = -999
+
         logger.info("PaddleHub model checkpoint loaded. current_epoch={}, "
                     "global_step={}, best_score={:.5f}".format(
-                        ckpt.current_epoch, ckpt.global_step, ckpt.best_score))
+                        ckpt.current_epoch, ckpt.global_step, best_score))
 
-        return True, ckpt.current_epoch, ckpt.global_step, ckpt.best_score
+        return True, ckpt.current_epoch, ckpt.global_step, best_score
 
     logger.info("PaddleHub model checkpoint not found, start from scratch...")
 
