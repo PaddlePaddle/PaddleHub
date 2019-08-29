@@ -177,7 +177,6 @@ class DefaultStrategy(object):
         else:
             raise ValueError("DefaultStrategy's optimizer is None")
 
-    # TODO complete __str__()
     def __str__(self):
         return "DefaultStrategy"
 
@@ -422,12 +421,16 @@ class CombinedStrategy(DefaultStrategy):
             batch_size=config.batch_size, phase='test', shuffle=False)
         num_train_examples = len(data_reader.get_train_examples())
 
-        _in_tokens = data_reader.in_tokens
-        if _in_tokens:
-            max_train_steps = config.num_epoch * num_train_examples // (
-                config.batch_size // config.max_seq_len) // dev_count
-        else:
-            max_train_steps = config.num_epoch * num_train_examples // config.batch_size // dev_count
+        max_train_steps = config.num_epoch * num_train_examples // config.batch_size // dev_count
+
+        try:
+            # nlp_reader
+            _in_tokens = data_reader.in_tokens
+            if _in_tokens:
+                max_train_steps *= data_reader.max_seq_len
+        except:
+            # cv_reader without .in_tokens and .max_seq_len
+            pass
 
         if self.scheduler["discriminative"] or self.scheduler[
                 "gradual_unfreeze"]:
