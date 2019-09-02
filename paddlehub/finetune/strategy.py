@@ -206,7 +206,7 @@ class CombinedStrategy(DefaultStrategy):
                 "blocks": 0,
                 "factor": 2.6
             },
-            "gradual_unfreeze": False,
+            "gradual_unfreeze": 0,
             "slanted_triangle": {
                 "cut_fraction": 0.0,
                 "ratio": 32
@@ -432,8 +432,8 @@ class CombinedStrategy(DefaultStrategy):
             # cv_reader without .in_tokens and .max_seq_len
             pass
 
-        if self.scheduler["discriminative"] or self.scheduler[
-                "gradual_unfreeze"]:
+        if self.scheduler["discriminative"]["blocks"] > 0 or self.scheduler[
+                "gradual_unfreeze"] > 0:
             self.depth_params_dict = get_depth_parameter(self.main_program)
             self.sorted_depth = sorted(
                 self.depth_params_dict.keys(), reverse=True)
@@ -469,14 +469,15 @@ class CombinedStrategy(DefaultStrategy):
         return False
 
     def step(self):
-        if self.scheduler["gradual_unfreeze"]:
+        if self.scheduler["gradual_unfreeze"] > 0:
             self.epoch += 1
-            if self.max_depth > 0:
+            if self.max_depth > 0 and self.epoch <= self.scheduler[
+                    "gradual_unfreeze"]:
                 set_gradual_unfreeze(
                     self.main_program,
-                    unfreeze_depths=self.sorted_depth[:self.max_depth *
-                                                      self.epoch //
-                                                      self.config._num_epoch])
+                    unfreeze_depths=self.
+                    sorted_depth[:self.max_depth * self.epoch //
+                                 self.scheduler["gradual_unfreeze"]])
             else:
                 logger.warning(
                     "The max op-depth in the network is %s. That results in that can't use the gradual unfreeze finetune strategy."
@@ -554,20 +555,21 @@ class ULMFiTStrategy(CombinedStrategy):
     def __init__(self,
                  learning_rate=1e-4,
                  optimizer_name="adam",
-                 gradual_unfreeze=False,
+                 gradual_unfreeze=3,
                  cut_fraction=0.1,
                  ratio=32,
-                 blocks=3,
-                 factor=2.6):
+                 dis_blocks=3,
+                 factor=2.6,
+                 frz_blocks=3):
 
         scheduler = {
             "slanted_triangle": {
                 "cut_fraction": cut_fraction,
                 "ratio": ratio
             },
-            "gradual_unfreeze": gradual_unfreeze,
+            "gradual_unfreeze": frz_blocks,
             "discriminative": {
-                "blocks": blocks,
+                "blocks": dis_blocks,
                 "factor": factor
             }
         }
