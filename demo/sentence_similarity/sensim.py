@@ -18,7 +18,7 @@ import numpy as np
 import scipy
 from scipy.spatial import distance
 
-from paddlehub.reader.tokenization import load_vocab, convert_tokens_to_ids
+from paddlehub.reader.tokenization import load_vocab
 import paddle.fluid as fluid
 import paddlehub as hub
 
