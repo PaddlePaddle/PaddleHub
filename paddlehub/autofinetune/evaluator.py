@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import io
 import hashlib
+import math
 import os
 import random
 import six
@@ -28,10 +29,10 @@ from paddlehub.common.utils import is_windows
 
 REWARD_SUM = 10000
 
-# if six.PY3:
-#     INF = math.inf
-# else:
-#     INF = float("inf")
+if six.PY3:
+    INF = math.inf
+else:
+    INF = float("inf")
 
 
 class BaseEvaluator(object):
