@@ -19,6 +19,10 @@ from __future__ import print_function
 
 import logging
 import math
+import os
+import json
+
+from paddlehub.common.dir import CONF_HOME
 
 
 class Logger(object):
@@ -29,14 +33,17 @@ class Logger(object):
         if not name:
             name = "PaddleHub"
         self.logger = logging.getLogger(name)
-
         self.handler = logging.StreamHandler()
         self.format = logging.Formatter(
             '[%(asctime)-15s] [%(levelname)8s] - %(message)s')
         self.handler.setFormatter(self.format)
 
         self.logger.addHandler(self.handler)
-        self.logLevel = "DEBUG"
+        if not os.path.exists(os.path.join(CONF_HOME, "config.json")):
+            self.logLevel = "DEBUG"
+        else:
+            with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
+                self.logLevel = json.load(fp).get("log_level", "DEBUG")
         self.logger.setLevel(self._get_logging_level())
 
     def _is_no_log(self):
