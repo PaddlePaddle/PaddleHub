@@ -20,6 +20,7 @@ import numpy as np
 import six
 import time
 
+from tb_paddle import SummaryWriter
 from paddlehub.common.logger import logger
 from paddlehub.common.utils import mkdir
 
@@ -60,7 +61,7 @@ class PSHE2(object):
         self.best_reward_all_pop = INF
         self.current_hparams = [[0] * self.num_hparm] * self._popsize
         for i in range(self.popsize):
-            self.current_hparams[i] = self.randomSolution()
+            self.current_hparams[i] = self.set_random_hparam()
 
         if output_dir is None:
             now = int(time.time())
@@ -68,6 +69,15 @@ class PSHE2(object):
             self._output_dir = "output_" + time_str
         else:
             self._output_dir = output_dir
+
+        self.writer = SummaryWriter(logdir=self._output_dir + '/tb_paddle')
+        self.hparams_name_list = [
+            param["name"] for param in evaluator.params['param_list']
+        ]
+        self.tag_scalar_dict = {}
+        for index, name in enumerate(self.hparams_name_list):
+            self.tag_scalar_dict[name] = []
+        self.tag_scalar_dict["best_eval_value"] = []
 
     @property
     def thread(self):
@@ -100,7 +110,7 @@ class PSHE2(object):
             output_dir = self._output_dir
         return output_dir
 
-    def randomSolution(self):
+    def set_random_hparam(self):
         solut = [0] * self.num_hparm
         for i in range(self.num_hparm):
             ratio = (np.random.random_sample() - 0.5) * 2.0
@@ -112,7 +122,7 @@ class PSHE2(object):
                     self.init_input[i] + 1.0) * ratio + self.init_input[i]
         return solut
 
-    def smallPeturb(self):
+    def small_peturb(self):
         for i in range(self.popsize):
             for j in range(self.num_hparm):
                 ratio = (np.random.random_sample() - 0.5) * 2.0
@@ -125,7 +135,7 @@ class PSHE2(object):
                         self.current_hparams[i][j] +
                         1.0) * ratio * self.epsilon + self.current_hparams[i][j]
 
-    def estimatePopGradients(self):
+    def estimate_popgradients(self):
         gradients = [[0] * self.num_hparm] * self.popsize
         for i in range(self.popsize):
             for j in range(self.num_hparm):
@@ -133,7 +143,7 @@ class PSHE2(object):
                     j] - self.best_hparms_all_pop[j]
         return gradients
 
-    def estimateLocalGradients(self):
+    def estimate_local_gradients(self):
         gradients = [[0] * self.num_hparm] * self.popsize
         for i in range(self.popsize):
             for j in range(self.num_hparm):
@@ -141,9 +151,9 @@ class PSHE2(object):
                     j] - self.best_hparams_per_pop[i][j]
         return gradients
 
-    def estimateMomemtum(self):
-        popGrads = self.estimatePopGradients()
-        localGrads = self.estimateLocalGradients()
+    def estimate_momemtum(self):
+        popGrads = self.estimate_popgradients()
+        localGrads = self.estimate_local_gradients()
         for i in range(self.popsize):
             for j in range(self.num_hparm):
                 self.momentums[i][j] = (
@@ -154,11 +164,12 @@ class PSHE2(object):
     def is_stop(self):
         return False
 
-    def solutions(self):
+    def get_current_hparams(self):
         return self.current_hparams
 
     def feedback(self, params_list, reward_list):
         self._iteration = self._iteration + 1
+
         for i in range(self.popsize):
             if reward_list[i] < self.best_reward_per_pop[i]:
                 self.best_hparams_per_pop[i] = copy.deepcopy(
@@ -167,18 +178,28 @@ class PSHE2(object):
             if reward_list[i] < self.best_reward_all_pop:
                 self.best_hparms_all_pop = self.current_hparams[i]
                 self.best_reward_all_pop = reward_list[i]
-        self.estimateMomemtum()
+
+        tag_scalar_dict = {}
+        for index, name in enumerate(self.hparams_name_list):
+            tag_scalar_dict[name] = self.best_hparms_all_pop[index]
+        self.tag_scalar_dict["best_eval_value"] = 1 - self.best_reward_all_pop
+        self.writer.add_scalars(
+            main_tag="hyperparameters tuning",
+            tag_scalar_dict=self.tag_scalar_dict,
+            global_step=self.iteration)
+
+        self.estimate_momemtum()
         for i in range(self.popsize):
             for j in range(len(self.init_input)):
                 self.current_hparams[i][j] = self.current_hparams[i][
                     j] + self.alpha * self.momentums[i][j]
-        self.smallPeturb()
+        self.small_peturb()
 
-    def optimal_solution(self):
+    def get_best_hparams(self):
         return self.best_hparms_all_pop
 
     def step(self, output_dir):
-        solutions = self.solutions()
+        solutions = self.get_current_hparams()
 
         params_cudas_dirs = []
         solution_results = []
@@ -207,5 +228,10 @@ class PSHE2(object):
                 params_cudas_dirs = []
 
         self.feedback(solutions, solution_results)
+
+        self.writer.add_scalars(
+            main_tag="Hyperparameter Tuning",
+            tag_scalar_dict={},
+        )
 
         return solutions_ckptdirs

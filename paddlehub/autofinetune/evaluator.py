@@ -39,6 +39,7 @@ class BaseEvaluator(object):
     def __init__(self, params_file, finetunee_script):
         with io.open(params_file, 'r', encoding='utf8') as f:
             self.params = yaml.safe_load(f)
+        print(self.params)
         self.finetunee_script = finetunee_script
 
     def get_init_params(self):

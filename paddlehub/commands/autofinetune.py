@@ -71,6 +71,7 @@ class AutoFineTuneCommand(BaseCommand):
             "--cuda",
             type=ast.literal_eval,
             default=['0'],
+            required=True,
             help="The list of gpu devices to be used")
         self.arg_config_group.add_argument(
             "--round", type=int, default=10, help="Number of searches")
@@ -139,7 +140,7 @@ class AutoFineTuneCommand(BaseCommand):
             run_round_cnt = run_round_cnt + 1
         print("PaddleHub Autofinetune ends.")
         with open("./log_file.txt", "w") as f:
-            best_choice = evaluator.convert_params(autoft.optimal_solution())
+            best_choice = evaluator.convert_params(autoft.get_best_hparams())
             print("The best hyperparameters:")
             f.write("The best hyperparameters:\n")
             param_name = []
