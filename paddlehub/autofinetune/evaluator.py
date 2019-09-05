@@ -18,16 +18,24 @@ from __future__ import print_function
 
 import io
 import hashlib
+import math
 import os
 import random
+import six
 import yaml
 
 from paddlehub.common.logger import logger
+from paddlehub.common.utils import is_windows
 
 REWARD_SUM = 10000
 
+if six.PY3:
+    INF = math.inf
+else:
+    INF = float("inf")
 
-class AutoFineTuneEvaluator(object):
+
+class BaseEvaluator(object):
     def __init__(self, params_file, finetunee_script):
         with io.open(params_file, 'r', encoding='utf8') as f:
             self.params = yaml.safe_load(f)
@@ -92,6 +100,17 @@ class AutoFineTuneEvaluator(object):
         return param_str
 
     def run(self, *args):
+        raise NotImplementedError
+
+    def new_round(self):
+        pass
+
+
+class FullTrailEvaluator(BaseEvaluator):
+    def __init__(self, params_file, finetunee_script):
+        super(FullTrailEvaluator, self).__init__(params_file, finetunee_script)
+
+    def run(self, *args):
         params = args[0][0]
         num_cuda = args[0][1]
         ckpt_dir = args[0][2]
@@ -101,16 +120,92 @@ class AutoFineTuneEvaluator(object):
             return REWARD_SUM
 
         param_str = self.format_params_str(params)
-        os.system("touch " + log_file)
-        run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --checkpoint_dir=%s %s >%s 2>&1" % \
+        f = open(log_file, "w")
+        f.close()
+
+        if is_windows():
+            run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --checkpoint_dir=%s %s >%s 2>&1" % \
+                    (num_cuda, self.finetunee_script, ckpt_dir, param_str, log_file)
+        else:
+            run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --checkpoint_dir=%s %s >%s 2>&1" % \
                     (num_cuda, self.finetunee_script, ckpt_dir, param_str, log_file)
 
         try:
-            f = os.popen(run_cmd)
-            eval_result = float(f.readlines()[-1])
+            os.system(run_cmd)
+            with open(log_file, "r") as f:
+                lines = f.readlines()
+                eval_result = lines[-1]
         except:
-            logger.warning(
-                "Program which was ran with hyperparameters as %s was crashed!"
+            print(
+                "WARNING: Program which was ran with hyperparameters as %s was crashed!"
                 % param_str.replace("--", ""))
             eval_result = 0.0
-        return self.get_reward(eval_result)
+        reward = self.get_reward(eval_result)
+        self.model_rewards[ckpt_dir] = reward
+        return reward
+
+
+class ModelBasedEvaluator(BaseEvaluator):
+    def __init__(self, params_file, finetunee_script):
+        super(ModelBasedEvaluator, self).__init__(params_file, finetunee_script)
+        self.model_rewards = {}
+        self.half_best_model_ckpt = []
+        self.run_count = 0
+
+    def run(self, *args):
+        params = args[0][0]
+        num_cuda = args[0][1]
+        ckpt_dir = args[0][2]
+        log_file = args[0][3]
+        params = self.convert_params(params)
+        if not self.is_valid_params(params):
+            return REWARD_SUM
+
+        param_str = self.format_params_str(params)
+        f = open(log_file, "w")
+        f.close()
+
+        if len(self.half_best_model_ckpt) > 0:
+            model_path = self.half_best_model_ckpt[self.run_count % len(
+                self.half_best_model_ckpt)] + "/best_model"
+            if is_windows():
+                run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --epochs=1 --model_path %s --checkpoint_dir=%s %s >%s 2>&1" % \
+                        (num_cuda, self.finetunee_script, model_path, ckpt_dir, param_str, log_file)
+            else:
+                run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --epochs=1 --model_path %s --checkpoint_dir=%s %s >%s 2>&1" % \
+                        (num_cuda, self.finetunee_script, model_path, ckpt_dir, param_str, log_file)
+        else:
+            if is_windows():
+                run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --checkpoint_dir=%s %s >%s 2>&1" % \
+                        (num_cuda, self.finetunee_script, ckpt_dir, param_str, log_file)
+            else:
+                run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --checkpoint_dir=%s %s >%s 2>&1" % \
+                        (num_cuda, self.finetunee_script, ckpt_dir, param_str, log_file)
+
+        self.run_count += 1
+        try:
+            os.system(run_cmd)
+            with open(log_file, "r") as f:
+                lines = f.readlines()
+                eval_result = lines[-1]
+        except:
+            print(
+                "WARNING: Program which was ran with hyperparameters as %s was crashed!"
+                % param_str.replace("--", ""))
+            eval_result = 0.0
+        reward = self.get_reward(eval_result)
+        self.model_rewards[ckpt_dir] = reward
+        return reward
+
+    def new_round(self):
+        """update self.half_best_model"""
+        half_size = int(len(self.model_rewards) / 2)
+        if half_size < 1:
+            half_size = 1
+        self.half_best_model_ckpt = list({
+            key
+            for key in sorted(
+                self.model_rewards, key=self.model_rewards.get, reverse=False)
+            [:half_size]
+        })
+        self.model_rewards = {}

@@ -29,12 +29,11 @@ import pandas
 import numpy as np
 
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.io.parser import yaml_parser, txt_parser
-from paddlehub.module.manager import default_module_manager
-from paddlehub.common import utils
 from paddlehub.common.arg_helper import add_argument, print_arguments
-from paddlehub.autofinetune.autoft import AutoFineTune
-from paddlehub.autofinetune.evaluator import AutoFineTuneEvaluator
+from paddlehub.autofinetune.autoft import PSHE2
+from paddlehub.autofinetune.evaluator import FullTrailEvaluator
+from paddlehub.autofinetune.evaluator import ModelBasedEvaluator
+from paddlehub.common.logger import logger
 
 import paddlehub as hub
 
@@ -60,25 +59,31 @@ class AutoFineTuneCommand(BaseCommand):
             "--param_file",
             type=str,
             default=None,
+            required=True,
             help=
             "Hyperparameters to be searched in the yaml format. The number of hyperparameters searched must be greater than 1."
         )
 
     def add_autoft_config_arg(self):
         self.arg_config_group.add_argument(
-            "--popsize", type=int, default=2, help="Population size")
+            "--popsize", type=int, default=5, help="Population size")
         self.arg_config_group.add_argument(
             "--cuda",
             type=ast.literal_eval,
             default=['0'],
             help="The list of gpu devices to be used")
         self.arg_config_group.add_argument(
-            "--round", type=int, default=1, help="Number of searches")
+            "--round", type=int, default=10, help="Number of searches")
         self.arg_config_group.add_argument(
             "--output_dir",
             type=str,
             default=None,
             help="Directory to model checkpoint")
+        self.arg_config_group.add_argument(
+            "--evaluate_choice",
+            type=str,
+            default="fulltrail",
+            help="Choices: fulltrail or modelbased.")
 
     def execute(self, argv):
         if not argv:
@@ -106,41 +111,55 @@ class AutoFineTuneCommand(BaseCommand):
             return False
 
         self.args = self.parser.parse_args(argv[1:])
-
-        autoft_eva = AutoFineTuneEvaluator(self.args.param_file,
+        if self.args.evaluate_choice.lower() == "fulltrail":
+            evaluator = FullTrailEvaluator(self.args.param_file,
                                            self.fintunee_script)
-        autoft = AutoFineTune(
-            autoft_eva,
+        elif self.args.evaluate_choice.lower() == "modelbased":
+            evaluator = ModelBasedEvaluator(self.args.param_file,
+                                            self.fintunee_script)
+        else:
+            raise ValueError(
+                "The evaluate %s is not defined!" % self.args.evaluate_choice)
+
+        autoft = PSHE2(
+            evaluator,
             cudas=self.args.cuda,
             popsize=self.args.popsize,
             output_dir=self.args.output_dir)
 
         run_round_cnt = 0
         solutions_ckptdirs = {}
+        print("PaddleHub Autofinetune starts.")
         while (not autoft.is_stop()) and run_round_cnt < self.args.round:
+            print("PaddleHub Autofinetune starts round at %s." % run_round_cnt)
             output_dir = autoft._output_dir + "/round" + str(run_round_cnt)
             res = autoft.step(output_dir)
             solutions_ckptdirs.update(res)
+            evaluator.new_round()
             run_round_cnt = run_round_cnt + 1
+        print("PaddleHub Autofinetune ends.")
         with open("./log_file.txt", "w") as f:
-            best_choice = autoft_eva.convert_params(autoft.optimal_solution())
+            best_choice = evaluator.convert_params(autoft.optimal_solution())
             print("The best hyperparameters:")
             f.write("The best hyperparameters:\n")
             param_name = []
-            for idx, param in enumerate(autoft_eva.params["param_list"]):
+            for idx, param in enumerate(evaluator.params["param_list"]):
                 param_name.append(param["name"])
                 f.write(param["name"] + "\t:\t" + str(best_choice[idx]) + "\n")
                 print("%s : %s" % (param["name"], best_choice[idx]))
             f.write("\n\n\n")
-            f.write("\t".join(param_name) + "\toutput_dir\n")
+            f.write("\t".join(param_name) + "\toutput_dir\n\n")
 
+            logger.info(
+                "The checkpont directory of programs ran with paramemters searched are saved as log_file.txt ."
+            )
             print(
                 "The checkpont directory of programs ran with paramemters searched are saved as log_file.txt ."
             )
             for solution, ckptdir in solutions_ckptdirs.items():
-                param = autoft_eva.convert_params(solution)
+                param = evaluator.convert_params(solution)
                 param = [str(p) for p in param]
-                f.write("\t".join(param) + "\t" + ckptdir + "\n")
+                f.write("\t".join(param) + "\t" + ckptdir + "\n\n")
 
         return True
 
