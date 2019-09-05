@@ -1,5 +1,5 @@
-#coding:utf-8
-#  Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# coding:utf-8
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import contextlib
 import time
 import copy
 import paddle.fluid as fluid
-from visualdl import LogWriter
+from tb_paddle import SummaryWriter
 
 import paddlehub as hub
 from paddlehub.common.paddle_helper import dtype_map, clone_program
@@ -142,7 +142,7 @@ class BasicTask(object):
         if not os.path.exists(self.config.checkpoint_dir):
             mkdir(self.config.checkpoint_dir)
         vdl_log_dir = os.path.join(self.config.checkpoint_dir, "vdllog")
-        self.log_writer = LogWriter(vdl_log_dir, sync_cycle=1)
+        self.tb_writer = SummaryWriter(vdl_log_dir)
 
         # run environment
         self._phases = []
@@ -437,11 +437,8 @@ class BasicTask(object):
         pass
 
     def _build_env_end_event(self):
-        with self.log_writer.mode(self.phase) as logw:
-            if not self.is_predict_phase:
-                self.env.loss_scalar = logw.scalar(
-                    tag="Loss [{}]".format(self.phase))
-                self.env.score_scalar = {}
+        if not self.is_predict_phase:
+            self.env.score_scalar = {}
 
     def _finetune_start_event(self):
         logger.info("PaddleHub finetune start")
@@ -460,15 +457,18 @@ class BasicTask(object):
 
     def _eval_end_event(self, run_states):
         eval_scores, eval_loss, run_speed = self._calculate_metrics(run_states)
-        self.env.loss_scalar.add_record(self.current_step, eval_loss)
+        self.tb_writer.add_scalar(
+            tag=self.phase + "/Loss [{}]".format(self.phase),
+            scalar_value=eval_loss,
+            global_step=self.current_step)
+
         log_scores = ""
         for metric in eval_scores:
-            if metric not in self.env.score_scalar:
-                with self.log_writer.mode(self.phase) as logw:
-                    self.env.score_scalar[metric] = logw.scalar(
-                        tag="{} [{}]".format(metric, self.phase))
-            self.env.score_scalar[metric].add_record(self.current_step,
-                                                     eval_scores[metric])
+            self.tb_writer.add_scalar(
+                tag=self.phase + "/{} [{}]".format(metric, self.phase),
+                scalar_value=eval_scores[metric],
+                global_step=self.current_step)
+
             log_scores += "%s=%.5f " % (metric, eval_scores[metric])
         logger.info(
             "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
@@ -497,15 +497,16 @@ class BasicTask(object):
 
     def _log_interval_event(self, run_states):
         scores, avg_loss, run_speed = self._calculate_metrics(run_states)
-        self.env.loss_scalar.add_record(self.current_step, avg_loss)
+        self.tb_writer.add_scalar(
+            tag=self.phase + "/Loss [{}]".format(self.phase),
+            scalar_value=avg_loss,
+            global_step=self.current_step)
         log_scores = ""
         for metric in scores:
-            if metric not in self.env.score_scalar:
-                with self.log_writer.mode(self.phase) as logw:
-                    self.env.score_scalar[metric] = logw.scalar(
-                        tag="{} [{}]".format(metric, self.phase))
-            self.env.score_scalar[metric].add_record(self.current_step,
-                                                     scores[metric])
+            self.tb_writer.add_scalar(
+                tag=self.phase + "/{} [{}]".format(metric, self.phase),
+                scalar_value=scores[metric],
+                global_step=self.current_step)
             log_scores += "%s=%.5f " % (metric, scores[metric])
         logger.info("step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
                     (self.current_step, self.max_train_steps, avg_loss,
