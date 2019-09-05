@@ -21,11 +21,7 @@ import os
 import collections
 import contextlib
 import time
-import multiprocessing
 import copy
-from collections import OrderedDict
-
-import numpy as np
 import paddle.fluid as fluid
 from visualdl import LogWriter
 
@@ -34,9 +30,7 @@ from paddlehub.common.paddle_helper import dtype_map, clone_program
 from paddlehub.common.utils import mkdir, to_list
 from paddlehub.common.logger import logger
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
-from paddlehub.finetune.evaluate import chunk_eval, calculate_f1, calculate_f1_np, matthews_corrcoef
 from paddlehub.finetune.config import RunConfig
-from scipy.stats import spearmanr
 
 
 class RunState(object):
@@ -595,7 +589,6 @@ class BasicTask(object):
 
                 # Save checkpoint after finetune
                 self.save_checkpoint()
-                self.is_checkpoint_loaded = False
                 # Final evaluation
                 if self._base_data_reader.get_dev_examples() != []:
                     self.eval(phase="dev")
