@@ -23,6 +23,7 @@ import time
 from tb_paddle import SummaryWriter
 from paddlehub.common.logger import logger
 from paddlehub.common.utils import mkdir
+from paddlehub.autofinetune.evaluator import REWARD_SUM
 
 if six.PY3:
     INF = math.inf
@@ -57,7 +58,7 @@ class PSHE2(object):
         self.best_hparams_per_pop = [[0] * self.num_hparm] * self._popsize
         self.best_reward_per_pop = [INF] * self._popsize
         self.momentums = [[0] * self.num_hparm] * self._popsize
-        self.best_hparms_all_pop = []
+        self.best_hparams_all_pop = []
         self.best_reward_all_pop = INF
         self.current_hparams = [[0] * self.num_hparm] * self._popsize
         for i in range(self.popsize):
@@ -74,10 +75,6 @@ class PSHE2(object):
         self.hparams_name_list = [
             param["name"] for param in evaluator.params['param_list']
         ]
-        self.tag_scalar_dict = {}
-        for index, name in enumerate(self.hparams_name_list):
-            self.tag_scalar_dict[name] = []
-        self.tag_scalar_dict["best_eval_value"] = []
 
     @property
     def thread(self):
@@ -140,7 +137,7 @@ class PSHE2(object):
         for i in range(self.popsize):
             for j in range(self.num_hparm):
                 gradients[i][j] = self.current_hparams[i][
-                    j] - self.best_hparms_all_pop[j]
+                    j] - self.best_hparams_all_pop[j]
         return gradients
 
     def estimate_local_gradients(self):
@@ -176,16 +173,18 @@ class PSHE2(object):
                     self.current_hparams[i])
                 self.best_reward_per_pop[i] = reward_list[i]
             if reward_list[i] < self.best_reward_all_pop:
-                self.best_hparms_all_pop = self.current_hparams[i]
+                self.best_hparams_all_pop = self.current_hparams[i]
                 self.best_reward_all_pop = reward_list[i]
 
-        tag_scalar_dict = {}
+        best_hparams = self.evaluator.convert_params(self.best_hparams_all_pop)
         for index, name in enumerate(self.hparams_name_list):
-            tag_scalar_dict[name] = self.best_hparms_all_pop[index]
-        self.tag_scalar_dict["best_eval_value"] = 1 - self.best_reward_all_pop
-        self.writer.add_scalars(
-            main_tag="hyperparameters tuning",
-            tag_scalar_dict=self.tag_scalar_dict,
+            self.writer.add_scalar(
+                tag="hyperparameter tuning/" + name,
+                scalar_value=best_hparams[index],
+                global_step=self.iteration)
+        self.writer.add_scalar(
+            tag="hyperparameter tuning/best_eval_value",
+            scalar_value=self.get_best_eval_value(),
             global_step=self.iteration)
 
         self.estimate_momemtum()
@@ -196,7 +195,10 @@ class PSHE2(object):
         self.small_peturb()
 
     def get_best_hparams(self):
-        return self.best_hparms_all_pop
+        return self.best_hparams_all_pop
+
+    def get_best_eval_value(self):
+        return REWARD_SUM - self.best_reward_all_pop
 
     def step(self, output_dir):
         solutions = self.get_current_hparams()
@@ -228,10 +230,5 @@ class PSHE2(object):
                 params_cudas_dirs = []
 
         self.feedback(solutions, solution_results)
-
-        self.writer.add_scalars(
-            main_tag="Hyperparameter Tuning",
-            tag_scalar_dict={},
-        )
 
         return solutions_ckptdirs
