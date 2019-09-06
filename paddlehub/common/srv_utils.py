@@ -16,6 +16,7 @@ import os
 import requests
 import time
 import paddle
+import socket
 
 from random import randint, seed
 
@@ -35,10 +36,14 @@ def get_stat_server():
 
 def hub_stat(argv):
     try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('bj.bcebos.com', 80))
+        ip_addr = s.getsockname()[0]
         params = {
             'command': ' '.join(argv),
             'hub_version': version.hub_version,
-            'paddle_version': paddle.__version__
+            'paddle_version': paddle.__version__,
+            'ip_addr': ip_addr
         }
         stat_api = get_stat_server()
         r = requests.get(stat_api, params=params, timeout=0.5)
