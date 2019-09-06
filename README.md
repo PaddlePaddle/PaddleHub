@@ -57,8 +57,8 @@ $ hub run lac --input_text "今天是个好日子"
 
 使用[情感分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=SentimentAnalysis)模型Senta对句子进行情感预测
 ```shell
-$ hub run senta_bilstm --input_text "今天是个好日子"
-[{'text': '今天是个好日子', 'sentiment_label': 2, 'sentiment_key': 'positive', 'positive_probs': 0.6065, 'negative_probs': 0.3935}]
+$ hub run senta_bilstm --input_text "今天天气真好"
+{'text': '今天天气真好', 'sentiment_label': 1, 'sentiment_key': 'positive', 'positive_probs': 0.9798, 'negative_probs': 0.0202}]
 ```
 
 `示例三`
