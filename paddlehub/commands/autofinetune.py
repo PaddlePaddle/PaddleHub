@@ -136,13 +136,6 @@ class AutoFineTuneCommand(BaseCommand):
             output_dir = autoft._output_dir + "/round" + str(run_round_cnt)
             res = autoft.step(output_dir)
             solutions_ckptdirs.update(res)
-            print("%s-th round: the best hyperparameter choice as" %
-                  run_round_cnt)
-            best_hparams = evaluator.convert_params(autoft.get_best_hparams())
-            best_eval_value = autoft.get_best_eval_value()
-            for index, hparam_name in enumerate(autoft.hparams_name_list):
-                print("%s : %.5f" % (hparam_name, best_hparams[index]))
-            print("best eval value : %.5f" % best_eval_value)
             evaluator.new_round()
             run_round_cnt = run_round_cnt + 1
         print("PaddleHub Autofinetune ends.")
@@ -152,7 +145,7 @@ class AutoFineTuneCommand(BaseCommand):
             print("The final best hyperparameters:")
             f.write("The final best hyperparameters:\n")
             for index, hparam_name in enumerate(autoft.hparams_name_list):
-                print("%s : %.5f" % (hparam_name, best_hparams[index]))
+                print("%s : %s" % (hparam_name, best_hparams[index]))
                 f.write(hparam_name + "\t:\t" + str(best_hparams[index]) + "\n")
             f.write("\n\n\n")
             f.write("\t".join(autoft.hparams_name_list) + "\toutput_dir\n\n")

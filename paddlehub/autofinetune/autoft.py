@@ -167,6 +167,16 @@ class PSHE2(object):
     def feedback(self, params_list, reward_list):
         self._iteration = self._iteration + 1
 
+        local_min_reward = min(reward_list)
+        local_min_reward_index = reward_list.index(local_min_reward)
+        local_hparams = self.evaluator.convert_params(
+            params_list[local_min_reward_index])
+        print("The local best eval value in the %s-th round is %s." %
+              (self._iteration - 1, REWARD_SUM - local_min_reward))
+        print("The local best hyperparameters are as:")
+        for index, hparam_name in enumerate(self.hparams_name_list):
+            print("%s=%s" % (hparam_name, local_hparams[index]))
+
         for i in range(self.popsize):
             if reward_list[i] < self.best_reward_per_pop[i]:
                 self.best_hparams_per_pop[i] = copy.deepcopy(
