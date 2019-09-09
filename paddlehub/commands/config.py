@@ -85,7 +85,8 @@ class ConfigCommand(BaseCommand):
     @staticmethod
     def set_log_level(level):
         if level not in logging._nameToLevel.keys():
-            print("Allowed values include: " + str(list(logging._nameToLevel.keys())))
+            print("Allowed values include: " +
+                  str(list(logging._nameToLevel.keys())))
             return
         with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
             current_config = json.load(fp)
