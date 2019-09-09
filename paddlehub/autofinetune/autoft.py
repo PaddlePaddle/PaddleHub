@@ -75,7 +75,11 @@ class BaseTuningStrategy(object):
 
     @property
     def output_dir(self):
-        self._output_dir
+        return self._output_dir
+
+    @property
+    def iteration(self):
+        return self._iteration
 
     @property
     def round(self):
@@ -88,9 +92,60 @@ class BaseTuningStrategy(object):
             output_dir = self._output_dir
         return output_dir
 
+    def randomSolution(self):
+        solut = [0] * self.num_hparm
+        for i in range(self.num_hparm):
+            ratio = (np.random.random_sample() - 0.5) * 2.0
+            if ratio >= 0:
+                solut[i] = (
+                    1.0 - self.init_input[i]) * ratio + self.init_input[i]
+            else:
+                solut[i] = (
+                    self.init_input[i] + 1.0) * ratio + self.init_input[i]
+        return solut
+
+    def smallPeturb(self):
+        for i in range(self.popsize):
+            for j in range(self.num_hparm):
+                ratio = (np.random.random_sample() - 0.5) * 2.0
+                if ratio >= 0:
+                    self.current_hparams[i][j] = (
+                        1.0 - self.current_hparams[i][j]
+                    ) * ratio * self.epsilon + self.current_hparams[i][j]
+                else:
+                    self.current_hparams[i][j] = (
+                        self.current_hparams[i][j] +
+                        1.0) * ratio * self.epsilon + self.current_hparams[i][j]
+
+    def estimatePopGradients(self):
+        gradients = [[0] * self.num_hparm] * self.popsize
+        for i in range(self.popsize):
+            for j in range(self.num_hparm):
+                gradients[i][j] = self.current_hparams[i][
+                    j] - self.best_hparms_all_pop[j]
+        return gradients
+
+    def estimateLocalGradients(self):
+        gradients = [[0] * self.num_hparm] * self.popsize
+        for i in range(self.popsize):
+            for j in range(self.num_hparm):
+                gradients[i][j] = self.current_hparams[i][
+                    j] - self.best_hparams_per_pop[i][j]
+        return gradients
+
+    def estimateMomemtum(self):
+        popGrads = self.estimatePopGradients()
+        localGrads = self.estimateLocalGradients()
+        for i in range(self.popsize):
+            for j in range(self.num_hparm):
+                self.momentums[i][j] = (
+                    1 - 3.0 * self.alpha / self.iteration
+                ) * self.momentums[i][j] - self.alpha * localGrads[i][
+                    j] - self.alpha * popGrads[i][j]
+
     def is_stop(self):
         return False
-
+  
     def get_current_hparams(self):
         return self.current_hparams
 

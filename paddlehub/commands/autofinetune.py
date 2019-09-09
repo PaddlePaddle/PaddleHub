@@ -167,6 +167,7 @@ class AutoFineTuneCommand(BaseCommand):
             f.write("\t".join(autoft.hparams_name_list) + "\toutput_dir\n\n")
             logger.info(
                 "The checkpont directory of programs ran with hyperparamemters searched are saved as log_file.txt ."
+
             )
             print(
                 "The checkpont directory of programs ran with hyperparamemters searched are saved as log_file.txt ."
