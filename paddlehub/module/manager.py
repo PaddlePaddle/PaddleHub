@@ -118,7 +118,8 @@ class LocalModuleManager(object):
             print_progress=True)
 
         if module_dir:
-            with open(os.path.join(MODULE_HOME, module_dir, "md5.txt"), "w") as fp:
+            with open(os.path.join(MODULE_HOME, module_dir, "md5.txt"),
+                      "w") as fp:
                 fp.write(md5_value)
             save_path = os.path.join(MODULE_HOME, module_name)
             if os.path.exists(save_path):
