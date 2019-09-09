@@ -18,7 +18,6 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import collections
 import contextlib
 import time
 import copy
@@ -265,7 +264,8 @@ class BasicTask(object):
                                      self._base_startup_program):
                 with fluid.unique_name.guard(self.env.UNG):
                     self.scheduled_lr, self.max_train_steps = self.config.strategy.execute(
-                        self.loss, self._base_data_reader, self.config)
+                        self.loss, self._base_data_reader, self.config,
+                        self.device_count)
 
         if self.is_train_phase:
             loss_name = self.env.loss.name

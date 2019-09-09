@@ -171,7 +171,7 @@ class DefaultStrategy(object):
             self.optimizer = fluid.optimizer.Adam(
                 learning_rate=self.learning_rate)
 
-    def execute(self, loss, data_reader, config):
+    def execute(self, loss, data_reader, config, dev_count):
         if self.optimizer is not None:
             self.optimizer.minimize(loss)
         else:
@@ -406,11 +406,10 @@ class CombinedStrategy(DefaultStrategy):
                             "weight_decay"] * scheduled_lr
                     fluid.layers.assign(output=param, input=updated_param)
 
-    def execute(self, loss, data_reader, config):
+    def execute(self, loss, data_reader, config, dev_count):
         # base information
         self.main_program = loss.block.program
         self.config = config
-        dev_count = self._get_dev_count(config)
 
         # self.num_examples = {'train': -1, 'dev': -1, 'test': -1} before data_generator
         data_reader.data_generator(
@@ -450,14 +449,6 @@ class CombinedStrategy(DefaultStrategy):
         self.regularization_handler(loss, scheduled_lr)
 
         return scheduled_lr, max_train_steps
-
-    def _get_dev_count(self, config):
-        if config.use_cuda:
-            dev_count = fluid.core.get_cuda_device_count()
-        else:
-            dev_count = int(
-                os.environ.get('CPU_NUM', multiprocessing.cpu_count()))
-        return dev_count
 
     def exclude_from_weight_decay(self, name):
         if name.find("layer_norm") > -1:
@@ -502,7 +493,7 @@ class AdamWeightDecayStrategy(CombinedStrategy):
             scheduler["noam_decay"] = True
         elif lr_scheduler == "linear_decay":
             scheduler["linear_decay"] = {
-                "start_point": 1 - warmup_proportion,
+                "start_point": warmup_proportion,
                 "end_learning_rate": 0,
             }
         else:
@@ -555,7 +546,6 @@ class ULMFiTStrategy(CombinedStrategy):
     def __init__(self,
                  learning_rate=1e-4,
                  optimizer_name="adam",
-                 gradual_unfreeze=3,
                  cut_fraction=0.1,
                  ratio=32,
                  dis_blocks=3,
