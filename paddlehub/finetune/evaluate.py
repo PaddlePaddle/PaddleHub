@@ -128,3 +128,75 @@ def calculate_f1(num_label, num_infer, num_correct):
     else:
         f1 = 2 * precision * recall / (precision + recall)
     return precision, recall, f1
+
+
+def calculate_f1_np(preds, labels):
+    preds = np.array(preds)
+    labels = np.array(labels)
+
+    tp = np.sum((labels == 1) & (preds == 1))
+    tn = np.sum((labels == 0) & (preds == 0))
+    fp = np.sum((labels == 0) & (preds == 1))
+    fn = np.sum((labels == 1) & (preds == 0))
+    p = tp / (tp + fp) if (tp + fp) else 0
+    r = tp / (tp + fn) if (tp + fn) else 0
+    f1 = (2 * p * r) / (p + r) if p + r else 0
+    return f1
+
+
+def matthews_corrcoef(preds, labels):
+    preds = np.array(preds)
+    labels = np.array(labels)
+
+    tp = np.sum((labels == 1) & (preds == 1))
+    tn = np.sum((labels == 0) & (preds == 0))
+    fp = np.sum((labels == 0) & (preds == 1))
+    fn = np.sum((labels == 1) & (preds == 0))
+
+    div = (tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)
+    mcc = ((tp * tn) - (fp * fn)) / np.sqrt(div) if div else 0
+    return mcc
+
+
+def recall_nk(data, n, k, m):
+    '''
+    This metric can be used to evaluate whether the model can find the correct response B for question A
+    Note: Only applies to each question A only has one correct response B1.
+
+    Parameters
+    ----------
+    data: List. Each element is a tuple, consist of the positive probability of the sample prediction and its label.
+                For each example, the only one true positive sample should be the first tuple.
+    n: int. The number of labels per example.
+        eg: [A,B1,1], [A,B2,0], [A,B3,0]  n=3 as there has 3 labels for example A
+    k: int. If the top k is right, the example will be considered right.
+        eg: [A,B1,1]=0.5, [A,B2,0]=0.8, [A,B3,0]=0.3(Probability of 1)
+           If k=2, the prediction for the example A will be considered correct as 0.5 is the top2 Probability
+           If k=1, the prediction will be considered wrong as 0.5 is not the biggest probability.
+    m: int. For every m examples, there's going to be a positive sample.
+        eg. data= [A1,B1,1], [A1,B2,0], [A1,B3,0], [A2,B1,1], [A2,B2,0], [A2,B3,0]
+           For every 3 examples, there will be one positive sample. so m=3, and n can be 1,2 or 3.
+    '''
+
+    def get_p_at_n_in_m(data, n, k, ind):
+        """
+        calculate precision in recall n
+        """
+        pos_score = data[ind][0]
+        curr = data[ind:ind + n]
+        curr = sorted(curr, key=lambda x: x[0], reverse=True)
+        if curr[k - 1][0] <= pos_score:
+            return 1
+        return 0
+
+    correct_num = 0.0
+
+    length = len(data) // m
+
+    for i in range(0, length):
+        ind = i * m
+        assert data[ind][1] == 1
+
+        correct_num += get_p_at_n_in_m(data, n, k, ind)
+
+    return correct_num / length

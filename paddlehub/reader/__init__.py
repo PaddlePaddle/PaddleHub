@@ -17,4 +17,6 @@ from .nlp_reader import ClassifyReader
 from .nlp_reader import SequenceLabelReader
 from .nlp_reader import LACClassifyReader
 from .nlp_reader import MultiLabelClassifyReader
+from .nlp_reader import ReadingComprehensionReader
+from .nlp_reader import RegressionReader
 from .cv_reader import ImageClassificationReader

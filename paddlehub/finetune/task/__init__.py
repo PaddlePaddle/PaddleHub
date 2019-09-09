@@ -1,7 +1,7 @@
 #coding:utf-8
-# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+#   Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,11 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
-USER_HOME = os.path.expanduser('~')
-HUB_HOME = os.path.join(USER_HOME, ".paddlehub")
-MODULE_HOME = os.path.join(HUB_HOME, "modules")
-CACHE_HOME = os.path.join(HUB_HOME, "cache")
-DATA_HOME = os.path.join(HUB_HOME, "dataset")
-CONF_HOME = os.path.join(HUB_HOME, "conf")
+from .basic_task import BasicTask, RunEnv, RunState
+from .classifier_task import ClassifierTask, ImageClassifierTask, TextClassifierTask, MultiLabelClassifierTask
+from .reading_comprehension_task import ReadingComprehensionTask
+from .regression_task import RegressionTask
+from .sequence_task import SequenceLabelTask

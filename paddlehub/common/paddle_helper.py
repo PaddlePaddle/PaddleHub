@@ -83,7 +83,6 @@ def from_param_to_module_attr(param, module_attr):
                               module_attr.map.data['trainable'])
     from_pyobj_to_module_attr(param.do_model_average,
                               module_attr.map.data['do_model_average'])
-    #TODO(wuzewu): don't save learning rate
     from_pyobj_to_module_attr(param.optimize_attr,
                               module_attr.map.data['optimize_attr'])
     from_pyobj_to_module_attr(
