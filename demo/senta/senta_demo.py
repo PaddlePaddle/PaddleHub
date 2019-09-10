@@ -21,7 +21,7 @@ if __name__ == "__main__":
         results[index]["text"] = text
     for index, result in enumerate(results):
         if six.PY2:
-            print(
-                json.dumps(results[index], encoding="utf8", ensure_ascii=False))
+            print(json.dumps(
+                results[index], encoding="utf8", ensure_ascii=False))
         else:
             print(results[index])
