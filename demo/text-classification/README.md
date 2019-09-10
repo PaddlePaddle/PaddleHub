@@ -5,10 +5,18 @@
 
 * **单句分类**
   - 中文情感分析任务 ChnSentiCorp
+  - GLUE-Cola
+  - GLUE-SST2
 
 * **句对分类**
   - 语义相似度 LCQMC
   - 检索式问答任务 NLPCC-DBQA
+  - GLUE-MNLI
+  - GLUE-QQP
+  - GLUE-QNLI
+  - GLUE-STS-B
+  - GLUE-MRPC
+  - GLUE-RTE
 
 ## 如何开始Finetune
 
@@ -48,6 +56,8 @@ PaddleHub还提供BERT模型可供选择, 所有模型对应的加载示例如�
    模型名                           | PaddleHub Module
 ---------------------------------- | :------:
 ERNIE, Chinese                     | `hub.Module(name='ernie')`
+ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
+ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
 BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
 BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
 BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
