@@ -80,8 +80,10 @@ class ConfigCommand(BaseCommand):
 
     @staticmethod
     def set_log_level(level):
-        if level not in ["CRITICAL", "FATAL", "ERROR", "WARN",
-                         "WARNING", "INFO", "DEBUG", "NOTSET"]:
+        if level not in [
+                "CRITICAL", "FATAL", "ERROR", "WARN", "WARNING", "INFO",
+                "DEBUG", "NOTSET"
+        ]:
             print("Allowed values include: "
                   "CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG, NOTSET")
             return
