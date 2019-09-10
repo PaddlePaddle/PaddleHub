@@ -21,14 +21,10 @@ import argparse
 import json
 import os
 import re
-import logging
 
-from paddlehub.common import utils
-from paddlehub.module.manager import default_module_manager
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.common.dir import CONF_HOME
 from paddlehub.common.server_config import default_server_config
-from paddlehub.common.logger import logger
 
 
 class ConfigCommand(BaseCommand):
@@ -84,9 +80,10 @@ class ConfigCommand(BaseCommand):
 
     @staticmethod
     def set_log_level(level):
-        if level not in logging._nameToLevel.keys():
-            print("Allowed values include: " +
-                  str(list(logging._nameToLevel.keys())))
+        if level not in ["CRITICAL", "FATAL", "ERROR", "WARN",
+                         "WARNING", "INFO", "DEBUG", "NOTSET"]:
+            print("Allowed values include: "
+                  "CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG, NOTSET")
             return
         with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
             current_config = json.load(fp)
@@ -95,8 +92,6 @@ class ConfigCommand(BaseCommand):
             fp.write(json.dumps(current_config))
             print("Set success! The current configuration is shown below.")
             print(json.dumps(current_config, indent=4))
-
-        # logger.setLevel(level)
 
     @staticmethod
     def show_help():
@@ -116,10 +111,7 @@ class ConfigCommand(BaseCommand):
         print(str)
 
     def execute(self, argv):
-        # logger.setLevel("ERROR")
-        # print(argv)
         args = self.parser.parse_args()
-        # print(args)
         if args.option is None:
             ConfigCommand.show_config()
         elif args.option == "reset":
