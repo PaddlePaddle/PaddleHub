@@ -36,7 +36,6 @@ class InstallCommand(BaseCommand):
             prog='%s %s <module_name>' % (ENTRY, name),
             usage='%(prog)s',
             add_help=False)
-        #TODO(wuzewu): add --upgrade option
 
     def execute(self, argv):
         if not argv:

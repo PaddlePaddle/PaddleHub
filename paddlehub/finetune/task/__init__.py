@@ -1,7 +1,7 @@
 #coding:utf-8
-#   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+#   Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,10 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .nlp_reader import ClassifyReader
-from .nlp_reader import SequenceLabelReader
-from .nlp_reader import LACClassifyReader
-from .nlp_reader import MultiLabelClassifyReader
-from .nlp_reader import ReadingComprehensionReader
-from .nlp_reader import RegressionReader
-from .cv_reader import ImageClassificationReader
+from .basic_task import BasicTask, RunEnv, RunState
+from .classifier_task import ClassifierTask, ImageClassifierTask, TextClassifierTask, MultiLabelClassifierTask
+from .reading_comprehension_task import ReadingComprehensionTask
+from .regression_task import RegressionTask
+from .sequence_task import SequenceLabelTask

@@ -117,7 +117,6 @@ def get_pykey(key, keyed_type):
     return str(key)
 
 
-#TODO(wuzewu): solving the problem of circular references
 def from_pyobj_to_module_attr(pyobj, module_attr, obj_filter=None):
     if obj_filter and obj_filter(pyobj):
         return

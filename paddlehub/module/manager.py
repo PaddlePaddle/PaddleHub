@@ -26,6 +26,7 @@ from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import MODULE_HOME
 from paddlehub.module import module_desc_pb2
 import paddlehub as hub
+from paddlehub.common.logger import logger
 
 
 class LocalModuleManager(object):
@@ -35,23 +36,26 @@ class LocalModuleManager(object):
         if not os.path.exists(self.local_modules_dir):
             utils.mkdir(self.local_modules_dir)
         elif os.path.isfile(self.local_modules_dir):
-            #TODO(wuzewu): give wanring
-            pass
+            raise ValueError("Module home should be a folder, not a file")
 
     def check_module_valid(self, module_path):
-        #TODO(wuzewu): code
-        info = {}
         try:
             desc_pb_path = os.path.join(module_path, 'module_desc.pb')
             if os.path.exists(desc_pb_path) and os.path.isfile(desc_pb_path):
+                info = {}
                 desc = module_desc_pb2.ModuleDesc()
                 with open(desc_pb_path, "rb") as fp:
                     desc.ParseFromString(fp.read())
                 info['version'] = desc.attr.map.data["module_info"].map.data[
                     "version"].s
+                return True, info
+            else:
+                logger.warning(
+                    "%s does not exist, the module will be reinstalled" %
+                    desc_pb_path)
         except:
-            return False, None
-        return True, info
+            pass
+        return False, None
 
     def all_modules(self, update=False):
         if not update and self.modules_dict:
@@ -60,7 +64,6 @@ class LocalModuleManager(object):
         for sub_dir_name in os.listdir(self.local_modules_dir):
             sub_dir_path = os.path.join(self.local_modules_dir, sub_dir_name)
             if os.path.isdir(sub_dir_path):
-                #TODO(wuzewu): get module name
                 valid, info = self.check_module_valid(sub_dir_path)
                 if valid:
                     module_name = sub_dir_name
@@ -92,7 +95,6 @@ class LocalModuleManager(object):
         url = search_result.get('url', None)
         md5_value = search_result.get('md5', None)
         installed_module_version = search_result.get('version', None)
-        #TODO(wuzewu): add compatibility check
         if not url or (module_version is not None and installed_module_version
                        != module_version) or (name != module_name):
             tips = "Can't find module %s" % module_name

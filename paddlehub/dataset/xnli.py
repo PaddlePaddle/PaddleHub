@@ -43,6 +43,7 @@ class XNLI(HubDataset):
                 "ar", "bg", "de", "el", "en", "es", "fr", "hi", "ru", "sw",
                 "th", "tr", "ur", "vi", "zh"
         ]:
+
             raise Exception(language +
                             "is not in XNLI. Please confirm the language")
         self.language = language
