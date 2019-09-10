@@ -22,4 +22,5 @@ message CheckPoint {
   int64 current_epoch = 1;
   int64 global_step = 2;
   string latest_model_dir = 3;
+  double best_score = 4;
 }

@@ -21,7 +21,6 @@ from __future__ import print_function
 import collections
 import io
 import unicodedata
-
 import six
 
 
