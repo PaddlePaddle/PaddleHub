@@ -109,7 +109,7 @@ class ConfigCommand(BaseCommand):
         str += "log\n"
         str += "\tShow log level.\n"
         str += "log [LEVEL]\n"
-        str += "\tSet log level as [LEVEL:NOLOG, DEBUG, INFO, WARNING, ERROR, CRITICAL].\n"
+        str += "\tSet log level as [LEVEL:CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG, NOTSET].\n"
         print(str)
 
     def execute(self, argv):
@@ -134,3 +134,4 @@ class ConfigCommand(BaseCommand):
 
 
 command = ConfigCommand.instance()
+
