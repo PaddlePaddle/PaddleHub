@@ -116,13 +116,13 @@ cls_task.finetune_and_eval()
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与MultiLabelClassifierTask返回的结果一致。
 3. `hub.MultiLabelClassifierTask`通过输入特征，label与迁移的类别数，可以生成适用于多标签分类的迁移任务`MultiLabelClassifierTask`
 
-## VisualDL 可视化
+## 可视化
 
 Finetune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
 ```bash
-$ visualdl --logdir $CKPT_DIR/vdllog -t ${HOST_IP}
+$ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_NUM}
 ```
-其中${HOST_IP}为本机IP地址，如本机IP地址为192.168.0.1，用浏览器打开192.168.0.1:8040，其中8040为端口号，即可看到训练过程中指标的变化情况
+其中${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，用浏览器打开192.168.0.1:8040，即可看到训练过程中指标的变化情况
 
 ## 模型预测
 
