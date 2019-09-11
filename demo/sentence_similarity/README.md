@@ -4,7 +4,7 @@
 
 本示例展示如何使用word2vec_skipgram Module进行句子相似度预测。
 
-word2vec_skipgram是对中文词语的向量表示，可以用于进行各类NLP下游任务等。
+word2vec_skipgram是对中文词语的向量表示，可以用于各类NLP下游任务等。
 
 ## 准备工作
 
