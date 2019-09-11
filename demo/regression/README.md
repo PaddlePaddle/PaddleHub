@@ -1,6 +1,6 @@
 # PaddleHub 回归任务
 
-本示例将展示如何使用PaddleHub Finetune API以及BERT预训练模型完成分类任务。
+本示例将展示如何使用PaddleHub Finetune API以及BERT预训练模型完成回归任务。
 
 
 ## 如何开始Finetune
@@ -91,7 +91,7 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 * `enable_memory_optim`: 是否使用内存优化， 默认为True
 * `strategy`: Finetune优化策略
 
-### Step4: 构建网络并创建分类迁移任务进行Finetune
+### Step4: 构建网络并创建回归迁移任务进行Finetune
 ```python
 pooled_output = outputs["pooled_output"]
 
@@ -112,8 +112,8 @@ reg_task = hub.RegressionTask(
 reg_task.finetune_and_eval()
 ```
 **NOTE:**
-1. `outputs["pooled_output"]`返回了ERNIE/BERT模型对应的[CLS]向量,可以用于句子或句对的特征表达。
-2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与ClassifyReader返回的结果一致。
+1. `outputs["pooled_output"]`返回了BERT模型对应的[CLS]向量,可以用于句子或句对的特征表达。
+2. `feed_list`中的inputs参数指名了BERT中的输入tensor的顺序，与RegressionReader返回的结果一致。
 
 ## 可视化
 
