@@ -12,4 +12,5 @@ pandas
 #[py2]pandas == 0.24.0
 flake8
 tb-paddle
+tb-nightly
 cma == 2.7.0
