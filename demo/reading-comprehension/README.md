@@ -138,11 +138,11 @@ $ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_N
 
 ```bash
 CKPT_DIR=".ckpt_rc/"
-python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 384 --batch_size=12
+python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 384 --batch_size=12 --version_2_with_negative=False
 ```
 其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
 
-参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到SQuAD数据集的最终效果。
+参数配置正确后，请执行脚本`sh run_predict.sh`，预测时程序会自动调用官方评价脚本(version_2_with_negative=False调用evaluate_v1.py，version_2_with_negative=True调用evaluate_v2.py)即可看到SQuAD数据集的最终效果。
 如需了解更多预测步骤，请参考`predict.py`
 
 **NOTE:**
