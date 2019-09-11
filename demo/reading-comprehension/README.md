@@ -5,7 +5,7 @@
 
 ## 如何开始Finetune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用BERT对SQuAD数据集进行Finetune。**由于BERT模型计算量较大，建议在GPU上使用，且显存需要大于14GB**
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_finetune.sh`即可开始使用BERT对SQuAD数据集进行Finetune。**由于BERT模型计算量较大，建议在GPU上使用，且显存需要大于14GB**
 
 其中脚本参数说明如下：
 
@@ -37,7 +37,7 @@ inputs, outputs, program = module.context(trainable=True, max_seq_len=384)
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值384，根据任务文本长度不同可以调整该值，但最大不超过512。
 
-### Step2: 准备数据集并使用ClassifyReader读取数据
+### Step2: 准备数据集并使用ReadingComprehensionReader读取数据
 ```python
 dataset = hub.dataset.SQUAD(
     version_2_with_negative=False)
@@ -95,7 +95,7 @@ config = hub.RunConfig(use_cuda=True, num_epoch=2, batch_size=12, strategy=strat
 * `enable_memory_optim`: 是否使用内存优化， 默认为True
 * `strategy`: Finetune优化策略
 
-### Step4: 构建网络并创建分类迁移任务进行Finetune
+### Step4: 构建网络并创建阅读理解迁移任务进行Finetune
 ```python
 seq_output = outputs["sequence_output"]
 
