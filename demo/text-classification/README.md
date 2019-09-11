@@ -162,7 +162,7 @@ cls_task.finetune_and_eval()
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与ClassifyReader返回的结果一致。
 3. `hub.TextClassifierTask`通过输入特征，label与迁移的类别数，可以生成适用于文本分类的迁移任务`TextClassifierTask`
 
-## VisualDL 可视化
+## 可视化
 
 Finetune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
 ```bash
