@@ -1,7 +1,6 @@
 # PaddleHub 阅读理解
 
 本示例将展示如何使用PaddleHub Finetune API以及BERT预训练模型完成阅读理解任务。
-其中分类任务可以分为两大类：
 
 ## 如何开始Finetune
 
@@ -121,7 +120,6 @@ reading_comprehension_task.finetune_and_eval()
 **NOTE:**
 1. `outputs["sequence_output"]`返回了BERT模型输入单词的对应输出,可以用于单词的特征表达。
 2. `feed_list`中的inputs参数指名了BERT中的输入tensor的顺序，与ClassifyReader返回的结果一致。
-3. `hub.ReadingComprehensionTask`通过输入特征，label与迁移的类别数，可以生成适用于文本分类的迁移任务`ReadingComprehensionTask`
 
 ## 可视化
 
