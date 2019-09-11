@@ -4,19 +4,20 @@
 其中分类任务可以分为两大类：
 
 * **单句分类**
-  - 中文情感分析任务 ChnSentiCorp
+  - ChnSentiCorp
   - GLUE-Cola
   - GLUE-SST2
 
 * **句对分类**
-  - 语义相似度 LCQMC
-  - 检索式问答任务 NLPCC-DBQA
+  - LCQMC
+  - NLPCC-DBQA
   - GLUE-MNLI
   - GLUE-QQP
   - GLUE-QNLI
   - GLUE-STS-B
   - GLUE-MRPC
   - GLUE-RTE
+  - XNLI
 
 ## 如何开始Finetune
 
@@ -32,10 +33,13 @@
 --warmup_proportion: 学习率warmup策略的比例，如果0.1，则学习率会在前10%训练step的过程中从0慢慢增长到learning_rate, 而后再缓慢衰减，默认为0
 --num_epoch: Finetune迭代的轮数
 --max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数
+--use_data_parallel: 是否使用并行计算，默认False。打开该功能依赖nccl库。
+--use_pyreader: 是否使用pyreader，默认False。
+--use_taskid: 是否使用taskid，taskid是ERNIE 2.0特有的，use_taskid=True表示使用ERNIE 2.0；如果想使用ERNIE 1.0 或者BERT等module，use_taskid应该设置为False。
 
 # 任务相关
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型
---dataset: 有三个参数可选，分别代表3个不同的分类任务; 分别是 chnsenticorp, lcqmc, nlpcc_dbqa
+--dataset: 有以下数据集可选: chnsenticorp, lcqmc, nlpcc_dbqa, GLUE, XNLI
 ```
 
 ## 代码步骤
@@ -77,7 +81,9 @@ dataset = hub.dataset.ChnSentiCorp()
 reader = hub.reader.ClassifyReader(
     dataset=dataset,
     vocab_path=module.get_vocab_path(),
-    max_seq_len=128)
+    max_seq_len=128,
+    use_task_id=False)
+metrics_choices = ["acc"]
 ```
 
 其中数据集的准备代码可以参考 [chnsenticorp.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/chnsenticorp.py)
@@ -88,9 +94,13 @@ reader = hub.reader.ClassifyReader(
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致
 
+`use_task_id` 表示是否使用ERNIR 2.0 module
+
 ClassifyReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
 
 **NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
+
+同时，利用Accuracy作为评价指标。
 
 ### Step3：选择优化策略和运行配置
 
@@ -156,16 +166,16 @@ cls_task.finetune_and_eval()
 
 Finetune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
 ```bash
-$ visualdl --logdir $CKPT_DIR/vdllog -t ${HOST_IP}
+$ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_NUM}
 ```
-其中${HOST_IP}为本机IP地址，如本机IP地址为192.168.0.1，用浏览器打开192.168.0.1:8040，其中8040为端口号，即可看到训练过程中指标的变化情况
+其中${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，用浏览器打开192.168.0.1:8040，即可看到训练过程中指标的变化情况
 
 ## 模型预测
 
 通过Finetune完成模型训练后，在对应的ckpt目录下，会自动保存验证集上效果最好的模型。
 配置脚本参数
 ```
-CKPT_DIR=".ckpt_chnsentiment/best_model"
+CKPT_DIR="ckpt_chnsentiment/"
 python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
 其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
