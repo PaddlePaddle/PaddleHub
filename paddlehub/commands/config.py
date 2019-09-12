@@ -68,24 +68,13 @@ class ConfigCommand(BaseCommand):
         print(json.dumps(config, indent=4))
 
     @staticmethod
-    def show_server_url():
-        with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
-            config = json.load(fp)
-            print(config["server_url"])
-
-    @staticmethod
-    def show_log_level():
-        with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
-            print(json.load(fp)["log_level"])
-
-    @staticmethod
     def set_log_level(level):
+        level = str(level).upper()
         if level not in [
-                "CRITICAL", "FATAL", "ERROR", "WARN", "WARNING", "INFO",
-                "DEBUG", "NOTSET"
+                "NOLOG", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
         ]:
             print("Allowed values include: "
-                  "CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG, NOTSET")
+                  "NOLOG, DEBUG, INFO, WARNING, ERROR, CRITICAL")
             return
         with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
             current_config = json.load(fp)
@@ -97,18 +86,14 @@ class ConfigCommand(BaseCommand):
 
     @staticmethod
     def show_help():
-        str = "config <option> <value>\n"
+        str = "config <option>\n"
         str += "\tShow hub server config without any option.\n"
         str += "option:\n"
         str += "reset\n"
         str += "\tReset config as default.\n"
-        str += "server\n"
-        str += "\tShow server url.\n"
-        str += "server [URL]\n"
+        str += "server==[URL]\n"
         str += "\tSet hub server url as [URL].\n"
-        str += "log\n"
-        str += "\tShow log level.\n"
-        str += "log [LEVEL]\n"
+        str += "log==[LEVEL]\n"
         str += "\tSet log level as [LEVEL:NOLOG, DEBUG, INFO, WARNING, ERROR, CRITICAL].\n"
         print(str)
 
@@ -118,16 +103,10 @@ class ConfigCommand(BaseCommand):
             ConfigCommand.show_config()
         elif args.option == "reset":
             ConfigCommand.set_config(default_server_config)
-        elif args.option == "server":
-            if args.value is not None:
-                ConfigCommand.set_server_url(args.value)
-            else:
-                ConfigCommand.show_server_url()
-        elif args.option == "log":
-            if args.value is not None:
-                ConfigCommand.set_log_level(args.value)
-            else:
-                ConfigCommand.show_log_level()
+        elif args.option.startswith("server=="):
+            ConfigCommand.set_server_url(args.option.split("==")[1])
+        elif args.option.startswith("log=="):
+            ConfigCommand.set_log_level(args.option.split("==")[1])
         else:
             ConfigCommand.show_help()
         return True
