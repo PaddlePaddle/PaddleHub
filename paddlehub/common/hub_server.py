@@ -24,7 +24,6 @@ import requests
 import json
 import yaml
 import random
-import fcntl
 
 from random import randint
 from paddlehub.common import utils, srv_utils
@@ -39,9 +38,6 @@ CACHE_TIME = 60 * 10
 
 class HubServer(object):
     def __init__(self, config_file_path=None):
-        LOCK_FILE = os.path.join(hub.HUB_HOME, '__LOCK__')
-        LOCK_FP = open(LOCK_FILE, 'a+')
-        fcntl.flock(LOCK_FP.fileno(), fcntl.LOCK_EX)
         if not config_file_path:
             config_file_path = os.path.join(hub.CONF_HOME, 'config.json')
         if not os.path.exists(hub.CONF_HOME):
@@ -57,7 +53,6 @@ class HubServer(object):
         self.server_url = self.config['server_url']
         self.request()
         self._load_resource_list_file_if_valid()
-        LOCK_FP.close()
 
     def get_server_url(self):
         random.seed(int(time.time()))
