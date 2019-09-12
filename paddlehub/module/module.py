@@ -117,7 +117,6 @@ class Module(object):
         self.cache_fetch_dict = None
         self.cache_program = None
 
-        # TODO(wuzewu): print more module loading info log
         if name:
             self._init_with_name(name=name, version=version)
         elif module_dir:
@@ -458,7 +457,6 @@ class Module(object):
         fetch_dict = self.cache_fetch_dict
         program = self.cache_program
 
-        #TODO(wuzewu): more option
         fetch_list = list(set([value for key, value in fetch_dict.items()]))
         with fluid.program_guard(program):
             result = []
@@ -554,7 +552,6 @@ class Module(object):
         self._recover_variable_info(program)
 
         paddle_helper.set_op_attr(program, is_test=for_test)
-        #TODO(wuzewu): return feed_list and fetch_list directly
         feed_dict = {}
         fetch_dict = {}
         for index, var in enumerate(signature.inputs):
@@ -569,7 +566,6 @@ class Module(object):
             if key:
                 fetch_dict[key] = program.global_block().var(var.name)
 
-        # TODO(ZeyuChen) encapsulate into a funtion
         # update BERT/ERNIE's input tensor's sequence length to max_seq_len
         if self.name.startswith("bert") or self.name.startswith("ernie"):
             MAX_SEQ_LENGTH = 512

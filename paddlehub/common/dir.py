@@ -16,9 +16,23 @@
 import os
 
 # TODO: Change dir.py's filename, this naming rule is not qualified
-USER_HOME = os.path.expanduser('~')
-HUB_HOME = os.path.join(USER_HOME, ".paddlehub")
-MODULE_HOME = os.path.join(HUB_HOME, "modules")
-CACHE_HOME = os.path.join(HUB_HOME, "cache")
-DATA_HOME = os.path.join(HUB_HOME, "dataset")
-CONF_HOME = os.path.join(HUB_HOME, "conf")
+
+
+def gen_user_home():
+    if "HUB_HOME" in os.environ:
+        home_path = os.environ["HUB_HOME"]
+        if os.path.exists(home_path) and os.path.isdir(home_path):
+            return home_path
+    return os.path.expanduser('~')
+
+
+def gen_hub_home():
+    return os.path.join(gen_user_home(), ".paddlehub")
+
+
+USER_HOME = gen_user_home()
+HUB_HOME = gen_hub_home()
+MODULE_HOME = os.path.join(gen_hub_home(), "modules")
+CACHE_HOME = os.path.join(gen_hub_home(), "cache")
+DATA_HOME = os.path.join(gen_hub_home(), "dataset")
+CONF_HOME = os.path.join(gen_hub_home(), "conf")

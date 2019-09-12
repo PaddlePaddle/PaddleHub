@@ -52,36 +52,35 @@ class ImageClassificationDataset(object):
         return dataset_path
 
     def _parse_data(self, data_path, shuffle=False, phase=None):
+        data = []
+        with open(data_path, "r") as file:
+            while True:
+                line = file.readline()
+                if not line:
+                    break
+                line = line.strip()
+                items = line.split(" ")
+                if len(items) > 2:
+                    image_path = " ".join(items[0:-1])
+                else:
+                    image_path = items[0]
+                if not os.path.isabs(image_path):
+                    if self.base_path is not None:
+                        image_path = os.path.join(self.base_path, image_path)
+                label = items[-1]
+                data.append((image_path, items[-1]))
+
+        if phase == 'train':
+            self.train_examples = data
+        elif phase == 'dev':
+            self.dev_examples = data
+        elif phase == 'test':
+            self.test_examples = data
+
+        if shuffle:
+            np.random.shuffle(data)
+
         def _base_reader():
-            data = []
-            with open(data_path, "r") as file:
-                while True:
-                    line = file.readline()
-                    if not line:
-                        break
-                    line = line.strip()
-                    items = line.split(" ")
-                    if len(items) > 2:
-                        image_path = " ".join(items[0:-1])
-                    else:
-                        image_path = items[0]
-                    if not os.path.isabs(image_path):
-                        if self.base_path is not None:
-                            image_path = os.path.join(self.base_path,
-                                                      image_path)
-                    label = items[-1]
-                    data.append((image_path, items[-1]))
-
-            if phase == 'train':
-                self.train_examples = data
-            elif phase == 'dev':
-                self.dev_examples = data
-            elif phase == 'test':
-                self.test_examples = data
-
-            if shuffle:
-                np.random.shuffle(data)
-
             for item in data:
                 yield item
 

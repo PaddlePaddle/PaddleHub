@@ -14,7 +14,9 @@
 --weight_decay: 控制正则项力度的参数，用于防止过拟合，默认为0.01
 --warmup_proportion: 学习率warmup策略的比例，如果0.1，则学习率会在前10%训练step的过程中从0慢慢增长到learning_rate, 而后再缓慢衰减，默认为0
 --num_epoch: Finetune迭代的轮数
---max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数
+--max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数。
+--use_data_parallel: 是否使用并行计算，默认False。打开该功能依赖nccl库。
+--use_pyreader: 是否使用pyreader，默认False。
 
 # 任务相关
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型
@@ -38,11 +40,6 @@ PaddleHub还提供BERT模型可供选择, 所有模型对应的加载示例如�
    模型名                           | PaddleHub Module
 ---------------------------------- | :------:
 ERNIE, Chinese                     | `hub.Module(name='ernie')`
-BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
-BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
-BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
-BERT-Large, Cased                  | `hub.Module(name='bert_cased_L-24_H-1024_A-16')`
-BERT-Base, Multilingual Cased      | `hub.Module(nane='bert_multi_cased_L-12_H-768_A-12')`
 BERT-Base, Chinese                 | `hub.Module(name='bert_chinese_L-12_H-768_A-12')`
 
 
@@ -113,7 +110,7 @@ sequence_output = outputs["sequence_output"]
 # feed_list的Tensor顺序不可以调整
 feed_list = [
     inputs["input_ids"].name, inputs["position_ids"].name,
-    inputs["segment_ids"].name, inputs["input_mask"].name, label.name
+    inputs["segment_ids"].name, inputs["input_mask"].name
 ]
 
 seq_label_task = hub.SequenceLabelTask(
@@ -132,21 +129,20 @@ seq_label_task.finetune_and_eval()
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与SequenceLabelReader返回的结果一致。
 3. `hub.SequenceLabelTask`通过输入特征，迁移的类别数，可以生成适用于序列标注的迁移任务`SequenceLabelTask`
 
-## VisualDL 可视化
+## 可视化
 
 Finetune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
 ```bash
-$ visualdl --logdir $CKPT_DIR/vdllog -t ${HOST_IP}
+$ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_NUM}
 ```
-其中${HOST_IP}为本机IP地址，如本机IP地址为192.168.0.1，用浏览器打开192.168.0.1:8040，其中8040为端口号，即可看到训练过程中指标的变化情况
-![img](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/develop/docs/imgs/seq_label_finetune_vdl.png)
+其中${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，用浏览器打开192.168.0.1:8040，即可看到训练过程中指标的变化情况
 
 ## 模型预测
 
 通过Finetune完成模型训练后，在对应的ckpt目录下，会自动保存验证集上效果最好的模型。
 配置脚本参数
 ```
-CKPT_DIR=".ckpt_sequence_label/best_model"
+CKPT_DIR="ckpt_sequence_label/"
 python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
 其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*

@@ -37,7 +37,7 @@ args = parser.parse_args()
 if __name__ == '__main__':
     # Load Paddlehub BERT pretrained model
     if args.use_taskid:
-        module = hub.Module(name="ernie_eng_base.hub_module")
+        module = hub.Module(name="ernie_v2_eng_base")
 
         inputs, outputs, program = module.context(
             trainable=True, max_seq_len=args.max_seq_len)

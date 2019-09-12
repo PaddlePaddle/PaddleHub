@@ -145,7 +145,7 @@ class BaseTuningStrategy(object):
 
     def is_stop(self):
         return False
-  
+
     def get_current_hparams(self):
         return self.current_hparams
 

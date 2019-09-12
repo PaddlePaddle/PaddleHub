@@ -16,7 +16,13 @@
 
 >* 多标签分类
 
+>* 回归任务
+
+>* 阅读理解
+
 >* 检索式问答任务
+
+>* 句子语义相似度计算
 
 ## 图像分类
 
@@ -50,10 +56,21 @@
 
 该样例展示了PaddleHub如何将BERT作为预训练模型在Toxic数据集上完成多标签分类的FineTune和预测。
 
+## 回归任务
+
+该样例展示了PaddleHub如何将BERT作为预训练模型在GLUE-STSB数据集上完成回归任务的FineTune和预测。
+
+## 阅读理解
+
+该样例展示了PaddleHub如何将BERT作为预训练模型在SQAD数据集上完成阅读理解的FineTune和预测。
+
 ## 检索式问答任务
 
 该样例展示了PaddleHub如何将ERNIE和BERT作为预训练模型在NLPCC-DBQA等数据集上完成检索式问答任务的FineTune和预测。
 
+## 句子语义相似度计算
+
+该样例展示了PaddleHub如何将word2vec_skipgram用于计算两个文本语义相似度。
 
 **NOTE**
 以上任务示例均是利用PaddleHub提供的数据集，若您想在自定义数据集上完成相应任务，请查看[PaddleHub适配自定义数据完成FineTune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
