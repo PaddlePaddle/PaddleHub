@@ -39,12 +39,13 @@ class Logger(object):
         self.handler.setFormatter(self.format)
 
         self.logger.addHandler(self.handler)
-        if not os.path.exists(os.path.join(CONF_HOME, "config.json")):
-            self.logLevel = "DEBUG"
-        else:
-            with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
-                self.logLevel = json.load(fp).get("log_level", "DEBUG")
+        self.logLevel = "DEBUG"
         self.logger.setLevel(self._get_logging_level())
+        if os.path.exists(os.path.join(CONF_HOME, "config.json")):
+            with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
+                level = json.load(fp).get("log_level")
+                self.logLevel = level
+                self.setLevel(level)
 
     def _is_no_log(self):
         return self.getLevel() == Logger.NOLOG
