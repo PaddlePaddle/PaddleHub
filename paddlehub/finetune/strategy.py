@@ -477,7 +477,7 @@ class CombinedStrategy(DefaultStrategy):
             pass
 
     def __str__(self):
-        return "Strategy with sheduler: %s, regularization: %s and clip: %s" % (
+        return "Strategy with scheduler: %s, regularization: %s and clip: %s" % (
             self.scheduler, self.regularization, self.clip)
 
 
