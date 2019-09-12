@@ -1,18 +1,5 @@
 # PaddleHub
 
-## 目录
-
-* [简介](https://github.com/paddlepaddle/paddlehub#%E7%AE%80%E4%BB%8B)
-* [环境依赖](https://github.com/paddlepaddle/paddlehub#%E7%8E%AF%E5%A2%83%E4%BE%9D%E8%B5%96)
-* [安装](https://github.com/paddlepaddle/paddlehub#%E5%AE%89%E8%A3%85)
-* [快速体验](https://github.com/paddlepaddle/paddlehub#%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C)
-* [教程](https://github.com/paddlepaddle/paddlehub#%E6%95%99%E7%A8%8B)
-* [FAQ](https://github.com/paddlepaddle/paddlehub#faq)
-* [用户交流群](https://github.com/paddlepaddle/paddlehub#%E7%94%A8%E6%88%B7%E4%BA%A4%E6%B5%81%E7%BE%A4)
-* [更新历史](https://github.com/paddlepaddle/paddlehub#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
-
-## 简介
-
 [![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=develop)](https://travis-ci.org/PaddlePaddle/PaddleHub)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
@@ -33,13 +20,25 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 * PaddleHub引入『**模型即软件**』的设计理念，支持通过Python API或者命令行工具，一键完成预训练模型地预测，更方便的应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
-## 环境依赖
+
+## 目录
+
+* [安装](https://github.com/paddlepaddle/paddlehub#%E5%AE%89%E8%A3%85)
+* [快速体验](https://github.com/paddlepaddle/paddlehub#%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C)
+* [教程](https://github.com/paddlepaddle/paddlehub#%E6%95%99%E7%A8%8B)
+* [FAQ](https://github.com/paddlepaddle/paddlehub#faq)
+* [用户交流群](https://github.com/paddlepaddle/paddlehub#%E7%94%A8%E6%88%B7%E4%BA%A4%E6%B5%81%E7%BE%A4)
+* [更新历史](https://github.com/paddlepaddle/paddlehub#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
+
+
+## 安装
+
+### 环境依赖
 * Python==2.7 or Python>=3.5
 * PaddlePaddle>=1.4.0
 
 除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络
 
-## 安装
 pip安装方式如下：
 
 ```shell
@@ -81,67 +80,43 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 同时，我们在AI Studio和AIBook上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
 * ERNIE文本分类:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79380)
-  * [AIBook](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_txt_cls)
+  * [AI Book](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_txt_cls)
 * ERNIE序列标注:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79377)
-  * [AIBook](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_seq_label)
+  * [AI Book](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_seq_label)
 * ELMo文本分类:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79400)
-  * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/elmo_txt_cls)
+  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/elmo_txt_cls)
 * senta情感分类:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79398)
-  * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/senta_bilstm)
+  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/senta_bilstm)
 * 图像分类:
   * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79378)
-  * [AIBook](https://console.bce.baidu.com/bml/#/bml/aibook/img_cls)
+  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/img_cls)
 
 ## 教程
 
-[API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
+PaddleHub Fine-tune API 详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
 
-[迁移学习](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
+PaddleHub如何完成迁移学习，详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
 
-[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
+PaddleHub如何自定义迁移任务，详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
 ## FAQ
 
-### 问题一
+**Q:** 利用PaddleHub ernie/bert进行Finetune时，运行出错并提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息
 
-**现象**
-
-利用PaddleHub ernie/bert进行Finetune时，提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息
-
-**原因**
-
-这是因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。
-
-**解决方法**
-
-首先将PaddlePaddle和PaddleHub升级至最新版本，同时将ernie卸载。
-
-如果机器不支持GPU，那么使用如下命令来安装PaddlePaddle的CPU版本
+**A:** 因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。可以将PaddlePaddle和PaddleHub升级至最新版本，同时将ernie卸载。
 ```shell
-$ pip install --upgrade paddlepaddle
-$ pip install --upgrade paddlehub
-$ hub uninstall ernie
-```
-
-如果机器支持GPU，则使用如下命令来安装PaddlePaddle的GPU版本
-```shell
+# 若是CPU环境，则 pip install --upgrade paddlepaddle
 $ pip install --upgrade paddlepaddle-gpu
 $ pip install --upgrade paddlehub
 $ hub uninstall ernie
 ```
 
-### 问题二
+**Q:** 使用PaddleHub时，无法下载预置数据集、Module的等现象
 
-**现象**
-
-使用paddlehub时，无法下载预置数据集、Module的等现象
-
-**原因**
-
-PaddleHub中的预训练模型和预置数据集都需要通过服务端进行下载，因此PaddleHub默认用户访问外网权限。
+**A:** PaddleHub中的预训练模型和预置数据集都需要通过服务端进行下载，因此PaddleHub默认用户访问外网权限。
 可以通过以下命令确认是否可以访问外网。
 
 ```python
@@ -153,22 +128,14 @@ print(res)
 # the common result is like this:
 # <Response [200]>
 ```
+**Note：** PaddleHub 1.1.1版本已支持离线运行Module
 
-**Note**
+**Q:** 利用PaddleHub Finetune如何适配自定义数据集
 
-PaddleHub 1.1.1版本已支持离线运行Module
+**A:** 参考[PaddleHub适配自定义数据集完成Finetune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
 
-### 问题三
 
-**现象**
-
-利用PaddleHub Finetune如何适配自定义数据集
-
-**解决方法**
-
-参考[PaddleHub适配自定义数据集完成Finetune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
-
-### 更多问题
+**更多问题**
 
 当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-FAQ)查找解决方案。
 如果在FAQ中没有找到解决方案，欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交给我们，我们会第一时间进行跟进
@@ -210,6 +177,3 @@ PaddleHub 1.1.1版本已支持离线运行Module
                 目前版本支持以下模型：词法分析LAC；情感分析Senta；目标检测SSD；图像分类ResNet, MobileNet, NASNet等。
 
 * 迁移学习: 提供了基于预训练模型的Finetune API，用户通过少量代码即可完成迁移学习，包括BERT/ERNIE文本分类、序列标注、图像分类迁移等。
-
-## 版权和许可证
-PaddleHub由[Apache-2.0 license](LICENSE)提供
