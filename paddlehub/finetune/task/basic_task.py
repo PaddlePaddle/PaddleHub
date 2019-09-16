@@ -458,14 +458,14 @@ class BasicTask(object):
     def _eval_end_event(self, run_states):
         eval_scores, eval_loss, run_speed = self._calculate_metrics(run_states)
         self.tb_writer.add_scalar(
-            tag=self.phase + "/Loss [{}]".format(self.phase),
+            tag="Loss_{}".format(self.phase),
             scalar_value=eval_loss,
             global_step=self.current_step)
 
         log_scores = ""
         for metric in eval_scores:
             self.tb_writer.add_scalar(
-                tag=self.phase + "/{} [{}]".format(metric, self.phase),
+                tag="{}_{}".format(metric, self.phase),
                 scalar_value=eval_scores[metric],
                 global_step=self.current_step)
 
@@ -498,13 +498,13 @@ class BasicTask(object):
     def _log_interval_event(self, run_states):
         scores, avg_loss, run_speed = self._calculate_metrics(run_states)
         self.tb_writer.add_scalar(
-            tag=self.phase + "/Loss [{}]".format(self.phase),
+            tag="Loss_{}".format(self.phase),
             scalar_value=avg_loss,
             global_step=self.current_step)
         log_scores = ""
         for metric in scores:
             self.tb_writer.add_scalar(
-                tag=self.phase + "/{} [{}]".format(metric, self.phase),
+                tag="{}_{}".format(metric, self.phase),
                 scalar_value=scores[metric],
                 global_step=self.current_step)
             log_scores += "%s=%.5f " % (metric, scores[metric])
