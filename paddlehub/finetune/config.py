@@ -55,7 +55,6 @@ class RunConfig(object):
             self._strategy = strategy
         self._enable_memory_optim = enable_memory_optim
         if checkpoint_dir is None:
-
             now = int(time.time())
             time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(now))
             self._checkpoint_dir = "ckpt_" + time_str
