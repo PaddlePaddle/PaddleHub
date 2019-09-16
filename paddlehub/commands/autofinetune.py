@@ -31,6 +31,7 @@ import numpy as np
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.common.arg_helper import add_argument, print_arguments
 from paddlehub.autofinetune.autoft import PSHE2
+from paddlehub.autofinetune.autoft import HAZero
 from paddlehub.autofinetune.evaluator import FullTrailEvaluator
 from paddlehub.autofinetune.evaluator import ModelBasedEvaluator
 from paddlehub.common.logger import logger
@@ -71,6 +72,7 @@ class AutoFineTuneCommand(BaseCommand):
             "--cuda",
             type=ast.literal_eval,
             default=['0'],
+            required=True,
             help="The list of gpu devices to be used")
         self.arg_config_group.add_argument(
             "--round", type=int, default=10, help="Number of searches")
@@ -84,6 +86,11 @@ class AutoFineTuneCommand(BaseCommand):
             type=str,
             default="fulltrail",
             help="Choices: fulltrail or modelbased.")
+        self.arg_config_group.add_argument(
+            "--tuning_strategy",
+            type=str,
+            default="HAZero",
+            help="Choices: HAZero or PSHE2.")
 
     def execute(self, argv):
         if not argv:
@@ -121,11 +128,21 @@ class AutoFineTuneCommand(BaseCommand):
             raise ValueError(
                 "The evaluate %s is not defined!" % self.args.evaluate_choice)
 
-        autoft = PSHE2(
-            evaluator,
-            cudas=self.args.cuda,
-            popsize=self.args.popsize,
-            output_dir=self.args.output_dir)
+        if self.args.tuning_strategy.lower() == "hazero":
+            autoft = HAZero(
+                evaluator,
+                cudas=self.args.cuda,
+                popsize=self.args.popsize,
+                output_dir=self.args.output_dir)
+        elif self.args.tuning_strategy.lower() == "pshe2":
+            autoft = PSHE2(
+                evaluator,
+                cudas=self.args.cuda,
+                popsize=self.args.popsize,
+                output_dir=self.args.output_dir)
+        else:
+            raise ValueError("The tuning strategy %s is not defined!" %
+                             self.args.tuning_strategy)
 
         run_round_cnt = 0
         solutions_ckptdirs = {}
@@ -138,23 +155,21 @@ class AutoFineTuneCommand(BaseCommand):
             evaluator.new_round()
             run_round_cnt = run_round_cnt + 1
         print("PaddleHub Autofinetune ends.")
-        with open("./log_file.txt", "w") as f:
-            best_choice = evaluator.convert_params(autoft.optimal_solution())
-            print("The best hyperparameters:")
-            f.write("The best hyperparameters:\n")
-            param_name = []
-            for idx, param in enumerate(evaluator.params["param_list"]):
-                param_name.append(param["name"])
-                f.write(param["name"] + "\t:\t" + str(best_choice[idx]) + "\n")
-                print("%s : %s" % (param["name"], best_choice[idx]))
-            f.write("\n\n\n")
-            f.write("\t".join(param_name) + "\toutput_dir\n\n")
 
+        with open("./log_file.txt", "w") as f:
+            best_hparams = evaluator.convert_params(autoft.get_best_hparams())
+            print("The final best hyperparameters:")
+            f.write("The final best hyperparameters:\n")
+            for index, hparam_name in enumerate(autoft.hparams_name_list):
+                print("%s=%s" % (hparam_name, best_hparams[index]))
+                f.write(hparam_name + "\t:\t" + str(best_hparams[index]) + "\n")
+            f.write("\n\n\n")
+            f.write("\t".join(autoft.hparams_name_list) + "\toutput_dir\n\n")
             logger.info(
-                "The checkpont directory of programs ran with paramemters searched are saved as log_file.txt ."
+                "The checkpont directory of programs ran with hyperparamemters searched are saved as log_file.txt ."
             )
             print(
-                "The checkpont directory of programs ran with paramemters searched are saved as log_file.txt ."
+                "The checkpont directory of programs ran with hyperparamemters searched are saved as log_file.txt ."
             )
             for solution, ckptdir in solutions_ckptdirs.items():
                 param = evaluator.convert_params(solution)

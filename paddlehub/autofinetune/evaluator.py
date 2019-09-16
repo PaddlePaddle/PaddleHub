@@ -40,6 +40,7 @@ class BaseEvaluator(object):
         with io.open(params_file, 'r', encoding='utf8') as f:
             self.params = yaml.safe_load(f)
         self.finetunee_script = finetunee_script
+        self.model_rewards = {}
 
     def get_init_params(self):
         init_params = []
@@ -134,7 +135,7 @@ class FullTrailEvaluator(BaseEvaluator):
             os.system(run_cmd)
             with open(log_file, "r") as f:
                 lines = f.readlines()
-                eval_result = lines[-1]
+                eval_result = float(lines[-1])
         except:
             print(
                 "WARNING: Program which was ran with hyperparameters as %s was crashed!"
@@ -148,7 +149,6 @@ class FullTrailEvaluator(BaseEvaluator):
 class ModelBasedEvaluator(BaseEvaluator):
     def __init__(self, params_file, finetunee_script):
         super(ModelBasedEvaluator, self).__init__(params_file, finetunee_script)
-        self.model_rewards = {}
         self.half_best_model_ckpt = []
         self.run_count = 0
 
@@ -187,7 +187,7 @@ class ModelBasedEvaluator(BaseEvaluator):
             os.system(run_cmd)
             with open(log_file, "r") as f:
                 lines = f.readlines()
-                eval_result = lines[-1]
+                eval_result = float(lines[-1])
         except:
             print(
                 "WARNING: Program which was ran with hyperparameters as %s was crashed!"
@@ -198,7 +198,7 @@ class ModelBasedEvaluator(BaseEvaluator):
         return reward
 
     def new_round(self):
-        """update self.half_best_model"""
+        """update half_best_model"""
         half_size = int(len(self.model_rewards) / 2)
         if half_size < 1:
             half_size = 1
