@@ -46,11 +46,6 @@ if __name__ == "__main__":
     place = fluid.CPUPlace()
     exe = fluid.Executor(place)
     feeder = fluid.DataFeeder(feed_list=[word_ids], place=place)
-    w2v, = exe.run(
-        program,
-        feed=feeder.feed([[[1123]]]),
-        fetch_list=[embedding.name],
-        return_numpy=False)
 
     data = [
         [
