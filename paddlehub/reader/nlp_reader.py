@@ -761,7 +761,8 @@ class RegressionReader(BaseReader):
                  label_map_config=None,
                  max_seq_len=128,
                  do_lower_case=True,
-                 random_seed=None):
+                 random_seed=None,
+                 use_task_id=False):
         self.max_seq_len = max_seq_len
         self.tokenizer = tokenization.FullTokenizer(
             vocab_file=vocab_path, do_lower_case=do_lower_case)
@@ -771,6 +772,10 @@ class RegressionReader(BaseReader):
         self.cls_id = self.vocab["[CLS]"]
         self.sep_id = self.vocab["[SEP]"]
         self.in_tokens = False
+        self.use_task_id = use_task_id
+
+        if self.use_task_id:
+            self.task_id = 0
 
         np.random.seed(random_seed)
 
@@ -811,11 +816,27 @@ class RegressionReader(BaseReader):
                 padded_token_ids, padded_position_ids, padded_text_type_ids,
                 input_mask, batch_labels
             ]
+
+            if self.use_task_id:
+                padded_task_ids = np.ones_like(
+                    padded_token_ids, dtype="int64") * self.task_id
+                return_list = [
+                    padded_token_ids, padded_position_ids, padded_text_type_ids,
+                    input_mask, padded_task_ids, batch_labels
+                ]
         else:
             return_list = [
                 padded_token_ids, padded_position_ids, padded_text_type_ids,
                 input_mask
             ]
+
+            if self.use_task_id:
+                padded_task_ids = np.ones_like(
+                    padded_token_ids, dtype="int64") * self.task_id
+                return_list = [
+                    padded_token_ids, padded_position_ids, padded_text_type_ids,
+                    input_mask, padded_task_ids
+                ]
 
         return return_list
 
