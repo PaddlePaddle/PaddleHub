@@ -186,6 +186,7 @@ $ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=hazero
 
 > `--tuning_strategy`: 设置自动优化超参策略，可选hazero和pshe2，默认为hazero
 
+**NOTE:** Auto Fine-tune功能会根据popsize和cuda自动实现排队使用GPU，如popsize=5，cuda=['0','1','2','3']，则每搜索一轮，Auto Fine-tune自动起四个进程训练，所以第5组超参组合需要排队一次。为了提高GPU利用率以及超参优化效率，此时建议可以设置为3张可用的卡，cuda=['0','1','2']。
 
 
 ## 四、可视化
