@@ -145,7 +145,7 @@ if __name__ == '__main__':
     ]
 
     if args.use_taskid:
-        feed_list = feed_list.append(inputs["task_ids"].name)
+        feed_list.append(inputs["task_ids"].name)
 
     # Select finetune strategy, setup config and finetune
     strategy = hub.AdamWeightDecayStrategy(
