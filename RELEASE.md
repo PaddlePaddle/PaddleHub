@@ -13,6 +13,10 @@
   * 日志记录级别
 
 
+# PaddleHub v1.1.2
+
+* PaddleHub支持修改预训练模型存放路径${HUB_HOME}
+
 # PaddleHub v1.1.1
 
 * PaddleHub支持离线运行
