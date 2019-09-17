@@ -140,9 +140,7 @@ if __name__ == '__main__':
             cls_task.load_parameters(args.model_path)
             logger.info("PaddleHub has loaded model from %s" % args.model_path)
 
-    run_states = cls_task.finetune()
-    train_avg_score, train_avg_loss, train_run_speed = cls_task._calculate_metrics(run_states)
-
+    cls_task.finetune()
     run_states = cls_task.eval()
     eval_avg_score, eval_avg_loss, eval_run_speed = cls_task._calculate_metrics(run_states)
 
