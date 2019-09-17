@@ -1,10 +1,10 @@
-# PaddleHub 自动超参搜索（Auto Fine-tune）
+# PaddleHub 超参优化（Auto Fine-tune）
 
 ## 一、简介
 
 机器学习训练模型的过程中自然少不了调参。模型的参数可分成两类：参数与超参数，前者是模型通过自身的训练学习得到的参数数据；后者则需要通过人工经验设置（如学习率、dropout_rate、batch_size等），以提高模型训练的效果。当前模型往往参数空间大，手动调参十分耗时，尝试成本高。PaddleHub  Auto Fine-tune可以实现自动调整超参数。
 
-PaddleHub Auto Fine-tune提供两种搜索超参策略：
+PaddleHub Auto Fine-tune提供两种超参优化策略：
 
 * HAZero: 核心思想是通过对正态分布中协方差矩阵的调整来处理变量之间的依赖关系和scaling。算法基本可以分成以下三步: 采样产生新解；计算目标函数值；更新正态分布参数。调整参数的基本思路为，调整参数使得产生好解的概率逐渐增大
 
@@ -15,15 +15,15 @@ PaddleHub Auto Fine-tune提供两种超参评估策略：
 
 * FullTrail: 给定一组超参，利用这组超参从头开始Finetune一个新模型，之后在数据集dev部分评估这个模型
 
-* ModelBased: 给定一组超参，若这组超参来自第一轮搜索的超参，则从头开始Finetune一个新模型；若这组超参数不是来自第一轮搜索的超参数，则程序会加载前几轮已经Fine-tune完毕后保存的较好模型，基于这个模型，在当前的超参数组合下继续Finetune。这个Fine-tune完毕后保存的较好模型，评估方式是这个模型在数据集dev部分的效果。
+* ModelBased: 给定一组超参，若这组超参来自第一轮优化的超参，则从头开始Finetune一个新模型；若这组超参数不是来自第一轮优化的超参数，则程序会加载前几轮已经Fine-tune完毕后保存的较好模型，基于这个模型，在当前的超参数组合下继续Finetune。这个Fine-tune完毕后保存的较好模型，评估方式是这个模型在数据集dev部分的效果。
 
 ## 二、准备工作
 
-使用PaddleHub Auto Fine-tune必须准备两个文件，并且这两个文件需要按照指定的格式书写。这两个文件分别是需要Fine-tune的python脚本finetuee.py和需要搜索的超参数信息yaml文件hparam.yaml。
+使用PaddleHub Auto Fine-tune必须准备两个文件，并且这两个文件需要按照指定的格式书写。这两个文件分别是需要Fine-tune的python脚本finetuee.py和需要优化的超参数信息yaml文件hparam.yaml。
 
 以Fine-tune中文情感分类任务为例，我们展示如何利用PaddleHub Auto Finetune进行自动搜素超参。
 
-以下是待搜索超参数的yaml文件hparam.yaml，包含需要搜素的超参名字、类型、范围等信息。其中类型只支持float和int类型
+以下是待优化超参数的yaml文件hparam.yaml，包含需要搜素的超参名字、类型、范围等信息。其中类型只支持float和int类型
 ```
 param_list:
 - name : learning_rate
@@ -149,13 +149,13 @@ if __name__ == '__main__':
 print(eval_avg_score["acc"], end="")
 ```
 **Note**:以上是finetunee.py的写法。
-> finetunee.py必须可以接收待搜素超参数选项参数, 并且待搜素超参数选项名字和yaml文件中的超参数名字保持一致.
+> finetunee.py必须可以接收待优化超参数选项参数, 并且待搜素超参数选项名字和yaml文件中的超参数名字保持一致.
 
 > finetunee.py必须有checkpoint_dir这个选项。
 
 > PaddleHub Auto Fine-tune超参评估策略选择为ModelBased，finetunee.py必须有model_path选项。
 
-> PaddleHub Auto Fine-tune搜索超参策略选择hazero时，必须提供两个以上的待搜索超参。
+> PaddleHub Auto Fine-tune优化超参策略选择hazero时，必须提供两个以上的待优化超参。
 
 > finetunee.py的最后一个输出必须是模型在数据集dev上的评价效果，同时以“”结束，如print(eval_avg_score["acc"], end="").
 
@@ -174,7 +174,7 @@ $ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=hazero
 
 其中，选项
 
-> `--param_file`: 需要搜索的超参数信息yaml文件
+> `--param_file`: 需要优化的超参数信息yaml文件
 
 > `--cuda`: 设置运行程序的可用GPU卡号，list类型，中间以逗号隔开，不能有空格，默认为[‘0’]
 
@@ -184,15 +184,15 @@ $ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=hazero
 
 > `--output_dir`: 设置程序运行输出结果存放目录，可选，不指定该选项参数时，在当前运行路径下生成存放程序运行输出信息的文件夹
 
-> `--evaluate_choice`: 设置自动搜索超参的评价效果方式，可选fulltrail和modelbased, 默认为fulltrail
+> `--evaluate_choice`: 设置自动优化超参的评价效果方式，可选fulltrail和modelbased, 默认为fulltrail
 
-> `--tuning_strategy`: 设置自动搜索超参策略，可选hazero和pshe2，默认为hazero
+> `--tuning_strategy`: 设置自动优化超参策略，可选hazero和pshe2，默认为hazero
 
 
 
 ## 四、可视化
 
-Auto Finetune API在搜索超参过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
+Auto Finetune API在优化超参过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
 
 ```shell
 $ tensorboard --logdir $OUTPUT/tb_paddle --host ${HOST_IP} --port ${PORT_NUM}
