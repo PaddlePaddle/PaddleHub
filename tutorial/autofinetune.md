@@ -167,7 +167,7 @@ print(eval_avg_score["acc"], end="")
 ```shell
 $ OUTPUT=result/
 $ hub autofinetune finetunee.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=5 --round=10
-$ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=hazero
+$ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2
 ```
 
 其中，选项
