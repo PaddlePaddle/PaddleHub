@@ -203,5 +203,7 @@ $ tensorboard --logdir $OUTPUT/tb_paddle --host ${HOST_IP} --port ${PORT_NUM}
 ## 五、其他
 
 如在使用Auto Fine-tune功能时，输出信息中包含如下字样：
+
 **WARNING：Program which was ran with hyperparameters as .... was crashed!**
+
 首先根据终端上的输出信息，确定这个输出信息是在第几个round（如round 3），之后查看${OUTPUT}/round3/下的日志文件信息log.info, 查看具体出错原因。
