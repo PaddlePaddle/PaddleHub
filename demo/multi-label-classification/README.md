@@ -4,7 +4,7 @@
 
 ## 如何开始Finetune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用BERT对Toxic数据集进行Finetune。**由于BERT模型计算量较大，建议在GPU上使用，且显存需要大于14GB**
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用BERT对Toxic数据集进行Finetune。
 
 其中脚本参数说明如下：
 
