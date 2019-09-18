@@ -140,8 +140,8 @@ class BasicTask(object):
         # log item
         if not os.path.exists(self.config.checkpoint_dir):
             mkdir(self.config.checkpoint_dir)
-        vdl_log_dir = os.path.join(self.config.checkpoint_dir, "visualization")
-        self.tb_writer = SummaryWriter(vdl_log_dir)
+        tb_log_dir = os.path.join(self.config.checkpoint_dir, "visualization")
+        self.tb_writer = SummaryWriter(tb_log_dir)
 
         # run environment
         self._phases = []
