@@ -140,9 +140,7 @@ if __name__ == '__main__':
             cls_task.load_parameters(args.model_path)
             logger.info("PaddleHub has loaded model from %s" % args.model_path)
 
-    run_states = cls_task.finetune()
-    train_avg_score, train_avg_loss, train_run_speed = cls_task._calculate_metrics(run_states)
-
+    cls_task.finetune()
     run_states = cls_task.eval()
     eval_avg_score, eval_avg_loss, eval_run_speed = cls_task._calculate_metrics(run_states)
 
@@ -169,7 +167,7 @@ print(eval_avg_score["acc"], end="")
 ```shell
 $ OUTPUT=result/
 $ hub autofinetune finetunee.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=5 --round=10
-$ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=hazero
+$ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2
 ```
 
 其中，选项
@@ -188,6 +186,7 @@ $ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=hazero
 
 > `--tuning_strategy`: 设置自动优化超参策略，可选hazero和pshe2，默认为hazero
 
+**NOTE:** Auto Fine-tune功能会根据popsize和cuda自动实现排队使用GPU，如popsize=5，cuda=['0','1','2','3']，则每搜索一轮，Auto Fine-tune自动起四个进程训练，所以第5组超参组合需要排队一次。为了提高GPU利用率以及超参优化效率，此时建议可以设置为3张可用的卡，cuda=['0','1','2']。
 
 
 ## 四、可视化
@@ -200,3 +199,11 @@ $ tensorboard --logdir $OUTPUT/tb_paddle --host ${HOST_IP} --port ${PORT_NUM}
 
 其中${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
 用浏览器打开192.168.0.1:8040，即可看到搜素过程中各超参以及指标的变化情况
+
+## 五、其他
+
+如在使用Auto Fine-tune功能时，输出信息中包含如下字样：
+
+**WARNING：Program which was ran with hyperparameters as ... was crashed!**
+
+首先根据终端上的输出信息，确定这个输出信息是在第几个round（如round 3），之后查看${OUTPUT}/round3/下的日志文件信息log.info, 查看具体出错原因。

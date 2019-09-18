@@ -140,8 +140,8 @@ class BasicTask(object):
         # log item
         if not os.path.exists(self.config.checkpoint_dir):
             mkdir(self.config.checkpoint_dir)
-        vdl_log_dir = os.path.join(self.config.checkpoint_dir, "visualization")
-        self.tb_writer = SummaryWriter(vdl_log_dir)
+        tb_log_dir = os.path.join(self.config.checkpoint_dir, "visualization")
+        self.tb_writer = SummaryWriter(tb_log_dir)
 
         # run environment
         self._phases = []
@@ -460,14 +460,14 @@ class BasicTask(object):
         self.tb_writer.add_scalar(
             tag="Loss_{}".format(self.phase),
             scalar_value=eval_loss,
-            global_step=self.current_step)
+            global_step=self._envs['train'].current_step)
 
         log_scores = ""
         for metric in eval_scores:
             self.tb_writer.add_scalar(
                 tag="{}_{}".format(metric, self.phase),
                 scalar_value=eval_scores[metric],
-                global_step=self.current_step)
+                global_step=self._envs['train'].current_step)
 
             log_scores += "%s=%.5f " % (metric, eval_scores[metric])
         logger.info(
@@ -500,13 +500,13 @@ class BasicTask(object):
         self.tb_writer.add_scalar(
             tag="Loss_{}".format(self.phase),
             scalar_value=avg_loss,
-            global_step=self.current_step)
+            global_step=self._envs['train'].current_step)
         log_scores = ""
         for metric in scores:
             self.tb_writer.add_scalar(
                 tag="{}_{}".format(metric, self.phase),
                 scalar_value=scores[metric],
-                global_step=self.current_step)
+                global_step=self._envs['train'].current_step)
             log_scores += "%s=%.5f " % (metric, scores[metric])
         logger.info("step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
                     (self.current_step, self.max_train_steps, avg_loss,
