@@ -199,3 +199,9 @@ $ tensorboard --logdir $OUTPUT/tb_paddle --host ${HOST_IP} --port ${PORT_NUM}
 
 其中${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
 用浏览器打开192.168.0.1:8040，即可看到搜素过程中各超参以及指标的变化情况
+
+## 五、其他
+
+如在使用Auto Fine-tune功能时，输出信息中包含如下字样：
+**WARNING：Program which was ran with hyperparameters as .... was crashed!**
+首先根据终端上的输出信息，确定这个输出信息是在第几个round（如round 3），之后查看${OUTPUT}/round3/下的日志文件信息log.info, 查看具体出错原因。
