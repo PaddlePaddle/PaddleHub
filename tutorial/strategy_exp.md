@@ -255,6 +255,11 @@ PaddleHub中实现了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
 
 ​	    本文详细描述了使用ULMFiT策略微调PaddleHub预训练模型的来龙去脉。对于NLP任务，我们划分了大规模数据集与小规模数据集；对于CV任务，我们划分了相似度小规模小、相似度小规模大、相似度大规模大、相似度大规模小四类数据集。我们实验了warm up + linear decay, slanted triangular learning rate, Discriminative fine-tuning, Gradual unfreezing四种策略。warm up + linear decay和slanted triangular learning rate在原理上和实验结果上都是相似的，用户可以任选其中一种策略并寻找它的Bias-Variance Tradeoff平衡点。我们建议采用Discriminative fine-tuning和Gradual unfreezing策略，它们均有良好的实验效果，在相似度大的数据集中可以设置较大的超参而在相似度小的数据集中应该设置较小的超参，采用该策略后，为了提升模型的拟合能力可以适当提高训练的轮数。欢迎您使用上述策略调试您的PaddleHub预训练模型，如有任何疑问请在issues中向我们提出！
 
+
+
+
+
+
 ## 六、参考文献
 
 1. Howard J, Ruder S. Universal language model fine-tuning for text classification[J]. arXiv preprint arXiv:1801.06146, 2018.MLA
