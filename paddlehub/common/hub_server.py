@@ -39,24 +39,26 @@ CACHE_TIME = 60 * 10
 
 class HubServer(object):
     def __init__(self, config_file_path=None):
-        lock.write_acquire()
-        print("开始初始化HubServer")
         if not config_file_path:
             config_file_path = os.path.join(hub.CONF_HOME, 'config.json')
         if not os.path.exists(hub.CONF_HOME):
             utils.mkdir(hub.CONF_HOME)
         if not os.path.exists(config_file_path):
             with open(config_file_path, 'w+') as fp:
+                lock.flock(fp, lock.LOCK_EX)
                 fp.write(json.dumps(default_server_config))
+                lock.flock(fp, lock.LOCK_UN)
 
         with open(config_file_path) as fp:
             self.config = json.load(fp)
+        fp_lock = open(config_file_path)
+        lock.flock(fp_lock, lock.LOCK_EX)
 
         utils.check_url(self.config['server_url'])
         self.server_url = self.config['server_url']
         self.request()
         self._load_resource_list_file_if_valid()
-        lock.write_release()
+        lock.flock(fp_lock, lock.LOCK_UN)
 
     def get_server_url(self):
         random.seed(int(time.time()))

@@ -32,6 +32,7 @@ from paddlehub.common.logger import logger
 from paddlehub.common.lock import lock
 from paddlehub.common.downloader import default_downloader
 from paddlehub.module import module_desc_pb2
+from paddlehub.common.dir import CONF_HOME
 from paddlehub.module import check_info_pb2
 from paddlehub.module.signature import Signature, create_signature
 from paddlehub.module.checker import ModuleChecker
@@ -118,8 +119,11 @@ class Module(object):
         self.cache_fetch_dict = None
         self.cache_program = None
 
+        fp_lock = open(os.path.join(CONF_HOME, 'config.json'))
         if name:
+            lock.flock(fp_lock, lock.LOCK_EX)
             self._init_with_name(name=name, version=version)
+            lock.flock(fp_lock, lock.LOCK_UN)
         elif module_dir:
             self._init_with_module_file(module_dir=module_dir[0])
         elif signatures:
