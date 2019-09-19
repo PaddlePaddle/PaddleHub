@@ -29,6 +29,7 @@ import paddle.fluid as fluid
 from paddlehub.common import utils
 from paddlehub.common import paddle_helper
 from paddlehub.common.logger import logger
+from paddlehub.common.lock import lock
 from paddlehub.common.downloader import default_downloader
 from paddlehub.module import module_desc_pb2
 from paddlehub.module import check_info_pb2
@@ -138,6 +139,7 @@ class Module(object):
             raise ValueError("Module initialized parameter is empty")
 
     def _init_with_name(self, name, version=None):
+        lock.write_acquire()
         log_msg = "Installing %s module" % name
         if version:
             log_msg += "-%s" % version
@@ -148,6 +150,7 @@ class Module(object):
             logger.error(tips)
             exit(1)
         logger.info(tips)
+        lock.write_release()
         self._init_with_module_file(module_dir[0])
 
     def _init_with_url(self, url):
@@ -199,6 +202,7 @@ class Module(object):
             self.assets.append(filepath)
 
     def _init_with_module_file(self, module_dir):
+        lock.write_acquire()
         checker = ModuleChecker(module_dir)
         checker.check()
 
@@ -220,6 +224,7 @@ class Module(object):
         self._generate_extra_info()
         self._restore_parameter(self.program)
         self._recover_variable_info(self.program)
+        lock.write_release()
 
     def _init_with_signature(self, signatures):
         self.name_prefix = HUB_VAR_PREFIX % self.name

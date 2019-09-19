@@ -30,6 +30,7 @@ from paddlehub.common import utils, srv_utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.server_config import default_server_config
 from paddlehub.io.parser import yaml_parser
+from paddlehub.common.lock import lock
 import paddlehub as hub
 
 RESOURCE_LIST_FILE = "resource_list_file.yml"
@@ -38,6 +39,8 @@ CACHE_TIME = 60 * 10
 
 class HubServer(object):
     def __init__(self, config_file_path=None):
+        lock.write_acquire()
+        print("开始初始化HubServer")
         if not config_file_path:
             config_file_path = os.path.join(hub.CONF_HOME, 'config.json')
         if not os.path.exists(hub.CONF_HOME):
@@ -53,6 +56,7 @@ class HubServer(object):
         self.server_url = self.config['server_url']
         self.request()
         self._load_resource_list_file_if_valid()
+        lock.write_release()
 
     def get_server_url(self):
         random.seed(int(time.time()))
