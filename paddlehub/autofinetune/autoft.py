@@ -166,6 +166,7 @@ class BaseTuningStrategy(object):
         cnt = 0
         solutions_ckptdirs = {}
         mkdir(output_dir)
+
         for idx, solution in enumerate(solutions):
             cuda = self.is_cuda_free["free"][0]
             ckptdir = output_dir + "/ckpt-" + str(idx)
@@ -174,8 +175,8 @@ class BaseTuningStrategy(object):
             solutions_ckptdirs[tuple(solution)] = ckptdir
             self.is_cuda_free["free"].remove(cuda)
             self.is_cuda_free["busy"].append(cuda)
-            if len(params_cudas_dirs) == self.thread or cnt == int(
-                    self.popsize / self.thread):
+            if len(params_cudas_dirs
+                   ) == self.thread or idx == len(solutions) - 1:
                 tp = ThreadPool(len(params_cudas_dirs))
                 solution_results += tp.map(self.evaluator.run,
                                            params_cudas_dirs)
@@ -245,11 +246,11 @@ class HAZero(BaseTuningStrategy):
         best_hparams = self.evaluator.convert_params(self.best_hparams_all_pop)
         for index, name in enumerate(self.hparams_name_list):
             self.writer.add_scalar(
-                tag="hyperparameter tuning/" + name,
+                tag="hyperparameter_tuning/" + name,
                 scalar_value=best_hparams[index],
                 global_step=self.round)
         self.writer.add_scalar(
-            tag="hyperparameter tuning/best_eval_value",
+            tag="hyperparameter_tuning/best_eval_value",
             scalar_value=self.get_best_eval_value(),
             global_step=self.round)
 
@@ -368,11 +369,11 @@ class PSHE2(BaseTuningStrategy):
         best_hparams = self.evaluator.convert_params(self.best_hparams_all_pop)
         for index, name in enumerate(self.hparams_name_list):
             self.writer.add_scalar(
-                tag="hyperparameter tuning/" + name,
+                tag="hyperparameter_tuning/" + name,
                 scalar_value=best_hparams[index],
                 global_step=self.round)
         self.writer.add_scalar(
-            tag="hyperparameter tuning/best_eval_value",
+            tag="hyperparameter_tuning/best_eval_value",
             scalar_value=self.get_best_eval_value(),
             global_step=self.round)
 

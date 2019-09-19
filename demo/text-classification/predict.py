@@ -148,13 +148,7 @@ if __name__ == '__main__':
     ]
 
     if args.use_taskid:
-        feed_list = [
-            inputs["input_ids"].name,
-            inputs["position_ids"].name,
-            inputs["segment_ids"].name,
-            inputs["input_mask"].name,
-            inputs["task_ids"].name,
-        ]
+        feed_list.append(inputs["task_ids"].name)
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
