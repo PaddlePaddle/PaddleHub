@@ -14,7 +14,7 @@
   * 新增**阅读理解Fine-tune任务**和**回归Fine-tune任务**
   * 新增多指标评测
   * 优化predict接口
-  
+
 
 # PaddleHub v1.1.2
 
