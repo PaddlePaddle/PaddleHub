@@ -23,4 +23,3 @@ class Lock(object):
 
 
 lock = Lock().get_lock()
-
