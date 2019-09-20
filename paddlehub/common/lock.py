@@ -9,7 +9,6 @@ class WinLock(object):
     def __init__(self):
         self.LOCK_EX = ""
         self.LOCK_UN = ""
-        self.LOCK_EE = ""
 
 
 class Lock(object):
