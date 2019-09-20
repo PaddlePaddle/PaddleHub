@@ -37,8 +37,9 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 * Python==2.7 or Python>=3.5
 * PaddlePaddle>=1.4.0
 
-除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络。PaddleHub 1.1.1版本支持离线运行，但有关下载数据集和预训练模型还是需要访问外网。
+除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络。若本地已存在相关的数据集和预训练模型，则可以离线运行PaddleHub。
 
+**NOTE:** 若是出现离线运行PaddleHub错误，请更新PaddleHub 1.1.1版本之上。
 pip安装方式如下：
 
 ```shell
