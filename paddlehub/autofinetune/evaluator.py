@@ -36,11 +36,12 @@ else:
 
 
 class BaseEvaluator(object):
-    def __init__(self, params_file, finetunee_script):
+    def __init__(self, params_file, finetunee_script, options_str=""):
         with io.open(params_file, 'r', encoding='utf8') as f:
             self.params = yaml.safe_load(f)
         self.finetunee_script = finetunee_script
         self.model_rewards = {}
+        self.options_str = options_str
 
     def get_init_params(self):
         init_params = []
@@ -108,13 +109,14 @@ class BaseEvaluator(object):
 
 
 class FullTrailEvaluator(BaseEvaluator):
-    def __init__(self, params_file, finetunee_script):
-        super(FullTrailEvaluator, self).__init__(params_file, finetunee_script)
+    def __init__(self, params_file, finetunee_script, options_str=""):
+        super(FullTrailEvaluator, self).__init__(
+            params_file, finetunee_script, options_str=options_str)
 
     def run(self, *args):
         params = args[0][0]
         num_cuda = args[0][1]
-        ckpt_dir = args[0][2]
+        saved_params_dir = args[0][2]
         log_file = args[0][3]
         params = self.convert_params(params)
         if not self.is_valid_params(params):
@@ -125,12 +127,11 @@ class FullTrailEvaluator(BaseEvaluator):
         f.close()
 
         if is_windows():
-            run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --checkpoint_dir=%s %s >%s 2>&1" % \
-                    (num_cuda, self.finetunee_script, ckpt_dir, param_str, log_file)
+            run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                    (num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
         else:
-            run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --checkpoint_dir=%s %s >%s 2>&1" % \
-                    (num_cuda, self.finetunee_script, ckpt_dir, param_str, log_file)
-
+            run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                    (num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
         try:
             os.system(run_cmd)
             with open(log_file, "r") as f:
@@ -142,20 +143,21 @@ class FullTrailEvaluator(BaseEvaluator):
                 % param_str.replace("--", ""))
             eval_result = 0.0
         reward = self.get_reward(eval_result)
-        self.model_rewards[ckpt_dir] = reward
+        self.model_rewards[saved_params_dir] = reward
         return reward
 
 
 class ModelBasedEvaluator(BaseEvaluator):
-    def __init__(self, params_file, finetunee_script):
-        super(ModelBasedEvaluator, self).__init__(params_file, finetunee_script)
-        self.half_best_model_ckpt = []
+    def __init__(self, params_file, finetunee_script, options_str=""):
+        super(ModelBasedEvaluator, self).__init__(
+            params_file, finetunee_script, options_str=options_str)
+        self.half_best_model_path = []
         self.run_count = 0
 
     def run(self, *args):
         params = args[0][0]
         num_cuda = args[0][1]
-        ckpt_dir = args[0][2]
+        saved_params_dir = args[0][2]
         log_file = args[0][3]
         params = self.convert_params(params)
         if not self.is_valid_params(params):
@@ -165,22 +167,23 @@ class ModelBasedEvaluator(BaseEvaluator):
         f = open(log_file, "w")
         f.close()
 
-        if len(self.half_best_model_ckpt) > 0:
-            model_path = self.half_best_model_ckpt[self.run_count % len(
-                self.half_best_model_ckpt)] + "/best_model"
+        if len(self.half_best_model_path) > 0:
+            model_path = self.half_best_model_path[self.run_count % len(
+                self.half_best_model_path)]
             if is_windows():
-                run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --epochs=1 --model_path %s --checkpoint_dir=%s %s >%s 2>&1" % \
-                        (num_cuda, self.finetunee_script, model_path, ckpt_dir, param_str, log_file)
+                run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --epochs=1 --model_path %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                        (num_cuda, self.finetunee_script, model_path, saved_params_dir, param_str, self.options_str, log_file)
             else:
-                run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --epochs=1 --model_path %s --checkpoint_dir=%s %s >%s 2>&1" % \
-                        (num_cuda, self.finetunee_script, model_path, ckpt_dir, param_str, log_file)
+                run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --epochs=1 --model_path %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                        (num_cuda, self.finetunee_script, model_path, saved_params_dir, param_str, self.options_str, log_file)
+
         else:
             if is_windows():
-                run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --checkpoint_dir=%s %s >%s 2>&1" % \
-                        (num_cuda, self.finetunee_script, ckpt_dir, param_str, log_file)
+                run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                        (num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
             else:
-                run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --checkpoint_dir=%s %s >%s 2>&1" % \
-                        (num_cuda, self.finetunee_script, ckpt_dir, param_str, log_file)
+                run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                        (num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
 
         self.run_count += 1
         try:
@@ -194,7 +197,7 @@ class ModelBasedEvaluator(BaseEvaluator):
                 % param_str.replace("--", ""))
             eval_result = 0.0
         reward = self.get_reward(eval_result)
-        self.model_rewards[ckpt_dir] = reward
+        self.model_rewards[saved_params_dir] = reward
         return reward
 
     def new_round(self):
@@ -202,7 +205,7 @@ class ModelBasedEvaluator(BaseEvaluator):
         half_size = int(len(self.model_rewards) / 2)
         if half_size < 1:
             half_size = 1
-        self.half_best_model_ckpt = list({
+        self.half_best_model_path = list({
             key
             for key in sorted(
                 self.model_rewards, key=self.model_rewards.get, reverse=False)
