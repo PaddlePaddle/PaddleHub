@@ -103,9 +103,12 @@ PaddleHub如何完成迁移学习，详情参考[wiki教程](https://github.com/
 
 PaddleHub如何自定义迁移任务，详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
-如何使用PaddleHub超参优化功能[autofinetune使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)
+如何使用PaddleHub超参优化功能，详情参考[autofinetune使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)
 
-如何使用PaddleHub“端到端地”完成文本相似度计算[word2vce使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/sentence_sim.ipynb)
+如何使用PaddleHub“端到端地”完成文本相似度计算，详情参考[word2vce使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/sentence_sim.ipynb)
+
+如何使用ULMFiT策略微调PaddleHub预训练模型，详情参考[PaddleHub 迁移学习与ULMFiT微调策略]
+(https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/strategy_exp.md)
 
 ## FAQ
 
