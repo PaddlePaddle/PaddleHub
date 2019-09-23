@@ -45,7 +45,7 @@ reader = hub.reader.RegressionReader(
     max_seq_len=args.max_seq_len)
 ```
 
-其中数据集的准备代码可以参考 [glue.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/glue.py)
+其中数据集的准备代码可以参考 [glue.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/glue.py)
 
 `hub.dataset.GLUE("STS-B")` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 

@@ -41,7 +41,7 @@ reader = hub.reader.LACClassifyReader(
     vocab_path=module.get_vocab_path())
 ```
 
-其中数据集的准备代码可以参考 [chnsenticorp.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/chnsenticorp.py)
+其中数据集的准备代码可以参考 [chnsenticorp.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/chnsenticorp.py)
 
 `hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
