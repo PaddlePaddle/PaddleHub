@@ -105,7 +105,6 @@ class AutoFineTuneCommand(BaseCommand):
         options_str = ""
         for key, value in zip(config_list[0::2], config_list[1::2]):
             options_str += "--" + key + "=" + value + " "
-        print(options_str)
         return options_str
 
     def execute(self, argv):
