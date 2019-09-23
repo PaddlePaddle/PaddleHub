@@ -19,7 +19,6 @@ from __future__ import print_function
 
 import six
 import sys
-import os
 
 from paddlehub.common.logger import logger
 from paddlehub.common.utils import sys_stdin_encoding
@@ -30,8 +29,6 @@ from paddlehub.commands import help
 from paddlehub.commands import version
 from paddlehub.commands import run
 from paddlehub.commands import download
-from paddlehub.common.lock import lock
-from paddlehub.common.dir import CONF_HOME
 
 
 class HubCommand(BaseCommand):
@@ -69,10 +66,7 @@ def main():
             argv.append(item.decode(sys_stdin_encoding()).decode("utf8"))
         else:
             argv.append(item)
-    fp_lock = open(os.path.join(CONF_HOME, 'config.json'))
-    lock.flock(fp_lock, lock.LOCK_EX)
     command.execute(argv[1:])
-    lock.flock(fp_lock, lock.LOCK_UN)
 
 
 if __name__ == "__main__":
