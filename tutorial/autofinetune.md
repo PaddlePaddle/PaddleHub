@@ -75,10 +75,20 @@ parser.add_argument("--warmup_prop", type=float, default=0.1, help="warmup_prop.
 parser.add_argument("--weight_decay", type=float, default=0.01, help="weight_decay.")
 parser.add_argument("--max_seq_len", type=int, default=128, help="Number of words of the longest seqence.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
+parser.add_argument("--saved_params_dir", type=str, default="", help="Directory for saving model during ")
 parser.add_argument("--model_path", type=str, default="", help="load model path")
 args = parser.parse_args()
 # yapf: enable.
 
+
+def is_path_valid(path):
+    if path == "":
+        return False
+    path = os.path.abspath(path)
+    dirname = os.path.dirname(path)
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
+    return True
 
 if __name__ == '__main__':
     # Load Paddlehub ERNIE pretrained model
@@ -133,7 +143,7 @@ if __name__ == '__main__':
         config=config,
         metrics_choices=metrics_choices)
 
-    # Finetune and evaluate by PaddleHub's API
+    # Load model from the defined model path or not
     if args.model_path != "":
         with cls_task.phase_guard(phase="train"):
             cls_task.init_if_necessary()
@@ -143,13 +153,18 @@ if __name__ == '__main__':
     cls_task.finetune()
     run_states = cls_task.eval()
     eval_avg_score, eval_avg_loss, eval_run_speed = cls_task._calculate_metrics(run_states)
+    
+    # Move ckpt/best_model to the defined saved parameters directory
+    if is_path_valid(args.saved_params_dir) and os.path.exists(config.checkpoint_dir+"/best_model/"):
+        shutil.copytree(config.checkpoint_dir+"/best_model/", args.saved_params_dir)
+        shutil.rmtree(config.checkpoint_dir)
 
-print(eval_avg_score["acc"], end="")
+    print(eval_avg_score["acc"], end="")
 ```
 **Note**:以上是finetunee.py的写法。
 > finetunee.py必须可以接收待优化超参数选项参数, 并且待搜素超参数选项名字和yaml文件中的超参数名字保持一致.
 
-> finetunee.py必须有checkpoint_dir这个选项。
+> finetunee.py必须有saved_params_dir这个选项。
 
 > PaddleHub Auto Fine-tune超参评估策略选择为ModelBased，finetunee.py必须有model_path选项。
 
@@ -202,8 +217,16 @@ $ tensorboard --logdir $OUTPUT/tb_paddle --host ${HOST_IP} --port ${PORT_NUM}
 
 ## 五、其他
 
-如在使用Auto Fine-tune功能时，输出信息中包含如下字样：
+1. 如在使用Auto Fine-tune功能时，输出信息中包含如下字样：
 
 **WARNING：Program which was ran with hyperparameters as ... was crashed!**
 
 首先根据终端上的输出信息，确定这个输出信息是在第几个round（如round 3），之后查看${OUTPUT}/round3/下的日志文件信息log.info, 查看具体出错原因。
+
+2. PaddleHub AutoFinetune 命令行支持从启动命令hub autofinetune传入finetunee.py中不需要搜索的选项参数，如上述示例中的max_seq_len选项，可以参照以下方式传入。
+
+```shell
+$ OUTPUT=result/
+$ hub autofinetune finetunee.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=5 --round=10
+$ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2 max_seq_len 128
+```
