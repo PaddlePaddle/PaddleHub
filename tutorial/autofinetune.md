@@ -21,6 +21,7 @@ PaddleHub Auto Fine-tune提供两种超参评估策略：
 使用PaddleHub Auto Fine-tune必须准备两个文件，并且这两个文件需要按照指定的格式书写。这两个文件分别是需要Fine-tune的python脚本finetuee.py和需要优化的超参数信息yaml文件hparam.yaml。
 
 [PaddleHub Auto Fine-tune超参优化--NLP情感分类任务]()
+
 [PaddleHub Auto Fine-tune超参优化--CV图像分类任务]()
 
 ## 三、启动方式
