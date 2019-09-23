@@ -166,7 +166,7 @@ if __name__ == '__main__':
     print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))
 ```
 **Note**:以上是finetunee.py的写法。
-> finetunee.py必须可以接收待优化超参数选项参数, 并且待搜素超参数选项名字和yaml文件中的超参数名字保持一致.
+> finetunee.py必须可以接收待优化超参数选项参数, 并且待搜素超参数选项名字和yaml文件中的超参数名字保持一致。
 
 > finetunee.py必须有saved_params_dir这个选项。
 
@@ -174,7 +174,7 @@ if __name__ == '__main__':
 
 > PaddleHub Auto Fine-tune优化超参策略选择hazero时，必须提供两个以上的待优化超参。
 
-> finetunee.py必须输出模型在数据集dev上的评价效果，同时以“AutoFinetuneEval"开始，和评价效果之间以“\t”分开，如print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"]))).
+> finetunee.py必须输出模型在数据集dev上的评价效果，同时以“AutoFinetuneEval"开始，和评价效果之间以“\t”分开，如print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))。
 
 
 
