@@ -11,6 +11,10 @@ PaddleHub Auto Fine-tune提供两种超参优化策略：
 * PSHE2: 采用粒子群算法，最优超参数组合就是所求问题的解。现在想求得最优解就是要找到更新超参数组合，即如何更新超参数，才能让算法更快更好的收敛到最优解。PSE2算法根据超参数本身历史的最优，在一定随机扰动的情况下决定下一步的更新方向。
 
 
+
+
+
+
 PaddleHub Auto Fine-tune提供两种超参评估策略：
 
 * FullTrail: 给定一组超参，利用这组超参从头开始Finetune一个新模型，之后在数据集dev部分评估这个模型
@@ -153,7 +157,7 @@ if __name__ == '__main__':
     cls_task.finetune()
     run_states = cls_task.eval()
     eval_avg_score, eval_avg_loss, eval_run_speed = cls_task._calculate_metrics(run_states)
-    
+
     # Move ckpt/best_model to the defined saved parameters directory
     if is_path_valid(args.saved_params_dir) and os.path.exists(config.checkpoint_dir+"/best_model/"):
         shutil.copytree(config.checkpoint_dir+"/best_model/", args.saved_params_dir)
