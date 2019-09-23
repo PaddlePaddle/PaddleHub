@@ -19,10 +19,10 @@ if __name__ == "__main__":
     results = lac.lexical_analysis(data=inputs, use_gpu=True, batch_size=10)
     for result in results:
         if six.PY2:
-            print(
-                json.dumps(result['word'], encoding="utf8", ensure_ascii=False))
-            print(
-                json.dumps(result['tag'], encoding="utf8", ensure_ascii=False))
+            print(json.dumps(
+                result['word'], encoding="utf8", ensure_ascii=False))
+            print(json.dumps(
+                result['tag'], encoding="utf8", ensure_ascii=False))
         else:
             print(result['word'])
             print(result['tag'])
