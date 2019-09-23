@@ -29,8 +29,10 @@ import paddle.fluid as fluid
 from paddlehub.common import utils
 from paddlehub.common import paddle_helper
 from paddlehub.common.logger import logger
+from paddlehub.common.lock import lock
 from paddlehub.common.downloader import default_downloader
 from paddlehub.module import module_desc_pb2
+from paddlehub.common.dir import CONF_HOME
 from paddlehub.module import check_info_pb2
 from paddlehub.module.signature import Signature, create_signature
 from paddlehub.module.checker import ModuleChecker
@@ -117,10 +119,14 @@ class Module(object):
         self.cache_fetch_dict = None
         self.cache_program = None
 
+        fp_lock = open(os.path.join(CONF_HOME, 'config.json'))
+        lock.flock(fp_lock, lock.LOCK_EX)
         if name:
             self._init_with_name(name=name, version=version)
+            lock.flock(fp_lock, lock.LOCK_UN)
         elif module_dir:
             self._init_with_module_file(module_dir=module_dir[0])
+            lock.flock(fp_lock, lock.LOCK_UN)
         elif signatures:
             if processor:
                 if not issubclass(processor, BaseProcessor):
@@ -134,7 +140,9 @@ class Module(object):
             self.processor = processor
             self._generate_module_info(module_info)
             self._init_with_signature(signatures=signatures)
+            lock.flock(fp_lock, lock.LOCK_UN)
         else:
+            lock.flock(fp_lock, lock.LOCK_UN)
             raise ValueError("Module initialized parameter is empty")
 
     def _init_with_name(self, name, version=None):
