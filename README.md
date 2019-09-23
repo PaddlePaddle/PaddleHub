@@ -37,8 +37,9 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 * Python==2.7 or Python>=3.5
 * PaddlePaddle>=1.4.0
 
-除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络
+除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络。若本地已存在相关的数据集和预训练模型，则可以离线运行PaddleHub。
 
+**NOTE:** 若是出现离线运行PaddleHub错误，请更新PaddleHub 1.1.1版本之上。
 pip安装方式如下：
 
 ```shell
@@ -102,9 +103,11 @@ PaddleHub如何完成迁移学习，详情参考[wiki教程](https://github.com/
 
 PaddleHub如何自定义迁移任务，详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
-如何使用PaddleHub超参优化功能[autofinetune使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)
+如何使用PaddleHub超参优化功能，详情参考[autofinetune使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)
 
-如何使用PaddleHub“端到端地”完成文本相似度计算[word2vce使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/sentence_sim.ipynb)
+如何使用PaddleHub“端到端地”完成文本相似度计算，详情参考[word2vce使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/sentence_sim.ipynb)
+
+如何使用ULMFiT策略微调PaddleHub预训练模型，详情参考[PaddleHub 迁移学习与ULMFiT微调策略](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/strategy_exp.md)
 
 ## FAQ
 

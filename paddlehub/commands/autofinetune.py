@@ -91,6 +91,21 @@ class AutoFineTuneCommand(BaseCommand):
             type=str,
             default="HAZero",
             help="Choices: HAZero or PSHE2.")
+        self.arg_config_group.add_argument(
+            'opts',
+            help='See utils/config.py for all options',
+            default=None,
+            nargs=argparse.REMAINDER)
+
+    def convert_to_other_options(self, config_list):
+        if len(config_list) % 2 != 0:
+            raise ValueError(
+                "Command for finetuned task options config format error! Please check it: {}"
+                .format(config_list))
+        options_str = ""
+        for key, value in zip(config_list[0::2], config_list[1::2]):
+            options_str += "--" + key + "=" + value + " "
+        return options_str
 
     def execute(self, argv):
         if not argv:
@@ -109,6 +124,11 @@ class AutoFineTuneCommand(BaseCommand):
             description=
             "Autofintune configuration for controlling autofinetune behavior, not required"
         )
+        self.arg_finetuned_task_group = self.parser.add_argument_group(
+            title="Finetuned task config options",
+            description=
+            "Finetuned task configuration for controlling finetuned task behavior, not required"
+        )
 
         self.add_params_file_arg()
         self.add_autoft_config_arg()
@@ -118,12 +138,20 @@ class AutoFineTuneCommand(BaseCommand):
             return False
 
         self.args = self.parser.parse_args(argv[1:])
+        options_str = ""
+        if self.args.opts is not None:
+            options_str = self.convert_to_other_options(self.args.opts)
+
         if self.args.evaluate_choice.lower() == "fulltrail":
-            evaluator = FullTrailEvaluator(self.args.param_file,
-                                           self.fintunee_script)
+            evaluator = FullTrailEvaluator(
+                self.args.param_file,
+                self.fintunee_script,
+                options_str=options_str)
         elif self.args.evaluate_choice.lower() == "modelbased":
-            evaluator = ModelBasedEvaluator(self.args.param_file,
-                                            self.fintunee_script)
+            evaluator = ModelBasedEvaluator(
+                self.args.param_file,
+                self.fintunee_script,
+                options_str=options_str)
         else:
             raise ValueError(
                 "The evaluate %s is not defined!" % self.args.evaluate_choice)
@@ -145,13 +173,13 @@ class AutoFineTuneCommand(BaseCommand):
                              self.args.tuning_strategy)
 
         run_round_cnt = 0
-        solutions_ckptdirs = {}
+        solutions_modeldirs = {}
         print("PaddleHub Autofinetune starts.")
         while (not autoft.is_stop()) and run_round_cnt < self.args.round:
             print("PaddleHub Autofinetune starts round at %s." % run_round_cnt)
             output_dir = autoft._output_dir + "/round" + str(run_round_cnt)
             res = autoft.step(output_dir)
-            solutions_ckptdirs.update(res)
+            solutions_modeldirs.update(res)
             evaluator.new_round()
             run_round_cnt = run_round_cnt + 1
         print("PaddleHub Autofinetune ends.")
@@ -164,17 +192,15 @@ class AutoFineTuneCommand(BaseCommand):
                 print("%s=%s" % (hparam_name, best_hparams[index]))
                 f.write(hparam_name + "\t:\t" + str(best_hparams[index]) + "\n")
             f.write("\n\n\n")
-            f.write("\t".join(autoft.hparams_name_list) + "\toutput_dir\n\n")
-            logger.info(
-                "The checkpont directory of programs ran with hyperparamemters searched are saved as log_file.txt ."
-            )
+            f.write("\t".join(autoft.hparams_name_list) +
+                    "\tsaved_params_dir\n\n")
             print(
                 "The checkpont directory of programs ran with hyperparamemters searched are saved as log_file.txt ."
             )
-            for solution, ckptdir in solutions_ckptdirs.items():
+            for solution, modeldir in solutions_modeldirs.items():
                 param = evaluator.convert_params(solution)
                 param = [str(p) for p in param]
-                f.write("\t".join(param) + "\t" + ckptdir + "\n\n")
+                f.write("\t".join(param) + "\t" + modeldir + "\n\n")
 
         return True
 

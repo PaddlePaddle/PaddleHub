@@ -164,15 +164,15 @@ class BaseTuningStrategy(object):
         params_cudas_dirs = []
         solution_results = []
         cnt = 0
-        solutions_ckptdirs = {}
+        solutions_modeldirs = {}
         mkdir(output_dir)
 
         for idx, solution in enumerate(solutions):
             cuda = self.is_cuda_free["free"][0]
-            ckptdir = output_dir + "/ckpt-" + str(idx)
+            modeldir = output_dir + "/model-" + str(idx) + "/"
             log_file = output_dir + "/log-" + str(idx) + ".info"
-            params_cudas_dirs.append([solution, cuda, ckptdir, log_file])
-            solutions_ckptdirs[tuple(solution)] = ckptdir
+            params_cudas_dirs.append([solution, cuda, modeldir, log_file])
+            solutions_modeldirs[tuple(solution)] = modeldir
             self.is_cuda_free["free"].remove(cuda)
             self.is_cuda_free["busy"].append(cuda)
             if len(params_cudas_dirs
@@ -190,7 +190,7 @@ class BaseTuningStrategy(object):
 
         self.feedback(solutions, solution_results)
 
-        return solutions_ckptdirs
+        return solutions_modeldirs
 
 
 class HAZero(BaseTuningStrategy):

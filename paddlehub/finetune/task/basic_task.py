@@ -588,13 +588,13 @@ class BasicTask(object):
                     run_states = self._run(do_eval=do_eval)
                     self.env.current_epoch += 1
 
-                # Save checkpoint after finetune
-                self.save_checkpoint()
                 # Final evaluation
                 if self._base_data_reader.get_dev_examples() != []:
                     self.eval(phase="dev")
                 if self._base_data_reader.get_test_examples() != []:
                     self.eval(phase="test", load_best_model=True)
+                # Save checkpoint after finetune
+                self.save_checkpoint()
 
             self._finetune_end_event(run_states)
             return run_states
