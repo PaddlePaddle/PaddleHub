@@ -28,6 +28,10 @@
 * 修复python2安装PaddleHub失败问题
 
 
+
+
+
+
 # PaddleHub v1.1.0
 
 * PaddleHub **新增预训练模型ERNIE 2.0 **
