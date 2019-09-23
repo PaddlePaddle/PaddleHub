@@ -30,7 +30,7 @@
 
 # `v1.1.0`
 
-* PaddleHub **新增预训练模型ERNIE 2.0 **
+* PaddleHub **新增预训练模型ERNIE 2.0**
   * 升级Reader， 支持自动传送数据给Ernie 1.0/2.0
   * 新增数据集GLUE(MRPC、QQP、SST-2、CoLA、QNLI、RTE、MNLI)
 
