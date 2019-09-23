@@ -61,7 +61,7 @@ reader = hub.reader.ClassifyReader(
     max_seq_len=128)
 ```
 
-其中数据集的准备代码可以参考 [nlpcc_dbqa.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.0.0/paddlehub/dataset/nlpcc_dbqa.py)
+其中数据集的准备代码可以参考 [nlpcc_dbqa.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/nlpcc_dbqa.py)
 
 `hub.dataset.NLPCC_DBQA())` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 

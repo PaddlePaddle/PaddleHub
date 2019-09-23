@@ -4,7 +4,7 @@
 
 本示例展示如何使用SSD Module进行预测。
 
-SSD是一个目标检测模型，可以检测出图片中的实物的类别和位置，PaddleHub发布的SSD模型通过pascalvoc数据集训练，支持20个数据类别的检测，关于模型的训练细节，请查看[SSD](https://github.com/PaddlePaddle/models/tree/develop/PaddleCV/object_detection)
+SSD是一个目标检测模型，可以检测出图片中的实物的类别和位置，PaddleHub发布的SSD模型通过pascalvoc数据集训练，支持20个数据类别的检测，关于模型的训练细节，请查看[SSD](https://github.com/PaddlePaddle/models/tree/release/v1.2/PaddleCV/object_detection)
 
 ## 准备工作
 
