@@ -108,6 +108,13 @@ class RunCommand(BaseCommand):
             type=str,
             default=None,
             help="file contain input data")
+        self.arg_input_group.add_argument(
+            '--use_strip',
+            type=ast.literal_eval,
+            default=True,
+            help=
+            "whether need to strip whitespace characters from the beginning and the end of the line in the file or not."
+        )
         if len(expect_data_format) == 1:
             if module_type.startswith("cv"):
                 self.arg_input_group.add_argument(
@@ -147,7 +154,8 @@ class RunCommand(BaseCommand):
         if len(expect_data_format) == 1:
             key = list(expect_data_format.keys())[0]
             if self.args.input_file:
-                input_data[key] = txt_parser.parse(self.args.input_file)
+                input_data[key] = txt_parser.parse(self.args.input_file,
+                                                   self.args.use_strip)
             else:
                 if module_type.startswith("cv"):
                     input_data[key] = [self.args.input_path]

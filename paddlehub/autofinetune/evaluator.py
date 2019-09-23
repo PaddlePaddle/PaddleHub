@@ -136,7 +136,17 @@ class FullTrailEvaluator(BaseEvaluator):
             os.system(run_cmd)
             with open(log_file, "r") as f:
                 lines = f.readlines()
-                eval_result = float(lines[-1])
+                eval_result = []
+                for line in lines:
+                    line = line.strip()
+                    if line.startswith("AutoFinetuneEval"):
+                        data = line.split("\t")
+                        eval_result = float(data[-1])
+                if eval_result == []:
+                    print(
+                        "WARNING: Program which was ran with hyperparameters as %s was crashed!"
+                        % param_str.replace("--", ""))
+                    eval_result = 0.0
         except:
             print(
                 "WARNING: Program which was ran with hyperparameters as %s was crashed!"
@@ -190,7 +200,17 @@ class ModelBasedEvaluator(BaseEvaluator):
             os.system(run_cmd)
             with open(log_file, "r") as f:
                 lines = f.readlines()
-                eval_result = float(lines[-1])
+                eval_result = []
+                for line in lines:
+                    line = line.strip()
+                    if line.startswith("AutoFinetuneEval"):
+                        data = line.split("\t")
+                        eval_result = float(data[-1])
+                if eval_result == []:
+                    print(
+                        "WARNING: Program which was ran with hyperparameters as %s was crashed!"
+                        % param_str.replace("--", ""))
+                    eval_result = 0.0
         except:
             print(
                 "WARNING: Program which was ran with hyperparameters as %s was crashed!"
