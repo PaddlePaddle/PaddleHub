@@ -182,7 +182,7 @@ if __name__ == '__main__':
 ```shell
 $ OUTPUT=result/
 $ hub autofinetune finetunee.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=5 --round=10
-$ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2
+ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2
 ```
 
 其中，选项
@@ -228,5 +228,5 @@ $ tensorboard --logdir $OUTPUT/tb_paddle --host ${HOST_IP} --port ${PORT_NUM}
 ```shell
 $ OUTPUT=result/
 $ hub autofinetune finetunee.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=5 --round=10
-$ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2 max_seq_len 128
+ --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2 max_seq_len 128
 ```
