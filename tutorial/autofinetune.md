@@ -7,7 +7,6 @@
 PaddleHub Auto Fine-tune提供两种超参优化策略：
 
 * HAZero: 核心思想是通过对正态分布中协方差矩阵的调整来处理变量之间的依赖关系和scaling。算法基本可以分成以下三步: 采样产生新解；计算目标函数值；更新正态分布参数。调整参数的基本思路为，调整参数使得产生更优解的概率逐渐增大。优化过程如下图：
-
 ![贝叶斯优化过程](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/bayesian_optimization.gif)
 *图片来源于https://www.kaggle.com/clair14/tutorial-bayesian-optimization*
 
