@@ -12,6 +12,8 @@ PaddleHub Auto Fine-tune提供两种超参优化策略：
 *图片来源于https://www.kaggle.com/clair14/tutorial-bayesian-optimization*
 
 * PSHE2: 采用粒子群算法，最优超参数组合就是所求问题的解。现在想求得最优解就是要找到更新超参数组合，即如何更新超参数，才能让算法更快更好的收敛到最优解。PSHE2算法根据超参数本身历史的最优，在一定随机扰动的情况下决定下一步的更新方向。
+![PBT优化过程](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/pbt_optimization.gif)
+*图片来源于https://deepmind.com/blog/article/population-based-training-neural-networks*
 
 PaddleHub Auto Fine-tune提供两种超参评估策略：
 
@@ -63,9 +65,9 @@ finetunee.py用于接受PaddleHub搜索到的超参进行一次优化过程，�
 
 ### 示例
 
-[PaddleHub Auto Fine-tune超参优化--NLP情感分类任务]()
+[PaddleHub Auto Fine-tune超参优化--NLP情感分类任务](./autofinetune-nlp.md)
 
-[PaddleHub Auto Fine-tune超参优化--CV图像分类任务]()
+[PaddleHub Auto Fine-tune超参优化--CV图像分类任务](./autofinetune-cv.md)
 
 ## 三、启动方式
 
@@ -94,21 +96,53 @@ $ hub autofinetune finetunee.py --param_file=hparam.yaml --cuda=['1','2'] --pops
 
 > `--tuning_strategy`: 设置自动优化超参策略，可选hazero和pshe2，默认为hazero
 
-**NOTE:** Auto Fine-tune功能会根据popsize和cuda自动实现排队使用GPU，如popsize=5，cuda=['0','1','2','3']，则每搜索一轮，Auto Fine-tune自动起四个进程训练，所以第5组超参组合需要排队一次。为了提高GPU利用率以及超参优化效率，此时建议可以设置为3张可用的卡，cuda=['0','1','2']。
+`NOTE`
+  * Auto Fine-tune功能会根据popsize和cuda自动实现排队使用GPU，为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，cuda=['0','1','2','3']，则每搜索一轮，Auto Fine-tune自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，且可以避免出现这种情况。
 
+## 四、目录结构
 
-## 四、可视化
+进行自动超参搜索时，PaddleHub会生成以下目录
+```
+./output_dir/
+    ├── log_file.txt
+    ├── visualization
+    ├── round0
+    ├── round1
+    ├── ...
+    └── roundn
+        ├── log-0.info
+        ├── log-1.info
+        ├── ...
+        ├── log-m.info
+        ├── model-0
+        ├── model-1
+        ├── ...
+        └── model-m
+```
+其中output_dir为启动autofinetune命令时指定的根目录，目录下:
+
+* log_file.txt记录了每一轮搜索所有的超参以及整个过程中所搜索到的最优超参
+
+* visualization记录了可视化过程的日志文件
+
+* round0 ~ roundn记录了每一轮的数据，在每个round目录下，还存在以下文件：
+
+  * log-0.info ~ log-m.info记录了每个搜索方向的日志
+  
+  * model-0 ~ model-m记录了对应搜索的参数
+
+## 五、可视化
 
 Auto Finetune API在优化超参过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
 
 ```shell
-$ tensorboard --logdir $OUTPUT/tb_paddle --host ${HOST_IP} --port ${PORT_NUM}
+$ tensorboard --logdir ${OUTPUT}/visualization --host ${HOST_IP} --port ${PORT_NUM}
 ```
 
-其中${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
-用浏览器打开192.168.0.1:8040，即可看到搜素过程中各超参以及指标的变化情况
+其中${OUTPUT}为AutoDL根目录，${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
+用浏览器打开192.168.0.1:8040，即可看到搜索过程中各超参以及指标的变化情况
 
-## 五、其他
+## 六、其他
 
 1. 如在使用Auto Fine-tune功能时，输出信息中包含如下字样：
 
