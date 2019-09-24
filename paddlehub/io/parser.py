@@ -71,11 +71,12 @@ class TextFileParser(object):
     def _check(self):
         pass
 
-    def parse(self, txt_file):
+    def parse(self, txt_file, use_strip=True):
         with codecs.open(txt_file, "r", sys_stdin_encoding()) as file:
             contents = []
             for line in file:
-                line = line.strip()
+                if use_strip:
+                    line = line.strip()
                 if line:
                     contents.append(line)
         return contents
