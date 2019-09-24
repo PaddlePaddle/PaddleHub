@@ -17,6 +17,8 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
   * [回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sentence_similarity)
   * [句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sentence_similarity)
   * [阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/reading-comprehension)
+* PaddleHub支持超参优化（Auto Fine-tune），给定Finetune任务运行脚本以及超参搜索范围，Auto Fine-tune即可给出对于当前任务的较佳超参数组合。
+  * [PaddleHub超参优化功能autofinetune使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune.md)
 * PaddleHub引入『**模型即软件**』的设计理念，支持通过Python API或者命令行工具，一键完成预训练模型地预测，更方便的应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
@@ -104,8 +106,6 @@ PaddleHub如何完成迁移学习，详情参考[wiki教程](https://github.com/
 PaddleHub如何自定义迁移任务，详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
 如何使用PaddleHub超参优化功能，详情参考[autofinetune使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune.md)
-
-如何使用PaddleHub“端到端地”完成文本相似度计算，详情参考[word2vce使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/sentence_sim.ipynb)
 
 如何使用ULMFiT策略微调PaddleHub预训练模型，详情参考[PaddleHub 迁移学习与ULMFiT微调策略](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/strategy_exp.md)
 
