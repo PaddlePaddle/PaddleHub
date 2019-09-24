@@ -195,8 +195,8 @@ class AutoFineTuneCommand(BaseCommand):
             f.write("\t".join(autoft.hparams_name_list) +
                     "\tsaved_params_dir\n\n")
             print(
-                "The checkpont directory of programs ran with hyperparamemters searched are saved as log_file.txt ."
-            )
+                "The related infomation  about hyperparamemters searched are saved as %s/log_file.txt ."
+                % autoft._output_dir)
             for solution, modeldir in solutions_modeldirs.items():
                 param = evaluator.convert_params(solution)
                 param = [str(p) for p in param]
