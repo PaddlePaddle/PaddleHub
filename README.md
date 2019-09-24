@@ -25,12 +25,12 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 
 ## 目录
 
-* [安装](https://github.com/paddlepaddle/paddlehub#%E5%AE%89%E8%A3%85)
-* [快速体验](https://github.com/paddlepaddle/paddlehub#%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C)
-* [教程](https://github.com/paddlepaddle/paddlehub#%E6%95%99%E7%A8%8B)
-* [FAQ](https://github.com/paddlepaddle/paddlehub#faq)
-* [用户交流群](https://github.com/paddlepaddle/paddlehub#%E7%94%A8%E6%88%B7%E4%BA%A4%E6%B5%81%E7%BE%A4)
-* [更新历史](https://github.com/paddlepaddle/paddlehub#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
+* [安装](#%E5%AE%89%E8%A3%85)
+* [快速体验](#%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C)
+* [教程](#%E6%95%99%E7%A8%8B)
+* [FAQ](#faq)
+* [用户交流群](#%E7%94%A8%E6%88%B7%E4%BA%A4%E6%B5%81%E7%BE%A4)
+* [更新历史](#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
 
 
 ## 安装
