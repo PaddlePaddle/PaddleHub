@@ -17,7 +17,7 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
   * [回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sentence_similarity)
   * [句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sentence_similarity)
   * [阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/reading-comprehension)
-* PaddleHub支持超参优化（Auto Fine-tune），给定Finetune任务运行脚本以及超参搜索范围，Auto Fine-tune即可给出对于当前任务的较佳超参数组合。
+* PaddleHub支持超参优化（Auto Fine-tune），给定Fine-tune任务运行脚本以及超参搜索范围，Auto Fine-tune即可给出对于当前任务的较佳超参数组合。
   * [PaddleHub超参优化功能autofinetune使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune.md)
 * PaddleHub引入『**模型即软件**』的设计理念，支持通过Python API或者命令行工具，一键完成预训练模型地预测，更方便的应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
