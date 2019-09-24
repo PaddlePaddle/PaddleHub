@@ -149,7 +149,8 @@ $ tensorboard --logdir ${OUTPUT}/visualization --host ${HOST_IP} --port ${PORT_N
 
 首先根据终端上的输出信息，确定这个输出信息是在第几个round（如round 3），之后查看${OUTPUT}/round3/下的日志文件信息log.info, 查看具体出错原因。
 
-2. PaddleHub AutoFinetune 命令行支持从启动命令hub autofinetune传入finetunee.py中不需要搜索的选项参数，如上述示例中的max_seq_len选项，可以参照以下方式传入。
+2. PaddleHub AutoFinetune 命令行支持从启动命令hub autofinetune传入finetunee.py中不需要搜索的选项参数，如
+[PaddleHub Auto Fine-tune超参优化--NLP情感分类任务](./autofinetune-nlp.md)示例中的max_seq_len选项，可以参照以下方式传入。
 
 ```shell
 $ OUTPUT=result/
