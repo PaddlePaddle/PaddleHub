@@ -1,5 +1,6 @@
-import fcntl
 import os
+if os.name == "posix":
+    import fcntl
 
 
 class WinLock(object):
@@ -15,23 +16,22 @@ class Lock(object):
     _owner = None
 
     def __init__(self):
-        self.LOCK_EX = fcntl.LOCK_EX
-        self.LOCK_UN = fcntl.LOCK_UN
-        self.LOCK_TE = ""
         if os.name == "posix":
             self.lock = fcntl
         else:
             self.lock = WinLock()
         _lock = self.lock
+        self.LOCK_EX = self.lock.LOCK_EX
+        self.LOCK_UN = self.lock.LOCK_UN
 
     def get_lock(self):
         return self.lock
 
     def flock(self, fp, cmd):
-        if cmd == fcntl.LOCK_UN:
+        if cmd == self.lock.LOCK_UN:
             Lock._owner = None
             self.lock.flock(fp, cmd)
-        elif cmd == fcntl.LOCK_EX:
+        elif cmd == self.lock.LOCK_EX:
             if Lock._owner is None:
                 Lock._owner = os.getpid()
                 self.lock.flock(fp, cmd)
