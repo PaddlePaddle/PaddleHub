@@ -184,7 +184,7 @@ class AutoFineTuneCommand(BaseCommand):
             run_round_cnt = run_round_cnt + 1
         print("PaddleHub Autofinetune ends.")
 
-        with open("./log_file.txt", "w") as f:
+        with open(autoft._output_dir + "/log_file.txt", "w") as f:
             best_hparams = evaluator.convert_params(autoft.get_best_hparams())
             print("The final best hyperparameters:")
             f.write("The final best hyperparameters:\n")
