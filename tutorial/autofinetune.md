@@ -6,9 +6,12 @@
 
 PaddleHub Auto Fine-tune提供两种超参优化策略：
 
-* HAZero: 核心思想是通过对正态分布中协方差矩阵的调整来处理变量之间的依赖关系和scaling。算法基本可以分成以下三步: 采样产生新解；计算目标函数值；更新正态分布参数。调整参数的基本思路为，调整参数使得产生更优解的概率逐渐增大
+* HAZero: 核心思想是通过对正态分布中协方差矩阵的调整来处理变量之间的依赖关系和scaling。算法基本可以分成以下三步: 采样产生新解；计算目标函数值；更新正态分布参数。调整参数的基本思路为，调整参数使得产生更优解的概率逐渐增大。优化过程如下图：
 
-* PSHE2: 采用粒子群算法，最优超参数组合就是所求问题的解。现在想求得最优解就是要找到更新超参数组合，即如何更新超参数，才能让算法更快更好的收敛到最优解。PSE2算法根据超参数本身历史的最优，在一定随机扰动的情况下决定下一步的更新方向。
+![贝叶斯优化过程](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/bayesian_optimization.gif)
+*图片来源于https://www.kaggle.com/clair14/tutorial-bayesian-optimization*
+
+* PSHE2: 采用粒子群算法，最优超参数组合就是所求问题的解。现在想求得最优解就是要找到更新超参数组合，即如何更新超参数，才能让算法更快更好的收敛到最优解。PSHE2算法根据超参数本身历史的最优，在一定随机扰动的情况下决定下一步的更新方向。
 
 PaddleHub Auto Fine-tune提供两种超参评估策略：
 
@@ -18,11 +21,51 @@ PaddleHub Auto Fine-tune提供两种超参评估策略：
 
 ## 二、准备工作
 
-使用PaddleHub Auto Fine-tune必须准备两个文件，并且这两个文件需要按照指定的格式书写。这两个文件分别是需要Fine-tune的python脚本finetuee.py和需要优化的超参数信息yaml文件hparam.yaml。
+使用PaddleHub Auto Fine-tune必须准备两个文件，并且这两个文件需要按照指定的格式书写。这两个文件分别是需要Fine-tune的python脚本finetunee.py和需要优化的超参数信息yaml文件hparam.yaml
 
-[PaddleHub Auto Fine-tune超参优化--NLP情感分类任务](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune-nlp.md)
+### 关于hparam.yaml
 
-[PaddleHub Auto Fine-tune超参优化--CV图像分类任务](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune-cv.md)
+hparam给出了需要搜索的超参名字、类型（int或者float，代表了离线型和连续型的两种超参）、搜索范围等信息，通过这些信息构建了一个超参空间，PaddleHub将在这个空间内进行超参数的搜索，将搜索到的超参传入finetunee.py获得评估效果，根据评估效果引导下一步的超参搜索方向，直到满足搜索次数
+
+`Note`:
+* yaml文件的最外层级的key必须是param_list
+ ```
+ param_list:
+  - name : hparam1
+    init_value : 0.001
+    type : float
+    lower_than : 0.05
+    greater_than : 0.00005
+    ...
+ ```
+* 超参名字可以随意指定，PaddleHub会将搜索到的值以指定名称传递给finetunee.py进行使用
+
+* PaddleHub Auto Fine-tune优化超参策略选择HAZero时，必须提供两个以上的待优化超参。
+
+### 关于finetunee.py
+
+finetunee.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优化后的效果返回
+
+`Note`
+
+* finetunee.py必须可以接收待优化超参数选项参数, 并且待搜索超参数选项名字和yaml文件中的超参数名字保持一致。
+
+* finetunee.py必须有saved_params_dir这个选项。并且在完成优化后，将参数保存到该路径下。
+
+* 如果PaddleHub Auto Fine-tune超参评估策略选择为ModelBased，则finetunee.py必须有model_path选项，并且从该选项指定的参数路径中恢复模型
+
+* finetunee.py必须输出模型的评价效果（建议使用dev或者test数据集），同时以“AutoFinetuneEval"开始，和评价效果之间以“\t”分开，如
+ ```python
+ print("AutoFinetuneEval"+"\t" + str(eval_acc))
+ ```
+ 
+* 输出的评价效果取值范围应该为`(-∞, 1]`，取值越高，表示效果越好。
+
+### 示例
+
+[PaddleHub Auto Fine-tune超参优化--NLP情感分类任务]()
+
+[PaddleHub Auto Fine-tune超参优化--CV图像分类任务]()
 
 ## 三、启动方式
 
@@ -37,7 +80,7 @@ $ hub autofinetune finetunee.py --param_file=hparam.yaml --cuda=['1','2'] --pops
 
 其中，选项
 
-> `--param_file`: 需要优化的超参数信息yaml文件
+> `--param_file`: 需要优化的超参数信息yaml文件，即上述[hparam.yaml](#hparam.yaml)。
 
 > `--cuda`: 设置运行程序的可用GPU卡号，list类型，中间以逗号隔开，不能有空格，默认为[‘0’]
 
