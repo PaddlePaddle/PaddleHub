@@ -57,7 +57,6 @@ class DownloadCommand(BaseCommand):
 
         extra = {"command": "download"}
         if self.args.type in ["Module", "Model"]:
-
             search_result = default_hub_server.get_resource_url(
                 mod_name,
                 resource_type=self.args.type,
