@@ -103,8 +103,9 @@ def finetune(args):
     eval_avg_score, eval_avg_loss, eval_run_speed = task._calculate_metrics(run_states)
 
     # Move ckpt/best_model to the defined saved parameters directory
-    if is_path_valid(args.saved_params_dir) and os.path.exists(config.checkpoint_dir+"/best_model/"):
-        shutil.copytree(config.checkpoint_dir+"/best_model/", args.saved_params_dir)
+    best_model_dir = os.path.join(config.checkpoint_dir, "best_model")
+    if is_path_valid(args.saved_params_dir) and os.path.exists(best_model_dir):
+        shutil.copytree(best_model_dir, args.saved_params_dir)
         shutil.rmtree(config.checkpoint_dir)
 
     print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))
