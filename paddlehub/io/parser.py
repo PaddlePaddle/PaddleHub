@@ -72,13 +72,21 @@ class TextFileParser(object):
         pass
 
     def parse(self, txt_file, use_strip=True):
-        with codecs.open(txt_file, "r", sys_stdin_encoding()) as file:
-            contents = []
-            for line in file:
-                if use_strip:
-                    line = line.strip()
-                if line:
-                    contents.append(line)
+        contents = []
+        try:
+            with codecs.open(txt_file, "r", encoding="utf8") as file:
+                for line in file:
+                    if use_strip:
+                        line = line.strip()
+                    if line:
+                        contents.append(line)
+        except:
+            with codecs.open(txt_file, "r", encoding="gbk") as file:
+                for line in file:
+                    if use_strip:
+                        line = line.strip()
+                    if line:
+                        contents.append(line)
         return contents
 
 
