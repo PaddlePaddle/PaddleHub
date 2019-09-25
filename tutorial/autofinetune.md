@@ -162,3 +162,5 @@ $ OUTPUT=result/
 $ hub autofinetune finetunee.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=5 --round=10
  --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2 max_seq_len 128
 ```
+
+3. PaddleHub Auto Fine-tune功能使用过程中确认使用的GPU卡仅供PaddleHub使用，无其他任务使用。
