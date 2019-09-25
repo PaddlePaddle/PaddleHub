@@ -51,7 +51,6 @@ class HubCommand(BaseCommand):
             help.command.execute(argv)
             exit(1)
             return False
-        srv_utils.hub_stat(['hub'] + argv)
         command = BaseCommand.command_dict[sub_command]
         return command.execute(argv[1:])
 
