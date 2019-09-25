@@ -84,12 +84,12 @@ class AutoFineTuneCommand(BaseCommand):
         self.arg_config_group.add_argument(
             "--evaluate_choice",
             type=str,
-            default="fulltrail",
+            default="modelbased",
             help="Choices: fulltrail or modelbased.")
         self.arg_config_group.add_argument(
             "--tuning_strategy",
             type=str,
-            default="HAZero",
+            default="pshe2",
             help="Choices: HAZero or PSHE2.")
         self.arg_config_group.add_argument(
             'opts',
