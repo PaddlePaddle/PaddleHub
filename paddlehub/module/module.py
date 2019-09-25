@@ -150,8 +150,9 @@ class Module(object):
         if version:
             log_msg += "-%s" % version
         logger.info(log_msg)
+        extra = {"command": "install"}
         result, tips, module_dir = default_module_manager.install_module(
-            module_name=name, module_version=version)
+            module_name=name, module_version=version, extra=extra)
         if not result:
             logger.error(tips)
             exit(1)

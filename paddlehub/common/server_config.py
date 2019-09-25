@@ -14,16 +14,9 @@
 
 HUB_SERVERS = ["http://paddlepaddle.org.cn/paddlehub"]
 
-STAT_SERVERS = [
-    "http://paddlepaddle.org.cn/paddlehub/stat",
-    "http://paddlepaddle.org.cn/paddlehub/stat"
-]
-
 default_server_config = {
     "server_url": HUB_SERVERS,
     "resource_storage_server_url": "https://bj.bcebos.com/paddlehub-data/",
     "debug": False,
     "log_level": "DEBUG"
 }
-
-default_stat_config = {"server_list": STAT_SERVERS}
