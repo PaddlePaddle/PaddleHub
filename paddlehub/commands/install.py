@@ -47,8 +47,10 @@ class InstallCommand(BaseCommand):
             "==")[1]
         module_name = module_name if "==" not in module_name else module_name.split(
             "==")[0]
+        extra = {}
+        extra["command"] = "install"
         result, tips, module_dir = default_module_manager.install_module(
-            module_name=module_name, module_version=module_version)
+            module_name=module_name, module_version=module_version, extra=extra)
         print(tips)
         return True
 

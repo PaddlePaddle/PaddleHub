@@ -62,8 +62,10 @@ class RunCommand(BaseCommand):
                 module_dir = (module_name, None)
             else:
                 print("Install Module %s" % module_name)
+                extra = {}
+                extra["command"] = "install"
                 result, tips, module_dir = default_module_manager.install_module(
-                    module_name)
+                    module_name, extra=extra)
                 print(tips)
                 if not result:
                     return None
