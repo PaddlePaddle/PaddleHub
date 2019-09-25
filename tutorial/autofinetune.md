@@ -96,9 +96,9 @@ $ hub autofinetune finetunee.py --param_file=hparam.yaml --cuda=['1','2'] --pops
 
 > `--output_dir`: 设置程序运行输出结果存放目录，可选，不指定该选项参数时，在当前运行路径下生成存放程序运行输出信息的文件夹
 
-> `--evaluate_choice`: 设置自动优化超参的评价效果方式，可选fulltrail和modelbased, 默认为fulltrail
+> `--evaluate_choice`: 设置自动优化超参的评价效果方式，可选fulltrail和modelbased, 默认为modelbased
 
-> `--tuning_strategy`: 设置自动优化超参策略，可选hazero和pshe2，默认为hazero
+> `--tuning_strategy`: 设置自动优化超参策略，可选hazero和pshe2，默认为pshe2
 
 `NOTE`
 * 进行超参搜索时，一共会进行n轮(--round指定)，每轮产生m组超参(--popsize指定)进行搜索。每一轮的超参会根据上一轮的优化结果决定，当指定GPU数量不足以同时跑一轮时，Auto Fine-tune功能自动实现排队，为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，cuda=['0','1','2','3']，则每搜索一轮，Auto Fine-tune自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，则可以避免这种情况的出现。
