@@ -4,7 +4,7 @@
 
 ## 如何开始Finetune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用ERNIE对NLPCC-DBQA数据集进行Finetune。**由于ERNIE模型计算量较大，建议在GPU上使用，且显存需要大于14GB**
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用ERNIE对NLPCC-DBQA数据集进行Finetune。
 
 其中脚本参数说明如下：
 
@@ -61,7 +61,7 @@ reader = hub.reader.ClassifyReader(
     max_seq_len=128)
 ```
 
-其中数据集的准备代码可以参考 [nlpcc_dbqa.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.0.0/paddlehub/dataset/nlpcc_dbqa.py)
+其中数据集的准备代码可以参考 [nlpcc_dbqa.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/nlpcc_dbqa.py)
 
 `hub.dataset.NLPCC_DBQA())` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 

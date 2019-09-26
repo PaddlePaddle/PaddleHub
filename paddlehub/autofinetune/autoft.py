@@ -63,7 +63,7 @@ class BaseTuningStrategy(object):
             self._output_dir = "output_" + time_str
         else:
             self._output_dir = output_dir
-        self.writer = SummaryWriter(logdir=self._output_dir + '/tb_paddle')
+        self.writer = SummaryWriter(logdir=self._output_dir + '/visualization')
 
     @property
     def thread(self):

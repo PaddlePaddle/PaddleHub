@@ -21,6 +21,7 @@ import os
 import contextlib
 import time
 import copy
+import logging
 import paddle.fluid as fluid
 from tb_paddle import SummaryWriter
 
@@ -286,6 +287,11 @@ class BasicTask(object):
                     build_strategy=self.build_strategy)
 
         self.exe.run(self.env.startup_program)
+
+        # to avoid to print logger two times in result of the logger usage of paddle-fluid
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+
         self._build_env_end_event()
 
     @property
