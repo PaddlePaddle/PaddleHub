@@ -82,8 +82,11 @@ def create_app():
             # print(input_data)
             print(type(input_data))
             results = predict_method(data=input_data)
+
         else:
             results = "您调用的模型{}不支持在线预测".format(module_name)
+        if module.type.startswith("CV"):
+            results = str(results)
         return {"result": results}
 
     return app_instance
