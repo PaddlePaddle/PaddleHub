@@ -26,3 +26,4 @@ from . import clear
 from . import config
 from . import hub
 from . import autofinetune
+from . import serving
