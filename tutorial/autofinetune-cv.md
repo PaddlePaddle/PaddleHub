@@ -1,11 +1,11 @@
-# PaddleHub 超参优化（Auto Fine-tune）——CV图像分类任务
+# PaddleHub Auto Fine-tune——图像分类任务
 
 
-使用PaddleHub Auto Fine-tune必须准备两个文件，并且这两个文件需要按照指定的格式书写。这两个文件分别是需要Fine-tune的python脚本finetuee.py和需要优化的超参数信息yaml文件hparam.yaml。
+使用PaddleHub Auto Fine-tune必须按照规定形式准备两个文件，分别是需要Fine-tune的python脚本`finetunee.py`和需要优化的超参数信息yaml文件hparam.yaml。
 
 以Fine-tune图像分类任务为例，我们展示如何利用PaddleHub Auto Finetune进行超参优化。
 
-以下是待优化超参数的yaml文件hparam.yaml，包含需要搜素的超参名字、类型、范围等信息。其中类型只支持float和int类型
+以下是待优化超参数的yaml文件hparam.yaml，包含需要搜素的超参名字、类型、范围等信息。目前参数搜索类型只支持float和int类型
 ```
 param_list:
 - name : learning_rate
@@ -20,7 +20,7 @@ param_list:
   greater_than : 10
 ```
 
-以下是图像分类的finetunee.py
+以下是图像分类的`finetunee.py`
 
 ```python
 # coding:utf-8
