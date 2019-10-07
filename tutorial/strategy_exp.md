@@ -6,7 +6,7 @@
 
 迁移学习通常由预训练阶段、微调阶段两部分组成。预训练阶段通常在超大规模数据集中进行，例如CV任务中的ImageNet包含千万张标注图片，NLP任务中的English Wikipedia包含25亿个单词，这样训练得到的预训练模型能够很好地学习到不同领域中的通用知识，具有很好的泛化能力。但预训练阶段使用的数据集往往与我们想要完成的任务的数据集存在差异，例如如果你只是想简单地判断一副图像是否是玫瑰花，ImageNet就没有提供相关的标注，因此为了更好的学习目标领域的知识，通常还需要对预训练模型参数进行微调。微调过程中，我们应该同时兼顾模型的拟合能力与泛化能力，控制好学习率，既不能太小使模型学习不充分，也不能太大丢失了过多的预训练通用知识。
 
-PaddleHub中实现了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://www.paddlepaddle.org.cn/hub)，ResNet、GoogLeNet、MobileNet等[CV预训练模型](https://www.paddlepaddle.org.cn/hub)；以及Adam + Weight Decay、L2SP、ULMFiT等微调策略。本文主要介绍ULMFiT微调策略在PaddleHub中的实验结果及其思考分析。
+PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://www.paddlepaddle.org.cn/hub)，ResNet、GoogLeNet、MobileNet等[CV预训练模型](https://www.paddlepaddle.org.cn/hub)；以及Adam + Weight Decay、L2SP、ULMFiT等微调策略。本文主要介绍ULMFiT微调策略在PaddleHub中的实验结果及其思考分析。
 
 ## 二、 ULMFiT
 
