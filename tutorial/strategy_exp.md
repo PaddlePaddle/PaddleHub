@@ -59,7 +59,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | Dev           | acc = 0.8766 | matthews = 0.5680 |
    | Test          | acc = 0.8733 | -                 |
 
-   其中Chnsenticorp汇报准确率（accuracy）得分，CoLA汇报马修斯相关系数（matthews correlation coefficient）得分。由于CoLA未公开测试集，且其在线测评每日仅限提交3次，本章只汇报其验证集上的得分。
+   其中Chnsenticorp汇报准确率（accuracy）得分，CoLA汇报马修斯相关系数（matthews correlation coefficient）得分。由于CoLA未公开测试集，且其在线测评每日仅限提交3次，本章只汇报其验证集上的得分。从实验结果中，可以看到模型在Chnsenticorp数据集的泛化能力较好，在CoLA数据集的泛化能力较弱。
 
    在下文中，如果没有特别说明，实验设置（例如Batch size、Num epoch等）均与Baseline一致。
 
@@ -73,7 +73,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | Chnsenticorp test  | **0.8733**    | 0.8700 | 0.8691     |
    | CoLA dev           | 0.5680        | 0.5780 | **0.5786** |
 
-   理论上该策略影响模型的拟合能力，从实验结果可以看到该策略效果不明确，在Chnsenticorp数据集中产生很小的副作用，而在CoLA数据集中该策略能够减缓预训练模型参数的更新速度，提升模型泛化能力。
+   理论上该策略影响模型的拟合能力，从实验结果可以看到该策略在Chnsenticorp数据集中产生很小的副作用，而在CoLA数据集中该策略能够减缓预训练模型参数的更新速度，提升模型泛化能力。
 
 4. slanted triangular learning rates（STLR）策略实验与分析
 
