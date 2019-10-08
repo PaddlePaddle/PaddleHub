@@ -102,7 +102,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | Chnsenticorp test | **0.8733**          | 0.8683     | 0.7175 |
    | CoLA dev          | 0.5680              | **0.5996** | 0.5749 |
 
-   由于Discriminative fine-tuning会降低底层的更新速度，该策略会抑制拟合能力，dis_blocks设置越大，模型的拟合能力越弱。为了提升模型的拟合能力，本小节继续增大epoch大小至5、8。
+   从实验结果中，可以看到由于Discriminative fine-tuning策略降低了模型底层的更新速度，该策略会抑制拟合能力，dis_blocks设置越大，模型的拟合能力越弱。为了提升模型的拟合能力，本小节继续增大epoch大小至5、8。
    
    对于Chnsenticorp，实验结果如下表所示：
 
@@ -253,7 +253,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
 
 本文详细描述了使用ULMFiT策略微调PaddleHub预训练模型的来龙去脉。对于NLP任务，我们选取了两个规模相当的数据集；对于CV任务，我们划分了相似度小规模小、相似度小规模大、相似度大规模大、相似度大规模小四类数据集。我们实验了warm up + linear decay, slanted triangular learning rate, Discriminative fine-tuning, Gradual unfreezing四种策略。
 
-warm up + linear decay和slanted triangular learning rate在原理上和实验结果上都是相似的，用户可以任选其中一种策略并寻找它的Bias-Variance Tradeoff平衡点。在采用Discriminative fine-tuning和Gradual unfreezing策略时，应当注意它们会降低模型的拟合能力，在相似度大的数据集中可以设置较大的超参而在相似度小的数据集中应该设置较小的超参；如果模型的拟合能力下降严重，可以适当提高训练的轮数。欢迎您使用上述策略调试您的PaddleHub预训练模型，同时我们欢迎您使用[PaddleHub Auto Fine-tune](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)自动搜索超参设置，如有任何疑问请在issues中向我们提出！
+warm up + linear decay和slanted triangular learning rate在原理上和实验结果上都是相似的，用户可以任选其中一种策略并寻找它的Bias-Variance Tradeoff平衡点。在采用Discriminative fine-tuning和Gradual unfreezing策略时，应当注意它们会降低模型的拟合能力，如果任务数据集与预训练数据集的相似度较大可以设置较大的超参，否则应该设置较小的超参；如果模型的拟合能力下降严重，可以适当提高训练的轮数。欢迎您使用上述策略调试您的PaddleHub预训练模型，同时我们欢迎您使用[PaddleHub Auto Fine-tune](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)自动搜索超参设置，如有任何疑问请在issues中向我们提出！
 
 ## 六、参考文献
 
