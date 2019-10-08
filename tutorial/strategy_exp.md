@@ -43,7 +43,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
 
 1. 数据集与预训练模型的选择
 
-   本章对数据集按数据规模进行划分，选择了一个大规模数据集Chnsenticorp，以及一个小规模数据集CoLA。针对中文数据集Chnsenticorp，为了凸现实验效果对比，本章没有选择ERNIE，而是选择Elmo作为其预训练模型。针对英文数据集CoLA，本章选择“bert_uncased_L-12_H-768_A-12”作为其预训练模型。
+   为探寻ULMFiT策略的一般性规律，本章选取两个数据集，一个为中文数据集Chnsenticorp，另一个为英文数据集CoLA，两个数据集的训练集数据规模相似，前者包含9601个句子，后者包含8551个句子。针对中文数据集Chnsenticorp，为了凸现实验效果对比，本章未选择ERNIE，而是选择Elmo作为其预训练模型。针对英文数据集CoLA，本章选择“bert_uncased_L-12_H-768_A-12”作为其预训练模型。
 
 2. Baseline与实验设置
 
@@ -73,7 +73,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | Chnsenticorp test  | **0.8733**    | 0.8700 | 0.8691     |
    | CoLA dev           | 0.5680        | 0.5780 | **0.5786** |
 
-   从实验结果可以看到该策略影响模型的拟合能力，在大规模数据集（Chnsenticorp）中该策略可能产生很小的副作用，而在小规模数据集（CoLA）中该策略能够减缓预训练模型参数的更新速度，抑制过拟合，提升模型性能。
+   理论上该策略影响模型的拟合能力，从实验结果可以看到该策略效果不明确，在Chnsenticorp数据集中产生很小的副作用，而在CoLA数据集中该策略能够减缓预训练模型参数的更新速度，提升模型泛化能力。
 
 4. slanted triangular learning rates（STLR）策略实验与分析
 
@@ -87,9 +87,9 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | Chnsenticorp test                   | **0.8733**    | 0.8700 | 0.8691 | 0.8666     | 0.8616 | 0.8691  | 0.8716  |
    | CoLA dev                            | 0.5680        | 0.5780 | 0.5786 | **0.5887** | 0.5826 | 0.5880  | 0.5827  |
 
-   由实验结果可以看到STLR无论是原理上还是实验效果上都与warmup + linear decay (end learning rate = lr/32) 相差无几，在小规模数据集中均有增益效果，而在大规模数据集中效果不明确，可能产生副作用。而对比warmup + linear decay (end learning rate = lr/32) 与warmup + linear decay (end learning rate = 0) 可以看到对于小规模数据集微调接近结束时，保持较小的学习率仍有帮助，但这会引入新的超参数end_learning_rate。
+   由实验结果可以看到STLR无论是原理上还是实验效果上都与warmup + linear decay (end learning rate = lr/32) 相差无几，在CoLA数据集中均有增益效果，而在Chnsenticorp数据集中依然产生了副作用。而对比warmup + linear decay (end learning rate = lr/32) 与warmup + linear decay (end learning rate = 0) 可以看到在模型微调接近结束时，保持较小的学习率对模型性能的提升可能仍有帮助，但这会引入新的超参数end_learning_rate。
 
-   基于此实验结果，我们建议用户可以在小规模NLP数据集中尝试slanted triangular或者warmup+linear decay的策略。
+   基于上述实验结果，我们建议用户尝试slanted triangular或者warmup+linear decay的策略时尝试更多的超参设置寻找该策略的Bias-Variance Tradeoff平衡点，合理的超参设置能够提升模型性能。
 
 5. Discriminative fine-tuning策略实验与分析
 
@@ -102,9 +102,9 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | Chnsenticorp test | **0.8733**          | 0.8683     | 0.7175 |
    | CoLA dev          | 0.5680              | **0.5996** | 0.5749 |
 
-   对于大规模数据集Chnsenticorp，采用该策略会抑制拟合能力，dis_blocks设置越大，模型的拟合能力越弱；而对于小规模数据集CoLAA，采用该策略则能够缓解小规模数据集中的过拟合问题，模型性能获得了提升。
-
-   由于Discriminative fine-tuning会降低底层的更新速度，为了提升模型的拟合能力，本小节继续增大epoch大小至5、8。对于大规模数据集Chnsenticorp，实验结果如下表所示：
+   由于Discriminative fine-tuning会降低底层的更新速度，该策略会抑制拟合能力，dis_blocks设置越大，模型的拟合能力越弱。为了提升模型的拟合能力，本小节继续增大epoch大小至5、8。
+   
+   对于Chnsenticorp，实验结果如下表所示：
 
    | dis_blocks        | -<br />（Baseline） | -          | 5      | -          | 5          |
    | ----------------- | ------------------- | ---------- | ------ | ---------- | ---------- |
@@ -112,7 +112,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | Chnsenticorp dev  | 0.8766              | 0.8775     | 0.8566 | 0.8775     | **0.8792** |
    | Chnsenticorp test | 0.8733              | **0.8841** | 0.8400 | **0.8841** | 0.8625     |
 
-   可以看到当dis_blocks=5时，epoch=8时，模型在dev上的得分才略微超越Baseline（epoch=3），而test中的得分则始终低于相同epoch、不采用Discriminative fine-tuning策略的实验结果。
+   可以看到当dis_blocks=5时，epoch=8时，模型在dev上的得分超越Baseline（epoch=3），但test中的得分则始终低于相同epoch、不采用Discriminative fine-tuning策略的实验结果。
 
    由于CoLA在dis_block=3，epoch=3时的成绩已经超越了Baseline，因为我们可以进一步增大dis_blocks，观察其实验效果，其结果如下表所示：
 
@@ -121,9 +121,9 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | epoch      | 3                   | 3          | 5      | 5      | 8      | 8      |
    | CoLA dev   | 0.5680              | **0.5996** | 0.5680 | 0.5605 | 0.5720 | 0.5788 |
 
-   实验结果表明，dis_blocks过大同样会导致模型在小规模数据集欠拟合的问题，当dis_blocks=7时，模型在epoch=5性能低于Baseline (epoch=3)，直至epoch=8才略微超过Baseline (epoch=8)，但仍显著低于dis_blocks=3，epoch=3的模型表现。
+   实验结果表明，dis_blocks过大同样会导致模型在CoLA数据集欠拟合的问题，当dis_blocks=7时，模型在epoch=5性能低于Baseline (epoch=3)，直至epoch=8才略微超过Baseline (epoch=8)，但仍显著低于dis_blocks=3，epoch=3的模型表现。
 
-   因此我们建议用户在小规模训练集中采用discriminative fine-tuning，并设置较小的dis_blocks，同时我们不建议在大规模数据集中采用，否则需要大幅提升epoch。
+   因此我们建议用户采用discriminative fine-tuning时，应当设置较小的dis_blocks，如果设置过大的dis_blocks，则需提升训练的epoch。
 
 6. Gradual unfreezing策略实验与分析
 
@@ -135,7 +135,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | Chnsenticorp test  | 0.8733        | 0.8816 |
    | CoLA dev           | 0.5680        | 0.5704 |
 
-   实验结果表明通过延后更新预训练模型中的底层参数，该策略不论是对大规模数据集还是对小规模数据集均有效，在大规模数据集中的效果更佳。我们建议用户采用这种策略，尤其是在大规模数据集中进行微调时。
+   实验结果表明通过延后更新预训练模型中的底层参数，该策略不论是对Chnsenticorp数据集还是对CoLA数据集均有效，我们建议用户采用这种策略。
 
 ## 四、CV实验与分析
 
@@ -251,9 +251,9 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
 
 ## 五、总结
 
-本文详细描述了使用ULMFiT策略微调PaddleHub预训练模型的来龙去脉。对于NLP任务，我们划分了大规模数据集与小规模数据集；对于CV任务，我们划分了相似度小规模小、相似度小规模大、相似度大规模大、相似度大规模小四类数据集。我们实验了warm up + linear decay, slanted triangular learning rate, Discriminative fine-tuning, Gradual unfreezing四种策略。
+本文详细描述了使用ULMFiT策略微调PaddleHub预训练模型的来龙去脉。对于NLP任务，我们选取了两个规模相当的数据集；对于CV任务，我们划分了相似度小规模小、相似度小规模大、相似度大规模大、相似度大规模小四类数据集。我们实验了warm up + linear decay, slanted triangular learning rate, Discriminative fine-tuning, Gradual unfreezing四种策略。
 
-warm up + linear decay和slanted triangular learning rate在原理上和实验结果上都是相似的，用户可以任选其中一种策略并寻找它的Bias-Variance Tradeoff平衡点。我们建议采用Discriminative fine-tuning和Gradual unfreezing策略，它们均有良好的实验效果，在相似度大的数据集中可以设置较大的超参而在相似度小的数据集中应该设置较小的超参，采用该策略后，为了提升模型的拟合能力可以适当提高训练的轮数。欢迎您使用上述策略调试您的PaddleHub预训练模型，同时我们欢迎您使用[PaddleHub Auto Fine-tune](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)自动搜索超参设置，如有任何疑问请在issues中向我们提出！
+warm up + linear decay和slanted triangular learning rate在原理上和实验结果上都是相似的，用户可以任选其中一种策略并寻找它的Bias-Variance Tradeoff平衡点。在采用Discriminative fine-tuning和Gradual unfreezing策略时，应当注意它们会降低模型的拟合能力，在相似度大的数据集中可以设置较大的超参而在相似度小的数据集中应该设置较小的超参；如果模型的拟合能力下降严重，可以适当提高训练的轮数。欢迎您使用上述策略调试您的PaddleHub预训练模型，同时我们欢迎您使用[PaddleHub Auto Fine-tune](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)自动搜索超参设置，如有任何疑问请在issues中向我们提出！
 
 ## 六、参考文献
 
