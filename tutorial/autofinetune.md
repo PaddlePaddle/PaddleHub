@@ -26,7 +26,7 @@ PaddleHub Auto Fine-tune为了评估搜素的超参对于任务的效果，提�
 
 ## 二、准备工作
 
-使用PaddleHub Auto Fine-tune需要准备两个指定格式的文件:待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
+使用PaddleHub Auto Fine-tune需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
 
 
 ### 1. hparam.yaml
