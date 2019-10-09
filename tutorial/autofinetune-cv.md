@@ -34,7 +34,7 @@ import paddlehub as hub
 import numpy as np
 
 parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--num_epoch",          type=int,               default=1,                         help="Number of epoches for fine-tuning.")
+parser.add_argument("--epochs",             type=int,               default=1,                         help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu",            type=ast.literal_eval,  default=True,                      help="Whether use GPU for fine-tuning.")
 parser.add_argument("--checkpoint_dir",     type=str,               default=None,                      help="Path to save log data.")
 
@@ -81,7 +81,7 @@ def finetune(args):
 
     config = hub.RunConfig(
         use_cuda=True,
-        num_epoch=args.num_epoch,
+        num_epoch=args.epochs,
         batch_size=args.batch_size,
         checkpoint_dir=args.checkpoint_dir,
         strategy=strategy)
