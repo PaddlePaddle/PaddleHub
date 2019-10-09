@@ -88,7 +88,7 @@ $ hub autofinetune finetunee.py --param_file=hparam.yaml --cuda=['1','2'] --pops
 
 > `--param_file`: 必填，待优化的超参数信息yaml文件，即上述[hparam.yaml](#hparam.yaml)。
 
-> `--cuda`: 可选，设置运行程序的可用GPU卡号，list类型，中间以逗号隔开，不能有空格，默认为[‘0’]
+> `--cuda`: 必填，设置运行程序的可用GPU卡号，list类型，中间以逗号隔开，不能有空格，默认为[‘0’]
 
 > `--popsize`: 可选，设置程序运行每轮产生的超参组合数，默认为5
 
