@@ -13,8 +13,7 @@ PaddleHub Auto Fine-tune提供两种超参优化策略：
 </p>
 *图片来源于https://www.kaggle.com/clair14/tutorial-bayesian-optimization*
 
-* PSHE2: 采用粒子群算法，最优超参数组合就是所求问题的解。现在想求得最优解就是要找到更新超参数组合，即如何更新超参数，才能让算法更快更好的收敛到最优解。PSHE2算法根据超参数本身历史的最优，在一定随机扰动的情况下决定下一步的更新方向。
-
+* PSHE2: 采用哈密尔顿动力系统搜索参数空间中“势能”最低的点。而最优超参数组合就是势能低点。现在想求得最优解就是要找到更新超参数组合，即如何更新超参数，才能让算法更快更好的收敛到最优解。PSHE2算法根据超参数本身历史的最优，在一定随机扰动的情况下决定下一步的更新方向。
 <p align="center">
 <img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/thermodynamics.gif" hspace='10'/> <br />
 </p>
