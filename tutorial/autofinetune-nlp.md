@@ -29,7 +29,7 @@ param_list:
   greater_than : 0.0
 ```
 
-以下是中文情感分类的train.py
+以下是中文情感分类的`train.py`
 
 ```python
 from __future__ import absolute_import
