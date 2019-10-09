@@ -81,7 +81,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | ----------------- | ------------------- | ---------- | ------ |
    | epoch             | 3                   | 3          | 3      |
    | Chnsenticorp      | **0.8766**          | 0.8641     | 0.6766 |
-   | CoLA dev          | 0.5680              | **0.5996** | 0.5749 |
+   | CoLA           | 0.5680              | **0.5996** | 0.5749 |
 
    由于Discriminative fine-tuning策略降低了模型底层的更新速度，抑制模型的拟合能力，实验结果表明，dis_blocks设置过大会导致模型性能明显下降。为了提升模型拟合能力，本小节继续增大epoch大小至5、8。
    
@@ -99,7 +99,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | dis_blocks | -<br />（Baseline） | 3          | -      | 7      | -      | 7      |
    | ---------- | ------------------- | ---------- | ------ | ------ | ------ | ------ |
    | epoch      | 3                   | 3          | 5      | 5      | 8      | 8      |
-   | CoLA dev   | 0.5680              | **0.5996** | 0.5680 | 0.5605 | 0.5720 | 0.5788 |
+   | CoLA    | 0.5680              | **0.5996** | 0.5680 | 0.5605 | 0.5720 | 0.5788 |
 
    实验结果表明，dis_blocks过大同样会导致性能下降的问题，当dis_blocks=7时，模型在epoch=5性能低于Baseline (epoch=3)，直至epoch=8才略微超过Baseline (epoch=8)，但仍显著低于dis_blocks=3，epoch=3的模型表现。建议用户采用discriminative fine-tuning时，应当设置较小的dis_blocks，如果设置过大的dis_blocks，则需提升训练的epoch。
 
