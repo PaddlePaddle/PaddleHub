@@ -83,7 +83,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | Chnsenticorp      | **0.8766**          | 0.8641     | 0.6766 |
    | CoLA           | 0.5680              | **0.5996** | 0.5749 |
 
-   由于Discriminative fine-tuning策略降低了模型底层的更新速度，抑制模型的拟合能力，实验结果表明，dis_blocks设置过大会导致模型性能明显下降。为了提升模型拟合能力，本小节继续增大epoch大小至5、8。
+   由于Discriminative fine-tuning策略会降低模型底层的更新速度，影响模型的拟合能力。实验结果表明，dis_blocks设置过大会导致模型性能明显下降。为了提升模型拟合能力，本小节继续增大epoch大小至5、8。
    
    对于Chnsenticorp，实验结果如下表所示：
 
