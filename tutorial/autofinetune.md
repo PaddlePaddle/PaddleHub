@@ -60,7 +60,7 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 
 * 超参评估策略选择ModelBased时，train.py须包含选项参数model_path，自动从model_path指定的路径恢复模型
 
-* finetunee.py须输出模型的评价效果（建议使用验证集或者测试集上的评价效果），输出以“AutoFinetuneEval"开始，与评价效果之间以“\t”分开，如
+* train.py须输出模型的评价效果（建议使用验证集或者测试集上的评价效果），输出以“AutoFinetuneEval"开始，与评价效果之间以“\t”分开，如
  ```python
  print("AutoFinetuneEval"+"\t" + str(eval_acc))
  ```
