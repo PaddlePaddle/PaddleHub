@@ -29,13 +29,13 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    Discriminative fine-tuning 是一种学习率逐层递减的策略，通过该策略可以减缓底层的更新速度。其计算公式为：
 
    <div align=center>η<sup>l-1</sup>=η<sup>l</sup>/factor</div>
-其中η<sup>l</sup>表示第l层的学习率；η<sup>l-1</sup>表示第l-1层的学习率；factor表示逐层衰减率，论文中作者根据经验设置为2.6。这个策略能够让模型微调过程中不断减缓底层的更新速度，尽可能的保留预训练模型中习得的底层通用知识。PaddleHub通过op的拓扑关系自动计算模型的层次，因此针对这一策略，PaddleHub提供了一个额外的超参：dis_blocks。dis_blocks用于设置划分的层数，默认为3，如果设置为0，则不采用Discriminative fine-tuning。
+其中η<sup>l</sup>表示第l层的学习率；η<sup>l-1</sup>表示第l-1层的学习率；factor表示逐层衰减率，论文中作者根据经验设置为2.6。这个策略能够让模型微调过程中不断减缓底层的更新速度，尽可能的保留预训练模型中习得的底层通用知识。PaddleHub通过op的拓扑关系自动计算模型的层次，因此针对这一策略，PaddleHub提供了一个额外的超参：dis_blocks，用于设置划分的层数，默认为3，如果设置为0，则不采用Discriminative fine-tuning。
 
 3. Gradual unfreezing
 
-   Gradual unfreezing是一种逐层解冻的策略，通过该策略可以优先更新上层，再慢慢解冻下层参与更新。PaddleHub在Gradual unfreezing策略中引入了一个额外的超参：frz_blocks，其作用与默认值与第2点提到的dis_blocks一致，在微调过程中，每经过一个epoch，模型解冻一个block，所有未被冻结的block都会参与到模型的参数更新中。
+   Gradual unfreezing是一种逐层解冻的策略，通过该策略可以优先更新上层，再慢慢解冻下层参与更新。PaddleHub在Gradual unfreezing策略中引入了一个额外的超参：frz_blocks，其作用与默认值与第2点提到的dis_blocks一致。在微调过程中，每经过一个epoch，模型解冻一个block，所有未被冻结的block都会参与到模型的参数更新中。
 
-本文接下来将对ULMFiT策略在NLP以及CV任务中的使用进行实验说明，由于slanted triangular learning rates与warmup + linear decay在原理上高度相似，本文也将对比slanted triangular learning rates与warmup + linear decay的实验效果。
+本文接下来将对ULMFiT策略在NLP以及CV任务中的使用进行实验说明，由于slanted triangular learning rates与warmup + linear decay在原理上相似，本文也将对比slanted triangular learning rates与warmup + linear decay的实验效果。
 
 ## 三、 在NLP迁移学习中使用ULMFiT策略
 
@@ -109,9 +109,8 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
 
    | gradual unfreezing | -（baseline） | 3      |
    | :----------------- | :------------ | :----- |
-   | Chnsenticorp dev   | 0.8766        | 0.8850 |
-   | Chnsenticorp test  | 0.8733        | 0.8816 |
-   | CoLA dev           | 0.5680        | 0.5704 |
+   | Chnsenticorp    | 0.8766        | **0.8850** |
+   | CoLA            | 0.5680        | **0.5704** |
 
    实验结果表明通过延后更新预训练模型中的底层参数，该策略不论是对Chnsenticorp数据集还是对CoLA数据集均有效。
 
