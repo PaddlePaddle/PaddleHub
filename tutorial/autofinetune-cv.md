@@ -1,9 +1,9 @@
 # PaddleHub Auto Fine-tune——图像分类任务
 
 
-使用PaddleHub Auto Fine-tune必须按照规定形式准备两个文件，分别是需要Fine-tune的python脚本`finetunee.py`和需要优化的超参数信息yaml文件hparam.yaml。
+使用PaddleHub Auto Fine-tune需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
 
-以Fine-tune图像分类任务为例，我们展示如何利用PaddleHub Auto Finetune进行超参优化。
+以Fine-tune图像分类任务为例，展示如何利用PaddleHub Auto Finetune进行超参优化。
 
 以下是待优化超参数的yaml文件hparam.yaml，包含需要搜素的超参名字、类型、范围等信息。目前参数搜索类型只支持float和int类型
 ```
@@ -20,7 +20,7 @@ param_list:
   greater_than : 10
 ```
 
-以下是图像分类的`finetunee.py`
+以下是图像分类的`train.py`
 
 ```python
 # coding:utf-8
@@ -33,16 +33,18 @@ import paddle.fluid as fluid
 import paddlehub as hub
 import numpy as np
 
-# yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch",          type=int,               default=1,                         help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu",            type=ast.literal_eval,  default=True,                      help="Whether use GPU for fine-tuning.")
 parser.add_argument("--checkpoint_dir",     type=str,               default=None,                      help="Path to save log data.")
+
+# the name of hyperparameters to be searched should keep with hparam.py
 parser.add_argument("--batch_size",         type=int,               default=16,                        help="Total examples' number in batch for training.")
-parser.add_argument("--saved_params_dir",   type=str,               default="",                        help="Directory for saving model")
 parser.add_argument("--learning_rate",      type=float,             default=1e-4,                      help="learning_rate.")
+
+# saved_params_dir and model_path are needed by auto finetune
+parser.add_argument("--saved_params_dir",   type=str,               default="",                        help="Directory for saving model")
 parser.add_argument("--model_path",         type=str,               default="",                        help="load model path")
-# yapf: enable.
 
 
 def is_path_valid(path):
@@ -55,11 +57,12 @@ def is_path_valid(path):
     return True
 
 def finetune(args):
+    # Load Paddlehub resnet50 pretrained model
     module = hub.Module(name="resnet_v2_50_imagenet")
     input_dict, output_dict, program = module.context(trainable=True)
 
+    # Download dataset and use ImageClassificationReader to read dataset
     dataset = hub.dataset.Flowers()
-
     data_reader = hub.reader.ImageClassificationReader(
         image_width=module.get_expected_image_width(),
         image_height=module.get_expected_image_height(),
@@ -83,6 +86,7 @@ def finetune(args):
         checkpoint_dir=args.checkpoint_dir,
         strategy=strategy)
 
+    # Construct transfer learning network
     task = hub.ImageClassifierTask(
         data_reader=data_reader,
         feed_list=feed_list,
@@ -108,6 +112,7 @@ def finetune(args):
         shutil.copytree(best_model_dir, args.saved_params_dir)
         shutil.rmtree(config.checkpoint_dir)
 
+    # acc on dev will be used by auto finetune
     print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))
 
 
