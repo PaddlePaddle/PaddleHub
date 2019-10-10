@@ -1,0 +1,68 @@
+
+    <select id="module_name" onchange="change_module(this.options[this.options.selectedIndex].value)">
+        <option value="default">default</option>
+        <option value="lac">lac</option>
+        <option value="yolov3_coco2017">yolov3</option>
+        <option value="senta_lstm">senta_lstm</option>
+    </select>
+    <div id="input_data_single"></div>
+    <div id="input_data"></div>
+<!--    <iframe id="iframeN" style="display: none" class="form-control"  name="iframeN">请等待上传完毕</iframe>-->
+<script>
+    function get_input_text_html(module_name)
+    {
+        inner_html =
+            '<form id="form0" action="/predict/'
+            + module_name
+            + '" method="post"><table><tr><td>输入一句单文本</td><td><input type="text" name="input_text""/></td><td><button type="button" onclick="single_input_text_button()">提交</button></td></tr></table></form>'
+        return inner_html
+    }
+    function get_input_file_html(module_name)
+    {
+        inner_html =
+            '<form id="form1" action="/predict/'
+            + module_name
+            + '" method="post" enctype="multipart/form-data"><table><tr><td>上传一个文档</td><td><input type="file" name="input_file"/></td><td><button type="button" onclick="uploadFra()">提交</button></td></tr></table></form>'
+        return inner_html
+    }
+
+    // 根据名字改变显示内容
+    function change_module(module_name)
+    {
+        console.log(module_name)
+        display_html = ""
+        if (module_name == "default")
+        {
+            display_html = "请选择要使用的模型."
+            document.getElementById("input_data_single").innerHTML = ""
+            document.getElementById("input_data").innerHTML = display_html
+        }
+        else if (module_name == "lac")
+        {
+            display_html0 = get_input_text_html(module_name)
+            display_html1 = get_input_file_html(module_name)
+            document.getElementById("input_data").innerHTML = display_html1
+            document.getElementById("input_data_single").innerHTML = display_html0
+        }
+        else if (module_name == "yolov3_coco2017")
+        {
+            display_html1 = get_input_file_html(module_name)
+            document.getElementById("input_data_single").innerHTML = display_html1
+        }
+        else if (module_name == "senta_lstm")
+        {
+            display_html0 = get_input_text_html(module_name)
+            display_html1 = get_input_file_html(module_name)
+            document.getElementById("input_data").innerHTML = display_html1
+            document.getElementById("input_data_single").innerHTML = display_html0
+        }
+    }
+
+    function single_input_text_button()
+    {
+        document.getElementById("form0").submit()
+    }
+    function uploadFra() {
+        document.getElementById("form1").submit();
+    }
+</script>

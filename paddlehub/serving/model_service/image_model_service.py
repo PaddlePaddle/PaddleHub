@@ -1,8 +1,7 @@
-from serving.model_service.base_model_service import BaseModelService
 import paddlehub as hub
 
 
-class TextModelService(object):
+class ImageModelService(object):
     @classmethod
     def instance(cls):
         if not hasattr(cls, "_instance"):
