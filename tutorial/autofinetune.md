@@ -26,9 +26,9 @@ PaddleHub Auto Fine-tune提供两种超参优化策略：
 
 PaddleHub Auto Fine-tune为了评估搜索的超参对于任务的效果，提供两种超参评估策略：
 
-* FullTrail: 给定一组超参，利用这组超参从头开始Fine-tune一个新模型，之后在验证集评估这个模型
+* **Full-Trail**: 给定一组超参，利用这组超参从头开始Fine-tune一个新模型，之后在验证集评估这个模型
 
-* ModelBased: 给定一组超参，若这组超参是第一轮尝试的超参组合，则从头开始Fine-tune一个新模型；否则基于前几轮已保存的较好模型，在当前的超参数组合下继续Fine-tune并评估。
+* **Model-Based**: 给定一组超参，若这组超参是第一轮尝试的超参组合，则从头开始Fine-tune一个新模型；否则基于前几轮已保存的较好模型，在当前的超参数组合下继续Fine-tune并评估。
 
 ## 二、准备工作
 
