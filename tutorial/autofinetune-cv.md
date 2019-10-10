@@ -32,7 +32,6 @@ import shutil
 import paddle.fluid as fluid
 import paddlehub as hub
 from paddlehub.common.logger import logger
-import numpy as np
 
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--epochs",             type=int,               default=1,                         help="Number of epoches for fine-tuning.")
