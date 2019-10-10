@@ -6,7 +6,12 @@
 
 PaddleHub Auto Fine-tune提供两种超参优化策略：
 
-* HAZero: 核心思想是通过对正态分布中协方差矩阵的调整来处理变量之间的依赖关系和scaling。算法基本可以分成以下三步: 采样产生新解；计算目标函数值；更新正态分布参数。调整参数的基本思路为，调整参数使得产生更优解的概率逐渐增大。优化过程如下图：
+* **HAZero**: 核心思想是通过对正态分布中协方差矩阵的调整来处理变量之间的依赖关系和scaling。算法基本可以分成以下三步: 
+1. 采样产生新解
+2. 计算目标函数值
+3. 更新正态分布参数。
+
+调整参数的基本思路为，调整参数使得产生更优解的概率逐渐增大。优化过程如下图：
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/bayesian_optimization.gif" hspace='10'/> <br />
@@ -14,11 +19,12 @@ PaddleHub Auto Fine-tune提供两种超参优化策略：
 *图片来源于https://www.kaggle.com/clair14/tutorial-bayesian-optimization*
 
 * PSHE2: 采用哈密尔顿动力系统搜索参数空间中“势能”最低的点。而最优超参数组合就是势能低点。现在想求得最优解就是要找到更新超参数组合，即如何更新超参数，才能让算法更快更好的收敛到最优解。PSHE2算法根据超参数本身历史的最优，在一定随机扰动的情况下决定下一步的更新方向。
+
 <p align="center">
 <img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/thermodynamics.gif" hspace='10'/> <br />
 </p>
 
-PaddleHub Auto Fine-tune为了评估搜素的超参对于任务的效果，提供两种超参评估策略：
+PaddleHub Auto Fine-tune为了评估搜索的超参对于任务的效果，提供两种超参评估策略：
 
 * FullTrail: 给定一组超参，利用这组超参从头开始Fine-tune一个新模型，之后在验证集评估这个模型
 
