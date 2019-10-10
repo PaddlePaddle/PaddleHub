@@ -31,6 +31,7 @@ import shutil
 
 import paddle.fluid as fluid
 import paddlehub as hub
+from paddlehub.common.logger import logger
 import numpy as np
 
 parser = argparse.ArgumentParser(__doc__)
