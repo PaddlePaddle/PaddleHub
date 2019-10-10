@@ -52,7 +52,7 @@ hparam给出待搜索的超参名字、类型（int或者float，离散型和连
 
 train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优化后的效果返回
 
-`Note`
+`Note`:
 
 * train.py的选项参数须包含待优化超参数，待搜索超参数选项名字和yaml文件中的超参数名字保持一致。
 
@@ -100,7 +100,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 > `--tuning_strategy`: 可选，设置自动优化超参策略，可选hazero和pshe2，默认为pshe2
 
-`NOTE`
+`NOTE`:
 * 进行超参搜索时，一共会进行n轮(--round指定)，每轮产生m组超参(--popsize指定)进行搜索。上一轮的优化结果决定下一轮超参数调整方向
 * 当指定GPU数量不足以同时跑一轮时，Auto Fine-tune功能自动实现排队为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，cuda=['0','1','2','3']，则每搜索一轮，Auto Fine-tune自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，则可以避免这种情况的出现。
 
