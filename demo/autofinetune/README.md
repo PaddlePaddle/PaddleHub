@@ -16,7 +16,7 @@ hparam给出待搜索的超参名字、类型（int或者float，离散型和连
 
 ## img_cls.py
 
-以mobilenet为预训练模型，在flowers数据集上进行Finetune。
+以mobilenet为预训练模型，在flowers数据集上进行Fine-tune。
 
 
 `NOTE`: 关于PaddleHub超参优化详情参考[教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune.md)
