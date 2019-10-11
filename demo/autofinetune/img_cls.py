@@ -61,7 +61,7 @@ def finetune(args):
         images_mean=module.get_pretrained_images_mean(),
         images_std=module.get_pretrained_images_std(),
         dataset=dataset)
-
+    # The last 2 layer of resnet_v2_101_imagenet network
     feature_map = output_dict["feature_map"]
 
     img = input_dict["image"]
@@ -92,8 +92,11 @@ def finetune(args):
             task.load_parameters(args.model_path)
             logger.info("PaddleHub has loaded model from %s" % args.model_path)
 
+    # Finetune by PaddleHub's API
     task.finetune()
+    # Evaluate by PaddleHub's API
     run_states = task.eval()
+    # Get acc score on dev
     eval_avg_score, eval_avg_loss, eval_run_speed = task._calculate_metrics(
         run_states)
 
