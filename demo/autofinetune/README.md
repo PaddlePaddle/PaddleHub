@@ -18,5 +18,9 @@ hparam给出待搜索的超参名字、类型（int或者float，离散型和连
 
 以mobilenet为预训练模型，在flowers数据集上进行Fine-tune。
 
+## 如何开始超参优化
+
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_autofinetune.sh`即可开始使用超参优化功能。
+
 
 `NOTE`: 关于PaddleHub超参优化详情参考[教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune.md)
