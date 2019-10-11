@@ -2,7 +2,7 @@ OUTPUT=result/
 
 hub autofinetune img_cls.py \
     --param_file=hparam.yaml \
-    --cuda=['6'] \
+    --cuda=['0'] \
     --popsize=5 \
     --round=10 \
     --output_dir=${OUTPUT} \
