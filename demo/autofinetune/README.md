@@ -1,5 +1,7 @@
 # PaddleHub超参优化——图像分类
 
+**确认安装PaddleHub版本在1.2.0以上, 同时PaddleHub Auto Fine-tune功能要求至少有一张GPU显卡可用。**
+
 本示例展示如何利用PaddleHub超参优化Auto Finetune，得到一个效果较佳的超参数组合
 
 使用PaddleHub Auto Fine-tune需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
