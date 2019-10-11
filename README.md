@@ -115,8 +115,6 @@ PaddleHub如何使用ULMFiT策略微调预训练模型，详情参考[PaddleHub 
 
 **A:** 因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。可以将PaddlePaddle和PaddleHub升级至最新版本，同时将ernie卸载。
 ```shell
-# 若是CPU环境，则 pip install --upgrade paddlepaddle
-$ pip install --upgrade paddlepaddle-gpu
 $ pip install --upgrade paddlehub
 $ hub uninstall ernie
 ```
