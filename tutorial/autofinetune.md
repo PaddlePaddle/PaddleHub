@@ -1,10 +1,10 @@
-# PaddleHub 超参优化（Auto Fine-tune）
+# PaddleHub 超参优化（AutoDL Finetuner）
 
 ## 一、简介
 
-目前深度学习模型参数可分类两类：*模型参数 (Model Parameters)* 与 *超参数 (Hyper Parameters)*，前者是模型通过大量的样本数据进行训练学习得到的参数数据；后者则需要通过人工经验或者不断尝试找到最佳设置（如学习率、dropout_rate、batch_size等），以提高模型训练的效果。如果想得到一个效果好的深度学习神经网络模型，超参的设置非常关键。因为模型参数空间大，目前超参调整都是通过手动，依赖人工经验或者不断尝试，且不同模型、样本数据和场景下不尽相同，所以需要大量尝试，时间成本和资源成本非常浪费。PaddleHub Auto Fine-tune可以实现自动调整超参数。
+目前深度学习模型参数可分类两类：*模型参数 (Model Parameters)* 与 *超参数 (Hyper Parameters)*，前者是模型通过大量的样本数据进行训练学习得到的参数数据；后者则需要通过人工经验或者不断尝试找到最佳设置（如学习率、dropout_rate、batch_size等），以提高模型训练的效果。如果想得到一个效果好的深度学习神经网络模型，超参的设置非常关键。因为模型参数空间大，目前超参调整都是通过手动，依赖人工经验或者不断尝试，且不同模型、样本数据和场景下不尽相同，所以需要大量尝试，时间成本和资源成本非常浪费。PaddleHub AutoDL Finetuner可以实现自动调整超参数。
 
-PaddleHub Auto Fine-tune提供两种超参优化策略：
+PaddleHub AutoDL Finetuner提供两种超参优化策略：
 
 * **HAZero**: 核心思想是通过对正态分布中协方差矩阵的调整来处理变量之间的依赖关系和scaling。算法基本可以分成以下三步: 
 1. 采样产生新解
@@ -24,7 +24,7 @@ PaddleHub Auto Fine-tune提供两种超参优化策略：
 <img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/thermodynamics.gif" hspace='10'/> <br />
 </p>
 
-PaddleHub Auto Fine-tune为了评估搜索的超参对于任务的效果，提供两种超参评估策略：
+PaddleHub AutoDL Finetuner为了评估搜索的超参对于任务的效果，提供两种超参评估策略：
 
 * **Full-Trail**: 给定一组超参，利用这组超参从头开始Fine-tune一个新模型，之后在验证集评估这个模型
 
@@ -32,7 +32,7 @@ PaddleHub Auto Fine-tune为了评估搜索的超参对于任务的效果，提�
 
 ## 二、准备工作
 
-使用PaddleHub Auto Fine-tune需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
+使用PaddleHub AutoDL Finetuner需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
 
 
 ### 1. hparam.yaml
@@ -79,13 +79,13 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 
 ### 示例
 
-[PaddleHub Auto Fine-tune超参优化--NLP情感分类任务](./autofinetune-nlp.md)
+[PaddleHub AutoDL Finetuner超参优化--NLP情感分类任务](./autofinetune-nlp.md)
 
-[PaddleHub Auto Fine-tune超参优化--CV图像分类任务](./autofinetune-cv.md)
+[PaddleHub AutoDL Finetuner超参优化--CV图像分类任务](./autofinetune-cv.md)
 
 ## 三、启动方式
 
-**确认安装PaddleHub版本在1.2.0以上, 同时PaddleHub Auto Fine-tune功能要求至少有一张GPU显卡可用。**
+**确认安装PaddleHub版本在1.2.0以上, 同时PaddleHub AutoDL Finetuner功能要求至少有一张GPU显卡可用。**
 
 通过以下命令方式：
 ```shell
@@ -114,7 +114,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 * 进行超参搜索时，一共会进行n轮(--round指定)，每轮产生m组超参(--popsize指定)进行搜索。上一轮的优化结果决定下一轮超参数调整方向
 
-* 当指定GPU数量不足以同时跑一轮时，Auto Fine-tune功能自动实现排队为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，cuda=['0','1','2','3']，则每搜索一轮，Auto Fine-tune自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，则可以避免这种情况的出现。
+* 当指定GPU数量不足以同时跑一轮时，AutoDL Finetuner功能自动实现排队为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，cuda=['0','1','2','3']，则每搜索一轮，AutoDL Finetuner自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，则可以避免这种情况的出现。
 
 ## 四、目录结构
 
@@ -150,18 +150,18 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 ## 五、可视化
 
-Auto Fine-tune API在优化超参过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
+AutoDL Finetuner API在优化超参过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
 
 ```shell
 $ tensorboard --logdir ${OUTPUT}/visualization --host ${HOST_IP} --port ${PORT_NUM}
 ```
 
-其中${OUTPUT}为AutoDL根目录，${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
+其中${OUTPUT}为AutoDL Finetuner输出目录，${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
 用浏览器打开192.168.0.1:8040，即可看到搜索过程中各超参以及指标的变化情况。
 
 ## 六、args参数传递
 
-PaddleHub Auto Fine-tune 支持将train.py中的args其余不需要搜索的参数通过autofinetune remainder方式传入。这个不需要搜索的选项参数名称应该和通过hub autofinetune的传入选项参数名称保持一致。如[PaddleHub Auto Fine-tune超参优化--NLP情感分类任务](./autofinetune-nlp.md)示例中的max_seq_len选项，可以参照以下方式传入。
+PaddleHub AutoDL Finetuner 支持将train.py中的args其余不需要搜索的参数通过autofinetune remainder方式传入。这个不需要搜索的选项参数名称应该和通过hub autofinetune的传入选项参数名称保持一致。如[PaddleHub AutoDL Finetuner超参优化--NLP情感分类任务](./autofinetune-nlp.md)示例中的max_seq_len选项，可以参照以下方式传入。
 
 ```shell
 $ OUTPUT=result/
@@ -171,10 +171,10 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 ## 七、其他
 
-1. 如在使用Auto Fine-tune功能时，输出信息中包含如下字样：
+1. 如在使用AutoDL Finetuner功能时，输出信息中包含如下字样：
 
 **WARNING：Program which was ran with hyperparameters as ... was crashed!**
 
 首先根据终端上的输出信息，确定这个输出信息是在第几个round（如round 3），之后查看${OUTPUT}/round3/下的日志文件信息log.info, 查看具体出错原因。
 
-2. PaddleHub Auto Fine-tune功能使用过程中建议使用的GPU卡仅供PaddleHub使用，无其他任务使用。
+2. PaddleHub AutoDL Finetuner功能使用过程中建议使用的GPU卡仅供PaddleHub使用，无其他任务使用。
