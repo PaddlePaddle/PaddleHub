@@ -58,9 +58,13 @@ hparam给出待搜索的超参名字、类型（int或者float）、搜索范围
 
 train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优化后的效果返回
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/demo.png" hspace='10'/> <br />
+</p>
+
 **NOTE**:
 
-* train.py的选项参数须包含待优化超参数，待搜索超参数选项名字和yaml文件中的超参数名字保持一致。
+* train.py的选项参数须包含待优化超参数，需要将超参以argparser的方式写在其中，待搜索超参数选项名字和yaml文件中的超参数名字保持一致。
 
 * train.py须包含选项参数saved_params_dir，优化后的参数将会保存到该路径下。
 
@@ -142,7 +146,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
   * log-0.info ~ log-m.info记录每个搜索方向的日志
 
-  * model-0 ~ model-m保存对应训练得到的参数
+  * model-0 ~ model-m记录对应搜索的参数
 
 ## 五、可视化
 
@@ -152,19 +156,12 @@ Auto Fine-tune API在优化超参过程中会自动对关键训练指标进行�
 $ tensorboard --logdir ${OUTPUT}/visualization --host ${HOST_IP} --port ${PORT_NUM}
 ```
 
-其中${OUTPUT}为output_dir，${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
-用浏览器打开192.168.0.1:8040，即可看到搜索过程中各超参以及指标的变化情况
+其中${OUTPUT}为AutoDL根目录，${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
+用浏览器打开192.168.0.1:8040，即可看到搜索过程中各超参以及指标的变化情况。
 
-## 六、其他
+## 六、args参数传递
 
-1. 如在使用Auto Fine-tune功能时，输出信息中包含如下字样：
-
-**WARNING：Program which was ran with hyperparameters as ... was crashed!**
-
-首先根据终端上的输出信息，确定这个输出信息是在第几个round（如round 3），之后查看${OUTPUT}/round3/下的日志文件信息log.info, 查看具体出错原因。
-
-2. PaddleHub Auto Fine-tune 命令行支持从启动命令hub autofinetune传入train.py中不需要搜索的选项参数，如
-[PaddleHub Auto Fine-tune超参优化--NLP情感分类任务](./autofinetune-nlp.md)示例中的max_seq_len选项，可以参照以下方式传入。这个不需要搜索的选项参数名称应该和通过hub autofinetune的传入选项参数名称保持一致。
+PaddleHub Auto Fine-tune 支持将train.py中的args其余不需要搜索的参数通过autofinetune remainder方式传入。这个不需要搜索的选项参数名称应该和通过hub autofinetune的传入选项参数名称保持一致。如[PaddleHub Auto Fine-tune超参优化--NLP情感分类任务](./autofinetune-nlp.md)示例中的max_seq_len选项，可以参照以下方式传入。这个不需要搜索的选项参数名称应该和通过hub autofinetune的传入选项参数名称保持一致。
 
 ```shell
 $ OUTPUT=result/
@@ -172,4 +169,12 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
  --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2 max_seq_len 128
 ```
 
-3. PaddleHub Auto Fine-tune功能使用过程中建议使用的GPU卡仅供PaddleHub使用，无其他任务使用。
+## 七、其他
+
+1. 如在使用Auto Fine-tune功能时，输出信息中包含如下字样：
+
+**WARNING：Program which was ran with hyperparameters as ... was crashed!**
+
+首先根据终端上的输出信息，确定这个输出信息是在第几个round（如round 3），之后查看${OUTPUT}/round3/下的日志文件信息log.info, 查看具体出错原因。
+
+2. PaddleHub Auto Fine-tune功能使用过程中建议使用的GPU卡仅供PaddleHub使用，无其他任务使用。
