@@ -152,7 +152,7 @@ Auto Fine-tune API在优化超参过程中会自动对关键训练指标进行�
 $ tensorboard --logdir ${OUTPUT}/visualization --host ${HOST_IP} --port ${PORT_NUM}
 ```
 
-其中${OUTPUT}为AutoDL根目录，${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
+其中${OUTPUT}为output_dir，${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
 用浏览器打开192.168.0.1:8040，即可看到搜索过程中各超参以及指标的变化情况
 
 ## 六、其他
