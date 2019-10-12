@@ -142,7 +142,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
   * log-0.info ~ log-m.info记录每个搜索方向的日志
 
-  * model-0 ~ model-m记录对应搜索的参数
+  * model-0 ~ model-m保存对应训练得到的参数
 
 ## 五、可视化
 
