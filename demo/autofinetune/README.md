@@ -1,6 +1,6 @@
 # PaddleHub超参优化——图像分类
 
-**确认安装PaddleHub版本在1.2.0以上, 同时PaddleHub AutoDL Finetuner功能要求至少有一张GPU显卡可用。**
+**确认安装PaddleHub版本在1.2.1以上, 同时PaddleHub AutoDL Finetuner功能要求至少有一张GPU显卡可用。**
 
 本示例展示如何利用PaddleHub超参优化AutoDL Finetuner，得到一个效果较佳的超参数组合
 
