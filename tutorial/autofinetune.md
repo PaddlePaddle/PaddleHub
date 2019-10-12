@@ -28,7 +28,7 @@ PaddleHub AutoDL Finetuner为了评估搜索的超参对于任务的效果，提
 
 * **Full-Trail**: 给定一组超参，利用这组超参从头开始Fine-tune一个新模型，之后在验证集评估这个模型
 
-* **Model-Based**: 给定一组超参，若这组超参是第一轮尝试的超参组合，则从头开始Fine-tune一个新模型；否则基于前几轮已保存的较好模型，在当前的超参数组合下继续Fine-tune并评估。
+* **Population-Based**: 给定一组超参，若这组超参是第一轮尝试的超参组合，则从头开始Fine-tune一个新模型；否则基于前几轮已保存的较好模型，在当前的超参数组合下继续Fine-tune并评估。
 
 ## 二、准备工作
 
@@ -68,7 +68,7 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 
 * train.py须包含选项参数saved_params_dir，优化后的参数将会保存到该路径下。
 
-* 超参评估策略选择ModelBased时，train.py须包含选项参数model_path，自动从model_path指定的路径恢复模型
+* 超参评估策略选择PopulationBased时，train.py须包含选项参数model_path，自动从model_path指定的路径恢复模型
 
 * train.py须输出模型的评价效果（建议使用验证集或者测试集上的评价效果），输出以“AutoFinetuneEval"开始，与评价效果之间以“\t”分开，如
  ```python
@@ -106,7 +106,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 > `--output_dir`: 可选，设置程序运行输出结果存放目录，不指定该选项参数时，在当前运行路径下生成存放程序运行输出信息的文件夹
 
-> `--evaluate_choice`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和modelbased, 默认为modelbased
+> `--evaluate_choice`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased
 
 > `--tuning_strategy`: 可选，设置自动优化超参策略，可选hazero和pshe2，默认为pshe2
 
