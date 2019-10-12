@@ -1,8 +1,8 @@
-# PaddleHub 超参优化（Auto Fine-tune）——NLP情感分类任务
+# PaddleHub 超参优化（AutoDL Finetuner）——NLP情感分类任务
 
-使用PaddleHub Auto Fine-tune需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
+使用PaddleHub  AutoDL Finetuner需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
 
-以Fine-tune中文情感分类任务为例，展示如何利用PaddleHub Auto Finetune进行超参优化。
+以Fine-tune中文情感分类任务为例，展示如何利用PaddleHub  AutoDL Finetuner进行超参优化。
 
 以下是待优化超参数的yaml文件hparam.yaml，包含需要搜索的超参名字、类型、范围等信息。其中类型只支持float和int
 ```
