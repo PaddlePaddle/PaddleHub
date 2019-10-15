@@ -32,7 +32,8 @@ class ReadingComprehensionTask(BasicTask):
                  data_reader,
                  startup_program=None,
                  config=None,
-                 metrics_choices=None):
+                 metrics_choices=None,
+                 return_numpy=True):
 
         main_program = feature.block.program
         super(ReadingComprehensionTask, self).__init__(
@@ -41,7 +42,8 @@ class ReadingComprehensionTask(BasicTask):
             feed_list=feed_list,
             startup_program=startup_program,
             config=config,
-            metrics_choices=metrics_choices)
+            metrics_choices=metrics_choices,
+            return_numpy=return_numpy)
         self.feature = feature
 
     def _build_net(self):

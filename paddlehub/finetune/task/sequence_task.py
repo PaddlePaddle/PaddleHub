@@ -23,6 +23,8 @@ import numpy as np
 import paddle.fluid as fluid
 from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
 from .basic_task import BasicTask
+from .basic_task import RunState
+from .basic_task import RunEnv
 
 
 class SequenceLabelTask(BasicTask):
@@ -35,7 +37,8 @@ class SequenceLabelTask(BasicTask):
                  startup_program=None,
                  config=None,
                  metrics_choices="default",
-                 add_crf=False):
+                 add_crf=False,
+                 return_numpy=True):
         if metrics_choices == "default":
             metrics_choices = ["f1", "precision", "recall"]
 
@@ -48,7 +51,8 @@ class SequenceLabelTask(BasicTask):
             feed_list=feed_list,
             startup_program=startup_program,
             config=config,
-            metrics_choices=metrics_choices)
+            metrics_choices=metrics_choices,
+            return_numpy=return_numpy)
         self.feature = feature
         self.max_seq_len = max_seq_len
         self.num_classes = num_classes
@@ -76,8 +80,12 @@ class SequenceLabelTask(BasicTask):
             ret_infers = fluid.layers.assign(self.ret_infers)
             return [ret_infers]
         else:
+            enc_out = fluid.layers.dropout(
+                x=self.feature,
+                dropout_prob=0.1,
+                dropout_implementation="upscale_in_train")
             self.logits = fluid.layers.fc(
-                input=self.feature,
+                input=enc_out,
                 size=self.num_classes,
                 num_flatten_dims=2,
                 param_attr=fluid.ParamAttr(

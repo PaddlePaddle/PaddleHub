@@ -35,7 +35,8 @@ class ClassifierTask(BasicTask):
                  startup_program=None,
                  config=None,
                  hidden_units=None,
-                 metrics_choices="default"):
+                 metrics_choices="default",
+                 return_numpy=True):
         if metrics_choices == "default":
             metrics_choices = ["acc"]
 
@@ -46,7 +47,8 @@ class ClassifierTask(BasicTask):
             feed_list=feed_list,
             startup_program=startup_program,
             config=config,
-            metrics_choices=metrics_choices)
+            metrics_choices=metrics_choices,
+            return_numpy=return_numpy)
 
         self.feature = feature
         self.num_classes = num_classes
@@ -147,7 +149,8 @@ class TextClassifierTask(ClassifierTask):
                  startup_program=None,
                  config=None,
                  hidden_units=None,
-                 metrics_choices="default"):
+                 metrics_choices="default",
+                 return_numpy=True):
 
         if metrics_choices == "default":
             metrics_choices = ["acc"]
@@ -159,7 +162,8 @@ class TextClassifierTask(ClassifierTask):
             startup_program=startup_program,
             config=config,
             hidden_units=hidden_units,
-            metrics_choices=metrics_choices)
+            metrics_choices=metrics_choices,
+            return_numpy=return_numpy)
 
     def _build_net(self):
         cls_feats = fluid.layers.dropout(
@@ -197,7 +201,8 @@ class MultiLabelClassifierTask(ClassifierTask):
                  startup_program=None,
                  config=None,
                  hidden_units=None,
-                 metrics_choices="default"):
+                 metrics_choices="default",
+                 return_numpy=True):
         if metrics_choices == "default":
             metrics_choices = ["auc"]
 
@@ -210,7 +215,8 @@ class MultiLabelClassifierTask(ClassifierTask):
             startup_program=startup_program,
             config=config,
             hidden_units=hidden_units,
-            metrics_choices=metrics_choices)
+            metrics_choices=metrics_choices,
+            return_numpy=return_numpy)
         self.class_name = list(data_reader.label_map.keys())
 
     def _build_net(self):
