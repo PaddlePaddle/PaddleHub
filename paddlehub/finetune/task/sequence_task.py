@@ -80,12 +80,8 @@ class SequenceLabelTask(BasicTask):
             ret_infers = fluid.layers.assign(self.ret_infers)
             return [ret_infers]
         else:
-            enc_out = fluid.layers.dropout(
-                x=self.feature,
-                dropout_prob=0.1,
-                dropout_implementation="upscale_in_train")
             self.logits = fluid.layers.fc(
-                input=enc_out,
+                input=self.feature,
                 size=self.num_classes,
                 num_flatten_dims=2,
                 param_attr=fluid.ParamAttr(
