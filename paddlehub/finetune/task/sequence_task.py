@@ -23,8 +23,6 @@ import numpy as np
 import paddle.fluid as fluid
 from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
 from .basic_task import BasicTask
-from .basic_task import RunState
-from .basic_task import RunEnv
 
 
 class SequenceLabelTask(BasicTask):
