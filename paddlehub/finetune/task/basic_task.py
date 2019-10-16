@@ -85,8 +85,7 @@ class BasicTask(object):
                  main_program=None,
                  startup_program=None,
                  config=None,
-                 metrics_choices="default",
-                 return_numpy=True):
+                 metrics_choices="default"):
 
         # base item
         self._base_data_reader = data_reader
@@ -123,7 +122,7 @@ class BasicTask(object):
         self.config = config if config else RunConfig()
         self.place = self.places[0]
         self.device_count = len(self.places)
-        self.return_numpy = return_numpy
+        self.return_numpy = True
 
         if self.config.use_data_parallel:
             if not self.config.use_pyreader and self.config.batch_size < self.device_count:

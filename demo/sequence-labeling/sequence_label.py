@@ -86,7 +86,7 @@ if __name__ == '__main__':
         max_seq_len=args.max_seq_len,
         num_classes=dataset.num_labels,
         config=config,
-        add_crf=False)
+        add_crf=True)
 
     # Finetune and evaluate model by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically

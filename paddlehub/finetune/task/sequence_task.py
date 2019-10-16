@@ -37,8 +37,7 @@ class SequenceLabelTask(BasicTask):
                  startup_program=None,
                  config=None,
                  metrics_choices="default",
-                 add_crf=False,
-                 return_numpy=True):
+                 add_crf=False):
         if metrics_choices == "default":
             metrics_choices = ["f1", "precision", "recall"]
 
@@ -51,11 +50,12 @@ class SequenceLabelTask(BasicTask):
             feed_list=feed_list,
             startup_program=startup_program,
             config=config,
-            metrics_choices=metrics_choices,
-            return_numpy=return_numpy)
+            metrics_choices=metrics_choices)
         self.feature = feature
         self.max_seq_len = max_seq_len
         self.num_classes = num_classes
+        if self.add_crf:
+            self.return_numpy = False
 
     def _build_net(self):
         self.seq_len = fluid.layers.data(

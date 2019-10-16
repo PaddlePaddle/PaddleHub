@@ -34,8 +34,7 @@ class RegressionTask(BasicTask):
                  startup_program=None,
                  config=None,
                  hidden_units=None,
-                 metrics_choices="default",
-                 return_numpy=True):
+                 metrics_choices="default"):
         if metrics_choices == "default":
             metrics_choices = ["spearman"]
 
@@ -46,8 +45,7 @@ class RegressionTask(BasicTask):
             feed_list=feed_list,
             startup_program=startup_program,
             config=config,
-            metrics_choices=metrics_choices,
-            return_numpy=return_numpy)
+            metrics_choices=metrics_choices)
         self.feature = feature
         self.hidden_units = hidden_units
 
