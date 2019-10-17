@@ -52,8 +52,13 @@ class SequenceLabelTask(BasicTask):
         self.feature = feature
         self.max_seq_len = max_seq_len
         self.num_classes = num_classes
+
+    @property
+    def return_numpy(self):
         if self.add_crf:
-            self.return_numpy = False
+            return False
+        else:
+            return True
 
     def _build_net(self):
         self.seq_len = fluid.layers.data(

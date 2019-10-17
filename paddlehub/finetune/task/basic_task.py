@@ -122,7 +122,6 @@ class BasicTask(object):
         self.config = config if config else RunConfig()
         self.place = self.places[0]
         self.device_count = len(self.places)
-        self.return_numpy = True
 
         if self.config.use_data_parallel:
             if not self.config.use_pyreader and self.config.batch_size < self.device_count:
@@ -306,6 +305,10 @@ class BasicTask(object):
         if not self.config.use_data_parallel:
             return [_places[0]]
         return _places
+
+    @property
+    def return_numpy(self):
+        return True
 
     @property
     def is_train_phase(self):
