@@ -31,7 +31,7 @@ def python_version():
 max_version, mid_version, min_version = python_version()
 
 REQUIRED_PACKAGES = [
-    'six >= 1.10.0', 'protobuf >= 3.1.0', 'pyyaml', 'Pillow', 'requests',
+    'six >= 1.10.0', 'protobuf >= 3.6.0', 'pyyaml', 'Pillow', 'requests',
     'tb-paddle', 'tb-nightly', 'cma == 2.7.0'
 ]
 
