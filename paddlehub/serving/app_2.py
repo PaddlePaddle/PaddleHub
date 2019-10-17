@@ -184,7 +184,6 @@ def worker():
 
 
 def create_app():
-    # app_instance = Flask("paddlehub.serving.app")
     app_instance = Flask(__name__)
     app_instance.config["JSON_AS_ASCII"] = False
     gunicorn_logger = logging.getLogger('gunicorn.error')
@@ -194,9 +193,6 @@ def create_app():
     pool = mp.Pool(processes=(mp.cpu_count() - 1))
     for i in range(mp.cpu_count() - 1):
         pool.apply_async(worker)
-    # pool = mp.Pool(processes=(mp.cpu_count()-1))
-    # for i in range((mp.cpu_count()-1)):
-    #     pool.apply_async(worker)
 
     @app_instance.route("/", methods=["GET", "POST"])
     def index():
@@ -204,68 +200,8 @@ def create_app():
 
     @app_instance.before_request
     def before_request():
-        # print("start, time= ", time.time())
-        # # global waiting_queue
-        # print(request.url)
-        # print(request.path)
-        # data = "data"
-        # try:
-        #     waiting_queue.put(data, block=False)
-        # except Queue.Full:
-        #     return {"result": "现在使用serving的人太多了，请稍后再尝试，谢谢！🙏"}
-        # print(request.form)
-        # print(request.data)
-        # print(request.path)
-        # print(request.url)
-        # print(request.form)
         request.data = {"id": str(time.time())}
         pass
-
-    # @app_instance.route("/predict/image/<module_name>", methods=["POST"])
-    # def predict_iamge(module_name):
-    #     global use_gpu
-    #     img_base64 = request.form.get("input_img", "")
-    #     received_file_name = request.form.get("input_file", "")
-    #     md5_get = hashlib.md5()
-    #     md5_src = str(time.time()) + str(img_base64)
-    #     md5_get.update(md5_src.encode("utf-8"))
-    #
-    #     ext = received_file_name.split(".")[-1]
-    #     if ext == "":
-    #         return {"result": "未识别的文件类型"}
-    #     filename = md5_get.hexdigest() + "." + ext
-    #     base64_head = img_base64.split(',')[0]
-    #     img_data = base64.b64decode(img_base64.split(',')[-1])
-    #     with open(filename, "wb") as fp:
-    #         fp.write(img_data)
-    #     input_data = {"image": [filename]}
-    #
-    #     module = ImageModelService.get_module(module_name)
-    #     method_name = module.desc.attr.map.data['default_signature'].s
-    #     if method_name != "":
-    #         predict_method = getattr(module, method_name)
-    #         print(input_data)
-    #         try:
-    #             print("Use gpu is", use_gpu)
-    #             results = predict_method(data=input_data, use_gpu=use_gpu)
-    #         except Exception as err:
-    #             print(err)
-    #             return {"result": "请检查数据格式!"}
-    #     else:
-    #         results = "您调用的模型{}不支持在线预测".format(module_name)
-    #     os.remove(filename)
-    #     output_file = os.path.join("./output", filename)
-    #     if output_file is not None and os.path.exists(output_file):
-    #         with open(output_file, "rb") as fp:
-    #             output_img_base64 = base64.b64encode(fp.read())
-    #         os.remove(output_file)
-    #     if module.type.startswith("CV"):
-    #         results = {
-    #             "border": str(results[0]["data"]),
-    #             "output_img": base64_head + ","
-    #                           + str(output_img_base64).replace("b'", "").replace("'", "")
-    #         }
-    #     return {"result": results}
 
     @app_instance.route("/predict/image/<module_name>", methods=["POST"])
     def predict_iamge(module_name):
@@ -299,27 +235,15 @@ def create_app():
             # time.sleep(5)
             result_len = len(results_dict.get(req_id, []))
         results = results_dict.get(req_id)
+        results = [i[1] for i in sorted(results, key=lambda k: k[0])]
+        print("results=", results)
         return {"result": str(results)}
 
     def data_2_item(data_list, req_id, score, module_name):
         global queues_dict
-        item_list = []
-        # print("开始放入")
-        # print("放%s个" % len(data_list))
         for index in range(len(data_list)):
             queues_dict[module_name].put((score, index, req_id,
                                           data_list[index]))
-
-    @app_instance.route("/down", methods=["GET", "POST"])
-    def down():
-        strr = ""
-        for key, value in queues_dict.items():
-            strr += key
-            strr += " : "
-            while value.qsize() != 0:
-                strr += str(value.get())
-                strr += ","
-        return {"r": strr}
 
     @app_instance.route("/predict/text/<module_name>", methods=["POST"])
     def predict_text(module_name):
@@ -351,82 +275,6 @@ def create_app():
             result_len = len(results_dict.get(req_id, []))
         results = results_dict.get(req_id)
         results = [i[1] for i in sorted(results, key=lambda k: k[0])]
-        return {"result": results}
-
-    # 此方法为废弃方法
-    @app_instance.route("/predict/<module_name>", methods=["POST"])
-    def predict(module_name):
-        print(request.form)
-        data = request.form.get("input_text", "")
-        img_base64 = request.form.get("input_img", "")
-        received_file_name = request.form.get("input_file", "")
-        filename = None
-
-        if module_name != "" and data != "":
-            print("ininin")
-            data = data.splitlines()
-            print(data)
-            data_temp = []
-            for index in range(len(data)):
-                data[index] = data[index].strip()
-                if data[index] != "":
-                    print("gll")
-                    data_temp.append(data[index])
-            data = data_temp
-            if not isinstance(data, list):
-                data = [data]
-            input_data = {"text": data}
-        # 如果是图片
-        elif module_name != "" and img_base64 != "":
-            md5_get = hashlib.md5()
-            md5_src = str(time.time()) + str(img_base64)
-            md5_get.update(md5_src.encode("utf-8"))
-            ext = received_file_name.split(".")[-1]
-            if ext == "":
-                return {"result": "未识别的文件类型，请添加后缀"}
-            filename = md5_get.hexdigest() + "." + ext
-            base64_head = img_base64.split(',')[0]
-            img_data = base64.b64decode(img_base64.split(',')[-1])
-            print("123123123")
-            print(img_data)
-            with open(filename, "wb") as fp:
-                fp.write(img_data)
-            input_data = {"image": [filename]}
-        else:
-            return {"result": "不支持的文件类型！"}
-        module = TextModelService.get_module(module_name)
-        method_name = module.desc.attr.map.data['default_signature'].s
-        if method_name != "":
-            predict_method = getattr(module, method_name)
-            print(input_data)
-            try:
-                results = predict_method(data=input_data)
-            except Exception as err:
-                print(err)
-                return {"result": "请检查数据格式!"}
-        else:
-            results = "您调用的模型{}不支持在线预测".format(module_name)
-        output_file = None
-        if filename is not None:
-            os.remove(filename)
-            output_file = os.path.join("./output", filename)
-        print("output_file=", output_file)
-
-        if output_file is not None and os.path.exists(output_file):
-            with open(output_file, "rb") as fp:
-                output_img_base64 = base64.b64encode(fp.read())
-            os.remove(output_file)
-        if module.type.startswith("CV"):
-            results = {
-                "border":
-                str(results[0]["data"]),
-                "output_img":
-                base64_head + "," + str(output_img_base64).replace(
-                    "b'", "").replace("'", "")
-            }
-        print(results)
-        if results == []:
-            results = "输入不能为空."
         return {"result": results}
 
     return app_instance
