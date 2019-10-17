@@ -51,7 +51,7 @@
     module_info = {
         "nlp_module":[{"Choose...":"Choose..."},{"lac":"lac"},
             {"senta_lstm":"senta_lstm"}],
-        "cv_module":[{"Choose...":"Choose..."},{"yolov3":"yolov3_coco2017"}],
+        "cv_module":[{"Choose...":"Choose..."},{"yolov3":"yolov3_coco2017"},{"faster_rcnn":"faster_rcnn_coco2017"}],
         "Choose...":[{"请先选择分类":"Choose..."}]
     };
     function get_module_option(module_categoty) {
@@ -72,30 +72,52 @@
     }
     function get_single_text_html() {
         html = ""
+        + '<p style="width: 5%"></p>'
         + '<p>请输入文字或者上传一个文本文件</p>'
+        + '<p style="width: 2%"></p>'
         + '<input type="file" id="file" onchange="handle_text(this.files)"/>'
-        + '<table class="table table-striped table-dark table-hover" style="width: 80%">'
+        +
+            '<table class="table table-striped table-dark table-hover" style="width: 95%"; align="center">'
             + '<tr>'
                 + '<td>'
-                    + '<textarea cols="100" rows="20"\n'
-                        + 'class="form-control"\n'
-                        + 'id="file_text"\n'
-                        + 'name="input_text">\n'
+                    + '<textarea cols="100" rows="30"'
+                        + 'class="form-control"'
+                        + 'id="file_text"'
+                        + 'onblur="blur_input_text()"'
+                        + 'onfocus="focus_input_text()"'
+                        + 'name="input_text">'
+                        + '在此键入文本或上传文本文件'
                     + '</textarea>'
                 + '</td>'
                 + '<td>'
-                    + '<input type="button" value="Start!" onclick="sub_text()"></input>'
+                    +
+            '<input type="button" value="Go!" onclick="sub_text()" class="btn-circle"></input>'
                 + '</td>'
                 + '<td>'
-                    + '<textarea cols="100" rows="20"\n'
-                        + 'class="form-control"\n'
-                        + 'id="result_text"\n'
-                        + 'name="result_text_name">\n'
+                    + '<textarea cols="100" rows="30"'
+                        + 'class="form-control"'
+                        + 'id="result_text"'
+
+                        + 'name="result_text_name">'
+
                     + '</textarea>'
                 + '</td>'
             + '</tr>'
         + '</table>';
         return html;
+    }
+    function blur_input_text()
+    {
+        text = document.getElementById("file_text");
+        if (text.value == ""){
+            text.value = "在此键入文本或上传文本文件";
+        }
+    }
+    function focus_input_text(){
+        text = document.getElementById("file_text");
+        if (text.value == "在此键入文本或上传文本文件"){
+            text.value = "";
+        }
     }
     function get_single_img_html() {
         html = ""
@@ -149,7 +171,8 @@
             let file = files[0];
             let reader = new FileReader();
             reader.onload = function(){
-                document.getElementById('file_text').innerHTML = this.result;
+                console.log("进得来");
+                document.getElementById('file_text').value = this.result;
             };
             reader.readAsText(file);
         }
@@ -189,7 +212,7 @@
                 },
                 success: function(data) {
                     html = get_result_html(data["result"]);
-                    document.getElementById("result_text").innerHTML = html;
+                    document.getElementById("result_text").value = html;
                 }
             });
     }
@@ -212,7 +235,7 @@
                 },
                 success: function(data) {
                     data = data["result"];
-                    document.getElementById("result_text").innerHTML = data["border"];
+                    document.getElementById("result_text").value = data["border"];
                     document.getElementById("result_img").src = data["output_img"];
                 }
             });

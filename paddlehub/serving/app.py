@@ -1,7 +1,8 @@
-# coding:utf8
+# coding: utf-8
 from flask import Flask, request, render_template
 from paddlehub.serving.model_service.text_model_service import TextModelService
 from paddlehub.serving.model_service.image_model_service import ImageModelService
+from paddlehub.serving import utils
 # from model_service.text_model_service import TextModelService
 # from model_service.image_model_service import ImageModelService
 import json
@@ -11,8 +12,27 @@ import os
 import base64
 import logging
 import sys
+import Queue
+import threading
 
 use_gpu = False
+waiting_queue = Queue.Queue(maxsize=10)
+
+
+class TestThread(threading.Thread):
+    def __init__(self, thread_id, name, counter):
+        threading.Thread.__init__(self)
+        self.thread_id = thread_id
+        self.name = name
+        self.counter = counter
+        self.g = ""
+
+    def run(self):
+        print("Starting")
+        print("exciting")
+        print("开始阻塞")
+        time.sleep(10)
+        self.g = time.time()
 
 
 def create_app():
@@ -22,13 +42,49 @@ def create_app():
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app_instance.logger.handlers = gunicorn_logger.handlers
     app_instance.logger.setLevel(gunicorn_logger.level)
+    global waiting_queue
+
+    @app_instance.route("/test", methods=["GET", "POST"])
+    def test_queue():
+        # print("进程为:", os.getpid())
+        # thread = TestThread(time.time(), "Thread-1", 1)
+        # thread.start()
+        # thread.join()
+        # return {"result": thread.g}
+        print("都可以到这一步")
+        while True:
+            pass
+        global waiting_queue
+        waiting_queue.put(time.time())
 
     @app_instance.route("/", methods=["GET", "POST"])
     def index():
         return render_template("main.html")
 
+    @app_instance.before_request
+    def before_request():
+        print("start, time= ", time.time())
+        # global waiting_queue
+        print(request.url)
+        print(request.path)
+        data = "data"
+        try:
+            waiting_queue.put(data, block=False)
+        except Queue.Full:
+            return {"result": "现在使用serving的人太多了，请稍后再尝试，谢谢！🙏"}
+        print(request.form)
+        print(request.data)
+        request.data = {"id": "test_id"}
+        # print("正常进行")
+
+    # @app_instance.route("/predict/image/<module_name>", methods=["POST"])
+    # def predict_iamge(module_name):
+
     @app_instance.route("/predict/image/<module_name>", methods=["POST"])
     def predict_iamge(module_name):
+        print("123123")
+        print(request.form)
+        print(request.data)
         global use_gpu
         img_base64 = request.form.get("input_img", "")
         received_file_name = request.form.get("input_file", "")
@@ -67,14 +123,20 @@ def create_app():
             os.remove(output_file)
         if module.type.startswith("CV"):
             results = {
-                "border": str(results[0]["data"]),
-                "output_img": base64_head + ","
-                + str(output_img_base64).replace("b'", "").replace("'", "")
+                "border":
+                str(results[0]["data"]),
+                "output_img":
+                base64_head + "," + str(output_img_base64).replace(
+                    "b'", "").replace("'", "")
             }
         return {"result": results}
 
     @app_instance.route("/predict/text/<module_name>", methods=["POST"])
     def predict_text(module_name):
+        print("123123")
+        print(request.data)
+        print(request.data.get("id"))
+        print(request.form)
         global use_gpu
         data = request.form.get("input_text", "")
         data = data.splitlines()
@@ -93,7 +155,6 @@ def create_app():
         method_name = module.desc.attr.map.data['default_signature'].s
         if method_name != "":
             predict_method = getattr(module, method_name)
-            print(input_data)
             try:
                 print("Use gpu is", use_gpu)
                 results = predict_method(data=input_data, use_gpu=use_gpu)
@@ -170,9 +231,11 @@ def create_app():
             os.remove(output_file)
         if module.type.startswith("CV"):
             results = {
-                "border": str(results[0]["data"]),
-                "output_img": base64_head + ","
-                + str(output_img_base64).replace("b'", "").replace("'", "")
+                "border":
+                str(results[0]["data"]),
+                "output_img":
+                base64_head + "," + str(output_img_base64).replace(
+                    "b'", "").replace("'", "")
             }
         print(results)
         if results == []:
