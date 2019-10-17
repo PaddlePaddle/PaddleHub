@@ -15,7 +15,11 @@ import cv2
 import multiprocessing as mp
 from multiprocessing.managers import BaseManager
 import random
-from Queue import PriorityQueue
+import six
+if six.PY2:
+    from Queue import PriorityQueue
+if six.PY3:
+    from queue import PriorityQueue
 
 
 class MyPriorityQueue(PriorityQueue):
@@ -28,47 +32,6 @@ class Manager(BaseManager):
 
 
 Manager.register("get_priorityQueue", MyPriorityQueue)
-m = Manager()
-m.start()
-
-use_gpu = False
-nlp_module = ["lac", "senta_lstm"]
-cv_module = ["yolov3_coco2017", "faster_rcnn_coco2017"]
-
-lac_queue = m.get_priorityQueue(maxsize=20)
-lac_batch_size = 3
-lac_name = "lac"
-yolov3_coco2017_queue = m.get_priorityQueue(maxsize=20)
-yolov3_coco2017_batch_size = 3
-yolov3_coco2017_name = "yolov3_coco2017"
-faster_rcnn_coco2017_queue = m.get_priorityQueue(maxsize=20)
-faster_rcnn_coco2017_batch_size = 3
-faster_rcnn_coco2017_name = "faster_rcnn_coco2017"
-senta_lstm_queue = m.get_priorityQueue(maxsize=20)
-senta_lstm_batch_size = 3
-senta_lstm_batch_name = "senta_lstm_batch"
-queues_list = [
-    lac_queue, yolov3_coco2017_queue, senta_lstm_queue,
-    faster_rcnn_coco2017_queue
-]
-batch_size_list = [
-    lac_batch_size, yolov3_coco2017_batch_size, senta_lstm_batch_size,
-    faster_rcnn_coco2017_batch_size
-]
-name_list = [
-    lac_name, yolov3_coco2017_name, senta_lstm_batch_name,
-    faster_rcnn_coco2017_name
-]
-queues_dict = {
-    "lac": lac_queue,
-    "yolov3_coco2017": yolov3_coco2017_queue,
-    "senta_lstm": senta_lstm_queue,
-    "faster_rcnn_coco2017": faster_rcnn_coco2017_queue
-}
-queue_name_list = [
-    "lac", "yolov3_coco2017", "senta_lstm", "faster_rcnn_coco2017"
-]
-results_dict = mp.Manager().dict()
 
 
 def choose_module_category(input_data, module_name, batch_size=1):
@@ -80,6 +43,8 @@ def choose_module_category(input_data, module_name, batch_size=1):
 
 
 def predict_nlp(input_data, module_name, batch_size=1):
+    # 加上延时，总时间只加单个进程的延时，证明多个worker是并行进行的
+    # time.sleep(10)
     global use_gpu
     real_input_data = []
     for index in range(len(input_data)):
@@ -90,6 +55,7 @@ def predict_nlp(input_data, module_name, batch_size=1):
         predict_method = getattr(module, method_name)
         try:
             real_input_data = {"text": real_input_data}
+            print("i am ", os.getpid(), "input_data=", real_input_data)
             results = predict_method(data=real_input_data, use_gpu=use_gpu)
         except Exception as err:
             return {"result": "请检查数据格式!"}
@@ -160,19 +126,31 @@ def predict_cv(input_data, module_name, batch_size=1):
 
 
 def worker():
+    print(lock)
     global batch_size_list, name_list, queue_name_list, cv_module
     latest_num = random.randrange(0, len(queue_name_list))
     while True:
-        time.sleep(0.000001)
+        time.sleep(0.01)
         for index in range(len(queue_name_list)):
             while queues_dict[queue_name_list[latest_num]].empty() is not True:
                 input_data = []
-                for index2 in range(batch_size_list[latest_num]):
-                    if queues_dict[queue_name_list[latest_num]].empty() is True:
-                        break
-                    input_data.append(
-                        queues_dict[queue_name_list[latest_num]].get())
-                # 取出了数据，现在进行实际预测，先用lac进行测试
+                lock.acquire()
+                # print("pid ", os.getpid(), "get lock")
+                # print(lock)
+                try:
+                    for index2 in range(batch_size_list[latest_num]):
+                        if queues_dict[
+                                queue_name_list[latest_num]].empty() is True:
+                            break
+                        input_data.append(
+                            queues_dict[queue_name_list[latest_num]].get())
+                finally:
+                    lock.release()
+                # if len(input_data) != 0:
+                # print("pid ", os.getpid(), "get data")
+                # print("pid ", os.getpid(), "release lock")
+                # print(lock)
+                # 取出了数据，现在进行实际预测
                 if len(input_data) != 0:
                     choose_module_category(input_data,
                                            queue_name_list[latest_num],
@@ -183,6 +161,11 @@ def worker():
             latest_num = (latest_num + 1) % len(queue_name_list)
 
 
+def init_pool(l):
+    global lock
+    lock = l
+
+
 def create_app():
     app_instance = Flask(__name__)
     app_instance.config["JSON_AS_ASCII"] = False
@@ -190,7 +173,20 @@ def create_app():
     app_instance.logger.handlers = gunicorn_logger.handlers
     app_instance.logger.setLevel(gunicorn_logger.level)
     global queues_dict
-    pool = mp.Pool(processes=(mp.cpu_count() - 1))
+    # try:
+    #     print("开始生成lock")
+    lock = mp.Lock()
+    #     print("成功获得lock")
+    # except Exception as err:
+    #     print(err)
+    # finally:
+    #     print(lock)
+
+    # lock = 3
+    pool = mp.Pool(
+        processes=(mp.cpu_count() - 1),
+        initializer=init_pool,
+        initargs=(lock, ))
     for i in range(mp.cpu_count() - 1):
         pool.apply_async(worker)
 
@@ -236,7 +232,25 @@ def create_app():
             result_len = len(results_dict.get(req_id, []))
         results = results_dict.get(req_id)
         results = [i[1] for i in sorted(results, key=lambda k: k[0])]
-        print("results=", results)
+        # print("results=", results)
+        filename = results[0].get("path")
+        ext = filename.split(".")[-1]
+        if filename is not None:
+            output_file = os.path.join("./output", filename)
+            if output_file is not None and os.path.exists(output_file):
+                # print("gagaga")
+                with open(output_file, "rb") as fp:
+                    output_img_base64 = base64.b64encode(fp.read())
+                os.remove(filename)
+                os.remove(output_file)
+                results = {
+                    "border":
+                    str(results[0]["data"]),
+                    "output_img":
+                    base64_head + "," + str(output_img_base64).replace(
+                        "b'", "").replace("'", "")
+                }
+                return {"result": results}
         return {"result": str(results)}
 
     def data_2_item(data_list, req_id, score, module_name):
@@ -266,26 +280,96 @@ def create_app():
         if data_num + queues_dict[module_name].qsize(
         ) > queues_dict[module_name].get_attribute("maxsize"):
             return {"result": "当前访问人数过多，请稍后再来"}
+        start = time.time()
+        # print("开始正式请求处理")
         data_2_item(data_list, req_id, score, module_name)
+        print("cunchu need", time.time() - start)
         results = []
         # 开始轮询查找
         result_len = 0
+        start = time.time()
+        # print("开始轮询查找")
         while result_len != data_num:
             # time.sleep(5)
             result_len = len(results_dict.get(req_id, []))
+        print("cha zhao xuyao", time.time() - start)
+        start = time.time()
         results = results_dict.get(req_id)
         results = [i[1] for i in sorted(results, key=lambda k: k[0])]
+        print("sort need", time.time() - start)
         return {"result": results}
 
     return app_instance
 
 
-def run(is_use_gpu=False):
+def config_with_file(configs):
+    print("只执行一次才对")
+    global m
+    global nlp_module, cv_module, queues_list, batch_size_list, name_list, \
+        queues_dict, queue_name_list, results_dict
+    m = Manager()
+    m.start()
+    nlp_module = []
+    cv_module = []
+    queues_list = []
+    batch_size_list = []
+    name_list = []
+    queues_dict = {}
+    queue_name_list = []
+    results_dict = mp.Manager().dict()
+    for item in configs:
+        print(item)
+        if item["category"] == "CV":
+            cv_module.append(item["module"])
+        elif item["category"] == "NLP":
+            nlp_module.append(item["module"])
+        queues_list.append(m.get_priorityQueue(maxsize=item["queue_size"]))
+        batch_size_list.append(item["batch_size"])
+        name_list.append(item["module"])
+        queues_dict.update({item["module"]: queues_list[-1]})
+        queue_name_list.append(item["module"])
+
+
+def run(is_use_gpu=False, configs=None):
     global use_gpu
     use_gpu = is_use_gpu
+    if configs is not None:
+        config_with_file(configs)
+    else:
+        print("缺少配置")
+        return
+    # return
     my_app = create_app()
     my_app.run(host="0.0.0.0", port=8888, debug=True)
 
 
 if __name__ == "__main__":
-    run(is_use_gpu=False)
+    configs = [{
+        'category': 'NLP',
+        u'queue_size': 20,
+        u'version': u'1.0.0',
+        u'module': 'lac',
+        u'batch_size': 20
+    },
+               {
+                   'category': 'NLP',
+                   u'queue_size': 20,
+                   u'version': u'1.0.0',
+                   u'module': 'senta_lstm',
+                   u'batch_size': 20
+               },
+               {
+                   'category': 'CV',
+                   u'queue_size': 20,
+                   u'version': u'1.0.0',
+                   u'module': 'yolov3_coco2017',
+                   u'batch_size': 20
+               },
+               {
+                   'category': 'CV',
+                   u'queue_size': 20,
+                   u'version': u'1.0.0',
+                   u'module': 'faster_rcnn_coco2017',
+                   u'batch_size': 20
+               }]
+    run(is_use_gpu=False, configs=configs)

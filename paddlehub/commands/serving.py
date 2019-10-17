@@ -20,14 +20,15 @@ from __future__ import print_function
 import argparse
 import subprocess
 import shlex
+import os
+import json
 import paddlehub as hub
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.serving import app
+from paddlehub.serving import app_2
 
 
 class ServingCommand(BaseCommand):
     name = "serving"
-    starting_flag = False
     module_list = []
 
     def __init__(self, name):
@@ -47,39 +48,71 @@ class ServingCommand(BaseCommand):
         # self.sub_parse.add_argument("--show", action="store_true")
         self.parser.add_argument("--use_gpu", action="store_true")
         self.parser.add_argument("--modules", nargs="+")
+        self.parser.add_argument("--config", "-c", nargs="+")
 
     @staticmethod
     def preinstall_modules(modules):
+        configs = []
         if modules is not None:
             for module in modules:
-                module_name = module if "==" not in module else module.split("==")[0]
-                module_version = None if "==" not in module else module.split("==")[1]
+                module_name = module if "==" not in module else \
+                module.split("==")[0]
+                module_version = None if "==" not in module else \
+                module.split("==")[1]
                 try:
-                    hub.Module(name=module_name, version=module_version)
-                    ServingCommand.module_list.append(module_name)
+                    m = hub.Module(name=module_name, version=module_version)
+                    configs.append({
+                        "module": module_name,
+                        "version": m.version,
+                        "category": str(m.type).split("/")[0].upper()
+                    })
                 except Exception as err:
                     pass
+            return configs
+
+    # @staticmethod
+    # def preinstall_modules(modules):
+    #     if modules is not None:
+    #         for module in modules:
+    #             module_name = module if "==" not in module else module.split("==")[0]
+    #             module_version = None if "==" not in module else module.split("==")[1]
+    #             try:
+    #                 hub.Module(name=module_name, version=module_version)
+    #
+    #             except Exception as err:
+    #                 pass
 
     @staticmethod
-    def start_serving(module=None, use_gpu=False):
-        if ServingCommand.starting_flag is True:
-            print("Serving has been started.")
-            return
-        if module is not None:
-            ServingCommand.preinstall_modules(module)
-        try:
-            ServingCommand.starting_flag = True
-            app.run(use_gpu)
-        except Exception as err:
-            ServingCommand.starting_flag = False
+    def start_serving(module=None, use_gpu=False, config_file=None):
+        if config_file is not None:
+            config_file = config_file[0]
+            if os.path.exists(config_file):
+                with open(config_file, "r") as fp:
+                    configs = json.load(fp)
+                    module = [
+                        str(i["module"]) + "==" + str(i["version"])
+                        for i in configs
+                    ]
+                    module_info = ServingCommand.preinstall_modules(module)
+                    for index in range(len(module_info)):
+                        configs[index].update(module_info[index])
+                    app_2.run(use_gpu, configs=configs)
+            else:
+                print("config_file ", config_file, "not exists.")
+        elif module is not None:
+            module_info = ServingCommand.preinstall_modules(module)
+            [
+                item.update({
+                    "batch_size": 20,
+                    "queue_size": 20
+                }) for item in module_info
+            ]
+            app_2.run(use_gpu, configs=module_info)
 
     @staticmethod
     def stop_serving():
         print("Please kill this process by yourself.")
         return
-        if ServingCommand.starting_flag is False:
-            print("Serving has been stopped.")
-            return
         lsof_command = "lsof -i:8888"
         try:
             result = subprocess.check_output(shlex.split(lsof_command))
@@ -93,16 +126,14 @@ class ServingCommand(BaseCommand):
             res = subprocess.check_output(shlex.split(ps_command))
             if "gunicorn" in res:
                 kill_command = "kill -9 " + process[1]
-                subprocess.check_call(shlex.split(kill_command), stdout=subprocess.PIPE,
-                                      stderr=subprocess.PIPE)
+                subprocess.check_call(
+                    shlex.split(kill_command),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
         print("Serving stop.")
-        ServingCommand.starting_flag = False
 
     @staticmethod
     def show_modules():
-        if ServingCommand.starting_flag is False:
-            print("Serving has not been start.")
-            return
         print("All models in use are as follows.")
         for module in ServingCommand.module_list:
             print(module)
@@ -114,16 +145,18 @@ class ServingCommand(BaseCommand):
         str += "option:\n"
         str += "--start\n"
         str += "\tStart PaddleHub-Serving if specifies this parameter.\n"
-        str += "--stop\n"
-        str += "\tStop PaddleHub-Serving if specifies this parameter.\n"
+        # str += "--stop\n"
+        # str += "\tStop PaddleHub-Serving if specifies this parameter.\n"
         str += "--modules [module1==version, module2==version...]\n"
         str += "\tPre-install modules via this parameter list.\n"
         print(str)
 
     def execute(self, argv):
         args = self.parser.parse_args()
+        print(args)
         if args.start is True:
-            ServingCommand.start_serving(args.modules, args.use_gpu)
+            ServingCommand.start_serving(args.modules, args.use_gpu,
+                                         args.config)
         # elif args.stop is True:
         #     ServingCommand.stop_serving()
         # elif args.show is True:

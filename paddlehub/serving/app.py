@@ -245,7 +245,7 @@ def create_app():
     return app_instance
 
 
-def run(is_use_gpu=False):
+def run(is_use_gpu=False, configs=None):
     global use_gpu
     use_gpu = is_use_gpu
     my_app = create_app()
