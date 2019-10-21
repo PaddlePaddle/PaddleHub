@@ -12,4 +12,3 @@ flake8
 tb-paddle
 tensorboard == 1.15
 cma == 2.7.0
-
