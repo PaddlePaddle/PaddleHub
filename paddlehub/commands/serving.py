@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -24,7 +24,7 @@ import os
 import json
 import paddlehub as hub
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.serving import app_2
+from paddlehub.serving import app
 
 
 class ServingCommand(BaseCommand):
@@ -44,8 +44,6 @@ class ServingCommand(BaseCommand):
         self.sub_parse = self.parser.add_mutually_exclusive_group(
             required=False)
         self.sub_parse.add_argument("--start", action="store_true")
-        # self.sub_parse.add_argument("--stop", action="store_true")
-        # self.sub_parse.add_argument("--show", action="store_true")
         self.parser.add_argument("--use_gpu", action="store_true")
         self.parser.add_argument("--modules", nargs="+")
         self.parser.add_argument("--config", "-c", nargs="+")
@@ -70,18 +68,6 @@ class ServingCommand(BaseCommand):
                     pass
             return configs
 
-    # @staticmethod
-    # def preinstall_modules(modules):
-    #     if modules is not None:
-    #         for module in modules:
-    #             module_name = module if "==" not in module else module.split("==")[0]
-    #             module_version = None if "==" not in module else module.split("==")[1]
-    #             try:
-    #                 hub.Module(name=module_name, version=module_version)
-    #
-    #             except Exception as err:
-    #                 pass
-
     @staticmethod
     def start_serving(module=None, use_gpu=False, config_file=None):
         if config_file is not None:
@@ -96,7 +82,7 @@ class ServingCommand(BaseCommand):
                     module_info = ServingCommand.preinstall_modules(module)
                     for index in range(len(module_info)):
                         configs[index].update(module_info[index])
-                    app_2.run(use_gpu, configs=configs)
+                    app.run(use_gpu, configs=configs)
             else:
                 print("config_file ", config_file, "not exists.")
         elif module is not None:
@@ -107,36 +93,7 @@ class ServingCommand(BaseCommand):
                     "queue_size": 20
                 }) for item in module_info
             ]
-            app_2.run(use_gpu, configs=module_info)
-
-    @staticmethod
-    def stop_serving():
-        print("Please kill this process by yourself.")
-        return
-        lsof_command = "lsof -i:8888"
-        try:
-            result = subprocess.check_output(shlex.split(lsof_command))
-        except Exception as err:
-            print("Serving has been stopped.")
-            return
-        result = result.splitlines()[1:]
-        for item in result:
-            process = item.split()
-            ps_command = "ps " + process[1]
-            res = subprocess.check_output(shlex.split(ps_command))
-            if "gunicorn" in res:
-                kill_command = "kill -9 " + process[1]
-                subprocess.check_call(
-                    shlex.split(kill_command),
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
-        print("Serving stop.")
-
-    @staticmethod
-    def show_modules():
-        print("All models in use are as follows.")
-        for module in ServingCommand.module_list:
-            print(module)
+            app.run(use_gpu, configs=module_info)
 
     @staticmethod
     def show_help():
@@ -145,22 +102,15 @@ class ServingCommand(BaseCommand):
         str += "option:\n"
         str += "--start\n"
         str += "\tStart PaddleHub-Serving if specifies this parameter.\n"
-        # str += "--stop\n"
-        # str += "\tStop PaddleHub-Serving if specifies this parameter.\n"
         str += "--modules [module1==version, module2==version...]\n"
         str += "\tPre-install modules via this parameter list.\n"
         print(str)
 
     def execute(self, argv):
         args = self.parser.parse_args()
-        print(args)
         if args.start is True:
             ServingCommand.start_serving(args.modules, args.use_gpu,
                                          args.config)
-        # elif args.stop is True:
-        #     ServingCommand.stop_serving()
-        # elif args.show is True:
-        #     ServingCommand.show_modules()
         else:
             ServingCommand.show_help()
 
