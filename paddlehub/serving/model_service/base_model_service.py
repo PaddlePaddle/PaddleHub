@@ -3,7 +3,6 @@ import abc
 
 
 class BaseModelService(object):
-
     def _initialize(self):
         pass
 
@@ -18,4 +17,3 @@ class BaseModelService(object):
     @abc.abstractmethod
     def _post_processing(self, data):
         pass
-
