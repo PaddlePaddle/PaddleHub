@@ -22,6 +22,7 @@ import contextlib
 import time
 import copy
 import logging
+import numpy as np
 import paddle.fluid as fluid
 from tb_paddle import SummaryWriter
 
@@ -304,6 +305,10 @@ class BasicTask(object):
         if not self.config.use_data_parallel:
             return [_places[0]]
         return _places
+
+    @property
+    def return_numpy(self):
+        return True
 
     @property
     def is_train_phase(self):
@@ -653,10 +658,18 @@ class BasicTask(object):
             step_run_state.run_step = 1
             num_batch_examples = len(batch)
 
-            fetch_result = self.exe.run(
-                self.main_program_to_be_run,
-                feed=data_feeder.feed(batch),
-                fetch_list=self.fetch_list)
+            if self.return_numpy:
+                fetch_result = self.exe.run(
+                    self.main_program_to_be_run,
+                    feed=data_feeder.feed(batch),
+                    fetch_list=self.fetch_list)
+            else:
+                fetch_result = self.exe.run(
+                    self.main_program_to_be_run,
+                    feed=data_feeder.feed(batch),
+                    fetch_list=self.fetch_list,
+                    return_numpy=False)
+                fetch_result = [np.array(x) for x in fetch_result]
 
             for index, result in enumerate(fetch_result):
                 step_run_state.run_results[index] = result
@@ -694,8 +707,17 @@ class BasicTask(object):
                     num_batch_examples = self.config.batch_size * self.device_count
                     step_run_state = RunState(len(self.fetch_list))
                     step_run_state.run_step = 1
-                    fetch_result = self.exe.run(
-                        self.main_program_to_be_run, fetch_list=self.fetch_list)
+
+                    if self.return_numpy:
+                        fetch_result = self.exe.run(
+                            self.main_program_to_be_run,
+                            fetch_list=self.fetch_list)
+                    else:
+                        fetch_result = self.exe.run(
+                            self.main_program_to_be_run,
+                            fetch_list=self.fetch_list,
+                            return_numpy=False)
+                        fetch_result = [np.array(x) for x in fetch_result]
 
                     for index, result in enumerate(fetch_result):
                         step_run_state.run_results[index] = result
