@@ -1,4 +1,17 @@
 # coding: utf-8
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from flask import Flask, request, render_template
 from paddlehub.serving.model_service.text_model_service import TextModelService
 from paddlehub.serving.model_service.image_model_service import ImageModelService
@@ -49,7 +62,9 @@ def predict_nlp(input_data, module_name, batch_size=1):
         predict_method = getattr(module, method_name)
         try:
             real_input_data = {"text": real_input_data}
-            results = predict_method(data=real_input_data, use_gpu=use_gpu)
+            results = predict_method(
+                data=real_input_data, use_gpu=use_gpu, batch_size=batch_size)
+
         except Exception as err:
             return {"result": "Please check data format!"}
     else:
@@ -86,7 +101,9 @@ def predict_cv(input_data, module_name, batch_size=1):
         predict_method = getattr(module, method_name)
         try:
             results = predict_method(
-                data={"image": filename_list}, use_gpu=use_gpu)
+                data={"image": filename_list},
+                use_gpu=use_gpu,
+                batch_size=batch_size)
         except Exception as err:
             return {"result": "Please check data format!"}
     else:
@@ -113,6 +130,7 @@ def predict_cv(input_data, module_name, batch_size=1):
 def worker():
     global batch_size_list, name_list, queue_name_list, cv_module
     latest_num = random.randrange(0, len(queue_name_list))
+
     while True:
         time.sleep(0.01)
         for index in range(len(queue_name_list)):
@@ -120,7 +138,9 @@ def worker():
                 input_data = []
                 lock.acquire()
                 try:
-                    for index2 in range(batch_size_list[latest_num]):
+                    batch = queues_dict[
+                        queue_name_list[latest_num]].get_attribute("maxsize")
+                    for index2 in range(batch):
                         if queues_dict[
                                 queue_name_list[latest_num]].empty() is True:
                             break
@@ -280,7 +300,7 @@ def config_with_file(configs):
         queue_name_list.append(item["module"])
 
 
-def run(is_use_gpu=False, configs=None):
+def run(is_use_gpu=False, configs=None, port=8888):
     global use_gpu
     use_gpu = is_use_gpu
     if configs is not None:
@@ -289,7 +309,7 @@ def run(is_use_gpu=False, configs=None):
         print("Start failed cause of missing configuration.")
         return
     my_app = create_app()
-    my_app.run(host="0.0.0.0", port=8888, debug=True)
+    my_app.run(host="0.0.0.0", port=port, debug=True)
 
 
 if __name__ == "__main__":

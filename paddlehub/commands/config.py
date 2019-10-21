@@ -46,12 +46,12 @@ class ConfigCommand(BaseCommand):
     @staticmethod
     def show_config():
         print("The current configuration is shown below.")
-        with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
+        with open(os.path.join(CONF_HOME, "serving_config.json"), "r") as fp:
             print(json.dumps(json.load(fp), indent=4))
 
     @staticmethod
     def set_server_url(server_url):
-        with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
+        with open(os.path.join(CONF_HOME, "serving_config.json"), "r") as fp:
             config = json.load(fp)
             re_str = "^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\*\+,;=.]+$"
             if re.match(re_str, server_url) is not None:
@@ -62,7 +62,7 @@ class ConfigCommand(BaseCommand):
 
     @staticmethod
     def set_config(config):
-        with open(os.path.join(CONF_HOME, "config.json"), "w") as fp:
+        with open(os.path.join(CONF_HOME, "serving_config.json"), "w") as fp:
             fp.write(json.dumps(config))
         print("Set success! The current configuration is shown below.")
         print(json.dumps(config, indent=4))
@@ -76,9 +76,9 @@ class ConfigCommand(BaseCommand):
             print("Allowed values include: "
                   "NOLOG, DEBUG, INFO, WARNING, ERROR, CRITICAL")
             return
-        with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
+        with open(os.path.join(CONF_HOME, "serving_config.json"), "r") as fp:
             current_config = json.load(fp)
-        with open(os.path.join(CONF_HOME, "config.json"), "w") as fp:
+        with open(os.path.join(CONF_HOME, "serving_config.json"), "w") as fp:
             current_config["log_level"] = level
             fp.write(json.dumps(current_config))
             print("Set success! The current configuration is shown below.")

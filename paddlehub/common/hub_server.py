@@ -40,7 +40,8 @@ CACHE_TIME = 60 * 10
 class HubServer(object):
     def __init__(self, config_file_path=None):
         if not config_file_path:
-            config_file_path = os.path.join(hub.CONF_HOME, 'config.json')
+            config_file_path = os.path.join(hub.CONF_HOME,
+                                            'serving_config.json')
         if not os.path.exists(hub.CONF_HOME):
             utils.mkdir(hub.CONF_HOME)
         if not os.path.exists(config_file_path):
