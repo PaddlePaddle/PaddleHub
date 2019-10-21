@@ -242,17 +242,12 @@ def create_app():
         start = time.time()
 
         data_2_item(data_list, req_id, score, module_name)
-        print("cunchu need", time.time() - start)
         results = []
         result_len = 0
-        start = time.time()
         while result_len != data_num:
             result_len = len(results_dict.get(req_id, []))
-        print("cha zhao xuyao", time.time() - start)
-        start = time.time()
         results = results_dict.get(req_id)
         results = [i[1] for i in sorted(results, key=lambda k: k[0])]
-        print("sort need", time.time() - start)
         return {"result": results}
 
     return app_instance
