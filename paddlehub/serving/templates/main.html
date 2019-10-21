@@ -10,7 +10,6 @@
 <body>
 <div class="input-group mb-3">
     <table class="table table-striped table-dark table-hover">
-<!--        <tr><td style="width: 100%;">Hub-Serving v1.0.0</td></tr>-->
         <tr>
             <td style="width: 17%"></td>
             <td style="width: 5%" valign="top">
@@ -56,7 +55,6 @@
     };
     function get_module_option(module_categoty) {
         options = module_info[module_categoty];
-        // console.log(options.keys());
         html = "";
         for (var i=0, len=options.length; i<len; i++){
             option_name = Object.keys(options[i])[0];
@@ -156,7 +154,6 @@
         if (module_name == "Choose..."){
             display_html = ""
         }else{
-            console.log(document.getElementById("inputGroupSelect01").value);
             if (document.getElementById("inputGroupSelect01").value == "nlp_module"){
                 display_html = get_single_text_html();
             }else if (document.getElementById("inputGroupSelect01").value == "cv_module"){
@@ -171,7 +168,6 @@
             let file = files[0];
             let reader = new FileReader();
             reader.onload = function(){
-                console.log("进得来");
                 document.getElementById('file_text').value = this.result;
             };
             reader.readAsText(file);
@@ -198,9 +194,7 @@
     }
     function sub_text() {
         var formParam = $("#main_form").serialize();
-        console.log("sub()", formParam);
         to_url = "/predict/text/" + document.getElementById("inputGroupSelect02").value;
-        // to_url = "/predict/" + document.getElementById("inputGroupSelect02").value;
         $.ajax({
                 cache: true,
                 type: "POST",
@@ -217,13 +211,11 @@
             });
     }
     function sub_img() {
-        console.log(document.getElementById("file").value);
         var formParam = {
             "input_img": document.getElementById("file_img").src,
             "input_file":document.getElementById("file").value
         };
         to_url = "/predict/image/" + document.getElementById("inputGroupSelect02").value;
-        // to_url = "/predict/" + document.getElementById("inputGroupSelect02").value;
         $.ajax({
                 cache: true,
                 type: "POST",

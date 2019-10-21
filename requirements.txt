@@ -9,6 +9,7 @@ six >= 1.10.0
 chardet == 3.0.4
 requests
 pandas
+flask
 flake8
 tb-paddle
 tb-nightly
