@@ -34,7 +34,7 @@ class ServingCommand(BaseCommand):
     def __init__(self, name):
         super(ServingCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Start PaddleHub Serving."
+        self.description = "Start a service for online predicting by using PaddleHub."
         self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s [COMMAND]' % (ENTRY, name),
