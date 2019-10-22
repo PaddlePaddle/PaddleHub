@@ -18,6 +18,7 @@ import copy
 import json
 import math
 import numpy as np
+import os
 import six
 import time
 
@@ -189,6 +190,8 @@ class BaseTuningStrategy(object):
                 params_cudas_dirs = []
 
         self.feedback(solutions, solution_results)
+        # remove the tmp.txt which records the eval results for trials
+        os.remove("tmp.txt")
 
         return solutions_modeldirs
 

@@ -46,7 +46,7 @@ class AutoFineTuneCommand(BaseCommand):
         super(AutoFineTuneCommand, self).__init__(name)
         self.show_in_help = True
         self.name = name
-        self.description = "Paddlehub helps to finetune a task by searching hyperparameters automatically."
+        self.description = "PaddleHub helps to finetune a task by searching hyperparameters automatically."
         self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <task to be fintuned in python script>' % (ENTRY,
