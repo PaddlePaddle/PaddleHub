@@ -119,7 +119,8 @@ seq_label_task = hub.SequenceLabelTask(
     feed_list=feed_list,
     max_seq_len=args.max_seq_len,
     num_classes=dataset.num_labels,
-    config=config)
+    config=config,
+    add_crf=False)
 
 seq_label_task.finetune_and_eval()
 ```
@@ -128,6 +129,7 @@ seq_label_task.finetune_and_eval()
 1. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达。
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与SequenceLabelReader返回的结果一致。
 3. `hub.SequenceLabelTask`通过输入特征，迁移的类别数，可以生成适用于序列标注的迁移任务`SequenceLabelTask`
+4. `hub.SequenceLabelTask`通过add_crf, 选择是否加入crf作为decoder。如果add_crf=True, 则在预训练模型计算图加入fc+crf层，否则只在在预训练模型计算图加入fc层。
 
 ## 可视化
 

@@ -1,8 +1,8 @@
-# `v1.2.0`
+# `v1.2.1`
 
 * 新增**超参优化Auto Fine-tune**，实现给定超参搜索空间，PaddleHub自动给出较佳的超参组合
-  * 支持两种优化策略：HAZero和PSHE2
-  * 支持两种评估方式：FullTrail和ModelBased
+  * 支持两种超参优化算法：HAZero和PSHE2
+  * 支持两种评估方式：FullTrail和PopulationBased
 * 新增Fine-tune**优化策略ULMFiT**，包括以下三种设置
   * Slanted triangular learning rates：学习率先线性增加后缓慢降低
   * Discriminative fine-tuning：将计算图划分为n段，不同的段设置不同学习率
