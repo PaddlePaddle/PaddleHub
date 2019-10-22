@@ -119,7 +119,7 @@ class Module(object):
         self.cache_fetch_dict = None
         self.cache_program = None
 
-        fp_lock = open(os.path.join(CONF_HOME, 'serving_config.json'))
+        fp_lock = open(os.path.join(CONF_HOME, 'config.json'))
         lock.flock(fp_lock, lock.LOCK_EX)
         if name:
             self._init_with_name(name=name, version=version)
