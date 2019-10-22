@@ -25,6 +25,7 @@ import sys
 import ast
 
 import six
+import shutil
 import pandas
 import numpy as np
 
@@ -190,17 +191,23 @@ class AutoFineTuneCommand(BaseCommand):
             f.write("The final best hyperparameters:\n")
             for index, hparam_name in enumerate(autoft.hparams_name_list):
                 print("%s=%s" % (hparam_name, best_hparams[index]))
-                f.write(hparam_name + "\t:\t" + str(best_hparams[index]) +
-                        "\n\n")
+                f.write(hparam_name + "\t:\t" + str(best_hparams[index]) + "\n")
+
+            best_model_dir = autoft._output_dir + "/best_model"
+            shutil.copytree(solutions_modeldirs[autoft.get_best_hparams()],
+                            best_model_dir)
+            f.write("The final best model parameters are saved as:\n" +
+                    best_model_dir + "\n")
+
             f.write("\t".join(autoft.hparams_name_list) +
-                    "\tsaved_params_dir\n\n")
+                    "\tsaved_params_dir\n")
             print(
                 "The related infomation  about hyperparamemters searched are saved as %s/log_file.txt ."
                 % autoft._output_dir)
             for solution, modeldir in solutions_modeldirs.items():
                 param = evaluator.convert_params(solution)
                 param = [str(p) for p in param]
-                f.write("\t".join(param) + "\t" + modeldir + "\n\n")
+                f.write("\t".join(param) + "\t" + modeldir + "\n")
 
         return True
 
