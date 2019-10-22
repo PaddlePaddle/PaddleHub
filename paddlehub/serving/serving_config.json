@@ -3,7 +3,7 @@
   {
     "module": "lac",
     "version": "1.0.0",
-    "batch_size": 1,
+    "batch_size": 200,
     "queue_size": 200
   },
   {
