@@ -33,7 +33,7 @@ from paddlehub.common.arg_helper import add_argument, print_arguments
 from paddlehub.autofinetune.autoft import PSHE2
 from paddlehub.autofinetune.autoft import HAZero
 from paddlehub.autofinetune.evaluator import FullTrailEvaluator
-from paddlehub.autofinetune.evaluator import ModelBasedEvaluator
+from paddlehub.autofinetune.evaluator import PopulationBasedEvaluator
 from paddlehub.common.logger import logger
 
 import paddlehub as hub
@@ -84,8 +84,8 @@ class AutoFineTuneCommand(BaseCommand):
         self.arg_config_group.add_argument(
             "--evaluate_choice",
             type=str,
-            default="modelbased",
-            help="Choices: fulltrail or modelbased.")
+            default="populationbased",
+            help="Choices: fulltrail or populationbased.")
         self.arg_config_group.add_argument(
             "--tuning_strategy",
             type=str,
@@ -147,8 +147,8 @@ class AutoFineTuneCommand(BaseCommand):
                 self.args.param_file,
                 self.fintunee_script,
                 options_str=options_str)
-        elif self.args.evaluate_choice.lower() == "modelbased":
-            evaluator = ModelBasedEvaluator(
+        elif self.args.evaluate_choice.lower() == "populationbased":
+            evaluator = PopulationBasedEvaluator(
                 self.args.param_file,
                 self.fintunee_script,
                 options_str=options_str)

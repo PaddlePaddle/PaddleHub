@@ -1,5 +1,5 @@
-#coding:utf-8
-#   Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# coding:utf-8
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -18,27 +18,25 @@ from __future__ import division
 from __future__ import print_function
 
 from collections import namedtuple
-import codecs
+import io
 import os
-import pandas as pd
-from numpy import nan
+import csv
 
 from paddlehub.dataset import InputExample, HubDataset
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
 
-_DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/toxic.tar.gz"
+_DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/tnews.tar.gz"
 
 
-class Toxic(HubDataset):
+class TNews(HubDataset):
     """
-    The kaggle Toxic dataset:
-    https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge
+    TNews is the chinese news classification dataset on JinRiTouDiao App.
     """
 
     def __init__(self):
-        self.dataset_dir = os.path.join(DATA_HOME, "toxic")
+        self.dataset_dir = os.path.join(DATA_HOME, "tnews")
         if not os.path.exists(self.dataset_dir):
             ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
                 url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
@@ -50,16 +48,19 @@ class Toxic(HubDataset):
         self._load_dev_examples()
 
     def _load_train_examples(self):
-        self.train_file = os.path.join(self.dataset_dir, "train.csv")
-        self.train_examples = self._read_csv(self.train_file)
+        self.train_file = os.path.join(self.dataset_dir,
+                                       "toutiao_category_train.txt")
+        self.train_examples = self._read_file(self.train_file)
 
     def _load_dev_examples(self):
-        self.dev_file = os.path.join(self.dataset_dir, "dev.csv")
-        self.dev_examples = self._read_csv(self.dev_file)
+        self.dev_file = os.path.join(self.dataset_dir,
+                                     "toutiao_category_dev.txt")
+        self.dev_examples = self._read_file(self.dev_file)
 
     def _load_test_examples(self):
-        self.test_file = os.path.join(self.dataset_dir, "test.csv")
-        self.test_examples = self._read_csv(self.test_file)
+        self.test_file = os.path.join(self.dataset_dir,
+                                      "toutiao_category_test.txt")
+        self.test_examples = self._read_file(self.test_file)
 
     def get_train_examples(self):
         return self.train_examples
@@ -72,8 +73,10 @@ class Toxic(HubDataset):
 
     def get_labels(self):
         return [
-            'toxic', 'severe_toxic', 'obscene', 'threat', 'insult',
-            'identity_hate'
+            'news_game', 'news_sports', 'news_finance', 'news_entertainment',
+            'news_tech', 'news_house', 'news_car', 'news_culture', 'news_world',
+            'news_travel', 'news_agriculture', 'news_military', 'news_edu',
+            'news_story', 'stock'
         ]
 
     @property
@@ -83,21 +86,20 @@ class Toxic(HubDataset):
         """
         return len(self.get_labels())
 
-    def _read_csv(self, input_file, quotechar=None):
+    def _read_file(self, input_file):
         """Reads a tab separated value file."""
-        data = pd.read_csv(input_file, encoding="UTF-8")
-        examples = []
-        for index, row in data.iterrows():
-            guid = row["id"]
-            text = row["comment_text"]
-            labels = [int(value) for value in row[2:]]
-            example = InputExample(guid=guid, label=labels, text_a=text)
-            examples.append(example)
+        with io.open(input_file, "r", encoding="UTF-8") as file:
+            examples = []
+            for line in file:
+                data = line.strip().split("_!_")
+                example = InputExample(
+                    guid=data[0], label=data[2], text_a=data[3])
+                examples.append(example)
 
-        return examples
+            return examples
 
 
 if __name__ == "__main__":
-    ds = Toxic()
-    for e in ds.get_train_examples():
+    ds = TNews()
+    for e in ds.get_train_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

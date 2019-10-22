@@ -157,9 +157,9 @@ class FullTrailEvaluator(BaseEvaluator):
         return reward
 
 
-class ModelBasedEvaluator(BaseEvaluator):
+class PopulationBasedEvaluator(BaseEvaluator):
     def __init__(self, params_file, finetunee_script, options_str=""):
-        super(ModelBasedEvaluator, self).__init__(
+        super(PopulationBasedEvaluator, self).__init__(
             params_file, finetunee_script, options_str=options_str)
         self.half_best_model_path = []
         self.run_count = 0

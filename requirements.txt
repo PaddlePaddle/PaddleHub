@@ -1,6 +1,6 @@
 #for python2, you should use requirements_py2.txt
 pre-commit
-protobuf >= 3.1.0
+protobuf >= 3.6.0
 yapf == 0.26.0
 pyyaml
 numpy
