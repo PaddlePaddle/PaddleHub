@@ -15,7 +15,7 @@
 from flask import Flask, request, render_template
 from paddlehub.serving.model_service.text_model_service import TextModelService
 from paddlehub.serving.model_service.image_model_service import ImageModelService
-from paddlehub.serving import utils
+from paddlehub.common import utils
 import time
 import os
 import base64
@@ -196,7 +196,7 @@ def create_app():
         if ext == "":
             return {"result": "Unrecognized file type"}
         score = time.time()
-        filename = utils.gen_md5(str(time.time()) + str(img_base64)) + "." + ext
+        filename = utils.md5(str(time.time()) + str(img_base64)) + "." + ext
         base64_head = img_base64.split(',')[0]
         img_data = base64.b64decode(img_base64.split(',')[-1])
         with open(filename, "wb") as fp:
@@ -309,7 +309,7 @@ def run(is_use_gpu=False, configs=None, port=8888):
         print("Start failed cause of missing configuration.")
         return
     my_app = create_app()
-    my_app.run(host="0.0.0.0", port=port, debug=True)
+    my_app.run(host="0.0.0.0", port=port, debug=False)
 
 
 if __name__ == "__main__":
