@@ -69,7 +69,7 @@ class AutoFineTuneCommand(BaseCommand):
         self.arg_config_group.add_argument(
             "--popsize", type=int, default=5, help="Population size")
         self.arg_config_group.add_argument(
-            "--cuda",
+            "--devices_id",
             type=ast.literal_eval,
             default=['0'],
             required=True,
@@ -82,7 +82,7 @@ class AutoFineTuneCommand(BaseCommand):
             default=None,
             help="Directory to model checkpoint")
         self.arg_config_group.add_argument(
-            "--evaluate_choice",
+            "--evaluator",
             type=str,
             default="populationbased",
             help="Choices: fulltrail or populationbased.")
@@ -142,30 +142,30 @@ class AutoFineTuneCommand(BaseCommand):
         if self.args.opts is not None:
             options_str = self.convert_to_other_options(self.args.opts)
 
-        if self.args.evaluate_choice.lower() == "fulltrail":
+        if self.args.evaluator.lower() == "fulltrail":
             evaluator = FullTrailEvaluator(
                 self.args.param_file,
                 self.fintunee_script,
                 options_str=options_str)
-        elif self.args.evaluate_choice.lower() == "populationbased":
+        elif self.args.evaluator.lower() == "populationbased":
             evaluator = PopulationBasedEvaluator(
                 self.args.param_file,
                 self.fintunee_script,
                 options_str=options_str)
         else:
             raise ValueError(
-                "The evaluate %s is not defined!" % self.args.evaluate_choice)
+                "The evaluate %s is not defined!" % self.args.evaluator)
 
         if self.args.tuning_strategy.lower() == "hazero":
             autoft = HAZero(
                 evaluator,
-                cudas=self.args.cuda,
+                cudas=self.args.devices_id,
                 popsize=self.args.popsize,
                 output_dir=self.args.output_dir)
         elif self.args.tuning_strategy.lower() == "pshe2":
             autoft = PSHE2(
                 evaluator,
-                cudas=self.args.cuda,
+                cudas=self.args.devices_id,
                 popsize=self.args.popsize,
                 output_dir=self.args.output_dir)
         else:
@@ -190,8 +190,8 @@ class AutoFineTuneCommand(BaseCommand):
             f.write("The final best hyperparameters:\n")
             for index, hparam_name in enumerate(autoft.hparams_name_list):
                 print("%s=%s" % (hparam_name, best_hparams[index]))
-                f.write(hparam_name + "\t:\t" + str(best_hparams[index]) + "\n")
-            f.write("\n\n\n")
+                f.write(hparam_name + "\t:\t" + str(best_hparams[index]) +
+                        "\n\n")
             f.write("\t".join(autoft.hparams_name_list) +
                     "\tsaved_params_dir\n\n")
             print(
