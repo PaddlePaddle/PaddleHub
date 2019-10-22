@@ -108,7 +108,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 > `--evaluate_choice`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased
 
-> `--tuning_strategy`: 可选，设置自动优化超参策略，可选hazero和pshe2，默认为pshe2
+> `--tuning_strategy`: 可选，设置自动优化超参算法，可选hazero和pshe2，默认为pshe2
 
 **NOTE**:
 
