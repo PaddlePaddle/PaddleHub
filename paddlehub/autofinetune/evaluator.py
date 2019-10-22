@@ -39,7 +39,6 @@ def report_final_result(result):
     rand_str = os.environ.get("tmp_env")
     # tmp.txt is to record the eval results for trials
     with open("tmp.txt", 'a') as file:
-        print(rand_str, result)
         file.write(rand_str + "\t" + str(float(result)) + "\n")
 
 
