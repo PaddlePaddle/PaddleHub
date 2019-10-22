@@ -35,6 +35,22 @@ else:
     INF = float("inf")
 
 
+def report_final_result(result):
+    rand_str = os.environ.get("tmp_env")
+    # tmp.txt is to record the eval results for trials
+    with open("tmp.txt", 'a') as file:
+        file.write(rand_str + "\t" + str(float(result)) + "\n")
+
+
+def unique_name():
+    seed = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+=-"
+    x = []
+    for idx in range(4):
+        x.append(random.choice(seed))
+    rand_str = "".join(x)
+    return rand_str
+
+
 class BaseEvaluator(object):
     def __init__(self, params_file, finetunee_script, options_str=""):
         with io.open(params_file, 'r', encoding='utf8') as f:
@@ -132,26 +148,31 @@ class FullTrailEvaluator(BaseEvaluator):
         else:
             run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
                     (num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
+
         try:
+            #  set temp environment variable to record the eval results for trials
+            rand_str = unique_name()
+            os.environ['tmp_env'] = rand_str
+
             os.system(run_cmd)
-            with open(log_file, "r") as f:
-                lines = f.readlines()
-                eval_result = []
-                for line in lines:
-                    line = line.strip()
-                    if line.startswith("AutoFinetuneEval"):
-                        data = line.split("\t")
-                        eval_result = float(data[-1])
-                if eval_result == []:
-                    print(
-                        "WARNING: Program which was ran with hyperparameters as %s was crashed!"
-                        % param_str.replace("--", ""))
-                    eval_result = 0.0
+
+            eval_result = []
+            with open('tmp.txt', 'r') as file:
+                for line in file:
+                    data = line.strip().split("\t")
+                    if rand_str == data[0]:
+                        eval_result = float(data[1])
+            if eval_result == []:
+                print(
+                    "WARNING: Program which was ran with hyperparameters as %s was crashed!"
+                    % param_str.replace("--", ""))
+                eval_result = 0.0
         except:
             print(
                 "WARNING: Program which was ran with hyperparameters as %s was crashed!"
                 % param_str.replace("--", ""))
             eval_result = 0.0
+
         reward = self.get_reward(eval_result)
         self.model_rewards[saved_params_dir] = reward
         return reward
@@ -196,26 +217,31 @@ class PopulationBasedEvaluator(BaseEvaluator):
                         (num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
 
         self.run_count += 1
+
         try:
+            #  set temp environment variable to record the eval results for trials
+            rand_str = unique_name()
+            os.environ['tmp_env'] = rand_str
+
             os.system(run_cmd)
-            with open(log_file, "r") as f:
-                lines = f.readlines()
-                eval_result = []
-                for line in lines:
-                    line = line.strip()
-                    if line.startswith("AutoFinetuneEval"):
-                        data = line.split("\t")
-                        eval_result = float(data[-1])
-                if eval_result == []:
-                    print(
-                        "WARNING: Program which was ran with hyperparameters as %s was crashed!"
-                        % param_str.replace("--", ""))
-                    eval_result = 0.0
+
+            eval_result = []
+            with open('tmp.txt', 'r') as file:
+                for line in file:
+                    data = line.strip().split("\t")
+                    if rand_str == data[0]:
+                        eval_result = float(data[1])
+            if eval_result == []:
+                print(
+                    "WARNING: Program which was ran with hyperparameters as %s was crashed!"
+                    % param_str.replace("--", ""))
+                eval_result = 0.0
         except:
             print(
                 "WARNING: Program which was ran with hyperparameters as %s was crashed!"
                 % param_str.replace("--", ""))
             eval_result = 0.0
+
         reward = self.get_reward(eval_result)
         self.model_rewards[saved_params_dir] = reward
         return reward
