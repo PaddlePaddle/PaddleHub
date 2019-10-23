@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding: utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -12,18 +12,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import paddlehub as hub
 
-from . import download
-from . import run
-from . import show
-from . import version
-from . import list
-from . import install
-from . import uninstall
-from . import search
-from . import help
-from . import clear
-from . import config
-from . import hub
-from . import autofinetune
-from . import serving
+
+class TextModelService(object):
+    @classmethod
+    def instance(cls):
+        if not hasattr(cls, "_instance"):
+            cls._instance = cls()
+        return cls._instance
+
+    @classmethod
+    def get_module(cls, name):
+        module = hub.Module(name=name)
+        return module
+
+    def _initialize(self):
+        pass
+
+    def _pre_processing(self):
+        pass
+
+    def _inference(self):
+        pass
+
+    def _post_processing(self):
+        pass

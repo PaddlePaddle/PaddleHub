@@ -1,0 +1,251 @@
+{# coding: utf-8 #}
+{# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved. #}
+
+{# Licensed under the Apache License, Version 2.0 (the "License" #}
+{# you may not use this file except in compliance with the License. #}
+{# You may obtain a copy of the License at #}
+
+{#     http://www.apache.org/licenses/LICENSE-2.0 #}
+{# #}
+{# Unless required by applicable law or agreed to in writing, software #}
+{# distributed under the License is distributed on an "AS IS" BASIS, #}
+{# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #}
+{# See the License for the specific language governing permissions and #}
+{# limitations under the License. #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="input-group mb-3">
+    <table class="table table-striped table-dark table-hover">
+        <tr>
+            <td style="width: 17%"></td>
+            <td style="width: 5%" valign="top">
+                <label class="input-group-text" for="inputGroupSelect01" style="color: white;
+                background-color: rgba(0,0,0,0); border: 0px; font-size: 20px">分类
+                </label>
+            </td>
+            <td style="width: 25%">
+                <select class="custom-select" id="inputGroupSelect01"
+                        onchange="select_category(this.options[this.options.selectedIndex].value)">
+                    <option selected>Choose...</option>
+                    <option value="nlp_module">nlp</option>
+                    <option value="cv_module">cv</option>
+                </select>
+            </td>
+            <td style="width: 6%"></td>
+            <td style="width: 5%">
+                <label class="input-group-text" for="inputGroupSelect02" style="color: white;
+                background-color: rgba(0,0,0,0); border: 0px; font-size: 20px">模型
+                </label>
+            </td>
+            <td style="width: 25%">
+                <select class="custom-select" id="inputGroupSelect02"
+                        onchange="select_module(this.options[this.options.selectedIndex].value)">
+                    <option selected value="Choose...">请先选择分类...</option>
+                </select>
+            </td>
+            <td style="width: 17%"></td>
+        </tr>
+    </table>
+</div>
+<form id="main_form">
+    <div class="input-group mb-3" id="display_div">
+
+    </div>
+</form>
+<script>
+    module_info = {
+        "nlp_module":[{"Choose...":"Choose..."},{"lac":"lac"},
+            {"senta_lstm":"senta_lstm"}],
+        "cv_module":[{"Choose...":"Choose..."},{"yolov3":"yolov3_coco2017"},{"faster_rcnn":"faster_rcnn_coco2017"}],
+        "Choose...":[{"请先选择分类":"Choose..."}]
+    };
+    function get_module_option(module_categoty) {
+        options = module_info[module_categoty];
+        html = "";
+        for (var i=0, len=options.length; i<len; i++){
+            option_name = Object.keys(options[i])[0];
+            option_value = options[i][option_name];
+            html = html
+            + "<option value='"
+            + option_value
+            + "'>"
+            + option_name
+            + "</option>";
+        }
+        return html;
+    }
+    function get_single_text_html() {
+        html = ""
+        + '<p style="width: 5%"></p>'
+        + '<p>请输入文字或者上传一个文本文件</p>'
+        + '<p style="width: 2%"></p>'
+        + '<input type="file" id="file" onchange="handle_text(this.files)"/>'
+        +
+            '<table class="table table-striped table-dark table-hover" style="width: 95%"; align="center">'
+            + '<tr>'
+                + '<td>'
+                    + '<textarea cols="100" rows="30"'
+                        + 'class="form-control"'
+                        + 'id="file_text"'
+                        + 'onblur="blur_input_text()"'
+                        + 'onfocus="focus_input_text()"'
+                        + 'name="input_text">'
+                        + '在此键入文本或上传文本文件'
+                    + '</textarea>'
+                + '</td>'
+                + '<td>'
+                    +
+            '<input type="button" value="Go!" onclick="sub_text()" class="btn-circle"></input>'
+                + '</td>'
+                + '<td>'
+                    + '<textarea cols="100" rows="30"'
+                        + 'class="form-control"'
+                        + 'id="result_text"'
+
+                        + 'name="result_text_name">'
+
+                    + '</textarea>'
+                + '</td>'
+            + '</tr>'
+        + '</table>';
+        return html;
+    }
+    function blur_input_text()
+    {
+        text = document.getElementById("file_text");
+        if (text.value == ""){
+            text.value = "在此键入文本或上传文本文件";
+        }
+    }
+    function focus_input_text(){
+        text = document.getElementById("file_text");
+        if (text.value == "在此键入文本或上传文本文件"){
+            text.value = "";
+        }
+    }
+    function get_single_img_html() {
+        html = ""
+        + '<p>请上传一个图片文件</p>'
+        + '<input type="file" id="file" onchange="handle_img(this.files)"/>'
+        + '<table class="table table-striped table-dark table-hover">'
+            + '<tr>'
+                + '<td style="width: 45%">'
+                    + '<img width="100%" id="file_img" name="input_img" value="kitten.jpg"/>'
+                + '</td>'
+                + '<td>'
+                    + '<input type="button" value="Start!" onclick="sub_img()"></input>'
+                + '</td>'
+                + '<td style="width: 45%"><table>'
+                    + '<tr><td>'
+                        + '<img width="100%" id="result_img" name="output_img"/>'
+                    + '</td></tr>'
+                    + '<tr><td>'
+                        + '<textarea cols="100" rows="2"'
+                            + 'class="form-control"'
+                            + 'id="result_text"'
+                            + 'name="result_text_name">'
+                        + '</textarea>'
+                    + '</td></tr>'
+                + '</table></td>'
+            + '</tr>'
+        + '</table>';
+        return html;
+    }
+    function select_category(module_categoty) {
+        select_module("Choose...");
+        option_html = get_module_option(module_categoty);
+        document.getElementById("inputGroupSelect02").innerHTML = option_html;
+    }
+    function select_module(module_name){
+        if (module_name == "Choose..."){
+            display_html = ""
+        }else{
+            if (document.getElementById("inputGroupSelect01").value == "nlp_module"){
+                display_html = get_single_text_html();
+            }else if (document.getElementById("inputGroupSelect01").value == "cv_module"){
+                display_html = get_single_img_html();
+            }
+
+        }
+        document.getElementById("display_div").innerHTML = display_html;
+    }
+    function handle_text(files) {
+        if (files.length){
+            let file = files[0];
+            let reader = new FileReader();
+            reader.onload = function(){
+                document.getElementById('file_text').value = this.result;
+            };
+            reader.readAsText(file);
+        }
+    }
+    function handle_img(files) {
+        if (files.length){
+            let file = files[0];
+            let reader = new FileReader();
+            reader.onload = function(){
+                document.getElementById('file_img').src = this.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    function get_result_html(results) {
+        html = "";
+        for (var i=0, len=results.length; i<len; ++i){
+            html = html
+            + JSON.stringify(results[i])
+            + '\r\n'
+        }
+        return html;
+    }
+    function sub_text() {
+        var formParam = $("#main_form").serialize();
+        to_url = "/predict/text/" + document.getElementById("inputGroupSelect02").value;
+        $.ajax({
+                cache: true,
+                type: "POST",
+                url:to_url,
+                data:formParam,
+                async: false,
+                error: function(request) {
+                    alert("Connection error:"+request.error);
+                },
+                success: function(data) {
+                    html = get_result_html(data["result"]);
+                    document.getElementById("result_text").value = html;
+                }
+            });
+    }
+    function sub_img() {
+        var formParam = {
+            "input_img": document.getElementById("file_img").src,
+            "input_file":document.getElementById("file").value
+        };
+        to_url = "/predict/image/" + document.getElementById("inputGroupSelect02").value;
+        $.ajax({
+                cache: true,
+                type: "POST",
+                url:to_url,
+                data:formParam,
+                async: false,
+                error: function(request) {
+                    alert("Connection error:"+request.error);
+                },
+                success: function(data) {
+                    data = data["result"];
+                    document.getElementById("result_text").value = data["border"];
+                    document.getElementById("result_img").src = data["output_img"];
+                }
+            });
+    }
+</script>
+</body>
+</html>
