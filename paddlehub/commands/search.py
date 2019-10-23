@@ -43,8 +43,9 @@ class SearchCommand(BaseCommand):
             argv = ['.*']
 
         resource_name = argv[0]
+        extra = {"command": "search"}
         resource_list = default_hub_server.search_resource(
-            resource_name, resource_type="Module")
+            resource_name, resource_type="Module", extra=extra)
         if utils.is_windows():
             placeholders = [20, 8, 8, 20]
         else:

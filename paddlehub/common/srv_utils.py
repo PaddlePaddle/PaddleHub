@@ -17,38 +17,11 @@ import requests
 import time
 import paddle
 import socket
+import json
 
 from random import randint, seed
 
 from paddlehub import version
-from paddlehub.common.server_config import default_stat_config
-
-
-def get_stat_server():
-    seed(int(time.time()))
-    stat_env = os.environ.get('HUB_SERVER_STAT_SRV')
-    if stat_env:
-        server_list = stat_env.split(';')
-    else:
-        server_list = default_stat_config['server_list']
-    return server_list[randint(0, len(server_list) - 1)]
-
-
-def hub_stat(argv):
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('bj.bcebos.com', 80))
-        ip_addr = s.getsockname()[0]
-        params = {
-            'command': ' '.join(argv),
-            'hub_version': version.hub_version,
-            'paddle_version': paddle.__version__,
-            'ip_addr': ip_addr
-        }
-        stat_api = get_stat_server()
-        r = requests.get(stat_api, params=params, timeout=0.5)
-    except:
-        pass
 
 
 def uri_path(server_url, api):
@@ -63,8 +36,9 @@ def uri_path(server_url, api):
     return srv
 
 
-def hub_request(api, params):
+def hub_request(api, params, extra=None):
     params['hub_version'] = version.hub_version
     params['paddle_version'] = paddle.__version__
+    params["extra"] = json.dumps(extra)
     r = requests.get(api, params)
     return r.json()

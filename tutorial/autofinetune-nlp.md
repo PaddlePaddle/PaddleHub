@@ -29,8 +29,6 @@ param_list:
   greater_than : 0.0
 ```
 
-**NOTE:** 该yaml文件的最外层级的key必须是param_list
-
 以下是中文情感分类的finetunee.py
 
 ```python
@@ -135,19 +133,10 @@ if __name__ == '__main__':
     eval_avg_score, eval_avg_loss, eval_run_speed = cls_task._calculate_metrics(run_states)
 
     # Move ckpt/best_model to the defined saved parameters directory
-    if is_path_valid(args.saved_params_dir) and os.path.exists(config.checkpoint_dir+"/best_model/"):
-        shutil.copytree(config.checkpoint_dir+"/best_model/", args.saved_params_dir)
+    best_model_dir = os.path.join(config.checkpoint_dir, "best_model")
+    if is_path_valid(args.saved_params_dir) and os.path.exists(best_model_dir):
+        shutil.copytree(best_model_dir, args.saved_params_dir)
         shutil.rmtree(config.checkpoint_dir)
 
     print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))
 ```
-**Note**:以上是finetunee.py的写法。
-> finetunee.py必须可以接收待优化超参数选项参数, 并且待搜素超参数选项名字和yaml文件中的超参数名字保持一致。
-
-> finetunee.py必须有saved_params_dir这个选项。
-
-> PaddleHub Auto Fine-tune超参评估策略选择为ModelBased，finetunee.py必须有model_path选项。
-
-> PaddleHub Auto Fine-tune优化超参策略选择hazero时，必须提供两个以上的待优化超参。
-
-> finetunee.py必须输出模型在数据集dev上的评价效果，同时以“AutoFinetuneEval"开始，和评价效果之间以“\t”分开，如print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))。
