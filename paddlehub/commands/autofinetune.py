@@ -193,11 +193,19 @@ class AutoFineTuneCommand(BaseCommand):
                 print("%s=%s" % (hparam_name, best_hparams[index]))
                 f.write(hparam_name + "\t:\t" + str(best_hparams[index]) + "\n")
 
+            print("The final best eval score is %s." %
+                  autoft.get_best_eval_value())
+            print("The final best model parameters are saved as " +
+                  autoft._output_dir + "/best_model .")
+            f.write("The final best eval score is %s.\n" %
+                    autoft.get_best_eval_value())
+            f.write(
+                "The final best model parameters are saved as ./best_model .")
+
             best_model_dir = autoft._output_dir + "/best_model"
-            shutil.copytree(solutions_modeldirs[autoft.get_best_hparams()],
-                            best_model_dir)
-            f.write("The final best model parameters are saved as:\n" +
-                    best_model_dir + "\n")
+            shutil.copytree(
+                solutions_modeldirs[tuple(autoft.get_best_hparams())],
+                best_model_dir)
 
             f.write("\t".join(autoft.hparams_name_list) +
                     "\tsaved_params_dir\n")

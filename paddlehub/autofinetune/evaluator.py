@@ -27,7 +27,7 @@ import yaml
 from paddlehub.common.logger import logger
 from paddlehub.common.utils import is_windows
 
-REWARD_SUM = 10000
+REWARD_SUM = 1
 
 if six.PY3:
     INF = math.inf

@@ -250,10 +250,9 @@ class HAZero(BaseTuningStrategy):
         for index, hparam_name in enumerate(self.hparams_name_list):
             print("%s=%s" % (hparam_name, local_hparams[index]))
 
-        for i in range(self.popsize):
-            if reward_list[i] <= self.best_reward_all_pop:
-                self.best_hparams_all_pop = self.current_hparams[i]
-                self.best_reward_all_pop = reward_list[i]
+        if local_min_reward <= self.best_reward_all_pop:
+            self.best_reward_all_pop = local_min_reward
+            self.best_hparams_all_pop = params_list[local_min_reward_index]
 
         best_hparams = self.evaluator.convert_params(self.best_hparams_all_pop)
         for index, name in enumerate(self.hparams_name_list):
@@ -372,6 +371,7 @@ class PSHE2(BaseTuningStrategy):
 
         local_min_reward = min(reward_list)
         local_min_reward_index = reward_list.index(local_min_reward)
+
         local_hparams = self.evaluator.convert_params(
             params_list[local_min_reward_index])
         print("The local best eval value in the %s-th round is %s." %
@@ -384,10 +384,12 @@ class PSHE2(BaseTuningStrategy):
             if reward_list[i] <= self.best_reward_per_pop[i]:
                 self.best_hparams_per_pop[i] = copy.deepcopy(
                     self.current_hparams[i])
-                self.best_reward_per_pop[i] = reward_list[i]
-            if reward_list[i] <= self.best_reward_all_pop:
-                self.best_hparams_all_pop = self.current_hparams[i]
-                self.best_reward_all_pop = reward_list[i]
+                self.best_reward_per_pop[i] = copy.deepcopy(reward_list[i])
+
+        if local_min_reward <= self.best_reward_all_pop:
+            self.best_reward_all_pop = local_min_reward
+            self.best_hparams_all_pop = copy.deepcopy(
+                params_list[local_min_reward_index])
 
         best_hparams = self.evaluator.convert_params(self.best_hparams_all_pop)
         for index, name in enumerate(self.hparams_name_list):
