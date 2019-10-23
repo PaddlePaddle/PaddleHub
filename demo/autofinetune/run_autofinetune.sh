@@ -1,10 +1,10 @@
-OUTPUT=result/
+OUTPUT=result
 
 hub autofinetune img_cls.py \
     --param_file=hparam.yaml \
-    --cuda=['0'] \
-    --popsize=5 \
+    --gpu=0 \
+    --popsize=15 \
     --round=10 \
     --output_dir=${OUTPUT} \
-    --evaluate_choice=fulltrail \
+    --evaluator=fulltrail \
     --tuning_strategy=pshe2
