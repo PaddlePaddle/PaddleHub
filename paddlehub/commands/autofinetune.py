@@ -70,9 +70,9 @@ class AutoFineTuneCommand(BaseCommand):
         self.arg_config_group.add_argument(
             "--popsize", type=int, default=5, help="Population size")
         self.arg_config_group.add_argument(
-            "--devices_id",
-            type=ast.literal_eval,
-            default=['0'],
+            "--gpu",
+            type=str,
+            default="0",
             required=True,
             help="The list of gpu devices to be used")
         self.arg_config_group.add_argument(
@@ -143,6 +143,9 @@ class AutoFineTuneCommand(BaseCommand):
         if self.args.opts is not None:
             options_str = self.convert_to_other_options(self.args.opts)
 
+        device_ids = self.args.gpu.strip().split(",")
+        device_ids = [int(device_id) for device_id in device_ids]
+
         if self.args.evaluator.lower() == "fulltrail":
             evaluator = FullTrailEvaluator(
                 self.args.param_file,
@@ -160,13 +163,13 @@ class AutoFineTuneCommand(BaseCommand):
         if self.args.tuning_strategy.lower() == "hazero":
             autoft = HAZero(
                 evaluator,
-                cudas=self.args.devices_id,
+                cudas=device_ids,
                 popsize=self.args.popsize,
                 output_dir=self.args.output_dir)
         elif self.args.tuning_strategy.lower() == "pshe2":
             autoft = PSHE2(
                 evaluator,
-                cudas=self.args.devices_id,
+                cudas=device_ids,
                 popsize=self.args.popsize,
                 output_dir=self.args.output_dir)
         else:
