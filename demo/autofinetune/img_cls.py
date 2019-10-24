@@ -12,11 +12,6 @@ parser = argparse.ArgumentParser(__doc__)
 parser.add_argument(
     "--epochs", type=int, default=5, help="Number of epoches for fine-tuning.")
 parser.add_argument(
-    "--use_gpu",
-    type=ast.literal_eval,
-    default=True,
-    help="Whether use GPU for fine-tuning.")
-parser.add_argument(
     "--checkpoint_dir", type=str, default=None, help="Path to save log data.")
 parser.add_argument(
     "--module",
