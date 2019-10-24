@@ -10,5 +10,5 @@ requests
 pandas < 0.25.0
 flake8
 tb-paddle
-tensorboard == 1.15
+tensorboard >= 1.15
 cma == 2.7.0
