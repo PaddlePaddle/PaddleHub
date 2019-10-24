@@ -25,9 +25,10 @@ import six
 import yaml
 
 from paddlehub.common.logger import logger
-from paddlehub.common.utils import is_windows
+from paddlehub.common.utils import is_windows, mkdir
 
 REWARD_SUM = 1
+TMP_HOME = "tmp/"
 
 if six.PY3:
     INF = math.inf
@@ -36,9 +37,10 @@ else:
 
 
 def report_final_result(result):
-    rand_str = os.environ.get("tmp_env")
+    rand_str = os.environ.get("PaddleHub_AutoDL_Trial_ID")
     # tmp.txt is to record the eval results for trials
-    with open("tmp.txt", 'a') as file:
+    mkdir(TMP_HOME)
+    with open(TMP_HOME + "tmp.txt", 'a') as file:
         file.write(rand_str + "\t" + str(float(result)) + "\n")
 
 
@@ -152,7 +154,7 @@ class FullTrailEvaluator(BaseEvaluator):
         try:
             #  set temp environment variable to record the eval results for trials
             rand_str = unique_name()
-            os.environ['tmp_env'] = rand_str
+            os.environ['PaddleHub_AutoDL_Trial_ID'] = rand_str
 
             os.system(run_cmd)
 
@@ -221,12 +223,12 @@ class PopulationBasedEvaluator(BaseEvaluator):
         try:
             #  set temp environment variable to record the eval results for trials
             rand_str = unique_name()
-            os.environ['tmp_env'] = rand_str
+            os.environ['PaddleHub_AutoDL_Trial_ID'] = rand_str
 
             os.system(run_cmd)
 
             eval_result = []
-            with open('tmp.txt', 'r') as file:
+            with open(TMP_HOME + 'tmp.txt', 'r') as file:
                 for line in file:
                     data = line.strip().split("\t")
                     if rand_str == data[0]:

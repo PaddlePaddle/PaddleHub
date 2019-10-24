@@ -84,7 +84,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | CoLA           | 0.5680              | **0.5996** | 0.5749 |
 
    由于Discriminative fine-tuning策略会降低模型底层的更新速度，影响模型的拟合能力。实验结果表明，dis_blocks设置过大会导致模型性能明显下降。为了提升模型拟合能力，本小节继续增大epoch大小至5、8。
-   
+
    对于Chnsenticorp，实验结果如下表所示：
 
    | dis_blocks        | -<br />（Baseline） | -          | 5      | -          | 5          |
@@ -93,7 +93,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
    | Chnsenticorp      | 0.8766              | 0.8775     | 0.8566 | 0.8775     | **0.8792** |
 
    可以看到当dis_blocks=5时，epoch=8时，模型性能超越Baseline。
-   
+
    在CoLA任务中，dis_block=3，epoch=3时的模型得分已经超越了Baseline，因为可以进一步增大dis_blocks，观察其实验效果，结果如下表所示：
 
    | dis_blocks | -<br />（Baseline） | 3          | -      | 7      | -      | 7      |
@@ -188,7 +188,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
 
 slanted triangular learning rate和warm up + linear decay在原理上和实验结果上都是相似的，Discriminative fine-tuning和Gradual unfreezing微调策略在使用中，应当注意它们会降低模型的拟合能力，可以适当提高训练的轮数。
 
-PaddleHub 1.2已发布AutoDL Finetuner，可以自动搜索超参设置，详情请参考[PaddleHub AutoDL Finetuner](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)。如有任何疑问欢迎您在issues中向我们提出！
+PaddleHub 1.2已发布AutoDL Finetuner，可以自动搜索超参设置，详情请参考[PaddleHub AutoDL Finetuner](./autofinetune.md)。如有任何疑问欢迎您在issues中向我们提出！
 
 ## 六、参考文献
 
