@@ -25,7 +25,7 @@ import time
 from tb_paddle import SummaryWriter
 from paddlehub.common.logger import logger
 from paddlehub.common.utils import mkdir
-from paddlehub.autofinetune.evaluator import REWARD_SUM
+from paddlehub.autofinetune.evaluator import REWARD_SUM, TMP_HOME
 
 if six.PY3:
     INF = math.inf
@@ -200,7 +200,7 @@ class BaseTuningStrategy(object):
 
         self.feedback(solutions, solution_results)
         # remove the tmp.txt which records the eval results for trials
-        os.remove("tmp.txt")
+        os.remove(TMP_HOME + "tmp.txt")
 
         return solutions_modeldirs
 
