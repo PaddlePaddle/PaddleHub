@@ -97,13 +97,17 @@ class HubServer(object):
             return False
         return True
 
-    def search_resource(self, resource_key, resource_type=None, update=False):
+    def search_resource(self,
+                        resource_key,
+                        resource_type=None,
+                        update=False,
+                        extra=None):
         try:
             payload = {'word': resource_key}
             if resource_type:
                 payload['type'] = resource_type
             api_url = srv_utils.uri_path(self.get_server_url(), 'search')
-            r = srv_utils.hub_request(api_url, payload)
+            r = srv_utils.hub_request(api_url, payload, extra=extra)
             if r['status'] == 0 and len(r['data']) > 0:
                 return [(item['name'], item['type'], item['version'],
                          item['summary']) for item in r['data']]
@@ -148,7 +152,8 @@ class HubServer(object):
                          resource_name,
                          resource_type=None,
                          version=None,
-                         update=False):
+                         update=False,
+                         extra=None):
         try:
             payload = {'word': resource_name}
             if resource_type:
@@ -156,7 +161,7 @@ class HubServer(object):
             if version:
                 payload['version'] = version
             api_url = srv_utils.uri_path(self.get_server_url(), 'search')
-            r = srv_utils.hub_request(api_url, payload)
+            r = srv_utils.hub_request(api_url, payload, extra)
             if r['status'] == 0 and len(r['data']) > 0:
                 for item in r['data']:
                     if resource_name.lower() == item['name'].lower():
@@ -201,19 +206,26 @@ class HubServer(object):
 
         return {}
 
-    def get_module_url(self, module_name, version=None, update=False):
+    def get_module_url(self,
+                       module_name,
+                       version=None,
+                       update=False,
+                       extra=None):
         return self.get_resource_url(
             resource_name=module_name,
             resource_type="Module",
             version=version,
-            update=update)
+            update=update,
+            extra=extra)
 
-    def get_model_url(self, module_name, version=None, update=False):
+    def get_model_url(self, module_name, version=None, update=False,
+                      extra=None):
         return self.get_resource_url(
             resource_name=module_name,
             resource_type="Model",
             version=version,
-            update=update)
+            update=update,
+            extra=extra)
 
     def request(self):
         if not os.path.exists(CACHE_HOME):

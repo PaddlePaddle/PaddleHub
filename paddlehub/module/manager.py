@@ -76,7 +76,11 @@ class LocalModuleManager(object):
         self.all_modules(update=update)
         return self.modules_dict.get(module_name, None)
 
-    def install_module(self, module_name, module_version=None, upgrade=False):
+    def install_module(self,
+                       module_name,
+                       module_version=None,
+                       upgrade=False,
+                       extra=None):
         self.all_modules(update=True)
         module_info = self.modules_dict.get(module_name, None)
         if module_info:
@@ -85,13 +89,12 @@ class LocalModuleManager(object):
                 module_dir = self.modules_dict[module_name][0]
                 module_tag = module_name if not module_version else '%s-%s' % (
                     module_name, module_version)
-                srv_utils.hub_stat(['installed', module_tag])
                 tips = "Module %s already installed in %s" % (module_tag,
                                                               module_dir)
                 return True, tips, self.modules_dict[module_name]
 
         search_result = hub.default_hub_server.get_module_url(
-            module_name, version=module_version)
+            module_name, version=module_version, extra=extra)
         name = search_result.get('name', None)
         url = search_result.get('url', None)
         md5_value = search_result.get('md5', None)
@@ -131,7 +134,6 @@ class LocalModuleManager(object):
             shutil.move(module_dir, save_path)
             module_dir = save_path
             tips = "Successfully installed %s" % module_name
-            srv_utils.hub_stat(['install', module_name, url])
             if installed_module_version:
                 tips += "-%s" % installed_module_version
             return True, tips, (module_dir, installed_module_version)
@@ -147,7 +149,6 @@ class LocalModuleManager(object):
                 1]:
             tips = "%s-%s is not installed" % (module_name, module_version)
             return True, tips
-        srv_utils.hub_stat(['uninstall', module_name])
         tips = "Successfully uninstalled %s" % module_name
         if module_version:
             tips += '-%s' % module_version

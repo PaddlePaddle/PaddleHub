@@ -84,12 +84,12 @@ class AutoFineTuneCommand(BaseCommand):
         self.arg_config_group.add_argument(
             "--evaluate_choice",
             type=str,
-            default="fulltrail",
+            default="modelbased",
             help="Choices: fulltrail or modelbased.")
         self.arg_config_group.add_argument(
             "--tuning_strategy",
             type=str,
-            default="HAZero",
+            default="pshe2",
             help="Choices: HAZero or PSHE2.")
         self.arg_config_group.add_argument(
             'opts',
@@ -184,7 +184,7 @@ class AutoFineTuneCommand(BaseCommand):
             run_round_cnt = run_round_cnt + 1
         print("PaddleHub Autofinetune ends.")
 
-        with open("./log_file.txt", "w") as f:
+        with open(autoft._output_dir + "/log_file.txt", "w") as f:
             best_hparams = evaluator.convert_params(autoft.get_best_hparams())
             print("The final best hyperparameters:")
             f.write("The final best hyperparameters:\n")
@@ -195,8 +195,8 @@ class AutoFineTuneCommand(BaseCommand):
             f.write("\t".join(autoft.hparams_name_list) +
                     "\tsaved_params_dir\n\n")
             print(
-                "The checkpont directory of programs ran with hyperparamemters searched are saved as log_file.txt ."
-            )
+                "The related infomation  about hyperparamemters searched are saved as %s/log_file.txt ."
+                % autoft._output_dir)
             for solution, modeldir in solutions_modeldirs.items():
                 param = evaluator.convert_params(solution)
                 param = [str(p) for p in param]
