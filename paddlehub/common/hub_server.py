@@ -56,8 +56,7 @@ class HubServer(object):
 
         utils.check_url(self.config['server_url'])
         self.server_url = self.config['server_url']
-        self.request()
-        # self.update_resource_file(replace=False)
+        self.update_resource_file(replace=False)
         self._load_resource_list_file_if_valid()
         lock.flock(fp_lock, lock.LOCK_UN)
 
@@ -264,7 +263,7 @@ class HubServer(object):
                 file_url = self.config[
                     'resource_storage_server_url'] + RESOURCE_LIST_FILE
                 result, tips, self.resource_list_file = default_downloader.download_file(
-                    file_url, save_path=cache_path, replace=True)
+                    file_url, save_path=CACHE_HOME, replace=True)
                 if not result:
                     return False
             except:
