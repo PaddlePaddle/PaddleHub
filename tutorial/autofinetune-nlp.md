@@ -140,7 +140,7 @@ if __name__ == '__main__':
     if is_path_valid(args.saved_params_dir) and os.path.exists(best_model_dir):
         shutil.copytree(best_model_dir, args.saved_params_dir)
         shutil.rmtree(config.checkpoint_dir)
-    
+
     # acc on dev will be used by auto finetune
     print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))
 ```
