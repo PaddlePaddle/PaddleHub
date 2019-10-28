@@ -11,5 +11,5 @@ pandas < 0.25.0
 flake8
 flask >= 1.1.0
 tb-paddle
-tb-nightly
+tensorboard >= 1.15
 cma == 2.7.0
