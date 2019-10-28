@@ -2,7 +2,7 @@
 
 ## 如何开始Finetune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_sequence_label.sh`即可开始使用ERNIE对MSRA_NER数据集进行Finetune。**由于ERNIE模型计算量较大，建议在GPU上使用，且显存需要大于14GB**
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_sequence_label.sh`即可开始使用ERNIE对MSRA_NER数据集进行Finetune。
 
 其中脚本参数说明如下：
 
@@ -57,7 +57,7 @@ reader = hub.reader.SequenceLabelReader(
     max_seq_len=128)
 ```
 
-其中数据集的准备代码可以参考 [msra_ner.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/msra_ner.py)
+其中数据集的准备代码可以参考 [msra_ner.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/msra_ner.py)
 
 `hub.dataset.MSRA_NER()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
@@ -119,7 +119,8 @@ seq_label_task = hub.SequenceLabelTask(
     feed_list=feed_list,
     max_seq_len=args.max_seq_len,
     num_classes=dataset.num_labels,
-    config=config)
+    config=config,
+    add_crf=False)
 
 seq_label_task.finetune_and_eval()
 ```
@@ -128,6 +129,7 @@ seq_label_task.finetune_and_eval()
 1. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达。
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与SequenceLabelReader返回的结果一致。
 3. `hub.SequenceLabelTask`通过输入特征，迁移的类别数，可以生成适用于序列标注的迁移任务`SequenceLabelTask`
+4. `hub.SequenceLabelTask`通过add_crf, 选择是否加入crf作为decoder。如果add_crf=True, 则在预训练模型计算图加入fc+crf层，否则只在在预训练模型计算图加入fc层。
 
 ## 可视化
 

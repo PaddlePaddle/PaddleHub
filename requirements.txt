@@ -1,6 +1,6 @@
 #for python2, you should use requirements_py2.txt
 pre-commit
-protobuf >= 3.1.0
+protobuf >= 3.6.0
 yapf == 0.26.0
 pyyaml
 numpy
@@ -9,6 +9,7 @@ six >= 1.10.0
 chardet == 3.0.4
 requests
 pandas
+flask >= 1.1.0
 flake8
 tb-paddle
 tb-nightly

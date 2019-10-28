@@ -55,16 +55,26 @@ class DownloadCommand(BaseCommand):
         self.args = self.parser.parse_args(argv[1:])
         self.args.type = self.check_type(self.args.type)
 
+        extra = {"command": "download"}
         if self.args.type in ["Module", "Model"]:
             search_result = default_hub_server.get_resource_url(
-                mod_name, resource_type=self.args.type, version=mod_version)
+                mod_name,
+                resource_type=self.args.type,
+                version=mod_version,
+                extra=extra)
         else:
             search_result = default_hub_server.get_resource_url(
-                mod_name, resource_type="Module", version=mod_version)
+                mod_name,
+                resource_type="Module",
+                version=mod_version,
+                extra=extra)
             self.args.type = "Module"
             if search_result == {}:
                 search_result = default_hub_server.get_resource_url(
-                    mod_name, resource_type="Model", version=mod_version)
+                    mod_name,
+                    resource_type="Model",
+                    version=mod_version,
+                    extra=extra)
                 self.args.type = "Model"
         url = search_result.get('url', None)
         except_md5_value = search_result.get('md5', None)

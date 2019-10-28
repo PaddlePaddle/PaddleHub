@@ -1,10 +1,10 @@
-# PaddleHub 超参优化（Auto Fine-tune）——NLP情感分类任务
+# PaddleHub 超参优化（AutoDL Finetuner）——NLP情感分类任务
 
-使用PaddleHub Auto Fine-tune必须准备两个文件，并且这两个文件需要按照指定的格式书写。这两个文件分别是需要Fine-tune的python脚本finetuee.py和需要优化的超参数信息yaml文件hparam.yaml。
+使用PaddleHub  AutoDL Finetuner需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
 
-以Fine-tune中文情感分类任务为例，我们展示如何利用PaddleHub Auto Finetune进行超参优化。
+以Fine-tune中文情感分类任务为例，展示如何利用PaddleHub  AutoDL Finetuner进行超参优化。
 
-以下是待优化超参数的yaml文件hparam.yaml，包含需要搜素的超参名字、类型、范围等信息。其中类型只支持float和int类型
+以下是待优化超参数的yaml文件hparam.yaml，包含需要搜索的超参名字、类型、范围等信息。其中类型只支持float和int
 ```
 param_list:
 - name : learning_rate
@@ -29,9 +29,7 @@ param_list:
   greater_than : 0.0
 ```
 
-**NOTE:** 该yaml文件的最外层级的key必须是param_list
-
-以下是中文情感分类的finetunee.py
+以下是中文情感分类的`train.py`
 
 ```python
 from __future__ import absolute_import
@@ -46,19 +44,22 @@ import paddlehub as hub
 import os
 from paddlehub.common.logger import logger
 
-# yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--epochs", type=int, default=3, help="epochs.")
+
+# the name of hyperparameters to be searched should keep with hparam.py
 parser.add_argument("--batch_size", type=int, default=32, help="batch_size.")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="learning_rate.")
 parser.add_argument("--warmup_prop", type=float, default=0.1, help="warmup_prop.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="weight_decay.")
+
 parser.add_argument("--max_seq_len", type=int, default=128, help="Number of words of the longest seqence.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
+
+# saved_params_dir and model_path are needed by auto finetune
 parser.add_argument("--saved_params_dir", type=str, default="", help="Directory for saving model during ")
 parser.add_argument("--model_path", type=str, default="", help="load model path")
 args = parser.parse_args()
-# yapf: enable.
 
 
 def is_path_valid(path):
@@ -135,19 +136,11 @@ if __name__ == '__main__':
     eval_avg_score, eval_avg_loss, eval_run_speed = cls_task._calculate_metrics(run_states)
 
     # Move ckpt/best_model to the defined saved parameters directory
-    if is_path_valid(args.saved_params_dir) and os.path.exists(config.checkpoint_dir+"/best_model/"):
-        shutil.copytree(config.checkpoint_dir+"/best_model/", args.saved_params_dir)
+    best_model_dir = os.path.join(config.checkpoint_dir, "best_model")
+    if is_path_valid(args.saved_params_dir) and os.path.exists(best_model_dir):
+        shutil.copytree(best_model_dir, args.saved_params_dir)
         shutil.rmtree(config.checkpoint_dir)
-
+    
+    # acc on dev will be used by auto finetune
     print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))
 ```
-**Note**:以上是finetunee.py的写法。
-> finetunee.py必须可以接收待优化超参数选项参数, 并且待搜素超参数选项名字和yaml文件中的超参数名字保持一致。
-
-> finetunee.py必须有saved_params_dir这个选项。
-
-> PaddleHub Auto Fine-tune超参评估策略选择为ModelBased，finetunee.py必须有model_path选项。
-
-> PaddleHub Auto Fine-tune优化超参策略选择hazero时，必须提供两个以上的待优化超参。
-
-> finetunee.py必须输出模型在数据集dev上的评价效果，同时以“AutoFinetuneEval"开始，和评价效果之间以“\t”分开，如print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))。

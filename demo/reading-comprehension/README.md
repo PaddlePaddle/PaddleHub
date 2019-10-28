@@ -4,7 +4,7 @@
 
 ## 如何开始Finetune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_finetune.sh`即可开始使用BERT对SQuAD数据集进行Finetune。**由于BERT模型计算量较大，建议在GPU上使用，且显存需要大于14GB**
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_finetune.sh`即可开始使用BERT对SQuAD数据集进行Finetune。
 
 其中脚本参数说明如下：
 
@@ -48,7 +48,7 @@ reader = hub.reader.ReadingComprehensionReader(
     max_query_length=64)
 ```
 
-其中数据集的准备代码可以参考 [squad.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/squad.py)
+其中数据集的准备代码可以参考 [squad.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/squad.py)
 
 `hub.dataset.SQUAD()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 

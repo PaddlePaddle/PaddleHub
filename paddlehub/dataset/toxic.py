@@ -33,8 +33,8 @@ _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/toxic.tar.gz"
 
 class Toxic(HubDataset):
     """
-    ChnSentiCorp (by Tan Songbo at ICT of Chinese Academy of Sciences, and for
-    opinion mining)
+    The kaggle Toxic dataset:
+    https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge
     """
 
     def __init__(self):

@@ -1,0 +1,11 @@
+param_list:
+- name : learning_rate
+  init_value : 0.001
+  type : float
+  lower_than : 0.05
+  greater_than : 0.00005
+- name : batch_size
+  init_value : 12
+  type : int
+  lower_than : 20
+  greater_than : 10

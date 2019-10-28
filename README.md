@@ -4,31 +4,33 @@
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
 
-PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习工具，可以结合预训练模型更便捷地开展迁移学习工作。通过PaddleHub，您可以：
+PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习工具，可以结合预训练模型更便捷地开展迁移学习工作。PaddleHub特性：
 
 * 便捷地获取PaddlePaddle生态下的所有预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、语言模型、视频分类、图像生成、图像分割等主流模型。
   * 更多详情可查看官网：https://www.paddlepaddle.org.cn/hub
 * 通过PaddleHub Fine-tune API，结合少量代码即可完成**大规模预训练模型**的迁移学习，具体Demo可参考以下链接：
-  * [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.1.0/demo/text-classification)
-  * [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.1.0/demo/sequence-labeling)
-  * [多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.1.0/demo/multi-label-classification)
-  * [图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.1.0/demo/image-classification)
-  * [检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.1.0/demo/qa_classification)
-  * [回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/sentence_similarity)
-  * [句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/sentence_similarity)
-  * [阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo/reading-comprehension)
-* PaddleHub引入『**模型即软件**』的设计理念，支持通过Python API或者命令行工具，一键完成预训练模型地预测，更方便的应用PaddlePaddle模型库。
+  * [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/text-classification)
+  * [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sequence-labeling)
+  * [多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/multi-label-classification)
+  * [图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/image-classification)
+  * [检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/qa_classification)
+  * [回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sentence_similarity)
+  * [句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sentence_similarity)
+  * [阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/reading-comprehension)
+* 支持超参优化（AutoDL Finetuner），自动调整超参数，给出效果较佳的超参数组合。
+  * [PaddleHub超参优化功能AutoDL Finetuner使用示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/autofinetune)
+* 引入『**模型即软件**』的设计理念，通过Python API或者命令行实现一键预测，更方便地应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
 
 ## 目录
 
-* [安装](https://github.com/paddlepaddle/paddlehub#%E5%AE%89%E8%A3%85)
-* [快速体验](https://github.com/paddlepaddle/paddlehub#%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C)
-* [教程](https://github.com/paddlepaddle/paddlehub#%E6%95%99%E7%A8%8B)
-* [FAQ](https://github.com/paddlepaddle/paddlehub#faq)
-* [用户交流群](https://github.com/paddlepaddle/paddlehub#%E7%94%A8%E6%88%B7%E4%BA%A4%E6%B5%81%E7%BE%A4)
-* [更新历史](https://github.com/paddlepaddle/paddlehub#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
+* [安装](#%E5%AE%89%E8%A3%85)
+* [快速体验](#%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C)
+* [教程](#%E6%95%99%E7%A8%8B)
+* [FAQ](#faq)
+* [用户交流群](#%E7%94%A8%E6%88%B7%E4%BA%A4%E6%B5%81%E7%BE%A4)
+* [更新历史](#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
 
 
 ## 安装
@@ -74,7 +76,7 @@ $ hub run ssd_mobilenet_v1_pascal --input_path test_object_detection.jpg
 $ hub run yolov3_coco2017 --input_path test_object_detection.jpg
 $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 ```
-![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.0.0/docs/imgs/object_detection_result.png)
+![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/object_detection_result.png)
 
 除了上述三类模型外，PaddleHub还发布了语言模型、语义模型、图像分类、生成模型、视频分类等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
 
@@ -103,11 +105,9 @@ PaddleHub如何完成迁移学习，详情参考[wiki教程](https://github.com/
 
 PaddleHub如何自定义迁移任务，详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
-如何使用PaddleHub超参优化功能，详情参考[autofinetune使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)
+PaddleHub如何自动优化超参数，详情参考[AutoDL Finetuner使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune.md)
 
-如何使用PaddleHub“端到端地”完成文本相似度计算，详情参考[word2vce使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/sentence_sim.ipynb)
-
-如何使用ULMFiT策略微调PaddleHub预训练模型，详情参考[PaddleHub 迁移学习与ULMFiT微调策略](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/strategy_exp.md)
+PaddleHub如何使用ULMFiT策略微调预训练模型，详情参考[PaddleHub 迁移学习与ULMFiT微调策略](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/strategy_exp.md)
 
 ## FAQ
 
@@ -115,8 +115,6 @@ PaddleHub如何自定义迁移任务，详情参考[wiki教程](https://github.c
 
 **A:** 因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。可以将PaddlePaddle和PaddleHub升级至最新版本，同时将ernie卸载。
 ```shell
-# 若是CPU环境，则 pip install --upgrade paddlepaddle
-$ pip install --upgrade paddlepaddle-gpu
 $ pip install --upgrade paddlehub
 $ hub uninstall ernie
 ```
@@ -149,10 +147,10 @@ print(res)
 
 ## 用户交流群
 
-* 飞桨PaddlePaddle 交流群：432676488（QQ群）
+* 飞桨PaddlePaddle 交流群：796771754（QQ群）
 * 飞桨 ERNIE交流群：760439550（QQ群）
 
 
 ## 更新历史
 
-详情参考[更新历史](https://github.com/PaddlePaddle/PaddleHub/blob/develop/RELEASE.md)
+详情参考[更新历史](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/RELEASE.md)

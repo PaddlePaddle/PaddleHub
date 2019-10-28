@@ -5,7 +5,7 @@
 
 ## 如何开始Finetune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_regression.sh`即可开始使用BERT对GLUE-STSB数据集进行Finetune。**由于ERNIE模型计算量较大，建议在GPU上使用，且显存需要大于14GB**
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_regression.sh`即可开始使用BERT对GLUE-STSB数据集进行Finetune。
 
 其中脚本参数说明如下：
 
@@ -45,7 +45,7 @@ reader = hub.reader.RegressionReader(
     max_seq_len=args.max_seq_len)
 ```
 
-其中数据集的准备代码可以参考 [glue.py](https://github.com/PaddlePaddle/PaddleHub/blob/develop/paddlehub/dataset/glue.py)
+其中数据集的准备代码可以参考 [glue.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/glue.py)
 
 `hub.dataset.GLUE("STS-B")` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 

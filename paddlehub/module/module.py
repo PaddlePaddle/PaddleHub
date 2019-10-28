@@ -150,8 +150,9 @@ class Module(object):
         if version:
             log_msg += "-%s" % version
         logger.info(log_msg)
+        extra = {"command": "install"}
         result, tips, module_dir = default_module_manager.install_module(
-            module_name=name, module_version=version)
+            module_name=name, module_version=version, extra=extra)
         if not result:
             logger.error(tips)
             exit(1)
@@ -575,7 +576,7 @@ class Module(object):
                 fetch_dict[key] = program.global_block().var(var.name)
 
         # update BERT/ERNIE's input tensor's sequence length to max_seq_len
-        if self.name.startswith("bert") or self.name.startswith("ernie"):
+        if "bert" in self.name or self.name.startswith("ernie"):
             MAX_SEQ_LENGTH = 512
             if max_seq_len > MAX_SEQ_LENGTH or max_seq_len <= 0:
                 raise ValueError(
