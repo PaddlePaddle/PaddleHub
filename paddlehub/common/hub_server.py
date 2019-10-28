@@ -271,10 +271,13 @@ class HubServer(object):
             return True
 
     def _server_check(self):
-        r = requests.get(self.get_server_url() + '/search')
-        if r.status_code == 200:
-            return True
-        else:
+        try:
+            r = requests.get(self.get_server_url() + '/search')
+            if r.status_code == 200:
+                return True
+            else:
+                return False
+        except:
             return False
 
     def server_check(self):
