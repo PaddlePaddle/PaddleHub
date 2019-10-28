@@ -188,7 +188,7 @@ PaddleHub中集成了ERNIE、BERT、LAC、ELMo等[NLP预训练模型](https://ww
 
 slanted triangular learning rate和warm up + linear decay在原理上和实验结果上都是相似的，Discriminative fine-tuning和Gradual unfreezing微调策略在使用中，应当注意它们会降低模型的拟合能力，可以适当提高训练的轮数。
 
-PaddleHub 1.2已发布AutoDL Finetuner，可以自动搜索超参设置，详情请参考[PaddleHub AutoDL Finetuner](https://github.com/PaddlePaddle/PaddleHub/blob/develop/tutorial/autofinetune.md)。如有任何疑问欢迎您在issues中向我们提出！
+PaddleHub 1.2已发布AutoDL Finetuner，可以自动搜索超参设置，详情请参考[PaddleHub AutoDL Finetuner](./autofinetune.md)。如有任何疑问欢迎您在issues中向我们提出！
 
 ## 六、参考文献
 
