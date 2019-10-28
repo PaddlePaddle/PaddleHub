@@ -147,7 +147,7 @@ print(res)
 
 ## 用户交流群
 
-* 飞桨PaddlePaddle 交流群：432676488（QQ群）
+* 飞桨PaddlePaddle 交流群：796771754（QQ群）
 * 飞桨 ERNIE交流群：760439550（QQ群）
 
 

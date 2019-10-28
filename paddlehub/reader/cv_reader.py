@@ -37,7 +37,7 @@ class ImageClassificationReader(object):
     def __init__(self,
                  image_width,
                  image_height,
-                 dataset,
+                 dataset=None,
                  channel_order="RGB",
                  images_mean=None,
                  images_std=None,
@@ -76,6 +76,8 @@ class ImageClassificationReader(object):
                        phase="train",
                        shuffle=False,
                        data=None):
+        if phase != 'predict' and not self.dataset:
+            raise ValueError("The dataset is none and it's not allowed!")
         if phase == "train":
             data = self.dataset.train_data(shuffle)
         elif phase == "test":
