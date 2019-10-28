@@ -200,7 +200,8 @@ class BaseTuningStrategy(object):
 
         self.feedback(solutions, solution_results)
         # remove the tmp.txt which records the eval results for trials
-        os.remove(TMP_HOME + "tmp.txt")
+        tmp_file = os.path.join(TMP_HOME, "tmp.txt")
+        os.remove(tmp_file)
 
         return solutions_modeldirs
 
