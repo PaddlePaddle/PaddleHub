@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
 
-PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习工具，可以结合预训练模型更便捷地开展迁移学习工作。通过PaddleHub，您可以：
+PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习工具，可以结合预训练模型更便捷地开展迁移学习工作。PaddleHub特性：
 
 * 便捷地获取PaddlePaddle生态下的所有预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、语言模型、视频分类、图像生成、图像分割等主流模型。
   * 更多详情可查看官网：https://www.paddlepaddle.org.cn/hub
@@ -17,9 +17,9 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
   * [回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sentence_similarity)
   * [句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sentence_similarity)
   * [阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/reading-comprehension)
-* PaddleHub支持超参优化（Auto Fine-tune），给定Fine-tune任务运行脚本以及超参搜索范围，Auto Fine-tune即可给出对于当前任务的较佳超参数组合。
-  * [PaddleHub超参优化功能autofinetune使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune.md)
-* PaddleHub引入『**模型即软件**』的设计理念，支持通过Python API或者命令行工具，一键完成预训练模型地预测，更方便的应用PaddlePaddle模型库。
+* 支持超参优化（AutoDL Finetuner），自动调整超参数，给出效果较佳的超参数组合。
+  * [PaddleHub超参优化功能AutoDL Finetuner使用示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/autofinetune)
+* 引入『**模型即软件**』的设计理念，通过Python API或者命令行实现一键预测，更方便地应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
 
@@ -105,9 +105,9 @@ PaddleHub如何完成迁移学习，详情参考[wiki教程](https://github.com/
 
 PaddleHub如何自定义迁移任务，详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
-如何使用PaddleHub超参优化功能，详情参考[autofinetune使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune.md)
+PaddleHub如何自动优化超参数，详情参考[AutoDL Finetuner使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune.md)
 
-如何使用ULMFiT策略微调PaddleHub预训练模型，详情参考[PaddleHub 迁移学习与ULMFiT微调策略](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/strategy_exp.md)
+PaddleHub如何使用ULMFiT策略微调预训练模型，详情参考[PaddleHub 迁移学习与ULMFiT微调策略](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/strategy_exp.md)
 
 ## FAQ
 
@@ -115,8 +115,6 @@ PaddleHub如何自定义迁移任务，详情参考[wiki教程](https://github.c
 
 **A:** 因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。可以将PaddlePaddle和PaddleHub升级至最新版本，同时将ernie卸载。
 ```shell
-# 若是CPU环境，则 pip install --upgrade paddlepaddle
-$ pip install --upgrade paddlepaddle-gpu
 $ pip install --upgrade paddlehub
 $ hub uninstall ernie
 ```
@@ -149,7 +147,7 @@ print(res)
 
 ## 用户交流群
 
-* 飞桨PaddlePaddle 交流群：432676488（QQ群）
+* 飞桨PaddlePaddle 交流群：796771754（QQ群）
 * 飞桨 ERNIE交流群：760439550（QQ群）
 
 

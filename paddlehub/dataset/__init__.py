@@ -23,6 +23,7 @@ from .toxic import Toxic
 from .squad import SQUAD
 from .xnli import XNLI
 from .glue import GLUE
+from .tnews import TNews
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat

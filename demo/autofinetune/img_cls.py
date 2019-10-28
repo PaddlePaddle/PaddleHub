@@ -1,28 +1,3 @@
-# PaddleHub AutoDL Finetuner——图像分类任务
-
-
-使用PaddleHub AutoDL Finetuner需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
-
-以Fine-tune图像分类任务为例，展示如何利用PaddleHub AutoDL Finetuner进行超参优化。
-
-以下是待优化超参数的yaml文件hparam.yaml，包含需要搜素的超参名字、类型、范围等信息。目前参数搜索类型只支持float和int类型
-```
-param_list:
-- name : learning_rate
-  init_value : 0.001
-  type : float
-  lower_than : 0.05
-  greater_than : 0.00005
-- name : batch_size
-  init_value : 12
-  type : int
-  lower_than : 20
-  greater_than : 10
-```
-
-以下是图像分类的`train.py`
-
-```python
 # coding:utf-8
 import argparse
 import os
@@ -34,17 +9,42 @@ import paddlehub as hub
 from paddlehub.common.logger import logger
 
 parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--epochs",             type=int,               default=1,                         help="Number of epoches for fine-tuning.")
-parser.add_argument("--use_gpu",            type=ast.literal_eval,  default=True,                      help="Whether use GPU for fine-tuning.")
-parser.add_argument("--checkpoint_dir",     type=str,               default=None,                      help="Path to save log data.")
+parser.add_argument(
+    "--epochs", type=int, default=5, help="Number of epoches for fine-tuning.")
+parser.add_argument(
+    "--checkpoint_dir", type=str, default=None, help="Path to save log data.")
+parser.add_argument(
+    "--module",
+    type=str,
+    default="mobilenet",
+    help="Module used as feature extractor.")
 
 # the name of hyperparameters to be searched should keep with hparam.py
-parser.add_argument("--batch_size",         type=int,               default=16,                        help="Total examples' number in batch for training.")
-parser.add_argument("--learning_rate",      type=float,             default=1e-4,                      help="learning_rate.")
+parser.add_argument(
+    "--batch_size",
+    type=int,
+    default=16,
+    help="Total examples' number in batch for training.")
+parser.add_argument(
+    "--learning_rate", type=float, default=1e-4, help="learning_rate.")
 
 # saved_params_dir and model_path are needed by auto finetune
-parser.add_argument("--saved_params_dir",   type=str,               default="",                        help="Directory for saving model")
-parser.add_argument("--model_path",         type=str,               default="",                        help="load model path")
+parser.add_argument(
+    "--saved_params_dir",
+    type=str,
+    default="",
+    help="Directory for saving model")
+parser.add_argument(
+    "--model_path", type=str, default="", help="load model path")
+
+module_map = {
+    "resnet50": "resnet_v2_50_imagenet",
+    "resnet101": "resnet_v2_101_imagenet",
+    "resnet152": "resnet_v2_152_imagenet",
+    "mobilenet": "mobilenet_v2_imagenet",
+    "nasnet": "nasnet_imagenet",
+    "pnasnet": "pnasnet_imagenet"
+}
 
 
 def is_path_valid(path):
@@ -56,9 +56,11 @@ def is_path_valid(path):
         os.mkdir(dirname)
     return True
 
+
 def finetune(args):
-    # Load Paddlehub resnet50 pretrained model
-    module = hub.Module(name="resnet_v2_50_imagenet")
+
+    # Load Paddlehub pretrained model, default as mobilenet
+    module = hub.Module(name=args.module)
     input_dict, output_dict, program = module.context(trainable=True)
 
     # Download dataset and use ImageClassificationReader to read dataset
@@ -70,15 +72,14 @@ def finetune(args):
         images_std=module.get_pretrained_images_std(),
         dataset=dataset)
 
+    # The last 2 layer of resnet_v2_101_imagenet network
     feature_map = output_dict["feature_map"]
 
     img = input_dict["image"]
     feed_list = [img.name]
 
     # Select finetune strategy, setup config and finetune
-    strategy = hub.DefaultFinetuneStrategy(
-        learning_rate=args.learning_rate)
-
+    strategy = hub.DefaultFinetuneStrategy(learning_rate=args.learning_rate)
     config = hub.RunConfig(
         use_cuda=True,
         num_epoch=args.epochs,
@@ -101,10 +102,13 @@ def finetune(args):
             task.load_parameters(args.model_path)
             logger.info("PaddleHub has loaded model from %s" % args.model_path)
 
-
+    # Finetune by PaddleHub's API
     task.finetune()
+    # Evaluate by PaddleHub's API
     run_states = task.eval()
-    eval_avg_score, eval_avg_loss, eval_run_speed = task._calculate_metrics(run_states)
+    # Get acc score on dev
+    eval_avg_score, eval_avg_loss, eval_run_speed = task._calculate_metrics(
+        run_states)
 
     # Move ckpt/best_model to the defined saved parameters directory
     best_model_dir = os.path.join(config.checkpoint_dir, "best_model")
@@ -113,10 +117,14 @@ def finetune(args):
         shutil.rmtree(config.checkpoint_dir)
 
     # acc on dev will be used by auto finetune
-    print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))
+    hub.report_final_result(eval_avg_score["acc"])
 
 
 if __name__ == "__main__":
     args = parser.parse_args()
+    if not args.module in module_map:
+        hub.logger.error("module should in %s" % module_map.keys())
+        exit(1)
+    args.module = module_map[args.module]
+
     finetune(args)
-```

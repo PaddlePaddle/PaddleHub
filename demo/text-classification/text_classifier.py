@@ -45,6 +45,10 @@ if __name__ == '__main__':
         dataset = hub.dataset.ChnSentiCorp()
         module = hub.Module(name="ernie")
         metrics_choices = ["acc"]
+    elif args.dataset.lower() == "tnews":
+        dataset = hub.dataset.TNews()
+        module = hub.Module(name="ernie")
+        metrics_choices = ["acc", "f1"]
     elif args.dataset.lower() == "nlpcc_dbqa":
         dataset = hub.dataset.NLPCC_DBQA()
         module = hub.Module(name="ernie")

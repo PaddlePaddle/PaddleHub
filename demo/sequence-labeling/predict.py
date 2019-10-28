@@ -79,13 +79,15 @@ if __name__ == '__main__':
         strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
     # Define a sequence labeling finetune task by PaddleHub's API
+    # if add crf, the network use crf as decoder
     seq_label_task = hub.SequenceLabelTask(
         data_reader=reader,
         feature=sequence_output,
         feed_list=feed_list,
         max_seq_len=args.max_seq_len,
         num_classes=dataset.num_labels,
-        config=config)
+        config=config,
+        add_crf=True)
 
     # test data
     data = [

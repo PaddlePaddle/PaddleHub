@@ -25,6 +25,7 @@ import sys
 import ast
 
 import six
+import shutil
 import pandas
 import numpy as np
 
@@ -33,7 +34,7 @@ from paddlehub.common.arg_helper import add_argument, print_arguments
 from paddlehub.autofinetune.autoft import PSHE2
 from paddlehub.autofinetune.autoft import HAZero
 from paddlehub.autofinetune.evaluator import FullTrailEvaluator
-from paddlehub.autofinetune.evaluator import ModelBasedEvaluator
+from paddlehub.autofinetune.evaluator import PopulationBasedEvaluator
 from paddlehub.common.logger import logger
 
 import paddlehub as hub
@@ -46,7 +47,7 @@ class AutoFineTuneCommand(BaseCommand):
         super(AutoFineTuneCommand, self).__init__(name)
         self.show_in_help = True
         self.name = name
-        self.description = "Paddlehub helps to finetune a task by searching hyperparameters automatically."
+        self.description = "PaddleHub helps to finetune a task by searching hyperparameters automatically."
         self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s <task to be fintuned in python script>' % (ENTRY,
@@ -69,9 +70,9 @@ class AutoFineTuneCommand(BaseCommand):
         self.arg_config_group.add_argument(
             "--popsize", type=int, default=5, help="Population size")
         self.arg_config_group.add_argument(
-            "--cuda",
-            type=ast.literal_eval,
-            default=['0'],
+            "--gpu",
+            type=str,
+            default="0",
             required=True,
             help="The list of gpu devices to be used")
         self.arg_config_group.add_argument(
@@ -82,10 +83,10 @@ class AutoFineTuneCommand(BaseCommand):
             default=None,
             help="Directory to model checkpoint")
         self.arg_config_group.add_argument(
-            "--evaluate_choice",
+            "--evaluator",
             type=str,
-            default="modelbased",
-            help="Choices: fulltrail or modelbased.")
+            default="populationbased",
+            help="Choices: fulltrail or populationbased.")
         self.arg_config_group.add_argument(
             "--tuning_strategy",
             type=str,
@@ -142,30 +143,33 @@ class AutoFineTuneCommand(BaseCommand):
         if self.args.opts is not None:
             options_str = self.convert_to_other_options(self.args.opts)
 
-        if self.args.evaluate_choice.lower() == "fulltrail":
+        device_ids = self.args.gpu.strip().split(",")
+        device_ids = [int(device_id) for device_id in device_ids]
+
+        if self.args.evaluator.lower() == "fulltrail":
             evaluator = FullTrailEvaluator(
                 self.args.param_file,
                 self.fintunee_script,
                 options_str=options_str)
-        elif self.args.evaluate_choice.lower() == "modelbased":
-            evaluator = ModelBasedEvaluator(
+        elif self.args.evaluator.lower() == "populationbased":
+            evaluator = PopulationBasedEvaluator(
                 self.args.param_file,
                 self.fintunee_script,
                 options_str=options_str)
         else:
             raise ValueError(
-                "The evaluate %s is not defined!" % self.args.evaluate_choice)
+                "The evaluate %s is not defined!" % self.args.evaluator)
 
         if self.args.tuning_strategy.lower() == "hazero":
             autoft = HAZero(
                 evaluator,
-                cudas=self.args.cuda,
+                cudas=device_ids,
                 popsize=self.args.popsize,
                 output_dir=self.args.output_dir)
         elif self.args.tuning_strategy.lower() == "pshe2":
             autoft = PSHE2(
                 evaluator,
-                cudas=self.args.cuda,
+                cudas=device_ids,
                 popsize=self.args.popsize,
                 output_dir=self.args.output_dir)
         else:
@@ -191,16 +195,30 @@ class AutoFineTuneCommand(BaseCommand):
             for index, hparam_name in enumerate(autoft.hparams_name_list):
                 print("%s=%s" % (hparam_name, best_hparams[index]))
                 f.write(hparam_name + "\t:\t" + str(best_hparams[index]) + "\n")
-            f.write("\n\n\n")
+
+            print("The final best eval score is %s." %
+                  autoft.get_best_eval_value())
+            print("The final best model parameters are saved as " +
+                  autoft._output_dir + "/best_model .")
+            f.write("The final best eval score is %s.\n" %
+                    autoft.get_best_eval_value())
+            f.write(
+                "The final best model parameters are saved as ./best_model .")
+
+            best_model_dir = autoft._output_dir + "/best_model"
+            shutil.copytree(
+                solutions_modeldirs[tuple(autoft.get_best_hparams())],
+                best_model_dir)
+
             f.write("\t".join(autoft.hparams_name_list) +
-                    "\tsaved_params_dir\n\n")
+                    "\tsaved_params_dir\n")
             print(
                 "The related infomation  about hyperparamemters searched are saved as %s/log_file.txt ."
                 % autoft._output_dir)
             for solution, modeldir in solutions_modeldirs.items():
                 param = evaluator.convert_params(solution)
                 param = [str(p) for p in param]
-                f.write("\t".join(param) + "\t" + modeldir + "\n\n")
+                f.write("\t".join(param) + "\t" + modeldir + "\n")
 
         return True
 

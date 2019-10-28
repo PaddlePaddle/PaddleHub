@@ -37,8 +37,8 @@ import paddlehub as hub
 
 class BaseReader(object):
     def __init__(self,
-                 dataset,
                  vocab_path,
+                 dataset=None,
                  label_map_config=None,
                  max_seq_len=512,
                  do_lower_case=True,
@@ -63,9 +63,13 @@ class BaseReader(object):
 
         # generate label map
         self.label_map = {}
-        for index, label in enumerate(self.dataset.get_labels()):
-            self.label_map[label] = index
-        logger.info("Dataset label map = {}".format(self.label_map))
+        if self.dataset:
+            for index, label in enumerate(self.dataset.get_labels()):
+                self.label_map[label] = index
+            logger.info("Dataset label map = {}".format(self.label_map))
+        else:
+            logger.info("Dataset is None! label map = {}".format(
+                self.label_map))
 
         self.current_example = 0
         self.current_epoch = 0
@@ -241,6 +245,8 @@ class BaseReader(object):
                        phase='train',
                        shuffle=True,
                        data=None):
+        if phase != 'predict' and not self.dataset:
+            raise ValueError("The dataset is None ! It isn't allowed.")
         if phase == 'train':
             shuffle = True
             examples = self.get_train_examples()
@@ -260,7 +266,10 @@ class BaseReader(object):
 
             for item in data:
                 # set label in order to run the program
-                label = list(self.label_map.keys())[0]
+                if self.dataset:
+                    label = list(self.label_map.keys())[0]
+                else:
+                    label = 0
                 if len(item) == 1:
                     item_i = InputExample(
                         guid=seq_id, text_a=item[0], label=label)
@@ -498,7 +507,7 @@ class SequenceLabelReader(BaseReader):
 
 
 class LACClassifyReader(object):
-    def __init__(self, dataset, vocab_path, in_tokens=False):
+    def __init__(self, vocab_path, dataset=None, in_tokens=False):
         self.dataset = dataset
         self.lac = hub.Module(name="lac")
         self.tokenizer = tokenization.FullTokenizer(
@@ -544,6 +553,8 @@ class LACClassifyReader(object):
                        phase="train",
                        shuffle=False,
                        data=None):
+        if phase != "predict" and not self.dataset:
+            raise ValueError("The dataset is None and it isn't allowed.")
         if phase == "train":
             shuffle = True
             data = self.dataset.get_train_examples()
@@ -756,8 +767,8 @@ class SquadInputFeatures(object):
 
 class RegressionReader(BaseReader):
     def __init__(self,
-                 dataset,
                  vocab_path,
+                 dataset=None,
                  label_map_config=None,
                  max_seq_len=128,
                  do_lower_case=True,
@@ -845,6 +856,8 @@ class RegressionReader(BaseReader):
                        phase='train',
                        shuffle=True,
                        data=None):
+        if phase != 'predict' and not self.dataset:
+            raise ValueError("The dataset is none and it's not allowed.")
         if phase == 'train':
             shuffle = True
             examples = self.get_train_examples()
