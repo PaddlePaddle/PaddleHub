@@ -20,7 +20,6 @@ import time
 import os
 import base64
 import logging
-import cv2
 import multiprocessing as mp
 from multiprocessing.managers import BaseManager
 import random
@@ -93,7 +92,6 @@ def predict_cv(input_data, module_name, batch_size=1):
     filename_list = []
     for index in range(len(input_data)):
         filename_list.append(input_data[index][3])
-        cv2.imread(input_data[index][3])
     input_images = {"image": filename_list}
     module = ImageModelService.get_module(module_name)
     method_name = module.desc.attr.map.data['default_signature'].s
@@ -130,31 +128,35 @@ def predict_cv(input_data, module_name, batch_size=1):
 def worker():
     global batch_size_list, name_list, queue_name_list, cv_module
     latest_num = random.randrange(0, len(queue_name_list))
-
-    while True:
-        time.sleep(0.01)
-        for index in range(len(queue_name_list)):
-            while queues_dict[queue_name_list[latest_num]].empty() is not True:
-                input_data = []
-                lock.acquire()
-                try:
-                    batch = queues_dict[
-                        queue_name_list[latest_num]].get_attribute("maxsize")
-                    for index2 in range(batch):
-                        if queues_dict[
-                                queue_name_list[latest_num]].empty() is True:
-                            break
-                        input_data.append(
-                            queues_dict[queue_name_list[latest_num]].get())
-                finally:
-                    lock.release()
-                if len(input_data) != 0:
-                    choose_module_category(input_data,
-                                           queue_name_list[latest_num],
-                                           batch_size_list[latest_num])
-                else:
-                    pass
-            latest_num = (latest_num + 1) % len(queue_name_list)
+    try:
+        while True:
+            time.sleep(0.01)
+            for index in range(len(queue_name_list)):
+                while queues_dict[
+                        queue_name_list[latest_num]].empty() is not True:
+                    input_data = []
+                    lock.acquire()
+                    try:
+                        batch = queues_dict[
+                            queue_name_list[latest_num]].get_attribute(
+                                "maxsize")
+                        for index2 in range(batch):
+                            if queues_dict[queue_name_list[latest_num]].empty(
+                            ) is True:
+                                break
+                            input_data.append(
+                                queues_dict[queue_name_list[latest_num]].get())
+                    finally:
+                        lock.release()
+                    if len(input_data) != 0:
+                        choose_module_category(input_data,
+                                               queue_name_list[latest_num],
+                                               batch_size_list[latest_num])
+                    else:
+                        pass
+                latest_num = (latest_num + 1) % len(queue_name_list)
+    except KeyboardInterrupt:
+        print("Process %s is end." % (os.getpid()))
 
 
 def init_pool(l):
@@ -168,7 +170,7 @@ def create_app():
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app_instance.logger.handlers = gunicorn_logger.handlers
     app_instance.logger.setLevel(gunicorn_logger.level)
-    global queues_dict
+    global queues_dict, pool
     lock = mp.Lock()
     pool = mp.Pool(
         processes=(mp.cpu_count() - 1),
@@ -310,6 +312,9 @@ def run(is_use_gpu=False, configs=None, port=8888):
         return
     my_app = create_app()
     my_app.run(host="0.0.0.0", port=port, debug=False)
+    pool.close()
+    pool.join()
+    print("PaddleHub-Serving has been stopped.")
 
 
 if __name__ == "__main__":
