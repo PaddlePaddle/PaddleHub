@@ -52,10 +52,11 @@ setup(
     author_email='paddle-dev@baidu.com',
     install_requires=REQUIRED_PACKAGES,
     packages=find_packages(),
-    data_files=[('paddlehub/serving/templates', [
+    package_data={'paddlehub/serving/templates':[
         'paddlehub/serving/templates/serving_config.json',
         'paddlehub/serving/templates/main.html'
-    ])],
+    ]},
+    include_package_data=True,
     # PyPI package information.
     classifiers=[
         'Development Status :: 4 - Beta',
