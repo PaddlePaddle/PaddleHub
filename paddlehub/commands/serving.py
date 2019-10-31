@@ -67,7 +67,8 @@ class ServingCommand(BaseCommand):
                         "category": str(m.type).split("/")[0].upper()
                     })
                 except Exception as err:
-                    pass
+                    print(err, ", start Hub-Serving unsuccessfully.")
+                    exit(1)
             return configs
 
     @staticmethod
