@@ -35,8 +35,6 @@
                 <select class="custom-select" id="inputGroupSelect01"
                         onchange="select_category(this.options[this.options.selectedIndex].value)">
                     <option selected>Choose...</option>
-                    <option value="nlp_module">nlp</option>
-                    <option value="cv_module">cv</option>
                 </select>
             </td>
             <td style="width: 6%"></td>
@@ -61,12 +59,31 @@
     </div>
 </form>
 <script>
-    module_info = {
-        "nlp_module":[{"Choose...":"Choose..."},{"lac":"lac"},
-            {"senta_lstm":"senta_lstm"}],
-        "cv_module":[{"Choose...":"Choose..."},{"yolov3":"yolov3_coco2017"},{"faster_rcnn":"faster_rcnn_coco2017"}],
-        "Choose...":[{"请先选择分类":"Choose..."}]
-    };
+    var module_info = {};
+
+    $.ajax({
+        type: "POST",
+        url: "/get/modules",
+        data: "",
+        dataType: "json",
+        async: false,
+        success: function (res) {
+            module_info = res.module_info;
+            console.log(res);
+            console.log("mo=", module_info);
+            if (module_info.hasOwnProperty("nlp_module"))
+            {
+                s = document.getElementById("inputGroupSelect01");
+                s.options.add(new Option("nlp", "nlp_module"));
+            }
+            if (module_info.hasOwnProperty("cv_module"))
+            {
+                s = document.getElementById("inputGroupSelect01");
+                s.options.add(new Option("cv", "cv_module"));
+            }
+        }
+    });
+
     function get_module_option(module_categoty) {
         options = module_info[module_categoty];
         html = "";

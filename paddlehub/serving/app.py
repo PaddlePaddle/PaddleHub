@@ -188,14 +188,29 @@ def create_app():
         request.data = {"id": str(time.time())}
         pass
 
+    @app_instance.route("/get/modules", methods=["GET", "POST"])
+    def get_modules_info():
+        global nlp_module, cv_module
+        module_info = {}
+        if len(nlp_module) > 0:
+            module_info.update({"nlp_module": [{"Choose...": "Choose..."}]})
+            for item in nlp_module:
+                module_info["nlp_module"].append({item: item})
+        if len(cv_module) > 0:
+            module_info.update({"cv_module": [{"Choose...": "Choose..."}]})
+            for item in cv_module:
+                module_info["cv_module"].append({item: item})
+        module_info.update({"Choose...": [{"请先选择分类": "Choose..."}]})
+        return {"module_info": module_info}
+
     @app_instance.route("/predict/image/<module_name>", methods=["POST"])
     def predict_iamge(module_name):
         global results_dict
         req_id = request.data.get("id")
         img_base64 = request.form.get("input_img", "")
         received_file_name = request.form.get("input_file", "")
-        ext = received_file_name.split(".")[-1]
-        if ext == "":
+        ext = img_base64.split(";")[0].split("/")[-1]
+        if ext not in ["jpeg", "jpg", "png"]:
             return {"result": "Unrecognized file type"}
         score = time.time()
         filename = utils.md5(str(time.time()) + str(img_base64)) + "." + ext
