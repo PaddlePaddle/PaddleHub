@@ -485,9 +485,9 @@ class ReadingComprehensionTask(BasicTask):
             total_num_seqs.extend(np_num_seqs)
             run_step += run_state.run_step
             if self.is_test_phase:
-                np_unique_ids = run_state[2]
-                np_start_logits = run_state[3]
-                np_end_logits = run_state[4]
+                np_unique_ids = run_state.run_results[2]
+                np_start_logits = run_state.run_results[3]
+                np_end_logits = run_state.run_results[4]
                 for idx in range(np_unique_ids.shape[0]):
                     unique_id = int(np_unique_ids[idx])
                     start_logits = [float(x) for x in np_start_logits[idx].flat]
