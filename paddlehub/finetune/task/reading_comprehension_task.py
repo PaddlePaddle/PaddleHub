@@ -389,6 +389,7 @@ class ReadingComprehensionTask(BasicTask):
             config=config,
             metrics_choices=metrics_choices)
         self.feature = feature
+        self.data_reader = data_reader
         self.sub_task = sub_task.lower()
         self.version_2_with_negative = (self.sub_task == "squad2.0")
         if self.sub_task in ["squad2.0", "squad"]:
@@ -510,8 +511,8 @@ class ReadingComprehensionTask(BasicTask):
                                              "nbest_predictions.json")
             output_null_log_odds_file = os.path.join(self.config.checkpoint_dir,
                                                      "null_odds.json")
-            all_examples = self.reader.all_examples[self.phase]
-            all_features = self.reader.all_features[self.phase]
+            all_examples = self.data_reader.all_examples[self.phase]
+            all_features = self.data_reader.all_features[self.phase]
             write_predictions(
                 all_examples=all_examples,
                 all_features=all_features,
