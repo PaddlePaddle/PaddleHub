@@ -23,12 +23,14 @@ import collections
 import math
 import six
 import json
+
 from collections import OrderedDict
 
 import numpy as np
 import paddle.fluid as fluid
 from .basic_task import BasicTask
 from paddlehub.common.logger import logger
+from paddlehub.reader import tokenization
 from paddlehub.finetune.evaluator import evaluate_v1
 from paddlehub.finetune.evaluator import evaluate_v2
 from paddlehub.finetune.evaluator import cmrc2018_evaluate
@@ -70,7 +72,7 @@ def _compute_softmax(scores):
     return probs
 
 
-def get_final_text(pred_text, orig_text, do_lower_case, tokenization):
+def get_final_text(pred_text, orig_text, do_lower_case):
     """Project the tokenized prediction back to the original text."""
 
     # When we created the data, we kept track of the alignment between original
@@ -169,8 +171,8 @@ def get_final_text(pred_text, orig_text, do_lower_case, tokenization):
 def write_predictions(all_examples, all_features, all_results, n_best_size,
                       max_answer_length, do_lower_case, output_prediction_file,
                       output_nbest_file, output_null_log_odds_file,
-                      tokenization, version_2_with_negative,
-                      null_score_diff_threshold, is_english):
+                      version_2_with_negative, null_score_diff_threshold,
+                      is_english):
     """Write final predictions to the json file and log-odds of null if needed."""
     logger.info("Writing predictions to: %s" % (output_prediction_file))
     logger.info("Writing nbest to: %s" % (output_nbest_file))
@@ -284,8 +286,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 tok_text = " ".join(tok_text.split())
                 orig_text = " ".join(orig_tokens)
 
-                final_text = get_final_text(tok_text, orig_text, do_lower_case,
-                                            tokenization)
+                final_text = get_final_text(tok_text, orig_text, do_lower_case)
                 if final_text in seen_predictions:
                     continue
 
@@ -524,7 +525,6 @@ class ReadingComprehensionTask(BasicTask):
                 output_prediction_file=output_prediction_file,
                 output_nbest_file=output_nbest_file,
                 output_null_log_odds_file=output_null_log_odds_file,
-                tokenization=self.data_reader.tokenizer,
                 version_2_with_negative=self.version_2_with_negative,
                 null_score_diff_threshold=self.null_score_diff_threshold,
                 is_english=self.is_english)
