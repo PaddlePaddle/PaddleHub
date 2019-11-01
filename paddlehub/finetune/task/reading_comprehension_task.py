@@ -178,7 +178,6 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     logger.info("Writing nbest to: %s" % (output_nbest_file))
 
     example_index_to_features = collections.defaultdict(list)
-    # print(all_features[:3])
     for feature in all_features:
         example_index_to_features[feature.example_index].append(feature)
 
@@ -186,15 +185,9 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     for result in all_results:
         unique_id_to_result[result.unique_id] = result
 
-    print("\n\n\nall_examples", all_examples[:5])
-    print("\n\n\nall_features", all_features[:5])
-    print("\n\n\nall_results", [r.unique_id for r in all_results[:5]])
-    print("\n\n\nunique_id_to_result", list(unique_id_to_result.keys())[:5])
-    _PrelimPrediction = collections.namedtuple(  # pylint: disable=invalid-name
-        "PrelimPrediction", [
-            "feature_index", "start_index", "end_index", "start_logit",
-            "end_logit"
-        ])
+    _PrelimPrediction = collections.namedtuple("PrelimPrediction", [
+        "feature_index", "start_index", "end_index", "start_logit", "end_logit"
+    ])
 
     all_predictions = collections.OrderedDict()
     all_nbest_json = collections.OrderedDict()
@@ -210,6 +203,11 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
         null_start_logit = 0  # the start logit at the slice with min null score
         null_end_logit = 0  # the end logit at the slice with min null score
         for (feature_index, feature) in enumerate(features):
+            if feature.unique_id not in unique_id_to_result:
+                logger.info(
+                    "As using pyreader, the last one batch is so small that the feature %s in the last batch is discarded "
+                    % feature.unique_id)
+                continue
             result = unique_id_to_result[feature.unique_id]
             start_indexes = _get_best_indexes(result.start_logits, n_best_size)
             end_indexes = _get_best_indexes(result.end_logits, n_best_size)

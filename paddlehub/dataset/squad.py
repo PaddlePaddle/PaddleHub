@@ -201,8 +201,6 @@ class SQUAD(object):
                         end_position=end_position,
                         is_impossible=is_impossible)
                     examples.append(example)
-                    if len(examples) > 3:
-                        return examples
 
         return examples
 

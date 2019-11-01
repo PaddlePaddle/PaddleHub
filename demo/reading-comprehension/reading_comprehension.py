@@ -101,4 +101,4 @@ if __name__ == '__main__':
     )
 
     # Finetune by PaddleHub's API
-    reading_comprehension_task.eval()
+    reading_comprehension_task.finetune_and_eval()
