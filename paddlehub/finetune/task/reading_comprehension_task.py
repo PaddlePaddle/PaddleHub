@@ -186,9 +186,9 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     for result in all_results:
         unique_id_to_result[result.unique_id] = result
 
-    print("\n\n\nall_features", all_features)
-    print("\n\n\nall_results", all_results)
-    print("\n\n\nunique_id_to_result", unique_id_to_result)
+    print("\n\n\nall_features", all_features[:2])
+    print("\n\n\nall_results", all_results[:2])
+    print("\n\n\nunique_id_to_result", unique_id_to_result.keys()[:1000])
     _PrelimPrediction = collections.namedtuple(  # pylint: disable=invalid-name
         "PrelimPrediction", [
             "feature_index", "start_index", "end_index", "start_logit",
@@ -492,7 +492,6 @@ class ReadingComprehensionTask(BasicTask):
             run_step += run_state.run_step
             if self.is_test_phase:
                 np_unique_ids = run_state.run_results[2]
-                print(np_unique_ids)
                 np_start_logits = run_state.run_results[3]
                 np_end_logits = run_state.run_results[4]
                 for idx in range(np_unique_ids.shape[0]):
