@@ -25,6 +25,7 @@ from .xnli import XNLI
 from .glue import GLUE
 from .tnews import TNews
 from .inews import INews
+from .drcd import DRCD
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat
