@@ -2,7 +2,7 @@ export FLAGS_eager_delete_tensor_gb=0.0
 export CUDA_VISIBLE_DEVICES=0,1
 
 python -u reading_comprehension.py \
-                   --batch_size=12 \
+                   --batch_size=2 \
                    --use_gpu=True \
                    --checkpoint_dir="./ckpt_rc" \
                    --learning_rate=3e-5 \

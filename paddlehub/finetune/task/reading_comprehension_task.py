@@ -178,7 +178,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     logger.info("Writing nbest to: %s" % (output_nbest_file))
 
     example_index_to_features = collections.defaultdict(list)
-    print(all_features[:3])
+    # print(all_features[:3])
     for feature in all_features:
         example_index_to_features[feature.example_index].append(feature)
 
@@ -186,6 +186,9 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     for result in all_results:
         unique_id_to_result[result.unique_id] = result
 
+    print("\n\n\nall_features", all_features)
+    print("\n\n\nall_results", all_results)
+    print("\n\n\nunique_id_to_result", unique_id_to_result)
     _PrelimPrediction = collections.namedtuple(  # pylint: disable=invalid-name
         "PrelimPrediction", [
             "feature_index", "start_index", "end_index", "start_logit",
@@ -489,6 +492,7 @@ class ReadingComprehensionTask(BasicTask):
             run_step += run_state.run_step
             if self.is_test_phase:
                 np_unique_ids = run_state.run_results[2]
+                print(np_unique_ids)
                 np_start_logits = run_state.run_results[3]
                 np_end_logits = run_state.run_results[4]
                 for idx in range(np_unique_ids.shape[0]):
@@ -500,7 +504,6 @@ class ReadingComprehensionTask(BasicTask):
                             unique_id=unique_id,
                             start_logits=start_logits,
                             end_logits=end_logits))
-        print(all_results[:3])
 
         run_time_used = time.time() - run_states[0].run_time_begin
         run_speed = run_step / run_time_used
