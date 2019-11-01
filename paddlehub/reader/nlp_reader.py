@@ -735,36 +735,6 @@ class MultiLabelClassifyReader(BaseReader):
         return record
 
 
-class SquadInputFeatures(object):
-    """A single set of features of squad_data."""
-
-    def __init__(self,
-                 unique_id,
-                 example_index,
-                 doc_span_index,
-                 tokens,
-                 token_to_orig_map,
-                 token_is_max_context,
-                 input_ids,
-                 input_mask,
-                 segment_ids,
-                 start_position=None,
-                 end_position=None,
-                 is_impossible=None):
-        self.unique_id = unique_id
-        self.example_index = example_index
-        self.doc_span_index = doc_span_index
-        self.tokens = tokens
-        self.token_to_orig_map = token_to_orig_map
-        self.token_is_max_context = token_is_max_context
-        self.input_ids = input_ids
-        self.input_mask = input_mask
-        self.segment_ids = segment_ids
-        self.start_position = start_position
-        self.end_position = end_position
-        self.is_impossible = is_impossible
-
-
 class RegressionReader(BaseReader):
     def __init__(self,
                  vocab_path,
@@ -909,26 +879,64 @@ class RegressionReader(BaseReader):
         return wrapper
 
 
-class ReadingComprehensionReader(object):
+class SquadInputFeatures(object):
+    """A single set of features of squad_data."""
+
     def __init__(self,
-                 dataset,
-                 vocab_path,
-                 do_lower_case=True,
-                 max_seq_length=512,
-                 doc_stride=128,
-                 max_query_length=64,
-                 random_seed=None):
+                 unique_id,
+                 example_index,
+                 doc_span_index,
+                 tokens,
+                 token_to_orig_map,
+                 token_is_max_context,
+                 input_ids,
+                 position_ids,
+                 input_mask,
+                 segment_ids,
+                 start_position=None,
+                 end_position=None,
+                 is_impossible=None):
+        self.unique_id = unique_id
+        self.example_index = example_index
+        self.doc_span_index = doc_span_index
+        self.tokens = tokens
+        self.token_to_orig_map = token_to_orig_map
+        self.token_is_max_context = token_is_max_context
+        self.input_ids = input_ids
+        self.position_ids = position_ids
+        self.input_mask = input_mask
+        self.segment_ids = segment_ids
+        self.start_position = start_position
+        self.end_position = end_position
+        self.is_impossible = is_impossible
+
+
+class ReadingComprehensionReader(BaseReader):
+    def __init__(
+            self,
+            dataset,
+            vocab_path,
+            do_lower_case=True,
+            max_seq_length=512,
+            doc_stride=128,
+            max_query_length=64,
+            random_seed=None,
+    ):
         self.dataset = dataset
-        self._tokenizer = tokenization.FullTokenizer(
+        self.tokenizer = tokenization.FullTokenizer(
             vocab_file=vocab_path, do_lower_case=do_lower_case)
-        self._max_seq_length = max_seq_length
-        self._doc_stride = doc_stride
-        self._max_query_length = max_query_length
-        self._in_tokens = False
+        self.max_seq_length = max_seq_length
+        self.doc_stride = doc_stride
+        self.max_query_length = max_query_length
+        self.in_tokens = False
+        self.all_eval_features = []
+        self.all_eval_examples = []
+        self.all_test_features = []
+        self.all_test_features = []
 
         np.random.seed(random_seed)
 
-        self.vocab = self._tokenizer.vocab
+        self.vocab = self.tokenizer.vocab
         self.vocab_size = len(self.vocab)
         self.pad_id = self.vocab["[PAD]"]
         self.cls_id = self.vocab["[CLS]"]
@@ -939,27 +947,62 @@ class ReadingComprehensionReader(object):
 
         self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
 
-    def get_train_progress(self):
-        """Gets progress for training phase."""
-        return self.current_train_example
+    def _pad_batch_records(self, batch_records, phase):
+        batch_token_ids = [record.token_ids for record in batch_records]
+        batch_text_type_ids = [record.text_type_ids for record in batch_records]
+        batch_position_ids = [record.position_ids for record in batch_records]
+        batch_unique_ids = [record.unique_id for record in batch_records]
+        batch_unique_ids = np.array(batch_unique_ids).astype("int64").reshape(
+            [-1, 1])
 
-    def get_train_examples(self):
-        """Gets a collection of `SquadExample`s for the train set."""
-        return self.dataset.get_train_examples()
+        # padding
+        padded_token_ids, input_mask = pad_batch_data(
+            batch_token_ids, pad_idx=self.pad_id, return_input_mask=True)
+        padded_text_type_ids = pad_batch_data(
+            batch_text_type_ids, pad_idx=self.pad_id)
+        padded_position_ids = pad_batch_data(
+            batch_position_ids, pad_idx=self.pad_id)
 
-    def get_dev_examples(self):
-        """Gets a collection of `SquadExample`s for the dev set."""
-        return self.dataset.get_dev_examples()
+        if phase != "predict":
+            batch_start_position = [
+                record.start_position for record in batch_records
+            ]
+            batch_end_position = [
+                record.end_position for record in batch_records
+            ]
+            batch_start_position = np.array(batch_start_position).astype(
+                "int64").reshape([-1, 1])
+            batch_end_position = np.array(batch_end_position).astype(
+                "int64").reshape([-1, 1])
 
-    def get_test_examples(self):
-        """Gets a collection of `SquadExample`s for prediction."""
-        return self.dataset.get_test_examples()
+            return_list = [
+                padded_token_ids, padded_position_ids, padded_text_type_ids,
+                input_mask, batch_unique_ids, batch_start_position,
+                batch_end_position
+            ]
 
-    def get_num_examples(self, phase):
-        if phase not in ['train', 'dev', 'test']:
-            raise ValueError(
-                "Unknown phase, which should be in ['train', 'predict'].")
-        return self.num_examples[phase]
+            if self.use_task_id:
+                padded_task_ids = np.ones_like(
+                    padded_token_ids, dtype="int64") * self.task_id
+                return_list = [
+                    padded_token_ids, padded_position_ids, padded_text_type_ids,
+                    input_mask, padded_task_ids, batch_unique_ids,
+                    batch_start_position, batch_end_position
+                ]
+
+        else:
+            return_list = [
+                padded_token_ids, padded_position_ids, padded_text_type_ids,
+                input_mask, batch_unique_ids
+            ]
+            if self.use_task_id:
+                padded_task_ids = np.ones_like(
+                    padded_token_ids, dtype="int64") * self.task_id
+                return_list = [
+                    padded_token_ids, padded_position_ids, padded_text_type_ids,
+                    input_mask, padded_task_ids, batch_unique_ids
+                ]
+        return return_list
 
     def data_generator(self,
                        batch_size=1,
@@ -986,92 +1029,55 @@ class ReadingComprehensionReader(object):
                 "Unknown phase, which should be in ['train', 'dev', 'test', 'predict']."
             )
 
-        def batch_reader(features, batch_size, in_tokens):
-            batch, total_token_num, max_len = [], 0, 0
-            for (index, feature) in enumerate(features):
-                if phase == 'train':
-                    self.current_train_example = index + 1
-                seq_len = len(feature.input_ids)
-                labels = [feature.unique_id
-                          ] if feature.start_position is None else [
-                              feature.start_position, feature.end_position
-                          ]
-                example = [
-                    feature.input_ids, feature.segment_ids,
-                    range(seq_len)
-                ] + labels
-                max_len = max(max_len, seq_len)
-
-                #max_len = max(max_len, len(token_ids))
-                if in_tokens:
-                    to_append = (len(batch) + 1) * max_len <= batch_size
-                else:
-                    to_append = len(batch) < batch_size
-
-                if to_append:
-                    batch.append(example)
-                    total_token_num += seq_len
-                else:
-                    yield batch, total_token_num
-                    batch, total_token_num, max_len = [example
-                                                       ], seq_len, seq_len
-            if len(batch) > 0:
-                yield batch, total_token_num
-
         def wrapper():
             if shuffle:
                 np.random.shuffle(examples)
-            if phase == "train":
-                features = self.convert_examples_to_features(
-                    examples, is_training=True)
-            else:
-                features = self.convert_examples_to_features(
-                    examples, is_training=False)
 
-            for batch_data, total_token_num in batch_reader(
-                    features, batch_size, self._in_tokens):
-                batch_data = prepare_batch_data(
-                    batch_data,
-                    total_token_num,
-                    self._max_seq_length,
-                    pad_id=self.pad_id,
-                    cls_id=self.cls_id,
-                    sep_id=self.sep_id,
-                    return_input_mask=True,
-                    return_max_len=False,
-                    return_num_token=False)
-
+            for batch_data in self._prepare_batch_data(
+                    examples, batch_size, phase=phase):
                 yield [batch_data]
+
+            self.all_eval_features = []
+            self.all_eval_examples = []
+            self.all_test_features = []
+            self.all_test_features = []
 
         return wrapper
 
-    def convert_examples_to_features(self, examples, is_training):
+    def _convert_example_to_record(self,
+                                   examples,
+                                   max_seq_length,
+                                   tokenizer,
+                                   phase=None):
         """Loads a data file into a list of `InputBatch`s."""
 
         unique_id = 1000000000
 
         for (example_index, example) in enumerate(examples):
-            query_tokens = self._tokenizer.tokenize(example.question_text)
+            query_tokens = tokenizer.tokenize(example.question_text)
 
-            if len(query_tokens) > self._max_query_length:
-                query_tokens = query_tokens[0:self._max_query_length]
+            if len(query_tokens) > self.max_query_length:
+                query_tokens = query_tokens[0:self.max_query_length]
 
             tok_to_orig_index = []
             orig_to_tok_index = []
             all_doc_tokens = []
             for (i, token) in enumerate(example.doc_tokens):
                 orig_to_tok_index.append(len(all_doc_tokens))
-                sub_tokens = self._tokenizer.tokenize(token)
+                sub_tokens = tokenizer.tokenize(token)
                 for sub_token in sub_tokens:
                     tok_to_orig_index.append(i)
                     all_doc_tokens.append(sub_token)
 
             tok_start_position = None
             tok_end_position = None
-            if is_training and example.is_impossible:
+            is_impossible = example.is_impossible if hasattr(
+                example, "is_impossible") else False
+
+            if phase != "predict" and is_impossible:
                 tok_start_position = -1
                 tok_end_position = -1
-            if is_training and not example.is_impossible:
+            if phase != "predict" and not is_impossible:
                 tok_start_position = orig_to_tok_index[example.start_position]
                 if example.end_position < len(example.doc_tokens) - 1:
                     tok_end_position = orig_to_tok_index[example.end_position +
@@ -1081,10 +1087,10 @@ class ReadingComprehensionReader(object):
                 (tok_start_position,
                  tok_end_position) = self.improve_answer_span(
                      all_doc_tokens, tok_start_position, tok_end_position,
-                     self._tokenizer, example.orig_answer_text)
+                     tokenizer, example.orig_answer_text)
 
             # The -3 accounts for [CLS], [SEP] and [SEP]
-            max_tokens_for_doc = self._max_seq_length - len(query_tokens) - 3
+            max_tokens_for_doc = max_seq_length - len(query_tokens) - 3
 
             # We can have documents that are longer than the maximum sequence length.
             # To deal with this we do a sliding window approach, where we take chunks
@@ -1099,7 +1105,7 @@ class ReadingComprehensionReader(object):
                 doc_spans.append(_DocSpan(start=start_offset, length=length))
                 if start_offset + length == len(all_doc_tokens):
                     break
-                start_offset += min(length, self._doc_stride)
+                start_offset += min(length, self.doc_stride)
 
             for (doc_span_index, doc_span) in enumerate(doc_spans):
                 tokens = []
@@ -1127,7 +1133,8 @@ class ReadingComprehensionReader(object):
                 tokens.append("[SEP]")
                 segment_ids.append(1)
 
-                input_ids = self._tokenizer.convert_tokens_to_ids(tokens)
+                input_ids = tokenizer.convert_tokens_to_ids(tokens)
+                position_ids = list(range(len(input_ids)))
 
                 # The mask has 1 for real tokens and 0 for padding tokens. Only real
                 # tokens are attended to.
@@ -1145,7 +1152,7 @@ class ReadingComprehensionReader(object):
 
                 start_position = None
                 end_position = None
-                if is_training and not example.is_impossible:
+                if phase != "predict" and not is_impossible:
                     # For training, if our document chunk does not contain an annotation
                     # we throw it out, since there is nothing to predict.
                     doc_start = doc_span.start
@@ -1162,7 +1169,7 @@ class ReadingComprehensionReader(object):
                         start_position = tok_start_position - doc_start + doc_offset
                         end_position = tok_end_position - doc_start + doc_offset
 
-                if is_training and example.is_impossible:
+                if phase != "predict" and is_impossible:
                     start_position = 0
                     end_position = 0
 
@@ -1187,9 +1194,9 @@ class ReadingComprehensionReader(object):
                         [str(x) for x in input_mask]))
                     logger.debug("segment_ids: %s" % " ".join(
                         [str(x) for x in segment_ids]))
-                    if is_training and example.is_impossible:
+                    if phase != "predict" and is_impossible:
                         logger.debug("impossible example")
-                    if is_training and not example.is_impossible:
+                    if phase != "predict" and not is_impossible:
                         answer_text = " ".join(
                             tokens[start_position:(end_position + 1)])
                         logger.debug("start_position: %d" % (start_position))
@@ -1205,13 +1212,21 @@ class ReadingComprehensionReader(object):
                     token_to_orig_map=token_to_orig_map,
                     token_is_max_context=token_is_max_context,
                     input_ids=input_ids,
+                    position_ids=position_ids,
                     input_mask=input_mask,
                     segment_ids=segment_ids,
                     start_position=start_position,
                     end_position=end_position,
-                    is_impossible=example.is_impossible)
+                    is_impossible=is_impossible)
 
                 unique_id += 1
+
+                if phase == 'val' or phase == 'dev':
+                    self.all_eval_features.append(feature)
+                    self.all_eval_examples.append(example)
+                elif phase == 'test':
+                    self.all_test_features.append(feature)
+                    self.all_test_examples.append(example)
 
                 yield feature
 

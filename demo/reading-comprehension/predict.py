@@ -66,6 +66,7 @@ def write_predictions(
         output_prediction_file,
         output_nbest_file,
         output_null_log_odds_file,
+        ensure_ascii,
         n_best_size=20,
         max_answer_length=30,
         do_lower_case=True,
@@ -100,7 +101,7 @@ def write_predictions(
         prelim_predictions = []
         # keep track of the minimum score of null start+end of position 0
         score_null = 1000000  # large and positive
-        min_null_feature_index = 0  # the paragraph slice with min mull score
+        min_null_feature_index = 0  # the paragraph slice with min null score
         null_start_logit = 0  # the start logit at the slice with min null score
         null_end_logit = 0  # the end logit at the slice with min null score
         for (feature_index, feature) in enumerate(features):
@@ -224,7 +225,7 @@ def write_predictions(
                     best_non_null_entry = entry
         # debug
         if best_non_null_entry is None:
-            print("Emmm..., sth wrong")
+            print("the best_non_null_entry is None, sth wrong")
 
         probs = compute_softmax(total_scores)
 
@@ -254,10 +255,14 @@ def write_predictions(
         all_nbest_json[example.qas_id] = nbest_json
 
     with open(output_prediction_file, "w") as writer:
-        writer.write(json.dumps(all_predictions, indent=4) + "\n")
+        writer.write(
+            json.dumps(all_predictions, indent=4, ensure_ascii=ensure_ascii) +
+            "\n")
 
     with open(output_nbest_file, "w") as writer:
-        writer.write(json.dumps(all_nbest_json, indent=4) + "\n")
+        writer.write(
+            json.dumps(all_nbest_json, indent=4, ensure_ascii=ensure_ascii) +
+            "\n")
 
     if version_2_with_negative:
         with open(output_null_log_odds_file, "w") as writer:
@@ -288,8 +293,8 @@ def get_final_text(pred_text, orig_text, do_lower_case):
     #
     # What we really want to return is "Steve Smith".
     #
-    # Therefore, we have to apply a semi-complicated alignment heruistic between
-    # `pred_text` and `orig_text` to get a character-to-charcter alignment. This
+    # Therefore, we have to apply a semi-complicated alignment heuristic between
+    # `pred_text` and `orig_text` to get a character-to-character alignment. This
     # can fail in certain cases in which case we just return `orig_text`.
 
     def _strip_spaces(text):

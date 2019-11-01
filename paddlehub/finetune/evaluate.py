@@ -25,6 +25,11 @@ import numpy as np
 from paddlehub.common.logger import logger
 import paddlehub as hub
 
+import sys
+import re
+import string
+from collections import Counter
+
 
 # Sequence label evaluation functions
 def chunk_eval(np_labels, np_infers, np_lens, tag_num, dev_count=1):

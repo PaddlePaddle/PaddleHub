@@ -31,9 +31,6 @@ parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight dec
 parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=384, help="Number of words of the longest seqence.")
-parser.add_argument("--null_score_diff_threshold", type=float, default=0.0, help="If null_score - best_non_null is greater than the threshold predict null.")
-parser.add_argument("--n_best_size",  type=int, default=20,help="The total number of n-best predictions to generate in the ""nbest_predictions.json output file.")
-parser.add_argument("--max_answer_length",  type=int, default=30,help="The maximum length of an answer that can be generated. This is needed ""because the start and end predictions are not conditioned on one another.")
 parser.add_argument("--batch_size", type=int, default=8, help="Total examples' number in batch for training.")
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=True, help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=True, help="Whether use data parallel.")
@@ -90,14 +87,11 @@ if __name__ == '__main__':
         strategy=strategy)
 
     # Define a reading comprehension finetune task by PaddleHub's API
-    sub_task = "squad" if not args.version_2_with_negative else "squad2.0"
     reading_comprehension_task = hub.ReadingComprehensionTask(
         data_reader=reader,
         feature=seq_output,
         feed_list=feed_list,
-        config=config,
-        sub_task=sub_task,
-    )
+        config=config)
 
     # Finetune by PaddleHub's API
-    reading_comprehension_task.finetune()
+    reading_comprehension_task.finetune_and_eval()
