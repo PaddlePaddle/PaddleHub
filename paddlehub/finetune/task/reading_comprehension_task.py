@@ -523,19 +523,19 @@ class ReadingComprehensionTask(BasicTask):
                 output_prediction_file=output_prediction_file,
                 output_nbest_file=output_nbest_file,
                 output_null_log_odds_file=output_null_log_odds_file,
-                tokenization=self.reader.tokenizer,
+                tokenization=self.data_reader.tokenizer,
                 version_2_with_negative=self.version_2_with_negative,
                 null_score_diff_threshold=self.null_score_diff_threshold,
                 is_english=self.is_english)
             if self.phase == 'val' or self.phase == 'dev':
                 with open(
-                        self.reader.dataset.dev_file, 'r',
+                        self.data_reader.dataset.dev_file, 'r',
                         encoding="utf8") as dataset_file:
                     dataset_json = json.load(dataset_file)
                     dataset = dataset_json['data']
             elif self.phase == 'test':
                 with open(
-                        self.reader.dataset.test_file, 'r',
+                        self.data_reader.dataset.test_file, 'r',
                         encoding="utf8") as dataset_file:
                     dataset_json = json.load(dataset_file)
                     dataset = dataset_json['data']
