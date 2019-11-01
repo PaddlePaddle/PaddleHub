@@ -927,10 +927,15 @@ class ReadingComprehensionReader(BaseReader):
         self.doc_stride = doc_stride
         self.max_query_length = max_query_length
         self.in_tokens = False
-        self.all_eval_features = []
-        self.all_eval_examples = []
-        self.all_test_features = []
-        self.all_test_examples = []
+        self.all_features = {"dev": [], "test": []}
+        self.all_examples = {"dev": [], "test": []}
+        self.unique_id = {
+            "train": 1000000000,
+            "dev": 1000000000,
+            "test": 1000000000,
+            "predict": 1000000000
+        }
+        self.example_id = {"train": 0, "dev": 0, "test": 0, "predict": 0}
 
         np.random.seed(random_seed)
 
@@ -1043,172 +1048,164 @@ class ReadingComprehensionReader(BaseReader):
         return wrapper
 
     def _convert_example_to_record(self,
-                                   examples,
+                                   example,
                                    max_seq_length,
                                    tokenizer,
                                    phase=None):
         """Loads a data file into a list of `InputBatch`s."""
 
-        unique_id = 1000000000
+        query_tokens = tokenizer.tokenize(example.question_text)
 
-        for (example_index, example) in enumerate(examples):
-            query_tokens = tokenizer.tokenize(example.question_text)
+        if len(query_tokens) > self.max_query_length:
+            query_tokens = query_tokens[0:self.max_query_length]
 
-            if len(query_tokens) > self.max_query_length:
-                query_tokens = query_tokens[0:self.max_query_length]
+        tok_to_orig_index = []
+        orig_to_tok_index = []
+        all_doc_tokens = []
+        for (i, token) in enumerate(example.doc_tokens):
+            orig_to_tok_index.append(len(all_doc_tokens))
+            sub_tokens = tokenizer.tokenize(token)
+            for sub_token in sub_tokens:
+                tok_to_orig_index.append(i)
+                all_doc_tokens.append(sub_token)
 
-            tok_to_orig_index = []
-            orig_to_tok_index = []
-            all_doc_tokens = []
-            for (i, token) in enumerate(example.doc_tokens):
-                orig_to_tok_index.append(len(all_doc_tokens))
-                sub_tokens = tokenizer.tokenize(token)
-                for sub_token in sub_tokens:
-                    tok_to_orig_index.append(i)
-                    all_doc_tokens.append(sub_token)
+        tok_start_position = None
+        tok_end_position = None
+        is_impossible = example.is_impossible if hasattr(
+            example, "is_impossible") else False
 
-            tok_start_position = None
-            tok_end_position = None
-            is_impossible = example.is_impossible if hasattr(
-                example, "is_impossible") else False
+        if phase != "predict" and is_impossible:
+            tok_start_position = -1
+            tok_end_position = -1
+        if phase != "predict" and not is_impossible:
+            tok_start_position = orig_to_tok_index[example.start_position]
+            if example.end_position < len(example.doc_tokens) - 1:
+                tok_end_position = orig_to_tok_index[example.end_position +
+                                                     1] - 1
+            else:
+                tok_end_position = len(all_doc_tokens) - 1
+            (tok_start_position, tok_end_position) = self.improve_answer_span(
+                all_doc_tokens, tok_start_position, tok_end_position, tokenizer,
+                example.orig_answer_text)
 
-            if phase != "predict" and is_impossible:
-                tok_start_position = -1
-                tok_end_position = -1
-            if phase != "predict" and not is_impossible:
-                tok_start_position = orig_to_tok_index[example.start_position]
-                if example.end_position < len(example.doc_tokens) - 1:
-                    tok_end_position = orig_to_tok_index[example.end_position +
-                                                         1] - 1
-                else:
-                    tok_end_position = len(all_doc_tokens) - 1
-                (tok_start_position,
-                 tok_end_position) = self.improve_answer_span(
-                     all_doc_tokens, tok_start_position, tok_end_position,
-                     tokenizer, example.orig_answer_text)
+        # The -3 accounts for [CLS], [SEP] and [SEP]
+        max_tokens_for_doc = max_seq_length - len(query_tokens) - 3
 
-            # The -3 accounts for [CLS], [SEP] and [SEP]
-            max_tokens_for_doc = max_seq_length - len(query_tokens) - 3
+        # We can have documents that are longer than the maximum sequence length.
+        # To deal with this we do a sliding window approach, where we take chunks
+        # of the up to our max length with a stride of `doc_stride`.
+        _DocSpan = collections.namedtuple("DocSpan", ["start", "length"])
+        doc_spans = []
+        start_offset = 0
+        while start_offset < len(all_doc_tokens):
+            length = len(all_doc_tokens) - start_offset
+            if length > max_tokens_for_doc:
+                length = max_tokens_for_doc
+            doc_spans.append(_DocSpan(start=start_offset, length=length))
+            if start_offset + length == len(all_doc_tokens):
+                break
+            start_offset += min(length, self.doc_stride)
 
-            # We can have documents that are longer than the maximum sequence length.
-            # To deal with this we do a sliding window approach, where we take chunks
-            # of the up to our max length with a stride of `doc_stride`.
-            _DocSpan = collections.namedtuple("DocSpan", ["start", "length"])
-            doc_spans = []
-            start_offset = 0
-            while start_offset < len(all_doc_tokens):
-                length = len(all_doc_tokens) - start_offset
-                if length > max_tokens_for_doc:
-                    length = max_tokens_for_doc
-                doc_spans.append(_DocSpan(start=start_offset, length=length))
-                if start_offset + length == len(all_doc_tokens):
-                    break
-                start_offset += min(length, self.doc_stride)
-
-            for (doc_span_index, doc_span) in enumerate(doc_spans):
-                tokens = []
-                token_to_orig_map = {}
-                token_is_max_context = {}
-                text_type_ids = []
-                tokens.append("[CLS]")
+        for (doc_span_index, doc_span) in enumerate(doc_spans):
+            tokens = []
+            token_to_orig_map = {}
+            token_is_max_context = {}
+            text_type_ids = []
+            tokens.append("[CLS]")
+            text_type_ids.append(0)
+            for token in query_tokens:
+                tokens.append(token)
                 text_type_ids.append(0)
-                for token in query_tokens:
-                    tokens.append(token)
-                    text_type_ids.append(0)
-                tokens.append("[SEP]")
-                text_type_ids.append(0)
+            tokens.append("[SEP]")
+            text_type_ids.append(0)
 
-                for i in range(doc_span.length):
-                    split_token_index = doc_span.start + i
-                    token_to_orig_map[len(
-                        tokens)] = tok_to_orig_index[split_token_index]
+            for i in range(doc_span.length):
+                split_token_index = doc_span.start + i
+                token_to_orig_map[len(
+                    tokens)] = tok_to_orig_index[split_token_index]
 
-                    is_max_context = self.check_is_max_context(
-                        doc_spans, doc_span_index, split_token_index)
-                    token_is_max_context[len(tokens)] = is_max_context
-                    tokens.append(all_doc_tokens[split_token_index])
-                    text_type_ids.append(1)
-                tokens.append("[SEP]")
+                is_max_context = self.check_is_max_context(
+                    doc_spans, doc_span_index, split_token_index)
+                token_is_max_context[len(tokens)] = is_max_context
+                tokens.append(all_doc_tokens[split_token_index])
                 text_type_ids.append(1)
+            tokens.append("[SEP]")
+            text_type_ids.append(1)
 
-                token_ids = tokenizer.convert_tokens_to_ids(tokens)
-                position_ids = list(range(len(token_ids)))
-                start_position = None
-                end_position = None
-                if phase != "predict" and not is_impossible:
-                    # For training, if our document chunk does not contain an annotation
-                    # we throw it out, since there is nothing to predict.
-                    doc_start = doc_span.start
-                    doc_end = doc_span.start + doc_span.length - 1
-                    out_of_span = False
-                    if not (tok_start_position >= doc_start
-                            and tok_end_position <= doc_end):
-                        out_of_span = True
-                    if out_of_span:
-                        start_position = 0
-                        end_position = 0
-                    else:
-                        doc_offset = len(query_tokens) + 2
-                        start_position = tok_start_position - doc_start + doc_offset
-                        end_position = tok_end_position - doc_start + doc_offset
-
-                if phase != "predict" and is_impossible:
+            token_ids = tokenizer.convert_tokens_to_ids(tokens)
+            position_ids = list(range(len(token_ids)))
+            start_position = None
+            end_position = None
+            if phase != "predict" and not is_impossible:
+                # For training, if our document chunk does not contain an annotation
+                # we throw it out, since there is nothing to predict.
+                doc_start = doc_span.start
+                doc_end = doc_span.start + doc_span.length - 1
+                out_of_span = False
+                if not (tok_start_position >= doc_start
+                        and tok_end_position <= doc_end):
+                    out_of_span = True
+                if out_of_span:
                     start_position = 0
                     end_position = 0
+                else:
+                    doc_offset = len(query_tokens) + 2
+                    start_position = tok_start_position - doc_start + doc_offset
+                    end_position = tok_end_position - doc_start + doc_offset
 
-                if example_index < 3:
-                    logger.debug("*** Example ***")
-                    logger.debug("unique_id: %s" % (unique_id))
-                    logger.debug("example_index: %s" % (example_index))
-                    logger.debug("doc_span_index: %s" % (doc_span_index))
-                    logger.debug("tokens: %s" % " ".join(
-                        [tokenization.printable_text(x) for x in tokens]))
-                    logger.debug("token_to_orig_map: %s" % " ".join([
-                        "%d:%d" % (x, y)
-                        for (x, y) in six.iteritems(token_to_orig_map)
-                    ]))
-                    logger.debug("token_is_max_context: %s" % " ".join([
-                        "%d:%s" % (x, y)
-                        for (x, y) in six.iteritems(token_is_max_context)
-                    ]))
-                    logger.debug(
-                        "input_ids: %s" % " ".join([str(x) for x in token_ids]))
-                    logger.debug("segment_ids: %s" % " ".join(
-                        [str(x) for x in text_type_ids]))
-                    if phase != "predict" and is_impossible:
-                        logger.debug("impossible example")
-                    if phase != "predict" and not is_impossible:
-                        answer_text = " ".join(
-                            tokens[start_position:(end_position + 1)])
-                        logger.debug("start_position: %d" % (start_position))
-                        logger.debug("end_position: %d" % (end_position))
-                        logger.debug("answer: %s" %
-                                     (tokenization.printable_text(answer_text)))
+            if phase != "predict" and is_impossible:
+                start_position = 0
+                end_position = 0
 
-                feature = SquadInputFeatures(
-                    unique_id=unique_id,
-                    example_index=example_index,
-                    doc_span_index=doc_span_index,
-                    tokens=tokens,
-                    token_to_orig_map=token_to_orig_map,
-                    token_is_max_context=token_is_max_context,
-                    token_ids=token_ids,
-                    position_ids=position_ids,
-                    text_type_ids=text_type_ids,
-                    start_position=start_position,
-                    end_position=end_position,
-                    is_impossible=is_impossible)
+            if self.example_id[phase] < 3:
+                logger.debug("*** Example ***")
+                logger.debug("unique_id: %s" % (self.unique_id[phase]))
+                logger.debug("example_index: %s" % (self.example_id[phase]))
+                logger.debug("doc_span_index: %s" % (doc_span_index))
+                logger.debug("tokens: %s" % " ".join(
+                    [tokenization.printable_text(x) for x in tokens]))
+                logger.debug("token_to_orig_map: %s" % " ".join([
+                    "%d:%d" % (x, y)
+                    for (x, y) in six.iteritems(token_to_orig_map)
+                ]))
+                logger.debug("token_is_max_context: %s" % " ".join([
+                    "%d:%s" % (x, y)
+                    for (x, y) in six.iteritems(token_is_max_context)
+                ]))
+                logger.debug(
+                    "input_ids: %s" % " ".join([str(x) for x in token_ids]))
+                logger.debug("segment_ids: %s" % " ".join(
+                    [str(x) for x in text_type_ids]))
+                if phase != "predict" and is_impossible:
+                    logger.debug("impossible example")
+                if phase != "predict" and not is_impossible:
+                    answer_text = " ".join(
+                        tokens[start_position:(end_position + 1)])
+                    logger.debug("start_position: %d" % (start_position))
+                    logger.debug("end_position: %d" % (end_position))
+                    logger.debug("answer: %s" %
+                                 (tokenization.printable_text(answer_text)))
 
-                unique_id += 1
+            feature = SquadInputFeatures(
+                unique_id=self.unique_id[phase],
+                example_index=self.example_id[phase],
+                doc_span_index=doc_span_index,
+                tokens=tokens,
+                token_to_orig_map=token_to_orig_map,
+                token_is_max_context=token_is_max_context,
+                token_ids=token_ids,
+                position_ids=position_ids,
+                text_type_ids=text_type_ids,
+                start_position=start_position,
+                end_position=end_position,
+                is_impossible=is_impossible)
 
-                if phase == 'val' or phase == 'dev':
-                    self.all_eval_features.append(feature)
-                    self.all_eval_examples.append(example)
-                elif phase == 'test':
-                    self.all_test_features.append(feature)
-                    self.all_test_examples.append(example)
+            self.all_features[phase].append(feature)
+            self.all_examples[phase].append(example)
+            self.unique_id[phase] += 1
+            self.example_id[phase] += 1
 
-                yield feature
+            return feature
 
     def improve_answer_span(self, doc_tokens, input_start, input_end, tokenizer,
                             orig_answer_text):

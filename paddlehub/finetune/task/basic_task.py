@@ -165,6 +165,10 @@ class BasicTask(object):
     def enter_phase(self, phase):
         if phase not in ["train", "val", "dev", "test", "predict", "inference"]:
             raise RuntimeError()
+        if phase in ["val", "dev"]:
+            phase = "dev"
+        elif phase in ["predict", "inference"]:
+            phase = "predict"
         self._phases.append(phase)
 
     def exit_phase(self):
@@ -330,7 +334,7 @@ class BasicTask(object):
     def env(self):
         phase = self.phase
         if phase in ["val", "dev", "test"]:
-            phase = "val"
+            phase = "dev"
         if not phase in self._envs:
             self._envs[phase] = RunEnv()
         return self._envs[phase]
