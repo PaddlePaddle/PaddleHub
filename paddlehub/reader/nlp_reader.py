@@ -960,11 +960,18 @@ class ReadingComprehensionReader(BaseReader):
 
         # padding
         padded_token_ids, input_mask = pad_batch_data(
-            batch_token_ids, pad_idx=self.pad_id, return_input_mask=True)
+            batch_token_ids,
+            pad_idx=self.pad_id,
+            return_input_mask=True,
+            max_seq_len=self.max_seq_len)
         padded_text_type_ids = pad_batch_data(
-            batch_text_type_ids, pad_idx=self.pad_id)
+            batch_text_type_ids,
+            pad_idx=self.pad_id,
+            max_seq_len=self.max_seq_len)
         padded_position_ids = pad_batch_data(
-            batch_position_ids, pad_idx=self.pad_id)
+            batch_position_ids,
+            pad_idx=self.pad_id,
+            max_seq_len=self.max_seq_len)
 
         if phase != "predict":
             batch_start_position = [
