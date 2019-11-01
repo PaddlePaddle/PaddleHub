@@ -179,7 +179,6 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     print(all_features[:3])
     for feature in all_features:
         example_index_to_features[feature.example_index].append(feature)
-    print(example_index_to_features.items()[:3])
 
     unique_id_to_result = {}
     for result in all_results:
@@ -562,4 +561,9 @@ class ReadingComprehensionTask(BasicTask):
                     dataset, predictions)
                 scores["f1"] = f1_score
                 scores["em"] = em_score
+
+            self.data_reader.all_features[self.phase] = []
+            self.data_reader.all_examples[self.phase] = []
+            self.data_reader.unique_id[self.phase] = 1000000000
+            self.data_reader.example_id[self.phase] = 0
         return scores, avg_loss, run_speed

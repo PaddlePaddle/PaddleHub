@@ -1049,11 +1049,6 @@ class ReadingComprehensionReader(BaseReader):
                     examples, batch_size, phase=phase):
                 yield [batch_data]
 
-            self.all_features[phase] = []
-            self.all_examples[phase] = []
-            self.unique_id[phase] = 1000000000
-            self.example_id[phase] = 0
-
         return wrapper
 
     def _convert_example_to_record(self,
