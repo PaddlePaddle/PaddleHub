@@ -1049,10 +1049,10 @@ class ReadingComprehensionReader(BaseReader):
                     examples, batch_size, phase=phase):
                 yield [batch_data]
 
-            self.all_eval_features = []
-            self.all_eval_examples = []
-            self.all_test_features = []
-            self.all_test_features = []
+            self.all_features[phase] = []
+            self.all_examples[phase] = []
+            self.unique_id[phase] = 1000000000
+            self.example_id[phase] = 0
 
         return wrapper
 
