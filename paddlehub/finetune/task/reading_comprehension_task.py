@@ -408,7 +408,7 @@ class ReadingComprehensionTask(BasicTask):
         self.max_answer_length = max_answer_length
 
     def _build_net(self):
-        self.unique_id = fluid.layers.data(
+        self.unique_ids = fluid.layers.data(
             name="unique_ids", shape=[-1, 1], lod_level=0, dtype="int64")
 
         logits = fluid.layers.fc(
@@ -460,22 +460,22 @@ class ReadingComprehensionTask(BasicTask):
     @property
     def feed_list(self):
         feed_list = [varname for varname in self._base_feed_list
-                     ] + [self.unique_id.name]
+                     ] + [self.unique_ids.name]
         if self.is_train_phase or self.is_test_phase:
             feed_list += [label.name for label in self.labels]
         return feed_list
 
     @property
     def fetch_list(self):
-        if self.is_train_phase:
-            return [self.loss.name, self.outputs[-1].name]
-        elif self.is_test_phase:
+        if self.is_train_phase or self.is_test_phase:
+            #     return [self.loss.name, self.outputs[-1].name, self.unique_ids.name]
+            # elif self.is_test_phase:
             return [
-                self.loss.name, self.outputs[-1].name, self.unique_id.name,
+                self.loss.name, self.outputs[-1].name, self.unique_ids.name,
                 self.outputs[0].name, self.outputs[1].name
             ]
         elif self.is_predict_phase:
-            return [self.unique_id.name
+            return [self.unique_ids.name
                     ] + [output.name for output in self.outputs]
 
     def _calculate_metrics(self, run_states):
