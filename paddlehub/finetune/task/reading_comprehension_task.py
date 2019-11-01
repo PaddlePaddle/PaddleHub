@@ -510,12 +510,8 @@ class ReadingComprehensionTask(BasicTask):
                                              "nbest_predictions.json")
             output_null_log_odds_file = os.path.join(self.config.checkpoint_dir,
                                                      "null_odds.json")
-            if self.phase == 'val' or self.phase == 'dev':
-                all_examples = self.reader.all_eval_examples
-                all_features = self.reader.all_eval_features
-            else:
-                all_examples = self.reader.all_test_examples
-                all_features = self.reader.all_test_features
+            all_examples = self.reader.all_examples[self.phase]
+            all_features = self.reader.all_features[self.phase]
             write_predictions(
                 all_examples=all_examples,
                 all_features=all_features,
@@ -536,12 +532,15 @@ class ReadingComprehensionTask(BasicTask):
                         encoding="utf8") as dataset_file:
                     dataset_json = json.load(dataset_file)
                     dataset = dataset_json['data']
-            else:
+            elif self.phase == 'test':
                 with open(
                         self.reader.dataset.test_file, 'r',
                         encoding="utf8") as dataset_file:
                     dataset_json = json.load(dataset_file)
                     dataset = dataset_json['data']
+            else:
+                raise Exception("Error phase: %s when runing _calculate_metrics"
+                                % self.phase)
             with open(
                     output_prediction_file, 'r',
                     encoding="utf8") as prediction_file:
