@@ -77,29 +77,29 @@ class SQUAD(object):
         else:
             logger.info("Dataset {} already cached.".format(self.dataset_dir))
         self.version_2_with_negative = version_2_with_negative
-        self._load_train_examples(version_2_with_negative, is_training=True)
-        self._load_dev_examples(version_2_with_negative, is_training=False)
+        self._load_train_examples(version_2_with_negative, if_has_answer=True)
+        self._load_dev_examples(version_2_with_negative, if_has_answer=True)
 
     def _load_train_examples(self,
                              version_2_with_negative=False,
-                             is_training=True):
+                             if_has_answer=True):
         if not version_2_with_negative:
             self.train_file = os.path.join(self.dataset_dir, "train-v1.1.json")
         else:
             self.train_file = os.path.join(self.dataset_dir, "train-v2.0.json")
 
-        self.train_examples = self._read_json(self.train_file, is_training,
+        self.train_examples = self._read_json(self.train_file, if_has_answer,
                                               version_2_with_negative)
 
     def _load_dev_examples(self,
                            version_2_with_negative=False,
-                           is_training=False):
+                           if_has_answer=True):
         if not version_2_with_negative:
             self.dev_file = os.path.join(self.dataset_dir, "dev-v1.1.json")
         else:
             self.dev_file = os.path.join(self.dataset_dir, "dev-v2.0.json")
 
-        self.dev_examples = self._read_json(self.dev_file, is_training,
+        self.dev_examples = self._read_json(self.dev_file, if_has_answer,
                                             version_2_with_negative)
 
     def _load_test_examples(self,
@@ -117,7 +117,9 @@ class SQUAD(object):
     def get_test_examples(self):
         return []
 
-    def _read_json(self, input_file, is_training,
+    def _read_json(self,
+                   input_file,
+                   if_has_answer,
                    version_2_with_negative=False):
         """Read a SQuAD json file into a list of SquadExample."""
         with open(input_file, "r") as reader:
@@ -154,7 +156,7 @@ class SQUAD(object):
                     end_position = None
                     orig_answer_text = None
                     is_impossible = False
-                    if is_training:
+                    if if_has_answer:
                         if version_2_with_negative:
                             is_impossible = qa["is_impossible"]
                         if (len(qa["answers"]) != 1) and (not is_impossible):
