@@ -1200,8 +1200,9 @@ class ReadingComprehensionReader(BaseReader):
                 end_position=end_position,
                 is_impossible=is_impossible)
 
-            self.all_features[phase].append(feature)
-            self.all_examples[phase].append(example)
+            if phase in ["dev", "test", "val"]:
+                self.all_features[phase].append(feature)
+                self.all_examples[phase].append(example)
             self.unique_id[phase] += 1
             self.example_id[phase] += 1
 
