@@ -132,7 +132,7 @@ class SQUAD(object):
             return False
 
         examples = []
-        for entry in input_data[:3]:
+        for entry in input_data:
             for paragraph in entry["paragraphs"]:
                 paragraph_text = paragraph["context"]
                 doc_tokens = []
@@ -201,6 +201,8 @@ class SQUAD(object):
                         end_position=end_position,
                         is_impossible=is_impossible)
                     examples.append(example)
+                    if len(examples) > 3:
+                        return examples
 
         return examples
 
