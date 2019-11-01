@@ -882,19 +882,21 @@ class RegressionReader(BaseReader):
 class SquadInputFeatures(object):
     """A single set of features of squad_data."""
 
-    def __init__(self,
-                 unique_id,
-                 example_index,
-                 doc_span_index,
-                 tokens,
-                 token_to_orig_map,
-                 token_is_max_context,
-                 token_ids,
-                 position_ids,
-                 text_type_ids,
-                 start_position=None,
-                 end_position=None,
-                 is_impossible=None):
+    def __init__(
+            self,
+            unique_id,
+            example_index,
+            doc_span_index,
+            tokens,
+            token_to_orig_map,
+            token_is_max_context,
+            token_ids,
+            position_ids,
+            text_type_ids,
+            start_position=None,
+            end_position=None,
+            is_impossible=None,
+    ):
         self.unique_id = unique_id
         self.example_index = example_index
         self.doc_span_index = doc_span_index
@@ -910,22 +912,22 @@ class SquadInputFeatures(object):
 
 
 class ReadingComprehensionReader(BaseReader):
-    def __init__(
-            self,
-            dataset,
-            vocab_path,
-            do_lower_case=True,
-            max_seq_len=512,
-            doc_stride=128,
-            max_query_length=64,
-            random_seed=None,
-    ):
+    def __init__(self,
+                 dataset,
+                 vocab_path,
+                 do_lower_case=True,
+                 max_seq_len=512,
+                 doc_stride=128,
+                 max_query_length=64,
+                 random_seed=None,
+                 use_task_id=False):
         self.dataset = dataset
         self.tokenizer = tokenization.FullTokenizer(
             vocab_file=vocab_path, do_lower_case=do_lower_case)
         self.max_seq_len = max_seq_len
         self.doc_stride = doc_stride
         self.max_query_length = max_query_length
+        self.use_task_id = use_task_id
         self.in_tokens = False
         self.all_features = {"dev": [], "test": []}
         self.all_examples = {"dev": [], "test": []}
