@@ -500,6 +500,7 @@ class ReadingComprehensionTask(BasicTask):
                             unique_id=unique_id,
                             start_logits=start_logits,
                             end_logits=end_logits))
+        print(all_results[:3])
 
         run_time_used = time.time() - run_states[0].run_time_begin
         run_speed = run_step / run_time_used
