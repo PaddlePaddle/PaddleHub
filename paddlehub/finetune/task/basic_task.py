@@ -506,6 +506,8 @@ class BasicTask(object):
                                            "best_model")
             logger.info("best model saved to %s [best %s=%.5f]" %
                         (model_saved_dir, main_metric, main_value))
+            for var in self.main_program.list_vars():
+                print(var)
             save_result = fluid.io.save_persistables(
                 executor=self.exe,
                 dirname=model_saved_dir,
