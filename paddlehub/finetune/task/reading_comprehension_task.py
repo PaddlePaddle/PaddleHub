@@ -186,9 +186,9 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     for result in all_results:
         unique_id_to_result[result.unique_id] = result
 
-    print("\n\n\nall_features", all_features[:2])
-    print("\n\n\nall_results", all_results[:2])
-    print("\n\n\nunique_id_to_result", unique_id_to_result.keys()[:1000])
+    print("\n\n\nall_features", all_features[:5])
+    print("\n\n\nall_results", [r.unique_id for r in all_results[:5]])
+    print("\n\n\nunique_id_to_result", list(unique_id_to_result.keys())[:1000])
     _PrelimPrediction = collections.namedtuple(  # pylint: disable=invalid-name
         "PrelimPrediction", [
             "feature_index", "start_index", "end_index", "start_logit",

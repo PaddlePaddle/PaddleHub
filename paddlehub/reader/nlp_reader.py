@@ -914,10 +914,6 @@ class SquadInputFeatures(object):
         s = ""
         s += "unique_id: %s " % self.unique_id
         s += "example_index: %s " % self.example_index
-        s += "doc_span_index: %s " % self.doc_span_index
-        s += "tokens: %s " % self.tokens
-        s += "token_to_orig_map: %s " % self.token_to_orig_map
-        s += "token_ids: %s " % self.token_ids
         s += "start_position: %s " % self.start_position
         s += "end_position: %s " % self.end_position
         s += "is_impossible: %s " % self.is_impossible
