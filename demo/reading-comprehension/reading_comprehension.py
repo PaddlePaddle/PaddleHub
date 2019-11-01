@@ -55,7 +55,7 @@ if __name__ == '__main__':
     reader = hub.reader.ReadingComprehensionReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_length=args.max_seq_len,
+        max_seq_len=args.max_seq_len,
         doc_stride=128,
         max_query_length=64)
 
@@ -100,4 +100,4 @@ if __name__ == '__main__':
     )
 
     # Finetune by PaddleHub's API
-    reading_comprehension_task.finetune()
+    reading_comprehension_task.finetune_and_eval()

@@ -917,7 +917,7 @@ class ReadingComprehensionReader(BaseReader):
             dataset,
             vocab_path,
             do_lower_case=True,
-            max_seq_length=512,
+            max_seq_len=512,
             doc_stride=128,
             max_query_length=64,
             random_seed=None,
@@ -925,14 +925,14 @@ class ReadingComprehensionReader(BaseReader):
         self.dataset = dataset
         self.tokenizer = tokenization.FullTokenizer(
             vocab_file=vocab_path, do_lower_case=do_lower_case)
-        self.max_seq_length = max_seq_length
+        self.max_seq_len = max_seq_len
         self.doc_stride = doc_stride
         self.max_query_length = max_query_length
         self.in_tokens = False
         self.all_eval_features = []
         self.all_eval_examples = []
         self.all_test_features = []
-        self.all_test_features = []
+        self.all_test_examples = []
 
         np.random.seed(random_seed)
 
