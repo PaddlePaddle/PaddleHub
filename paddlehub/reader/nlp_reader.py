@@ -889,10 +889,9 @@ class SquadInputFeatures(object):
                  tokens,
                  token_to_orig_map,
                  token_is_max_context,
-                 input_ids,
+                 token_ids,
                  position_ids,
-                 input_mask,
-                 segment_ids,
+                 text_type_ids,
                  start_position=None,
                  end_position=None,
                  is_impossible=None):
@@ -902,10 +901,9 @@ class SquadInputFeatures(object):
         self.tokens = tokens
         self.token_to_orig_map = token_to_orig_map
         self.token_is_max_context = token_is_max_context
-        self.input_ids = input_ids
+        self.token_ids = token_ids
         self.position_ids = position_ids
-        self.input_mask = input_mask
-        self.segment_ids = segment_ids
+        self.text_type_ids = text_type_ids
         self.start_position = start_position
         self.end_position = end_position
         self.is_impossible = is_impossible
@@ -1111,14 +1109,14 @@ class ReadingComprehensionReader(BaseReader):
                 tokens = []
                 token_to_orig_map = {}
                 token_is_max_context = {}
-                segment_ids = []
+                text_type_ids = []
                 tokens.append("[CLS]")
-                segment_ids.append(0)
+                text_type_ids.append(0)
                 for token in query_tokens:
                     tokens.append(token)
-                    segment_ids.append(0)
+                    text_type_ids.append(0)
                 tokens.append("[SEP]")
-                segment_ids.append(0)
+                text_type_ids.append(0)
 
                 for i in range(doc_span.length):
                     split_token_index = doc_span.start + i
@@ -1129,27 +1127,12 @@ class ReadingComprehensionReader(BaseReader):
                         doc_spans, doc_span_index, split_token_index)
                     token_is_max_context[len(tokens)] = is_max_context
                     tokens.append(all_doc_tokens[split_token_index])
-                    segment_ids.append(1)
+                    text_type_ids.append(1)
                 tokens.append("[SEP]")
-                segment_ids.append(1)
+                text_type_ids.append(1)
 
-                input_ids = tokenizer.convert_tokens_to_ids(tokens)
-                position_ids = list(range(len(input_ids)))
-
-                # The mask has 1 for real tokens and 0 for padding tokens. Only real
-                # tokens are attended to.
-                input_mask = [1] * len(input_ids)
-
-                # Zero-pad up to the sequence length.
-                #while len(input_ids) < max_seq_length:
-                #  input_ids.append(0)
-                #  input_mask.append(0)
-                #  segment_ids.append(0)
-
-                #assert len(input_ids) == max_seq_length
-                #assert len(input_mask) == max_seq_length
-                #assert len(segment_ids) == max_seq_length
-
+                token_ids = tokenizer.convert_tokens_to_ids(tokens)
+                position_ids = list(range(len(token_ids)))
                 start_position = None
                 end_position = None
                 if phase != "predict" and not is_impossible:
@@ -1189,11 +1172,9 @@ class ReadingComprehensionReader(BaseReader):
                         for (x, y) in six.iteritems(token_is_max_context)
                     ]))
                     logger.debug(
-                        "input_ids: %s" % " ".join([str(x) for x in input_ids]))
-                    logger.debug("input_mask: %s" % " ".join(
-                        [str(x) for x in input_mask]))
+                        "input_ids: %s" % " ".join([str(x) for x in token_ids]))
                     logger.debug("segment_ids: %s" % " ".join(
-                        [str(x) for x in segment_ids]))
+                        [str(x) for x in text_type_ids]))
                     if phase != "predict" and is_impossible:
                         logger.debug("impossible example")
                     if phase != "predict" and not is_impossible:
@@ -1211,10 +1192,9 @@ class ReadingComprehensionReader(BaseReader):
                     tokens=tokens,
                     token_to_orig_map=token_to_orig_map,
                     token_is_max_context=token_is_max_context,
-                    input_ids=input_ids,
+                    token_ids=token_ids,
                     position_ids=position_ids,
-                    input_mask=input_mask,
-                    segment_ids=segment_ids,
+                    text_type_ids=text_type_ids,
                     start_position=start_position,
                     end_position=end_position,
                     is_impossible=is_impossible)
