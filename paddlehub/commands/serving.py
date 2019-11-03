@@ -21,10 +21,10 @@ import argparse
 import subprocess
 import shlex
 import os
+import socket
 import json
 import paddlehub as hub
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.serving import app
 
 
 class ServingCommand(BaseCommand):
@@ -46,21 +46,43 @@ class ServingCommand(BaseCommand):
         self.sub_parse.add_argument("--start", action="store_true")
         self.parser.add_argument(
             "--use_gpu", action="store_true", default=False)
+        self.parser.add_argument(
+            "--use_multiprocess", action="store_true", default=False)
         self.parser.add_argument("--modules", "-m", nargs="+")
         self.parser.add_argument("--config", "-c", nargs="+")
         self.parser.add_argument("--port", "-p", nargs="+", default=[8888])
 
     @staticmethod
+    def port_is_open(ip, port):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.connect((ip, int(port)))
+            s.shutdown(2)
+            return True
+        except:
+            return False
+
+    @staticmethod
     def preinstall_modules(modules):
         configs = []
+        module_exist = {}
         if modules is not None:
             for module in modules:
                 module_name = module if "==" not in module else \
                 module.split("==")[0]
                 module_version = None if "==" not in module else \
                 module.split("==")[1]
+                if module_exist.get(module_name, "") != "":
+                    print(module_name, "==", module_exist.get(module_name),
+                          " will be ignored cause new version is specified.")
+                    configs.pop()
+                module_exist.update({module_name: module_version})
                 try:
                     m = hub.Module(name=module_name, version=module_version)
+                    method_name = m.desc.attr.map.data['default_signature'].s
+                    if method_name == "":
+                        raise RuntimeError("{} cannot be use for "
+                                           "predicting".format(module_name))
                     configs.append({
                         "module": module_name,
                         "version": m.version,
@@ -73,6 +95,10 @@ class ServingCommand(BaseCommand):
 
     @staticmethod
     def start_serving(args):
+        if args.use_multiprocess is True:
+            from paddlehub.serving import app
+        else:
+            from paddlehub.serving import app_single as app
         config_file = args.config
         if config_file is not None:
             config_file = config_file[0]
@@ -81,6 +107,9 @@ class ServingCommand(BaseCommand):
                     configs = json.load(fp)
                     use_gpu = configs.get("use_gpu", False)
                     port = configs.get("port", 8888)
+                    if ServingCommand.port_is_open("127.0.0.1", port) is True:
+                        print("Port %s is occupied, please change it." % (port))
+                        return False
                     configs = configs.get("modules_info")
                     module = [
                         str(i["module"]) + "==" + str(i["version"])
@@ -97,6 +126,9 @@ class ServingCommand(BaseCommand):
             if module is not None:
                 use_gpu = args.use_gpu
                 port = args.port[0]
+                if ServingCommand.port_is_open("127.0.0.1", port) is True:
+                    print("Port %s is occupied, please change it." % (port))
+                    return False
                 module_info = ServingCommand.preinstall_modules(module)
                 [
                     item.update({
