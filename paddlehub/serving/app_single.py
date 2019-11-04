@@ -54,7 +54,7 @@ def predict_lexical_analysis(module, input_text, extra=[]):
     predict_method = getattr(module, method_name)
     data = {"text": input_text}
     try:
-        if extra is []:
+        if extra == []:
             results = predict_method(data=data, use_gpu=use_gpu)
         else:
             user_dict = extra[0]
