@@ -473,8 +473,9 @@ class ReadingComprehensionTask(BasicTask):
                 self.outputs[0].name, self.outputs[1].name
             ]
         elif self.is_predict_phase:
-            return [self.unique_ids.name
-                    ] + [output.name for output in self.outputs]
+            return [
+                self.unique_ids.name,
+            ] + [output.name for output in self.outputs]
 
     def _calculate_metrics(self, run_states):
         total_cost, total_num_seqs, all_results = [], [], []
@@ -567,3 +568,47 @@ class ReadingComprehensionTask(BasicTask):
             self.data_reader.unique_id[self.phase] = 1000000000
             self.data_reader.example_id[self.phase] = 0
         return scores, avg_loss, run_speed
+
+    def _predict_end_event(self, run_states):
+        all_results = []
+        RawResult = collections.namedtuple(
+            "RawResult", ["unique_id", "start_logits", "end_logits"])
+        for run_state in run_states:
+            np_unique_ids = run_state.run_results[0]
+            np_start_logits = run_state.run_results[1]
+            np_end_logits = run_state.run_results[2]
+            for idx in range(np_unique_ids.shape[0]):
+                unique_id = int(np_unique_ids[idx])
+                start_logits = [float(x) for x in np_start_logits[idx].flat]
+                end_logits = [float(x) for x in np_end_logits[idx].flat]
+                all_results.append(
+                    RawResult(
+                        unique_id=unique_id,
+                        start_logits=start_logits,
+                        end_logits=end_logits))
+        # If none of metrics has been implemented, loss will be used to evaluate.
+        output_prediction_file = os.path.join(self.config.checkpoint_dir,
+                                              "predict_predictions.json")
+        output_nbest_file = os.path.join(self.config.checkpoint_dir,
+                                         "predict_nbest_predictions.json")
+        output_null_log_odds_file = os.path.join(self.config.checkpoint_dir,
+                                                 "predict_null_odds.json")
+        all_examples = self.data_reader.all_examples[self.phase]
+        all_features = self.data_reader.all_features[self.phase]
+        write_predictions(
+            all_examples=all_examples,
+            all_features=all_features,
+            all_results=all_results,
+            n_best_size=self.n_best_size,
+            max_answer_length=self.max_answer_length,
+            do_lower_case=True,
+            output_prediction_file=output_prediction_file,
+            output_nbest_file=output_nbest_file,
+            output_null_log_odds_file=output_null_log_odds_file,
+            version_2_with_negative=self.version_2_with_negative,
+            null_score_diff_threshold=self.null_score_diff_threshold,
+            is_english=self.is_english)
+
+        logger.info(
+            "PaddleHub predict finished. \nYou can see the prediction in %s" %
+            output_prediction_file)

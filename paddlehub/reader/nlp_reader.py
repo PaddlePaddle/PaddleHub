@@ -938,8 +938,8 @@ class ReadingComprehensionReader(BaseReader):
         self.max_query_length = max_query_length
         self.use_task_id = use_task_id
         self.in_tokens = False
-        self.all_features = {"dev": [], "test": []}
-        self.all_examples = {"dev": [], "test": []}
+        self.all_features = {"dev": [], "test": [], "predict": []}
+        self.all_examples = {"dev": [], "test": [], "predict": []}
         self.unique_id = {
             "train": 1000000000,
             "dev": 1000000000,
@@ -1213,7 +1213,7 @@ class ReadingComprehensionReader(BaseReader):
                 end_position=end_position,
                 is_impossible=is_impossible)
 
-            if phase in ["dev", "test", "val"]:
+            if phase in ["dev", "test", "val", "predict"]:
                 self.all_features[phase].append(feature)
                 self.all_examples[phase].append(example)
             self.unique_id[phase] += 1
