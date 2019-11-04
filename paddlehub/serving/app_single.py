@@ -225,6 +225,7 @@ def predict_semantic_segmentation(module, input_img, id, batch_size):
     for index in range(len(input_img)):
         # special
         item = input_img[index]
+        output_file_path = ""
         with open(results[index]["processed"], "rb") as fp:
             # special
             b_head = "data:image/png;base64"
@@ -234,12 +235,14 @@ def predict_semantic_segmentation(module, input_img, id, batch_size):
             base64_list.append(b_img)
             results[index]["origin"] = results[index]["origin"].replace(
                 id + "_", "")
+            output_file_path = results[index]["processed"]
             results[index]["processed"] = results[index]["processed"].replace(
                 id + "_", "")
             results[index].update({"base64": b_img})
             results_pack.append(results[index])
         os.remove(item)
-        os.remove(results[index]["processed"])
+        if output_file_path != "":
+            os.remove(output_file_path)
     return results_pack
 
 
