@@ -18,8 +18,6 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-import subprocess
-import shlex
 import os
 import socket
 import json
@@ -50,7 +48,7 @@ class ServingCommand(BaseCommand):
             "--use_multiprocess", action="store_true", default=False)
         self.parser.add_argument("--modules", "-m", nargs="+")
         self.parser.add_argument("--config", "-c", nargs="+")
-        self.parser.add_argument("--port", "-p", nargs="+", default=[8888])
+        self.parser.add_argument("--port", "-p", nargs="+", default=[8866])
 
     @staticmethod
     def port_is_open(ip, port):
@@ -106,7 +104,7 @@ class ServingCommand(BaseCommand):
                 with open(config_file, "r") as fp:
                     configs = json.load(fp)
                     use_gpu = configs.get("use_gpu", False)
-                    port = configs.get("port", 8888)
+                    port = configs.get("port", 8866)
                     if ServingCommand.port_is_open("127.0.0.1", port) is True:
                         print("Port %s is occupied, please change it." % (port))
                         return False

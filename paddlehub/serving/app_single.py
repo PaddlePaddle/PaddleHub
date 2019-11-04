@@ -28,10 +28,12 @@ def predict_sentiment_analysis(module, input_text, extra=None):
     method_name = module.desc.attr.map.data['default_signature'].s
     predict_method = getattr(module, method_name)
     try:
-        data = eval(input_text[0])
-        data.update(eval(input_text[1]))
+        data = input_text[0]
+        data.update(input_text[1])
         results = predict_method(data=data, use_gpu=use_gpu)
     except Exception as err:
+        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(curr, " - ", err)
         return {"result": "Please check data format!"}
     return results
 
@@ -44,6 +46,8 @@ def predict_pretrained_model(module, input_text, extra=None):
         data = {"text": input_text}
         results = predict_method(data=data, use_gpu=use_gpu)
     except Exception as err:
+        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(curr, " - ", err)
         return {"result": "Please check data format!"}
     return results
 
@@ -60,7 +64,11 @@ def predict_lexical_analysis(module, input_text, extra=[]):
             user_dict = extra[0]
             results = predict_method(
                 data=data, user_dict=user_dict, use_gpu=use_gpu)
+            for path in extra:
+                os.remove(path)
     except Exception as err:
+        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(curr, " - ", err)
         return {"result": "Please check data format!"}
     return results
 
@@ -73,6 +81,8 @@ def predict_classification(module, input_img):
         input_img = {"image": input_img}
         results = predict_method(data=input_img, use_gpu=use_gpu)
     except Exception as err:
+        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(curr, " - ", err)
         return {"result": "Please check data format!"}
     return results
 
@@ -87,6 +97,8 @@ def predict_gan(module, input_img, extra={}):
         input_img = {"image": input_img}
         results = predict_method(data=input_img, use_gpu=use_gpu)
     except Exception as err:
+        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(curr, " - ", err)
         return {"result": "Please check data format!"}
     base64_list = []
     results_pack = []
@@ -118,6 +130,8 @@ def predict_object_detection(module, input_img):
         input_img = {"image": input_img}
         results = predict_method(data=input_img, use_gpu=use_gpu)
     except Exception as err:
+        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(curr, " - ", err)
         return {"result": "Please check data format!"}
     base64_list = []
     results_pack = []
@@ -147,6 +161,8 @@ def predict_semantic_segmentation(module, input_img):
         input_img = {"image": input_img}
         results = predict_method(data=input_img, use_gpu=use_gpu)
     except Exception as err:
+        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(curr, " - ", err)
         return {"result": "Please check data format!"}
     base64_list = []
     results_pack = []
@@ -235,7 +251,12 @@ def create_app():
     def predict_text(module_name):
         req_id = request.data.get("id")
         global use_gpu
-        data = request.form.getlist("input_text")
+        if module_name == "simnet_bow":
+            text_1 = request.form.getlist("text_1")
+            text_2 = request.form.getlist("text_2")
+            data = [{"text_1": text_1}, {"text_2": text_2}]
+        else:
+            data = request.form.getlist("text")
         file = request.files.getlist("user_dict")
         module = TextModelService.get_module(module_name)
         module_type = module.type.split("/")[-1].replace("-", "_").lower()
@@ -263,7 +284,7 @@ def config_with_file(configs):
             nlp_module.append(item["module"])
 
 
-def run(is_use_gpu=False, configs=None, port=8888, timeout=60):
+def run(is_use_gpu=False, configs=None, port=8866, timeout=60):
     global use_gpu, time_out
     time_out = timeout
     use_gpu = is_use_gpu

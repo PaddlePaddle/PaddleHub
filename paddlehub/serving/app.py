@@ -337,7 +337,7 @@ def config_with_file(configs):
         queue_name_list.append(item["module"])
 
 
-def run(is_use_gpu=False, configs=None, port=8888, timeout=60):
+def run(is_use_gpu=False, configs=None, port=8866, timeout=60):
     global use_gpu, time_out
     time_out = timeout
     use_gpu = is_use_gpu
