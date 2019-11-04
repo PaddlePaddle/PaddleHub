@@ -125,8 +125,12 @@ class DRCD(object):
             return False
 
         def _tokenize_chinese_chars(text):
-            """Adds whitespace around any CJK character. Chinese words and Punctuation is character-tokenized,
-             and English words and Numbers is word-tokenized"""
+            """Because Chinese (and Japanese Kanji and Korean Hanja) does not have whitespace
+            characters, we add spaces around every character in the CJK Unicode range before
+            applying WordPiece. This means that Chinese is effectively character-tokenized.
+            Note that the CJK Unicode block only includes Chinese-origin characters and
+            does not include Hangul Korean or Katakana/Hiragana Japanese, which are tokenized
+            with whitespace+WordPiece like all other languages."""
             output = []
             for char in text:
                 cp = ord(char)
