@@ -4,7 +4,6 @@ export CUDA_VISIBLE_DEVICES=0
 CKPT_DIR="./ckpt_rc"
 dataset=drcd
 
-mkdir $RES_DIR
 python -u  predict.py \
                    --batch_size=12 \
                    --use_gpu=True \
