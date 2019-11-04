@@ -209,9 +209,9 @@ def create_app():
         global results_dict
         req_id = request.data.get("id")
 
-        img_base64 = request.form.get("input_img", "")
+        img_base64 = request.form.get("image", "")
         if img_base64 != "":
-            img_base64 = request.form.get("input_img", "")
+            img_base64 = request.form.get("image", "")
             ext = img_base64.split(";")[0].split("/")[-1]
             if ext not in ["jpeg", "jpg", "png"]:
                 return {"result": "Unrecognized file type"}
@@ -221,7 +221,7 @@ def create_app():
             with open(filename, "wb") as fp:
                 fp.write(img_data)
         else:
-            file = request.files["input_img"]
+            file = request.files["image"]
             filename = file.filename
             ext = file.filename.split(".")[-1]
             if ext not in ["jpeg", "jpg", "png"]:
@@ -276,7 +276,7 @@ def create_app():
     def predict_text(module_name):
         global results_dict, queues_dict
         req_id = request.data.get("id")
-        data_list = request.form.get("input_text")
+        data_list = request.form.get("text")
         score = time.time()
         data_list = data_list.splitlines()
         data_temp = []

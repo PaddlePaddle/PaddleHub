@@ -219,7 +219,7 @@ def create_app():
     def predict_image(module_name):
         req_id = request.data.get("id")
         global use_gpu
-        img_base64 = request.form.getlist("input_img")
+        img_base64 = request.form.getlist("image")
         file_name_list = []
         if img_base64 != "":
             for item in img_base64:
@@ -235,7 +235,7 @@ def create_app():
                 with open(filename, "wb") as fp:
                     fp.write(img_data)
         else:
-            file = request.files.getlist("input_img")
+            file = request.files.getlist("image")
             for item in file:
                 file_name = req_id + "_" + item.filename
                 item.save(file_name)
