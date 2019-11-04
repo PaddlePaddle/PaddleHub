@@ -81,15 +81,15 @@ class DRCD(object):
 
     def _load_train_examples(self):
         self.train_file = os.path.join(self.dataset_dir, "DRCD_training.json")
-        self.train_examples = self._read_json(self.train_file, is_training=True)
+        self.train_examples = self._read_json(self.train_file)
 
     def _load_dev_examples(self):
         self.dev_file = os.path.join(self.dataset_dir, "DRCD_dev.json")
-        self.dev_examples = self._read_json(self.dev_file, is_training=False)
+        self.dev_examples = self._read_json(self.dev_file)
 
     def _load_test_examples(self):
         self.test_file = os.path.join(self.dataset_dir, "DRCD_test.json")
-        self.test_examples = self._read_json(self.test_file, is_training=False)
+        self.test_examples = self._read_json(self.test_file)
 
     def get_train_examples(self):
         return self.train_examples
@@ -100,7 +100,7 @@ class DRCD(object):
     def get_test_examples(self):
         return self.test_examples
 
-    def _read_json(self, input_file, is_training):
+    def _read_json(self, input_file):
         """Read a DRCD json file into a list of CRCDExample."""
 
         def _is_chinese_char(cp):
@@ -175,37 +175,33 @@ class DRCD(object):
                 for qa in paragraph["qas"]:
                     qas_id = qa["id"]
                     question_text = qa["question"]
-                    start_position = None
-                    end_position = None
-                    orig_answer_text = None
-                    if is_training:
-                        # Only select the first answer
-                        answer = qa["answers"][0]
-                        orig_answer_text = answer["text"]
-                        answer_offset = answer["answer_start"]
-                        while paragraph_text[answer_offset] in [
-                                " ", "\t", "\r", "\n", "。", "，", "：", ":", ".",
-                                ","
-                        ]:
-                            answer_offset += 1
-                        start_position = char_to_word_offset[answer_offset]
-                        answer_length = len(orig_answer_text)
-                        end_position = char_to_word_offset[answer_offset +
-                                                           answer_length - 1]
-                        # Only add answers where the text can be exactly recovered from the
-                        # document. If this CAN'T happen it's likely due to weird Unicode
-                        # stuff so we will just skip the example.
-                        #
-                        # Note that this means for training mode, every example is NOT
-                        # guaranteed to be preserved.
-                        actual_text = "".join(
-                            doc_tokens[start_position:(end_position + 1)])
-                        cleaned_answer_text = "".join(
-                            tokenization.whitespace_tokenize(orig_answer_text))
-                        if actual_text.find(cleaned_answer_text) == -1:
-                            logger.warning((actual_text, " vs ",
-                                            cleaned_answer_text, " in ", qa))
-                            continue
+
+                    # Only select the first answer
+                    answer = qa["answers"][0]
+                    orig_answer_text = answer["text"]
+                    answer_offset = answer["answer_start"]
+                    while paragraph_text[answer_offset] in [
+                            " ", "\t", "\r", "\n", "。", "，", "：", ":", ".", ","
+                    ]:
+                        answer_offset += 1
+                    start_position = char_to_word_offset[answer_offset]
+                    answer_length = len(orig_answer_text)
+                    end_position = char_to_word_offset[answer_offset +
+                                                       answer_length - 1]
+                    # Only add answers where the text can be exactly recovered from the
+                    # document. If this CAN'T happen it's likely due to weird Unicode
+                    # stuff so we will just skip the example.
+                    #
+                    # Note that this means for training mode, every example is NOT
+                    # guaranteed to be preserved.
+                    actual_text = "".join(
+                        doc_tokens[start_position:(end_position + 1)])
+                    cleaned_answer_text = "".join(
+                        tokenization.whitespace_tokenize(orig_answer_text))
+                    if actual_text.find(cleaned_answer_text) == -1:
+                        logger.warning((actual_text, " vs ",
+                                        cleaned_answer_text, " in ", qa))
+                        continue
                     example = DRCDExample(
                         qas_id=qas_id,
                         question_text=question_text,
