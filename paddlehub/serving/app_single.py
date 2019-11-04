@@ -233,9 +233,9 @@ def predict_semantic_segmentation(module, input_img, id, batch_size):
             b_body = str(b_body).replace("b'", "").replace("'", "")
             b_img = b_head + "," + b_body
             base64_list.append(b_img)
+            output_file_path = results[index]["processed"]
             results[index]["origin"] = results[index]["origin"].replace(
                 id + "_", "")
-            output_file_path = results[index]["processed"]
             results[index]["processed"] = results[index]["processed"].replace(
                 id + "_", "")
             results[index].update({"base64": b_img})
