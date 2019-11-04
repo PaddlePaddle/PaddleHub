@@ -468,8 +468,6 @@ class ReadingComprehensionTask(BasicTask):
     @property
     def fetch_list(self):
         if self.is_train_phase or self.is_test_phase:
-            #     return [self.loss.name, self.outputs[-1].name, self.unique_ids.name]
-            # elif self.is_test_phase:
             return [
                 self.loss.name, self.outputs[-1].name, self.unique_ids.name,
                 self.outputs[0].name, self.outputs[1].name
