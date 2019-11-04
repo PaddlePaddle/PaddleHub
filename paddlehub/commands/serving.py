@@ -159,7 +159,12 @@ class ServingCommand(BaseCommand):
         print(str)
 
     def execute(self, argv):
-        args = self.parser.parse_args()
+        try:
+            args = self.parser.parse_args()
+        except:
+            print("Please refer to the instructions below.")
+            ServingCommand.show_help()
+            return False
         if args.start is True:
             ServingCommand.start_serving(args)
         else:
