@@ -133,9 +133,7 @@ def calc_em_score(answers, prediction):
 
 
 def get_eval(original_file, prediction_file):
-    ground_truth_file = json.load(open(original_file, 'r'))
-    prediction_file = json.load(open(prediction_file, 'r'))
-    F1, EM, TOTAL, SKIP = evaluate(ground_truth_file, prediction_file)
+    F1, EM, TOTAL, SKIP = evaluate(original_file, prediction_file)
     AVG = (EM + F1) * 0.5
     output_result = OrderedDict()
     output_result['AVERAGE'] = '%.3f' % AVG
