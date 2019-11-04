@@ -96,7 +96,7 @@ class CMRC2018(object):
         return self.dev_examples
 
     def get_test_examples(self):
-        raise Exception("not test_file")
+        return []
 
     def _read_json(self, input_file):
         """Read a cmrc2018 json file into a list of CRCDExample."""
@@ -148,6 +148,7 @@ class CMRC2018(object):
             return False
 
         examples = []
+        drop = 0
         with open(input_file, "r") as reader:
             input_data = json.load(reader)["data"]
         for entry in input_data:
@@ -201,8 +202,9 @@ class CMRC2018(object):
                     cleaned_answer_text = "".join(
                         tokenization.whitespace_tokenize(orig_answer_text))
                     if actual_text.find(cleaned_answer_text) == -1:
-                        logger.warning((actual_text, " vs ",
-                                        cleaned_answer_text, " in ", qa))
+                        drop += 1
+                        # logger.warning((actual_text, " vs ",
+                        #                 cleaned_answer_text, " in ", qa))
                         continue
                     example = CMRC2018Example(
                         qas_id=qas_id,
@@ -212,6 +214,8 @@ class CMRC2018(object):
                         start_position=start_position,
                         end_position=end_position)
                     examples.append(example)
+
+        logger.warning("%i bad examples has been dropped" % drop)
         return examples
 
 
