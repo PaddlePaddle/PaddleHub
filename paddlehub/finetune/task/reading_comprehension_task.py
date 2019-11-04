@@ -273,7 +273,10 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 orig_doc_end = feature.token_to_orig_map[pred.end_index]
                 orig_tokens = example.doc_tokens[orig_doc_start:(
                     orig_doc_end + 1)]
-                tok_text = " ".join(tok_tokens)
+                if is_english:
+                    tok_text = " ".join(tok_tokens)
+                else:
+                    tok_text = "".join(tok_tokens)
 
                 # De-tokenize WordPieces that have been split off.
                 tok_text = tok_text.replace(" ##", "")
@@ -282,7 +285,10 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 # Clean whitespace
                 tok_text = tok_text.strip()
                 tok_text = " ".join(tok_text.split())
-                orig_text = " ".join(orig_tokens)
+                if is_english:
+                    orig_text = " ".join(orig_tokens)
+                else:
+                    orig_text = "".join(orig_tokens)
 
                 final_text = get_final_text(tok_text, orig_text, do_lower_case)
                 if final_text in seen_predictions:
