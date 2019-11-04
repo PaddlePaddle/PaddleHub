@@ -60,6 +60,8 @@ def predict_lexical_analysis(module, input_text, extra=[]):
             user_dict = extra[0]
             results = predict_method(
                 data=data, user_dict=user_dict, use_gpu=use_gpu)
+            for path in extra:
+                os.remove(path)
     except Exception as err:
         return {"result": "Please check data format!"}
     return results
