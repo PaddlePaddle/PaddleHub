@@ -558,10 +558,7 @@ class ReadingComprehensionTask(BasicTask):
                     na_probs = json.load(odds_file)
                 scores = evaluate_v2.evaluate(dataset, predictions, na_probs)
             elif self.sub_task in ["cmrc2018", "drcd"]:
-                f1_score, em_score, total_count, skip_count = cmrc2018_evaluate.get_eval(
-                    dataset, predictions)
-                scores["f1"] = f1_score
-                scores["em"] = em_score
+                scores = cmrc2018_evaluate.get_eval(dataset, predictions)
 
             self.data_reader.all_features[self.phase] = []
             self.data_reader.all_examples[self.phase] = []

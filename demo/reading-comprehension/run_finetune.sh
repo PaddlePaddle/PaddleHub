@@ -1,6 +1,6 @@
 export FLAGS_eager_delete_tensor_gb=0.0
 
-dataset=drcd
+dataset=squad
 python -u reading_comprehension.py \
                    --batch_size=32 \
                    --use_gpu=True \

@@ -12,6 +12,9 @@ from collections import OrderedDict
 import re
 import json
 import nltk
+import sys
+
+nltk.download('punkt')
 
 
 # split Chinese with English
@@ -136,9 +139,9 @@ def get_eval(original_file, prediction_file):
     F1, EM, TOTAL, SKIP = evaluate(original_file, prediction_file)
     AVG = (EM + F1) * 0.5
     output_result = OrderedDict()
-    output_result['AVERAGE'] = '%.3f' % AVG
-    output_result['F1'] = '%.3f' % F1
-    output_result['EM'] = '%.3f' % EM
+    output_result['AVERAGE'] = AVG
+    output_result['F1'] = F1
+    output_result['EM'] = EM
     output_result['TOTAL'] = TOTAL
     output_result['SKIP'] = SKIP
 
