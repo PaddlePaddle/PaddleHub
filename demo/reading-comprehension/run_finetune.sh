@@ -2,7 +2,7 @@ export FLAGS_eager_delete_tensor_gb=0.0
 
 dataset=squad
 python -u reading_comprehension.py \
-                   --batch_size=32 \
+                   --batch_size=8 \
                    --use_gpu=True \
                    --checkpoint_dir=./ckpt_${dataset} \
                    --learning_rate=3e-5 \

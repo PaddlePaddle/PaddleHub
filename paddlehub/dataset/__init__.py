@@ -26,6 +26,7 @@ from .glue import GLUE
 from .tnews import TNews
 from .inews import INews
 from .drcd import DRCD
+from .cmrc2018 import CMRC2018
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat

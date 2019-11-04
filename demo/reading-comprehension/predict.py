@@ -58,23 +58,26 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub bert_uncased_L-12_H-768_A-12 pretrained model
-    module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
-    # module = hub.Module(module_dir=["./bert_uncased_L-12_H-768_A-12.hub_module"])
-    inputs, outputs, program = module.context(
-        trainable=True, max_seq_len=args.max_seq_len)
-
     # Download dataset and use ReadingComprehensionReader to read dataset
     if args.dataset == "squad":
         dataset = hub.dataset.SQUAD(version_2_with_negative=False)
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     elif args.dataset == "squad2.0" or args.dataset == "squad2":
         args.dataset = "squad2.0"
         dataset = hub.dataset.SQUAD(version_2_with_negative=True)
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     elif args.dataset == "drcd":
         dataset = hub.dataset.DRCD()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+    elif args.dataset == "cmrc2018":
+        dataset = hub.dataset.CMRC2018()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
     else:
         raise Exception(
             "Only support datasets: squad, squad2.0, drcd and cmrc2018")
+
+    inputs, outputs, program = module.context(
+        trainable=True, max_seq_len=args.max_seq_len)
 
     reader = hub.reader.ReadingComprehensionReader(
         dataset=dataset,
