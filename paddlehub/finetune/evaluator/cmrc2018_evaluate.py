@@ -81,7 +81,7 @@ def evaluate(ground_truth_file, prediction_file):
     em = 0
     total_count = 0
     skip_count = 0
-    for instance in ground_truth_file["data"]:
+    for instance in ground_truth_file:
         # context_id   = instance['context_id'].strip()
         # context_text = instance['context_text'].strip()
         for para in instance["paragraphs"]:
