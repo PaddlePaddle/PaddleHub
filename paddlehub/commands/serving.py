@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import argparse
 import os
+import platform
 import socket
 import json
 import paddlehub as hub
@@ -39,9 +40,9 @@ class ServingCommand(BaseCommand):
             usage='%(prog)s',
             add_help=True)
         self.parser.add_argument("command")
+        self.parser.add_argument("sub_command")
         self.sub_parse = self.parser.add_mutually_exclusive_group(
             required=False)
-        self.sub_parse.add_argument("--start", action="store_true")
         self.parser.add_argument(
             "--use_gpu", action="store_true", default=False)
         self.parser.add_argument(
@@ -51,7 +52,7 @@ class ServingCommand(BaseCommand):
         self.parser.add_argument("--port", "-p", nargs="+", default=[8866])
 
     @staticmethod
-    def port_is_open(ip, port):
+    def is_port_occupied(ip, port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             s.connect((ip, int(port)))
@@ -93,19 +94,28 @@ class ServingCommand(BaseCommand):
 
     @staticmethod
     def start_serving(args):
-        if args.use_multiprocess is True:
-            from paddlehub.serving import app
-        else:
-            from paddlehub.serving import app_single as app
         config_file = args.config
         if config_file is not None:
             config_file = config_file[0]
             if os.path.exists(config_file):
                 with open(config_file, "r") as fp:
                     configs = json.load(fp)
+                    use_multiprocess = configs.get("use_multiprocess", False)
+                    if use_multiprocess is True:
+                        if platform.system() == "Windows":
+                            print(
+                                "Warning: Windows cannot use multiprocess working "
+                                "mode, Hub-Serving will switch to single process mode"
+                            )
+                            from paddlehub.serving import app_single as app
+                        else:
+                            from paddlehub.serving import app
+                    else:
+                        from paddlehub.serving import app_single as app
                     use_gpu = configs.get("use_gpu", False)
                     port = configs.get("port", 8866)
-                    if ServingCommand.port_is_open("127.0.0.1", port) is True:
+                    if ServingCommand.is_port_occupied("127.0.0.1",
+                                                       port) is True:
                         print("Port %s is occupied, please change it." % (port))
                         return False
                     configs = configs.get("modules_info")
@@ -120,11 +130,21 @@ class ServingCommand(BaseCommand):
             else:
                 print("config_file ", config_file, "not exists.")
         else:
+            if args.use_multiprocess is True:
+                if platform.system() == "Windows":
+                    print(
+                        "Warning: Windows cannot use multiprocess working "
+                        "mode, Hub-Serving will switch to single process mode")
+                    from paddlehub.serving import app_single as app
+                else:
+                    from paddlehub.serving import app
+            else:
+                from paddlehub.serving import app_single as app
             module = args.modules
             if module is not None:
                 use_gpu = args.use_gpu
                 port = args.port[0]
-                if ServingCommand.port_is_open("127.0.0.1", port) is True:
+                if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
                     print("Port %s is occupied, please change it." % (port))
                     return False
                 module_info = ServingCommand.preinstall_modules(module)
@@ -142,9 +162,10 @@ class ServingCommand(BaseCommand):
     def show_help():
         str = "serving <option>\n"
         str += "\tManage PaddleHub-Serving.\n"
-        str += "option:\n"
-        str += "--start\n"
+        str += "sub command:\n"
+        str += "start\n"
         str += "\tStart PaddleHub-Serving if specifies this parameter.\n"
+        str += "option:\n"
         str += "--modules/-m [module1==version, module2==version...]\n"
         str += "\tPre-install modules via this parameter list.\n"
         str += "--port/-p XXXX\n"
@@ -163,7 +184,7 @@ class ServingCommand(BaseCommand):
             print("Please refer to the instructions below.")
             ServingCommand.show_help()
             return False
-        if args.start is True:
+        if args.sub_command == "start":
             ServingCommand.start_serving(args)
         else:
             ServingCommand.show_help()

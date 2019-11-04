@@ -22,6 +22,48 @@ import os
 import base64
 import logging
 
+nlp_module_method = {
+    "lac": "predict_lexical_analysis",
+    "simnet_bow": "predict_sentiment_analysis",
+    "lm_lstm": "predict_pretrained_model",
+    "senta_lstm": "predict_pretrained_model",
+    "senta_gru": "predict_pretrained_model",
+    "senta_cnn": "predict_pretrained_model",
+    "senta_bow": "predict_pretrained_model",
+    "senta_bilstm": "predict_pretrained_model",
+    "emotion_detection_textcnn": "predict_pretrained_model"
+}
+cv_module_method = {
+    "vgg19_imagenet": "predict_classification",
+    "vgg16_imagenet": "predict_classification",
+    "vgg13_imagenet": "predict_classification",
+    "vgg11_imagenet": "predict_classification",
+    "shufflenet_v2_imagenet": "predict_classification",
+    "se_resnext50_32x4d_imagenet": "predict_classification",
+    "se_resnext101_32x4d_imagenet": "predict_classification",
+    "resnet_v2_50_imagenet": "predict_classification",
+    "resnet_v2_34_imagenet": "predict_classification",
+    "resnet_v2_18_imagenet": "predict_classification",
+    "resnet_v2_152_imagenet": "predict_classification",
+    "resnet_v2_101_imagenet": "predict_classification",
+    "pnasnet_imagenet": "predict_classification",
+    "nasnet_imagenet": "predict_classification",
+    "mobilenet_v2_imagenet": "predict_classification",
+    "googlenet_imagenet": "predict_classification",
+    "alexnet_imagenet": "predict_classification",
+    "yolov3_coco2017": "predict_object_detection",
+    "ultra_light_fast_generic_face_detector_1mb_640":
+    "predict_object_detection",
+    "ultra_light_fast_generic_face_detector_1mb_320":
+    "predict_object_detection",
+    "ssd_mobilenet_v1_pascal": "predict_object_detection",
+    "pyramidbox_face_detection": "predict_object_detection",
+    "faster_rcnn_coco2017": "predict_object_detection",
+    "cyclegan_cityscapes": "predict_gan",
+    "deeplabv3p_xception65_humanseg": "predict_semantic_segmentation",
+    "ace2p": "predict_semantic_segmentation"
+}
+
 
 def predict_sentiment_analysis(module, input_text, extra=None):
     global use_gpu
@@ -221,7 +263,7 @@ def create_app():
         global use_gpu
         img_base64 = request.form.getlist("image")
         file_name_list = []
-        if img_base64 != "":
+        if img_base64 != []:
             for item in img_base64:
                 ext = item.split(";")[0].split("/")[-1]
                 if ext not in ["jpeg", "jpg", "png"]:
@@ -241,8 +283,12 @@ def create_app():
                 item.save(file_name)
                 file_name_list.append(file_name)
         module = ImageModelService.get_module(module_name)
-        module_type = module.type.split("/")[-1].replace("-", "_").lower()
-        predict_func = eval("predict_" + module_type)
+        predict_func_name = cv_module_method.get(module_name, "")
+        if predict_func_name != "":
+            predict_func = eval(predict_func_name)
+        else:
+            module_type = module.type.split("/")[-1].replace("-", "_").lower()
+            predict_func = eval("predict_" + module_type)
         results = predict_func(module, file_name_list)
         r = {"results": str(results)}
         return r
@@ -259,8 +305,12 @@ def create_app():
             data = request.form.getlist("text")
         file = request.files.getlist("user_dict")
         module = TextModelService.get_module(module_name)
-        module_type = module.type.split("/")[-1].replace("-", "_").lower()
-        predict_func = eval("predict_" + module_type)
+        predict_func_name = nlp_module_method.get(module_name, "")
+        if predict_func_name != "":
+            predict_func = eval(predict_func_name)
+        else:
+            module_type = module.type.split("/")[-1].replace("-", "_").lower()
+            predict_func = eval("predict_" + module_type)
         file_list = []
         for item in file:
             file_path = req_id + "_" + item.filename
