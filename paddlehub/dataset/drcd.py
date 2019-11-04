@@ -178,7 +178,6 @@ class DRCD(object):
                     start_position = None
                     end_position = None
                     orig_answer_text = None
-                    is_impossible = False
                     if is_training:
                         # Only select the first answer
                         answer = qa["answers"][0]
@@ -213,8 +212,7 @@ class DRCD(object):
                         doc_tokens=doc_tokens,
                         orig_answer_text=orig_answer_text,
                         start_position=start_position,
-                        end_position=end_position,
-                        is_impossible=is_impossible)
+                        end_position=end_position)
                     examples.append(example)
         return examples
 

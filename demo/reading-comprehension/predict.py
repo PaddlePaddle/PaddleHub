@@ -53,7 +53,7 @@ parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=True, 
 parser.add_argument("--max_answer_length", type=int, default=30, help="Max answer length.")
 parser.add_argument("--n_best_size", type=int, default=20, help="The total number of n-best predictions to generate in the nbest_predictions.json output file.")
 parser.add_argument("--null_score_diff_threshold", type=float, default=0.0, help="If null_score - best_non_null is greater than the threshold predict null.")
-parser.add_argument("--version_2_with_negative", type=ast.literal_eval, default=False, help="If true, the SQuAD examples contain some that do not have an answer. If using squad v2.0, it should be set true.")
+parser.add_argument("--dataset", type=str, default="squad", help="Support squad, squad2.0, drcd and cmrc2018")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -65,8 +65,16 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Download dataset and use ReadingComprehensionReader to read dataset
-    dataset = hub.dataset.SQUAD(
-        version_2_with_negative=args.version_2_with_negative)
+    if args.dataset == "squad":
+        dataset = hub.dataset.SQUAD(version_2_with_negative=False)
+    elif args.dataset == "squad2.0" or args.dataset == "squad2":
+        args.dataset = "squad2.0"
+        dataset = hub.dataset.SQUAD(version_2_with_negative=True)
+    elif args.dataset == "drcd":
+        dataset = hub.dataset.DRCD()
+    else:
+        raise Exception(
+            "Only support datasets: squad, squad2.0, drcd and cmrc2018")
 
     reader = hub.reader.ReadingComprehensionReader(
         dataset=dataset,

@@ -2,13 +2,13 @@ export FLAGS_eager_delete_tensor_gb=0.0
 export CUDA_VISIBLE_DEVICES=0
 
 CKPT_DIR="./ckpt_rc"
-RES_DIR="./result"
+dataset=drcd
 
 mkdir $RES_DIR
-
 python -u  predict.py \
                    --batch_size=12 \
                    --use_gpu=True \
+                   --dataset=${dataset} \
                    --checkpoint_dir=${CKPT_DIR} \
                    --learning_rate=3e-5 \
                    --weight_decay=0.01 \
@@ -16,6 +16,4 @@ python -u  predict.py \
                    --num_epoch=1 \
                    --max_seq_len=384 \
                    --use_pyreader=False \
-                   --use_data_parallel=False \
-                   --version_2_with_negative=False \
-                   --result_dir=${RES_DIR}
+                   --use_data_parallel=False

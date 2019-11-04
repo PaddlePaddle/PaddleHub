@@ -37,7 +37,7 @@ parser.add_argument("--max_answer_length",  type=int, default=30,help="The maxim
 parser.add_argument("--batch_size", type=int, default=8, help="Total examples' number in batch for training.")
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=True, help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=True, help="Whether use data parallel.")
-parser.add_argument("--version_2_with_negative", type=ast.literal_eval, default=False, help="If true, the SQuAD examples contain some that do not have an answer. If using squad v2.0, it should be set true.")
+parser.add_argument("--dataset", type=str, default="squad", help="Support squad, squad2.0, drcd and cmrc2018")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -49,8 +49,16 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Download dataset and use ReadingComprehensionReader to read dataset
-    dataset = hub.dataset.SQUAD(
-        version_2_with_negative=args.version_2_with_negative)
+    if args.dataset == "squad":
+        dataset = hub.dataset.SQUAD(version_2_with_negative=False)
+    elif args.dataset == "squad2.0" or args.dataset == "squad2":
+        args.dataset = "squad2.0"
+        dataset = hub.dataset.SQUAD(version_2_with_negative=True)
+    elif args.dataset == "drcd":
+        dataset = hub.dataset.DRCD()
+    else:
+        raise Exception(
+            "Only support datasets: squad, squad2.0, drcd and cmrc2018")
 
     reader = hub.reader.ReadingComprehensionReader(
         dataset=dataset,
@@ -91,13 +99,12 @@ if __name__ == '__main__':
         strategy=strategy)
 
     # Define a reading comprehension finetune task by PaddleHub's API
-    sub_task = "squad" if not args.version_2_with_negative else "squad2.0"
     reading_comprehension_task = hub.ReadingComprehensionTask(
         data_reader=reader,
         feature=seq_output,
         feed_list=feed_list,
         config=config,
-        sub_task=sub_task,
+        sub_task=args.dataset,
     )
 
     # Finetune by PaddleHub's API
