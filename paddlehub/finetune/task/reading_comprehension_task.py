@@ -609,6 +609,6 @@ class ReadingComprehensionTask(BasicTask):
             null_score_diff_threshold=self.null_score_diff_threshold,
             is_english=self.is_english)
 
-        logger.info(
-            "PaddleHub predict finished. \nYou can see the prediction in %s" %
-            output_prediction_file)
+        logger.info("PaddleHub predict finished.")
+
+        logger.info("You can see the prediction in %s" % output_prediction_file)
