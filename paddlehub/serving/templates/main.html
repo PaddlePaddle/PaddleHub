@@ -16,7 +16,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Hub-Serving</title>
+    <link rel="shortcut icon" href="https://paddlepaddle-org-cn.bj.bcebos.com/paddle-site-front/favicon.ico"/>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
@@ -35,8 +36,6 @@
                 <select class="custom-select" id="inputGroupSelect01"
                         onchange="select_category(this.options[this.options.selectedIndex].value)">
                     <option selected>Choose...</option>
-                    <option value="nlp_module">nlp</option>
-                    <option value="cv_module">cv</option>
                 </select>
             </td>
             <td style="width: 6%"></td>
@@ -61,12 +60,31 @@
     </div>
 </form>
 <script>
-    module_info = {
-        "nlp_module":[{"Choose...":"Choose..."},{"lac":"lac"},
-            {"senta_lstm":"senta_lstm"}],
-        "cv_module":[{"Choose...":"Choose..."},{"yolov3":"yolov3_coco2017"},{"faster_rcnn":"faster_rcnn_coco2017"}],
-        "Choose...":[{"请先选择分类":"Choose..."}]
-    };
+    var module_info = {};
+
+    $.ajax({
+        type: "POST",
+        url: "/get/modules",
+        data: "",
+        dataType: "json",
+        async: false,
+        success: function (res) {
+            module_info = res.module_info;
+            console.log(res);
+            console.log("mo=", module_info);
+            if (module_info.hasOwnProperty("nlp_module"))
+            {
+                s = document.getElementById("inputGroupSelect01");
+                s.options.add(new Option("nlp", "nlp_module"));
+            }
+            if (module_info.hasOwnProperty("cv_module"))
+            {
+                s = document.getElementById("inputGroupSelect01");
+                s.options.add(new Option("cv", "cv_module"));
+            }
+        }
+    });
+
     function get_module_option(module_categoty) {
         options = module_info[module_categoty];
         html = "";
@@ -241,7 +259,7 @@
                 },
                 success: function(data) {
                     data = data["result"];
-                    document.getElementById("result_text").value = data["border"];
+                    document.getElementById("result_text").value = data["desc"];
                     document.getElementById("result_img").src = data["output_img"];
                 }
             });

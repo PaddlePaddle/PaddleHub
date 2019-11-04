@@ -59,6 +59,11 @@ setup(
         ]
     },
     include_package_data=True,
+    data_files=[('paddlehub/serving/templates', [
+        'paddlehub/serving/templates/serving_config.json',
+        'paddlehub/serving/templates/main.html'
+    ])],
+    include_data_files=True,
     # PyPI package information.
     classifiers=[
         'Development Status :: 4 - Beta',

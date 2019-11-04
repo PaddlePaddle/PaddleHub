@@ -185,24 +185,51 @@ def create_app():
 
     @app_instance.before_request
     def before_request():
-        request.data = {"id": str(time.time())}
+        request.data = {"id": utils.md5(request.remote_addr + str(time.time()))}
+        print(request.remote_addr)
         pass
+
+    @app_instance.route("/get/modules", methods=["GET", "POST"])
+    def get_modules_info():
+        global nlp_module, cv_module
+        module_info = {}
+        if len(nlp_module) > 0:
+            module_info.update({"nlp_module": [{"Choose...": "Choose..."}]})
+            for item in nlp_module:
+                module_info["nlp_module"].append({item: item})
+        if len(cv_module) > 0:
+            module_info.update({"cv_module": [{"Choose...": "Choose..."}]})
+            for item in cv_module:
+                module_info["cv_module"].append({item: item})
+        module_info.update({"Choose...": [{"请先选择分类": "Choose..."}]})
+        return {"module_info": module_info}
 
     @app_instance.route("/predict/image/<module_name>", methods=["POST"])
     def predict_iamge(module_name):
         global results_dict
         req_id = request.data.get("id")
-        img_base64 = request.form.get("input_img", "")
-        received_file_name = request.form.get("input_file", "")
-        ext = received_file_name.split(".")[-1]
-        if ext == "":
-            return {"result": "Unrecognized file type"}
+
+        img_base64 = request.form.get("image", "")
+        if img_base64 != "":
+            img_base64 = request.form.get("image", "")
+            ext = img_base64.split(";")[0].split("/")[-1]
+            if ext not in ["jpeg", "jpg", "png"]:
+                return {"result": "Unrecognized file type"}
+            filename = utils.md5(str(time.time()) + str(img_base64)) + "." + ext
+            base64_head = img_base64.split(',')[0]
+            img_data = base64.b64decode(img_base64.split(',')[-1])
+            with open(filename, "wb") as fp:
+                fp.write(img_data)
+        else:
+            file = request.files["image"]
+            filename = file.filename
+            ext = file.filename.split(".")[-1]
+            if ext not in ["jpeg", "jpg", "png"]:
+                return {"result": "Unrecognized file type"}
+            base64_head = "data:image/" + ext + ";base64"
+            filename = utils.md5(filename) + '.' + ext
+            file.save(filename)
         score = time.time()
-        filename = utils.md5(str(time.time()) + str(img_base64)) + "." + ext
-        base64_head = img_base64.split(',')[0]
-        img_data = base64.b64decode(img_base64.split(',')[-1])
-        with open(filename, "wb") as fp:
-            fp.write(img_data)
         file_list = [filename]
         if queues_dict[module_name].qsize(
         ) + 1 > queues_dict[module_name].get_attribute("maxsize"):
@@ -211,9 +238,14 @@ def create_app():
         data_num = len(file_list)
         results = []
         result_len = 0
+        start_time = time.time()
         while result_len != data_num:
             result_len = len(results_dict.get(req_id, []))
+            if time.time() - start_time > time_out:
+                results_dict.pop(req_id, None)
+                return {"result": "Request time out."}
         results = results_dict.get(req_id)
+        results_dict.pop(req_id, None)
         results = [i[1] for i in sorted(results, key=lambda k: k[0])]
         filename = results[0].get("path")
         ext = filename.split(".")[-1]
@@ -225,7 +257,7 @@ def create_app():
                 os.remove(filename)
                 os.remove(output_file)
                 results = {
-                    "border":
+                    "desc":
                     str(results[0]["data"]),
                     "output_img":
                     base64_head + "," + str(output_img_base64).replace(
@@ -244,7 +276,7 @@ def create_app():
     def predict_text(module_name):
         global results_dict, queues_dict
         req_id = request.data.get("id")
-        data_list = request.form.get("input_text")
+        data_list = request.form.get("text")
         score = time.time()
         data_list = data_list.splitlines()
         data_temp = []
@@ -261,14 +293,17 @@ def create_app():
         if data_num + queues_dict[module_name].qsize(
         ) > queues_dict[module_name].get_attribute("maxsize"):
             return {"result": "Too many visitors now, please come back later."}
-        start = time.time()
-
         data_2_item(data_list, req_id, score, module_name)
         results = []
         result_len = 0
+        start_time = time.time()
         while result_len != data_num:
             result_len = len(results_dict.get(req_id, []))
+            if time.time() - start_time > time_out:
+                results_dict.pop(req_id, None)
+                return {"result": "Request time out."}
         results = results_dict.get(req_id)
+        results_dict.pop(req_id, None)
         results = [i[1] for i in sorted(results, key=lambda k: k[0])]
         return {"result": results}
 
@@ -302,8 +337,9 @@ def config_with_file(configs):
         queue_name_list.append(item["module"])
 
 
-def run(is_use_gpu=False, configs=None, port=8888):
-    global use_gpu
+def run(is_use_gpu=False, configs=None, port=8866, timeout=60):
+    global use_gpu, time_out
+    time_out = timeout
     use_gpu = is_use_gpu
     if configs is not None:
         config_with_file(configs)

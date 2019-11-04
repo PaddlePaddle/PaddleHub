@@ -155,9 +155,10 @@ class Module(object):
             module_name=name, module_version=version, extra=extra)
         if not result:
             logger.error(tips)
-            exit(1)
-        logger.info(tips)
-        self._init_with_module_file(module_dir[0])
+            raise RuntimeError(tips)
+        else:
+            logger.info(tips)
+            self._init_with_module_file(module_dir[0])
 
     def _init_with_url(self, url):
         utils.check_url(url)
@@ -165,8 +166,9 @@ class Module(object):
             url, save_path=".")
         if not result:
             logger.error(tips)
-            exit(1)
-        self._init_with_module_file(module_dir)
+            raise RuntimeError(tips)
+        else:
+            self._init_with_module_file(module_dir)
 
     def _dump_processor(self):
         import inspect
