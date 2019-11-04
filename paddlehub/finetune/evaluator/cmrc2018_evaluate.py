@@ -14,7 +14,11 @@ import json
 import nltk
 import sys
 
-nltk.download('punkt')
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    print("Downloading nltk punkt")
+    nltk.download('punkt')
 
 
 # split Chinese with English
