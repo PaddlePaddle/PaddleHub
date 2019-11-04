@@ -80,11 +80,11 @@ class CMRC2018(object):
 
     def _load_train_examples(self):
         self.train_file = os.path.join(self.dataset_dir, "cmrc2018_train.json")
-        self.train_examples = self._read_json(self.train_file)
+        self.train_examples = self._read_json(self.train_file, is_training=True)
 
     def _load_dev_examples(self):
         self.dev_file = os.path.join(self.dataset_dir, "cmrc2018_dev.json")
-        self.dev_examples = self._read_json(self.dev_file)
+        self.dev_examples = self._read_json(self.dev_file, is_training=False)
 
     def _load_test_examples(self):
         pass
@@ -98,7 +98,7 @@ class CMRC2018(object):
     def get_test_examples(self):
         return []
 
-    def _read_json(self, input_file):
+    def _read_json(self, input_file, is_training=False):
         """Read a cmrc2018 json file into a list of CRCDExample."""
 
         def _is_chinese_char(cp):
@@ -197,15 +197,16 @@ class CMRC2018(object):
                     #
                     # Note that this means for training mode, every example is NOT
                     # guaranteed to be preserved.
-                    actual_text = "".join(
-                        doc_tokens[start_position:(end_position + 1)])
-                    cleaned_answer_text = "".join(
-                        tokenization.whitespace_tokenize(orig_answer_text))
-                    if actual_text.find(cleaned_answer_text) == -1:
-                        drop += 1
-                        # logger.warning((actual_text, " vs ",
-                        #                 cleaned_answer_text, " in ", qa))
-                        continue
+                    if is_training:
+                        actual_text = "".join(
+                            doc_tokens[start_position:(end_position + 1)])
+                        cleaned_answer_text = "".join(
+                            tokenization.whitespace_tokenize(orig_answer_text))
+                        if actual_text.find(cleaned_answer_text) == -1:
+                            drop += 1
+                            # logger.warning((actual_text, " vs ",
+                            #                 cleaned_answer_text, " in ", qa))
+                            continue
                     example = CMRC2018Example(
                         qas_id=qas_id,
                         question_text=question_text,
