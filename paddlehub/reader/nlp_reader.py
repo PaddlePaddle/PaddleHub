@@ -879,7 +879,7 @@ class RegressionReader(BaseReader):
         return wrapper
 
 
-class SquadInputFeatures(object):
+class Features(object):
     """A single set of features of squad_data."""
 
     def __init__(
@@ -940,15 +940,10 @@ class ReadingComprehensionReader(BaseReader):
         self.max_query_length = max_query_length
         self.use_task_id = use_task_id
         self.in_tokens = False
+        # self.all_examples[phase] and self.all_features[phase] will be used
+        # in write_prediction in reading_comprehension_task
         self.all_features = {"dev": [], "test": [], "predict": []}
         self.all_examples = {"dev": [], "test": [], "predict": []}
-        self.unique_id = {
-            "train": 1000000000,
-            "dev": 1000000000,
-            "test": 1000000000,
-            "predict": 1000000000
-        }
-        self.example_id = {"train": 0, "dev": 0, "test": 0, "predict": 0}
 
         np.random.seed(random_seed)
 
@@ -1027,6 +1022,26 @@ class ReadingComprehensionReader(BaseReader):
                 ]
         return return_list
 
+    def _prepare_batch_data(self, records, batch_size, phase=None):
+        """generate batch records"""
+        batch_records, max_len = [], 0
+        for index, record in enumerate(records):
+            if phase == "train":
+                self.current_example = index
+            max_len = max(max_len, len(record.token_ids))
+            if self.in_tokens:
+                to_append = (len(batch_records) + 1) * max_len <= batch_size
+            else:
+                to_append = len(batch_records) < batch_size
+            if to_append:
+                batch_records.append(record)
+            else:
+                yield self._pad_batch_records(batch_records, phase)
+                batch_records, max_len = [record], len(record.token_ids)
+
+        if batch_records:
+            yield self._pad_batch_records(batch_records, phase)
+
     def data_generator(self,
                        batch_size=1,
                        phase='train',
@@ -1035,15 +1050,12 @@ class ReadingComprehensionReader(BaseReader):
         if phase == 'train':
             shuffle = True
             examples = self.get_train_examples()
-            self.num_examples['train'] = len(examples)
         elif phase == 'dev':
             shuffle = False
             examples = self.get_dev_examples()
-            self.num_examples['dev'] = len(examples)
         elif phase == 'test':
             shuffle = False
             examples = self.get_test_examples()
-            self.num_examples['test'] = len(examples)
         elif phase == 'predict':
             shuffle = False
             examples = data
@@ -1052,200 +1064,158 @@ class ReadingComprehensionReader(BaseReader):
                 "Unknown phase, which should be in ['train', 'dev', 'test', 'predict']."
             )
 
+        # self.num_examples[phase] use in strategy.py to show the total steps
+        # As reading comprehension task will divide a long context into several doc_spans and then get multiple features
+        # To get the real total steps, we need to know the features' length
+        # So we use _convert_examples_to_records rather than _convert_example_to_record in this task
+        features = self._convert_examples_to_records(examples, self.max_seq_len,
+                                                     self.tokenizer, phase)
+        self.num_examples[phase] = len(features)
+
+        if phase in ["dev", "test", "val", "predict"]:
+            self.all_examples[phase] = examples
+            self.all_features[phase] = features
+
         def wrapper():
             if shuffle:
                 np.random.shuffle(examples)
 
             for batch_data in self._prepare_batch_data(
-                    examples, batch_size, phase=phase):
+                    features, batch_size, phase=phase):
                 yield [batch_data]
 
         return wrapper
 
-    def _convert_example_to_records(self,
-                                    example,
-                                    max_seq_length,
-                                    tokenizer,
-                                    phase=None):
+    def _convert_examples_to_records(self,
+                                     examples,
+                                     max_seq_length,
+                                     tokenizer,
+                                     phase=None):
         """Loads a data file into a list of `InputBatch`s."""
         features = []
-        query_tokens = tokenizer.tokenize(example.question_text)
+        unique_id = 1000000000
 
-        if len(query_tokens) > self.max_query_length:
-            query_tokens = query_tokens[0:self.max_query_length]
+        for (example_index, example) in enumerate(examples):
+            query_tokens = tokenizer.tokenize(example.question_text)
+            if len(query_tokens) > self.max_query_length:
+                query_tokens = query_tokens[0:self.max_query_length]
+            tok_to_orig_index = []
+            orig_to_tok_index = []
+            all_doc_tokens = []
+            for (i, token) in enumerate(example.doc_tokens):
+                orig_to_tok_index.append(len(all_doc_tokens))
+                sub_tokens = tokenizer.tokenize(token)
+                for sub_token in sub_tokens:
+                    tok_to_orig_index.append(i)
+                    all_doc_tokens.append(sub_token)
 
-        tok_to_orig_index = []
-        orig_to_tok_index = []
-        all_doc_tokens = []
-        for (i, token) in enumerate(example.doc_tokens):
-            orig_to_tok_index.append(len(all_doc_tokens))
-            sub_tokens = tokenizer.tokenize(token)
-            for sub_token in sub_tokens:
-                tok_to_orig_index.append(i)
-                all_doc_tokens.append(sub_token)
-
-        tok_start_position = None
-        tok_end_position = None
-        is_impossible = example.is_impossible if hasattr(
-            example, "is_impossible") else False
-
-        if phase != "predict" and is_impossible:
-            tok_start_position = -1
-            tok_end_position = -1
-        if phase != "predict" and not is_impossible:
-            tok_start_position = orig_to_tok_index[example.start_position]
-            if example.end_position < len(example.doc_tokens) - 1:
-                tok_end_position = orig_to_tok_index[example.end_position +
-                                                     1] - 1
-            else:
-                tok_end_position = len(all_doc_tokens) - 1
-            (tok_start_position, tok_end_position) = self.improve_answer_span(
-                all_doc_tokens, tok_start_position, tok_end_position, tokenizer,
-                example.orig_answer_text)
-
-        # The -3 accounts for [CLS], [SEP] and [SEP]
-        max_tokens_for_doc = max_seq_length - len(query_tokens) - 3
-
-        # We can have documents that are longer than the maximum sequence length.
-        # To deal with this we do a sliding window approach, where we take chunks
-        # of the up to our max length with a stride of `doc_stride`.
-        _DocSpan = collections.namedtuple("DocSpan", ["start", "length"])
-        doc_spans = []
-        start_offset = 0
-        while start_offset < len(all_doc_tokens):
-            length = len(all_doc_tokens) - start_offset
-            if length > max_tokens_for_doc:
-                length = max_tokens_for_doc
-            doc_spans.append(_DocSpan(start=start_offset, length=length))
-            if start_offset + length == len(all_doc_tokens):
-                break
-            start_offset += min(length, self.doc_stride)
-
-        for (doc_span_index, doc_span) in enumerate(doc_spans):
-            tokens = []
-            token_to_orig_map = {}
-            token_is_max_context = {}
-            text_type_ids = []
-            tokens.append("[CLS]")
-            text_type_ids.append(0)
-            for token in query_tokens:
-                tokens.append(token)
-                text_type_ids.append(0)
-            tokens.append("[SEP]")
-            text_type_ids.append(0)
-
-            for i in range(doc_span.length):
-                split_token_index = doc_span.start + i
-                token_to_orig_map[len(
-                    tokens)] = tok_to_orig_index[split_token_index]
-
-                is_max_context = self.check_is_max_context(
-                    doc_spans, doc_span_index, split_token_index)
-                token_is_max_context[len(tokens)] = is_max_context
-                tokens.append(all_doc_tokens[split_token_index])
-                text_type_ids.append(1)
-            tokens.append("[SEP]")
-            text_type_ids.append(1)
-
-            token_ids = tokenizer.convert_tokens_to_ids(tokens)
-            position_ids = list(range(len(token_ids)))
-            start_position = None
-            end_position = None
-            if phase != "predict" and not is_impossible:
-                # For training, if our document chunk does not contain an annotation
-                # we throw it out, since there is nothing to predict.
-                doc_start = doc_span.start
-                doc_end = doc_span.start + doc_span.length - 1
-                out_of_span = False
-                if not (tok_start_position >= doc_start
-                        and tok_end_position <= doc_end):
-                    out_of_span = True
-                if out_of_span:
-                    start_position = 0
-                    end_position = 0
-                else:
-                    doc_offset = len(query_tokens) + 2
-                    start_position = tok_start_position - doc_start + doc_offset
-                    end_position = tok_end_position - doc_start + doc_offset
+            tok_start_position = None
+            tok_end_position = None
+            is_impossible = example.is_impossible if hasattr(
+                example, "is_impossible") else False
 
             if phase != "predict" and is_impossible:
-                start_position = 0
-                end_position = 0
+                tok_start_position = -1
+                tok_end_position = -1
+            if phase != "predict" and not is_impossible:
+                tok_start_position = orig_to_tok_index[example.start_position]
+                if example.end_position < len(example.doc_tokens) - 1:
+                    tok_end_position = orig_to_tok_index[example.end_position +
+                                                         1] - 1
+                else:
+                    tok_end_position = len(all_doc_tokens) - 1
+                (tok_start_position,
+                 tok_end_position) = self.improve_answer_span(
+                     all_doc_tokens, tok_start_position, tok_end_position,
+                     tokenizer, example.orig_answer_text)
 
-            if self.example_id[phase] < 3:
-                logger.debug("*** Example ***")
-                logger.debug("unique_id: %s" % (self.unique_id[phase]))
-                logger.debug("example_index: %s" % (self.example_id[phase]))
-                logger.debug("doc_span_index: %s" % (doc_span_index))
-                logger.debug("tokens: %s" % " ".join(
-                    [tokenization.printable_text(x) for x in tokens]))
-                logger.debug("token_to_orig_map: %s" % " ".join([
-                    "%d:%d" % (x, y)
-                    for (x, y) in six.iteritems(token_to_orig_map)
-                ]))
-                logger.debug("token_is_max_context: %s" % " ".join([
-                    "%d:%s" % (x, y)
-                    for (x, y) in six.iteritems(token_is_max_context)
-                ]))
-                logger.debug(
-                    "input_ids: %s" % " ".join([str(x) for x in token_ids]))
-                logger.debug("segment_ids: %s" % " ".join(
-                    [str(x) for x in text_type_ids]))
-                if phase != "predict" and is_impossible:
-                    logger.debug("impossible example")
+            # The -3 accounts for [CLS], [SEP] and [SEP]
+            max_tokens_for_doc = max_seq_length - len(query_tokens) - 3
+
+            # We can have documents that are longer than the maximum sequence length.
+            # To deal with this we do a sliding window approach, where we take chunks
+            # of the up to our max length with a stride of `doc_stride`.
+            _DocSpan = collections.namedtuple("DocSpan", ["start", "length"])
+            doc_spans = []
+            start_offset = 0
+            while start_offset < len(all_doc_tokens):
+                length = len(all_doc_tokens) - start_offset
+                if length > max_tokens_for_doc:
+                    length = max_tokens_for_doc
+                doc_spans.append(_DocSpan(start=start_offset, length=length))
+                if start_offset + length == len(all_doc_tokens):
+                    break
+                start_offset += min(length, self.doc_stride)
+
+            for (doc_span_index, doc_span) in enumerate(doc_spans):
+                tokens = []
+                token_to_orig_map = {}
+                token_is_max_context = {}
+                text_type_ids = []
+                tokens.append("[CLS]")
+                text_type_ids.append(0)
+                for token in query_tokens:
+                    tokens.append(token)
+                    text_type_ids.append(0)
+                tokens.append("[SEP]")
+                text_type_ids.append(0)
+
+                for i in range(doc_span.length):
+                    split_token_index = doc_span.start + i
+                    token_to_orig_map[len(
+                        tokens)] = tok_to_orig_index[split_token_index]
+
+                    is_max_context = self.check_is_max_context(
+                        doc_spans, doc_span_index, split_token_index)
+                    token_is_max_context[len(tokens)] = is_max_context
+                    tokens.append(all_doc_tokens[split_token_index])
+                    text_type_ids.append(1)
+                tokens.append("[SEP]")
+                text_type_ids.append(1)
+
+                token_ids = tokenizer.convert_tokens_to_ids(tokens)
+                position_ids = list(range(len(token_ids)))
+                start_position = None
+                end_position = None
                 if phase != "predict" and not is_impossible:
-                    answer_text = " ".join(
-                        tokens[start_position:(end_position + 1)])
-                    logger.debug("start_position: %d" % (start_position))
-                    logger.debug("end_position: %d" % (end_position))
-                    logger.debug("answer: %s" %
-                                 (tokenization.printable_text(answer_text)))
+                    # For training, if our document chunk does not contain an annotation
+                    # we throw it out, since there is nothing to predict.
+                    doc_start = doc_span.start
+                    doc_end = doc_span.start + doc_span.length - 1
+                    out_of_span = False
+                    if not (tok_start_position >= doc_start
+                            and tok_end_position <= doc_end):
+                        out_of_span = True
+                    if out_of_span:
+                        start_position = 0
+                        end_position = 0
+                    else:
+                        doc_offset = len(query_tokens) + 2
+                        start_position = tok_start_position - doc_start + doc_offset
+                        end_position = tok_end_position - doc_start + doc_offset
 
-            feature = SquadInputFeatures(
-                unique_id=self.unique_id[phase],
-                example_index=self.example_id[phase],
-                doc_span_index=doc_span_index,
-                tokens=tokens,
-                token_to_orig_map=token_to_orig_map,
-                token_is_max_context=token_is_max_context,
-                token_ids=token_ids,
-                position_ids=position_ids,
-                text_type_ids=text_type_ids,
-                start_position=start_position,
-                end_position=end_position,
-                is_impossible=is_impossible)
-            features.append(feature)
-            if phase in ["dev", "test", "val", "predict"]:
-                self.all_features[phase].append(feature)
-            self.unique_id[phase] += 1
+                if phase != "predict" and is_impossible:
+                    start_position = 0
+                    end_position = 0
 
-        if phase in ["dev", "test", "val", "predict"]:
-            self.all_examples[phase].append(example)
-        self.example_id[phase] += 1
+                feature = Features(
+                    unique_id=unique_id,
+                    example_index=example_index,
+                    doc_span_index=doc_span_index,
+                    tokens=tokens,
+                    token_to_orig_map=token_to_orig_map,
+                    token_is_max_context=token_is_max_context,
+                    token_ids=token_ids,
+                    position_ids=position_ids,
+                    text_type_ids=text_type_ids,
+                    start_position=start_position,
+                    end_position=end_position,
+                    is_impossible=is_impossible)
+                features.append(feature)
+
+                unique_id += 1
+
         return features
-
-    def _prepare_batch_data(self, examples, batch_size, phase=None):
-        """generate batch records"""
-        batch_records, max_len = [], 0
-        for index, example in enumerate(examples):
-            if phase == "train":
-                self.current_example = index
-            records = self._convert_example_to_records(
-                example, self.max_seq_len, self.tokenizer, phase)
-            for record in records:
-                max_len = max(max_len, len(record.token_ids))
-                if self.in_tokens:
-                    to_append = (len(batch_records) + 1) * max_len <= batch_size
-                else:
-                    to_append = len(batch_records) < batch_size
-                if to_append:
-                    batch_records.append(record)
-                else:
-                    yield self._pad_batch_records(batch_records, phase)
-                    batch_records, max_len = [record], len(record.token_ids)
-
-        if batch_records:
-            yield self._pad_batch_records(batch_records, phase)
 
     def improve_answer_span(self, doc_tokens, input_start, input_end, tokenizer,
                             orig_answer_text):
