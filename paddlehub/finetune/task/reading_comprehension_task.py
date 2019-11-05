@@ -72,7 +72,7 @@ def _compute_softmax(scores):
     return probs
 
 
-def get_final_text(pred_text, orig_text, do_lower_case):
+def get_final_text(pred_text, orig_text, do_lower_case, is_english):
     """Project the tokenized prediction back to the original text."""
 
     # When we created the data, we kept track of the alignment between original
@@ -117,7 +117,10 @@ def get_final_text(pred_text, orig_text, do_lower_case):
     # length, we assume the characters are one-to-one aligned.
     tokenizer = tokenization.BasicTokenizer(do_lower_case=do_lower_case)
 
-    tok_text = " ".join(tokenizer.tokenize(orig_text))
+    if is_english:
+        tok_text = " ".join(tokenizer.tokenize(orig_text))
+    else:
+        tok_text = "".join(tokenizer.tokenize(orig_text))
 
     start_position = tok_text.find(pred_text)
     if start_position == -1:
@@ -277,8 +280,10 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 orig_doc_end = feature.token_to_orig_map[pred.end_index]
                 orig_tokens = example.doc_tokens[orig_doc_start:(
                     orig_doc_end + 1)]
-                tok_text = " ".join(tok_tokens)
-
+                if is_english:
+                    tok_text = " ".join(tok_tokens)
+                else:
+                    tok_text = "".join(tok_tokens)
                 # De-tokenize WordPieces that have been split off.
                 tok_text = tok_text.replace(" ##", "")
                 tok_text = tok_text.replace("##", "")
@@ -286,9 +291,13 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 # Clean whitespace
                 tok_text = tok_text.strip()
                 tok_text = " ".join(tok_text.split())
-                orig_text = " ".join(orig_tokens)
+                if is_english:
+                    orig_text = " ".join(orig_tokens)
+                else:
+                    orig_text = "".join(orig_tokens)
 
-                final_text = get_final_text(tok_text, orig_text, do_lower_case)
+                final_text = get_final_text(tok_text, orig_text, do_lower_case,
+                                            is_english)
                 if final_text in seen_predictions:
                     continue
 
@@ -563,11 +572,6 @@ class ReadingComprehensionTask(BasicTask):
                 scores = evaluate_v2.evaluate(dataset, predictions, na_probs)
             elif self.sub_task in ["cmrc2018", "drcd"]:
                 scores = cmrc2018_evaluate.get_eval(dataset, predictions)
-
-            self.data_reader.all_features[self.phase] = []
-            self.data_reader.all_examples[self.phase] = []
-            self.data_reader.unique_id[self.phase] = 1000000000
-            self.data_reader.example_id[self.phase] = 0
         return scores, avg_loss, run_speed
 
     def _predict_end_event(self, run_states):
