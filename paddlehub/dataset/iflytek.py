@@ -30,7 +30,7 @@ from paddlehub.common.logger import logger
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/iflytek.tar.gz"
 
 
-class Iflytek(HubDataset):
+class IFLYTEK(HubDataset):
     def __init__(self):
         self.dataset_dir = os.path.join(DATA_HOME, "iflytek")
         if not os.path.exists(self.dataset_dir):
@@ -90,6 +90,6 @@ class Iflytek(HubDataset):
 
 
 if __name__ == "__main__":
-    ds = Iflytek()
+    ds = IFLYTEK()
     for e in ds.get_train_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

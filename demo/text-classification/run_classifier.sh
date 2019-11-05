@@ -22,13 +22,24 @@ CKPT_DIR="./ckpt_${DATASET}"
 #       mnli_mm: dev and test in mismatched dataset.
 #      The difference can be seen in https://www.nyu.edu/projects/bowman/multinli/paper.pdf.
 #       If you are not sure which one to pick, just use mnli or mnli_m.
-# XNLI: batch_size=32, weight_decay=0, num_epoch=2, max_seq_len=128, lr=5e-5
+# XNLI: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
 #       Specify the language with an underscore like xnli_zh.
 #       ar- Arabic      bg- Bulgarian      de- German
 #       el- Greek       en- English        es- Spanish
 #       fr- French      hi- Hindi          ru- Russian
 #       sw- Swahili     th- Thai           tr- Turkish
 #       ur- Urdu        vi- Vietnamese     zh- Chinese (Simplified)
+
+# ChineseGlue  RoBERTa-wwm-large-ext
+# TNews: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
+# XNLI_zh: batch_size=16, length=128, epoch=2
+# LCQMC: batch_size=16, length=128, epoch=3
+# INEWS: batch_size=4, length=512, epoch=3
+# BQ: batch_size=16, length=128, epoch=3
+# MSRANER: batch_size=8, length=256, epoch=5, lr=2e-5
+# THUCNEWS: batch_size=32, length=512, epoch=8
+# iFLYTEK: batch_size=32, length=128, epoch=3
+
 
 python -u text_classifier.py \
                    --batch_size=24 \

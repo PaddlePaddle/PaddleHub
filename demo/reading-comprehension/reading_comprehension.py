@@ -35,7 +35,7 @@ parser.add_argument("--null_score_diff_threshold", type=float, default=0.0, help
 parser.add_argument("--n_best_size",  type=int, default=20,help="The total number of n-best predictions to generate in the ""nbest_predictions.json output file.")
 parser.add_argument("--max_answer_length",  type=int, default=30,help="The maximum length of an answer that can be generated. This is needed ""because the start and end predictions are not conditioned on one another.")
 parser.add_argument("--batch_size", type=int, default=8, help="Total examples' number in batch for training.")
-parser.add_argument("--use_pyreader", type=ast.literal_eval, default=True, help="Whether use pyreader to feed data.")
+parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=True, help="Whether use data parallel.")
 parser.add_argument("--dataset", type=str, default="squad", help="Support squad, squad2.0, drcd and cmrc2018")
 args = parser.parse_args()
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         log_interval=10,
-        eval_interval=100,
+        eval_interval=300,
         use_pyreader=args.use_pyreader,
         use_data_parallel=args.use_data_parallel,
         save_ckpt_interval=1000,

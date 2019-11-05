@@ -617,21 +617,3 @@ class ReadingComprehensionTask(BasicTask):
         logger.info("PaddleHub predict finished.")
 
         logger.info("You can see the prediction in %s" % output_prediction_file)
-
-    def eval(self, phase="dev", load_best_model=False):
-        # Warning: DO NOT use eval(load_best_model=True) in finetune_and_eval
-        # It will cause trainer unable to continue training from checkpoint after eval
-        # More important, The model should evaluate current performance during training.
-
-        # pyreader will drop the last one batch if its size is too small
-        # so we just use _run_with_data_feeder in this task
-        with self.phase_guard(phase=phase):
-            if load_best_model:
-                self.init_if_load_best_model()
-            else:
-                self.init_if_necessary()
-            self._eval_start_event()
-            with fluid.program_guard(self.main_program, self.startup_program):
-                run_states = self._run_with_data_feeder(do_eval=False)
-            self._eval_end_event(run_states)
-            return run_states

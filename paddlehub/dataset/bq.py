@@ -30,7 +30,7 @@ from paddlehub.common.logger import logger
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/bq.tar.gz"
 
 
-class Bq(HubDataset):
+class BQ(HubDataset):
     def __init__(self):
         self.dataset_dir = os.path.join(DATA_HOME, "bq")
         if not os.path.exists(self.dataset_dir):
@@ -87,6 +87,6 @@ class Bq(HubDataset):
 
 
 if __name__ == "__main__":
-    ds = Bq()
+    ds = BQ()
     for e in ds.get_train_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
