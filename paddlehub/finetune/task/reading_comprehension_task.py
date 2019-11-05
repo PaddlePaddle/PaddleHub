@@ -207,6 +207,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
             result = unique_id_to_result[feature.unique_id]
             start_indexes = _get_best_indexes(result.start_logits, n_best_size)
             end_indexes = _get_best_indexes(result.end_logits, n_best_size)
+
             # if we could have irrelevant answers, get the min score of irrelevant
             if version_2_with_negative:
                 feature_null_score = result.start_logits[0] + result.end_logits[
@@ -216,6 +217,10 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                     min_null_feature_index = feature_index
                     null_start_logit = result.start_logits[0]
                     null_end_logit = result.end_logits[0]
+
+            print(feature)
+            print(start_indexes)
+            print(end_indexes)
             for start_index in start_indexes:
                 for end_index in end_indexes:
                     # We could hypothetically create invalid predictions, e.g., predict
@@ -262,6 +267,8 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
 
         seen_predictions = {}
         nbest = []
+        if not prelim_predictions:
+            print("not prelim_predictions:", example_index, example)
         for pred in prelim_predictions:
             if len(nbest) >= n_best_size:
                 break
@@ -273,10 +280,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 orig_doc_end = feature.token_to_orig_map[pred.end_index]
                 orig_tokens = example.doc_tokens[orig_doc_start:(
                     orig_doc_end + 1)]
-                if is_english:
-                    tok_text = " ".join(tok_tokens)
-                else:
-                    tok_text = "".join(tok_tokens)
+                tok_text = " ".join(tok_tokens)
 
                 # De-tokenize WordPieces that have been split off.
                 tok_text = tok_text.replace(" ##", "")
@@ -285,10 +289,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 # Clean whitespace
                 tok_text = tok_text.strip()
                 tok_text = " ".join(tok_text.split())
-                if is_english:
-                    orig_text = " ".join(orig_tokens)
-                else:
-                    orig_text = "".join(orig_tokens)
+                orig_text = " ".join(orig_tokens)
 
                 final_text = get_final_text(tok_text, orig_text, do_lower_case)
                 if final_text in seen_predictions:

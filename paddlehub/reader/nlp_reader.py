@@ -917,6 +917,8 @@ class SquadInputFeatures(object):
         s += "start_position: %s " % self.start_position
         s += "end_position: %s " % self.end_position
         s += "is_impossible: %s " % self.is_impossible
+        # s += "tokens: %s" % self.tokens
+        # s += "token_to_orig_map %s" % self.token_to_orig_map
         return s
 
 
@@ -1060,13 +1062,13 @@ class ReadingComprehensionReader(BaseReader):
 
         return wrapper
 
-    def _convert_example_to_record(self,
-                                   example,
-                                   max_seq_length,
-                                   tokenizer,
-                                   phase=None):
+    def _convert_example_to_records(self,
+                                    example,
+                                    max_seq_length,
+                                    tokenizer,
+                                    phase=None):
         """Loads a data file into a list of `InputBatch`s."""
-
+        features = []
         query_tokens = tokenizer.tokenize(example.question_text)
 
         if len(query_tokens) > self.max_query_length:
@@ -1212,14 +1214,37 @@ class ReadingComprehensionReader(BaseReader):
                 start_position=start_position,
                 end_position=end_position,
                 is_impossible=is_impossible)
-
+            features.append(feature)
             if phase in ["dev", "test", "val", "predict"]:
                 self.all_features[phase].append(feature)
                 self.all_examples[phase].append(example)
             self.unique_id[phase] += 1
             self.example_id[phase] += 1
 
-            return feature
+        return features
+
+    def _prepare_batch_data(self, examples, batch_size, phase=None):
+        """generate batch records"""
+        batch_records, max_len = [], 0
+        for index, example in enumerate(examples):
+            if phase == "train":
+                self.current_example = index
+            records = self._convert_example_to_records(
+                example, self.max_seq_len, self.tokenizer, phase)
+            for record in records:
+                max_len = max(max_len, len(record.token_ids))
+                if self.in_tokens:
+                    to_append = (len(batch_records) + 1) * max_len <= batch_size
+                else:
+                    to_append = len(batch_records) < batch_size
+                if to_append:
+                    batch_records.append(record)
+                else:
+                    yield self._pad_batch_records(batch_records, phase)
+                    batch_records, max_len = [record], len(record.token_ids)
+
+        if batch_records:
+            yield self._pad_batch_records(batch_records, phase)
 
     def improve_answer_span(self, doc_tokens, input_start, input_end, tokenizer,
                             orig_answer_text):

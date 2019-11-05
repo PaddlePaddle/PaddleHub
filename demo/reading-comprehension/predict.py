@@ -125,5 +125,5 @@ if __name__ == '__main__':
         config=config)
 
     # Data to be predicted
-    data = dataset.dev_examples[:80]
+    data = dataset.dev_examples[97:98]
     reading_comprehension_task.predict(data=data)
