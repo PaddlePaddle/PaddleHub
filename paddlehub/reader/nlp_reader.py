@@ -1217,10 +1217,11 @@ class ReadingComprehensionReader(BaseReader):
             features.append(feature)
             if phase in ["dev", "test", "val", "predict"]:
                 self.all_features[phase].append(feature)
-                self.all_examples[phase].append(example)
             self.unique_id[phase] += 1
-            self.example_id[phase] += 1
 
+        if phase in ["dev", "test", "val", "predict"]:
+            self.all_examples[phase].append(example)
+        self.example_id[phase] += 1
         return features
 
     def _prepare_batch_data(self, examples, batch_size, phase=None):

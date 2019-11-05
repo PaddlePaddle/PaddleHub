@@ -218,9 +218,6 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                     null_start_logit = result.start_logits[0]
                     null_end_logit = result.end_logits[0]
 
-            print(feature)
-            print(start_indexes)
-            print(end_indexes)
             for start_index in start_indexes:
                 for end_index in end_indexes:
                     # We could hypothetically create invalid predictions, e.g., predict
@@ -268,7 +265,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
         seen_predictions = {}
         nbest = []
         if not prelim_predictions:
-            print("not prelim_predictions:", example_index, example)
+            logger.warning(("not prelim_predictions:", example.qas_id))
         for pred in prelim_predictions:
             if len(nbest) >= n_best_size:
                 break
