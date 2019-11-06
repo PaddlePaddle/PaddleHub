@@ -1084,7 +1084,7 @@ class ReadingComprehensionReader(BaseReader):
 
         def wrapper():
             if shuffle:
-                np.random.shuffle(examples)
+                np.random.shuffle(features)
 
             for batch_data in self._prepare_batch_data(
                     features, batch_size, phase=phase):
