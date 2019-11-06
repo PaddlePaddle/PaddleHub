@@ -38,7 +38,7 @@ CKPT_DIR="./ckpt_${DATASET}"
 # BQ: batch_size=16, length=128, epoch=3
 # MSRANER: batch_size=8, length=256, epoch=5, lr=2e-5
 # THUCNEWS: batch_size=32, length=512, epoch=8
-# iFLYTEK: batch_size=32, length=128, epoch=3
+# iFLYTEK: batch_size=8, length=512, epoch=3, lr=2.5e-5
 
 
 python -u text_classifier.py \

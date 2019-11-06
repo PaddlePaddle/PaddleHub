@@ -65,7 +65,7 @@ class IFLYTEK(HubDataset):
         return self.test_examples
 
     def get_labels(self):
-        return [str(i) for i in range(14)]
+        return [str(i) for i in range(119)]
 
     @property
     def num_labels(self):
@@ -82,7 +82,7 @@ class IFLYTEK(HubDataset):
                 data = line.strip().split("_!_")
                 try:
                     example = InputExample(
-                        guid=i, label=data[0], text_a=data[1], text_b=None)
+                        guid=i, label=str(data[0]), text_a=data[1], text_b=None)
                     examples.append(example)
                 except:
                     pass

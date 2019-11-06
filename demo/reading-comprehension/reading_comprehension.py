@@ -36,7 +36,7 @@ parser.add_argument("--n_best_size",  type=int, default=20,help="The total numbe
 parser.add_argument("--max_answer_length",  type=int, default=30,help="The maximum length of an answer that can be generated. This is needed ""because the start and end predictions are not conditioned on one another.")
 parser.add_argument("--batch_size", type=int, default=8, help="Total examples' number in batch for training.")
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
-parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=True, help="Whether use data parallel.")
+parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
 parser.add_argument("--dataset", type=str, default="squad", help="Support squad, squad2.0, drcd and cmrc2018")
 args = parser.parse_args()
 # yapf: enable.

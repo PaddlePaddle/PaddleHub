@@ -942,8 +942,8 @@ class ReadingComprehensionReader(BaseReader):
         self.in_tokens = False
         # self.all_examples[phase] and self.all_features[phase] will be used
         # in write_prediction in reading_comprehension_task
-        self.all_features = {"dev": [], "test": [], "predict": []}
-        self.all_examples = {"dev": [], "test": [], "predict": []}
+        self.all_features = {"train": [], "dev": [], "test": [], "predict": []}
+        self.all_examples = {"train": [], "dev": [], "test": [], "predict": []}
 
         np.random.seed(random_seed)
 
@@ -1047,34 +1047,40 @@ class ReadingComprehensionReader(BaseReader):
                        phase='train',
                        shuffle=False,
                        data=None):
-        if phase == 'train':
-            shuffle = True
-            examples = self.get_train_examples()
-        elif phase == 'dev':
-            shuffle = False
-            examples = self.get_dev_examples()
-        elif phase == 'test':
-            shuffle = False
-            examples = self.get_test_examples()
-        elif phase == 'predict':
-            shuffle = False
-            examples = data
+        # we need all_examples and  all_features in write_prediction in reading_comprehension_task
+        # we can also use all_examples and all_features to avoid duplicate long-time preprocessing
+        examples = None
+        if self.all_examples[phase]:
+            examples = self.all_examples[phase]
         else:
-            raise ValueError(
-                "Unknown phase, which should be in ['train', 'dev', 'test', 'predict']."
-            )
+            if phase == 'train':
+                examples = self.get_train_examples()
+            elif phase == 'dev':
+                examples = self.get_dev_examples()
+            elif phase == 'test':
+                examples = self.get_test_examples()
+            elif phase == 'predict':
+                examples = data
+            else:
+                raise ValueError(
+                    "Unknown phase, which should be in ['train', 'dev', 'test', 'predict']."
+                )
+            self.all_examples[phase] = examples
+        shuffle = True if phase == 'train' else False
 
-        # self.num_examples[phase] use in strategy.py to show the total steps
         # As reading comprehension task will divide a long context into several doc_spans and then get multiple features
         # To get the real total steps, we need to know the features' length
         # So we use _convert_examples_to_records rather than _convert_example_to_record in this task
-        features = self._convert_examples_to_records(examples, self.max_seq_len,
-                                                     self.tokenizer, phase)
-        self.num_examples[phase] = len(features)
-
-        if phase in ["dev", "test", "val", "predict"]:
-            self.all_examples[phase] = examples
+        if self.all_features[phase]:
+            features = self.all_features[phase]
+        else:
+            features = self._convert_examples_to_records(
+                examples, self.max_seq_len, self.tokenizer, phase)
             self.all_features[phase] = features
+
+        # self.num_examples["train"] use in strategy.py to show the total steps,
+        # we need to cover it with correct len(features)
+        self.num_examples[phase] = len(features)
 
         def wrapper():
             if shuffle:
