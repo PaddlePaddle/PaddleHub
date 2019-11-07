@@ -21,7 +21,9 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
   * [PaddleHub超参优化功能AutoDL Finetuner使用示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/autofinetune)
 * 引入『**模型即软件**』的设计理念，通过Python API或者命令行实现一键预测，更方便地应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
-
+* 一键Module服务化部署 - HubServing
+  * [PaddleHub-Serving一键服务部署](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)
+  * [使用示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/serving)
 
 ## 目录
 
