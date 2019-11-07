@@ -106,7 +106,6 @@ class HubServer(object):
             if resource_type:
                 payload['type'] = resource_type
             api_url = srv_utils.uri_path(self.get_server_url(), 'search')
-            print(payload)
             r = srv_utils.hub_request(api_url, payload, extra=extra)
             if r['status'] == 0 and len(r['data']) > 0:
                 return [(item['name'], item['type'], item['version'],
