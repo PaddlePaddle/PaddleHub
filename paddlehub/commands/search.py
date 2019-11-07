@@ -54,7 +54,7 @@ class SearchCommand(BaseCommand):
             titles=["ResourceName", "Type", "Version", "Summary"],
             placeholders=placeholders)
         if len(resource_list) == 0:
-            if default_hub_server.server_check() is False:
+            if default_hub_server._server_check() is False:
                 print(
                     "Request Hub-Server unsuccessfully, please check your network."
                 )

@@ -269,4 +269,8 @@ class HubServer(object):
             print("Request Hub-Server unsuccessfully.")
 
 
+def server_check():
+    default_hub_server.server_check()
+
+
 default_hub_server = HubServer()
