@@ -8,7 +8,7 @@ $ hub serving start -m deeplabv3p_xception65_humanseg
 ```  
 
 ## python脚本  
-```
+```shell
 $ python deeplabv3p_xception65_humanseg_serving_demo.py
 ```
 

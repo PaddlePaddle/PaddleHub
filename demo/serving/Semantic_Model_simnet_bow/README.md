@@ -1,6 +1,6 @@
 ## 数据格式  
 input: {"text1": [text_a1, text_a2, ...], "text2": [text_b1, text_b2, ...]}  
-output: {"result":[result_1, result_2, ...]}  
+output: {"results":[result_1, result_2, ...]}  
 
 ## Serving快速启动命令  
 ```shell
