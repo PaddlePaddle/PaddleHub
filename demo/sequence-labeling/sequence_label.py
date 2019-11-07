@@ -37,7 +37,7 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     # Load Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
+    module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
@@ -69,6 +69,9 @@ if __name__ == '__main__':
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
+        log_interval=10,
+        eval_interval=300,
+        save_ckpt_interval=10000,
         use_data_parallel=args.use_data_parallel,
         use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,

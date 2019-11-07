@@ -88,5 +88,5 @@ class BQ(HubDataset):
 
 if __name__ == "__main__":
     ds = BQ()
-    for e in ds.get_train_examples()[:10]:
+    for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

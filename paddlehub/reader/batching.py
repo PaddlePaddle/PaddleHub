@@ -66,7 +66,7 @@ def prepare_batch_data(insts,
         return_pos=False,
         return_input_mask=False)
 
-    return_list = [src_id, sent_id, pos_id, self_input_mask] + labels_list
+    return_list = [src_id, pos_id, sent_id, self_input_mask] + labels_list
 
     return return_list if len(return_list) > 1 else return_list[0]
 

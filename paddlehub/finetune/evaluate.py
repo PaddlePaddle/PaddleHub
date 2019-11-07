@@ -17,18 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import time
-
-import paddle.fluid as fluid
 import numpy as np
-
-from paddlehub.common.logger import logger
-import paddlehub as hub
-
-import sys
-import re
-import string
-from collections import Counter
 
 
 # Sequence label evaluation functions

@@ -5,11 +5,36 @@ export CUDA_VISIBLE_DEVICES=0
 DATASET="chnsenticorp"
 CKPT_DIR="./ckpt_${DATASET}"
 
+python -u text_classifier.py \
+                   --batch_size=24 \
+                   --use_gpu=True \
+                   --dataset=${DATASET} \
+                   --checkpoint_dir=${CKPT_DIR} \
+                   --learning_rate=5e-5 \
+                   --weight_decay=0.01 \
+                   --max_seq_len=128 \
+                   --num_epoch=3 \
+                   --use_pyreader=True \
+                   --use_data_parallel=True \
+                   --use_taskid=False
+
 # Recommending hyper parameters for difference task
+# for ChineseGLUE:
+# TNews: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
+# LCQMC: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
+# XNLI_zh: batch_size=32, weight_decay=0, num_epoch=2, max_seq_len=128, lr=5e-5
+# INEWS: batch_size=4, weight_decay=0, num_epoch=3, max_seq_len=512, lr=5e-5
+# DRCD: see demo: reading-comprehension
+# CMRC2018: see demo: reading-comprehension
+# BQ: batch_size=32, weight_decay=0, num_epoch=2, max_seq_len=100, lr=1e-5
+# MSRANER: see demo: sequence-labeling
+# THUCNEWS: batch_size=8, weight_decay=0, num_epoch=2, max_seq_len=512, lr=5e-5
+# IFLYTEKDATA: batch_size=16, weight_decay=0, num_epoch=5, max_seq_len=256, lr=1e-5
+
+# for other tasks:
 # ChnSentiCorp: batch_size=24, weight_decay=0.01, num_epoch=3, max_seq_len=128, lr=5e-5
 # NLPCC_DBQA: batch_size=8, weight_decay=0.01, num_epoch=3, max_seq_len=512, lr=2e-5
 # LCQMC: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=2e-5
-# TNews: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
 # QQP: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
 # QNLI: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
 # SST-2: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
@@ -29,27 +54,3 @@ CKPT_DIR="./ckpt_${DATASET}"
 #       fr- French      hi- Hindi          ru- Russian
 #       sw- Swahili     th- Thai           tr- Turkish
 #       ur- Urdu        vi- Vietnamese     zh- Chinese (Simplified)
-
-# ChineseGlue  RoBERTa-wwm-large-ext
-# TNews: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
-# XNLI_zh: batch_size=16, length=128, epoch=2
-# LCQMC: batch_size=16, length=128, epoch=3
-# INEWS: batch_size=4, length=512, epoch=3
-# BQ: batch_size=16, length=128, epoch=3
-# MSRANER: batch_size=8, length=256, epoch=5, lr=2e-5
-# THUCNEWS: batch_size=32, length=512, epoch=8
-# iFLYTEK: batch_size=8, length=512, epoch=3, lr=2.5e-5
-
-
-python -u text_classifier.py \
-                   --batch_size=24 \
-                   --use_gpu=True \
-                   --dataset=${DATASET} \
-                   --checkpoint_dir=${CKPT_DIR} \
-                   --learning_rate=5e-5 \
-                   --weight_decay=0.01 \
-                   --max_seq_len=128 \
-                   --num_epoch=3 \
-                   --use_pyreader=True \
-                   --use_data_parallel=True \
-                   --use_taskid=False \

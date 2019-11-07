@@ -132,7 +132,7 @@ if __name__ == '__main__':
         metrics_choices = ["acc"]
     elif args.dataset.lower().startswith("xnli"):
         dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
-        module = hub.Module(name="bert_multi_cased_L-12_H-768_A-12")
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
         metrics_choices = ["acc"]
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)

@@ -91,9 +91,9 @@ if __name__ == '__main__':
     config = hub.RunConfig(
         log_interval=10,
         eval_interval=300,
+        save_ckpt_interval=10000,
         use_pyreader=args.use_pyreader,
         use_data_parallel=args.use_data_parallel,
-        save_ckpt_interval=1000,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
