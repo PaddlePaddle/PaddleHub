@@ -22,17 +22,6 @@ import os
 import base64
 import logging
 
-nlp_module_method = {
-    "lac": "predict_lexical_analysis",
-    "simnet_bow": "predict_sentiment_analysis",
-    "lm_lstm": "predict_pretrained_model",
-    "senta_lstm": "predict_pretrained_model",
-    "senta_gru": "predict_pretrained_model",
-    "senta_cnn": "predict_pretrained_model",
-    "senta_bow": "predict_pretrained_model",
-    "senta_bilstm": "predict_pretrained_model",
-    "emotion_detection_textcnn": "predict_pretrained_model"
-}
 cv_module_method = {
     "vgg19_imagenet": "predict_classification",
     "vgg16_imagenet": "predict_classification",
@@ -65,63 +54,33 @@ cv_module_method = {
 }
 
 
-def predict_sentiment_analysis(module, input_text, batch_size, extra=None):
-    global use_gpu
+def predict_nlp(module, input_text, req_id, batch_size, extra=None):
     method_name = module.desc.attr.map.data['default_signature'].s
     predict_method = getattr(module, method_name)
     try:
-        data = input_text[0]
-        data.update(input_text[1])
-        results = predict_method(
-            data=data, use_gpu=use_gpu, batch_size=batch_size)
-    except Exception as err:
-        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        print(curr, " - ", err)
-        return {"result": "Please check data format!"}
-    return results
-
-
-def predict_pretrained_model(module, input_text, batch_size, extra=None):
-    global use_gpu
-    method_name = module.desc.attr.map.data['default_signature'].s
-    predict_method = getattr(module, method_name)
-    try:
-        data = {"text": input_text}
-        results = predict_method(
-            data=data, use_gpu=use_gpu, batch_size=batch_size)
-    except Exception as err:
-        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        print(curr, " - ", err)
-        return {"result": "Please check data format!"}
-    return results
-
-
-def predict_lexical_analysis(module, input_text, batch_size, extra=[]):
-    global use_gpu
-    method_name = module.desc.attr.map.data['default_signature'].s
-    predict_method = getattr(module, method_name)
-    data = {"text": input_text}
-    try:
-        if extra == []:
-            results = predict_method(
-                data=data, use_gpu=use_gpu, batch_size=batch_size)
-        else:
-            user_dict = extra[0]
-            results = predict_method(
+        data = input_text
+        if module.name == "lac" and extra.get("user_dict", []) != []:
+            res = predict_method(
                 data=data,
-                user_dict=user_dict,
+                user_dict=extra.get("user_dict", [])[0],
                 use_gpu=use_gpu,
                 batch_size=batch_size)
-            for path in extra:
-                os.remove(path)
+        else:
+            res = predict_method(
+                data=data, use_gpu=use_gpu, batch_size=batch_size)
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
-        return {"result": "Please check data format!"}
-    return results
+        return {"results": "Please check data format!"}
+    finally:
+        user_dict = extra.get("user_dict", [])
+        for item in user_dict:
+            if os.path.exists(item):
+                os.remove(item)
+    return {"results": res}
 
 
-def predict_classification(module, input_img, batch_size):
+def predict_classification(module, input_img, id, batch_size, extra={}):
     global use_gpu
     method_name = module.desc.attr.map.data['default_signature'].s
     predict_method = getattr(module, method_name)
@@ -133,46 +92,50 @@ def predict_classification(module, input_img, batch_size):
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
         return {"result": "Please check data format!"}
+    finally:
+        for item in input_img["image"]:
+            if os.path.exists(item):
+                os.remove(item)
     return results
 
 
 def predict_gan(module, input_img, id, batch_size, extra={}):
-    # special
     output_folder = module.name.split("_")[0] + "_" + "output"
     global use_gpu
     method_name = module.desc.attr.map.data['default_signature'].s
     predict_method = getattr(module, method_name)
     try:
+        extra.update({"image": input_img})
         input_img = {"image": input_img}
         results = predict_method(
-            data=input_img, use_gpu=use_gpu, batch_size=batch_size)
+            data=extra, use_gpu=use_gpu, batch_size=batch_size)
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
         return {"result": "Please check data format!"}
-    base64_list = []
-    results_pack = []
-    input_img = input_img.get("image", [])
-    for index in range(len(input_img)):
-        # special
-        item = input_img[index]
-        with open(os.path.join(output_folder, item), "rb") as fp:
-            # special
-            b_head = "data:image/" + item.split(".")[-1] + ";base64"
-            b_body = base64.b64encode(fp.read())
-            b_body = str(b_body).replace("b'", "").replace("'", "")
-            b_img = b_head + "," + b_body
-            base64_list.append(b_img)
-            results[index] = results[index].replace(id + "_", "")
-            results[index] = {"path": results[index]}
-            results[index].update({"base64": b_img})
-            results_pack.append(results[index])
-        os.remove(item)
-        os.remove(os.path.join(output_folder, item))
+    finally:
+        base64_list = []
+        results_pack = []
+        input_img = input_img.get("image", [])
+        for index in range(len(input_img)):
+            item = input_img[index]
+            output_file = results[index].split(" ")[-1]
+            with open(output_file, "rb") as fp:
+                b_head = "data:image/" + item.split(".")[-1] + ";base64"
+                b_body = base64.b64encode(fp.read())
+                b_body = str(b_body).replace("b'", "").replace("'", "")
+                b_img = b_head + "," + b_body
+                base64_list.append(b_img)
+                results[index] = results[index].replace(id + "_", "")
+                results[index] = {"path": results[index]}
+                results[index].update({"base64": b_img})
+                results_pack.append(results[index])
+            os.remove(item)
+            os.remove(output_file)
     return results_pack
 
 
-def predict_object_detection(module, input_img, id, batch_size):
+def predict_object_detection(module, input_img, id, batch_size, extra={}):
     output_folder = "output"
     global use_gpu
     method_name = module.desc.attr.map.data['default_signature'].s
@@ -185,28 +148,28 @@ def predict_object_detection(module, input_img, id, batch_size):
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
         return {"result": "Please check data format!"}
-    base64_list = []
-    results_pack = []
-    input_img = input_img.get("image", [])
-    for index in range(len(input_img)):
-        item = input_img[index]
-        with open(os.path.join(output_folder, item), "rb") as fp:
-            b_head = "data:image/" + item.split(".")[-1] + ";base64"
-            b_body = base64.b64encode(fp.read())
-            b_body = str(b_body).replace("b'", "").replace("'", "")
-            b_img = b_head + "," + b_body
-            base64_list.append(b_img)
-            results[index]["path"] = results[index]["path"].replace(
-                id + "_", "")
-            results[index].update({"base64": b_img})
-            results_pack.append(results[index])
-        os.remove(item)
-        os.remove(os.path.join(output_folder, item))
+    finally:
+        base64_list = []
+        results_pack = []
+        input_img = input_img.get("image", [])
+        for index in range(len(input_img)):
+            item = input_img[index]
+            with open(os.path.join(output_folder, item), "rb") as fp:
+                b_head = "data:image/" + item.split(".")[-1] + ";base64"
+                b_body = base64.b64encode(fp.read())
+                b_body = str(b_body).replace("b'", "").replace("'", "")
+                b_img = b_head + "," + b_body
+                base64_list.append(b_img)
+                results[index]["path"] = results[index]["path"].replace(
+                    id + "_", "")
+                results[index].update({"base64": b_img})
+                results_pack.append(results[index])
+            os.remove(item)
+            os.remove(os.path.join(output_folder, item))
     return results_pack
 
 
-def predict_semantic_segmentation(module, input_img, id, batch_size):
-    # special
+def predict_semantic_segmentation(module, input_img, id, batch_size, extra={}):
     output_folder = module.name.split("_")[-1] + "_" + "output"
     global use_gpu
     method_name = module.desc.attr.map.data['default_signature'].s
@@ -219,30 +182,30 @@ def predict_semantic_segmentation(module, input_img, id, batch_size):
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
         return {"result": "Please check data format!"}
-    base64_list = []
-    results_pack = []
-    input_img = input_img.get("image", [])
-    for index in range(len(input_img)):
-        # special
-        item = input_img[index]
-        output_file_path = ""
-        with open(results[index]["processed"], "rb") as fp:
+    finally:
+        base64_list = []
+        results_pack = []
+        input_img = input_img.get("image", [])
+        for index in range(len(input_img)):
             # special
-            b_head = "data:image/png;base64"
-            b_body = base64.b64encode(fp.read())
-            b_body = str(b_body).replace("b'", "").replace("'", "")
-            b_img = b_head + "," + b_body
-            base64_list.append(b_img)
-            output_file_path = results[index]["processed"]
-            results[index]["origin"] = results[index]["origin"].replace(
-                id + "_", "")
-            results[index]["processed"] = results[index]["processed"].replace(
-                id + "_", "")
-            results[index].update({"base64": b_img})
-            results_pack.append(results[index])
-        os.remove(item)
-        if output_file_path != "":
-            os.remove(output_file_path)
+            item = input_img[index]
+            output_file_path = ""
+            with open(results[index]["processed"], "rb") as fp:
+                b_head = "data:image/png;base64"
+                b_body = base64.b64encode(fp.read())
+                b_body = str(b_body).replace("b'", "").replace("'", "")
+                b_img = b_head + "," + b_body
+                base64_list.append(b_img)
+                output_file_path = results[index]["processed"]
+                results[index]["origin"] = results[index]["origin"].replace(
+                    id + "_", "")
+                results[index]["processed"] = results[index][
+                    "processed"].replace(id + "_", "")
+                results[index].update({"base64": b_img})
+                results_pack.append(results[index])
+            os.remove(item)
+            if output_file_path != "":
+                os.remove(output_file_path)
     return results_pack
 
 
@@ -274,14 +237,18 @@ def create_app():
             module_info.update({"cv_module": [{"Choose...": "Choose..."}]})
             for item in cv_module:
                 module_info["cv_module"].append({item: item})
-        module_info.update({"Choose...": [{"请先选择分类": "Choose..."}]})
         return {"module_info": module_info}
 
     @app_instance.route("/predict/image/<module_name>", methods=["POST"])
     def predict_image(module_name):
+        if request.path.split("/")[-1] not in cv_module:
+            return {"error": "Module {} is not available.".format(module_name)}
         req_id = request.data.get("id")
         global use_gpu, batch_size_dict
         img_base64 = request.form.getlist("image")
+        extra_info = {}
+        for item in list(request.form.keys()):
+            extra_info.update({item: request.form.getlist(item)})
         file_name_list = []
         if img_base64 != []:
             for item in img_base64:
@@ -310,36 +277,34 @@ def create_app():
             module_type = module.type.split("/")[-1].replace("-", "_").lower()
             predict_func = eval("predict_" + module_type)
         batch_size = batch_size_dict.get(module_name, 1)
-        results = predict_func(module, file_name_list, req_id, batch_size)
+        results = predict_func(module, file_name_list, req_id, batch_size,
+                               extra_info)
         r = {"results": str(results)}
         return r
 
     @app_instance.route("/predict/text/<module_name>", methods=["POST"])
     def predict_text(module_name):
+        if request.path.split("/")[-1] not in nlp_module:
+            return {"error": "Module {} is not available.".format(module_name)}
         req_id = request.data.get("id")
-        global use_gpu
-        if module_name == "simnet_bow":
-            text_1 = request.form.getlist("text_1")
-            text_2 = request.form.getlist("text_2")
-            data = [{"text_1": text_1}, {"text_2": text_2}]
-        else:
-            data = request.form.getlist("text")
-        file = request.files.getlist("user_dict")
+        inputs = {}
+        for item in list(request.form.keys()):
+            inputs.update({item: request.form.getlist(item)})
+        files = {}
+        for file_key in list(request.files.keys()):
+            files[file_key] = []
+            for file in request.files.getlist(file_key):
+                file_name = req_id + "_" + file.filename
+                files[file_key].append(file_name)
+                file.save(file_name)
         module = TextModelService.get_module(module_name)
-        predict_func_name = nlp_module_method.get(module_name, "")
-        if predict_func_name != "":
-            predict_func = eval(predict_func_name)
-        else:
-            module_type = module.type.split("/")[-1].replace("-", "_").lower()
-            predict_func = eval("predict_" + module_type)
-        file_list = []
-        for item in file:
-            file_path = req_id + "_" + item.filename
-            file_list.append(file_path)
-            item.save(file_path)
-        batch_size = batch_size_dict.get(module_name, 1)
-        results = predict_func(module, data, batch_size, file_list)
-        return {"results": results}
+        results = predict_nlp(
+            module=module,
+            input_text=inputs,
+            req_id=req_id,
+            batch_size=batch_size_dict.get(module_name, 1),
+            extra=files)
+        return results
 
     return app_instance
 
