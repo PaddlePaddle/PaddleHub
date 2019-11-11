@@ -90,7 +90,7 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 通过以下命令方式：
 ```shell
 $ OUTPUT=result/
-$ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=5 --round=10
+$ hub autofinetune train.py --param_file=hparam.yaml --gpu=1,2 --popsize=5 --round=10
  --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2
 ```
 
@@ -98,7 +98,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 > `--param_file`: 必填，待优化的超参数信息yaml文件，即上述[hparam.yaml](#hparam.yaml)。
 
-> `--cuda`: 必填，设置运行程序的可用GPU卡号，list类型，中间以逗号隔开，不能有空格，默认为[‘0’]
+> `--gpu`: 必填，设置运行程序的可用GPU卡号，中间以逗号隔开，不能有空格
 
 > `--popsize`: 可选，设置程序运行每轮产生的超参组合数，默认为5
 
@@ -106,7 +106,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 > `--output_dir`: 可选，设置程序运行输出结果存放目录，不指定该选项参数时，在当前运行路径下生成存放程序运行输出信息的文件夹
 
-> `--evaluate_choice`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased
+> `--evaluator`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased
 
 > `--tuning_strategy`: 可选，设置自动优化超参算法，可选hazero和pshe2，默认为pshe2
 
@@ -114,7 +114,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 * 进行超参搜索时，一共会进行n轮(--round指定)，每轮产生m组超参(--popsize指定)进行搜索。上一轮的优化结果决定下一轮超参数调整方向
 
-* 当指定GPU数量不足以同时跑一轮时，AutoDL Finetuner功能自动实现排队为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，cuda=['0','1','2','3']，则每搜索一轮，AutoDL Finetuner自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，则可以避免这种情况的出现。
+* 当指定GPU数量不足以同时跑一轮时，AutoDL Finetuner功能自动实现排队为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，gpu=0,1,2,3，则每搜索一轮，AutoDL Finetuner自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，则可以避免这种情况的出现。
 
 ## 四、目录结构
 
@@ -165,8 +165,8 @@ PaddleHub AutoDL Finetuner 支持将train.py中的args其余不需要搜索的�
 
 ```shell
 $ OUTPUT=result/
-$ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=5 --round=10
- --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2 max_seq_len 128
+$ hub autofinetune train.py --param_file=hparam.yaml --gpu=0,1 --popsize=5 --round=10
+ --output_dir=${OUTPUT} --evaluator=fulltrail --tuning_strategy=pshe2 max_seq_len 128
 ```
 
 ## 七、其他
