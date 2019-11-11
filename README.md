@@ -82,22 +82,16 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 除了上述三类模型外，PaddleHub还发布了语言模型、语义模型、图像分类、生成模型、视频分类等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
 
-同时，我们在AI Studio和AIBook上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
-* ERNIE文本分类:
-  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79380)
-  * [AI Book](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_txt_cls)
-* ERNIE序列标注:
-  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79377)
-  * [AI Book](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_seq_label)
-* ELMo文本分类:
-  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79400)
-  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/elmo_txt_cls)
-* senta情感分类:
-  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79398)
-  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/senta_bilstm)
-* 图像分类:
-  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79378)
-  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/img_cls)
+同时，我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
+
+|类别|AIStudio链接|
+|-|-|
+|ERNIE文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79380)|
+|ERNIE序列标注|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79377)|
+|ELMo文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79400)|
+|senta情感分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79398)|
+|图像分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79378)|
+
 
 ## 教程
 
