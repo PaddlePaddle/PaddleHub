@@ -90,7 +90,7 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 通过以下命令方式：
 ```shell
 $ OUTPUT=result/
-$ hub autofinetune train.py --param_file=hparam.yaml --gpu=1,2 --popsize=5 --round=10
+$ hub autofinetune train.py --param_file=hparam.yaml --gpu=0,1 --popsize=5 --round=10
  --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2
 ```
 
