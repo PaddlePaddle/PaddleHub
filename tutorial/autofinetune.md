@@ -85,7 +85,7 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 
 ## 三、启动方式
 
-**确认安装PaddleHub版本在1.2.1以上, 同时PaddleHub AutoDL Finetuner功能要求至少有一张GPU显卡可用。**
+**确认安装PaddleHub版本在1.2.1, 同时PaddleHub AutoDL Finetuner功能要求至少有一张GPU显卡可用。**
 
 通过以下命令方式：
 ```shell
