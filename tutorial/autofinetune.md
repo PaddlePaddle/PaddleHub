@@ -70,9 +70,9 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 
 * 超参评估策略选择PopulationBased时，train.py须包含选项参数model_path，自动从model_path指定的路径恢复模型
 
-* train.py须输出模型的评价效果（建议使用验证集或者测试集上的评价效果），输出以“AutoFinetuneEval"开始，与评价效果之间以“\t”分开，如
+* train.py须反馈模型的评价效果（建议使用验证集或者测试集上的评价效果），通过调用`report_final_result`接口反馈，如
  ```python
- print("AutoFinetuneEval"+"\t" + str(eval_acc))
+ hub.report_final_result(eval_avg_score["acc"])
  ```
 
 * 输出的评价效果取值范围应为`(-∞, 1]`，取值越高，表示效果越好。
