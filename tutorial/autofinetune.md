@@ -122,6 +122,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --gpu=0,1 --popsize=5 --rou
 ```
 ./output_dir/
     ├── log_file.txt
+    ├── best_model
     ├── visualization
     ├── round0
     ├── round1
@@ -139,6 +140,8 @@ $ hub autofinetune train.py --param_file=hparam.yaml --gpu=0,1 --popsize=5 --rou
 其中output_dir为启动autofinetune命令时指定的根目录，目录下:
 
 * log_file.txt记录每一轮搜索所有的超参以及整个过程中所搜索到的最优超参
+
+* best_model保存整个搜索训练过程中得到的最优的模型参数
 
 * visualization记录可视化过程的日志文件
 
