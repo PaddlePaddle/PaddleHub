@@ -43,20 +43,36 @@ if __name__ == '__main__':
     # Download dataset and use ClassifyReader to read dataset
     if args.dataset.lower() == "chnsenticorp":
         dataset = hub.dataset.ChnSentiCorp()
-        module = hub.Module(name="ernie")
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "tnews":
         dataset = hub.dataset.TNews()
-        module = hub.Module(name="ernie")
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
         metrics_choices = ["acc", "f1"]
     elif args.dataset.lower() == "nlpcc_dbqa":
         dataset = hub.dataset.NLPCC_DBQA()
-        module = hub.Module(name="ernie")
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "lcqmc":
         dataset = hub.dataset.LCQMC()
-        module = hub.Module(name="ernie")
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
         metrics_choices = ["acc"]
+    elif args.dataset.lower() == 'inews':
+        dataset = hub.dataset.INews()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+        metrics_choices = ["acc", "f1"]
+    elif args.dataset.lower() == 'bq':
+        dataset = hub.dataset.BQ()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+        metrics_choices = ["acc", "f1"]
+    elif args.dataset.lower() == 'thucnews':
+        dataset = hub.dataset.THUCNEWS()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+        metrics_choices = ["acc", "f1"]
+    elif args.dataset.lower() == 'iflytek':
+        dataset = hub.dataset.IFLYTEK()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+        metrics_choices = ["acc", "f1"]
     elif args.dataset.lower() == "mrpc":
         dataset = hub.dataset.GLUE("MRPC")
         if args.use_taskid:
@@ -116,7 +132,7 @@ if __name__ == '__main__':
         metrics_choices = ["acc"]
     elif args.dataset.lower().startswith("xnli"):
         dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
-        module = hub.Module(name="bert_multi_cased_L-12_H-768_A-12")
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
         metrics_choices = ["acc"]
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
@@ -140,7 +156,7 @@ if __name__ == '__main__':
     pooled_output = outputs["pooled_output"]
 
     # Setup feed list for data feeder
-    # Must feed all the tensor of ERNIE's module need
+    # Must feed all the tensor of module need
     feed_list = [
         inputs["input_ids"].name,
         inputs["position_ids"].name,

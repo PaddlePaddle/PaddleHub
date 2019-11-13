@@ -165,6 +165,10 @@ class BasicTask(object):
     def enter_phase(self, phase):
         if phase not in ["train", "val", "dev", "test", "predict", "inference"]:
             raise RuntimeError()
+        if phase in ["val", "dev"]:
+            phase = "dev"
+        elif phase in ["predict", "inference"]:
+            phase = "predict"
         self._phases.append(phase)
 
     def exit_phase(self):
@@ -330,7 +334,7 @@ class BasicTask(object):
     def env(self):
         phase = self.phase
         if phase in ["val", "dev", "test"]:
-            phase = "val"
+            phase = "dev"
         if not phase in self._envs:
             self._envs[phase] = RunEnv()
         return self._envs[phase]
@@ -468,18 +472,19 @@ class BasicTask(object):
 
     def _eval_end_event(self, run_states):
         eval_scores, eval_loss, run_speed = self._calculate_metrics(run_states)
-        self.tb_writer.add_scalar(
-            tag="Loss_{}".format(self.phase),
-            scalar_value=eval_loss,
-            global_step=self._envs['train'].current_step)
+        if 'train' in self._envs:
+            self.tb_writer.add_scalar(
+                tag="Loss_{}".format(self.phase),
+                scalar_value=eval_loss,
+                global_step=self._envs['train'].current_step)
 
         log_scores = ""
         for metric in eval_scores:
-            self.tb_writer.add_scalar(
-                tag="{}_{}".format(metric, self.phase),
-                scalar_value=eval_scores[metric],
-                global_step=self._envs['train'].current_step)
-
+            if 'train' in self._envs:
+                self.tb_writer.add_scalar(
+                    tag="{}_{}".format(metric, self.phase),
+                    scalar_value=eval_scores[metric],
+                    global_step=self._envs['train'].current_step)
             log_scores += "%s=%.5f " % (metric, eval_scores[metric])
         logger.info(
             "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
@@ -501,6 +506,7 @@ class BasicTask(object):
                                            "best_model")
             logger.info("best model saved to %s [best %s=%.5f]" %
                         (model_saved_dir, main_metric, main_value))
+
             save_result = fluid.io.save_persistables(
                 executor=self.exe,
                 dirname=model_saved_dir,

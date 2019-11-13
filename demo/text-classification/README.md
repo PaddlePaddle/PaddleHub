@@ -4,19 +4,24 @@
 其中分类任务可以分为两大类：
 
 * **单句分类**
-  - ChnSentiCorp
+  - ChineseGLUE-IFLYTEK
+  - ChineseGLUE-THUCNEWS
   - GLUE-Cola
   - GLUE-SST2
-
+  - ChnSentiCorp
 * **句对分类**
-  - LCQMC
-  - NLPCC-DBQA
+  - ChineseGLUE-LCQMC
+  - ChineseGLUE-INEWS
+  - ChineseGLUE-TNEWS
+  - ChinesGLUE-BQ
+  - ChineseGLUE-XNLI_zh
   - GLUE-MNLI
   - GLUE-QQP
   - GLUE-QNLI
   - GLUE-STS-B
   - GLUE-MRPC
   - GLUE-RTE
+  - NLPCC-DBQA
   - XNLI
 
 ## 如何开始Finetune

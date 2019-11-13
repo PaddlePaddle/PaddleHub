@@ -583,7 +583,7 @@ class Module(object):
             if max_seq_len > MAX_SEQ_LENGTH or max_seq_len <= 0:
                 raise ValueError(
                     "max_seq_len({}) should be in the range of [1, {}]".format(
-                        MAX_SEQ_LENGTH))
+                        max_seq_len, MAX_SEQ_LENGTH))
             logger.info(
                 "Set maximum sequence length of input tensor to {}".format(
                     max_seq_len))
