@@ -31,8 +31,8 @@ import paddle.fluid as fluid
 from .basic_task import BasicTask
 from paddlehub.common.logger import logger
 from paddlehub.reader import tokenization
-from paddlehub.finetune.evaluator import evaluate_v1
-from paddlehub.finetune.evaluator import evaluate_v2
+from paddlehub.finetune.evaluator import squad1_evaluate
+from paddlehub.finetune.evaluator import squad2_evaluate
 from paddlehub.finetune.evaluator import cmrc2018_evaluate
 
 
@@ -563,13 +563,14 @@ class ReadingComprehensionTask(BasicTask):
                 predictions = json.load(prediction_file)
 
             if self.sub_task == "squad":
-                scores = evaluate_v1.evaluate(dataset, predictions)
+                scores = squad1_evaluate.evaluate(dataset, predictions)
             elif self.sub_task == "squad2.0":
                 with open(
                         output_null_log_odds_file, 'r',
                         encoding="utf8") as odds_file:
                     na_probs = json.load(odds_file)
-                scores = evaluate_v2.evaluate(dataset, predictions, na_probs)
+                scores = squad2_evaluate.evaluate(dataset, predictions,
+                                                  na_probs)
             elif self.sub_task in ["cmrc2018", "drcd"]:
                 scores = cmrc2018_evaluate.get_eval(dataset, predictions)
         return scores, avg_loss, run_speed
