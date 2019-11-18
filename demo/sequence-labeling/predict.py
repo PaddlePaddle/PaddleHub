@@ -31,6 +31,8 @@ from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
+parser.add_argument("--dataset", type=str, default="msra_ner", help="The choice of dataset")
+parser.add_argument("--add_crf", type=ast.literal_eval, default=True, help="Whether use crf as decoder.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
@@ -44,8 +46,14 @@ if __name__ == '__main__':
     module = hub.Module(name="ernie")
     inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
 
-    # Sentence labeling dataset reader
-    dataset = hub.dataset.MSRA_NER()
+    # Download dataset and use SequenceLabelReader to read dataset
+    if args.dataset.lower() == "msra_ner":
+        dataset = hub.dataset.MSRA_NER()
+    elif args.dataset.lower() == "express_ner":
+        dataset = hub.dataset.Express_NER()
+    else:
+        raise ValueError("%s dataset is not defined" % args.dataset)
+
     reader = hub.reader.SequenceLabelReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
@@ -87,15 +95,15 @@ if __name__ == '__main__':
         max_seq_len=args.max_seq_len,
         num_classes=dataset.num_labels,
         config=config,
-        add_crf=True)
+        add_crf=args.add_crf)
 
     # test data
     data = [
-        ["我们变而以书会友，以书结缘，把欧美、港台流行的食品类图谱、画册、工具书汇集一堂。"],
-        ["为了跟踪国际最新食品工艺、流行趋势，大量搜集海外专业书刊资料是提高技艺的捷径。"],
-        ["其中线装古籍逾千册；民国出版物几百种；珍本四册、稀见本四百余册，出版时间跨越三百余年。"],
-        ["有的古木交柯，春机荣欣，从诗人句中得之，而入画中，观之令人心驰。"],
-        ["不过重在晋趣，略增明人气息，妙在集古有道、不露痕迹罢了。"],
+        [u"黑龙江省双鸭山市尖山区八马路与东平行路交叉口北40米韦业涛18600009172"],
+        [u"广西壮族自治区桂林市雁山区雁山镇西龙村老年活动中心17610348888羊卓卫"],
+        [u"15652864561河南省开封市顺河回族区顺河区公园路32号赵本山"],
+        [u"河北省唐山市玉田县无终大街159号18614253058尚汉生"],
+        [u"台湾台中市北区北区锦新街18号18511226708蓟丽"],
     ]
 
     run_states = seq_label_task.predict(data=data)
@@ -104,20 +112,42 @@ if __name__ == '__main__':
     for num_batch, batch_results in enumerate(results):
         infers = batch_results[0].reshape([-1]).astype(np.int32).tolist()
         np_lens = batch_results[1]
-
         for index, np_len in enumerate(np_lens):
             labels = infers[index * args.max_seq_len:(index + 1) *
                             args.max_seq_len]
-
             label_str = ""
+            sent_out_str = ""
+            last_word = ""
+            last_tag = ""
+            #flag: cls position
+            flag = 0
             count = 0
             for label_val in labels:
-                label_str += inv_label_map[label_val]
+                label_tag = inv_label_map[label_val]
+                if flag == 0:
+                    flag = 1
+                    continue
+                cur_word = data[num_batch * args.batch_size + index][0][count]
+                if last_word == "":
+                    last_word = cur_word
+                    last_tag = label_tag.split("-")[1]
+                elif label_tag.startswith("B-"):
+                    sent_out_str += last_word + u"/" + last_tag + u" "
+                    last_word = data[num_batch * args.batch_size +
+                                     index][0][count]
+                    last_tag = label_tag.split("-")[1]
+                elif label_tag.startswith("O"):
+                    sent_out_str += last_word + u"/" + last_tag + u" "
+                    last_word = data[num_batch * args.batch_size +
+                                     index][0][count]
+                    last_tag = label_tag
+                elif label_tag.startswith("I-"):
+                    last_word += cur_word
+                else:
+                    raise ValueError("invalid tag: %s" % (label_tag))
                 count += 1
-                if count == np_len:
+                if count == np_len - 1:
                     break
-
-            # Drop the label results of CLS and SEP Token
-            print(
-                "%s\tpredict=%s" %
-                (data[num_batch * args.batch_size + index][0], label_str[1:-1]))
+            if cur_word != "":
+                sent_out_str += last_word + "/" + last_tag + " "
+            print(sent_out_str)
