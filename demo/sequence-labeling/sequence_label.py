@@ -22,6 +22,8 @@ import paddlehub as hub
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
+parser.add_argument("--dataset", type=str, default="msra_ner", help="The choice of dataset")
+parser.add_argument("--add_crf", type=ast.literal_eval, default=True, help="Whether use crf as decoder.")
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
@@ -42,7 +44,13 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Download dataset and use SequenceLabelReader to read dataset
-    dataset = hub.dataset.MSRA_NER()
+    if args.dataset.lower() == "msra_ner":
+        dataset = hub.dataset.MSRA_NER()
+    elif args.dataset.lower() == "express_ner":
+        dataset = hub.dataset.Express_NER()
+    else:
+        raise ValueError("%s dataset is not defined" % args.dataset)
+
     reader = hub.reader.SequenceLabelReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
@@ -86,7 +94,7 @@ if __name__ == '__main__':
         max_seq_len=args.max_seq_len,
         num_classes=dataset.num_labels,
         config=config,
-        add_crf=True)
+        add_crf=args.add_crf)
 
     # Finetune and evaluate model by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically

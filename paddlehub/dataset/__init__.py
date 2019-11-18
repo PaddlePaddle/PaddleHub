@@ -24,6 +24,7 @@ from .squad import SQUAD
 from .xnli import XNLI
 from .glue import GLUE
 from .tnews import TNews
+from .express_ner import Express_NER
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat
