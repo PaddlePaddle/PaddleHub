@@ -98,12 +98,12 @@ if __name__ == '__main__':
         add_crf=args.add_crf)
 
     # test data
+    data = [[example] for example in dataset.get_test_examples()]
+
     data = [
-        [u"黑龙江省双鸭山市尖山区八马路与东平行路交叉口北40米韦业涛18600009172"],
-        [u"广西壮族自治区桂林市雁山区雁山镇西龙村老年活动中心17610348888羊卓卫"],
-        [u"15652864561河南省开封市顺河回族区顺河区公园路32号赵本山"],
-        [u"河北省唐山市玉田县无终大街159号18614253058尚汉生"],
-        [u"台湾台中市北区北区锦新街18号18511226708蓟丽"],
+        ["\002".join(list(u"喻晓刚云南省楚雄彝族自治州南华县东街古城路37号18513386163"))],
+        ["\002".join(list(u"河北省唐山市玉田县无终大街159号18614253058尚汉生"))],
+        ["\002".join(list(u"台湾嘉义县番路乡番路乡公田村龙头17之19号宣树毅13720072123"))],
     ]
 
     run_states = seq_label_task.predict(data=data)
@@ -122,32 +122,32 @@ if __name__ == '__main__':
             #flag: cls position
             flag = 0
             count = 0
+            sentence_str = data[num_batch * args.batch_size +
+                                index][0].strip().split("\002")
             for label_val in labels:
-                label_tag = inv_label_map[label_val]
                 if flag == 0:
                     flag = 1
                     continue
-                cur_word = data[num_batch * args.batch_size + index][0][count]
+                if count == np_len - 2:
+                    break
+                label_tag = inv_label_map[label_val]
+                cur_word = sentence_str[count]
                 if last_word == "":
                     last_word = cur_word
                     last_tag = label_tag.split("-")[1]
                 elif label_tag.startswith("B-"):
                     sent_out_str += last_word + u"/" + last_tag + u" "
-                    last_word = data[num_batch * args.batch_size +
-                                     index][0][count]
+                    last_word = cur_word
                     last_tag = label_tag.split("-")[1]
-                elif label_tag.startswith("O"):
+                elif label_tag == "O":
                     sent_out_str += last_word + u"/" + last_tag + u" "
-                    last_word = data[num_batch * args.batch_size +
-                                     index][0][count]
+                    last_word = cur_word
                     last_tag = label_tag
                 elif label_tag.startswith("I-"):
                     last_word += cur_word
                 else:
-                    raise ValueError("invalid tag: %s" % (label_tag))
+                    raise ValueError("Invalid tag: %s" % (label_tag))
                 count += 1
-                if count == np_len - 1:
-                    break
             if cur_word != "":
                 sent_out_str += last_word + "/" + last_tag + " "
             print(sent_out_str)
