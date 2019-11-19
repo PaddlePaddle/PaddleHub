@@ -254,6 +254,10 @@ class RunCommand(BaseCommand):
         config = self.get_config()
         data = self.get_data()
 
+        if hasattr(self.args, "input_path") and \
+                self.check_file() is False:
+            return False
+
         try:
             self.check_data(data)
         except DataFormatError:
