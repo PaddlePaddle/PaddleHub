@@ -128,6 +128,8 @@ class Module(object):
         elif module_dir:
             self._init_with_module_file(module_dir=module_dir[0])
             lock.flock(fp_lock, lock.LOCK_UN)
+            name = module_dir[0].split("/")[-1]
+            version = module_dir[1]
         elif signatures:
             if processor:
                 if not issubclass(processor, BaseProcessor):
