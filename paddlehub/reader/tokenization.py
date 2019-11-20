@@ -194,16 +194,15 @@ class WSSPTokenizer(object):
             text = text.split(' ')
         if self.lower:
             text = [s.lower() for s in text]
-        in_vocab = []
-        for word in text:
-            if word in self.vocab:
-                in_vocab.append(word)
-            else:
-                in_vocab.append(unk_token)
-        text = ' '.join(in_vocab)
+        text = ' '.join(text)
         tokens = self.sp_model.EncodeAsPieces(text)
-        print(tokens)
-        return tokens
+        in_vocab_tokens = []
+        for token in tokens:
+            if token in self.vocab:
+                in_vocab_tokens.append(token)
+            else:
+                in_vocab_tokens.append(unk_token)
+        return in_vocab_tokens
 
     def convert_tokens_to_ids(self, tokens):
         return convert_by_vocab(self.vocab, tokens)
