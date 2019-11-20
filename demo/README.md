@@ -72,5 +72,8 @@
 
 该样例展示了PaddleHub如何将word2vec_skipgram用于计算两个文本语义相似度。
 
+## 模型服务化
+展示了PaddleHub-Serving如何利用模型进行服务化部署，主要包括模型预测服务化和Bert-as-Service服务化。
+
 **NOTE**
 以上任务示例均是利用PaddleHub提供的数据集，若您想在自定义数据集上完成相应任务，请查看[PaddleHub适配自定义数据完成FineTune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
