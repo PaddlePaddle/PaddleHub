@@ -186,11 +186,11 @@ class WSSPTokenizer(object):
         return words
 
     def tokenize(self, text):
-        sen = text.decode('utf8')
+        text = convert_to_unicode(text)
         if self.ws:
-            sen = [s for s in self.cut(sen) if s != ' ']
+            sen = [s for s in self.cut(text) if s != ' ']
         else:
-            sen = sen.split(' ')
+            sen = text.split(' ')
         if self.lower:
             sen = [s.lower() for s in sen]
         sen = ' '.join(sen)
