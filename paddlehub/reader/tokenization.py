@@ -201,8 +201,9 @@ class WSSPTokenizer(object):
             else:
                 in_vocab.append(unk_token)
         text = ' '.join(in_vocab)
-        ret = self.sp_model.EncodeAsPieces(text)
-        return ret
+        tokens = self.sp_model.EncodeAsPieces(text)
+        print(tokens)
+        return tokens
 
     def convert_tokens_to_ids(self, tokens):
         return convert_by_vocab(self.vocab, tokens)

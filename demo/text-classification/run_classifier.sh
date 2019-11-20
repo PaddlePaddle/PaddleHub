@@ -13,8 +13,8 @@ python -u text_classifier.py \
                    --weight_decay=0.01 \
                    --max_seq_len=128 \
                    --num_epoch=3 \
-                   --use_pyreader=True \
-                   --use_data_parallel=True
+                   --use_pyreader=False \
+                   --use_data_parallel=False
 
 # Recommending hyper parameters for difference task
 # for ChineseGLUE:
