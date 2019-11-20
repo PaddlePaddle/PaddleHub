@@ -81,6 +81,7 @@ def load_vocab(vocab_file):
         index = items[1] if len(items) == 2 else num
         token = token.strip()
         vocab[token] = int(index)
+    fin.close()
     return vocab
 
 
@@ -168,7 +169,7 @@ class WSSPTokenizer(object):
         self.window_size = 5
         self.sp_model.Load(sp_model_dir)
 
-    def cut(self, chars):
+    def cut(self, chars, unk_token="[UNK]"):
         words = []
         idx = 0
         while idx < len(chars):
@@ -181,7 +182,7 @@ class WSSPTokenizer(object):
                     break
             if not matched:
                 i = 1
-                words.append(chars[idx])
+                words.append(unk_token)
             idx += i
         return words
 
