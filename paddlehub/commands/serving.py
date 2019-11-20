@@ -24,6 +24,7 @@ import socket
 import json
 import paddlehub as hub
 from paddlehub.commands.base_command import BaseCommand, ENTRY
+from paddle_gpu_serving.run import BertServer
 
 
 class ServingCommand(BaseCommand):
@@ -41,6 +42,7 @@ class ServingCommand(BaseCommand):
             add_help=True)
         self.parser.add_argument("command")
         self.parser.add_argument("sub_command")
+        self.parser.add_argument("bert_service", nargs="?")
         self.sub_parse = self.parser.add_mutually_exclusive_group(
             required=False)
         self.parser.add_argument(
@@ -48,8 +50,23 @@ class ServingCommand(BaseCommand):
         self.parser.add_argument(
             "--use_multiprocess", action="store_true", default=False)
         self.parser.add_argument("--modules", "-m", nargs="+")
-        self.parser.add_argument("--config", "-c", nargs="+")
-        self.parser.add_argument("--port", "-p", nargs="+", default=[8866])
+        self.parser.add_argument("--config", "-c", nargs="?")
+        self.parser.add_argument("--port", "-p", nargs="?", default=8866)
+        self.parser.add_argument("--gpu", "-i", nargs="?", default=0)
+
+    @staticmethod
+    def start_bert_serving(args):
+        if platform.system() != "Linux":
+            print("Error. Bert-Service only support linux.")
+            return False
+
+        if ServingCommand.is_port_occupied("127.0.0.1", args.port) is True:
+            print("Port %s is occupied, please change it." % args.port)
+            return False
+
+        bs = BertServer(with_gpu=args.use_gpu)
+        bs.with_model(model_name=args.modules[0])
+        bs.run(gpu_index=args.gpu, port=args.port)
 
     @staticmethod
     def is_port_occupied(ip, port):
@@ -96,7 +113,6 @@ class ServingCommand(BaseCommand):
     def start_serving(args):
         config_file = args.config
         if config_file is not None:
-            config_file = config_file[0]
             if os.path.exists(config_file):
                 with open(config_file, "r") as fp:
                     configs = json.load(fp)
@@ -116,7 +132,7 @@ class ServingCommand(BaseCommand):
                     port = configs.get("port", 8866)
                     if ServingCommand.is_port_occupied("127.0.0.1",
                                                        port) is True:
-                        print("Port %s is occupied, please change it." % (port))
+                        print("Port %s is occupied, please change it." % port)
                         return False
                     configs = configs.get("modules_info")
                     module = [
@@ -181,11 +197,13 @@ class ServingCommand(BaseCommand):
         try:
             args = self.parser.parse_args()
         except:
-            print("Please refer to the instructions below.")
             ServingCommand.show_help()
             return False
         if args.sub_command == "start":
-            ServingCommand.start_serving(args)
+            if args.bert_service == "bert_serving":
+                ServingCommand.start_bert_serving(args)
+            else:
+                ServingCommand.start_serving(args)
         else:
             ServingCommand.show_help()
 
