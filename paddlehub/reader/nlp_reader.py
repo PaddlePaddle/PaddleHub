@@ -49,7 +49,7 @@ class BaseReader(object):
                  in_tokens=False):
         self.max_seq_len = max_seq_len
         if sp_model_path and word_dict_path:
-            self.tzokenizer = tokenization.WSSPTokenizer(
+            self.tokenizer = tokenization.WSSPTokenizer(
                 vocab_path, sp_model_path, word_dict_path, ws=True, lower=True)
         else:
             self.tokenizer = tokenization.FullTokenizer(
