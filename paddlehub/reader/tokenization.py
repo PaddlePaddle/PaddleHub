@@ -183,6 +183,7 @@ class WSSPTokenizer(object):
             if not matched:
                 i = 1
                 words.append(unk_token)
+                print(chars[idx])
             idx += i
         return words
 
