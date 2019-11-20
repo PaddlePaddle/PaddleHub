@@ -361,6 +361,34 @@ class ClassifyReader(BaseReader):
 
 
 class SequenceLabelReader(BaseReader):
+    def __init__(self,
+                 vocab_path,
+                 dataset=None,
+                 label_map_config=None,
+                 max_seq_len=512,
+                 do_lower_case=True,
+                 random_seed=None,
+                 use_task_id=False,
+                 sp_model_path=None,
+                 word_dict_path=None,
+                 in_tokens=False):
+        super(SequenceLabelReader, self).__init__(
+            vocab_path=vocab_path,
+            dataset=dataset,
+            label_map_config=label_map_config,
+            max_seq_len=max_seq_len,
+            do_lower_case=do_lower_case,
+            random_seed=random_seed,
+            use_task_id=use_task_id,
+            sp_model_path=sp_model_path,
+            word_dict_path=word_dict_path,
+            in_tokens=in_tokens)
+        if sp_model_path and word_dict_path:
+            self.tokenizer = tokenization.FullTokenizer(
+                vocab_file=vocab_path,
+                do_lower_case=do_lower_case,
+                use_sentence_piece_vocab=True)
+
     def _pad_batch_records(self, batch_records, phase=None):
         batch_token_ids = [record.token_ids for record in batch_records]
         batch_text_type_ids = [record.text_type_ids for record in batch_records]
