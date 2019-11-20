@@ -37,16 +37,23 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     # Load Paddlehub ERNIE pretrained model
-    module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+    module = hub.Module(name="ernie_v2_chinese_tiny")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
+    if module.name.startswith("ernie_v2"):
+        use_taskid = True
+    else:
+        use_taskid = False
 
     # Download dataset and use SequenceLabelReader to read dataset
     dataset = hub.dataset.MSRA_NER()
     reader = hub.reader.SequenceLabelReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+        max_seq_len=args.max_seq_len,
+        use_task_id=use_taskid,
+        sp_model_path=module.get_spm_path(),
+        word_dict_path=module.get_word_dict_path())
 
     # Construct transfer learning network
     # Use "sequence_output" for token-level output.

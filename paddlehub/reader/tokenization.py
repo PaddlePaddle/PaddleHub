@@ -113,11 +113,17 @@ def whitespace_tokenize(text):
 class FullTokenizer(object):
     """Runs end-to-end tokenziation."""
 
-    def __init__(self, vocab_file, do_lower_case=True):
+    def __init__(self,
+                 vocab_file,
+                 do_lower_case=True,
+                 use_sentence_piece_vocab=False):
         self.vocab = load_vocab(vocab_file)
         self.inv_vocab = {v: k for k, v in self.vocab.items()}
         self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
-        self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
+        self.use_sentence_piece_vocab = use_sentence_piece_vocab
+        self.wordpiece_tokenizer = WordpieceTokenizer(
+            vocab=self.vocab,
+            use_sentence_piece_vocab=self.use_sentence_piece_vocab)
 
     def tokenize(self, text):
         split_tokens = []
@@ -329,10 +335,15 @@ class BasicTokenizer(object):
 class WordpieceTokenizer(object):
     """Runs WordPiece tokenziation."""
 
-    def __init__(self, vocab, unk_token="[UNK]", max_input_chars_per_word=100):
+    def __init__(self,
+                 vocab,
+                 unk_token="[UNK]",
+                 max_input_chars_per_word=100,
+                 use_sentence_piece_vocab=False):
         self.vocab = vocab
         self.unk_token = unk_token
         self.max_input_chars_per_word = max_input_chars_per_word
+        self.use_sentence_piece_vocab = use_sentence_piece_vocab
 
     def tokenize(self, text):
         """Tokenizes a piece of text into its word pieces.
@@ -369,7 +380,9 @@ class WordpieceTokenizer(object):
                 cur_substr = None
                 while start < end:
                     substr = "".join(chars[start:end])
-                    if start > 0:
+                    if start == 0 and self.use_sentence_piece_vocab:
+                        substr = u'\u2581' + substr
+                    if start > 0 and not self.use_sentence_piece_vocab:
                         substr = "##" + substr
                     if substr in self.vocab:
                         cur_substr = substr
