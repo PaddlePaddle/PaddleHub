@@ -320,6 +320,19 @@ class Module(object):
         for assets_file in self.assets:
             if "vocab.txt" in assets_file:
                 return assets_file
+        return None
+
+    def get_word_dict_path(self):
+        for assets_file in self.assets:
+            if "dict.wordseg.pickle" in assets_file:
+                return assets_file
+        return None
+
+    def get_spm_path(self):
+        for assets_file in self.assets:
+            if "spm_cased_simp_sampled.model" in assets_file:
+                return assets_file
+        return None
 
     def _recover_from_desc(self):
         # recover signature

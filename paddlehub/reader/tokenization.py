@@ -22,6 +22,8 @@ import collections
 import io
 import unicodedata
 import six
+import sentencepiece as spm
+import pickle
 
 
 def convert_to_unicode(text):
@@ -146,6 +148,54 @@ class CharTokenizer(object):
                 split_tokens.append(sub_token)
 
         return split_tokens
+
+    def convert_tokens_to_ids(self, tokens):
+        return convert_by_vocab(self.vocab, tokens)
+
+    def convert_ids_to_tokens(self, ids):
+        return convert_by_vocab(self.inv_vocab, ids)
+
+
+class WSSPTokenizer(object):
+    def __init__(self, vocab_file, sp_model_dir, word_dict, ws=True,
+                 lower=True):
+        self.vocab = load_vocab(vocab_file)
+        self.inv_vocab = {v: k for k, v in self.vocab.items()}
+        self.ws = ws
+        self.lower = lower
+        self.dict = pickle.load(open(word_dict, 'rb'), encoding='utf8')
+        self.sp_model = spm.SentencePieceProcessor()
+        self.window_size = 5
+        self.sp_model.Load(sp_model_dir)
+
+    def cut(self, chars):
+        words = []
+        idx = 0
+        while idx < len(chars):
+            matched = False
+            for i in range(self.window_size, 0, -1):
+                cand = chars[idx:idx + i]
+                if cand in self.dict:
+                    words.append(cand)
+                    matched = True
+                    break
+            if not matched:
+                i = 1
+                words.append(chars[idx])
+            idx += i
+        return words
+
+    def tokenize(self, text):
+        sen = text.decode('utf8')
+        if self.ws:
+            sen = [s for s in self.cut(sen) if s != ' ']
+        else:
+            sen = sen.split(' ')
+        if self.lower:
+            sen = [s.lower() for s in sen]
+        sen = ' '.join(sen)
+        ret = self.sp_model.EncodeAsPieces(sen)
+        return ret
 
     def convert_tokens_to_ids(self, tokens):
         return convert_by_vocab(self.vocab, tokens)

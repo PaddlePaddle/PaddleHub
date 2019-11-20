@@ -33,7 +33,6 @@ parser.add_argument("--max_seq_len", type=int, default=512, help="Number of word
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
-parser.add_argument("--use_taskid", type=ast.literal_eval, default=False, help="Whether to use taskid ,if yes to use ernie v2.")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -43,7 +42,7 @@ if __name__ == '__main__':
     # Download dataset and use ClassifyReader to read dataset
     if args.dataset.lower() == "chnsenticorp":
         dataset = hub.dataset.ChnSentiCorp()
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+        module = hub.Module(name="ernie_v2_chinese_tiny")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "tnews":
         dataset = hub.dataset.TNews()
@@ -75,60 +74,36 @@ if __name__ == '__main__':
         metrics_choices = ["acc", "f1"]
     elif args.dataset.lower() == "mrpc":
         dataset = hub.dataset.GLUE("MRPC")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["f1", "acc"]
     # The first metric will be choose to eval. Ref: task.py:799
     elif args.dataset.lower() == "qqp":
         dataset = hub.dataset.GLUE("QQP")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["f1", "acc"]
     elif args.dataset.lower() == "sst-2":
         dataset = hub.dataset.GLUE("SST-2")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "cola":
         dataset = hub.dataset.GLUE("CoLA")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["matthews", "acc"]
     elif args.dataset.lower() == "qnli":
         dataset = hub.dataset.GLUE("QNLI")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "rte":
         dataset = hub.dataset.GLUE("RTE")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "mnli" or args.dataset.lower() == "mnli":
         dataset = hub.dataset.GLUE("MNLI_m")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "mnli_mm":
         dataset = hub.dataset.GLUE("MNLI_mm")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower().startswith("xnli"):
         dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
@@ -137,19 +112,22 @@ if __name__ == '__main__':
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
 
+    # Check metric
     support_metrics = ["acc", "f1", "matthews"]
     for metric in metrics_choices:
         if metric not in support_metrics:
             raise ValueError("\"%s\" metric is not defined" % metric)
 
+    # Start preparing parameters for reader and task accoring to module
+    # For ernie_v2, it has an addition embedding named task_id
+    # For ernie_v2_chinese_tiny, it use an addition sentence_piece_vocab to tokenize
+    if module.name.startswith("ernie_v2"):
+        use_taskid = True
+    else:
+        use_taskid = False
+
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
-    reader = hub.reader.ClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        use_task_id=args.use_taskid)
-
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
@@ -163,9 +141,18 @@ if __name__ == '__main__':
         inputs["segment_ids"].name,
         inputs["input_mask"].name,
     ]
-
-    if args.use_taskid:
+    if use_taskid:
         feed_list.append(inputs["task_ids"].name)
+    # Finish preparing parameter for reader and task accoring to modul
+
+    # Define reader
+    reader = hub.reader.ClassifyReader(
+        dataset=dataset,
+        vocab_path=module.get_vocab_path(),
+        max_seq_len=args.max_seq_len,
+        use_task_id=use_taskid,
+        sp_model_path=module.get_spm_path(),
+        word_dict_path=module.get_word_dict_path())
 
     # Select finetune strategy, setup config and finetune
     strategy = hub.AdamWeightDecayStrategy(

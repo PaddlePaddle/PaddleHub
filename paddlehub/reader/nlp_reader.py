@@ -44,10 +44,16 @@ class BaseReader(object):
                  do_lower_case=True,
                  random_seed=None,
                  use_task_id=False,
+                 sp_model_path=None,
+                 word_dict_path=None,
                  in_tokens=False):
         self.max_seq_len = max_seq_len
-        self.tokenizer = tokenization.FullTokenizer(
-            vocab_file=vocab_path, do_lower_case=do_lower_case)
+        if sp_model_path and word_dict_path:
+            self.tokenizer = tokenization.WSSPTokenizer(
+                vocab_path, sp_model_path, word_dict_path, ws=True, lower=True)
+        else:
+            self.tokenizer = tokenization.FullTokenizer(
+                vocab_file=vocab_path, do_lower_case=do_lower_case)
         self.vocab = self.tokenizer.vocab
         self.dataset = dataset
         self.pad_id = self.vocab["[PAD]"]
