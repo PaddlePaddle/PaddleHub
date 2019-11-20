@@ -169,7 +169,7 @@ class WSSPTokenizer(object):
         self.window_size = 5
         self.sp_model.Load(sp_model_dir)
 
-    def cut(self, chars, unk_token="[UNK]"):
+    def cut(self, chars):
         words = []
         idx = 0
         while idx < len(chars):
@@ -182,21 +182,26 @@ class WSSPTokenizer(object):
                     break
             if not matched:
                 i = 1
-                words.append(unk_token)
-                print(chars[idx])
+                words.append(chars[idx])
             idx += i
         return words
 
-    def tokenize(self, text):
+    def tokenize(self, text, unk_token="[UNK]"):
         text = convert_to_unicode(text)
         if self.ws:
-            sen = [s for s in self.cut(text) if s != ' ']
+            text = [s for s in self.cut(text) if s != ' ']
         else:
-            sen = text.split(' ')
+            text = text.split(' ')
         if self.lower:
-            sen = [s.lower() for s in sen]
-        sen = ' '.join(sen)
-        ret = self.sp_model.EncodeAsPieces(sen)
+            text = [s.lower() for s in text]
+        in_vocab = []
+        for word in text:
+            if word in self.vocab:
+                in_vocab.append(word)
+            else:
+                in_vocab.append(unk_token)
+        text = ' '.join(in_vocab)
+        ret = self.sp_model.EncodeAsPieces(text)
         return ret
 
     def convert_tokens_to_ids(self, tokens):
