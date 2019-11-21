@@ -51,7 +51,6 @@ if __name__ == '__main__':
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len,
-        use_task_id=use_taskid,
         sp_model_path=module.get_spm_path(),
         word_dict_path=module.get_word_dict_path())
 

@@ -121,27 +121,11 @@ if __name__ == '__main__':
     # Start preparing parameters for reader and task accoring to module
     # For ernie_v2, it has an addition embedding named task_id
     # For ernie_v2_chinese_tiny, it use an addition sentence_piece_vocab to tokenize
-    if module.name.startswith("ernie_v2"):
-        use_taskid = True
-    else:
-        use_taskid = False
-
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
-
-    check = [inputs["task_ids"].name]
-    global_block = program.global_block()
-    for op in global_block.ops:
-        for input_arg in op.input_arg_names:
-            for ch in check:
-                if ch in input_arg:
-                    print(op)
-                    check.append(input_arg)
-                    break
-    exit(0)
     pooled_output = outputs["pooled_output"]
 
     # Setup feed list for data feeder
@@ -152,8 +136,6 @@ if __name__ == '__main__':
         inputs["segment_ids"].name,
         inputs["input_mask"].name,
     ]
-    if use_taskid:
-        feed_list.append(inputs["task_ids"].name)
     # Finish preparing parameter for reader and task accoring to modul
 
     # Define reader
@@ -161,7 +143,6 @@ if __name__ == '__main__':
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len,
-        use_task_id=use_taskid,
         sp_model_path=module.get_spm_path(),
         word_dict_path=module.get_word_dict_path())
 
