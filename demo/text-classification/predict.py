@@ -36,7 +36,6 @@ parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whe
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
 parser.add_argument("--dataset", type=str, default="chnsenticorp", help="The choice of dataset")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
-parser.add_argument("--use_taskid", type=ast.literal_eval, default=False, help="Whether to use taskid ,if yes to use ernie v2.")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -58,60 +57,36 @@ if __name__ == '__main__':
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "mrpc":
         dataset = hub.dataset.GLUE("MRPC")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["f1", "acc"]
     # The first metric will be choose to eval. Ref: task.py:799
     elif args.dataset.lower() == "qqp":
         dataset = hub.dataset.GLUE("QQP")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["f1", "acc"]
     elif args.dataset.lower() == "sst-2":
         dataset = hub.dataset.GLUE("SST-2")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "cola":
         dataset = hub.dataset.GLUE("CoLA")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["matthews", "acc"]
     elif args.dataset.lower() == "qnli":
         dataset = hub.dataset.GLUE("QNLI")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "rte":
         dataset = hub.dataset.GLUE("RTE")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "mnli" or args.dataset.lower() == "mnli_m":
         dataset = hub.dataset.GLUE("MNLI_m")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "mnli_mm":
         dataset = hub.dataset.GLUE("MNLI_mm")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower().startswith("xnli"):
         dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
