@@ -131,6 +131,17 @@ if __name__ == '__main__':
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
+
+    check = [inputs["task_ids"].name]
+    global_block = program.global_block()
+    for op in global_block.ops:
+        for input_arg in op.input_arg_names:
+            for ch in check:
+                if ch in input_arg:
+                    print(op)
+                    check.append(input_arg)
+                    break
+    exit(0)
     pooled_output = outputs["pooled_output"]
 
     # Setup feed list for data feeder
