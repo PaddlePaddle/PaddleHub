@@ -34,7 +34,6 @@ parser.add_argument("--max_seq_len", type=int, default=512, help="Number of word
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
-parser.add_argument("--use_taskid", type=ast.literal_eval, default=False, help="Whether to use taskid ,if yes to use ernie v2.")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -43,10 +42,7 @@ if __name__ == '__main__':
     # Download dataset and use ClassifyReader to read dataset
     if args.dataset.lower() == "sts-b":
         dataset = hub.dataset.GLUE("STS-B")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
 

@@ -40,10 +40,6 @@ if __name__ == '__main__':
     module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
-    if module.name.startswith("ernie_v2"):
-        use_taskid = True
-    else:
-        use_taskid = False
 
     # Download dataset and use SequenceLabelReader to read dataset
     dataset = hub.dataset.MSRA_NER()

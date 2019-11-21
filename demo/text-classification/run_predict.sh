@@ -18,4 +18,3 @@ python -u predict.py --checkpoint_dir=$CKPT_DIR \
                             --use_gpu=True \
                             --dataset=${DATASET} \
                             --batch_size=150 \
-                            --use_taskid=False \

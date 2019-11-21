@@ -16,5 +16,4 @@ python -u regression.py \
                    --max_seq_len=128 \
                    --num_epoch=3 \
                    --use_pyreader=True \
-                   --use_data_parallel=True \
-                   --use_taskid=False \
+                   --use_data_parallel=True
