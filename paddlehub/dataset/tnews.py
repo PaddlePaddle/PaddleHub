@@ -29,6 +29,24 @@ from paddlehub.common.logger import logger
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/tnews.tar.gz"
 
+LABEL_NAME = {
+    "100": "news_story",
+    "101": "news_culture",
+    "102": "news_entertainment",
+    "103": "news_sports",
+    "104": "news_finance",
+    "106": "news_house",
+    "107": "news_car",
+    "108": "news_edu",
+    "109": "news_tech",
+    "110": "news_military",
+    "112": "news_travel",
+    "113": "news_world",
+    "114": "stock",
+    "115": "news_agriculture",
+    "116": "news_game"
+}
+
 
 class TNews(HubDataset):
     """
@@ -78,24 +96,7 @@ class TNews(HubDataset):
         ]
 
     def get_label_name(self, id):
-        label_name = {
-            "100": "news_story",
-            "101": "news_culture",
-            "102": "news_entertainment",
-            "103": "news_sports",
-            "104": "news_finance",
-            "106": "news_house",
-            "107": "news_car",
-            "108": "news_edu",
-            "109": "news_tech",
-            "110": "news_military",
-            "112": "news_travel",
-            "113": "news_world",
-            "114": "stock",
-            "115": "news_agriculture",
-            "116": "news_game"
-        }
-        return label_name[id]
+        return LABEL_NAME[id]
 
     @property
     def num_labels(self):
