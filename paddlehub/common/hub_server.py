@@ -287,7 +287,10 @@ class CacheUpdater(threading.Thread):
             "command": "update_cache",
             "mtime": os.stat(cache_path).st_mtime
         }
-        r = srv_utils.hub_request(api_url, payload, extra)
+        try:
+            r = srv_utils.hub_request(api_url, payload, extra)
+        except Exception as err:
+            pass
         if r.get("update_cache", 0) == 1:
             with open(cache_path, 'w+') as fp:
                 yaml.safe_dump({'resource_list': r['data']}, fp)
