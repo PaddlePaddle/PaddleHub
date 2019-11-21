@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # Download dataset and use ClassifyReader to read dataset
     if args.dataset.lower() == "chnsenticorp":
         dataset = hub.dataset.ChnSentiCorp()
-        module = hub.Module(name="ernie_v2_chinese_tiny")
+        module = hub.Module(name="ernie_tiny")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "tnews":
         dataset = hub.dataset.TNews()
