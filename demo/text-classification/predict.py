@@ -130,8 +130,7 @@ if __name__ == '__main__':
     reader = hub.reader.ClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        use_task_id=args.use_taskid)
+        max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
@@ -146,9 +145,6 @@ if __name__ == '__main__':
         inputs["segment_ids"].name,
         inputs["input_mask"].name,
     ]
-
-    if args.use_taskid:
-        feed_list.append(inputs["task_ids"].name)
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(

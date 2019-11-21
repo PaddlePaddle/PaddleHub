@@ -50,9 +50,10 @@ if __name__ == '__main__':
 
         # Setup feed list for data feeder
         feed_list = [
-            inputs["input_ids"].name, inputs["position_ids"].name,
-            inputs["segment_ids"].name, inputs["input_mask"].name,
-            inputs["task_ids"].name
+            inputs["input_ids"].name,
+            inputs["position_ids"].name,
+            inputs["segment_ids"].name,
+            inputs["input_mask"].name,
         ]
     else:
         module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
@@ -74,8 +75,7 @@ if __name__ == '__main__':
     reader = hub.reader.MultiLabelClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        use_task_id=args.use_taskid)
+        max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.

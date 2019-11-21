@@ -40,7 +40,6 @@
 --max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数
 --use_data_parallel: 是否使用并行计算，默认False。打开该功能依赖nccl库。
 --use_pyreader: 是否使用pyreader，默认False。
---use_taskid: 是否使用taskid，taskid是ERNIE 2.0特有的，use_taskid=True表示使用ERNIE 2.0；如果想使用ERNIE 1.0 或者BERT等module，use_taskid应该设置为False。
 
 # 任务相关
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型
@@ -86,8 +85,7 @@ dataset = hub.dataset.ChnSentiCorp()
 reader = hub.reader.ClassifyReader(
     dataset=dataset,
     vocab_path=module.get_vocab_path(),
-    max_seq_len=128,
-    use_task_id=False)
+    max_seq_len=128)
 metrics_choices = ["acc"]
 ```
 
@@ -98,8 +96,6 @@ metrics_choices = ["acc"]
 `module.get_vocab_path()` 会返回预训练模型对应的词表
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致
-
-`use_task_id` 表示是否使用ERNIR 2.0 module
 
 ClassifyReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
 
