@@ -18,15 +18,15 @@ python -u text_classifier.py \
 
 # Recommending hyper parameters for difference task
 # for ChineseGLUE:
-# TNews: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
-# LCQMC: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
+# TNews: batch_size=16, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
+# LCQMC: batch_size=16, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
 # XNLI_zh: batch_size=32, weight_decay=0, num_epoch=2, max_seq_len=128, lr=5e-5
 # INEWS: batch_size=4, weight_decay=0, num_epoch=3, max_seq_len=512, lr=5e-5
 # DRCD: see demo: reading-comprehension
 # CMRC2018: see demo: reading-comprehension
 # BQ: batch_size=32, weight_decay=0, num_epoch=2, max_seq_len=100, lr=1e-5
 # MSRANER: see demo: sequence-labeling
-# THUCNEWS: batch_size=8, weight_decay=0, num_epoch=2, max_seq_len=512, lr=5e-5
+# THUCNEWS: batch_size=8, weight_decay=0, num_epoch=8, max_seq_len=512, lr=5e-5
 # IFLYTEKDATA: batch_size=16, weight_decay=0, num_epoch=5, max_seq_len=256, lr=1e-5
 
 # for other tasks:
