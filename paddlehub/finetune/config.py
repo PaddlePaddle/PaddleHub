@@ -30,14 +30,14 @@ class RunConfig(object):
     def __init__(self,
                  log_interval=10,
                  eval_interval=100,
-                 use_pyreader=False,
-                 use_data_parallel=False,
+                 use_pyreader=True,
+                 use_data_parallel=True,
                  save_ckpt_interval=None,
                  use_cuda=True,
                  checkpoint_dir=None,
                  num_epoch=1,
                  batch_size=32,
-                 enable_memory_optim=True,
+                 enable_memory_optim=False,
                  strategy=None):
         """ Construct finetune Config """
         self._log_interval = log_interval
@@ -53,7 +53,11 @@ class RunConfig(object):
             self._strategy = DefaultStrategy()
         else:
             self._strategy = strategy
-        self._enable_memory_optim = enable_memory_optim
+        if enable_memory_optim:
+            logger.warning(
+                "The memory optimization feature has been dropped! PaddleHub now doesn't optimize the memory of the program."
+            )
+        self._enable_memory_optim = False
         if checkpoint_dir is None:
             now = int(time.time())
             time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(now))
