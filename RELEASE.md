@@ -1,3 +1,16 @@
+# `v1.3.0`
+
+* 新增PaddleHub Serving服务部署
+  * 新增[hub serving](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)命令，支持一键启动Module预测服务部署
+* 新增预训练模型：
+  * roberta_wwm_ext_chinese_L-24_H-1024_A-16
+  * roberta_wwm_ext_chinese_L-12_H-768_A-12
+  * bert_wwm_ext_chinese_L-12_H-768_A-12
+  * bert_wwm_chinese_L-12_H-768_A-12
+* AutoDL Finetuner优化使用体验
+  * 支持通过接口方式回传模型性能
+  * 可视化效果优化，支持多trail效果显示
+
 # `v1.2.1`
 
 * 新增**超参优化Auto Fine-tune**，实现给定超参搜索空间，PaddleHub自动给出较佳的超参组合

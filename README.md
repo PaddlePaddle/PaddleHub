@@ -1,6 +1,6 @@
 # PaddleHub
 
-[![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=develop)](https://travis-ci.org/PaddlePaddle/PaddleHub)
+[![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=release/v1.3)](https://travis-ci.org/PaddlePaddle/PaddleHub)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
 
@@ -9,19 +9,21 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 * 便捷地获取PaddlePaddle生态下的所有预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、语言模型、视频分类、图像生成、图像分割等主流模型。
   * 更多详情可查看官网：https://www.paddlepaddle.org.cn/hub
 * 通过PaddleHub Fine-tune API，结合少量代码即可完成**大规模预训练模型**的迁移学习，具体Demo可参考以下链接：
-  * [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/text-classification)
-  * [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sequence-labeling)
-  * [多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/multi-label-classification)
-  * [图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/image-classification)
-  * [检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/qa_classification)
-  * [回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sentence_similarity)
-  * [句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/sentence_similarity)
-  * [阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/reading-comprehension)
+  * [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/text-classification)
+  * [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/sequence-labeling)
+  * [多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/multi-label-classification)
+  * [图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/image-classification)
+  * [检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/qa_classification)
+  * [回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/sentence_similarity)
+  * [句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/sentence_similarity)
+  * [阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/reading-comprehension)
 * 支持超参优化（AutoDL Finetuner），自动调整超参数，给出效果较佳的超参数组合。
-  * [PaddleHub超参优化功能AutoDL Finetuner使用示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.2/demo/autofinetune)
+  * [PaddleHub超参优化功能AutoDL Finetuner使用示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/autofinetune)
 * 引入『**模型即软件**』的设计理念，通过Python API或者命令行实现一键预测，更方便地应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
-
+* 一键Module服务化部署 - HubServing
+  * [PaddleHub-Serving一键服务部署](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)
+  * [使用示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/serving)
 
 ## 目录
 
@@ -37,7 +39,7 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 
 ### 环境依赖
 * Python==2.7 or Python>=3.5
-* PaddlePaddle>=1.4.0
+* PaddlePaddle>=1.6.1
 
 除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络。若本地已存在相关的数据集和预训练模型，则可以离线运行PaddleHub。
 
@@ -76,26 +78,20 @@ $ hub run ssd_mobilenet_v1_pascal --input_path test_object_detection.jpg
 $ hub run yolov3_coco2017 --input_path test_object_detection.jpg
 $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 ```
-![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/object_detection_result.png)
+![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.3/docs/imgs/object_detection_result.png)
 
 除了上述三类模型外，PaddleHub还发布了语言模型、语义模型、图像分类、生成模型、视频分类等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
 
-同时，我们在AI Studio和AIBook上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
-* ERNIE文本分类:
-  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79380)
-  * [AI Book](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_txt_cls)
-* ERNIE序列标注:
-  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79377)
-  * [AI Book](https://console.bce.baidu.com/bml/?_=1562072915183#/bml/aibook/ernie_seq_label)
-* ELMo文本分类:
-  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79400)
-  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/elmo_txt_cls)
-* senta情感分类:
-  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79398)
-  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/senta_bilstm)
-* 图像分类:
-  * [AI Studio](https://aistudio.baidu.com/aistudio/projectDetail/79378)
-  * [AI Book](https://console.bce.baidu.com/bml/#/bml/aibook/img_cls)
+同时，我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
+
+|类别|AIStudio链接|
+|-|-|
+|ERNIE文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79380)|
+|ERNIE序列标注|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79377)|
+|ELMo文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79400)|
+|senta情感分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79398)|
+|图像分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79378)|
+
 
 ## 教程
 
@@ -105,9 +101,9 @@ PaddleHub如何完成迁移学习，详情参考[wiki教程](https://github.com/
 
 PaddleHub如何自定义迁移任务，详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
-PaddleHub如何自动优化超参数，详情参考[AutoDL Finetuner使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/autofinetune.md)
+PaddleHub如何自动优化超参数，详情参考[AutoDL Finetuner使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.3/tutorial/autofinetune.md)
 
-PaddleHub如何使用ULMFiT策略微调预训练模型，详情参考[PaddleHub 迁移学习与ULMFiT微调策略](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/tutorial/strategy_exp.md)
+PaddleHub如何使用ULMFiT策略微调预训练模型，详情参考[PaddleHub 迁移学习与ULMFiT微调策略](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.3/tutorial/strategy_exp.md)
 
 ## FAQ
 
@@ -153,4 +149,4 @@ print(res)
 
 ## 更新历史
 
-详情参考[更新历史](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/RELEASE.md)
+详情参考[更新历史](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.3/RELEASE.md)

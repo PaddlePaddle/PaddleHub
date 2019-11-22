@@ -23,6 +23,7 @@ import shutil
 from paddlehub.common import utils
 from paddlehub.common import srv_utils
 from paddlehub.common.downloader import default_downloader
+from paddlehub.common.hub_server import default_hub_server
 from paddlehub.common.dir import MODULE_HOME
 from paddlehub.module import module_desc_pb2
 import paddlehub as hub
@@ -100,11 +101,14 @@ class LocalModuleManager(object):
         installed_module_version = search_result.get('version', None)
         if not url or (module_version is not None and installed_module_version
                        != module_version) or (name != module_name):
-            tips = "Can't find module %s" % module_name
-            if module_version:
-                tips += " with version %s" % module_version
-            module_tag = module_name if not module_version else '%s-%s' % (
-                module_name, module_version)
+            if default_hub_server._server_check() is False:
+                tips = "Request Hub-Server unsuccessfully, please check your network."
+            else:
+                tips = "Can't find module %s" % module_name
+                if module_version:
+                    tips += " with version %s" % module_version
+                module_tag = module_name if not module_version else '%s-%s' % (
+                    module_name, module_version)
             return False, tips, None
 
         result, tips, module_zip_file = default_downloader.download_file(

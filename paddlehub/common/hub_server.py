@@ -24,6 +24,7 @@ import requests
 import json
 import yaml
 import random
+import threading
 
 from random import randint
 from paddlehub.common import utils, srv_utils
@@ -31,7 +32,7 @@ from paddlehub.common.downloader import default_downloader
 from paddlehub.common.server_config import default_server_config
 from paddlehub.io.parser import yaml_parser
 from paddlehub.common.lock import lock
-import paddlehub as hub
+from paddlehub.common.dir import CONF_HOME, CACHE_HOME
 
 RESOURCE_LIST_FILE = "resource_list_file.yml"
 CACHE_TIME = 60 * 10
@@ -40,9 +41,9 @@ CACHE_TIME = 60 * 10
 class HubServer(object):
     def __init__(self, config_file_path=None):
         if not config_file_path:
-            config_file_path = os.path.join(hub.CONF_HOME, 'config.json')
-        if not os.path.exists(hub.CONF_HOME):
-            utils.mkdir(hub.CONF_HOME)
+            config_file_path = os.path.join(CONF_HOME, 'config.json')
+        if not os.path.exists(CONF_HOME):
+            utils.mkdir(CONF_HOME)
         if not os.path.exists(config_file_path):
             with open(config_file_path, 'w+') as fp:
                 lock.flock(fp, lock.LOCK_EX)
@@ -69,7 +70,7 @@ class HubServer(object):
         return self.server_url[random.randint(0, len(self.server_url) - 1)]
 
     def resource_list_file_path(self):
-        return os.path.join(hub.CACHE_HOME, RESOURCE_LIST_FILE)
+        return os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
 
     def _load_resource_list_file_if_valid(self):
         self.resource_list_file = {}
@@ -227,12 +228,12 @@ class HubServer(object):
             extra=extra)
 
     def request(self):
-        if not os.path.exists(hub.CACHE_HOME):
-            utils.mkdir(hub.CACHE_HOME)
+        if not os.path.exists(CACHE_HOME):
+            utils.mkdir(CACHE_HOME)
         try:
             r = requests.get(self.get_server_url() + '/' + 'search')
             data = json.loads(r.text)
-            cache_path = os.path.join(hub.CACHE_HOME, RESOURCE_LIST_FILE)
+            cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
             with open(cache_path, 'w+') as fp:
                 yaml.safe_dump({'resource_list': data['data']}, fp)
             return True
@@ -245,12 +246,61 @@ class HubServer(object):
             file_url = self.config[
                 'resource_storage_server_url'] + RESOURCE_LIST_FILE
             result, tips, self.resource_list_file = default_downloader.download_file(
-                file_url, save_path=hub.CACHE_HOME, replace=True)
+                file_url, save_path=CACHE_HOME, replace=True)
             if not result:
                 return False
         except:
             return False
         return True
+
+    def _server_check(self):
+        try:
+            r = requests.get(self.get_server_url() + '/search')
+            if r.status_code == 200:
+                return True
+            else:
+                return False
+        except:
+            return False
+
+    def server_check(self):
+        if self._server_check() is True:
+            print("Request Hub-Server successfully.")
+        else:
+            print("Request Hub-Server unsuccessfully.")
+
+
+class CacheUpdater(threading.Thread):
+    def __init__(self, module, version=None):
+        threading.Thread.__init__(self)
+        self.module = module
+        self.version = version
+
+    def update_resource_list_file(self, module, version=None):
+        payload = {'word': module}
+        if version:
+            payload['version'] = version
+        api_url = srv_utils.uri_path(default_hub_server.get_server_url(),
+                                     'search')
+        cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
+        extra = {
+            "command": "update_cache",
+            "mtime": os.stat(cache_path).st_mtime
+        }
+        try:
+            r = srv_utils.hub_request(api_url, payload, extra)
+        except Exception as err:
+            pass
+        if r.get("update_cache", 0) == 1:
+            with open(cache_path, 'w+') as fp:
+                yaml.safe_dump({'resource_list': r['data']}, fp)
+
+    def run(self):
+        self.update_resource_list_file(self.module, self.version)
+
+
+def server_check():
+    default_hub_server.server_check()
 
 
 default_hub_server = HubServer()

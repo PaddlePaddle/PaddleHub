@@ -14,14 +14,14 @@ PaddleHub AutoDL Finetuner提供两种超参优化算法：
 调整参数的基本思路为，调整参数使得产生更优解的概率逐渐增大。优化过程如下图：
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/bayesian_optimization.gif" hspace='10'/> <br />
+<img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.3/docs/imgs/bayesian_optimization.gif" hspace='10'/> <br />
 </p>
 *图片来源于https://www.kaggle.com/clair14/tutorial-bayesian-optimization*
 
 * PSHE2: 采用哈密尔顿动力系统搜索参数空间中“势能”最低的点。而最优超参数组合就是势能低点。现在想求得最优解就是要找到更新超参数组合，即如何更新超参数，才能让算法更快更好的收敛到最优解。PSHE2算法根据超参数本身历史的最优，在一定随机扰动的情况下决定下一步的更新方向。
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/thermodynamics.gif" hspace='10'/> <br />
+<img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.3/docs/imgs/thermodynamics.gif" hspace='10'/> <br />
 </p>
 
 PaddleHub AutoDL Finetuner为了评估搜索的超参对于任务的效果，提供两种超参评估策略：
@@ -59,7 +59,7 @@ hparam给出待搜索的超参名字、类型（int或者float）、搜索范围
 train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优化后的效果返回
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.2/docs/imgs/demo.png" hspace='10'/> <br />
+<img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.3/docs/imgs/demo.png" hspace='10'/> <br />
 </p>
 
 **NOTE**:
@@ -70,9 +70,9 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 
 * 超参评估策略选择PopulationBased时，train.py须包含选项参数model_path，自动从model_path指定的路径恢复模型
 
-* train.py须输出模型的评价效果（建议使用验证集或者测试集上的评价效果），输出以“AutoFinetuneEval"开始，与评价效果之间以“\t”分开，如
+* train.py须反馈模型的评价效果（建议使用验证集或者测试集上的评价效果），通过调用`report_final_result`接口反馈，如
  ```python
- print("AutoFinetuneEval"+"\t" + str(eval_acc))
+ hub.report_final_result(eval_avg_score["acc"])
  ```
 
 * 输出的评价效果取值范围应为`(-∞, 1]`，取值越高，表示效果越好。
@@ -85,20 +85,20 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 
 ## 三、启动方式
 
-**确认安装PaddleHub版本在1.2.1以上, 同时PaddleHub AutoDL Finetuner功能要求至少有一张GPU显卡可用。**
+**确认安装PaddleHub版本在1.3.0以上, 同时PaddleHub AutoDL Finetuner功能要求至少有一张GPU显卡可用。**
 
 通过以下命令方式：
 ```shell
 $ OUTPUT=result/
-$ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=5 --round=10
- --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2
+$ hub autofinetune train.py --param_file=hparam.yaml --gpu=0,1 --popsize=5 --round=10
+ --output_dir=${OUTPUT} --evaluator=fulltrail --tuning_strategy=pshe2
 ```
 
 其中，选项
 
 > `--param_file`: 必填，待优化的超参数信息yaml文件，即上述[hparam.yaml](#hparam.yaml)。
 
-> `--cuda`: 必填，设置运行程序的可用GPU卡号，list类型，中间以逗号隔开，不能有空格，默认为[‘0’]
+> `--gpu`: 必填，设置运行程序的可用GPU卡号，中间以逗号隔开，不能有空格
 
 > `--popsize`: 可选，设置程序运行每轮产生的超参组合数，默认为5
 
@@ -106,7 +106,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 > `--output_dir`: 可选，设置程序运行输出结果存放目录，不指定该选项参数时，在当前运行路径下生成存放程序运行输出信息的文件夹
 
-> `--evaluate_choice`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased
+> `--evaluator`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased
 
 > `--tuning_strategy`: 可选，设置自动优化超参算法，可选hazero和pshe2，默认为pshe2
 
@@ -114,7 +114,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 * 进行超参搜索时，一共会进行n轮(--round指定)，每轮产生m组超参(--popsize指定)进行搜索。上一轮的优化结果决定下一轮超参数调整方向
 
-* 当指定GPU数量不足以同时跑一轮时，AutoDL Finetuner功能自动实现排队为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，cuda=['0','1','2','3']，则每搜索一轮，AutoDL Finetuner自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，则可以避免这种情况的出现。
+* 当指定GPU数量不足以同时跑一轮时，AutoDL Finetuner功能自动实现排队为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，gpu=0,1,2,3，则每搜索一轮，AutoDL Finetuner自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，则可以避免这种情况的出现。
 
 ## 四、目录结构
 
@@ -122,6 +122,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 ```
 ./output_dir/
     ├── log_file.txt
+    ├── best_model
     ├── visualization
     ├── round0
     ├── round1
@@ -139,6 +140,8 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 其中output_dir为启动autofinetune命令时指定的根目录，目录下:
 
 * log_file.txt记录每一轮搜索所有的超参以及整个过程中所搜索到的最优超参
+
+* best_model保存整个搜索训练过程中得到的最优的模型参数
 
 * visualization记录可视化过程的日志文件
 
@@ -165,8 +168,8 @@ PaddleHub AutoDL Finetuner 支持将train.py中的args其余不需要搜索的�
 
 ```shell
 $ OUTPUT=result/
-$ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=5 --round=10
- --output_dir=${OUTPUT} --evaluate_choice=fulltrail --tuning_strategy=pshe2 max_seq_len 128
+$ hub autofinetune train.py --param_file=hparam.yaml --gpu=0,1 --popsize=5 --round=10
+ --output_dir=${OUTPUT} --evaluator=fulltrail --tuning_strategy=pshe2 max_seq_len 128
 ```
 
 ## 七、其他
