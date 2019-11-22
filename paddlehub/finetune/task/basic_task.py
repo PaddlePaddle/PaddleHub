@@ -134,10 +134,6 @@ class BasicTask(object):
 
         self.exe = fluid.Executor(place=self.place)
         self.build_strategy = fluid.BuildStrategy()
-        if self.config.enable_memory_optim:
-            self.build_strategy.memory_optimize = True
-        else:
-            self.build_strategy.memory_optimize = False
 
         # log item
         if not os.path.exists(self.config.checkpoint_dir):
@@ -277,8 +273,6 @@ class BasicTask(object):
         share_vars_from = self._base_compiled_program
 
         if not self.config.use_data_parallel:
-            if self.config.enable_memory_optim:
-                fluid.memory_optimize(self.env.main_program)
             self.env.main_program_compiled = None
         else:
             self.env.main_program_compiled = fluid.CompiledProgram(
