@@ -54,7 +54,9 @@ dataset = hub.dataset.MSRA_NER()
 reader = hub.reader.SequenceLabelReader(
     dataset=dataset,
     vocab_path=module.get_vocab_path(),
-    max_seq_len=128)
+    max_seq_len=128,
+    sp_model_path=module.get_spm_path(),
+    word_dict_path=module.get_word_dict_path())
 ```
 
 其中数据集的准备代码可以参考 [msra_ner.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/msra_ner.py)
@@ -64,6 +66,10 @@ reader = hub.reader.SequenceLabelReader(
 `module.get_vaocab_path()` 会返回预训练模型对应的词表
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致
+
+`module.sp_model_path` 若module为ernie_tiny则返回对应的子词切分模型，否则返回None
+
+`module.word_dict_path` 若module为ernie_tiny则返回对应的词语切分模型，否则返回None
 
 SequenceLabelReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
 
