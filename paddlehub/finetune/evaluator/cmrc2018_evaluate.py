@@ -54,7 +54,6 @@ def mixed_segmentation(in_str, rm_punc=False):
         ss = nltk.word_tokenize(temp_str)
         segs_out.extend(ss)
 
-    print(segs_out)
     return segs_out
 
 
