@@ -25,6 +25,8 @@ import ast
 
 import six
 import pandas
+import imghdr
+import cv2
 import numpy as np
 
 from paddlehub.commands.base_command import BaseCommand, ENTRY
@@ -159,6 +161,8 @@ class RunCommand(BaseCommand):
                                                    self.args.use_strip)
             else:
                 if module_type.startswith("cv"):
+                    if hasattr(self.args, "input_path"):
+                        self.check_file()
                     input_data[key] = [self.args.input_path]
                 elif module_type.startswith("nlp"):
                     input_data[key] = [self.args.input_text]
@@ -200,6 +204,16 @@ class RunCommand(BaseCommand):
                         "ERROR: The number of values in input file is inconsistent with expectations."
                     )
                     raise DataFormatError
+
+    def check_file(self):
+        file_path = self.args.input_path
+        if not os.path.exists(file_path):
+            raise RuntimeError("ERROR: File %s is not exist." % file_path)
+        if imghdr.what(file_path) is not None or \
+                cv2.VideoCapture(file_path).get(cv2.CAP_PROP_FRAME_COUNT) > 1:
+            return
+
+        raise RuntimeError("ERROR: Format of %s is illegal." % file_path)
 
     def execute(self, argv):
         if not argv:
