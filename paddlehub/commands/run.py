@@ -209,7 +209,6 @@ class RunCommand(BaseCommand):
         file_path = self.args.input_path
         if not os.path.exists(file_path):
             raise RuntimeError("ERROR: File %s is not exist." % file_path)
-
         if imghdr.what(file_path) is not None or \
                 cv2.VideoCapture(file_path).get(cv2.CAP_PROP_FRAME_COUNT) > 1:
             return
