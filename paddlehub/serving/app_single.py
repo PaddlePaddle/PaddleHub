@@ -12,11 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 from flask import Flask, request, render_template
-from paddlehub.serving.model_service.text_model_service import TextModelService
-from paddlehub.serving.model_service.image_model_service import ImageModelService
+from paddlehub.serving.model_service.model_manage import default_module_manager
 from paddlehub.common import utils
-# from model_service.text_model_service import TextModelService
-# from model_service.image_model_service import ImageModelService
 import time
 import os
 import base64
@@ -269,7 +266,7 @@ def create_app():
                 file_name = req_id + "_" + item.filename
                 item.save(file_name)
                 file_name_list.append(file_name)
-        module = ImageModelService.get_module(module_name)
+        module = default_module_manager.get_module(module_name)
         predict_func_name = cv_module_method.get(module_name, "")
         if predict_func_name != "":
             predict_func = eval(predict_func_name)
@@ -297,7 +294,7 @@ def create_app():
                 file_name = req_id + "_" + file.filename
                 files[file_key].append(file_name)
                 file.save(file_name)
-        module = TextModelService.get_module(module_name)
+        module = default_module_manager.get_module(module_name)
         results = predict_nlp(
             module=module,
             input_text=inputs,
@@ -321,6 +318,7 @@ def config_with_file(configs):
         elif item["category"] == "NLP":
             nlp_module.append(item["module"])
         batch_size_dict.update({item["module"]: item["batch_size"]})
+        default_module_manager.load_module([item["module"]])
 
 
 def run(is_use_gpu=False, configs=None, port=8866, timeout=60):
