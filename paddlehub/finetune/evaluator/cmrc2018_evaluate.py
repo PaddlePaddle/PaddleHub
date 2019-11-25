@@ -15,7 +15,7 @@ import re
 
 import nltk
 
-from paddlehub.common.dir import THIRDPARTY_HOME
+from paddlehub.common.dir import THIRD_PARTY_HOME
 from paddlehub.common.downloader import default_downloader
 
 _PUNKT_URL = "https://paddlehub.bj.bcebos.com/paddlehub-thirdparty/punkt.tar.gz"
@@ -23,7 +23,7 @@ _PUNKT_URL = "https://paddlehub.bj.bcebos.com/paddlehub-thirdparty/punkt.tar.gz"
 
 # split Chinese with English
 def mixed_segmentation(in_str, rm_punc=False):
-    nltk_path = os.path.join(THIRDPARTY_HOME, "nltk_data")
+    nltk_path = os.path.join(THIRD_PARTY_HOME, "nltk_data")
     tokenizers_path = os.path.join(nltk_path, "tokenizers")
     punkt_path = os.path.join(tokenizers_path, "punkt")
     if not os.path.exists(punkt_path):
