@@ -33,20 +33,27 @@ inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
 
-如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
-PaddleHub还提供BERT模型可供选择, 所有模型对应的加载示例如下：
+PaddleHub还提供BERT等模型可供选择, 模型对应的加载示例如下：
 
    模型名                           | PaddleHub Module
 ---------------------------------- | :------:
 ERNIE, Chinese                     | `hub.Module(name='ernie')`
+ERNIE tiny, Chinese                | `hub.Module(name='ernie_tiny')`
+ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
+ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
 BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
 BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
 BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
 BERT-Large, Cased                  | `hub.Module(name='bert_cased_L-24_H-1024_A-16')`
 BERT-Base, Multilingual Cased      | `hub.Module(nane='bert_multi_cased_L-12_H-768_A-12')`
 BERT-Base, Chinese                 | `hub.Module(name='bert_chinese_L-12_H-768_A-12')`
+BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-768_A-12')`
+BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
+更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
 
-
+如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
 ```python
 # 更换name参数即可无缝切换BERT中文模型, 代码示例如下
 module = hub.Module(name="bert_chinese_L-12_H-768_A-12")

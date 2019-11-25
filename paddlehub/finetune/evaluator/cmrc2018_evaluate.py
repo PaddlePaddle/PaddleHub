@@ -9,20 +9,28 @@ v4: fixed segmentation issues
 '''
 from __future__ import print_function
 from collections import OrderedDict
-import re
-import json
-import nltk
-import sys
 
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    print("Downloading nltk punkt")
-    nltk.download('punkt')
+import os
+import re
+
+import nltk
+
+from paddlehub.common.dir import THIRD_PARTY_HOME
+from paddlehub.common.downloader import default_downloader
+
+_PUNKT_URL = "https://paddlehub.bj.bcebos.com/paddlehub-thirdparty/punkt.tar.gz"
 
 
 # split Chinese with English
 def mixed_segmentation(in_str, rm_punc=False):
+    nltk_path = os.path.join(THIRD_PARTY_HOME, "nltk_data")
+    tokenizers_path = os.path.join(nltk_path, "tokenizers")
+    punkt_path = os.path.join(tokenizers_path, "punkt")
+    if not os.path.exists(punkt_path):
+        default_downloader.download_file_and_uncompress(
+            url=_PUNKT_URL, save_path=tokenizers_path, print_progress=True)
+    nltk.data.path.append(nltk_path)
+
     in_str = str(in_str).lower().strip()
     segs_out = []
     temp_str = ""
