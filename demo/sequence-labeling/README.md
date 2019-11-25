@@ -34,7 +34,7 @@ inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
 
-PaddleHub还提供BERT模型可供选择, 模型对应的加载示例如下：
+PaddleHub还提供BERT等模型可供选择, 模型对应的加载示例如下：
 
    模型名                           | PaddleHub Module
 ---------------------------------- | :------:
