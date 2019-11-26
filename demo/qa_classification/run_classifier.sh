@@ -1,7 +1,6 @@
 export FLAGS_eager_delete_tensor_gb=0.0
 export CUDA_VISIBLE_DEVICES=0
 
-
 CKPT_DIR="./ckpt_qa"
 # Recommending hyper parameters for difference task
 # ChnSentiCorp: batch_size=24, weight_decay=0.01, num_epoch=3, max_seq_len=128, lr=5e-5

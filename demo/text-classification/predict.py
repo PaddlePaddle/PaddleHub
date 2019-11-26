@@ -45,7 +45,7 @@ if __name__ == '__main__':
     # Download dataset and use ClassifyReader to read dataset
     if args.dataset.lower() == "chnsenticorp":
         dataset = hub.dataset.ChnSentiCorp()
-        module = hub.Module(name="ernie")
+        module = hub.Module(name="ernie_tiny")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "nlpcc_dbqa":
         dataset = hub.dataset.NLPCC_DBQA()
