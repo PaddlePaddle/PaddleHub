@@ -148,6 +148,7 @@ if __name__ == '__main__':
     config = hub.RunConfig(
         use_cuda=args.use_gpu,
         use_data_parallel=True,
+        use_pyreader=False,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
         checkpoint_dir=args.checkpoint_dir,
