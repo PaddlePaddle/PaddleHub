@@ -17,4 +17,4 @@ python -u predict.py --checkpoint_dir=$CKPT_DIR \
                             --max_seq_len=128 \
                             --use_gpu=True \
                             --dataset=${DATASET} \
-                            --batch_size=150 \
+                            --batch_size=32 \
