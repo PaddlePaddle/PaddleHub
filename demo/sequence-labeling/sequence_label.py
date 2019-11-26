@@ -71,9 +71,6 @@ if __name__ == '__main__':
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
-        log_interval=10,
-        eval_interval=300,
-        save_ckpt_interval=10000,
         use_data_parallel=args.use_data_parallel,
         use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,
