@@ -47,7 +47,7 @@ if __name__ == '__main__':
     elif args.dataset.lower() == "tnews":
         dataset = hub.dataset.TNews()
         module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc", "f1"]
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == "nlpcc_dbqa":
         dataset = hub.dataset.NLPCC_DBQA()
         module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
@@ -59,19 +59,19 @@ if __name__ == '__main__':
     elif args.dataset.lower() == 'inews':
         dataset = hub.dataset.INews()
         module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc", "f1"]
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == 'bq':
         dataset = hub.dataset.BQ()
         module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc", "f1"]
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == 'thucnews':
         dataset = hub.dataset.THUCNEWS()
         module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc", "f1"]
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == 'iflytek':
         dataset = hub.dataset.IFLYTEK()
         module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc", "f1"]
+        metrics_choices = ["acc"]
     elif args.dataset.lower() == "mrpc":
         dataset = hub.dataset.GLUE("MRPC")
         module = hub.Module(name="ernie_v2_eng_base")
@@ -97,7 +97,7 @@ if __name__ == '__main__':
         dataset = hub.dataset.GLUE("RTE")
         module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
-    elif args.dataset.lower() == "mnli" or args.dataset.lower() == "mnli":
+    elif args.dataset.lower() == "mnli" or args.dataset.lower() == "mnli_m":
         dataset = hub.dataset.GLUE("MNLI_m")
         module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
