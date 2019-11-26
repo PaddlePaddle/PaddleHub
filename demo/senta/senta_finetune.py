@@ -39,6 +39,7 @@ if __name__ == '__main__':
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
         checkpoint_dir=args.checkpoint_dir,
+        use_pyreader=False,
         strategy=strategy)
 
     # Define a classfication finetune task by PaddleHub's API
