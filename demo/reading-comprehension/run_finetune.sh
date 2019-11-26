@@ -1,4 +1,5 @@
 export FLAGS_eager_delete_tensor_gb=0.0
+export CUDA_VISIBLE_DEVICES=0
 
 # Recommending hyper parameters for difference task
 # squad: batch_size=8, weight_decay=0, num_epoch=3, max_seq_len=512, lr=5e-5

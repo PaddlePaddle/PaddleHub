@@ -41,7 +41,7 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     # loading Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
+    module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
 
     # Sentence labeling dataset reader
@@ -49,7 +49,9 @@ if __name__ == '__main__':
     reader = hub.reader.SequenceLabelReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+        max_seq_len=args.max_seq_len,
+        sp_model_path=module.get_spm_path(),
+        word_dict_path=module.get_word_dict_path())
     inv_label_map = {val: key for key, val in reader.label_map.items()}
 
     place = fluid.CUDAPlace(0) if args.use_gpu else fluid.CPUPlace()

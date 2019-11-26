@@ -49,6 +49,7 @@ class ImageClassificationReader(object):
         self.data_augmentation = data_augmentation
         self.images_std = images_std
         self.images_mean = images_mean
+        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
 
         if self.images_mean is None:
             try:
@@ -80,12 +81,15 @@ class ImageClassificationReader(object):
             raise ValueError("The dataset is none and it's not allowed!")
         if phase == "train":
             data = self.dataset.train_data(shuffle)
+            self.num_examples['train'] = len(self.get_train_examples())
         elif phase == "test":
             shuffle = False
             data = self.dataset.test_data(shuffle)
+            self.num_examples['test'] = len(self.get_test_examples())
         elif phase == "val" or phase == "dev":
             shuffle = False
             data = self.dataset.validate_data(shuffle)
+            self.num_examples['dev'] = len(self.get_dev_examples())
         elif phase == "predict":
             data = data
 
