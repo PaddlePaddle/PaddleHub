@@ -1,3 +1,10 @@
+# `v1.4.0`
+
+* 新增预训练模型ERNIE tiny
+* 修复module与PaddlePaddle版本兼容性问题
+* 优化Hub Serving启动过程和模型加载流程，提高服务响应速度
+
+
 # `v1.3.0`
 
 * 新增PaddleHub Serving服务部署
