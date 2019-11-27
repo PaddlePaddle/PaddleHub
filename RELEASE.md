@@ -1,6 +1,7 @@
 # `v1.4.0`
 
 * 新增预训练模型ERNIE tiny
+* 新增数据集：INEWS、BQ、DRCD、CMRC2018、THUCNEWS，支持ChineseGLUE（CLUE）所有任务
 * 修复module与PaddlePaddle版本兼容性问题
 * 优化Hub Serving启动过程和模型加载流程，提高服务响应速度
 
