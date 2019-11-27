@@ -9,21 +9,21 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 * 便捷地获取PaddlePaddle生态下的所有预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、语言模型、视频分类、图像生成、图像分割等主流模型。
   * 更多详情可查看官网：https://www.paddlepaddle.org.cn/hub
 * 通过PaddleHub Fine-tune API，结合少量代码即可完成**大规模预训练模型**的迁移学习，具体Demo可参考以下链接：
-  * [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/text-classification)
-  * [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/sequence-labeling)
-  * [多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/multi-label-classification)
-  * [图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/image-classification)
-  * [检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/qa_classification)
-  * [回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/sentence_similarity)
-  * [句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/sentence_similarity)
-  * [阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/reading-comprehension)
+  * [文本分类](./demo/text-classification)
+  * [序列标注](./demo/sequence-labeling)
+  * [多标签分类](./demo/multi-label-classification)
+  * [图像分类](./demo/image-classification)
+  * [检索式问答任务](./demo/qa_classification)
+  * [回归任务](./demo/sentence_similarity)
+  * [句子语义相似度计算](./demo/sentence_similarity)
+  * [阅读理解任务](./demo/reading-comprehension)
 * 支持超参优化（AutoDL Finetuner），自动调整超参数，给出效果较佳的超参数组合。
-  * [PaddleHub超参优化功能AutoDL Finetuner使用示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/autofinetune)
+  * [PaddleHub超参优化功能AutoDL Finetuner使用示例](./demo/autofinetune)
 * 引入『**模型即软件**』的设计理念，通过Python API或者命令行实现一键预测，更方便地应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 * 一键Module服务化部署 - HubServing
   * [PaddleHub-Serving一键服务部署](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)
-  * [使用示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.3/demo/serving)
+  * [使用示例](./demo/serving)
 
 ## 目录
 
@@ -149,4 +149,4 @@ print(res)
 
 ## 更新历史
 
-详情参考[更新历史](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.3/RELEASE.md)
+详情参考[更新历史](./RELEASE.md)
