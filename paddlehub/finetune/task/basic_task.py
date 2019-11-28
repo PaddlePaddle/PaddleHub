@@ -22,6 +22,9 @@ import contextlib
 import time
 import copy
 import logging
+import inspect
+from functools import partial
+
 import numpy as np
 import paddle.fluid as fluid
 from tb_paddle import SummaryWriter
@@ -76,6 +79,87 @@ class RunEnv(object):
 
     def __getattr__(self, key):
         return self.__dict__[key]
+
+
+class Task_Hooks():
+    def __init__(self):
+        self._registered_hooks = {
+            "build_env_start": {},
+            "build_env_end": {},
+            "finetune_start": {},
+            "finetune_end": {},
+            "predict_start": {},
+            "predict_end": {},
+            "eval_start": {},
+            "eval_end": {},
+            "log_interval": {},
+            "save_ckpt_interval": {},
+            "eval_interval": {},
+            "run_step": {},
+        }
+        self._hook_parms_num = {
+            "build_env_start": 1,
+            "build_env_end": 1,
+            "finetune_start": 1,
+            "finetune_end": 2,
+            "predict_start": 1,
+            "predict_end": 2,
+            "eval_start": 1,
+            "eval_end": 2,
+            "log_interval": 2,
+            "save_ckpt_interval": 1,
+            "eval_interval": 1,
+            "run_step": 2,
+        }
+
+    def add(self, type, *args):
+        if len(args) == 1:
+            name = ""
+            func = args[0]
+        elif len(args) == 2:
+            name = args[0]
+            func = args[1]
+        if type not in self._registered_hooks:
+            raise Exception("type: %s is not exist" % (type))
+        if not name and name != 0:
+            name = "hook_" + id(func)
+        if name in self._registered_hooks[type]:
+            raise Exception(
+                "name: %s has existed in type:%s, use function: modify to modify it"
+                % (name, type))
+        else:
+            args_num = len(inspect.getfullargspec(func).args)
+            if args_num != self._hook_parms_num[type]:
+                raise Exception(
+                    "The number of parameters to the hook type:%s should be %i"
+                    % (type, self._hook_parms_num[type]))
+            self._registered_hooks[type][name] = func
+
+    def delete(self, type, name):
+        if self.is_exist(type, name):
+            del self._registered_hooks[type][name]
+
+    def modify(self, type, name, func):
+        if self.is_exist(type, name):
+            self._registered_hooks[type][name] = func
+
+    def is_exist(self, type, name):
+        if type not in self._registered_hooks:
+            raise Exception("type: %s is not exist" % (type))
+        if name not in self._registered_hooks[type]:
+            raise Exception("name: %s is not exist in type: %s" % (type))
+        return True
+
+    def __call__(self, type):
+        return self._registered_hooks[type]
+
+    def __repr__(self):
+        ret = copy.deepcopy(self._registered_hooks)
+        for type, type_d in ret.items():
+            for name, func in type_d.items():
+                type_d[name] = inspect.getsource(func)
+        #TODO: Format output
+        return str(ret)
 
 
 class BasicTask(object):
@@ -145,6 +229,14 @@ class BasicTask(object):
         self._phases = []
         self._envs = {}
         self._predict_data = None
+
+        # event hooks
+        self._hooks = Task_Hooks()
+        for type, event_hooks in self._hooks._registered_hooks.items():
+            self._hooks.add(type, "default",
+                            eval("self._default_%s_event" % type))
+            setattr(BasicTask, "_%s_event" % type,
+                    self.create_event_function(type))
 
         # accelerate predict
         self.is_best_model_loaded = False
@@ -442,29 +534,39 @@ class BasicTask(object):
             return [metric.name for metric in self.metrics] + [self.loss.name]
         return [output.name for output in self.outputs]
 
-    def _build_env_start_event(self):
+    def create_event_function(self, type):
+        def hook_function(self, *args):
+            for name, func in self.hook.registered_hook[type].items():
+                if inspect.ismethod(func):
+                    func(*args)
+                else:
+                    partial(func, self)(*args)
+
+        return hook_function
+
+    def _default_build_env_start_event(self):
         pass
 
-    def _build_env_end_event(self):
+    def _default_build_env_end_event(self):
         if not self.is_predict_phase:
             self.env.score_scalar = {}
 
-    def _finetune_start_event(self):
+    def _default_finetune_start_event(self):
         logger.info("PaddleHub finetune start")
 
-    def _finetune_end_event(self, run_states):
+    def _default_finetune_end_event(self, run_states):
         logger.info("PaddleHub finetune finished.")
 
-    def _predict_start_event(self):
+    def _default_predict_start_event(self):
         logger.info("PaddleHub predict start")
 
-    def _predict_end_event(self, run_states):
+    def _default_predict_end_event(self, run_states):
         logger.info("PaddleHub predict finished.")
 
-    def _eval_start_event(self):
+    def _default_eval_start_event(self):
         logger.info("Evaluation on {} dataset start".format(self.phase))
 
-    def _eval_end_event(self, run_states):
+    def _default_eval_end_event(self, run_states):
         eval_scores, eval_loss, run_speed = self._calculate_metrics(run_states)
         if 'train' in self._envs:
             self.tb_writer.add_scalar(
@@ -506,7 +608,7 @@ class BasicTask(object):
                 dirname=model_saved_dir,
                 main_program=self.main_program)
 
-    def _log_interval_event(self, run_states):
+    def _default_log_interval_event(self, run_states):
         scores, avg_loss, run_speed = self._calculate_metrics(run_states)
         self.tb_writer.add_scalar(
             tag="Loss_{}".format(self.phase),
@@ -523,15 +625,14 @@ class BasicTask(object):
                     (self.current_step, self.max_train_steps, avg_loss,
                      log_scores, run_speed))
 
-    def _save_ckpt_interval_event(self):
+    def _default_save_ckpt_interval_event(self):
         self.save_checkpoint()
 
-    def _eval_interval_event(self):
+    def _default_eval_interval_event(self):
         self.eval(phase="dev")
 
-    def _run_step_event(self, run_state):
-        if self.is_predict_phase:
-            yield run_state.run_results
+    def _default_run_step_event(self, run_state):
+        raise NotImplementedError
 
     def _build_net(self):
         raise NotImplementedError
