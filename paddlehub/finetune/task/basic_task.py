@@ -122,7 +122,7 @@ class Task_Hooks():
         if type not in self._registered_hooks:
             raise Exception("type: %s is not exist" % (type))
         if not name and name != 0:
-            name = "hook_" + id(func)
+            name = "hook_%s" % id(func)
         if name in self._registered_hooks[type]:
             raise Exception(
                 "name: %s has existed in type:%s, use modify method to modify it"
