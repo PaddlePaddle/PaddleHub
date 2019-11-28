@@ -632,7 +632,7 @@ class BasicTask(object):
         self.eval(phase="dev")
 
     def _default_run_step_event(self, run_state):
-        raise NotImplementedError
+        pass
 
     def _build_net(self):
         raise NotImplementedError
