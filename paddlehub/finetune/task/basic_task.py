@@ -125,7 +125,7 @@ class Task_Hooks():
             name = "hook_" + id(func)
         if name in self._registered_hooks[type]:
             raise Exception(
-                "name: %s has existed in type:%s, use function: modify to modify it"
+                "name: %s has existed in type:%s, use modify method to modify it"
                 % (name, type))
         else:
             args_num = len(inspect.getfullargspec(func).args)
@@ -543,6 +543,15 @@ class BasicTask(object):
                     partial(func, self)(*args)
 
         return hook_function
+
+    def add_hook(self, type, *args):
+        self._hooks.add(type, *args)
+
+    def delete_hook(self, type, name):
+        self._hooks.delete(type, name)
+
+    def modify_hook(self, type, name, func):
+        self._hooks.modify(type, name, func)
 
     def _default_build_env_start_event(self):
         pass

@@ -171,6 +171,16 @@ if __name__ == '__main__':
         config=config,
         metrics_choices=metrics_choices)
 
+    from paddlehub.common.logger import logger
+
+    def func(self, run_states):
+        logger.info("Test " * 10)
+        print(self.best_score)
+        print(len(run_states))
+        logger.info("Test " * 10)
+
+    cls_task.add_hook("log_interval", "myhook", func)
+
     # Finetune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically
     cls_task.finetune_and_eval()
