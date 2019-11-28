@@ -261,6 +261,10 @@ class BasicTask(object):
                 var = self.env.main_program.global_block().vars[var_name]
                 var.persistable = True
 
+        # to avoid to print logger two times in result of the logger usage of paddle-fluid
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+
         if self.is_train_phase:
             with fluid.program_guard(self.env.main_program,
                                      self._base_startup_program):
@@ -286,10 +290,6 @@ class BasicTask(object):
                     build_strategy=self.build_strategy)
 
         self.exe.run(self.env.startup_program)
-
-        # to avoid to print logger two times in result of the logger usage of paddle-fluid
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
 
         self._build_env_end_event()
 
