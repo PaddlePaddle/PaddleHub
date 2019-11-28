@@ -19,10 +19,12 @@ from __future__ import print_function
 
 import time
 from collections import OrderedDict
+
 import numpy as np
 import paddle
 import paddle.fluid as fluid
 from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
+from paddlehub.common.utils import version_compare
 from .basic_task import BasicTask
 
 
@@ -62,7 +64,7 @@ class SequenceLabelTask(BasicTask):
             return True
 
     def _build_net(self):
-        if paddle.__version__ >= "1.6":
+        if version_compare(paddle.__version__, "1.6"):
             self.seq_len = fluid.layers.data(
                 name="seq_len", shape=[-1], dtype='int64')
         else:
