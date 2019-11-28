@@ -174,12 +174,27 @@ if __name__ == '__main__':
     from paddlehub.common.logger import logger
 
     def func(self, run_states):
-        logger.info("Test " * 10)
+        logger.info("default " * 10)
         print(self.best_score)
         print(len(run_states))
-        logger.info("Test " * 10)
+        logger.info("default " * 10)
 
-    cls_task.add_hook("log_interval", "myhook", func)
+    def func1(self, run_states):
+        logger.info("modify " * 10)
+        print(self.best_score)
+        print(len(run_states))
+        logger.info("modify " * 10)
+
+    def func2(self, run_states):
+        logger.info("add " * 10)
+        print(self.best_score)
+        print(len(run_states))
+        logger.info("add " * 10)
+
+    cls_task.delete_hook("log_interval", "default")
+    cls_task.add_hook("log_interval", "default", func)
+    cls_task.modify_hook("log_interval", "default", func1)
+    cls_task.add_hook("log_interval", func2)
 
     # Finetune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically
