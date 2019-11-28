@@ -536,7 +536,7 @@ class BasicTask(object):
 
     def create_event_function(self, type):
         def hook_function(self, *args):
-            for name, func in self.hook.registered_hook[type].items():
+            for name, func in self._hooks(type).items():
                 if inspect.ismethod(func):
                     func(*args)
                 else:
