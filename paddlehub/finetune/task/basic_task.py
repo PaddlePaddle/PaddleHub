@@ -174,7 +174,7 @@ class Task_Hooks():
                 for line in source.split("\n"):
                     ret += "\t\t%s\n" % line
                 ret += "\t}\n"
-            ret += "}"
+            ret += "}\n"
         return ret
 
     def __call__(self, type):
