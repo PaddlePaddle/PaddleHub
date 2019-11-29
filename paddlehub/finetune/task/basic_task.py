@@ -167,16 +167,22 @@ class Task_Hooks():
         # formatted output the source code
         ret = ""
         for type, hooks in self._registered_hooks.items():
-            ret += "hook type: %s{\n" % type
+            already_print_type = False
             for name, func in hooks.items():
                 if name == "default" and only_customized:
                     continue
+                if not already_print_type:
+                    ret += "hook type: %s{\n" % type
+                    already_print_type = True
                 source = inspect.getsource(func)
-                ret += "    name: %s{\n" % name
+                ret += " name: %s{\n" % name
                 for line in source.split("\n"):
-                    ret += "        %s\n" % line
-                ret += "    }\n"
-            ret += "}\n"
+                    ret += "  %s\n" % line
+                ret += " }\n"
+            if already_print_type:
+                ret += "}\n"
+        if not ret:
+            ret = "Not any hooks when only_customized=%s" % only_customized
         return ret
 
     def __call__(self, type):
