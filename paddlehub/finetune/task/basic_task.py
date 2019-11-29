@@ -163,12 +163,14 @@ class Task_Hooks():
             raise ValueError("name: %s is not exist in type: %s" % (type))
         return True
 
-    def show(self):
+    def show(self, only_customized=True):
         # formatted output the source code
         ret = ""
         for type, hooks in self._registered_hooks.items():
             ret += "hook type: %s{\n" % type
             for name, func in hooks.items():
+                if name == "default" and only_customized:
+                    continue
                 source = inspect.getsource(func)
                 ret += "    name: %s{\n" % name
                 for line in source.split("\n"):
@@ -181,7 +183,7 @@ class Task_Hooks():
         return self._registered_hooks[type]
 
     def __repr__(self):
-        return self.show()
+        return self.show(only_customized=False)
 
 
 class BasicTask(object):
@@ -563,8 +565,8 @@ class BasicTask(object):
         return hook_function
 
     @property
-    def hooks(self):
-        return self._hooks.show()
+    def hooks(self, only_customized=True):
+        return self._hooks.show(only_customized)
 
     def add_hook(self, type, *args):
         self._hooks.add(type, *args)
