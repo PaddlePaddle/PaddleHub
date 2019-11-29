@@ -170,10 +170,10 @@ class Task_Hooks():
             ret += "hook type: %s{\n" % type
             for name, func in hooks.items():
                 source = inspect.getsource(func)
-                ret += "\tname: %s{\n" % name
+                ret += "    name: %s{\n" % name
                 for line in source.split("\n"):
-                    ret += "\t\t%s\n" % line
-                ret += "\t}\n"
+                    ret += "        %s\n" % line
+                ret += "    }\n"
             ret += "}\n"
         return ret
 
