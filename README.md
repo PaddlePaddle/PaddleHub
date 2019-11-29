@@ -40,7 +40,7 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 ### 环境依赖
 * Python==2.7 or Python>=3.5 for Linux or Mac
 
-  ==Python>=3.6 for Windows==
+  **Python>=3.6 for Windows**
 
 * PaddlePaddle>=1.6.1
 
