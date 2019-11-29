@@ -158,9 +158,10 @@ class Task_Hooks():
 
     def exist(self, type, name):
         if type not in self._registered_hooks:
-            raise ValueError("type: %s is not exist" % (type))
+            raise ValueError("type: %s does not exist" % (type))
         if name not in self._registered_hooks[type]:
-            raise ValueError("name: %s is not exist in type: %s" % (type))
+            raise ValueError(
+                "name: %s does not exist in type: %s" % (name, type))
         return True
 
     def show(self, only_customized=True):
