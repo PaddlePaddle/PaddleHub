@@ -131,7 +131,7 @@ class Task_Hooks():
 
         # check validity
         if type not in self._registered_hooks:
-            raise ValueError("type: %s is not exist" % (type))
+            raise ValueError("type: %s does not exist" % (type))
         if name in self._registered_hooks[type]:
             raise ValueError(
                 "name: %s has existed in type:%s, use modify method to modify it"
