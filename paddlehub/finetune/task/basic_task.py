@@ -120,46 +120,51 @@ class Task_Hooks():
             name = args[0]
             func = args[1]
         if type not in self._registered_hooks:
-            raise Exception("type: %s is not exist" % (type))
+            raise ValueError("type: %s is not exist" % (type))
         if not name and name != 0:
             name = "hook_%s" % id(func)
         if name in self._registered_hooks[type]:
-            raise Exception(
+            raise ValueError(
                 "name: %s has existed in type:%s, use modify method to modify it"
                 % (name, type))
         else:
             args_num = len(inspect.getfullargspec(func).args)
             if args_num != self._hook_parms_num[type]:
-                raise Exception(
+                raise ValueError(
                     "The number of parameters to the hook type:%s should be %i"
                     % (type, self._hook_parms_num[type]))
             self._registered_hooks[type][name] = func
 
     def delete(self, type, name):
-        if self.is_exist(type, name):
+        if self.exist(type, name):
             del self._registered_hooks[type][name]
 
     def modify(self, type, name, func):
-        if self.is_exist(type, name):
+        if self.exist(type, name):
             self._registered_hooks[type][name] = func
 
-    def is_exist(self, type, name):
+    def exist(self, type, name):
         if type not in self._registered_hooks:
-            raise Exception("type: %s is not exist" % (type))
+            raise ValueError("type: %s is not exist" % (type))
         if name not in self._registered_hooks[type]:
-            raise Exception("name: %s is not exist in type: %s" % (type))
+            raise ValueError("name: %s is not exist in type: %s" % (type))
         return True
 
     def __call__(self, type):
         return self._registered_hooks[type]
 
     def __repr__(self):
-        ret = copy.deepcopy(self._registered_hooks)
-        for type, type_d in ret.items():
-            for name, func in type_d.items():
-                type_d[name] = inspect.getsource(func)
-        #TODO: Format output
-        return str(ret)
+        ret = ""
+        for type, hooks in self._registered_hooks.items():
+            ret += "hook type: %s{\n" % type
+            for name, func in hooks.items():
+                source = inspect.getsource(func)
+                ret += "\tname: %s{\n" % name
+                for line in source.split("\n"):
+                    ret += "\t\t%s\n" % line
+                ret += "\t}\n"
+            ret += "}"
+        return ret
 
 
 class BasicTask(object):
