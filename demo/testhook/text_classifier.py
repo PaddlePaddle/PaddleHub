@@ -171,6 +171,73 @@ if __name__ == '__main__':
         config=config,
         metrics_choices=metrics_choices)
 
+    from paddlehub.common.logger import logger
+
+    def func(self, run_states):
+        scores, avg_loss, run_speed = self._calculate_metrics(run_states)
+        self.tb_writer.add_scalar(
+            tag="Loss_{}".format(self.phase),
+            scalar_value=avg_loss,
+            global_step=self._envs['train'].current_step)
+        log_scores = ""
+        for metric in scores:
+            self.tb_writer.add_scalar(
+                tag="{}_{}".format(metric, self.phase),
+                scalar_value=scores[metric],
+                global_step=self._envs['train'].current_step)
+            log_scores += "%s=%.5f " % (metric, scores[metric])
+        logger.info("NEW DEFAULT step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
+                    (self.current_step, self.max_train_steps, avg_loss,
+                     log_scores, run_speed))
+
+    def func1(self, run_states):
+        logger.info("modify modify modify self.best_score=%s len(run_states)=%s"
+                    % (self.best_score, len(run_states)))
+
+    def func2(self, run_states):
+        logger.info("add2 add2 add2 self.best_score=%s len(run_states)=%s" %
+                    (self.best_score, len(run_states)))
+
+    cls_task.delete_hook("log_interval", "default")
+    cls_task.add_hook("log_interval", "add", func)
+    cls_task.add_hook("log_interval", "modified", func)
+    cls_task.modify_hook("log_interval", "modified", func1)
+    cls_task.add_hook("log_interval", func2)
+    print(cls_task.hooks)
+    try:
+        cls_task.add_hook("log_interval", 000, func)
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.add_hook("log_interval", 111)
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.add_hook("log_interval")
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.add_hook("xxx_interval", func)
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.delete_hook("xxx_interval", "xxx")
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.delete_hook("log_interval", "xxx")
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.modify_hook("log_interval", "xxx", func)
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.modify_hook("log_interval", "modified", 111)
+    except Exception as e:
+        print(e)
+
+    print(cls_task.hooks)
     # Finetune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically
     cls_task.finetune_and_eval()

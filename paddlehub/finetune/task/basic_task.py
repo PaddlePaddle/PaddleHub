@@ -113,16 +113,25 @@ class Task_Hooks():
         }
 
     def add(self, type, *args):
+        # support two types of parameters input
         if len(args) == 1:
-            name = ""
             func = args[0]
+            name = "hook_%s" % id(func)
+            if not callable(func):
+                raise ValueError("The hook function must be a function")
         elif len(args) == 2:
             name = args[0]
             func = args[1]
+            if not (isinstance(name, str) and callable(func)):
+                raise ValueError(
+                    "The hook name must be a string, and the hook function must be a function"
+                )
+        else:
+            raise ValueError("Parameter quantity error")
+
+        # check validity
         if type not in self._registered_hooks:
             raise ValueError("type: %s is not exist" % (type))
-        if not name and name != 0:
-            name = "hook_%s" % id(func)
         if name in self._registered_hooks[type]:
             raise ValueError(
                 "name: %s has existed in type:%s, use modify method to modify it"
@@ -140,6 +149,10 @@ class Task_Hooks():
             del self._registered_hooks[type][name]
 
     def modify(self, type, name, func):
+        if not (isinstance(name, str) and callable(func)):
+            raise ValueError(
+                "The hook name must be a string, and the hook function must be a function"
+            )
         if self.exist(type, name):
             self._registered_hooks[type][name] = func
 
@@ -150,10 +163,8 @@ class Task_Hooks():
             raise ValueError("name: %s is not exist in type: %s" % (type))
         return True
 
-    def __call__(self, type):
-        return self._registered_hooks[type]
-
-    def __repr__(self):
+    def show(self):
+        # formatted output the source code
         ret = ""
         for type, hooks in self._registered_hooks.items():
             ret += "hook type: %s{\n" % type
@@ -165,6 +176,12 @@ class Task_Hooks():
                 ret += "\t}\n"
             ret += "}"
         return ret
+
+    def __call__(self, type):
+        return self._registered_hooks[type]
+
+    def __repr__(self):
+        return self.show()
 
 
 class BasicTask(object):
@@ -358,6 +375,10 @@ class BasicTask(object):
                 var = self.env.main_program.global_block().vars[var_name]
                 var.persistable = True
 
+        # to avoid to print logger two times in result of the logger usage of paddle-fluid
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+
         if self.is_train_phase:
             with fluid.program_guard(self.env.main_program,
                                      self._base_startup_program):
@@ -383,10 +404,6 @@ class BasicTask(object):
                     build_strategy=self.build_strategy)
 
         self.exe.run(self.env.startup_program)
-
-        # to avoid to print logger two times in result of the logger usage of paddle-fluid
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
 
         self._build_env_end_event()
 
@@ -548,6 +565,10 @@ class BasicTask(object):
                     partial(func, self)(*args)
 
         return hook_function
+
+    @property
+    def hooks(self):
+        return self._hooks.show()
 
     def add_hook(self, type, *args):
         self._hooks.add(type, *args)

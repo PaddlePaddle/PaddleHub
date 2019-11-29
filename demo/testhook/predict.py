@@ -14,24 +14,27 @@
 # limitations under the License.
 """Finetuning on classification task """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import argparse
 import ast
+import numpy as np
+import os
+import time
+import paddle
 import paddle.fluid as fluid
 import paddlehub as hub
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
-parser.add_argument("--dataset", type=str, default="chnsenticorp", help="The choice of dataset")
-parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
-parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
-parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
-parser.add_argument("--data_dir", type=str, default=None, help="Path to training data.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
+parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
-parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
+parser.add_argument("--dataset", type=str, default="chnsenticorp", help="The choice of dataset")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
 args = parser.parse_args()
 # yapf: enable.
@@ -112,55 +115,41 @@ if __name__ == '__main__':
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
 
-    # Check metric
     support_metrics = ["acc", "f1", "matthews"]
     for metric in metrics_choices:
         if metric not in support_metrics:
             raise ValueError("\"%s\" metric is not defined" % metric)
 
-    # Start preparing parameters for reader and task accoring to module
-    # For ernie_v2, it has an addition embedding named task_id
-    # For ernie_v2_chinese_tiny, it use an addition sentence_piece_vocab to tokenize
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
+    reader = hub.reader.ClassifyReader(
+        dataset=dataset,
+        vocab_path=module.get_vocab_path(),
+        max_seq_len=args.max_seq_len)
+
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
     pooled_output = outputs["pooled_output"]
 
     # Setup feed list for data feeder
-    # Must feed all the tensor of module need
+    # Must feed all the tensor of ERNIE's module need
     feed_list = [
         inputs["input_ids"].name,
         inputs["position_ids"].name,
         inputs["segment_ids"].name,
         inputs["input_mask"].name,
     ]
-    # Finish preparing parameter for reader and task accoring to modul
-
-    # Define reader
-    reader = hub.reader.ClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        sp_model_path=module.get_spm_path(),
-        word_dict_path=module.get_word_dict_path())
-
-    # Select finetune strategy, setup config and finetune
-    strategy = hub.AdamWeightDecayStrategy(
-        weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate,
-        lr_scheduler="linear_decay")
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
-        use_data_parallel=args.use_data_parallel,
+        use_data_parallel=False,
         use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,
-        num_epoch=args.num_epoch,
         batch_size=args.batch_size,
+        enable_memory_optim=False,
         checkpoint_dir=args.checkpoint_dir,
-        strategy=strategy)
+        strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
     # Define a classfication finetune task by PaddleHub's API
     cls_task = hub.TextClassifierTask(
@@ -171,6 +160,83 @@ if __name__ == '__main__':
         config=config,
         metrics_choices=metrics_choices)
 
-    # Finetune and evaluate by PaddleHub's API
-    # will finish training, evaluation, testing, save model automatically
-    cls_task.finetune_and_eval()
+    from paddlehub.common.logger import logger
+
+    def func(self, run_states):
+        scores, avg_loss, run_speed = self._calculate_metrics(run_states)
+        self.tb_writer.add_scalar(
+            tag="Loss_{}".format(self.phase),
+            scalar_value=avg_loss,
+            global_step=self._envs['train'].current_step)
+        log_scores = ""
+        for metric in scores:
+            self.tb_writer.add_scalar(
+                tag="{}_{}".format(metric, self.phase),
+                scalar_value=scores[metric],
+                global_step=self._envs['train'].current_step)
+            log_scores += "%s=%.5f " % (metric, scores[metric])
+        logger.info("NEW DEFAULT step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
+                    (self.current_step, self.max_train_steps, avg_loss,
+                     log_scores, run_speed))
+
+    def func1(self, run_states):
+        logger.info("modify modify modify self.best_score=%s len(run_states)=%s"
+                    % (self.best_score, len(run_states)))
+
+    def func2(self, run_states):
+        logger.info("add2 add2 add2 self.best_score=%s len(run_states)=%s" %
+                    (self.best_score, len(run_states)))
+
+    cls_task.delete_hook("log_interval", "default")
+    cls_task.add_hook("log_interval", "add", func)
+    cls_task.add_hook("log_interval", "modified", func)
+    cls_task.modify_hook("log_interval", "modified", func1)
+    cls_task.add_hook("log_interval", func2)
+    print(cls_task.hooks)
+    try:
+        cls_task.add_hook("log_interval", 000, func)
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.add_hook("log_interval", 111)
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.add_hook("log_interval")
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.add_hook("xxx_interval", func)
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.delete_hook("xxx_interval", "xxx")
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.delete_hook("log_interval", "xxx")
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.modify_hook("log_interval", "xxx", func)
+    except Exception as e:
+        print(e)
+    try:
+        cls_task.modify_hook("log_interval", "modified", 111)
+    except Exception as e:
+        print(e)
+
+    print(cls_task.hooks)
+
+    # Data to be prdicted
+    data = [[d.text_a, d.text_b] for d in dataset.get_dev_examples()[:3]]
+
+    index = 0
+    run_states = cls_task.predict(data=data)
+    results = [run_state.run_results for run_state in run_states]
+    for batch_result in results:
+        # get predict index
+        batch_result = np.argmax(batch_result, axis=2)[0]
+        for result in batch_result:
+            print("%s\tpredict=%s" % (data[index][0], result))
+            index += 1
