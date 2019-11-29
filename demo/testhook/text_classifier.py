@@ -199,11 +199,12 @@ if __name__ == '__main__':
                     (self.best_score, len(run_states)))
 
     cls_task.delete_hook("log_interval", "default")
+    print(cls_task.hooks)
     cls_task.add_hook("log_interval", "add", func)
     cls_task.add_hook("log_interval", "modified", func)
+    print(cls_task.hooks)
     cls_task.modify_hook("log_interval", "modified", func1)
     cls_task.add_hook("log_interval", func2)
-    print(cls_task.hooks)
     try:
         cls_task.add_hook("log_interval", 000, func)
     except Exception as e:
@@ -237,7 +238,6 @@ if __name__ == '__main__':
     except Exception as e:
         print(e)
 
-    print(cls_task.hooks)
     # Finetune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically
     cls_task.finetune_and_eval()

@@ -37,9 +37,9 @@ class Logger(object):
         self.format = logging.Formatter(
             '[%(asctime)-15s] [%(levelname)8s] - %(message)s')
         self.handler.setFormatter(self.format)
-
         self.logger.addHandler(self.handler)
         self.logLevel = "DEBUG"
+        self.logger.propagate = False
         self.logger.setLevel(self._get_logging_level())
         if os.path.exists(os.path.join(CONF_HOME, "config.json")):
             with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
