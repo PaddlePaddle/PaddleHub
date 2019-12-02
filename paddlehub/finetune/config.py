@@ -109,3 +109,8 @@ class RunConfig(object):
     @property
     def use_data_parallel(self):
         return self._use_data_parallel
+
+    def __repr__(self):
+        return "config with num_epoch=%s, batch_size=%s, use_cuda=%s, checkpoint_dir=%s and strategy=%s" % (
+            self.num_epoch, self.batch_size, self.use_cuda, self.checkpoint_dir,
+            self.strategy.__class__.__name__)
