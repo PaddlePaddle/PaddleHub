@@ -287,10 +287,6 @@ class BasicTask(object):
 
         self.exe.run(self.env.startup_program)
 
-        # to avoid to print logger two times in result of the logger usage of paddle-fluid
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
-
         self._build_env_end_event()
 
     @property
@@ -755,3 +751,8 @@ class BasicTask(object):
                 break
 
         return global_run_states
+
+    def __repr__(self):
+        return "Task %s with metrics_choices: %s and Reader: %s" % (
+            self.__class__.__name__, self.metrics_choices,
+            self._base_data_reader.__class__.__name__)
