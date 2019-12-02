@@ -453,7 +453,7 @@ class BasicTask(object):
         logger.training("PaddleHub finetune start")
 
     def _finetune_end_event(self, run_states):
-        logger.training("PaddleHub finetune finished.")
+        logger.info("PaddleHub finetune finished.")
 
     def _predict_start_event(self):
         logger.info("PaddleHub predict start")
