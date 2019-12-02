@@ -17,6 +17,7 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
 
+import colorlog
 import logging
 import math
 import os
@@ -32,15 +33,15 @@ class Logger(object):
     def __init__(self, name=None):
         if not name:
             name = "PaddleHub"
-        self.logger = logging.getLogger(name)
-        self.handler = logging.StreamHandler()
-        self.format = logging.Formatter(
-            '[%(asctime)-15s] [%(levelname)8s] - %(message)s')
+        self.logger = colorlog.getLogger(name)
+        self.handler = colorlog.StreamHandler()
+        self.format = colorlog.ColoredFormatter(
+            '%(log_color)s[%(asctime)-15s] [%(levelname)8s] - %(message)s')
         self.handler.setFormatter(self.format)
-
         self.logger.addHandler(self.handler)
         self.logLevel = "DEBUG"
         self.logger.setLevel(self._get_logging_level())
+        self.logger.propagate = False
         if os.path.exists(os.path.join(CONF_HOME, "config.json")):
             with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
                 level = json.load(fp).get("log_level", "DEBUG")

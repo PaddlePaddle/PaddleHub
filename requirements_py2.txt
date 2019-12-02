@@ -15,3 +15,4 @@ tensorboard >= 1.15
 cma == 2.7.0
 sentencepiece
 nltk
+colorlog
