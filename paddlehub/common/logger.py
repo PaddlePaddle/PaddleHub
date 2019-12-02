@@ -51,10 +51,10 @@ class Logger(object):
                 'DEBUG': 'purple',
                 'INFO': 'green',
                 'WARNING': 'yellow',
-                'ERROR': 'bold_red',
+                'ERROR': 'red',
                 'CRITICAL': 'bold_red',
-                'TRAINING': 'cyan',
-                'EVALUATING': 'blue',
+                'TRAINING': 'blue',
+                'EVALUATING': 'bold_blue',
             })
         self.handler.setFormatter(self.format)
         self.logger.addHandler(self.handler)
