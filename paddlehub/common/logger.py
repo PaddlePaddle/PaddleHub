@@ -32,12 +32,12 @@ class Logger(object):
     WARNING = 30
     ERROR = 40
     CRITICAL = 50
-    TRAINING = 21
-    EVALUATING = 22
+    TRAIN = 21
+    EVAL = 22
     PLACEHOLDER = '%'
     NOLOG = "NOLOG"
-    logging.addLevelName(TRAINING, 'TRAINING')
-    logging.addLevelName(EVALUATING, 'EVALUATING')
+    logging.addLevelName(TRAIN, 'TRAIN')
+    logging.addLevelName(EVAL, 'EVAL')
 
     def __init__(self, name=None):
         if not name:
@@ -46,7 +46,7 @@ class Logger(object):
         self.handler = logging.StreamHandler()
 
         self.format = colorlog.ColoredFormatter(
-            '%(log_color)s[%(asctime)-15s] [%(levelname)10s] - %(message)s',
+            '%(log_color)s[%(asctime)-15s] [%(levelname)8s] - %(message)s',
             log_colors={
                 'DEBUG': 'purple',
                 'INFO': 'green',
@@ -145,10 +145,10 @@ class Logger(object):
         self(logger.CRITICAL, msg)
 
     def training(self, msg):
-        self(logger.TRAINING, msg)
+        self(logger.TRAIN, msg)
 
     def evaluating(self, msg):
-        self(logger.EVALUATING, msg)
+        self(logger.EVAL, msg)
 
 
 logger = Logger()
