@@ -1,3 +1,8 @@
+# `v1.4.1`
+
+* 修复利用Transformer类模型完成序列标注任务适配paddle1.6版本的问题
+* Windows下兼容性提升为python >= 3.6
+
 # `v1.4.0`
 
 * 新增预训练模型ERNIE tiny
