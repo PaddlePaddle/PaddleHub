@@ -99,11 +99,14 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 |类别|AIStudio链接|
 |-|-|
+|ERNIE Tiny 文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/186443)
 |ERNIE文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79380)|
 |ERNIE序列标注|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79377)|
 |ELMo文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79400)|
 |senta情感分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79398)|
-|图像分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79378)|
+|图像分类| [点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79378)|
+|自定义数据FineTune|[序列标注任务](https://aistudio.baidu.com/aistudio/projectdetail/184200)|
+|自定义数据FineTune|[文本分类任务](https://aistudio.baidu.com/aistudio/projectdetail/185121) |
 
 
 ## 教程
