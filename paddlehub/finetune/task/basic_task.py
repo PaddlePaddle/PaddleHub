@@ -753,6 +753,6 @@ class BasicTask(object):
         return global_run_states
 
     def __repr__(self):
-        return "Task: %s with metrics_choices: %s， reader: %s, and %s" % (
+        return "Task: %s with metrics_choices: %s， reader: %s, %s" % (
             self.__class__.__name__, self.metrics_choices,
             self._base_data_reader.__class__.__name__, self.config)
