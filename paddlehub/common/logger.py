@@ -144,10 +144,10 @@ class Logger(object):
     def critical(self, msg):
         self(logger.CRITICAL, msg)
 
-    def training(self, msg):
+    def train(self, msg):
         self(logger.TRAIN, msg)
 
-    def evaluating(self, msg):
+    def eval(self, msg):
         self(logger.EVAL, msg)
 
 

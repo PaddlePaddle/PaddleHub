@@ -450,7 +450,7 @@ class BasicTask(object):
             self.env.score_scalar = {}
 
     def _finetune_start_event(self):
-        logger.training("PaddleHub finetune start")
+        logger.train("PaddleHub finetune start")
 
     def _finetune_end_event(self, run_states):
         logger.info("PaddleHub finetune finished.")
@@ -462,7 +462,7 @@ class BasicTask(object):
         logger.info("PaddleHub predict finished.")
 
     def _eval_start_event(self):
-        logger.evaluating("Evaluation on {} dataset start".format(self.phase))
+        logger.eval("Evaluation on {} dataset start".format(self.phase))
 
     def _eval_end_event(self, run_states):
         eval_scores, eval_loss, run_speed = self._calculate_metrics(run_states)
@@ -480,7 +480,7 @@ class BasicTask(object):
                     scalar_value=eval_scores[metric],
                     global_step=self._envs['train'].current_step)
             log_scores += "%s=%.5f " % (metric, eval_scores[metric])
-        logger.evaluating(
+        logger.eval(
             "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
             (self.phase, eval_loss, log_scores, run_speed))
 
@@ -498,8 +498,8 @@ class BasicTask(object):
             self.best_score = main_value
             model_saved_dir = os.path.join(self.config.checkpoint_dir,
                                            "best_model")
-            logger.evaluating("best model saved to %s [best %s=%.5f]" %
-                              (model_saved_dir, main_metric, main_value))
+            logger.eval("best model saved to %s [best %s=%.5f]" %
+                        (model_saved_dir, main_metric, main_value))
 
             save_result = fluid.io.save_persistables(
                 executor=self.exe,
@@ -519,9 +519,9 @@ class BasicTask(object):
                 scalar_value=scores[metric],
                 global_step=self._envs['train'].current_step)
             log_scores += "%s=%.5f " % (metric, scores[metric])
-        logger.training("step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
-                        (self.current_step, self.max_train_steps, avg_loss,
-                         log_scores, run_speed))
+        logger.train("step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
+                     (self.current_step, self.max_train_steps, avg_loss,
+                      log_scores, run_speed))
 
     def _save_ckpt_interval_event(self):
         self.save_checkpoint()
