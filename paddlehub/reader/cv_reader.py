@@ -82,30 +82,30 @@ class ImageClassificationReader(Basic_Reader):
             raise ValueError("The dataset is none and it's not allowed!")
         if phase == "train":
             shuffle = True
-            try:
-                # Compatible with ImageClassificationDataset
-                data = self.dataset.train_data()
-                self.num_examples['train'] = len(self.get_train_examples())
-            except:
-                data = self.get_train_examples()
-                self.num_examples['train'] = len(data)
+            if hasattr(self.dataset, "train_data"):
+                # Compatible with ImageClassificationDataset which has done shuffle
+                self.dataset.train_data()
+                shuffle = False
+            data = self.get_train_examples()
+            self.num_examples['train'] = len(data)
         elif phase == "val" or phase == "dev":
             shuffle = False
-            try:
-                data = self.dataset.validate_data()
-                self.num_examples['dev'] = len(self.get_dev_examples())
-            except:
-                data = self.get_dev_examples()
-                self.num_examples['train'] = len(data)
+            if hasattr(self.dataset, "validate_data"):
+                # Compatible with ImageClassificationDataset
+                self.dataset.validate_data()
+                shuffle = False
+            data = self.get_dev_examples()
+            self.num_examples['dev'] = len(data)
         elif phase == "test":
             shuffle = False
-            try:
+            if hasattr(self.dataset, "test_data"):
+                # Compatible with ImageClassificationDataset
                 data = self.dataset.test_data()
-                self.num_examples['test'] = len(self.get_test_examples())
-            except:
-                data = self.get_test_examples()
-                self.num_examples['train'] = len(data)
+                shuffle = False
+            data = self.get_test_examples()
+            self.num_examples['test'] = len(data)
         elif phase == "predict":
+            shuffle = False
             data = data
 
         def preprocess(image_path):
@@ -133,6 +133,9 @@ class ImageClassificationReader(Basic_Reader):
             return image
 
         def _data_reader():
+            if shuffle:
+                np.random.shuffle(data)
+
             if phase == "predict":
                 for image_path in data:
                     image = preprocess(image_path)

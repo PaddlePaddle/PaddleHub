@@ -136,7 +136,7 @@ class ImageClassificationDataset(object):
                 self.label_list = file.read().split("\n")
         return {index: key for index, key in enumerate(self.label_list)}
 
-    def train_data(self, shuffle=False):
+    def train_data(self, shuffle=True):
         train_data_path = os.path.join(self.base_path, self.train_list_file)
         return self._parse_data(train_data_path, shuffle, phase='train')
 
