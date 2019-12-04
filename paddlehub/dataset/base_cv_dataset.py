@@ -18,11 +18,15 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import numpy as np
 
 from paddlehub.dataset import HubDataset
+import paddlehub as hub
+from paddlehub.common.downloader import default_downloader
+from paddlehub.common.logger import logger
 
 
-class ImageClassificationDataset(HubDataset):
+class Base_CV_Dataset(HubDataset):
     def __init__(self,
                  base_path,
                  train_list_file=None,
@@ -30,7 +34,7 @@ class ImageClassificationDataset(HubDataset):
                  test_list_file=None,
                  label_list_file=None,
                  label_list=None):
-        super(ImageClassificationDataset, self).__init__(
+        super(Base_CV_Dataset, self).__init__(
             base_path=base_path,
             train_file=train_list_file,
             dev_file=validate_list_file,
@@ -57,3 +61,98 @@ class ImageClassificationDataset(HubDataset):
                 label = items[-1]
                 data.append((image_path, label))
         return data
+
+
+class ImageClassificationDataset(object):
+    logger.warning(
+        "From PaddleHub v1.5, we recommend inheriting Base_CV_Dataset instead of ImageClassificationDataset. see https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune for more details."
+    )
+
+    def __init__(self):
+        self.base_path = None
+        self.train_list_file = None
+        self.test_list_file = None
+        self.validate_list_file = None
+        self.label_list_file = None
+        self.num_labels = 0
+        self.label_list = []
+
+        self.train_examples = []
+        self.dev_examples = []
+        self.test_examples = []
+
+    def _download_dataset(self, dataset_path, url):
+        if not os.path.exists(dataset_path):
+            result, tips, dataset_path = default_downloader.download_file_and_uncompress(
+                url=url,
+                save_path=hub.common.dir.DATA_HOME,
+                print_progress=True,
+                replace=True)
+            if not result:
+                print(tips)
+                exit()
+        return dataset_path
+
+    def _parse_data(self, data_path, shuffle=False, phase=None):
+        data = []
+        with open(data_path, "r") as file:
+            while True:
+                line = file.readline()
+                if not line:
+                    break
+                line = line.strip()
+                items = line.split(" ")
+                if len(items) > 2:
+                    image_path = " ".join(items[0:-1])
+                else:
+                    image_path = items[0]
+                if not os.path.isabs(image_path):
+                    if self.base_path is not None:
+                        image_path = os.path.join(self.base_path, image_path)
+                label = items[-1]
+                data.append((image_path, items[-1]))
+
+        if phase == 'train':
+            self.train_examples = data
+        elif phase == 'dev':
+            self.dev_examples = data
+        elif phase == 'test':
+            self.test_examples = data
+
+        if shuffle:
+            np.random.shuffle(data)
+
+        def _base_reader():
+            for item in data:
+                yield item
+
+        return _base_reader()
+
+    def label_dict(self):
+        if not self.label_list:
+            with open(os.path.join(self.base_path, self.label_list_file),
+                      "r") as file:
+                self.label_list = file.read().split("\n")
+        return {index: key for index, key in enumerate(self.label_list)}
+
+    def train_data(self, shuffle=True):
+        train_data_path = os.path.join(self.base_path, self.train_list_file)
+        return self._parse_data(train_data_path, shuffle, phase='train')
+
+    def test_data(self, shuffle=False):
+        test_data_path = os.path.join(self.base_path, self.test_list_file)
+        return self._parse_data(test_data_path, shuffle, phase='dev')
+
+    def validate_data(self, shuffle=False):
+        validate_data_path = os.path.join(self.base_path,
+                                          self.validate_list_file)
+        return self._parse_data(validate_data_path, shuffle, phase='test')
+
+    def get_train_examples(self):
+        return self.train_examples
+
+    def get_dev_examples(self):
+        return self.dev_examples
+
+    def get_test_examples(self):
+        return self.test_examples
