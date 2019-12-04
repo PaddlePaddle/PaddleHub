@@ -142,12 +142,12 @@ class ImageClassificationDataset(object):
 
     def test_data(self, shuffle=False):
         test_data_path = os.path.join(self.base_path, self.test_list_file)
-        return self._parse_data(test_data_path, shuffle, phase='dev')
+        return self._parse_data(test_data_path, shuffle, phase='test')
 
     def validate_data(self, shuffle=False):
         validate_data_path = os.path.join(self.base_path,
                                           self.validate_list_file)
-        return self._parse_data(validate_data_path, shuffle, phase='test')
+        return self._parse_data(validate_data_path, shuffle, phase='dev')
 
     def get_train_examples(self):
         return self.train_examples
