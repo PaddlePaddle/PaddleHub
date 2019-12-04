@@ -25,13 +25,38 @@ from paddlehub.dataset.base_cv_dataset import ImageClassificationDataset
 
 class DogCatDataset(ImageClassificationDataset):
     def __init__(self):
-        super(DogCatDataset, self).__init__()
         dataset_path = os.path.join(hub.common.dir.DATA_HOME, "dog-cat")
-        self.base_path = self._download_dataset(
+        base_path = self._download_dataset(
             dataset_path=dataset_path,
             url="https://bj.bcebos.com/paddlehub-dataset/dog-cat.tar.gz")
-        self.train_list_file = "train_list.txt"
-        self.test_list_file = "test_list.txt"
-        self.validate_list_file = "validate_list.txt"
-        self.label_list_file = "label_list.txt"
-        self.num_labels = 2
+        super(DogCatDataset, self).__init__(
+            base_path=base_path,
+            train_list_file="train_list.txt",
+            validate_list_file="validate_list.txt",
+            test_list_file="test_list.txt",
+            label_list_file="label_list.txt",
+            label_list=None)
+
+
+if __name__ == "__main__":
+    ds = DogCatDataset()
+    print("first 10 dev")
+    for e in ds.get_dev_examples()[:10]:
+        print(e)
+    print("first 10 train")
+    for e in ds.get_train_examples()[:10]:
+        print(e)
+    print("first 10 test")
+    for e in ds.get_test_examples()[:10]:
+        print(e)
+    print("first 10 init_phase")
+    for e in ds[:10]:
+        print(e)
+    print("first 10 phase=test")
+    ds.set_current_phase("test")
+    for e in ds[:10]:
+        print(e)
+    print("ds[1]=", ds[1])
+    print("ds=", ds)
+    print("len(ds)=", len(ds))
+    print("len(ds.test_examples)=", len(ds.test_examples))

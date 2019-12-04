@@ -18,11 +18,8 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
-import json
 import numpy as np
-import platform
 import six
-import sys
 from collections import namedtuple
 
 import paddle
@@ -33,9 +30,10 @@ from paddlehub.common.utils import sys_stdout_encoding
 from paddlehub.dataset.dataset import InputExample
 from .batching import pad_batch_data, prepare_batch_data
 import paddlehub as hub
+from .basic_reader import Basic_Reader
 
 
-class BaseReader(object):
+class BaseReader(Basic_Reader):
     def __init__(self,
                  vocab_path,
                  dataset=None,
@@ -47,6 +45,7 @@ class BaseReader(object):
                  sp_model_path=None,
                  word_dict_path=None,
                  in_tokens=False):
+        super(BaseReader, self).__init__(dataset, random_seed)
         self.max_seq_len = max_seq_len
         if sp_model_path and word_dict_path:
             self.tokenizer = tokenization.WSSPTokenizer(
@@ -55,52 +54,28 @@ class BaseReader(object):
             self.tokenizer = tokenization.FullTokenizer(
                 vocab_file=vocab_path, do_lower_case=do_lower_case)
         self.vocab = self.tokenizer.vocab
-        self.dataset = dataset
         self.pad_id = self.vocab["[PAD]"]
         self.cls_id = self.vocab["[CLS]"]
         self.sep_id = self.vocab["[SEP]"]
+        self.mask_id = self.vocab["[MASK]"]
         self.in_tokens = in_tokens
         self.use_task_id = use_task_id
 
         if self.use_task_id:
+            logger.warning(
+                "use_task_id has been de discarded since PaddleHub v1.4.0")
             self.task_id = 0
-
-        np.random.seed(random_seed)
 
         # generate label map
         self.label_map = {}
-        if self.dataset:
+        try:
             for index, label in enumerate(self.dataset.get_labels()):
                 self.label_map[label] = index
             logger.info("Dataset label map = {}".format(self.label_map))
-        else:
-            logger.info("Dataset is None! label map = {}".format(
-                self.label_map))
-
-        self.current_example = 0
-        self.current_epoch = 0
-
-        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
-
-    def get_train_examples(self):
-        """Gets a collection of `InputExample`s for the train set."""
-        return self.dataset.get_train_examples()
-
-    def get_dev_examples(self):
-        """Gets a collection of `InputExample`s for the dev set."""
-        return self.dataset.get_dev_examples()
-
-    def get_val_examples(self):
-        """Gets a collection of `InputExample`s for the val set."""
-        return self.dataset.get_val_examples()
-
-    def get_test_examples(self):
-        """Gets a collection of `InputExample`s for prediction."""
-        return self.dataset.get_test_examples()
-
-    def get_train_progress(self):
-        """Gets progress for training phase."""
-        return self.current_example, self.current_epoch
+        except:
+            logger.info(
+                "Dataset is None or it has not any labels, label map = {}".
+                format(self.label_map))
 
     def _truncate_seq_pair(self, tokens_a, tokens_b, max_length):
         """Truncates a sequence pair in place to the maximum length."""
@@ -237,14 +212,6 @@ class BaseReader(object):
 
         if batch_records:
             yield self._pad_batch_records(batch_records, phase)
-
-    def get_num_examples(self, phase):
-        """Get number of examples for train, dev or test."""
-        if phase not in ['train', 'val', 'dev', 'test']:
-            raise ValueError(
-                "Unknown phase, which should be in ['train', 'val'/'dev', 'test']."
-            )
-        return self.num_examples[phase]
 
     def data_generator(self,
                        batch_size=1,
@@ -540,108 +507,6 @@ class SequenceLabelReader(BaseReader):
         return record
 
 
-class LACClassifyReader(object):
-    def __init__(self, vocab_path, dataset=None, in_tokens=False):
-        self.dataset = dataset
-        self.lac = hub.Module(name="lac")
-        self.tokenizer = tokenization.FullTokenizer(
-            vocab_file=vocab_path, do_lower_case=False)
-        self.vocab = self.tokenizer.vocab
-        self.feed_key = list(
-            self.lac.processor.data_format(
-                sign_name="lexical_analysis").keys())[0]
-
-        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
-        self.in_tokens = in_tokens
-
-    def get_num_examples(self, phase):
-        """Get number of examples for train, dev or test."""
-        if phase not in ['train', 'val', 'dev', 'test']:
-            raise ValueError(
-                "Unknown phase, which should be in ['train', 'val'/'dev', 'test']."
-            )
-        return self.num_examples[phase]
-
-    def get_train_examples(self):
-        """Gets a collection of `InputExample`s for the train set."""
-        return self.dataset.get_train_examples()
-
-    def get_dev_examples(self):
-        """Gets a collection of `InputExample`s for the dev set."""
-        return self.dataset.get_dev_examples()
-
-    def get_val_examples(self):
-        """Gets a collection of `InputExample`s for the val set."""
-        return self.dataset.get_val_examples()
-
-    def get_test_examples(self):
-        """Gets a collection of `InputExample`s for prediction."""
-        return self.dataset.get_test_examples()
-
-    def get_train_progress(self):
-        """Gets progress for training phase."""
-        return self.current_example, self.current_epoch
-
-    def data_generator(self,
-                       batch_size=1,
-                       phase="train",
-                       shuffle=False,
-                       data=None):
-        if phase != "predict" and not self.dataset:
-            raise ValueError("The dataset is None and it isn't allowed.")
-        if phase == "train":
-            shuffle = True
-            data = self.dataset.get_train_examples()
-            self.num_examples['train'] = len(data)
-        elif phase == "test":
-            shuffle = False
-            data = self.dataset.get_test_examples()
-            self.num_examples['test'] = len(data)
-        elif phase == "val" or phase == "dev":
-            shuffle = False
-            data = self.dataset.get_dev_examples()
-            self.num_examples['dev'] = len(data)
-        elif phase == "predict":
-            data = data
-        else:
-            raise ValueError(
-                "Unknown phase, which should be in ['train', 'dev', 'test'].")
-
-        def preprocess(text):
-            data_dict = {self.feed_key: [text]}
-            processed = self.lac.lexical_analysis(data=data_dict)
-            processed = [
-                self.vocab[word] for word in processed[0]['word']
-                if word in self.vocab
-            ]
-            if len(processed) == 0:
-                if six.PY2:
-                    text = text.encode(sys_stdout_encoding())
-                logger.warning(
-                    "The words in text %s can't be found in the vocabulary." %
-                    (text))
-            return processed
-
-        def _data_reader():
-            if shuffle:
-                np.random.shuffle(data)
-
-            if phase == "predict":
-                for text in data:
-                    text = preprocess(text)
-                    if not text:
-                        continue
-                    yield (text, )
-            else:
-                for item in data:
-                    text = preprocess(item.text_a)
-                    if not text:
-                        continue
-                    yield (text, item.label)
-
-        return paddle.batch(_data_reader, batch_size=batch_size)
-
-
 class MultiLabelClassifyReader(BaseReader):
     def _pad_batch_records(self, batch_records, phase=None):
         batch_token_ids = [record.token_ids for record in batch_records]
@@ -770,38 +635,6 @@ class MultiLabelClassifyReader(BaseReader):
 
 
 class RegressionReader(BaseReader):
-    def __init__(self,
-                 vocab_path,
-                 dataset=None,
-                 label_map_config=None,
-                 max_seq_len=128,
-                 do_lower_case=True,
-                 random_seed=None,
-                 use_task_id=False):
-        self.max_seq_len = max_seq_len
-        self.tokenizer = tokenization.FullTokenizer(
-            vocab_file=vocab_path, do_lower_case=do_lower_case)
-        self.vocab = self.tokenizer.vocab
-        self.dataset = dataset
-        self.pad_id = self.vocab["[PAD]"]
-        self.cls_id = self.vocab["[CLS]"]
-        self.sep_id = self.vocab["[SEP]"]
-        self.in_tokens = False
-        self.use_task_id = use_task_id
-
-        if self.use_task_id:
-            self.task_id = 0
-
-        np.random.seed(random_seed)
-
-        # generate label map
-        self.label_map = {}  # Unlike BaseReader, it's not filled
-
-        self.current_example = 0
-        self.current_epoch = 0
-
-        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
-
     def _pad_batch_records(self, batch_records, phase=None):
         batch_token_ids = [record.token_ids for record in batch_records]
         batch_text_type_ids = [record.text_type_ids for record in batch_records]
@@ -965,32 +798,28 @@ class ReadingComprehensionReader(BaseReader):
                  doc_stride=128,
                  max_query_length=64,
                  random_seed=None,
-                 use_task_id=False):
-        self.dataset = dataset
-        self.tokenizer = tokenization.FullTokenizer(
-            vocab_file=vocab_path, do_lower_case=do_lower_case)
-        self.max_seq_len = max_seq_len
+                 use_task_id=False,
+                 sp_model_path=None,
+                 word_dict_path=None,
+                 in_tokens=False):
+        super(ReadingComprehensionReader, self).__init__(
+            vocab_path=vocab_path,
+            dataset=dataset,
+            label_map_config=None,
+            max_seq_len=max_seq_len,
+            do_lower_case=do_lower_case,
+            random_seed=random_seed,
+            use_task_id=use_task_id,
+            sp_model_path=sp_model_path,
+            word_dict_path=word_dict_path,
+            in_tokens=in_tokens)
+
         self.doc_stride = doc_stride
         self.max_query_length = max_query_length
-        self.use_task_id = use_task_id
-        self.in_tokens = False
         # self.all_examples[phase] and self.all_features[phase] will be used
         # in write_prediction in reading_comprehension_task
         self.all_features = {"train": [], "dev": [], "test": [], "predict": []}
         self.all_examples = {"train": [], "dev": [], "test": [], "predict": []}
-
-        np.random.seed(random_seed)
-
-        self.vocab = self.tokenizer.vocab
-        self.vocab_size = len(self.vocab)
-        self.pad_id = self.vocab["[PAD]"]
-        self.cls_id = self.vocab["[CLS]"]
-        self.sep_id = self.vocab["[SEP]"]
-        self.mask_id = self.vocab["[MASK]"]
-
-        self.current_train_example = 0
-
-        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
 
     def _pad_batch_records(self, batch_records, phase):
         batch_token_ids = [record.token_ids for record in batch_records]
@@ -1329,6 +1158,79 @@ class ReadingComprehensionReader(BaseReader):
                 best_span_index = span_index
 
         return cur_span_index == best_span_index
+
+
+class LACClassifyReader(Basic_Reader):
+    def __init__(self, vocab_path, dataset=None, in_tokens=False):
+        super(LACClassifyReader, self).__init__(dataset)
+        self.in_tokens = in_tokens
+
+        self.lac = hub.Module(name="lac")
+        self.tokenizer = tokenization.FullTokenizer(
+            vocab_file=vocab_path, do_lower_case=False)
+        self.vocab = self.tokenizer.vocab
+        self.feed_key = list(
+            self.lac.processor.data_format(
+                sign_name="lexical_analysis").keys())[0]
+
+    def data_generator(self,
+                       batch_size=1,
+                       phase="train",
+                       shuffle=False,
+                       data=None):
+        if phase != "predict" and not self.dataset:
+            raise ValueError("The dataset is None and it isn't allowed.")
+        if phase == "train":
+            shuffle = True
+            data = self.dataset.get_train_examples()
+            self.num_examples['train'] = len(data)
+        elif phase == "test":
+            shuffle = False
+            data = self.dataset.get_test_examples()
+            self.num_examples['test'] = len(data)
+        elif phase == "val" or phase == "dev":
+            shuffle = False
+            data = self.dataset.get_dev_examples()
+            self.num_examples['dev'] = len(data)
+        elif phase == "predict":
+            data = data
+        else:
+            raise ValueError(
+                "Unknown phase, which should be in ['train', 'dev', 'test'].")
+
+        def preprocess(text):
+            data_dict = {self.feed_key: [text]}
+            processed = self.lac.lexical_analysis(data=data_dict)
+            processed = [
+                self.vocab[word] for word in processed[0]['word']
+                if word in self.vocab
+            ]
+            if len(processed) == 0:
+                if six.PY2:
+                    text = text.encode(sys_stdout_encoding())
+                logger.warning(
+                    "The words in text %s can't be found in the vocabulary." %
+                    (text))
+            return processed
+
+        def _data_reader():
+            if shuffle:
+                np.random.shuffle(data)
+
+            if phase == "predict":
+                for text in data:
+                    text = preprocess(text)
+                    if not text:
+                        continue
+                    yield (text, )
+            else:
+                for item in data:
+                    text = preprocess(item.text_a)
+                    if not text:
+                        continue
+                    yield (text, item.label)
+
+        return paddle.batch(_data_reader, batch_size=batch_size)
 
 
 if __name__ == '__main__':

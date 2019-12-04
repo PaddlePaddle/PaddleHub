@@ -22,6 +22,7 @@ import numpy as np
 from PIL import Image
 
 import paddlehub.io.augmentation as image_augmentation
+from .basic_reader import Basic_Reader
 
 channel_order_dict = {
     "RGB": [0, 1, 2],
@@ -33,7 +34,7 @@ channel_order_dict = {
 }
 
 
-class ImageClassificationReader(object):
+class ImageClassificationReader(Basic_Reader):
     def __init__(self,
                  image_width,
                  image_height,
@@ -41,15 +42,15 @@ class ImageClassificationReader(object):
                  channel_order="RGB",
                  images_mean=None,
                  images_std=None,
-                 data_augmentation=False):
+                 data_augmentation=False,
+                 random_seed=None):
+        super(ImageClassificationReader, self).__init__(dataset, random_seed)
         self.image_width = image_width
         self.image_height = image_height
         self.channel_order = channel_order
-        self.dataset = dataset
         self.data_augmentation = data_augmentation
         self.images_std = images_std
         self.images_mean = images_mean
-        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
 
         if self.images_mean is None:
             try:
@@ -73,7 +74,7 @@ class ImageClassificationReader(object):
             raise ValueError("Image width and height should not be negative.")
 
     def data_generator(self,
-                       batch_size,
+                       batch_size=1,
                        phase="train",
                        shuffle=False,
                        data=None):
@@ -128,12 +129,3 @@ class ImageClassificationReader(object):
                     yield (image, label)
 
         return paddle.batch(_data_reader, batch_size=batch_size)
-
-    def get_train_examples(self):
-        return self.dataset.train_examples
-
-    def get_dev_examples(self):
-        return self.dataset.dev_examples
-
-    def get_test_examples(self):
-        return self.dataset.test_examples

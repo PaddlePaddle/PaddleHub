@@ -17,6 +17,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+
+import paddlehub as hub
+from paddlehub.common.downloader import default_downloader
+from paddlehub.common.logger import logger
+
 
 class InputExample(object):
     """
@@ -50,20 +56,120 @@ class InputExample(object):
 
 
 class HubDataset(object):
+    def __init__(self,
+                 base_path,
+                 train_file=None,
+                 dev_file=None,
+                 test_file=None,
+                 label_file=None,
+                 label_list=None,
+                 init_phase="train"):
+        if not (train_file or dev_file or test_file):
+            raise ValueError("At least one file should be assigned")
+        self.base_path = base_path
+        self.train_file = train_file
+        self.dev_file = dev_file
+        self.test_file = test_file
+        self.label_file = label_file
+        self.label_list = label_list
+
+        if init_phase not in ["train", "dev", "val", "test"]:
+            raise ValueError("phase only support train/dev/val/test")
+        if init_phase == "val":
+            init_phase = "dev"
+        self._current_phase = init_phase
+
+        self.train_examples = []
+        self.dev_examples = []
+        self.test_examples = []
+
+        self._load_train_examples()
+        self._load_dev_examples()
+        self._load_test_examples()
+
+        if self.label_file:
+            if not self.label_list:
+                self.label_list = self._load_label_data()
+            else:
+                logger.warning(
+                    "As label_list has been assigned, label_file will be disabled"
+                )
+
     def get_train_examples(self):
-        raise NotImplementedError()
+        return self.train_examples
 
     def get_dev_examples(self):
-        raise NotImplementedError()
+        return self.dev_examples
 
     def get_test_examples(self):
-        raise NotImplementedError()
+        return self.test_examples
 
     def get_val_examples(self):
         return self.get_dev_examples()
 
     def get_labels(self):
-        raise NotImplementedError()
+        return self.label_list
 
+    @property
     def num_labels(self):
-        raise NotImplementedError()
+        return len(self.label_list)
+
+    def label_dict(self):
+        return {index: key for index, key in enumerate(self.label_list)}
+
+    def _download_dataset(self, dataset_path, url):
+        if not os.path.exists(dataset_path):
+            result, tips, dataset_path = default_downloader.download_file_and_uncompress(
+                url=url,
+                save_path=hub.common.dir.DATA_HOME,
+                print_progress=True,
+                replace=True)
+            if not result:
+                raise Exception(tips)
+        else:
+            logger.info("Dataset {} already cached.".format(dataset_path))
+        return dataset_path
+
+    def _load_train_examples(self):
+        self.train_file = os.path.join(self.base_path, self.train_file)
+        self.train_examples = self._read_file(self.train_file, phase="train")
+
+    def _load_dev_examples(self):
+        self.dev_file = os.path.join(self.base_path, self.dev_file)
+        self.dev_examples = self._read_file(self.dev_file, phase="dev")
+
+    def _load_test_examples(self):
+        self.test_file = os.path.join(self.base_path, self.test_file)
+        self.test_examples = self._read_file(self.test_file, phase="test")
+
+    def _read_file(self, path, phase=None):
+        raise NotImplementedError
+
+    def _load_label_data(self):
+        with open(os.path.join(self.base_path, self.label_file), "r") as file:
+            return file.read().split("\n")
+
+    def set_current_phase(self, phase):
+        if phase not in ["train", "dev", "val", "test"]:
+            raise ValueError("phase only support train/dev/val/test")
+        if phase == "val":
+            phase = "dev"
+        self._current_phase = phase
+
+    @property
+    def current_phase(self):
+        return self._current_phase
+
+    def __len__(self):
+        return len(eval("self.%s_examples" % self.current_phase))
+
+    def __getitem__(self, item):
+        return eval("self.%s_examples[%s]" % (self.current_phase, item))
+
+    def __iter__(self):
+        return eval("self.%s_examples" % self.current_phase)
+
+    def __str__(self):
+        return "Dataset: %s with %i train examples, %i dev examples and %i test examples" % (
+            self.__class__.__name__, len(self.train_examples),
+            len(self.dev_examples), len(self.test_examples))

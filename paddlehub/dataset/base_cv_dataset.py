@@ -19,39 +19,28 @@ from __future__ import print_function
 
 import os
 
-import numpy as np
-
-import paddlehub as hub
-from paddlehub.common.downloader import default_downloader
+from paddlehub.dataset import HubDataset
 
 
-class ImageClassificationDataset(object):
-    def __init__(self):
-        self.base_path = None
-        self.train_list_file = None
-        self.test_list_file = None
-        self.validate_list_file = None
-        self.label_list_file = None
-        self.num_labels = 0
-        self.label_list = []
+class ImageClassificationDataset(HubDataset):
+    def __init__(self,
+                 base_path,
+                 train_list_file=None,
+                 validate_list_file=None,
+                 test_list_file=None,
+                 label_list_file=None,
+                 label_list=None,
+                 init_phase="train"):
+        super(ImageClassificationDataset, self).__init__(
+            base_path=base_path,
+            train_file=train_list_file,
+            dev_file=validate_list_file,
+            test_file=test_list_file,
+            label_file=label_list_file,
+            label_list=label_list,
+            init_phase=init_phase)
 
-        self.train_examples = []
-        self.dev_examples = []
-        self.test_examples = []
-
-    def _download_dataset(self, dataset_path, url):
-        if not os.path.exists(dataset_path):
-            result, tips, dataset_path = default_downloader.download_file_and_uncompress(
-                url=url,
-                save_path=hub.common.dir.DATA_HOME,
-                print_progress=True,
-                replace=True)
-            if not result:
-                print(tips)
-                exit()
-        return dataset_path
-
-    def _parse_data(self, data_path, shuffle=False, phase=None):
+    def _read_file(self, data_path, phase=None):
         data = []
         with open(data_path, "r") as file:
             while True:
@@ -68,49 +57,5 @@ class ImageClassificationDataset(object):
                     if self.base_path is not None:
                         image_path = os.path.join(self.base_path, image_path)
                 label = items[-1]
-                data.append((image_path, items[-1]))
-
-        if phase == 'train':
-            self.train_examples = data
-        elif phase == 'dev':
-            self.dev_examples = data
-        elif phase == 'test':
-            self.test_examples = data
-
-        if shuffle:
-            np.random.shuffle(data)
-
-        def _base_reader():
-            for item in data:
-                yield item
-
-        return _base_reader()
-
-    def label_dict(self):
-        if not self.label_list:
-            with open(os.path.join(self.base_path, self.label_list_file),
-                      "r") as file:
-                self.label_list = file.read().split("\n")
-        return {index: key for index, key in enumerate(self.label_list)}
-
-    def train_data(self, shuffle=True):
-        train_data_path = os.path.join(self.base_path, self.train_list_file)
-        return self._parse_data(train_data_path, shuffle, phase='train')
-
-    def test_data(self, shuffle=False):
-        test_data_path = os.path.join(self.base_path, self.test_list_file)
-        return self._parse_data(test_data_path, shuffle, phase='dev')
-
-    def validate_data(self, shuffle=False):
-        validate_data_path = os.path.join(self.base_path,
-                                          self.validate_list_file)
-        return self._parse_data(validate_data_path, shuffle, phase='test')
-
-    def get_train_examples(self):
-        return self.train_examples
-
-    def get_dev_examples(self):
-        return self.dev_examples
-
-    def get_test_examples(self):
-        return self.test_examples
+                data.append((image_path, label))
+        return data
