@@ -22,13 +22,13 @@ import os
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.dataset.base_nlp_dataset import Base_NLP_Dataset
 
-_DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/bq.tar.gz"
-
 
 class BQ(Base_NLP_Dataset):
     def __init__(self):
         dataset_dir = os.path.join(DATA_HOME, "bq")
-        base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
+        base_path = self._download_dataset(
+            dataset_dir,
+            url="https://bj.bcebos.com/paddlehub-dataset/bq.tar.gz")
         super(BQ, self).__init__(
             base_path=base_path,
             train_file="train.txt",
