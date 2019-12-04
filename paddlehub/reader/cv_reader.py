@@ -81,16 +81,30 @@ class ImageClassificationReader(Basic_Reader):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is none and it's not allowed!")
         if phase == "train":
-            data = self.dataset.train_data(shuffle)
-            self.num_examples['train'] = len(self.get_train_examples())
-        elif phase == "test":
-            shuffle = False
-            data = self.dataset.test_data(shuffle)
-            self.num_examples['test'] = len(self.get_test_examples())
+            shuffle = True
+            try:
+                # Compatible with ImageClassificationDataset
+                data = self.dataset.train_data()
+                self.num_examples['train'] = len(self.get_train_examples())
+            except:
+                data = self.get_train_examples()
+                self.num_examples['train'] = len(data)
         elif phase == "val" or phase == "dev":
             shuffle = False
-            data = self.dataset.validate_data(shuffle)
-            self.num_examples['dev'] = len(self.get_dev_examples())
+            try:
+                data = self.dataset.validate_data()
+                self.num_examples['dev'] = len(self.get_dev_examples())
+            except:
+                data = self.get_dev_examples()
+                self.num_examples['train'] = len(data)
+        elif phase == "test":
+            shuffle = False
+            try:
+                data = self.dataset.test_data()
+                self.num_examples['test'] = len(self.get_test_examples())
+            except:
+                data = self.get_test_examples()
+                self.num_examples['train'] = len(data)
         elif phase == "predict":
             data = data
 

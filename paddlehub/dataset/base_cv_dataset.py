@@ -63,9 +63,10 @@ class Base_CV_Dataset(HubDataset):
         return data
 
 
+# discarded. please use Base_CV_Dataset
 class ImageClassificationDataset(object):
     logger.warning(
-        "From PaddleHub v1.5, we recommend inheriting Base_CV_Dataset instead of ImageClassificationDataset. see https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune for more details."
+        "ImageClassificationDataset will be discarded in the near future, please use Base_CV_Dataset instead of ImageClassificationDataset. see https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune for more details."
     )
 
     def __init__(self):
@@ -135,7 +136,7 @@ class ImageClassificationDataset(object):
                 self.label_list = file.read().split("\n")
         return {index: key for index, key in enumerate(self.label_list)}
 
-    def train_data(self, shuffle=True):
+    def train_data(self, shuffle=False):
         train_data_path = os.path.join(self.base_path, self.train_list_file)
         return self._parse_data(train_data_path, shuffle, phase='train')
 
