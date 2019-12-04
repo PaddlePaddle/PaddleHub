@@ -66,7 +66,12 @@ class Base_CV_Dataset(HubDataset):
 # discarded. please use Base_CV_Dataset
 class ImageClassificationDataset(object):
     logger.warning(
-        "ImageClassificationDataset will be discarded in the near future, please use Base_CV_Dataset instead of ImageClassificationDataset. It's more easy-to-use with more functions and support eval test set in the end of finetune automatically. For more details, see https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune."
+        "ImageClassificationDataset will be discarded in the near future, "
+        "please use Base_CV_Dataset instead of ImageClassificationDataset. "
+        "It's more easy-to-use with more functions and support eval test set "
+        "in the end of finetune automatically. For more details, see "
+        "https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%"
+        "85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune"
     )
 
     def __init__(self):
