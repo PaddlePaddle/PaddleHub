@@ -29,16 +29,14 @@ class Base_NLP_Dataset(HubDataset):
                  dev_file=None,
                  test_file=None,
                  label_file=None,
-                 label_list=None,
-                 init_phase="train"):
+                 label_list=None):
         super(Base_NLP_Dataset, self).__init__(
             base_path=base_path,
             train_file=train_file,
             dev_file=dev_file,
             test_file=test_file,
             label_file=label_file,
-            label_list=label_list,
-            init_phase=init_phase)
+            label_list=label_list)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""

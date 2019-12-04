@@ -50,14 +50,4 @@ if __name__ == "__main__":
     print("first 10 test")
     for e in ds.get_test_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
-    print("first 10 init_phase")
-    for e in ds[:10]:
-        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
-    print("first 10 phase=test")
-    ds.set_current_phase("test")
-    for e in ds[:10]:
-        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
-    print("ds[1]=", ds[1])
-    print("ds=", ds)
-    print("len(ds)=", len(ds))
-    print("len(ds.test_examples)=", len(ds.test_examples))
+    print(ds)

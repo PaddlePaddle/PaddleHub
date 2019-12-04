@@ -62,8 +62,7 @@ class HubDataset(object):
                  dev_file=None,
                  test_file=None,
                  label_file=None,
-                 label_list=None,
-                 init_phase="train"):
+                 label_list=None):
         if not (train_file or dev_file or test_file):
             raise ValueError("At least one file should be assigned")
         self.base_path = base_path
@@ -72,12 +71,6 @@ class HubDataset(object):
         self.test_file = test_file
         self.label_file = label_file
         self.label_list = label_list
-
-        if init_phase not in ["train", "dev", "val", "test"]:
-            raise ValueError("phase only support train/dev/val/test")
-        if init_phase == "val":
-            init_phase = "dev"
-        self._current_phase = init_phase
 
         self.train_examples = []
         self.dev_examples = []
@@ -149,27 +142,7 @@ class HubDataset(object):
         with open(os.path.join(self.base_path, self.label_file), "r") as file:
             return file.read().split("\n")
 
-    def set_current_phase(self, phase):
-        if phase not in ["train", "dev", "val", "test"]:
-            raise ValueError("phase only support train/dev/val/test")
-        if phase == "val":
-            phase = "dev"
-        self._current_phase = phase
-
-    @property
-    def current_phase(self):
-        return self._current_phase
-
-    def __len__(self):
-        return len(eval("self.%s_examples" % self.current_phase))
-
-    def __getitem__(self, item):
-        return eval("self.%s_examples[%s]" % (self.current_phase, item))
-
-    def __iter__(self):
-        return eval("self.%s_examples" % self.current_phase)
-
     def __str__(self):
-        return "Dataset: %s with %i train examples, %i dev examples and %i test examples" % (
+        return "Dataset: %s with %i tresponse.css('title::text').extract_first()rain examples, %i dev examples and %i test examples" % (
             self.__class__.__name__, len(self.train_examples),
             len(self.dev_examples), len(self.test_examples))

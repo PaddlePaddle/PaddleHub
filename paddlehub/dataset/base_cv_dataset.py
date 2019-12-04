@@ -29,16 +29,14 @@ class ImageClassificationDataset(HubDataset):
                  validate_list_file=None,
                  test_list_file=None,
                  label_list_file=None,
-                 label_list=None,
-                 init_phase="train"):
+                 label_list=None):
         super(ImageClassificationDataset, self).__init__(
             base_path=base_path,
             train_file=train_list_file,
             dev_file=validate_list_file,
             test_file=test_list_file,
             label_file=label_list_file,
-            label_list=label_list,
-            init_phase=init_phase)
+            label_list=label_list)
 
     def _read_file(self, data_path, phase=None):
         data = []
