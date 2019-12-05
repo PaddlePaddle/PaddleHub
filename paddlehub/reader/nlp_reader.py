@@ -68,11 +68,12 @@ class BaseReader(Basic_Reader):
 
         # generate label map
         self.label_map = {}
-        if self.dataset:
+        try:
             for index, label in enumerate(self.dataset.get_labels()):
                 self.label_map[label] = index
             logger.info("Dataset label map = {}".format(self.label_map))
-        else:
+        except:
+            # some dataset like squad, its label_list=None
             logger.info(
                 "Dataset is None or it has not any labels, label map = {}".
                 format(self.label_map))
