@@ -48,7 +48,6 @@ class ChnSentiCorp(Base_NLP_Dataset):
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
-        print(input_file)
         with codecs.open(input_file, "r", encoding="UTF-8") as f:
             reader = csv.reader(f, delimiter="\t", quotechar=None)
             examples = []

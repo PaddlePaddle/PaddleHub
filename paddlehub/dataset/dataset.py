@@ -158,6 +158,6 @@ class HubDataset(object):
             return file.read().split("\n")
 
     def __str__(self):
-        return "Dataset: %s with %i tresponse.css('title::text').extract_first()rain examples, %i dev examples and %i test examples" % (
+        return "Dataset: %s with %i train examples, %i dev examples and %i test examples" % (
             self.__class__.__name__, len(self.train_examples),
             len(self.dev_examples), len(self.test_examples))
