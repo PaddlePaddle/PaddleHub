@@ -1,47 +1,62 @@
-## 数据格式  
-#### 模型所需参数可通过嵌套字典形式传递
-input: {files: {"image": [file_1, file_2, ...]}, data: {...}}  
-output: {"results":[result_1, result_2, ...]}  
+# 部署图像生成服务-以stgan_celeba为例
+## 1 简介
+&emsp;&emsp;图像生成是指根据预先设置的标签，生成对应图像的过程。stgan_celeba通过在GAN中加入encoder-decoder，可实现人脸属性的转换。关于stgan_celeba的具体信息请参阅[stgan_celeba](https://paddlepaddle.org.cn/hubdetail?name=stgan_celeba&en_category=GANs)。
 
-## Serving快速启动命令  
-```shell  
-$ hub serving start -m stgan_celeba  
-```  
+&emsp;&emsp;使用PaddleHub-Serving可以轻松部署一个在线图像生成服务API，可将此API接入自己的web网站，也可接入应用程序，如美图类应用，实现传照片换脸的功能。
 
-## python脚本  
+&emsp;&emsp;下面就带领大家使用PaddleHub-Serving，通过简单几步部署一个图像生成服务。
+
+## 2 启动PaddleHub-Serving
+&emsp;&emsp;启动命令如下
 ```shell
-$ python yolov3_coco2017_serving_demo.py
+$ hub serving start -m stgan_celeba
 ```
+&emsp;&emsp;启动时会显示加载模型过程，启动成功后显示
+```shell
+Loading stgan_celeba successful.
+```
+&emsp;&emsp;这样就完成了一个图像生成服务化API的部署，默认端口号为8866。
 
-## 结果示例  
+## 3 测试图像生成在线API
+&emsp;&emsp;我们用来测试的样例图片为  
+
+<p align="center">  
+<img src="../img/woman.jpg" width="100%" />  
+</p>  
+
+&emsp;&emsp;根据stgan_celeba所需信息，准备的数据包括图像文件和生成图像风格，格式为
 ```python
-[  
-    {  
-        "path": "cat.jpg",  
-        "data": [  
-            {  
-                "left": 322.2323,  
-                "right": 1420.4119,  
-                "top": 208.81363,  
-                "bottom": 996.04395,  
-                "label": "cat",  
-                "confidence": 0.9289875  
-            }  
-        ]  
-    },  
-    {  
-        "path": "dog.jpg",  
-        "data": [  
-            {  
-                "left": 204.74722,  
-                "right": 746.02637,  
-                "top": 122.793274,  
-                "bottom": 566.6292,  
-                "label": "dog",  
-                "confidence": 0.86698055  
-            }  
-        ]  
-    }  
-]  
+files = [("image", file_a), ("image", file_b)]
+data = {"info": ["info_a_1, info_a_2", "info_b_1, info_b_2"], "style": ["style_a", "style_b"]}
 ```
-结果含有生成图片的base64编码，可提取生成图片，示例python脚本生成图片位置为当前目录下的output文件夹下。
+&emsp;&emsp;注意文件列表每个元素第一个参数为"image"。
+
+&emsp;&emsp;info为图像描述，image为要生成的图像风格。
+
+&emsp;&emsp;代码如下
+```python
+>>> # 文件数据
+>>> file_list = ["../img/woman.png"]
+>>> files = [("image", (open(item, "rb"))) for item in file_list]  
+>>> # 图片及风格信息
+>>> data = {"info": ["Female,Brown_Hair"], "style": ["Aged"]}
+```
+&emsp;&emsp;然后就可以发送请求到图像生成服务API，并得到结果了，代码如下
+```python
+>>> url = "http://127.0.0.1:8866/predict/image/stgan_celeba"
+>>> r = requests.post(url=url, data=data, files=files)
+```
+&emsp;&emsp;stgan_celeba返回的结果包括生成图像的base64编码格式，经过转换可以得到生成图像，代码如下
+```python
+>>> for item in results:
+...     with open(output_path, "wb") as fp:
+...         fp.write(base64.b64decode(item["base64"].split(',')[-1]))
+```
+&emsp;&emsp;查看指定输出文件夹，就能看到生成图像了，如图
+
+<p align="center">  
+<img src="../img/woman.jpg" width="100%" />  
+</p>  
+
+
+&emsp;&emsp;这样我们就完成了对图像生成服务化的部署和测试。完整的测试代码见[stgan_celeba_serving_demo.py](./stgan_celeba_serving_demo.py)。
