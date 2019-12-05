@@ -20,10 +20,10 @@ from __future__ import print_function
 import os
 
 import paddlehub as hub
-from paddlehub.dataset.base_cv_dataset import ImageClassificationDataset
+from paddlehub.dataset.base_cv_dataset import Base_CV_Dataset
 
 
-class Food101Dataset(ImageClassificationDataset):
+class Food101Dataset(Base_CV_Dataset):
     def __init__(self):
         dataset_path = os.path.join(hub.common.dir.DATA_HOME, "food-101",
                                     "images")
@@ -36,3 +36,17 @@ class Food101Dataset(ImageClassificationDataset):
             test_list_file="test_list.txt",
             validate_list_file="validate_list.txt",
             label_list_file="label_list.txt")
+
+
+if __name__ == "__main__":
+    ds = Food101Dataset()
+    print("first 10 dev")
+    for e in ds.get_dev_examples()[:10]:
+        print(e)
+    print("first 10 train")
+    for e in ds.get_train_examples()[:10]:
+        print(e)
+    print("first 10 test")
+    for e in ds.get_test_examples()[:10]:
+        print(e)
+    print(ds)

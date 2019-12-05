@@ -28,6 +28,7 @@ class Base_NLP_Dataset(HubDataset):
                  train_file=None,
                  dev_file=None,
                  test_file=None,
+                 predict_file=None,
                  label_file=None,
                  label_list=None):
         super(Base_NLP_Dataset, self).__init__(
@@ -35,6 +36,7 @@ class Base_NLP_Dataset(HubDataset):
             train_file=train_file,
             dev_file=dev_file,
             test_file=test_file,
+            predict_file=predict_file,
             label_file=label_file,
             label_list=label_list)
 

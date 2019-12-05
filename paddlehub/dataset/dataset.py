@@ -61,6 +61,7 @@ class HubDataset(object):
                  train_file=None,
                  dev_file=None,
                  test_file=None,
+                 predict_file=None,
                  label_file=None,
                  label_list=None):
         if not (train_file or dev_file or test_file):
@@ -69,23 +70,29 @@ class HubDataset(object):
         self.train_file = train_file
         self.dev_file = dev_file
         self.test_file = test_file
+        self.predict_file = predict_file
         self.label_file = label_file
         self.label_list = label_list
 
         self.train_examples = []
         self.dev_examples = []
         self.test_examples = []
+        self.predict_examples = []
 
-        self._load_train_examples()
-        self._load_dev_examples()
-        self._load_test_examples()
-
+        if train_file:
+            self._load_train_examples()
+        if dev_file:
+            self._load_dev_examples()
+        if test_file:
+            self._load_test_examples()
+        if predict_file:
+            self._load_predict_examples()
         if self.label_file:
             if not self.label_list:
                 self.label_list = self._load_label_data()
             else:
                 logger.warning(
-                    "As label_list has been assigned, label_file will be disabled"
+                    "As label_list has been assigned, label_file is noneffective"
                 )
 
     def get_train_examples(self):
@@ -99,6 +106,9 @@ class HubDataset(object):
 
     def get_val_examples(self):
         return self.get_dev_examples()
+
+    def get_predict_examples(self):
+        return self.predict_examples
 
     def get_labels(self):
         return self.label_list
@@ -124,16 +134,21 @@ class HubDataset(object):
         return dataset_path
 
     def _load_train_examples(self):
-        self.train_file = os.path.join(self.base_path, self.train_file)
-        self.train_examples = self._read_file(self.train_file, phase="train")
+        self.train_path = os.path.join(self.base_path, self.train_file)
+        self.train_examples = self._read_file(self.train_path, phase="train")
 
     def _load_dev_examples(self):
-        self.dev_file = os.path.join(self.base_path, self.dev_file)
-        self.dev_examples = self._read_file(self.dev_file, phase="dev")
+        self.dev_path = os.path.join(self.base_path, self.dev_file)
+        self.dev_examples = self._read_file(self.dev_path, phase="dev")
 
     def _load_test_examples(self):
-        self.test_file = os.path.join(self.base_path, self.test_file)
-        self.test_examples = self._read_file(self.test_file, phase="test")
+        self.test_path = os.path.join(self.base_path, self.test_file)
+        self.test_examples = self._read_file(self.test_path, phase="test")
+
+    def _load_predict_examples(self):
+        self.predict_path = os.path.join(self.base_path, self.predict_file)
+        self.predict_examples = self._read_file(
+            self.predict_path, phase="predict")
 
     def _read_file(self, path, phase=None):
         raise NotImplementedError

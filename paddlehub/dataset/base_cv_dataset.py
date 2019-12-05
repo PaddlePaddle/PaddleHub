@@ -32,6 +32,7 @@ class Base_CV_Dataset(HubDataset):
                  train_list_file=None,
                  validate_list_file=None,
                  test_list_file=None,
+                 predict_list_file=None,
                  label_list_file=None,
                  label_list=None):
         super(Base_CV_Dataset, self).__init__(
@@ -39,6 +40,7 @@ class Base_CV_Dataset(HubDataset):
             train_file=train_list_file,
             dev_file=validate_list_file,
             test_file=test_list_file,
+            predict_file=predict_list_file,
             label_file=label_list_file,
             label_list=label_list)
 
@@ -65,15 +67,6 @@ class Base_CV_Dataset(HubDataset):
 
 # discarded. please use Base_CV_Dataset
 class ImageClassificationDataset(object):
-    logger.warning(
-        "ImageClassificationDataset will be discarded in the near future, "
-        "please use Base_CV_Dataset instead of ImageClassificationDataset. "
-        "It's more easy-to-use with more functions and support eval test set "
-        "in the end of finetune automatically. For more details, see "
-        "https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%"
-        "85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune"
-    )
-
     def __init__(self):
         self.base_path = None
         self.train_list_file = None
@@ -88,6 +81,14 @@ class ImageClassificationDataset(object):
         self.test_examples = []
 
     def _download_dataset(self, dataset_path, url):
+        logger.warning(
+            "ImageClassificationDataset will be discarded in the near future, "
+            "please use Base_CV_Dataset instead of ImageClassificationDataset. "
+            "It's more easy-to-use with more functions and support evaluating test set "
+            "in the end of finetune automatically. For more details, see "
+            "https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%"
+            "85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune"
+        )
         if not os.path.exists(dataset_path):
             result, tips, dataset_path = default_downloader.download_file_and_uncompress(
                 url=url,
