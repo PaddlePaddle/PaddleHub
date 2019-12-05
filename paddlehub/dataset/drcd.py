@@ -20,7 +20,7 @@ import os
 from paddlehub.reader import tokenization
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
-from paddlehub.dataset.base_nlp_dataset import Base_NLP_Dataset
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/drcd.tar.gz"
 SPIECE_UNDERLINE = '▁'
@@ -62,7 +62,7 @@ class DRCDExample(object):
         return s
 
 
-class DRCD(Base_NLP_Dataset):
+class DRCD(BaseNLPDatast):
     """A single set of features of data."""
 
     def __init__(self):

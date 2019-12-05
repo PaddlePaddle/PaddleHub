@@ -22,12 +22,12 @@ import os
 
 from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import Base_NLP_Dataset
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/thucnews.tar.gz"
 
 
-class THUCNEWS(Base_NLP_Dataset):
+class THUCNEWS(BaseNLPDatast):
     def __init__(self):
         dataset_dir = os.path.join(DATA_HOME, "thucnews")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)

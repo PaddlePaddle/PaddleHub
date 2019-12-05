@@ -25,12 +25,12 @@ import csv
 
 from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import Base_NLP_Dataset
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/XNLI-lan.tar.gz"
 
 
-class XNLI(Base_NLP_Dataset):
+class XNLI(BaseNLPDatast):
     """
     Please refer to
     https://arxiv.org/pdf/1809.05053.pdf

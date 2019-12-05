@@ -26,7 +26,7 @@ from paddlehub.common.downloader import default_downloader
 from paddlehub.common.logger import logger
 
 
-class Base_CV_Dataset(HubDataset):
+class BaseCVDatast(HubDataset):
     def __init__(self,
                  base_path,
                  train_list_file=None,
@@ -35,7 +35,7 @@ class Base_CV_Dataset(HubDataset):
                  predict_list_file=None,
                  label_list_file=None,
                  label_list=None):
-        super(Base_CV_Dataset, self).__init__(
+        super(BaseCVDatast, self).__init__(
             base_path=base_path,
             train_file=train_list_file,
             dev_file=validate_list_file,
@@ -65,12 +65,12 @@ class Base_CV_Dataset(HubDataset):
         return data
 
 
-# discarded. please use Base_CV_Dataset
+# discarded. please use BaseCVDatast
 class ImageClassificationDataset(object):
     def __init__(self):
         logger.warning(
             "ImageClassificationDataset is not longer recommended from PaddleHub v1.5.0, "
-            "please use Base_CV_Dataset instead of ImageClassificationDataset. "
+            "please use BaseCVDatast instead of ImageClassificationDataset. "
             "It's more easy-to-use with more functions and support evaluating test set "
             "in the end of finetune automatically. For more details, see "
             "https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%"

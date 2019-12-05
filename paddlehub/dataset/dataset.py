@@ -161,3 +161,7 @@ class HubDataset(object):
         return "Dataset: %s with %i train examples, %i dev examples and %i test examples" % (
             self.__class__.__name__, len(self.train_examples),
             len(self.dev_examples), len(self.test_examples))
+
+
+# add alias, similar to BasicTask and BasicReader
+BasicDataset = HubDataset

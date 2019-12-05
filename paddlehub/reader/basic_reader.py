@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class Basic_Reader(object):
+class BasicReader(object):
     def __init__(self, dataset, random_seed=None):
         self.dataset = dataset
         np.random.seed(random_seed)

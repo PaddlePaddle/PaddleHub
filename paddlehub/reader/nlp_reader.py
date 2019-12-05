@@ -28,12 +28,12 @@ from paddlehub.reader import tokenization
 from paddlehub.common.logger import logger
 from paddlehub.common.utils import sys_stdout_encoding
 from paddlehub.dataset.dataset import InputExample
-from .batching import pad_batch_data, prepare_batch_data
+from .batching import pad_batch_data
 import paddlehub as hub
-from .basic_reader import Basic_Reader
+from .basic_reader import BasicReader
 
 
-class BaseReader(Basic_Reader):
+class BaseReader(BasicReader):
     def __init__(self,
                  vocab_path,
                  dataset=None,
@@ -1161,7 +1161,7 @@ class ReadingComprehensionReader(BaseReader):
         return cur_span_index == best_span_index
 
 
-class LACClassifyReader(Basic_Reader):
+class LACClassifyReader(BasicReader):
     def __init__(self, vocab_path, dataset=None, in_tokens=False):
         super(LACClassifyReader, self).__init__(dataset)
         self.in_tokens = in_tokens

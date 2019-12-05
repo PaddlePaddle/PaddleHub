@@ -22,7 +22,7 @@ import io
 from paddlehub.dataset import InputExample, HubDataset
 
 
-class Base_NLP_Dataset(HubDataset):
+class BaseNLPDatast(HubDataset):
     def __init__(self,
                  base_path,
                  train_file=None,
@@ -31,7 +31,7 @@ class Base_NLP_Dataset(HubDataset):
                  predict_file=None,
                  label_file=None,
                  label_list=None):
-        super(Base_NLP_Dataset, self).__init__(
+        super(BaseNLPDatast, self).__init__(
             base_path=base_path,
             train_file=train_file,
             dev_file=dev_file,

@@ -22,7 +22,7 @@ import numpy as np
 from PIL import Image
 
 import paddlehub.io.augmentation as image_augmentation
-from .basic_reader import Basic_Reader
+from .basic_reader import BasicReader
 
 channel_order_dict = {
     "RGB": [0, 1, 2],
@@ -34,7 +34,7 @@ channel_order_dict = {
 }
 
 
-class ImageClassificationReader(Basic_Reader):
+class ImageClassificationReader(BasicReader):
     def __init__(self,
                  image_width,
                  image_height,
