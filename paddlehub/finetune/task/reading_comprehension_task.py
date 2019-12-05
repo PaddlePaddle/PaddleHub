@@ -544,13 +544,13 @@ class ReadingComprehensionTask(BasicTask):
                 is_english=self.is_english)
             if self.phase == 'val' or self.phase == 'dev':
                 with open(
-                        self.data_reader.dataset.dev_file, 'r',
+                        self.data_reader.dataset.dev_path, 'r',
                         encoding="utf8") as dataset_file:
                     dataset_json = json.load(dataset_file)
                     dataset = dataset_json['data']
             elif self.phase == 'test':
                 with open(
-                        self.data_reader.dataset.test_file, 'r',
+                        self.data_reader.dataset.test_path, 'r',
                         encoding="utf8") as dataset_file:
                     dataset_json = json.load(dataset_file)
                     dataset = dataset_json['data']
