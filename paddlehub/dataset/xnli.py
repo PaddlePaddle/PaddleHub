@@ -42,8 +42,8 @@ class XNLI(BaseNLPDatast):
                 "ar", "bg", "de", "el", "en", "es", "fr", "hi", "ru", "sw",
                 "th", "tr", "ur", "vi", "zh"
         ]:
-            raise Exception(language +
-                            "is not in XNLI. Please confirm the language")
+            raise Exception(
+                "%s is not in XNLI. Please confirm the language" % language)
         self.language = language
         dataset_dir = os.path.join(DATA_HOME, "XNLI-lan")
         dataset_dir = self._download_dataset(dataset_dir, url=_DATA_URL)
