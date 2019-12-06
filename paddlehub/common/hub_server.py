@@ -38,6 +38,14 @@ RESOURCE_LIST_FILE = "resource_list_file.yml"
 CACHE_TIME = 60 * 10
 
 
+def async_func(f):
+    def wrapper(*args, **kwargs):
+        thr = threading.Thread(target=f, args=args, kwargs=kwargs)
+        thr.start()
+
+    return wrapper
+
+
 class HubServer(object):
     def __init__(self, config_file_path=None):
         if not config_file_path:
@@ -53,11 +61,11 @@ class HubServer(object):
         with open(config_file_path) as fp:
             self.config = json.load(fp)
         fp_lock = open(config_file_path)
-        lock.flock(fp_lock, lock.LOCK_EX)
 
         utils.check_url(self.config['server_url'])
         self.server_url = self.config['server_url']
-        self.request()
+        self.request(fp_lock)
+        lock.flock(fp_lock, lock.LOCK_EX)
         self._load_resource_list_file_if_valid()
         lock.flock(fp_lock, lock.LOCK_UN)
 
@@ -227,18 +235,25 @@ class HubServer(object):
             update=update,
             extra=extra)
 
-    def request(self):
+    @async_func
+    def request(self, fp_lock):
+        lock.flock(fp_lock, lock.LOCK_EX)
         if not os.path.exists(CACHE_HOME):
             utils.mkdir(CACHE_HOME)
+        cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
+        if os.path.exists(cache_path) and (
+                time.time() - os.stat(cache_path).st_mtime) < 60 * 60 * 24:
+            lock.flock(fp_lock, lock.LOCK_UN)
+            return True
         try:
-            r = requests.get(self.get_server_url() + '/' + 'search')
+            r = requests.get(self.get_server_url() + '/' + 'search', timeout=3)
             data = json.loads(r.text)
-            cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
             with open(cache_path, 'w+') as fp:
                 yaml.safe_dump({'resource_list': data['data']}, fp)
             return True
         except:
             if self.config.get('debug', False):
+                lock.flock(fp_lock, lock.LOCK_UN)
                 raise
             else:
                 pass
@@ -251,6 +266,8 @@ class HubServer(object):
                 return False
         except:
             return False
+        finally:
+            lock.flock(fp_lock, lock.LOCK_UN)
         return True
 
     def _server_check(self):
@@ -270,33 +287,27 @@ class HubServer(object):
             print("Request Hub-Server unsuccessfully.")
 
 
-class CacheUpdater(threading.Thread):
-    def __init__(self, module, version=None):
-        threading.Thread.__init__(self)
-        self.module = module
-        self.version = version
-
-    def update_resource_list_file(self, module, version=None):
-        payload = {'word': module}
-        if version:
-            payload['version'] = version
-        api_url = srv_utils.uri_path(default_hub_server.get_server_url(),
-                                     'search')
-        cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
+@async_func
+def update_resource_list_file(module, version=None):
+    payload = {'word': module}
+    if version:
+        payload['version'] = version
+    api_url = srv_utils.uri_path(default_hub_server.get_server_url(), 'search')
+    cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
+    if os.path.exists(cache_path):
         extra = {
             "command": "update_cache",
             "mtime": os.stat(cache_path).st_mtime
         }
-        try:
-            r = srv_utils.hub_request(api_url, payload, extra)
-        except Exception as err:
-            pass
-        if r.get("update_cache", 0) == 1:
-            with open(cache_path, 'w+') as fp:
-                yaml.safe_dump({'resource_list': r['data']}, fp)
-
-    def run(self):
-        self.update_resource_list_file(self.module, self.version)
+    else:
+        extra = {"command": "update_cache", "mtime": str(time.time())}
+    try:
+        r = srv_utils.hub_request(api_url, payload, extra)
+    except Exception as err:
+        pass
+    if r.get("update_cache", 0) == 1:
+        with open(cache_path, 'w+') as fp:
+            yaml.safe_dump({'resource_list': r['data']}, fp)
 
 
 def server_check():
