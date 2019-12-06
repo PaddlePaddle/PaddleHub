@@ -69,8 +69,8 @@ class BaseCVDatast(HubDataset):
 class ImageClassificationDataset(object):
     def __init__(self):
         logger.warning(
-            "ImageClassificationDataset is not longer recommended from PaddleHub v1.5.0, "
-            "please use BaseCVDatast instead of ImageClassificationDataset. "
+            "ImageClassificationDataset is no longer recommended from PaddleHub v1.5.0, "
+            "please use BaseCVDataset instead of ImageClassificationDataset. "
             "It's more easy-to-use with more functions and support evaluating test set "
             "in the end of finetune automatically. For more details, see "
             "https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%"
