@@ -15,6 +15,7 @@ jobs:
     - name: "CI on Linux/Python3.6"
       os: linux
       python: 3.6
+      script: /bin/bash ./scripts/check_code_style.sh
     - name: "CI on Linux/Python3.5"
       os: linux
       python: 3.5
@@ -30,7 +31,6 @@ install:
   - pip install -r requirements.txt
 
 script:
-  - if [[ $TRAVIS_PYTHON_VERSION != 2.7 ]]; then /bin/bash ./scripts/check_code_style.sh; fi
   - if [[ $TRAVIS_OS_NAME != "windows" ]]; then /bin/bash ./scripts/test_cml.sh; fi
   - if [[ $TRAVIS_OS_NAME != "windows" ]]; then /bin/bash ./scripts/test_all_module.sh; fi
 
