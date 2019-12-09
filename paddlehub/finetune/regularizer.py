@@ -20,7 +20,6 @@ from __future__ import print_function
 import os
 
 import paddle.fluid as fluid
-import numpy as np
 
 import paddlehub as hub
 

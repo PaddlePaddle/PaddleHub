@@ -18,26 +18,13 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-import io
-import json
-import os
-import sys
-import ast
-
-import six
 import shutil
-import pandas
-import numpy as np
 
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.common.arg_helper import add_argument, print_arguments
 from paddlehub.autofinetune.autoft import PSHE2
 from paddlehub.autofinetune.autoft import HAZero
 from paddlehub.autofinetune.evaluator import FullTrailEvaluator
 from paddlehub.autofinetune.evaluator import PopulationBasedEvaluator
-from paddlehub.common.logger import logger
-
-import paddlehub as hub
 
 
 class AutoFineTuneCommand(BaseCommand):

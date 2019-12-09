@@ -65,11 +65,10 @@ def main():
 
 
 if __name__ == "__main__":
-    # argv = []
-    # for item in sys.argv:
-    #     if six.PY2:
-    #         argv.append(item.decode(sys_stdin_encoding()).decode("utf8"))
-    #     else:
-    #         argv.append(item)
-    # command.execute(argv[1:])
-    command.execute("hub list".split())
+    argv = []
+    for item in sys.argv:
+        if six.PY2:
+            argv.append(item.decode(sys_stdin_encoding()).decode("utf8"))
+        else:
+            argv.append(item)
+    command.execute(argv[1:])

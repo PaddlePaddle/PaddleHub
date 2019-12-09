@@ -33,7 +33,6 @@ from paddlehub.common.lock import lock
 from paddlehub.common.downloader import default_downloader
 from paddlehub.module import module_desc_pb2
 from paddlehub.common.dir import CONF_HOME
-from paddlehub.module import check_info_pb2
 from paddlehub.common.hub_server import CacheUpdater
 from paddlehub.module.signature import Signature, create_signature
 from paddlehub.module.checker import ModuleChecker

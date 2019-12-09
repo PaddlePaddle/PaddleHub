@@ -19,12 +19,10 @@ from __future__ import print_function
 
 import sys
 import os
-import time
 import multiprocessing
 import hashlib
 import platform
 
-import paddle
 import paddle.fluid as fluid
 import six
 
