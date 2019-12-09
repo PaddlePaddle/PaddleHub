@@ -261,6 +261,10 @@ class BasicTask(object):
                 var = self.env.main_program.global_block().vars[var_name]
                 var.persistable = True
 
+        # to avoid to print logger two times in result of the logger usage of paddle-fluid 1.6
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+
         if self.is_train_phase:
             with fluid.program_guard(self.env.main_program,
                                      self._base_startup_program):
@@ -287,7 +291,7 @@ class BasicTask(object):
 
         self.exe.run(self.env.startup_program)
 
-        # to avoid to print logger two times in result of the logger usage of paddle-fluid
+        # to avoid to print logger two times in result of the logger usage of paddle-fluid 1.5
         for handler in logging.root.handlers[:]:
             logging.root.removeHandler(handler)
 
@@ -588,6 +592,7 @@ class BasicTask(object):
         return self.finetune(do_eval=True)
 
     def finetune(self, do_eval=False):
+
         # Start to finetune
         with self.phase_guard(phase="train"):
             self.init_if_necessary()
