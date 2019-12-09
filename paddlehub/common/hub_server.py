@@ -39,6 +39,8 @@ CACHE_TIME = 60 * 10
 
 
 class HubServer(object):
+    _instance_lock = threading.Lock()
+
     def __init__(self, config_file_path=None):
         if not config_file_path:
             config_file_path = os.path.join(CONF_HOME, 'config.json')
@@ -60,6 +62,13 @@ class HubServer(object):
         self.request()
         self._load_resource_list_file_if_valid()
         lock.flock(fp_lock, lock.LOCK_UN)
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(HubServer, "_instance"):
+            with HubServer._instance_lock:
+                if not hasattr(HubServer, "_instance"):
+                    HubServer._instance = object.__new__(cls)
+        return HubServer._instance
 
     def get_server_url(self):
         random.seed(int(time.time()))
@@ -280,8 +289,7 @@ class CacheUpdater(threading.Thread):
         payload = {'word': module}
         if version:
             payload['version'] = version
-        api_url = srv_utils.uri_path(default_hub_server.get_server_url(),
-                                     'search')
+        api_url = srv_utils.uri_path(HubServer().get_server_url(), 'search')
         cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
         extra = {
             "command": "update_cache",
@@ -300,7 +308,4 @@ class CacheUpdater(threading.Thread):
 
 
 def server_check():
-    default_hub_server.server_check()
-
-
-default_hub_server = HubServer()
+    HubServer().server_check()

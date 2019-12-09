@@ -20,15 +20,11 @@ from __future__ import print_function
 import six
 import sys
 
+from paddlehub.commands.base_command import BaseCommand
+
 from paddlehub.common.logger import logger
 from paddlehub.common.utils import sys_stdin_encoding
-from paddlehub.common import srv_utils
-from paddlehub.commands.base_command import BaseCommand
-from paddlehub.commands import show
 from paddlehub.commands import help
-from paddlehub.commands import version
-from paddlehub.commands import run
-from paddlehub.commands import download
 
 
 class HubCommand(BaseCommand):
@@ -69,10 +65,11 @@ def main():
 
 
 if __name__ == "__main__":
-    argv = []
-    for item in sys.argv:
-        if six.PY2:
-            argv.append(item.decode(sys_stdin_encoding()).decode("utf8"))
-        else:
-            argv.append(item)
-    command.execute(argv[1:])
+    # argv = []
+    # for item in sys.argv:
+    #     if six.PY2:
+    #         argv.append(item.decode(sys_stdin_encoding()).decode("utf8"))
+    #     else:
+    #         argv.append(item)
+    # command.execute(argv[1:])
+    command.execute("hub list".split())
