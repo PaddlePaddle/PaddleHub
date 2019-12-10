@@ -77,7 +77,7 @@ class LocalModuleManager(object):
     def install_module(self,
                        module_name,
                        module_version=None,
-                       module_path=None,
+                       module_path="",
                        upgrade=False,
                        extra=None):
         # check if has installed module
