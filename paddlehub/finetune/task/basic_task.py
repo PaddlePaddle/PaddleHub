@@ -81,7 +81,7 @@ class RunEnv(object):
         return self.__dict__[key]
 
 
-class Task_Hooks():
+class TaskHooks():
     def __init__(self):
         self._registered_hooks = {
             "build_env_start": {},
@@ -97,7 +97,7 @@ class Task_Hooks():
             "eval_interval": {},
             "run_step": {},
         }
-        self._hook_parms_num = {
+        self._hook_params_num = {
             "build_env_start": 1,
             "build_env_end": 1,
             "finetune_start": 1,
@@ -112,68 +112,60 @@ class Task_Hooks():
             "run_step": 2,
         }
 
-    def add(self, type, *args):
-        # support two types of parameters input
-        if len(args) == 1:
-            func = args[0]
+    def add(self, hook_type, name=None, func=None):
+        if not func or not callable(func):
+            raise ValueError(
+                "The hook function is empty or it is not a function")
+        if name and not isinstance(name, str):
+            raise ValueError("The hook name must be a string")
+        if not name:
             name = "hook_%s" % id(func)
-            if not callable(func):
-                raise ValueError("The hook function must be a function")
-        elif len(args) == 2:
-            name = args[0]
-            func = args[1]
-            if not (isinstance(name, str) and callable(func)):
-                raise ValueError(
-                    "The hook name must be a string, and the hook function must be a function"
-                )
-        else:
-            raise ValueError("Parameter quantity error")
 
         # check validity
-        if type not in self._registered_hooks:
-            raise ValueError("type: %s does not exist" % (type))
-        if name in self._registered_hooks[type]:
+        if hook_type not in self._registered_hooks:
+            raise ValueError("hook_type: %s does not exist" % (hook_type))
+        if name in self._registered_hooks[hook_type]:
             raise ValueError(
-                "name: %s has existed in type:%s, use modify method to modify it"
-                % (name, type))
+                "name: %s has existed in hook_type:%s, use modify method to modify it"
+                % (name, hook_type))
         else:
             args_num = len(inspect.getfullargspec(func).args)
-            if args_num != self._hook_parms_num[type]:
+            if args_num != self._hook_params_num[hook_type]:
                 raise ValueError(
-                    "The number of parameters to the hook type:%s should be %i"
-                    % (type, self._hook_parms_num[type]))
-            self._registered_hooks[type][name] = func
+                    "The number of parameters to the hook hook_type:%s should be %i"
+                    % (hook_type, self._hook_params_num[hook_type]))
+            self._registered_hooks[hook_type][name] = func
 
-    def delete(self, type, name):
-        if self.exist(type, name):
-            del self._registered_hooks[type][name]
+    def delete(self, hook_type, name):
+        if self.exist(hook_type, name):
+            del self._registered_hooks[hook_type][name]
 
-    def modify(self, type, name, func):
+    def modify(self, hook_type, name, func):
         if not (isinstance(name, str) and callable(func)):
             raise ValueError(
                 "The hook name must be a string, and the hook function must be a function"
             )
-        if self.exist(type, name):
-            self._registered_hooks[type][name] = func
+        if self.exist(hook_type, name):
+            self._registered_hooks[hook_type][name] = func
 
-    def exist(self, type, name):
-        if type not in self._registered_hooks:
-            raise ValueError("type: %s does not exist" % (type))
-        if name not in self._registered_hooks[type]:
+    def exist(self, hook_type, name):
+        if hook_type not in self._registered_hooks:
+            raise ValueError("hook_type: %s does not exist" % (hook_type))
+        if name not in self._registered_hooks[hook_type]:
             raise ValueError(
-                "name: %s does not exist in type: %s" % (name, type))
+                "name: %s does not exist in hook_type: %s" % (name, hook_type))
         return True
 
     def show(self, only_customized=True):
         # formatted output the source code
         ret = ""
-        for type, hooks in self._registered_hooks.items():
+        for hook_type, hooks in self._registered_hooks.items():
             already_print_type = False
             for name, func in hooks.items():
                 if name == "default" and only_customized:
                     continue
                 if not already_print_type:
-                    ret += "hook type: %s{\n" % type
+                    ret += "hook_type: %s{\n" % hook_type
                     already_print_type = True
                 source = inspect.getsource(func)
                 ret += " name: %s{\n" % name
@@ -186,8 +178,8 @@ class Task_Hooks():
             ret = "Not any hooks when only_customized=%s" % only_customized
         return ret
 
-    def __call__(self, type):
-        return self._registered_hooks[type]
+    def __getitem__(self, hook_type):
+        return self._registered_hooks[hook_type]
 
     def __repr__(self):
         return self.show(only_customized=False)
@@ -262,12 +254,12 @@ class BasicTask(object):
         self._predict_data = None
 
         # event hooks
-        self._hooks = Task_Hooks()
-        for type, event_hooks in self._hooks._registered_hooks.items():
-            self._hooks.add(type, "default",
-                            eval("self._default_%s_event" % type))
-            setattr(BasicTask, "_%s_event" % type,
-                    self.create_event_function(type))
+        self._hooks = TaskHooks()
+        for hook_type, event_hooks in self._hooks._registered_hooks.items():
+            self._hooks.add(hook_type, "default",
+                            eval("self._default_%s_event" % hook_type))
+            setattr(BasicTask, "_%s_event" % hook_type,
+                    self.create_event_function(hook_type))
 
         # accelerate predict
         self.is_best_model_loaded = False
@@ -561,9 +553,9 @@ class BasicTask(object):
             return [metric.name for metric in self.metrics] + [self.loss.name]
         return [output.name for output in self.outputs]
 
-    def create_event_function(self, type):
+    def create_event_function(self, hook_type):
         def hook_function(self, *args):
-            for name, func in self._hooks(type).items():
+            for name, func in self._hooks[hook_type].items():
                 if inspect.ismethod(func):
                     func(*args)
                 else:
@@ -572,17 +564,20 @@ class BasicTask(object):
         return hook_function
 
     @property
-    def hooks(self, only_customized=True):
+    def hooks(self):
+        return self._hooks._registered_hooks
+
+    def show_hooks(self, only_customized=True):
         return self._hooks.show(only_customized)
 
-    def add_hook(self, type, *args):
-        self._hooks.add(type, *args)
+    def add_hook(self, hook_type, name=None, func=None):
+        self._hooks.add(hook_type, name=name, func=func)
 
-    def delete_hook(self, type, name):
-        self._hooks.delete(type, name)
+    def delete_hook(self, hook_type, name):
+        self._hooks.delete(hook_type, name)
 
-    def modify_hook(self, type, name, func):
-        self._hooks.modify(type, name, func)
+    def modify_hook(self, hook_type, name, func):
+        self._hooks.modify(hook_type, name, func)
 
     def _default_build_env_start_event(self):
         pass
