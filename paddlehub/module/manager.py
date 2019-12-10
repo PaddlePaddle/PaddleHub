@@ -93,50 +93,55 @@ class LocalModuleManager(object):
                                                               module_dir)
                 return True, tips, self.modules_dict[module_name]
 
-        # get tar.gz file
-        if not module_path:
-            search_result = hub.HubServer().get_module_url(
-                module_name, version=module_version, extra=extra)
-            name = search_result.get('name', None)
-            url = search_result.get('url', None)
-            md5_value = search_result.get('md5', None)
-            installed_module_version = search_result.get('version', None)
-            if not url or (module_version is not None
-                           and installed_module_version != module_version) or (
-                               name != module_name):
-                if hub.HubServer()._server_check() is False:
-                    tips = "Request Hub-Server unsuccessfully, please check your network."
-                else:
-                    tips = "Can't find module %s" % module_name
-                    if module_version:
-                        tips += " with version %s" % module_version
-                    module_tag = module_name if not module_version else '%s-%s' % (
-                        module_name, module_version)
-                return False, tips, None
+        if not module_path or os.path.isfile(module_path):
+            if not module_path:
+                # get tar.gz file
+                search_result = hub.HubServer().get_module_url(
+                    module_name, version=module_version, extra=extra)
+                name = search_result.get('name', None)
+                url = search_result.get('url', None)
+                md5_value = search_result.get('md5', None)
+                installed_module_version = search_result.get('version', None)
+                if not url or (module_version is not None
+                               and installed_module_version != module_version
+                               ) or (name != module_name):
+                    if hub.HubServer()._server_check() is False:
+                        tips = "Request Hub-Server unsuccessfully, please check your network."
+                    else:
+                        tips = "Can't find module %s" % module_name
+                        if module_version:
+                            tips += " with version %s" % module_version
+                        module_tag = module_name if not module_version else '%s-%s' % (
+                            module_name, module_version)
+                    return False, tips, None
 
-            result, tips, module_zip_file = default_downloader.download_file(
-                url=url,
-                save_path=hub.CACHE_HOME,
-                save_name=module_name,
-                replace=True,
+                result, tips, module_zip_file = default_downloader.download_file(
+                    url=url,
+                    save_path=hub.CACHE_HOME,
+                    save_name=module_name,
+                    replace=True,
+                    print_progress=True)
+                if_delete_targz = True
+            else:
+                module_zip_file = module_path
+                md5_value = None
+                installed_module_version = None
+                if_delete_targz = False
+
+            # uncompress
+            result, tips, module_dir = default_downloader.uncompress(
+                file=module_zip_file,
+                dirname=MODULE_HOME,
+                delete_file=if_delete_targz,
                 print_progress=True)
-            if_delete_targz = True
 
-        elif os.path.isfile(module_path):
-            module_zip_file = module_path
+        elif os.path.isdir(module_path):
+            module_dir = module_path
             md5_value = None
             installed_module_version = None
-            if_delete_targz = False
         else:
-            tips = "module_path must be a file path"
+            tips = "module_path must point to a tar.gz file or a directory with module files"
             return False, tips, None
-
-        # uncompress
-        result, tips, module_dir = default_downloader.uncompress(
-            file=module_zip_file,
-            dirname=MODULE_HOME,
-            delete_file=if_delete_targz,
-            print_progress=True)
 
         # rename and supplement
         if module_dir:
@@ -148,7 +153,10 @@ class LocalModuleManager(object):
             save_path = os.path.join(MODULE_HOME, module_name)
             if os.path.exists(save_path):
                 shutil.rmtree(save_path)
-            shutil.move(module_dir, save_path)
+            if os.path.isdir(module_path):
+                shutil.copytree(module_dir, save_path)
+            else:
+                shutil.move(module_dir, save_path)
             module_dir = save_path
             tips = "Successfully installed %s" % module_name
             if installed_module_version:
