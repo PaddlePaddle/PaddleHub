@@ -78,6 +78,12 @@ class BaseReader(BasicReader):
                 "Dataset is None or it has not any labels, label map = {}".
                 format(self.label_map))
 
+        self.Record_With_Label_Id = namedtuple(
+            'Record',
+            ['token_ids', 'text_type_ids', 'position_ids', 'label_id'])
+        self.Record_Wo_Label_Id = namedtuple(
+            'Record', ['token_ids', 'text_type_ids', 'position_ids'])
+
     def _truncate_seq_pair(self, tokens_a, tokens_b, max_length):
         """Truncates a sequence pair in place to the maximum length."""
 
@@ -165,24 +171,14 @@ class BaseReader(BasicReader):
         else:
             label_id = example.label
 
-        Record = namedtuple(
-            'Record',
-            ['token_ids', 'text_type_ids', 'position_ids', 'label_id'])
-
         if phase != "predict":
-            Record = namedtuple(
-                'Record',
-                ['token_ids', 'text_type_ids', 'position_ids', 'label_id'])
-
-            record = Record(
+            record = self.Record_With_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids,
                 label_id=label_id)
         else:
-            Record = namedtuple('Record',
-                                ['token_ids', 'text_type_ids', 'position_ids'])
-            record = Record(
+            record = self.Record_Wo_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids)
@@ -476,15 +472,11 @@ class SequenceLabelReader(BaseReader):
             label_ids = [no_entity_id
                          ] + [self.label_map[label]
                               for label in labels] + [no_entity_id]
-
-            Record = namedtuple(
-                'Record',
-                ['token_ids', 'text_type_ids', 'position_ids', 'label_ids'])
-            record = Record(
+            record = self.Record_With_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids,
-                label_ids=label_ids)
+                label_id=label_ids)
         else:
             tokens = self._reseg_token_label(
                 tokens=tokens, tokenizer=tokenizer, phase=phase)
@@ -497,9 +489,7 @@ class SequenceLabelReader(BaseReader):
             position_ids = list(range(len(token_ids)))
             text_type_ids = [0] * len(token_ids)
 
-            Record = namedtuple('Record',
-                                ['token_ids', 'text_type_ids', 'position_ids'])
-            record = Record(
+            record = self.Record_Wo_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids,
@@ -615,19 +605,13 @@ class MultiLabelClassifyReader(BaseReader):
                 label_ids.append(int(label))
 
         if phase != "predict":
-            Record = namedtuple(
-                'Record',
-                ['token_ids', 'text_type_ids', 'position_ids', 'label_ids'])
-
-            record = Record(
+            record = self.Record_With_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids,
-                label_ids=label_ids)
+                label_id=label_ids)
         else:
-            Record = namedtuple('Record',
-                                ['token_ids', 'text_type_ids', 'position_ids'])
-            record = Record(
+            record = self.Record_Wo_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids)
@@ -817,6 +801,7 @@ class ReadingComprehensionReader(BaseReader):
 
         self.doc_stride = doc_stride
         self.max_query_length = max_query_length
+        self._DocSpan = collections.namedtuple("DocSpan", ["start", "length"])
         # self.all_examples[phase] and self.all_features[phase] will be used
         # in write_prediction in reading_comprehension_task
         self.all_features = {"train": [], "dev": [], "test": [], "predict": []}
@@ -1005,14 +990,14 @@ class ReadingComprehensionReader(BaseReader):
             # We can have documents that are longer than the maximum sequence length.
             # To deal with this we do a sliding window approach, where we take chunks
             # of the up to our max length with a stride of `doc_stride`.
-            _DocSpan = collections.namedtuple("DocSpan", ["start", "length"])
             doc_spans = []
             start_offset = 0
             while start_offset < len(all_doc_tokens):
                 length = len(all_doc_tokens) - start_offset
                 if length > max_tokens_for_doc:
                     length = max_tokens_for_doc
-                doc_spans.append(_DocSpan(start=start_offset, length=length))
+                doc_spans.append(
+                    self._DocSpan(start=start_offset, length=length))
                 if start_offset + length == len(all_doc_tokens):
                     break
                 start_offset += min(length, self.doc_stride)

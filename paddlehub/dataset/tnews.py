@@ -17,15 +17,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from collections import namedtuple
 import io
 import os
-import csv
 
 from paddlehub.dataset import InputExample, HubDataset
-from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.common.logger import logger
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/tnews.tar.gz"
 
