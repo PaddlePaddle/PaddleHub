@@ -36,6 +36,9 @@ class InstallCommand(BaseCommand):
             prog='%s %s <module_name>' % (ENTRY, name),
             usage='%(prog)s',
             add_help=False)
+        # yapf: disable
+        self.add_arg('--path',  str,  "",   "path to save the model/module" )
+        # yapf: enable
 
     def execute(self, argv):
         if not argv:
@@ -48,8 +51,14 @@ class InstallCommand(BaseCommand):
         module_name = module_name if "==" not in module_name else module_name.split(
             "==")[0]
         extra = {"command": "install"}
+        args = self.parser.parse_args(argv[1:])
+        module_path = args.path
+
         result, tips, module_dir = default_module_manager.install_module(
-            module_name=module_name, module_version=module_version, extra=extra)
+            module_name=module_name,
+            module_version=module_version,
+            module_path=module_path,
+            extra=extra)
         print(tips)
         return True
 

@@ -77,8 +77,10 @@ class LocalModuleManager(object):
     def install_module(self,
                        module_name,
                        module_version=None,
+                       module_path=None,
                        upgrade=False,
                        extra=None):
+        # check if has installed module
         self.all_modules(update=True)
         module_info = self.modules_dict.get(module_name, None)
         if module_info:
@@ -91,40 +93,58 @@ class LocalModuleManager(object):
                                                               module_dir)
                 return True, tips, self.modules_dict[module_name]
 
-        search_result = hub.HubServer().get_module_url(
-            module_name, version=module_version, extra=extra)
-        name = search_result.get('name', None)
-        url = search_result.get('url', None)
-        md5_value = search_result.get('md5', None)
-        installed_module_version = search_result.get('version', None)
-        if not url or (module_version is not None and installed_module_version
-                       != module_version) or (name != module_name):
-            if hub.HubServer()._server_check() is False:
-                tips = "Request Hub-Server unsuccessfully, please check your network."
-            else:
-                tips = "Can't find module %s" % module_name
-                if module_version:
-                    tips += " with version %s" % module_version
-                module_tag = module_name if not module_version else '%s-%s' % (
-                    module_name, module_version)
+        # get tar.gz file
+        if not module_path:
+            search_result = hub.HubServer().get_module_url(
+                module_name, version=module_version, extra=extra)
+            name = search_result.get('name', None)
+            url = search_result.get('url', None)
+            md5_value = search_result.get('md5', None)
+            installed_module_version = search_result.get('version', None)
+            if not url or (module_version is not None
+                           and installed_module_version != module_version) or (
+                               name != module_name):
+                if hub.HubServer()._server_check() is False:
+                    tips = "Request Hub-Server unsuccessfully, please check your network."
+                else:
+                    tips = "Can't find module %s" % module_name
+                    if module_version:
+                        tips += " with version %s" % module_version
+                    module_tag = module_name if not module_version else '%s-%s' % (
+                        module_name, module_version)
+                return False, tips, None
+
+            result, tips, module_zip_file = default_downloader.download_file(
+                url=url,
+                save_path=hub.CACHE_HOME,
+                save_name=module_name,
+                replace=True,
+                print_progress=True)
+            if_delete_targz = True
+
+        elif os.path.isfile(module_path):
+            module_zip_file = module_path
+            md5_value = None
+            installed_module_version = None
+            if_delete_targz = False
+        else:
+            tips = "module_path must be a file path"
             return False, tips, None
 
-        result, tips, module_zip_file = default_downloader.download_file(
-            url=url,
-            save_path=hub.CACHE_HOME,
-            save_name=module_name,
-            replace=True,
-            print_progress=True)
+        # uncompress
         result, tips, module_dir = default_downloader.uncompress(
             file=module_zip_file,
             dirname=MODULE_HOME,
-            delete_file=True,
+            delete_file=if_delete_targz,
             print_progress=True)
 
+        # rename and supplement
         if module_dir:
-            with open(os.path.join(MODULE_HOME, module_dir, "md5.txt"),
-                      "w") as fp:
-                fp.write(md5_value)
+            if md5_value:
+                with open(
+                        os.path.join(MODULE_HOME, module_dir, "md5.txt"),
+                        "w") as fp:
+                    fp.write(md5_value)
             save_path = os.path.join(MODULE_HOME, module_name)
             if os.path.exists(save_path):
                 shutil.rmtree(save_path)
