@@ -123,16 +123,24 @@ class Module(object):
         fp_lock = open(os.path.join(CONF_HOME, 'config.json'))
         lock.flock(fp_lock, lock.LOCK_EX)
         if name:
-            self._init_with_name(name=name, version=version)
+            result, module_dir = self._init_with_name(
+                name=name, version=version)
+            if result == True:
+                version = module_dir[1]
             lock.flock(fp_lock, lock.LOCK_UN)
         elif module_dir:
-            self._init_with_module_file(module_dir=module_dir[0])
-            lock.flock(fp_lock, lock.LOCK_UN)
-            name = module_dir[0].split("/")[-1]
-            if len(module_dir) > 1:
+            if isinstance(module_dir, tuple) or isinstance(module_dir, list):
+                self._init_with_module_file(module_dir=module_dir[0])
+                name = os.path.split(module_dir[0])[-1]
                 version = module_dir[1]
-            else:
-                version = default_module_manager.search_module(name)[1]
+            if isinstance(module_dir, str):
+                self._init_with_module_file(module_dir=module_dir)
+                name = os.path.split(module_dir)[-1]
+                try:
+                    version = default_module_manager.search_module(name)[1]
+                except Exception as err:
+                    version = "0.0.0"
+            lock.flock(fp_lock, lock.LOCK_UN)
         elif signatures:
             if processor:
                 if not issubclass(processor, BaseProcessor):
@@ -166,6 +174,7 @@ class Module(object):
         else:
             logger.info(tips)
             self._init_with_module_file(module_dir[0])
+        return result, module_dir
 
     def _init_with_url(self, url):
         utils.check_url(url)
