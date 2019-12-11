@@ -338,7 +338,7 @@ def run(is_use_gpu=False, configs=None, port=8866, timeout=60):
 if __name__ == "__main__":
     configs = [{
         'category': 'NLP',
-        u'queue_size': 20,
+        u'queue_size': 100,
         u'version': u'1.0.0',
         u'module': 'lac',
         u'batch_size': 20
