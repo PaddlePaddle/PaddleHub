@@ -408,7 +408,6 @@ class BasicTask(object):
                     build_strategy=self.build_strategy)
 
         self.exe.run(self.env.startup_program)
-
         self._build_env_end_event()
 
     @property
@@ -624,7 +623,7 @@ class BasicTask(object):
                     scalar_value=eval_scores[metric],
                     global_step=self._envs['train'].current_step)
             log_scores += "%s=%.5f " % (metric, eval_scores[metric])
-        logger.info(
+        logger.eval(
             "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
             (self.phase, eval_loss, log_scores, run_speed))
 
@@ -642,7 +641,7 @@ class BasicTask(object):
             self.best_score = main_value
             model_saved_dir = os.path.join(self.config.checkpoint_dir,
                                            "best_model")
-            logger.info("best model saved to %s [best %s=%.5f]" %
+            logger.eval("best model saved to %s [best %s=%.5f]" %
                         (model_saved_dir, main_metric, main_value))
 
             save_result = fluid.io.save_persistables(
@@ -663,9 +662,9 @@ class BasicTask(object):
                 scalar_value=scores[metric],
                 global_step=self._envs['train'].current_step)
             log_scores += "%s=%.5f " % (metric, scores[metric])
-        logger.info("step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
-                    (self.current_step, self.max_train_steps, avg_loss,
-                     log_scores, run_speed))
+        logger.train("step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
+                     (self.current_step, self.max_train_steps, avg_loss,
+                      log_scores, run_speed))
 
     def _default_save_ckpt_interval_event(self):
         self.save_checkpoint()
@@ -731,6 +730,7 @@ class BasicTask(object):
         return self.finetune(do_eval=True)
 
     def finetune(self, do_eval=False):
+
         # Start to finetune
         with self.phase_guard(phase="train"):
             self.init_if_necessary()
@@ -898,3 +898,8 @@ class BasicTask(object):
                 break
 
         return global_run_states
+
+    def __repr__(self):
+        return "Task: %s with metrics_choices: %s， reader: %s, %s" % (
+            self.__class__.__name__, self.metrics_choices,
+            self._base_data_reader.__class__.__name__, self.config)

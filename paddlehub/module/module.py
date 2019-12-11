@@ -129,7 +129,10 @@ class Module(object):
             self._init_with_module_file(module_dir=module_dir[0])
             lock.flock(fp_lock, lock.LOCK_UN)
             name = module_dir[0].split("/")[-1]
-            version = module_dir[1]
+            if len(module_dir) > 1:
+                version = module_dir[1]
+            else:
+                version = default_module_manager.search_module(name)[1]
         elif signatures:
             if processor:
                 if not issubclass(processor, BaseProcessor):
