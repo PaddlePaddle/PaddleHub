@@ -114,10 +114,10 @@ class TaskHooks():
 
     def add(self, hook_type, name=None, func=None):
         if not func or not callable(func):
-            raise ValueError(
+            raise TypeError(
                 "The hook function is empty or it is not a function")
         if name and not isinstance(name, str):
-            raise ValueError("The hook name must be a string")
+            raise TypeError("The hook name must be a string")
         if not name:
             name = "hook_%s" % id(func)
 
@@ -139,22 +139,29 @@ class TaskHooks():
     def delete(self, hook_type, name):
         if self.exist(hook_type, name):
             del self._registered_hooks[hook_type][name]
+        else:
+            raise ValueError(
+                "No hook_type: %s exists or name: %s does not exist in hook_type: %s"
+                % (hook_type, name, hook_type))
 
     def modify(self, hook_type, name, func):
         if not (isinstance(name, str) and callable(func)):
-            raise ValueError(
+            raise TypeError(
                 "The hook name must be a string, and the hook function must be a function"
             )
         if self.exist(hook_type, name):
             self._registered_hooks[hook_type][name] = func
+        else:
+            raise ValueError(
+                "No hook_type: %s exists or name: %s does not exist in hook_type: %s"
+                % (hook_type, name, hook_type))
 
     def exist(self, hook_type, name):
-        if hook_type not in self._registered_hooks:
-            raise ValueError("hook_type: %s does not exist" % (hook_type))
-        if name not in self._registered_hooks[hook_type]:
-            raise ValueError(
-                "name: %s does not exist in hook_type: %s" % (name, hook_type))
-        return True
+        if hook_type not in self._registered_hooks \
+                or name not in self._registered_hooks[hook_type]:
+            return False
+        else:
+            return True
 
     def info(self, only_customized=True):
         # formatted output the source code
