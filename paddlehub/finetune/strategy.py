@@ -414,11 +414,7 @@ class CombinedStrategy(DefaultStrategy):
         # self.num_examples = {'train': -1, 'dev': -1, 'test': -1} before data_generator
         data_reader.data_generator(
             batch_size=config.batch_size, phase='train', shuffle=True)
-        data_reader.data_generator(
-            batch_size=config.batch_size, phase='dev', shuffle=False)
-        data_reader.data_generator(
-            batch_size=config.batch_size, phase='test', shuffle=False)
-        num_train_examples = len(data_reader.get_train_examples())
+        num_train_examples = data_reader.num_examples['train']
 
         max_train_steps = config.num_epoch * num_train_examples // config.batch_size // dev_count
 

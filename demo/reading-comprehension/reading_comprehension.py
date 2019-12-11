@@ -31,28 +31,42 @@ parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight dec
 parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=384, help="Number of words of the longest seqence.")
+parser.add_argument("--null_score_diff_threshold", type=float, default=0.0, help="If null_score - best_non_null is greater than the threshold predict null.")
+parser.add_argument("--n_best_size",  type=int, default=20,help="The total number of n-best predictions to generate in the ""nbest_predictions.json output file.")
+parser.add_argument("--max_answer_length",  type=int, default=30,help="The maximum length of an answer that can be generated. This is needed ""because the start and end predictions are not conditioned on one another.")
 parser.add_argument("--batch_size", type=int, default=8, help="Total examples' number in batch for training.")
-parser.add_argument("--use_pyreader", type=ast.literal_eval, default=True, help="Whether use pyreader to feed data.")
-parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=True, help="Whether use data parallel.")
-parser.add_argument("--version_2_with_negative", type=ast.literal_eval, default=False, help="If true, the SQuAD examples contain some that do not have an answer. If using squad v2.0, it should be set true.")
+parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
+parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
+parser.add_argument("--dataset", type=str, default="squad", help="Support squad, squad2.0, drcd and cmrc2018")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub bert_uncased_L-12_H-768_A-12 pretrained model
-    module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    # Download dataset and use ReadingComprehensionReader to read dataset
+    if args.dataset == "squad":
+        dataset = hub.dataset.SQUAD(version_2_with_negative=False)
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset == "squad2.0" or args.dataset == "squad2":
+        args.dataset = "squad2.0"
+        dataset = hub.dataset.SQUAD(version_2_with_negative=True)
+        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+    elif args.dataset == "drcd":
+        dataset = hub.dataset.DRCD()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+    elif args.dataset == "cmrc2018":
+        dataset = hub.dataset.CMRC2018()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+    else:
+        raise Exception(
+            "Only support datasets: squad, squad2.0, drcd and cmrc2018")
 
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use ReadingComprehensionReader to read dataset
-    dataset = hub.dataset.SQUAD(
-        version_2_with_negative=args.version_2_with_negative)
-
     reader = hub.reader.ReadingComprehensionReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_length=args.max_seq_len,
+        max_seq_len=args.max_seq_len,
         doc_stride=128,
         max_query_length=64)
 
@@ -75,10 +89,9 @@ if __name__ == '__main__':
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
-        log_interval=10,
+        eval_interval=300,
         use_pyreader=args.use_pyreader,
         use_data_parallel=args.use_data_parallel,
-        save_ckpt_interval=1000,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
@@ -91,7 +104,9 @@ if __name__ == '__main__':
         data_reader=reader,
         feature=seq_output,
         feed_list=feed_list,
-        config=config)
+        config=config,
+        sub_task=args.dataset,
+    )
 
     # Finetune by PaddleHub's API
-    reading_comprehension_task.finetune()
+    reading_comprehension_task.finetune_and_eval()

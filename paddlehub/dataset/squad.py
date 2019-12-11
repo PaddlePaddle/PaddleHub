@@ -76,42 +76,50 @@ class SQUAD(object):
                 url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
         else:
             logger.info("Dataset {} already cached.".format(self.dataset_dir))
-
-        self._load_train_examples(version_2_with_negative, is_training=True)
-        self._load_predict_examples(version_2_with_negative, is_training=False)
+        self.version_2_with_negative = version_2_with_negative
+        self._load_train_examples(version_2_with_negative, if_has_answer=True)
+        self._load_dev_examples(version_2_with_negative, if_has_answer=True)
 
     def _load_train_examples(self,
                              version_2_with_negative=False,
-                             is_training=True):
+                             if_has_answer=True):
         if not version_2_with_negative:
             self.train_file = os.path.join(self.dataset_dir, "train-v1.1.json")
         else:
             self.train_file = os.path.join(self.dataset_dir, "train-v2.0.json")
 
-        self.train_examples = self._read_json(self.train_file, is_training,
+        self.train_examples = self._read_json(self.train_file, if_has_answer,
                                               version_2_with_negative)
 
-    def _load_predict_examples(self,
-                               version_2_with_negative=False,
-                               is_training=False):
+    def _load_dev_examples(self,
+                           version_2_with_negative=False,
+                           if_has_answer=True):
         if not version_2_with_negative:
-            self.predict_file = os.path.join(self.dataset_dir, "dev-v1.1.json")
+            self.dev_file = os.path.join(self.dataset_dir, "dev-v1.1.json")
         else:
-            self.predict_file = os.path.join(self.dataset_dir, "dev-v2.0.json")
+            self.dev_file = os.path.join(self.dataset_dir, "dev-v2.0.json")
 
-        self.predict_examples = self._read_json(self.predict_file, is_training,
-                                                version_2_with_negative)
+        self.dev_examples = self._read_json(self.dev_file, if_has_answer,
+                                            version_2_with_negative)
+
+    def _load_test_examples(self,
+                            version_2_with_negative=False,
+                            is_training=False):
+        self.test_file = None
+        logger.error("not test_file")
 
     def get_train_examples(self):
         return self.train_examples
 
     def get_dev_examples(self):
-        return []
+        return self.dev_examples
 
     def get_test_examples(self):
         return []
 
-    def _read_json(self, input_file, is_training,
+    def _read_json(self,
+                   input_file,
+                   if_has_answer,
                    version_2_with_negative=False):
         """Read a SQuAD json file into a list of SquadExample."""
         with open(input_file, "r") as reader:
@@ -148,14 +156,13 @@ class SQUAD(object):
                     end_position = None
                     orig_answer_text = None
                     is_impossible = False
-                    if is_training:
-
+                    if if_has_answer:
                         if version_2_with_negative:
                             is_impossible = qa["is_impossible"]
-                        if (len(qa["answers"]) != 1) and (not is_impossible):
-                            raise ValueError(
-                                "For training, each question should have exactly 1 answer."
-                            )
+                        # if (len(qa["answers"]) != 1) and (not is_impossible):
+                        #     raise ValueError(
+                        #         "For training, each question should have exactly 1 answer."
+                        #     )
                         if not is_impossible:
                             answer = qa["answers"][0]
                             orig_answer_text = answer["text"]
@@ -177,8 +184,8 @@ class SQUAD(object):
                                     orig_answer_text))
                             if actual_text.find(cleaned_answer_text) == -1:
                                 logger.warning(
-                                    "Could not find answer: '%s' vs. '%s'",
-                                    actual_text, cleaned_answer_text)
+                                    "Could not find answer: '%s' vs. '%s'" %
+                                    (actual_text, cleaned_answer_text))
                                 continue
                         else:
                             start_position = -1
@@ -199,8 +206,8 @@ class SQUAD(object):
 
 
 if __name__ == "__main__":
-    ds = SQUAD(version_2_with_negative=True)
-    examples = ds.get_dev_examples()
+    ds = SQUAD(version_2_with_negative=False)
+    examples = ds.get_train_examples()
     for index, e in enumerate(examples):
         if index < 10:
             print(e)

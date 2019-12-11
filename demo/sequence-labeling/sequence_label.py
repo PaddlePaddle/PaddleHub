@@ -37,7 +37,7 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     # Load Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
+    module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
@@ -46,7 +46,9 @@ if __name__ == '__main__':
     reader = hub.reader.SequenceLabelReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+        max_seq_len=args.max_seq_len,
+        sp_model_path=module.get_spm_path(),
+        word_dict_path=module.get_word_dict_path())
 
     # Construct transfer learning network
     # Use "sequence_output" for token-level output.

@@ -34,15 +34,27 @@ inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
 
-如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
-PaddleHub还提供BERT模型可供选择, 所有模型对应的加载示例如下：
+PaddleHub还提供BERT等模型可供选择, 模型对应的加载示例如下：
 
    模型名                           | PaddleHub Module
 ---------------------------------- | :------:
 ERNIE, Chinese                     | `hub.Module(name='ernie')`
+ERNIE tiny, Chinese                | `hub.Module(name='ernie_tiny')`
+ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
+ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
+BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
+BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
+BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
+BERT-Large, Cased                  | `hub.Module(name='bert_cased_L-24_H-1024_A-16')`
+BERT-Base, Multilingual Cased      | `hub.Module(nane='bert_multi_cased_L-12_H-768_A-12')`
 BERT-Base, Chinese                 | `hub.Module(name='bert_chinese_L-12_H-768_A-12')`
+BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-768_A-12')`
+BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
+更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
 
-
+如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
 ```python
 # 更换name参数即可无缝切换BERT中文模型, 代码示例如下
 module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
@@ -54,7 +66,9 @@ dataset = hub.dataset.MSRA_NER()
 reader = hub.reader.SequenceLabelReader(
     dataset=dataset,
     vocab_path=module.get_vocab_path(),
-    max_seq_len=128)
+    max_seq_len=128,
+    sp_model_path=module.get_spm_path(),
+    word_dict_path=module.get_word_dict_path())
 ```
 
 其中数据集的准备代码可以参考 [msra_ner.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/msra_ner.py)
@@ -64,6 +78,10 @@ reader = hub.reader.SequenceLabelReader(
 `module.get_vaocab_path()` 会返回预训练模型对应的词表
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致
+
+`module.sp_model_path` 若module为ernie_tiny则返回对应的子词切分模型，否则返回None
+
+`module.word_dict_path` 若module为ernie_tiny则返回对应的词语切分模型，否则返回None
 
 SequenceLabelReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
 

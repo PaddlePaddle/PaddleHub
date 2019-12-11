@@ -36,7 +36,6 @@ parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whe
 parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
 parser.add_argument("--dataset", type=str, default="chnsenticorp", help="The choice of dataset")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
-parser.add_argument("--use_taskid", type=ast.literal_eval, default=False, help="Whether to use taskid ,if yes to use ernie v2.")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -46,76 +45,72 @@ if __name__ == '__main__':
     # Download dataset and use ClassifyReader to read dataset
     if args.dataset.lower() == "chnsenticorp":
         dataset = hub.dataset.ChnSentiCorp()
-        module = hub.Module(name="ernie")
+        module = hub.Module(name="ernie_tiny")
+        metrics_choices = ["acc"]
+    elif args.dataset.lower() == "tnews":
+        dataset = hub.dataset.TNews()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "nlpcc_dbqa":
         dataset = hub.dataset.NLPCC_DBQA()
-        module = hub.Module(name="ernie")
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "lcqmc":
         dataset = hub.dataset.LCQMC()
-        module = hub.Module(name="ernie")
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+        metrics_choices = ["acc"]
+    elif args.dataset.lower() == 'inews':
+        dataset = hub.dataset.INews()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+        metrics_choices = ["acc"]
+    elif args.dataset.lower() == 'bq':
+        dataset = hub.dataset.BQ()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+        metrics_choices = ["acc"]
+    elif args.dataset.lower() == 'thucnews':
+        dataset = hub.dataset.THUCNEWS()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
+        metrics_choices = ["acc"]
+    elif args.dataset.lower() == 'iflytek':
+        dataset = hub.dataset.IFLYTEK()
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "mrpc":
         dataset = hub.dataset.GLUE("MRPC")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["f1", "acc"]
     # The first metric will be choose to eval. Ref: task.py:799
     elif args.dataset.lower() == "qqp":
         dataset = hub.dataset.GLUE("QQP")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["f1", "acc"]
     elif args.dataset.lower() == "sst-2":
         dataset = hub.dataset.GLUE("SST-2")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "cola":
         dataset = hub.dataset.GLUE("CoLA")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["matthews", "acc"]
     elif args.dataset.lower() == "qnli":
         dataset = hub.dataset.GLUE("QNLI")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "rte":
         dataset = hub.dataset.GLUE("RTE")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "mnli" or args.dataset.lower() == "mnli_m":
         dataset = hub.dataset.GLUE("MNLI_m")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower() == "mnli_mm":
         dataset = hub.dataset.GLUE("MNLI_mm")
-        if args.use_taskid:
-            module = hub.Module(name="ernie_v2_eng_base")
-        else:
-            module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+        module = hub.Module(name="ernie_v2_eng_base")
         metrics_choices = ["acc"]
     elif args.dataset.lower().startswith("xnli"):
         dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
-        module = hub.Module(name="bert_multi_cased_L-12_H-768_A-12")
+        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
         metrics_choices = ["acc"]
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
@@ -130,8 +125,7 @@ if __name__ == '__main__':
     reader = hub.reader.ClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        use_task_id=args.use_taskid)
+        max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
@@ -146,9 +140,6 @@ if __name__ == '__main__':
         inputs["segment_ids"].name,
         inputs["input_mask"].name,
     ]
-
-    if args.use_taskid:
-        feed_list.append(inputs["task_ids"].name)
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(

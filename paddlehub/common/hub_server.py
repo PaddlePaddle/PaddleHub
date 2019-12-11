@@ -24,6 +24,7 @@ import requests
 import json
 import yaml
 import random
+import threading
 
 from random import randint
 from paddlehub.common import utils, srv_utils
@@ -267,6 +268,35 @@ class HubServer(object):
             print("Request Hub-Server successfully.")
         else:
             print("Request Hub-Server unsuccessfully.")
+
+
+class CacheUpdater(threading.Thread):
+    def __init__(self, module, version=None):
+        threading.Thread.__init__(self)
+        self.module = module
+        self.version = version
+
+    def update_resource_list_file(self, module, version=None):
+        payload = {'word': module}
+        if version:
+            payload['version'] = version
+        api_url = srv_utils.uri_path(default_hub_server.get_server_url(),
+                                     'search')
+        cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
+        extra = {
+            "command": "update_cache",
+            "mtime": os.stat(cache_path).st_mtime
+        }
+        try:
+            r = srv_utils.hub_request(api_url, payload, extra)
+        except Exception as err:
+            pass
+        if r.get("update_cache", 0) == 1:
+            with open(cache_path, 'w+') as fp:
+                yaml.safe_dump({'resource_list': r['data']}, fp)
+
+    def run(self):
+        self.update_resource_list_file(self.module, self.version)
 
 
 def server_check():

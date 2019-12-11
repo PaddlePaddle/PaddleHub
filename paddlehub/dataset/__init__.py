@@ -24,6 +24,12 @@ from .squad import SQUAD
 from .xnli import XNLI
 from .glue import GLUE
 from .tnews import TNews
+from .inews import INews
+from .drcd import DRCD
+from .cmrc2018 import CMRC2018
+from .bq import BQ
+from .iflytek import IFLYTEK
+from .thucnews import THUCNEWS
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat

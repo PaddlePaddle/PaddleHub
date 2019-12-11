@@ -4,19 +4,24 @@
 其中分类任务可以分为两大类：
 
 * **单句分类**
-  - ChnSentiCorp
+  - ChineseGLUE-IFLYTEK
+  - ChineseGLUE-THUCNEWS
   - GLUE-Cola
   - GLUE-SST2
-
+  - ChnSentiCorp
 * **句对分类**
-  - LCQMC
-  - NLPCC-DBQA
+  - ChineseGLUE-LCQMC
+  - ChineseGLUE-INEWS
+  - ChineseGLUE-TNEWS
+  - ChinesGLUE-BQ
+  - ChineseGLUE-XNLI_zh
   - GLUE-MNLI
   - GLUE-QQP
   - GLUE-QNLI
   - GLUE-STS-B
   - GLUE-MRPC
   - GLUE-RTE
+  - NLPCC-DBQA
   - XNLI
 
 ## 如何开始Finetune
@@ -35,7 +40,6 @@
 --max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数
 --use_data_parallel: 是否使用并行计算，默认False。打开该功能依赖nccl库。
 --use_pyreader: 是否使用pyreader，默认False。
---use_taskid: 是否使用taskid，taskid是ERNIE 2.0特有的，use_taskid=True表示使用ERNIE 2.0；如果想使用ERNIE 1.0 或者BERT等module，use_taskid应该设置为False。
 
 # 任务相关
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型
@@ -54,12 +58,12 @@ inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
 
-如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
-PaddleHub还提供BERT模型可供选择, 所有模型对应的加载示例如下：
+PaddleHub还提供BERT等模型可供选择, 模型对应的加载示例如下：
 
    模型名                           | PaddleHub Module
 ---------------------------------- | :------:
 ERNIE, Chinese                     | `hub.Module(name='ernie')`
+ERNIE tiny, Chinese                | `hub.Module(name='ernie_tiny')`
 ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
 ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
 BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
@@ -68,8 +72,13 @@ BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-1
 BERT-Large, Cased                  | `hub.Module(name='bert_cased_L-24_H-1024_A-16')`
 BERT-Base, Multilingual Cased      | `hub.Module(nane='bert_multi_cased_L-12_H-768_A-12')`
 BERT-Base, Chinese                 | `hub.Module(name='bert_chinese_L-12_H-768_A-12')`
+BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-768_A-12')`
+BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
+更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
 
-
+如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
 ```python
 # 更换name参数即可无缝切换BERT中文模型, 代码示例如下
 module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
@@ -82,7 +91,8 @@ reader = hub.reader.ClassifyReader(
     dataset=dataset,
     vocab_path=module.get_vocab_path(),
     max_seq_len=128,
-    use_task_id=False)
+    sp_model_path=module.get_spm_path(),
+    word_dict_path=module.get_word_dict_path())
 metrics_choices = ["acc"]
 ```
 
@@ -94,7 +104,9 @@ metrics_choices = ["acc"]
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致
 
-`use_task_id` 表示是否使用ERNIR 2.0 module
+`module.sp_model_path` 若module为ernie_tiny则返回对应的子词切分模型，否则返回None
+
+`module.word_dict_path` 若module为ernie_tiny则返回对应的词语切分模型，否则返回None
 
 ClassifyReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
 

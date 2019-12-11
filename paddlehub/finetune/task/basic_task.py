@@ -134,10 +134,6 @@ class BasicTask(object):
 
         self.exe = fluid.Executor(place=self.place)
         self.build_strategy = fluid.BuildStrategy()
-        if self.config.enable_memory_optim:
-            self.build_strategy.memory_optimize = True
-        else:
-            self.build_strategy.memory_optimize = False
 
         # log item
         if not os.path.exists(self.config.checkpoint_dir):
@@ -165,6 +161,10 @@ class BasicTask(object):
     def enter_phase(self, phase):
         if phase not in ["train", "val", "dev", "test", "predict", "inference"]:
             raise RuntimeError()
+        if phase in ["val", "dev"]:
+            phase = "dev"
+        elif phase in ["predict", "inference"]:
+            phase = "predict"
         self._phases.append(phase)
 
     def exit_phase(self):
@@ -261,6 +261,10 @@ class BasicTask(object):
                 var = self.env.main_program.global_block().vars[var_name]
                 var.persistable = True
 
+        # to avoid to print logger two times in result of the logger usage of paddle-fluid 1.6
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+
         if self.is_train_phase:
             with fluid.program_guard(self.env.main_program,
                                      self._base_startup_program):
@@ -277,8 +281,6 @@ class BasicTask(object):
         share_vars_from = self._base_compiled_program
 
         if not self.config.use_data_parallel:
-            if self.config.enable_memory_optim:
-                fluid.memory_optimize(self.env.main_program)
             self.env.main_program_compiled = None
         else:
             self.env.main_program_compiled = fluid.CompiledProgram(
@@ -288,11 +290,6 @@ class BasicTask(object):
                     build_strategy=self.build_strategy)
 
         self.exe.run(self.env.startup_program)
-
-        # to avoid to print logger two times in result of the logger usage of paddle-fluid
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
-
         self._build_env_end_event()
 
     @property
@@ -330,7 +327,7 @@ class BasicTask(object):
     def env(self):
         phase = self.phase
         if phase in ["val", "dev", "test"]:
-            phase = "val"
+            phase = "dev"
         if not phase in self._envs:
             self._envs[phase] = RunEnv()
         return self._envs[phase]
@@ -452,7 +449,7 @@ class BasicTask(object):
             self.env.score_scalar = {}
 
     def _finetune_start_event(self):
-        logger.info("PaddleHub finetune start")
+        logger.train("PaddleHub finetune start")
 
     def _finetune_end_event(self, run_states):
         logger.info("PaddleHub finetune finished.")
@@ -464,24 +461,25 @@ class BasicTask(object):
         logger.info("PaddleHub predict finished.")
 
     def _eval_start_event(self):
-        logger.info("Evaluation on {} dataset start".format(self.phase))
+        logger.eval("Evaluation on {} dataset start".format(self.phase))
 
     def _eval_end_event(self, run_states):
         eval_scores, eval_loss, run_speed = self._calculate_metrics(run_states)
-        self.tb_writer.add_scalar(
-            tag="Loss_{}".format(self.phase),
-            scalar_value=eval_loss,
-            global_step=self._envs['train'].current_step)
+        if 'train' in self._envs:
+            self.tb_writer.add_scalar(
+                tag="Loss_{}".format(self.phase),
+                scalar_value=eval_loss,
+                global_step=self._envs['train'].current_step)
 
         log_scores = ""
         for metric in eval_scores:
-            self.tb_writer.add_scalar(
-                tag="{}_{}".format(metric, self.phase),
-                scalar_value=eval_scores[metric],
-                global_step=self._envs['train'].current_step)
-
+            if 'train' in self._envs:
+                self.tb_writer.add_scalar(
+                    tag="{}_{}".format(metric, self.phase),
+                    scalar_value=eval_scores[metric],
+                    global_step=self._envs['train'].current_step)
             log_scores += "%s=%.5f " % (metric, eval_scores[metric])
-        logger.info(
+        logger.eval(
             "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
             (self.phase, eval_loss, log_scores, run_speed))
 
@@ -499,8 +497,9 @@ class BasicTask(object):
             self.best_score = main_value
             model_saved_dir = os.path.join(self.config.checkpoint_dir,
                                            "best_model")
-            logger.info("best model saved to %s [best %s=%.5f]" %
+            logger.eval("best model saved to %s [best %s=%.5f]" %
                         (model_saved_dir, main_metric, main_value))
+
             save_result = fluid.io.save_persistables(
                 executor=self.exe,
                 dirname=model_saved_dir,
@@ -519,9 +518,9 @@ class BasicTask(object):
                 scalar_value=scores[metric],
                 global_step=self._envs['train'].current_step)
             log_scores += "%s=%.5f " % (metric, scores[metric])
-        logger.info("step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
-                    (self.current_step, self.max_train_steps, avg_loss,
-                     log_scores, run_speed))
+        logger.train("step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
+                     (self.current_step, self.max_train_steps, avg_loss,
+                      log_scores, run_speed))
 
     def _save_ckpt_interval_event(self):
         self.save_checkpoint()
@@ -588,6 +587,7 @@ class BasicTask(object):
         return self.finetune(do_eval=True)
 
     def finetune(self, do_eval=False):
+
         # Start to finetune
         with self.phase_guard(phase="train"):
             self.init_if_necessary()
@@ -755,3 +755,8 @@ class BasicTask(object):
                 break
 
         return global_run_states
+
+    def __repr__(self):
+        return "Task: %s with metrics_choices: %s， reader: %s, %s" % (
+            self.__class__.__name__, self.metrics_choices,
+            self._base_data_reader.__class__.__name__, self.config)

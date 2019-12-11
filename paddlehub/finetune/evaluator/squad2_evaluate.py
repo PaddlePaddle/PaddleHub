@@ -138,6 +138,7 @@ def find_all_best_thresh(main_eval, preds, exact_raw, f1_raw, na_probs,
     main_eval['best_exact_thresh'] = exact_thresh
     main_eval['best_f1'] = best_f1
     main_eval['best_f1_thresh'] = f1_thresh
+    return main_eval
 
 
 def find_best_thresh(preds, scores, na_probs, qid_to_has_ans):
@@ -161,3 +162,28 @@ def find_best_thresh(preds, scores, na_probs, qid_to_has_ans):
             best_score = cur_score
             best_thresh = na_probs[qid]
     return 100.0 * best_score / len(scores), best_thresh
+
+
+def evaluate(dataset, predictions, na_probs):
+    qid_to_has_ans = make_qid_to_has_ans(dataset)
+    has_ans_qids = [k for k, v in qid_to_has_ans.items() if v]
+    no_ans_qids = [k for k, v in qid_to_has_ans.items() if not v]
+    exact_raw, f1_raw = get_raw_scores(dataset, predictions)
+    exact_thresh = apply_no_ans_threshold(
+        exact_raw, na_probs, qid_to_has_ans, na_prob_thresh=1.0)
+    f1_thresh = apply_no_ans_threshold(
+        f1_raw, na_probs, qid_to_has_ans, na_prob_thresh=1.0)
+    out_eval = make_eval_dict(exact_thresh, f1_thresh)
+
+    if has_ans_qids:
+        has_ans_eval = make_eval_dict(
+            exact_thresh, f1_thresh, qid_list=has_ans_qids)
+        merge_eval(out_eval, has_ans_eval, 'HasAns')
+    if no_ans_qids:
+        no_ans_eval = make_eval_dict(
+            exact_thresh, f1_thresh, qid_list=no_ans_qids)
+        merge_eval(out_eval, no_ans_eval, 'NoAns')
+
+    find_all_best_thresh(out_eval, predictions, exact_raw, f1_raw, na_probs,
+                         qid_to_has_ans)
+    return out_eval

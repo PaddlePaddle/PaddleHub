@@ -22,6 +22,8 @@ import collections
 import io
 import unicodedata
 import six
+import sentencepiece as spm
+import pickle
 
 
 def convert_to_unicode(text):
@@ -79,6 +81,7 @@ def load_vocab(vocab_file):
         index = items[1] if len(items) == 2 else num
         token = token.strip()
         vocab[token] = int(index)
+    fin.close()
     return vocab
 
 
@@ -110,11 +113,17 @@ def whitespace_tokenize(text):
 class FullTokenizer(object):
     """Runs end-to-end tokenziation."""
 
-    def __init__(self, vocab_file, do_lower_case=True):
+    def __init__(self,
+                 vocab_file,
+                 do_lower_case=True,
+                 use_sentence_piece_vocab=False):
         self.vocab = load_vocab(vocab_file)
         self.inv_vocab = {v: k for k, v in self.vocab.items()}
         self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
-        self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
+        self.use_sentence_piece_vocab = use_sentence_piece_vocab
+        self.wordpiece_tokenizer = WordpieceTokenizer(
+            vocab=self.vocab,
+            use_sentence_piece_vocab=self.use_sentence_piece_vocab)
 
     def tokenize(self, text):
         split_tokens = []
@@ -146,6 +155,60 @@ class CharTokenizer(object):
                 split_tokens.append(sub_token)
 
         return split_tokens
+
+    def convert_tokens_to_ids(self, tokens):
+        return convert_by_vocab(self.vocab, tokens)
+
+    def convert_ids_to_tokens(self, ids):
+        return convert_by_vocab(self.inv_vocab, ids)
+
+
+class WSSPTokenizer(object):
+    def __init__(self, vocab_file, sp_model_dir, word_dict, ws=True,
+                 lower=True):
+        self.vocab = load_vocab(vocab_file)
+        self.inv_vocab = {v: k for k, v in self.vocab.items()}
+        self.ws = ws
+        self.lower = lower
+        self.dict = pickle.load(open(word_dict, 'rb'), encoding='utf8')
+        self.sp_model = spm.SentencePieceProcessor()
+        self.window_size = 5
+        self.sp_model.Load(sp_model_dir)
+
+    def cut(self, chars):
+        words = []
+        idx = 0
+        while idx < len(chars):
+            matched = False
+            for i in range(self.window_size, 0, -1):
+                cand = chars[idx:idx + i]
+                if cand in self.dict:
+                    words.append(cand)
+                    matched = True
+                    break
+            if not matched:
+                i = 1
+                words.append(chars[idx])
+            idx += i
+        return words
+
+    def tokenize(self, text, unk_token="[UNK]"):
+        text = convert_to_unicode(text)
+        if self.ws:
+            text = [s for s in self.cut(text) if s != ' ']
+        else:
+            text = text.split(' ')
+        if self.lower:
+            text = [s.lower() for s in text]
+        text = ' '.join(text)
+        tokens = self.sp_model.EncodeAsPieces(text)
+        in_vocab_tokens = []
+        for token in tokens:
+            if token in self.vocab:
+                in_vocab_tokens.append(token)
+            else:
+                in_vocab_tokens.append(unk_token)
+        return in_vocab_tokens
 
     def convert_tokens_to_ids(self, tokens):
         return convert_by_vocab(self.vocab, tokens)
@@ -272,10 +335,15 @@ class BasicTokenizer(object):
 class WordpieceTokenizer(object):
     """Runs WordPiece tokenziation."""
 
-    def __init__(self, vocab, unk_token="[UNK]", max_input_chars_per_word=100):
+    def __init__(self,
+                 vocab,
+                 unk_token="[UNK]",
+                 max_input_chars_per_word=100,
+                 use_sentence_piece_vocab=False):
         self.vocab = vocab
         self.unk_token = unk_token
         self.max_input_chars_per_word = max_input_chars_per_word
+        self.use_sentence_piece_vocab = use_sentence_piece_vocab
 
     def tokenize(self, text):
         """Tokenizes a piece of text into its word pieces.
@@ -312,7 +380,9 @@ class WordpieceTokenizer(object):
                 cur_substr = None
                 while start < end:
                     substr = "".join(chars[start:end])
-                    if start > 0:
+                    if start == 0 and self.use_sentence_piece_vocab:
+                        substr = u'\u2581' + substr
+                    if start > 0 and not self.use_sentence_piece_vocab:
                         substr = "##" + substr
                     if substr in self.vocab:
                         cur_substr = substr

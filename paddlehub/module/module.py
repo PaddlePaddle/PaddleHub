@@ -34,6 +34,7 @@ from paddlehub.common.downloader import default_downloader
 from paddlehub.module import module_desc_pb2
 from paddlehub.common.dir import CONF_HOME
 from paddlehub.module import check_info_pb2
+from paddlehub.common.hub_server import CacheUpdater
 from paddlehub.module.signature import Signature, create_signature
 from paddlehub.module.checker import ModuleChecker
 from paddlehub.module.manager import default_module_manager
@@ -127,6 +128,11 @@ class Module(object):
         elif module_dir:
             self._init_with_module_file(module_dir=module_dir[0])
             lock.flock(fp_lock, lock.LOCK_UN)
+            name = module_dir[0].split("/")[-1]
+            if len(module_dir) > 1:
+                version = module_dir[1]
+            else:
+                version = default_module_manager.search_module(name)[1]
         elif signatures:
             if processor:
                 if not issubclass(processor, BaseProcessor):
@@ -144,6 +150,7 @@ class Module(object):
         else:
             lock.flock(fp_lock, lock.LOCK_UN)
             raise ValueError("Module initialized parameter is empty")
+        CacheUpdater(name, version).start()
 
     def _init_with_name(self, name, version=None):
         log_msg = "Installing %s module" % name
@@ -320,6 +327,19 @@ class Module(object):
         for assets_file in self.assets:
             if "vocab.txt" in assets_file:
                 return assets_file
+        return None
+
+    def get_word_dict_path(self):
+        for assets_file in self.assets:
+            if "dict.wordseg.pickle" in assets_file:
+                return assets_file
+        return None
+
+    def get_spm_path(self):
+        for assets_file in self.assets:
+            if "spm_cased_simp_sampled.model" in assets_file:
+                return assets_file
+        return None
 
     def _recover_from_desc(self):
         # recover signature
@@ -583,7 +603,7 @@ class Module(object):
             if max_seq_len > MAX_SEQ_LENGTH or max_seq_len <= 0:
                 raise ValueError(
                     "max_seq_len({}) should be in the range of [1, {}]".format(
-                        MAX_SEQ_LENGTH))
+                        max_seq_len, MAX_SEQ_LENGTH))
             logger.info(
                 "Set maximum sequence length of input tensor to {}".format(
                     max_seq_len))
@@ -592,16 +612,12 @@ class Module(object):
                     "input_ids", "position_ids", "segment_ids", "input_mask",
                     "task_ids"
                 ]
-                logger.warning(
-                    "%s will exploite task_id, the arguement use_taskid of Reader class must be True."
-                    % self.name)
+                logger.warning("For %s, it's no necessary to feed task_ids now."
+                               % self.name)
             else:
                 feed_list = [
                     "input_ids", "position_ids", "segment_ids", "input_mask"
                 ]
-                logger.warning(
-                    "%s has no task_id, the arguement use_taskid of Reader class must be False."
-                    % self.name)
             for tensor_name in feed_list:
                 seq_tensor_shape = [-1, max_seq_len, 1]
                 logger.info("The shape of input tensor[{}] set to {}".format(

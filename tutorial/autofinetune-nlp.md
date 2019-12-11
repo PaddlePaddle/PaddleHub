@@ -142,5 +142,5 @@ if __name__ == '__main__':
         shutil.rmtree(config.checkpoint_dir)
 
     # acc on dev will be used by auto finetune
-    print("AutoFinetuneEval"+"\t"+str(float(eval_avg_score["acc"])))
+    hub.report_final_result(eval_avg_score["acc"])
 ```

@@ -30,37 +30,21 @@ parser.add_argument("--warmup_proportion", type=float, default=0.1, help="Warmup
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=128, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=1, help="Total examples' number in batch for training.")
-parser.add_argument("--use_taskid", type=ast.literal_eval, default=False, help="Whether to user ernie v2 , if not to use bert.")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
     # Load Paddlehub BERT pretrained model
-    if args.use_taskid:
-        module = hub.Module(name="ernie_v2_eng_base")
+    module = hub.Module(name="ernie_v2_eng_base")
 
-        inputs, outputs, program = module.context(
-            trainable=True, max_seq_len=args.max_seq_len)
+    inputs, outputs, program = module.context(
+        trainable=True, max_seq_len=args.max_seq_len)
 
-        # Setup feed list for data feeder
-        feed_list = [
-            inputs["input_ids"].name, inputs["position_ids"].name,
-            inputs["segment_ids"].name, inputs["input_mask"].name,
-            inputs["task_ids"].name
-        ]
-    else:
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
-
-        inputs, outputs, program = module.context(
-            trainable=True, max_seq_len=args.max_seq_len)
-
-        # Setup feed list for data feeder
-        feed_list = [
-            inputs["input_ids"].name,
-            inputs["position_ids"].name,
-            inputs["segment_ids"].name,
-            inputs["input_mask"].name,
-        ]
+    # Setup feed list for data feeder
+    feed_list = [
+        inputs["input_ids"].name, inputs["position_ids"].name,
+        inputs["segment_ids"].name, inputs["input_mask"].name
+    ]
 
     # Download dataset and use MultiLabelReader to read dataset
     dataset = hub.dataset.Toxic()
@@ -68,8 +52,7 @@ if __name__ == '__main__':
     reader = hub.reader.MultiLabelClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        use_task_id=args.use_taskid)
+        max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.

@@ -16,5 +16,4 @@ python -u multi_label_classifier.py \
                    --learning_rate=5e-5 \
                    --weight_decay=0.01 \
                    --max_seq_len=128 \
-                   --num_epoch=3 \
-                   --use_taskid=False
+                   --num_epoch=3
