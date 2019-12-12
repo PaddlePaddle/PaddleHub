@@ -3,7 +3,7 @@
 利用PaddleHub-Serving可以完成模型服务化部署，主要包括利用Bert as Service实现embedding服务化，利用预测模型实现预测服务化。
 
 ## 2. Bert as Service
-* [Bert as Service介绍与示例](./bert_as_service)
+* [Bert as Service介绍与示例](bert_service)
 
 该示例展示了利用Bert as Service进行远程embedding服务化部署和在线预测，获取文本embedding结果。
 

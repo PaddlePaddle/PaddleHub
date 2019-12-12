@@ -64,20 +64,23 @@ $ pip install ujson
 
 
 ## 3. 支持模型
-目前`Bert as Service`支持的语义模型如下表，可根据需要选择模型进行部署embedding服务，未来还将支持更多模型。  
+目前`Bert Service`支持的语义模型如下表，可根据需要选择模型进行部署embedding服务，未来还将支持更多模型。  
 
-|模型|网络|数据集|
-|:-|:-:|:-|
-|[ERNIE](https://paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel)|ERNIE|百科类、资讯类、论坛对话类数据等中文语料|  
-|[roberta_wwm_ext_chinese_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=roberta_wwm_ext_chinese_L-12_H-768_A-12&en_category=SemanticModel)|BERT|中文维基百科、百科、新闻、问答等|
-|[roberta_wwm_ext_chinese_L-24_H-1024_A-16](https://paddlepaddle.org.cn/hubdetail?name=roberta_wwm_ext_chinese_L-24_H-1024_A-16&en_category=SemanticModel)|BERT|中文维基百科、百科、新闻、问答等|  
-|[bert_wwm_ext_chinese_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_wwm_ext_chinese_L-12_H-768_A-12&en_category=SemanticModel)|BERT|中文维基百科、百科、新闻、问答等|  
-|[bert_uncased_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_uncased_L-12_H-768_A-12&en_category=SemanticModel)|BERT|英文维基百科|  
-|[bert_uncased_L-24_H-1024_A-16](https://paddlepaddle.org.cn/hubdetail?name=bert_uncased_L-24_H-1024_A-16&en_category=SemanticModel)|BERT|英文维基百科|  
-|[bert_cased_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_cased_L-12_H-768_A-12&en_category=SemanticModel)|BERT|英文维基百科|  
-|[bert_cased_L-24_H-1024_A-16](https://paddlepaddle.org.cn/hubdetail?name=bert_cased_L-24_H-1024_A-16&en_category=SemanticModel)|BERT|英文维基百科|  
-|[bert_multi_cased_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_multi_cased_L-12_H-768_A-12&en_category=SemanticModel)|BERT|英文维基百科|  
-|[bert_chinese_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_chinese_L-12_H-768_A-12&en_category=SemanticModel)|BERT|中文维基百科|  
+|模型|网络|
+|:-|:-:|
+|[ERNIE](https://paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel)|ERNIE|
+|[ernie_tiny](https://paddlepaddle.org.cn/hubdetail?name=ernie_tiny&en_category=SemanticModel)|ERNIE|
+|[ernie_v2_eng_large](https://paddlepaddle.org.cn/hubdetail?name=ernie_v2_eng_large&en_category=SemanticModel)|ERNIE|
+|[ernie_v2_eng_base](https://paddlepaddle.org.cn/hubdetail?name=ernie_v2_eng_base&en_category=SemanticModel)|ERNIE|
+|[roberta_wwm_ext_chinese_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=roberta_wwm_ext_chinese_L-12_H-768_A-12&en_category=SemanticModel)|BERT|
+|[roberta_wwm_ext_chinese_L-24_H-1024_A-16](https://paddlepaddle.org.cn/hubdetail?name=roberta_wwm_ext_chinese_L-24_H-1024_A-16&en_category=SemanticModel)|BERT|
+|[bert_wwm_ext_chinese_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_wwm_ext_chinese_L-12_H-768_A-12&en_category=SemanticModel)|BERT|
+|[bert_uncased_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_uncased_L-12_H-768_A-12&en_category=SemanticModel)|BERT|
+|[bert_uncased_L-24_H-1024_A-16](https://paddlepaddle.org.cn/hubdetail?name=bert_uncased_L-24_H-1024_A-16&en_category=SemanticModel)|BERT|
+|[bert_cased_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_cased_L-12_H-768_A-12&en_category=SemanticModel)|BERT|
+|[bert_cased_L-24_H-1024_A-16](https://paddlepaddle.org.cn/hubdetail?name=bert_cased_L-24_H-1024_A-16&en_category=SemanticModel)|BERT|
+|[bert_multi_cased_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_multi_cased_L-12_H-768_A-12&en_category=SemanticModel)|BERT|
+|[bert_chinese_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_chinese_L-12_H-768_A-12&en_category=SemanticModel)|BERT|
 
 
 ## 4. 服务端(server)
@@ -87,7 +90,7 @@ server端接收client端发送的数据，执行模型计算过程并将计算�
 server端启动时会按照指定的模型名称从PaddleHub获取对应的模型文件进行加载，无需提前下载模型或指定模型路径，对模型的管理工作由PaddleHub负责。在加载模型后在指定的端口启动`BRPC`服务，保持端口监听，当接收到数据后便执行模型计算，并将计算结果通过`BRPC`返回并发送至client端。
 
 ### 4.2 启动  
-使用PaddleHub的命令行工具可一键启动`Bert as Service`，命令如下：
+使用PaddleHub的命令行工具可一键启动`Bert Service`，命令如下：
 ```shell
 $ hub serving start bert_service -m ernie_tiny -p 8866 --use_gpu --gpu 0
 ```
@@ -111,7 +114,7 @@ Server[baidu::paddle_serving::predictor::bert_service::BertServiceImpl] is servi
 
 |参数|说明|是否必填|  
 |:--:|:--:|:----:|  
-|hub serving start bert_serving|启动`Bert as Service`服务端。|必填项|  
+|hub serving start bert_service|启动`Bert Service`服务端。|必填项|  
 |--module/-m|指定启动的模型，如果指定的模型不存在，则自动通过PaddleHub下载指定模型。|必填项|  
 |--port/-p|指定启动的端口，每个端口对应一个模型，可基于不同端口进行多次启动，以实现多个模型的服务部署。|必填项|  
 |--use_gpu|若指定此项则使用GPU进行工作，反之仅使用CPU。注意需安装GPU版本的PaddlePaddle。|非必填项，默认为不指定|  
@@ -120,7 +123,7 @@ Server[baidu::paddle_serving::predictor::bert_service::BertServiceImpl] is servi
 </div>
 
 ### 4.3 关闭
-通过在启动服务端的命令行页面使用Ctrl+C终止`Bert as Service`运行，关闭成功则显示：
+通过在启动服务端的命令行页面使用Ctrl+C终止`Bert Service`运行，关闭成功则显示：
 ```shell
 Paddle Inference Server exit successfully!
 ```
@@ -137,7 +140,6 @@ client端利用PaddleHub的语义理解任务将原始文本按照不同模型�
 def connect(input_text,
             model_name,
             max_seq_len=128,
-            emb_size=768,
             show_ids=False,
             do_lower_case=True,
             server="127.0.0.1:8866",
@@ -151,7 +153,6 @@ def connect(input_text,
 |input_text|输入文本，要获取embedding的原始文本|二维list类型，内部元素为string类型的文本|[['样例1'],['样例2']]|  
 |model_name|指定使用的模型名称|string|"ernie"|  
 |max_seq_len|计算时的样例长度，样例长度不足时采用补零策略，超出此参数则超出部分会被截断|int|128|  
-|emb_size|返回的embedding数据长度，需要与模型计算的embedding长度相等|int|768|  
 |show_ids|是否展现数据预处理后的样例信息，指定为True则显示样例信息，反之则不显示|bool|False|  
 |do_lower_case|是否将英文字母转换成小写，指定为True则将所有英文字母转换为小写，反之则保持原状|bool|True|
 |server|要访问的server地址，包括ip地址及端口号|string|"127.0.0.1:8866"|  
@@ -159,22 +160,22 @@ def connect(input_text,
 
 
 ## 6. Demo
-在这里，我们将展示一个实际场景中可能使用的demo，我们利用PaddleHub在一台GPU机器上部署`bert_wwm_ext_chinese_L-12_H-768_A-12`模型服务，并在另一台CPU机器上尝试访问，获取一首七言绝句的embedding。
+在这里，我们将展示一个实际场景中可能使用的demo，我们利用PaddleHub在一台GPU机器上部署`ernie_tiny`模型服务，并在另一台CPU机器上尝试访问，获取一首七言绝句的embedding。
 ### 6.1 安装环境依赖
 首先需要安装环境依赖，根据第2节内容分别在两台机器上安装相应依赖。  
 
-### 6.2 启动`Bert Serving`服务端
-确保环境依赖安装正确后，在要部署服务的GPU机器上使用PaddleHub命令行工具启动`Bert as Service`服务端，命令如下：
+### 6.2 启动Bert Service服务端
+确保环境依赖安装正确后，在要部署服务的GPU机器上使用PaddleHub命令行工具启动`Bert Service`服务端，命令如下：
 ```shell
-$ hub serving start bert_serving -m bert_chinese_L-12_H-768_A-12 --use_gpu --gpu 0 --port 8866
+$ hub serving start bert_service -m ernie_tiny --use_gpu --gpu 0 --port 8866
 ```
 启动成功后打印
 ```shell
 Server[baidu::paddle_serving::predictor::bert_service::BertServiceImpl] is serving on port=8866.
 ```  
 这样就启动了`ernie_tiny`的在线服务，监听8866端口，并在0号GPU上进行任务。
-### 6.3 使用`Bert Serving`客户端进行远程调用  
-部署好服务端后，就可以用普通机器作为客户端测试在线embedding功能。  
+### 6.3 使用Bert Service客户端进行远程调用  
+部署好服务端后，就可以用普通机器作为客户端测试在线embedding功能。
 
 首先导入客户端依赖。  
 ```python
@@ -188,17 +189,17 @@ input_text = [["西风吹老洞庭波"], ["一夜湘君白发多"], ["醉后不�
 ```python
 result = bert_service.connect(
     input_text=input_text,
-    model_name="bert_chinese_L-12_H-768_A-12",
+    model_name="ernie_tiny",
     server="127.0.0.1:8866")
 ```
 最后即可得到embedding结果(此处只展示部分结果)。
 ```python
 [[0.9993321895599361, 0.9994612336158751, 0.9999646544456481, 0.732795298099517, -0.34387934207916204, ... ]]
 ```
-客户端代码demo文件见[示例](./bert_as_service_client.py)。  
+客户端代码demo文件见[示例](bert_service_client.py)。  
 运行命令如下：  
 ```shell
-$ python bert_as_service.py
+$ python bert_service_client.py
 ```  
 
 运行过程如下图：
@@ -209,12 +210,12 @@ $ python bert_as_service.py
 
 </div>  
 
-### 6.4 关闭`Bert Serving`服务端
-如要停止`Bert Serving`服务端程序，可在其启动命令行页面使用Ctrl+C方式关闭，关闭成功会打印如下日志：
+### 6.4 关闭Bert Service服务端
+如要停止`Bert Service`服务端程序，可在其启动命令行页面使用Ctrl+C方式关闭，关闭成功会打印如下日志：
 ```shell
 Paddle Inference Server exit successfully!
 ```
-这样，我们就利用一台GPU机器就完成了Bert Service的部署，并利用另一台普通机器进行了测试，可见通过`Bert Service`能够方便地进行在线embedding服务的快速部署。  
+这样，我们就利用一台GPU机器就完成了`Bert Service`的部署，并利用另一台普通机器进行了测试，可见通过`Bert Service`能够方便地进行在线embedding服务的快速部署。  
 
 ## 7. FAQ  
 > Q : 如何在一台服务器部署多个模型？  

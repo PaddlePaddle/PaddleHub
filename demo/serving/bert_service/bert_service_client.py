@@ -12,9 +12,7 @@ if __name__ == "__main__":
     ]
     # 调用客户端接口bert_service.connect()获取结果
     result = bert_service.connect(
-        input_text=input_text,
-        model_name="bert_chinese_L-12_H-768_A-12",
-        server="127.0.0.1:8866")
+        input_text=input_text, model_name="ernie_tiny", server="127.0.0.1:8866")
 
     # 打印embedding结果
     for item in result:
