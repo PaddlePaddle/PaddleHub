@@ -231,7 +231,7 @@ class PopulationBasedEvaluator(BaseEvaluator):
             os.system(run_cmd)
 
             eval_result = []
-            tmp_file = os.join.path(TMP_HOME, 'tmp.txt')
+            tmp_file = os.path.join(TMP_HOME, 'tmp.txt')
             with open(tmp_file, 'r') as file:
                 for line in file:
                     data = line.strip().split("\t")
