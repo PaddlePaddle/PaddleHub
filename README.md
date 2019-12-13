@@ -7,7 +7,7 @@
 PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub开发者可以使用高质量的预训练模型结合Fine-tune API快速完成迁移学习到应用部署的全流程工作。PaddleHub具有以下特性：
 
 * 便捷获取飞桨生态下的高质量预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、语言模型、视频分类、图像生成、图像分割等主流模型。更多模型详情请查看官网：https://www.paddlepaddle.org.cn/hub
-* 通过PaddleHub Fine-tune API，使用少量代码即可完成预训练模型的迁移学习，更多使用Demo请参考以下链接：
+* 通过高质量预训练模型与PaddleHub Fine-tune API，只需要少量代码即可实现自然语言处理和计算机视觉场景的深度学习模型，更多Demo请参考以下链接：
   * [文本分类](./demo/text-classification)
   * [序列标注](./demo/sequence-labeling)
   * [多标签分类](./demo/multi-label-classification)
