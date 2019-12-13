@@ -20,18 +20,21 @@ import ujson
 import random
 from paddlehub.common.logger import logger
 
-if sys.version_info[0] == 2:
+_ver = sys.version_info
+is_py2 = (_ver[0] == 2)
+is_py3 = (_ver[0] == 3)
+
+if is_py2:
     import httplib
-else:
+if is_py3:
     import http.client as httplib
 
 
-class BertService(object):
+class BertService():
     def __init__(self,
                  profile=False,
                  max_seq_len=128,
                  model_name="bert_uncased_L-12_H-768_A-12",
-                 emb_size=768,
                  show_ids=False,
                  do_lower_case=True,
                  process_id=0,
@@ -40,7 +43,6 @@ class BertService(object):
         self.process_id = process_id
         self.reader_flag = False
         self.batch_size = 16
-        self.embedding_size = emb_size
         self.max_seq_len = max_seq_len
         self.profile = profile
         self.model_name = model_name
@@ -53,7 +55,7 @@ class BertService(object):
         self.feed_var_names = ''
         self.retry = retry
 
-    def connect(self, server='127.0.0.1:8866'):
+    def connect(self, server='127.0.0.1:8010'):
         self.server_list.append(server)
 
     def connect_all_server(self, server_list):
@@ -64,7 +66,7 @@ class BertService(object):
         if self.reader_flag == False:
             module = hub.Module(name=self.model_name)
             inputs, outputs, program = module.context(
-                trainable=True, max_seq_len=128)
+                trainable=True, max_seq_len=self.max_seq_len)
             input_ids = inputs["input_ids"]
             position_ids = inputs["position_ids"]
             segment_ids = inputs["segment_ids"]
@@ -131,6 +133,7 @@ class BertService(object):
                     return 'retry'
 
         elif self.load_balance == 'bind':
+
             try:
                 self.con_index = int(self.process_id) % len(self.server_list)
                 cur_con = httplib.HTTPConnection(
@@ -184,7 +187,6 @@ class BertService(object):
             copy_time = time.time() - copy_start
             request = {"instances": request}
             request["max_seq_len"] = self.max_seq_len
-            request["emb_size"] = self.embedding_size
             request["feed_var_names"] = self.feed_var_names
             request_msg = ujson.dumps(request)
             if self.show_ids:
@@ -219,7 +221,6 @@ class BertService(object):
 def connect(input_text,
             model_name,
             max_seq_len=128,
-            emb_size=768,
             show_ids=False,
             do_lower_case=True,
             server="127.0.0.1:8866",
@@ -228,7 +229,6 @@ def connect(input_text,
     bc = BertService(
         max_seq_len=max_seq_len,
         model_name=model_name,
-        emb_size=emb_size,
         show_ids=show_ids,
         do_lower_case=do_lower_case,
         retry=retry)

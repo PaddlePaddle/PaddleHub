@@ -181,8 +181,8 @@ class ServingCommand(BaseCommand):
         str += "sub command:\n"
         str += "start\n"
         str += "\tStart PaddleHub-Serving if specifies this parameter.\n"
-        str += "start bert_serving\n"
-        str += "\tStart Bert as Service if specifies this parameter.\n"
+        str += "start bert_service\n"
+        str += "\tStart Bert Service if specifies this parameter.\n"
         str += "option:\n"
         str += "--modules/-m [module1==version, module2==version...]\n"
         str += "\tPre-install modules via this parameter list.\n"
@@ -204,7 +204,7 @@ class ServingCommand(BaseCommand):
             ServingCommand.show_help()
             return False
         if args.sub_command == "start":
-            if args.bert_service == "bert_serving":
+            if args.bert_service == "bert_service":
                 ServingCommand.start_bert_serving(args)
             else:
                 ServingCommand.start_serving(args)
