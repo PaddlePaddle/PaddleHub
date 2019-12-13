@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
 
-PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习工具，可以结合预训练模型更便捷地开展迁移学习工作。PaddleHub特性：
+PaddleHub是飞桨的预训练模型管理和迁移学习工具，可以结合预训练模型更便捷地开展迁移学习工作。PaddleHub特性：
 
 * 便捷地获取PaddlePaddle生态下的预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、语言模型、视频分类、图像生成、图像分割等主流模型。
   * 更多详情可查看官网：https://www.paddlepaddle.org.cn/hub
@@ -18,10 +18,10 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
   * [句子语义相似度计算](./demo/sentence_similarity)
   * [阅读理解任务](./demo/reading-comprehension)
 
-* 实现『**模型即软件**』的设计理念，通过Python API或者命令行实现一键预测，更方便地应用PaddlePaddle模型库。
+* 『**模型即软件**』的设计理念，通过Python API或者命令行实现一键预测，更方便地应用PaddlePaddle模型库。
   * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 * 一键Module服务化部署 - HubServing
-  * [PaddleHub Serving一键服务部署](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)
+  * [PaddleHub Serving一键服务化部署](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)
   * [使用示例](./demo/serving)
 * 支持AutoDL Finetuner超参优化技术， 自动搜索最优模型超参得到更好的模型效果。
   * [AutoDL Finetuner超参优化功能使用示例](./demo/autofinetune)
