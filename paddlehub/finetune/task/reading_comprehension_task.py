@@ -575,7 +575,7 @@ class ReadingComprehensionTask(BasicTask):
                 scores = cmrc2018_evaluate.get_eval(dataset, predictions)
         return scores, avg_loss, run_speed
 
-    def _predict_end_event(self, run_states):
+    def _default_predict_end_event(self, run_states):
         all_results = []
         RawResult = collections.namedtuple(
             "RawResult", ["unique_id", "start_logits", "end_logits"])
