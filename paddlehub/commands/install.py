@@ -60,6 +60,7 @@ class InstallCommand(BaseCommand):
             module_path=module_path,
             extra=extra)
         print(tips)
+
         return True
 
 
