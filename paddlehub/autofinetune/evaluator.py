@@ -21,6 +21,7 @@ import hashlib
 import math
 import os
 import random
+import string
 import six
 import yaml
 
@@ -42,17 +43,12 @@ def report_final_result(result):
     # tmp.txt is to record the eval results for trials
     mkdir(TMP_HOME)
     tmp_file = os.path.join(TMP_HOME, "tmp.txt")
-    with open(tmp_file, 'a') as file:
-        file.write(trial_id + "\t" + str(float(result)) + "\n")
+    with open(tmp_file, 'a') as f:
+        f.write(trial_id + "\t" + str(float(result)) + "\n")
 
 
 def unique_name():
-    seed = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+=-"
-    x = []
-    for idx in range(4):
-        x.append(random.choice(seed))
-    rand_str = "".join(x)
-    return rand_str
+    return ''.join(random.sample(string.ascii_letters + string.digits, 8))
 
 
 class BaseEvaluator(object):
@@ -146,18 +142,17 @@ class FullTrailEvaluator(BaseEvaluator):
         f = open(log_file, "w")
         f.close()
 
+        #  set temp environment variable to record the eval results for trials
+        rand_str = unique_name()
+
         if is_windows():
-            run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
-                    (num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
+            run_cmd = "set PaddleHub_AutoDL_Trial_ID=%s&set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                    (rand_str, num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
         else:
-            run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
-                    (num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
+            run_cmd = "export PaddleHub_AutoDL_Trial_ID=%s; export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                    (rand_str, num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
 
         try:
-            #  set temp environment variable to record the eval results for trials
-            rand_str = unique_name()
-            os.environ['PaddleHub_AutoDL_Trial_ID'] = rand_str
-
             os.system(run_cmd)
 
             eval_result = []
@@ -172,7 +167,7 @@ class FullTrailEvaluator(BaseEvaluator):
                     "WARNING: Program which was ran with hyperparameters as %s was crashed!"
                     % param_str.replace("--", ""))
                 eval_result = 0.0
-        except:
+        except Exception as e:
             print(
                 "WARNING: Program which was ran with hyperparameters as %s was crashed!"
                 % param_str.replace("--", ""))
@@ -203,37 +198,36 @@ class PopulationBasedEvaluator(BaseEvaluator):
         f = open(log_file, "w")
         f.close()
 
+        #  set temp environment variable to record the eval results for trials
+        rand_str = unique_name()
+
         if len(self.half_best_model_path) > 0:
             model_path = self.half_best_model_path[self.run_count % len(
                 self.half_best_model_path)]
             if is_windows():
-                run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --epochs=1 --model_path %s --saved_params_dir=%s %s %s >%s 2>&1" % \
-                        (num_cuda, self.finetunee_script, model_path, saved_params_dir, param_str, self.options_str, log_file)
+                run_cmd = "set PaddleHub_AutoDL_Trial_ID=%s&set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --epochs=1 --model_path %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                        (rand_str, num_cuda, self.finetunee_script, model_path, saved_params_dir, param_str, self.options_str, log_file)
             else:
-                run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --epochs=1 --model_path %s --saved_params_dir=%s %s %s >%s 2>&1" % \
-                        (num_cuda, self.finetunee_script, model_path, saved_params_dir, param_str, self.options_str, log_file)
+                run_cmd = "export PaddleHub_AutoDL_Trial_ID=%s; export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --epochs=1 --model_path %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                        (rand_str, num_cuda, self.finetunee_script, model_path, saved_params_dir, param_str, self.options_str, log_file)
 
         else:
             if is_windows():
-                run_cmd = "set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
-                        (num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
+                run_cmd = "set PaddleHub_AutoDL_Trial_ID=%s&set FLAGS_eager_delete_tensor_gb=0.0&set CUDA_VISIBLE_DEVICES=%s&python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                        (rand_str, num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
             else:
-                run_cmd = "export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
-                        (num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
+                run_cmd = "export PaddleHub_AutoDL_Trial_ID=%s; export FLAGS_eager_delete_tensor_gb=0.0; export CUDA_VISIBLE_DEVICES=%s; python -u %s --saved_params_dir=%s %s %s >%s 2>&1" % \
+                        (rand_str, num_cuda, self.finetunee_script, saved_params_dir, param_str, self.options_str, log_file)
 
         self.run_count += 1
 
         try:
-            #  set temp environment variable to record the eval results for trials
-            rand_str = unique_name()
-            os.environ['PaddleHub_AutoDL_Trial_ID'] = rand_str
-
             os.system(run_cmd)
 
             eval_result = []
-            tmp_file = os.join.path(TMP_HOME, 'tmp.txt')
-            with open(tmp_file, 'r') as file:
-                for line in file:
+            tmp_file = os.path.join(TMP_HOME, 'tmp.txt')
+            with open(tmp_file, 'r') as f:
+                for line in f:
                     data = line.strip().split("\t")
                     if rand_str == data[0]:
                         eval_result = float(data[1])
@@ -242,7 +236,8 @@ class PopulationBasedEvaluator(BaseEvaluator):
                     "WARNING: Program which was ran with hyperparameters as %s was crashed!"
                     % param_str.replace("--", ""))
                 eval_result = 0.0
-        except:
+        except Exception as e:
+            print(e)
             print(
                 "WARNING: Program which was ran with hyperparameters as %s was crashed!"
                 % param_str.replace("--", ""))
