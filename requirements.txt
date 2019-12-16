@@ -1,14 +1,11 @@
-#for python2, you should use requirements_py2.txt
 pre-commit
 protobuf >= 3.6.0
 yapf == 0.26.0
 pyyaml
-numpy
 Pillow
 six >= 1.10.0
 chardet == 3.0.4
 requests
-pandas
 flask >= 1.1.0
 flake8
 tb-paddle
@@ -17,3 +14,11 @@ cma == 2.7.0
 sentencepiece
 nltk
 colorlog
+
+# numpy no longer support python2 in version 1.17 and above
+numpy ; python_version >= "3"
+numpy < 1.17.0 ; python_version < "3"
+
+# pandas no longer support python2 in version 0.25 and above
+pandas ; python_version >= "3"
+pandas < 0.25.0 ; python_version < "3"
