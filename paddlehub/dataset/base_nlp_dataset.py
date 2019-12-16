@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import io
+import csv
 
 from paddlehub.dataset import InputExample, HubDataset
 
@@ -30,7 +31,11 @@ class BaseNLPDatast(HubDataset):
                  test_file=None,
                  predict_file=None,
                  label_file=None,
-                 label_list=None):
+                 label_list=None,
+                 train_file_with_head=False,
+                 dev_file_with_head=False,
+                 test_file_with_head=False,
+                 predict_file_with_head=False):
         super(BaseNLPDatast, self).__init__(
             base_path=base_path,
             train_file=train_file,
@@ -38,15 +43,38 @@ class BaseNLPDatast(HubDataset):
             test_file=test_file,
             predict_file=predict_file,
             label_file=label_file,
-            label_list=label_list)
+            label_list=label_list,
+            train_file_with_head=train_file_with_head,
+            dev_file_with_head=dev_file_with_head,
+            test_file_with_head=test_file_with_head,
+            predict_file_with_head=predict_file_with_head)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
         with io.open(input_file, "r", encoding="UTF-8") as file:
+            reader = csv.reader(file, delimiter="\t", quotechar=None)
             examples = []
-            for (i, line) in enumerate(file):
-                data = line.strip().split("\t")
-                example = InputExample(
-                    guid=i, label=data[2], text_a=data[0], text_b=data[1])
+            for (i, line) in enumerate(reader):
+                if i == 0:
+                    ncol = len(line)
+                    if self.if_file_with_head[phase]:
+                        continue
+                if ncol == 1:
+                    if phase != "predict":
+                        example = InputExample(guid=i, text_a=line[0])
+                    else:
+                        raise Exception(
+                            "the %s file: %s only has one column but it is not a predict file"
+                            % (phase, input_file))
+                elif ncol == 2:
+                    example = InputExample(
+                        guid=i, text_a=line[0], label=line[1])
+                elif ncol == 3:
+                    example = InputExample(
+                        guid=i, text_a=line[0], text_b=line[1], label=line[2])
+                else:
+                    raise Exception(
+                        "the %s file: %s has too many columns (should <=3)" %
+                        (phase, input_file))
                 examples.append(example)
             return examples
