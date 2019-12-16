@@ -14,6 +14,7 @@ cma == 2.7.0
 sentencepiece
 nltk
 colorlog
+opencv-python
 
 # numpy no longer support python2 in version 1.17 and above
 numpy ; python_version >= "3"
