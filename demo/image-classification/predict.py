@@ -87,6 +87,8 @@ def predict(args):
             print("input %i is %s, and the predict result is %s" %
                   (index, data[index - 1], result))
 
+    print(task.predict(data=data, return_result=True))
+
 
 if __name__ == "__main__":
     args = parser.parse_args()

@@ -101,13 +101,14 @@ if __name__ == '__main__':
     results = [run_state.run_results for run_state in run_states]
     if not os.path.exists("output"):
         os.makedirs("output")
-    fout = open(os.path.join("output", "%s.tsv" % args.dataset.upper()), 'w')
-    fout.write("index\tprediction")
+    # fout = open(os.path.join("output", "%s.tsv" % args.dataset.upper()), 'w')
+    # fout.write("index\tprediction")
     for batch_result in results:
         for result in batch_result[0]:
             if index < 3:
                 print("%s\t%s\tpredict=%.3f" % (data[index][0], data[index][1],
                                                 result[0]))
-            fout.write("\n%s\t%.3f" % (index, result[0]))
+            # fout.write("\n%s\t%.3f" % (index, result[0]))
             index += 1
-    fout.close()
+    # fout.close()
+    print(reg_task.predict(data=data, return_result=True))
