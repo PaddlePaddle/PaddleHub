@@ -106,18 +106,5 @@ if __name__ == '__main__':
             for category_id in range(dataset.num_labels):
                 sample_category_prob = batch_result[category_id][sample_id]
                 sample_result.append(np.argmax(sample_category_prob))
-            print(sample_result)
             all_result.append(sample_result)
     print(all_result)
-
-    print(multi_label_cls_task.predict(data=data, return_result=True))
-
-    # # get predict index
-    # for category in range(dataset.num_labels):
-    #
-    # label_ids = []
-    # for i in range(dataset.num_labels):
-    #     label_val = np.argmax(batch_result[i],axis=2)
-    #     label_ids.append(label_val)
-    # print("%s\tpredict=%s" % (data[index][0], label_ids))
-    # index += 1

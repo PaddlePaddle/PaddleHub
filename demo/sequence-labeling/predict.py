@@ -123,5 +123,3 @@ if __name__ == '__main__':
             print(
                 "%s\tpredict=%s" %
                 (data[num_batch * args.batch_size + index][0], label_str[1:-1]))
-
-    print(seq_label_task.predict(data=data, return_result=True))

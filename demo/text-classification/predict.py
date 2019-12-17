@@ -172,5 +172,3 @@ if __name__ == '__main__':
         for result in batch_result:
             print("%s\tpredict=%s" % (data[index][0], result))
             index += 1
-
-    print(cls_task.predict(data=data, return_result=True))

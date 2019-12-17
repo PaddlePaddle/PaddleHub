@@ -135,10 +135,14 @@ class ClassifierTask(BasicTask):
         return scores, avg_loss, run_speed
 
     def _postprocessing(self, run_states):
-        id2label = {
-            val: key
-            for key, val in self._base_data_reader.label_map.items()
-        }
+        try:
+            id2label = {
+                val: key
+                for key, val in self._base_data_reader.label_map.items()
+            }
+        except:
+            raise Exception(
+                "image-classification does not support return_result now")
         results = []
         for batch_state in run_states:
             batch_result = batch_state.run_results
