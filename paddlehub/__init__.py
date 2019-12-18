@@ -38,7 +38,7 @@ from .common.logger import logger
 from .common.paddle_helper import connect_program
 from .common.hub_server import default_hub_server
 
-from .module.module import Module, create_module
+from .module.module import Module
 from .module.base_processor import BaseProcessor
 from .module.signature import Signature, create_signature
 from .module.manager import default_module_manager

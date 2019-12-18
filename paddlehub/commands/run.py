@@ -71,10 +71,10 @@ class RunCommand(BaseCommand):
                 if not result:
                     return None
 
-        return hub.Module(module_dir=module_dir)
+        return hub.Module(directory=module_dir[0])
 
     def add_module_config_arg(self):
-        configs = self.module.processor.configs()
+        configs = self.module.configs()
         for config in configs:
             if not config["dest"].startswith("--"):
                 config["dest"] = "--%s" % config["dest"]
@@ -104,8 +104,8 @@ class RunCommand(BaseCommand):
 
     def add_module_input_arg(self):
         module_type = self.module.type.lower()
-        expect_data_format = self.module.processor.data_format(
-            self.module.default_signature.name)
+        expect_data_format = self.module.data_format(
+            self.module.default_signature)
         self.arg_input_group.add_argument(
             '--input_file',
             type=str,
@@ -144,15 +144,15 @@ class RunCommand(BaseCommand):
         if self.args.config:
             yaml_config = yaml_parser.parse(self.args.config)
         module_config = yaml_config.get("config", {})
-        for _config in self.module.processor.configs():
+        for _config in self.module.configs():
             key = _config['dest']
             module_config[key] = self.args.__dict__[key]
         return module_config
 
     def get_data(self):
         module_type = self.module.type.lower()
-        expect_data_format = self.module.processor.data_format(
-            self.module.default_signature.name)
+        expect_data_format = self.module.data_format(
+            self.module.default_signature)
         input_data = {}
         if len(expect_data_format) == 1:
             key = list(expect_data_format.keys())[0]
@@ -176,8 +176,8 @@ class RunCommand(BaseCommand):
         return input_data
 
     def check_data(self, data):
-        expect_data_format = self.module.processor.data_format(
-            self.module.default_signature.name)
+        expect_data_format = self.module.data_format(
+            self.module.default_signature)
 
         if len(data.keys()) != len(expect_data_format.keys()):
             print(
@@ -260,7 +260,7 @@ class RunCommand(BaseCommand):
             return False
 
         results = self.module(
-            sign_name=self.module.default_signature.name,
+            sign_name=self.module.default_signature,
             data=data,
             use_gpu=self.args.use_gpu,
             batch_size=self.args.batch_size,
