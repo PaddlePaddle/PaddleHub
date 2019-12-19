@@ -83,7 +83,7 @@ def default_signature(func):
     return _wrapper
 
 
-def create_module(directory, name, author, author_email, module_type, summary,
+def create_module(directory, name, author, email, module_type, summary,
                   version):
     output_file = "{}.{}".format(name, HUB_PACKAGE_SUFFIX)
 
@@ -93,12 +93,12 @@ def create_module(directory, name, author, author_email, module_type, summary,
     attr.type = module_desc_pb2.MAP
     module_info = attr.map.data['module_info']
     module_info.type = module_desc_pb2.MAP
-    for key in [
-            "name", "author", "author_email", "module_type", "summary",
-            "version"
-    ]:
-        utils.from_pyobj_to_module_attr(locals()[key],
-                                        module_info.map.data[key])
+    utils.from_pyobj_to_module_attr(name, module_info.map.data['name'])
+    utils.from_pyobj_to_module_attr(author, module_info.map.data['author'])
+    utils.from_pyobj_to_module_attr(email, module_info.map.data['author_email'])
+    utils.from_pyobj_to_module_attr(module_type, module_info.map.data['type'])
+    utils.from_pyobj_to_module_attr(summary, module_info.map.data['summary'])
+    utils.from_pyobj_to_module_attr(version, module_info.map.data['version'])
 
     module_desc_path = os.path.join(directory, "module_desc.pb")
     with open(module_desc_path, "wb") as f:
