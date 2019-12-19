@@ -199,14 +199,16 @@ class AutoFineTuneCommand(BaseCommand):
                 print("%s=%s" % (hparam_name, best_hparams[index]))
                 f.write(hparam_name + "\t:\t" + str(best_hparams[index]) + "\n")
 
-            best_hparams_dir, best_hparams_rank = solutions_modeldirs[tuple(best_hparams_origin)]
+            best_hparams_dir, best_hparams_rank = solutions_modeldirs[tuple(
+                best_hparams_origin)]
 
             print("The final best eval score is %s." %
                   autoft.get_best_eval_value())
 
             if autoft.mpi.multi_machine:
                 print("The final best model parameters are saved as " +
-                      autoft._output_dir + "/best_model on rank " + str(best_hparams_rank) + " .")
+                      autoft._output_dir + "/best_model on rank " +
+                      str(best_hparams_rank) + " .")
             else:
                 print("The final best model parameters are saved as " +
                       autoft._output_dir + "/best_model .")
@@ -226,7 +228,8 @@ class AutoFineTuneCommand(BaseCommand):
                         "\tsaved_params_dir\trank\n")
             else:
                 f.write(
-                    "The final best model parameters are saved as ./best_model .")
+                    "The final best model parameters are saved as ./best_model ."
+                )
                 f.write("\t".join(autoft.hparams_name_list) +
                         "\tsaved_params_dir\n")
 
@@ -237,7 +240,8 @@ class AutoFineTuneCommand(BaseCommand):
                 param = evaluator.convert_params(solution)
                 param = [str(p) for p in param]
                 if autoft.mpi.multi_machine:
-                    f.write("\t".join(param) + "\t" + modeldir[0] + "\t" + str(modeldir[1]) + "\n")
+                    f.write("\t".join(param) + "\t" + modeldir[0] + "\t" +
+                            str(modeldir[1]) + "\n")
                 else:
                     f.write("\t".join(param) + "\t" + modeldir[0] + "\n")
 

@@ -79,7 +79,8 @@ class BaseTuningStrategy(object):
         # for parallel on mpi
         self.mpi = MPIHelper()
         if self.mpi.multi_machine:
-            print("Autofinetune multimachine mode: running on {}".format(self.mpi.gather(self.mpi.name)))
+            print("Autofinetune multimachine mode: running on {}".format(
+                self.mpi.gather(self.mpi.name)))
 
     @property
     def thread(self):

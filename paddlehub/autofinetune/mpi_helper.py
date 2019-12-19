@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 class MPIHelper(object):
     def __init__(self):
         try:
@@ -43,7 +44,7 @@ class MPIHelper(object):
     def bcast(self, data):
         if self._multi_machine:
             # call real bcast
-            return self._comm.bcast(data, root = 0)
+            return self._comm.bcast(data, root=0)
         else:
             # do nothing
             return data
@@ -51,7 +52,7 @@ class MPIHelper(object):
     def gather(self, data):
         if self._multi_machine:
             # call real gather
-            return self._comm.gather(data, root = 0)
+            return self._comm.gather(data, root=0)
         else:
             # do nothing
             return [data]
@@ -73,7 +74,8 @@ class MPIHelper(object):
             return average_count * self._rank, average_count * (self._rank + 1)
         else:
             if self._rank < array_length % self._size:
-                return (average_count + 1) * self._rank, (average_count + 1) * (self._rank + 1)
+                return (average_count + 1) * self._rank, (average_count + 1) * (
+                    self._rank + 1)
             else:
                 start = (average_count + 1) * (array_length % self._size) \
                       + average_count * (self._rank - array_length % self._size)
@@ -83,7 +85,8 @@ class MPIHelper(object):
 if __name__ == "__main__":
 
     mpi = MPIHelper()
-    print("Hello world from process {} of {} at {}.".format(mpi.rank, mpi.size, mpi.name))
+    print("Hello world from process {} of {} at {}.".format(
+        mpi.rank, mpi.size, mpi.name))
 
     all_node_names = mpi.gather(mpi.name)
     print("all node names using gather: {}".format(all_node_names))
@@ -106,8 +109,7 @@ if __name__ == "__main__":
 
     # test for split
     for i in range(12):
-        length = i + mpi.size # length should >= mpi.size
+        length = i + mpi.size  # length should >= mpi.size
         [start, end] = mpi.split_range(length)
         split_result = mpi.gather([start, end])
         print("length {}, split_result {}".format(length, split_result))
-
