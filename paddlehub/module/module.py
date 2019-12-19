@@ -137,6 +137,7 @@ class Module(object):
                  version=None):
         if not directory:
             return
+        self._code_version = "v2"
         self._directory = directory
         self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
         self._desc = module_desc_pb2.ModuleDesc()
@@ -225,6 +226,14 @@ class Module(object):
     def name_prefix(self):
         return self._name_prefix
 
+    @property
+    def code_version(self):
+        return self._code_version
+
+    @property
+    def is_runable(self):
+        return False
+
 
 class ModuleHelper(object):
     def __init__(self, directory):
@@ -252,6 +261,7 @@ class ModuleV1(Module):
         if not directory:
             return
         super(ModuleV1, self).__init__(name, directory, module_dir, version)
+        self._code_version = "v1"
         self.program = None
         self.assets = []
         self.helper = None
@@ -501,11 +511,9 @@ class ModuleV1(Module):
         if not self.processor:
             raise ValueError("This Module is not callable!")
 
-    def configs(self):
-        return self.processor.configs()
-
-    def data_format(self, signature):
-        return self.processor.data_format(signature)
+    @property
+    def is_runable(self):
+        return self.default_signature != None
 
     def context(self,
                 sign_name=None,
