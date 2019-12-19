@@ -188,37 +188,58 @@ class AutoFineTuneCommand(BaseCommand):
             run_round_cnt = run_round_cnt + 1
         print("PaddleHub Autofinetune ends.")
 
+        best_hparams_origin = autoft.get_best_hparams()
+        best_hparams_origin = autoft.mpi.bcast(best_hparams_origin)
+
         with open(autoft._output_dir + "/log_file.txt", "w") as f:
-            best_hparams = evaluator.convert_params(autoft.get_best_hparams())
+            best_hparams = evaluator.convert_params(best_hparams_origin)
             print("The final best hyperparameters:")
             f.write("The final best hyperparameters:\n")
             for index, hparam_name in enumerate(autoft.hparams_name_list):
                 print("%s=%s" % (hparam_name, best_hparams[index]))
                 f.write(hparam_name + "\t:\t" + str(best_hparams[index]) + "\n")
 
+            best_hparams_dir, best_hparams_rank = solutions_modeldirs[tuple(best_hparams_origin)]
+
             print("The final best eval score is %s." %
                   autoft.get_best_eval_value())
-            print("The final best model parameters are saved as " +
-                  autoft._output_dir + "/best_model .")
+
+            if autoft.mpi.multi_machine:
+                print("The final best model parameters are saved as " +
+                      autoft._output_dir + "/best_model on rank " + str(best_hparams_rank) + " .")
+            else:
+                print("The final best model parameters are saved as " +
+                      autoft._output_dir + "/best_model .")
             f.write("The final best eval score is %s.\n" %
                     autoft.get_best_eval_value())
-            f.write(
-                "The final best model parameters are saved as ./best_model .")
 
             best_model_dir = autoft._output_dir + "/best_model"
-            shutil.copytree(
-                solutions_modeldirs[tuple(autoft.get_best_hparams())],
-                best_model_dir)
 
-            f.write("\t".join(autoft.hparams_name_list) +
-                    "\tsaved_params_dir\n")
+            if autoft.mpi.rank == best_hparams_rank:
+                shutil.copytree(best_hparams_dir, best_model_dir)
+
+            if autoft.mpi.multi_machine:
+                f.write(
+                    "The final best model parameters are saved as ./best_model on rank " \
+                    + str(best_hparams_rank) + " .")
+                f.write("\t".join(autoft.hparams_name_list) +
+                        "\tsaved_params_dir\trank\n")
+            else:
+                f.write(
+                    "The final best model parameters are saved as ./best_model .")
+                f.write("\t".join(autoft.hparams_name_list) +
+                        "\tsaved_params_dir\n")
+
             print(
-                "The related infomation  about hyperparamemters searched are saved as %s/log_file.txt ."
+                "The related infomation about hyperparamemters searched are saved as %s/log_file.txt ."
                 % autoft._output_dir)
             for solution, modeldir in solutions_modeldirs.items():
                 param = evaluator.convert_params(solution)
                 param = [str(p) for p in param]
-                f.write("\t".join(param) + "\t" + modeldir + "\n")
+                if autoft.mpi.multi_machine:
+                    f.write("\t".join(param) + "\t" + modeldir[0] + "\t" + str(modeldir[1]) + "\n")
+                else:
+                    f.write("\t".join(param) + "\t" + modeldir[0] + "\n")
 
         return True
 
