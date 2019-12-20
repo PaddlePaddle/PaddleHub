@@ -93,17 +93,18 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 同时，我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
 
-|类别|AIStudio链接|
-|-|-|
-|ERNIE Tiny 文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/186443)
-|ERNIE文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79380)|
-|ERNIE序列标注|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79377)|
-|ELMo文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79400)|
-|senta情感分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79398)|
-|图像分类| [点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79378)|
-|自定义数据FineTune（序列标注任务）|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/184200)|
-|自定义数据FineTune（文本分类任务）|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/185121) |
-
+|预训练模型|任务类型|数据集|AIStudio链接|备注|
+|-|-|-|-|-|
+|ResNet|图像分类|猫狗数据集DogCat|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216772)||
+|ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216764)||
+|ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216649)|本教程讲述了如何将自定义数据集加载，并利用PaddleHub Finetune API完成文本分类迁移学习。|
+|ERNIE|序列标注|中文序列标注数据集MSRA_NER|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216787)||
+|ERNIE|序列标注|中文快递单数据集Express|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216683)|本教程讲述了如何将自定义数据集加载，并利用PaddleHub Finetune API完成序列标注迁移学习。|
+|ERNIE Tiny|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215599)||
+|Senta|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216851)|本教程讲述了任何利用Senta和PaddleHub Finetune API完成情感分类迁移学习。|
+|Senta|情感分析预测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216735)||
+|LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215641)||
+|Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216749)||
 
 ## 教程
 
