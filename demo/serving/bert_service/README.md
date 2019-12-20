@@ -226,7 +226,7 @@ Paddle Inference Server exit successfully!
 > A : 可通过多次启动`Bert Service`，分配不同端口实现。如果使用GPU，需要指定不同的显卡。如同时部署`ernie`和`bert_chinese_L-12_H-768_A-12`，分别执行命令如下：  
 > ```shell
 > $ hub serving start bert_serving -m ernie -p 8866
-> $ hub serving start bert_serving -m bert_serving -m bert_chinese_L-12_H-768_A-12 -p 8867
+> $ hub serving start bert_serving -m bert_chinese_L-12_H-768_A-12 -p 8867
 > ```
 
 > Q : 启动时显示"Check out http://yq01-gpu-255-129-12-00.epc.baidu.com:8887 in web
