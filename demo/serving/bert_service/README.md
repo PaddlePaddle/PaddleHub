@@ -179,18 +179,22 @@ Server[baidu::paddle_serving::predictor::bert_service::BertServiceImpl] is servi
 
 首先导入客户端依赖。  
 ```python
-from paddlehub.serving.bert_serving import bert_service
+from paddlehub.serving.bert_serving import bs_client
 ```
-接着输入文本信息。
+
+接着启动并初始化`bert service`客户端`BSClient`(这里的server为虚拟地址，需根据自己实际ip设置)
+```python
+bc = bs_client.BSClient(module_name="ernie_tiny", server="127.0.0.1:8866")
+```
+
+然后输入文本信息。
 ```python
 input_text = [["西风吹老洞庭波"], ["一夜湘君白发多"], ["醉后不知天在水"], ["满船清梦压星河"], ]
 ```
-然后利用客户端接口发送文本到服务端，以获取embedding结果(server为虚拟地址，需根据自己实际ip设置)。
+
+最后利用客户端接口`get_result`发送文本到服务端，以获取embedding结果。
 ```python
-result = bert_service.connect(
-    input_text=input_text,
-    model_name="ernie_tiny",
-    server="127.0.0.1:8866")
+result = bc.get_result(input_text=input_text)
 ```
 最后即可得到embedding结果(此处只展示部分结果)。
 ```python
@@ -229,8 +233,8 @@ Paddle Inference Server exit successfully!
  browser."，这个页面有什么作用。  
 > A : 这是`BRPC`的内置服务，主要用于查看请求数、资源占用等信息，可对server端性能有大致了解，具体信息可查看[BRPC内置服务](https://github.com/apache/incubator-brpc/blob/master/docs/cn/builtin_service.md)。
 
-> Q : 为什么输入文本的格式为[["文本1"], ["文本2"], ]，而不是["文本1", "文本2", ]？  
-> A : 因为Bert模型可以对一轮对话生成向量表示，例如[["问题1","回答1"],["问题2","回答2"]]，为了防止使用时混乱，每个样本使用一个list表示，一个样本list内部可以是1条string或2条string，如下面的文本：
+> Q : 为什么输入文本的格式为[["文本1"], ["文本2"], ]，而不是["文本1", "文本2", ]？
+> A : 因为Bert模型可以对一轮对话生成向量表示，例如[["问题1","回答1"],["问题2","回答2"]]，为了防止使用时混乱，每个样本使用一个list表示，一个样本list内部可以是1条string或2条string，如下面的文本：  
 > ```python
 > input_text = [
 >    ["你今天吃饭了吗","我已经吃过饭了"],
