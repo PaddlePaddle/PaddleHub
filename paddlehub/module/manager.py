@@ -85,6 +85,7 @@ class LocalModuleManager(object):
                        upgrade=False,
                        extra=None):
         md5_value = installed_module_version = None
+        from_user_dir = True if module_dir else False
         if module_name:
             self.all_modules(update=True)
             module_info = self.modules_dict.get(module_name, None)
@@ -135,6 +136,7 @@ class LocalModuleManager(object):
                 size = len(file_names) - 1
                 module_dir = os.path.split(file_names[0])[0]
                 module_dir = os.path.join(hub.CACHE_HOME, module_dir)
+                # remove cache
                 if os.path.exists(module_dir):
                     shutil.rmtree(module_dir)
                 for index, file_name in enumerate(file_names):
@@ -160,8 +162,11 @@ class LocalModuleManager(object):
                     fp.write(md5_value)
             save_path = os.path.join(MODULE_HOME, module_name)
             if os.path.exists(save_path):
-                shutil.rmtree(save_path)
-            shutil.move(module_dir, save_path)
+                shutil.move(save_path)
+            if from_user_dir:
+                shutil.copytree(module_dir, save_path)
+            else:
+                shutil.move(module_dir, save_path)
             module_dir = save_path
             tips = "Successfully installed %s" % module_name
             if installed_module_version:
