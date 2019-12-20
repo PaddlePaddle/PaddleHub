@@ -159,7 +159,7 @@ class ServingCommand(BaseCommand):
             module = args.modules
             if module is not None:
                 use_gpu = args.use_gpu
-                port = args.port[0]
+                port = args.port
                 if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
                     print("Port %s is occupied, please change it." % (port))
                     return False
