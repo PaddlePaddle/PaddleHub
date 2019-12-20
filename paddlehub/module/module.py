@@ -158,6 +158,8 @@ class Module(object):
         self._summary = utils.from_module_attr_to_pyobj(
             module_info.map.data['summary'])
 
+        self._initialize()
+
     @classmethod
     def init_with_name(cls, name, version=None):
         log_msg = "Installing %s module" % name
@@ -233,6 +235,9 @@ class Module(object):
     @property
     def is_runable(self):
         return False
+
+    def _initialize(self):
+        pass
 
 
 class ModuleHelper(object):
