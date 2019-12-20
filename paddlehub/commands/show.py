@@ -22,7 +22,7 @@ import argparse
 
 from paddlehub.common import utils
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.commands.cml_utils import TablePrinter
+from paddlehub.common.cml_utils import TablePrinter
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.module import Module
 from paddlehub.io.parser import yaml_parser

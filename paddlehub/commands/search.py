@@ -22,7 +22,7 @@ import argparse
 from paddlehub.common import utils
 from paddlehub.common.hub_server import default_hub_server
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.commands.cml_utils import TablePrinter
+from paddlehub.common.cml_utils import TablePrinter
 
 
 class SearchCommand(BaseCommand):

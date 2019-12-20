@@ -21,7 +21,7 @@ from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.module.manager import default_module_manager
 from paddlehub.commands.base_command import BaseCommand
-from paddlehub.commands.cml_utils import TablePrinter
+from paddlehub.common.cml_utils import TablePrinter
 
 
 class ListCommand(BaseCommand):
