@@ -32,7 +32,7 @@ import paddle.fluid as fluid
 
 from paddlehub.common import utils
 from paddlehub.common import paddle_helper
-from paddlehub.common.dir import CONF_HOME
+from paddlehub.common.dir import CACHE_HOME
 from paddlehub.common.lock import lock
 from paddlehub.common.logger import logger
 from paddlehub.common.hub_server import CacheUpdater
@@ -59,7 +59,7 @@ HUB_PACKAGE_SUFFIX = "phm"
 
 def create_module(directory, name, author, email, module_type, summary,
                   version):
-    save_file_name = "{}.{}".format(name, HUB_PACKAGE_SUFFIX)
+    save_file_name = "{}-{}.{}".format(name, version, HUB_PACKAGE_SUFFIX)
 
     # record module info and serialize
     desc = module_desc_pb2.ModuleDesc()
@@ -105,8 +105,6 @@ def create_module(directory, name, author, email, module_type, summary,
 
 class Module(object):
     def __new__(cls, name=None, directory=None, module_dir=None, version=None):
-        fp_lock = open(os.path.join(CONF_HOME, 'config.json'))
-        lock.flock(fp_lock, lock.LOCK_EX)
         module = None
 
         if cls.__name__ == "Module":
@@ -128,8 +126,6 @@ class Module(object):
 
         if not module:
             module = object.__new__(cls)
-
-        lock.flock(fp_lock, lock.LOCK_UN)
         CacheUpdater(name, version).start()
         return module
 
@@ -162,6 +158,8 @@ class Module(object):
 
     @classmethod
     def init_with_name(cls, name, version=None):
+        fp_lock = open(os.path.join(CACHE_HOME, name), "a")
+        lock.flock(fp_lock, lock.LOCK_EX)
         log_msg = "Installing %s module" % name
         if version:
             log_msg += "-%s" % version
@@ -174,6 +172,7 @@ class Module(object):
             raise RuntimeError(tips)
 
         logger.info(tips)
+        lock.flock(fp_lock, lock.LOCK_UN)
         return cls.init_with_directory(directory=module_dir[0])
 
     @classmethod
