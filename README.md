@@ -91,7 +91,9 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 除了上述三类模型外，PaddleHub还发布了语言模型、语义模型、图像分类、生成模型、视频分类等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
 
-同时，我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
+## 教程
+
+我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
 
 |预训练模型|任务类型|数据集|AIStudio链接|备注|
 |-|-|-|-|-|
@@ -105,8 +107,6 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 |Senta|情感分析预测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216735)||
 |LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215641)||
 |Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216749)||
-
-## 教程
 
 [Fine-tune API参考](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
 
