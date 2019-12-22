@@ -23,106 +23,38 @@ import paddlehub as hub
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
-parser.add_argument("--dataset", type=str, default="chnsenticorp", help="The choice of dataset")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
-parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
-parser.add_argument("--data_dir", type=str, default=None, help="Path to training data.")
+parser.add_argument("--warmup_proportion", type=float, default=0.1, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
-parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    dataset = None
-    metrics_choices = []
-    # Download dataset and use ClassifyReader to read dataset
-    if args.dataset.lower() == "chnsenticorp":
-        dataset = hub.dataset.ChnSentiCorp()
-        module = hub.Module(name="ernie_tiny")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == "tnews":
-        dataset = hub.dataset.TNews()
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == "nlpcc_dbqa":
-        dataset = hub.dataset.NLPCC_DBQA()
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == "lcqmc":
-        dataset = hub.dataset.LCQMC()
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == 'inews':
-        dataset = hub.dataset.INews()
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == 'bq':
-        dataset = hub.dataset.BQ()
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == 'thucnews':
-        dataset = hub.dataset.THUCNEWS()
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == 'iflytek':
-        dataset = hub.dataset.IFLYTEK()
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == "mrpc":
-        dataset = hub.dataset.GLUE("MRPC")
-        module = hub.Module(name="ernie_v2_eng_base")
-        metrics_choices = ["f1", "acc"]
-    # The first metric will be choose to eval. Ref: task.py:799
-    elif args.dataset.lower() == "qqp":
-        dataset = hub.dataset.GLUE("QQP")
-        module = hub.Module(name="ernie_v2_eng_base")
-        metrics_choices = ["f1", "acc"]
-    elif args.dataset.lower() == "sst-2":
-        dataset = hub.dataset.GLUE("SST-2")
-        module = hub.Module(name="ernie_v2_eng_base")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == "cola":
-        dataset = hub.dataset.GLUE("CoLA")
-        module = hub.Module(name="ernie_v2_eng_base")
-        metrics_choices = ["matthews", "acc"]
-    elif args.dataset.lower() == "qnli":
-        dataset = hub.dataset.GLUE("QNLI")
-        module = hub.Module(name="ernie_v2_eng_base")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == "rte":
-        dataset = hub.dataset.GLUE("RTE")
-        module = hub.Module(name="ernie_v2_eng_base")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == "mnli" or args.dataset.lower() == "mnli_m":
-        dataset = hub.dataset.GLUE("MNLI_m")
-        module = hub.Module(name="ernie_v2_eng_base")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower() == "mnli_mm":
-        dataset = hub.dataset.GLUE("MNLI_mm")
-        module = hub.Module(name="ernie_v2_eng_base")
-        metrics_choices = ["acc"]
-    elif args.dataset.lower().startswith("xnli"):
-        dataset = hub.dataset.XNLI(language=args.dataset.lower()[-2:])
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-        metrics_choices = ["acc"]
-    else:
-        raise ValueError("%s dataset is not defined" % args.dataset)
 
-    # Check metric
-    support_metrics = ["acc", "f1", "matthews"]
-    for metric in metrics_choices:
-        if metric not in support_metrics:
-            raise ValueError("\"%s\" metric is not defined" % metric)
-
-    # Start preparing parameters for reader and task accoring to module
-    # For ernie_v2, it has an addition embedding named task_id
-    # For ernie_v2_chinese_tiny, it use an addition sentence_piece_vocab to tokenize
+    # Load Paddlehub ERNIE Tiny pretrained model
+    module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
+
+    # Download dataset and use accuracy as metrics
+    # Choose dataset: GLUE/XNLI/ChinesesGLUE/NLPCC-DBQA/LCQMC
+    # metric should be acc, f1 or matthews
+    dataset = hub.dataset.ChnSentiCorp()
+    metrics_choices = ["acc"]
+
+    # For ernie_tiny, it use sub-word to tokenize chinese sentence
+    # If not ernie tiny, sp_model_path and word_dict_path should be set None
+    reader = hub.reader.ClassifyReader(
+        dataset=dataset,
+        vocab_path=module.get_vocab_path(),
+        max_seq_len=args.max_seq_len,
+        sp_model_path=module.get_spm_path(),
+        word_dict_path=module.get_word_dict_path())
+
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
@@ -136,26 +68,14 @@ if __name__ == '__main__':
         inputs["segment_ids"].name,
         inputs["input_mask"].name,
     ]
-    # Finish preparing parameter for reader and task accoring to modul
-
-    # Define reader
-    reader = hub.reader.ClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        sp_model_path=module.get_spm_path(),
-        word_dict_path=module.get_word_dict_path())
 
     # Select finetune strategy, setup config and finetune
     strategy = hub.AdamWeightDecayStrategy(
-        weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate,
-        lr_scheduler="linear_decay")
+        weight_decay=args.weight_decay, learning_rate=args.learning_rate)
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         use_data_parallel=args.use_data_parallel,
-        use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
