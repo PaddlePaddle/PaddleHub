@@ -108,7 +108,10 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 |LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215641)||
 |Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216749)||
 
-[Fine-tune API参考](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
+
+同时，关于PaddleHub更多信息参考：
+
+[Fine-tune API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
 
 [实现自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
