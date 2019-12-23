@@ -45,6 +45,13 @@ if __name__ == '__main__':
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
+    # Download dataset and use MultiLabelReader to read dataset
+    dataset = hub.dataset.Toxic()
+    reader = hub.reader.MultiLabelClassifyReader(
+        dataset=dataset,
+        vocab_path=module.get_vocab_path(),
+        max_seq_len=args.max_seq_len)
+
     # Setup feed list for data feeder
     feed_list = [
         inputs["input_ids"].name,
@@ -52,13 +59,6 @@ if __name__ == '__main__':
         inputs["segment_ids"].name,
         inputs["input_mask"].name,
     ]
-
-    # Download dataset and use MultiLabelReader to read dataset
-    dataset = hub.dataset.Toxic()
-    reader = hub.reader.MultiLabelClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
