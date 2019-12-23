@@ -68,7 +68,7 @@ $ pip install ujson
 
 |模型|网络|
 |:-|:-:|
-|[ERNIE](https://paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel)|ERNIE|
+|[ernie](https://paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel)|ERNIE|
 |[ernie_tiny](https://paddlepaddle.org.cn/hubdetail?name=ernie_tiny&en_category=SemanticModel)|ERNIE|
 |[ernie_v2_eng_large](https://paddlepaddle.org.cn/hubdetail?name=ernie_v2_eng_large&en_category=SemanticModel)|ERNIE|
 |[ernie_v2_eng_base](https://paddlepaddle.org.cn/hubdetail?name=ernie_v2_eng_base&en_category=SemanticModel)|ERNIE|
@@ -225,8 +225,8 @@ Paddle Inference Server exit successfully!
 > Q : 如何在一台服务器部署多个模型？  
 > A : 可通过多次启动`Bert Service`，分配不同端口实现。如果使用GPU，需要指定不同的显卡。如同时部署`ernie`和`bert_chinese_L-12_H-768_A-12`，分别执行命令如下：  
 > ```shell
-> $ hub serving start bert_serving -m ernie -p 8866
-> $ hub serving start bert_serving -m bert_chinese_L-12_H-768_A-12 -p 8867
+> $ hub serving start bert_service -m ernie -p 8866
+> $ hub serving start bert_service -m bert_chinese_L-12_H-768_A-12 -p 8867
 > ```
 
 > Q : 启动时显示"Check out http://yq01-gpu-255-129-12-00.epc.baidu.com:8887 in web
