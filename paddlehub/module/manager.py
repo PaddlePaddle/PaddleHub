@@ -80,7 +80,6 @@ class LocalModuleManager(object):
                        module_dir=None,
                        module_package=None,
                        module_version=None,
-                       module_path="",
                        upgrade=False,
                        extra=None):
         md5_value = installed_module_version = None
