@@ -41,43 +41,22 @@ hub.common.logger.logger.setLevel("INFO")
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=1, help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
-parser.add_argument("--learning_rate", type=float, default=4e-5, help="Learning rate used to train with warmup.")
-parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
-parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint.")
-parser.add_argument("--result_dir", type=str, default=None, help="Directory to predicted results to be written.")
 parser.add_argument("--max_seq_len", type=int, default=384, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=8, help="Total examples' number in batch for training.")
-parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
-parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=True, help="Whether use data parallel.")
-parser.add_argument("--max_answer_length", type=int, default=30, help="Max answer length.")
-parser.add_argument("--n_best_size", type=int, default=20, help="The total number of n-best predictions to generate in the nbest_predictions.json output file.")
-parser.add_argument("--null_score_diff_threshold", type=float, default=0.0, help="If null_score - best_non_null is greater than the threshold predict null.")
-parser.add_argument("--dataset", type=str, default="squad", help="Support squad, squad2.0, drcd and cmrc2018")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Download dataset and use ReadingComprehensionReader to read dataset
-    if args.dataset == "squad":
-        dataset = hub.dataset.SQUAD(version_2_with_negative=False)
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
-    elif args.dataset == "squad2.0" or args.dataset == "squad2":
-        args.dataset = "squad2.0"
-        dataset = hub.dataset.SQUAD(version_2_with_negative=True)
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
-    elif args.dataset == "drcd":
-        dataset = hub.dataset.DRCD()
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-    elif args.dataset == "cmrc2018":
-        dataset = hub.dataset.CMRC2018()
-        module = hub.Module(name="roberta_wwm_ext_chinese_L-24_H-1024_A-16")
-    else:
-        raise Exception(
-            "Only support datasets: squad, squad2.0, drcd and cmrc2018")
-
+    # Load Paddlehub BERT pretrained model
+    module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
+
+    # Download dataset and use ReadingComprehensionReader to read dataset
+    # If you wanna load SQuAD 2.0 dataset, just set version_2_with_negative as True
+    dataset = hub.dataset.SQUAD(version_2_with_negative=False)
+    # dataset = hub.dataset.SQUAD(version_2_with_negative=True)
 
     reader = hub.reader.ReadingComprehensionReader(
         dataset=dataset,
@@ -97,25 +76,13 @@ if __name__ == '__main__':
         inputs["input_mask"].name,
     ]
 
-    # Select finetune strategy, setup config and finetune
-    strategy = hub.AdamWeightDecayStrategy(
-        weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate,
-        warmup_proportion=args.warmup_proportion,
-        lr_scheduler="linear_decay")
-
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
-        log_interval=10,
-        use_pyreader=args.use_pyreader,
-        use_data_parallel=args.use_data_parallel,
-        save_ckpt_interval=100,
+        use_data_parallel=False,
         use_cuda=args.use_gpu,
-        num_epoch=args.num_epoch,
         batch_size=args.batch_size,
         checkpoint_dir=args.checkpoint_dir,
-        enable_memory_optim=True,
-        strategy=strategy)
+        strategy=hub.AdamWeightDecayStrategy())
 
     # Define a reading comprehension finetune task by PaddleHub's API
     reading_comprehension_task = hub.ReadingComprehensionTask(
@@ -125,5 +92,5 @@ if __name__ == '__main__':
         config=config)
 
     # Data to be predicted
-    data = dataset.dev_examples[97:98]
+    data = dataset.dev_examples[:10]
     reading_comprehension_task.predict(data=data)
