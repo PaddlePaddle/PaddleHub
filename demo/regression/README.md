@@ -1,6 +1,6 @@
 # PaddleHub 回归任务
 
-本示例将展示如何使用PaddleHub Finetune API以及BERT预训练模型完成回归任务。
+本示例将展示如何使用PaddleHub Finetune API以及Transformer类模型完成回归任务。
 
 
 ## 如何开始Finetune
@@ -17,8 +17,7 @@
 --warmup_proportion: 学习率warmup策略的比例，如果0.1，则学习率会在前10%训练step的过程中从0慢慢增长到learning_rate, 而后再缓慢衰减，默认为0
 --num_epoch: Finetune迭代的轮数
 --max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数
---use_data_parallel: 是否使用并行计算，默认False。打开该功能依赖nccl库。
---use_pyreader: 是否使用pyreader，默认False。
+--use_data_parallel: 是否使用并行计算，默认True。打开该功能依赖nccl库。
 
 # 任务相关
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型
@@ -31,7 +30,7 @@
 ### Step1: 加载预训练模型
 
 ```python
-module = hub.Module(name="ernie")
+module = hub.Module(name="ernie_v2_eng_base")
 inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
@@ -58,8 +57,8 @@ RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L
 
 如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
 ```python
-# 更换name参数即可无缝切换BERT中文模型, 代码示例如下
-module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
+# 更换name参数即可无缝切换BERT模型, 代码示例如下
+module = hub.Module(name="bert_cased_L-12_H-768_A-12")
 ```
 
 ### Step2: 准备数据集并使用RegressionReader读取数据
@@ -97,6 +96,9 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 ```
 
 #### 优化策略
+
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)
+
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`
 
 `learning_rate`: Finetune过程中的最大学习率;
@@ -138,7 +140,7 @@ reg_task = hub.RegressionTask(
 reg_task.finetune_and_eval()
 ```
 **NOTE:**
-1. `outputs["pooled_output"]`返回了BERT模型对应的[CLS]向量,可以用于句子或句对的特征表达。
+1. `outputs["pooled_output"]`返回了ERNIE/BERT模型对应的[CLS]向量,可以用于句子或句对的特征表达。
 2. `feed_list`中的inputs参数指名了BERT中的输入tensor的顺序，与RegressionReader返回的结果一致。
 
 ## 可视化
@@ -154,10 +156,10 @@ $ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_N
 通过Finetune完成模型训练后，在对应的ckpt目录下，会自动保存验证集上效果最好的模型。
 配置脚本参数
 ```
-CKPT_DIR="ckpt_STS-B/"
+CKPT_DIR="ckpt_stsb/"
 python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
-其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
+其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE/BERT模型的最大序列长度，*请与训练时配置的参数保持一致*
 
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下回归任务预测结果。
 如需了解更多预测步骤，请参考`predict.py`
