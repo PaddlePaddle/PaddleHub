@@ -2,6 +2,16 @@
 
 本示例将展示如何使用PaddleHub Finetune API以及BERT预训练模型在Toxic完成多标签分类任务。
 
+多标签分类是广义的多分类，多分类是将样本精确地分类为两个以上类别之一的单标签问题。 在多标签问题中，样本可以分配给多个类别，没有限制。
+如下图所示：
+
+<p align="center">
+<img src="https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.4/docs/imgs/multi-label-cls.png" hspace='10'/> <br />
+</p>
+*图片来源于https://mc.ai/building-a-multi-label-text-classifier-using-bert-and-tensorflow/*
+
+
+
 ## 如何开始Finetune
 
 在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用BERT对Toxic数据集进行Finetune。
@@ -29,9 +39,24 @@
 ### Step1: 加载预训练模型
 
 ```python
-module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+module = hub.Module(name="ernie_v2_eng_base")
 inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 ```
+
+其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
+
+PaddleHub还提供BERT等模型可供选择, 模型对应的加载示例如下：
+
+   模型名                           | PaddleHub Module
+---------------------------------- | :------:
+ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
+ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
+BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
+BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
+BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
+BERT-Large, Cased                  | `hub.Module(name='bert_cased_L-24_H-1024_A-16')`
+
+更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
 
 ### Step2: 准备数据集并使用MultiLabelClassifyReader读取数据
 ```python
