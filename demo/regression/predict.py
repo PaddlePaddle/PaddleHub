@@ -34,29 +34,17 @@ parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory 
 parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
-parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
-parser.add_argument("--dataset", type=str, default="STS-B", help="Directory to model checkpoint")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    dataset = None
-    metrics_choices = []
-    # Download dataset and use ClassifyReader to read dataset
-    if args.dataset.lower() == "sts-b":
-        dataset = hub.dataset.GLUE("STS-B")
-        module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
-        metrics_choices = ["acc"]
-    else:
-        raise ValueError("%s dataset is not defined" % args.dataset)
-
-    support_metrics = ["acc", "f1", "matthews"]
-    for metric in metrics_choices:
-        if metric not in support_metrics:
-            raise ValueError("\"%s\" metric is not defined" % metric)
-
+    # Load Paddlehub ERNIE 2.0 pretrained model
+    module = hub.Module(name="ernie_v2_eng_base")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
+
+    # Download dataset and use RegressionReader to read dataset
+    dataset = hub.dataset.GLUE("STS-B")
     reader = hub.reader.RegressionReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
@@ -79,35 +67,27 @@ if __name__ == '__main__':
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         use_data_parallel=False,
-        use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,
         batch_size=args.batch_size,
-        enable_memory_optim=False,
         checkpoint_dir=args.checkpoint_dir,
-        strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
+        strategy=hub.AdamWeightDecayStrategy())
 
     # Define a regression finetune task by PaddleHub's API
     reg_task = hub.RegressionTask(
         data_reader=reader,
         feature=pooled_output,
         feed_list=feed_list,
-        config=config)
+        config=config,
+    )
 
     # Data to be prdicted
-    data = [[d.text_a, d.text_b] for d in dataset.get_predict_examples()]
+    data = [[d.text_a, d.text_b] for d in dataset.get_predict_examples()[:10]]
 
     index = 0
     run_states = reg_task.predict(data=data)
     results = [run_state.run_results for run_state in run_states]
-    if not os.path.exists("output"):
-        os.makedirs("output")
-    fout = open(os.path.join("output", "%s.tsv" % args.dataset.upper()), 'w')
-    fout.write("index\tprediction")
     for batch_result in results:
         for result in batch_result[0]:
-            if index < 3:
-                print("%s\t%s\tpredict=%.3f" % (data[index][0], data[index][1],
-                                                result[0]))
-            fout.write("\n%s\t%.3f" % (index, result[0]))
+            print("text:%s\t%s\tpredict:%.3f" % (data[index][0], data[index][1],
+                                                 result[0]))
             index += 1
-    fout.close()
