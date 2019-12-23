@@ -94,6 +94,9 @@ config = hub.RunConfig(use_cuda=True, use_data_parallel=True, use_pyreader=True,
 ```
 
 #### 优化策略
+
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)
+
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`
 
 * `learning_rate`: Finetune过程中的最大学习率;
