@@ -30,10 +30,6 @@ install:
   - pip install --upgrade paddlepaddle
   - pip install -r requirements.txt
 
-script:
-  - if [[ $TRAVIS_OS_NAME != "windows" ]]; then /bin/bash ./scripts/test_cml.sh; fi
-  - if [[ $TRAVIS_OS_NAME != "windows" ]]; then /bin/bash ./scripts/test_all_module.sh; fi
-
 notifications:
   email:
     on_success: change
