@@ -15,7 +15,6 @@ parser.add_argument("--checkpoint_dir",     type=str,               default="pad
 parser.add_argument("--batch_size",         type=int,               default=16,                         help="Total examples' number in batch for training.")
 parser.add_argument("--module",             type=str,               default="resnet50",                 help="Module used as feature extractor.")
 parser.add_argument("--dataset",            type=str,               default="flowers",                  help="Dataset to finetune.")
-parser.add_argument("--use_pyreader",       type=ast.literal_eval,  default=True,                      help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel",  type=ast.literal_eval,  default=True,                      help="Whether use data parallel.")
 # yapf: enable.
 
@@ -30,9 +29,11 @@ module_map = {
 
 
 def finetune(args):
+    # Load Paddlehub  pretrained model
     module = hub.Module(name=args.module)
     input_dict, output_dict, program = module.context(trainable=True)
 
+    # Download dataset
     if args.dataset.lower() == "flowers":
         dataset = hub.dataset.Flowers()
     elif args.dataset.lower() == "dogcat":
@@ -46,6 +47,7 @@ def finetune(args):
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
 
+    # Use ImageClassificationReader to read dataset
     data_reader = hub.reader.ImageClassificationReader(
         image_width=module.get_expected_image_width(),
         image_height=module.get_expected_image_height(),
@@ -55,25 +57,27 @@ def finetune(args):
 
     feature_map = output_dict["feature_map"]
 
-    img = input_dict["image"]
-    feed_list = [img.name]
+    # Setup feed list for data feeder
+    feed_list = [input_dict["image"].name]
 
+    # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         use_data_parallel=args.use_data_parallel,
-        use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
-        enable_memory_optim=False,
         checkpoint_dir=args.checkpoint_dir,
         strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
+    # Define a reading comprehension finetune task by PaddleHub's API
     task = hub.ImageClassifierTask(
         data_reader=data_reader,
         feed_list=feed_list,
         feature=feature_map,
         num_classes=dataset.num_labels,
         config=config)
+
+    # Finetune by PaddleHub's API
     task.finetune_and_eval()
 
 

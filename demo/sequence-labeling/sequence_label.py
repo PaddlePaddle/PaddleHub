@@ -26,17 +26,16 @@ parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches 
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
-parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
+parser.add_argument("--warmup_proportion", type=float, default=0.1, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
-parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub ERNIE pretrained model
+    # Load Paddlehub ERNIE Tiny pretrained model
     module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
@@ -55,8 +54,7 @@ if __name__ == '__main__':
     sequence_output = outputs["sequence_output"]
 
     # Setup feed list for data feeder
-    # Must feed all the tensor of ERNIE's module need
-    # Compared to classification task, we need add seq_len tensor to feedlist
+    # Must feed all the tensor of module need
     feed_list = [
         inputs["input_ids"].name, inputs["position_ids"].name,
         inputs["segment_ids"].name, inputs["input_mask"].name
@@ -64,15 +62,13 @@ if __name__ == '__main__':
 
     # Select a finetune strategy
     strategy = hub.AdamWeightDecayStrategy(
+        warmup_proportion=args.warmup_proportion,
         weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate,
-        lr_scheduler="linear_decay",
-    )
+        learning_rate=args.learning_rate)
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         use_data_parallel=args.use_data_parallel,
-        use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
@@ -80,7 +76,7 @@ if __name__ == '__main__':
         strategy=strategy)
 
     # Define a sequence labeling finetune task by PaddleHub's API
-    # if add crf, the network use crf as decoder
+    # If add crf, the network use crf as decoder
     seq_label_task = hub.SequenceLabelTask(
         data_reader=reader,
         feature=sequence_output,
