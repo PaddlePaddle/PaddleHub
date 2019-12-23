@@ -26,6 +26,7 @@ from tb_paddle import SummaryWriter
 from paddlehub.common.logger import logger
 from paddlehub.common.utils import mkdir
 from paddlehub.autofinetune.evaluator import REWARD_SUM, TMP_HOME
+from paddlehub.autofinetune.mpi_helper import MPIHelper
 
 if six.PY3:
     INF = math.inf
@@ -74,6 +75,12 @@ class BaseTuningStrategy(object):
             writer_pop_trail = SummaryWriter(
                 logdir=self._output_dir + '/visualization/pop_{}'.format(i))
             self.writer_pop_trails.append(writer_pop_trail)
+
+        # for parallel on mpi
+        self.mpi = MPIHelper()
+        if self.mpi.multi_machine:
+            print("Autofinetune multimachine mode: running on {}".format(
+                self.mpi.gather(self.mpi.name)))
 
     @property
     def thread(self):
@@ -177,16 +184,22 @@ class BaseTuningStrategy(object):
         solutions_modeldirs = {}
         mkdir(output_dir)
 
-        for idx, solution in enumerate(solutions):
+        solutions = self.mpi.bcast(solutions)
+
+        # split solutions to "solutions for me"
+        range_start, range_end = self.mpi.split_range(len(solutions))
+        my_solutions = solutions[range_start:range_end]
+
+        for idx, solution in enumerate(my_solutions):
             cuda = self.is_cuda_free["free"][0]
             modeldir = output_dir + "/model-" + str(idx) + "/"
             log_file = output_dir + "/log-" + str(idx) + ".info"
             params_cudas_dirs.append([solution, cuda, modeldir, log_file])
-            solutions_modeldirs[tuple(solution)] = modeldir
+            solutions_modeldirs[tuple(solution)] = (modeldir, self.mpi.rank)
             self.is_cuda_free["free"].remove(cuda)
             self.is_cuda_free["busy"].append(cuda)
             if len(params_cudas_dirs
-                   ) == self.thread or idx == len(solutions) - 1:
+                   ) == self.thread or idx == len(my_solutions) - 1:
                 tp = ThreadPool(len(params_cudas_dirs))
                 solution_results += tp.map(self.evaluator.run,
                                            params_cudas_dirs)
@@ -198,12 +211,25 @@ class BaseTuningStrategy(object):
                     self.is_cuda_free["busy"].remove(param_cuda[1])
                 params_cudas_dirs = []
 
-        self.feedback(solutions, solution_results)
+        all_solution_results = self.mpi.gather(solution_results)
+
+        if self.mpi.rank == 0:
+            # only rank 0 need to feedback
+            all_solution_results = [y for x in all_solution_results for y in x]
+            self.feedback(solutions, all_solution_results)
+
         # remove the tmp.txt which records the eval results for trials
         tmp_file = os.path.join(TMP_HOME, "tmp.txt")
-        os.remove(tmp_file)
+        if os.path.exists(tmp_file):
+            os.remove(tmp_file)
 
-        return solutions_modeldirs
+        # collect all solutions_modeldirs
+        collected_solutions_modeldirs = self.mpi.allgather(solutions_modeldirs)
+        return_dict = {}
+        for i in collected_solutions_modeldirs:
+            return_dict.update(i)
+
+        return return_dict
 
 
 class HAZero(BaseTuningStrategy):

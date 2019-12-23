@@ -19,24 +19,19 @@ from __future__ import print_function
 
 import platform
 
+import six
 from setuptools import find_packages
 from setuptools import setup
+
 from paddlehub.version import hub_version
-
-
-def python_version():
-    return [int(v) for v in platform.python_version().split(".")]
-
-
-max_version, mid_version, min_version = python_version()
 
 REQUIRED_PACKAGES = [
     'six >= 1.10.0', 'protobuf >= 3.6.0', 'pyyaml', 'Pillow', 'requests',
     'tb-paddle', 'tensorboard >= 1.15', 'cma == 2.7.0', 'flask >= 1.1.0',
-    'sentencepiece', 'nltk'
+    'sentencepiece', 'nltk', 'colorlog', 'opencv-python'
 ]
 
-if max_version < 3:
+if six.PY2:
     REQUIRED_PACKAGES += ["numpy < 1.17.0", "pandas < 0.25.0"]
 else:
     REQUIRED_PACKAGES += ["numpy", "pandas"]

@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import os
 import shutil
+import tarfile
 
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
@@ -75,17 +76,77 @@ class LocalModuleManager(object):
         return self.modules_dict.get(module_name, None)
 
     def install_module(self,
-                       module_name,
+                       module_name=None,
+                       module_dir=None,
+                       module_package=None,
                        module_version=None,
                        module_path="",
                        upgrade=False,
                        extra=None):
-        # check if has installed module
-        self.all_modules(update=True)
-        module_info = self.modules_dict.get(module_name, None)
-        if module_info:
-            if not module_version or module_version == self.modules_dict[
-                    module_name][1]:
+        md5_value = installed_module_version = None
+        from_user_dir = True if module_dir else False
+        if module_name:
+            self.all_modules(update=True)
+            module_info = self.modules_dict.get(module_name, None)
+            if module_info:
+                if not module_version or module_version == self.modules_dict[
+                        module_name][1]:
+                    module_dir = self.modules_dict[module_name][0]
+                    module_tag = module_name if not module_version else '%s-%s' % (
+                        module_name, module_version)
+                    tips = "Module %s already installed in %s" % (module_tag,
+                                                                  module_dir)
+                    return True, tips, self.modules_dict[module_name]
+
+            search_result = hub.default_hub_server.get_module_url(
+                module_name, version=module_version, extra=extra)
+            name = search_result.get('name', None)
+            url = search_result.get('url', None)
+            md5_value = search_result.get('md5', None)
+            installed_module_version = search_result.get('version', None)
+            if not url or (module_version is not None
+                           and installed_module_version != module_version) or (
+                               name != module_name):
+                if default_hub_server._server_check() is False:
+                    tips = "Request Hub-Server unsuccessfully, please check your network."
+                else:
+                    tips = "Can't find module %s" % module_name
+                    if module_version:
+                        tips += " with version %s" % module_version
+                    module_tag = module_name if not module_version else '%s-%s' % (
+                        module_name, module_version)
+                return False, tips, None
+
+            result, tips, module_zip_file = default_downloader.download_file(
+                url=url,
+                save_path=hub.CACHE_HOME,
+                save_name=module_name,
+                replace=True,
+                print_progress=True)
+            result, tips, module_dir = default_downloader.uncompress(
+                file=module_zip_file,
+                dirname=MODULE_HOME,
+                delete_file=True,
+                print_progress=True)
+
+        if module_package:
+            with tarfile.open(module_package, "r:gz") as tar:
+                file_names = tar.getnames()
+                size = len(file_names) - 1
+                module_dir = os.path.split(file_names[0])[0]
+                module_dir = os.path.join(hub.CACHE_HOME, module_dir)
+                # remove cache
+                if os.path.exists(module_dir):
+                    shutil.rmtree(module_dir)
+                for index, file_name in enumerate(file_names):
+                    tar.extract(file_name, hub.CACHE_HOME)
+
+        if module_dir:
+            if not module_name:
+                module_name = hub.Module(directory=module_dir).name
+            self.all_modules(update=False)
+            module_info = self.modules_dict.get(module_name, None)
+            if module_info:
                 module_dir = self.modules_dict[module_name][0]
                 module_tag = module_name if not module_version else '%s-%s' % (
                     module_name, module_version)
@@ -93,58 +154,6 @@ class LocalModuleManager(object):
                                                               module_dir)
                 return True, tips, self.modules_dict[module_name]
 
-        if not module_path or os.path.isfile(module_path):
-            if not module_path:
-                # get tar.gz file
-                search_result = hub.HubServer().get_module_url(
-                    module_name, version=module_version, extra=extra)
-                name = search_result.get('name', None)
-                url = search_result.get('url', None)
-                md5_value = search_result.get('md5', None)
-                installed_module_version = search_result.get('version', None)
-                if not url or (module_version is not None
-                               and installed_module_version != module_version
-                               ) or (name != module_name):
-                    if hub.HubServer()._server_check() is False:
-                        tips = "Request Hub-Server unsuccessfully, please check your network."
-                    else:
-                        tips = "Can't find module %s" % module_name
-                        if module_version:
-                            tips += " with version %s" % module_version
-                        module_tag = module_name if not module_version else '%s-%s' % (
-                            module_name, module_version)
-                    return False, tips, None
-
-                result, tips, module_zip_file = default_downloader.download_file(
-                    url=url,
-                    save_path=hub.CACHE_HOME,
-                    save_name=module_name,
-                    replace=True,
-                    print_progress=True)
-                if_delete_targz = True
-            else:
-                module_zip_file = module_path
-                md5_value = None
-                installed_module_version = None
-                if_delete_targz = False
-
-            # uncompress
-            result, tips, module_dir = default_downloader.uncompress(
-                file=module_zip_file,
-                dirname=MODULE_HOME,
-                delete_file=if_delete_targz,
-                print_progress=True)
-
-        elif os.path.isdir(module_path):
-            module_dir = module_path
-            md5_value = None
-            installed_module_version = None
-        else:
-            tips = "module_path must point to a tar.gz file or a directory with module files"
-            return False, tips, None
-
-        # rename and supplement
-        if module_dir:
             if md5_value:
                 with open(
                         os.path.join(MODULE_HOME, module_dir, "md5.txt"),
@@ -152,8 +161,8 @@ class LocalModuleManager(object):
                     fp.write(md5_value)
             save_path = os.path.join(MODULE_HOME, module_name)
             if os.path.exists(save_path):
-                shutil.rmtree(save_path)
-            if os.path.isdir(module_path):
+                shutil.move(save_path)
+            if from_user_dir:
                 shutil.copytree(module_dir, save_path)
             else:
                 shutil.move(module_dir, save_path)

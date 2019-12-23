@@ -17,6 +17,7 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
 
+import colorlog
 import logging
 import math
 import os
@@ -26,21 +27,41 @@ from paddlehub.common.dir import CONF_HOME
 
 
 class Logger(object):
+    DEBUG = 10
+    INFO = 20
+    WARNING = 30
+    ERROR = 40
+    CRITICAL = 50
+    TRAIN = 21
+    EVAL = 22
     PLACEHOLDER = '%'
     NOLOG = "NOLOG"
+    logging.addLevelName(TRAIN, 'TRAIN')
+    logging.addLevelName(EVAL, 'EVAL')
 
     def __init__(self, name=None):
         if not name:
             name = "PaddleHub"
         self.logger = logging.getLogger(name)
         self.handler = logging.StreamHandler()
-        self.format = logging.Formatter(
-            '[%(asctime)-15s] [%(levelname)8s] - %(message)s')
-        self.handler.setFormatter(self.format)
 
+        self.format = colorlog.ColoredFormatter(
+            '%(log_color)s[%(asctime)-15s] [%(levelname)8s] - %(message)s',
+            log_colors={
+                'DEBUG': 'purple',
+                'INFO': 'green',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'bold_red',
+                'TRAIN': 'cyan',
+                'EVAL': 'blue',
+            })
+        self.handler.setFormatter(self.format)
         self.logger.addHandler(self.handler)
         self.logLevel = "DEBUG"
-        self.logger.setLevel(self._get_logging_level())
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.propagate = False
+
         if os.path.exists(os.path.join(CONF_HOME, "config.json")):
             with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
                 level = json.load(fp).get("log_level", "DEBUG")
@@ -49,9 +70,6 @@ class Logger(object):
 
     def _is_no_log(self):
         return self.getLevel() == Logger.NOLOG
-
-    def _get_logging_level(self):
-        return eval("logging.%s" % self.logLevel)
 
     def setLevel(self, logLevel):
         self.logLevel = logLevel.upper()
@@ -62,7 +80,7 @@ class Logger(object):
     def getLevel(self):
         return self.logLevel
 
-    def __call__(self, type, msg):
+    def __call__(self, level, msg):
         def _get_log_arr(msg, len_limit=30):
             ph = Logger.PLACEHOLDER
             lrspace = 2
@@ -109,24 +127,29 @@ class Logger(object):
         if self._is_no_log():
             return
 
-        func = eval("self.logger.%s" % type)
         for msg in _get_log_arr(msg):
-            func(msg)
+            self.logger.log(level, msg)
 
     def debug(self, msg):
-        self("debug", msg)
+        self(logger.DEBUG, msg)
 
     def info(self, msg):
-        self("info", msg)
-
-    def error(self, msg):
-        self("error", msg)
+        self(logger.INFO, msg)
 
     def warning(self, msg):
-        self("warning", msg)
+        self(logger.WARNING, msg)
+
+    def error(self, msg):
+        self(logger.ERROR, msg)
 
     def critical(self, msg):
-        self("critical", msg)
+        self(logger.CRITICAL, msg)
+
+    def train(self, msg):
+        self(logger.TRAIN, msg)
+
+    def eval(self, msg):
+        self(logger.EVAL, msg)
 
 
 logger = Logger()

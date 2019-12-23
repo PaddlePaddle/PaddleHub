@@ -39,7 +39,7 @@ from .common.paddle_helper import connect_program
 from .common.hub_server import HubServer
 from .common.hub_server import server_check
 
-from .module.module import Module, create_module
+from .module.module import Module
 from .module.base_processor import BaseProcessor
 from .module.signature import Signature, create_signature
 from .module.manager import default_module_manager
