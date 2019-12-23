@@ -206,8 +206,10 @@ class ServingCommand(BaseCommand):
         if args.sub_command == "start":
             if args.bert_service == "bert_service":
                 ServingCommand.start_bert_serving(args)
-            else:
+            elif args.bert_service is None:
                 ServingCommand.start_serving(args)
+            else:
+                ServingCommand.show_help()
         else:
             ServingCommand.show_help()
 
