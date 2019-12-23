@@ -30,7 +30,6 @@ parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
-parser.add_argument("--use_pyreader", type=ast.literal_eval, default=False, help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
 args = parser.parse_args()
 # yapf: enable.
@@ -38,13 +37,11 @@ args = parser.parse_args()
 if __name__ == '__main__':
     # Load Paddlehub ERNIE pretrained model
     module = hub.Module(name="ernie")
-    # module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Download dataset and use ClassifyReader to read dataset
     dataset = hub.dataset.NLPCC_DBQA()
-
     reader = hub.reader.ClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
@@ -66,14 +63,13 @@ if __name__ == '__main__':
 
     # Select finetune strategy, setup config and finetune
     strategy = hub.AdamWeightDecayStrategy(
+        warmup_proportion=args.warmup_proportion,
         weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate,
-        lr_scheduler="linear_decay")
+        learning_rate=args.learning_rate)
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         use_data_parallel=args.use_data_parallel,
-        use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
