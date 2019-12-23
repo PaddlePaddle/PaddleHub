@@ -49,14 +49,22 @@ PaddleHub还提供BERT等模型可供选择, 模型对应的加载示例如下�
 
    模型名                           | PaddleHub Module
 ---------------------------------- | :------:
+ERNIE, Chinese                     | `hub.Module(name='ernie')`
+ERNIE tiny, Chinese                | `hub.Module(name='ernie_tiny')`
 ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
 ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
 BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
 BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
 BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
 BERT-Large, Cased                  | `hub.Module(name='bert_cased_L-24_H-1024_A-16')`
+BERT-Base, Multilingual Cased      | `hub.Module(nane='bert_multi_cased_L-12_H-768_A-12')`
+BERT-Base, Chinese                 | `hub.Module(name='bert_chinese_L-12_H-768_A-12')`
+BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-768_A-12')`
+BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
 
-更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
+更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub)。
 
 ### Step2: 准备数据集并使用MultiLabelClassifyReader读取数据
 ```python
