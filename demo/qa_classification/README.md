@@ -51,6 +51,7 @@ BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-7
 BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
 RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
 RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
+
 更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
 
 如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
