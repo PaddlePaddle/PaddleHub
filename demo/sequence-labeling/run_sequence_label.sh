@@ -9,5 +9,5 @@ python -u sequence_label.py \
                    --checkpoint_dir $CKPT_DIR \
                    --max_seq_len 128 \
                    --learning_rate 5e-5 \
-                   --use_pyreader True \
+                   --warmup_proportion 0.1 \
                    --use_data_parallel True
