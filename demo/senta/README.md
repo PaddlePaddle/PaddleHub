@@ -1,37 +1,21 @@
-# PaddleHub Senta
-
-## 关于
+# Senta 情感分析
 
 本示例展示如何使用PaddleHub Senta Module进行预测。
 
-Senta是百度NLP开放的中文情感分析模型，可以用于进行中文句子的情感分析，输出结果为`{正向/中性/负向}`中的一个，关于模型的结构细节，请查看[Senta](https://github.com/baidu/senta), 本示例代码选择的是Senta-BiLSTM模型。
-
-## 准备工作
-
-在运行本目录的脚本前，需要先安装1.3.0版本以上的PaddlePaddle（如果您本地已经安装了符合条件的PaddlePaddle版本，那么可以跳过`准备工作`这一步）。
-
-如果您的机器支持GPU，我们建议下载GPU版本的PaddlePaddle，使用GPU进行训练和预测的效率都比使用CPU要高。
-```shell
-# 安装GPU版本的PaddlePaddle
-$ pip install --upgrade paddlepaddle-gpu
-```
-
-如果您的机器不支持GPU，可以通过下面的命令来安装CPU版本的PaddlePaddle
-
-```shell
-# 安装CPU版本的PaddlePaddle
-$ pip install --upgrade paddlepaddle
-```
-
-在安装过程中如果遇到问题，您可以到[Paddle官方网站](http://www.paddlepaddle.org/)上查看解决方案。
+Senta是百度NLP开放的中文情感分析模型，可以用于进行中文句子的情感分析，输出结果为`{正向/中性/负向}`中的一个，关于模型更多信息参见[Senta](https://www.paddlepaddle.org.cn/hubdetail?name=senta_bilstm&en_category=SentimentAnalysis), 本示例代码选择的是Senta-BiLSTM模型。
 
 ## 命令行方式预测
 
-`cli_demo.sh`给出了使用命令行接口 (Command Line Interface) 调用Module预测的示例脚本
-通过以下命令体验下效果
-
 ```shell
-$ sh cli_demo.sh
+$ hub run senta_bilstm --input_text "这家餐厅很好吃"
+$ hub run senta_bilstm --input_file test.txt
+```
+
+test.txt 存放待预测文本， 如：
+
+```text
+这家餐厅很好吃
+这部电影真的很差劲
 ```
 
 ## 通过python API预测
@@ -45,7 +29,18 @@ python senta_demo.py
 
 ## 通过PaddleHub Finetune API微调
 `senta_finetune.py` 给出了如何使用Senta模型的句子特征进行Fine-tuning的实例代码。
-可以运行以下命令在ChnSentiCorp数据集上进行Fine-tuning.
+可以运行以下命令在ChnSentiCorp数据集上进行Fine-tuning。
+
 ```shell
 $ sh run_finetune.sh
 ```
+
+同时，我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
+
+|预训练模型|任务类型|数据集|AIStudio链接|备注|
+|-|-|-|-|-|
+|ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216764)||
+|ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216649)|本教程讲述了如何将自定义数据集加载，并利用Finetune API完成文本分类迁移学习。|
+|ERNIE|序列标注|中文序列标注数据集MSRA_NER|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216787)||
+|ERNIE|序列标注|中文快递单数据集Express|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216683)|本教程讲述了如何将自定义数据集加载，并利用Finetune API完成序列标注迁移学习。|
+|ERNIE Tiny|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215599)||
