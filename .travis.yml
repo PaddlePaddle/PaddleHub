@@ -16,12 +16,6 @@ jobs:
       os: linux
       python: 3.6
       script: /bin/bash ./scripts/check_code_style.sh
-    - name: "CI on Linux/Python3.5"
-      os: linux
-      python: 3.5
-    - name: "CI on Linux/Python2.7"
-      os: linux
-      python: 2.7
 
 env:
   - PYTHONPATH=${PWD}
