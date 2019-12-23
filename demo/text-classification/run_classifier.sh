@@ -10,10 +10,11 @@ python -u text_classifier.py \
                    --learning_rate=5e-5 \
                    --weight_decay=0.01 \
                    --max_seq_len=128 \
+                   --warmup_proportion=0.1 \
                    --num_epoch=3 \
                    --use_data_parallel=True
 
-# Recommending hyper parameters for difference task
+# The sugguested hyper parameters for difference task
 # for ChineseGLUE:
 # TNews: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
 # LCQMC: batch_size=32, weight_decay=0, num_epoch=3, max_seq_len=128, lr=5e-5
