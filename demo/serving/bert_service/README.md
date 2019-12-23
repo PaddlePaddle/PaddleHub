@@ -68,7 +68,7 @@ $ pip install ujson
 
 |模型|网络|
 |:-|:-:|
-|[ERNIE](https://paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel)|ERNIE|
+|[ernie](https://paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel)|ERNIE|
 |[ernie_tiny](https://paddlepaddle.org.cn/hubdetail?name=ernie_tiny&en_category=SemanticModel)|ERNIE|
 |[ernie_v2_eng_large](https://paddlepaddle.org.cn/hubdetail?name=ernie_v2_eng_large&en_category=SemanticModel)|ERNIE|
 |[ernie_v2_eng_base](https://paddlepaddle.org.cn/hubdetail?name=ernie_v2_eng_base&en_category=SemanticModel)|ERNIE|
@@ -179,18 +179,22 @@ Server[baidu::paddle_serving::predictor::bert_service::BertServiceImpl] is servi
 
 首先导入客户端依赖。  
 ```python
-from paddlehub.serving.bert_serving import bert_service
+from paddlehub.serving.bert_serving import bs_client
 ```
-接着输入文本信息。
+
+接着启动并初始化`bert service`客户端`BSClient`(这里的server为虚拟地址，需根据自己实际ip设置)
+```python
+bc = bs_client.BSClient(module_name="ernie_tiny", server="127.0.0.1:8866")
+```
+
+然后输入文本信息。
 ```python
 input_text = [["西风吹老洞庭波"], ["一夜湘君白发多"], ["醉后不知天在水"], ["满船清梦压星河"], ]
 ```
-然后利用客户端接口发送文本到服务端，以获取embedding结果(server为虚拟地址，需根据自己实际ip设置)。
+
+最后利用客户端接口`get_result`发送文本到服务端，以获取embedding结果。
 ```python
-result = bert_service.connect(
-    input_text=input_text,
-    model_name="ernie_tiny",
-    server="127.0.0.1:8866")
+result = bc.get_result(input_text=input_text)
 ```
 最后即可得到embedding结果(此处只展示部分结果)。
 ```python
@@ -221,16 +225,16 @@ Paddle Inference Server exit successfully!
 > Q : 如何在一台服务器部署多个模型？  
 > A : 可通过多次启动`Bert Service`，分配不同端口实现。如果使用GPU，需要指定不同的显卡。如同时部署`ernie`和`bert_chinese_L-12_H-768_A-12`，分别执行命令如下：  
 > ```shell
-> $ hub serving start bert_serving -m ernie -p 8866
-> $ hub serving start bert_serving -m bert_serving -m bert_chinese_L-12_H-768_A-12 -p 8867
+> $ hub serving start bert_service -m ernie -p 8866
+> $ hub serving start bert_service -m bert_chinese_L-12_H-768_A-12 -p 8867
 > ```
 
 > Q : 启动时显示"Check out http://yq01-gpu-255-129-12-00.epc.baidu.com:8887 in web
  browser."，这个页面有什么作用。  
 > A : 这是`BRPC`的内置服务，主要用于查看请求数、资源占用等信息，可对server端性能有大致了解，具体信息可查看[BRPC内置服务](https://github.com/apache/incubator-brpc/blob/master/docs/cn/builtin_service.md)。
 
-> Q : 为什么输入文本的格式为[["文本1"], ["文本2"], ]，而不是["文本1", "文本2", ]？  
-> A : 因为Bert模型可以对一轮对话生成向量表示，例如[["问题1","回答1"],["问题2","回答2"]]，为了防止使用时混乱，每个样本使用一个list表示，一个样本list内部可以是1条string或2条string，如下面的文本：
+> Q : 为什么输入文本的格式为[["文本1"], ["文本2"], ]，而不是["文本1", "文本2", ]？
+> A : 因为Bert模型可以对一轮对话生成向量表示，例如[["问题1","回答1"],["问题2","回答2"]]，为了防止使用时混乱，每个样本使用一个list表示，一个样本list内部可以是1条string或2条string，如下面的文本：  
 > ```python
 > input_text = [
 >    ["你今天吃饭了吗","我已经吃过饭了"],

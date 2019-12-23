@@ -298,17 +298,23 @@ class CacheUpdater(threading.Thread):
         api_url = srv_utils.uri_path(default_hub_server.get_server_url(),
                                      'search')
         cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
-        extra = {
-            "command": "update_cache",
-            "mtime": os.stat(cache_path).st_mtime
-        }
+        if os.path.exists(cache_path):
+            extra = {
+                "command": "update_cache",
+                "mtime": os.stat(cache_path).st_mtime
+            }
+        else:
+            extra = {
+                "command": "update_cache",
+                "mtime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            }
         try:
             r = srv_utils.hub_request(api_url, payload, extra)
+            if r.get("update_cache", 0) == 1:
+                with open(cache_path, 'w+') as fp:
+                    yaml.safe_dump({'resource_list': r['data']}, fp)
         except Exception as err:
             pass
-        if r.get("update_cache", 0) == 1:
-            with open(cache_path, 'w+') as fp:
-                yaml.safe_dump({'resource_list': r['data']}, fp)
 
     def run(self):
         self.update_resource_list_file(self.module, self.version)
