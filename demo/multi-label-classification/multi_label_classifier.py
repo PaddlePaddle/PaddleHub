@@ -34,9 +34,8 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub BERT pretrained model
+    # Load Paddlehub ERNIE 2.0 pretrained model
     module = hub.Module(name="ernie_v2_eng_base")
-
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
@@ -48,7 +47,6 @@ if __name__ == '__main__':
 
     # Download dataset and use MultiLabelReader to read dataset
     dataset = hub.dataset.Toxic()
-
     reader = hub.reader.MultiLabelClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
@@ -60,9 +58,9 @@ if __name__ == '__main__':
 
     # Select finetune strategy, setup config and finetune
     strategy = hub.AdamWeightDecayStrategy(
+        warmup_proportion=args.warmup_proportion,
         weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate,
-        lr_scheduler="linear_decay")
+        learning_rate=args.learning_rate)
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(

@@ -40,9 +40,8 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub BERT pretrained model
-    module = hub.Module(name="ernie_eng_base.hub_module")
-
+    # Load Paddlehub ERNIE 2.0 pretrained model
+    module = hub.Module(name="ernie_v2_eng_base")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
@@ -56,7 +55,6 @@ if __name__ == '__main__':
 
     # Download dataset and use MultiLabelReader to read dataset
     dataset = hub.dataset.Toxic()
-
     reader = hub.reader.MultiLabelClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
@@ -70,10 +68,8 @@ if __name__ == '__main__':
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         use_data_parallel=False,
-        use_pyreader=False,
         use_cuda=args.use_gpu,
         batch_size=args.batch_size,
-        enable_memory_optim=False,
         checkpoint_dir=args.checkpoint_dir,
         strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
@@ -85,7 +81,7 @@ if __name__ == '__main__':
         num_classes=dataset.num_labels,
         config=config)
 
-    # Data to be prdicted
+    # Data to be predicted
     data = [
         [
             "Yes you did. And you admitted to doing it. See the Warren Kinsella talk page."
