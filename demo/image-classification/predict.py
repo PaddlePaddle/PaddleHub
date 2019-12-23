@@ -27,9 +27,11 @@ module_map = {
 
 
 def predict(args):
+    # Load Paddlehub  pretrained model
     module = hub.Module(name=args.module)
     input_dict, output_dict, program = module.context(trainable=True)
 
+    # Download dataset
     if args.dataset.lower() == "flowers":
         dataset = hub.dataset.Flowers()
     elif args.dataset.lower() == "dogcat":
@@ -43,6 +45,7 @@ def predict(args):
     else:
         raise ValueError("%s dataset is not defined" % args.dataset)
 
+    # Use ImageClassificationReader to read dataset
     data_reader = hub.reader.ImageClassificationReader(
         image_width=module.get_expected_image_width(),
         image_height=module.get_expected_image_height(),
@@ -52,9 +55,10 @@ def predict(args):
 
     feature_map = output_dict["feature_map"]
 
-    img = input_dict["image"]
-    feed_list = [img.name]
+    # Setup feed list for data feeder
+    feed_list = [input_dict["image"].name]
 
+    # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         use_data_parallel=False,
         use_cuda=args.use_gpu,
@@ -62,7 +66,8 @@ def predict(args):
         checkpoint_dir=args.checkpoint_dir,
         strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
-    task = hub.ClassifierTask(
+    # Define a reading comprehension finetune task by PaddleHub's API
+    task = hub.ImageClassifierTask(
         data_reader=data_reader,
         feed_list=feed_list,
         feature=feature_map,
