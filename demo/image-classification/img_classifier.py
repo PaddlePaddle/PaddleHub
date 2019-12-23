@@ -15,7 +15,6 @@ parser.add_argument("--checkpoint_dir",     type=str,               default="pad
 parser.add_argument("--batch_size",         type=int,               default=16,                         help="Total examples' number in batch for training.")
 parser.add_argument("--module",             type=str,               default="resnet50",                 help="Module used as feature extractor.")
 parser.add_argument("--dataset",            type=str,               default="flowers",                  help="Dataset to finetune.")
-parser.add_argument("--use_pyreader",       type=ast.literal_eval,  default=True,                      help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel",  type=ast.literal_eval,  default=True,                      help="Whether use data parallel.")
 # yapf: enable.
 
@@ -60,11 +59,9 @@ def finetune(args):
 
     config = hub.RunConfig(
         use_data_parallel=args.use_data_parallel,
-        use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
-        enable_memory_optim=False,
         checkpoint_dir=args.checkpoint_dir,
         strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
