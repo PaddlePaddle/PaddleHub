@@ -42,6 +42,7 @@ files = [("image", file_1), ("image", file_2)]
 ```
 &emsp;&emsp;然后就可以发送请求到图像分类服务API，并得到结果了，代码如下
 ```python
+>>> # 指定检测方法为vgg11_imagenet并发送post请求
 >>> url = "http://127.0.0.1:8866/predict/image/vgg11_imagenet"
 >>> r = requests.post(url=url, files=files)
 ```
@@ -52,4 +53,6 @@ files = [("image", file_1), ("image", file_2)]
     "results": "[[{'Egyptian cat': 0.540287435054779}], [{'daisy': 0.9976677298545837}]]"
 }
 ```
-&emsp;&emsp;这样我们就完成了对图像分类预测服务化部署和测试。完整的测试代码见[vgg11_imagenent_serving_demo.py](./vgg11_imagenet_serving_demo.py)。
+&emsp;&emsp;这样我们就完成了对图像分类预测服务化部署和测试。
+
+&emsp;&emsp;完整的测试代码见[vgg11_imagenent_serving_demo.py](./vgg11_imagenet_serving_demo.py)。

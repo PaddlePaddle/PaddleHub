@@ -6,10 +6,10 @@ import os
 
 if __name__ == "__main__":
     # 指定要使用的图片文件并生成列表[("image", img_1), ("image", img_2), ... ]
-    file_list = ["../img/woman.png"]
+    file_list = ["../img/man.png"]
     files = [("image", (open(item, "rb"))) for item in file_list]
     # 为每张图片对应指定info和style
-    data = {"info": ["Female,Brown_Hair"], "style": ["Bangs"]}
+    data = {"info": ["Male,Black_Hair,Eyeglasses,No_Beard"], "style": ["Bald"]}
     # 指定图片生成方法为stgan_celeba并发送post请求
     url = "http://127.0.0.1:8866/predict/image/stgan_celeba"
     r = requests.post(url=url, data=data, files=files)
