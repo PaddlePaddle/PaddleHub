@@ -783,7 +783,11 @@ class BasicTask(object):
         return run_states
 
     def _postprocessing(self, run_states):
-        raise NotImplementedError
+        results = []
+        for batch_state in run_states:
+            batch_result = batch_state.run_results[0]
+            results += [result[0] for result in batch_result]
+        return results
 
     def _run(self, do_eval=False):
         with fluid.program_guard(self.main_program, self.startup_program):

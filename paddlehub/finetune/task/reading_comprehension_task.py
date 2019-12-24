@@ -171,11 +171,9 @@ def get_final_text(pred_text, orig_text, do_lower_case, is_english):
     return output_text
 
 
-def write_predictions(all_examples, all_features, all_results, n_best_size,
-                      max_answer_length, do_lower_case, output_prediction_file,
-                      output_nbest_file, output_null_log_odds_file,
-                      version_2_with_negative, null_score_diff_threshold,
-                      is_english):
+def get_predictions(all_examples, all_features, all_results, n_best_size,
+                    max_answer_length, do_lower_case, version_2_with_negative,
+                    null_score_diff_threshold, is_english):
     example_index_to_features = collections.defaultdict(list)
     for feature in all_features:
         example_index_to_features[feature.example_index].append(feature)
@@ -363,25 +361,8 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 all_predictions[example.qas_id] = best_non_null_entry.text
 
         all_nbest_json[example.qas_id] = nbest_json
-    """Write final predictions to the json file and log-odds of null if needed."""
-    with open(output_prediction_file, "w") as writer:
-        logger.info("Writing predictions to: %s" % (output_prediction_file))
-        writer.write(
-            json.dumps(all_predictions, indent=4, ensure_ascii=is_english) +
-            "\n")
 
-    with open(output_nbest_file, "w") as writer:
-        logger.info("Writing nbest to: %s" % (output_nbest_file))
-        writer.write(
-            json.dumps(all_nbest_json, indent=4, ensure_ascii=is_english) +
-            "\n")
-
-    if version_2_with_negative:
-        logger.info("Writing null_log_odds to: %s" % (output_nbest_file))
-        with open(output_null_log_odds_file, "w") as writer:
-            writer.write(
-                json.dumps(scores_diff_json, indent=4, ensure_ascii=is_english)
-                + "\n")
+    return all_predictions, all_nbest_json, scores_diff_json
 
 
 class ReadingComprehensionTask(BasicTask):
@@ -521,24 +502,15 @@ class ReadingComprehensionTask(BasicTask):
         scores = OrderedDict()
         # If none of metrics has been implemented, loss will be used to evaluate.
         if self.is_test_phase:
-            output_prediction_file = os.path.join(self.config.checkpoint_dir,
-                                                  "predictions.json")
-            output_nbest_file = os.path.join(self.config.checkpoint_dir,
-                                             "nbest_predictions.json")
-            output_null_log_odds_file = os.path.join(self.config.checkpoint_dir,
-                                                     "null_odds.json")
             all_examples = self.data_reader.all_examples[self.phase]
             all_features = self.data_reader.all_features[self.phase]
-            write_predictions(
+            all_predictions, all_nbest_json, scores_diff_json = get_predictions(
                 all_examples=all_examples,
                 all_features=all_features,
                 all_results=all_results,
                 n_best_size=self.n_best_size,
                 max_answer_length=self.max_answer_length,
                 do_lower_case=True,
-                output_prediction_file=output_prediction_file,
-                output_nbest_file=output_nbest_file,
-                output_null_log_odds_file=output_null_log_odds_file,
                 version_2_with_negative=self.version_2_with_negative,
                 null_score_diff_threshold=self.null_score_diff_threshold,
                 is_english=self.is_english)
@@ -557,25 +529,17 @@ class ReadingComprehensionTask(BasicTask):
             else:
                 raise Exception("Error phase: %s when runing _calculate_metrics"
                                 % self.phase)
-            with open(
-                    output_prediction_file, 'r',
-                    encoding="utf8") as prediction_file:
-                predictions = json.load(prediction_file)
 
             if self.sub_task == "squad":
-                scores = squad1_evaluate.evaluate(dataset, predictions)
+                scores = squad1_evaluate.evaluate(dataset, all_predictions)
             elif self.sub_task == "squad2.0":
-                with open(
-                        output_null_log_odds_file, 'r',
-                        encoding="utf8") as odds_file:
-                    na_probs = json.load(odds_file)
-                scores = squad2_evaluate.evaluate(dataset, predictions,
-                                                  na_probs)
+                scores = squad2_evaluate.evaluate(dataset, all_predictions,
+                                                  scores_diff_json)
             elif self.sub_task in ["cmrc2018", "drcd"]:
-                scores = cmrc2018_evaluate.get_eval(dataset, predictions)
+                scores = cmrc2018_evaluate.get_eval(dataset, all_predictions)
         return scores, avg_loss, run_speed
 
-    def _default_predict_end_event(self, run_states):
+    def _postprocessing(self, run_states):
         all_results = []
         RawResult = collections.namedtuple(
             "RawResult", ["unique_id", "start_logits", "end_logits"])
@@ -593,28 +557,16 @@ class ReadingComprehensionTask(BasicTask):
                         start_logits=start_logits,
                         end_logits=end_logits))
         # If none of metrics has been implemented, loss will be used to evaluate.
-        output_prediction_file = os.path.join(self.config.checkpoint_dir,
-                                              "predict_predictions.json")
-        output_nbest_file = os.path.join(self.config.checkpoint_dir,
-                                         "predict_nbest_predictions.json")
-        output_null_log_odds_file = os.path.join(self.config.checkpoint_dir,
-                                                 "predict_null_odds.json")
         all_examples = self.data_reader.all_examples[self.phase]
         all_features = self.data_reader.all_features[self.phase]
-        write_predictions(
+        all_predictions, all_nbest_json, scores_diff_json = get_predictions(
             all_examples=all_examples,
             all_features=all_features,
             all_results=all_results,
             n_best_size=self.n_best_size,
             max_answer_length=self.max_answer_length,
             do_lower_case=True,
-            output_prediction_file=output_prediction_file,
-            output_nbest_file=output_nbest_file,
-            output_null_log_odds_file=output_null_log_odds_file,
             version_2_with_negative=self.version_2_with_negative,
             null_score_diff_threshold=self.null_score_diff_threshold,
             is_english=self.is_english)
-
-        logger.info("PaddleHub predict finished.")
-
-        logger.info("You can see the prediction in %s" % output_prediction_file)
+        return all_predictions
