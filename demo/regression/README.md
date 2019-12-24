@@ -172,3 +172,8 @@ python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下回归任务预测结果。
 如需了解更多预测步骤，请参考`predict.py`
+
+
+## 超参优化AutoDL Finetuner
+
+PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../../tutorial/autofinetune.md) 和[使用样例](../autofinetune)
