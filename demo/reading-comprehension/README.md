@@ -94,7 +94,9 @@ CMRC 2018     |  hub.dataset.CMRC2018()                                         
 
 更多数据集信息参考[Dataset](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset)
 
-如何加载自定义数据集完成Finetune参考[自定义数据](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
+#### 自定义数据集
+
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
 
 ### Step3：选择优化策略和运行配置
 
@@ -160,6 +162,11 @@ reading_comprehension_task.finetune_and_eval()
 2. `feed_list`中的inputs参数指名了BERT中的输入tensor的顺序，与ReadingComprehensionReader返回的结果一致。
 3. `sub_task`指明阅读理解数据集名称，可选{squad, squad2.0, cmrc2018, drcd}, 用于适配各个数据集的模型训练过程中的评估方法
 4.  `hub.ReadingComprehensionTask`通过输入特征、段落背景、问题和答案，可以生成适用于阅读理解迁移任务ReadingComprehensionTask
+
+
+#### 自定义迁移任务
+
+如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
 ## 可视化
 
