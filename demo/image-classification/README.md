@@ -64,6 +64,10 @@ data_reader = hub.reader.ImageClassificationReader(
 
 `module.module.get_pretrained_images_mean()` 和 `module.get_pretrained_images_std()`会返回预训练模型对应的图片均值和方差
 
+#### 自定义数据集
+
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
+
 ### Step3：选择优化策略和运行配置
 
 ```python
@@ -118,6 +122,10 @@ task.finetune_and_eval()
 1. `output_dict["feature_map"]`返回了resnet/mobilenet等模型对应的feature_map，可以用于图片的特征表达。
 2. `feed_list`中的inputs参数指明了resnet/mobilenet等模型的输入tensor的顺序，与ImageClassifierTask返回的结果一致。
 3. `hub.ImageClassifierTask`通过输入特征，label与迁移的类别数，可以生成适用于图像分类的迁移任务`ImageClassifierTask`
+
+#### 自定义迁移任务
+
+如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
 ## 可视化
 
