@@ -113,11 +113,15 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 [Fine-tune API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
 
+[自定义数据集如何Finetune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
+
 [实现自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
 [自动优化超参AutoDL Finetuner使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.3/tutorial/autofinetune.md)
 
 [迁移学习与ULMFiT微调策略](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.3/tutorial/strategy_exp.md)
+
+
 
 ## FAQ
 
