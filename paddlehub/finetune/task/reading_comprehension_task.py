@@ -400,6 +400,8 @@ class ReadingComprehensionTask(BasicTask):
         self.null_score_diff_threshold = null_score_diff_threshold
         self.n_best_size = n_best_size
         self.max_answer_length = max_answer_length
+        self.RawResult = collections.namedtuple(
+            "RawResult", ["unique_id", "start_logits", "end_logits"])
 
     def _build_net(self):
         self.unique_ids = fluid.layers.data(
@@ -474,8 +476,6 @@ class ReadingComprehensionTask(BasicTask):
     def _calculate_metrics(self, run_states):
         total_cost, total_num_seqs, all_results = [], [], []
         run_step = 0
-        RawResult = collections.namedtuple(
-            "RawResult", ["unique_id", "start_logits", "end_logits"])
         for run_state in run_states:
             np_loss = run_state.run_results[0]
             np_num_seqs = run_state.run_results[1]
@@ -491,7 +491,7 @@ class ReadingComprehensionTask(BasicTask):
                     start_logits = [float(x) for x in np_start_logits[idx].flat]
                     end_logits = [float(x) for x in np_end_logits[idx].flat]
                     all_results.append(
-                        RawResult(
+                        self.RawResult(
                             unique_id=unique_id,
                             start_logits=start_logits,
                             end_logits=end_logits))
@@ -541,8 +541,6 @@ class ReadingComprehensionTask(BasicTask):
 
     def _postprocessing(self, run_states):
         all_results = []
-        RawResult = collections.namedtuple(
-            "RawResult", ["unique_id", "start_logits", "end_logits"])
         for run_state in run_states:
             np_unique_ids = run_state.run_results[0]
             np_start_logits = run_state.run_results[1]
@@ -552,11 +550,10 @@ class ReadingComprehensionTask(BasicTask):
                 start_logits = [float(x) for x in np_start_logits[idx].flat]
                 end_logits = [float(x) for x in np_end_logits[idx].flat]
                 all_results.append(
-                    RawResult(
+                    self.RawResult(
                         unique_id=unique_id,
                         start_logits=start_logits,
                         end_logits=end_logits))
-        # If none of metrics has been implemented, loss will be used to evaluate.
         all_examples = self.data_reader.all_examples[self.phase]
         all_features = self.data_reader.all_features[self.phase]
         all_predictions, all_nbest_json, scores_diff_json = get_predictions(
