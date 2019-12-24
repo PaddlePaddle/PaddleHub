@@ -113,6 +113,39 @@ class LocalModuleManager(object):
                                name != module_name):
                 if default_hub_server._server_check() is False:
                     tips = "Request Hub-Server unsuccessfully, please check your network."
+                    return False, tips, None
+                module_versions_info = default_hub_server.search_module_info(
+                    module_name)
+                if module_versions_info is not None and len(
+                        module_versions_info) > 0:
+
+                    if utils.is_windows():
+                        placeholders = [20, 8, 14, 14]
+                    else:
+                        placeholders = [30, 8, 16, 16]
+                    tp = TablePrinter(
+                        titles=[
+                            "ResourceName", "Version", "PaddlePaddle",
+                            "PaddleHub"
+                        ],
+                        placeholders=placeholders)
+                    module_versions_info.sort(
+                        key=cmp_to_key(utils.sort_version_key))
+                    for resource_name, resource_version, paddle_version, \
+                        hub_version in module_versions_info:
+                        colors = ["yellow", None, None, None]
+
+                        tp.add_line(
+                            contents=[
+                                resource_name, resource_version,
+                                utils.strflist_version(paddle_version),
+                                utils.strflist_version(hub_version)
+                            ],
+                            colors=colors)
+                    tips = "The version of PaddlePaddle or PaddleHub " \
+                           "can not match module, please upgrade your " \
+                           "PaddlePaddle or PaddleHub according to the form " \
+                           "below." + tp.get_text()
                 else:
                     tips = "Can't find module %s" % module_name
                     if module_version:
@@ -158,73 +191,7 @@ class LocalModuleManager(object):
                                                               module_dir)
                 return True, tips, self.modules_dict[module_name]
 
-        search_result = hub.default_hub_server.get_module_url(
-            module_name, version=module_version, extra=extra)
-        name = search_result.get('name', None)
-        url = search_result.get('url', None)
-        md5_value = search_result.get('md5', None)
-        installed_module_version = search_result.get('version', None)
-        if not url or (module_version is not None and installed_module_version
-                       != module_version) or (name != module_name):
-            if default_hub_server._server_check() is False:
-                tips = "Request Hub-Server unsuccessfully, please check your network."
-                return False, tips, None
-            module_versions_info = default_hub_server.search_module_info(
-                module_name)
-            if module_versions_info is not None and len(
-                    module_versions_info) > 0:
-
-                if utils.is_windows():
-                    placeholders = [20, 8, 14, 14]
-                else:
-                    placeholders = [30, 8, 16, 16]
-                tp = TablePrinter(
-                    titles=[
-                        "ResourceName", "Version", "PaddlePaddle", "PaddleHub"
-                    ],
-                    placeholders=placeholders)
-                module_versions_info.sort(
-                    key=cmp_to_key(utils.sort_version_key))
-                for resource_name, resource_version, paddle_version, \
-                    hub_version in module_versions_info:
-                    colors = ["yellow", None, None, None]
-
-                    tp.add_line(
-                        contents=[
-                            resource_name, resource_version,
-                            utils.strflist_version(paddle_version),
-                            utils.strflist_version(hub_version)
-                        ],
-                        colors=colors)
-                tips = "The version of PaddlePaddle or PaddleHub " \
-                       "can not match module, please upgrade your " \
-                       "PaddlePaddle or PaddleHub according to the form " \
-                       "below." + tp.get_text()
-
-            else:
-                tips = "Can't find module %s" % module_name
-                if module_version:
-                    tips += " with version %s" % module_version
-                module_tag = module_name if not module_version else '%s-%s' % (
-                    module_name, module_version)
-            return False, tips, None
-
-        result, tips, module_zip_file = default_downloader.download_file(
-            url=url,
-            save_path=hub.CACHE_HOME,
-            save_name=module_name,
-            replace=True,
-            print_progress=True)
-        result, tips, module_dir = default_downloader.uncompress(
-            file=module_zip_file,
-            dirname=MODULE_HOME,
-            delete_file=True,
-            print_progress=True)
-
         if module_dir:
-            with open(os.path.join(MODULE_HOME, module_dir, "md5.txt"),
-                      "w") as fp:
-                fp.write(md5_value)
             if md5_value:
                 with open(
                         os.path.join(MODULE_HOME, module_dir, "md5.txt"),

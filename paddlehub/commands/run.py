@@ -241,7 +241,7 @@ class RunCommand(BaseCommand):
             return False
 
         if self.module.code_version == "v2":
-            results = self.module(argv[1:])
+            results = self.module.run_func(argv[1:])
         else:
             self.module.check_processor()
             self.add_module_config_arg()
