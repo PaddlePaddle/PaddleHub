@@ -192,7 +192,7 @@ class TaskHooks():
         return self.info(only_customized=False)
 
 
-class BasicTask(object):
+class BaseTask(object):
     def __init__(self,
                  feed_list,
                  data_reader,
@@ -265,7 +265,7 @@ class BasicTask(object):
         for hook_type, event_hooks in self._hooks._registered_hooks.items():
             self._hooks.add(hook_type, "default",
                             eval("self._default_%s_event" % hook_type))
-            setattr(BasicTask, "_%s_event" % hook_type,
+            setattr(BaseTask, "_%s_event" % hook_type,
                     self.create_event_function(hook_type))
 
         # accelerate predict

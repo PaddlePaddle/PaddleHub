@@ -16,12 +16,11 @@
 
 import json
 import os
-import sys
 
 from paddlehub.reader import tokenization
-from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/cmrc2018.tar.gz"
 SPIECE_UNDERLINE = '▁'
@@ -63,42 +62,22 @@ class CMRC2018Example(object):
         return s
 
 
-class CMRC2018(object):
+class CMRC2018(BaseNLPDatast):
     """A single set of features of data."""
 
     def __init__(self):
-        self.dataset_dir = os.path.join(DATA_HOME, "cmrc2018")
-        if not os.path.exists(self.dataset_dir):
-            ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
-                url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
-        else:
-            logger.info("Dataset {} already cached.".format(self.dataset_dir))
+        dataset_dir = os.path.join(DATA_HOME, "cmrc2018")
+        base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
+        super(CMRC2018, self).__init__(
+            base_path=base_path,
+            train_file="cmrc2018_train.json",
+            dev_file="cmrc2018_dev.json",
+            test_file=None,
+            label_file=None,
+            label_list=None,
+        )
 
-        self._load_train_examples()
-        self._load_dev_examples()
-        self._load_test_examples()
-
-    def _load_train_examples(self):
-        self.train_file = os.path.join(self.dataset_dir, "cmrc2018_train.json")
-        self.train_examples = self._read_json(self.train_file, is_training=True)
-
-    def _load_dev_examples(self):
-        self.dev_file = os.path.join(self.dataset_dir, "cmrc2018_dev.json")
-        self.dev_examples = self._read_json(self.dev_file, is_training=False)
-
-    def _load_test_examples(self):
-        pass
-
-    def get_train_examples(self):
-        return self.train_examples
-
-    def get_dev_examples(self):
-        return self.dev_examples
-
-    def get_test_examples(self):
-        return []
-
-    def _read_json(self, input_file, is_training=False):
+    def _read_file(self, input_file, phase=False):
         """Read a cmrc2018 json file into a list of CRCDExample."""
 
         def _is_chinese_char(cp):
@@ -197,7 +176,7 @@ class CMRC2018(object):
                     #
                     # Note that this means for training mode, every example is NOT
                     # guaranteed to be preserved.
-                    if is_training:
+                    if phase == "train":
                         actual_text = "".join(
                             doc_tokens[start_position:(end_position + 1)])
                         cleaned_answer_text = "".join(

@@ -17,6 +17,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+
+import paddlehub as hub
+from paddlehub.common.downloader import default_downloader
+from paddlehub.common.logger import logger
+
 
 class InputExample(object):
     """
@@ -49,21 +55,124 @@ class InputExample(object):
                 self.text_a, self.text_b, self.label)
 
 
-class HubDataset(object):
+class BaseDataset(object):
+    def __init__(self,
+                 base_path,
+                 train_file=None,
+                 dev_file=None,
+                 test_file=None,
+                 predict_file=None,
+                 label_file=None,
+                 label_list=None,
+                 train_file_with_head=False,
+                 dev_file_with_head=False,
+                 test_file_with_head=False,
+                 predict_file_with_head=False):
+        if not (train_file or dev_file or test_file):
+            raise ValueError("At least one file should be assigned")
+        self.base_path = base_path
+        self.train_file = train_file
+        self.dev_file = dev_file
+        self.test_file = test_file
+        self.predict_file = predict_file
+        self.label_file = label_file
+        self.label_list = label_list
+
+        self.train_examples = []
+        self.dev_examples = []
+        self.test_examples = []
+        self.predict_examples = []
+
+        self.if_file_with_head = {
+            "train": train_file_with_head,
+            "dev": dev_file_with_head,
+            "test": test_file_with_head,
+            "predict": predict_file_with_head
+        }
+
+        if train_file:
+            self._load_train_examples()
+        if dev_file:
+            self._load_dev_examples()
+        if test_file:
+            self._load_test_examples()
+        if predict_file:
+            self._load_predict_examples()
+        if self.label_file:
+            if not self.label_list:
+                self.label_list = self._load_label_data()
+            else:
+                logger.warning(
+                    "As label_list has been assigned, label_file is noneffective"
+                )
+
     def get_train_examples(self):
-        raise NotImplementedError()
+        return self.train_examples
 
     def get_dev_examples(self):
-        raise NotImplementedError()
+        return self.dev_examples
 
     def get_test_examples(self):
-        raise NotImplementedError()
+        return self.test_examples
 
     def get_val_examples(self):
         return self.get_dev_examples()
 
-    def get_labels(self):
-        raise NotImplementedError()
+    def get_predict_examples(self):
+        return self.predict_examples
 
+    def get_labels(self):
+        return self.label_list
+
+    @property
     def num_labels(self):
-        raise NotImplementedError()
+        return len(self.label_list)
+
+    def label_dict(self):
+        return {index: key for index, key in enumerate(self.label_list)}
+
+    def _download_dataset(self, dataset_path, url):
+        if not os.path.exists(dataset_path):
+            result, tips, dataset_path = default_downloader.download_file_and_uncompress(
+                url=url,
+                save_path=hub.common.dir.DATA_HOME,
+                print_progress=True,
+                replace=True)
+            if not result:
+                raise Exception(tips)
+        else:
+            logger.info("Dataset {} already cached.".format(dataset_path))
+        return dataset_path
+
+    def _load_train_examples(self):
+        self.train_path = os.path.join(self.base_path, self.train_file)
+        self.train_examples = self._read_file(self.train_path, phase="train")
+
+    def _load_dev_examples(self):
+        self.dev_path = os.path.join(self.base_path, self.dev_file)
+        self.dev_examples = self._read_file(self.dev_path, phase="dev")
+
+    def _load_test_examples(self):
+        self.test_path = os.path.join(self.base_path, self.test_file)
+        self.test_examples = self._read_file(self.test_path, phase="test")
+
+    def _load_predict_examples(self):
+        self.predict_path = os.path.join(self.base_path, self.predict_file)
+        self.predict_examples = self._read_file(
+            self.predict_path, phase="predict")
+
+    def _read_file(self, path, phase=None):
+        raise NotImplementedError
+
+    def _load_label_data(self):
+        with open(os.path.join(self.base_path, self.label_file), "r") as file:
+            return file.read().split("\n")
+
+    def __str__(self):
+        return "Dataset: %s with %i train examples, %i dev examples and %i test examples" % (
+            self.__class__.__name__, len(self.train_examples),
+            len(self.dev_examples), len(self.test_examples))
+
+
+# add alias, compatible with old version
+HubDataset = BaseDataset

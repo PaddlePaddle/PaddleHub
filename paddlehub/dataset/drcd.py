@@ -16,12 +16,11 @@
 
 import json
 import os
-import sys
 
 from paddlehub.reader import tokenization
-from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/drcd.tar.gz"
 SPIECE_UNDERLINE = '▁'
@@ -39,8 +38,7 @@ class DRCDExample(object):
                  doc_tokens,
                  orig_answer_text=None,
                  start_position=None,
-                 end_position=None,
-                 is_impossible=False):
+                 end_position=None):
         self.qas_id = qas_id
         self.question_text = question_text
         self.doc_tokens = doc_tokens
@@ -64,43 +62,22 @@ class DRCDExample(object):
         return s
 
 
-class DRCD(object):
+class DRCD(BaseNLPDatast):
     """A single set of features of data."""
 
     def __init__(self):
-        self.dataset_dir = os.path.join(DATA_HOME, "drcd")
-        if not os.path.exists(self.dataset_dir):
-            ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
-                url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
-        else:
-            logger.info("Dataset {} already cached.".format(self.dataset_dir))
+        dataset_dir = os.path.join(DATA_HOME, "drcd")
+        base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
+        super(DRCD, self).__init__(
+            base_path=base_path,
+            train_file="DRCD_training.json",
+            dev_file="DRCD_dev.json",
+            test_file="DRCD_test.json",
+            label_file=None,
+            label_list=None,
+        )
 
-        self._load_train_examples()
-        self._load_dev_examples()
-        self._load_test_examples()
-
-    def _load_train_examples(self):
-        self.train_file = os.path.join(self.dataset_dir, "DRCD_training.json")
-        self.train_examples = self._read_json(self.train_file)
-
-    def _load_dev_examples(self):
-        self.dev_file = os.path.join(self.dataset_dir, "DRCD_dev.json")
-        self.dev_examples = self._read_json(self.dev_file)
-
-    def _load_test_examples(self):
-        self.test_file = os.path.join(self.dataset_dir, "DRCD_test.json")
-        self.test_examples = self._read_json(self.test_file)
-
-    def get_train_examples(self):
-        return self.train_examples
-
-    def get_dev_examples(self):
-        return self.dev_examples
-
-    def get_test_examples(self):
-        return self.test_examples
-
-    def _read_json(self, input_file):
+    def _read_file(self, input_file, phase=None):
         """Read a DRCD json file into a list of CRCDExample."""
 
         def _is_chinese_char(cp):

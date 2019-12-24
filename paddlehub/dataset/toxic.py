@@ -17,73 +17,39 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from collections import namedtuple
-import codecs
 import os
 import pandas as pd
-from numpy import nan
 
-from paddlehub.dataset import InputExample, HubDataset
-from paddlehub.common.downloader import default_downloader
+from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.common.logger import logger
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/toxic.tar.gz"
 
 
-class Toxic(HubDataset):
+class Toxic(BaseNLPDatast):
     """
     The kaggle Toxic dataset:
     https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge
     """
 
     def __init__(self):
-        self.dataset_dir = os.path.join(DATA_HOME, "toxic")
-        if not os.path.exists(self.dataset_dir):
-            ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
-                url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
-        else:
-            logger.info("Dataset {} already cached.".format(self.dataset_dir))
-
-        self._load_train_examples()
-        self._load_test_examples()
-        self._load_dev_examples()
-
-    def _load_train_examples(self):
-        self.train_file = os.path.join(self.dataset_dir, "train.csv")
-        self.train_examples = self._read_csv(self.train_file)
-
-    def _load_dev_examples(self):
-        self.dev_file = os.path.join(self.dataset_dir, "dev.csv")
-        self.dev_examples = self._read_csv(self.dev_file)
-
-    def _load_test_examples(self):
-        self.test_file = os.path.join(self.dataset_dir, "test.csv")
-        self.test_examples = self._read_csv(self.test_file)
-
-    def get_train_examples(self):
-        return self.train_examples
-
-    def get_dev_examples(self):
-        return self.dev_examples
-
-    def get_test_examples(self):
-        return self.test_examples
-
-    def get_labels(self):
-        return [
+        dataset_dir = os.path.join(DATA_HOME, "toxic")
+        base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
+        label_list = [
             'toxic', 'severe_toxic', 'obscene', 'threat', 'insult',
             'identity_hate'
         ]
+        super(Toxic, self).__init__(
+            base_path=base_path,
+            train_file="train.csv",
+            dev_file="dev.csv",
+            test_file="test.csv",
+            label_file=None,
+            label_list=label_list,
+        )
 
-    @property
-    def num_labels(self):
-        """
-        Return the number of labels in the dataset.
-        """
-        return len(self.get_labels())
-
-    def _read_csv(self, input_file, quotechar=None):
+    def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
         data = pd.read_csv(input_file, encoding="UTF-8")
         examples = []
@@ -99,5 +65,13 @@ class Toxic(HubDataset):
 
 if __name__ == "__main__":
     ds = Toxic()
-    for e in ds.get_train_examples():
+    print("first 10 dev")
+    for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
+    print("first 10 train")
+    for e in ds.get_train_examples()[:10]:
+        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
+    print("first 10 test")
+    for e in ds.get_test_examples()[:10]:
+        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
+    print(ds)

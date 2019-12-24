@@ -16,12 +16,11 @@
 
 import json
 import os
-import sys
 
 from paddlehub.reader import tokenization
-from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/squad.tar.gz"
 
@@ -66,61 +65,31 @@ class SquadExample(object):
         return s
 
 
-class SQUAD(object):
+class SQUAD(BaseNLPDatast):
     """A single set of features of data."""
 
     def __init__(self, version_2_with_negative=False):
-        self.dataset_dir = os.path.join(DATA_HOME, "squad_data")
-        if not os.path.exists(self.dataset_dir):
-            ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
-                url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
-        else:
-            logger.info("Dataset {} already cached.".format(self.dataset_dir))
         self.version_2_with_negative = version_2_with_negative
-        self._load_train_examples(version_2_with_negative, if_has_answer=True)
-        self._load_dev_examples(version_2_with_negative, if_has_answer=True)
-
-    def _load_train_examples(self,
-                             version_2_with_negative=False,
-                             if_has_answer=True):
         if not version_2_with_negative:
-            self.train_file = os.path.join(self.dataset_dir, "train-v1.1.json")
+            train_file = "train-v1.1.json"
+            dev_file = "dev-v1.1.json"
         else:
-            self.train_file = os.path.join(self.dataset_dir, "train-v2.0.json")
+            train_file = "train-v2.0.json"
+            dev_file = "dev-v2.0.json"
 
-        self.train_examples = self._read_json(self.train_file, if_has_answer,
-                                              version_2_with_negative)
+        dataset_dir = os.path.join(DATA_HOME, "squad_data")
+        base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
 
-    def _load_dev_examples(self,
-                           version_2_with_negative=False,
-                           if_has_answer=True):
-        if not version_2_with_negative:
-            self.dev_file = os.path.join(self.dataset_dir, "dev-v1.1.json")
-        else:
-            self.dev_file = os.path.join(self.dataset_dir, "dev-v2.0.json")
+        super(SQUAD, self).__init__(
+            base_path=base_path,
+            train_file=train_file,
+            dev_file=dev_file,
+            test_file=None,
+            label_file=None,
+            label_list=None,
+        )
 
-        self.dev_examples = self._read_json(self.dev_file, if_has_answer,
-                                            version_2_with_negative)
-
-    def _load_test_examples(self,
-                            version_2_with_negative=False,
-                            is_training=False):
-        self.test_file = None
-        logger.error("not test_file")
-
-    def get_train_examples(self):
-        return self.train_examples
-
-    def get_dev_examples(self):
-        return self.dev_examples
-
-    def get_test_examples(self):
-        return []
-
-    def _read_json(self,
-                   input_file,
-                   if_has_answer,
-                   version_2_with_negative=False):
+    def _read_file(self, input_file, phase=None):
         """Read a SQuAD json file into a list of SquadExample."""
         with open(input_file, "r") as reader:
             input_data = json.load(reader)["data"]
@@ -156,13 +125,15 @@ class SQUAD(object):
                     end_position = None
                     orig_answer_text = None
                     is_impossible = False
-                    if if_has_answer:
-                        if version_2_with_negative:
+                    if phase in ["train", "dev"]:
+                        if self.version_2_with_negative:
                             is_impossible = qa["is_impossible"]
-                        # if (len(qa["answers"]) != 1) and (not is_impossible):
-                        #     raise ValueError(
-                        #         "For training, each question should have exactly 1 answer."
-                        #     )
+                        if phase == "train" and (len(qa["answers"]) !=
+                                                 1) and (not is_impossible):
+                            print(qa)
+                            raise ValueError(
+                                "For training, each question should have exactly 1 answer."
+                            )
                         if not is_impossible:
                             answer = qa["answers"][0]
                             orig_answer_text = answer["text"]
@@ -206,8 +177,14 @@ class SQUAD(object):
 
 
 if __name__ == "__main__":
-    ds = SQUAD(version_2_with_negative=False)
-    examples = ds.get_train_examples()
-    for index, e in enumerate(examples):
-        if index < 10:
-            print(e)
+    ds = SQUAD(version_2_with_negative=True)
+    print("first 10 dev")
+    for e in ds.get_dev_examples()[:2]:
+        print(e)
+    print("first 10 train")
+    for e in ds.get_train_examples()[:2]:
+        print(e)
+    print("first 10 test")
+    for e in ds.get_test_examples()[:2]:
+        print(e)
+    print(ds)

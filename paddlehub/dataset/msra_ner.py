@@ -20,18 +20,15 @@ from __future__ import print_function
 import os
 import codecs
 import csv
-import json
-from collections import namedtuple
 
-from paddlehub.dataset import InputExample, HubDataset
-from paddlehub.common.downloader import default_downloader
+from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.common.logger import logger
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/msra_ner.tar.gz"
 
 
-class MSRA_NER(HubDataset):
+class MSRA_NER(BaseNLPDatast):
     """
     A set of manually annotated Chinese word-segmentation data and
     specifications for training and testing a Chinese word-segmentation system
@@ -40,55 +37,23 @@ class MSRA_NER(HubDataset):
     """
 
     def __init__(self):
-        self.dataset_dir = os.path.join(DATA_HOME, "msra_ner")
-        if not os.path.exists(self.dataset_dir):
-            ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
-                url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
-        else:
-            logger.info("Dataset {} already cached.".format(self.dataset_dir))
+        dataset_dir = os.path.join(DATA_HOME, "msra_ner")
+        base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
+        super(MSRA_NER, self).__init__(
+            base_path=base_path,
+            train_file="train.tsv",
+            dev_file="dev.tsv",
+            test_file="test.tsv",
+            label_file=None,
+            label_list=[
+                "B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"
+            ],
+        )
 
-        self._load_train_examples()
-        self._load_test_examples()
-        self._load_dev_examples()
-
-    def _load_train_examples(self):
-        train_file = os.path.join(self.dataset_dir, "train.tsv")
-        self.train_examples = self._read_tsv(train_file)
-
-    def _load_dev_examples(self):
-        self.dev_file = os.path.join(self.dataset_dir, "dev.tsv")
-        self.dev_examples = self._read_tsv(self.dev_file)
-
-    def _load_test_examples(self):
-        self.test_file = os.path.join(self.dataset_dir, "test.tsv")
-        self.test_examples = self._read_tsv(self.test_file)
-
-    def get_train_examples(self):
-        return self.train_examples
-
-    def get_dev_examples(self):
-        return self.dev_examples
-
-    def get_test_examples(self):
-        return self.test_examples
-
-    def get_labels(self):
-        return ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
-
-    @property
-    def num_labels(self):
-        """
-        Return the number of labels in the dataset.
-        """
-        return len(self.get_labels())
-
-    def get_label_map(self):
-        return self.label_map
-
-    def _read_tsv(self, input_file, quotechar=None):
+    def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
         with codecs.open(input_file, "r", encoding="UTF-8") as f:
-            reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
+            reader = csv.reader(f, delimiter="\t", quotechar=None)
             examples = []
             seq_id = 0
             header = next(reader)  # skip header
@@ -103,5 +68,13 @@ class MSRA_NER(HubDataset):
 
 if __name__ == "__main__":
     ds = MSRA_NER()
-    for e in ds.get_train_examples():
+    print("first 10 dev")
+    for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
+    print("first 10 train")
+    for e in ds.get_train_examples()[:10]:
+        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
+    print("first 10 test")
+    for e in ds.get_test_examples()[:10]:
+        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
+    print(ds)

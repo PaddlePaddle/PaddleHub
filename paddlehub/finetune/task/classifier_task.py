@@ -23,10 +23,10 @@ import numpy as np
 import paddle.fluid as fluid
 
 from paddlehub.finetune.evaluate import calculate_f1_np, matthews_corrcoef
-from .basic_task import BasicTask
+from .base_task import BaseTask
 
 
-class ClassifierTask(BasicTask):
+class ClassifierTask(BaseTask):
     def __init__(self,
                  feature,
                  num_classes,
