@@ -106,7 +106,7 @@ class LocalModuleManager(object):
             if not url or (module_version is not None
                            and installed_module_version != module_version) or (
                                name != module_name):
-                if default_hub_server._server_check() is False:
+                if hub.default_hub_server._server_check() is False:
                     tips = "Request Hub-Server unsuccessfully, please check your network."
                 else:
                     tips = "Can't find module %s" % module_name

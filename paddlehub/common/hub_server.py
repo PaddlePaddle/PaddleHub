@@ -26,7 +26,6 @@ import yaml
 import random
 import threading
 
-from random import randint
 from paddlehub.common import utils, srv_utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.server_config import default_server_config
@@ -38,10 +37,21 @@ RESOURCE_LIST_FILE = "resource_list_file.yml"
 CACHE_TIME = 60 * 10
 
 
-class HubServer(object):
-    _instance_lock = threading.Lock()
+def Singleton(cls):
+    _instance = {}
 
+    def _get_instance(*args, **kargs):
+        if cls not in _instance:
+            _instance[cls] = cls(*args, **kargs)
+        return _instance[cls]
+
+    return _get_instance
+
+
+@Singleton
+class HubServer(object):
     def __init__(self, config_file_path=None):
+        print("Debug: in HubServer:__init__")
         if not config_file_path:
             config_file_path = os.path.join(CONF_HOME, 'config.json')
         if not os.path.exists(CONF_HOME):
@@ -62,13 +72,6 @@ class HubServer(object):
         self.request()
         self._load_resource_list_file_if_valid()
         lock.flock(fp_lock, lock.LOCK_UN)
-
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(HubServer, "_instance"):
-            with HubServer._instance_lock:
-                if not hasattr(HubServer, "_instance"):
-                    HubServer._instance = object.__new__(cls)
-        return HubServer._instance
 
     def get_server_url(self):
         random.seed(int(time.time()))
