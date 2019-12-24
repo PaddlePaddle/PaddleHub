@@ -21,15 +21,15 @@ import os
 import csv
 import io
 
-from paddlehub.dataset import InputExample, HubDataset
-from paddlehub.common.downloader import default_downloader
-from paddlehub.common.dir import DATA_HOME
+from paddlehub.dataset import InputExample
 from paddlehub.common.logger import logger
+from paddlehub.common.dir import DATA_HOME
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/glue_data.tar.gz"
 
 
-class GLUE(HubDataset):
+class GLUE(BaseNLPDatast):
     """
     Please refer to
     https://gluebenchmark.com
@@ -43,147 +43,107 @@ class GLUE(HubDataset):
                 'RTE', 'SST-2', 'STS-B'
         ]:
             raise Exception(
-                sub_dataset +
-                " is not in GLUE benchmark. Please confirm the data set")
-        self.mismatch = False
+                "%s is not in GLUE benchmark. Please confirm the data set" %
+                sub_dataset)
+
+        mismatch = False
         if sub_dataset == 'MNLI_mm':
             sub_dataset = 'MNLI'
-            self.mismatch = True
+            mismatch = True
         elif sub_dataset == 'MNLI_m':
             sub_dataset = 'MNLI'
         self.sub_dataset = sub_dataset
-        self.dataset_dir = os.path.join(DATA_HOME, "glue_data")
 
-        if not os.path.exists(self.dataset_dir):
-            ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
-                url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
-        else:
-            logger.info("Dataset {} already cached.".format(self.dataset_dir))
+        # test.tsv has not label,so it is a predict file
+        dev_file = "dev.tsv"
+        predict_file = "test.tsv"
+        if sub_dataset == 'MNLI' and not mismatch:
+            dev_file = 'dev_matched.tsv'
+            predict_file = "test_matched.tsv"
+        elif sub_dataset == 'MNLI' and mismatch:
+            dev_file = 'dev_mismatched.tsv'
+            predict_file = "test_mismatched.tsv"
 
-        self._load_train_examples()
-        self._load_dev_examples()
-        self._load_test_examples()
-        self._load_predict_examples()
+        dataset_dir = os.path.join(DATA_HOME, "glue_data")
+        dataset_dir = self._download_dataset(dataset_dir, url=_DATA_URL)
+        base_path = os.path.join(dataset_dir, self.sub_dataset)
 
-    def _load_train_examples(self):
-        self.train_file = os.path.join(self.dataset_dir, self.sub_dataset,
-                                       "train.tsv")
-        self.train_examples = self._read_tsv(self.train_file)
+        label_list = None
+        if sub_dataset in ['MRPC', 'QQP', 'SST-2', 'CoLA']:
+            label_list = ["0", "1"]
+        elif sub_dataset in ['QNLI', 'RTE']:
+            label_list = ['not_entailment', 'entailment']
+        elif sub_dataset in ['MNLI']:
+            label_list = ["neutral", "contradiction", "entailment"]
+        elif sub_dataset in ['STS-B']:
+            label_list = None
 
-    def _load_dev_examples(self):
-        if self.sub_dataset == 'MNLI' and not self.mismatch:
-            self.dev_file = os.path.join(self.dataset_dir, self.sub_dataset,
-                                         "dev_matched.tsv")
-        elif self.sub_dataset == 'MNLI' and self.mismatch:
-            self.dev_file = os.path.join(self.dataset_dir, self.sub_dataset,
-                                         "dev_mismatched.tsv")
-        else:
-            self.dev_file = os.path.join(self.dataset_dir, self.sub_dataset,
-                                         "dev.tsv")
-        self.dev_examples = self._read_tsv(self.dev_file)
+        super(GLUE, self).__init__(
+            base_path=base_path,
+            train_file="train.tsv",
+            dev_file=dev_file,
+            predict_file=predict_file,
+            label_file=None,
+            label_list=label_list,
+        )
 
-    def _load_test_examples(self):
-        self.test_examples = []
-
-    def _load_predict_examples(self):
-        if self.sub_dataset == 'MNLI' and not self.mismatch:
-            self.predict_file = os.path.join(self.dataset_dir, self.sub_dataset,
-                                             "test_matched.tsv")
-        elif self.sub_dataset == 'MNLI' and self.mismatch:
-            self.predict_file = os.path.join(self.dataset_dir, self.sub_dataset,
-                                             "test_mismatched.tsv")
-        else:
-            self.predict_file = os.path.join(self.dataset_dir, self.sub_dataset,
-                                             "test.tsv")
-        self.predict_examples = self._read_tsv(self.predict_file, wo_label=True)
-
-    def get_train_examples(self):
-        return self.train_examples
-
-    def get_dev_examples(self):
-        return self.dev_examples
-
-    def get_test_examples(self):
-        return self.test_examples
-
-    def get_predict_examples(self):
-        return self.predict_examples
-
-    def get_labels(self):
-        """See base class."""
-        if self.sub_dataset in ['MRPC', 'QQP', 'SST-2', 'CoLA']:
-            return ["0", "1"]
-        elif self.sub_dataset in ['QNLI', 'RTE']:
-            return ['not_entailment', 'entailment']
-        elif self.sub_dataset in ['MNLI']:
-            return ["neutral", "contradiction", "entailment"]
-        elif self.sub_dataset in ['STS-B']:
-            return Exception("No category labels for regreesion tasks")
-
-    @property
-    def num_labels(self):
-        """
-        Return the number of labels in the dataset.
-        """
-        return len(self.get_labels())
-
-    def _read_tsv(self, input_file, quotechar=None, wo_label=False):
+    def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
         with io.open(input_file, "r", encoding="UTF-8") as f:
-            reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
+            reader = csv.reader(f, delimiter="\t", quotechar=None)
             examples = []
             seq_id = 0
-            if self.sub_dataset != 'CoLA' or wo_label:
+            if self.sub_dataset != 'CoLA' or phase == "predict":
                 header = next(reader)  # skip header
             if self.sub_dataset in [
                     'MRPC',
             ]:
-                if wo_label:
+                if phase == "predict":
                     label_index, text_a_index, text_b_index = [None, -2, -1]
                 else:
                     label_index, text_a_index, text_b_index = [0, -2, -1]
             elif self.sub_dataset in [
                     'QNLI',
             ]:
-                if wo_label:
+                if phase == "predict":
                     label_index, text_a_index, text_b_index = [None, 1, 2]
                 else:
                     label_index, text_a_index, text_b_index = [3, 1, 2]
             elif self.sub_dataset in [
                     'QQP',
             ]:
-                if wo_label:
+                if phase == "predict":
                     label_index, text_a_index, text_b_index = [None, 1, 2]
                 else:
                     label_index, text_a_index, text_b_index = [5, 3, 4]
             elif self.sub_dataset in [
                     'RTE',
             ]:
-                if wo_label:
+                if phase == "predict":
                     label_index, text_a_index, text_b_index = [None, 1, 2]
                 else:
                     label_index, text_a_index, text_b_index = [3, 1, 2]
             elif self.sub_dataset in [
                     'SST-2',
             ]:
-                if wo_label:
+                if phase == "predict":
                     label_index, text_a_index, text_b_index = [None, 1, None]
                 else:
                     label_index, text_a_index, text_b_index = [1, 0, None]
             elif self.sub_dataset in [
                     'MNLI',
             ]:
-                if wo_label:
+                if phase == "predict":
                     label_index, text_a_index, text_b_index = [None, 8, 9]
                 else:
                     label_index, text_a_index, text_b_index = [-1, 8, 9]
             elif self.sub_dataset in ['CoLA']:
-                if wo_label:
+                if phase == "predict":
                     label_index, text_a_index, text_b_index = [None, 1, None]
                 else:
                     label_index, text_a_index, text_b_index = [1, 3, None]
             elif self.sub_dataset in ['STS-B']:
-                if wo_label:
+                if phase == "predict":
                     label_index, text_a_index, text_b_index = [None, -2, -1]
                 else:
                     label_index, text_a_index, text_b_index = [-1, -3, -2]

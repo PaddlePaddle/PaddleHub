@@ -28,7 +28,7 @@ from collections import OrderedDict
 
 import numpy as np
 import paddle.fluid as fluid
-from .basic_task import BasicTask
+from .base_task import BaseTask
 from paddlehub.common.logger import logger
 from paddlehub.reader import tokenization
 from paddlehub.finetune.evaluator import squad1_evaluate
@@ -176,6 +176,13 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                       output_nbest_file, output_null_log_odds_file,
                       version_2_with_negative, null_score_diff_threshold,
                       is_english):
+    _PrelimPrediction = collections.namedtuple("PrelimPrediction", [
+        "feature_index", "start_index", "end_index", "start_logit", "end_logit"
+    ])
+
+    _NbestPrediction = collections.namedtuple(
+        "NbestPrediction", ["text", "start_logit", "end_logit"])
+
     example_index_to_features = collections.defaultdict(list)
     for feature in all_features:
         example_index_to_features[feature.example_index].append(feature)
@@ -183,10 +190,6 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     unique_id_to_result = {}
     for result in all_results:
         unique_id_to_result[result.unique_id] = result
-
-    _PrelimPrediction = collections.namedtuple("PrelimPrediction", [
-        "feature_index", "start_index", "end_index", "start_logit", "end_logit"
-    ])
 
     all_predictions = collections.OrderedDict()
     all_nbest_json = collections.OrderedDict()
@@ -261,9 +264,6 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
             prelim_predictions,
             key=lambda x: (x.start_logit + x.end_logit),
             reverse=True)
-
-        _NbestPrediction = collections.namedtuple(  # pylint: disable=invalid-name
-            "NbestPrediction", ["text", "start_logit", "end_logit"])
 
         seen_predictions = {}
         nbest = []
@@ -384,7 +384,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 + "\n")
 
 
-class ReadingComprehensionTask(BasicTask):
+class ReadingComprehensionTask(BaseTask):
     def __init__(self,
                  feature,
                  feed_list,
@@ -419,6 +419,9 @@ class ReadingComprehensionTask(BasicTask):
         self.null_score_diff_threshold = null_score_diff_threshold
         self.n_best_size = n_best_size
         self.max_answer_length = max_answer_length
+
+        self.RawResult = collections.namedtuple(
+            "RawResult", ["unique_id", "start_logits", "end_logits"])
 
     def _build_net(self):
         self.unique_ids = fluid.layers.data(
@@ -493,8 +496,6 @@ class ReadingComprehensionTask(BasicTask):
     def _calculate_metrics(self, run_states):
         total_cost, total_num_seqs, all_results = [], [], []
         run_step = 0
-        RawResult = collections.namedtuple(
-            "RawResult", ["unique_id", "start_logits", "end_logits"])
         for run_state in run_states:
             np_loss = run_state.run_results[0]
             np_num_seqs = run_state.run_results[1]
@@ -510,7 +511,7 @@ class ReadingComprehensionTask(BasicTask):
                     start_logits = [float(x) for x in np_start_logits[idx].flat]
                     end_logits = [float(x) for x in np_end_logits[idx].flat]
                     all_results.append(
-                        RawResult(
+                        self.RawResult(
                             unique_id=unique_id,
                             start_logits=start_logits,
                             end_logits=end_logits))
@@ -544,13 +545,13 @@ class ReadingComprehensionTask(BasicTask):
                 is_english=self.is_english)
             if self.phase == 'val' or self.phase == 'dev':
                 with open(
-                        self.data_reader.dataset.dev_file, 'r',
+                        self.data_reader.dataset.dev_path, 'r',
                         encoding="utf8") as dataset_file:
                     dataset_json = json.load(dataset_file)
                     dataset = dataset_json['data']
             elif self.phase == 'test':
                 with open(
-                        self.data_reader.dataset.test_file, 'r',
+                        self.data_reader.dataset.test_path, 'r',
                         encoding="utf8") as dataset_file:
                     dataset_json = json.load(dataset_file)
                     dataset = dataset_json['data']
@@ -577,8 +578,6 @@ class ReadingComprehensionTask(BasicTask):
 
     def _default_predict_end_event(self, run_states):
         all_results = []
-        RawResult = collections.namedtuple(
-            "RawResult", ["unique_id", "start_logits", "end_logits"])
         for run_state in run_states:
             np_unique_ids = run_state.run_results[0]
             np_start_logits = run_state.run_results[1]
@@ -588,7 +587,7 @@ class ReadingComprehensionTask(BasicTask):
                 start_logits = [float(x) for x in np_start_logits[idx].flat]
                 end_logits = [float(x) for x in np_end_logits[idx].flat]
                 all_results.append(
-                    RawResult(
+                    self.RawResult(
                         unique_id=unique_id,
                         start_logits=start_logits,
                         end_logits=end_logits))

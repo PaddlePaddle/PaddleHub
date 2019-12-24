@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # NLP Dataset
-from .dataset import InputExample, HubDataset
+from .dataset import InputExample, BaseDataset
 from .chnsenticorp import ChnSentiCorp
 from .msra_ner import MSRA_NER
 from .nlpcc_dbqa import NLPCC_DBQA
