@@ -20,10 +20,10 @@ from __future__ import print_function
 import io
 import csv
 
-from paddlehub.dataset import InputExample, HubDataset
+from paddlehub.dataset import InputExample, BaseDataset
 
 
-class BaseNLPDatast(HubDataset):
+class BaseNLPDatast(BaseDataset):
     def __init__(self,
                  base_path,
                  train_file=None,

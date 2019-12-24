@@ -22,10 +22,10 @@ from collections import OrderedDict
 import numpy as np
 import paddle.fluid as fluid
 from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
-from .basic_task import BasicTask
+from .base_task import BaseTask
 
 
-class SequenceLabelTask(BasicTask):
+class SequenceLabelTask(BaseTask):
     def __init__(self,
                  feature,
                  max_seq_len,

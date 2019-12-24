@@ -20,13 +20,13 @@ from __future__ import print_function
 import os
 import numpy as np
 
-from paddlehub.dataset import HubDataset
+from paddlehub.dataset import BaseDataset
 import paddlehub as hub
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.logger import logger
 
 
-class BaseCVDatast(HubDataset):
+class BaseCVDatast(BaseDataset):
     def __init__(self,
                  base_path,
                  train_list_file=None,
@@ -72,10 +72,7 @@ class ImageClassificationDataset(object):
             "ImageClassificationDataset is no longer recommended from PaddleHub v1.5.0, "
             "please use BaseCVDataset instead of ImageClassificationDataset. "
             "It's more easy-to-use with more functions and support evaluating test set "
-            "in the end of finetune automatically. For more details, see "
-            "https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%"
-            "85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune"
-        )
+            "in the end of finetune automatically.")
         self.base_path = None
         self.train_list_file = None
         self.test_list_file = None

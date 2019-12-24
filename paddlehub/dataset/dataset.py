@@ -55,7 +55,7 @@ class InputExample(object):
                 self.text_a, self.text_b, self.label)
 
 
-class HubDataset(object):
+class BaseDataset(object):
     def __init__(self,
                  base_path,
                  train_file=None,
@@ -174,5 +174,5 @@ class HubDataset(object):
             len(self.dev_examples), len(self.test_examples))
 
 
-# add alias, similar to BasicTask and BasicReader
-BasicDataset = HubDataset
+# add alias, compatible with old version
+HubDataset = BaseDataset

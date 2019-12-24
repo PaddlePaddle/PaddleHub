@@ -28,7 +28,7 @@ from collections import OrderedDict
 
 import numpy as np
 import paddle.fluid as fluid
-from .basic_task import BasicTask
+from .base_task import BaseTask
 from paddlehub.common.logger import logger
 from paddlehub.reader import tokenization
 from paddlehub.finetune.evaluator import squad1_evaluate
@@ -384,7 +384,7 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
                 + "\n")
 
 
-class ReadingComprehensionTask(BasicTask):
+class ReadingComprehensionTask(BaseTask):
     def __init__(self,
                  feature,
                  feed_list,

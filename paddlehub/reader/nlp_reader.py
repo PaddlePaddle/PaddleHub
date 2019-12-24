@@ -30,10 +30,10 @@ from paddlehub.common.utils import sys_stdout_encoding
 from paddlehub.dataset.dataset import InputExample
 from .batching import pad_batch_data
 import paddlehub as hub
-from .basic_reader import BasicReader
+from .base_reader import BaseReader
 
 
-class BaseReader(BasicReader):
+class BaseNLPReader(BaseReader):
     def __init__(self,
                  vocab_path,
                  dataset=None,
@@ -45,7 +45,7 @@ class BaseReader(BasicReader):
                  sp_model_path=None,
                  word_dict_path=None,
                  in_tokens=False):
-        super(BaseReader, self).__init__(dataset, random_seed)
+        super(BaseNLPReader, self).__init__(dataset, random_seed)
         self.max_seq_len = max_seq_len
         if sp_model_path and word_dict_path:
             self.tokenizer = tokenization.WSSPTokenizer(
@@ -271,7 +271,7 @@ class BaseReader(BasicReader):
         return wrapper
 
 
-class ClassifyReader(BaseReader):
+class ClassifyReader(BaseNLPReader):
     def _pad_batch_records(self, batch_records, phase=None):
         batch_token_ids = [record.token_ids for record in batch_records]
         batch_text_type_ids = [record.text_type_ids for record in batch_records]
@@ -324,7 +324,7 @@ class ClassifyReader(BaseReader):
         return return_list
 
 
-class SequenceLabelReader(BaseReader):
+class SequenceLabelReader(BaseNLPReader):
     def __init__(self,
                  vocab_path,
                  dataset=None,
@@ -498,7 +498,7 @@ class SequenceLabelReader(BaseReader):
         return record
 
 
-class MultiLabelClassifyReader(BaseReader):
+class MultiLabelClassifyReader(BaseNLPReader):
     def _pad_batch_records(self, batch_records, phase=None):
         batch_token_ids = [record.token_ids for record in batch_records]
         batch_text_type_ids = [record.text_type_ids for record in batch_records]
@@ -619,7 +619,7 @@ class MultiLabelClassifyReader(BaseReader):
         return record
 
 
-class RegressionReader(BaseReader):
+class RegressionReader(BaseNLPReader):
     def _pad_batch_records(self, batch_records, phase=None):
         batch_token_ids = [record.token_ids for record in batch_records]
         batch_text_type_ids = [record.text_type_ids for record in batch_records]
@@ -699,7 +699,7 @@ class RegressionReader(BaseReader):
 
             for item in data:
                 # set label in order to run the program
-                label = -1  # different from BaseReader
+                label = -1  # different from BaseNLPReader
                 if len(item) == 1:
                     item_i = InputExample(
                         guid=seq_id, text_a=item[0], label=label)
@@ -774,7 +774,7 @@ class Features(object):
         return s
 
 
-class ReadingComprehensionReader(BaseReader):
+class ReadingComprehensionReader(BaseNLPReader):
     def __init__(self,
                  dataset,
                  vocab_path,
@@ -1146,7 +1146,7 @@ class ReadingComprehensionReader(BaseReader):
         return cur_span_index == best_span_index
 
 
-class LACClassifyReader(BasicReader):
+class LACClassifyReader(BaseReader):
     def __init__(self, vocab_path, dataset=None, in_tokens=False):
         super(LACClassifyReader, self).__init__(dataset)
         self.in_tokens = in_tokens

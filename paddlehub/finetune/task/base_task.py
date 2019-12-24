@@ -78,7 +78,7 @@ class RunEnv(object):
         return self.__dict__[key]
 
 
-class BasicTask(object):
+class BaseTask(object):
     def __init__(self,
                  feed_list,
                  data_reader,
