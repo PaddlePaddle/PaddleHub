@@ -7,9 +7,9 @@
 PaddleHub AutoDL Finetuner提供两种超参优化算法：
 
 * **HAZero**: 核心思想是通过对正态分布中协方差矩阵的调整来处理变量之间的依赖关系和scaling。算法基本可以分成以下三步: 
-1. 采样产生新解
-2. 计算目标函数值
-3. 更新正态分布参数。
+  1. 采样产生新解
+  2. 计算目标函数值
+  3. 更新正态分布参数。
 
 调整参数的基本思路为，调整参数使得产生更优解的概率逐渐增大。优化过程如下图：
 
@@ -96,19 +96,19 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 
 其中，选项
 
-> `--param_file`: 必填，待优化的超参数信息yaml文件，即上述[hparam.yaml](#hparam.yaml)。
+* `--param_file`: 必填，待优化的超参数信息yaml文件，即上述[hparam.yaml](#hparam.yaml)。
 
-> `--cuda`: 必填，设置运行程序的可用GPU卡号，list类型，中间以逗号隔开，不能有空格，默认为[‘0’]
+* `--cuda`: 必填，设置运行程序的可用GPU卡号，list类型，中间以逗号隔开，不能有空格，默认为[‘0’]
 
-> `--popsize`: 可选，设置程序运行每轮产生的超参组合数，默认为5
+* `--popsize`: 可选，设置程序运行每轮产生的超参组合数，默认为5
 
-> `--round`: 可选，设置程序运行的轮数，默认为10
+* `--round`: 可选，设置程序运行的轮数，默认为10
 
-> `--output_dir`: 可选，设置程序运行输出结果存放目录，不指定该选项参数时，在当前运行路径下生成存放程序运行输出信息的文件夹
+* `--output_dir`: 可选，设置程序运行输出结果存放目录，不指定该选项参数时，在当前运行路径下生成存放程序运行输出信息的文件夹
 
-> `--evaluate_choice`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased
+* `--evaluate_choice`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased
 
-> `--tuning_strategy`: 可选，设置自动优化超参算法，可选hazero和pshe2，默认为pshe2
+* `--tuning_strategy`: 可选，设置自动优化超参算法，可选hazero和pshe2，默认为pshe2
 
 **NOTE**:
 
@@ -121,6 +121,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
 进行自动超参搜索时，PaddleHub会生成以下目录
 ```
 ./output_dir/
+    ├── best_model 
     ├── log_file.txt
     ├── visualization
     ├── round0
@@ -137,6 +138,8 @@ $ hub autofinetune train.py --param_file=hparam.yaml --cuda=['1','2'] --popsize=
         └── model-m
 ```
 其中output_dir为启动autofinetune命令时指定的根目录，目录下:
+
+* best_model记录整个超参优化过程中训练保存的最佳模型参数
 
 * log_file.txt记录每一轮搜索所有的超参以及整个过程中所搜索到的最优超参
 
