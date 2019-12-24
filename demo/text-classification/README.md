@@ -108,8 +108,6 @@ ChinesGLUE-BQ        |  hub.dataset.BQ()        | 句对      | roberta_wwm_ext_
 
 更多数据集信息参考[Dataset](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset)
 
-如何加载自定义数据集完成Finetune参考[自定义数据](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
-
 
 #### 自定义数据集
 
