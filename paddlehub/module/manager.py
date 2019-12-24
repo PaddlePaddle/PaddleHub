@@ -97,7 +97,7 @@ class LocalModuleManager(object):
                                                                   module_dir)
                     return True, tips, self.modules_dict[module_name]
 
-            search_result = hub.HubServer.get_module_url(
+            search_result = hub.HubServer().get_module_url(
                 module_name, version=module_version, extra=extra)
             name = search_result.get('name', None)
             url = search_result.get('url', None)
@@ -106,7 +106,7 @@ class LocalModuleManager(object):
             if not url or (module_version is not None
                            and installed_module_version != module_version) or (
                                name != module_name):
-                if hub.HubServer._server_check() is False:
+                if hub.HubServer()._server_check() is False:
                     tips = "Request Hub-Server unsuccessfully, please check your network."
                 else:
                     tips = "Can't find module %s" % module_name
