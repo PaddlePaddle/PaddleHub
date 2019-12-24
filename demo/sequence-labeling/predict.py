@@ -100,6 +100,17 @@ if __name__ == '__main__':
         ["不过重在晋趣，略增明人气息，妙在集古有道、不露痕迹罢了。"],
     ]
 
+    # Add 0x02 between characters to match the format of training data,
+    # otherwise the length of prediction results will not match the input string
+    # if the input string contains non-Chinese characters.
+    tmp_data = []
+    for example in data:
+        formatted = []
+        for sentence in example:
+            formatted.append('\x02'.join(list(sentence)))
+        tmp_data.append(formatted)
+    data = tmp_data
+
     run_states = seq_label_task.predict(data=data)
     results = [run_state.run_results for run_state in run_states]
 
