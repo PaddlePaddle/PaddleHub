@@ -82,12 +82,8 @@ def create_module(directory, name, author, email, module_type, summary,
     checker.generate_check_info()
 
     # add __init__
-    module_init_1 = os.path.join(directory, "__init__.py")
-    with open(module_init_1, "a") as file:
-        file.write("")
-
-    module_init_2 = os.path.join(directory, "python", "__init__.py")
-    with open(module_init_2, "a") as file:
+    module_init = os.path.join(directory, "__init__.py")
+    with open(module_init, "a") as file:
         file.write("")
 
     # package the module
@@ -98,8 +94,7 @@ def create_module(directory, name, author, email, module_type, summary,
 
     os.remove(module_desc_path)
     os.remove(checker.pb_path)
-    os.remove(module_init_1)
-    os.remove(module_init_2)
+    os.remove(module_init)
 
 
 _module_runable_func = {}
@@ -209,9 +204,8 @@ class Module(object):
             basename = os.path.split(directory)[-1]
             dirname = os.path.join(*list(os.path.split(directory)[:-1]))
             sys.path.append(dirname)
-            pymodule = importlib.import_module(
-                "{}.python.module".format(basename))
-            return pymodule.HubModule(directory=directory)
+            user_module = importlib.import_module("{}.module".format(basename))
+            return user_module.HubModule(directory=directory)
         return ModuleV1(directory=directory)
 
     @property
