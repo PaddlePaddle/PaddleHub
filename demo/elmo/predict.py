@@ -168,12 +168,4 @@ if __name__ == '__main__':
         "19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"
     ]
 
-    index = 0
-    run_states = elmo_task.predict(data=data)
-    results = [run_state.run_results for run_state in run_states]
-    for batch_result in results:
-        # get predict index
-        batch_result = np.argmax(batch_result, axis=2)[0]
-        for result in batch_result:
-            print("%s\tpredict=%s" % (data[index], result))
-            index += 1
+    print(elmo_task.predict(data=data, return_result=True))

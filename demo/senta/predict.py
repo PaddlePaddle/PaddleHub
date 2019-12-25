@@ -59,11 +59,4 @@ if __name__ == '__main__':
 
     data = ["这家餐厅很好吃", "这部电影真的很差劲"]
 
-    run_states = cls_task.predict(data=data)
-    results = [run_state.run_results for run_state in run_states]
-    index = 0
-    for batch_result in results:
-        batch_result = np.argmax(batch_result, axis=2)[0]
-        for result in batch_result:
-            print("%s\tpredict=%s" % (data[index], result))
-            index += 1
+    print(cls_task.predict(data=data, return_result=True))

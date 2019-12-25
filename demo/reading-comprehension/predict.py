@@ -113,4 +113,4 @@ if __name__ == '__main__':
 
     # Data to be predicted
     data = dataset.dev_examples[97:98]
-    reading_comprehension_task.predict(data=data)
+    print(reading_comprehension_task.predict(data=data, return_result=True))

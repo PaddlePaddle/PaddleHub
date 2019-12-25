@@ -73,19 +73,7 @@ def predict(args):
         config=config)
 
     data = ["./test/test_img_daisy.jpg", "./test/test_img_roses.jpg"]
-    label_map = dataset.label_dict()
-    index = 0
-    # get classification result
-    run_states = task.predict(data=data)
-    results = [run_state.run_results for run_state in run_states]
-    for batch_result in results:
-        # get predict index
-        batch_result = np.argmax(batch_result, axis=2)[0]
-        for result in batch_result:
-            index += 1
-            result = label_map[result]
-            print("input %i is %s, and the predict result is %s" %
-                  (index, data[index - 1], result))
+    print(task.predict(data=data, return_result=True))
 
 
 if __name__ == "__main__":

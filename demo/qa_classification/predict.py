@@ -90,15 +90,4 @@ if __name__ == '__main__':
             ["北京奥运博物馆的场景效果负责人是谁", "于海勃，美国加利福尼亚大学教授 场景效果负责人 总设计师"],
             ["北京奥运博物馆的场景效果负责人是谁？", "洪麦恩，清华大学美术学院教授 内容及主展线负责人 总设计师"]]
 
-    index = 0
-    run_states = cls_task.predict(data=data)
-    results = [run_state.run_results for run_state in run_states]
-    max_probs = 0
-    for index, batch_result in enumerate(results):
-        # get predict index
-        if max_probs <= batch_result[0][0, 1]:
-            max_probs = batch_result[0][0, 1]
-            max_flag = index
-
-    print("question:%s\tthe predict answer:%s\t" % (data[max_flag][0],
-                                                    data[max_flag][1]))
+    print(cls_task.predict(data=data, return_result=True))

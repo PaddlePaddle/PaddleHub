@@ -63,20 +63,9 @@ class BaseNLPReader(BaseReader):
 
         if self.use_task_id:
             logger.warning(
-                "use_task_id has been de discarded since PaddleHub v1.4.0")
+                "use_task_id has been de discarded since PaddleHub v1.4.0, it's no necessary to feed task_ids now."
+            )
             self.task_id = 0
-
-        # generate label map
-        self.label_map = {}
-        try:
-            for index, label in enumerate(self.dataset.get_labels()):
-                self.label_map[label] = index
-            logger.info("Dataset label map = {}".format(self.label_map))
-        except:
-            # some dataset like squad, its label_list=None
-            logger.info(
-                "Dataset is None or it has not any labels, label map = {}".
-                format(self.label_map))
 
         self.Record_With_Label_Id = namedtuple(
             'Record',
@@ -375,7 +364,7 @@ class SequenceLabelReader(BaseNLPReader):
             pad_idx=self.pad_id)
 
         if phase != "predict":
-            batch_label_ids = [record.label_ids for record in batch_records]
+            batch_label_ids = [record.label_id for record in batch_records]
             padded_label_ids = pad_batch_data(
                 batch_label_ids,
                 max_seq_len=self.max_seq_len,
@@ -520,7 +509,7 @@ class MultiLabelClassifyReader(BaseNLPReader):
             pad_idx=self.pad_id)
 
         if phase != "predict":
-            batch_labels_ids = [record.label_ids for record in batch_records]
+            batch_labels_ids = [record.label_id for record in batch_records]
             num_label = len(self.dataset.get_labels())
             batch_labels = np.array(batch_labels_ids).astype("int64").reshape(
                 [-1, num_label])
