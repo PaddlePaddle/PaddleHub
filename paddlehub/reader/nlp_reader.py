@@ -509,7 +509,7 @@ class MultiLabelClassifyReader(BaseNLPReader):
             pad_idx=self.pad_id)
 
         if phase != "predict":
-            batch_labels_ids = [record.label_ids for record in batch_records]
+            batch_labels_ids = [record.label_id for record in batch_records]
             num_label = len(self.dataset.get_labels())
             batch_labels = np.array(batch_labels_ids).astype("int64").reshape(
                 [-1, num_label])
