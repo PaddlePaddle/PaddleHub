@@ -50,7 +50,7 @@ message CheckInfo {
   string paddle_version = 1;
   string hub_version = 2;
   string module_proto_version = 3;
-  string module_code_version = 4;
-  repeated FileInfo file_infos = 5;
-  repeated Requires requires = 6;
+  repeated FileInfo file_infos = 4;
+  repeated Requires requires = 5;
+  string module_code_version = 6;
 };
