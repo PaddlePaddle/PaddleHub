@@ -321,7 +321,7 @@ class MultiLabelClassifierTask(ClassifierTask):
 
     def _postprocessing(self, run_states):
         results = []
-        label_list = self._base_data_reader.label_map.keys()
+        label_list = list(self._base_data_reader.label_map.keys())
         for batch_state in run_states:
             batch_result = batch_state.run_results
             for sample_id in range(len(batch_result[0])):
