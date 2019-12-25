@@ -23,10 +23,10 @@ from collections import OrderedDict
 import numpy as np
 import paddle.fluid as fluid
 from scipy.stats import spearmanr
-from .basic_task import BasicTask
+from .base_task import BaseTask
 
 
-class RegressionTask(BasicTask):
+class RegressionTask(BaseTask):
     def __init__(self,
                  feature,
                  feed_list,

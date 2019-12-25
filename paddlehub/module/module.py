@@ -24,7 +24,7 @@ import functools
 import inspect
 import importlib
 import tarfile
-from collections import defaultdict
+import six
 from shutil import copyfile
 
 import paddle
@@ -102,6 +102,23 @@ def create_module(directory, name, author, email, module_type, summary,
     os.remove(module_init_2)
 
 
+_module_runable_func = {}
+
+
+def runable(func):
+    if six.PY3:
+        mod = func.__qualname__.split(".")[:-1]
+        mod = ".".join(mod)
+    else:
+        mod = func.im_class.__name__
+    _module_runable_func[mod] = func.__name__
+
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return _wrapper
+
+
 class Module(object):
     def __new__(cls, name=None, directory=None, module_dir=None, version=None):
         module = None
@@ -133,6 +150,12 @@ class Module(object):
                  version=None):
         if not directory:
             return
+
+        if self.__class__.__name__ in _module_runable_func:
+            _run_func_name = _module_runable_func[self.__class__.__name__]
+            self._run_func = getattr(self, _run_func_name)
+        else:
+            self._run_func = None
         self._code_version = "v2"
         self._directory = directory
         self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
@@ -192,6 +215,10 @@ class Module(object):
         return ModuleV1(directory=directory)
 
     @property
+    def run_func(self):
+        return self._run_func
+
+    @property
     def desc(self):
         return self._desc
 
@@ -224,16 +251,12 @@ class Module(object):
         return self._name
 
     @property
-    def name_prefix(self):
-        return self._name_prefix
-
-    @property
     def code_version(self):
         return self._code_version
 
     @property
     def is_runable(self):
-        return False
+        return self._run_func != None
 
     def _initialize(self):
         pass
@@ -630,7 +653,7 @@ class ModuleV1(Module):
         return feed_dict, fetch_dict, program
 
     def get_name_prefix(self):
-        return self.name_prefix
+        return self._name_prefix
 
     def get_var_name_with_prefix(self, var_name):
         return self.get_name_prefix() + var_name

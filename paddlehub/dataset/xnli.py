@@ -23,15 +23,14 @@ import io
 import os
 import csv
 
-from paddlehub.dataset import InputExample, HubDataset
-from paddlehub.common.downloader import default_downloader
+from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.common.logger import logger
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/XNLI-lan.tar.gz"
 
 
-class XNLI(HubDataset):
+class XNLI(BaseNLPDatast):
     """
     Please refer to
     https://arxiv.org/pdf/1809.05053.pdf
@@ -43,61 +42,25 @@ class XNLI(HubDataset):
                 "ar", "bg", "de", "el", "en", "es", "fr", "hi", "ru", "sw",
                 "th", "tr", "ur", "vi", "zh"
         ]:
-
-            raise Exception(language +
-                            "is not in XNLI. Please confirm the language")
+            raise Exception(
+                "%s is not in XNLI. Please confirm the language" % language)
         self.language = language
-        self.dataset_dir = os.path.join(DATA_HOME, "XNLI-lan")
+        dataset_dir = os.path.join(DATA_HOME, "XNLI-lan")
+        dataset_dir = self._download_dataset(dataset_dir, url=_DATA_URL)
+        base_path = os.path.join(dataset_dir, language)
+        super(XNLI, self).__init__(
+            base_path=base_path,
+            train_file="%s_train.tsv" % language,
+            dev_file="%s_dev.tsv" % language,
+            test_file="%s_test.tsv" % language,
+            label_file=None,
+            label_list=["neutral", "contradiction", "entailment"],
+        )
 
-        if not os.path.exists(self.dataset_dir):
-            ret, tips, self.dataset_dir = default_downloader.download_file_and_uncompress(
-                url=_DATA_URL, save_path=DATA_HOME, print_progress=True)
-        else:
-            logger.info("Dataset {} already cached.".format(self.dataset_dir))
-
-        self._load_train_examples()
-        self._load_test_examples()
-        self._load_dev_examples()
-
-    def _load_train_examples(self):
-        self.train_file = os.path.join(self.dataset_dir, self.language,
-                                       self.language + "_train.tsv")
-        self.train_examples = self._read_tsv(self.train_file)
-
-    def _load_dev_examples(self):
-        self.dev_file = os.path.join(self.dataset_dir, self.language,
-                                     self.language + "_dev.tsv")
-        self.dev_examples = self._read_tsv(self.dev_file)
-
-    def _load_test_examples(self):
-        self.test_file = os.path.join(self.dataset_dir, self.language,
-                                      self.language + "_test.tsv")
-        self.test_examples = self._read_tsv(self.test_file)
-
-    def get_train_examples(self):
-        return self.train_examples
-
-    def get_dev_examples(self):
-        return self.dev_examples
-
-    def get_test_examples(self):
-        return self.test_examples
-
-    def get_labels(self):
-        """See base class."""
-        return ["neutral", "contradiction", "entailment"]
-
-    @property
-    def num_labels(self):
-        """
-        Return the number of labels in the dataset.
-        """
-        return len(self.get_labels())
-
-    def _read_tsv(self, input_file, quotechar=None):
+    def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
         with io.open(input_file, "r", encoding="UTF-8") as f:
-            reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
+            reader = csv.reader(f, delimiter="\t", quotechar=None)
             examples = []
             seq_id = 0
             header = next(reader)  # skip header
@@ -112,5 +75,13 @@ class XNLI(HubDataset):
 
 if __name__ == "__main__":
     ds = XNLI()
-    for e in ds.get_train_examples()[:3]:
+    print("first 10 dev")
+    for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
+    print("first 10 train")
+    for e in ds.get_train_examples()[:10]:
+        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
+    print("first 10 test")
+    for e in ds.get_test_examples()[:10]:
+        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
+    print(ds)

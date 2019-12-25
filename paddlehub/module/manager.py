@@ -19,11 +19,14 @@ from __future__ import print_function
 
 import os
 import shutil
+
+from functools import cmp_to_key
 import tarfile
 
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import MODULE_HOME
+from paddlehub.common.cml_utils import TablePrinter
 from paddlehub.module import module_desc_pb2
 import paddlehub as hub
 from paddlehub.common.logger import logger
@@ -108,6 +111,39 @@ class LocalModuleManager(object):
                                name != module_name):
                 if hub.HubServer()._server_check() is False:
                     tips = "Request Hub-Server unsuccessfully, please check your network."
+                    return False, tips, None
+                module_versions_info = default_hub_server.search_module_info(
+                    module_name)
+                if module_versions_info is not None and len(
+                        module_versions_info) > 0:
+
+                    if utils.is_windows():
+                        placeholders = [20, 8, 14, 14]
+                    else:
+                        placeholders = [30, 8, 16, 16]
+                    tp = TablePrinter(
+                        titles=[
+                            "ResourceName", "Version", "PaddlePaddle",
+                            "PaddleHub"
+                        ],
+                        placeholders=placeholders)
+                    module_versions_info.sort(
+                        key=cmp_to_key(utils.sort_version_key))
+                    for resource_name, resource_version, paddle_version, \
+                        hub_version in module_versions_info:
+                        colors = ["yellow", None, None, None]
+
+                        tp.add_line(
+                            contents=[
+                                resource_name, resource_version,
+                                utils.strflist_version(paddle_version),
+                                utils.strflist_version(hub_version)
+                            ],
+                            colors=colors)
+                    tips = "The version of PaddlePaddle or PaddleHub " \
+                           "can not match module, please upgrade your " \
+                           "PaddlePaddle or PaddleHub according to the form " \
+                           "below." + tp.get_text()
                 else:
                     tips = "Can't find module %s" % module_name
                     if module_version:
@@ -151,11 +187,13 @@ class LocalModuleManager(object):
                                                               module_dir)
                 return True, tips, self.modules_dict[module_name]
 
+        if module_dir:
             if md5_value:
                 with open(
                         os.path.join(MODULE_HOME, module_dir, "md5.txt"),
                         "w") as fp:
                     fp.write(md5_value)
+
             save_path = os.path.join(MODULE_HOME, module_name)
             if os.path.exists(save_path):
                 shutil.move(save_path)

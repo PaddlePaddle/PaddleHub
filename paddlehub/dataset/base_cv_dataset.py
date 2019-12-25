@@ -18,15 +18,61 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-
 import numpy as np
 
+from paddlehub.dataset import BaseDataset
 import paddlehub as hub
 from paddlehub.common.downloader import default_downloader
+from paddlehub.common.logger import logger
 
 
+class BaseCVDatast(BaseDataset):
+    def __init__(self,
+                 base_path,
+                 train_list_file=None,
+                 validate_list_file=None,
+                 test_list_file=None,
+                 predict_list_file=None,
+                 label_list_file=None,
+                 label_list=None):
+        super(BaseCVDatast, self).__init__(
+            base_path=base_path,
+            train_file=train_list_file,
+            dev_file=validate_list_file,
+            test_file=test_list_file,
+            predict_file=predict_list_file,
+            label_file=label_list_file,
+            label_list=label_list)
+
+    def _read_file(self, data_path, phase=None):
+        data = []
+        with open(data_path, "r") as file:
+            while True:
+                line = file.readline()
+                if not line:
+                    break
+                line = line.strip()
+                items = line.split(" ")
+                if len(items) > 2:
+                    image_path = " ".join(items[0:-1])
+                else:
+                    image_path = items[0]
+                if not os.path.isabs(image_path):
+                    if self.base_path is not None:
+                        image_path = os.path.join(self.base_path, image_path)
+                label = items[-1]
+                data.append((image_path, label))
+        return data
+
+
+# discarded. please use BaseCVDatast
 class ImageClassificationDataset(object):
     def __init__(self):
+        logger.warning(
+            "ImageClassificationDataset is no longer recommended from PaddleHub v1.5.0, "
+            "please use BaseCVDataset instead of ImageClassificationDataset. "
+            "It's more easy-to-use with more functions and support evaluating test set "
+            "in the end of finetune automatically.")
         self.base_path = None
         self.train_list_file = None
         self.test_list_file = None
@@ -99,12 +145,12 @@ class ImageClassificationDataset(object):
 
     def test_data(self, shuffle=False):
         test_data_path = os.path.join(self.base_path, self.test_list_file)
-        return self._parse_data(test_data_path, shuffle, phase='dev')
+        return self._parse_data(test_data_path, shuffle, phase='test')
 
     def validate_data(self, shuffle=False):
         validate_data_path = os.path.join(self.base_path,
                                           self.validate_list_file)
-        return self._parse_data(validate_data_path, shuffle, phase='test')
+        return self._parse_data(validate_data_path, shuffle, phase='dev')
 
     def get_train_examples(self):
         return self.train_examples

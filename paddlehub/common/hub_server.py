@@ -170,6 +170,21 @@ class HubServer(object):
         self.search_resource(
             resource_key=module_key, resource_type="Model", update=update)
 
+    def search_module_info(self, module_key):
+        try:
+            payload = {'name': module_key}
+            api_url = srv_utils.uri_path(self.get_server_url(), 'info')
+            r = srv_utils.hub_request(api_url, payload)
+            if r['status'] == 0 and len(r['data']) > 0:
+                return [(item['raw_name'], item['version'],
+                         item['paddle_version'], item["hub_version"])
+                        for item in r['data']["info"]]
+        except:
+            if self.config.get('debug', False):
+                raise
+            else:
+                pass
+
     def get_resource_url(self,
                          resource_name,
                          resource_type=None,
