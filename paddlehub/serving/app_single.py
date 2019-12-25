@@ -206,7 +206,15 @@ def predict_semantic_segmentation(module, input_img, id, batch_size, extra={}):
     return results_pack
 
 
-def create_app():
+def create_app(init_flag=False, configs=None):
+    if init_flag is False:
+        if configs is None:
+            raise RuntimeError("Lack of necessary configs.")
+        global use_gpu, time_out
+        time_out = 60
+        use_gpu = configs.get("use_gpu", False)
+        config_with_file(configs.get("modules_info", []))
+
     app_instance = Flask(__name__)
     app_instance.config["JSON_AS_ASCII"] = False
     gunicorn_logger = logging.getLogger('gunicorn.error')
@@ -220,7 +228,6 @@ def create_app():
     @app_instance.before_request
     def before_request():
         request.data = {"id": utils.md5(request.remote_addr + str(time.time()))}
-        pass
 
     @app_instance.route("/get/modules", methods=["GET", "POST"])
     def get_modules_info():
@@ -330,8 +337,8 @@ def run(is_use_gpu=False, configs=None, port=8866, timeout=60):
     else:
         print("Start failed cause of missing configuration.")
         return
-    my_app = create_app()
-    my_app.run(host="0.0.0.0", port=port, debug=False)
+    my_app = create_app(init_flag=True)
+    my_app.run(host="0.0.0.0", port=port, debug=False, threaded=False)
     print("PaddleHub-Serving has been stopped.")
 
 
