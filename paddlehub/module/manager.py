@@ -112,7 +112,7 @@ class LocalModuleManager(object):
                 if hub.HubServer()._server_check() is False:
                     tips = "Request Hub-Server unsuccessfully, please check your network."
                     return False, tips, None
-                module_versions_info = default_hub_server.search_module_info(
+                module_versions_info = hub.HubServer().search_module_info(
                     module_name)
                 if module_versions_info is not None and len(
                         module_versions_info) > 0:
