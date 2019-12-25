@@ -61,7 +61,7 @@ class InstallCommand(BaseCommand):
                 module_name=module_name,
                 module_version=module_version,
                 extra=extra)
-        
+
         print(tips)
 
         return True
