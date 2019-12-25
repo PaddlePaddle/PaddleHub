@@ -94,6 +94,6 @@ if __name__ == '__main__':
         config=config)
 
     # Data to be prdicted
-    data = [[d.text_a, d.text_b] for d in dataset.get_predict_examples()]
+    data = [[d.text_a, d.text_b] for d in dataset.get_predict_examples()[:3]]
 
     print(reg_task.predict(data=data, return_result=True))
