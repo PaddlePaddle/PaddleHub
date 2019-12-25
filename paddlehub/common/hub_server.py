@@ -37,9 +37,20 @@ RESOURCE_LIST_FILE = "resource_list_file.yml"
 CACHE_TIME = 60 * 10
 
 
+def synchronized(func):
+    func.__lock__ = threading.Lock()
+
+    def synced_func(*args, **kws):
+        with func.__lock__:
+            return func(*args, **kws)
+
+    return synced_func
+
+
 def Singleton(cls):
     _instance = {}
 
+    @synchronized
     def _get_instance(*args, **kargs):
         if cls not in _instance:
             _instance[cls] = cls(*args, **kargs)
@@ -51,7 +62,6 @@ def Singleton(cls):
 @Singleton
 class HubServer(object):
     def __init__(self, config_file_path=None):
-        print("Debug: in HubServer:__init__")
         if not config_file_path:
             config_file_path = os.path.join(CONF_HOME, 'config.json')
         if not os.path.exists(CONF_HOME):
@@ -292,7 +302,8 @@ class CacheUpdater(threading.Thread):
         payload = {'word': module}
         if version:
             payload['version'] = version
-        api_url = srv_utils.uri_path(HubServer().get_server_url(), 'search')
+        api_url = srv_utils.uri_path(HubServer().get_server_url(),
+                                     'search')  #1111111
         cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
         if os.path.exists(cache_path):
             extra = {
