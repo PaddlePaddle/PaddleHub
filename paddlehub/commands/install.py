@@ -44,6 +44,7 @@ class InstallCommand(BaseCommand):
             self.help()
             return False
         extra = {"command": "install"}
+
         if argv[0].endswith("tar.gz") or argv[0].endswith("phm"):
             result, tips, module_dir = default_module_manager.install_module(
                 module_package=argv[0], extra=extra)
@@ -60,7 +61,9 @@ class InstallCommand(BaseCommand):
                 module_name=module_name,
                 module_version=module_version,
                 extra=extra)
+
         print(tips)
+
         return True
 
 

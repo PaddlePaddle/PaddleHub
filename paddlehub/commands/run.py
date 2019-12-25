@@ -20,20 +20,16 @@ from __future__ import print_function
 import argparse
 import json
 import os
-import sys
 import ast
 
 import six
 import pandas
 import imghdr
 import cv2
-import numpy as np
 
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.io.parser import yaml_parser, txt_parser
 from paddlehub.module.manager import default_module_manager
-from paddlehub.common import utils
-from paddlehub.common.arg_helper import add_argument, print_arguments
 import paddlehub as hub
 
 

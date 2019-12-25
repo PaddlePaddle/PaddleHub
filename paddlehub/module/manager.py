@@ -24,9 +24,7 @@ from functools import cmp_to_key
 import tarfile
 
 from paddlehub.common import utils
-from paddlehub.common import srv_utils
 from paddlehub.common.downloader import default_downloader
-from paddlehub.common.hub_server import default_hub_server
 from paddlehub.common.dir import MODULE_HOME
 from paddlehub.common.cml_utils import TablePrinter
 from paddlehub.module import module_desc_pb2
@@ -102,7 +100,7 @@ class LocalModuleManager(object):
                                                                   module_dir)
                     return True, tips, self.modules_dict[module_name]
 
-            search_result = hub.default_hub_server.get_module_url(
+            search_result = hub.HubServer().get_module_url(
                 module_name, version=module_version, extra=extra)
             name = search_result.get('name', None)
             url = search_result.get('url', None)
@@ -111,10 +109,10 @@ class LocalModuleManager(object):
             if not url or (module_version is not None
                            and installed_module_version != module_version) or (
                                name != module_name):
-                if default_hub_server._server_check() is False:
+                if hub.HubServer()._server_check() is False:
                     tips = "Request Hub-Server unsuccessfully, please check your network."
                     return False, tips, None
-                module_versions_info = default_hub_server.search_module_info(
+                module_versions_info = hub.HubServer().search_module_info(
                     module_name)
                 if module_versions_info is not None and len(
                         module_versions_info) > 0:
@@ -150,8 +148,6 @@ class LocalModuleManager(object):
                     tips = "Can't find module %s" % module_name
                     if module_version:
                         tips += " with version %s" % module_version
-                    module_tag = module_name if not module_version else '%s-%s' % (
-                        module_name, module_version)
                 return False, tips, None
 
             result, tips, module_zip_file = default_downloader.download_file(

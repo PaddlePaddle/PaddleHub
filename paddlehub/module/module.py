@@ -37,7 +37,6 @@ from paddlehub.common.lock import lock
 from paddlehub.common.logger import logger
 from paddlehub.common.hub_server import CacheUpdater
 from paddlehub.module import module_desc_pb2
-from paddlehub.module import check_info_pb2
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.checker import ModuleChecker
 from paddlehub.module.signature import Signature, create_signature
