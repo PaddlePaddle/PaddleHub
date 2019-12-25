@@ -168,5 +168,4 @@ if __name__ == '__main__':
         "19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"
     ]
 
-    index = 0
     print(elmo_task.predict(data=data, return_result=True))

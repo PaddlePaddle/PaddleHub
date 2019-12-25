@@ -629,8 +629,6 @@ class ModuleV1(Module):
                     "input_ids", "position_ids", "segment_ids", "input_mask",
                     "task_ids"
                 ]
-                logger.warning("For %s, it's no necessary to feed task_ids now."
-                               % self.name)
             else:
                 feed_list = [
                     "input_ids", "position_ids", "segment_ids", "input_mask"

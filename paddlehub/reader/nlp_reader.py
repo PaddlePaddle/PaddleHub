@@ -63,7 +63,8 @@ class BaseNLPReader(BaseReader):
 
         if self.use_task_id:
             logger.warning(
-                "use_task_id has been de discarded since PaddleHub v1.4.0")
+                "use_task_id has been de discarded since PaddleHub v1.4.0, it's no necessary to feed task_ids now."
+            )
             self.task_id = 0
 
         self.Record_With_Label_Id = namedtuple(
@@ -363,7 +364,7 @@ class SequenceLabelReader(BaseNLPReader):
             pad_idx=self.pad_id)
 
         if phase != "predict":
-            batch_label_ids = [record.label_ids for record in batch_records]
+            batch_label_ids = [record.label_id for record in batch_records]
             padded_label_ids = pad_batch_data(
                 batch_label_ids,
                 max_seq_len=self.max_seq_len,

@@ -328,6 +328,9 @@ class MultiLabelClassifierTask(ClassifierTask):
                 for category_id in range(
                         self._base_data_reader.dataset.num_labels):
                     sample_category_prob = batch_result[category_id][sample_id]
-                    sample_result.append(np.argmax(sample_category_prob))
+                    sample_category_id = np.argmax(
+                        sample_category_prob).tolist()
+
+                    sample_result.append()
                 results.append(sample_result)
         return results
