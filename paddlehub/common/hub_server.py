@@ -302,8 +302,7 @@ class CacheUpdater(threading.Thread):
         payload = {'word': module}
         if version:
             payload['version'] = version
-        api_url = srv_utils.uri_path(HubServer().get_server_url(),
-                                     'search')  #1111111
+        api_url = srv_utils.uri_path(HubServer().get_server_url(), 'search')
         cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
         if os.path.exists(cache_path):
             extra = {
