@@ -321,6 +321,7 @@ class MultiLabelClassifierTask(ClassifierTask):
 
     def _postprocessing(self, run_states):
         results = []
+        label_list = self._base_data_reader.label_map.keys()
         for batch_state in run_states:
             batch_result = batch_state.run_results
             for sample_id in range(len(batch_result[0])):
@@ -328,9 +329,8 @@ class MultiLabelClassifierTask(ClassifierTask):
                 for category_id in range(
                         self._base_data_reader.dataset.num_labels):
                     sample_category_prob = batch_result[category_id][sample_id]
-                    sample_category_id = np.argmax(
-                        sample_category_prob).tolist()
-
-                    sample_result.append()
+                    sample_category_value = np.argmax(sample_category_prob)
+                    sample_result.append(
+                        {label_list[category_id]: sample_category_value})
                 results.append(sample_result)
         return results
