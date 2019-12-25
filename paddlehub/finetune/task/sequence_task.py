@@ -216,3 +216,22 @@ class SequenceLabelTask(BaseTask):
         elif self.is_predict_phase:
             return [self.ret_infers.name] + [self.seq_len.name]
         return [output.name for output in self.outputs]
+
+    def _postprocessing(self, run_states):
+        id2label = {
+            val: key
+            for key, val in self._base_data_reader.label_map.items()
+        }
+        results = []
+        for batch_states in run_states:
+            batch_results = batch_states.run_results
+            batch_infers = batch_results[0].reshape([-1]).astype(
+                np.int32).tolist()
+            seq_lens = batch_results[1].reshape([-1]).astype(np.int32).tolist()
+            current_id = 0
+            for length in seq_lens:
+                seq_infers = batch_infers[current_id:current_id + length]
+                seq_result = list(map(id2label.get, seq_infers[1:-1]))
+                current_id += int(length)
+                results.append(seq_result)
+        return results
