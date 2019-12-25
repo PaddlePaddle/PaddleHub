@@ -156,7 +156,7 @@ class ServingCommand(BaseCommand):
             print("Port %s is occupied, please change it." % port)
             return False
         workers = configs.get("workers", number_of_workers())
-        options = {"bind": "127.0.0.1:%s" % port, "workers": workers}
+        options = {"bind": "0.0.0.0:%s" % port, "workers": workers}
         StandaloneApplication(
             app.create_app(init_flag=False, configs=configs), options).run()
         print("PaddleHub-Serving has been stopped.")
@@ -196,7 +196,7 @@ class ServingCommand(BaseCommand):
                     "queue_size": 20
                 }) for item in module_info
             ]
-            options = {"bind": "127.0.0.1:%s" % port, "workers": workers}
+            options = {"bind": "0.0.0.0:%s" % port, "workers": workers}
             configs = {"use_gpu": use_gpu, "modules_info": module_info}
             StandaloneApplication(
                 app.create_app(init_flag=False, configs=configs),
