@@ -142,7 +142,8 @@ class ClassifierTask(BaseTask):
             }
         except:
             raise Exception(
-                "image-classification does not support return_result now")
+                "ImageClassificationDataset does not support postprocessing, please use BaseCVDatast instead"
+            )
         results = []
         for batch_state in run_states:
             batch_result = batch_state.run_results

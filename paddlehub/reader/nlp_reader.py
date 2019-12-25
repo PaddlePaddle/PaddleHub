@@ -66,18 +66,6 @@ class BaseNLPReader(BaseReader):
                 "use_task_id has been de discarded since PaddleHub v1.4.0")
             self.task_id = 0
 
-        # generate label map
-        self.label_map = {}
-        try:
-            for index, label in enumerate(self.dataset.get_labels()):
-                self.label_map[label] = index
-            logger.info("Dataset label map = {}".format(self.label_map))
-        except:
-            # some dataset like squad, its label_list=None
-            logger.info(
-                "Dataset is None or it has not any labels, label map = {}".
-                format(self.label_map))
-
         self.Record_With_Label_Id = namedtuple(
             'Record',
             ['token_ids', 'text_type_ids', 'position_ids', 'label_id'])

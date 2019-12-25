@@ -169,11 +169,4 @@ if __name__ == '__main__':
     ]
 
     index = 0
-    run_states = elmo_task.predict(data=data)
-    results = [run_state.run_results for run_state in run_states]
-    for batch_result in results:
-        # get predict index
-        batch_result = np.argmax(batch_result, axis=2)[0]
-        for result in batch_result:
-            print("%s\tpredict=%s" % (data[index], result))
-            index += 1
+    print(elmo_task.predict(data=data, return_result=True))

@@ -96,15 +96,4 @@ if __name__ == '__main__':
     ]
 
     index = 0
-    run_states = multi_label_cls_task.predict(data=data)
-
-    all_result = []
-    for batch_state in run_states:
-        batch_result = batch_state.run_results
-        for sample_id in range(len(batch_result[0])):
-            sample_result = []
-            for category_id in range(dataset.num_labels):
-                sample_category_prob = batch_result[category_id][sample_id]
-                sample_result.append(np.argmax(sample_category_prob))
-            all_result.append(sample_result)
-    print(all_result)
+    print(multi_label_cls_task.predict(data=data, return_result=True))
