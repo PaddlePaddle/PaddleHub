@@ -767,7 +767,7 @@ class BaseTask(object):
             self._eval_end_event(run_states)
             return run_states
 
-    def predict(self, data, load_best_model=True):
+    def predict(self, data, load_best_model=True, return_result=False):
         with self.phase_guard(phase="predict"):
             if load_best_model:
                 self.init_if_load_best_model()
@@ -778,7 +778,16 @@ class BaseTask(object):
             run_states = self._run()
             self._predict_end_event(run_states)
             self._predict_data = None
+            if return_result:
+                return self._postprocessing(run_states)
         return run_states
+
+    def _postprocessing(self, run_states):
+        results = []
+        for batch_state in run_states:
+            batch_result = batch_state.run_results[0]
+            results += [result[0] for result in batch_result]
+        return results
 
     def _run(self, do_eval=False):
         with fluid.program_guard(self.main_program, self.startup_program):

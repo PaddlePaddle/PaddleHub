@@ -134,6 +134,22 @@ class ClassifierTask(BaseTask):
 
         return scores, avg_loss, run_speed
 
+    def _postprocessing(self, run_states):
+        try:
+            id2label = {
+                val: key
+                for key, val in self._base_data_reader.label_map.items()
+            }
+        except:
+            raise Exception(
+                "image-classification does not support return_result now")
+        results = []
+        for batch_state in run_states:
+            batch_result = batch_state.run_results
+            batch_infer = np.argmax(batch_result, axis=2)[0]
+            results += [id2label[sample_infer] for sample_infer in batch_infer]
+        return results
+
 
 ImageClassifierTask = ClassifierTask
 
@@ -301,3 +317,16 @@ class MultiLabelClassifierTask(ClassifierTask):
         if self.is_train_phase or self.is_test_phase:
             return [metric.name for metric in self.metrics] + [self.loss.name]
         return self.outputs
+
+    def _postprocessing(self, run_states):
+        results = []
+        for batch_state in run_states:
+            batch_result = batch_state.run_results
+            for sample_id in range(len(batch_result[0])):
+                sample_result = []
+                for category_id in range(
+                        self._base_data_reader.dataset.num_labels):
+                    sample_category_prob = batch_result[category_id][sample_id]
+                    sample_result.append(np.argmax(sample_category_prob))
+                results.append(sample_result)
+        return results
