@@ -112,8 +112,6 @@ class LocalModuleManager(object):
                     tips = "Can't find module %s" % module_name
                     if module_version:
                         tips += " with version %s" % module_version
-                    module_tag = module_name if not module_version else '%s-%s' % (
-                        module_name, module_version)
                 return False, tips, None
 
             result, tips, module_zip_file = default_downloader.download_file(
