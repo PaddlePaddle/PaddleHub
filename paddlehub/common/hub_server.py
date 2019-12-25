@@ -40,26 +40,26 @@ CACHE_TIME = 60 * 10
 def synchronized(func):
     func.__lock__ = threading.Lock()
 
-    def synced_func(*args, **kws):
+    def synced_func(*args, **kwargs):
         with func.__lock__:
-            return func(*args, **kws)
+            return func(*args, **kwargs)
 
     return synced_func
 
 
-def Singleton(cls):
+def singleton(cls):
     _instance = {}
 
     @synchronized
-    def _get_instance(*args, **kargs):
+    def _get_instance(*args, **kwargs):
         if cls not in _instance:
-            _instance[cls] = cls(*args, **kargs)
+            _instance[cls] = cls(*args, **kwargs)
         return _instance[cls]
 
     return _get_instance
 
 
-@Singleton
+@singleton
 class HubServer(object):
     def __init__(self, config_file_path=None):
         if not config_file_path:
