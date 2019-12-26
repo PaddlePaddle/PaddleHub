@@ -125,18 +125,15 @@ $ hub uninstall ernie
 
 **Q:** 使用PaddleHub时，无法下载预置数据集、Module的等现象
 
-**A:** PaddleHub中的预训练模型和预置数据集都需要通过服务端进行下载，因此PaddleHub默认用户访问外网权限。
-可以通过以下命令确认是否可以访问外网。
+**A:** 下载数据集、module等，PaddleHub要求机器可以访问外网。可以使用server_check()可以检查本地与远端PaddleHub-Server的连接状态，使用方法如下：
 
 ```python
-import requests
-
-res = requests.get('http://paddlepaddle.org.cn/paddlehub/search', {'word': 'ernie', 'type': 'Module'})
-print(res)
-
-# the common result is like this:
-# <Response [200]>
+import paddlehub
+paddlehub.server_check()
+# 如果可以连接远端PaddleHub-Server，则显示Request Hub-Server successfully.
+# 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully.
 ```
+
 **Note：** PaddleHub 1.1.1版本已支持离线运行Module
 
 **Q:** 利用PaddleHub Finetune如何适配自定义数据集
