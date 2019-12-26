@@ -1,0 +1,224 @@
+# Hub-Serving一键服务部署
+## 1 简介
+### 1.1 什么是PaddleHub-Serving一键服务部署
+PaddleHub-Serving是基于PaddleHub的一键模型服务部署工具，能够通过简单的Hub命令行工具轻松启动一个模型预测在线服务，开发者可利用PaddleHub-Serving快速得到一个预测服务API。
+
+### 1.2 支持模型
+目前PaddleHub-Serving支持PaddleHub所有可直接用于预测的模型进行服务部署，包括`lac`、`senta_bilstm`等nlp类模型，以及`yolov3_coco2017`、`vgg16_imagenet`等cv类模型，未来还将支持开发者使用自己finetune后的模型用于快捷服务部署。
+
+### 1.3 所需环境
+下表是使用PaddleHub-Serving的环境要求及注意事项。  
+
+|项目|建议版本|说明|  
+|:-:|:-:|:-:|  
+|操作系统|Linux/Darwin/Windows|建议使用Linux或Darwin，对多线程启动方式支持性较好|  
+|PaddleHub|>=1.4.0|无|  
+|PaddlePaddle|>=1.6.1|若使用GPU计算，则对应使用PaddlePaddle-gpu版本|  
+
+## 2 使用
+### 2.1 启动Hub-Serving服务端部署
+Hub-Serving有两种启动方式，分别是使用命令行命令启动，以及使用配置文件启动。
+
+#### 2.1.1 命令行命令启动
+启动命令
+```shell
+$ hub serving start --modules [Module1==Version1, Module2==Version2, ...] \
+                    --port XXXX \
+                    --use_gpu \
+                    --use_multiprocess
+```
+
+**参数**：
+
+|参数|用途|  
+|-|-|  
+|--modules/-m|Hub-Serving预安装模型，以多个Module==Version键值对的形式列出<br/>*`当不指定Version时，默认选择最新版本`*|  
+|--port/-p|服务端口，默认为8866|  
+|--use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
+|--use_multiprocess|是否启用并发方式，默认为单进程方式|  
+
+#### 2.1.2 配置文件启动
+启动命令
+```shell
+$ hub serving start --config config.json
+```
+`config.json`格式如下：  
+
+```json
+{  
+  "modules_info": [  
+    {  
+       "module": module_name1,  
+       "version": module_version1,  
+       "batch_size": batch_size1
+    },  
+    {  
+       "module": module_name2,  
+       "version": module_version2,  
+       "batch_size": batch_size2
+    }
+  ],  
+  "use_gpu": false,  
+  "port": 8866,
+  "use_multiprocess": false
+}
+```
+
+**参数**：
+
+|参数|用途|  
+|-|-|  
+|--modules_info|Hub-Serving预安装模型，以字典列表形式列出，其中`module`为预测服务使用的模型名，`version`为其版本，`batch_size`为预测批次大小。
+|--use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
+|--port/-p|服务端口，默认为8866|  
+|--use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式|  
+
+### 2.2 访问PaddleHub-Serving服务端
+
+在使用PaddleHub-Serving部署服务端的模型预测服务后，就可以在客户端访问预测接口以获取结果了，接口url格式为：
+
+http://0.0.0.0:8866/predict/<CATEGORY>/<MODULE>
+
+其中，<CATEGORY>为text或image，与模型种类对应，<MODULE>为模型名。
+
+通过发送一个POST请求，即可获取预测结果，下面我们将展示一个具体的demo，以说明使用PaddleHub-Serving部署和使用流程。
+
+### 2.3 利用PaddleHub-Serving进行个性化开发
+使用PaddleHub-Serving进行模型服务部署后，可以利用得到的接口进行开发，如对外提供web服务，或接入到应用程序中，以降低客户端预测压力，提高性能，下面展示了一个web页面demo:
+
+<p align="center">  
+
+<img src="../img/web_demo.png" width="60%" />  
+
+</p>  
+
+## 3 示例-部署一个在线lac分词服务
+
+### 3.1 部署lac在线服务
+现在，我们要部署一个lac在线服务，以通过接口获取文本的分词结果。
+
+首先，根据2.1节所述，启动PaddleHub-Serving服务端的两种方式分别为:
+```shell
+$ hub serving start -m lac
+```
+或
+```shell
+$ hub serving start -c serving_config.json
+```
+其中`serving_config.json`的内容如下：
+```json
+{
+  "modules_info": [
+  {
+    "module": "lac",
+    "version": "1.0.0",
+    "batch_size": 1
+  }
+],
+  "use_gpu": false,
+  "port": 8866,
+  "use_multiprocess": false
+}
+```
+启动成功界面如图：
+
+<p align="center">  
+
+<img src="../img/start_serving_lac.png" width="100%" />  
+
+</p>  
+
+这样我们就在8866端口部署了lac的在线分词服务。
+*此处warning为Flask提示，不影响使用*
+
+### 3.2 访问lac预测接口
+
+在服务部署好之后，我们可以进行测试，用来测试的文本为`今天是个好日子`和`天气预报说今天要下雨`。
+
+客户端代码如下
+```python
+# coding: utf8
+import requests
+import json
+
+if __name__ == "__main__":
+    # 指定用于用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
+    text_list = ["今天是个好日子", "天气预报说今天要下雨"]
+    text = {"text": text_list}
+    # 指定预测方法为lac并发送post请求
+    url = "http://127.0.0.1:8866/predict/text/lac"
+    r = requests.post(url=url, data=text)
+
+    # 打印预测结果
+    print(json.dumps(r.json(), indent=4, ensure_ascii=False))
+```
+运行后得到结果
+```python
+{
+    "results": [
+        {
+            "tag": [
+                "TIME",
+                "v",
+                "q",
+                "n"
+            ],
+            "word": [
+                "今天",
+                "是",
+                "个",
+                "好日子"
+            ]
+        },
+        {
+            "tag": [
+                "n",
+                "v",
+                "TIME",
+                "v",
+                "v"
+            ],
+            "word": [
+                "天气预报",
+                "说",
+                "今天",
+                "要",
+                "下雨"
+            ]
+        }
+    ]
+}
+```
+关于PaddleHub-Serving的一键服务部署功能示例，可参阅下列demo
+
+* [图像分类-基于vgg11_imagent](serving/classification_vgg11_imagenet)  
+
+该示例展示了利用vgg11_imagent完成图像分类服务化部署和在线预测，获取图像分类结果。
+
+* [图像生成-基于stgan_celeba](serving/GAN_stgan_celeba)  
+
+该示例展示了利用stgan_celeba生成图像服务化部署和在线预测，获取指定风格的生成图像。
+
+* [文本审核-基于porn_detection_lstm](serving/text_censorship_porn_detection_lstm)  
+
+该示例展示了利用porn_detection_lstm完成中文文本黄色敏感信息鉴定的服务化部署和在线预测，获取文本是否敏感及其置信度。
+
+* [中文词法分析-基于lac](serving/lexical_analysis_lac)
+
+该示例展示了利用lac完成中文文本分词服务化部署和在线预测，获取文本的分词结果，并可通过用户自定义词典干预分词结果。
+
+* [目标检测-基于yolov3_darknet53_coco2017](serving/object_detection_yolov3_darknet53_coco2017)  
+
+该示例展示了利用yolov3_darknet53_coco2017完成目标检测服务化部署和在线预测，获取检测结果和覆盖识别框的图片。
+
+* [中文语义分析-基于simnet_bow](serving/semantic_model_simnet_bow)
+
+该示例展示了利用simnet_bow完成中文文本相似度检测服务化部署和在线预测，获取文本的相似程度。  
+
+* [图像分割-基于deeplabv3p_xception65_humanseg](serving/semantic_segmentation_deeplabv3p_xception65_humanseg)
+
+该示例展示了利用deeplabv3p_xception65_humanseg完成图像分割服务化部署和在线预测，获取识别结果和分割后的图像。
+
+* [中文情感分析-基于simnet_bow](serving/semantic_model_simnet_bow)
+
+该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
