@@ -57,8 +57,8 @@ class BertService(object):
         self.retry = retry
 
         module = hub.Module(name=self.model_name)
-        inputs, outputs, program = module.context(trainable=True,
-                                                  max_seq_len=self.max_seq_len)
+        inputs, outputs, program = module.context(
+                trainable=True, max_seq_len=self.max_seq_len)
         input_ids = inputs["input_ids"]
         position_ids = inputs["position_ids"]
         segment_ids = inputs["segment_ids"]
@@ -184,9 +184,8 @@ class BertService(object):
 
     def prepare_data(self, text):
         self.batch_size = len(text)
-        data_generator = self.reader.data_generator(batch_size=self.batch_size,
-                                                    phase='predict',
-                                                    data=text)
+        data_generator = self.reader.data_generator(
+                batch_size=self.batch_size, phase='predict', data=text)
         request_msg = ""
         for run_step, batch in enumerate(data_generator(), start=1):
             request = []
@@ -196,22 +195,14 @@ class BertService(object):
             mask_list = batch[0][3].reshape(-1).tolist()
             for si in range(self.batch_size):
                 instance_dict = {}
-                instance_dict["token_ids"] = token_list[si *
-                                                        self.max_seq_len:(si +
-                                                                          1) *
-                                                        self.max_seq_len]
-                instance_dict["sentence_type_ids"] = sent_list[si *
-                                                               self.max_seq_len:
-                                                               (si + 1) *
-                                                               self.max_seq_len]
-                instance_dict["position_ids"] = pos_list[si *
-                                                         self.max_seq_len:(si +
-                                                                           1) *
-                                                         self.max_seq_len]
-                instance_dict["input_masks"] = mask_list[si *
-                                                         self.max_seq_len:(si +
-                                                                           1) *
-                                                         self.max_seq_len]
+                instance_dict["token_ids"] = token_list[si * self.max_seq_len:(
+                    si + 1) * self.max_seq_len]
+                instance_dict["sentence_type_ids"] = sent_list[
+                    si * self.max_seq_len:(si + 1) * self.max_seq_len]
+                instance_dict["position_ids"] = pos_list[si * self.max_seq_len:(
+                    si + 1) * self.max_seq_len]
+                instance_dict["input_masks"] = mask_list[si * self.max_seq_len:(
+                    si + 1) * self.max_seq_len]
                 request.append(instance_dict)
 
             request = {"instances": request}

@@ -44,12 +44,10 @@ class ServingCommand(BaseCommand):
         self.parser.add_argument("bert_service", nargs="?")
         self.sub_parse = self.parser.add_mutually_exclusive_group(
             required=False)
-        self.parser.add_argument("--use_gpu",
-                                 action="store_true",
-                                 default=False)
-        self.parser.add_argument("--use_multiprocess",
-                                 action="store_true",
-                                 default=False)
+        self.parser.add_argument(
+                "--use_gpu", action="store_true", default=False)
+        self.parser.add_argument(
+                "--use_multiprocess", action="store_true", default=False)
         self.parser.add_argument("--modules", "-m", nargs="+")
         self.parser.add_argument("--config", "-c", nargs="?")
         self.parser.add_argument("--port", "-p", nargs="?", default=8866)
