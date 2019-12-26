@@ -66,7 +66,7 @@ class ServingCommand(BaseCommand):
         from paddle_gpu_serving.run import BertServer
         bs = BertServer(with_gpu=args.use_gpu)
         bs.with_model(model_name=args.modules[0])
-        bs.run(gpu_index=args.gpu, port=args.port)
+        bs.run(gpu_index=args.gpu, port=int(args.port))
 
     @staticmethod
     def is_port_occupied(ip, port):
