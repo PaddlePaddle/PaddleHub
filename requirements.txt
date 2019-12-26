@@ -11,7 +11,7 @@ flake8
 tb-paddle
 tensorboard >= 1.15
 cma == 2.7.0
-gunicorn >= 20.0.0
+gunicorn >= 19.10.0
 sentencepiece
 nltk
 colorlog
