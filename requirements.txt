@@ -11,7 +11,6 @@ flake8
 tb-paddle
 tensorboard >= 1.15
 cma == 2.7.0
-gunicorn >= 19.10.0
 sentencepiece
 nltk
 colorlog
@@ -24,3 +23,6 @@ numpy < 1.17.0 ; python_version < "3"
 # pandas no longer support python2 in version 0.25 and above
 pandas ; python_version >= "3"
 pandas < 0.25.0 ; python_version < "3"
+
+# gunicorn not support windows
+gunicorn >= 19.10.0; sys_platform == "darwin" or sys_platform == "linux"
