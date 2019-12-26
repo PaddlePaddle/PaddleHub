@@ -6,7 +6,7 @@
 
 PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub开发者可以使用高质量的预训练模型结合Fine-tune API快速完成迁移学习到应用部署的全流程工作。PaddleHub具有以下特性：
 
-* 便捷获取飞桨生态下的高质量预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割等主流模型。更多模型详情请查看官网：https://www.paddlepaddle.org.cn/hub
+* 便捷获取飞桨生态下的高质量预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型。更多模型详情请查看官网：https://www.paddlepaddle.org.cn/hub
 * 通过高质量预训练模型与PaddleHub Fine-tune API，只需要少量代码即可实现自然语言处理和计算机视觉场景的深度学习模型，更多Demo请参考以下链接：
 
   [文本分类](./demo/text-classification)     [序列标注](./demo/sequence-labeling)   [多标签分类](./demo/multi-label-classification)   [图像分类](./demo/image-classification) [检索式问答任务](./demo/qa_classification) [回归任务](./demo/regression)   [句子语义相似度计算](./demo/sentence_similarity) [阅读理解任务](./demo/reading-comprehension)
@@ -77,7 +77,7 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 ```
 ![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.3/docs/imgs/object_detection_result.png)
 
-除了上述三类模型外，PaddleHub还发布了语言模型、语义模型、图像分类、生成模型、视频分类等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
+除了上述三类模型外，PaddleHub还发布了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
 
 ## 教程
 
