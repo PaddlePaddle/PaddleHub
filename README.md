@@ -8,14 +8,8 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 
 * 便捷获取飞桨生态下的高质量预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割等主流模型。更多模型详情请查看官网：https://www.paddlepaddle.org.cn/hub
 * 通过高质量预训练模型与PaddleHub Fine-tune API，只需要少量代码即可实现自然语言处理和计算机视觉场景的深度学习模型，更多Demo请参考以下链接：
-  * [文本分类](./demo/text-classification)
-  * [序列标注](./demo/sequence-labeling)
-  * [多标签分类](./demo/multi-label-classification)
-  * [图像分类](./demo/image-classification)
-  * [检索式问答任务](./demo/qa_classification)
-  * [回归任务](./demo/sentence_similarity)
-  * [句子语义相似度计算](./demo/sentence_similarity)
-  * [阅读理解任务](./demo/reading-comprehension)
+
+  [文本分类](./demo/text-classification)     [序列标注](./demo/sequence-labeling)   [多标签分类](./demo/multi-label-classification)   [图像分类](./demo/image-classification) [检索式问答任务](./demo/qa_classification) [回归任务](./demo/regression)   [句子语义相似度计算](./demo/sentence_similarity) [阅读理解任务](./demo/reading-comprehension)
 
 * 『**模型即软件**』的设计理念，通过Python API或命令行实现快速预测，更方便地使用PaddlePaddle模型库，更多介绍请参考教程[PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 * PaddleHub提供便捷的服务化部署能力，简单一行命令即可搭建属于自己的模型的API服务，更多详情请参考教程[PaddleHub Serving一键服务化部署](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)和[使用示例](./demo/serving)
@@ -60,9 +54,7 @@ paddlehub.server_check()
 
 
 ## 快速体验
-安装成功后，执行下面的命令，可以快速体验PaddleHub无需代码、一键预测的命令行功能：
-
-`示例一`
+安装成功后，执行命令[hub run](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7#run)，可以快速体验PaddleHub无需代码、一键预测的命令行功能，如下三个示例：
 
 使用[词法分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=LexicalAnalysis)模型LAC进行分词
 ```shell
@@ -70,19 +62,15 @@ $ hub run lac --input_text "今天是个好日子"
 [{'word': ['今天', '是', '个', '好日子'], 'tag': ['TIME', 'v', 'q', 'n']}]
 ```
 
-`示例二`
-
 使用[情感分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=SentimentAnalysis)模型Senta对句子进行情感预测
 ```shell
 $ hub run senta_bilstm --input_text "今天天气真好"
 {'text': '今天天气真好', 'sentiment_label': 1, 'sentiment_key': 'positive', 'positive_probs': 0.9798, 'negative_probs': 0.0202}]
 ```
 
-`示例三`
-
 使用[目标检测](http://www.paddlepaddle.org.cn/hub?filter=category&value=ObjectDetection)模型 SSD/YOLO v3/Faster RCNN 对图片进行目标检测
 ```shell
-$ wget --no-check-certificate https://paddlehub.bj.bcebos.com/resources/test_object_detection.jpg
+$ wget https://paddlehub.bj.bcebos.com/resources/test_object_detection.jpg
 $ hub run ssd_mobilenet_v1_pascal --input_path test_object_detection.jpg
 $ hub run yolov3_coco2017 --input_path test_object_detection.jpg
 $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
