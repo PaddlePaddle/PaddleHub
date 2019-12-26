@@ -58,7 +58,7 @@ class BertService(object):
 
         module = hub.Module(name=self.model_name)
         inputs, outputs, program = module.context(
-                trainable=True, max_seq_len=self.max_seq_len)
+            trainable=True, max_seq_len=self.max_seq_len)
         input_ids = inputs["input_ids"]
         position_ids = inputs["position_ids"]
         segment_ids = inputs["segment_ids"]
@@ -185,7 +185,7 @@ class BertService(object):
     def prepare_data(self, text):
         self.batch_size = len(text)
         data_generator = self.reader.data_generator(
-                batch_size=self.batch_size, phase='predict', data=text)
+            batch_size=self.batch_size, phase='predict', data=text)
         request_msg = ""
         for run_step, batch in enumerate(data_generator(), start=1):
             request = []
