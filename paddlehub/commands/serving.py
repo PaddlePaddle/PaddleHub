@@ -44,10 +44,12 @@ class ServingCommand(BaseCommand):
         self.parser.add_argument("bert_service", nargs="?")
         self.sub_parse = self.parser.add_mutually_exclusive_group(
             required=False)
-        self.parser.add_argument(
-            "--use_gpu", action="store_true", default=False)
-        self.parser.add_argument(
-            "--use_multiprocess", action="store_true", default=False)
+        self.parser.add_argument("--use_gpu",
+                                 action="store_true",
+                                 default=False)
+        self.parser.add_argument("--use_multiprocess",
+                                 action="store_true",
+                                 default=False)
         self.parser.add_argument("--modules", "-m", nargs="+")
         self.parser.add_argument("--config", "-c", nargs="?")
         self.parser.add_argument("--port", "-p", nargs="?", default=8866)
@@ -66,7 +68,7 @@ class ServingCommand(BaseCommand):
         from paddle_gpu_serving.run import BertServer
         bs = BertServer(with_gpu=args.use_gpu)
         bs.with_model(model_name=args.modules[0])
-        bs.run(gpu_index=args.gpu, port=args.port)
+        bs.run(gpu_index=args.gpu, port=int(args.port))
 
     @staticmethod
     def is_port_occupied(ip, port):
