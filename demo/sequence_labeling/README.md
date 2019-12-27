@@ -1,22 +1,20 @@
-# PaddleHub 回归任务
-
-本示例将展示如何使用PaddleHub Fine-tune API以及Transformer类模型完成回归任务。
-
+# PaddleHub 序列标注
 
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_regression.sh`即可开始使用BERT对GLUE-STSB数据集进行Fine-tune。
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_sequence_label.sh`即可开始使用ERNIE对MSRA_NER数据集进行Fine-tune。
 
 其中脚本参数说明如下：
 
 ```bash
 # 模型相关
+--use_gpu: 是否使用GPU，默认为False
 --batch_size: 批处理大小，请结合显存情况进行调整，若出现显存不足，请适当调低这一参数
 --learning_rate: Fine-tune的最大学习率
 --weight_decay: 控制正则项力度的参数，用于防止过拟合，默认为0.01
 --warmup_proportion: 学习率warmup策略的比例，如果0.1，则学习率会在前10%训练step的过程中从0慢慢增长到learning_rate, 而后再缓慢衰减，默认为0
 --num_epoch: Fine-tune迭代的轮数
---max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数
+--max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数。
 --use_data_parallel: 是否使用并行计算，默认True。打开该功能依赖nccl库。
 
 # 任务相关
@@ -30,7 +28,7 @@
 ### Step1: 加载预训练模型
 
 ```python
-module = hub.Module(name="ernie_v2_eng_base")
+module = hub.Module(name="ernie")
 inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
@@ -58,30 +56,36 @@ RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L
 
 如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
 ```python
-# 更换name参数即可无缝切换BERT模型, 代码示例如下
-module = hub.Module(name="bert_cased_L-12_H-768_A-12")
+# 更换name参数即可无缝切换BERT中文模型, 代码示例如下
+module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
 ```
 
-### Step2: 准备数据集并使用RegressionReader读取数据
+### Step2: 准备数据集并使用SequenceLabelReader读取数据
 ```python
-dataset = hub.dataset.GLUE("STS-B")
-reader = hub.reader.RegressionReader(
+dataset = hub.dataset.MSRA_NER()
+reader = hub.reader.SequenceLabelReader(
     dataset=dataset,
     vocab_path=module.get_vocab_path(),
-    max_seq_len=args.max_seq_len)
+    max_seq_len=128,
+    sp_model_path=module.get_spm_path(),
+    word_dict_path=module.get_word_dict_path())
 ```
 
-其中数据集的准备代码可以参考 [glue.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/glue.py)
+其中数据集的准备代码可以参考 [msra_ner.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/msra_ner.py)
 
-`hub.dataset.GLUE("STS-B")` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
+`hub.dataset.MSRA_NER()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
-`module.get_vocab_path()` 会返回预训练模型对应的词表
+`module.get_vaocab_path()` 会返回预训练模型对应的词表
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致
 
-RegressionReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
+`module.sp_model_path` 和 `module.word_dict_path` 用于 ERNIE Tiny 中文sub-word中文切词技术
 
-**NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
+SequenceLabelReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
+
+**NOTE**:
+* Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
+* 如果选择的预训练模型不是ERNIE Tiny，则无需设定sp_model_path和word_dict_path参数
 
 #### 自定义数据集
 
@@ -99,54 +103,58 @@ strategy = hub.AdamWeightDecayStrategy(
 
 config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strategy)
 ```
-
 #### 优化策略
 
 PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)
 
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`
 
-`learning_rate`: Fine-tune过程中的最大学习率;
+`learning_rate`: fine-tune过程中的最大学习率;
 `weight_decay`: 模型的正则项参数，默认0.01，如果模型有过拟合倾向，可适当调高这一参数;
 `warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate;
-`lr_scheduler`: 有两种策略可选(1) `linear_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
+`lr_scheduler`: 有两种策略可选（1）`linear_decay`策略学习率会在最高点后以线性方式衰减;（2） `noam_decay`策略学习率会在最高点以多项式形式衰减；
 
 #### 运行配置
-`RunConfig` 主要控制Fine-tune的训练，包含以下可控制的参数:
+`RunConfig` 主要控制fine-tune的训练，包含以下可控制的参数:
 
 * `log_interval`: 进度日志打印间隔，默认每10个step打印一次
 * `eval_interval`: 模型评估的间隔，默认每100个step评估一次验证集
 * `save_ckpt_interval`: 模型保存间隔，请根据任务大小配置，默认只保存验证集效果最好的模型和训练结束的模型
 * `use_cuda`: 是否使用GPU训练，默认为False
 * `checkpoint_dir`: 模型checkpoint保存路径, 若用户没有指定，程序会自动生成
-* `num_epoch`: Fine-tune的轮数
+* `num_epoch`: fine-tune的轮数
 * `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size
 * `enable_memory_optim`: 是否使用内存优化， 默认为True
-* `strategy`: Fine-tune优化策略
+* `strategy`: fine-tune优化策略
 
-### Step4: 构建网络并创建回归迁移任务进行Fine-tune
+### Step4: 构建网络并创建序列标注迁移任务进行fine-tune
 ```python
-pooled_output = outputs["pooled_output"]
+
+sequence_output = outputs["sequence_output"]
 
 # feed_list的Tensor顺序不可以调整
 feed_list = [
-    inputs["input_ids"].name,
-    inputs["position_ids"].name,
-    inputs["segment_ids"].name,
-    inputs["input_mask"].name,
+    inputs["input_ids"].name, inputs["position_ids"].name,
+    inputs["segment_ids"].name, inputs["input_mask"].name
 ]
 
-reg_task = hub.RegressionTask(
+seq_label_task = hub.SequenceLabelTask(
     data_reader=reader,
-    feature=pooled_output,
+    feature=sequence_output,
     feed_list=feed_list,
-    config=config)
+    max_seq_len=args.max_seq_len,
+    num_classes=dataset.num_labels,
+    config=config,
+    add_crf=False)
 
-reg_task.finetune_and_eval()
+seq_label_task.finetune_and_eval()
 ```
+
 **NOTE:**
-1. `outputs["pooled_output"]`返回了ERNIE/BERT模型对应的[CLS]向量,可以用于句子或句对的特征表达。
-2. `feed_list`中的inputs参数指名了BERT中的输入tensor的顺序，与RegressionReader返回的结果一致。
+1. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达。
+2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与SequenceLabelReader返回的结果一致。
+3. `hub.SequenceLabelTask`通过输入特征，迁移的类别数，可以生成适用于序列标注的迁移任务`SequenceLabelTask`
+4. `hub.SequenceLabelTask`通过add_crf, 选择是否加入crf作为decoder。如果add_crf=True, 则在预训练模型计算图加入fc+crf层，否则只在在预训练模型计算图加入fc层。
 
 #### 自定义迁移任务
 
@@ -165,12 +173,12 @@ $ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_N
 通过Fine-tune完成模型训练后，在对应的ckpt目录下，会自动保存验证集上效果最好的模型。
 配置脚本参数
 ```
-CKPT_DIR="ckpt_stsb/"
+CKPT_DIR="ckpt_sequence_label/"
 python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
-其中CKPT_DIR为Fine-tune API保存最佳模型的路径, max_seq_len是ERNIE/BERT模型的最大序列长度，*请与训练时配置的参数保持一致*
+其中CKPT_DIR为Fine-tune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
 
-参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下回归任务预测结果。
+参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
 如需了解更多预测步骤，请参考`predict.py`
 
 我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
