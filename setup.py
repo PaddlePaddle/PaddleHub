@@ -36,6 +36,9 @@ if six.PY2:
 else:
     REQUIRED_PACKAGES += ["numpy", "pandas"]
 
+if platform.system() != "Windows":
+    REQUIRED_PACKAGES += ['gunicorn >= 19.10.0']
+
 setup(
     name='paddlehub',
     version=hub_version.replace('-', ''),
