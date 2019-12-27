@@ -43,7 +43,7 @@ pip安装方式如下：
 ```shell
 $ pip install paddlehub
 ```
-2. 下载数据集、module等，PaddleHub要求机器可以访问外网。可以使用server_check()可以检查本地与远端PaddleHub-Server的连接状态，使用方法如下：
+2. 使用PaddleHub下载数据集、预训练模型等，要求机器可以访问外网。可以使用server_check()可以检查本地与远端PaddleHub-Server的连接状态，使用方法如下：
 
 ```python
 import paddlehub
@@ -115,13 +115,10 @@ $ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
 
 ## FAQ
 
-**Q:** 利用PaddleHub ernie/bert进行Finetune时，运行出错并提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息
+**Q:** 利用PaddleHub Finetune如何适配自定义数据集
 
-**A:** 因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。可以将PaddlePaddle和PaddleHub升级至最新版本，同时将ernie卸载。
-```shell
-$ pip install --upgrade paddlehub
-$ hub uninstall ernie
-```
+**A:** 参考[PaddleHub适配自定义数据集完成Finetune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
+
 
 **Q:** 使用PaddleHub时，无法下载预置数据集、Module的等现象
 
@@ -134,11 +131,16 @@ paddlehub.server_check()
 # 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully.
 ```
 
+**Q:** 利用PaddleHub ernie/bert进行Finetune时，运行出错并提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息
+
+**A:** 因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。可以将PaddlePaddle和PaddleHub升级至最新版本，同时将ernie卸载。
+```shell
+$ pip install --upgrade paddlehub
+$ hub uninstall ernie
+```
+
+
 **Note：** PaddleHub 1.1.1版本已支持离线运行Module
-
-**Q:** 利用PaddleHub Finetune如何适配自定义数据集
-
-**A:** 参考[PaddleHub适配自定义数据集完成Finetune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
 
 
 **更多问题**
