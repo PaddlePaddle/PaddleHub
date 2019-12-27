@@ -13,7 +13,7 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 
 * 『**模型即软件**』的设计理念，通过Python API或命令行实现快速预测，更方便地使用PaddlePaddle模型库，更多介绍请参考教程[PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 * PaddleHub提供便捷的服务化部署能力，简单一行命令即可搭建属于自己的模型的API服务，更多详情请参考教程[PaddleHub Serving一键服务化部署](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)和[使用示例](./demo/serving)
-* 支持AutoDL Finetuner超参优化技术， 自动搜索最优模型超参得到更好的模型效果。详情请参考[AutoDL Finetuner超参优化功能教程](./demo/autofinetune)
+* 支持AutoDL Finetuner超参优化技术， 自动搜索最优模型超参得到更好的模型效果。详情请参考[AutoDL Finetuner超参优化功能教程](.tutorial/autofinetune.md)
 
 ## 目录
 
