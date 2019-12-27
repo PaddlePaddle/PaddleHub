@@ -53,10 +53,10 @@ data_reader = hub.reader.ImageClassificationReader(
 
 | 数据集    | API                                        |
 | -------- | ------------------------------------------ |
-| Flowers  | hub.dataset.Flowers()                      | 
-| DogCat   | hub.dataset.DogCat()                       | 
-| Indoor67 | hub.dataset.Indoor67()                     | 
-| Food101  | hub.dataset.Food101()                      | 
+| Flowers  | hub.dataset.Flowers()                      |
+| DogCat   | hub.dataset.DogCat()                       |
+| Indoor67 | hub.dataset.Indoor67()                     |
+| Food101  | hub.dataset.Food101()                      |
 
 `hub.dataset.Flowers()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
@@ -115,7 +115,7 @@ task = hub.ImageClassifierTask(
     feature=feature_map,
     num_classes=dataset.num_labels,
     config=config)
-    
+
 task.finetune_and_eval()
 ```
 **NOTE:**
