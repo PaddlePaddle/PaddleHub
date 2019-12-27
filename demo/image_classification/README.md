@@ -1,26 +1,26 @@
 # PaddleHub 图像分类
 
-本示例将展示如何使用PaddleHub Finetune API以及[ResNet](https://www.paddlepaddle.org.cn/hubdetail?name=resnet_v2_50_imagenet&en_category=ImageClassification)等预训练模型完成分类任务。
+本示例将展示如何使用PaddleHub Fine-tune API以及[ResNet](https://www.paddlepaddle.org.cn/hubdetail?name=resnet_v2_50_imagenet&en_category=ImageClassification)等预训练模型完成分类任务。
 
-## 如何开始Finetune
+## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用ResNet对[Flowers](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset#class-hubdatasetflowersdataset)等数据集进行Finetune。
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用ResNet对[Flowers](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset#class-hubdatasetflowersdataset)等数据集进行Fine-tune。
 
 其中脚本参数说明如下：
 
 ```shell
 --batch_size: 批处理大小，请结合显存情况进行调整，若出现显存不足，请适当调低这一参数。默认为16
---num_epoch: finetune迭代的轮数。默认为1
---module: 使用哪个Module作为finetune的特征提取器，脚本支持{resnet50/resnet101/resnet152/mobilenet/nasnet/pnasnet}等模型。默认为resnet50
+--num_epoch: Fine-tune迭代的轮数。默认为1
+--module: 使用哪个Module作为Fine-tune的特征提取器，脚本支持{resnet50/resnet101/resnet152/mobilenet/nasnet/pnasnet}等模型。默认为resnet50
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型。默认为paddlehub_finetune_ckpt
---dataset: 使用什么数据集进行finetune, 脚本支持分别是{flowers/dogcat/stanforddogs/indoor67/food101}。默认为flowers
+--dataset: 使用什么数据集进行Fine-tune, 脚本支持分别是{flowers/dogcat/stanforddogs/indoor67/food101}。默认为flowers
 --use_gpu: 是否使用GPU进行训练，如果机器支持GPU且安装了GPU版本的PaddlePaddle，我们建议您打开这个开关。默认关闭
 --use_data_parallel: 是否使用数据并行，打开该开关时，会将数据分散到不同的卡上进行训练（CPU下会分布到不同线程）。默认打开
 ```
 
 ## 代码步骤
 
-使用PaddleHub Finetune API进行Finetune可以分为4个步骤
+使用PaddleHub Fine-tune API进行Fine-tune可以分为4个步骤
 
 ### Step1: 加载预训练模型
 
@@ -90,7 +90,7 @@ PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStr
 * `regularization_coeff`: 正则化的λ参数。默认为1e-3
 
 #### 运行配置
-`RunConfig` 主要控制Finetune的训练，包含以下可控制的参数:
+`RunConfig` 主要控制Fine-tune的训练，包含以下可控制的参数:
 
 * `log_interval`: 进度日志打印间隔，默认每10个step打印一次
 * `eval_interval`: 模型评估的间隔，默认每100个step评估一次验证集
@@ -99,11 +99,11 @@ PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStr
 * `use_pyreader`: 是否使用pyreader，默认False
 * `use_data_parallel`: 是否使用并行计算，默认True。打开该功能依赖nccl库
 * `checkpoint_dir`: 模型checkpoint保存路径, 若用户没有指定，程序会自动生成
-* `num_epoch`: finetune的轮数
+* `num_epoch`: Fine-tune的轮数
 * `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size
-* `strategy`: Finetune优化策略
+* `strategy`: Fine-tune优化策略
 
-### Step4: 构建网络并创建分类迁移任务进行Finetune
+### Step4: 构建网络并创建分类迁移任务进行Fine-tune
 
 ```python
 feature_map = output_dict["feature_map"]
@@ -129,7 +129,7 @@ task.finetune_and_eval()
 
 ## 可视化
 
-Finetune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
+Fine-tune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
 ```bash
 $ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_NUM}
 ```
@@ -137,19 +137,19 @@ $ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_N
 
 ## 模型预测
 
-当完成Finetune后，Finetune过程在验证集上表现最优的模型会被保存在`${CHECKPOINT_DIR}/best_model`目录下，其中`${CHECKPOINT_DIR}`目录为finetune时所选择的保存checkpoint的目录。
+当完成Fine-tune后，Fine-tune过程在验证集上表现最优的模型会被保存在`${CHECKPOINT_DIR}/best_model`目录下，其中`${CHECKPOINT_DIR}`目录为Fine-tune时所选择的保存checkpoint的目录。
 
 我们使用该模型来进行预测。predict.py脚本支持的参数如下：
 
 ```shell
---module: 使用哪个Module作为finetune的特征提取器，脚本支持{resnet50/resnet101/resnet152/mobilenet/nasnet/pnasnet}等模型。默认为resnet50
+--module: 使用哪个Module作为Fine-tune的特征提取器，脚本支持{resnet50/resnet101/resnet152/mobilenet/nasnet/pnasnet}等模型。默认为resnet50
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型。默认为paddlehub_finetune_ckpt
---dataset: 使用什么数据集进行finetune, 脚本支持分别是{flowers/dogcat}。默认为flowers
+--dataset: 使用什么数据集进行Fine-tune, 脚本支持分别是{flowers/dogcat}。默认为flowers
 --use_gpu: 使用使用GPU进行训练，如果本机支持GPU且安装了GPU版本的PaddlePaddle，我们建议您打开这个开关。默认关闭
 --use_pyreader: 是否使用pyreader进行数据喂入。默认关闭
 ```
 
-`注意`：进行预测时，所选择的module，checkpoint_dir，dataset必须和Finetune所用的一样
+`注意`：进行预测时，所选择的module，checkpoint_dir，dataset必须和Fine-tune所用的一样
 
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下图片分类预测结果
 如需了解更多预测步骤，请参考`predict.py`
@@ -160,11 +160,11 @@ $ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_N
 |-|-|-|-|-|
 |ResNet|图像分类|猫狗数据集DogCat|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216772)||
 |ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216764)||
-|ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216649)|本教程讲述了如何将自定义数据集加载，并利用Finetune API完成文本分类迁移学习。|
+|ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216649)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成文本分类迁移学习。|
 |ERNIE|序列标注|中文序列标注数据集MSRA_NER|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216787)||
-|ERNIE|序列标注|中文快递单数据集Express|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216683)|本教程讲述了如何将自定义数据集加载，并利用Finetune API完成序列标注迁移学习。|
+|ERNIE|序列标注|中文快递单数据集Express|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216683)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成序列标注迁移学习。|
 |ERNIE Tiny|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215599)||
-|Senta|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216851)|本教程讲述了任何利用Senta和Finetune API完成情感分类迁移学习。|
+|Senta|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216851)|本教程讲述了任何利用Senta和Fine-tune API完成情感分类迁移学习。|
 |Senta|情感分析预测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216735)||
 |LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215641)||
 |Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216749)||
