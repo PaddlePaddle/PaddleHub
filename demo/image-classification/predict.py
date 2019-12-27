@@ -9,7 +9,7 @@ import numpy as np
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--use_gpu",            type=ast.literal_eval,  default=False,                      help="Whether use GPU for predict.")
+parser.add_argument("--use_gpu",            type=ast.literal_eval,  default=True,                      help="Whether use GPU for predict.")
 parser.add_argument("--checkpoint_dir",     type=str,               default="paddlehub_finetune_ckpt",  help="Path to save log data.")
 parser.add_argument("--batch_size",         type=int,               default=16,                         help="Total examples' number in batch for training.")
 parser.add_argument("--module",             type=str,               default="resnet50",                 help="Module used as a feature extractor.")
