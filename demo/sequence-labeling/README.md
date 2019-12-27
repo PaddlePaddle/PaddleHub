@@ -15,8 +15,7 @@
 --warmup_proportion: 学习率warmup策略的比例，如果0.1，则学习率会在前10%训练step的过程中从0慢慢增长到learning_rate, 而后再缓慢衰减，默认为0
 --num_epoch: Finetune迭代的轮数
 --max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数。
---use_data_parallel: 是否使用并行计算，默认False。打开该功能依赖nccl库。
---use_pyreader: 是否使用pyreader，默认False。
+--use_data_parallel: 是否使用并行计算，默认True。打开该功能依赖nccl库。
 
 # 任务相关
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型
@@ -52,6 +51,7 @@ BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-7
 BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
 RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
 RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
+
 更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
 
 如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
@@ -79,13 +79,17 @@ reader = hub.reader.SequenceLabelReader(
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致
 
-`module.sp_model_path` 若module为ernie_tiny则返回对应的子词切分模型，否则返回None
-
-`module.word_dict_path` 若module为ernie_tiny则返回对应的词语切分模型，否则返回None
+`module.sp_model_path` 和 `module.word_dict_path` 用于 ERNIE Tiny 中文sub-word中文切词技术
 
 SequenceLabelReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
 
-**NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
+**NOTE**: 
+* Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
+* 如果选择的预训练模型不是ERNIE Tiny，则无需设定sp_model_path和word_dict_path参数
+
+#### 自定义数据集
+
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
 
 ### Step3：选择优化策略和运行配置
 
@@ -100,12 +104,15 @@ strategy = hub.AdamWeightDecayStrategy(
 config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strategy)
 ```
 #### 优化策略
+
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)
+
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`
 
 `learning_rate`: Finetune过程中的最大学习率;
 `weight_decay`: 模型的正则项参数，默认0.01，如果模型有过拟合倾向，可适当调高这一参数;
 `warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate;
-`lr_scheduler`: 有两种策略可选(1) `linear_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
+`lr_scheduler`: 有两种策略可选（1）`linear_decay`策略学习率会在最高点后以线性方式衰减;（2） `noam_decay`策略学习率会在最高点以多项式形式衰减；
 
 #### 运行配置
 `RunConfig` 主要控制Finetune的训练，包含以下可控制的参数:
@@ -149,6 +156,10 @@ seq_label_task.finetune_and_eval()
 3. `hub.SequenceLabelTask`通过输入特征，迁移的类别数，可以生成适用于序列标注的迁移任务`SequenceLabelTask`
 4. `hub.SequenceLabelTask`通过add_crf, 选择是否加入crf作为decoder。如果add_crf=True, 则在预训练模型计算图加入fc+crf层，否则只在在预训练模型计算图加入fc层。
 
+#### 自定义迁移任务
+
+如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
+
 ## 可视化
 
 Finetune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
@@ -170,5 +181,22 @@ python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
 如需了解更多预测步骤，请参考`predict.py`
 
-```
-text=它折射出华夏文明的绚丽光环，使这片古老的土地更加异彩纷呈，充满魅力。	label=OOOOB-LOCI-LOCOOOOOOOOOOOOOOOOOOOOOOOOOOOO	predict=OOOOOB-LOCI-LOCOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
+
+|预训练模型|任务类型|数据集|AIStudio链接|备注|
+|-|-|-|-|-|
+|ResNet|图像分类|猫狗数据集DogCat|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216772)||
+|ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216764)||
+|ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216649)|本教程讲述了如何将自定义数据集加载，并利用Finetune API完成文本分类迁移学习。|
+|ERNIE|序列标注|中文序列标注数据集MSRA_NER|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216787)||
+|ERNIE|序列标注|中文快递单数据集Express|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216683)|本教程讲述了如何将自定义数据集加载，并利用Finetune API完成序列标注迁移学习。|
+|ERNIE Tiny|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215599)||
+|Senta|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216851)|本教程讲述了任何利用Senta和Finetune API完成情感分类迁移学习。|
+|Senta|情感分析预测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216735)||
+|LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215641)||
+|Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216749)||
+
+
+## 超参优化AutoDL Finetuner
+
+PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../../tutorial/autofinetune.md) 和[使用样例](../autofinetune)

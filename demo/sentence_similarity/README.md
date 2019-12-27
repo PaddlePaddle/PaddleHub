@@ -1,28 +1,8 @@
-# Word2vec
+# 句子相似度
 
-## 关于
+本示例展示如何使用word2vec_skipgram模型进行句子相似度预测。
 
-本示例展示如何使用word2vec_skipgram Module进行句子相似度预测。
-
-word2vec_skipgram是对中文词语的向量表示，可以用于各类NLP下游任务等。
-
-## 准备工作
-
-在运行本目录的脚本前，需要先安装1.4.0版本以上的PaddlePaddle（如果您本地已经安装了符合条件的PaddlePaddle版本，那么可以跳过`准备工作`这一步）。
-
-```shell
-# 安装GPU版本的PaddlePaddle
-$ pip install --upgrade paddlepaddle-gpu
-```
-
-如果您的机器不支持GPU，可以通过下面的命令来安装CPU版本的PaddlePaddle
-
-```shell
-# 安装CPU版本的PaddlePaddle
-$ pip install --upgrade paddlepaddle
-```
-
-在安装过程中如果遇到问题，您可以到[Paddle官方网站](http://www.paddlepaddle.org/)上查看解决方案。
+该示例运用最简单的方法，将一个句子中所有单词的word embedding叠加，得到句子向量。之后计算余弦相似度。
 
 ## 预测
 

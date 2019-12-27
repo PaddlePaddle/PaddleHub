@@ -2,6 +2,16 @@
 
 本示例将展示如何使用PaddleHub Finetune API以及BERT预训练模型在Toxic完成多标签分类任务。
 
+多标签分类是广义的多分类，多分类是将样本精确地分类为两个以上类别之一的单标签问题。 在多标签问题中，样本可以分配给多个类别，没有限制。
+如下图所示：
+
+<p align="center">
+<img src="https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.4/docs/imgs/multi-label-cls.png" hspace='10'/> <br />
+</p>
+*图片来源于https://mc.ai/building-a-multi-label-text-classifier-using-bert-and-tensorflow/*
+
+
+
 ## 如何开始Finetune
 
 在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用BERT对Toxic数据集进行Finetune。
@@ -29,9 +39,32 @@
 ### Step1: 加载预训练模型
 
 ```python
-module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
+module = hub.Module(name="ernie_v2_eng_base")
 inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 ```
+
+其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
+
+PaddleHub还提供BERT等模型可供选择, 模型对应的加载示例如下：
+
+   模型名                           | PaddleHub Module
+---------------------------------- | :------:
+ERNIE, Chinese                     | `hub.Module(name='ernie')`
+ERNIE tiny, Chinese                | `hub.Module(name='ernie_tiny')`
+ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
+ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
+BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
+BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
+BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
+BERT-Large, Cased                  | `hub.Module(name='bert_cased_L-24_H-1024_A-16')`
+BERT-Base, Multilingual Cased      | `hub.Module(nane='bert_multi_cased_L-12_H-768_A-12')`
+BERT-Base, Chinese                 | `hub.Module(name='bert_chinese_L-12_H-768_A-12')`
+BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-768_A-12')`
+BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
+
+更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub)。
 
 ### Step2: 准备数据集并使用MultiLabelClassifyReader读取数据
 ```python
@@ -54,6 +87,12 @@ MultiLabelClassifyReader中的`data_generator`会自动按照模型对应词表�
 
 **NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
 
+
+
+#### 自定义数据集
+
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
+
 ### Step3：选择优化策略和运行配置
 
 ```python
@@ -74,6 +113,8 @@ config = hub.RunConfig(use_cuda=True, use_data_parallel=True, use_pyreader=True,
 * `weight_decay`: 模型的正则项参数，默认0.01，如果模型有过拟合倾向，可适当调高这一参数;
 * `warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate;
 * `lr_scheduler`: 有两种策略可选(1) `linear_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
+
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)
 
 #### 运行配置
 `RunConfig` 主要控制Finetune的训练，包含以下可控制的参数:
@@ -116,6 +157,10 @@ cls_task.finetune_and_eval()
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与MultiLabelClassifierTask返回的结果一致。
 3. `hub.MultiLabelClassifierTask`通过输入特征，label与迁移的类别数，可以生成适用于多标签分类的迁移任务`MultiLabelClassifierTask`
 
+#### 自定义迁移任务
+
+如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
+
 ## 可视化
 
 Finetune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
@@ -136,3 +181,8 @@ python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
 如需了解更多预测步骤，请参考`predict.py`
+
+
+## 超参优化AutoDL Finetuner
+
+PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../../tutorial/autofinetune.md) 和[使用样例](../autofinetune)

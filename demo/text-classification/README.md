@@ -1,28 +1,6 @@
 # PaddleHub 文本分类
 
-本示例将展示如何使用PaddleHub Finetune API以及Transformer类预训练模型完成分类任务。
-其中分类任务可以分为两大类：
-
-* **单句分类**
-  - ChineseGLUE-IFLYTEK
-  - ChineseGLUE-THUCNEWS
-  - GLUE-Cola
-  - GLUE-SST2
-  - ChnSentiCorp
-* **句对分类**
-  - ChineseGLUE-LCQMC
-  - ChineseGLUE-INEWS
-  - ChineseGLUE-TNEWS
-  - ChinesGLUE-BQ
-  - ChineseGLUE-XNLI_zh
-  - GLUE-MNLI
-  - GLUE-QQP
-  - GLUE-QNLI
-  - GLUE-STS-B
-  - GLUE-MRPC
-  - GLUE-RTE
-  - NLPCC-DBQA
-  - XNLI
+本示例将展示如何使用PaddleHub Finetune API以及Transformer类预训练模型(ERNIE/BERT/RoBERTa)完成分类任务。
 
 ## 如何开始Finetune
 
@@ -31,19 +9,14 @@
 其中脚本参数说明如下：
 
 ```bash
-# 模型相关
 --batch_size: 批处理大小，请结合显存情况进行调整，若出现显存不足，请适当调低这一参数
 --learning_rate: Finetune的最大学习率
 --weight_decay: 控制正则项力度的参数，用于防止过拟合，默认为0.01
 --warmup_proportion: 学习率warmup策略的比例，如果0.1，则学习率会在前10%训练step的过程中从0慢慢增长到learning_rate, 而后再缓慢衰减，默认为0
 --num_epoch: Finetune迭代的轮数
 --max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数
---use_data_parallel: 是否使用并行计算，默认False。打开该功能依赖nccl库。
---use_pyreader: 是否使用pyreader，默认False。
-
-# 任务相关
+--use_data_parallel: 是否使用并行计算，默认True。打开该功能依赖nccl库。
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型
---dataset: 有以下数据集可选: chnsenticorp, lcqmc, nlpcc_dbqa, GLUE, XNLI
 ```
 
 ## 代码步骤
@@ -96,8 +69,6 @@ reader = hub.reader.ClassifyReader(
 metrics_choices = ["acc"]
 ```
 
-其中数据集的准备代码可以参考 [chnsenticorp.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/chnsenticorp.py)
-
 `hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
 
 `module.get_vocab_path()` 会返回预训练模型对应的词表
@@ -112,7 +83,35 @@ ClassifyReader中的`data_generator`会自动按照模型对应词表对数据�
 
 **NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
 
-同时，利用Accuracy作为评价指标。
+PaddleHub还提供了其他的文本分类数据集，分两类（单句分类和句对分类），具体信息如下表
+
+   数据集         |  API                         | 单句/句对 |  推荐预训练模型                   | 推荐评价指标 |
+---------------- | -----------------------------| ---------| ------------------------------ | -----------|
+ChnSentiCorp     |  hub.dataset.ChnSentiCorp()  | 单句      | ernie_tiny                     |  accuracy  |
+LCQMC            |  hub.dataset.LCQMC()         | 句对      | ernie_tiny                     |  accuracy  |
+NLPCC-QBDA       |  hub.dataset.NLPCC_DBQA()    | 句对      | ernie_tiny                     |  accuracy  |
+GLUE-CoLA        |  hub.dataset.GLUE("CoLA")    | 单句      | ernie_v2_eng_base              |  matthews  |
+GLUE-SST2        |  hub.dataset.GLUE("SST-2")   | 单句      | ernie_v2_eng_base              |  accuracy  |
+GLUE-CoLA        |  hub.dataset.GLUE("CoLA")    | 单句      | ernie_v2_eng_base              |  accuracy  |
+GLUE-MNLI        |  hub.dataset.GLUE("MNLI_m")  | 句对      | ernie_v2_eng_base              |  accuracy  |
+GLUE-QQP         |  hub.dataset.GLUE("QQP")     | 句对      | ernie_v2_eng_base              |  accuracy  |
+GLUE-QNLI        |  hub.dataset.GLUE("QNLI")    | 句对      | ernie_v2_eng_base              |  accuracy  |
+GLUE-STS-2       |  hub.dataset.GLUE("SST-2"")  | 句对      | ernie_v2_eng_base              |  accuracy  |
+GLUE-MRPC        |  hub.dataset.GLUE("MRPC")    | 句对      | ernie_v2_eng_base              |  f1        |
+GLUE-RTE         |  hub.dataset.GLUE("RTE")     | 单句      | ernie_v2_eng_base              |  accuracy  |
+XNLI             | hub.dataset.XNLI(language=zh)| 句对      | roberta_wwm_ext_chinese_L-24_H-1024_A-16 |  accuracy  |
+ChineseGLUE-THUCNEWS |  hub.dataset.THUCNEWS()  | 单句      | roberta_wwm_ext_chinese_L-24_H-1024_A-16 |  accuracy  |
+ChineseGLUE-IFLYTEK  |  hub.dataset.IFLYTEK()   | 单句      | roberta_wwm_ext_chinese_L-24_H-1024_A-16 |  accuracy  |
+ChineseGLUE-INEWS    |  hub.dataset.INews()     | 句对      | roberta_wwm_ext_chinese_L-24_H-1024_A-16 |  accuracy  |
+ChineseGLUE-TNEWS    |  hub.dataset.TNews()     | 句对      | roberta_wwm_ext_chinese_L-24_H-1024_A-16 |  accuracy  |
+ChinesGLUE-BQ        |  hub.dataset.BQ()        | 句对      | roberta_wwm_ext_chinese_L-24_H-1024_A-16 |  accuracy  |
+
+更多数据集信息参考[Dataset](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset)
+
+
+#### 自定义数据集
+
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
 
 ### Step3：选择优化策略和运行配置
 
@@ -130,22 +129,18 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 #### 优化策略
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`
 
-`learning_rate`: Finetune过程中的最大学习率;
-`weight_decay`: 模型的正则项参数，默认0.01，如果模型有过拟合倾向，可适当调高这一参数;
-`warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate;
-`lr_scheduler`: 有两种策略可选(1) `linear_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
+* `learning_rate`: Finetune过程中的最大学习率;
+* `weight_decay`: 模型的正则项参数，默认0.01，如果模型有过拟合倾向，可适当调高这一参数;
+* `warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate;
+* `lr_scheduler`: 有两种策略可选(1) `linear_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
 
 #### 运行配置
 `RunConfig` 主要控制Finetune的训练，包含以下可控制的参数:
 
-* `log_interval`: 进度日志打印间隔，默认每10个step打印一次
-* `eval_interval`: 模型评估的间隔，默认每100个step评估一次验证集
-* `save_ckpt_interval`: 模型保存间隔，请根据任务大小配置，默认只保存验证集效果最好的模型和训练结束的模型
 * `use_cuda`: 是否使用GPU训练，默认为False
 * `checkpoint_dir`: 模型checkpoint保存路径, 若用户没有指定，程序会自动生成
 * `num_epoch`: finetune的轮数
 * `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size
-* `enable_memory_optim`: 是否使用内存优化， 默认为True
 * `strategy`: Finetune优化策略
 
 ### Step4: 构建网络并创建分类迁移任务进行Finetune
@@ -174,6 +169,10 @@ cls_task.finetune_and_eval()
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与ClassifyReader返回的结果一致。
 3. `hub.TextClassifierTask`通过输入特征，label与迁移的类别数，可以生成适用于文本分类的迁移任务`TextClassifierTask`
 
+#### 自定义迁移任务
+
+如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
+
 ## 可视化
 
 Finetune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
@@ -196,6 +195,27 @@ python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 如需了解更多预测步骤，请参考`predict.py`
 
 ```
-text=键盘缝隙大进灰，装系统自己不会装，屏幕有点窄玩游戏人物有点变形	label=0	predict=0
-accuracy = 0.954267
+这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般	predict=0
+交通方便；环境很好；服务态度很好 房间较小	predict=1
+19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~	predict=0
 ```
+
+我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
+
+|预训练模型|任务类型|数据集|AIStudio链接|备注|
+|-|-|-|-|-|
+|ResNet|图像分类|猫狗数据集DogCat|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216772)||
+|ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216764)||
+|ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216649)|本教程讲述了如何将自定义数据集加载，并利用Finetune API完成文本分类迁移学习。|
+|ERNIE|序列标注|中文序列标注数据集MSRA_NER|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216787)||
+|ERNIE|序列标注|中文快递单数据集Express|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216683)|本教程讲述了如何将自定义数据集加载，并利用Finetune API完成序列标注迁移学习。|
+|ERNIE Tiny|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215599)||
+|Senta|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216851)|本教程讲述了任何利用Senta和Finetune API完成情感分类迁移学习。|
+|Senta|情感分析预测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216735)||
+|LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215641)||
+|Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216749)||
+
+
+## 超参优化AutoDL Finetuner
+
+PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../../tutorial/autofinetune.md) 和[使用样例](../autofinetune)

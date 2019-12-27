@@ -34,11 +34,17 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub BERT pretrained model
+    # Load Paddlehub ERNIE 2.0 pretrained model
     module = hub.Module(name="ernie_v2_eng_base")
-
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
+
+    # Download dataset and use MultiLabelReader to read dataset
+    dataset = hub.dataset.Toxic()
+    reader = hub.reader.MultiLabelClassifyReader(
+        dataset=dataset,
+        vocab_path=module.get_vocab_path(),
+        max_seq_len=args.max_seq_len)
 
     # Setup feed list for data feeder
     feed_list = [
@@ -46,23 +52,15 @@ if __name__ == '__main__':
         inputs["segment_ids"].name, inputs["input_mask"].name
     ]
 
-    # Download dataset and use MultiLabelReader to read dataset
-    dataset = hub.dataset.Toxic()
-
-    reader = hub.reader.MultiLabelClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
-
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     pooled_output = outputs["pooled_output"]
 
     # Select finetune strategy, setup config and finetune
     strategy = hub.AdamWeightDecayStrategy(
+        warmup_proportion=args.warmup_proportion,
         weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate,
-        lr_scheduler="linear_decay")
+        learning_rate=args.learning_rate)
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(

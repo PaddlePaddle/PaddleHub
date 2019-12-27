@@ -15,13 +15,12 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Step1: load Paddlehub senta pretrained model
+    # Load Paddlehub senta pretrained model
     module = hub.Module(name="senta_bilstm")
     inputs, outputs, program = module.context(trainable=True)
 
-    # Step2: Download dataset and use LACClassifyReader to read dataset
+    # Download dataset and use LACClassifyReader to read dataset
     dataset = hub.dataset.ChnSentiCorp()
-
     reader = hub.reader.LACClassifyReader(
         dataset=dataset, vocab_path=module.get_vocab_path())
 
@@ -31,16 +30,15 @@ if __name__ == '__main__':
     # Must feed all the tensor of senta's module need
     feed_list = [inputs["words"].name]
 
-    strategy = hub.finetune.strategy.AdamWeightDecayStrategy(
-        learning_rate=1e-4, weight_decay=0.01, warmup_proportion=0.05)
-
+    # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
         use_cuda=args.use_gpu,
+        use_pyreader=False,
+        use_data_parallel=False,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
         checkpoint_dir=args.checkpoint_dir,
-        use_pyreader=False,
-        strategy=strategy)
+        strategy=hub.AdamWeightDecayStrategy())
 
     # Define a classfication finetune task by PaddleHub's API
     cls_task = hub.TextClassifierTask(

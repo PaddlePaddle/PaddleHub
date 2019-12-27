@@ -51,6 +51,7 @@ BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-7
 BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
 RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
 RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
+
 更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
 
 如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
@@ -80,6 +81,11 @@ ClassifyReader中的`data_generator`会自动按照模型对应词表对数据�
 
 **NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
 
+
+#### 自定义数据集
+
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
+
 ### Step3：选择优化策略和运行配置
 
 ```python
@@ -94,6 +100,9 @@ config = hub.RunConfig(use_cuda=True, use_data_parallel=True, use_pyreader=True,
 ```
 
 #### 优化策略
+
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)
+
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`
 
 * `learning_rate`: Finetune过程中的最大学习率;
@@ -142,6 +151,10 @@ cls_task.finetune_and_eval()
 2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与ClassifyReader返回的结果一致。
 3. `hub.TextClassifierTask`通过输入特征，label与迁移的类别数，可以生成适用于文本分类的迁移任务`TextClassifierTask`
 
+#### 自定义迁移任务
+
+如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
+
 ## 可视化
 
 Finetune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
@@ -162,3 +175,8 @@ python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
 如需了解更多预测步骤，请参考`predict.py`
+
+
+## 超参优化AutoDL Finetuner
+
+PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../../tutorial/autofinetune.md) 和[使用样例](../autofinetune)

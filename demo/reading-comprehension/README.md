@@ -17,11 +17,9 @@
 --num_epoch: Finetune迭代的轮数
 --max_seq_len: BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数
 --use_data_parallel: 是否使用并行计算，默认False。打开该功能依赖nccl库。
---use_pyreader: 是否使用pyreader，默认False。
 
 # 任务相关
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型
---version_2_with_negative: 若version_2_with_negative=False，则使用SQuAD 1.1数据集；若version_2_with_negative=True，则使用SQuAD 2.0数据集；
 ```
 
 ## 代码步骤
@@ -36,6 +34,33 @@ inputs, outputs, program = module.context(trainable=True, max_seq_len=384)
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值384，根据任务文本长度不同可以调整该值，但最大不超过512。
 
+PaddleHub还提供BERT等模型可供选择, 模型对应的加载示例如下：
+
+   模型名                           | PaddleHub Module
+---------------------------------- | :------:
+ERNIE, Chinese                     | `hub.Module(name='ernie')`
+ERNIE tiny, Chinese                | `hub.Module(name='ernie_tiny')`
+ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
+ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
+BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
+BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
+BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
+BERT-Large, Cased                  | `hub.Module(name='bert_cased_L-24_H-1024_A-16')`
+BERT-Base, Multilingual Cased      | `hub.Module(nane='bert_multi_cased_L-12_H-768_A-12')`
+BERT-Base, Chinese                 | `hub.Module(name='bert_chinese_L-12_H-768_A-12')`
+BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-768_A-12')`
+BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
+RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
+
+更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
+
+如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
+```python
+# 更换name参数即可无缝切换BERT中文模型, 代码示例如下
+module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
+```
+
 ### Step2: 准备数据集并使用ReadingComprehensionReader读取数据
 ```python
 dataset = hub.dataset.SQUAD(
@@ -43,14 +68,12 @@ dataset = hub.dataset.SQUAD(
 reader = hub.reader.ReadingComprehensionReader(
     dataset=dataset,
     vocab_path=module.get_vocab_path(),
-    max_seq_length=args.max_seq_len,
-    doc_stride=128,
-    max_query_length=64)
+    max_seq_length=384)
 ```
 
 其中数据集的准备代码可以参考 [squad.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/squad.py)
 
-`hub.dataset.SQUAD()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录
+`hub.dataset.SQUAD(version_2_with_negative=False)` 会自动从网络下载数据集SQuAD v1.1并解压到用户目录下`$HOME/.paddlehub/dataset`目录；如果想选择数据集SQuAD v2.0，则只需version_2_with_negative=True
 
 `module.get_vocab_path()` 会返回预训练模型对应的词表
 
@@ -60,21 +83,35 @@ ReadingComprehensionReader中的`data_generator`会自动按照模型对应词�
 
 **NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
 
+PaddleHub还提供了其他的阅读理解数据集，具体信息如下表：
+
+数据集         |  API                                                                | 推荐预训练模型                           |
+------------- | ------------------------------------------------------------------- |--------------------------------------- |
+SQuAD v1.1    |  hub.dataset.SQUAD(version_2_with_negative=False)                   | bert_uncased_L-12_H-768_A-12           |
+SQuAD v2.0    |  hub.dataset.SQUAD(version_2_with_negative=True)                    | bert_uncased_L-12_H-768_A-12           |
+DRCD          |  hub.dataset.DRCD()                                                 |roberta_wwm_ext_chinese_L-24_H-1024_A-16|
+CMRC 2018     |  hub.dataset.CMRC2018()                                             |roberta_wwm_ext_chinese_L-24_H-1024_A-16|
+
+更多数据集信息参考[Dataset](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset)
+
+#### 自定义数据集
+
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
+
 ### Step3：选择优化策略和运行配置
 
 ```python
 strategy = hub.AdamWeightDecayStrategy(
     learning_rate=5e-5,
     weight_decay=0.01,
-    warmup_proportion=0.0,
-    lr_scheduler="linear_decay",
+    warmup_proportion=0.1
 )
 
 config = hub.RunConfig(use_cuda=True, num_epoch=2, batch_size=12, strategy=strategy)
 ```
 
 #### 优化策略
-针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`
+针对ERNIE/BERT类Transformer模型，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`
 
 `learning_rate`: Finetune过程中的最大学习率;
 
@@ -82,7 +119,9 @@ config = hub.RunConfig(use_cuda=True, num_epoch=2, batch_size=12, strategy=strat
 
 `warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate;
 
-`lr_scheduler`: 有两种策略可选(1) `linear_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减;
+`lr_scheduler`: 有两种策略可选（1）`linear_decay`策略学习率会在最高点后以线性方式衰减; （2）`noam_decay`策略学习率会在最高点以多项式形式衰减;
+
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)
 
 #### 运行配置
 `RunConfig` 主要控制Finetune的训练，包含以下可控制的参数:
@@ -113,13 +152,21 @@ reading_comprehension_task = hub.ReadingComprehensionTask(
     data_reader=reader,
     feature=seq_output,
     feed_list=feed_list,
-    config=config)
+    config=config,
+    sub_task="squad")
 
 reading_comprehension_task.finetune_and_eval()
 ```
 **NOTE:**
-1. `outputs["sequence_output"]`返回了BERT模型输入单词的对应输出,可以用于单词的特征表达。
-2. `feed_list`中的inputs参数指名了BERT中的输入tensor的顺序，与ClassifyReader返回的结果一致。
+1. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达。
+2. `feed_list`中的inputs参数指名了BERT中的输入tensor的顺序，与ReadingComprehensionReader返回的结果一致。
+3. `sub_task`指明阅读理解数据集名称，可选{squad, squad2.0, cmrc2018, drcd}, 用于适配各个数据集的模型训练过程中的评估方法
+4.  `hub.ReadingComprehensionTask`通过输入特征、段落背景、问题和答案，可以生成适用于阅读理解迁移任务ReadingComprehensionTask
+
+
+#### 自定义迁移任务
+
+如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
 ## 可视化
 
@@ -136,12 +183,17 @@ $ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_N
 
 ```bash
 CKPT_DIR=".ckpt_rc/"
-python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 384 --batch_size=12 --version_2_with_negative=False
+python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 384 --batch_size=1
 ```
-其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
+其中CKPT_DIR为Finetune API保存最佳模型的路径, max_seq_len是ERNIE/BERT模型的最大序列长度，*请与训练时配置的参数保持一致*
 
-参数配置正确后，请执行脚本`sh run_predict.sh`，预测时程序会自动调用官方评价脚本(version_2_with_negative=False调用evaluate_v1.py，version_2_with_negative=True调用evaluate_v2.py)即可看到SQuAD数据集的最终效果。
+参数配置正确后，请执行脚本`sh run_predict.sh`，预测时程序会自动调用官方评价脚本即可看到SQuAD数据集的最终效果。
 如需了解更多预测步骤，请参考`predict.py`
 
 **NOTE:**
 运行预测脚本时，建议用单卡预测。
+
+
+## 超参优化AutoDL Finetuner
+
+PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../../tutorial/autofinetune.md) 和[使用样例](../autofinetune)
