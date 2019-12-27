@@ -4,28 +4,33 @@
     "module": "lac",
     "version": "1.0.0",
     "batch_size": 200,
-    "queue_size": 200
+    "queue_size": 200,
+    "category": "NLP"
   },
   {
     "module": "senta_lstm",
     "version": "1.0.0",
     "batch_size": 1,
-    "queue_size": 200
+    "queue_size": 200,
+    "category": "NLP"
   },
   {
-    "module": "yolov3_coco2017",
+    "module": "yolov3_darknet53_coco2017",
     "version": "1.0.0",
     "batch_size": 1,
-    "queue_size": 10
+    "queue_size": 10,
+    "category": "CV"
   },
   {
     "module": "faster_rcnn_coco2017",
     "version": "1.0.0",
     "batch_size": 1,
-    "queue_size": 10
+    "queue_size": 10,
+    "category": "CV"
   }
 ],
   "use_gpu": false,
   "port": 8866,
-  "use_multiprocess": false
+  "use_multiprocess": true,
+  "workers": 3
 }
