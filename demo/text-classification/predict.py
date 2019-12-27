@@ -50,6 +50,7 @@ if __name__ == '__main__':
     # For ernie_tiny, it use sub-word to tokenize chinese sentence
     # If not ernie tiny, sp_model_path and word_dict_path should be set None
     reader = hub.reader.ClassifyReader(
+        dataset=dataset,
         vocab_path=module.get_vocab_path(),
         max_seq_len=args.max_seq_len,
         sp_model_path=module.get_spm_path(),
