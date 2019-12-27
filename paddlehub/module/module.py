@@ -101,11 +101,7 @@ _module_runable_func = {}
 
 
 def runable(func):
-    if six.PY3:
-        mod = func.__qualname__.split(".")[:-1]
-        mod = ".".join(mod)
-    else:
-        mod = func.im_class.__name__
+    mod = func.__module__ + "." + inspect.stack()[1][3]
     _module_runable_func[mod] = func.__name__
 
     def _wrapper(*args, **kwargs):
@@ -146,8 +142,9 @@ class Module(object):
         if not directory:
             return
 
-        if self.__class__.__name__ in _module_runable_func:
-            _run_func_name = _module_runable_func[self.__class__.__name__]
+        mod = self.__class__.__module__ + "." + self.__class__.__name__
+        if mod in _module_runable_func:
+            _run_func_name = _module_runable_func[mod]
             self._run_func = getattr(self, _run_func_name)
         else:
             self._run_func = None
