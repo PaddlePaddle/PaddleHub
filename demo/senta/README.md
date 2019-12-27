@@ -158,7 +158,7 @@ $ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_N
 配置脚本参数
 ```
 CKPT_DIR="ckpt_chnsentiment/"
-python predict.py --checkpoint_dir $CKPT_DIR 
+python predict.py --checkpoint_dir $CKPT_DIR
 ```
 其中CKPT_DIR为Finetune API保存最佳模型的路径
 

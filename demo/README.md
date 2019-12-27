@@ -10,10 +10,10 @@
 
 * [情感分析](./senta)
   该样例展示了PaddleHub如何利用中文情感分析模型Senta进行FineTune和预测。
-  
+
 * [序列标注](./sequence-labeling)
   该样例展示了PaddleHub如何将ERNIE/BERT等Transformer类模型作为预训练模型在MSRA_NER数据集上完成序列标注的FineTune和预测。
-  
+
 * [目标检测](./ssd)
   该样例展示了PaddleHub如何将SSD作为预训练模型在PascalVOC数据集上完成目标检测的预测。
 
@@ -22,7 +22,7 @@
 
 * [多标签分类](./multi-label-classification)
   该样例展示了PaddleHub如何将BERT作为预训练模型在Toxic数据集上完成多标签分类的FineTune和预测。
-  
+
 * [回归任务](./regression)
   该样例展示了PaddleHub如何将BERT作为预训练模型在GLUE-STSB数据集上完成回归任务的FineTune和预测。
 
@@ -34,10 +34,10 @@
 
 * [句子语义相似度计算](./sentence_similarity)
   该样例展示了PaddleHub如何将word2vec_skipgram用于计算两个文本语义相似度。
-  
+
 * [超参优化AutoDL Finetuner使用](./autofinetune)
   该样例展示了PaddleHub超参优化AutoDL Finetuner如何使用，给出了自动搜素图像分类/文本分类任务的较佳超参数示例。
-  
+
 * [服务化部署Hub Serving使用](./serving)
   该样例文件夹下展示了服务化部署Hub Serving如何使用，将PaddleHub支持的可预测Module如何服务化部署。
 
