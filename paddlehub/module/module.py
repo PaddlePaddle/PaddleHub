@@ -25,7 +25,7 @@ import inspect
 import importlib
 import tarfile
 import six
-from shutil import copyfile
+import shutil
 
 import paddle
 import paddle.fluid as fluid
@@ -36,6 +36,7 @@ from paddlehub.common.dir import CACHE_HOME
 from paddlehub.common.lock import lock
 from paddlehub.common.logger import logger
 from paddlehub.common.hub_server import CacheUpdater
+from paddlehub.common import tmp_dir
 from paddlehub.module import module_desc_pb2
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.checker import ModuleChecker
@@ -58,43 +59,51 @@ HUB_PACKAGE_SUFFIX = "phm"
 
 def create_module(directory, name, author, email, module_type, summary,
                   version):
-    save_file_name = "{}-{}.{}".format(name, version, HUB_PACKAGE_SUFFIX)
+    save_file = "{}-{}.{}".format(name, version, HUB_PACKAGE_SUFFIX)
 
-    # record module info and serialize
-    desc = module_desc_pb2.ModuleDesc()
-    attr = desc.attr
-    attr.type = module_desc_pb2.MAP
-    module_info = attr.map.data['module_info']
-    module_info.type = module_desc_pb2.MAP
-    utils.from_pyobj_to_module_attr(name, module_info.map.data['name'])
-    utils.from_pyobj_to_module_attr(author, module_info.map.data['author'])
-    utils.from_pyobj_to_module_attr(email, module_info.map.data['author_email'])
-    utils.from_pyobj_to_module_attr(module_type, module_info.map.data['type'])
-    utils.from_pyobj_to_module_attr(summary, module_info.map.data['summary'])
-    utils.from_pyobj_to_module_attr(version, module_info.map.data['version'])
+    with tmp_dir() as base_dir:
+        # package the module
+        with tarfile.open(save_file, "w:gz") as tar:
+            module_dir = os.path.join(base_dir, name)
+            shutil.copytree(directory, module_dir)
 
-    module_desc_path = os.path.join(directory, "module_desc.pb")
-    with open(module_desc_path, "wb") as f:
-        f.write(desc.SerializeToString())
+            # record module info and serialize
+            desc = module_desc_pb2.ModuleDesc()
+            attr = desc.attr
+            attr.type = module_desc_pb2.MAP
+            module_info = attr.map.data['module_info']
+            module_info.type = module_desc_pb2.MAP
+            utils.from_pyobj_to_module_attr(name, module_info.map.data['name'])
+            utils.from_pyobj_to_module_attr(author,
+                                            module_info.map.data['author'])
+            utils.from_pyobj_to_module_attr(
+                email, module_info.map.data['author_email'])
+            utils.from_pyobj_to_module_attr(module_type,
+                                            module_info.map.data['type'])
+            utils.from_pyobj_to_module_attr(summary,
+                                            module_info.map.data['summary'])
+            utils.from_pyobj_to_module_attr(version,
+                                            module_info.map.data['version'])
+            module_desc_path = os.path.join(module_dir, "module_desc.pb")
+            with open(module_desc_path, "wb") as f:
+                f.write(desc.SerializeToString())
 
-    # generate check info
-    checker = ModuleChecker(directory)
-    checker.generate_check_info()
+            # generate check info
+            checker = ModuleChecker(module_dir)
+            checker.generate_check_info()
 
-    # add __init__
-    module_init = os.path.join(directory, "__init__.py")
-    with open(module_init, "a") as file:
-        file.write("")
+            # add __init__
+            module_init = os.path.join(module_dir, "__init__.py")
+            with open(module_init, "a") as file:
+                file.write("")
 
-    # package the module
-    with tarfile.open(save_file_name, "w:gz") as tar:
-        for dirname, _, files in os.walk(directory):
-            for file in files:
-                tar.add(os.path.join(dirname, file))
+            _cwd = os.getcwd()
+            os.chdir(base_dir)
+            for dirname, _, files in os.walk(module_dir):
+                for file in files:
+                    tar.add(os.path.join(dirname, file).replace(base_dir, "."))
 
-    os.remove(module_desc_path)
-    os.remove(checker.pb_path)
-    os.remove(module_init)
+            os.chdir(_cwd)
 
 
 _module_runable_func = {}
@@ -340,7 +349,7 @@ class ModuleV1(Module):
         for asset in self.assets:
             filename = os.path.basename(asset)
             newfile = os.path.join(self.helper.assets_path(), filename)
-            copyfile(asset, newfile)
+            shutil.copyfile(asset, newfile)
 
     def _load_assets(self):
         assets_path = self.helper.assets_path()
