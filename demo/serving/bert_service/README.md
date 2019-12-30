@@ -18,7 +18,7 @@
 
 * 专注下游深度学习任务，可利用PaddleHub的`Bert Service`大幅减少embedding代码。  
 
-`Bert as Service`具有几个突出的优点：  
+`Bert Service`具有几个突出的优点：  
 
 * 代码精短，易于使用。简单的pip安装方式，服务端仅需一行命令即可启动，客户端仅需一行代码即可获取embedding结果。  
 
