@@ -166,7 +166,7 @@ class LocalModuleManager(object):
             with tarfile.open(module_package, "r:gz") as tar:
                 file_names = tar.getnames()
                 size = len(file_names) - 1
-                module_dir = os.path.split(file_names[0])[0]
+                module_dir = os.path.split(file_names[0])[1]
                 module_dir = os.path.join(hub.CACHE_HOME, module_dir)
                 # remove cache
                 if os.path.exists(module_dir):

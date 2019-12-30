@@ -25,16 +25,8 @@ from setuptools import setup
 
 from paddlehub.version import hub_version
 
-REQUIRED_PACKAGES = [
-    'six >= 1.10.0', 'protobuf >= 3.6.0', 'pyyaml', 'Pillow', 'requests',
-    'tb-paddle', 'tensorboard >= 1.15', 'cma == 2.7.0', 'flask >= 1.1.0',
-    'sentencepiece', 'nltk', 'colorlog', 'opencv-python'
-]
-
-if six.PY2:
-    REQUIRED_PACKAGES += ["numpy < 1.17.0", "pandas < 0.25.0"]
-else:
-    REQUIRED_PACKAGES += ["numpy", "pandas"]
+with open("requirements.txt") as fin:
+    REQUIRED_PACKAGES = fin.read()
 
 setup(
     name='paddlehub',
@@ -72,6 +64,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Mathematics',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
