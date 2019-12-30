@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Finetuning on classification task """
+"""Finetuning on sequence labeling task."""
 
 import argparse
 import ast
@@ -23,45 +23,44 @@ import paddlehub as hub
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
-parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
-parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
+parser.add_argument("--warmup_proportion", type=float, default=0.1, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
+parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
+    # Load Paddlehub ERNIE Tiny pretrained model
+    module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use ClassifyReader to read dataset
-    dataset = hub.dataset.NLPCC_DBQA()
-    reader = hub.reader.ClassifyReader(
+    # Download dataset and use SequenceLabelReader to read dataset
+    dataset = hub.dataset.MSRA_NER()
+    reader = hub.reader.SequenceLabelReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+        max_seq_len=args.max_seq_len,
+        sp_model_path=module.get_spm_path(),
+        word_dict_path=module.get_word_dict_path())
 
     # Construct transfer learning network
-    # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
-    pooled_output = outputs["pooled_output"]
+    sequence_output = outputs["sequence_output"]
 
     # Setup feed list for data feeder
-    # Must feed all the tensor of ERNIE's module need
+    # Must feed all the tensor of module need
     feed_list = [
-        inputs["input_ids"].name,
-        inputs["position_ids"].name,
-        inputs["segment_ids"].name,
-        inputs["input_mask"].name,
+        inputs["input_ids"].name, inputs["position_ids"].name,
+        inputs["segment_ids"].name, inputs["input_mask"].name
     ]
 
-    # Select finetune strategy, setup config and finetune
+    # Select a finetune strategy
     strategy = hub.AdamWeightDecayStrategy(
         warmup_proportion=args.warmup_proportion,
         weight_decay=args.weight_decay,
@@ -76,14 +75,17 @@ if __name__ == '__main__':
         checkpoint_dir=args.checkpoint_dir,
         strategy=strategy)
 
-    # Define a classfication finetune task by PaddleHub's API
-    cls_task = hub.TextClassifierTask(
+    # Define a sequence labeling finetune task by PaddleHub's API
+    # If add crf, the network use crf as decoder
+    seq_label_task = hub.SequenceLabelTask(
         data_reader=reader,
-        feature=pooled_output,
+        feature=sequence_output,
         feed_list=feed_list,
+        max_seq_len=args.max_seq_len,
         num_classes=dataset.num_labels,
-        config=config)
+        config=config,
+        add_crf=True)
 
-    # Finetune and evaluate by PaddleHub's API
+    # Finetune and evaluate model by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically
-    cls_task.finetune_and_eval()
+    seq_label_task.finetune_and_eval()

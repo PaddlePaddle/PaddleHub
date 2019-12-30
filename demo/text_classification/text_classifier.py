@@ -16,17 +16,16 @@
 
 import argparse
 import ast
-
 import paddle.fluid as fluid
 import paddlehub as hub
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
-parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
+parser.add_argument("--warmup_proportion", type=float, default=0.1, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
@@ -35,17 +34,26 @@ args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
+
+    # Load Paddlehub ERNIE Tiny pretrained model
+    module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use ClassifyReader to read dataset
-    dataset = hub.dataset.NLPCC_DBQA()
+    # Download dataset and use accuracy as metrics
+    # Choose dataset: GLUE/XNLI/ChinesesGLUE/NLPCC-DBQA/LCQMC
+    # metric should be acc, f1 or matthews
+    dataset = hub.dataset.ChnSentiCorp()
+    metrics_choices = ["acc"]
+
+    # For ernie_tiny, it use sub-word to tokenize chinese sentence
+    # If not ernie tiny, sp_model_path and word_dict_path should be set None
     reader = hub.reader.ClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+        max_seq_len=args.max_seq_len,
+        sp_model_path=module.get_spm_path(),
+        word_dict_path=module.get_word_dict_path())
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
@@ -53,7 +61,7 @@ if __name__ == '__main__':
     pooled_output = outputs["pooled_output"]
 
     # Setup feed list for data feeder
-    # Must feed all the tensor of ERNIE's module need
+    # Must feed all the tensor of module need
     feed_list = [
         inputs["input_ids"].name,
         inputs["position_ids"].name,
@@ -82,7 +90,8 @@ if __name__ == '__main__':
         feature=pooled_output,
         feed_list=feed_list,
         num_classes=dataset.num_labels,
-        config=config)
+        config=config,
+        metrics_choices=metrics_choices)
 
     # Finetune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically

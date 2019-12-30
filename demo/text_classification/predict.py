@@ -23,7 +23,6 @@ import ast
 import numpy as np
 import os
 import time
-
 import paddle
 import paddle.fluid as fluid
 import paddlehub as hub
@@ -34,21 +33,28 @@ parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory 
 parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub ERNIE 2.0 pretrained model
-    module = hub.Module(name="ernie_v2_eng_base")
+    # Load Paddlehub ERNIE Tiny pretrained model
+    module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use RegressionReader to read dataset
-    dataset = hub.dataset.GLUE("STS-B")
-    reader = hub.reader.RegressionReader(
+    # Download dataset and use accuracy as metrics
+    # Choose dataset: GLUE/XNLI/ChinesesGLUE/NLPCC-DBQA/LCQMC
+    dataset = hub.dataset.ChnSentiCorp()
+
+    # For ernie_tiny, it use sub-word to tokenize chinese sentence
+    # If not ernie tiny, sp_model_path and word_dict_path should be set None
+    reader = hub.reader.ClassifyReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+        max_seq_len=args.max_seq_len,
+        sp_model_path=module.get_spm_path(),
+        word_dict_path=module.get_word_dict_path())
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
@@ -56,7 +62,7 @@ if __name__ == '__main__':
     pooled_output = outputs["pooled_output"]
 
     # Setup feed list for data feeder
-    # Must feed all the tensor of ERNIE's module need
+    # Must feed all the tensor of module need
     feed_list = [
         inputs["input_ids"].name,
         inputs["position_ids"].name,
@@ -66,21 +72,22 @@ if __name__ == '__main__':
 
     # Setup runing config for PaddleHub Finetune API
     config = hub.RunConfig(
-        use_data_parallel=False,
+        use_data_parallel=args.use_data_parallel,
         use_cuda=args.use_gpu,
         batch_size=args.batch_size,
         checkpoint_dir=args.checkpoint_dir,
         strategy=hub.AdamWeightDecayStrategy())
 
-    # Define a regression finetune task by PaddleHub's API
-    reg_task = hub.RegressionTask(
+    # Define a classfication finetune task by PaddleHub's API
+    cls_task = hub.TextClassifierTask(
         data_reader=reader,
         feature=pooled_output,
         feed_list=feed_list,
-        config=config,
-    )
+        num_classes=dataset.num_labels,
+        config=config)
 
     # Data to be prdicted
-    data = [[d.text_a, d.text_b] for d in dataset.get_predict_examples()[:10]]
+    data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
+            ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]]
 
-    print(reg_task.predict(data=data, return_result=True))
+    print(cls_task.predict(data=data, return_result=True))

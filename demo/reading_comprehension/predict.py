@@ -20,43 +20,41 @@ from __future__ import print_function
 
 import argparse
 import ast
-import numpy as np
-import os
-import time
-
-import paddle
-import paddle.fluid as fluid
 import paddlehub as hub
+hub.common.logger.logger.setLevel("INFO")
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
-parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
-parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--num_epoch", type=int, default=1, help="Number of epoches for fine-tuning.")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint.")
+parser.add_argument("--max_seq_len", type=int, default=384, help="Number of words of the longest seqence.")
+parser.add_argument("--batch_size", type=int, default=8, help="Total examples' number in batch for training.")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
-    # Load Paddlehub ERNIE 2.0 pretrained model
-    module = hub.Module(name="ernie_v2_eng_base")
+    # Load Paddlehub BERT pretrained model
+    module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use RegressionReader to read dataset
-    dataset = hub.dataset.GLUE("STS-B")
-    reader = hub.reader.RegressionReader(
+    # Download dataset and use ReadingComprehensionReader to read dataset
+    # If you wanna load SQuAD 2.0 dataset, just set version_2_with_negative as True
+    dataset = hub.dataset.SQUAD(version_2_with_negative=False)
+    # dataset = hub.dataset.SQUAD(version_2_with_negative=True)
+
+    reader = hub.reader.ReadingComprehensionReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+        max_seq_len=args.max_seq_len,
+        doc_stride=128,
+        max_query_length=64)
 
-    # Construct transfer learning network
-    # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
-    pooled_output = outputs["pooled_output"]
+    seq_output = outputs["sequence_output"]
 
     # Setup feed list for data feeder
-    # Must feed all the tensor of ERNIE's module need
     feed_list = [
         inputs["input_ids"].name,
         inputs["position_ids"].name,
@@ -72,15 +70,13 @@ if __name__ == '__main__':
         checkpoint_dir=args.checkpoint_dir,
         strategy=hub.AdamWeightDecayStrategy())
 
-    # Define a regression finetune task by PaddleHub's API
-    reg_task = hub.RegressionTask(
+    # Define a reading comprehension finetune task by PaddleHub's API
+    reading_comprehension_task = hub.ReadingComprehensionTask(
         data_reader=reader,
-        feature=pooled_output,
+        feature=seq_output,
         feed_list=feed_list,
-        config=config,
-    )
+        config=config)
 
-    # Data to be prdicted
-    data = [[d.text_a, d.text_b] for d in dataset.get_predict_examples()[:10]]
-
-    print(reg_task.predict(data=data, return_result=True))
+    # Data to be predicted
+    data = dataset.dev_examples[:10]
+    print(reading_comprehension_task.predict(data=data, return_result=True))

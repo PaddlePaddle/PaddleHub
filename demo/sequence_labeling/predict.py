@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Finetuning on classification task """
+"""Finetuning on sequence labeling task """
 
 from __future__ import absolute_import
 from __future__ import division
@@ -27,32 +27,36 @@ import time
 import paddle
 import paddle.fluid as fluid
 import paddlehub as hub
+from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
+parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
-parser.add_argument("--max_seq_len", type=int, default=128, help="Number of words of the longest seqence.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
     # loading Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
+    module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
 
-    # Sentence classification  dataset reader
-    dataset = hub.dataset.NLPCC_DBQA()
-    reader = hub.reader.ClassifyReader(
+    # Sentence labeling dataset reader
+    dataset = hub.dataset.MSRA_NER()
+    reader = hub.reader.SequenceLabelReader(
         dataset=dataset,
         vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+        max_seq_len=args.max_seq_len,
+        sp_model_path=module.get_spm_path(),
+        word_dict_path=module.get_word_dict_path())
+
+    inv_label_map = {val: key for key, val in reader.label_map.items()}
 
     # Construct transfer learning network
-    # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
-    pooled_output = outputs["pooled_output"]
+    sequence_output = outputs["sequence_output"]
 
     # Setup feed list for data feeder
     # Must feed all the tensor of ERNIE's module need
@@ -71,17 +75,35 @@ if __name__ == '__main__':
         checkpoint_dir=args.checkpoint_dir,
         strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
-    # Define a classfication finetune task by PaddleHub's API
-    cls_task = hub.TextClassifierTask(
+    # Define a sequence labeling finetune task by PaddleHub's API
+    # if add crf, the network use crf as decoder
+    seq_label_task = hub.SequenceLabelTask(
         data_reader=reader,
-        feature=pooled_output,
+        feature=sequence_output,
         feed_list=feed_list,
+        max_seq_len=args.max_seq_len,
         num_classes=dataset.num_labels,
-        config=config)
+        config=config,
+        add_crf=True)
 
-    # Data to be prdicted
-    data = [["北京奥运博物馆的场景效果负责人是谁？", "主要承担奥运文物征集、保管、研究和爱国主义教育基地建设相关工作。"],
-            ["北京奥运博物馆的场景效果负责人是谁", "于海勃，美国加利福尼亚大学教授 场景效果负责人 总设计师"],
-            ["北京奥运博物馆的场景效果负责人是谁？", "洪麦恩，清华大学美术学院教授 内容及主展线负责人 总设计师"]]
+    # Data to be predicted
+    data = [
+        ["我们变而以书会友，以书结缘，把欧美、港台流行的食品类图谱、画册、工具书汇集一堂。"],
+        ["为了跟踪国际最新食品工艺、流行趋势，大量搜集海外专业书刊资料是提高技艺的捷径。"],
+        ["其中线装古籍逾千册；民国出版物几百种；珍本四册、稀见本四百余册，出版时间跨越三百余年。"],
+        ["有的古木交柯，春机荣欣，从诗人句中得之，而入画中，观之令人心驰。"],
+        ["不过重在晋趣，略增明人气息，妙在集古有道、不露痕迹罢了。"],
+    ]
 
-    print(cls_task.predict(data=data, return_result=True))
+    # Add 0x02 between characters to match the format of training data,
+    # otherwise the length of prediction results will not match the input string
+    # if the input string contains non-Chinese characters.
+    tmp_data = []
+    for example in data:
+        formatted = []
+        for sentence in example:
+            formatted.append('\x02'.join(list(sentence)))
+        tmp_data.append(formatted)
+    data = tmp_data
+
+    print(seq_label_task.predict(data=data, return_result=True))
