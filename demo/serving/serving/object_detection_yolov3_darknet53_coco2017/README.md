@@ -1,6 +1,6 @@
-# 部署图像分类服务-以yolov3_coco2017为例
+# 部署图像分类服务-以yolov3_darknet53_coco2017为例
 ## 1 简介
-目标检测作为深度学习常见任务，在各种场景下都有所使用。使用`yolov3_coco2017`模型可以进行目标检测任务，关于`yolov3_coco2017`的具体信息请参阅[yolov3_coco2017](https://paddlepaddle.org.cn/hubdetail?name=yolov3_coco2017&en_category=ObjectDetection)。
+目标检测作为深度学习常见任务，在各种场景下都有所使用。使用`yolov3_darknet53_coco2017`模型可以进行目标检测任务，关于`yolov3_darknet53_coco2017`的具体信息请参阅[yolov3_darknet53_coco2017](https://paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_coco2017&en_category=ObjectDetection)。
 
 使用PaddleHub-Serving可以轻松部署一个在线目标检测服务API，可将此API接入自己的web网站进行在线目标检测，也可接入移动端应用程序，实现识图、圈人等功能。
 
@@ -9,11 +9,11 @@
 ## 2 启动PaddleHub-Serving
 启动命令如下
 ```shell
-$ hub serving start -m yolov3_coco2017
+$ hub serving start -m yolov3_darknet53_coco2017
 ```
 启动时会显示加载模型过程，启动成功后显示
 ```shell
-Loading yolov3_coco2017 successful.
+Loading yolov3_darknet53_coco2017 successful.
 ```
 这样就完成了一个图像生成服务化API的部署，默认端口号为8866。
 
@@ -22,13 +22,13 @@ Loading yolov3_coco2017 successful.
 
 <p align="center">  
 
-<img src="../img/cat.jpg" width="100%" />  
+<img src="../img/cat.jpg" width="65%" />  
 
 </p>  
 
 <p align="center">  
 
-<img src="../img/dog.jpg" width="100%" />  
+<img src="../img/dog.jpg" width="65%" />  
 
 </p>  
 
@@ -46,8 +46,8 @@ files = [("image", file_1), ("image", file_2)]
 ```
 然后就可以发送请求到目标检测服务API，并得到结果，代码如下
 ```python
->>> # 指定检测方法为yolov3_coco2017并发送post请求
->>> url = "http://127.0.0.1:8866/predict/image/yolov3_coco2017"
+>>> # 指定检测方法为yolov3_darknet53_coco2017并发送post请求
+>>> url = "http://127.0.0.1:8866/predict/image/yolov3_darknet53_coco2017"
 >>> r = requests.post(url=url, files=files)
 ```
 我们可以打印接口返回结果
@@ -93,7 +93,7 @@ files = [("image", file_1), ("image", file_2)]
 ```
 根据结果可以看出准确识别了请求的图片。
 
-yolov3_coco2017返回的结果还包括标注检测框的图像的base64编码格式，经过转换可以得到生成图像，代码如下
+yolov3_darknet53_coco2017返回的结果还包括标注检测框的图像的base64编码格式，经过转换可以得到生成图像，代码如下
 ```python
 >>> for item in results:
 ...     with open(output_path, "wb") as fp:
@@ -103,13 +103,13 @@ yolov3_coco2017返回的结果还包括标注检测框的图像的base64编码�
 
 <p align="center">  
 
-<img src="./output/cat.jpg" width="80%" />  
+<img src="./output/cat.jpg" width="65%" />  
 
 </p>  
 
 <p align="center">  
 
-<img src="./output/dog.jpg" width="80%" />  
+<img src="./output/dog.jpg" width="65%" />  
 
 </p>  
 

@@ -21,21 +21,11 @@ Loading vgg11_imagenet successful.
 我们用来测试的样例图片为  
 
 <p align="center">  
-<img src="../img/cat.jpg" width="80%" />  
+<img src="../img/cat.jpg" width="45%" />  
 </p>  
 
 <p align="center">  
-<img src="../img/flower.jpg" width="80%"/>  
-</p>
-
-## python脚本  
-
-<p align="center">  
-<img src="../img/cat.jpg" width="80%" />  
-</p>  
-
-<p align="center">  
-<img src="../img/flower.jpg" width="80%"/>  
+<img src="../img/flower.jpg" width="45%"/>  
 </p>
 
 准备的数据格式为

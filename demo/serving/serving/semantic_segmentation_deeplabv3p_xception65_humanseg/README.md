@@ -22,7 +22,7 @@ Loading deeplabv3p_xception65_humanseg successful.
 
 <p align="center">  
 
-<img src="../img/girl.jpg" width="100%" />  
+<img src="../img/girl.jpg" width="65%" />  
 
 </p>  
 
@@ -66,7 +66,7 @@ deeplabv3p_xception65_humanseg返回的结果还包括人像分割后的图像�
 
 <p align="center">  
 
-<img src="./output/girl.png" width="100%" />  
+<img src="./output/girl.png" width="65%" />  
 
 </p>  
 

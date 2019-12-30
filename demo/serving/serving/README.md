@@ -48,14 +48,14 @@ $ hub serving start --config config.json
 {  
   "modules_info": [  
     {  
-       "module": module_name1,  
-       "version": module_version1,  
-       "batch_size": batch_size1
+       "module": "MODULE_NAME_1",
+       "version": "MODULE_VERSION_1",
+       "batch_size": "BATCH_SIZE_1"
     },  
     {  
-       "module": module_name2,  
-       "version": module_version2,  
-       "batch_size": batch_size2
+       "module": "MODULE_NAME_2",  
+       "version": "MODULE_VERSION_2",  
+       "batch_size": "BATCH_SIZE_2"
     }
   ],  
   "use_gpu": false,  
@@ -68,7 +68,7 @@ $ hub serving start --config config.json
 
 |参数|用途|  
 |-|-|  
-|--modules_info|Hub-Serving预安装模型，以字典列表形式列出，其中`module`为预测服务使用的模型名，`version`为其版本，`batch_size`为预测批次大小。
+|--modules_info|Hub-Serving预安装模型，以字典列表形式列出，其中:<br>`module`为预测服务使用的模型名<br>`version`为预测模型的版本<br>`batch_size`为预测批次大小
 |--use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
 |--port/-p|服务端口，默认为8866|  
 |--use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式|  
@@ -77,9 +77,9 @@ $ hub serving start --config config.json
 
 在使用PaddleHub-Serving部署服务端的模型预测服务后，就可以在客户端访问预测接口以获取结果了，接口url格式为：
 
-http://0.0.0.0:8866/predict/<CATEGORY>/<MODULE>
+http://0.0.0.0:8866/predict/\<CATEGORY\>/\<MODULE>
 
-其中，<CATEGORY>为text或image，与模型种类对应，<MODULE>为模型名。
+其中，\<CATEGORY>为text或image，与模型种类对应，\<MODULE>为模型名。
 
 通过发送一个POST请求，即可获取预测结果，下面我们将展示一个具体的demo，以说明使用PaddleHub-Serving部署和使用流程。
 
@@ -88,7 +88,7 @@ http://0.0.0.0:8866/predict/<CATEGORY>/<MODULE>
 
 <p align="center">  
 
-<img src="../img/web_demo.png" width="60%" />  
+<img src="./img/web_demo.png" width="60%" />  
 
 </p>  
 
@@ -124,7 +124,7 @@ $ hub serving start -c serving_config.json
 
 <p align="center">  
 
-<img src="../img/start_serving_lac.png" width="100%" />  
+<img src="./img/start_serving_lac.png" width="100%" />  
 
 </p>  
 
@@ -153,43 +153,49 @@ if __name__ == "__main__":
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 运行后得到结果
-```python
-{
-    "results": [
-        {
-            "tag": [
-                "TIME",
-                "v",
-                "q",
-                "n"
-            ],
-            "word": [
-                "今天",
-                "是",
-                "个",
-                "好日子"
-            ]
-        },
-        {
-            "tag": [
-                "n",
-                "v",
-                "TIME",
-                "v",
-                "v"
-            ],
-            "word": [
-                "天气预报",
-                "说",
-                "今天",
-                "要",
-                "下雨"
-            ]
-        }
-    ]
-}
-```
-关于PaddleHub-Serving的一键服务部署功能示例，可参阅下列demo
+<details>
+    <summary>lac分词结果</summary>
+
+    ```python
+    {
+        "results": [
+            {
+                "tag": [
+                    "TIME",
+                    "v",
+                    "q",
+                    "n"
+                ],
+                "word": [
+                    "今天",
+                    "是",
+                    "个",
+                    "好日子"
+                ]
+            },
+            {
+                "tag": [
+                    "n",
+                    "v",
+                    "TIME",
+                    "v",
+                    "v"
+                ],
+                "word": [
+                    "天气预报",
+                    "说",
+                    "今天",
+                    "要",
+                    "下雨"
+                ]
+            }
+        ]
+    }
+    ```
+
+</detail>  
+
+获取其他PaddleHub-Serving的一键服务部署场景示例，可参阅下列demo
 
 * [图像分类-基于vgg11_imagent](serving/classification_vgg11_imagenet)  
 
