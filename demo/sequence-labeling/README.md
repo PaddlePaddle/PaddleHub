@@ -83,7 +83,7 @@ reader = hub.reader.SequenceLabelReader(
 
 SequenceLabelReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`.
 
-**NOTE**: 
+**NOTE**:
 * Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
 * 如果选择的预训练模型不是ERNIE Tiny，则无需设定sp_model_path和word_dict_path参数
 
