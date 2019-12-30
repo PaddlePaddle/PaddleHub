@@ -18,7 +18,7 @@
 
 * 专注下游深度学习任务，可利用PaddleHub的`Bert Service`大幅减少embedding代码。  
 
-`Bert as Service`具有几个突出的优点：  
+`Bert Service`具有几个突出的优点：  
 
 * 代码精短，易于使用。简单的pip安装方式，服务端仅需一行命令即可启动，客户端仅需一行代码即可获取embedding结果。  
 
@@ -135,29 +135,29 @@ client端接收文本数据，并获取server端返回的模型计算的embeddin
 
 client端利用PaddleHub的语义理解任务将原始文本按照不同模型的数据预处理方案将文本ID化，并生成对应的sentence type、position、input masks数据，将这些信息封装成json数据，通过http协议按照指定的IP端口信息发送至server端，等待并获取模型生成结果。
 ### 5.2 启动
-连接服务端方法原型为：
+服务端类BSClient初始化方法原型为：
 ```python
-def connect(input_text,
-            model_name,
-            max_seq_len=128,
-            show_ids=False,
-            do_lower_case=True,
-            server="127.0.0.1:8866",
-            retry=3)
+BSClient.__init__(self,
+             module_name,
+             server,
+             max_seq_len=20,
+             show_ids=False,
+             do_lower_case=True,
+             retry=3)
+# 获取embedding方法原型为
+BSClient.get_result(self, input_text)  
 ```  
-
 其中各参数说明如下表：  
 
 |参数|说明|类型|样例|  
 |:--:|:--:|:--:|:--:|  
-|input_text|输入文本，要获取embedding的原始文本|二维list类型，内部元素为string类型的文本|[['样例1'],['样例2']]|  
-|model_name|指定使用的模型名称|string|"ernie"|  
+|module_name|指定使用的模型名称|string|"ernie"|  
+|server|要访问的server地址，包括ip地址及端口号|string|"127.0.0.1:8866"|  
 |max_seq_len|计算时的样例长度，样例长度不足时采用补零策略，超出此参数则超出部分会被截断|int|128|  
 |show_ids|是否展现数据预处理后的样例信息，指定为True则显示样例信息，反之则不显示|bool|False|  
 |do_lower_case|是否将英文字母转换成小写，指定为True则将所有英文字母转换为小写，反之则保持原状|bool|True|
-|server|要访问的server地址，包括ip地址及端口号|string|"127.0.0.1:8866"|  
-|retry|连接失败后的最大重试次数|int|3|
-
+|retry|连接失败后的最大重试次数|int|3|  
+|input_text|输入文本，要获取embedding的原始文本|二维list类型，内部元素为string类型的文本|[['样例1'],['样例2']]|
 
 ## 6. Demo
 在这里，我们将展示一个实际场景中可能使用的demo，我们利用PaddleHub在一台GPU机器上部署`ernie_tiny`模型服务，并在另一台CPU机器上尝试访问，获取一首七言绝句的embedding。
@@ -233,7 +233,7 @@ Paddle Inference Server exit successfully!
  browser."，这个页面有什么作用。  
 > A : 这是`BRPC`的内置服务，主要用于查看请求数、资源占用等信息，可对server端性能有大致了解，具体信息可查看[BRPC内置服务](https://github.com/apache/incubator-brpc/blob/master/docs/cn/builtin_service.md)。
 
-> Q : 为什么输入文本的格式为[["文本1"], ["文本2"], ]，而不是["文本1", "文本2", ]？
+> Q : 为什么输入文本的格式为[["文本1"], ["文本2"], ]，而不是["文本1", "文本2", ]？  
 > A : 因为Bert模型可以对一轮对话生成向量表示，例如[["问题1","回答1"],["问题2","回答2"]]，为了防止使用时混乱，每个样本使用一个list表示，一个样本list内部可以是1条string或2条string，如下面的文本：  
 > ```python
 > input_text = [
