@@ -1,6 +1,6 @@
 # 句子相似度
 
-本示例展示如何使用word2vec_skipgram模型进行句子相似度预测。
+本示例展示如何使用[word2vec_skipgram](https://www.paddlepaddle.org.cn/hubdetail?name=word2vec_skipgram&en_category=SemanticModel)模型进行句子相似度预测。
 
 该示例运用最简单的方法，将一个句子中所有单词的word embedding叠加，得到句子向量。之后计算余弦相似度。
 
