@@ -232,6 +232,6 @@ class SequenceLabelTask(BaseTask):
             for length in seq_lens:
                 seq_infers = batch_infers[current_id:current_id + length]
                 seq_result = list(map(id2label.get, seq_infers[1:-1]))
-                current_id += self.max_seq_len
+                current_id += length if self.add_crf else self.max_seq_len
                 results.append(seq_result)
         return results
