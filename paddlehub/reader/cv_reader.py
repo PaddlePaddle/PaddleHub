@@ -22,6 +22,7 @@ import numpy as np
 from PIL import Image
 
 import paddlehub.io.augmentation as image_augmentation
+from ..contrib.ppdet.data.reader import Reader
 
 channel_order_dict = {
     "RGB": [0, 1, 2],
@@ -137,3 +138,117 @@ class ImageClassificationReader(object):
 
     def get_test_examples(self):
         return self.dataset.test_examples
+
+
+class ObjectDetectionReader(ImageClassificationReader):
+    def __init__(self,
+                 image_width,
+                 image_height,
+                 dataset=None,
+                 channel_order="RGB",
+                 images_mean=None,
+                 images_std=None,
+                 data_augmentation=False):
+        super(ObjectDetectionReader,
+              self).__init__(image_width, image_height, dataset, channel_order,
+                             images_mean, images_std, data_augmentation)
+        self.drop_last = False
+        self.use_padded_im_info = True
+        self.model_type = 'ssd'
+
+    def data_generator(self,
+                       batch_size,
+                       phase="train",
+                       shuffle=False,
+                       data=None):
+        if phase != 'predict' and not self.dataset:
+            raise ValueError("The dataset is none and it's not allowed!")
+        if phase == "train":
+            data = self.dataset.train_data(shuffle)
+            self.num_examples['train'] = len(self.get_train_examples())
+        elif phase == "test":
+            shuffle = False
+            data = self.dataset.test_data(shuffle)
+            self.num_examples['test'] = len(self.get_test_examples())
+        elif phase == "val" or phase == "dev":
+            shuffle = False
+            data = self.dataset.validate_data(shuffle)
+            self.num_examples['dev'] = len(self.get_dev_examples())
+        elif phase == "predict":
+            data = data
+
+        data_cf = {}
+        transform_config = {
+            'WORKER_CONF': {
+                'bufsize': 10,
+                'worker_num': 1,
+                'use_process': False,
+                'memsize': '3G'
+            },
+            'BATCH_SIZE': batch_size,
+            'DROP_LAST': self.drop_last,
+            'USE_PADDED_IM_INFO': self.use_padded_im_info,
+        }
+        transform_config['IS_PADDING'] = False
+        # transform_config['RANDOM_SHAPES'] = None
+        # transform_config['MULTI_SCALES'] = None
+
+        ops = [
+            dict(op='DecodeImage', to_rgb=True, with_mixup=False),
+            dict(op='NormalizeBox'),
+            dict(
+                op='RandomDistort',
+                brightness_lower=0.875,
+                brightness_upper=1.125,
+                is_order=True),
+            dict(op='ExpandImage', max_ratio=4, prob=0.5),
+            dict(
+                op='CropImage',
+                batch_sampler=[[1, 1, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0],
+                               [1, 50, 0.3, 1.0, 0.5, 2.0, 0.1, 0.0],
+                               [1, 50, 0.3, 1.0, 0.5, 2.0, 0.3, 0.0],
+                               [1, 50, 0.3, 1.0, 0.5, 2.0, 0.5, 0.0],
+                               [1, 50, 0.3, 1.0, 0.5, 2.0, 0.7, 0.0],
+                               [1, 50, 0.3, 1.0, 0.5, 2.0, 0.9, 0.0],
+                               [1, 50, 0.3, 1.0, 0.5, 2.0, 0.0, 1.0]],
+                satisfy_all=False,
+                avoid_no_bbox=False),
+            dict(op='ResizeImage', target_size=300, use_cv2=False, interp=1),
+            dict(op='RandomFlipImage', is_normalized=True),
+            dict(op='Permute'),
+            dict(
+                op='NormalizeImage',
+                mean=[127.5, 127.5, 127.5],
+                std=[127.502231, 127.502231, 127.502231],
+                is_scale=False),
+            dict(op='ArrangeSSD')
+        ]
+        transform_config['OPS'] = ops
+        # fields = ['image', 'im_shape', 'im_id', 'gt_box',
+        #           'gt_label', 'is_difficult']
+        fields = [
+            'image', 'gt_box', 'gt_label', 'im_shape', 'im_id', 'is_difficult'
+        ]
+        ops_eval = [
+            dict(op='DecodeImage', to_rgb=True, with_mixup=False),
+            dict(op='NormalizeBox'),
+            dict(op='ResizeImage', target_size=300, use_cv2=False, interp=1),
+            dict(op='Permute'),
+            dict(
+                op='NormalizeImage',
+                mean=[127.5, 127.5, 127.5],
+                std=[127.502231, 127.502231, 127.502231],
+                is_scale=False),
+            dict(op='ArrangeEvalSSD', fields=fields)
+        ]
+        if phase not in ('train', 'predict'):
+            transform_config['OPS'] = ops_eval
+
+        mode = 'VAL' if phase != 'train' else 'TRAIN'
+
+        # def batch_reader():
+        batch_reader = Reader.create(
+            mode, data_cf, transform_config, my_source=data)
+        # return itr
+        # When call `batch_reader()`, then return generator(or iterator)
+        return batch_reader
