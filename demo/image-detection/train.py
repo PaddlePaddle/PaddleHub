@@ -64,7 +64,7 @@ def finetune(args):
 
     config = hub.RunConfig(
         log_interval=1,
-        eval_interval=3,
+        eval_interval=5,
         use_data_parallel=args.use_data_parallel,
         use_pyreader=args.use_pyreader,
         use_cuda=args.use_gpu,

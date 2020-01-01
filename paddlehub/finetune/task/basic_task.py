@@ -650,7 +650,6 @@ class BasicTask(object):
             return self._run_with_data_feeder(do_eval=do_eval)
 
     def _run_with_data_feeder(self, do_eval=False):
-
         data_feeder = fluid.DataFeeder(
             feed_list=self.feed_list, place=self.place)
 

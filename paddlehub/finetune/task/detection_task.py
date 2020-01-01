@@ -20,11 +20,13 @@ from __future__ import print_function
 import time
 from collections import OrderedDict
 import numpy as np
+import six
 import paddle.fluid as fluid
 
 from paddlehub.finetune.evaluate import calculate_f1_np, matthews_corrcoef
 from .basic_task import BasicTask
 from ...contrib.ppdet.utils.eval_utils import eval_results
+from ...common import detection_config as dconf
 
 feed_var_def = [
     {
@@ -121,46 +123,28 @@ class DetectionTask(BasicTask):
         self.feature = feature
         self.num_classes = num_classes
         self.hidden_units = hidden_units
+        self.model_type = 'ssd'
 
     @property
     def base_feed_var_list(self):
         vars = self.main_program.global_block().vars
         return [vars[varname] for varname in self._base_feed_list]
 
-    def _build_net(self):
-        feature_maps = self.feature
+    def _ssd_build_net(self):
+        feature_list = self.feature
         image = self.base_feed_var_list[0]
-        conf = {
-            'input_size':
-            300,
-            'aspect_ratios': [[2.0], [2.0, 3.0], [2.0, 3.0], [2.0, 3.0],
-                              [2.0, 3.0], [2.0, 3.0]],
-            'min_ratio':
-            20,
-            'max_ratio':
-            90,
-            'nms_threshold':
-            0.45,
-            "nms_top_k":
-            400,
-            "score_threshold":
-            0.01,
-            "keep_top_k":
-            200,
-            "nms_eta":
-            1.0,
-        }
 
         mbox_locs, mbox_confs, box, box_var = fluid.layers.multi_box_head(
-            inputs=feature_maps,
+            inputs=feature_list,
             image=image,
-            base_size=conf["input_size"],
+            base_size=300,
             num_classes=self.num_classes,
             min_sizes=[60.0, 105.0, 150.0, 195.0, 240.0, 285.0],
             max_sizes=[[], 150.0, 195.0, 240.0, 285.0, 300.0],
-            aspect_ratios=conf["aspect_ratios"],
-            min_ratio=conf["min_ratio"],
-            max_ratio=conf["max_ratio"])
+            aspect_ratios=[[2.0], [2.0, 3.0], [2.0, 3.0], [2.0, 3.0],
+                              [2.0, 3.0], [2.0, 3.0]],
+            min_ratio=20,
+            max_ratio=90)
 
         self.env.mid_vars = [mbox_locs, mbox_confs, box, box_var]
 
@@ -170,17 +154,16 @@ class DetectionTask(BasicTask):
             box,
             box_var,
             background_label=0,
-            nms_threshold=conf["nms_threshold"],
-            nms_top_k=conf["nms_top_k"],
-            keep_top_k=conf["keep_top_k"],
-            score_threshold=conf["score_threshold"],
-            nms_eta=conf["nms_eta"])
+            nms_threshold=0.45,
+            nms_top_k=400,
+            keep_top_k=200,
+            score_threshold=0.01,
+            nms_eta=1.0)
 
         self.ret_infers = nmsed_out
-
         return [nmsed_out]
 
-    def _add_label(self):
+    def _ssd_add_label(self):
         feed_var_map = {var['name']: var for var in feed_var_def}
         # tensor padding with 0 is used instead of LoD tensor when
         # num_max_boxes is set
@@ -196,12 +179,12 @@ class DetectionTask(BasicTask):
 
         # Todo: 必须和下面loss时取label顺序一致；必须与Arrange后field顺序一致
         if self.is_train_phase:
-            fields = ['image', 'gt_box', 'gt_label']
-        else:
-            fields = [
-                'image', 'gt_box', 'gt_label', 'im_shape', 'im_id',
-                'is_difficult'
-            ]
+            fields = dconf.feed_config[self.model_type]['train']['fields']
+        elif self.is_test_phase:
+            fields = dconf.feed_config[self.model_type]['dev']['fields']
+        else:  # Cannot go to here
+            raise RuntimeError("Cannot go to _add_label in predict phase")
+            # fields = dconf.feed_config[self.model_type]['predict']['fields']
 
         labels = []
         for key in fields[1:]:
@@ -213,13 +196,7 @@ class DetectionTask(BasicTask):
             labels.append(l)
         return labels
 
-    @property
-    def return_numpy(self):
-        return 2  # return lod tensor
-
-    def _add_loss(self):
-        # ce_loss = fluid.layers.cross_entropy(
-        #     input=self.outputs[0], label=self.labels[0])
+    def _ssd_add_loss(self):
         gt_box = self.labels[0]
         gt_label = self.labels[1]
         mbox_locs, mbox_confs, box, box_var = self.env.mid_vars
@@ -234,16 +211,48 @@ class DetectionTask(BasicTask):
         loss.persistable = True
         return loss
 
+    def _build_net(self):
+        if self.model_type == 'ssd':
+            outputs = self._ssd_build_net()
+        else:
+            raise NotImplementedError
+
+        return outputs
+
+    def _add_label(self):
+        if self.model_type == 'ssd':
+            labels = self._ssd_add_label()
+        else:
+            raise NotImplementedError
+        return labels
+
+    @property
+    def return_numpy(self):
+        return 2  # return lod tensor
+
+    def _add_loss(self):
+        if self.model_type == 'ssd':
+            loss = self._ssd_add_loss()
+        else:
+            raise NotImplementedError
+        return loss
+
     def _add_metrics(self):
-        # acc = fluid.layers.accuracy(input=self.outputs[0], label=self.labels[0])
         return []
 
     @property
+    def feed_list(self):
+        feed_list = [varname for varname in self._base_feed_list]
+        if self.is_train_phase or self.is_test_phase:
+            feed_list += [label.name for label in self.labels]
+        return feed_list
+
+    @property
     def fetch_list(self):
-        # Todo:
+        # ensure fetch loss at last element in train/test phase
+        # ensure fetch 'im_shape', 'im_id', 'bbox' at first three elements in test phase
         if self.is_train_phase:
             return [
-                self.labels[0].name, self.labels[1].name, self.ret_infers.name,
                 self.loss.name
             ]
         elif self.is_test_phase:
@@ -284,9 +293,9 @@ class DetectionTask(BasicTask):
             }
             results.append(res)
 
-        is_bbox_normalized = True
+        is_bbox_normalized = dconf.conf[self.model_type]['is_bbox_normalized']
         eval_feed = Feed()
-        eval_feed.with_background = True
+        eval_feed.with_background = dconf.conf[self.model_type]['with_background']
         eval_feed.dataset = self.reader
 
         for metric in self.metrics_choices:
