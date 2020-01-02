@@ -152,6 +152,10 @@ class BasicTask(object):
         # set default phase
         self.enter_phase("train")
 
+    @property
+    def base_main_program(self):
+        return self._base_main_program
+
     @contextlib.contextmanager
     def phase_guard(self, phase):
         self.enter_phase(phase)
@@ -198,7 +202,7 @@ class BasicTask(object):
         self._build_env_start_event()
         self.env.is_inititalized = True
         self.env.main_program = clone_program(
-            self._base_main_program, for_test=False)
+            self.base_main_program, for_test=False)
 
         self.env.startup_program = fluid.Program()
         with fluid.program_guard(self.env.main_program,

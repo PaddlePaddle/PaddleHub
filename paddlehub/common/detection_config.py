@@ -89,6 +89,46 @@ ssd_predict_ops = [
     dict(op='ArrangeTestSSD')
 ]
 
+rcnn_train_ops = [
+    dict(op='DecodeImage', to_rgb=True),
+    dict(op='RandomFlipImage', prob=0.5),
+    dict(
+        op='NormalizeImage',
+        mean=[127.5, 127.5, 127.5],
+        std=[127.502231, 127.502231, 127.502231],
+        is_scale=True,
+        is_channel_first=False),
+    dict(op='ResizeImage', target_size=800, max_size=1333, interp=1),
+    dict(op='Permute', to_bgr=False),
+    dict(op='ArrangeRCNN'),
+]
+
+rcnn_eval_ops = [
+    dict(op='DecodeImage', to_rgb=True),
+    dict(
+        op='NormalizeImage',
+        mean=[127.5, 127.5, 127.5],
+        std=[127.502231, 127.502231, 127.502231],
+        is_scale=True,
+        is_channel_first=False),
+    dict(op='ResizeImage', target_size=800, max_size=1333, interp=1),
+    dict(op='Permute', to_bgr=False),
+    dict(op='ArrangeEvalRCNN'),
+]
+
+rcnn_predict_ops = [
+    dict(op='DecodeImage', to_rgb=True),
+    dict(
+        op='NormalizeImage',
+        mean=[127.5, 127.5, 127.5],
+        std=[127.502231, 127.502231, 127.502231],
+        is_scale=True,
+        is_channel_first=False),
+    dict(op='ResizeImage', target_size=800, max_size=1333, interp=1),
+    dict(op='Permute', to_bgr=False),
+    dict(op='ArrangeTestRCNN'),
+]
+
 feed_config = {
     "ssd": {
         "train": {
@@ -107,12 +147,27 @@ feed_config = {
             "IS_PADDING": False,
         },
     },
-    "yolo": {
-        "train": {},
-        "dev": {},
-        "predict": {},
-    },
     "rcnn": {
+        "train": {
+            "fields": ['image', 'im_info', 'gt_box', 'gt_label', 'is_crowd', 'im_id'],
+            "OPS": rcnn_train_ops,
+            "IS_PADDING": True,
+        },
+        "dev": {
+            "fields": ['image', 'im_info', 'im_shape', 'gt_box',
+                       'gt_label', 'is_difficult', 'im_id'],
+            "OPS": rcnn_eval_ops,
+            "IS_PADDING": True,
+            "USE_PADDED_IM_INFO": True,
+        },
+        "predict": {
+            "fields": ['image', 'im_info', 'im_shape', 'im_id'],
+            "OPS": rcnn_predict_ops,
+            "IS_PADDING": True,
+            "USE_PADDED_IM_INFO": True,
+        },
+    },
+    "yolo": {
         "train": {},
         "dev": {},
         "predict": {},

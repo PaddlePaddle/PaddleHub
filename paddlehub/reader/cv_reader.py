@@ -153,8 +153,6 @@ class ObjectDetectionReader(ImageClassificationReader):
         super(ObjectDetectionReader,
               self).__init__(image_width, image_height, dataset, channel_order,
                              images_mean, images_std, data_augmentation)
-        self.drop_last = False
-        self.use_padded_im_info = True
         self.model_type = 'ssd'
 
     def data_generator(self,
@@ -164,9 +162,11 @@ class ObjectDetectionReader(ImageClassificationReader):
                        data=None):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is none and it's not allowed!")
+        drop_last = False
         if phase == "train":
             data = self.dataset.train_data(shuffle)
             self.num_examples['train'] = len(self.get_train_examples())
+            drop_last = True
         elif phase == "test":
             shuffle = False
             data = self.dataset.test_data(shuffle)
@@ -187,8 +187,8 @@ class ObjectDetectionReader(ImageClassificationReader):
                 'memsize': '3G'
             },
             'BATCH_SIZE': batch_size,
-            'DROP_LAST': self.drop_last,
-            'USE_PADDED_IM_INFO': self.use_padded_im_info,
+            'DROP_LAST': drop_last,
+            'USE_PADDED_IM_INFO': False,
         }
         # transform_config['IS_PADDING'] = False
         # transform_config['RANDOM_SHAPES'] = None
