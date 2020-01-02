@@ -37,24 +37,25 @@ img_cls.py以mobilenet为预训练模型，在flowers数据集上进行Fine-tune
 
 * import paddlehub
 
-在img_cls.py加上`import paddlehub as hub`
+  在img_cls.py加上`import paddlehub as hub`
 
 * 从AutoDL Finetuner获得参数值
 
-1. img_cls.py的选项参数须包含待优化超参数，需要将超参以argparser的方式写在其中，待搜索超参数选项名字和yaml文件中的超参数名字保持一致。
+  1. img_cls.py的选项参数须包含待优化超参数，需要将超参以argparser的方式写在其中，待搜索超参数选项名字和yaml文件中的超参数名字保持一致。
 
-2. img_cls.py须包含选项参数saved_params_dir，优化后的参数将会保存到该路径下。
+  2. img_cls.py须包含选项参数saved_params_dir，优化后的参数将会保存到该路径下。
 
-3. 超参评估策略选择PopulationBased时，img_cls.py须包含选项参数model_path，自动从model_path指定的路径恢复模型
+  3. 超参评估策略选择PopulationBased时，img_cls.py须包含选项参数model_path，自动从model_path指定的路径恢复模型
 
 * 返回配置的最终效果
 
-img_cls.py须反馈模型的评价效果（建议使用验证集或者测试集上的评价效果），通过调用`report_final_result`接口反馈，如
+  img_cls.py须反馈模型的评价效果（建议使用验证集或者测试集上的评价效果），通过调用`report_final_result`接口反馈，如
 
-```python
-hub.report_final_result(eval_avg_score["acc"])
-```
-**NOTE:** 输出的评价效果取值范围应为`(-∞, 1]`，取值越高，表示效果越好。
+  ```python
+  hub.report_final_result(eval_avg_score["acc"])
+  ```
+
+  **NOTE:** 输出的评价效果取值范围应为`(-∞, 1]`，取值越高，表示效果越好。
 
 
 ## 启动AutoDL Finetuner
