@@ -79,9 +79,9 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 
 ### 示例
 
-[PaddleHub AutoDL Finetuner超参优化--NLP情感分类任务](./autofinetune-nlp.md)
+[PaddleHub AutoDL Finetuner超参优化--NLP情感分类任务](../demo/autofinetune_text_classification.md)
 
-[PaddleHub AutoDL Finetuner超参优化--CV图像分类任务](./autofinetune-cv.md)
+[PaddleHub AutoDL Finetuner超参优化--CV图像分类任务](../../autofinetune_image_ classification.md)
 
 ## 三、启动方式
 
