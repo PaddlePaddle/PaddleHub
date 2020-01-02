@@ -4,7 +4,6 @@ import os
 import ast
 import shutil
 
-import paddle.fluid as fluid
 import paddlehub as hub
 from paddlehub.common.logger import logger
 
@@ -58,7 +57,6 @@ def is_path_valid(path):
 
 
 def finetune(args):
-
     # Load Paddlehub pretrained model, default as mobilenet
     module = hub.Module(name=args.module)
     input_dict, output_dict, program = module.context(trainable=True)
