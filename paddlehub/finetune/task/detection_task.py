@@ -181,8 +181,8 @@ class DetectionTask(BasicTask):
         elif self.is_test_phase:
             fields = dconf.feed_config[self.model_type]['dev']['fields']
         else:  # Cannot go to here
-            raise RuntimeError("Cannot go to _add_label in predict phase")
-            # fields = dconf.feed_config[self.model_type]['predict']['fields']
+            # raise RuntimeError("Cannot go to _add_label in predict phase")
+            fields = dconf.feed_config[self.model_type]['predict']['fields']
 
         labels = []
         for i in idx_list:
@@ -224,15 +224,21 @@ class DetectionTask(BasicTask):
             keep_top_k=200,
             score_threshold=0.01,
             nms_eta=1.0)
+
+        if self.is_predict_phase:  # add im_id
+            self.env.labels = self._ssd_add_label()
         return [nmsed_out]
 
     def _ssd_add_label(self):
         # train: 'gt_box', 'gt_label'
         # dev: 'im_shape', 'im_id', 'gt_box', 'gt_label', 'is_difficult'
         if self.is_train_phase:
-            idx_list = [1, 2]
+            idx_list = [1, 2]  # 'gt_box', 'gt_label'
+        elif self.is_test_phase:
+            # Todo: remove 'im_shape' when using new module
+            idx_list = [1, 2, 3, 4, 5]  # 'im_shape', 'im_id', 'gt_box', 'gt_label', 'is_difficult'
         else:
-            idx_list = [1, 2, 3, 4, 5]  # Todo: remove 'im_shape' when using new module
+            idx_list = [1]  # im_id
         return self._add_label_by_fields(idx_list)
 
     def _ssd_add_loss(self):
@@ -257,7 +263,7 @@ class DetectionTask(BasicTask):
     def _ssd_feed_list(self):
         # Todo: update when using new module
         feed_list = [varname for varname in self.base_feed_list]
-        if self.is_train_phase or self.is_test_phase:
+        if self.is_train_phase or self.is_test_phase or self.is_predict_phase:
             feed_list += [label.name for label in self.labels]
         return feed_list
 
@@ -270,7 +276,7 @@ class DetectionTask(BasicTask):
             return [
                 self.labels[0].name, self.labels[1].name, self.outputs[0].name,
                 self.loss.name]
-        return [output.name for output in self.outputs]
+        return [self.outputs[0].name, self.labels[0].name]
 
     def _rcnn_build_net(self):
         if self.is_train_phase:
@@ -559,6 +565,12 @@ class DetectionTask(BasicTask):
             return self._yolo_fetch_list()
         else:
             raise NotImplementedError
+
+    @property
+    def labels(self):
+        if not self.env.is_inititalized:
+            self._build_env()
+        return self.env.labels
 
     def _calculate_metrics(self, run_states):
         loss_sum = run_examples = 0

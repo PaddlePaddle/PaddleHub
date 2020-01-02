@@ -165,19 +165,24 @@ class ObjectDetectionReader(ImageClassificationReader):
             raise ValueError("The dataset is none and it's not allowed!")
         drop_last = False
         if phase == "train":
-            data = self.dataset.train_data(shuffle)
+            data_src = self.dataset.train_data(shuffle)
             self.num_examples['train'] = len(self.get_train_examples())
             drop_last = True
         elif phase == "test":
             shuffle = False
-            data = self.dataset.test_data(shuffle)
+            data_src = self.dataset.test_data(shuffle)
             self.num_examples['test'] = len(self.get_test_examples())
         elif phase == "val" or phase == "dev":
             shuffle = False
-            data = self.dataset.validate_data(shuffle)
+            data_src = self.dataset.validate_data(shuffle)
             self.num_examples['dev'] = len(self.get_dev_examples())
-        elif phase == "predict":
-            data = data
+        else:  # phase == "predict":
+            from ..contrib.ppdet.data.source import build_source
+            data_config = {
+                "IMAGES": data,
+                "TYPE": "SimpleSource"
+            }
+            data_src = build_source(data_config)
 
         data_cf = {}
         transform_config = {
@@ -191,9 +196,6 @@ class ObjectDetectionReader(ImageClassificationReader):
             'DROP_LAST': drop_last,
             'USE_PADDED_IM_INFO': False,
         }
-        # transform_config['IS_PADDING'] = False
-        # transform_config['RANDOM_SHAPES'] = None
-        # transform_config['MULTI_SCALES'] = None
 
         phase_trans = {
             "val": "dev",
@@ -208,9 +210,8 @@ class ObjectDetectionReader(ImageClassificationReader):
 
         ppdet_mode = 'VAL' if phase != 'train' else 'TRAIN'
 
-        # def batch_reader():
         batch_reader = Reader.create(
-            ppdet_mode, data_cf, transform_config, my_source=data)
+            ppdet_mode, data_cf, transform_config, my_source=data_src)
         # return itr
         # When call `batch_reader()`, then return generator(or iterator)
         return batch_reader

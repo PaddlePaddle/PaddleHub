@@ -186,7 +186,8 @@ feed_config = {
             "IS_PADDING": False,
         },
         "predict": {
-            "fields": ['image', 'im_id', 'im_shape'],
+            # "fields": ['image', 'im_id', 'im_shape'],
+            "fields": ['image', 'im_id'],
             "OPS": ssd_predict_ops,
             "IS_PADDING": False,
         },
