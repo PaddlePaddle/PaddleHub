@@ -11,9 +11,9 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 
 * **[模型即软件](#模型即软件)**，通过Python API或命令行实现快速预测，更方便地使用PaddlePaddle模型库。
 
-* **[迁移学习](#迁移学习)**。用户通过Fine-tune API，只需要少量代码即可完成自然语言处理和计算机视觉场景的深度迁移学习。
+* **[迁移学习](#迁移学习)**，用户通过Fine-tune API，只需要少量代码即可完成自然语言处理和计算机视觉场景的深度迁移学习。
 
-* **[服务化部署](#服务化部署paddlehub-serving)**，简单一行命令即可搭建属于自己的模型的API服务
+* **[服务化部署](#服务化部署paddlehub-serving)**，简单一行命令即可搭建属于自己的模型的API服务。
 
 * **[超参优化](#超参优化autodl-finetuner)**，自动搜索最优超参，得到更好的模型效果。
 
@@ -49,8 +49,8 @@ $ pip install paddlehub
 ```python
 import paddlehub
 paddlehub.server_check()
-# 如果可以连接远端PaddleHub-Server，则显示Request Hub-Server successfully.
-# 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully.
+# 如果可以连接远端PaddleHub-Server，则显示Request Hub-Server successfully。
+# 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully。
 ```
 
 
@@ -92,7 +92,7 @@ PaddleHub同时支持安装、卸载、查看模型信息等命令行功能，�
 
 * 示例合集
 
-PaddleHub提供了使用Finetune-API和预训练模型完成[文本分类](./demo/text_classification)、[序列标注](./demo/sequence_labeling)、[多标签分类](./demo/multi_label_classification)、[图像分类](./demo/image_classification)、[检索式问答任务](./demo/qa_classification)、[回归任务](./demo/regression)、[句子语义相似度计算](./demo/sentence_similarity)、[阅读理解任务](./demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](./demo)
+PaddleHub提供了使用Finetune-API和预训练模型完成[文本分类](./demo/text_classification)、[序列标注](./demo/sequence_labeling)、[多标签分类](./demo/multi_label_classification)、[图像分类](./demo/image_classification)、[检索式问答任务](./demo/qa_classification)、[回归任务](./demo/regression)、[句子语义相似度计算](./demo/sentence_similarity)、[阅读理解任务](./demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](./demo)。
 
 * 场景化使用
 
@@ -111,7 +111,7 @@ PaddleHub在AI Studio上提供了IPython NoteBook形式的demo。用户可以直
 |LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215711)||
 |Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215962)||
 
-**NOTE:** `[飞桨PaddleHub](https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927)`是PaddleHub的官方账号
+**NOTE:** [`飞桨PaddleHub`](https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927)是PaddleHub的官方账号。
 
 关于PaddleHub快捷完成迁移学习，更多信息参考：
 
@@ -135,7 +135,7 @@ PaddleHub Serving启动方式有两种：
 $ hub serving start --modules [Module1==Version1, Module2==Version2, ...]
 ```
 
-其中选项参数`--modules/-m`表示待部署模型
+其中选项参数`--modules/-m`表示待部署模型。
 
 * 配置文件方式：
 
@@ -145,7 +145,7 @@ $ hub serving start --config config.json
 
 config.json文件包含待部署模型信息等，
 
-关于PaddleHub Serving详细信息参考[PaddleHub Serving一键服务化部署](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)
+关于PaddleHub Serving详细信息参考[PaddleHub Serving一键服务化部署](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)。
 
 ### 超参优化AutoDL Finetuner
 
@@ -156,23 +156,23 @@ AutoDL Finetuner详细信息参见[PaddleHub超参优化](./tutorial/autofinetun
 
 ## FAQ
 
-**Q:** 利用PaddleHub Fine-tune如何适配自定义数据集
+**Q:** 利用PaddleHub Fine-tune如何适配自定义数据集？
 
-**A:** 参考[PaddleHub适配自定义数据集完成Fine-tune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
+**A:** 参考[PaddleHub适配自定义数据集完成Fine-tune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)。
 
 
-**Q:** 使用PaddleHub时，无法下载预置数据集、Module的等现象
+**Q:** 使用PaddleHub时，无法下载预置数据集、Module的等现象。
 
 **A:** 下载数据集、module等，PaddleHub要求机器可以访问外网。可以使用server_check()可以检查本地与远端PaddleHub-Server的连接状态，使用方法如下：
 
 ```python
 import paddlehub
 paddlehub.server_check()
-# 如果可以连接远端PaddleHub-Server，则显示Request Hub-Server successfully.
-# 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully.
+# 如果可以连接远端PaddleHub-Server，则显示Request Hub-Server successfully。
+# 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully。
 ```
 
-**Q:** 利用PaddleHub ernie/bert进行Fine-tune时，运行出错并提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息
+**Q:** 利用PaddleHub ernie/bert进行Fine-tune时，运行出错并提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息。
 
 **A:** 因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。可以将PaddlePaddle和PaddleHub升级至最新版本，同时将ernie卸载。
 ```shell
@@ -187,7 +187,7 @@ $ hub uninstall ernie
 **更多问题**
 
 当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-FAQ)查找解决方案。
-如果在FAQ中没有找到解决方案，欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交给我们，我们会第一时间进行跟进
+如果在FAQ中没有找到解决方案，欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交给我们，我们会第一时间进行跟进。
 
 ## 用户交流群
 

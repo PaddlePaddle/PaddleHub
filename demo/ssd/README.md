@@ -11,12 +11,12 @@ $ hub run ssd_mobilenet_v1_pascal --input_path "/PATH/TO/IMAGE"
 $ hub run ssd_mobilenet_v1_pascal --input_file test.txt
 ```
 
-test.txt 存放待检测图片的存放路径
+test.txt 存放待检测图片的存放路径。
 
 ## 通过python API预测
 
-`ssd_demo.py`给出了使用python API调用SSD预测的示例代码
-通过以下命令试验下效果
+`ssd_demo.py`给出了使用python API调用SSD预测的示例代码。
+通过以下命令试验下效果：
 
 ```shell
 python ssd_demo.py

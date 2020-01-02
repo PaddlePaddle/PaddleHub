@@ -16,7 +16,7 @@ AutoDL Finetuner会根据搜索空间来取样生成参数和网络架构。搜�
 要定义搜索空间，需要定义变量名称、类型及其搜索范围。通过这些信息构建了一个超参空间，
 PaddleHub将在这个空间内进行超参数的搜索，将搜索到的超参传入train.py获得评估效果，根据评估效果自动调整超参搜索方向，直到满足搜索次数。
 
-以Fine-tune图像分类任务为例, 以下是待优化超参数的yaml文件hparam.yaml，包含需要搜素的超参名字、类型、范围等信息。目前参数搜索类型只支持float和int类型
+以Fine-tune图像分类任务为例, 以下是待优化超参数的yaml文件hparam.yaml，包含需要搜素的超参名字、类型、范围等信息。目前参数搜索类型只支持float和int类型。
 ```
 param_list:
 - name : learning_rate
@@ -63,4 +63,4 @@ img_cls.py以mobilenet为预训练模型，在flowers数据集上进行Fine-tune
 在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_autofinetune.sh`即可开始使用超参优化功能。
 
 
-**NOTE:** 关于PaddleHub超参优化详情参考[教程](../../tutorial/autofinetune.md)
+**NOTE:** 关于PaddleHub超参优化详情参考[教程](../../tutorial/autofinetune.md)。
