@@ -108,6 +108,7 @@ class DetectionTask(BasicTask):
                  num_classes,
                  feed_list,
                  data_reader,
+                 model_type='ssd',
                  predict_feature=None,
                  predict_feed_list=None,
                  startup_program=None,
@@ -137,7 +138,7 @@ class DetectionTask(BasicTask):
         self.predict_feature = predict_feature
         self.num_classes = num_classes
         self.hidden_units = hidden_units
-        self.model_type = 'ssd'
+        self.model_type = model_type
 
     @property
     def base_main_program(self):
@@ -156,21 +157,25 @@ class DetectionTask(BasicTask):
         vars = self.main_program.global_block().vars
         return [vars[varname] for varname in self.base_feed_list]
 
-    def _inner_add_label(self, start_index):
+    @property
+    def return_numpy(self):
+        return 2  # return lod tensor
+
+    def _add_label_by_fields(self, idx_list):
         feed_var_map = {var['name']: var for var in feed_var_def}
         # tensor padding with 0 is used instead of LoD tensor when
         # num_max_boxes is set
-        if getattr(self, 'num_max_boxes', None) is not None:
-            feed_var_map['gt_label']['shape'] = [self.num_max_boxes]
-            feed_var_map['gt_score']['shape'] = [self.num_max_boxes]
-            feed_var_map['gt_box']['shape'] = [self.num_max_boxes, 4]
-            feed_var_map['is_difficult']['shape'] = [self.num_max_boxes]
+        num_max_boxes = dconf.conf[self.model_type].get('num_max_boxes', None)
+        if num_max_boxes is not None:
+            feed_var_map['gt_label']['shape'] = [num_max_boxes]
+            feed_var_map['gt_score']['shape'] = [num_max_boxes]
+            feed_var_map['gt_box']['shape'] = [num_max_boxes, 4]
+            feed_var_map['is_difficult']['shape'] = [num_max_boxes]
             feed_var_map['gt_label']['lod_level'] = 0
             feed_var_map['gt_score']['lod_level'] = 0
             feed_var_map['gt_box']['lod_level'] = 0
             feed_var_map['is_difficult']['lod_level'] = 0
 
-        # Todo: 必须和下面loss时取label顺序一致；必须与Arrange后field顺序一致
         if self.is_train_phase:
             fields = dconf.feed_config[self.model_type]['train']['fields']
         elif self.is_test_phase:
@@ -180,7 +185,8 @@ class DetectionTask(BasicTask):
             # fields = dconf.feed_config[self.model_type]['predict']['fields']
 
         labels = []
-        for key in fields[start_index:]:
+        for i in idx_list:
+            key = fields[i]
             l = fluid.layers.data(
                 name=feed_var_map[key]['name'],
                 shape=feed_var_map[key]['shape'],
@@ -222,13 +228,20 @@ class DetectionTask(BasicTask):
 
     def _ssd_add_label(self):
         # train: 'gt_box', 'gt_label'
-        # dev: 'gt_box', 'gt_label', 'im_shape', 'im_id', 'is_difficult'
-        start_index = 1
-        return self._inner_add_label(start_index)
+        # dev: 'im_shape', 'im_id', 'gt_box', 'gt_label', 'is_difficult'
+        if self.is_train_phase:
+            idx_list = [1, 2]
+        else:
+            idx_list = [1, 2, 3, 4, 5]  # Todo: remove 'im_shape' when using new module
+        return self._add_label_by_fields(idx_list)
 
     def _ssd_add_loss(self):
-        gt_box = self.labels[0]
-        gt_label = self.labels[1]
+        if self.is_train_phase:
+            gt_box = self.labels[0]
+            gt_label = self.labels[1]
+        else:  # Todo: update here when using new module
+            gt_box = self.labels[2]
+            gt_label = self.labels[3]
         mbox_locs, mbox_confs, box, box_var = self.env.mid_vars
         loss = fluid.layers.ssd_loss(
             location=mbox_locs,
@@ -241,13 +254,21 @@ class DetectionTask(BasicTask):
         loss.persistable = True
         return loss
 
+    def _ssd_feed_list(self):
+        # Todo: update when using new module
+        feed_list = [varname for varname in self.base_feed_list]
+        if self.is_train_phase or self.is_test_phase:
+            feed_list += [label.name for label in self.labels]
+        return feed_list
+
     def _ssd_fetch_list(self):
         # ensure fetch 'im_shape', 'im_id', 'bbox' at first three elements in test phase
         if self.is_train_phase:
             return [self.loss.name]
         elif self.is_test_phase:
+            # Todo: update when using new module
             return [
-                self.labels[2].name, self.labels[3].name, self.outputs[0].name,
+                self.labels[0].name, self.labels[1].name, self.outputs[0].name,
                 self.loss.name]
         return [output.name for output in self.outputs]
 
@@ -333,10 +354,10 @@ class DetectionTask(BasicTask):
 
     def _rcnn_add_label(self):
         if self.is_train_phase:
-            start_index = -1  # 'im_id'
+            idx_list = [2,]  # 'im_id'
         else:  # test
-            start_index = 3  # 'gt_box', 'gt_label', 'is_difficult', 'im_id'
-        return self._inner_add_label(start_index)
+            idx_list = [2, 4, 5, 6]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
+        return self._add_label_by_fields(idx_list)
 
     def _rcnn_add_loss(self):
         if self.is_train_phase:
@@ -345,12 +366,138 @@ class DetectionTask(BasicTask):
             loss = fluid.layers.fill_constant(shape=[], value=-1, dtype='float32')
         return loss
 
+    def _rcnn_feed_list(self):
+        feed_list = [varname for varname in self.base_feed_list]
+        if self.is_train_phase:
+            # feed_list is ['image', 'im_info', 'gt_box', 'gt_label', 'is_crowd']
+            return feed_list[:2] + [self.labels[0].name] + feed_list[2:]
+        elif self.is_test_phase:
+            # feed list is ['image', 'im_info', 'im_shape']
+            return feed_list[:2] + [self.labels[0].name] + feed_list[2:] + \
+                   [label.name for label in self.labels[1:]]
+        return feed_list
+
     def _rcnn_fetch_list(self):
         # ensure fetch 'im_shape', 'im_id', 'bbox' at first three elements in test phase
         if self.is_train_phase:
             return [self.loss.name]
         elif self.is_test_phase:
-            return [self.feed_list[2], self.labels[-1].name, self.outputs[0].name, self.loss.name]
+            return [self.feed_list[2], self.labels[0].name, self.outputs[0].name, self.loss.name]
+        return [self.outputs[0].name]
+
+    def _yolo_build_net(self):
+        self.anchor_masks = [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
+        tip_list = self.feature
+        outputs = []
+        for i, tip in enumerate(tip_list):
+            # out channel number = mask_num * (5 + class_num)
+            num_filters = len(self.anchor_masks[i]) * (self.num_classes + 5)
+            block_out = fluid.layers.conv2d(
+                input=tip,
+                num_filters=num_filters,
+                filter_size=1,
+                stride=1,
+                padding=0,
+                act=None,
+                param_attr=ParamAttr(name="yolo_output.{}.conv.weights".format(i)),
+                bias_attr=ParamAttr(
+                    regularizer=L2Decay(0.),
+                    name="yolo_output.{}.conv.bias".format(i)))
+            outputs.append(block_out)
+
+        if self.is_train_phase:
+            return outputs
+
+        self.anchors = [[10, 13], [16, 30], [33, 23], [30, 61], [62, 45],
+                   [59, 119], [116, 90], [156, 198], [373, 326]]
+        # self.mask_anchors = []
+        # for masks in self.anchor_masks:
+        #     self.mask_anchors.append([])
+        #     for mask in masks:
+        #         self.mask_anchors[-1].extend(anchors[mask])
+        self.mask_anchors = [
+            [116, 90, 156, 198, 373, 326],
+            [30, 61, 62, 45, 59, 119],
+            [10, 13, 16, 30, 33, 23]]
+        im_size = self.base_feed_var_list[1]
+        boxes = []
+        scores = []
+        downsample = 32
+        for i, output in enumerate(outputs):
+            box, score = fluid.layers.yolo_box(
+                x=output,
+                img_size=im_size,
+                anchors=self.mask_anchors[i],
+                class_num=self.num_classes,
+                conf_thresh=0.01,
+                downsample_ratio=downsample,
+                name="yolo_box" + str(i))
+            boxes.append(box)
+            scores.append(fluid.layers.transpose(score, perm=[0, 2, 1]))
+            downsample //= 2
+        yolo_boxes = fluid.layers.concat(boxes, axis=1)
+        yolo_scores = fluid.layers.concat(scores, axis=2)
+        # pred = self.nms(bboxes=yolo_boxes, scores=yolo_scores)
+        pred = fluid.layers.multiclass_nms(
+            bboxes=yolo_boxes, scores=yolo_scores,
+            score_threshold=.01,
+            nms_top_k=1000,
+            keep_top_k=100,
+            nms_threshold=0.45,
+            normalized=False,
+            nms_eta=1.0,
+            background_label=-1)
+        return [pred]
+
+    def _yolo_add_label(self):
+        if self.is_train_phase:
+            idx_list = [1, 2, 3]  # 'gt_box', 'gt_label', 'gt_score'
+        else:  # test phase
+            idx_list = [2, 3, 4, 5]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
+        return self._add_label_by_fields(idx_list)
+
+    def _yolo_add_loss(self):
+        if self.is_train_phase:
+            gt_box, gt_label, gt_score = self.labels
+            outputs = self.outputs
+            losses = []
+            downsample = 32
+            for i, output in enumerate(outputs):
+                anchor_mask = self.anchor_masks[i]
+                loss = fluid.layers.yolov3_loss(
+                    x=output,
+                    gt_box=gt_box,
+                    gt_label=gt_label,
+                    gt_score=gt_score,
+                    anchors=self.anchors,
+                    anchor_mask=anchor_mask,
+                    class_num=self.num_classes,
+                    ignore_thresh=0.7,
+                    downsample_ratio=downsample,
+                    use_label_smooth=True,
+                    name="yolo_loss" + str(i))
+                losses.append(fluid.layers.reduce_mean(loss))
+                downsample //= 2
+
+            loss = sum(losses)
+        else:
+            loss = fluid.layers.fill_constant(shape=[], value=-1, dtype='float32')
+        return loss
+
+    def _yolo_feed_list(self):
+        feed_list = [varname for varname in self.base_feed_list]
+        if self.is_train_phase:
+            feed_list = [feed_list[0]] + [label.name for label in self.labels]
+        elif self.is_test_phase:
+            feed_list = feed_list + [label.name for label in self.labels]
+        return feed_list
+
+    def _yolo_fetch_list(self):
+        # ensure fetch 'im_shape', 'im_id', 'bbox' at first three elements in test phase
+        if self.is_train_phase:
+            return [self.loss.name]
+        elif self.is_test_phase:
+            return [self.feed_list[1], self.labels[0].name, self.outputs[0].name, self.loss.name]
         return [self.outputs[0].name]
 
     def _build_net(self):
@@ -358,6 +505,8 @@ class DetectionTask(BasicTask):
             outputs = self._ssd_build_net()
         elif self.model_type == 'rcnn':
             outputs = self._rcnn_build_net()
+        elif self.model_type == 'yolo':
+            outputs = self._yolo_build_net()
         else:
             raise NotImplementedError
         return outputs
@@ -367,19 +516,19 @@ class DetectionTask(BasicTask):
             labels = self._ssd_add_label()
         elif self.model_type == 'rcnn':
             labels = self._rcnn_add_label()
+        elif self.model_type == 'yolo':
+            labels = self._yolo_add_label()
         else:
             raise NotImplementedError
         return labels
-
-    @property
-    def return_numpy(self):
-        return 2  # return lod tensor
 
     def _add_loss(self):
         if self.model_type == 'ssd':
             loss = self._ssd_add_loss()
         elif self.model_type == 'rcnn':
             loss = self._rcnn_add_loss()
+        elif self.model_type == 'yolo':
+            loss = self._yolo_add_loss()
         else:
             raise NotImplementedError
         return loss
@@ -389,10 +538,14 @@ class DetectionTask(BasicTask):
 
     @property
     def feed_list(self):
-        feed_list = [varname for varname in self.base_feed_list]
-        if self.is_train_phase or self.is_test_phase:
-            feed_list += [label.name for label in self.labels]
-        return feed_list
+        if self.model_type == 'ssd':
+            return self._ssd_feed_list()
+        elif self.model_type == 'rcnn':
+            return self._rcnn_feed_list()
+        elif self.model_type == 'yolo':
+            return self._yolo_feed_list()
+        else:
+            raise NotImplementedError
 
     @property
     def fetch_list(self):
@@ -402,6 +555,8 @@ class DetectionTask(BasicTask):
             return self._ssd_fetch_list()
         elif self.model_type == 'rcnn':
             return self._rcnn_fetch_list()
+        elif self.model_type == 'yolo':
+            return self._yolo_fetch_list()
         else:
             raise NotImplementedError
 

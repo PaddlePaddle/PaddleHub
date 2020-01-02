@@ -24,6 +24,7 @@ import numpy as np
 import paddlehub as hub
 from paddlehub.common.downloader import default_downloader
 from ..contrib.ppdet.data.source import build_source
+from ..common import detection_config as dconf
 
 
 class ImageClassificationDataset(object):
@@ -124,12 +125,12 @@ class ObjectDetectionDataset(ImageClassificationDataset):
         self.validate_image_dir = None
         self.test_image_dir = None
         self.model_type = model_type
-        self.with_background = True
         self._dsc = None
         self.cid2cname = None
+        # self.label_dict()  # refresh cid2cname and num_labels
 
     def label_dict(self):
-        if self.cid2cname:
+        if self.cid2cname is not None:
             return self.cid2cname
         # todo: handle this
         _ = self.train_data()
@@ -137,14 +138,18 @@ class ObjectDetectionDataset(ImageClassificationDataset):
 
     def _parse_data(self, data_path, image_dir, shuffle=False, phase=None):
         # dataset_dir = '/home/ssd1/zhaopenghao/data/sku_detect/huihe6_data/huihe6_coco/'
+        with_background = dconf.conf[self.model_type]['with_background']
+        mixup_epoch = -1
+        if phase == 'train':
+            mixup_epoch = dconf.conf[self.model_type].get('mixup_epoch', -1)
         file_conf = {
             'ANNO_FILE': data_path,
             'IMAGE_DIR': image_dir,
             # 'USE_DEFAULT_LABEL': feed.dataset.use_default_label,
             'IS_SHUFFLE': shuffle,
             'SAMPLES': -1,
-            'WITH_BACKGROUND': self.with_background,
-            'MIXUP_EPOCH': -1,
+            'WITH_BACKGROUND': with_background,
+            'MIXUP_EPOCH': mixup_epoch,
             'TYPE': 'RoiDbSource',
         }
         sc_conf = {'data_cf': file_conf, 'cname2cid': None}
@@ -152,12 +157,15 @@ class ObjectDetectionDataset(ImageClassificationDataset):
         self._dsc = data_source
         data_source.reset()
         data = data_source._roidb
-        if not self.cid2cname:
+        if self.cid2cname is None:
             cname2cid = data_source.cname2cid
             cid2cname = {v: k for k, v in cname2cid.items()}
             self.cid2cname = cid2cname
-            # Todo: handle num labels
-            self.num_labels = len(cid2cname) + 1
+            # Todo: handle num labels for yolo
+            if with_background:
+                self.num_labels = len(cid2cname) + 1
+            else:
+                self.num_labels = len(cid2cname)
 
         if phase == 'train':
             self.train_examples = data

@@ -34,7 +34,7 @@ def finetune(args):
         trainable=True, sign_name=sig_name)
 
     # define dataset
-    ds = ObjectDetectionDataset()
+    ds = ObjectDetectionDataset(model_type='ssd')
     ds.base_path = '/Users/zhaopenghao/Downloads/coco_10'
     ds.train_image_dir = 'val'
     ds.train_list_file = 'annotations/val.json'
@@ -42,10 +42,13 @@ def finetune(args):
     ds.validate_list_file = 'annotations/val.json'
     ds.test_image_dir = 'val'
     ds.test_list_file = 'annotations/val.json'
-    ds.num_labels = 81
+    # ds.num_labels = 81
+    # Todo: handle ds.num_labels refresh
+    print(ds.label_dict())
+    print("ds.num_labels", ds.num_labels)
 
     # define batch reader
-    data_reader = ObjectDetectionReader(1, 1, dataset=ds)
+    data_reader = ObjectDetectionReader(1, 1, dataset=ds, model_type='ssd')
 
     print("output_dict", len(output_dict))
     print(output_dict.keys())
@@ -79,6 +82,7 @@ def finetune(args):
         feed_list=feed_list,
         feature=feature_map,
         num_classes=ds.num_labels,
+        model_type='ssd',
         config=config)
     task.finetune_and_eval()
 

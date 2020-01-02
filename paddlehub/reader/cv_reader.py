@@ -146,6 +146,7 @@ class ObjectDetectionReader(ImageClassificationReader):
                  image_width,
                  image_height,
                  dataset=None,
+                 model_type='ssd',
                  channel_order="RGB",
                  images_mean=None,
                  images_std=None,
@@ -153,7 +154,7 @@ class ObjectDetectionReader(ImageClassificationReader):
         super(ObjectDetectionReader,
               self).__init__(image_width, image_height, dataset, channel_order,
                              images_mean, images_std, data_augmentation)
-        self.model_type = 'ssd'
+        self.model_type = model_type
 
     def data_generator(self,
                        batch_size,
