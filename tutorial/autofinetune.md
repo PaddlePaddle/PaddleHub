@@ -7,11 +7,14 @@
 PaddleHub AutoDL Finetuner提供两种超参优化算法：
 
 * **HAZero**: 核心思想是通过对正态分布中协方差矩阵的调整来处理变量之间的依赖关系和scaling。算法基本可以分成以下三步:
-1. 采样产生新解
-2. 计算目标函数值
-3. 更新正态分布参数。
 
-调整参数的基本思路为，调整参数使得产生更优解的概率逐渐增大。优化过程如下图：
+  1. 采样产生新解
+
+  2. 计算目标函数值
+
+  3. 更新正态分布参数。
+
+  调整参数的基本思路为，调整参数使得产生更优解的概率逐渐增大。优化过程如下图：
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.3/docs/imgs/bayesian_optimization.gif" hspace='10'/> <br />
@@ -71,17 +74,17 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 * 超参评估策略选择PopulationBased时，train.py须包含选项参数model_path，自动从model_path指定的路径恢复模型
 
 * train.py须反馈模型的评价效果（建议使用验证集或者测试集上的评价效果），通过调用`report_final_result`接口反馈，如
- ```python
- hub.report_final_result(eval_avg_score["acc"])
- ```
+  ```python
+  hub.report_final_result(eval_avg_score["acc"])
+  ```
 
 * 输出的评价效果取值范围应为`(-∞, 1]`，取值越高，表示效果越好。
 
 ### 示例
 
-[PaddleHub AutoDL Finetuner超参优化--NLP情感分类任务](./autofinetune-nlp.md)
+[PaddleHub AutoDL Finetuner超参优化--NLP情感分类任务](../demo/autofinetune_text_classification)
 
-[PaddleHub AutoDL Finetuner超参优化--CV图像分类任务](./autofinetune-cv.md)
+[PaddleHub AutoDL Finetuner超参优化--CV图像分类任务](../demo/autofinetune_image_classification)
 
 ## 三、启动方式
 
