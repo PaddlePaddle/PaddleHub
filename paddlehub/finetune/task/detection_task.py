@@ -356,13 +356,17 @@ class DetectionTask(BasicTask):
                 nms_eta=1.0,
                 background_label=0
             )
+            if self.is_predict_phase:
+                self.env.labels = self._rcnn_add_label()
             return [pred_result]
 
     def _rcnn_add_label(self):
         if self.is_train_phase:
             idx_list = [2,]  # 'im_id'
-        else:  # test
+        elif self.is_test_phase:
             idx_list = [2, 4, 5, 6]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
+        else:  # predict
+            idx_list = [2]
         return self._add_label_by_fields(idx_list)
 
     def _rcnn_add_loss(self):
@@ -381,7 +385,7 @@ class DetectionTask(BasicTask):
             # feed list is ['image', 'im_info', 'im_shape']
             return feed_list[:2] + [self.labels[0].name] + feed_list[2:] + \
                    [label.name for label in self.labels[1:]]
-        return feed_list
+        return feed_list[:2] + [self.labels[0].name] + feed_list[2:]
 
     def _rcnn_fetch_list(self):
         # ensure fetch 'im_shape', 'im_id', 'bbox' at first three elements in test phase
@@ -389,7 +393,7 @@ class DetectionTask(BasicTask):
             return [self.loss.name]
         elif self.is_test_phase:
             return [self.feed_list[2], self.labels[0].name, self.outputs[0].name, self.loss.name]
-        return [self.outputs[0].name]
+        return [self.feed_list[2], self.labels[0].name, self.outputs[0].name]
 
     def _yolo_build_net(self):
         self.anchor_masks = [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
@@ -453,13 +457,17 @@ class DetectionTask(BasicTask):
             normalized=False,
             nms_eta=1.0,
             background_label=-1)
+        if self.is_predict_phase:
+            self.env.labels = self._yolo_add_label()
         return [pred]
 
     def _yolo_add_label(self):
         if self.is_train_phase:
             idx_list = [1, 2, 3]  # 'gt_box', 'gt_label', 'gt_score'
-        else:  # test phase
+        elif self.is_test_phase:
             idx_list = [2, 3, 4, 5]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
+        else:  # predict
+            idx_list = [2]
         return self._add_label_by_fields(idx_list)
 
     def _yolo_add_loss(self):
@@ -493,10 +501,10 @@ class DetectionTask(BasicTask):
     def _yolo_feed_list(self):
         feed_list = [varname for varname in self.base_feed_list]
         if self.is_train_phase:
-            feed_list = [feed_list[0]] + [label.name for label in self.labels]
+            return [feed_list[0]] + [label.name for label in self.labels]
         elif self.is_test_phase:
-            feed_list = feed_list + [label.name for label in self.labels]
-        return feed_list
+            return feed_list + [label.name for label in self.labels]
+        return feed_list + [self.labels[0].name]
 
     def _yolo_fetch_list(self):
         # ensure fetch 'im_shape', 'im_id', 'bbox' at first three elements in test phase
@@ -504,7 +512,7 @@ class DetectionTask(BasicTask):
             return [self.loss.name]
         elif self.is_test_phase:
             return [self.feed_list[1], self.labels[0].name, self.outputs[0].name, self.loss.name]
-        return [self.outputs[0].name]
+        return [self.feed_list[1], self.labels[0].name, self.outputs[0].name]
 
     def _build_net(self):
         if self.model_type == 'ssd':
