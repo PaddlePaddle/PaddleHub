@@ -8,11 +8,11 @@ PaddleHub AutoDL Finetuner提供两种超参优化算法：
 
 * **HAZero**: 核心思想是通过对正态分布中协方差矩阵的调整来处理变量之间的依赖关系和scaling。算法基本可以分成以下三步:
 
-  1. 采样产生新解
+  1. 采样产生新解；
 
-  2. 计算目标函数值
+  2. 计算目标函数值；
 
-  3. 更新正态分布参数。
+  3. 更新正态分布参数；
 
   调整参数的基本思路为，调整参数使得产生更优解的概率逐渐增大。优化过程如下图：
 
@@ -29,21 +29,21 @@ PaddleHub AutoDL Finetuner提供两种超参优化算法：
 
 PaddleHub AutoDL Finetuner为了评估搜索的超参对于任务的效果，提供两种超参评估策略：
 
-* **Full-Trail**: 给定一组超参，利用这组超参从头开始Fine-tune一个新模型，之后在验证集评估这个模型
+* **Full-Trail**: 给定一组超参，利用这组超参从头开始Fine-tune一个新模型，之后在验证集评估这个模型；
 
-* **Population-Based**: 给定一组超参，若这组超参是第一轮尝试的超参组合，则从头开始Fine-tune一个新模型；否则基于前几轮已保存的较好模型，在当前的超参数组合下继续Fine-tune并评估。
+* **Population-Based**: 给定一组超参，若这组超参是第一轮尝试的超参组合，则从头开始Fine-tune一个新模型；否则基于前几轮已保存的较好模型，在当前的超参数组合下继续Fine-tune并评估；
 
 ## 二、准备工作
 
-使用PaddleHub AutoDL Finetuner需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py
+使用PaddleHub AutoDL Finetuner需要准备两个指定格式的文件：待优化的超参数信息yaml文件hparam.yaml和需要Fine-tune的python脚本train.py。
 
 
 ### 1. hparam.yaml
 
 hparam给出待搜索的超参名字、类型（int或者float）、搜索范围等信息，通过这些信息构建了一个超参空间，PaddleHub将在这个空间内进行超参数的搜索，将搜索到的超参传入train.py获得评估效果，根据评估效果自动调整超参搜索方向，直到满足搜索次数。
 
-**Note**:
-* yaml文件的最外层级的key必须是param_list
+**NOTE：**
+* yaml文件的最外层级的key必须是param_list；
  ```
  param_list:
   - name : hparam1
@@ -53,13 +53,13 @@ hparam给出待搜索的超参名字、类型（int或者float）、搜索范围
     greater_than : 0.00005
     ...
  ```
-* 超参名字可以任意指定，PaddleHub会将搜索到的值以指定名称传递给train.py使用
+* 超参名字可以任意指定，PaddleHub会将搜索到的值以指定名称传递给train.py使用；
 
-* 优化超参策略选择HAZero时，需要提供两个以上的待优化超参。
+* 优化超参策略选择HAZero时，需要提供两个以上的待优化超参；
 
 ### 2. train.py
 
-train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优化后的效果返回
+train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优化后的效果返回。
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.3/docs/imgs/demo.png" hspace='10'/> <br />
@@ -82,9 +82,9 @@ train.py用于接受PaddleHub搜索到的超参进行一次优化过程，将优
 
 ### 示例
 
-[PaddleHub AutoDL Finetuner超参优化--NLP情感分类任务](../demo/autofinetune_text_classification)
+[PaddleHub AutoDL Finetuner超参优化--NLP情感分类任务](../demo/autofinetune_text_classification)。
 
-[PaddleHub AutoDL Finetuner超参优化--CV图像分类任务](../demo/autofinetune_image_classification)
+[PaddleHub AutoDL Finetuner超参优化--CV图像分类任务](../demo/autofinetune_image_classification)。
 
 ## 三、启动方式
 
@@ -99,25 +99,25 @@ $ hub autofinetune train.py --param_file=hparam.yaml --gpu=0,1 --popsize=5 --rou
 
 其中，选项
 
-> `--param_file`: 必填，待优化的超参数信息yaml文件，即上述[hparam.yaml](#hparam.yaml)。
+* `--param_file`: 必填，待优化的超参数信息yaml文件，即上述[hparam.yaml](#hparam.yaml)；
 
-> `--gpu`: 必填，设置运行程序的可用GPU卡号，中间以逗号隔开，不能有空格
+* `--gpu`: 必填，设置运行程序的可用GPU卡号，中间以逗号隔开，不能有空格；
 
-> `--popsize`: 可选，设置程序运行每轮产生的超参组合数，默认为5
+* `--popsize`: 可选，设置程序运行每轮产生的超参组合数，默认为5；
 
-> `--round`: 可选，设置程序运行的轮数，默认为10
+* `--round`: 可选，设置程序运行的轮数，默认为10；
 
-> `--output_dir`: 可选，设置程序运行输出结果存放目录，不指定该选项参数时，在当前运行路径下生成存放程序运行输出信息的文件夹
+* `--output_dir`: 可选，设置程序运行输出结果存放目录，不指定该选项参数时，在当前运行路径下生成存放程序运行输出信息的文件夹；
 
-> `--evaluator`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased
+* `--evaluator`: 可选，设置自动优化超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased；
 
-> `--tuning_strategy`: 可选，设置自动优化超参算法，可选hazero和pshe2，默认为pshe2
+* `--tuning_strategy`: 可选，设置自动优化超参算法，可选hazero和pshe2，默认为pshe2；
 
-**NOTE**:
+**NOTE:**
 
-* 进行超参搜索时，一共会进行n轮(--round指定)，每轮产生m组超参(--popsize指定)进行搜索。上一轮的优化结果决定下一轮超参数调整方向
+* 进行超参搜索时，一共会进行n轮(--round指定)，每轮产生m组超参(--popsize指定)进行搜索。上一轮的优化结果决定下一轮超参数调整方向；
 
-* 当指定GPU数量不足以同时跑一轮时，AutoDL Finetuner功能自动实现排队为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，gpu=0,1,2,3，则每搜索一轮，AutoDL Finetuner自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，则可以避免这种情况的出现。
+* 当指定GPU数量不足以同时跑一轮时，AutoDL Finetuner功能自动实现排队为了提高GPU利用率，建议卡数为刚好可以被popsize整除。如popsize=6，gpu=0,1,2,3，则每搜索一轮，AutoDL Finetuner自动起四个进程训练，所以第5/6组超参组合需要排队一次，在搜索第5/6两组超参时，会存在两张卡出现空闲等待的情况，如果设置为3张可用的卡，则可以避免这种情况的出现；
 
 ## 四、目录结构
 
@@ -142,21 +142,21 @@ $ hub autofinetune train.py --param_file=hparam.yaml --gpu=0,1 --popsize=5 --rou
 ```
 其中output_dir为启动autofinetune命令时指定的根目录，目录下:
 
-* log_file.txt记录每一轮搜索所有的超参以及整个过程中所搜索到的最优超参
+* log_file.txt记录每一轮搜索所有的超参以及整个过程中所搜索到的最优超参；
 
-* best_model保存整个搜索训练过程中得到的最优的模型参数
+* best_model保存整个搜索训练过程中得到的最优的模型参数；
 
-* visualization记录可视化过程的日志文件
+* visualization记录可视化过程的日志文件；
 
-* round0 ~ roundn记录每一轮的数据，在每个round目录下，还存在以下文件：
+* round0 ~ roundn记录每一轮的数据，在每个round目录下，还存在以下文件；
 
-  * log-0.info ~ log-m.info记录每个搜索方向的日志
+  * log-0.info ~ log-m.info记录每个搜索方向的日志；
 
-  * model-0 ~ model-m记录对应搜索的参数
+  * model-0 ~ model-m记录对应搜索的参数；
 
 ## 五、可视化
 
-AutoDL Finetuner API在优化超参过程中会自动对关键训练指标进行打点，启动程序后执行下面命令
+AutoDL Finetuner API在优化超参过程中会自动对关键训练指标进行打点，启动程序后执行下面命令。
 
 ```shell
 $ tensorboard --logdir ${OUTPUT}/visualization --host ${HOST_IP} --port ${PORT_NUM}

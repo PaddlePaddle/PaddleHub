@@ -65,4 +65,4 @@
 
 ## 超参优化AutoDL Finetuner
 
-PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../tutorial/autofinetune.md)
+PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../tutorial/autofinetune.md)。
