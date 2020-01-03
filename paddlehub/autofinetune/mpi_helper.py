@@ -69,7 +69,7 @@ class MPIHelper(object):
     def split_range(self, array_length):
         if self._size == 1:
             return 0, array_length
-        average_count = array_length / self._size
+        average_count = array_length // self._size
         if array_length % self._size == 0:
             return average_count * self._rank, average_count * (self._rank + 1)
         else:

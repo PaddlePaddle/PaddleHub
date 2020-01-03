@@ -221,7 +221,7 @@ class AutoFineTuneCommand(BaseCommand):
                         "\tsaved_params_dir\n")
 
             print(
-                "The related infomation about hyperparamemters searched are saved as %s/log_file.txt ."
+                "The related information about hyperparamemters searched are saved as %s/log_file.txt ."
                 % autoft._output_dir)
             for solution, modeldir in solutions_modeldirs.items():
                 param = evaluator.convert_params(solution)
