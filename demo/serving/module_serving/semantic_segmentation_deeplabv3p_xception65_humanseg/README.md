@@ -1,12 +1,12 @@
 # 部署图像分割服务-以deeplabv3p_xception65_humanseg为例
-## 1 简介
-图像分割是深度学习的常见任务。使用`deeplabv3p_xception65_humanseg`模型可以进行人像分割任务，关于`deeplabv3p_xception65_humanseg`的具体信息请参阅[deeplabv3p_xception65_humanseg](https://paddlepaddle.org.cn/hubdetail?name=deeplabv3p_xception65_humanseg&en_category=ImageSegmentation)。
+## 简介
+图像分割是深度学习的常见任务。使用`deeplabv3p_xception65_humanseg`模型可以进行人像分割任务，关于`deeplabv3p_xception65_humanseg`的具体信息请参见[deeplabv3p_xception65_humanseg](https://paddlepaddle.org.cn/hubdetail?name=deeplabv3p_xception65_humanseg&en_category=ImageSegmentation)。
 
-使用PaddleHub-Serving可以轻松部署一个在线图像分割服务API，可将此API接入自己的web网站进行在线图像分割，也可接入移动端应用程序，实现拍照分割等功能。
+使用PaddleHub Serving可以轻松部署一个在线图像分割服务API，可将此API接入自己的web网站进行在线图像分割，也可接入移动端应用程序，实现拍照分割等功能。
 
-下面就带领大家使用PaddleHub-Serving，通过简单几步部署一个目标检测服务。
+下面就带领大家使用PaddleHub Serving，通过简单几步部署一个目标检测服务。
 
-## 2 启动PaddleHub-Serving
+## Step1：启动PaddleHub Serving
 启动命令如下
 ```shell
 $ hub serving start -m deeplabv3p_xception65_humanseg
@@ -17,7 +17,7 @@ Loading deeplabv3p_xception65_humanseg successful.
 ```
 这样就完成了一个图像分割服务化API的部署，默认端口号为8866。
 
-## 3 测试图像分割在线API
+## Step2：测试图像分割在线API
 我们用来测试的样例图片为  
 
 <p align="center">  
@@ -38,6 +38,8 @@ files = [("image", file_1), ("image", file_2)]
 >>> file_list = ["../img/girl.jpg"]
 >>> files = [("image", (open(item, "rb"))) for item in file_list]
 ```
+
+## Step3：获取并验证结果
 然后就可以发送请求到图像分割服务API，并得到结果，代码如下
 ```python
 >>> # 指定检测方法为deeplabv3p_xception65_humanseg并发送post请求
