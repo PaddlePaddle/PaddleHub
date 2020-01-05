@@ -1,17 +1,17 @@
 # Bert Service  
-## 1. 简介
-### 1.1 什么是Bert Service
+## 简介
+### 什么是Bert Service
 `Bert Service`是基于Paddle Serving框架的快速部署模型远程计算服务方案，可将embedding过程通过调用API接口的方式实现，减少了对机器资源的依赖。使用PaddleHub可在服务器上一键部署`Bert Service`服务，在另外的普通机器上通过客户端接口即可轻松的获取文本对应的embedding数据。  
 
 整体流程图如下：  
 
 <div align="center">  
 
-<img src="./img/bs.png" aligh="center" width="100%" alt="BS流程图" />  
+<img src="../demo/serving/bert_service/img/bs.png" aligh="center" width="100%" alt="BS流程图" />  
 
 </div>  
 
-### 1.2 为什么使用Bert Service  
+### 为什么使用Bert Service  
 * 算力有限的集群环境中，可利用一台或几台高性能机器部署`Bert Service`服务端，为全部机器提供在线embedding功能。  
 
 * 实际的生产服务器不适宜承担大批量embedding工作，通过API接口可减少资源占用。  
@@ -28,9 +28,10 @@
 
 * 删繁就简，专注任务。`Bert Service`基于PaddlePaddle和PaddleHub开发，将模型的下载和安装等管理工作交由PaddleHub，开发者可以专注于主要任务，还可以无缝对接PaddleHub继续进行文本分类、序列标注等下游任务。
 
+使用Bert Service搭建服务主要分为下面三个步骤：
 
-## 2. 环境准备
-### 2.1 环境要求  
+## Step1：环境准备
+### 环境要求  
 下表是使用`Bert Service`的环境要求，带有*号标志项为非必需依赖，可根据实际使用需求选择安装。  
 
 |项目|版本|说明|  
@@ -43,7 +44,7 @@
 |paddle-gpu-serving*|>=0.8.0|在`Bert Service`服务端需依赖此包|  
 |ujson*|>=1.35|在`Bert Service`客户端需依赖此包|  
 
-### 2.2 安装步骤
+### 安装步骤
 a) 安装PaddlePaddle，利用pip下载CPU版本命令如下。GPU版本、Docker方式安装等其他更具体的安装过程见[开始使用PaddlePaddle](https://paddlepaddle.org.cn/install/quick)
 ```shell
 $ # 安装paddlepaddle的CPU版本
@@ -63,7 +64,7 @@ $ pip install ujson
 ```
 
 
-## 3. 支持模型
+### 支持模型
 目前`Bert Service`支持的语义模型如下表，可根据需要选择模型进行部署embedding服务，未来还将支持更多模型。  
 
 |模型|网络|
@@ -83,13 +84,13 @@ $ pip install ujson
 |[bert_chinese_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_chinese_L-12_H-768_A-12&en_category=SemanticModel)|BERT|
 
 
-## 4. 服务端(server)
-### 4.1 简介
+## Step2：服务端(server)
+### 简介
 server端接收client端发送的数据，执行模型计算过程并将计算结果返回给client端。  
 
 server端启动时会按照指定的模型名称从PaddleHub获取对应的模型文件进行加载，无需提前下载模型或指定模型路径，对模型的管理工作由PaddleHub负责。在加载模型后在指定的端口启动`BRPC`服务，保持端口监听，当接收到数据后便执行模型计算，并将计算结果通过`BRPC`返回并发送至client端。
 
-### 4.2 启动  
+### 启动  
 使用PaddleHub的命令行工具可一键启动`Bert Service`，命令如下：
 ```shell
 $ hub serving start bert_service -m ernie_tiny -p 8866 --use_gpu --gpu 0
@@ -122,19 +123,19 @@ Server[baidu::paddle_serving::predictor::bert_service::BertServiceImpl] is servi
 
 </div>
 
-### 4.3 关闭
+### 关闭
 通过在启动服务端的命令行页面使用Ctrl+C终止`Bert Service`运行，关闭成功则显示：
 ```shell
 Paddle Inference Server exit successfully!
 ```
 
 
-## 5.客户端(client)  
-### 5.1 简介
+## Step3：客户端(client)  
+### 简介
 client端接收文本数据，并获取server端返回的模型计算的embedding结果。  
 
 client端利用PaddleHub的语义理解任务将原始文本按照不同模型的数据预处理方案将文本ID化，并生成对应的sentence type、position、input masks数据，将这些信息封装成json数据，通过http协议按照指定的IP端口信息发送至server端，等待并获取模型生成结果。
-### 5.2 启动
+### 启动
 服务端类BSClient初始化方法原型为：
 ```python
 BSClient.__init__(self,
@@ -159,12 +160,12 @@ BSClient.get_result(self, input_text)
 |retry|连接失败后的最大重试次数|int|3|  
 |input_text|输入文本，要获取embedding的原始文本|二维list类型，内部元素为string类型的文本|[['样例1'],['样例2']]|
 
-## 6. Demo
+## Demo-利用Bert Service部署ernie_tiny在线embedding服务
 在这里，我们将展示一个实际场景中可能使用的demo，我们利用PaddleHub在一台GPU机器上部署`ernie_tiny`模型服务，并在另一台CPU机器上尝试访问，获取一首七言绝句的embedding。
-### 6.1 安装环境依赖
+### Step1：安装环境依赖
 首先需要安装环境依赖，根据第2节内容分别在两台机器上安装相应依赖。  
 
-### 6.2 启动Bert Service服务端
+### Step2：启动Bert Service服务端
 确保环境依赖安装正确后，在要部署服务的GPU机器上使用PaddleHub命令行工具启动`Bert Service`服务端，命令如下：
 ```shell
 $ hub serving start bert_service -m ernie_tiny --use_gpu --gpu 0 --port 8866
@@ -174,7 +175,7 @@ $ hub serving start bert_service -m ernie_tiny --use_gpu --gpu 0 --port 8866
 Server[baidu::paddle_serving::predictor::bert_service::BertServiceImpl] is serving on port=8866.
 ```  
 这样就启动了`ernie_tiny`的在线服务，监听8866端口，并在0号GPU上进行任务。
-### 6.3 使用Bert Service客户端进行远程调用  
+### Step3：使用Bert Service客户端进行远程调用  
 部署好服务端后，就可以用普通机器作为客户端测试在线embedding功能。
 
 首先导入客户端依赖。  
@@ -214,30 +215,30 @@ $ python bert_service_client.py
 
 </div>  
 
-### 6.4 关闭Bert Service服务端
+### Step4：关闭Bert Service服务端
 如要停止`Bert Service`服务端程序，可在其启动命令行页面使用Ctrl+C方式关闭，关闭成功会打印如下日志：
 ```shell
 Paddle Inference Server exit successfully!
 ```
 这样，我们就利用一台GPU机器就完成了`Bert Service`的部署，并利用另一台普通机器进行了测试，可见通过`Bert Service`能够方便地进行在线embedding服务的快速部署。  
 
-## 7. FAQ  
-> Q : 如何在一台服务器部署多个模型？  
-> A : 可通过多次启动`Bert Service`，分配不同端口实现。如果使用GPU，需要指定不同的显卡。如同时部署`ernie`和`bert_chinese_L-12_H-768_A-12`，分别执行命令如下：  
-> ```shell
-> $ hub serving start bert_service -m ernie -p 8866
-> $ hub serving start bert_service -m bert_chinese_L-12_H-768_A-12 -p 8867
-> ```
+## FAQ  
+Q : 如何在一台服务器部署多个模型？  
+A : 可通过多次启动`Bert Service`，分配不同端口实现。如果使用GPU，需要指定不同的显卡。如同时部署`ernie`和`bert_chinese_L-12_H-768_A-12`，分别执行命令如下：  
+```shell
+$ hub serving start bert_service -m ernie -p 8866
+$ hub serving start bert_service -m bert_chinese_L-12_H-768_A-12 -p 8867
+```
 
-> Q : 启动时显示"Check out http://yq01-gpu-255-129-12-00.epc.baidu.com:8887 in web
+Q : 启动时显示"Check out http://yq01-gpu-255-129-12-00.epc.baidu.com:8887 in web
  browser."，这个页面有什么作用。  
-> A : 这是`BRPC`的内置服务，主要用于查看请求数、资源占用等信息，可对server端性能有大致了解，具体信息可查看[BRPC内置服务](https://github.com/apache/incubator-brpc/blob/master/docs/cn/builtin_service.md)。
+A : 这是`BRPC`的内置服务，主要用于查看请求数、资源占用等信息，可对server端性能有大致了解，具体信息可查看[BRPC内置服务](https://github.com/apache/incubator-brpc/blob/master/docs/cn/builtin_service.md)。
 
-> Q : 为什么输入文本的格式为[["文本1"], ["文本2"], ]，而不是["文本1", "文本2", ]？  
-> A : 因为Bert模型可以对一轮对话生成向量表示，例如[["问题1","回答1"],["问题2","回答2"]]，为了防止使用时混乱，每个样本使用一个list表示，一个样本list内部可以是1条string或2条string，如下面的文本：  
-> ```python
-> input_text = [
->    ["你今天吃饭了吗","我已经吃过饭了"],
->    ["今天天气怎么样","今天天气不错"],
-> ]
-> ```
+Q : 为什么输入文本的格式为[["文本1"], ["文本2"], ]，而不是["文本1", "文本2", ]？  
+A : 因为Bert模型可以对一轮对话生成向量表示，例如[["问题1","回答1"],["问题2","回答2"]]，为了防止使用时混乱，每个样本使用一个list表示，一个样本list内部可以是1条string或2条string，如下面的文本：  
+```python
+input_text = [
+   ["你今天吃饭了吗","我已经吃过饭了"],
+   ["今天天气怎么样","今天天气不错"],
+]
+```

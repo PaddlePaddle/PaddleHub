@@ -79,7 +79,7 @@ $ hub serving start --config config.json
 
 在使用PaddleHub Serving部署服务端的模型预测服务后，就可以在客户端访问预测接口以获取结果了，接口url格式为：
 
-http://0.0.0.0:8866/predict/\<CATEGORY\>/\<MODULE>
+http://0.0.0.0:8866/predict/<CATEGORY\>/\<MODULE>
 
 其中，\<CATEGORY>为text或image，与模型种类对应，\<MODULE>为模型名。
 
@@ -90,7 +90,7 @@ http://0.0.0.0:8866/predict/\<CATEGORY\>/\<MODULE>
 
 <p align="center">  
 
-<img src="./img/web_demo.png" width="60%" />  
+<img src="../demo/serving/module_serving/img/web_demo.png" width="60%" />  
 
 </p>  
 
@@ -126,7 +126,7 @@ $ hub serving start -c serving_config.json
 
 <p align="center">  
 
-<img src="./img/start_serving_lac.png" width="100%" />  
+<img src="../demo/serving/module_serving/img/start_serving_lac.png" width="100%" />  
 
 </p>  
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 ## 示例-其他模型的一键部署服务
 
 获取其他PaddleHub Serving的一键服务部署场景示例，可参见下列demo
-[](../demo)
+
 * [图像分类-基于vgg11_imagent](../demo/serving/module_serving/classification_vgg11_imagenet)  
 
 该示例展示了利用vgg11_imagent完成图像分类服务化部署和在线预测，获取图像分类结果。
