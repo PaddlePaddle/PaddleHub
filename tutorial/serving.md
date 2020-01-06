@@ -1,12 +1,12 @@
 # PaddleHub Serving模型一键服务部署
 ## 简介
 ### 为什么使用一键服务部署
-使用PaddleHub能够快速进行迁移学习和模型预测，但开发者常面临将训练好的模型部署上线的需求，无论是对外开放服务端口，还是在局域网中搭建预测服务，都需要PaddleHub具有快速部署模型预测服务的能力。在这个背景下，模型一键服务部署工具——PaddleHub Serving应运而生。开发者通过一句命令即可快速得到一个预测服务API，而无需关注网络框架选择和实现。
+使用PaddleHub能够快速进行模型预测，但开发者常面临本地预测过程迁移线上的需求。无论是对外开放服务端口，还是在局域网中搭建预测服务，都需要PaddleHub具有快速部署模型预测服务的能力。在这个背景下，模型一键服务部署工具——PaddleHub Serving应运而生。开发者通过一句命令即可快速启动一个模型预测在线服务，而无需关注网络框架选择和实现。
 ### 什么是一键服务部署
 PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通过简单的Hub命令行工具轻松启动一个模型预测在线服务，前端通过Flask和Gunicorn完成网络请求的处理，后端直接调用PaddleHub预测接口，同时支持使用多进程方式利用多核提高并发能力，保证预测服务的性能。
 
 ### 支持模型
-目前PaddleHub Serving支持PaddleHub所有可直接用于预测的模型进行服务部署，包括`lac`、`senta_bilstm`等nlp类模型，以及`yolov3_coco2017`、`vgg16_imagenet`等cv类模型，未来还将支持开发者使用PaddleHub Fine-tune API得到的模型用于快捷服务部署。
+目前PaddleHub Serving支持对PaddleHub所有可直接预测的模型进行服务部署，包括`lac`、`senta_bilstm`等NLP类模型，以及`yolov3_darknet53_coco2017`、`vgg16_imagenet`等CV类模型，更多模型请参见[PaddleHub支持模型列表](https://paddlepaddle.org.cn/hublist)。未来还将支持开发者使用PaddleHub Fine-tune API得到的模型用于快捷服务部署。
 
 ### 所需环境
 下表是使用PaddleHub Serving的环境要求及注意事项。  
@@ -19,7 +19,7 @@ PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通
 
 ## 使用
 ### Step1：启动服务端部署
-PaddleHub Serving有两种启动方式，分别是使用命令行命令启动，以及使用配置文件启动。
+PaddleHub Serving有两种启动方式，分别是使用命令行启动，以及使用配置文件启动。
 
 #### 命令行命令启动
 启动命令
@@ -99,7 +99,7 @@ http://0.0.0.0:8866/predict/<CATEGORY\>/\<MODULE>
 ### Step1：部署lac在线服务
 现在，我们要部署一个lac在线服务，以通过接口获取文本的分词结果。
 
-首先，根据2.1节所述，启动PaddleHub Serving服务端的两种方式分别为:
+首先，任意选择一种启动方式，两种方式分别为:
 ```shell
 $ hub serving start -m lac
 ```
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     text_list = ["今天是个好日子", "天气预报说今天要下雨"]
     text = {"text": text_list}
     # 指定预测方法为lac并发送post请求
-    url = "http://127.0.0.1:8866/predict/text/lac"
+    url = "http://0.0.0.0:8866/predict/text/lac"
     r = requests.post(url=url, data=text)
 
     # 打印预测结果
@@ -219,4 +219,4 @@ if __name__ == "__main__":
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
 
 ## Bert Service
-除了预训练模型一键服务部署功能外外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](./bert_service.md)。
+除了预训练模型一键服务部署功能之外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](./bert_service.md)。
