@@ -1,11 +1,10 @@
 # PaddleHub Serving
 ## 简介
-### 为什么使用PaddleHub Serving
+### 背景
 使用PaddleHub能够完成预训练模型的管理和一键预测，但开发者还经常面临将模型部署上线以对外提供服务的需求，而利用PaddleHub Serving可便捷的将模型部署上线，开发者只需要关注如何处理输入数据和输出结果即可。
-### 什么是PaddleHub Serving
+### 主要功能
 PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通过简单的Hub命令行工具轻松启动一个模型预测在线服务。
 
-### 主要功能
 PaddleHub Serving主要包括利用Bert Service实现embedding服务化，以及利用预测模型实现预训练模型预测服务化两大功能，未来还将支持开发者使用PaddleHub Fine-tune API的模型服务化。
 
 ## Bert Service
