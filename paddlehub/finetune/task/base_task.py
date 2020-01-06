@@ -24,6 +24,12 @@ import copy
 import logging
 import inspect
 from functools import partial
+try:
+    # python 3
+    from inspect import getfullargspec as get_args
+except ImportError:
+    # python 2
+    from inspect import getargspec as get_args
 
 import numpy as np
 import paddle.fluid as fluid
@@ -129,11 +135,7 @@ class TaskHooks():
                 "name: %s has existed in hook_type:%s, use modify method to modify it"
                 % (name, hook_type))
         else:
-            try:
-                args_num = len(inspect.getfullargspec(func).args)
-            except:
-                # support python 2
-                args_num = len(inspect.getargspec(func).args)
+            args_num = len(get_args(func).args)
             if args_num != self._hook_params_num[hook_type]:
                 raise ValueError(
                     "The number of parameters to the hook hook_type:%s should be %i"
