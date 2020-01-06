@@ -10,7 +10,7 @@ PaddleHub Serving主要包括利用Bert Service实现embedding服务化，以及
 ## Bert Service
 `Bert Service`是基于[Paddle Serving](https://github.com/PaddlePaddle/Serving)框架的快速部署模型远程计算服务方案，可将embedding过程通过调用API接口的方式实现，减少了对机器资源的依赖。使用PaddleHub可在服务器上一键部署`Bert Service`服务，在另外的普通机器上通过客户端接口即可轻松的获取文本对应的embedding数据。
 
-关于`Bert Service`的具体信息和demo请参见[Bert Service](../../tutorial/bert_service.md)
+关于其具体信息和demo请参见[Bert Service](../../tutorial/bert_service.md)
 
 该示例展示了利用`Bert Service`进行远程embedding服务化部署和在线预测，并获取文本embedding结果。
 
