@@ -215,3 +215,6 @@ if __name__ == "__main__":
 * [中文情感分析-基于simnet_bow](../demo/serving/module_serving/semantic_model_simnet_bow)
 
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
+
+## Bert Service
+除了预训练模型一键服务部署功能外外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](./bert_service.md)。

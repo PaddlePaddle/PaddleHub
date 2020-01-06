@@ -53,7 +53,7 @@ $ hub serving start -c serving_config.json
 
 在服务部署好之后，我们可以进行测试，用来测试的文本为`今天是个好日子`和`天气预报说今天要下雨`。
 
-客户端代码如下
+客户端代码如下：
 ```python
 # coding: utf8
 import requests
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     # 打印预测结果
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
-运行后得到结果
+运行后得到结果：
 
 
 ```python
@@ -96,9 +96,9 @@ if __name__ == "__main__":
 }
 ```
 
-## 示例-其他模型的一键部署服务
+## Demo——其他模型的一键部署服务
 
-获取其他PaddleHub Serving的一键服务部署场景示例，可参见下列demo
+获取其他PaddleHub Serving的一键服务部署场景示例，可参见下列demo：
 
 * [图像分类-基于vgg11_imagent](../demo/serving/module_serving/classification_vgg11_imagenet)  
 
@@ -131,3 +131,6 @@ if __name__ == "__main__":
 * [中文情感分析-基于simnet_bow](../demo/serving/module_serving/semantic_model_simnet_bow)
 
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
+
+## Bert Service
+除了预训练模型一键服务部署功能外外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](../../../tutorial/bert_service.md)。

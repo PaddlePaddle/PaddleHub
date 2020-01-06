@@ -8,11 +8,11 @@
 这里就带领大家使用PaddleHub Serving，通过简单几步部署一个文本审核在线服务。
 
 ## Step1：启动PaddleHub Serving
-启动命令如下
+启动命令如下：
 ```shell
 $ hub serving start -m porn_detection_lstm  
 ```
-启动时会显示加载模型过程，启动成功后显示
+启动时会显示加载模型过程，启动成功后显示：
 ```shell
 Loading porn_detection_lstm successful.
 ```
@@ -21,26 +21,26 @@ Loading porn_detection_lstm successful.
 ## Step2：测试文本审核在线API
 在服务部署好之后，我们可以进行测试，用来测试的文本为`黄片下载`和`中国黄页`。
 
-准备的数据格式为
+准备的数据格式为：
 ```python
 {"text": [text_1, text_2, ...]}  
 ```
 **NOTE:** 字典的key为"text"。
 
-根据文本和数据格式，代码如下
+根据文本和数据格式，代码如下：
 ```python
 >>> # 指定用于用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
 >>> text_list = ["黄片下载", "中国黄页"]
 >>> text = {"text": text_list}
 ```
 ## Step3：获取并验证结果
-接下来发送请求到文本审核API，并得到结果，代码如下
+接下来发送请求到文本审核API，并得到结果，代码如下：
 ```python
 # 指定预测方法为lac并发送post请求
 >>> url = "http://127.0.0.1:8866/predict/text/porn_detection_lstm"
 >>> r = requests.post(url=url, data=text)
 ```
-`porn_detection_lstm`模型返回的结果为每个文本鉴定后的结果，我们尝试打印接口返回结果
+`porn_detection_lstm`模型返回的结果为每个文本鉴定后的结果，我们尝试打印接口返回结果：
 ```python
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
