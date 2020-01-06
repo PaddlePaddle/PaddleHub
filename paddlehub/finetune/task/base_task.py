@@ -24,13 +24,11 @@ import copy
 import logging
 import inspect
 from functools import partial
-try:
-    # python 3
-    from inspect import getfullargspec as get_args
-except ImportError:
-    # python 2
+import six
+if six.PY2:
     from inspect import getargspec as get_args
-
+else:
+    from inspect import getfullargspec as get_args
 import numpy as np
 import paddle.fluid as fluid
 from tb_paddle import SummaryWriter
