@@ -21,7 +21,7 @@ Loading stgan_celeba successful.
 我们用来测试的样例图片为：  
 
 <p align="center">  
-<img src="../img/man.png" width="30%" />  
+<img src="../../../docs/imgs/man.png" width="30%" />  
 </p>  
 
 根据stgan_celeba所需信息，准备的数据包括图像文件和生成图像风格，格式为：

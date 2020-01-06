@@ -7,7 +7,7 @@
 
 <div align="center">  
 
-<img src="../demo/serving/bert_service/img/bs.png" aligh="center" width="100%" alt="BS流程图" />  
+<img src="../docs/imgs/bs.png" aligh="center" width="100%" alt="BS流程图" />  
 
 </div>  
 

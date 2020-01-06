@@ -17,7 +17,7 @@ Bert Service是基于[Paddle Serving](https://github.com/PaddlePaddle/Serving)�
 ##  预训练模型一键服务部署
 预训练模型一键服务部署是基于PaddleHub的预训练模型快速部署的服务化方案，能够将模型预测以API接口的方式实现。
 
-关于预训练模型一键服务部署的具体信息请参见[PaqddleHub Serving](../../tutorial/serving.md)
+关于预训练模型一键服务部署的具体信息请参见[PaddleHub Serving](../../tutorial/serving.md)
 
 预训练模型一键服务部署包括以下示例：  
 
