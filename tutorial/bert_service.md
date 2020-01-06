@@ -30,7 +30,7 @@
 
 使用Bert Service搭建服务主要分为下面三个步骤：
 
-## Step1：环境准备
+## Step1：准备环境
 ### 环境要求  
 下表是使用`Bert Service`的环境要求，带有*号标志项为非必需依赖，可根据实际使用需求选择安装。  
 
@@ -41,7 +41,7 @@
 |PaddlePaddle|>=1.6.1|若使用GPU计算，则对应使用PaddlePaddle-gpu版本|  
 |GCC|>=4.8|无|  
 |CUDA*|>=8|若使用GPU，需使用CUDA8以上版本|  
-|paddle-gpu-serving*|>=0.8.0|在`Bert Service`服务端需依赖此包|  
+|paddle-gpu-serving*|>=0.8.2|在`Bert Service`服务端需依赖此包|  
 |ujson*|>=1.35|在`Bert Service`客户端需依赖此包|  
 
 ### 安装步骤
@@ -84,7 +84,7 @@ $ pip install ujson
 |[bert_chinese_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_chinese_L-12_H-768_A-12&en_category=SemanticModel)|BERT|
 
 
-## Step2：服务端(server)
+## Step2：启动服务端(server)
 ### 简介
 server端接收client端发送的数据，执行模型计算过程并将计算结果返回给client端。  
 
@@ -130,7 +130,7 @@ Paddle Inference Server exit successfully!
 ```
 
 
-## Step3：客户端(client)  
+## Step3：启动客户端(client)  
 ### 简介
 client端接收文本数据，并获取server端返回的模型计算的embedding结果。  
 
