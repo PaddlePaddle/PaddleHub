@@ -1,6 +1,6 @@
 # 使用Word2Vec进行文本语义相似度计算
 
-本示例展示利用PaddleHub“端到端地”完成文本相似度计算
+本示例展示利用PaddleHub“端到端地”完成文本相似度计算。
 
 ## 一、准备文本数据
 
@@ -12,7 +12,7 @@
 ```
 
 ## 二、分词
-利用PaddleHub Module LAC对文本数据进行分词
+利用PaddleHub Module LAC对文本数据进行分词。
 
 ```python
 # coding:utf-8
@@ -59,7 +59,7 @@ for text_pair in raw_data:
 
 ## 三、计算文本语义相似度
 
-将分词文本中的单词相应替换为wordid，之后输入wor2vec module中计算两个文本语义相似度
+将分词文本中的单词相应替换为wordid，之后输入wor2vec module中计算两个文本语义相似度。
 
 ```python
 def convert_tokens_to_ids(vocab, text):
