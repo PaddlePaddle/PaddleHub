@@ -1,7 +1,7 @@
 # PaddleHub Serving
 ## 简介
 ### 背景
-使用PaddleHub能够完成预训练模型的管理和一键预测，但开发者还经常面临将模型部署上线以对外提供服务的需求，而利用PaddleHub Serving可便捷的将模型部署上线，开发者只需要关注如何处理输入数据和输出结果即可。
+使用PaddleHub能够完成预训练模型的管理和预测，但开发者还经常面临将模型部署上线以对外提供服务的需求，而利用PaddleHub Serving可便捷的将模型部署上线，开发者只需要关注如何处理输入数据和输出结果即可。
 ### 主要功能
 PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通过简单的Hub命令行工具轻松启动一个模型预测在线服务。
 
@@ -14,12 +14,12 @@ Bert Service是基于[Paddle Serving](https://github.com/PaddlePaddle/Serving)�
 
 该示例展示了利用Bert Service进行远程embedding服务化部署和在线预测，并获取文本embedding结果。
 
-##  一键服务部署
-一键服务部署是基于PaddleHub的预训练模型快速部署的服务化方案，能够将模型预测以API接口的方式实现。
+##  预训练模型一键服务部署
+预训练模型一键服务部署是基于PaddleHub的预训练模型快速部署的服务化方案，能够将模型预测以API接口的方式实现。
 
-关于一键服务部署的具体信息请参见[PaqddleHub Serving](../../tutorial/PaddleHub_serving.md)
+关于预训练模型一键服务部署的具体信息请参见[PaqddleHub Serving](../../tutorial/serving.md)
 
-一键服务部署包括以下示例：  
+预训练模型一键服务部署包括以下示例：  
 
 * [图像分类-基于vgg11_imagent](module_serving/classification_vgg11_imagenet)  
 
@@ -53,4 +53,4 @@ Bert Service是基于[Paddle Serving](https://github.com/PaddlePaddle/Serving)�
 
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
 
-关于Paddle-Serving一键模型部署功能的具体信息请参见[serving](module_serving)
+关于Paddle Serving预训练模型一键服务部署功能的具体信息请参见[serving](module_serving)
