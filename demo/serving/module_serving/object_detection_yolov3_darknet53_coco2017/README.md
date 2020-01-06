@@ -22,13 +22,13 @@ Loading yolov3_darknet53_coco2017 successful.
 
 <p align="center">  
 
-<img src="../../../docs/imgs/cat.jpg" width="65%" />  
+<img src="../../../../docs/imgs/cat.jpg" width="65%" />  
 
 </p>  
 
 <p align="center">  
 
-<img src="../../../docs/imgs/dog.jpg" width="65%" />  
+<img src="../../../../docs/imgs/dog.jpg" width="65%" />  
 
 </p>  
 

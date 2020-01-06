@@ -35,7 +35,7 @@ files = [("image", file_1), ("image", file_2)]
 代码如下
 ```python
 >>> # 指定要检测的图片并生成列表[("image", img_1), ("image", img_2), ... ]
->>> file_list = ["../../../docs/imgs/girl.jpg"]
+>>> file_list = ["../../../../docs/imgs/girl.jpg"]
 >>> files = [("image", (open(item, "rb"))) for item in file_list]
 ```
 

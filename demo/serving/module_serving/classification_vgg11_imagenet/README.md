@@ -21,11 +21,11 @@ Loading vgg11_imagenet successful.
 我们用来测试的样例图片为：  
 
 <p align="center">  
-<img src="../../../docs/imgs/cat.jpg" width="45%" />  
+<img src="../../../../docs/imgs/cat.jpg" width="45%" />  
 </p>  
 
 <p align="center">  
-<img src="../../../docs/imgs/flower.jpg" width="45%"/>  
+<img src="../../../../docs/imgs/flower.jpg" width="45%"/>  
 </p>
 
 准备的数据格式为：
