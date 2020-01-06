@@ -160,7 +160,7 @@ BSClient.get_result(self, input_text)
 |retry|连接失败后的最大重试次数|int|3|  
 |input_text|输入文本，要获取embedding的原始文本|二维list类型，内部元素为string类型的文本|[['样例1'],['样例2']]|
 
-## Demo-利用Bert Service部署ernie_tiny在线embedding服务
+## Demo——利用Bert Service部署ernie_tiny在线embedding服务
 在这里，我们将展示一个实际场景中可能使用的demo，我们利用PaddleHub在一台GPU机器上部署`ernie_tiny`模型服务，并在另一台CPU机器上尝试访问，获取一首七言绝句的embedding。
 ### Step1：安装环境依赖
 首先需要安装环境依赖，根据第2节内容分别在两台机器上安装相应依赖。  

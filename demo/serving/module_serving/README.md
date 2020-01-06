@@ -10,7 +10,7 @@ PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通
 
 **NOTE:** 关于PaddleHub Serving一键服务部署的具体信息请参见[PaddleHub Servung](../../../tutorial/serving.md)。
 
-## 示例-部署一个在线lac分词服务
+## Demo——部署一个在线lac分词服务
 
 ### Step1：部署lac在线服务
 现在，我们要部署一个lac在线服务，以通过接口获取文本的分词结果。
