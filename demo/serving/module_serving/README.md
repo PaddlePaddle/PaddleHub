@@ -8,129 +8,43 @@ PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通
 ### 支持模型
 目前PaddleHub Serving支持PaddleHub所有可直接用于预测的模型进行服务部署，包括`lac`、`senta_bilstm`等nlp类模型，以及`yolov3_coco2017`、`vgg16_imagenet`等cv类模型，未来还将支持开发者使用PaddleHub Fine-tune API得到的模型用于快捷服务部署。
 
-**NOTE:** 关于PaddleHub Serving一键服务部署的具体信息请参见[PaddleHub Servung](../../../tutorial/serving.md)。
+**NOTE:** 关于PaddleHub Serving一键服务部署的具体信息请参见[PaddleHub Serving](../../../tutorial/serving.md)。
 
-## Demo——部署一个在线lac分词服务
+## Demo
 
-### Step1：部署lac在线服务
-现在，我们要部署一个lac在线服务，以通过接口获取文本的分词结果。
+获取PaddleHub Serving的一键服务部署场景示例，可参见下列demo：
 
-首先，根据2.1节所述，启动PaddleHub Serving服务端的两种方式分别为:
-```shell
-$ hub serving start -m lac
-```
-或
-```shell
-$ hub serving start -c serving_config.json
-```
-其中`serving_config.json`的内容如下：
-```json
-{
-  "modules_info": [
-  {
-    "module": "lac",
-    "version": "1.0.0",
-    "batch_size": 1
-  }
-],
-  "use_gpu": false,
-  "port": 8866,
-  "use_multiprocess": false
-}
-```
-启动成功界面如图：
-
-<p align="center">  
-
-<img src="../demo/serving/module_serving/img/start_serving_lac.png" width="100%" />  
-
-</p>  
-
-这样我们就在8866端口部署了lac的在线分词服务。
-*此处warning为Flask提示，不影响使用*
-
-### Step2：访问lac预测接口
-
-在服务部署好之后，我们可以进行测试，用来测试的文本为`今天是个好日子`和`天气预报说今天要下雨`。
-
-客户端代码如下：
-```python
-# coding: utf8
-import requests
-import json
-
-if __name__ == "__main__":
-    # 指定用于用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
-    text_list = ["今天是个好日子", "天气预报说今天要下雨"]
-    text = {"text": text_list}
-    # 指定预测方法为lac并发送post请求
-    url = "http://127.0.0.1:8866/predict/text/lac"
-    r = requests.post(url=url, data=text)
-
-    # 打印预测结果
-    print(json.dumps(r.json(), indent=4, ensure_ascii=False))
-```
-运行后得到结果：
-
-
-```python
-{
-    "results": [
-        {
-            "tag": [
-                "TIME", "v", "q", "n"
-            ],
-            "word": [
-                "今天", "是", "个", "好日子"
-            ]
-        },
-        {
-            "tag": [
-                "n", "v", "TIME", "v", "v"
-            ],
-            "word": [
-                "天气预报", "说", "今天", "要", "下雨"
-            ]
-        }
-    ]
-}
-```
-
-## Demo——其他模型的一键部署服务
-
-获取其他PaddleHub Serving的一键服务部署场景示例，可参见下列demo：
-
-* [图像分类-基于vgg11_imagent](../demo/serving/module_serving/classification_vgg11_imagenet)  
+* [图像分类-基于vgg11_imagent](../module_serving/classification_vgg11_imagenet)  
 
 &emsp;&emsp;该示例展示了利用vgg11_imagent完成图像分类服务化部署和在线预测，获取图像分类结果。
 
-* [图像生成-基于stgan_celeba](../demo/serving/module_serving/GAN_stgan_celeba)  
+* [图像生成-基于stgan_celeba](../module_serving/GAN_stgan_celeba)  
 
 &emsp;&emsp;该示例展示了利用stgan_celeba生成图像服务化部署和在线预测，获取指定风格的生成图像。
 
-* [文本审核-基于porn_detection_lstm](../demo/serving/module_serving/text_censorship_porn_detection_lstm)  
+* [文本审核-基于porn_detection_lstm](../module_serving/text_censorship_porn_detection_lstm)  
 
 &emsp;&emsp;该示例展示了利用porn_detection_lstm完成中文文本黄色敏感信息鉴定的服务化部署和在线预测，获取文本是否敏感及其置信度。
 
-* [中文词法分析-基于lac](../demo/serving/module_serving/lexical_analysis_lac)
+* [中文词法分析-基于lac](../module_serving/lexical_analysis_lac)
 
 &emsp;&emsp;该示例展示了利用lac完成中文文本分词服务化部署和在线预测，获取文本的分词结果，并可通过用户自定义词典干预分词结果。
 
-* [目标检测-基于yolov3_darknet53_coco2017](.../demo/serving/serving/object_detection_yolov3_darknet53_coco2017)  
+* [目标检测-基于yolov3_darknet53_coco2017](../module_serving/object_detection_yolov3_darknet53_coco2017)  
 
 &emsp;&emsp;该示例展示了利用yolov3_darknet53_coco2017完成目标检测服务化部署和在线预测，获取检测结果和覆盖识别框的图片。
 
-* [中文语义分析-基于simnet_bow](../demo/serving/module_serving/semantic_model_simnet_bow)
+* [中文语义分析-基于simnet_bow](../module_serving/semantic_model_simnet_bow)
 
 &emsp;&emsp;该示例展示了利用simnet_bow完成中文文本相似度检测服务化部署和在线预测，获取文本的相似程度。  
 
-* [图像分割-基于deeplabv3p_xception65_humanseg](../demo/serving/module_serving/semantic_segmentation_deeplabv3p_xception65_humanseg)
+* [图像分割-基于deeplabv3p_xception65_humanseg](../module_serving/semantic_segmentation_deeplabv3p_xception65_humanseg)
 
 &emsp;&emsp;该示例展示了利用deeplabv3p_xception65_humanseg完成图像分割服务化部署和在线预测，获取识别结果和分割后的图像。
 
-* [中文情感分析-基于simnet_bow](../demo/serving/module_serving/semantic_model_simnet_bow)
+* [中文情感分析-基于simnet_bow](../module_serving/semantic_model_simnet_bow)
 
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
 
 ## Bert Service
-除了预训练模型一键服务部署功能外外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](../../../tutorial/bert_service.md)。
+除了预训练模型一键服务部署功能之外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](../../../tutorial/bert_service.md)。

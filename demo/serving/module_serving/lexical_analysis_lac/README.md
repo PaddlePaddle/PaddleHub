@@ -6,7 +6,7 @@
 
 这里就带领大家使用PaddleHub Serving，通过简单几步部署一个词法分析在线服务。
 
-## 2 启动PaddleHub Serving
+## Step1：启动PaddleHub Serving
 启动命令如下
 ```shell
 $ hub serving start -m lac  

@@ -3,7 +3,7 @@ import requests
 import json
 
 if __name__ == "__main__":
-    # 指定用于用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
+    # 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
     text_list = ["今天是个好日子", "天气预报说今天要下雨"]
     text = {"text": text_list}
     # 指定自定义词典{"user_dict": dict.txt}
