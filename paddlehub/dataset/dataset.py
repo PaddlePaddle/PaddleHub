@@ -128,7 +128,7 @@ class BaseDataset(object):
     def num_labels(self):
         return len(self.label_list)
 
-    # To compatibility with the usage of ImageClassificationDataset
+    # To be compatible with ImageClassificationDataset
     def label_dict(self):
         return {index: key for index, key in enumerate(self.label_list)}
 
