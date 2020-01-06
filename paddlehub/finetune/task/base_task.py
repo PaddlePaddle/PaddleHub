@@ -129,7 +129,11 @@ class TaskHooks():
                 "name: %s has existed in hook_type:%s, use modify method to modify it"
                 % (name, hook_type))
         else:
-            args_num = len(inspect.getfullargspec(func).args)
+            try:
+                args_num = len(inspect.getfullargspec(func).args)
+            except:
+                # support python 2
+                args_num = len(inspect.getargspec(func).args)
             if args_num != self._hook_params_num[hook_type]:
                 raise ValueError(
                     "The number of parameters to the hook hook_type:%s should be %i"
