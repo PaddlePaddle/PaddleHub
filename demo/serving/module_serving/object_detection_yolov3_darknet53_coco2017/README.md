@@ -1,12 +1,12 @@
 # 部署图像分类服务-以yolov3_darknet53_coco2017为例
-## 1 简介
-目标检测作为深度学习常见任务，在各种场景下都有所使用。使用`yolov3_darknet53_coco2017`模型可以进行目标检测任务，关于`yolov3_darknet53_coco2017`的具体信息请参阅[yolov3_darknet53_coco2017](https://paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_coco2017&en_category=ObjectDetection)。
+## 简介
+目标检测作为深度学习常见任务，在各种场景下都有所使用。使用`yolov3_darknet53_coco2017`模型可以进行目标检测任务，关于`yolov3_darknet53_coco2017`的具体信息请参见[yolov3_darknet53_coco2017](https://paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_coco2017&en_category=ObjectDetection)。
 
-使用PaddleHub-Serving可以轻松部署一个在线目标检测服务API，可将此API接入自己的web网站进行在线目标检测，也可接入移动端应用程序，实现识图、圈人等功能。
+使用PaddleHub Serving可以轻松部署一个在线目标检测服务API，可将此API接入自己的web网站进行在线目标检测，也可接入移动端应用程序，实现识图、圈人等功能。
 
-下面就带领大家使用PaddleHub-Serving，通过简单几步部署一个目标检测服务。
+下面就带领大家使用PaddleHub Serving，通过简单几步部署一个目标检测服务。
 
-## 2 启动PaddleHub-Serving
+## Step1：启动PaddleHub Serving
 启动命令如下
 ```shell
 $ hub serving start -m yolov3_darknet53_coco2017
@@ -17,7 +17,7 @@ Loading yolov3_darknet53_coco2017 successful.
 ```
 这样就完成了一个图像生成服务化API的部署，默认端口号为8866。
 
-## 3 测试图像生成在线API
+## Step2：测试图像生成在线API
 我们用来测试的样例图片为  
 
 <p align="center">  
@@ -36,7 +36,7 @@ Loading yolov3_darknet53_coco2017 successful.
 ```python
 files = [("image", file_1), ("image", file_2)]
 ```
-注意文件列表每个元素第一个参数为"image"。
+**NOTE:** 文件列表每个元素第一个参数为"image"。
 
 代码如下
 ```python
@@ -44,6 +44,8 @@ files = [("image", file_1), ("image", file_2)]
 >>> file_list = ["../img/cat.jpg", "../img/dog.jpg"]
 >>> files = [("image", (open(item, "rb"))) for item in file_list]
 ```
+
+## Step3：获取并验证结果
 然后就可以发送请求到目标检测服务API，并得到结果，代码如下
 ```python
 >>> # 指定检测方法为yolov3_darknet53_coco2017并发送post请求
