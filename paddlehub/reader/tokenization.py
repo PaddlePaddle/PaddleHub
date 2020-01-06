@@ -170,7 +170,7 @@ class WSSPTokenizer(object):
         self.inv_vocab = {v: k for k, v in self.vocab.items()}
         self.ws = ws
         self.lower = lower
-        self.dict = pickle.load(open(word_dict, 'rb'), encoding='utf8')
+        self.dict = pickle.load(open(word_dict, 'rb'))
         self.sp_model = spm.SentencePieceProcessor()
         self.window_size = 5
         self.sp_model.Load(sp_model_dir)
