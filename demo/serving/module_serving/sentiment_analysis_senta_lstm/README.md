@@ -25,7 +25,7 @@ Loading senta_lstm successful.
 ```python
 {"text": [text_1, text_2, ...]}  
 ```
-注意字典的key为"text"。
+**NOTE:** 字典的key为"text"。
 
 根据文本和数据格式，代码如下
 ```python

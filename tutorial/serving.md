@@ -6,7 +6,7 @@
 PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通过简单的Hub命令行工具轻松启动一个模型预测在线服务，前端通过Flask和Gunicorn完成网络请求的处理，后端直接调用PaddleHub预测接口，同时支持使用多进程方式利用多核提高并发能力，保证预测服务的性能。
 
 ### 支持模型
-目前PaddleHub Serving支持PaddleHub所有可直接用于预测的模型进行服务部署，包括`lac`、`senta_bilstm`等nlp类模型，以及`yolov3_coco2017`、`vgg16_imagenet`等cv类模型，未来还将支持开发者使用自己finetune后的模型用于快捷服务部署。
+目前PaddleHub Serving支持PaddleHub所有可直接用于预测的模型进行服务部署，包括`lac`、`senta_bilstm`等nlp类模型，以及`yolov3_coco2017`、`vgg16_imagenet`等cv类模型，未来还将支持开发者使用PaddleHub Fine-tune API得到的模型用于快捷服务部署。
 
 ### 所需环境
 下表是使用PaddleHub Serving的环境要求及注意事项。  
@@ -186,32 +186,32 @@ if __name__ == "__main__":
 
 * [图像分类-基于vgg11_imagent](../demo/serving/module_serving/classification_vgg11_imagenet)  
 
-该示例展示了利用vgg11_imagent完成图像分类服务化部署和在线预测，获取图像分类结果。
+&emsp;&emsp;该示例展示了利用vgg11_imagent完成图像分类服务化部署和在线预测，获取图像分类结果。
 
 * [图像生成-基于stgan_celeba](../demo/serving/module_serving/GAN_stgan_celeba)  
 
-该示例展示了利用stgan_celeba生成图像服务化部署和在线预测，获取指定风格的生成图像。
+&emsp;&emsp;该示例展示了利用stgan_celeba生成图像服务化部署和在线预测，获取指定风格的生成图像。
 
 * [文本审核-基于porn_detection_lstm](../demo/serving/module_serving/text_censorship_porn_detection_lstm)  
 
-该示例展示了利用porn_detection_lstm完成中文文本黄色敏感信息鉴定的服务化部署和在线预测，获取文本是否敏感及其置信度。
+&emsp;&emsp;该示例展示了利用porn_detection_lstm完成中文文本黄色敏感信息鉴定的服务化部署和在线预测，获取文本是否敏感及其置信度。
 
 * [中文词法分析-基于lac](../demo/serving/module_serving/lexical_analysis_lac)
 
-该示例展示了利用lac完成中文文本分词服务化部署和在线预测，获取文本的分词结果，并可通过用户自定义词典干预分词结果。
+&emsp;&emsp;该示例展示了利用lac完成中文文本分词服务化部署和在线预测，获取文本的分词结果，并可通过用户自定义词典干预分词结果。
 
 * [目标检测-基于yolov3_darknet53_coco2017](.../demo/serving/serving/object_detection_yolov3_darknet53_coco2017)  
 
-该示例展示了利用yolov3_darknet53_coco2017完成目标检测服务化部署和在线预测，获取检测结果和覆盖识别框的图片。
+&emsp;&emsp;该示例展示了利用yolov3_darknet53_coco2017完成目标检测服务化部署和在线预测，获取检测结果和覆盖识别框的图片。
 
 * [中文语义分析-基于simnet_bow](../demo/serving/module_serving/semantic_model_simnet_bow)
 
-该示例展示了利用simnet_bow完成中文文本相似度检测服务化部署和在线预测，获取文本的相似程度。  
+&emsp;&emsp;该示例展示了利用simnet_bow完成中文文本相似度检测服务化部署和在线预测，获取文本的相似程度。  
 
 * [图像分割-基于deeplabv3p_xception65_humanseg](../demo/serving/module_serving/semantic_segmentation_deeplabv3p_xception65_humanseg)
 
-该示例展示了利用deeplabv3p_xception65_humanseg完成图像分割服务化部署和在线预测，获取识别结果和分割后的图像。
+&emsp;&emsp;该示例展示了利用deeplabv3p_xception65_humanseg完成图像分割服务化部署和在线预测，获取识别结果和分割后的图像。
 
 * [中文情感分析-基于simnet_bow](../demo/serving/module_serving/semantic_model_simnet_bow)
 
-该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
+&emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。

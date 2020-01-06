@@ -24,7 +24,7 @@ Loading lac successful.
 ```python
 {"text_1": [text_a1, text_a2, ... ], "text_2": [text_b1, text_b2, ... ]}
 ```
-注意字典的key分别为"text_1"和"text_2"，与`simnet_bow`模型使用的输入数据一致。
+**NOTE:** 字典的key分别为"text_1"和"text_2"，与`simnet_bow`模型使用的输入数据一致。
 
 根据文本和数据格式，代码如下
 ```python

@@ -36,7 +36,7 @@ Loading yolov3_darknet53_coco2017 successful.
 ```python
 files = [("image", file_1), ("image", file_2)]
 ```
-注意文件列表每个元素第一个参数为"image"。
+**NOTE:** 文件列表每个元素第一个参数为"image"。
 
 代码如下
 ```python

@@ -29,7 +29,8 @@ Loading stgan_celeba successful.
 files = [("image", file_a), ("image", file_b)]
 data = {"info": ["info_a_1, info_a_2", "info_b_1, info_b_2"], "style": ["style_a", "style_b"]}
 ```
-注意文件列表每个元素第一个参数为"image"。
+
+**NOTE:** 文件列表每个元素第一个参数为"image"。
 
 info为图像描述，根据示例图像信息，info应为"Male,Black_Hair,Eyeglasses,No_Beard"，即"男性，黑发，戴眼镜，没有胡子"。
 

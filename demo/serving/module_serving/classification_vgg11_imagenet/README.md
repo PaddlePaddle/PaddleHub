@@ -32,7 +32,7 @@ Loading vgg11_imagenet successful.
 ```python
 files = [("image", file_1), ("image", file_2)]
 ```
-注意每个元素第一个参数为"image"。
+**NOTE:** 每个元素第一个参数为"image"。
 
 代码如下：
 ```python
