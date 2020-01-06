@@ -24,7 +24,11 @@ import copy
 import logging
 import inspect
 from functools import partial
-
+import six
+if six.PY2:
+    from inspect import getargspec as get_args
+else:
+    from inspect import getfullargspec as get_args
 import numpy as np
 import paddle.fluid as fluid
 from tb_paddle import SummaryWriter
@@ -129,7 +133,7 @@ class TaskHooks():
                 "name: %s has existed in hook_type:%s, use modify method to modify it"
                 % (name, hook_type))
         else:
-            args_num = len(inspect.getfullargspec(func).args)
+            args_num = len(get_args(func).args)
             if args_num != self._hook_params_num[hook_type]:
                 raise ValueError(
                     "The number of parameters to the hook hook_type:%s should be %i"
