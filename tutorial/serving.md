@@ -90,7 +90,7 @@ http://0.0.0.0:8866/predict/<CATEGORY\>/\<MODULE>
 
 <p align="center">  
 
-<img src="../demo/serving/module_serving/img/web_demo.png" width="60%" />  
+<img src="../docs/imgs/web_demo.png" width="60%" />  
 
 </p>  
 
@@ -126,7 +126,7 @@ $ hub serving start -c serving_config.json
 
 <p align="center">  
 
-<img src="../demo/serving/module_serving/img/start_serving_lac.png" width="100%" />  
+<img src="../docs/imgs/start_serving_lac.png" width="100%" />  
 
 </p>  
 
