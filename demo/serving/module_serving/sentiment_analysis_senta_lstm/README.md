@@ -21,13 +21,13 @@ Loading senta_lstm successful.
 ## Step2：测试词法分析在线API
 在服务部署好之后，我们可以进行测试，用来测试的文本为`我不爱吃甜食`和`我喜欢躺在床上看电影`。
 
-准备的数据格式为
+准备的数据格式为：
 ```python
 {"text": [text_1, text_2, ...]}  
 ```
 **NOTE:** 字典的key为"text"。
 
-根据文本和数据格式，代码如下
+根据文本和数据格式，代码如下：
 ```python
 >>> # 指定用于用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
 >>> text_list = ["我不爱吃甜食", "我喜欢躺在床上看电影"]
@@ -35,13 +35,13 @@ Loading senta_lstm successful.
 ```
 
 ## Step3：获取并验证结果
-接下来发送请求到词法分析API，并得到结果，代码如下
+接下来发送请求到词法分析API，并得到结果，代码如下：
 ```python
 # 指定预测方法为lac并发送post请求
 >>> url = "http://127.0.0.1:8866/predict/text/senta_lstm"
 >>> r = requests.post(url=url, data=text)
 ```
-`LAC`模型返回的结果为每个文本分词后的结果，我们尝试打印接口返回结果
+`LAC`模型返回的结果为每个文本分词后的结果，我们尝试打印接口返回结果：
 ```python
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))

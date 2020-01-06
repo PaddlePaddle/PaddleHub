@@ -21,13 +21,13 @@ Loading lac successful.
 ### 不使用自定义词典
 在服务部署好之后，我们可以进行测试，用来测试的文本为`今天是个好日子`和`天气预报说今天要下雨`。
 
-准备的数据格式为
+准备的数据格式为：
 ```python
 {"text": [text_1, text_2, ...]}  
 ```
 **NOTE:** 字典的key为"text"。
 
-根据文本和数据格式，代码如下
+根据文本和数据格式，代码如下：
 ```python
 >>> # 指定用于用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
 >>> text_list = ["今天是个好日子", "天气预报说今天要下雨"]
@@ -35,13 +35,13 @@ Loading lac successful.
 ```
 
 ## Step3：获取并验证结果
-接下来发送请求到词法分析API，并得到结果，代码如下
+接下来发送请求到词法分析API，并得到结果，代码如下：
 ```python
 # 指定预测方法为lac并发送post请求
 >>> url = "http://127.0.0.1:8866/predict/text/lac"
 >>> r = requests.post(url=url, data=text)
 ```
-`LAC`模型返回的结果为每个文本分词后的结果，我们尝试打印接口返回结果
+`LAC`模型返回的结果为每个文本分词后的结果，我们尝试打印接口返回结果：
 ```python
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
@@ -85,11 +85,11 @@ Loading lac successful.
 完整的测试代码见[lac_serving_demo.py](lac_serving_demo.py)。
 
 ### 使用自定义词典
-`LAC`模型在预测时还可以使用自定义词典干预默认分词结果，这种情况只需要将自定义词典以文件的形式附加到request请求即可，数据格式如下
+`LAC`模型在预测时还可以使用自定义词典干预默认分词结果，这种情况只需要将自定义词典以文件的形式附加到request请求即可，数据格式如下：
 ```python
 {"user_dict": user_dict.txt}
 ```
-根据数据格式，具体代码如下
+根据数据格式，具体代码如下：
 ```python
 >>> # 指定自定义词典{"user_dict": dict.txt}
 >>> file = {"user_dict": open("dict.txt", "rb")}
