@@ -120,9 +120,10 @@ def runable(func):
 
 
 class Module(object):
-    def __new__(cls, name=None, directory=None, module_dir=None, version=None):
-        module = None
 
+    _record = {}
+
+    def __new__(cls, name=None, directory=None, module_dir=None, version=None):
         if cls.__name__ == "Module":
             if name:
                 module = cls.init_with_name(name=name, version=version)
@@ -147,8 +148,10 @@ class Module(object):
 
     def __init__(self, name=None, directory=None, module_dir=None,
                  version=None):
-        if not directory:
+        # Avoid module being initialized multiple times
+        if not directory or id(self) in Module._record:
             return
+        Module._record[id(self)] = True
 
         mod = self.__class__.__module__ + "." + self.__class__.__name__
         if mod in _module_runable_func:

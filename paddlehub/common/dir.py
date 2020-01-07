@@ -43,7 +43,7 @@ THIRD_PARTY_HOME = os.path.join(gen_hub_home(), "thirdparty")
 TMP_HOME = os.path.join(gen_hub_home(), "tmp")
 
 if not os.path.exists(TMP_HOME):
-    os.mkdir(TMP_HOME)
+    os.makedirs(TMP_HOME)
 
 
 @contextlib.contextmanager

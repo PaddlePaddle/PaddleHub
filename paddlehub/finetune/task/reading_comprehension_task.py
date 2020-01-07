@@ -26,6 +26,7 @@ import json
 
 from collections import OrderedDict
 
+import io
 import numpy as np
 import paddle.fluid as fluid
 from .base_task import BaseTask
@@ -517,13 +518,13 @@ class ReadingComprehensionTask(BaseTask):
                 null_score_diff_threshold=self.null_score_diff_threshold,
                 is_english=self.is_english)
             if self.phase == 'val' or self.phase == 'dev':
-                with open(
+                with io.open(
                         self.data_reader.dataset.dev_path, 'r',
                         encoding="utf8") as dataset_file:
                     dataset_json = json.load(dataset_file)
                     dataset = dataset_json['data']
             elif self.phase == 'test':
-                with open(
+                with io.open(
                         self.data_reader.dataset.test_path, 'r',
                         encoding="utf8") as dataset_file:
                     dataset_json = json.load(dataset_file)
