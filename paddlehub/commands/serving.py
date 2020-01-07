@@ -239,8 +239,7 @@ class ServingCommand(BaseCommand):
         StandaloneApplication(
             app.create_app(init_flag=False, configs=configs), options).run()
 
-    @staticmethod
-    def start_single_app_with_file(configs):
+    def start_single_app_with_file(self, configs):
         use_gpu = configs.get("use_gpu", False)
         port = configs.get("port", 8866)
         if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
@@ -251,6 +250,7 @@ class ServingCommand(BaseCommand):
         module_info = ServingCommand.preinstall_modules(module)
         for index in range(len(module_info)):
             configs[index].update(module_info[index])
+        self.dump_pid_file()
         app.run(use_gpu, configs=configs, port=port)
 
     @staticmethod
@@ -304,6 +304,7 @@ class ServingCommand(BaseCommand):
                     "queue_size": 20
                 }) for item in module_info
             ]
+            self.dump_pid_file()
             app.run(use_gpu, configs=module_info, port=port)
         else:
             print("Lack of necessary parameters!")

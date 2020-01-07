@@ -22,16 +22,12 @@ import os
 import multiprocessing
 import hashlib
 import platform
-import uuid
-import json
 
 import paddle.fluid as fluid
 import six
 
 from paddlehub.module import module_desc_pb2
 from paddlehub.common.logger import logger
-from paddlehub.common.dir import CONF_HOME
-from paddlehub.common.decorator_utils import singleton
 
 
 def version_compare(version1, version2):
@@ -57,24 +53,6 @@ def version_compare(version1, version2):
 
 def get_platform():
     return platform.platform()
-
-
-@singleton
-class ConfigInfo(object):
-    def __init__(self):
-        self.filepath = os.path.join(CONF_HOME, "config.json")
-        self.hub_name = None
-        self.configs = None
-        if os.path.exists(self.filepath):
-            with open(self.filepath, "r") as fp:
-                self.configs = json.load(fp)
-                self.use_id = self.configs.get("hub_name", None)
-
-    def get_hub_name(self):
-        if self.hub_name is None:
-            hub_name = uuid.UUID(int=uuid.getnode()).hex[-12:]
-            self.hub_name = md5(hub_name)
-        return self.hub_name
 
 
 def is_windows():
