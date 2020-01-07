@@ -3,7 +3,7 @@ import requests
 import json
 
 if __name__ == "__main__":
-    # 指定用于用于匹配的文本并生成字典{"text_1": [text_a1, text_a2, ... ]
+    # 指定用于匹配的文本并生成字典{"text_1": [text_a1, text_a2, ... ]
     #                              "text_2": [text_b1, text_b2, ... ]}
     text = {
         "text_1": ["这道题太难了", "这道题太难了", "这道题太难了"],

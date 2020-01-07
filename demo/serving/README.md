@@ -8,11 +8,11 @@ PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通
 PaddleHub Serving主要包括利用Bert Service实现embedding服务化，以及利用预测模型实现预训练模型预测服务化两大功能，未来还将支持开发者使用PaddleHub Fine-tune API的模型服务化。
 
 ## Bert Service
-Bert Service是基于[Paddle Serving](https://github.com/PaddlePaddle/Serving)框架的快速部署模型远程计算服务方案，可将embedding过程通过调用API接口的方式实现，减少了对机器资源的依赖。使用PaddleHub可在服务器上一键部署`Bert Service`服务，在另外的普通机器上通过客户端接口即可轻松的获取文本对应的embedding数据。
+`Bert Service`是基于[Paddle Serving](https://github.com/PaddlePaddle/Serving)框架的快速部署模型远程计算服务方案，可将embedding过程通过调用API接口的方式实现，减少了对机器资源的依赖。使用PaddleHub可在服务器上一键部署`Bert Service`服务，在另外的普通机器上通过客户端接口即可轻松的获取文本对应的embedding数据。
 
-关于Bert Service的具体信息和demo请参见[Bert Service](../../tutorial/bert_service.md)
+关于其具体信息和demo请参见[Bert Service](../../tutorial/bert_service.md)
 
-该示例展示了利用Bert Service进行远程embedding服务化部署和在线预测，并获取文本embedding结果。
+该示例展示了利用`Bert Service`进行远程embedding服务化部署和在线预测，并获取文本embedding结果。
 
 ##  预训练模型一键服务部署
 预训练模型一键服务部署是基于PaddleHub的预训练模型快速部署的服务化方案，能够将模型预测以API接口的方式实现。
@@ -53,4 +53,4 @@ Bert Service是基于[Paddle Serving](https://github.com/PaddlePaddle/Serving)�
 
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
 
-关于Paddle Serving预训练模型一键服务部署功能的具体信息请参见[serving](module_serving)
+关于Paddle Serving预训练模型一键服务部署功能的具体信息请参见[Module Serving](module_serving)。
