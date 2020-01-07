@@ -64,10 +64,10 @@ class BaseDataset(object):
                  predict_file=None,
                  label_file=None,
                  label_list=None,
-                 train_file_with_head=False,
-                 dev_file_with_head=False,
-                 test_file_with_head=False,
-                 predict_file_with_head=False):
+                 train_file_with_header=False,
+                 dev_file_with_header=False,
+                 test_file_with_header=False,
+                 predict_file_with_header=False):
         if not (train_file or dev_file or test_file):
             raise ValueError("At least one file should be assigned")
         self.base_path = base_path
@@ -84,10 +84,10 @@ class BaseDataset(object):
         self.predict_examples = []
 
         self.if_file_with_head = {
-            "train": train_file_with_head,
-            "dev": dev_file_with_head,
-            "test": test_file_with_head,
-            "predict": predict_file_with_head
+            "train": train_file_with_header,
+            "dev": dev_file_with_header,
+            "test": test_file_with_header,
+            "predict": predict_file_with_header
         }
 
         if train_file:

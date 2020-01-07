@@ -20,10 +20,10 @@ from __future__ import print_function
 import os
 
 import paddlehub as hub
-from paddlehub.dataset.base_cv_dataset import BaseCVDatast
+from paddlehub.dataset.base_cv_dataset import BaseCVDataset
 
 
-class Indoor67Dataset(BaseCVDatast):
+class Indoor67Dataset(BaseCVDataset):
     def __init__(self):
         dataset_path = os.path.join(hub.common.dir.DATA_HOME, "Indoor67")
         base_path = self._download_dataset(

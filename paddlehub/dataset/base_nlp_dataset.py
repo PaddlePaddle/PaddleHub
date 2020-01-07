@@ -23,7 +23,7 @@ import csv
 from paddlehub.dataset import InputExample, BaseDataset
 
 
-class BaseNLPDatast(BaseDataset):
+class BaseNLPDataset(BaseDataset):
     def __init__(self,
                  base_path,
                  train_file=None,
@@ -32,11 +32,11 @@ class BaseNLPDatast(BaseDataset):
                  predict_file=None,
                  label_file=None,
                  label_list=None,
-                 train_file_with_head=False,
-                 dev_file_with_head=False,
-                 test_file_with_head=False,
-                 predict_file_with_head=False):
-        super(BaseNLPDatast, self).__init__(
+                 train_file_with_header=False,
+                 dev_file_with_header=False,
+                 test_file_with_header=False,
+                 predict_file_with_header=False):
+        super(BaseNLPDataset, self).__init__(
             base_path=base_path,
             train_file=train_file,
             dev_file=dev_file,
@@ -44,10 +44,10 @@ class BaseNLPDatast(BaseDataset):
             predict_file=predict_file,
             label_file=label_file,
             label_list=label_list,
-            train_file_with_head=train_file_with_head,
-            dev_file_with_head=dev_file_with_head,
-            test_file_with_head=test_file_with_head,
-            predict_file_with_head=predict_file_with_head)
+            train_file_with_header=train_file_with_header,
+            dev_file_with_header=dev_file_with_header,
+            test_file_with_header=test_file_with_header,
+            predict_file_with_header=predict_file_with_header)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""

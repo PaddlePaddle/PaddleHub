@@ -24,12 +24,12 @@ import io
 from paddlehub.dataset import InputExample
 from paddlehub.common.logger import logger
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/glue_data.tar.gz"
 
 
-class GLUE(BaseNLPDatast):
+class GLUE(BaseNLPDataset):
     """
     Please refer to
     https://gluebenchmark.com
