@@ -1,3 +1,4 @@
+#coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -11,14 +12,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from paddlehub.common.utils import ConfigInfo
 
-HUB_SERVERS = ["http://paddlepaddle.org.cn/paddlehub"]
+import threading
 
-default_server_config = {
-    "server_url": HUB_SERVERS,
-    "resource_storage_server_url": "https://bj.bcebos.com/paddlehub-data/",
-    "debug": False,
-    "log_level": "DEBUG",
-    "hub_name": ConfigInfo().get_hub_name()
-}
+
+def synchronized(func):
+    func.__lock__ = threading.Lock()
+
+    def synced_func(*args, **kwargs):
+        with func.__lock__:
+            return func(*args, **kwargs)
+
+    return synced_func
+
+
+def singleton(cls):
+    _instance = {}
+
+    @synchronized
+    def _get_instance(*args, **kwargs):
+        if cls not in _instance:
+            _instance[cls] = cls(*args, **kwargs)
+        return _instance[cls]
+
+    return _get_instance

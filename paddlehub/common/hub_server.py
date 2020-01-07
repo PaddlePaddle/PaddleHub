@@ -28,35 +28,15 @@ import threading
 
 from paddlehub.common import utils, srv_utils
 from paddlehub.common.downloader import default_downloader
+from paddlehub.common.decorator_utils import singleton
 from paddlehub.common.server_config import default_server_config
 from paddlehub.io.parser import yaml_parser
 from paddlehub.common.lock import lock
 from paddlehub.common.dir import CONF_HOME, CACHE_HOME
+from paddlehub.common.utils import ConfigInfo
 
 RESOURCE_LIST_FILE = "resource_list_file.yml"
 CACHE_TIME = 60 * 10
-
-
-def synchronized(func):
-    func.__lock__ = threading.Lock()
-
-    def synced_func(*args, **kwargs):
-        with func.__lock__:
-            return func(*args, **kwargs)
-
-    return synced_func
-
-
-def singleton(cls):
-    _instance = {}
-
-    @synchronized
-    def _get_instance(*args, **kwargs):
-        if cls not in _instance:
-            _instance[cls] = cls(*args, **kwargs)
-        return _instance[cls]
-
-    return _get_instance
 
 
 @singleton
@@ -72,8 +52,9 @@ class HubServer(object):
                 fp.write(json.dumps(default_server_config))
                 lock.flock(fp, lock.LOCK_UN)
 
-        with open(config_file_path) as fp:
+        with open(config_file_path, "r") as fp:
             self.config = json.load(fp)
+
         fp_lock = open(config_file_path)
         lock.flock(fp_lock, lock.LOCK_EX)
 
@@ -308,29 +289,44 @@ class HubServer(object):
 
 
 class CacheUpdater(threading.Thread):
-    def __init__(self, module, version=None):
+    def __init__(self,
+                 command="update_cache",
+                 module=None,
+                 version=None,
+                 addition=None):
         threading.Thread.__init__(self)
+        self.command = command
         self.module = module
         self.version = version
+        self.addition = addition
 
-    def update_resource_list_file(self, module, version=None):
+    def update_resource_list_file(self,
+                                  command="update_cache",
+                                  module=None,
+                                  version=None,
+                                  addition=None):
         payload = {'word': module}
         if version:
             payload['version'] = version
         api_url = srv_utils.uri_path(HubServer().get_server_url(), 'search')
         cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
+        hub_name = ConfigInfo().get_hub_name()
         if os.path.exists(cache_path):
             extra = {
-                "command": "update_cache",
-                "mtime": os.stat(cache_path).st_mtime
+                "command": command,
+                "mtime": os.stat(cache_path).st_mtime,
+                "hub_name": hub_name
             }
         else:
             extra = {
-                "command": "update_cache",
-                "mtime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                "command": command,
+                "mtime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+                "hub_name": hub_name
             }
+        if addition is not None:
+            extra.update({"addition": addition})
         try:
-            r = srv_utils.hub_request(api_url, payload, extra)
+            r = srv_utils.hub_request(api_url, payload, extra, timeout=0.1)
             if r.get("update_cache", 0) == 1:
                 with open(cache_path, 'w+') as fp:
                     yaml.safe_dump({'resource_list': r['data']}, fp)
@@ -338,7 +334,8 @@ class CacheUpdater(threading.Thread):
             pass
 
     def run(self):
-        self.update_resource_list_file(self.module, self.version)
+        self.update_resource_list_file(self.command, self.module, self.version,
+                                       self.addition)
 
 
 def server_check():

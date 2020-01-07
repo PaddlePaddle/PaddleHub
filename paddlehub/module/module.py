@@ -139,11 +139,10 @@ class Module(object):
                 else:
                     directory = module_dir
                 module = cls.init_with_directory(directory=directory)
-
-        if not module:
-            module = object.__new__(cls)
+            CacheUpdater("update_cache", module.name, module.version).start()
         else:
-            CacheUpdater(module.name, module.version).start()
+            module = object.__new__(cls)
+
         return module
 
     def __init__(self, name=None, directory=None, module_dir=None,

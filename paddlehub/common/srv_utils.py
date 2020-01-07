@@ -31,9 +31,9 @@ def uri_path(server_url, api):
     return srv
 
 
-def hub_request(api, params, extra=None):
+def hub_request(api, params, extra=None, timeout=8):
     params['hub_version'] = version.hub_version
     params['paddle_version'] = paddle.__version__
     params["extra"] = json.dumps(extra)
-    r = requests.get(api, params)
+    r = requests.get(api, params, timeout=timeout)
     return r.json()

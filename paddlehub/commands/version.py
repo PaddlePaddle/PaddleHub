@@ -19,6 +19,7 @@ from __future__ import print_function
 
 from paddlehub import version
 from paddlehub.commands.base_command import BaseCommand
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class VersionCommand(BaseCommand):
@@ -30,6 +31,7 @@ class VersionCommand(BaseCommand):
         self.description = "Show PaddleHub's version."
 
     def execute(self, argv):
+        CacheUpdater("hub_version").start()
         print("hub %s" % version.hub_version)
         return True
 
