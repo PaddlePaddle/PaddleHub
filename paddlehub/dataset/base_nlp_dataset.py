@@ -60,7 +60,7 @@ class BaseNLPDataset(BaseDataset):
                     if self.if_file_with_header[phase]:
                         continue
                 if ncol == 1:
-                    if phase != "predict":
+                    if phase == "predict":
                         example = InputExample(guid=i, text_a=line[0])
                     else:
                         raise Exception(
