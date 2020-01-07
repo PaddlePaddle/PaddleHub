@@ -57,7 +57,7 @@ class BaseNLPDataset(BaseDataset):
             for (i, line) in enumerate(reader):
                 if i == 0:
                     ncol = len(line)
-                    if self.if_file_with_head[phase]:
+                    if self.if_file_with_header[phase]:
                         continue
                 if ncol == 1:
                     if phase != "predict":

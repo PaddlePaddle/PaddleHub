@@ -83,7 +83,7 @@ class BaseDataset(object):
         self.test_examples = []
         self.predict_examples = []
 
-        self.if_file_with_head = {
+        self.if_file_with_header = {
             "train": train_file_with_header,
             "dev": dev_file_with_header,
             "test": test_file_with_header,
