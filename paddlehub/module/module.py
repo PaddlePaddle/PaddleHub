@@ -143,7 +143,7 @@ class Module(object):
         if not module:
             module = object.__new__(cls)
         else:
-            CacheUpdater(module.name, module.version).start()
+            CacheUpdater("update_cache", module.name, module.version).start()
         return module
 
     def __init__(self, name=None, directory=None, module_dir=None,

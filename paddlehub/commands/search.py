@@ -23,6 +23,7 @@ import paddlehub as hub
 from paddlehub.common import utils
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.common.cml_utils import TablePrinter
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class SearchCommand(BaseCommand):
@@ -43,6 +44,7 @@ class SearchCommand(BaseCommand):
             argv = ['.*']
 
         resource_name = argv[0]
+        CacheUpdater("hub_search", resource_name).start()
         extra = {"command": "search"}
         resource_list = hub.HubServer().search_resource(
             resource_name, resource_type="Module", extra=extra)

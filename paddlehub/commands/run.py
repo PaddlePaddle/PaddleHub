@@ -30,6 +30,7 @@ import cv2
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.io.parser import yaml_parser, txt_parser
 from paddlehub.module.manager import default_module_manager
+from paddlehub.common.hub_server import CacheUpdater
 import paddlehub as hub
 
 
@@ -212,13 +213,14 @@ class RunCommand(BaseCommand):
         raise RuntimeError("ERROR: Format of %s is illegal." % file_path)
 
     def execute(self, argv):
+
         if not argv:
             print("ERROR: Please specify a module name.\n")
             self.help()
             return False
 
         module_name = argv[0]
-
+        CacheUpdater("hub_run", module_name).start()
         self.parser.prog = '%s %s %s' % (ENTRY, self.name, module_name)
         self.arg_input_group = self.parser.add_argument_group(
             title="Input options", description="Data input to the module")

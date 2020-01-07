@@ -21,6 +21,7 @@ import os
 
 from paddlehub.commands.base_command import BaseCommand
 from paddlehub.common.dir import CACHE_HOME
+from paddlehub.common.hub_server import CacheUpdater
 
 
 def file_num_in_dir(dirname):
@@ -56,6 +57,7 @@ class ClearCommand(BaseCommand):
         return CACHE_HOME
 
     def execute(self, argv):
+        CacheUpdater("hub_clear").start()
         result = True
         total_file_size = 0
         total_file_count = 0
