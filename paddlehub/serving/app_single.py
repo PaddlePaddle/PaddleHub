@@ -133,7 +133,7 @@ def predict_gan(module, input_img, id, batch_size, extra={}):
 
 
 def predict_object_detection(module, input_img, id, batch_size, extra={}):
-    output_folder = "output"
+    output_folder = "detection_result"
     global use_gpu
     method_name = module.desc.attr.map.data['default_signature'].s
     predict_method = getattr(module, method_name)

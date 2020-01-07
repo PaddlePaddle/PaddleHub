@@ -128,7 +128,7 @@ class BaseDataset(object):
     def num_labels(self):
         return len(self.label_list)
 
-    # To compatibility with the usage of ImageClassificationDataset
+    # To be compatible with ImageClassificationDataset
     def label_dict(self):
         return {index: key for index, key in enumerate(self.label_list)}
 
@@ -167,7 +167,7 @@ class BaseDataset(object):
 
     def _load_label_data(self):
         with open(os.path.join(self.base_path, self.label_file), "r") as file:
-            return file.read().split("\n")
+            return file.read().strip().split("\n")
 
     def __str__(self):
         return "Dataset: %s with %i train examples, %i dev examples and %i test examples" % (

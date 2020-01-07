@@ -115,7 +115,7 @@
                         + 'id="file_text"'
                         + 'onblur="blur_input_text()"'
                         + 'onfocus="focus_input_text()"'
-                        + 'name="input_text">'
+                        + 'name="text">'
                         + '在此键入文本或上传文本文件'
                     + '</textarea>'
                 + '</td>'
@@ -237,14 +237,15 @@
                     alert("Connection error:"+request.error);
                 },
                 success: function(data) {
-                    html = get_result_html(data["result"]);
+                    console.log(data);
+                    html = get_result_html(data["results"]);
                     document.getElementById("result_text").value = html;
                 }
             });
     }
     function sub_img() {
         var formParam = {
-            "input_img": document.getElementById("file_img").src,
+            "image": document.getElementById("file_img").src,
             "input_file":document.getElementById("file").value
         };
         to_url = "/predict/image/" + document.getElementById("inputGroupSelect02").value;
@@ -258,9 +259,13 @@
                     alert("Connection error:"+request.error);
                 },
                 success: function(data) {
-                    data = data["result"];
-                    document.getElementById("result_text").value = data["desc"];
-                    document.getElementById("result_img").src = data["output_img"];
+                    data = data.results;
+                    data = data.replace(/'/g, '"');
+                    data = JSON.parse(data);
+                    data = data[0];
+
+                    document.getElementById("result_text").value = JSON.stringify(data.data[0]);
+                    document.getElementById("result_img").src = data.base64;
                 }
             });
     }
