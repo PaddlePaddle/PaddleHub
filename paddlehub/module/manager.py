@@ -168,8 +168,7 @@ class LocalModuleManager(object):
                 with tarfile.open(module_package, "r:gz") as tar:
                     file_names = tar.getnames()
                     size = len(file_names) - 1
-                    module_dir = os.path.split(file_names[0])[0]
-                    module_dir = os.path.join(_dir, module_dir)
+                    module_dir = os.path.join(_dir, file_names[0])
                     for index, file_name in enumerate(file_names):
                         tar.extract(file_name, _dir)
 
@@ -195,7 +194,7 @@ class LocalModuleManager(object):
 
                 save_path = os.path.join(MODULE_HOME, module_name)
                 if os.path.exists(save_path):
-                    shutil.move(save_path)
+                    shutil.rmtree(save_path)
                 if from_user_dir:
                     shutil.copytree(module_dir, save_path)
                 else:
