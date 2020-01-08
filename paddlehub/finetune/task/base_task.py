@@ -24,6 +24,7 @@ import copy
 import logging
 import inspect
 from functools import partial
+from collections import OrderedDict
 import six
 if six.PY2:
     from inspect import getargspec as get_args
@@ -88,18 +89,18 @@ class RunEnv(object):
 class TaskHooks():
     def __init__(self):
         self._registered_hooks = {
-            "build_env_start": {},
-            "build_env_end": {},
-            "finetune_start": {},
-            "finetune_end": {},
-            "predict_start": {},
-            "predict_end": {},
-            "eval_start": {},
-            "eval_end": {},
-            "log_interval": {},
-            "save_ckpt_interval": {},
-            "eval_interval": {},
-            "run_step": {},
+            "build_env_start": OrderedDict(),
+            "build_env_end": OrderedDict(),
+            "finetune_start": OrderedDict(),
+            "finetune_end": OrderedDict(),
+            "predict_start": OrderedDict(),
+            "predict_end": OrderedDict(),
+            "eval_start": OrderedDict(),
+            "eval_end": OrderedDict(),
+            "log_interval": OrderedDict(),
+            "save_ckpt_interval": OrderedDict(),
+            "eval_interval": OrderedDict(),
+            "run_step": OrderedDict(),
         }
         self._hook_params_num = {
             "build_env_start": 1,
@@ -139,6 +140,7 @@ class TaskHooks():
                     "The number of parameters to the hook hook_type:%s should be %i"
                     % (hook_type, self._hook_params_num[hook_type]))
             self._registered_hooks[hook_type][name] = func
+        logger.info("Add hook %s:%s successfully" % (hook_type, name))
 
     def delete(self, hook_type, name):
         if self.exist(hook_type, name):
@@ -147,6 +149,7 @@ class TaskHooks():
             raise ValueError(
                 "No hook_type: %s exists or name: %s does not exist in hook_type: %s"
                 % (hook_type, name, hook_type))
+        logger.info("Delete hook %s:%s successfully" % (hook_type, name))
 
     def modify(self, hook_type, name, func):
         if not (isinstance(name, str) and callable(func)):
@@ -159,6 +162,7 @@ class TaskHooks():
             raise ValueError(
                 "No hook_type: %s exists or name: %s does not exist in hook_type: %s"
                 % (hook_type, name, hook_type))
+        logger.info("Modify hook %s:%s successfully" % (hook_type, name))
 
     def exist(self, hook_type, name):
         if hook_type not in self._registered_hooks \
