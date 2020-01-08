@@ -265,7 +265,7 @@ class BaseTask(object):
         for hook_type, event_hooks in self._hooks._registered_hooks.items():
             self._hooks.add(hook_type, "default",
                             eval("self._default_%s" % hook_type))
-            setattr(BaseTask, "_%s_event" % hook_type,
+            setattr(BaseTask, "_%s" % hook_type,
                     self.create_event_function(hook_type))
 
         # accelerate predict
