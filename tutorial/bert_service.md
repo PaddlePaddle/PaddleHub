@@ -40,7 +40,6 @@
 |PaddleHub|>=1.4.0|无|  
 |PaddlePaddle|>=1.6.1|若使用GPU计算，则对应使用PaddlePaddle-gpu版本|  
 |GCC|>=4.8|无|  
-|CUDA*|>=8|若使用GPU，需使用CUDA8以上版本|  
 |paddle-gpu-serving*|>=0.8.2|在`Bert Service`服务端需依赖此包|  
 |ujson*|>=1.35|在`Bert Service`客户端需依赖此包|  
 
@@ -201,7 +200,7 @@ result = bc.get_result(input_text=input_text)
 ```python
 [[0.9993321895599361, 0.9994612336158751, 0.9999646544456481, 0.732795298099517, -0.34387934207916204, ... ]]
 ```
-客户端代码demo文件见[示例](../paddlehub/serving/bert_serving/bert_service.py)。  
+客户端代码demo文件见[示例](../demo/serving/bert_service/bert_service_client.py)。  
 运行命令如下：  
 ```shell
 $ python bert_service_client.py
