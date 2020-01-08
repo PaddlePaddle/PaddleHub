@@ -121,10 +121,11 @@ class TaskHooks():
         if not func or not callable(func):
             raise TypeError(
                 "The hook function is empty or it is not a function")
-        if name and not isinstance(name, str):
-            raise TypeError("The hook name must be a string")
-        if not name:
+        if name == None:
             name = "hook_%s" % id(func)
+            logger.info(name)
+        if not isinstance(name, str) or name.strip() == "":
+            raise TypeError("The hook name must be a non-empty string")
 
         # check validity
         if hook_type not in self._registered_hooks:
@@ -587,6 +588,8 @@ class BaseTask(object):
 
     def add_hook(self, hook_type, name=None, func=None):
         self._hooks.add(hook_type, name=name, func=func)
+        if not name:
+            name = "hook_%s" % id(func)
         logger.info("Add hook %s:%s successfully" % (hook_type, name))
 
     def delete_hook(self, hook_type, name):
