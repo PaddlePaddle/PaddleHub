@@ -49,6 +49,7 @@ BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-7
 BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
 RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
 RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
+
 更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
 
 如果想尝试BERT模型，只需要更换Module中的`name`参数即可.
@@ -92,11 +93,10 @@ LCQMC            |  hub.dataset.LCQMC()         | 句对      | ernie_tiny      
 NLPCC-QBDA       |  hub.dataset.NLPCC_DBQA()    | 句对      | ernie_tiny                     |  accuracy  |
 GLUE-CoLA        |  hub.dataset.GLUE("CoLA")    | 单句      | ernie_v2_eng_base              |  matthews  |
 GLUE-SST2        |  hub.dataset.GLUE("SST-2")   | 单句      | ernie_v2_eng_base              |  accuracy  |
-GLUE-CoLA        |  hub.dataset.GLUE("CoLA")    | 单句      | ernie_v2_eng_base              |  accuracy  |
 GLUE-MNLI        |  hub.dataset.GLUE("MNLI_m")  | 句对      | ernie_v2_eng_base              |  accuracy  |
 GLUE-QQP         |  hub.dataset.GLUE("QQP")     | 句对      | ernie_v2_eng_base              |  accuracy  |
 GLUE-QNLI        |  hub.dataset.GLUE("QNLI")    | 句对      | ernie_v2_eng_base              |  accuracy  |
-GLUE-STS-2       |  hub.dataset.GLUE("SST-2"")  | 句对      | ernie_v2_eng_base              |  accuracy  |
+GLUE-STS-B       |  hub.dataset.GLUE("STS-B")   | 句对      | ernie_v2_eng_base              |  accuracy  |
 GLUE-MRPC        |  hub.dataset.GLUE("MRPC")    | 句对      | ernie_v2_eng_base              |  f1        |
 GLUE-RTE         |  hub.dataset.GLUE("RTE")     | 单句      | ernie_v2_eng_base              |  accuracy  |
 XNLI             | hub.dataset.XNLI(language=zh)| 句对      | roberta_wwm_ext_chinese_L-24_H-1024_A-16 |  accuracy  |
