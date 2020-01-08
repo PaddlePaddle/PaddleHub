@@ -89,32 +89,32 @@ class RunEnv(object):
 class TaskHooks():
     def __init__(self):
         self._registered_hooks = {
-            "build_env_start": OrderedDict(),
-            "build_env_end": OrderedDict(),
-            "finetune_start": OrderedDict(),
-            "finetune_end": OrderedDict(),
-            "predict_start": OrderedDict(),
-            "predict_end": OrderedDict(),
-            "eval_start": OrderedDict(),
-            "eval_end": OrderedDict(),
-            "log_interval": OrderedDict(),
-            "save_ckpt_interval": OrderedDict(),
-            "eval_interval": OrderedDict(),
-            "run_step": OrderedDict(),
+            "build_env_start_event": OrderedDict(),
+            "build_env_end_event": OrderedDict(),
+            "finetune_start_event": OrderedDict(),
+            "finetune_end_event": OrderedDict(),
+            "predict_start_event": OrderedDict(),
+            "predict_end_event": OrderedDict(),
+            "eval_start_event": OrderedDict(),
+            "eval_end_event": OrderedDict(),
+            "log_interval_event": OrderedDict(),
+            "save_ckpt_interval_event": OrderedDict(),
+            "eval_interval_event": OrderedDict(),
+            "run_step_event": OrderedDict(),
         }
         self._hook_params_num = {
-            "build_env_start": 1,
-            "build_env_end": 1,
-            "finetune_start": 1,
-            "finetune_end": 2,
-            "predict_start": 1,
-            "predict_end": 2,
-            "eval_start": 1,
-            "eval_end": 2,
-            "log_interval": 2,
-            "save_ckpt_interval": 1,
-            "eval_interval": 1,
-            "run_step": 2,
+            "build_env_start_event": 1,
+            "build_env_end_event": 1,
+            "finetune_start_event": 1,
+            "finetune_end_event": 2,
+            "predict_start_event": 1,
+            "predict_end_event": 2,
+            "eval_start_event": 1,
+            "eval_end_event": 2,
+            "log_interval_event": 2,
+            "save_ckpt_interval_event": 1,
+            "eval_interval_event": 1,
+            "run_step_event": 2,
         }
 
     def add(self, hook_type, name=None, func=None):
@@ -123,11 +123,10 @@ class TaskHooks():
                 "The hook function is empty or it is not a function")
         if name == None:
             name = "hook_%s" % id(func)
-            logger.info(name)
-        if not isinstance(name, str) or name.strip() == "":
-            raise TypeError("The hook name must be a non-empty string")
 
         # check validity
+        if not isinstance(name, str) or name.strip() == "":
+            raise TypeError("The hook name must be a non-empty string")
         if hook_type not in self._registered_hooks:
             raise ValueError("hook_type: %s does not exist" % (hook_type))
         if name in self._registered_hooks[hook_type]:
@@ -265,7 +264,7 @@ class BaseTask(object):
         self._hooks = TaskHooks()
         for hook_type, event_hooks in self._hooks._registered_hooks.items():
             self._hooks.add(hook_type, "default",
-                            eval("self._default_%s_event" % hook_type))
+                            eval("self._default_%s" % hook_type))
             setattr(BaseTask, "_%s_event" % hook_type,
                     self.create_event_function(hook_type))
 
