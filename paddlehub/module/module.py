@@ -37,6 +37,7 @@ from paddlehub.common.lock import lock
 from paddlehub.common.logger import logger
 from paddlehub.common.hub_server import CacheUpdater
 from paddlehub.common import tmp_dir
+from paddlehub.common.downloader import progress
 from paddlehub.module import module_desc_pb2
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.checker import ModuleChecker
@@ -99,10 +100,22 @@ def create_module(directory, name, author, email, module_type, summary,
 
             _cwd = os.getcwd()
             os.chdir(base_dir)
-            for dirname, _, files in os.walk(module_dir):
-                for file in files:
-                    tar.add(os.path.join(dirname, file).replace(base_dir, "."))
+            module_dir = module_dir.replace(base_dir, ".")
+            tar.add(module_dir, recursive=False)
+            files = []
+            for dirname, _, subfiles in os.walk(module_dir):
+                for file in subfiles:
+                    files.append(os.path.join(dirname, file))
 
+            total_length = len(files)
+            print("Create Module {}-{}".format(name, version))
+            for index, file in enumerate(files):
+                done = int(float(index) / total_length * 50)
+                progress("[%-50s] %.2f%%" % ('=' * done,
+                                             float(index / total_length * 100)))
+                tar.add(file)
+            progress("[%-50s] %.2f%%" % ('=' * 50, 100), end=True)
+            print("Module package saved as {}".format(save_file))
             os.chdir(_cwd)
 
 
