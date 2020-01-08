@@ -140,7 +140,6 @@ class TaskHooks():
                     "The number of parameters to the hook hook_type:%s should be %i"
                     % (hook_type, self._hook_params_num[hook_type]))
             self._registered_hooks[hook_type][name] = func
-        logger.info("Add hook %s:%s successfully" % (hook_type, name))
 
     def delete(self, hook_type, name):
         if self.exist(hook_type, name):
@@ -149,7 +148,6 @@ class TaskHooks():
             raise ValueError(
                 "No hook_type: %s exists or name: %s does not exist in hook_type: %s"
                 % (hook_type, name, hook_type))
-        logger.info("Delete hook %s:%s successfully" % (hook_type, name))
 
     def modify(self, hook_type, name, func):
         if not (isinstance(name, str) and callable(func)):
@@ -162,7 +160,6 @@ class TaskHooks():
             raise ValueError(
                 "No hook_type: %s exists or name: %s does not exist in hook_type: %s"
                 % (hook_type, name, hook_type))
-        logger.info("Modify hook %s:%s successfully" % (hook_type, name))
 
     def exist(self, hook_type, name):
         if hook_type not in self._registered_hooks \
@@ -590,12 +587,15 @@ class BaseTask(object):
 
     def add_hook(self, hook_type, name=None, func=None):
         self._hooks.add(hook_type, name=name, func=func)
+        logger.info("Add hook %s:%s successfully" % (hook_type, name))
 
     def delete_hook(self, hook_type, name):
         self._hooks.delete(hook_type, name)
+        logger.info("Delete hook %s:%s successfully" % (hook_type, name))
 
     def modify_hook(self, hook_type, name, func):
         self._hooks.modify(hook_type, name, func)
+        logger.info("Modify hook %s:%s successfully" % (hook_type, name))
 
     def _default_build_env_start_event(self):
         pass
