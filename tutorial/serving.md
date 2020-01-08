@@ -8,15 +8,6 @@ PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通
 ### 支持模型
 目前PaddleHub Serving支持对PaddleHub所有可直接预测的模型进行服务部署，包括`lac`、`senta_bilstm`等NLP类模型，以及`yolov3_darknet53_coco2017`、`vgg16_imagenet`等CV类模型，更多模型请参见[PaddleHub支持模型列表](https://paddlepaddle.org.cn/hublist)。未来还将支持开发者使用PaddleHub Fine-tune API得到的模型用于快捷服务部署。
 
-### 所需环境
-下表是使用PaddleHub Serving的环境要求及注意事项。  
-
-|项目|建议版本|说明|  
-|:-:|:-:|:-:|  
-|操作系统|Linux/Darwin/Windows|建议使用Linux或Darwin，对多线程启动方式支持性较好|  
-|PaddleHub|>=1.4.0|无|  
-|PaddlePaddle|>=1.6.1|若使用GPU计算，则对应使用PaddlePaddle-gpu版本|  
-
 ## 使用
 ### Step1：启动服务端部署
 PaddleHub Serving有两种启动方式，分别是使用命令行启动，以及使用配置文件启动。
@@ -37,7 +28,7 @@ $ hub serving start --modules [Module1==Version1, Module2==Version2, ...] \
 |--modules/-m|PaddleHub Serving预安装模型，以多个Module==Version键值对的形式列出<br>*`当不指定Version时，默认选择最新版本`*|  
 |--port/-p|服务端口，默认为8866|  
 |--use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
-|--use_multiprocess|是否启用并发方式，默认为单进程方式|  
+|--use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式<br>*`Windows操作系统只支持单进程方式`*|  
 
 #### 配置文件启动
 启动命令
@@ -60,8 +51,8 @@ $ hub serving start --config config.json
        "batch_size": "BATCH_SIZE_2"
     }
   ],  
-  "use_gpu": false,  
   "port": 8866,
+  "use_gpu": false,  
   "use_multiprocess": false
 }
 ```
@@ -70,10 +61,10 @@ $ hub serving start --config config.json
 
 |参数|用途|  
 |-|-|  
-|--modules_info|PaddleHub Serving预安装模型，以字典列表形式列出，其中:<br>`module`为预测服务使用的模型名<br>`version`为预测模型的版本<br>`batch_size`为预测批次大小
-|--use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
-|--port/-p|服务端口，默认为8866|  
-|--use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式|  
+|modules_info|PaddleHub Serving预安装模型，以字典列表形式列出，其中:<br>`module`为预测服务使用的模型名<br>`version`为预测模型的版本<br>`batch_size`为预测批次大小
+|port|服务端口，默认为8866|  
+|use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
+|use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式<br>*`Windows操作系统只支持单进程方式`*|  
 
 ### Step2：访问服务端
 
