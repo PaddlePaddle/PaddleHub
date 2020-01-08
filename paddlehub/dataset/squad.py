@@ -20,7 +20,7 @@ import os
 from paddlehub.reader import tokenization
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/squad.tar.gz"
 
@@ -65,7 +65,7 @@ class SquadExample(object):
         return s
 
 
-class SQUAD(BaseNLPDatast):
+class SQUAD(BaseNLPDataset):
     """A single set of features of data."""
 
     def __init__(self, version_2_with_negative=False):
