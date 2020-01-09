@@ -24,6 +24,7 @@ import hashlib
 import platform
 import uuid
 import json
+import time
 
 import paddle.fluid as fluid
 import six
@@ -72,8 +73,8 @@ class ConfigInfo(object):
 
     def get_hub_name(self):
         if self.hub_name is None:
-            hub_name = uuid.UUID(int=uuid.getnode()).hex[-12:]
-            self.hub_name = md5(hub_name)
+            self.hub_name = md5(str(uuid.uuid1())[-12:0]) + "-" + str(
+                int(time.time()))
         return self.hub_name
 
 
