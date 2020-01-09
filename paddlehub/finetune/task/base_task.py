@@ -168,13 +168,13 @@ class TaskHooks():
         else:
             return True
 
-    def info(self, only_customized=True):
+    def info(self, show_default=False):
         # formatted output the source code
         ret = ""
         for hook_type, hooks in self._registered_hooks.items():
             already_print_type = False
             for name, func in hooks.items():
-                if name == "default" and only_customized:
+                if name == "default" and not show_default:
                     continue
                 if not already_print_type:
                     ret += "hook_type: %s{\n" % hook_type
@@ -187,7 +187,7 @@ class TaskHooks():
             if already_print_type:
                 ret += "}\n"
         if not ret:
-            ret = "Not any hooks when only_customized=%s" % only_customized
+            ret = "Not any customized hooks have been defined, you can set show_default=True to see the default hooks information"
         return ret
 
     def __getitem__(self, hook_type):
