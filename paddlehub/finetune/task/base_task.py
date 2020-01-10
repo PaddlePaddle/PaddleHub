@@ -586,9 +586,9 @@ class BaseTask(object):
         return self._hooks.info(only_customized)
 
     def add_hook(self, hook_type, name=None, func=None):
-        self._hooks.add(hook_type, name=name, func=func)
-        if not name:
+        if name == None:
             name = "hook_%s" % id(func)
+        self._hooks.add(hook_type, name=name, func=func)
         logger.info("Add hook %s:%s successfully" % (hook_type, name))
 
     def delete_hook(self, hook_type, name):
