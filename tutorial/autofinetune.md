@@ -99,7 +99,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --gpu=0,1 --popsize=5 --rou
 
 其中，选项
 
-* `--param_file`: 必填，待优化的超参数信息yaml文件，即上述[hparam.yaml](#hparam.yaml)；
+* `--param_file`: 必填，待优化的超参数信息yaml文件，即上述[hparam.yaml](#1-hparamyaml)；
 
 * `--gpu`: 必填，设置运行程序的可用GPU卡号，中间以逗号隔开，不能有空格；
 
@@ -167,7 +167,7 @@ $ tensorboard --logdir ${OUTPUT}/visualization --host ${HOST_IP} --port ${PORT_N
 
 ## 六、args参数传递
 
-PaddleHub AutoDL Finetuner 支持将train.py中的args其余不需要搜索的参数通过autofinetune remainder方式传入。这个不需要搜索的选项参数名称应该和通过hub autofinetune的传入选项参数名称保持一致。如[PaddleHub AutoDL Finetuner超参优化--NLP情感分类任务](./autofinetune-nlp.md)示例中的max_seq_len选项，可以参照以下方式传入。
+PaddleHub AutoDL Finetuner 支持将train.py中的args其余不需要搜索的参数通过autofinetune remainder方式传入。这个不需要搜索的选项参数名称应该和通过hub autofinetune的传入选项参数名称保持一致。如[PaddleHub AutoDL Finetuner超参优化--NLP情感分类任务](../demo/autofinetune_text_classification)示例中的max_seq_len选项，可以参照以下方式传入。
 
 ```shell
 $ OUTPUT=result/
