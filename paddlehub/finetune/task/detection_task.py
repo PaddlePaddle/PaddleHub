@@ -395,8 +395,33 @@ class DetectionTask(BasicTask):
             return [self.feed_list[2], self.labels[0].name, self.outputs[0].name, self.loss.name]
         return [self.feed_list[2], self.labels[0].name, self.outputs[0].name]
 
+    def _yolo_parse_anchors(self, anchors):
+        """
+        Check ANCHORS/ANCHOR_MASKS in config and parse mask_anchors
+        """
+        self.anchors = []
+        self.mask_anchors = []
+
+        assert len(anchors) > 0, "ANCHORS not set."
+        assert len(self.anchor_masks) > 0, "ANCHOR_MASKS not set."
+
+        for anchor in anchors:
+            assert len(anchor) == 2, "anchor {} len should be 2".format(anchor)
+            self.anchors.extend(anchor)
+
+        anchor_num = len(anchors)
+        for masks in self.anchor_masks:
+            self.mask_anchors.append([])
+            for mask in masks:
+                assert mask < anchor_num, "anchor mask index overflow"
+                self.mask_anchors[-1].extend(anchors[mask])
+
     def _yolo_build_net(self):
         self.anchor_masks = [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
+        anchors = [[10, 13], [16, 30], [33, 23], [30, 61], [62, 45],
+                        [59, 119], [116, 90], [156, 198], [373, 326]]
+        self._yolo_parse_anchors(anchors)
+
         tip_list = self.feature
         outputs = []
         for i, tip in enumerate(tip_list):
@@ -409,26 +434,16 @@ class DetectionTask(BasicTask):
                 stride=1,
                 padding=0,
                 act=None,
-                param_attr=ParamAttr(name="yolo_output.{}.conv.weights".format(i)),
+                # Todo: conflict with module pretrain weights?
+                param_attr=ParamAttr(name="ft_yolo_output.{}.conv.weights".format(i)),
                 bias_attr=ParamAttr(
                     regularizer=L2Decay(0.),
-                    name="yolo_output.{}.conv.bias".format(i)))
+                    name="ft_yolo_output.{}.conv.bias".format(i)))
             outputs.append(block_out)
 
         if self.is_train_phase:
             return outputs
 
-        self.anchors = [[10, 13], [16, 30], [33, 23], [30, 61], [62, 45],
-                   [59, 119], [116, 90], [156, 198], [373, 326]]
-        # self.mask_anchors = []
-        # for masks in self.anchor_masks:
-        #     self.mask_anchors.append([])
-        #     for mask in masks:
-        #         self.mask_anchors[-1].extend(anchors[mask])
-        self.mask_anchors = [
-            [116, 90, 156, 198, 373, 326],
-            [30, 61, 62, 45, 59, 119],
-            [10, 13, 16, 30, 33, 23]]
         im_size = self.base_feed_var_list[1]
         boxes = []
         scores = []
@@ -495,7 +510,7 @@ class DetectionTask(BasicTask):
 
             loss = sum(losses)
         else:
-            loss = fluid.layers.fill_constant(shape=[], value=-1, dtype='float32')
+            loss = fluid.layers.fill_constant(shape=[1], value=-1, dtype='float32')
         return loss
 
     def _yolo_feed_list(self):

@@ -23,18 +23,21 @@ parser.add_argument("--use_data_parallel",  type=ast.literal_eval,  default=Fals
 
 
 def finetune(args):
-    # module = hub.Module(name=args.module)
-    # input_dict, output_dict, program = module.context(trainable=True)
+    module_name = 'yolov3_darknet53_coco2017'
+    model_type = 'yolo'
+    module = hub.Module(name=module_name)
+    input_dict, output_dict, program = module.context(trainable=True)
+    # import pdb; pdb.set_trace()
     # Todo:
-    module_dir = '/Users/zhaopenghao/projects/HubModule/image/object_detection/ssd/v1.0.0/ssd_mobilenet_v1_pascal.hub_module'
-    version = 'v3.0.0'
-    sig_name = 'feature_map'  # "multi_scale_feature"
-    module = hub.Module(module_dir=[module_dir, version])
-    input_dict, output_dict, program = module.context(
-        trainable=True, sign_name=sig_name)
+    # module_dir = '/Users/zhaopenghao/projects/HubModule/image/object_detection/ssd/v1.0.0/ssd_mobilenet_v1_pascal.hub_module'
+    # version = 'v3.0.0'
+    # sig_name = 'feature_map'  # "multi_scale_feature"
+    # module = hub.Module(module_dir=[module_dir, version])
+    # input_dict, output_dict, program = module.context(
+    #     trainable=True, sign_name=sig_name)
 
     # define dataset
-    ds = ObjectDetectionDataset(model_type='ssd')
+    ds = ObjectDetectionDataset(model_type=model_type)
     ds.base_path = '/Users/zhaopenghao/Downloads/coco_10'
     ds.train_image_dir = 'val'
     ds.train_list_file = 'annotations/val.json'
@@ -48,7 +51,7 @@ def finetune(args):
     print("ds.num_labels", ds.num_labels)
 
     # define batch reader
-    data_reader = ObjectDetectionReader(1, 1, dataset=ds, model_type='ssd')
+    data_reader = ObjectDetectionReader(1, 1, dataset=ds, model_type=model_type)
 
     print("output_dict", len(output_dict))
     print(output_dict.keys())
@@ -56,14 +59,16 @@ def finetune(args):
     # hub module 重复输出结果两次，
     # for i in range(len(output_dict) // 2):
     #     feature_map.append(output_dict[i])
-    fetch_list = [
-        'module11', 'module13', 'module14', 'module15', 'module16', 'module17'
-    ]
-    feature_map = [output_dict[vname] for vname in fetch_list]
+    # fetch_list = [
+    #     'module11', 'module13', 'module14', 'module15', 'module16', 'module17'
+    # ]
+    # feature_map = [output_dict[vname] for vname in fetch_list]
     # import pdb; pdb.set_trace()
+    feature_map = output_dict['head_features']
 
     img = input_dict["image"]
-    feed_list = [img.name]
+    im_size = input_dict["im_size"]
+    feed_list = [img.name, im_size.name]
 
     config = hub.RunConfig(
         log_interval=1,
@@ -82,7 +87,7 @@ def finetune(args):
         feed_list=feed_list,
         feature=feature_map,
         num_classes=ds.num_labels,
-        model_type='ssd',
+        model_type=model_type,
         config=config)
     task.finetune_and_eval()
 
