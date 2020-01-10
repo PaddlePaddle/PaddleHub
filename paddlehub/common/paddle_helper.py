@@ -19,7 +19,6 @@ from __future__ import print_function
 
 import copy
 
-import paddle
 import paddle.fluid as fluid
 
 from paddlehub.module import module_desc_pb2

@@ -19,12 +19,10 @@ from __future__ import print_function
 
 import sys
 import os
-import time
 import multiprocessing
 import hashlib
 import platform
 
-import paddle
 import paddle.fluid as fluid
 import six
 
@@ -257,3 +255,38 @@ def sys_stdout_encoding():
     if encoding is None:
         encoding = get_platform_default_encoding()
     return encoding
+
+
+def version_sum(version):
+    """
+    get sum(version), eg: version_sum(1.4.5) = 1*100*100*100 + 4*100*100 + 5*100
+    :param version: string("1.3.6")
+    :return:
+    """
+    sum = 0
+    version_list = version.split(".")
+    for i in version_list:
+        sum = (sum + int(i)) * 100
+    return sum
+
+
+def sort_version_key(version_a, version_b):
+    if version_sum(version_a[1]) > version_sum(version_b[1]):
+        return -1
+    elif version_sum(version_a[1]) == version_sum(version_b[1]):
+        return 0
+    else:
+        return 1
+
+
+def strflist_version(version_list):
+    version_list = version_list[1:-1].split(",")
+    result = ""
+    if version_list[0] != "-1.0.0":
+        result = ">" + version_list[0]
+    if version_list[1] != "99.0.0":
+        if result != "":
+            result = result + ", " + "<" + version_list[1]
+        else:
+            result = "<" + version_list[1]
+    return result if result != "" else "-"

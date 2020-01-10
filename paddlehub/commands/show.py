@@ -22,7 +22,7 @@ import argparse
 
 from paddlehub.common import utils
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.commands.cml_utils import TablePrinter
+from paddlehub.common.cml_utils import TablePrinter
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.module import Module
 from paddlehub.io.parser import yaml_parser
@@ -125,8 +125,6 @@ class ShowCommand(BaseCommand):
 
         cwd = os.getcwd()
         module_dir = default_module_manager.search_module(module_name)
-        module_dir = (os.path.join(cwd, module_name),
-                      None) if not module_dir else module_dir
         if not module_dir or not os.path.exists(module_dir[0]):
             print("%s is not existed!" % module_name)
             return True

@@ -36,9 +36,10 @@ from .common.dir import CACHE_HOME
 from .common.dir import CONF_HOME
 from .common.logger import logger
 from .common.paddle_helper import connect_program
-from .common.hub_server import default_hub_server
+from .common.hub_server import HubServer
+from .common.hub_server import server_check
 
-from .module.module import Module, create_module
+from .module.module import Module
 from .module.base_processor import BaseProcessor
 from .module.signature import Signature, create_signature
 from .module.manager import default_module_manager
@@ -62,5 +63,3 @@ from .finetune.strategy import ULMFiTStrategy
 from .finetune.strategy import CombinedStrategy
 
 from .autofinetune.evaluator import report_final_result
-
-from .common.hub_server import server_check

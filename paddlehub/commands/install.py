@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+import os
 
 from paddlehub.common import utils
 from paddlehub.module.manager import default_module_manager
@@ -42,15 +43,27 @@ class InstallCommand(BaseCommand):
             print("ERROR: Please specify a module name.\n")
             self.help()
             return False
-        module_name = argv[0]
-        module_version = None if "==" not in module_name else module_name.split(
-            "==")[1]
-        module_name = module_name if "==" not in module_name else module_name.split(
-            "==")[0]
         extra = {"command": "install"}
-        result, tips, module_dir = default_module_manager.install_module(
-            module_name=module_name, module_version=module_version, extra=extra)
+
+        if argv[0].endswith("tar.gz") or argv[0].endswith("phm"):
+            result, tips, module_dir = default_module_manager.install_module(
+                module_package=argv[0], extra=extra)
+        elif os.path.exists(argv[0]) and os.path.isdir(argv[0]):
+            result, tips, module_dir = default_module_manager.install_module(
+                module_dir=argv[0], extra=extra)
+        else:
+            module_name = argv[0]
+            module_version = None if "==" not in module_name else module_name.split(
+                "==")[1]
+            module_name = module_name if "==" not in module_name else module_name.split(
+                "==")[0]
+            result, tips, module_dir = default_module_manager.install_module(
+                module_name=module_name,
+                module_version=module_version,
+                extra=extra)
+
         print(tips)
+
         return True
 
 
