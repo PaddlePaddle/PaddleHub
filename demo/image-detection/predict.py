@@ -8,6 +8,7 @@ import paddlehub as hub
 import numpy as np
 from paddlehub.reader.cv_reader import ObjectDetectionReader
 from paddlehub.dataset.base_cv_dataset import ObjectDetectionDataset
+from paddlehub.contrib.ppdet.utils.coco_eval import bbox2out
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
@@ -20,19 +21,52 @@ parser.add_argument("--use_pyreader",       type=ast.literal_eval,  default=Fals
 # yapf: enable.
 
 module_map = {
-    "ssd": "ssd_mobilenet_v1_pascal",
+    "yolov3": "yolov3_darknet53_coco2017",
+    "ssd": "ssd_vgg16_512_coco2017",
 }
 
 
-def predict(args):
-    module_dir = '/Users/zhaopenghao/projects/HubModule/image/object_detection/ssd/v1.0.0/ssd_mobilenet_v1_pascal.hub_module'
-    version = 'v3.0.0'
-    sig_name = 'feature_map'  # "multi_scale_feature"
-    module = hub.Module(module_dir=[module_dir, version])
-    input_dict, output_dict, program = module.context(
-        trainable=True, sign_name=sig_name)
+def get_model_type(module_name):
+    if 'yolo' in module_name:
+        return 'yolo'
+    elif 'ssd' in module_name:
+        return 'ssd'
+    elif 'rcnn' in module_map:
+        return 'rcnn'
+    else:
+        raise ValueError("module {} not supported".format(module_name))
 
-    ds = ObjectDetectionDataset(model_type='ssd')
+
+def get_feed_list(input_dict, module_name):
+    if 'yolo' in module_name:
+        img = input_dict["image"]
+        im_size = input_dict["im_size"]
+        feed_list = [img.name, im_size.name]
+    elif 'ssd' in module_map:
+        image = input_dict["image"]
+        # image_shape = input_dict["im_shape"]
+        image_shape = input_dict["im_size"]
+        feed_list = [image.name, image_shape.name]
+    else:
+        raise NotImplementedError
+    return feed_list
+
+
+def get_mid_feature(output_dict, module_name):
+    if 'yolo' in module_name:
+        feature = output_dict['head_features']
+    elif 'ssd' in module_name:
+        feature = output_dict['body_features']
+    else:
+        raise NotImplementedError
+    return feature
+
+
+def predict(args):
+    module_name = args.module  # 'yolov3_darknet53_coco2017'
+    model_type = get_model_type(module_name)  # 'yolo'
+    # define data
+    ds = ObjectDetectionDataset(model_type=model_type)
     ds.base_path = '/Users/zhaopenghao/Downloads/coco_10'
     ds.train_image_dir = 'val'
     ds.train_list_file = 'annotations/val.json'
@@ -45,15 +79,13 @@ def predict(args):
     print(ds.label_dict())
     print("ds.num_labels", ds.num_labels)
 
-    data_reader = ObjectDetectionReader(1, 1, dataset=ds, model_type='ssd')
+    data_reader = ObjectDetectionReader(1, 1, dataset=ds, model_type=model_type)
 
-    fetch_list = [
-        'module11', 'module13', 'module14', 'module15', 'module16', 'module17'
-    ]
-    feature_map = [output_dict[vname] for vname in fetch_list]
-
-    img = input_dict["image"]
-    feed_list = [img.name]
+    # define model(program)
+    module = hub.Module(name=module_name)
+    input_dict, output_dict, program = module.context(trainable=True)
+    feed_list = get_feed_list(input_dict, module_name)
+    feature = get_mid_feature(output_dict, module_name)
 
     config = hub.RunConfig(
         use_data_parallel=False,
@@ -67,31 +99,23 @@ def predict(args):
     task = hub.DetectionTask(
         data_reader=data_reader,
         feed_list=feed_list,
-        feature=feature_map,
+        feature=feature,
         num_classes=ds.num_labels,
-        model_type='ssd',
+        model_type=model_type,
         config=config)
 
     data = ["./test/test_img_bird.jpg", "./test/test_img_cat.jpg",]
     label_map = ds.label_dict()
-    index = 0
-    # get classification result
     run_states = task.predict(data=data)
     results = [run_state.run_results for run_state in run_states]
     c = 1
     for outs in results:
-        # get predict index
-        # Todo: handle keys dynamically
-        keys = ['bbox', 'im_id']
+        keys = ['im_shape', 'im_id', 'bbox']
         res = {
             k: (np.array(v), v.recursive_sequence_lengths())
             for k, v in zip(keys, outs)
         }
-        # print(res['bbox'])
-        # batch_num = len(res['bbox'][1][0])
-        # res['im_id'] = ([[i,] for i in range(batch_num)], None)
-        print(res['im_id'])
-        from paddlehub.contrib.ppdet.utils.coco_eval import bbox2out
+        print("im_id", res['im_id'])
         is_bbox_normalized = False
         clsid2catid = {}
         for k in label_map:
@@ -102,9 +126,9 @@ def predict(args):
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    # if not args.module in module_map:
-    #     hub.logger.error("module should in %s" % module_map.keys())
-    #     exit(1)
-    # args.module = module_map[args.module]
+    if not args.module in module_map:
+        hub.logger.error("module should in %s" % module_map.keys())
+        exit(1)
+    args.module = module_map[args.module]
 
     predict(args)

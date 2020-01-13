@@ -272,9 +272,7 @@ class ArrangeTestSSD(BaseOperator):
         h = sample['h']
         w = sample['w']
         im_shape = np.array((h, w))
-        # outs = (im, im_id, im_shape)
-        # Todo:
-        outs = (im, im_id)
+        outs = (im, im_id, im_shape)
         return outs
 
 

@@ -286,7 +286,8 @@ class DetectionTask(BasicTask):
             return [
                 self.base_feed_list[1], self.labels[0].name, self.outputs[0].name,
                 self.loss.name]
-        return [self.outputs[0].name, self.labels[0].name, self.base_feed_list[1]]
+        # im_shape, im_id, bbox
+        return [self.base_feed_list[1], self.labels[0].name, self.outputs[0].name]
 
     def _rcnn_build_net(self):
         if self.is_train_phase:
@@ -402,7 +403,9 @@ class DetectionTask(BasicTask):
         if self.is_train_phase:
             return [self.loss.name]
         elif self.is_test_phase:
+            # im_shape, im_id, bbox
             return [self.feed_list[2], self.labels[0].name, self.outputs[0].name, self.loss.name]
+        # im_shape, im_id, bbox
         return [self.feed_list[2], self.labels[0].name, self.outputs[0].name]
 
     def _yolo_parse_anchors(self, anchors):
@@ -536,7 +539,9 @@ class DetectionTask(BasicTask):
         if self.is_train_phase:
             return [self.loss.name]
         elif self.is_test_phase:
+            # im_shape, im_id, bbox
             return [self.feed_list[1], self.labels[0].name, self.outputs[0].name, self.loss.name]
+        # im_shape, im_id, bbox
         return [self.feed_list[1], self.labels[0].name, self.outputs[0].name]
 
     def _build_net(self):
