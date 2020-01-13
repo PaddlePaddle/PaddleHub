@@ -59,7 +59,7 @@ class ConfigInfo(object):
 
     def get_hub_name(self):
         if self.hub_name is None:
-            self.hub_name = md5(str(uuid.uuid1())[-12:0]) + "-" + str(
+            self.hub_name = md5(str(uuid.uuid1())[-12:]) + "-" + str(
                 int(time.time()))
             with open(self.filepath, "w") as fp:
                 fp.write(json.dumps(default_server_config))

@@ -16,7 +16,7 @@ import uuid
 from paddlehub.common.utils import md5
 
 HUB_SERVERS = ["http://paddlepaddle.org.cn/paddlehub"]
-hub_name = md5(str(uuid.uuid1())[-12:0]) + "-" + str(int(time.time()))
+hub_name = md5(str(uuid.uuid1())[-12:]) + "-" + str(int(time.time()))
 
 default_server_config = {
     "server_url": HUB_SERVERS,
