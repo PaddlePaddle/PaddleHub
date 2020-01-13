@@ -21,21 +21,51 @@ parser.add_argument("--use_pyreader",       type=ast.literal_eval,  default=Fals
 parser.add_argument("--use_data_parallel",  type=ast.literal_eval,  default=False,                      help="Whether use data parallel.")
 # yapf: enable.
 
+module_map = {
+    "yolov3": "yolov3_darknet53_coco2017",
+    "ssd": "ssd_vgg16_512_coco2017",
+}
+
+
+def get_model_type(module_name):
+    if 'yolo' in module_name:
+        return 'yolo'
+    elif 'ssd' in module_name:
+        return 'ssd'
+    elif 'rcnn' in module_map:
+        return 'rcnn'
+    else:
+        raise ValueError("module {} not supported".format(module_name))
+
+
+def get_feed_list(input_dict, module_name):
+    if 'yolo' in module_name:
+        img = input_dict["image"]
+        im_size = input_dict["im_size"]
+        feed_list = [img.name, im_size.name]
+    elif 'ssd' in module_map:
+        image = input_dict["image"]
+        # image_shape = input_dict["im_shape"]
+        image_shape = input_dict["im_size"]
+        feed_list = [image.name, image_shape.name]
+    else:
+        raise NotImplementedError
+    return feed_list
+
+
+def get_mid_feature(output_dict, module_name):
+    if 'yolo' in module_name:
+        feature = output_dict['head_features']
+    elif 'ssd' in module_name:
+        feature = output_dict['body_features']
+    else:
+        raise NotImplementedError
+    return feature
+
 
 def finetune(args):
-    module_name = 'yolov3_darknet53_coco2017'
-    model_type = 'yolo'
-    module = hub.Module(name=module_name)
-    input_dict, output_dict, program = module.context(trainable=True)
-    # import pdb; pdb.set_trace()
-    # Todo:
-    # module_dir = '/Users/zhaopenghao/projects/HubModule/image/object_detection/ssd/v1.0.0/ssd_mobilenet_v1_pascal.hub_module'
-    # version = 'v3.0.0'
-    # sig_name = 'feature_map'  # "multi_scale_feature"
-    # module = hub.Module(module_dir=[module_dir, version])
-    # input_dict, output_dict, program = module.context(
-    #     trainable=True, sign_name=sig_name)
-
+    module_name = args.module  # 'yolov3_darknet53_coco2017'
+    model_type = get_model_type(module_name)  # 'yolo'
     # define dataset
     ds = ObjectDetectionDataset(model_type=model_type)
     ds.base_path = '/Users/zhaopenghao/Downloads/coco_10'
@@ -53,22 +83,15 @@ def finetune(args):
     # define batch reader
     data_reader = ObjectDetectionReader(1, 1, dataset=ds, model_type=model_type)
 
-    print("output_dict", len(output_dict))
-    print(output_dict.keys())
-    # feature_map = []
-    # hub module 重复输出结果两次，
-    # for i in range(len(output_dict) // 2):
-    #     feature_map.append(output_dict[i])
-    # fetch_list = [
-    #     'module11', 'module13', 'module14', 'module15', 'module16', 'module17'
-    # ]
-    # feature_map = [output_dict[vname] for vname in fetch_list]
-    # import pdb; pdb.set_trace()
-    feature_map = output_dict['head_features']
+    # define model(program)
+    module = hub.Module(name=module_name)
+    input_dict, output_dict, program = module.context(trainable=True)
+    import pdb; pdb.set_trace()
 
-    img = input_dict["image"]
-    im_size = input_dict["im_size"]
-    feed_list = [img.name, im_size.name]
+    feed_list = get_feed_list(input_dict, module_name)
+    print("output_dict length:", len(output_dict))
+    print(output_dict.keys())
+    feature = get_mid_feature(output_dict, module_name)
 
     config = hub.RunConfig(
         log_interval=1,
@@ -85,7 +108,7 @@ def finetune(args):
     task = hub.DetectionTask(
         data_reader=data_reader,
         feed_list=feed_list,
-        feature=feature_map,
+        feature=feature,
         num_classes=ds.num_labels,
         model_type=model_type,
         config=config)
@@ -94,9 +117,9 @@ def finetune(args):
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    # if not args.module in module_map:
-    #     hub.logger.error("module should in %s" % module_map.keys())
-    #     exit(1)
-    # args.module = module_map[args.module]
+    if not args.module in module_map:
+        hub.logger.error("module should in %s" % module_map.keys())
+        exit(1)
+    args.module = module_map[args.module]
 
     finetune(args)

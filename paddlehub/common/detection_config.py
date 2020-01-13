@@ -59,8 +59,8 @@ ssd_train_ops = [
     dict(op='Permute'),
     dict(
         op='NormalizeImage',
-        mean=[127.5, 127.5, 127.5],
-        std=[127.502231, 127.502231, 127.502231],
+        mean=[104, 117, 123],
+        std=[1, 1, 1],
         is_scale=False),
     dict(op='ArrangeSSD')
 ]
@@ -73,8 +73,8 @@ ssd_eval_ops = [
     dict(op='Permute'),
     dict(
         op='NormalizeImage',
-        mean=[127.5, 127.5, 127.5],
-        std=[127.502231, 127.502231, 127.502231],
+        mean=[104, 117, 123],
+        std=[1, 1, 1],
         is_scale=False),
     dict(op='ArrangeEvalSSD', fields=ssd_eval_fields)
 ]
@@ -85,8 +85,8 @@ ssd_predict_ops = [
     dict(op='Permute'),
     dict(
         op='NormalizeImage',
-        mean=[127.5, 127.5, 127.5],
-        std=[127.502231, 127.502231, 127.502231],
+        mean=[104, 117, 123],
+        std=[1, 1, 1],
         is_scale=False),
     dict(op='ArrangeTestSSD')
 ]
@@ -186,8 +186,8 @@ feed_config = {
             "IS_PADDING": False,
         },
         "predict": {
-            # "fields": ['image', 'im_id', 'im_shape'],
-            "fields": ['image', 'im_id'],
+            "fields": ['image', 'im_id', 'im_shape'],
+            # "fields": ['image', 'im_id'],
             "OPS": ssd_predict_ops,
             "IS_PADDING": False,
         },

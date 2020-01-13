@@ -199,17 +199,23 @@ class DetectionTask(BasicTask):
         feature_list = self.feature
         image = self.base_feed_var_list[0]
 
+        # todo: modify according to input size
         mbox_locs, mbox_confs, box, box_var = fluid.layers.multi_box_head(
             inputs=feature_list,
             image=image,
-            base_size=300,
             num_classes=self.num_classes,
-            min_sizes=[60.0, 105.0, 150.0, 195.0, 240.0, 285.0],
-            max_sizes=[[], 150.0, 195.0, 240.0, 285.0, 300.0],
-            aspect_ratios=[[2.0], [2.0, 3.0], [2.0, 3.0], [2.0, 3.0],
-                              [2.0, 3.0], [2.0, 3.0]],
-            min_ratio=20,
-            max_ratio=90)
+            aspect_ratios=[[2.], [2., 3.], [2., 3.], [2., 3.], [2., 3.], [2.], [2.]],
+            base_size=512,  # 300,
+            min_sizes=[20.0, 51.0, 133.0, 215.0, 296.0, 378.0, 460.0],  # [60.0, 105.0, 150.0, 195.0, 240.0, 285.0],
+            max_sizes=[51.0, 133.0, 215.0, 296.0, 378.0, 460.0, 542.0],  # [[], 150.0, 195.0, 240.0, 285.0, 300.0],
+            steps=[8, 16, 32, 64, 128, 256, 512],
+            min_ratio=15,
+            max_ratio=90,
+            kernel_size=3,
+            offset=0.5,
+            flip=True,
+            pad=1,
+        )
 
         self.env.mid_vars = [mbox_locs, mbox_confs, box, box_var]
 
@@ -235,8 +241,8 @@ class DetectionTask(BasicTask):
         if self.is_train_phase:
             idx_list = [1, 2]  # 'gt_box', 'gt_label'
         elif self.is_test_phase:
-            # Todo: remove 'im_shape' when using new module
-            idx_list = [1, 2, 3, 4, 5]  # 'im_shape', 'im_id', 'gt_box', 'gt_label', 'is_difficult'
+            # xTodo: remove 'im_shape' when using new module
+            idx_list = [2, 3, 4, 5]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
         else:
             idx_list = [1]  # im_id
         return self._add_label_by_fields(idx_list)
@@ -245,9 +251,9 @@ class DetectionTask(BasicTask):
         if self.is_train_phase:
             gt_box = self.labels[0]
             gt_label = self.labels[1]
-        else:  # Todo: update here when using new module
-            gt_box = self.labels[2]
-            gt_label = self.labels[3]
+        else:  # xTodo: update here when using new module
+            gt_box = self.labels[1]
+            gt_label = self.labels[2]
         mbox_locs, mbox_confs, box, box_var = self.env.mid_vars
         loss = fluid.layers.ssd_loss(
             location=mbox_locs,
@@ -261,10 +267,14 @@ class DetectionTask(BasicTask):
         return loss
 
     def _ssd_feed_list(self):
-        # Todo: update when using new module
+        # xTodo: update when using new module
         feed_list = [varname for varname in self.base_feed_list]
-        if self.is_train_phase or self.is_test_phase or self.is_predict_phase:
-            feed_list += [label.name for label in self.labels]
+        if self.is_train_phase:
+            feed_list = feed_list[:1] + [label.name for label in self.labels]
+        elif self.is_test_phase:
+            feed_list = feed_list + [label.name for label in self.labels]
+        else:  # self.is_predict_phase:
+            feed_list = [feed_list[0], self.labels[0].name, feed_list[1]]
         return feed_list
 
     def _ssd_fetch_list(self):
@@ -272,11 +282,11 @@ class DetectionTask(BasicTask):
         if self.is_train_phase:
             return [self.loss.name]
         elif self.is_test_phase:
-            # Todo: update when using new module
+            # xTodo: update when using new module
             return [
-                self.labels[0].name, self.labels[1].name, self.outputs[0].name,
+                self.base_feed_list[1], self.labels[0].name, self.outputs[0].name,
                 self.loss.name]
-        return [self.outputs[0].name, self.labels[0].name]
+        return [self.outputs[0].name, self.labels[0].name, self.base_feed_list[1]]
 
     def _rcnn_build_net(self):
         if self.is_train_phase:
