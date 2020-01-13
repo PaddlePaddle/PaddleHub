@@ -23,6 +23,7 @@ import os
 from paddlehub.common import utils
 from paddlehub.module.manager import default_module_manager
 from paddlehub.commands.base_command import BaseCommand, ENTRY
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class InstallCommand(BaseCommand):
@@ -57,6 +58,7 @@ class InstallCommand(BaseCommand):
                 "==")[1]
             module_name = module_name if "==" not in module_name else module_name.split(
                 "==")[0]
+            CacheUpdater("hub_install", module_name, module_version).start()
             result, tips, module_dir = default_module_manager.install_module(
                 module_name=module_name,
                 module_version=module_version,

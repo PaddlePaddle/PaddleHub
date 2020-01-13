@@ -25,6 +25,7 @@ from paddlehub.autofinetune.autoft import PSHE2
 from paddlehub.autofinetune.autoft import HAZero
 from paddlehub.autofinetune.evaluator import FullTrailEvaluator
 from paddlehub.autofinetune.evaluator import PopulationBasedEvaluator
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class AutoFineTuneCommand(BaseCommand):
@@ -96,6 +97,7 @@ class AutoFineTuneCommand(BaseCommand):
         return options_str
 
     def execute(self, argv):
+        CacheUpdater("hub_autofinetune").start()
         if not argv:
             print("ERROR: Please specify a script to be finetuned in python.\n")
             self.help()

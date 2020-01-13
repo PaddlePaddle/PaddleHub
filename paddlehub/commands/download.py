@@ -24,6 +24,7 @@ import paddlehub as hub
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.commands.base_command import BaseCommand, ENTRY
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class DownloadCommand(BaseCommand):
@@ -52,6 +53,7 @@ class DownloadCommand(BaseCommand):
         mod_name = argv[0]
         mod_version = None if "==" not in mod_name else mod_name.split("==")[1]
         mod_name = mod_name if "==" not in mod_name else mod_name.split("==")[0]
+        CacheUpdater("hub_download", mod_name, mod_version).start()
         self.args = self.parser.parse_args(argv[1:])
         self.args.type = self.check_type(self.args.type)
 

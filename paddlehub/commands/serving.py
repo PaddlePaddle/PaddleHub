@@ -25,7 +25,11 @@ import json
 import paddlehub as hub
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.serving import app_single as app
+from paddlehub.common.dir import CONF_HOME
+from paddlehub.common.hub_server import CacheUpdater
 import multiprocessing
+import time
+import signal
 
 if platform.system() == "Windows":
 
@@ -64,6 +68,15 @@ def number_of_workers():
     return (multiprocessing.cpu_count() * 2) + 1
 
 
+def pid_is_exist(pid):
+    try:
+        os.kill(pid, 0)
+    except:
+        return False
+    else:
+        return True
+
+
 class ServingCommand(BaseCommand):
     name = "serving"
     module_list = []
@@ -90,6 +103,59 @@ class ServingCommand(BaseCommand):
         self.parser.add_argument("--config", "-c", nargs="?")
         self.parser.add_argument("--port", "-p", nargs="?", default=8866)
         self.parser.add_argument("--gpu", "-i", nargs="?", default=0)
+
+    def dump_pid_file(self):
+        pid = os.getpid()
+        filepath = os.path.join(CONF_HOME,
+                                "serving_" + self.args.port + ".json")
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        with open(filepath, "w") as fp:
+            info = {
+                "pid": pid,
+                "module": self.args.modules,
+                "start_time": time.time()
+            }
+            json.dump(info, fp)
+
+    @staticmethod
+    def load_pid_file(filepath, port=None):
+        if port is None:
+            port = os.path.basename(filepath).split(".")[0].split("_")[1]
+        if not os.path.exists(filepath):
+            print(
+                "PaddleHub-Serving config file is not exists, "
+                "please confirm the port [%s] you specified is correct." % port)
+            return False
+        with open(filepath, "r") as fp:
+            info = json.load(fp)
+            return info
+
+    def stop_serving(self, port):
+        filepath = os.path.join(CONF_HOME, "serving_" + str(port) + ".json")
+        info = self.load_pid_file(filepath, port)
+        if info is False:
+            return
+        pid = info["pid"]
+        module = info["module"]
+        start_time = info["start_time"]
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+        if not pid_is_exist(pid):
+            print("PaddleHub-Serving has been stopped.")
+            return
+        print("PaddleHub-Serving will stop.")
+        CacheUpdater(
+            "hub_serving_stop",
+            module=module,
+            addition={
+                "period_time": time.time() - start_time
+            }).start()
+        if platform.system() == "Windows":
+            os.kill(pid, signal.SIGTERM)
+        else:
+            os.killpg(pid, signal.SIGTERM)
 
     @staticmethod
     def start_bert_serving(args):
@@ -132,6 +198,10 @@ class ServingCommand(BaseCommand):
                     configs.pop()
                 module_exist.update({module_name: module_version})
                 try:
+                    CacheUpdater(
+                        "hub_serving_start",
+                        module=module_name,
+                        version=module_version).start()
                     m = hub.Module(name=module_name, version=module_version)
                     method_name = m.desc.attr.map.data['default_signature'].s
                     if method_name == "":
@@ -147,8 +217,29 @@ class ServingCommand(BaseCommand):
                     exit(1)
             return configs
 
-    @staticmethod
-    def start_single_app_with_file(configs):
+    def start_app_with_file(self, configs, workers):
+        port = configs.get("port", 8866)
+        if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
+            print("Port %s is occupied, please change it." % port)
+            return False
+
+        modules = configs.get("modules_info")
+        module = [str(i["module"]) + "==" + str(i["version"]) for i in modules]
+        module_info = ServingCommand.preinstall_modules(module)
+        for index in range(len(module_info)):
+            modules[index].update(module_info[index])
+        options = {
+            "bind": "0.0.0.0:%s" % port,
+            "workers": workers,
+            "pid": "./pid.txt"
+        }
+
+        configs["modules_info"] = modules
+        self.dump_pid_file()
+        StandaloneApplication(
+            app.create_app(init_flag=False, configs=configs), options).run()
+
+    def start_single_app_with_file(self, configs):
         use_gpu = configs.get("use_gpu", False)
         port = configs.get("port", 8866)
         if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
@@ -159,6 +250,7 @@ class ServingCommand(BaseCommand):
         module_info = ServingCommand.preinstall_modules(module)
         for index in range(len(module_info)):
             configs[index].update(module_info[index])
+        self.dump_pid_file()
         app.run(use_gpu, configs=configs, port=port)
 
     @staticmethod
@@ -172,6 +264,30 @@ class ServingCommand(BaseCommand):
         StandaloneApplication(
             app.create_app(init_flag=False, configs=configs), options).run()
         print("PaddleHub-Serving has been stopped.")
+
+    def start_app_with_args(self, workers):
+        module = self.args.modules
+        if module is not None:
+            use_gpu = self.args.use_gpu
+            port = self.args.port
+            if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
+                print("Port %s is occupied, please change it." % port)
+                return False
+            module_info = ServingCommand.preinstall_modules(module)
+            [
+                item.update({
+                    "batch_size": 1,
+                    "queue_size": 20
+                }) for item in module_info
+            ]
+            options = {"bind": "0.0.0.0:%s" % port, "workers": workers}
+            configs = {"use_gpu": use_gpu, "modules_info": module_info}
+            self.dump_pid_file()
+            StandaloneApplication(
+                app.create_app(init_flag=False, configs=configs),
+                options).run()
+        else:
+            print("Lack of necessary parameters!")
 
     def start_single_app_with_args(self):
         module = self.args.modules
@@ -188,6 +304,7 @@ class ServingCommand(BaseCommand):
                     "queue_size": 20
                 }) for item in module_info
             ]
+            self.dump_pid_file()
             app.run(use_gpu, configs=module_info, port=port)
         else:
             print("Lack of necessary parameters!")
@@ -224,52 +341,62 @@ class ServingCommand(BaseCommand):
                 with open(config_file, "r") as fp:
                     configs = json.load(fp)
                     use_multiprocess = configs.get("use_multiprocess", False)
-                    if use_multiprocess is True:
-                        if platform.system() == "Windows":
-                            print(
-                                "Warning: Windows cannot use multiprocess working "
-                                "mode, Hub-Serving will switch to single process mode"
-                            )
-                            ServingCommand.start_single_app_with_file(configs)
-                        else:
-                            ServingCommand.start_multi_app_with_file(configs)
-                    else:
+                    if platform.system() == "Windows":
+                        print(
+                            "Warning: Windows cannot use multiprocess working "
+                            "mode, Hub-Serving will switch to single process mode"
+                        )
                         ServingCommand.start_single_app_with_file(configs)
+                    else:
+                        if use_multiprocess is True:
+                            self.start_app_with_file(configs,
+                                                     number_of_workers())
+                        else:
+                            self.start_app_with_file(configs, 1)
+
             else:
                 print("config_file ", config_file, "not exists.")
         else:
-            if self.args.use_multiprocess is True:
-                if platform.system() == "Windows":
-                    print(
-                        "Warning: Windows cannot use multiprocess working "
-                        "mode, Hub-Serving will switch to single process mode")
-                    self.start_single_app_with_args()
-                else:
-                    self.start_multi_app_with_args()
-            else:
+            if platform.system() == "Windows":
+                print("Warning: Windows cannot use multiprocess working "
+                      "mode, Hub-Serving will switch to single process mode")
                 self.start_single_app_with_args()
+            else:
+                if self.args.use_multiprocess is True:
+                    self.start_app_with_args(number_of_workers())
+                else:
+                    self.start_app_with_args(1)
 
     @staticmethod
     def show_help():
         str = "serving <option>\n"
         str += "\tManage PaddleHub-Serving.\n"
         str += "sub command:\n"
-        str += "start\n"
+        str += "1. start\n"
         str += "\tStart PaddleHub-Serving if specifies this parameter.\n"
-        str += "start bert_service\n"
+        str += "2. start bert_service\n"
         str += "\tStart Bert Service if specifies this parameter.\n"
-        str += "option:\n"
+        str += "[start] option:\n"
         str += "--modules/-m [module1==version, module2==version...]\n"
         str += "\tPre-install modules via this parameter list.\n"
         str += "--port/-p XXXX\n"
         str += "\tUse port XXXX for serving.\n"
         str += "--use_gpu\n"
         str += "\tUse gpu for predicting if specifies this parameter.\n"
-        str += "--gpu\n"
-        str += "\tSpecify the graphics card to use, only work for Bert as Service\n"
+        str += "--use_multiprocess\n"
+        str += "\tChoose multoprocess mode, cannot be use on Windows.\n"
         str += "--config/-c file_path\n"
-        str += "\tUse configs in file to starting paddlehub serving."
+        str += "\tUse configs in file to starting paddlehub serving. "
         str += "Other parameter will be ignored if specifies this parameter.\n"
+        str += "[start bert_service] option:\n"
+        str += "--modules/-m\n"
+        str += "\tPre-install modules via this parameter.\n"
+        str += "--port/-p XXXX\n"
+        str += "\tUse port XXXX for serving.\n"
+        str += "--use_gpu\n"
+        str += "\tUse gpu for predicting if specifies this parameter.\n"
+        str += "--gpu\n"
+        str += "\tSpecify the graphics card to use.\n"
         print(str)
 
     def execute(self, argv):
@@ -285,6 +412,11 @@ class ServingCommand(BaseCommand):
                 self.start_serving()
             else:
                 ServingCommand.show_help()
+        elif self.args.sub_command == "stop":
+            if self.args.bert_service == "bert_service":
+                print("Please stop bert_service by kill process by yourself")
+            elif self.args.bert_service is None:
+                self.stop_serving(port=self.args.port)
         else:
             ServingCommand.show_help()
 
