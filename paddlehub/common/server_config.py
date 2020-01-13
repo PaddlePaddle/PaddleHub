@@ -11,14 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from paddlehub.common.utils import ConfigInfo
+import time
+import uuid
+from paddlehub.common.utils import md5
 
 HUB_SERVERS = ["http://paddlepaddle.org.cn/paddlehub"]
+hub_name = md5(str(uuid.uuid1())[-12:0]) + "-" + str(int(time.time()))
 
 default_server_config = {
     "server_url": HUB_SERVERS,
     "resource_storage_server_url": "https://bj.bcebos.com/paddlehub-data/",
     "debug": False,
     "log_level": "DEBUG",
-    "hub_name": ConfigInfo().get_hub_name()
+    "hub_name": hub_name
 }

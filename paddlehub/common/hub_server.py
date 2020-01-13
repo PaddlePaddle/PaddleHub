@@ -33,7 +33,7 @@ from paddlehub.common.server_config import default_server_config
 from paddlehub.io.parser import yaml_parser
 from paddlehub.common.lock import lock
 from paddlehub.common.dir import CONF_HOME, CACHE_HOME
-from paddlehub.common.utils import ConfigInfo
+from paddlehub.common.srv_utils import ConfigInfo
 
 RESOURCE_LIST_FILE = "resource_list_file.yml"
 CACHE_TIME = 60 * 10
