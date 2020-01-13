@@ -26,30 +26,42 @@ import paddlehub as hub
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.serving import app_single as app
 import multiprocessing
-import gunicorn.app.base
+
+if platform.system() == "Windows":
+
+    class StandaloneApplication(object):
+        def __init__(self):
+            pass
+
+        def load_config(self):
+            pass
+
+        def load(self):
+            pass
+else:
+    import gunicorn.app.base
+
+    class StandaloneApplication(gunicorn.app.base.BaseApplication):
+        def __init__(self, app, options=None):
+            self.options = options or {}
+            self.application = app
+            super(StandaloneApplication, self).__init__()
+
+        def load_config(self):
+            config = {
+                key: value
+                for key, value in self.options.items()
+                if key in self.cfg.settings and value is not None
+            }
+            for key, value in config.items():
+                self.cfg.set(key.lower(), value)
+
+        def load(self):
+            return self.application
 
 
 def number_of_workers():
     return (multiprocessing.cpu_count() * 2) + 1
-
-
-class StandaloneApplication(gunicorn.app.base.BaseApplication):
-    def __init__(self, app, options=None):
-        self.options = options or {}
-        self.application = app
-        super(StandaloneApplication, self).__init__()
-
-    def load_config(self):
-        config = {
-            key: value
-            for key, value in self.options.items()
-            if key in self.cfg.settings and value is not None
-        }
-        for key, value in config.items():
-            self.cfg.set(key.lower(), value)
-
-    def load(self):
-        return self.application
 
 
 class ServingCommand(BaseCommand):

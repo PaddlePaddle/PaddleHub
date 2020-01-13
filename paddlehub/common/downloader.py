@@ -29,7 +29,7 @@ import tarfile
 from paddlehub.common import utils
 from paddlehub.common.logger import logger
 
-__all__ = ['Downloader']
+__all__ = ['Downloader', 'progress']
 FLUSH_INTERVAL = 0.1
 
 lasttime = time.time()

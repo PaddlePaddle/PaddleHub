@@ -68,5 +68,4 @@ Paddle Inference Server exit successfully!
 这样，我们就利用一台GPU机器就完成了`Bert Service`的部署，并利用另一台普通机器进行了测试，可见通过`Bert Service`能够方便地进行在线embedding服务的快速部署。  
 
 ## 预训练模型一键服务部署
-除了`Bert Service`外，PaddleHub
-Serving还具有预训练模型一键服务部署功能，能够将预训练模型快捷部署上线，对外提供可靠的在线预测服务，具体信息请参见[Module Serving](../../../tutorial/serving.md)。
+除了`Bert Service`外，PaddleHub Serving还具有预训练模型一键服务部署功能，能够将预训练模型快捷部署上线，对外提供可靠的在线预测服务，具体信息请参见[Module Serving](../../../tutorial/serving.md)。

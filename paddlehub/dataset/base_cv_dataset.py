@@ -26,7 +26,7 @@ from paddlehub.common.downloader import default_downloader
 from paddlehub.common.logger import logger
 
 
-class BaseCVDatast(BaseDataset):
+class BaseCVDataset(BaseDataset):
     def __init__(self,
                  base_path,
                  train_list_file=None,
@@ -35,7 +35,7 @@ class BaseCVDatast(BaseDataset):
                  predict_list_file=None,
                  label_list_file=None,
                  label_list=None):
-        super(BaseCVDatast, self).__init__(
+        super(BaseCVDataset, self).__init__(
             base_path=base_path,
             train_file=train_list_file,
             dev_file=validate_list_file,
@@ -65,7 +65,7 @@ class BaseCVDatast(BaseDataset):
         return data
 
 
-# discarded. please use BaseCVDatast
+# discarded. please use BaseCVDataset
 class ImageClassificationDataset(object):
     def __init__(self):
         logger.warning(

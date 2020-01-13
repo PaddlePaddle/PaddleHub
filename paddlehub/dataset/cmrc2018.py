@@ -20,7 +20,7 @@ import os
 from paddlehub.reader import tokenization
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDatast
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/cmrc2018.tar.gz"
 SPIECE_UNDERLINE = '▁'
@@ -62,7 +62,7 @@ class CMRC2018Example(object):
         return s
 
 
-class CMRC2018(BaseNLPDatast):
+class CMRC2018(BaseNLPDataset):
     """A single set of features of data."""
 
     def __init__(self):
