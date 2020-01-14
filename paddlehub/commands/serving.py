@@ -107,7 +107,7 @@ class ServingCommand(BaseCommand):
     def dump_pid_file(self):
         pid = os.getpid()
         filepath = os.path.join(CONF_HOME,
-                                "serving_" + self.args.port + ".json")
+                                "serving_" + str(self.args.port) + ".json")
         if os.path.exists(filepath):
             os.remove(filepath)
         with open(filepath, "w") as fp:
@@ -376,6 +376,7 @@ class ServingCommand(BaseCommand):
         str += "\tStart PaddleHub-Serving if specifies this parameter.\n"
         str += "2. start bert_service\n"
         str += "\tStart Bert Service if specifies this parameter.\n"
+        str += "\n"
         str += "[start] option:\n"
         str += "--modules/-m [module1==version, module2==version...]\n"
         str += "\tPre-install modules via this parameter list.\n"
