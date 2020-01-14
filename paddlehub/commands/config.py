@@ -25,6 +25,9 @@ import re
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.common.dir import CONF_HOME
 from paddlehub.common.server_config import default_server_config
+from paddlehub.common.hub_server import HubServer
+
+HubServer()
 
 
 class ConfigCommand(BaseCommand):

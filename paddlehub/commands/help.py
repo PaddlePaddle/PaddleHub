@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 from paddlehub.commands.base_command import BaseCommand
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class HelpCommand(BaseCommand):
@@ -32,6 +33,7 @@ class HelpCommand(BaseCommand):
         return BaseCommand.command_dict
 
     def execute(self, argv):
+        CacheUpdater("hub_help").start()
         hub_command = BaseCommand.command_dict["hub"]
         help_text = "\n"
         help_text += "Usage:\n"
