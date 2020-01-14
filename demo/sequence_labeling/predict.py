@@ -87,7 +87,7 @@ if __name__ == '__main__':
         add_crf=True)
 
     # Data to be predicted
-    # If using python 2, prefix "u" is necessary
+    # If using python 2, the prefix "u" is necessary
     data = [
         [u"我们变而以书会友，以书结缘，把欧美、港台流行的食品类图谱、画册、工具书汇集一堂。"],
         [u"为了跟踪国际最新食品工艺、流行趋势，大量搜集海外专业书刊资料是提高技艺的捷径。"],
