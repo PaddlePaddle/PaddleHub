@@ -17,6 +17,14 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 
 * **[超参优化](#超参优化autodl-finetuner)**，自动搜索最优超参，得到更好的模型效果。
 
+
+**PaddleHub发布最新版本1.4.1**
+
+
+<p align="center">
+<img src="https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.4/docs/imgs/paddlehub_finetune.gif" hspace='10'/> <br />
+</p>
+
 ## 目录
 
 * [安装](#%E5%AE%89%E8%A3%85)
