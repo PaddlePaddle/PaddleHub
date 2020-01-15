@@ -104,10 +104,10 @@ class Feed(object):
 
 class DetectionTask(BasicTask):
     def __init__(self,
-                 feature,
+                 data_reader,
                  num_classes,
                  feed_list,
-                 data_reader,
+                 feature,
                  model_type='ssd',
                  predict_feature=None,
                  predict_feed_list=None,
@@ -321,8 +321,7 @@ class DetectionTask(BasicTask):
                                         regularizer=L2Decay(0.)))
 
         if self.is_train_phase:
-            rpn_cls_loss, rpn_reg_loss = self.feature[-2:]
-            outs = self.feature[:5]
+            rpn_cls_loss, rpn_reg_loss, outs = self.feature[1:]
             labels_int32 = outs[1]
             bbox_targets = outs[2]
             bbox_inside_weights = outs[3]

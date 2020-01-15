@@ -8,14 +8,15 @@ import paddlehub as hub
 from paddlehub.reader.cv_reader import ObjectDetectionReader
 from paddlehub.dataset.base_cv_dataset import ObjectDetectionDataset
 import numpy as np
+from paddlehub.common.detection_config import get_model_type, get_feed_list, get_mid_feature
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch",          type=int,               default=1,                          help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu",            type=ast.literal_eval,  default=False,                      help="Whether use GPU for fine-tuning.")
-parser.add_argument("--checkpoint_dir",     type=str,               default="paddlehub_finetune_ckpt",  help="Path to save log data.")
+parser.add_argument("--checkpoint_dir",     type=str,               default="paddlehub_finetune_ckpt_frcnn",  help="Path to save log data.")
 parser.add_argument("--batch_size",         type=int,               default=2,                         help="Total examples' number in batch for training.")
-parser.add_argument("--module",             type=str,               default="ssd",                 help="Module used as feature extractor.")
+parser.add_argument("--module",             type=str,               default="faster_rcnn",                 help="Module used as feature extractor.")
 parser.add_argument("--dataset",            type=str,               default="coco_10",                  help="Dataset to finetune.")
 parser.add_argument("--use_pyreader",       type=ast.literal_eval,  default=False,                      help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel",  type=ast.literal_eval,  default=False,                      help="Whether use data parallel.")
@@ -24,43 +25,8 @@ parser.add_argument("--use_data_parallel",  type=ast.literal_eval,  default=Fals
 module_map = {
     "yolov3": "yolov3_darknet53_coco2017",
     "ssd": "ssd_vgg16_512_coco2017",
+    "faster_rcnn": "faster_rcnn_resnet50_coco2017",
 }
-
-
-def get_model_type(module_name):
-    if 'yolo' in module_name:
-        return 'yolo'
-    elif 'ssd' in module_name:
-        return 'ssd'
-    elif 'rcnn' in module_map:
-        return 'rcnn'
-    else:
-        raise ValueError("module {} not supported".format(module_name))
-
-
-def get_feed_list(input_dict, module_name):
-    if 'yolo' in module_name:
-        img = input_dict["image"]
-        im_size = input_dict["im_size"]
-        feed_list = [img.name, im_size.name]
-    elif 'ssd' in module_map:
-        image = input_dict["image"]
-        # image_shape = input_dict["im_shape"]
-        image_shape = input_dict["im_size"]
-        feed_list = [image.name, image_shape.name]
-    else:
-        raise NotImplementedError
-    return feed_list
-
-
-def get_mid_feature(output_dict, module_name):
-    if 'yolo' in module_name:
-        feature = output_dict['head_features']
-    elif 'ssd' in module_name:
-        feature = output_dict['body_features']
-    else:
-        raise NotImplementedError
-    return feature
 
 
 def finetune(args):
@@ -81,17 +47,22 @@ def finetune(args):
     print("ds.num_labels", ds.num_labels)
 
     # define batch reader
+    # todo: handle img size input arguments
     data_reader = ObjectDetectionReader(1, 1, dataset=ds, model_type=model_type)
 
     # define model(program)
     module = hub.Module(name=module_name)
-    input_dict, output_dict, program = module.context(trainable=True)
-    import pdb; pdb.set_trace()
+    if model_type == 'rcnn':
+        input_dict, output_dict, program = module.context(trainable=True, phase='train')
+        input_dict_pred, output_dict_pred, program_pred = module.context(trainable=False)
+    else:
+        input_dict, output_dict, program = module.context(trainable=True)
+        input_dict_pred = output_dict_pred = None
 
-    feed_list = get_feed_list(input_dict, module_name)
+    feed_list, pred_feed_list = get_feed_list(module_name, input_dict, input_dict_pred)
     print("output_dict length:", len(output_dict))
     print(output_dict.keys())
-    feature = get_mid_feature(output_dict, module_name)
+    feature, pred_feature = get_mid_feature(module_name, output_dict, output_dict_pred)
 
     config = hub.RunConfig(
         log_interval=1,
@@ -107,9 +78,11 @@ def finetune(args):
 
     task = hub.DetectionTask(
         data_reader=data_reader,
+        num_classes=ds.num_labels,
         feed_list=feed_list,
         feature=feature,
-        num_classes=ds.num_labels,
+        predict_feed_list=pred_feed_list,
+        predict_feature=pred_feature,
         model_type=model_type,
         config=config)
     task.finetune_and_eval()

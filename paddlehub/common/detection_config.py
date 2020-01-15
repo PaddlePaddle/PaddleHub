@@ -199,6 +199,7 @@ feed_config = {
             "IS_PADDING": True,
         },
         "dev": {
+            # Todo: reduce fields
             "fields": ['image', 'im_info', 'im_id', 'im_shape', 'gt_box',
                        'gt_label', 'is_difficult'],
             "OPS": rcnn_eval_ops,
@@ -229,3 +230,64 @@ feed_config = {
         },
     },
 }
+
+
+def get_model_type(module_name):
+    if 'yolo' in module_name:
+        return 'yolo'
+    elif 'ssd' in module_name:
+        return 'ssd'
+    elif 'rcnn' in module_name:
+        return 'rcnn'
+    else:
+        raise ValueError("module {} not supported".format(module_name))
+
+
+def get_feed_list(module_name, input_dict, input_dict_pred=None):
+    pred_feed_list = None
+    if 'yolo' in module_name:
+        img = input_dict["image"]
+        im_size = input_dict["im_size"]
+        feed_list = [img.name, im_size.name]
+    elif 'ssd' in module_name:
+        image = input_dict["image"]
+        # image_shape = input_dict["im_shape"]
+        image_shape = input_dict["im_size"]
+        feed_list = [image.name, image_shape.name]
+    elif 'rcnn' in module_name:
+        image = input_dict['image']
+        im_info = input_dict['im_info']
+        gt_bbox = input_dict['gt_bbox']
+        gt_class = input_dict['gt_class']
+        is_crowd = input_dict['is_crowd']
+        feed_list = [image.name, im_info.name, gt_bbox.name, gt_class.name, is_crowd.name]
+        assert input_dict_pred is not None
+        image = input_dict_pred['image']
+        im_info = input_dict_pred['im_info']
+        im_shape = input_dict['im_shape']
+        pred_feed_list = [image.name, im_info.name, im_shape.name]
+    else:
+        raise NotImplementedError
+    return feed_list, pred_feed_list
+
+
+def get_mid_feature(module_name, output_dict, output_dict_pred=None):
+    feature_pred = None
+    if 'yolo' in module_name:
+        feature = output_dict['head_features']
+    elif 'ssd' in module_name:
+        feature = output_dict['body_features']
+    elif 'rcnn' in module_name:
+        head_feat = output_dict['head_feat']
+        rpn_cls_loss = output_dict['rpn_cls_loss']
+        rpn_reg_loss = output_dict['rpn_reg_loss']
+        generate_proposal_labels = output_dict['generate_proposal_labels']
+        feature = [head_feat, rpn_cls_loss, rpn_reg_loss, generate_proposal_labels]
+        assert output_dict_pred is not None
+        head_feat = output_dict_pred['head_feat']
+        rois = output_dict_pred['rois']
+        feature_pred = [head_feat, rois]
+    else:
+        raise NotImplementedError
+    return feature, feature_pred
+
