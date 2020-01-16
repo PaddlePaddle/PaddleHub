@@ -295,28 +295,31 @@ class DetectionTask(BasicTask):
         else:
             head_feat = self.predict_feature[0]
 
+        # todo: ValueError: Variable cls_score_w has been created before.
+        #  the previous shape is (2048, 81); the new shape is (100352, 81).
+        #  They are not matched.
         cls_score = fluid.layers.fc(input=head_feat,
                                     size=self.num_classes,
                                     act=None,
-                                    name='cls_score',
+                                    name='my_cls_score',
                                     param_attr=ParamAttr(
-                                        name='cls_score_w',
+                                        name='my_cls_score_w',
                                         initializer=Normal(
                                             loc=0.0, scale=0.01)),
                                     bias_attr=ParamAttr(
-                                        name='cls_score_b',
+                                        name='my_cls_score_b',
                                         learning_rate=2.,
                                         regularizer=L2Decay(0.)))
         bbox_pred = fluid.layers.fc(input=head_feat,
                                     size=4 * self.num_classes,
                                     act=None,
-                                    name='bbox_pred',
+                                    name='my_bbox_pred',
                                     param_attr=ParamAttr(
-                                        name='bbox_pred_w',
+                                        name='my_bbox_pred_w',
                                         initializer=Normal(
                                             loc=0.0, scale=0.001)),
                                     bias_attr=ParamAttr(
-                                        name='bbox_pred_b',
+                                        name='my_bbox_pred_b',
                                         learning_rate=2.,
                                         regularizer=L2Decay(0.)))
 
@@ -383,7 +386,7 @@ class DetectionTask(BasicTask):
         if self.is_train_phase:
             loss = self.env.outputs[-1]
         else:
-            loss = fluid.layers.fill_constant(shape=[], value=-1, dtype='float32')
+            loss = fluid.layers.fill_constant(shape=[1], value=-1, dtype='float32')
         return loss
 
     def _rcnn_feed_list(self):

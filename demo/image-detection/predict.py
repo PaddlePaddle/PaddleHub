@@ -32,16 +32,9 @@ def predict(args):
     module_name = args.module  # 'yolov3_darknet53_coco2017'
     model_type = get_model_type(module_name)  # 'yolo'
     # define data
-    ds = ObjectDetectionDataset(model_type=model_type)
-    ds.base_path = '/Users/zhaopenghao/Downloads/coco_10'
-    ds.train_image_dir = 'val'
-    ds.train_list_file = 'annotations/val.json'
-    ds.validate_image_dir = 'val'
-    ds.validate_list_file = 'annotations/val.json'
-    ds.test_image_dir = 'val'
-    ds.test_list_file = 'annotations/val.json'
-    # ds.num_labels = 81
+    ds = hub.dataset.Coco10(model_type)
     # Todo: handle ds.num_labels refresh
+    # ds.num_labels = 81
     print(ds.label_dict())
     print("ds.num_labels", ds.num_labels)
 

@@ -161,7 +161,7 @@ class ObjectDetectionDataset(ImageClassificationDataset):
             cname2cid = data_source.cname2cid
             cid2cname = {v: k for k, v in cname2cid.items()}
             self.cid2cname = cid2cname
-            # Todo: handle num labels for yolo
+            # xTodo: handle num labels for yolo
             if with_background:
                 self.num_labels = len(cid2cname) + 1
             else:

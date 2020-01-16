@@ -14,9 +14,9 @@ from paddlehub.common.detection_config import get_model_type, get_feed_list, get
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch",          type=int,               default=1,                          help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu",            type=ast.literal_eval,  default=False,                      help="Whether use GPU for fine-tuning.")
-parser.add_argument("--checkpoint_dir",     type=str,               default="paddlehub_finetune_ckpt_frcnn",  help="Path to save log data.")
-parser.add_argument("--batch_size",         type=int,               default=2,                         help="Total examples' number in batch for training.")
-parser.add_argument("--module",             type=str,               default="faster_rcnn",                 help="Module used as feature extractor.")
+parser.add_argument("--checkpoint_dir",     type=str,               default="paddlehub_finetune_ckpt_yolov3",  help="Path to save log data.")
+parser.add_argument("--batch_size",         type=int,               default=1,                         help="Total examples' number in batch for training.")
+parser.add_argument("--module",             type=str,               default="yolov3",                 help="Module used as feature extractor.")
 parser.add_argument("--dataset",            type=str,               default="coco_10",                  help="Dataset to finetune.")
 parser.add_argument("--use_pyreader",       type=ast.literal_eval,  default=False,                      help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel",  type=ast.literal_eval,  default=False,                      help="Whether use data parallel.")
@@ -33,16 +33,9 @@ def finetune(args):
     module_name = args.module  # 'yolov3_darknet53_coco2017'
     model_type = get_model_type(module_name)  # 'yolo'
     # define dataset
-    ds = ObjectDetectionDataset(model_type=model_type)
-    ds.base_path = '/Users/zhaopenghao/Downloads/coco_10'
-    ds.train_image_dir = 'val'
-    ds.train_list_file = 'annotations/val.json'
-    ds.validate_image_dir = 'val'
-    ds.validate_list_file = 'annotations/val.json'
-    ds.test_image_dir = 'val'
-    ds.test_list_file = 'annotations/val.json'
-    # ds.num_labels = 81
+    ds = hub.dataset.Coco10(model_type)
     # Todo: handle ds.num_labels refresh
+    # ds.num_labels = 81
     print(ds.label_dict())
     print("ds.num_labels", ds.num_labels)
 
@@ -53,11 +46,12 @@ def finetune(args):
     # define model(program)
     module = hub.Module(name=module_name)
     if model_type == 'rcnn':
-        input_dict, output_dict, program = module.context(trainable=True, phase='train')
+        input_dict, output_dict, program = module.context(load_pretrained=False, trainable=True, phase='train')
         input_dict_pred, output_dict_pred, program_pred = module.context(trainable=False)
     else:
         input_dict, output_dict, program = module.context(trainable=True)
         input_dict_pred = output_dict_pred = None
+    # import pdb; pdb.set_trace()
 
     feed_list, pred_feed_list = get_feed_list(module_name, input_dict, input_dict_pred)
     print("output_dict length:", len(output_dict))
@@ -86,6 +80,9 @@ def finetune(args):
         model_type=model_type,
         config=config)
     task.finetune_and_eval()
+    # self = task
+    # with self.phase_guard(phase="train"):
+    #     self.init_if_necessary()
 
 
 if __name__ == "__main__":

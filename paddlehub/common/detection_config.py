@@ -197,6 +197,7 @@ feed_config = {
             "fields": ['image', 'im_info', 'im_id', 'gt_box', 'gt_label', 'is_crowd'],
             "OPS": rcnn_train_ops,
             "IS_PADDING": True,
+            "COARSEST_STRIDE": 32,
         },
         "dev": {
             # Todo: reduce fields
@@ -204,12 +205,14 @@ feed_config = {
                        'gt_label', 'is_difficult'],
             "OPS": rcnn_eval_ops,
             "IS_PADDING": True,
+            "COARSEST_STRIDE": 32,
             "USE_PADDED_IM_INFO": True,
         },
         "predict": {
             "fields": ['image', 'im_info', 'im_id', 'im_shape'],
             "OPS": rcnn_predict_ops,
             "IS_PADDING": True,
+            "COARSEST_STRIDE": 32,
             "USE_PADDED_IM_INFO": True,
         },
     },
