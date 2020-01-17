@@ -43,7 +43,7 @@ param_list:
 
 ## Step2:改动模型代码
 
-text_cls.py以ernie为预训练模型，在ChnSentiCorp数据集上进行Fine-tune。PaddleHub如何完成Finetune可以参考[文本分类迁移学习示例](../text_classification)
+text_cls.py以ernie为预训练模型，在ChnSentiCorp数据集上进行Fine-tune。PaddleHub如何完成Finetune可以参考[文本分类迁移学习示例](../text_classification)。
 
 * import paddlehub
 
