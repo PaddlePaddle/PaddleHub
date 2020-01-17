@@ -21,7 +21,7 @@
 
 ## 代码步骤
 
-使用PaddleHub Fine-tune API进行Fine-tune可以分为4个步骤；
+使用PaddleHub Fine-tune API进行Fine-tune可以分为4个步骤。
 
 ### Step1: 加载预训练模型
 

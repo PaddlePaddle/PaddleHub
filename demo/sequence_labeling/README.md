@@ -160,10 +160,6 @@ seq_label_task.finetune_and_eval()
 
 如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)。
 
-#### 自定义迁移任务
-
-如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
-
 ## 可视化
 
 Fine-tune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令：
