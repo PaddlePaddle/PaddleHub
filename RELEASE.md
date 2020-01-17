@@ -69,7 +69,7 @@
 # `v1.0.0`
 
 * 全新发布PaddleHub官网，易用性全面提升
-  * 新增网站  http://hub.paddlepaddle.org.cn  包含PaddlePaddle生态的预训练模型使用介绍
+  * 新增网站  https://www.paddlepaddle.org.cn/hub  包含PaddlePaddle生态的预训练模型使用介绍
   * 迁移学习Demo接入AI Studio与AI Book,无需安装即可快速体验
 
 * 新增29个预训练模型，覆盖文本、图像、视频三大领域；目前官方提供40个预训练模型
