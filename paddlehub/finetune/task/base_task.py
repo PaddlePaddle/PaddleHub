@@ -560,6 +560,11 @@ class BaseTask(object):
         return [output.name for output in self.outputs]
 
     @property
+    def fetch_var_list(self):
+        vars = self.main_program.global_block().vars
+        return [vars[varname] for varname in self.fetch_list]
+
+    @property
     def tb_writer(self):
         if not os.path.exists(self.config.checkpoint_dir):
             mkdir(self.config.checkpoint_dir)
@@ -739,6 +744,20 @@ class BaseTask(object):
     def save_parameters(self, dirname):
         fluid.io.save_params(
             self.exe, dirname=dirname, main_program=self.main_program)
+
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None):
+        with self.phase_guard("predict"):
+            fluid.io.save_inference_model(
+                dirname=dirname,
+                executor=self.exe,
+                feeded_var_names=self.feed_list,
+                target_vars=self.fetch_var_list,
+                main_program=self.main_program,
+                model_filename=model_filename,
+                params_filename=params_filename)
 
     def finetune_and_eval(self):
         return self.finetune(do_eval=True)
