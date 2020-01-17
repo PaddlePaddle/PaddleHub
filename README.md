@@ -17,6 +17,14 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 
 * **[超参优化](#超参优化autodl-finetuner)**，自动搜索最优超参，得到更好的模型效果。
 
+
+**PaddleHub发布最新版本1.4.1**
+
+
+<p align="center">
+<img src="./docs/imgs/paddlehub_finetune.gif" hspace='10'/> <br />
+</p>
+
 ## 目录
 
 * [安装](#%E5%AE%89%E8%A3%85)
@@ -105,7 +113,7 @@ PaddleHub在AI Studio上提供了IPython NoteBook形式的demo。用户可以直
 |ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/221999)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成文本分类迁移学习。|
 |ERNIE|序列标注|中文序列标注数据集MSRA_NER|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147009)||
 |ERNIE|序列标注|中文快递单数据集Express|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/184200)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成序列标注迁移学习。|
-|ERNIE Tiny|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/221971)||
+|ERNIE Tiny|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/186443)||
 |Senta|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216846)|本教程讲述了任何利用Senta和Fine-tune API完成情感分类迁移学习。|
 |Senta|情感分析预测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215814)||
 |LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215711)||
