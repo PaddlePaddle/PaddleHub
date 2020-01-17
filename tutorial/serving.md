@@ -193,7 +193,7 @@ if __name__ == "__main__":
 
 &emsp;&emsp;该示例展示了利用lac完成中文文本分词服务化部署和在线预测，获取文本的分词结果，并可通过用户自定义词典干预分词结果。
 
-* [目标检测-基于yolov3_darknet53_coco2017](.../demo/serving/serving/object_detection_yolov3_darknet53_coco2017)  
+* [目标检测-基于yolov3_darknet53_coco2017](../demo/serving/module_serving/object_detection_yolov3_darknet53_coco2017)  
 
 &emsp;&emsp;该示例展示了利用yolov3_darknet53_coco2017完成目标检测服务化部署和在线预测，获取检测结果和覆盖识别框的图片。
 
