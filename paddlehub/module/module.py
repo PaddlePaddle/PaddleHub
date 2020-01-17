@@ -105,6 +105,8 @@ def create_module(directory, name, author, email, module_type, summary,
             files = []
             for dirname, _, subfiles in os.walk(module_dir):
                 for file in subfiles:
+                    #                     if file.startswith("."):
+                    #                         continue
                     files.append(os.path.join(dirname, file))
 
             total_length = len(files)
