@@ -84,7 +84,7 @@ class ServingCommand(BaseCommand):
     def __init__(self, name):
         super(ServingCommand, self).__init__(name)
         self.show_in_help = True
-        self.description = "Start a service for online predicting by using PaddleHub."
+        self.description = "Start Module Serving or Bert Service for online predicting."
         self.parser = argparse.ArgumentParser(
             description=self.__class__.__doc__,
             prog='%s %s [COMMAND]' % (ENTRY, name),
@@ -124,7 +124,7 @@ class ServingCommand(BaseCommand):
             port = os.path.basename(filepath).split(".")[0].split("_")[1]
         if not os.path.exists(filepath):
             print(
-                "PaddleHub-Serving config file is not exists, "
+                "PaddleHub Serving config file is not exists, "
                 "please confirm the port [%s] you specified is correct." % port)
             return False
         with open(filepath, "r") as fp:
@@ -143,9 +143,9 @@ class ServingCommand(BaseCommand):
             os.remove(filepath)
 
         if not pid_is_exist(pid):
-            print("PaddleHub-Serving has been stopped.")
+            print("PaddleHub Serving has been stopped.")
             return
-        print("PaddleHub-Serving will stop.")
+        print("PaddleHub Serving will stop.")
         CacheUpdater(
             "hub_serving_stop",
             module=module,
@@ -160,7 +160,7 @@ class ServingCommand(BaseCommand):
     @staticmethod
     def start_bert_serving(args):
         if platform.system() != "Linux":
-            print("Error. Bert-Service only support linux.")
+            print("Error. Bert Service only support linux.")
             return False
 
         if ServingCommand.is_port_occupied("127.0.0.1", args.port) is True:
@@ -213,7 +213,7 @@ class ServingCommand(BaseCommand):
                         "category": str(m.type).split("/")[0].upper()
                     })
                 except Exception as err:
-                    print(err, ", start Hub-Serving unsuccessfully.")
+                    print(err, ", start PaddleHub Serving unsuccessfully.")
                     exit(1)
             return configs
 
@@ -263,7 +263,7 @@ class ServingCommand(BaseCommand):
         options = {"bind": "0.0.0.0:%s" % port, "workers": workers}
         StandaloneApplication(
             app.create_app(init_flag=False, configs=configs), options).run()
-        print("PaddleHub-Serving has been stopped.")
+        print("PaddleHub Serving has been stopped.")
 
     def start_app_with_args(self, workers):
         module = self.args.modules
@@ -330,7 +330,7 @@ class ServingCommand(BaseCommand):
             StandaloneApplication(
                 app.create_app(init_flag=False, configs=configs),
                 options).run()
-            print("PaddleHub-Serving has been stopped.")
+            print("PaddleHub Serving has been stopped.")
         else:
             print("Lack of necessary parameters!")
 
@@ -344,7 +344,7 @@ class ServingCommand(BaseCommand):
                     if platform.system() == "Windows":
                         print(
                             "Warning: Windows cannot use multiprocess working "
-                            "mode, Hub-Serving will switch to single process mode"
+                            "mode, PaddleHub Serving will switch to single process mode"
                         )
                         ServingCommand.start_single_app_with_file(configs)
                     else:
@@ -358,8 +358,10 @@ class ServingCommand(BaseCommand):
                 print("config_file ", config_file, "not exists.")
         else:
             if platform.system() == "Windows":
-                print("Warning: Windows cannot use multiprocess working "
-                      "mode, Hub-Serving will switch to single process mode")
+                print(
+                    "Warning: Windows cannot use multiprocess working "
+                    "mode, PaddleHub Serving will switch to single process mode"
+                )
                 self.start_single_app_with_args()
             else:
                 if self.args.use_multiprocess is True:
@@ -370,34 +372,41 @@ class ServingCommand(BaseCommand):
     @staticmethod
     def show_help():
         str = "serving <option>\n"
-        str += "\tManage PaddleHub-Serving.\n"
+        str += "\tManage PaddleHub Serving.\n"
         str += "sub command:\n"
         str += "1. start\n"
-        str += "\tStart PaddleHub-Serving if specifies this parameter.\n"
-        str += "2. start bert_service\n"
-        str += "\tStart Bert Service if specifies this parameter.\n"
+        str += "\tStart PaddleHub Serving.\n"
+        str += "2. stop\n"
+        str += "\tStop PaddleHub Serving.\n"
+        str += "3. start bert_service\n"
+        str += "\tStart Bert Service.\n"
         str += "\n"
         str += "[start] option:\n"
         str += "--modules/-m [module1==version, module2==version...]\n"
-        str += "\tPre-install modules via this parameter list.\n"
+        str += "\tPre-install modules via the parameter list.\n"
         str += "--port/-p XXXX\n"
         str += "\tUse port XXXX for serving.\n"
         str += "--use_gpu\n"
-        str += "\tUse gpu for predicting if specifies this parameter.\n"
+        str += "\tUse gpu for predicting if you specify the parameter.\n"
         str += "--use_multiprocess\n"
         str += "\tChoose multoprocess mode, cannot be use on Windows.\n"
         str += "--config/-c file_path\n"
-        str += "\tUse configs in file to starting paddlehub serving. "
-        str += "Other parameter will be ignored if specifies this parameter.\n"
+        str += "\tUse configs in file to start PaddleHub Serving. "
+        str += "Other parameters will be ignored if you specify the parameter.\n"
+        str += "\n"
+        str += "[stop] option:\n"
+        str += "--port/-p XXXX\n"
+        str += "\tStop PaddleHub Serving on port XXXX safely.\n"
+        str += "\n"
         str += "[start bert_service] option:\n"
         str += "--modules/-m\n"
-        str += "\tPre-install modules via this parameter.\n"
+        str += "\tPre-install modules via the parameter.\n"
         str += "--port/-p XXXX\n"
         str += "\tUse port XXXX for serving.\n"
         str += "--use_gpu\n"
-        str += "\tUse gpu for predicting if specifies this parameter.\n"
+        str += "\tUse gpu for predicting if specifies the parameter.\n"
         str += "--gpu\n"
-        str += "\tSpecify the graphics card to use.\n"
+        str += "\tSpecify the GPU devices to use.\n"
         print(str)
 
     def execute(self, argv):
@@ -415,7 +424,7 @@ class ServingCommand(BaseCommand):
                 ServingCommand.show_help()
         elif self.args.sub_command == "stop":
             if self.args.bert_service == "bert_service":
-                print("Please stop bert_service by kill process by yourself")
+                print("Please stop Bert Service by kill process by yourself")
             elif self.args.bert_service is None:
                 self.stop_serving(port=self.args.port)
         else:

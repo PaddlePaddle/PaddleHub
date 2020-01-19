@@ -90,12 +90,12 @@ class ConfigCommand(BaseCommand):
     @staticmethod
     def show_help():
         str = "config <option>\n"
-        str += "\tShow hub server config without any option.\n"
+        str += "\tShow PaddleHub config without any option.\n"
         str += "option:\n"
         str += "reset\n"
         str += "\tReset config as default.\n"
         str += "server==[URL]\n"
-        str += "\tSet hub server url as [URL].\n"
+        str += "\tSet PaddleHub Server url as [URL].\n"
         str += "log==[LEVEL]\n"
         str += "\tSet log level as [LEVEL:NOLOG, DEBUG, INFO, WARNING, ERROR, CRITICAL].\n"
         print(str)
