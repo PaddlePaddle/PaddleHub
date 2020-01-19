@@ -662,11 +662,7 @@ class BaseTask(object):
                                            "best_model")
             logger.eval("best model saved to %s [best %s=%.5f]" %
                         (model_saved_dir, main_metric, main_value))
-
-            save_result = fluid.io.save_persistables(
-                executor=self.exe,
-                dirname=model_saved_dir,
-                main_program=self.main_program)
+            self.save_inference_model(dirname=model_saved_dir)
 
     def _default_log_interval_event(self, run_states):
         scores, avg_loss, run_speed = self._calculate_metrics(run_states)
@@ -717,6 +713,10 @@ class BaseTask(object):
     # NOTE: current saved checkpoint machanism is not completed,
     # it can't restore dataset training status
     def save_checkpoint(self):
+        model_saved_dir = os.path.join(self.config.checkpoint_dir,
+                                       "step_%d" % self.current_step)
+        logger.info("Saving model checkpoint to {}".format(model_saved_dir))
+        self.save_inference_model(dirname=model_saved_dir)
         save_checkpoint(
             checkpoint_dir=self.config.checkpoint_dir,
             current_epoch=self.current_epoch,
@@ -836,9 +836,16 @@ class BaseTask(object):
         global_run_states = []
         period_run_states = []
 
+        parallel_batch = []
         for run_step, batch in enumerate(self.reader(), start=1):
-            if self.config.use_data_parallel and len(batch) < self.device_count:
-                continue
+            if self.config.use_data_parallel:
+                parallel_batch += batch
+                if len(parallel_batch) < self.device_count:
+                    continue
+                else:
+                    batch = parallel_batch
+                    parallel_batch = []
+
             step_run_state = RunState(len(self.fetch_list))
             step_run_state.run_step = 1
             num_batch_examples = len(batch)

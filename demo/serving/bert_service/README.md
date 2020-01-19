@@ -46,7 +46,7 @@ result = bc.get_result(input_text=input_text)
 ```python
 [[0.9993321895599361, 0.9994612336158751, 0.9999646544456481, 0.732795298099517, -0.34387934207916204, ... ]]
 ```
-客户端代码demo文件见[示例](../paddlehub/serving/bert_serving/bert_service.py)。  
+客户端代码demo文件见[示例](./bert_service_client.py)。  
 运行命令如下：  
 ```shell
 $ python bert_service_client.py
