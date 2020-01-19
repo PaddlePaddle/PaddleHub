@@ -153,7 +153,7 @@ $ hub serving start --config config.json
 
 config.json文件包含待部署模型信息等，
 
-关于PaddleHub Serving详细信息参考[PaddleHub Serving一键服务化部署](./tutorial/serving.md)。
+关于PaddleHub Serving详细信息参见[PaddleHub Serving一键服务化部署](./tutorial/serving.md)。
 
 ### 超参优化AutoDL Finetuner
 
