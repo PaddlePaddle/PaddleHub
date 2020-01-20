@@ -21,9 +21,15 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 **PaddleHub发布最新版本1.5.0**
 
 
+
 <p align="center">
-<img src="./docs/imgs/paddlehub_finetune.gif" hspace='10'/> <br />
+ <img src="./docs/imgs/paddlehub_finetune.gif" align="middle"  
 </p>
+
+<p align='center'>
+ 十行代码完成ERNIE工业级文本分类
+</p>
+
 
 ## 目录
 
@@ -135,6 +141,8 @@ PaddleHub同时支持安装、卸载、查看模型信息等命令行功能，�
 
 PaddleHub提供便捷的服务化部署能力，简单一行命令即可实现模型部署上线以对外提供服务。
 
+**PaddleHub 1.5.0版本增加文本Embedding服务[Bert Service](./tutorial/bert_service.md), 轻松获取文本embedding**
+
 PaddleHub Serving启动方式有两种：
 
 * 命令行方式：
@@ -205,6 +213,6 @@ $ hub uninstall ernie
 
 ## 更新历史
 
-PaddleHub v1.4.1已发布！
+PaddleHub v1.5.0已发布！
 
 详情参考[更新历史](./RELEASE.md)

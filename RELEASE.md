@@ -1,3 +1,21 @@
+# `v1.5.0`
+
+* 升级PaddleHub Serving，提升性能和易用性
+   * 新增文本Embedding服务[Bert Service](./tutorial/bert_service.md), 轻松获取文本embedding；
+      * 代码精短，易于使用。服务端/客户端一行命令即可获取文本embedding；  
+      * 更高性能，更高效率。通过Paddle AnalysisPredictor API优化计算图，提升速度减小显存占用
+      * 随"机"应变，灵活扩展。根据机器资源和实际需求可灵活增加服务端数量，支持多显卡多模型计算任务
+   * 优化并发方式，多核环境中使用多线程并发提高整体QPS
+
+* 优化PaddleHub迁移学习组网Task功能，提升易用性
+   * 增加Hook机制，支持[修改Task内置方法](https://github.com/PaddlePaddle/PaddleHub/wiki/%E5%A6%82%E4%BD%95%E4%BF%AE%E6%94%B9Task%E5%86%85%E7%BD%AE%E6%96%B9%E6%B3%95%EF%BC%9F)
+   * 增加colorlog，支持日志彩色显示
+   * 改用save_inference_model接口保存模型，方便模型部署
+   * 优化predict接口，增加return_result参数，方便用户直接获取预测结果
+
+* 优化PaddleHub Dataset基类，加载[自定义数据](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)代码更少、更简单
+
+
 # `v1.4.1`
 
 * 修复利用Transformer类模型完成序列标注任务适配paddle1.6版本的问题
