@@ -1,7 +1,9 @@
 # Bert Service  
 ## 简介
+### 为什么使用Bert Service
+开发者在进行NLP（自然语言处理）的时候常常需要获取文本的embedding（词向量），需要专门编写相应代码，且只能在本地进行。使用`Bert Service`能够将此过程转化为远程调用API，完成远程获取embedding。
 ### 什么是Bert Service
-`Bert Service`是基于[Paddle Serving](https://github.com/PaddlePaddle/Serving)框架的快速部署模型远程计算服务方案，可将embedding过程通过调用API接口的方式实现，减少了对机器资源的依赖。使用PaddleHub可在服务器上一键部署`Bert Service`服务，在另外的普通机器上通过客户端接口即可轻松的获取文本对应的embedding数据。  
+`Bert Service`是基于[Paddle Serving](https://github.com/PaddlePaddle/Serving)框架的快速部署模型远程计算服务方案，可将获取embedding的过程通过调用API接口的方式实现，减少了对机器资源的依赖。使用PaddleHub可在服务器上一键部署`Bert Service`服务，在另外的普通机器上通过客户端接口即可轻松的获取文本对应的embedding数据。  
 
 整体流程图如下：  
 
@@ -11,7 +13,8 @@
 
 </div>  
 
-### 为什么使用Bert Service  
+### Bert Service的特点
+使用`Bert Service`能够帮助开发者在限制性较强的环境中有效获取embedding，常用于以下情景：  
 * 算力有限的集群环境中，可利用一台或几台高性能机器部署`Bert Service`服务端，为全部机器提供在线embedding功能。  
 
 * 实际的生产服务器不适宜承担大批量embedding工作，通过API接口可减少资源占用。  
@@ -69,9 +72,9 @@ $ pip install ujson
 |模型|网络|
 |:-|:-:|
 |[ernie](https://paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel)|ERNIE|
-|[ernie_tiny](https://paddlepaddle.org.cn/hubdetail?name=ernie_tiny&en_category=SemanticModel)|ERNIE|
-|[ernie_v2_eng_large](https://paddlepaddle.org.cn/hubdetail?name=ernie_v2_eng_large&en_category=SemanticModel)|ERNIE|
-|[ernie_v2_eng_base](https://paddlepaddle.org.cn/hubdetail?name=ernie_v2_eng_base&en_category=SemanticModel)|ERNIE|
+|[ernie_tiny](https://paddlepaddle.org.cn/hubdetail?name=ernie_tiny&en_category=SemanticModel)|ERNIE tiny|
+|[ernie_v2_eng_large](https://paddlepaddle.org.cn/hubdetail?name=ernie_v2_eng_large&en_category=SemanticModel)|ERNIE 2.0|
+|[ernie_v2_eng_base](https://paddlepaddle.org.cn/hubdetail?name=ernie_v2_eng_base&en_category=SemanticModel)|ERNIE 2.0|
 |[roberta_wwm_ext_chinese_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=roberta_wwm_ext_chinese_L-12_H-768_A-12&en_category=SemanticModel)|BERT|
 |[roberta_wwm_ext_chinese_L-24_H-1024_A-16](https://paddlepaddle.org.cn/hubdetail?name=roberta_wwm_ext_chinese_L-24_H-1024_A-16&en_category=SemanticModel)|BERT|
 |[bert_wwm_ext_chinese_L-12_H-768_A-12](https://paddlepaddle.org.cn/hubdetail?name=bert_wwm_ext_chinese_L-12_H-768_A-12&en_category=SemanticModel)|BERT|
