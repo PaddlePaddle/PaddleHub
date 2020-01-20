@@ -21,9 +21,15 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 **PaddleHub发布最新版本1.5.0**
 
 
+
 <p align="center">
-<img src="./docs/imgs/paddlehub_finetune.gif" hspace='10'/> <br />
+ <img src="./docs/imgs/paddlehub_finetune.gif" align="middle"  
 </p>
+
+<p align='center'>
+ 十行代码完成ERNIE工业级文本分类
+</p>
+
 
 ## 目录
 
