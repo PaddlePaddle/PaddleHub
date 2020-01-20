@@ -33,7 +33,7 @@ param_list:
 
 ## Step2:改动模型代码
 
-img_cls.py以mobilenet为预训练模型，在flowers数据集上进行Fine-tune。PaddleHub如何完成Finetune可以参考[图像分类迁移学习示例](../image_classification)
+img_cls.py以mobilenet为预训练模型，在flowers数据集上进行Fine-tune。PaddleHub如何完成Finetune可以参考[图像分类迁移学习示例](../image_classification)。
 
 * import paddlehub
 

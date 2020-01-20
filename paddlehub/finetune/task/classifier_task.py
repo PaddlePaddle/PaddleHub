@@ -317,7 +317,7 @@ class MultiLabelClassifierTask(ClassifierTask):
     def fetch_list(self):
         if self.is_train_phase or self.is_test_phase:
             return [metric.name for metric in self.metrics] + [self.loss.name]
-        return self.outputs
+        return [output.name for output in self.outputs]
 
     def _postprocessing(self, run_states):
         results = []

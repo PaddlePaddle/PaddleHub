@@ -20,20 +20,8 @@ from __future__ import print_function
 
 import argparse
 import ast
-import collections
-import json
-import io
-import math
-import numpy as np
-import os
-import six
-import sys
-import time
 
-import paddle
-import paddle.fluid as fluid
 import paddlehub as hub
-from paddlehub.finetune.task.reading_comprehension_task import write_predictions
 
 hub.common.logger.logger.setLevel("INFO")
 
@@ -93,4 +81,4 @@ if __name__ == '__main__':
 
     # Data to be predicted
     data = dataset.dev_examples[:10]
-    reading_comprehension_task.predict(data=data)
+    print(reading_comprehension_task.predict(data=data, return_result=True))

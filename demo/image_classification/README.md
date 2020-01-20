@@ -20,7 +20,7 @@
 
 ## 代码步骤
 
-使用PaddleHub Fine-tune API进行Fine-tune可以分为4个步骤
+使用PaddleHub Fine-tune API进行Fine-tune可以分为4个步骤。
 
 ### Step1: 加载预训练模型
 
@@ -29,7 +29,7 @@ module = hub.Module(name="resnet_v2_50_imagenet")
 inputs, outputs, program = module.context(trainable=True)
 ```
 
-PaddleHub提供许多图像分类预训练模型，如xception、mobilenet、efficientnet等，详细信息参见[图像分类模型](https://www.paddlepaddle.org.cn/hub?filter=en_category&value=ImageClassification)
+PaddleHub提供许多图像分类预训练模型，如xception、mobilenet、efficientnet等，详细信息参见[图像分类模型](https://www.paddlepaddle.org.cn/hub?filter=en_category&value=ImageClassification)。
 
 如果想尝试efficientnet模型，只需要更换Module中的`name`参数即可.
 ```python
