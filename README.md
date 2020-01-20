@@ -141,6 +141,8 @@ PaddleHub同时支持安装、卸载、查看模型信息等命令行功能，�
 
 PaddleHub提供便捷的服务化部署能力，简单一行命令即可实现模型部署上线以对外提供服务。
 
+**PaddleHub 1.5.0版本增加文本Embedding服务[Bert Service](./tutorial/bert_service.md), 轻松获取文本embedding**
+
 PaddleHub Serving启动方式有两种：
 
 * 命令行方式：
