@@ -92,6 +92,21 @@ label_list.txt的格式如下
 ...
 ```
 
+示例：
+以[DogCat数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset#class-hubdatasetdogcatdataset)为示例，train_list.txt/test_list.txt/validate_list.txt内容如下示例
+```
+cat/3270.jpg 0
+cat/646.jpg 0
+dog/12488.jpg 1
+```
+
+label_list.txt内容如下：
+```
+cat
+dog
+```
+
+
 ## 自定义数据加载
 
 加载图像类自定义数据集，用户仅需要继承基类BaseCVDatast，修改数据集存放地址即可。具体使用如下：
