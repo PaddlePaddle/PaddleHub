@@ -45,6 +45,9 @@ TMP_HOME = os.path.join(gen_hub_home(), "tmp")
 if not os.path.exists(TMP_HOME):
     os.makedirs(TMP_HOME)
 
+if not os.path.exists(CACHE_HOME):
+    os.makedirs(CACHE_HOME)
+
 
 @contextlib.contextmanager
 def tmp_file():
