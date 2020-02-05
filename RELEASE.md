@@ -1,3 +1,7 @@
+# `v1.5.1`
+
+* 修复加载module缺少cache目录的问题
+
 # `v1.5.0`
 
 * 升级PaddleHub Serving，提升性能和易用性
