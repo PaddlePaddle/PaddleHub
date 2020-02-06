@@ -137,13 +137,13 @@ $ hub run ace2p --input_path test_image.jpg
 
 [实现自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
 
-[ULMFiT优化策略](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.3/tutorial/strategy_exp.md)
+[ULMFiT优化策略](./docs/tutorial/strategy_exp.md)
 
 ### 服务化部署PaddleHub Serving
 
 PaddleHub提供便捷的服务化部署能力，简单一行命令即可实现模型部署上线以对外提供服务。
 
-**PaddleHub 1.5.0版本增加文本Embedding服务[Bert Service](./tutorial/bert_service.md), 轻松获取文本embedding**
+**PaddleHub 1.5.0版本增加文本Embedding服务[Bert Service](./docs/tutorial/bert_service.md), 轻松获取文本embedding**
 
 PaddleHub Serving启动方式有两种：
 
@@ -163,13 +163,13 @@ $ hub serving start --config config.json
 
 config.json文件包含待部署模型信息等，
 
-关于PaddleHub Serving详细信息参见[PaddleHub Serving一键服务化部署](./tutorial/serving.md)。
+关于PaddleHub Serving详细信息参见[PaddleHub Serving一键服务化部署](./docs/tutorial/serving.md)。
 
 ### 超参优化AutoDL Finetuner
 
 深度学习模型往往包含许多的超参数，而这些超参数的取值对模型性能起着至关重要的作用。因为模型参数空间大，目前超参调整都是通过手动，依赖人工经验或者不断尝试，且不同模型、样本数据和场景下不尽相同，所以需要大量尝试，时间成本和资源成本非常浪费。PaddleHub AutoDL Finetuner可以实现自动调整超参数，使得模型性能达到最优水平。它通过多种调优的算法来搜索最优超参。
 
-AutoDL Finetuner详细信息参见[PaddleHub超参优化](./tutorial/autofinetune.md)。
+AutoDL Finetuner详细信息参见[PaddleHub超参优化](./docs/tutorial/autofinetune.md)。
 
 
 ## FAQ
