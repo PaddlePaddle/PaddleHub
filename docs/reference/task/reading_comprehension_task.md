@@ -1,5 +1,5 @@
 # Class `hub.ReadingComprehensionTask`
-阅读理解任务Task，继承自[BaseTask]()，该Task基于输入的特征，添加一个全连接层来创建一个阅读理解任务用于Fine-tune，损失函数为交叉熵Loss。
+阅读理解任务Task，继承自[BaseTask](base_task.md)，该Task基于输入的特征，添加一个全连接层来创建一个阅读理解任务用于Fine-tune，损失函数为交叉熵Loss。
 ```python
 hub.ReadingComprehensionTask(
     feature,
@@ -14,7 +14,7 @@ hub.ReadingComprehensionTask(
 * feed_list (list): 待feed变量的名字列表
 * data_reader: 提供数据的Reader
 * startup_program (fluid.Program): 存储了模型参数初始化op的Program，如果未提供，则使用fluid.default_startup_program()
-* config ([RunConfig]()): 运行配置
+* config ([RunConfig](../config.md)): 运行配置
 
 **返回**
 

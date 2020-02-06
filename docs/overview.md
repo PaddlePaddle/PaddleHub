@@ -20,9 +20,9 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 
 借鉴了Anaconda和PIP等软件包管理的理念，开发了PaddleHub命令行工具。可以方便快捷的完成模型的搜索、下载、安装、升级、预测等功能。
 更加详细的使用说明可以参考
-[PaddleHub命令行工具]()。
+[PaddleHub命令行工具](tutorial/cmdintro.md)。
 
-目前的预训练模型覆盖了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看。[快速体验](QuickStart.md)通过命令行即可调用预训练模型进行预测。
+目前的预训练模型覆盖了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看。[快速体验](quickstart.md)通过命令行即可调用预训练模型进行预测。
 
 ## 迁移学习
 
@@ -31,10 +31,12 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 ![PaddleHub-Finetune](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.4/docs/imgs/paddlehub_finetune.jpg)
 
 <p align="center">
-<img src="https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.4/docs/imgs/paddlehub_finetune.gif" hspace='10'/> <br />
+ <img src="./docs/imgs/paddlehub_finetune.gif" align="middle"  
 </p>
 
-* 示例合集
+<p align='center'>
+ 十行代码完成ERNIE工业级文本分类
+</p>
 
   PaddleHub提供了使用Finetune-API和预训练模型完成[文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/text_classification)、[序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/sequence_labeling)、[多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/multi_label_classification)、[图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/image_classification)、[检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/qa_classification)、[回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/regression)、[句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/sentence_similarity)、[阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo)。
 
@@ -59,23 +61,23 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 
 关于PaddleHub快捷完成迁移学习，更多信息参考：
 
-[Fine-tune API]()
+[API](reference)
 
-[自定义数据集如何Fine-tune]()
+[自定义数据集如何Fine-tune](tutorial/how_to_load_data.md)
 
-[实现自定义迁移任务]()
+[实现自定义迁移任务](tutorial/how_to_define_task.md)
 
-[ULMFiT优化策略]()
+[ULMFiT优化策略](tutorial/strategy_exp.md)
 
 ## 服务化部署PaddleHub Serving
 
 PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通过简单的Hub命令行工具轻松启动一个模型预测在线服务。
 其主要包括利用Bert Service实现embedding服务化，以及利用预测模型实现预训练模型预测服务化两大功能。未来还将支持开发者使用PaddleHub Fine-tune API的模型服务化。
 
-关于服务化部署详细信息参见[PaddleHub Serving一键服务部署]()。
+关于服务化部署详细信息参见[PaddleHub Serving一键服务部署](tutorial/serving.md)。
 
 ## 超参优化AutoDL Finetuner
 
 深度学习模型往往包含许多的超参数，而这些超参数的取值对模型性能起着至关重要的作用。因为模型参数空间大，目前超参调整都是通过手动，依赖人工经验或者不断尝试，且不同模型、样本数据和场景下不尽相同，所以需要大量尝试，时间成本和资源成本非常浪费。PaddleHub AutoDL Finetuner可以实现自动调整超参数，使得模型性能达到最优水平。它通过多种调优的算法来搜索最优超参。
 
-AutoDL Finetuner详细信息参见[PaddleHub超参优化]()。
+AutoDL Finetuner详细信息参见[PaddleHub超参优化](tutorial/autofinetune.md)。

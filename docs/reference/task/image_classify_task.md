@@ -1,5 +1,5 @@
 # Class `hub.ImageClassifierTask`
-通用的分类任务Task，继承自[BaseTask]()，该Task基于输入的特征，添加一个或多个全连接层来创建一个分类任务用于Fine-tune，度量指标为准确率，损失函数为交叉熵Loss。
+通用的分类任务Task，继承自[BaseTask](base_task.md)，该Task基于输入的特征，添加一个或多个全连接层来创建一个分类任务用于Fine-tune，度量指标为准确率，损失函数为交叉熵Loss。
 
 ```python
 hub.ImageClassifierTask(

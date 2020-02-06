@@ -1,4 +1,4 @@
-# Strategy
+## hub.strategy
 
 在PaddleHub中，Strategy类封装了一系列适用于迁移学习的Fine-tune策略。Strategy包含了对预训练参数使用什么学习率变化策略，使用哪种类型的优化器，使用什么类型的正则化等。
 

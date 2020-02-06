@@ -1,10 +1,19 @@
-**若您想在自定义数据集上完成FineTune，请查看[PaddleHub适配自定义数据完成Fine-tune]()**
+**若您想在自定义数据集上完成Fine-tune，请查看[PaddleHub适配自定义数据完成Fine-tune](../tutorial/how_to_load_data.md)**
 
-## PaddleHub提供以下数据集可供下载：
+## hub.dataset
 
 ### Class `hub.dataset.ChnSentiCorp`
 
 ChnSentiCorp 是中文情感分析数据集，其目标是判断一段文本的情感态度。
+
+**示例**
+
+```python
+import paddlehub as hub
+
+dataset = hub.dataset.ChnSentiCorp()
+```
+
 数据集样例
 ```text
 label   text_a
@@ -14,14 +23,6 @@ label   text_a
 ...
 ```
 以上类别“0”表示反对态度，“1”表示支持态度。每个字段以tab键分隔。
-
-**示例**
-
-```python
-import paddlehub as hub
-
-dataset = hub.dataset.ChnSentiCorp()
-```
 
 ### Class `hub.dataset.LCQMC`
 

@@ -1,6 +1,6 @@
 # 常见问题
 
-## 使用`pip install paddlehub`时提示`Could not find a version that satisfies the requirement paddlehub (from versions: )`
+## 使用pip install paddlehub时提示`Could not find a version that satisfies the requirement paddlehub (from versions: )`
 
 这可能是因为pip指向了一个pypi的镜像源，该镜像源没有及时同步paddlehub版本导致。
 

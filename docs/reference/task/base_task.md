@@ -15,7 +15,7 @@ hub.BaseTask(
 * data_reader: 提供数据的Reader
 * main_program (fluid.Program): 存储了模型计算图的Program，如果未提供，则使用fluid.default_main_program()
 * startup_program (fluid.Program): 存储了模型参数初始化op的Program，如果未提供，则使用fluid.default_startup_program()
-* config ([RunConfig]()): 运行配置
+* config ([RunConfig](../config.md)): 运行配置
 * metric_choices : 任务评估指标，默认为"acc"。metrics_choices支持训练过程中同时评估多个指标，作为最佳模型的判断依据，例如["matthews", "acc"]，"matthews"将作为主指标，为最佳模型的判断依据；
 
 ## 基本概念

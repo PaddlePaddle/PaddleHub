@@ -1,6 +1,6 @@
-# RunConfig
+## hub.config
 
-在PaddleHub中，RunConfig代表了在对[Task]()进行Finetune时的运行配置。包括运行的epoch次数、batch的大小、是否使用GPU训练等。
+在PaddleHub中，RunConfig代表了在对[Task](./task)进行Fine-tune时的运行配置。包括运行的epoch次数、batch的大小、是否使用GPU训练等。
 
 ### Class `hub.finetune.config.RunConfig`
 
