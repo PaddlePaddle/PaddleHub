@@ -13,6 +13,7 @@
 from recommonmark.transform import AutoStructify
 from recommonmark.parser import CommonMarkParser
 import os
+import paddlehub as hub
 import sys
 sys.path.insert(0, os.path.abspath('../paddlehub'))
 
