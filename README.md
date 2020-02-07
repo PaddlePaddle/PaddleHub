@@ -72,7 +72,7 @@ paddlehub.server_check()
 ### 模型即软件
 
 PaddleHub提出 **模型即软件** 的理念，通过Python API或命令行实现快速预测，更方便地使用PaddlePaddle模型库。
-安装PaddleHub成功后，执行命令[hub run](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7#run)，可以快速体验PaddleHub无需代码、一键预测的命令行功能，如下三个示例：
+安装PaddleHub成功后，执行命令[hub run](./docs/tutorial/cmdintro.md)，可以快速体验PaddleHub无需代码、一键预测的命令行功能，如下三个示例：
 
 * 使用[词法分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=LexicalAnalysis)模型LAC进行分词
 ```shell
@@ -86,19 +86,21 @@ $ hub run senta_bilstm --input_text "今天天气真好"
 {'text': '今天天气真好', 'sentiment_label': 1, 'sentiment_key': 'positive', 'positive_probs': 0.9798, 'negative_probs': 0.0202}]
 ```
 
-* 使用[目标检测](http://www.paddlepaddle.org.cn/hub?filter=category&value=ObjectDetection)模型 SSD/YOLO v3/Faster RCNN 对图片进行目标检测
-
+* 使用[目标检测](http://www.paddlepaddle.org.cn/hub?filter=category&value=ObjectDetection)模型Ultra-Light-Fast-Generic-Face-Detector-1MB对图片进行人脸识别
 ```shell
-$ wget https://paddlehub.bj.bcebos.com/resources/test_object_detection.jpg
-$ hub run ssd_mobilenet_v1_pascal --input_path test_object_detection.jpg
-$ hub run yolov3_darknet53_coco2017 --input_path test_object_detection.jpg
-$ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
+$ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
+$ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image.jpg
 ```
-![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.3/docs/imgs/object_detection_result.png)
+![人脸识别结果](docs/imgs/face_detection_result.jpeg)
+
+* 使用[图像分割](https://www.paddlepaddle.org.cn/hub?filter=en_category&value=ImageSegmentation)模型ace2p对图片进行语义分割
+```shell
+$ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
+$ hub run ace2p --input_path test_image.jpg
+```
+![图像分割结果](docs/imgs/img_seg_result.jpeg)
 
 除了上述三类模型外，PaddleHub还发布了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
-
-PaddleHub同时支持安装、卸载、查看模型信息等命令行功能，详细参见[PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
 
 ### 迁移学习
 
@@ -129,19 +131,19 @@ PaddleHub同时支持安装、卸载、查看模型信息等命令行功能，�
 
 关于PaddleHub快捷完成迁移学习，更多信息参考：
 
-[Fine-tune API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
+[Fine-tune API](./docs/reference)
 
-[自定义数据集如何Fine-tune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
+[自定义数据集如何Fine-tune](./docs/tutorial/how_to_load_data.md)
 
-[实现自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
+[实现自定义迁移任务](./docs/tutorial/how_to_define_task.md)
 
-[ULMFiT优化策略](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.3/tutorial/strategy_exp.md)
+[ULMFiT优化策略](./docs/tutorial/strategy_exp.md)
 
 ### 服务化部署PaddleHub Serving
 
 PaddleHub提供便捷的服务化部署能力，简单一行命令即可实现模型部署上线以对外提供服务。
 
-**PaddleHub 1.5.0版本增加文本Embedding服务[Bert Service](./tutorial/bert_service.md), 轻松获取文本embedding**
+**PaddleHub 1.5.0版本增加文本Embedding服务[Bert Service](./docs/tutorial/bert_service.md), 轻松获取文本embedding**
 
 PaddleHub Serving启动方式有两种：
 
@@ -161,13 +163,13 @@ $ hub serving start --config config.json
 
 config.json文件包含待部署模型信息等，
 
-关于PaddleHub Serving详细信息参见[PaddleHub Serving一键服务化部署](./tutorial/serving.md)。
+关于PaddleHub Serving详细信息参见[PaddleHub Serving一键服务化部署](./docs/tutorial/serving.md)。
 
 ### 超参优化AutoDL Finetuner
 
 深度学习模型往往包含许多的超参数，而这些超参数的取值对模型性能起着至关重要的作用。因为模型参数空间大，目前超参调整都是通过手动，依赖人工经验或者不断尝试，且不同模型、样本数据和场景下不尽相同，所以需要大量尝试，时间成本和资源成本非常浪费。PaddleHub AutoDL Finetuner可以实现自动调整超参数，使得模型性能达到最优水平。它通过多种调优的算法来搜索最优超参。
 
-AutoDL Finetuner详细信息参见[PaddleHub超参优化](./tutorial/autofinetune.md)。
+AutoDL Finetuner详细信息参见[PaddleHub超参优化](./docs/tutorial/autofinetune.md)。
 
 
 ## FAQ
