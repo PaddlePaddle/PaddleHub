@@ -31,7 +31,7 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 ![PaddleHub-Finetune](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.4/docs/imgs/paddlehub_finetune.jpg)
 
 <p align="center">
- <img src="./docs/imgs/paddlehub_finetune.gif" align="middle"  
+ <img src="./imgs/paddlehub_finetune.gif" align="middle"  
 </p>
 
 <p align='center'>
