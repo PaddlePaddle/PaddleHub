@@ -91,14 +91,14 @@ $ hub run senta_bilstm --input_text "今天天气真好"
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 $ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image.jpg
 ```
-![人脸识别结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.5/docs/imgs/face_detection_result.png)
+![人脸识别结果](docs/imgs/face_detection_result.png)
 
 * 使用[图像分割](https://www.paddlepaddle.org.cn/hub?filter=en_category&value=ImageSegmentation)模型ace2p对图片进行tu
 ```shell
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 $ hub run ace2p --input_path test_image.jpg
 ```
-![图像分割结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.5/docs/imgs/img_seg_result.png)
+![图像分割结果](docs/imgs/img_seg_result.png)
 
 除了上述三类模型外，PaddleHub还发布了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
 
