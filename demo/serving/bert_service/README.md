@@ -3,7 +3,7 @@
 ### 什么是Bert Service
 `Bert Service`是基于[Paddle Serving](https://github.com/PaddlePaddle/Serving)框架的快速部署模型远程计算服务方案，可将embedding过程通过调用API接口的方式实现，减少了对机器资源的依赖。使用PaddleHub可在服务器上一键部署`Bert Service`服务，在另外的普通机器上通过客户端接口即可轻松的获取文本对应的embedding数据。  
 
-**NOTE:** 关于`Bert Service`的更多信息请参见[Bert Serving](../../../tutorial/bert_service.md)。
+**NOTE:** 关于`Bert Service`的更多信息请参见[Bert Serving](../../../docs/tutorial/bert_service.md)。
 
 ## Demo——利用Bert Service部署ernie_tiny在线embedding服务
 在这里，我们将展示一个实际场景中可能使用的demo，我们利用PaddleHub在一台GPU机器上部署`ernie_tiny`模型服务，并在另一台CPU机器上尝试访问，获取一首七言绝句的embedding。
@@ -68,4 +68,4 @@ Paddle Inference Server exit successfully!
 这样，我们就利用一台GPU机器就完成了`Bert Service`的部署，并利用另一台普通机器进行了测试，可见通过`Bert Service`能够方便地进行在线embedding服务的快速部署。  
 
 ## 预训练模型一键服务部署
-除了`Bert Service`外，PaddleHub Serving还具有预训练模型一键服务部署功能，能够将预训练模型快捷部署上线，对外提供可靠的在线预测服务，具体信息请参见[Module Serving](../../../tutorial/serving.md)。
+除了`Bert Service`外，PaddleHub Serving还具有预训练模型一键服务部署功能，能够将预训练模型快捷部署上线，对外提供可靠的在线预测服务，具体信息请参见[Module Serving](../../../docs/tutorial/serving.md)。

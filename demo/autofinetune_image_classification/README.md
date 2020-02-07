@@ -63,4 +63,4 @@ img_cls.py以mobilenet为预训练模型，在flowers数据集上进行Fine-tune
 在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_autofinetune.sh`即可开始使用超参优化功能。
 
 
-**NOTE:** 关于PaddleHub超参优化详情参考[教程](../../tutorial/autofinetune.md)。
+**NOTE:** 关于PaddleHub超参优化详情参考[教程](../../docs/tutorial/autofinetune.md)。

@@ -8,7 +8,7 @@ PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通
 ### 支持模型
 目前PaddleHub Serving支持PaddleHub所有可直接用于预测的模型进行服务部署，包括`lac`、`senta_bilstm`等NLP类模型，以及`yolov3_darknett53_coco2017`、`vgg16_imagenet`等CV类模型，未来还将支持开发者使用PaddleHub Fine-tune API得到的模型用于快捷服务部署。
 
-**NOTE:** 关于PaddleHub Serving一键服务部署的具体信息请参见[PaddleHub Serving](../../../tutorial/serving.md)。
+**NOTE:** 关于PaddleHub Serving一键服务部署的具体信息请参见[PaddleHub Serving](../../../docs/tutorial/serving.md)。
 
 ## Demo
 
@@ -47,4 +47,4 @@ PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
 
 ## Bert Service
-除了预训练模型一键服务部署功能之外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](../../../tutorial/bert_service.md)。
+除了预训练模型一键服务部署功能之外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](../../../docs/tutorial/bert_service.md)。
