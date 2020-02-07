@@ -13,5 +13,5 @@ PaddleHub 文档
     教程<tutorial/tutorial_index>
     API<reference/ref_index>
     FAQ<faq>
-    社区贡献<contribution>
+    社区贡献<contribution/contri_index.rst>
     更新历史<release>

@@ -72,7 +72,7 @@ paddlehub.server_check()
 ### 模型即软件
 
 PaddleHub提出 **模型即软件** 的理念，通过Python API或命令行实现快速预测，更方便地使用PaddlePaddle模型库。
-安装PaddleHub成功后，执行命令[hub run](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7#run)，可以快速体验PaddleHub无需代码、一键预测的命令行功能，如下三个示例：
+安装PaddleHub成功后，执行命令[hub run](./docs/tutorial/cmdintro.md)，可以快速体验PaddleHub无需代码、一键预测的命令行功能，如下三个示例：
 
 * 使用[词法分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=LexicalAnalysis)模型LAC进行分词
 ```shell
@@ -93,7 +93,7 @@ $ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image
 ```
 ![人脸识别结果](docs/imgs/face_detection_result.jpeg)
 
-* 使用[图像分割](https://www.paddlepaddle.org.cn/hub?filter=en_category&value=ImageSegmentation)模型ace2p对图片进行tu
+* 使用[图像分割](https://www.paddlepaddle.org.cn/hub?filter=en_category&value=ImageSegmentation)模型ace2p对图片进行语义分割
 ```shell
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 $ hub run ace2p --input_path test_image.jpg
@@ -131,11 +131,11 @@ $ hub run ace2p --input_path test_image.jpg
 
 关于PaddleHub快捷完成迁移学习，更多信息参考：
 
-[Fine-tune API](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
+[Fine-tune API](./docs/reference)
 
-[自定义数据集如何Fine-tune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
+[自定义数据集如何Fine-tune](./docs/tutorial/how_to_load_data.md)
 
-[实现自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
+[实现自定义迁移任务](./docs/tutorial/how_to_define_task.md)
 
 [ULMFiT优化策略](./docs/tutorial/strategy_exp.md)
 
