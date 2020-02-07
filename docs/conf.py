@@ -12,7 +12,6 @@
 #
 from recommonmark.transform import AutoStructify
 from recommonmark.parser import CommonMarkParser
-import paddlehub as hub
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../paddlehub'))
@@ -24,7 +23,7 @@ copyright = '2020, PaddlePaddle'
 author = 'PaddlePaddle'
 
 # The full version, including alpha/beta/rc tags
-release = hub.version.hub_version
+release = "v1.5"
 
 # -- General configuration ---------------------------------------------------
 
