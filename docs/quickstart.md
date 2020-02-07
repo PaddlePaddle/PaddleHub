@@ -19,7 +19,7 @@ $ hub run senta_bilstm --input_text "今天天气真好"
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 $ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image.jpg
 ```
-![人脸识别结果](./imgs/face_detection_result.png)
+![人脸识别结果](./imgs/face_detection_result.jpg)
 
 使用[图像分割](https://www.paddlepaddle.org.cn/hub?filter=en_category&value=ImageSegmentation)模型ace2p对图片进行tu
 ```shell
