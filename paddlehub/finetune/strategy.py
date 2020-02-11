@@ -202,12 +202,12 @@ class CombinedStrategy(DefaultStrategy):
             "noam_decay": False,
             "discriminative": {
                 "blocks": 0,
-                "layer_params": [],
+                "params_layer": None,
                 "factor": 2.6
             },
             "gradual_unfreeze": {
                 "blocks": 0,
-                "layer_params": [],
+                "params_layer": None,
             },
             "slanted_triangle": {
                 "cut_fraction": 0.0,
@@ -239,17 +239,17 @@ class CombinedStrategy(DefaultStrategy):
             self.check_assign(self.clip, name, clip[name])
 
         # resolve the conflict
-        if self.scheduler["discriminative"]["layer_params"] and self.scheduler[
+        if self.scheduler["discriminative"]["params_layer"] and self.scheduler[
                 "discriminative"]["blocks"]:
             logger.warning(
-                "Both layer_params and blocks have been set in discriminative, only layer_params will take effect"
+                "Both params_layer and blocks have been set in discriminative, only params_layer will take effect"
             )
             self.scheduler["discriminative"]["blocks"] = 0
 
         if self.scheduler["gradual_unfreeze"][
-                "layer_params"] and self.scheduler["gradual_unfreeze"]["blocks"]:
+                "params_layer"] and self.scheduler["gradual_unfreeze"]["blocks"]:
             logger.warning(
-                "Both layer_params and blocks have been set in gradual_unfreeze, only layer_params will take effect"
+                "Both params_layer and blocks have been set in gradual_unfreeze, only params_layer will take effect"
             )
             self.scheduler["gradual_unfreeze"]["blocks"] = 0
 
@@ -280,9 +280,9 @@ class CombinedStrategy(DefaultStrategy):
             sub_dict = dictionary[key]
             for sub_name in value:
                 self.check_assign(sub_dict, sub_name, value[sub_name])
-        elif isinstance(dictionary[key],
-                        type(value)) or (isinstance(dictionary[key], float)
-                                         and isinstance(value, (float, int))):
+        elif isinstance(dictionary[key], type(value)) or (
+                isinstance(dictionary[key], float)
+                and isinstance(value, (float, int))) or dictionary[key] == None:
             dictionary[key] = value
         else:
             if isinstance(dictionary[key], dict):
@@ -385,14 +385,16 @@ class CombinedStrategy(DefaultStrategy):
 
         # discriminative learning rate
         # based on layer
-        if self.scheduler["discriminative"]["layer_params"]:
-            max_layer = len(self.scheduler["discriminative"]["layer_params"])
-            for layer, layer_params in enumerate(
-                    self.scheduler["discriminative"]["layer_params"]):
-                for param in layer_params:
-                    param.optimize_attr["learning_rate"] *= pow(
-                        1.0 / self.scheduler["discriminative"]["factor"],
-                        max_layer - layer - 1)
+        if self.scheduler["discriminative"]["params_layer"]:
+            max_layer = max(
+                self.scheduler["discriminative"]["params_layer"].values())
+            for param in self.main_program.global_block().iter_parameters():
+                param_layer = self.scheduler["discriminative"]["params_layer"][
+                    param.name]
+                param.optimize_attr["learning_rate"] *= pow(
+                    1.0 / self.scheduler["discriminative"]["factor"],
+                    max_layer - param_layer)
+
         # based on blocks
         if self.scheduler["discriminative"]["blocks"]:
             _block_layers = math.ceil(
@@ -471,7 +473,7 @@ class CombinedStrategy(DefaultStrategy):
             pass
 
         if self.scheduler["discriminative"]["blocks"] > 0 or self.scheduler[
-                "gradual_unfreeze"] > 0:
+                "gradual_unfreeze"]["blocks"] > 0:
             self.depth_params_dict = get_depth_parameter(self.main_program)
             self.sorted_depth = sorted(
                 self.depth_params_dict.keys(), reverse=True)
@@ -513,18 +515,18 @@ class CombinedStrategy(DefaultStrategy):
                 logger.warning(
                     "The max op-depth in the network is %s. That results in that can't use the gradual unfreeze finetune strategy."
                     % (self.max_depth))
-        elif self.scheduler["gradual_unfreeze"]["layer_params"]:
-            self.epoch += 1
-            max_layer = len(self.scheduler["gradual_unfreeze"]["layer_params"])
+        elif self.scheduler["gradual_unfreeze"]["params_layer"]:
+            max_layer = len(
+                self.scheduler["gradual_unfreeze"]["params_layer"].values())
             if self.epoch <= max_layer:
-                for layer_params in self.scheduler["gradual_unfreeze"][
-                        "layer_params"][:max_layer - self.epoch]:
-                    for param in layer_params:
-                        param.stop_gradient = True
-                for layer_params in self.scheduler["gradual_unfreeze"][
-                        "layer_params"][max_layer - self.epoch:]:
-                    for param in layer_params:
+                for param in self.main_program.global_block().iter_parameters():
+                    param_layer = self.scheduler["gradual_unfreeze"][
+                        "params_layer"][param.name]
+                    if param_layer >= max_layer - self.epoch:
                         param.stop_gradient = False
+                    else:
+                        param.stop_gradient = True
+            self.epoch += 1
         else:
             pass
 
@@ -538,10 +540,10 @@ class CombinedStrategy(DefaultStrategy):
         strategy_name += "noam decay, " if self.scheduler["noam_decay"] else ""
         strategy_name += "discriminative learning rate, " if self.scheduler[
             "discriminative"]["blocks"] or self.scheduler["discriminative"][
-                "layer_params"] else ""
+                "params_layer"] else ""
         strategy_name += "gradual unfreeze, " if self.scheduler[
             "gradual_unfreeze"]["blocks"] or self.scheduler["gradual_unfreeze"][
-                "layer_params"] else ""
+                "params_layer"] else ""
         strategy_name += "slanted triangle learning rate, " if self.scheduler[
             "slanted_triangle"] else ""
 
@@ -628,7 +630,7 @@ class ULMFiTStrategy(CombinedStrategy):
                  dis_blocks=3,
                  factor=2.6,
                  frz_blocks=3,
-                 layer_params=[]):
+                 params_layer=None):
 
         scheduler = {
             "slanted_triangle": {
@@ -637,12 +639,12 @@ class ULMFiTStrategy(CombinedStrategy):
             },
             "gradual_unfreeze": {
                 "blocks": frz_blocks,
-                "layer_params": layer_params
+                "params_layer": params_layer
             },
             "discriminative": {
                 "blocks": dis_blocks,
                 "factor": factor,
-                "layer_params": layer_params
+                "params_layer": params_layer
             }
         }
         regularization = {}
