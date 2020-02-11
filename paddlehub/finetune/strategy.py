@@ -389,11 +389,13 @@ class CombinedStrategy(DefaultStrategy):
             max_layer = max(
                 self.scheduler["discriminative"]["params_layer"].values())
             for param in self.main_program.global_block().iter_parameters():
-                param_layer = self.scheduler["discriminative"]["params_layer"][
-                    param.name]
-                param.optimize_attr["learning_rate"] *= pow(
-                    1.0 / self.scheduler["discriminative"]["factor"],
-                    max_layer - param_layer)
+                if param.name in self.scheduler["discriminative"][
+                        "params_layer"]:
+                    param_layer = self.scheduler["discriminative"][
+                        "params_layer"][param.name]
+                    param.optimize_attr["learning_rate"] *= pow(
+                        1.0 / self.scheduler["discriminative"]["factor"],
+                        max_layer - param_layer)
 
         # based on blocks
         if self.scheduler["discriminative"]["blocks"]:
@@ -516,16 +518,18 @@ class CombinedStrategy(DefaultStrategy):
                     "The max op-depth in the network is %s. That results in that can't use the gradual unfreeze finetune strategy."
                     % (self.max_depth))
         elif self.scheduler["gradual_unfreeze"]["params_layer"]:
-            max_layer = len(
+            max_layer = max(
                 self.scheduler["gradual_unfreeze"]["params_layer"].values())
             if self.epoch <= max_layer:
                 for param in self.main_program.global_block().iter_parameters():
-                    param_layer = self.scheduler["gradual_unfreeze"][
-                        "params_layer"][param.name]
-                    if param_layer >= max_layer - self.epoch:
-                        param.stop_gradient = False
-                    else:
-                        param.stop_gradient = True
+                    if param.name in self.scheduler["gradual_unfreeze"][
+                            "params_layer"]:
+                        param_layer = self.scheduler["gradual_unfreeze"][
+                            "params_layer"][param.name]
+                        if param_layer >= max_layer - self.epoch:
+                            param.stop_gradient = False
+                        else:
+                            param.stop_gradient = True
             self.epoch += 1
         else:
             pass
