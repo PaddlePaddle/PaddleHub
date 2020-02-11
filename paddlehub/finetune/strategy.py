@@ -534,34 +534,31 @@ class CombinedStrategy(DefaultStrategy):
     def __str__(self):
         self.clip = {"GlobalNorm": 0.0, "Norm": 0.0}
 
-        use_scheduler = ""
-        use_scheduler += "warmup, " if self.scheduler["warmup"] else ""
-        use_scheduler += "linear decay, " if self.scheduler["linear_decay"][
+        strategy_name = ""
+        strategy_name += "warmup, " if self.scheduler["warmup"] else ""
+        strategy_name += "linear decay, " if self.scheduler["linear_decay"][
             "start_point"] < 1 else ""
-        use_scheduler += "noam decay, " if self.scheduler["noam_decay"] else ""
-        use_scheduler += "discriminative learning rate, " if self.scheduler[
+        strategy_name += "noam decay, " if self.scheduler["noam_decay"] else ""
+        strategy_name += "discriminative learning rate, " if self.scheduler[
             "discriminative"]["blocks"] or self.scheduler["discriminative"][
                 "layer_params"] else ""
-        use_scheduler += "gradual unfreeze, " if self.scheduler[
+        strategy_name += "gradual unfreeze, " if self.scheduler[
             "gradual_unfreeze"]["blocks"] or self.scheduler["gradual_unfreeze"][
                 "layer_params"] else ""
-        use_scheduler += "slanted triangle learning rate, " if self.scheduler[
+        strategy_name += "slanted triangle learning rate, " if self.scheduler[
             "slanted_triangle"] else ""
 
-        use_regularization = ""
-        use_regularization += "L2 regularization, " if self.regularization[
+        strategy_name += "L2 regularization, " if self.regularization[
             "L2"] else ""
-        use_regularization += "L2SP regularization, " if self.regularization[
+        strategy_name += "L2SP regularization, " if self.regularization[
             "L2SP"] else ""
-        use_regularization += "weight decay regularization, " if self.regularization[
+        strategy_name += "weight decay regularization, " if self.regularization[
             "weight_decay"] else ""
 
-        use_clip = ""
-        use_clip += "GlobalNorm clip, " if self.clip["GlobalNorm"] else ""
-        use_clip += "Norm clip, " if self.clip["Norm"] else ""
+        strategy_name += "GlobalNorm clip, " if self.clip["GlobalNorm"] else ""
+        strategy_name += "Norm clip, " if self.clip["Norm"] else ""
 
-        return "Strategy with scheduler: %s \n\t regularization: %s \n\t clip: %s" % (
-            use_scheduler, use_regularization, use_clip)
+        return "Strategy with %s" % (strategy_name)
 
 
 class AdamWeightDecayStrategy(CombinedStrategy):
