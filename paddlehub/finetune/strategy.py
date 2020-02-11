@@ -270,14 +270,6 @@ class CombinedStrategy(DefaultStrategy):
             )
             self.scheduler["linear_decay"]["start_point"] = 1
 
-        # calculate the blocks
-        if self.scheduler["discriminative"]["blocks"] > 0 or self.scheduler[
-                "gradual_unfreeze"]["blocks"] > 0:
-            self.depth_params_dict = get_depth_parameter(self.main_program)
-            self.sorted_depth = sorted(
-                self.depth_params_dict.keys(), reverse=True)
-            self.max_depth = len(self.sorted_depth)
-
         self.epoch = 0
         self.main_program = None
 
@@ -463,6 +455,14 @@ class CombinedStrategy(DefaultStrategy):
         # base information
         self.main_program = loss.block.program
         self.config = config
+
+        # calculate the blocks
+        if self.scheduler["discriminative"]["blocks"] > 0 or self.scheduler[
+                "gradual_unfreeze"]["blocks"] > 0:
+            self.depth_params_dict = get_depth_parameter(self.main_program)
+            self.sorted_depth = sorted(
+                self.depth_params_dict.keys(), reverse=True)
+            self.max_depth = len(self.sorted_depth)
 
         # self.num_examples = {'train': -1, 'dev': -1, 'test': -1} before data_generator
         data_reader.data_generator(
