@@ -480,7 +480,6 @@ class CombinedStrategy(DefaultStrategy):
             # cv_reader without .in_tokens and .max_seq_len
             pass
 
-        logger.info(self.__str__())
         # handle scheduler
         scheduled_lr = self.scheduler_handler(max_train_steps)
 
@@ -489,6 +488,8 @@ class CombinedStrategy(DefaultStrategy):
 
         # handle regularization
         self.regularization_handler(loss, scheduled_lr)
+
+        logger.info(self.__str__())
 
         return scheduled_lr, max_train_steps
 
@@ -531,8 +532,36 @@ class CombinedStrategy(DefaultStrategy):
             pass
 
     def __str__(self):
-        return "Strategy with scheduler: %s, regularization: %s and clip: %s" % (
-            self.scheduler, self.regularization, self.clip)
+        self.clip = {"GlobalNorm": 0.0, "Norm": 0.0}
+
+        use_scheduler = ""
+        use_scheduler += "warmup, " if self.scheduler["warmup"] else ""
+        use_scheduler += "linear decay, " if self.scheduler["linear_decay"][
+            "start_point"] < 1 else ""
+        use_scheduler += "noam decay, " if self.scheduler["noam_decay"] else ""
+        use_scheduler += "discriminative learning rate, " if self.scheduler[
+            "discriminative"]["blocks"] or self.scheduler["discriminative"][
+                "layer_params"] else ""
+        use_scheduler += "gradual unfreeze, " if self.scheduler[
+            "gradual_unfreeze"]["blocks"] or self.scheduler["gradual_unfreeze"][
+                "layer_params"] else ""
+        use_scheduler += "slanted triangle learning rate, " if self.scheduler[
+            "slanted_triangle"] else ""
+
+        use_regularization = ""
+        use_regularization += "L2 regularization, " if self.regularization[
+            "L2"] else ""
+        use_regularization += "L2SP regularization, " if self.regularization[
+            "L2SP"] else ""
+        use_regularization += "weight decay regularization, " if self.regularization[
+            "weight_decay"] else ""
+
+        use_clip = ""
+        use_clip += "GlobalNorm clip, " if self.clip["GlobalNorm"] else ""
+        use_clip += "Norm clip, " if self.clip["Norm"] else ""
+
+        return "Strategy with scheduler: %s \n\t regularization: %s \n\t clip: %s" % (
+            use_scheduler, use_regularization, use_clip)
 
 
 class AdamWeightDecayStrategy(CombinedStrategy):
