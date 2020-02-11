@@ -401,12 +401,10 @@ class CombinedStrategy(DefaultStrategy):
             power = 0
             for cnt, depth in enumerate(self.sorted_depth):
                 for index, param in enumerate(self.depth_params_dict[depth]):
-                    print(param)
                     param.optimize_attr["learning_rate"] *= \
                         pow(1.0 / self.scheduler["discriminative"]["factor"], power)
                 if cnt and cnt % _block_layers == 0:
                     power += 1
-
         return scheduled_lr
 
     def clip_handler(self):
@@ -456,14 +454,6 @@ class CombinedStrategy(DefaultStrategy):
         self.main_program = loss.block.program
         self.config = config
 
-        # calculate the blocks
-        if self.scheduler["discriminative"]["blocks"] > 0 or self.scheduler[
-                "gradual_unfreeze"]["blocks"] > 0:
-            self.depth_params_dict = get_depth_parameter(self.main_program)
-            self.sorted_depth = sorted(
-                self.depth_params_dict.keys(), reverse=True)
-            self.max_depth = len(self.sorted_depth)
-
         # self.num_examples = {'train': -1, 'dev': -1, 'test': -1} before data_generator
         data_reader.data_generator(
             batch_size=config.batch_size, phase='train', shuffle=True)
@@ -479,6 +469,13 @@ class CombinedStrategy(DefaultStrategy):
         except:
             # cv_reader without .in_tokens and .max_seq_len
             pass
+
+        if self.scheduler["discriminative"]["blocks"] > 0 or self.scheduler[
+                "gradual_unfreeze"] > 0:
+            self.depth_params_dict = get_depth_parameter(self.main_program)
+            self.sorted_depth = sorted(
+                self.depth_params_dict.keys(), reverse=True)
+            self.max_depth = len(self.sorted_depth)
 
         # handle scheduler
         scheduled_lr = self.scheduler_handler(max_train_steps)
