@@ -604,7 +604,8 @@ class ULMFiTStrategy(CombinedStrategy):
                  ratio=32,
                  dis_blocks=3,
                  factor=2.6,
-                 frz_blocks=3):
+                 frz_blocks=3,
+                 layer_params=[]):
 
         scheduler = {
             "slanted_triangle": {
@@ -613,10 +614,12 @@ class ULMFiTStrategy(CombinedStrategy):
             },
             "gradual_unfreeze": {
                 "blocks": frz_blocks,
+                "layer_params": layer_params
             },
             "discriminative": {
                 "blocks": dis_blocks,
-                "factor": factor
+                "factor": factor,
+                "layer_params": layer_params
             }
         }
         regularization = {}
