@@ -6,6 +6,7 @@
 
 PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub开发者可以使用高质量的预训练模型结合Fine-tune API快速完成迁移学习到应用部署的全流程工作。其提供了飞桨生态下的高质量预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型。更多模型详情请查看官网：https://www.paddlepaddle.org.cn/hub
 
+**PaddleHub上线口罩检测预训练模型pyramidbox_lite_mobile_mask和pyramidbox_lite_server_mask**
 
 基于预训练模型，PaddleHub支持以下功能：  
 
@@ -116,6 +117,7 @@ $ hub run ace2p --input_path test_image.jpg
 
 |预训练模型|任务类型|数据集|AIStudio链接|备注|
 |-|-|-|-|-|
+|pyramidbox_lite_mobile_mask|口罩检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/267322)|
 |ResNet|图像分类|猫狗数据集DogCat|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147010)||
 |ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147006)||
 |ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/221999)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成文本分类迁移学习。|
