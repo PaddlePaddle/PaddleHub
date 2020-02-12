@@ -4,7 +4,8 @@ import json
 
 if __name__ == "__main__":
     # 指定要预测的图片并生成列表[("image", img_1), ("image", img_2), ... ]
-    file_list = ["../img/cat.jpg", "../img/flower.jpg"]
+    file_list = ["../../../../docs/imgs/cat.jpg",
+                 "../../../../docs/imgs/flower.jpg"]
     files = [("image", (open(item, "rb"))) for item in file_list]
     # 指定预测方法为vgg11_imagenet并发送post请求
     url = "http://127.0.0.1:8866/predict/image/vgg11_imagenet"
