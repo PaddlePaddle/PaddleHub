@@ -81,7 +81,7 @@ http://0.0.0.0:8866/predict/<CATEGORY\>/\<MODULE>
 
 <p align="center">  
 
-<img src="../docs/imgs/web_demo.png" width="60%" />  
+<img src="../imgs/web_demo.png" width="60%" />  
 
 </p>  
 
@@ -117,7 +117,7 @@ $ hub serving start -c serving_config.json
 
 <p align="center">  
 
-<img src="../docs/imgs/start_serving_lac.png" width="100%" />  
+<img src="../imgs/start_serving_lac.png" width="100%" />  
 
 </p>  
 
@@ -171,41 +171,41 @@ if __name__ == "__main__":
 }
 ```
 
-此Demo的具体信息和代码请参见[LAC Serving](../demo/serving/module_serving/lexical_analysis_lac)。另外，下面展示了一些其他的一键服务部署Demo。
+此Demo的具体信息和代码请参见[LAC Serving](../../demo/serving/module_serving/lexical_analysis_lac)。另外，下面展示了一些其他的一键服务部署Demo。
 
 ## Demo——其他模型的一键部署服务
 
 获取其他PaddleHub Serving的一键服务部署场景示例，可参见下列demo
 
-* [图像分类-基于vgg11_imagent](../demo/serving/module_serving/classification_vgg11_imagenet)  
+* [图像分类-基于vgg11_imagent](../../demo/serving/module_serving/classification_vgg11_imagenet)  
 
 &emsp;&emsp;该示例展示了利用vgg11_imagent完成图像分类服务化部署和在线预测，获取图像分类结果。
 
-* [图像生成-基于stgan_celeba](../demo/serving/module_serving/GAN_stgan_celeba)  
+* [图像生成-基于stgan_celeba](../../demo/serving/module_serving/GAN_stgan_celeba)  
 
 &emsp;&emsp;该示例展示了利用stgan_celeba生成图像服务化部署和在线预测，获取指定风格的生成图像。
 
-* [文本审核-基于porn_detection_lstm](../demo/serving/module_serving/text_censorship_porn_detection_lstm)  
+* [文本审核-基于porn_detection_lstm](../../demo/serving/module_serving/text_censorship_porn_detection_lstm)  
 
 &emsp;&emsp;该示例展示了利用porn_detection_lstm完成中文文本黄色敏感信息鉴定的服务化部署和在线预测，获取文本是否敏感及其置信度。
 
-* [中文词法分析-基于lac](../demo/serving/module_serving/lexical_analysis_lac)
+* [中文词法分析-基于lac](../../demo/serving/module_serving/lexical_analysis_lac)
 
 &emsp;&emsp;该示例展示了利用lac完成中文文本分词服务化部署和在线预测，获取文本的分词结果，并可通过用户自定义词典干预分词结果。
 
-* [目标检测-基于yolov3_darknet53_coco2017](../demo/serving/module_serving/object_detection_yolov3_darknet53_coco2017)  
+* [目标检测-基于yolov3_darknet53_coco2017](../../demo/serving/module_serving/object_detection_yolov3_darknet53_coco2017)  
 
 &emsp;&emsp;该示例展示了利用yolov3_darknet53_coco2017完成目标检测服务化部署和在线预测，获取检测结果和覆盖识别框的图片。
 
-* [中文语义分析-基于simnet_bow](../demo/serving/module_serving/semantic_model_simnet_bow)
+* [中文语义分析-基于simnet_bow](../../demo/serving/module_serving/semantic_model_simnet_bow)
 
 &emsp;&emsp;该示例展示了利用simnet_bow完成中文文本相似度检测服务化部署和在线预测，获取文本的相似程度。  
 
-* [图像分割-基于deeplabv3p_xception65_humanseg](../demo/serving/module_serving/semantic_segmentation_deeplabv3p_xception65_humanseg)
+* [图像分割-基于deeplabv3p_xception65_humanseg](../../demo/serving/module_serving/semantic_segmentation_deeplabv3p_xception65_humanseg)
 
 &emsp;&emsp;该示例展示了利用deeplabv3p_xception65_humanseg完成图像分割服务化部署和在线预测，获取识别结果和分割后的图像。
 
-* [中文情感分析-基于simnet_bow](../demo/serving/module_serving/semantic_model_simnet_bow)
+* [中文情感分析-基于simnet_bow](../../demo/serving/module_serving/semantic_model_simnet_bow)
 
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
 
