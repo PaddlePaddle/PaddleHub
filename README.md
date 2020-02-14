@@ -125,6 +125,7 @@ $ hub run ace2p --input_path test_image.jpg
 
 |预训练模型|任务类型|数据集|AIStudio链接|备注|
 |-|-|-|-|-|
+|pyramidbox_lite_mobile_mask|口罩检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/267322)|
 |ResNet|图像分类|猫狗数据集DogCat|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147010)||
 |ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147006)||
 |ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/221999)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成文本分类迁移学习。|
