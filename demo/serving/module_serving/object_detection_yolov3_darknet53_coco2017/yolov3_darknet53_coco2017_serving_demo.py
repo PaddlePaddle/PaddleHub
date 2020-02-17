@@ -7,7 +7,8 @@ import os
 if __name__ == "__main__":
     # 指定要检测的图片并生成列表[("image", img_1), ("image", img_2), ... ]
     file_list = [
-        "../../../../docs/imgs/cat.jpg", "../../../../docs/imgs/dog.jpg"
+        "../../../../docs/imgs/cat.jpg",
+        "../../../../docs/imgs/dog.jpg"
     ]
     files = [("image", (open(item, "rb"))) for item in file_list]
     # 指定检测方法为yolov3_coco2017并发送post请求

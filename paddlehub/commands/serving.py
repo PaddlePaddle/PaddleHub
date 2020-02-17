@@ -344,7 +344,9 @@ class ServingCommand(BaseCommand):
                 with open(config_file, "r") as fp:
                     configs = json.load(fp)
                     use_multiprocess = configs.get("use_multiprocess", False)
-                    if single_mode is True or platform.system() == "Windows":
+                    if single_mode is True:
+                        ServingCommand.start_single_app_with_file(configs)
+                    elif platform.system() == "Windows":
                         print(
                             "Warning: Windows cannot use multiprocess working "
                             "mode, PaddleHub Serving will switch to single process mode"
@@ -360,7 +362,9 @@ class ServingCommand(BaseCommand):
             else:
                 print("config_file ", config_file, "not exists.")
         else:
-            if single_mode is True or platform.system() == "Windows":
+            if single_mode is True:
+                self.start_single_app_with_args()
+            elif platform.system() == "Windows":
                 print(
                     "Warning: Windows cannot use multiprocess working "
                     "mode, PaddleHub Serving will switch to single process mode"
