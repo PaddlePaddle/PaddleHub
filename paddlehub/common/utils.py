@@ -322,10 +322,10 @@ def strflist_version(version_list):
     version_list = version_list[1:-1].split(",")
     result = ""
     if version_list[0] != "-1.0.0":
-        result = ">" + version_list[0]
+        result = ">=" + version_list[0]
     if version_list[1] != "99.0.0":
         if result != "":
-            result = result + ", " + "<" + version_list[1]
+            result = result + ", " + "<=" + version_list[1]
         else:
-            result = "<" + version_list[1]
+            result = "<=" + version_list[1]
     return result if result != "" else "-"
