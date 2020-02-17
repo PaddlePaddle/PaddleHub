@@ -234,7 +234,7 @@ class RunCommand(BaseCommand):
             return False
 
         # If the module is not executable, give an alarm and exit
-        if not self.module.is_runable:
+        if not self.module.is_runnable:
             print("ERROR! Module %s is not executable." % module_name)
             return False
 

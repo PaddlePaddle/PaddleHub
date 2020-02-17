@@ -121,12 +121,12 @@ def create_module(directory, name, author, email, module_type, summary,
             os.chdir(_cwd)
 
 
-_module_runable_func = {}
+_module_runnable_func = {}
 
 
-def runable(func):
+def runnable(func):
     mod = func.__module__ + "." + inspect.stack()[1][3]
-    _module_runable_func[mod] = func.__name__
+    _module_runnable_func[mod] = func.__name__
 
     def _wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -169,8 +169,8 @@ class Module(object):
         Module._record[id(self)] = True
 
         mod = self.__class__.__module__ + "." + self.__class__.__name__
-        if mod in _module_runable_func:
-            _run_func_name = _module_runable_func[mod]
+        if mod in _module_runnable_func:
+            _run_func_name = _module_runnable_func[mod]
             self._run_func = getattr(self, _run_func_name)
         else:
             self._run_func = None
@@ -272,7 +272,7 @@ class Module(object):
         return self._code_version
 
     @property
-    def is_runable(self):
+    def is_runnable(self):
         return self._run_func != None
 
     def _initialize(self):
@@ -556,7 +556,7 @@ class ModuleV1(Module):
             raise ValueError("This Module is not callable!")
 
     @property
-    def is_runable(self):
+    def is_runnable(self):
         return self.default_signature != None
 
     def context(self,
