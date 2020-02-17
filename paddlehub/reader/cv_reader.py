@@ -112,7 +112,7 @@ class ImageClassificationReader(BaseReader):
             image = Image.open(image_path)
             image = image_augmentation.image_resize(image, self.image_width,
                                                     self.image_height)
-            if self.data_augmentation:
+            if self.data_augmentation and phase == "train":
                 image = image_augmentation.image_random_process(
                     image, enable_resize=False, enable_crop=False)
 
