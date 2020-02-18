@@ -135,7 +135,7 @@ def predict_gan(module, input_img, id, batch_size, extra={}):
     return results_pack
 
 
-def predict_mask(module, input_img, id, batch_size, extra=None, r_img=False):
+def predict_mask(module, input_img, id, batch_size, extra=None, r_img=True):
     output_folder = "detection_result"
     global use_gpu
     method_name = module.desc.attr.map.data['default_signature'].s
