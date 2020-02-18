@@ -138,12 +138,18 @@ class Module(object):
 
     _record = {}
 
-    def __new__(cls, name=None, directory=None, module_dir=None, version=None):
+    def __new__(cls,
+                name=None,
+                directory=None,
+                module_dir=None,
+                version=None,
+                **kwargs):
         if cls.__name__ == "Module":
             if name:
-                module = cls.init_with_name(name=name, version=version)
+                module = cls.init_with_name(
+                    name=name, version=version, **kwargs)
             elif directory:
-                module = cls.init_with_directory(directory=directory)
+                module = cls.init_with_directory(directory=directory, **kwargs)
             elif module_dir:
                 logger.warning(
                     "Parameter module_dir is deprecated, please use directory to specify the path"
@@ -154,15 +160,19 @@ class Module(object):
                     version = module_dir[1]
                 else:
                     directory = module_dir
-                module = cls.init_with_directory(directory=directory)
+                module = cls.init_with_directory(directory=directory, **kwargs)
             CacheUpdater("update_cache", module.name, module.version).start()
         else:
             module = object.__new__(cls)
 
         return module
 
-    def __init__(self, name=None, directory=None, module_dir=None,
-                 version=None):
+    def __init__(self,
+                 name=None,
+                 directory=None,
+                 module_dir=None,
+                 version=None,
+                 **kwargs):
         # Avoid module being initialized multiple times
         if not directory or id(self) in Module._record:
             return
@@ -195,10 +205,10 @@ class Module(object):
         self._summary = utils.from_module_attr_to_pyobj(
             module_info.map.data['summary'])
 
-        self._initialize()
+        self._initialize(**kwargs)
 
     @classmethod
-    def init_with_name(cls, name, version=None):
+    def init_with_name(cls, name, version=None, **kwargs):
         fp_lock = open(os.path.join(CACHE_HOME, name), "a")
         lock.flock(fp_lock, lock.LOCK_EX)
         log_msg = "Installing %s module" % name
@@ -214,10 +224,10 @@ class Module(object):
 
         logger.info(tips)
         lock.flock(fp_lock, lock.LOCK_UN)
-        return cls.init_with_directory(directory=module_dir[0])
+        return cls.init_with_directory(directory=module_dir[0], **kwargs)
 
     @classmethod
-    def init_with_directory(cls, directory):
+    def init_with_directory(cls, directory, **kwargs):
         desc_file = os.path.join(directory, MODULE_DESC_PBNAME)
         checker = ModuleChecker(directory)
         checker.check()
@@ -229,10 +239,10 @@ class Module(object):
             if 'module' in sys.modules:
                 sys.modules.pop('module')
             _module = importlib.import_module("module")
-            user_module = _module.HubModule(directory=directory)
+            user_module = _module.HubModule(directory=directory, **kwargs)
             sys.path.pop(0)
             return user_module
-        return ModuleV1(directory=directory)
+        return ModuleV1(directory=directory, **kwargs)
 
     @property
     def run_func(self):
