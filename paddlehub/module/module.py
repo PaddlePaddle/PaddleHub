@@ -224,11 +224,14 @@ class Module(object):
 
         module_code_version = checker.module_code_version
         if module_code_version == "v2":
-            basename = os.path.split(directory)[-1]
-            dirname = os.path.join(*list(os.path.split(directory)[:-1]))
-            sys.path.append(dirname)
-            user_module = importlib.import_module("{}.module".format(basename))
-            return user_module.HubModule(directory=directory)
+            sys.path.insert(0, directory)
+            # clear module cache
+            if 'module' in sys.modules:
+                sys.modules.pop('module')
+            _module = importlib.import_module("module")
+            user_module = _module.HubModule(directory=directory)
+            sys.path.pop(0)
+            return user_module
         return ModuleV1(directory=directory)
 
     @property
