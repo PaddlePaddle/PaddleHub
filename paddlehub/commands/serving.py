@@ -173,8 +173,7 @@ class ServingCommand(BaseCommand):
         bs = BertServer(with_gpu=args.use_gpu)
         bs.with_model(model_name=args.modules[0])
         CacheUpdater(
-            "hub_bert_service",
-            module=args.modules[0],
+            "hub_bert_service", module=args.modules[0],
             version="0.0.0").start()
         bs.run(gpu_index=args.gpu, port=int(args.port))
 
