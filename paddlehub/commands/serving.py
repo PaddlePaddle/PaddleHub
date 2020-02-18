@@ -103,6 +103,8 @@ class ServingCommand(BaseCommand):
         self.parser.add_argument("--config", "-c", nargs="?")
         self.parser.add_argument("--port", "-p", nargs="?", default=8866)
         self.parser.add_argument("--gpu", "-i", nargs="?", default=0)
+        self.parser.add_argument(
+            "--use_singleprocess", action="store_true", default=False)
 
     def dump_pid_file(self):
         pid = os.getpid()
@@ -336,12 +338,15 @@ class ServingCommand(BaseCommand):
 
     def start_serving(self):
         config_file = self.args.config
+        single_mode = self.args.use_singleprocess
         if config_file is not None:
             if os.path.exists(config_file):
                 with open(config_file, "r") as fp:
                     configs = json.load(fp)
                     use_multiprocess = configs.get("use_multiprocess", False)
-                    if platform.system() == "Windows":
+                    if single_mode is True:
+                        ServingCommand.start_single_app_with_file(configs)
+                    elif platform.system() == "Windows":
                         print(
                             "Warning: Windows cannot use multiprocess working "
                             "mode, PaddleHub Serving will switch to single process mode"
@@ -357,7 +362,9 @@ class ServingCommand(BaseCommand):
             else:
                 print("config_file ", config_file, "not exists.")
         else:
-            if platform.system() == "Windows":
+            if single_mode is True:
+                self.start_single_app_with_args()
+            elif platform.system() == "Windows":
                 print(
                     "Warning: Windows cannot use multiprocess working "
                     "mode, PaddleHub Serving will switch to single process mode"

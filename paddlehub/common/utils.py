@@ -22,9 +22,12 @@ import os
 import multiprocessing
 import hashlib
 import platform
+import base64
 
 import paddle.fluid as fluid
 import six
+import numpy as np
+import cv2
 
 from paddlehub.module import module_desc_pb2
 from paddlehub.common.logger import logger
@@ -49,6 +52,42 @@ def version_compare(version1, version2):
         elif vn1 < vn2:
             return False
     return len(version1) > len(version2)
+
+
+def base64s_to_cvmats(base64s):
+    for index, value in enumerate(base64s):
+        value = bytes(value, encoding="utf8")
+        value = base64.b64decode(value)
+        value = np.fromstring(value, np.uint8)
+        value = cv2.imdecode(value, 1)
+
+        base64s[index] = value
+    return base64s
+
+
+def handle_mask_results(results):
+    result = []
+    if len(results) <= 0:
+        return results
+    _id = results[0]["id"]
+    _item = {
+        "data": [],
+        "path": results[0].get("path", ""),
+        "id": results[0]["id"]
+    }
+    for item in results:
+        if item["id"] == _id:
+            _item["data"].append(item["data"])
+        else:
+            result.append(_item)
+            _id = _id + 1
+            _item = {
+                "data": [item["data"]],
+                "path": item.get("path", ""),
+                "id": item.get("id", _id)
+            }
+    result.append(_item)
+    return result
 
 
 def get_platform():
@@ -283,10 +322,10 @@ def strflist_version(version_list):
     version_list = version_list[1:-1].split(",")
     result = ""
     if version_list[0] != "-1.0.0":
-        result = ">" + version_list[0]
+        result = ">=" + version_list[0]
     if version_list[1] != "99.0.0":
         if result != "":
-            result = result + ", " + "<" + version_list[1]
+            result = result + ", " + "<=" + version_list[1]
         else:
-            result = "<" + version_list[1]
+            result = "<=" + version_list[1]
     return result if result != "" else "-"

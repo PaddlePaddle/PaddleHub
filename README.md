@@ -78,10 +78,10 @@ PaddleHub提出 **模型即软件** 的理念，通过Python API或命令行实�
 
 * 使用[目标检测](http://www.paddlepaddle.org.cn/hub?filter=category&value=ObjectDetection)模型pyramidbox_lite_mobile_mask对图片进行口罩检测
 ```shell
-$ wget https://paddlehub.bj.bcebos.com/resources/test_mask_detection_result.jpg
-$ hub run pyramidbox_lite_mobile_mask --input_path test_mask_detection_result.jpg
+$ wget https://paddlehub.bj.bcebos.com/resources/test_mask_detection.jpg
+$ hub run pyramidbox_lite_mobile_mask --input_path test_mask_detection.jpg
 ```
-![人脸识别结果](docs/imgs/test_mask_detectionresult.jpg)
+![人脸识别结果](docs/imgs/test_mask_detection_result.jpg)
 
 * 使用[词法分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=LexicalAnalysis)模型LAC进行分词
 ```shell

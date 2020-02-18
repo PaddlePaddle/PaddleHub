@@ -6,7 +6,7 @@ import os
 
 if __name__ == "__main__":
     # 指定要使用的图片文件并生成列表[("image", img_1), ("image", img_2), ... ]
-    file_list = ["../img/man.png"]
+    file_list = ["../../../../docs/imgs/man.png"]
     files = [("image", (open(item, "rb"))) for item in file_list]
     # 为每张图片对应指定info和style
     data = {"info": ["Male,Black_Hair"], "style": ["Bald"]}

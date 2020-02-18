@@ -9,7 +9,7 @@
 
 <div align="center">  
 
-<img src="../docs/imgs/bs.png" aligh="center" width="100%" alt="BS流程图" />  
+<img src="../imgs/bs.png" aligh="center" width="100%" alt="BS流程图" />  
 
 </div>  
 
@@ -203,7 +203,7 @@ result = bc.get_result(input_text=input_text)
 ```python
 [[0.9993321895599361, 0.9994612336158751, 0.9999646544456481, 0.732795298099517, -0.34387934207916204, ... ]]
 ```
-客户端代码demo文件见[示例](../demo/serving/bert_service/bert_service_client.py)。  
+客户端代码demo文件见[示例](../../demo/serving/bert_service/bert_service_client.py)。  
 运行命令如下：  
 ```shell
 $ python bert_service_client.py

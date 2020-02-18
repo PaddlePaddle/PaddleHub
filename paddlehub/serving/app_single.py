@@ -18,6 +18,7 @@ import time
 import os
 import base64
 import logging
+import shutil
 
 cv_module_method = {
     "vgg19_imagenet": "predict_classification",
@@ -47,7 +48,9 @@ cv_module_method = {
     "faster_rcnn_coco2017": "predict_object_detection",
     "cyclegan_cityscapes": "predict_gan",
     "deeplabv3p_xception65_humanseg": "predict_semantic_segmentation",
-    "ace2p": "predict_semantic_segmentation"
+    "ace2p": "predict_semantic_segmentation",
+    "pyramidbox_lite_server_mask": "predict_mask",
+    "pyramidbox_lite_mobile_mask": "predict_mask"
 }
 
 
@@ -129,6 +132,59 @@ def predict_gan(module, input_img, id, batch_size, extra={}):
                 results_pack.append(results[index])
             os.remove(item)
             os.remove(output_file)
+    return results_pack
+
+
+def predict_mask(module, input_img, id, batch_size, extra=None, r_img=False):
+    output_folder = "detection_result"
+    global use_gpu
+    method_name = module.desc.attr.map.data['default_signature'].s
+    predict_method = getattr(module, method_name)
+    try:
+        data = {}
+        if input_img is not None:
+            input_img = {"image": input_img}
+            data.update(input_img)
+        if extra is not None:
+            data.update(extra)
+            r_img = True if "r_img" in extra.keys() else False
+        results = predict_method(
+            data=data, use_gpu=use_gpu, batch_size=batch_size)
+        results = utils.handle_mask_results(results)
+    except Exception as err:
+        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(curr, " - ", err)
+        return {"result": "Please check data format!"}
+    finally:
+        base64_list = []
+        results_pack = []
+        if input_img is not None:
+            if r_img is False:
+                shutil.rmtree(output_folder)
+                for index in range(len(results)):
+                    results[index]["path"] = ""
+                results_pack = results
+            else:
+                input_img = input_img.get("image", [])
+                for index in range(len(input_img)):
+                    item = input_img[index]
+                    with open(os.path.join(output_folder, item), "rb") as fp:
+                        b_head = "data:image/" + item.split(".")[-1] + ";base64"
+                        b_body = base64.b64encode(fp.read())
+                        b_body = str(b_body).replace("b'", "").replace("'", "")
+                        b_img = b_head + "," + b_body
+                        base64_list.append(b_img)
+                        results[index]["path"] = results[index]["path"].replace(
+                            id + "_", "") if results[index]["path"] != "" \
+                            else ""
+
+                        results[index].update({"base64": b_img})
+                        results_pack.append(results[index])
+                    os.remove(item)
+                    os.remove(os.path.join(output_folder, item))
+        else:
+            results_pack = results
+
     return results_pack
 
 
@@ -253,6 +309,14 @@ def create_app(init_flag=False, configs=None):
         extra_info = {}
         for item in list(request.form.keys()):
             extra_info.update({item: request.form.getlist(item)})
+
+        for key in extra_info.keys():
+            if isinstance(extra_info[key], list):
+                extra_info[key] = utils.base64s_to_cvmats(
+                    eval(extra_info[key][0])["b64s"]) if isinstance(
+                        extra_info[key][0], str
+                    ) and "b64s" in extra_info[key][0] else extra_info[key]
+
         file_name_list = []
         if img_base64 != []:
             for item in img_base64:
@@ -260,7 +324,7 @@ def create_app(init_flag=False, configs=None):
                 if ext not in ["jpeg", "jpg", "png"]:
                     return {"result": "Unrecognized file type"}
                 filename = req_id + "_" \
-                           + utils.md5(str(time.time())+item[0:20]) \
+                           + utils.md5(str(time.time()) + item[0:20]) \
                            + "." \
                            + ext
                 img_data = base64.b64decode(item.split(',')[-1])
@@ -281,6 +345,10 @@ def create_app(init_flag=False, configs=None):
             module_type = module.type.split("/")[-1].replace("-", "_").lower()
             predict_func = eval("predict_" + module_type)
         batch_size = batch_size_dict.get(module_name, 1)
+        if file_name_list == []:
+            file_name_list = None
+        if extra_info == {}:
+            extra_info = None
         results = predict_func(module, file_name_list, req_id, batch_size,
                                extra_info)
         r = {"results": str(results)}
