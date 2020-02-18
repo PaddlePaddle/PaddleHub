@@ -147,7 +147,7 @@ def predict_mask(module, input_img, id, batch_size, extra=None, r_img=True):
             data.update(input_img)
         if extra is not None:
             data.update(extra)
-            r_img = False if "r_img" in extra.keys() else True
+            r_img = False if "visual_result" in extra.keys() else True
         results = predict_method(
             data=data,
             visualization=r_img,
