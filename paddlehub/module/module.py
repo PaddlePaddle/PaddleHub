@@ -239,7 +239,11 @@ class Module(object):
             if 'module' in sys.modules:
                 sys.modules.pop('module')
             _module = importlib.import_module("module")
-            user_module = _module.HubModule(directory=directory, **kwargs)
+            for _item, _cls in inspect.getmembers(_module, inspect.isclass):
+                _item = _module.__dict__[_item]
+                if issubclass(_item, Module):
+                    user_module = _item(directory=directory, **kwargs)
+                    break
             sys.path.pop(0)
             return user_module
         return ModuleV1(directory=directory, **kwargs)
