@@ -149,7 +149,10 @@ def predict_mask(module, input_img, id, batch_size, extra=None, r_img=True):
             data.update(extra)
             r_img = False if "r_img" in extra.keys() else True
         results = predict_method(
-            data=data, visualization=r_img, use_gpu=use_gpu, batch_size=batch_size)
+            data=data,
+            visualization=r_img,
+            use_gpu=use_gpu,
+            batch_size=batch_size)
         results = utils.handle_mask_results(results)
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
