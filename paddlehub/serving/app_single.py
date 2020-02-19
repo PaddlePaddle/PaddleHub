@@ -135,7 +135,7 @@ def predict_gan(module, input_img, id, batch_size, extra={}):
     return results_pack
 
 
-def predict_mask(module, input_img, id, batch_size, extra=None, r_img=False):
+def predict_mask(module, input_img, id, batch_size, extra=None, r_img=True):
     output_folder = "detection_result"
     global use_gpu
     method_name = module.desc.attr.map.data['default_signature'].s
@@ -147,9 +147,12 @@ def predict_mask(module, input_img, id, batch_size, extra=None, r_img=False):
             data.update(input_img)
         if extra is not None:
             data.update(extra)
-            r_img = True if "r_img" in extra.keys() else False
+            r_img = False if "visual_result" in extra.keys() else True
         results = predict_method(
-            data=data, use_gpu=use_gpu, batch_size=batch_size)
+            data=data,
+            visualization=r_img,
+            use_gpu=use_gpu,
+            batch_size=batch_size)
         results = utils.handle_mask_results(results)
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
@@ -160,7 +163,6 @@ def predict_mask(module, input_img, id, batch_size, extra=None, r_img=False):
         results_pack = []
         if input_img is not None:
             if r_img is False:
-                shutil.rmtree(output_folder)
                 for index in range(len(results)):
                     results[index]["path"] = ""
                 results_pack = results
