@@ -1,5 +1,8 @@
 # 更新历史
 
+## `v1.5.2`
+
+* 优化pyramidbox_lite_server_mask、pyramidbox_lite_mobile_mask模型的服务化部署性能
 
 ## `v1.5.1`
 
