@@ -163,7 +163,13 @@ class Module(object):
                 module = cls.init_with_directory(directory=directory, **kwargs)
             CacheUpdater("update_cache", module.name, module.version).start()
         else:
-            module = object.__new__(cls)
+            if not name and not directory:
+                directory = os.path.dirname(
+                    sys.modules[cls.__module__].__file__)
+                module = Module.init_with_directory(
+                    directory=directory, **kwargs)
+            else:
+                module = object.__new__(cls)
 
         return module
 
