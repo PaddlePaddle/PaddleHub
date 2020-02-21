@@ -8,8 +8,8 @@ import os
 module = hub.Module(name="pyramidbox_lite_mobile_mask")
 
 
-def paint_chinese_opencv(im, chinese, position, fontsize,
-                         color_bgr):  #opencv输出中文
+#opencv输出中文
+def paint_chinese(im, chinese, position, fontsize, color_bgr):
     img_PIL = Image.fromarray(cv2.cvtColor(
         im, cv2.COLOR_BGR2RGB))  # 图像从OpenCV格式转换成PIL格式
     font = ImageFont.truetype('思源黑体SC-Heavy.otf', fontsize, encoding="utf-8")
@@ -17,8 +17,8 @@ def paint_chinese_opencv(im, chinese, position, fontsize,
     #position = (100,100)# 文字输出位置
     color = color_bgr[::-1]
     draw = ImageDraw.Draw(img_PIL)
-    draw.text(position, chinese, font=font,
-              fill=color)  # PIL图片上打印汉字 # 参数1：打印坐标，参数2：文本，参数3：字体颜色，参数4：字体
+    # PIL图片上打印汉字 # 参数1：打印坐标，参数2：文本，参数3：字体颜色，参数4：字体
+    draw.text(position, chinese, font=font, fill=color)
     img = cv2.cvtColor(np.asarray(img_PIL), cv2.COLOR_RGB2BGR)  # PIL图片转cv2 图片
     return img
 
@@ -96,8 +96,9 @@ while (1):
 
         cv2.rectangle(frame_copy, (left, top), (right, bottom), color, 3)
         # cv2.putText(frame, label, (left, top-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
-        frame_copy = paint_chinese_opencv(frame_copy, label_cn,
-                                          (left, top - 36), 24, color)
+        origin_point = (left, top - 36)
+        frame_copy = paint_chinese(frame_copy, label_cn, origin_point, 24,
+                                   color)
 
     writer.write(frame_copy)
 
