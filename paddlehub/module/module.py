@@ -135,9 +135,6 @@ def runnable(func):
 
 
 class Module(object):
-
-    _record = {}
-
     def __new__(cls,
                 name=None,
                 directory=None,
@@ -180,9 +177,8 @@ class Module(object):
                  version=None,
                  **kwargs):
         # Avoid module being initialized multiple times
-        if not directory or id(self) in Module._record:
+        if "_is_initialize" in self.__dict__ and self._is_initialize:
             return
-        Module._record[id(self)] = True
 
         mod = self.__class__.__module__ + "." + self.__class__.__name__
         if mod in _module_runnable_func:
@@ -212,6 +208,7 @@ class Module(object):
             module_info.map.data['summary'])
 
         self._initialize(**kwargs)
+        self._is_initialize = True
 
     @classmethod
     def init_with_name(cls, name, version=None, **kwargs):
