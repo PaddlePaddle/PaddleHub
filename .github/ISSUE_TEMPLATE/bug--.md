@@ -1,7 +1,7 @@
 ---
 name: BUG反馈
 about: PaddleHub Bug反馈
-title: "[BUG]"
+title: ''
 labels: ''
 assignees: ''
 
