@@ -18,7 +18,7 @@ import time
 import os
 import base64
 import logging
-import shutil
+import glob
 
 cv_module_method = {
     "vgg19_imagenet": "predict_classification",
@@ -140,6 +140,8 @@ def predict_mask(module, input_img, id, batch_size, extra=None, r_img=True):
     global use_gpu
     method_name = module.desc.attr.map.data['default_signature'].s
     predict_method = getattr(module, method_name)
+    data_len = len(input_img) if input_img is not None else 0
+    results = []
     try:
         data = {}
         if input_img is not None:
@@ -153,7 +155,7 @@ def predict_mask(module, input_img, id, batch_size, extra=None, r_img=True):
             visualization=r_img,
             use_gpu=use_gpu,
             batch_size=batch_size)
-        results = utils.handle_mask_results(results)
+        results = utils.handle_mask_results(results, data_len)
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
@@ -166,24 +168,36 @@ def predict_mask(module, input_img, id, batch_size, extra=None, r_img=True):
                 for index in range(len(results)):
                     results[index]["path"] = ""
                 results_pack = results
+                str_id = id + "*"
+                files_deleted = glob.glob(str_id)
+                for path in files_deleted:
+                    if os.path.exists(path):
+                        os.remove(path)
             else:
                 input_img = input_img.get("image", [])
                 for index in range(len(input_img)):
                     item = input_img[index]
-                    with open(os.path.join(output_folder, item), "rb") as fp:
-                        b_head = "data:image/" + item.split(".")[-1] + ";base64"
-                        b_body = base64.b64encode(fp.read())
-                        b_body = str(b_body).replace("b'", "").replace("'", "")
-                        b_img = b_head + "," + b_body
-                        base64_list.append(b_img)
-                        results[index]["path"] = results[index]["path"].replace(
-                            id + "_", "") if results[index]["path"] != "" \
-                            else ""
-
-                        results[index].update({"base64": b_img})
+                    file_path = os.path.join(output_folder, item)
+                    if not os.path.exists(file_path):
                         results_pack.append(results[index])
-                    os.remove(item)
-                    os.remove(os.path.join(output_folder, item))
+                        os.remove(item)
+                    else:
+                        with open(file_path, "rb") as fp:
+                            b_head = "data:image/" + item.split(
+                                ".")[-1] + ";base64"
+                            b_body = base64.b64encode(fp.read())
+                            b_body = str(b_body).replace("b'", "").replace(
+                                "'", "")
+                            b_img = b_head + "," + b_body
+                            base64_list.append(b_img)
+                            results[index]["path"] = results[index]["path"].replace(
+                                id + "_", "") if results[index]["path"] != "" \
+                                else ""
+
+                            results[index].update({"base64": b_img})
+                            results_pack.append(results[index])
+                        os.remove(item)
+                        os.remove(os.path.join(output_folder, item))
         else:
             results_pack = results
 
