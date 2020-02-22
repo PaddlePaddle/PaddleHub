@@ -18,7 +18,7 @@ import time
 import os
 import base64
 import logging
-import shutil
+import glob
 
 cv_module_method = {
     "vgg19_imagenet": "predict_classification",
@@ -140,7 +140,7 @@ def predict_mask(module, input_img, id, batch_size, extra=None, r_img=True):
     global use_gpu
     method_name = module.desc.attr.map.data['default_signature'].s
     predict_method = getattr(module, method_name)
-    data_len = len(input_img)
+    data_len = len(input_img) if input_img is not None else 0
     results = []
     try:
         data = {}
@@ -168,6 +168,11 @@ def predict_mask(module, input_img, id, batch_size, extra=None, r_img=True):
                 for index in range(len(results)):
                     results[index]["path"] = ""
                 results_pack = results
+                str_id = id + "*"
+                files_deleted = glob.glob(str_id)
+                for path in files_deleted:
+                    if os.path.exists(path):
+                        os.remove(path)
             else:
                 input_img = input_img.get("image", [])
                 for index in range(len(input_img)):
