@@ -279,7 +279,7 @@ cv2.destroyAllWindows()
 此DEMO是显示一个固定视频，分析导出的 json 渲染到网页里面，如需实时显示需要再次开发
 
 ### python 导出的数据
-使用上面的 python 文件完整执行后会有3个种类的数据输出
+使用上面的 python 文件完整执行后会有3个种类的数据输出，放到`web/video/result`目录下
 ![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/329AC9C2D89447EABE6B8C45D620441E?ynotemdtimestamp=1582271320612)
 
 ### json数据结构
@@ -302,32 +302,3 @@ cv2.destroyAllWindows()
 ![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/DC72DE1CF51747138871BB0E3D54E20D?ynotemdtimestamp=1582271320612)
 
 北京奇想天外科技有限公司
-
-**公司简介**
-
-我们是一个充满活力的硬件方案团队，成员30人。部分来自微软，腾讯，百度等知名互联网公司，核心成员为连续创业者，开发经验，产品项目流程管理经验丰富，能够为同样创业的你，或是需要外包开发服务的你，提供优质的咨询及外包服务。
-
-奇想天外是腾讯，联通等公司的软件供应商，也曾为多个创业项目完成从无到有的研发工作，其中不乏已经获得千万级别投资的优质项目。在这个过程中积累的经验，不仅为开发阶段提供了重要的时间和质量的保障，还可以在项目进行初期为您提供免费的产品和项目咨询，产品运营推广咨询，和行业内优质的资源信息。最终制定行之有效的研发及选型计划。
-
-公司业务范围：
-
-1.	产品，项目，实施方案免费咨询。
-2.	IOS 安卓，端端开发
-3.	小程序，微信公众号开发
-4.	平面，交互设计
-5.	产品外观，内部结构设计
-6.	硬件PCB研发，供应链管理，成本调研
-7.	MR AR 方向研发
-8.	区块链项目研发
-9.	网站开发
-
-
-**联系方式**
-
-公司官网：[http://www.cheerthink.com/](http://www.cheerthink.com/)
-
-邮箱：[wangchao@cheerthink.com](mailto:wangchao@cheerthink.com)
-
-微信：KAOL2046
-
-![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/D95FB28A2E5D4180BB6AF8948D892F8D?ynotemdtimestamp=1582271320612)
