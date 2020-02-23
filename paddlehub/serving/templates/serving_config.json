@@ -1,27 +1,19 @@
 {
-  "modules_info": [
-  {
-    "module": "lac",
-    "version": "1.0.0",
-    "batch_size": 200
+  "modules_info": {
+
+    "yolov3_darknet53_coco2017": {
+      "name": "yolov3_darknet53_coco2017",
+      "version": "1.0.0",
+      "batch_size": 1,
+      "use_gpu": false
+    },
+    "senta_lstm": {
+      "name": "senta_lstm",
+      "version": "1.0.0",
+      "batch_size": 1,
+      "use_gpu": false
+    }
   },
-  {
-    "module": "senta_lstm",
-    "version": "1.0.0",
-    "batch_size": 1
-  },
-  {
-    "module": "yolov3_darknet53_coco2017",
-    "version": "1.0.0",
-    "batch_size": 1
-  },
-  {
-    "module": "faster_rcnn_coco2017",
-    "version": "1.0.0",
-    "batch_size": 1
-  }
-],
-  "use_gpu": false,
   "port": 8866,
   "use_multiprocess": true,
   "workers": 3
