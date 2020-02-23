@@ -65,10 +65,14 @@ def base64s_to_cvmats(base64s):
     return base64s
 
 
-def handle_mask_results(results):
+def handle_mask_results(results, data_len):
     result = []
-    if len(results) <= 0:
-        return results
+    if len(results) <= 0 and data_len != 0:
+        return [{
+            "data": "No face.",
+            "id": i,
+            "path": ""
+        } for i in range(1, data_len + 1)]
     _id = results[0]["id"]
     _item = {
         "data": [],
@@ -87,6 +91,15 @@ def handle_mask_results(results):
                 "id": item.get("id", _id)
             }
     result.append(_item)
+    for index in range(1, data_len + 1):
+        if index > len(result):
+            result.append({"data": "No face.", "id": index, "path": ""})
+        elif result[index - 1]["id"] != index:
+            result.insert(index - 1, {
+                "data": "No face.",
+                "id": index,
+                "path": ""
+            })
     return result
 
 
