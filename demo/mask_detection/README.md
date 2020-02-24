@@ -1,11 +1,11 @@
 # 基于PaddleHub实现口罩佩戴检测应用
 
-本文档基于飞桨本次开源的口罩佩戴识别模型, 提供了一个完整的支持视频流的WebDemo，以及高性能的Python和C++集成部署方案, 可用于不同场景下的软件集成。
+本文档基于飞桨本次开源的口罩佩戴识别模型, 提供了一个完整的支持视频流的Web Demo，以及高性能的Python和C++集成部署方案, 适用于不同场景下的软件集成。
 
 ## 目录
-- [1. 搭建视频流场景的WebDemo](#1搭建视频流场景WebDemo)
-- [2. 高性能Python部署方案](#2高性能Python部署方案)
-- [3. 高性能C++部署方案](#3高性能c部署方案)
+- [1. 搭建视频流场景的WebDemo](#1-搭建视频流场景webdemo)
+- [2. 高性能Python部署方案](#2-高性能Python部署方案)
+- [3. 高性能C++部署方案](#3-高性能c部署方案)
 
 ## 1. 搭建视频流场景WebDemo
 ![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/BB6BC87A45D146CEBA7BF237B5383835?ynotemdtimestamp=1582271320612)
@@ -21,14 +21,14 @@
 
 ![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/7E12DBD91D1D4AB5B33C84786D519065?ynotemdtimestamp=1582271320612)![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/2BD974FB990C4C448B30B04194545054?ynotemdtimestamp=1582271320612)![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/E49E34A071F8484D948511430FAB0360?ynotemdtimestamp=1582271320612)
 
-### 1. 部署环境
+### 1.1 部署环境
 参考： https://www.paddlepaddle.org.cn/install/quick
 
 #### 安装paddlehub
 `pip install paddlehub`
 
 
-### 2. 开发识别服务
+### 1.2 开发识别服务
 #### 加载预训练模型
 ```python
 import paddlehub as hub
@@ -83,7 +83,7 @@ print(results)
 ```
 >"label"：是否戴口罩，"confidence"：置信度，其余字段为脸框的位置大小
 
-### 将结果显示到原视频帧中
+#### 将结果显示到原视频帧中
 ```python
 # results为口罩检测结果
 for result in results:
@@ -105,7 +105,7 @@ for result in results:
 
 >原DEMO中是英文+置信度显示在框的上面，尝试改为中文，遇到字体问题，以下是解决办法
 
-### 图片写入中文
+#### 图片写入中文
 
 需要事先准备ttf/otf等格式的字体文件
 ```python
@@ -142,7 +142,7 @@ for result in results:
 ![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/4F75E5C6F42F4C3CBE1341742D032847?ynotemdtimestamp=1582271320612)
 
 
-### 提取头像文件
+#### 提取头像文件
 ```python
 img_name = "avatar_%d.png" % (maskIndex)
 path = "./result/" + img_name
@@ -151,7 +151,7 @@ cv2.imwrite(path, image,[int(cv2.IMWRITE_PNG_COMPRESSION), 9])
 ```
 
 
-### 结果写入JSON
+#### 结果写入JSON
 ```python
 with open("./result/2-mask_detection.json","w") as f:
     json.dump(data, f)
@@ -161,17 +161,17 @@ with open("./result/2-mask_detection.json","w") as f:
 
 完整代码可以参考`mask_detection.py`
 
-## 3.制作网页呈现效果
+### 1.3 制作网页呈现效果
 此DEMO是显示一个固定视频，分析导出的 json 渲染到网页里面，如需实时显示需要再次开发
 
-### python 导出的数据
+#### python 导出的数据
 使用上面的 python 文件完整执行后会有3个种类的数据输出，放到`web/video/result`目录下
 ![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/329AC9C2D89447EABE6B8C45D620441E?ynotemdtimestamp=1582271320612)
 
-### json数据结构
+#### json数据结构
 ![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/5D46F32061B047D4AB0AC016FE2A63A5?ynotemdtimestamp=1582271320612)
 
-### 使用数据渲染网页
+#### 使用数据渲染网页
 
 - 网页中左侧 "视频播放视频区"，播放同时实时回调当前播放的时间点
 - 根据时间点换算为帧（1秒30帧），遍历 json 数据中的数据
@@ -179,12 +179,12 @@ with open("./result/2-mask_detection.json","w") as f:
 
 ![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/6329B326216A4950BF35E0CB37CDC58F?ynotemdtimestamp=1582271320612)
 
-## 2. 高性能Python部署集成方案
+## 2. 高性能Python部署方案
 
 更多信息可以参考[文档](./python/README.md)
 
 
-## 3. 高性能C++部署集成方案
+## 3. 高性能C++部署方案
 
 更多信息可以参考[文档](./cpp/README.md)
 
