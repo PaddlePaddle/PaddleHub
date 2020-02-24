@@ -135,15 +135,18 @@ def runnable(func):
 
 
 class Module(object):
-
-    _record = {}
-
-    def __new__(cls, name=None, directory=None, module_dir=None, version=None):
+    def __new__(cls,
+                name=None,
+                directory=None,
+                module_dir=None,
+                version=None,
+                **kwargs):
         if cls.__name__ == "Module":
             if name:
-                module = cls.init_with_name(name=name, version=version)
+                module = cls.init_with_name(
+                    name=name, version=version, **kwargs)
             elif directory:
-                module = cls.init_with_directory(directory=directory)
+                module = cls.init_with_directory(directory=directory, **kwargs)
             elif module_dir:
                 logger.warning(
                     "Parameter module_dir is deprecated, please use directory to specify the path"
@@ -154,19 +157,28 @@ class Module(object):
                     version = module_dir[1]
                 else:
                     directory = module_dir
-                module = cls.init_with_directory(directory=directory)
+                module = cls.init_with_directory(directory=directory, **kwargs)
             CacheUpdater("update_cache", module.name, module.version).start()
         else:
-            module = object.__new__(cls)
+            if not name and not directory:
+                directory = os.path.dirname(
+                    sys.modules[cls.__module__].__file__)
+                module = Module.init_with_directory(
+                    directory=directory, **kwargs)
+            else:
+                module = object.__new__(cls)
 
         return module
 
-    def __init__(self, name=None, directory=None, module_dir=None,
-                 version=None):
+    def __init__(self,
+                 name=None,
+                 directory=None,
+                 module_dir=None,
+                 version=None,
+                 **kwargs):
         # Avoid module being initialized multiple times
-        if not directory or id(self) in Module._record:
+        if "_is_initialize" in self.__dict__ and self._is_initialize:
             return
-        Module._record[id(self)] = True
 
         mod = self.__class__.__module__ + "." + self.__class__.__name__
         if mod in _module_runnable_func:
@@ -195,10 +207,11 @@ class Module(object):
         self._summary = utils.from_module_attr_to_pyobj(
             module_info.map.data['summary'])
 
-        self._initialize()
+        self._initialize(**kwargs)
+        self._is_initialize = True
 
     @classmethod
-    def init_with_name(cls, name, version=None):
+    def init_with_name(cls, name, version=None, **kwargs):
         fp_lock = open(os.path.join(CACHE_HOME, name), "a")
         lock.flock(fp_lock, lock.LOCK_EX)
         log_msg = "Installing %s module" % name
@@ -214,22 +227,29 @@ class Module(object):
 
         logger.info(tips)
         lock.flock(fp_lock, lock.LOCK_UN)
-        return cls.init_with_directory(directory=module_dir[0])
+        return cls.init_with_directory(directory=module_dir[0], **kwargs)
 
     @classmethod
-    def init_with_directory(cls, directory):
+    def init_with_directory(cls, directory, **kwargs):
         desc_file = os.path.join(directory, MODULE_DESC_PBNAME)
         checker = ModuleChecker(directory)
         checker.check()
 
         module_code_version = checker.module_code_version
         if module_code_version == "v2":
-            basename = os.path.split(directory)[-1]
-            dirname = os.path.join(*list(os.path.split(directory)[:-1]))
-            sys.path.append(dirname)
-            user_module = importlib.import_module("{}.module".format(basename))
-            return user_module.HubModule(directory=directory)
-        return ModuleV1(directory=directory)
+            sys.path.insert(0, directory)
+            # clear module cache
+            if 'module' in sys.modules:
+                sys.modules.pop('module')
+            _module = importlib.import_module("module")
+            for _item, _cls in inspect.getmembers(_module, inspect.isclass):
+                _item = _module.__dict__[_item]
+                if issubclass(_item, Module):
+                    user_module = _item(directory=directory, **kwargs)
+                    break
+            sys.path.pop(0)
+            return user_module
+        return ModuleV1(directory=directory, **kwargs)
 
     @property
     def run_func(self):
