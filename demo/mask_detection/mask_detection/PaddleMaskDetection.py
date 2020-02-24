@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 import paddlehub as hub
 import cv2
 from PIL import Image, ImageDraw, ImageFont
@@ -12,7 +13,8 @@ module = hub.Module(name="pyramidbox_lite_mobile_mask")
 def paint_chinese(im, chinese, position, fontsize, color_bgr):
     img_PIL = Image.fromarray(cv2.cvtColor(
         im, cv2.COLOR_BGR2RGB))  # 图像从OpenCV格式转换成PIL格式
-    font = ImageFont.truetype('思源黑体SC-Heavy.otf', fontsize, encoding="utf-8")
+    font = ImageFont.truetype(
+        'SourceHanSansSC-Medium.otf', fontsize, encoding="utf-8")
     #color = (255,0,0) # 字体颜色
     #position = (100,100)# 文字输出位置
     color = color_bgr[::-1]
@@ -38,8 +40,8 @@ maskIndex = 0
 index = 0
 data = []
 
-# capture = cv2.VideoCapture(0) # 打开摄像头
-capture = cv2.VideoCapture('./2.mp4')  # 打开视频文件
+capture = cv2.VideoCapture(0)  # 打开摄像头
+#capture = cv2.VideoCapture('./2.mp4')  # 打开视频文件
 while (1):
     frameData = {}
 
