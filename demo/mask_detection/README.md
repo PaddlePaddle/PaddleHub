@@ -38,11 +38,18 @@ module = hub.Module(name="pyramidbox_lite_mobile_mask") #口罩检测模型
 >以上语句paddlehub会自动下载口罩检测模型 "pyramidbox_lite_mobile_mask" 不需要提前下载模型
 
 #### OpenCV打开摄像头或视频文件
+
+下载测试视频
+
+```
+wget https://paddlehub.bj.bcebos.com/mask_detection/test_video.mp4
+```
+
 ```python
 import cv2
 
 capture = cv2.VideoCapture(0) # 打开摄像头
-# capture = cv2.VideoCapture('./2.mp4') # 打开视频文件
+# capture = cv2.VideoCapture('./test_video.mp4') # 打开视频文件
 while(1):
     ret, frame = capture.read() # frame即视频的一帧数据
     if ret == False:
@@ -109,24 +116,22 @@ for result in results:
 
 需要事先准备ttf/otf等格式的字体文件
 ```python
-def paint_chinese_opencv(im,chinese,position,fontsize,color_bgr):#opencv输出中文
-    img_PIL = Image.fromarray(cv2.cvtColor(im,cv2.COLOR_BGR2RGB))# 图像从OpenCV格式转换成PIL格式
+def paint_chinese_opencv(im,chinese,position,fontsize,color_bgr):
+    img_PIL = Image.fromarray(cv2.cvtColor(im,cv2.COLOR_BGR2RGB)) # 图像从OpenCV格式转换成PIL格式
     font = ImageFont.truetype('思源黑体SC-Heavy.otf',fontsize,encoding="utf-8") # 加载字体文件
     #color = (255,0,0) # 字体颜色
-    #position = (100,100)# 文字输出位置
+    #position = (100,100) # 文字输出位置
     color = color_bgr[::-1]
     draw = ImageDraw.Draw(img_PIL)
-    draw.text(position,chinese,font=font,fill=color)# PIL图片上打印汉字 # 参数1：打印坐标，参数2：文本，参数3：字体颜色，参数4：字体
-    img = cv2.cvtColor(np.asarray(img_PIL),cv2.COLOR_RGB2BGR)# PIL图片转cv2 图片
+    # PIL图片上打印汉字 # 参数1：打印坐标，参数2：文本，参数3：字体颜色，参数4：字体
+    draw.text(position,chinese,font=font,fill=color)
+    img = cv2.cvtColor(np.asarray(img_PIL),cv2.COLOR_RGB2BGR)# PIL图片转cv2图片
     return img
 ```
 ```python
 for result in results:
-    # print(result)
-
     label = result['data']['label']
     confidence = result['data']['confidence']
-
     top, right, bottom, left = int(result['data']['top']), int(result['data']['right']), int(result['data']['bottom']), int(result['data']['left'])
 
     color = (0, 255, 0)
@@ -183,11 +188,9 @@ with open("./result/2-mask_detection.json","w") as f:
 
 更多信息可以参考[文档](./python/README.md)
 
-
 ## 3. 高性能C++部署方案
 
 更多信息可以参考[文档](./cpp/README.md)
-
 
 ## 欢迎交流
 
