@@ -1,4 +1,4 @@
-# 百度PaddlePaddle实现口罩检测应用
+# PaddleHub实现口罩佩戴检测应用
 
 ## 0 项目介绍
 ![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/BB6BC87A45D146CEBA7BF237B5383835?ynotemdtimestamp=1582271320612)

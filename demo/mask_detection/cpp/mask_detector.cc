@@ -77,7 +77,7 @@ void VisualizeResult(const cv::Mat& img,
       text = "NO MASK:  ";
       roi_color = cv::Scalar(0, 0, 255);
     }
-    text += std::to_string(static_cast<int>(results[i].score*100)) + "%";
+    text += std::to_string(static_cast<int>(results[i].confidence * 100)) + "%";
     int font_face = cv::FONT_HERSHEY_TRIPLEX;
     double font_scale = 1.f;
     float thickness = 1;
@@ -243,7 +243,7 @@ void MaskClassifier::Postprocess(std::vector<FaceResult>* faces) {
       }
     }
     (*faces)[i].class_id = best_class_id;
-    (*faces)[i].score = best_class_score;
+    (*faces)[i].confidence = best_class_score;
   }
 }
 
