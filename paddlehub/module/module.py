@@ -135,7 +135,6 @@ class Module(object):
             self._run_func = getattr(self, _run_func_name)
         else:
             self._run_func = None
-        self._code_version = "v2"
         self._directory = directory
         self._initialize(**kwargs)
         self._is_initialize = True
@@ -215,10 +214,6 @@ class Module(object):
         return self.__class__._name
 
     @property
-    def code_version(self):
-        return self._code_version
-
-    @property
     def is_runnable(self):
         return self._run_func != None
 
@@ -252,7 +247,6 @@ class ModuleV1(Module):
         if not directory:
             return
         super(ModuleV1, self).__init__(name, directory, module_dir, version)
-        self._code_version = "v1"
         self.program = None
         self.assets = []
         self.helper = None
