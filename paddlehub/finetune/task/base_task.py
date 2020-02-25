@@ -772,7 +772,8 @@ class BaseTask(object):
             "fp32": fluid.core.AnalysisConfig.Precision.Float32,
             "fp16": fluid.core.AnalysisConfig.Precision.Half
         }
-        predictor_config = fluid.core.AnalysisConfig(self.config.checkpoint_dir)
+        predictor_config = fluid.core.AnalysisConfig(
+            os.path.join(self.config.checkpoint_dir, "best_model"))
         if self.config.use_cuda:
             predictor_config.enable_use_gpu(100, 0)
             predictor_config.switch_ir_optim(True)
@@ -858,6 +859,12 @@ class BaseTask(object):
                 step_run_state = RunState(len(self.fetch_list))
                 step_run_state.run_step = 1
                 num_batch_examples = len(batch)
+
+                if self.is_predict_phase and self.deploy_mode != "debug":
+                    batch = fluid.core.PaddleTensor(batch)
+                    fetch_result = self.predictor.run(batch)
+                    print(fetch_result)
+                    return
 
                 fetch_result = self.exe.run(
                     self.main_program_to_be_run,
