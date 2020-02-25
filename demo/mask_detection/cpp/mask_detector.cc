@@ -258,7 +258,7 @@ void MaskClassifier::Predict(std::vector<FaceResult>* faces) {
   predictor_->ZeroCopyRun();
   // Get output tensor
   auto output_names = predictor_->GetOutputNames();
-  auto out_tensor = predictor_->GetOutputTensor(output_names[1]);
+  auto out_tensor = predictor_->GetOutputTensor(output_names[0]);
   std::vector<int> output_shape = out_tensor->shape();
   // Calculate output length
   int output_size = 1;
