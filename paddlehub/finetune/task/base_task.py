@@ -778,10 +778,6 @@ class BaseTask(object):
             predictor_config.enable_use_gpu(100, 0)
             predictor_config.switch_ir_optim(True)
             if self.deploy_mode in ["int8", "fp16", "fp32"]:
-                if self.deploy_mode not in TRT_PRECISION_MAP:
-                    raise ValueError(
-                        "Invalid deploy_mode [%s], only support[int8, fp16, fp32]"
-                        % self.deploy_mode)
                 precision_type = TRT_PRECISION_MAP[self.deploy_mode]
                 use_calib = (self.deploy_mode == "int8")
                 predictor_config.enable_tensorrt_engine(
@@ -801,6 +797,31 @@ class BaseTask(object):
         predictor_config.enable_memory_optim()
         return fluid.core.create_paddle_predictor(predictor_config)
 
+    def _deploy(self):
+        global_run_states = []
+        period_run_states = []
+
+        for run_step, batch in enumerate(self.reader(), start=1):
+            step_run_state = RunState(len(self.fetch_list))
+            step_run_state.run_step = 1
+            num_batch_examples = len(batch)
+
+            if not self.config.use_pyreader:
+                batch = batch[0]
+
+            batch = [fluid.core.PaddleTensor(data) for data in batch]
+            fetch_result = self.predictor.run(batch)
+            print(fetch_result)
+            for index, result in enumerate(fetch_result):
+                step_run_state.run_results[index] = result
+            step_run_state.run_examples += num_batch_examples
+            step_run_state.update()
+            period_run_states += [step_run_state]
+            self._run_step_event(step_run_state)
+
+        global_run_states += period_run_states
+        return global_run_states
+
     def predict(self,
                 data,
                 load_best_model=True,
@@ -812,16 +833,17 @@ class BaseTask(object):
         self.deploy_mode = deploy_mode
 
         with self.phase_guard(phase="predict"):
+            self._predict_data = data
+            self._predict_start_event()
             if self.deploy_mode == "debug":
                 if load_best_model:
                     self.init_if_load_best_model()
                 else:
                     self.init_if_necessary()
+                run_states = self._run()
             else:
                 self.predictor = self._create_predictor()
-            self._predict_data = data
-            self._predict_start_event()
-            run_states = self._run()
+                run_states = self._deploy()
             self._predict_end_event(run_states)
             self._predict_data = None
             if return_result:
@@ -852,6 +874,7 @@ class BaseTask(object):
                     self.reader,
                     multi_devices=self.config.use_data_parallel,
                     drop_last=True)
+
             global_run_states = []
             period_run_states = []
 
@@ -859,12 +882,6 @@ class BaseTask(object):
                 step_run_state = RunState(len(self.fetch_list))
                 step_run_state.run_step = 1
                 num_batch_examples = len(batch)
-
-                if self.is_predict_phase and self.deploy_mode != "debug":
-                    batch = fluid.core.PaddleTensor(batch)
-                    fetch_result = self.predictor.run(batch)
-                    print(fetch_result)
-                    return
 
                 fetch_result = self.exe.run(
                     self.main_program_to_be_run,
