@@ -6,7 +6,7 @@ import numpy as np
 import json
 import os
 
-module = hub.Module(name="pyramidbox_lite_mobile_mask")
+module = hub.Module(name="pyramidbox_lite_server_mask", version='1.1.0')
 
 # opencv输出中文
 def paint_chinese(im, chinese, position, fontsize, color_bgr):
@@ -29,8 +29,8 @@ if not os.path.exists(result_path):
     os.mkdir(result_path)
 
 name = "./result/1-mask_detection.mp4"
-width = 1920
-height = 1080
+width = 1280
+height = 720
 fps = 30
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 writer = cv2.VideoWriter(name, fourcc, fps, (width, height))
@@ -40,7 +40,7 @@ index = 0
 data = []
 
 capture = cv2.VideoCapture(0)  # 打开摄像头
-# capture = cv2.VideoCapture('./test_video.mp4')  # 打开视频文件
+#capture = cv2.VideoCapture('/Users/chenlingchi/Downloads/crowd.mp4')  # 打开视频文件
 while True:
     frameData = {}
     ret, frame = capture.read()  # frame即视频的一帧数据
@@ -88,10 +88,10 @@ while True:
             label_cn = "无口罩"
 
         cv2.rectangle(frame_copy, (left, top), (right, bottom), color, 3)
-        # cv2.putText(frame, label, (left, top-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
-        origin_point = (left, top - 36)
-        frame_copy = paint_chinese(frame_copy, label_cn, origin_point, 24,
-                                   color)
+        cv2.putText(frame, label, (left, top-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+        #origin_point = (left, top - 36)
+        #frame_copy = paint_chinese(frame_copy, label_cn, origin_point, 24,
+        #                           color)
 
     writer.write(frame_copy)
 
