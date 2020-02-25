@@ -286,7 +286,7 @@ cv2.destroyAllWindows()
 ![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/5D46F32061B047D4AB0AC016FE2A63A5?ynotemdtimestamp=1582271320612)
 
 ### 使用数据渲染网页
-
+- 点击网页中播放键开始播放
 - 网页中左侧 "视频播放视频区"，播放同时实时回调当前播放的时间点
 - 根据时间点换算为帧（1秒30帧），遍历 json 数据中的数据
 - 把数据中对应的数据输出到网页右侧 "信息区"

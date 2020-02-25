@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import json
 import os
+import subprocess
 
 module = hub.Module(name="pyramidbox_lite_mobile_mask")
 
@@ -23,15 +24,22 @@ def paint_chinese(im, chinese, position, fontsize, color_bgr):
     return img
 
 
+def excuteCommand(com):
+    ex = subprocess.Popen(com, stdout=subprocess.PIPE, shell=True)
+    out, err = ex.communicate()
+    status = ex.wait()
+    return out.decode()
+
+
 result_path = './result'
 if not os.path.exists(result_path):
     os.mkdir(result_path)
 
-name = "./result/1-mask_detection.mp4"
+name = "./result/1-mask_detection.avi"
 width = 1920
 height = 1080
 fps = 30
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+fourcc = cv2.VideoWriter_fourcc(*'mjpg')
 writer = cv2.VideoWriter(name, fourcc, fps, (width, height))
 
 maskIndex = 0
@@ -123,3 +131,10 @@ with open("./result/2-mask_detection.json", "w") as f:
 writer.release()
 
 cv2.destroyAllWindows()
+
+print("转码中...")
+
+excuteCommand(
+    'ffmpeg -i ./result/1-mask_detection.avi ./result/1-mask_detection.mp4')
+
+print("转码完成")

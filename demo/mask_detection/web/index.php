@@ -74,7 +74,6 @@ $cams[4]["cam_area_h"]=0.5;
 <meta name="format-detection" content="telephone=no, address=no, email=no" />
 <link rel="stylesheet" type="text/css" href="css/css.css">
 <script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/echarts.js"></script>
 <style type="text/css">
 body {
 	margin: 0;
@@ -145,8 +144,10 @@ body {
 										loaded: "loadedHandler",
 										autoplay: true,//是否自动播放					
 										drag: 'start', //拖动的属性
+										//debug: true, //拖动的属性
+										//flashplayer: true,
 										video: [
-											['video/result/222.mp4', 'video/mp4', '中文标清', 0],
+											['video/result/1-mask_detection.mp4', 'video/mp4', '中文标清', 0],
 										]
 									};
 									var player = new ckplayer(videoObject);
