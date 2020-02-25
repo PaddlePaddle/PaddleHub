@@ -32,7 +32,7 @@ name = "./result/1-mask_detection.mp4"
 width = 1280
 height = 720
 fps = 30
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+fourcc = cv2.VideoWriter_fourcc(*'vp90')
 writer = cv2.VideoWriter(name, fourcc, fps, (width, height))
 
 maskIndex = 0
