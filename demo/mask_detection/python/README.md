@@ -27,7 +27,7 @@ python export_model.py
 `pyramidbox_lite_server_mask`为服务器版模型，在此推荐该版本模型，精度相对移动版本更高。
 成功执行代码后导出的模型路径结构：
 ```
-pyramidbox_lite_mobile_mask
+pyramidbox_lite_server_mask
 |
 ├── mask_detector   # 口罩人脸分类模型
 |   ├── __model__   # 模型文件
@@ -50,15 +50,22 @@ python infer.py --models_dir=/path/to/models --img_paths=/path/to/images --video
 
 | 参数 | 是否必须|含义 |
 |-------|-------|----------|
-| models_dir | Yes|两个模型路径./pyramidbox_lite_mobile_mask |
+| models_dir | Yes|上诉导出的模型路径 |
 | img_paths |img_paths/video_path 二选一|需要预测的图片目录 |
 | video_path |img_paths/video_path 二选一|需要预测的视频目录|
 | video_size |No|预测视频分辨率大小(w,h) |
 | use_camera |No|是否打开摄像头进行预测 |
 | use_gpu |No|是否GPU，默认为False|
+说明：
+如果use_gpu=True，请先在命令行指定GPU,如：
+
+```
+export CUDA_VISIBLE_DEVICES=0
+```
 
 ## 3. 可视化结果
 执行完预测后，预测的可视化结果会保存在当前路径下的`./result/`下面。
+
 输入样例:
 ![avatar](./images/mask.jpg)
 
