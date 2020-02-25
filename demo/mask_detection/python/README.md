@@ -15,7 +15,7 @@
     请点击[官方安装文档](https://paddlepaddle.org.cn/install/quick) 选择适合的方式
   - `PaddleHub`的安装: `pip install paddlehub`
   - `opencv`的安装: `pip install opencv-python`
-  - 
+
 #### 1.2 从`PaddleHub`导出预测模型
 ```
 git clone https://github.com/PaddlePaddle/PaddleHub.git
