@@ -82,13 +82,13 @@ while True:
         maskIndex += 1
 
         color = (0, 255, 0)
-        label_cn = "有口罩"
+        label_cn = "戴口罩"
         if label == 'NO MASK':
             color = (0, 0, 255)
             label_cn = "无口罩"
 
         cv2.rectangle(frame_copy, (left, top), (right, bottom), color, 3)
-        cv2.putText(frame, label, (left, top-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+        cv2.putText(frame_copy, label, (left, top-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
         #origin_point = (left, top - 36)
         #frame_copy = paint_chinese(frame_copy, label_cn, origin_point, 24,
         #                           color)
