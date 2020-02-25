@@ -59,4 +59,8 @@ python infer.py --models_dir=/path/to/models --img_paths=/path/to/images --video
 
 ##3. 可视化
 
+输入样例:
+![avatar](./images/mask.jpg)
 
+输出结果:  
+![avatar](./images/mask.jpg.result.jpg)
