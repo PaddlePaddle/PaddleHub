@@ -33,24 +33,30 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser('mask detection.')
-    parser.add_argument(
-        '--models_dir', type=str, default='', help='path of models.')
-    parser.add_argument(
-        '--img_paths', type=str, default='', help='path of images')
-    parser.add_argument(
-        '--video_path', type=str, default='', help='path of video.')
-    parser.add_argument(
-        '--video_size', type=tuple, default=(1920, 1080), help='size of video.')
-    parser.add_argument(
-        '--use_camera',
-        type=bool,
-        default=False,
-        help='switch detect video or camera, default:video.')
-    parser.add_argument(
-        '--use_gpu',
-        type=bool,
-        default=False,
-        help='switch cpu/gpu, default:cpu.')
+    parser.add_argument('--models_dir',
+                        type=str,
+                        default='',
+                        help='path of models.')
+    parser.add_argument('--img_paths',
+                        type=str,
+                        default='',
+                        help='path of images')
+    parser.add_argument('--video_path',
+                        type=str,
+                        default='',
+                        help='path of video.')
+    parser.add_argument('--video_size',
+                        type=tuple,
+                        default=(1920, 1080),
+                        help='size of video.')
+    parser.add_argument('--use_camera',
+                        type=bool,
+                        default=False,
+                        help='switch detect video or camera, default:video.')
+    parser.add_argument('--use_gpu',
+                        type=bool,
+                        default=False,
+                        help='switch cpu/gpu, default:cpu.')
     args = parser.parse_args()
     return args
 
@@ -102,11 +108,10 @@ class MaskClassifier:
         h, w = self.EVAL_SIZE[1], self.EVAL_SIZE[0]
         inputs = []
         for face in faces:
-            im = cv2.resize(
-                face.rect_data, (128, 128),
-                fx=0,
-                fy=0,
-                interpolation=cv2.INTER_CUBIC)
+            im = cv2.resize(face.rect_data, (128, 128),
+                            fx=0,
+                            fy=0,
+                            interpolation=cv2.INTER_CUBIC)
             # HWC -> CHW
             im = im.swapaxes(1, 2)
             im = im.swapaxes(0, 1)
@@ -132,7 +137,7 @@ class MaskClassifier:
             input_data = np.concatenate(inputs)
             im_tensor = fluid.core.PaddleTensor(
                 input_data.copy().astype('float32'))
-            output_data = self.predictor.run([im_tensor])[1]
+            output_data = self.predictor.run([im_tensor])[0]
             output_data = output_data.as_ndarray()
             self.Postprocess(output_data, faces)
 
@@ -146,8 +151,10 @@ class FaceDetector:
 
     def Preprocess(self, image, shrink):
         h, w = int(image.shape[1] * shrink), int(image.shape[0] * shrink)
-        im = cv2.resize(
-            image, (h, w), fx=0, fy=0, interpolation=cv2.INTER_CUBIC)
+        im = cv2.resize(image, (h, w),
+                        fx=0,
+                        fy=0,
+                        interpolation=cv2.INTER_CUBIC)
         # HWC -> CHW
         im = im.swapaxes(1, 2)
         im = im.swapaxes(0, 1)
@@ -187,18 +194,16 @@ class FaceDetector:
 
 
 def predict_images(args):
-    detector = FaceDetector(
-        model_dir=args.models_dir + '/pyramidbox_lite/',
-        mean=[104.0, 177.0, 123.0],
-        scale=[0.007843, 0.007843, 0.007843],
-        use_gpu=args.use_gpu,
-        threshold=0.7)
+    detector = FaceDetector(model_dir=args.models_dir + '/pyramidbox_lite/',
+                            mean=[104.0, 177.0, 123.0],
+                            scale=[0.007843, 0.007843, 0.007843],
+                            use_gpu=args.use_gpu,
+                            threshold=0.7)
 
-    classifier = MaskClassifier(
-        model_dir=args.models_dir + '/mask_detector/',
-        mean=[0.5, 0.5, 0.5],
-        scale=[1.0, 1.0, 1.0],
-        use_gpu=args.use_gpu)
+    classifier = MaskClassifier(model_dir=args.models_dir + '/mask_detector/',
+                                mean=[0.5, 0.5, 0.5],
+                                scale=[1.0, 1.0, 1.0],
+                                use_gpu=args.use_gpu)
     names = []
     image_paths = []
     for name in os.listdir(args.img_paths):
@@ -225,18 +230,16 @@ def predict_video(args, im_shape=(1920, 1080), use_camera=False):
     else:
         capture = cv2.VideoCapture(args.video_path)
 
-    detector = FaceDetector(
-        model_dir=args.models_dir + '/pyramidbox_lite/',
-        mean=[104.0, 177.0, 123.0],
-        scale=[0.007843, 0.007843, 0.007843],
-        use_gpu=args.use_gpu,
-        threshold=0.7)
+    detector = FaceDetector(model_dir=args.models_dir + '/pyramidbox_lite/',
+                            mean=[104.0, 177.0, 123.0],
+                            scale=[0.007843, 0.007843, 0.007843],
+                            use_gpu=args.use_gpu,
+                            threshold=0.7)
 
-    classifier = MaskClassifier(
-        model_dir=args.models_dir + '/mask_detector/',
-        mean=[0.5, 0.5, 0.5],
-        scale=[1.0, 1.0, 1.0],
-        use_gpu=args.use_gpu)
+    classifier = MaskClassifier(model_dir=args.models_dir + '/mask_detector/',
+                                mean=[0.5, 0.5, 0.5],
+                                scale=[1.0, 1.0, 1.0],
+                                use_gpu=args.use_gpu)
 
     path = './result'
     isExists = os.path.exists(path)
@@ -244,8 +247,8 @@ def predict_video(args, im_shape=(1920, 1080), use_camera=False):
         os.makedirs(path)
     fps = 30
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    writer = cv2.VideoWriter(
-        os.path.join(path, 'result.mp4'), fourcc, fps, args.video_size)
+    writer = cv2.VideoWriter(os.path.join(path, 'result.mp4'), fourcc, fps,
+                             args.video_size)
     import time
     start_time = time.time()
     index = 0
