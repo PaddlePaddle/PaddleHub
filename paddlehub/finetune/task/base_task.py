@@ -32,6 +32,7 @@ else:
     from inspect import getfullargspec as get_args
 import numpy as np
 import paddle.fluid as fluid
+from paddle.fluid.core import PaddleDType, PaddleTensor, AnalysisConfig, create_paddle_predictor
 from tb_paddle import SummaryWriter
 
 import paddlehub as hub
@@ -194,7 +195,7 @@ class TaskHooks():
         return self._registered_hooks[hook_type]
 
     def __repr__(self):
-        return self.info(only_customized=False)
+        return self.info(show_default=False)
 
 
 class BaseTask(object):
@@ -338,46 +339,6 @@ class BaseTask(object):
             hub.common.paddle_helper.set_op_attr(
                 self.env.main_program, is_test=True)
 
-        if self.config.use_pyreader:
-            t_program = fluid.Program()
-            with fluid.program_guard(t_program, self.env.startup_program):
-                self.env.py_reader = fluid.layers.py_reader(
-                    capacity=64,
-                    shapes=[var.shape for var in self.feed_var_list],
-                    dtypes=[dtype_map[var.dtype] for var in self.feed_var_list],
-                    lod_levels=[var.lod_level for var in self.feed_var_list],
-                    use_double_buffer=False)
-
-                feed_var_list = self.feed_var_list
-                py_vars = fluid.layers.read_file(self.env.py_reader)
-                py_vars = to_list(py_vars)
-                input_dict = {
-                    feed_var_list[index].name: py_var
-                    for index, py_var in enumerate(py_vars)
-                }
-
-                hub.connect_program(
-                    pre_program=t_program,
-                    next_program=self.env.main_program,
-                    input_dict=input_dict,
-                    need_log=False)
-
-            self.env.main_program = t_program
-            if not self.is_predict_phase:
-                self.env.loss = self.env.main_program.global_block().vars[
-                    self.env.loss.name]
-                metrics_name = [var.name for var in self.env.metrics]
-                self.env.metrics = [
-                    self.env.main_program.global_block().vars[name]
-                    for name in metrics_name
-                ]
-
-            outputs_name = [var.name for var in self.env.outputs]
-            self.env.outputs = [
-                self.env.main_program.global_block().vars[name]
-                for name in outputs_name
-            ]
-
         if self.config.enable_memory_optim:
             for var_name in self.fetch_list:
                 var = self.env.main_program.global_block().vars[var_name]
@@ -405,7 +366,8 @@ class BaseTask(object):
                 self.env.main_program).with_data_parallel(
                     loss_name=loss_name,
                     share_vars_from=share_vars_from,
-                    build_strategy=self.build_strategy)
+                    build_strategy=self.build_strategy,
+                    places=self.places)
 
         self.exe.run(self.env.startup_program)
         self._build_env_end_event()
@@ -501,7 +463,10 @@ class BaseTask(object):
         else:
             data = None
         self.env.reader = self._base_data_reader.data_generator(
-            batch_size=self.config.batch_size, phase=self.phase, data=data)
+            batch_size=self.config.batch_size,
+            phase=self.phase,
+            data=data,
+            return_list=not self.config.use_pyreader)
         return self.env.reader
 
     @property
@@ -800,12 +765,59 @@ class BaseTask(object):
             self._eval_end_event(run_states)
             return run_states
 
-    def predict(self, data, load_best_model=True, return_result=False):
+    def _create_predictor(self):
+        # Paddle-TRT Precision Map
+        TRT_PRECISION_MAP = {
+            "int8": fluid.core.AnalysisConfig.Precision.Int8,
+            "fp32": fluid.core.AnalysisConfig.Precision.Float32,
+            "fp16": fluid.core.AnalysisConfig.Precision.Half
+        }
+        predictor_config = fluid.core.AnalysisConfig(self.config.checkpoint_dir)
+        if self.config.use_cuda:
+            predictor_config.enable_use_gpu(100, 0)
+            predictor_config.switch_ir_optim(True)
+            if self.deploy_mode in ["int8", "fp16", "fp32"]:
+                if self.deploy_mode not in TRT_PRECISION_MAP:
+                    raise ValueError(
+                        "Invalid deploy_mode [%s], only support[int8, fp16, fp32]"
+                        % self.deploy_mode)
+                precision_type = TRT_PRECISION_MAP[self.deploy_mode]
+                use_calib = (self.deploy_mode == "int8")
+                predictor_config.enable_tensorrt_engine(
+                    workspace_size=1 << 30,
+                    max_batch_size=self.config.batch_size,
+                    min_subgraph_size=40,
+                    precision_mode=precision_type,
+                    use_static=False,
+                    use_calib_mode=use_calib)
+        else:
+            predictor_config.disable_gpu()
+            if self.deploy_mode in ["int8", "fp16", "fp32"]:
+                logger.warning(
+                    "deploy_mode [\"int8\", \"fp16\", \"fp32\"] only work with GPU"
+                )
+        predictor_config.switch_specify_input_names(True)
+        predictor_config.enable_memory_optim()
+        return fluid.core.create_paddle_predictor(predictor_config)
+
+    def predict(self,
+                data,
+                load_best_model=True,
+                return_result=False,
+                deploy_mode="debug"):
+        assert deploy_mode in [
+            "debug", "limited", "int8", "fp16", "fp32"
+        ], "Invalid deploy_mode [%s], only support[\"debug\", \"limited\", \"int8\", \"fp16\", \"fp32\"]" % deploy_mode
+        self.deploy_mode = deploy_mode
+
         with self.phase_guard(phase="predict"):
-            if load_best_model:
-                self.init_if_load_best_model()
+            if self.deploy_mode == "debug":
+                if load_best_model:
+                    self.init_if_load_best_model()
+                else:
+                    self.init_if_necessary()
             else:
-                self.init_if_necessary()
+                self.predictor = self._create_predictor()
             self._predict_data = data
             self._predict_start_event()
             run_states = self._run()
@@ -825,128 +837,168 @@ class BaseTask(object):
     def _run(self, do_eval=False):
         with fluid.program_guard(self.main_program, self.startup_program):
             if self.config.use_pyreader:
-                return self._run_with_py_reader(do_eval=do_eval)
-            return self._run_with_data_feeder(do_eval=do_eval)
-
-    def _run_with_data_feeder(self, do_eval=False):
-
-        data_feeder = fluid.DataFeeder(
-            feed_list=self.feed_list, place=self.place)
-
-        global_run_states = []
-        period_run_states = []
-
-        parallel_batch = []
-        for run_step, batch in enumerate(self.reader(), start=1):
-            if self.config.use_data_parallel:
-                parallel_batch += batch
-                if len(parallel_batch) < self.device_count:
-                    continue
-                else:
-                    batch = parallel_batch
-                    parallel_batch = []
-
-            step_run_state = RunState(len(self.fetch_list))
-            step_run_state.run_step = 1
-            num_batch_examples = len(batch)
-
-            if self.return_numpy:
-                fetch_result = self.exe.run(
-                    self.main_program_to_be_run,
-                    feed=data_feeder.feed(batch),
-                    fetch_list=self.fetch_list)
+                data_loader = fluid.io.DataLoader.from_generator(
+                    feed_list=self.feed_var_list,
+                    capacity=64,
+                    use_double_buffer=True,
+                    iterable=True)
+                data_reader = data_loader.set_batch_generator(
+                    self.reader, places=self.places)
             else:
-                fetch_result = self.exe.run(
-                    self.main_program_to_be_run,
-                    feed=data_feeder.feed(batch),
-                    fetch_list=self.fetch_list,
-                    return_numpy=False)
-                fetch_result = [np.array(x) for x in fetch_result]
-
-            for index, result in enumerate(fetch_result):
-                step_run_state.run_results[index] = result
-            step_run_state.run_examples += num_batch_examples
-            step_run_state.update()
-            period_run_states += [step_run_state]
-            self.env.current_step += 1
-            if self.is_train_phase:
-                if self.current_step % self.config.log_interval == 0:
-                    self._log_interval_event(period_run_states)
-                    global_run_states += period_run_states
-                    period_run_states = []
-
-                if self.config.save_ckpt_interval and self.current_step % self.config.save_ckpt_interval == 0:
-                    self._save_ckpt_interval_event()
-
-                if do_eval and self.current_step % self.config.eval_interval == 0:
-                    self._eval_interval_event()
-
-            self._run_step_event(step_run_state)
-
-        global_run_states += period_run_states
-        return global_run_states
-
-    def _run_with_py_reader(self, do_eval=False):
-        flag = False
-        use_data_parallel_backup = self.config.use_data_parallel
-        while True:
+                data_feeder = fluid.DataFeeder(
+                    feed_list=self.feed_list, place=self.place)
+                data_reader = data_feeder.decorate_reader(
+                    self.reader,
+                    multi_devices=self.config.use_data_parallel,
+                    drop_last=True)
             global_run_states = []
             period_run_states = []
-            self.py_reader.decorate_paddle_reader(self.reader)
-            self.py_reader.start()
-            try:
-                while True:
-                    num_batch_examples = self.config.batch_size * self.device_count
-                    step_run_state = RunState(len(self.fetch_list))
-                    step_run_state.run_step = 1
 
-                    if self.return_numpy:
-                        fetch_result = self.exe.run(
-                            self.main_program_to_be_run,
-                            fetch_list=self.fetch_list)
-                    else:
-                        fetch_result = self.exe.run(
-                            self.main_program_to_be_run,
-                            fetch_list=self.fetch_list,
-                            return_numpy=False)
-                        fetch_result = [np.array(x) for x in fetch_result]
+            for run_step, batch in enumerate(data_reader(), start=1):
+                step_run_state = RunState(len(self.fetch_list))
+                step_run_state.run_step = 1
+                num_batch_examples = len(batch)
 
-                    for index, result in enumerate(fetch_result):
-                        step_run_state.run_results[index] = result
-                    step_run_state.run_examples += num_batch_examples
-                    step_run_state.update()
-                    period_run_states += [step_run_state]
-                    self.env.current_step += 1
-                    if self.is_train_phase:
-                        if self.current_step % self.config.log_interval == 0:
-                            self._log_interval_event(period_run_states)
-                            global_run_states += period_run_states
-                            period_run_states = []
+                fetch_result = self.exe.run(
+                    self.main_program_to_be_run,
+                    feed=batch,
+                    fetch_list=self.fetch_list)
 
-                        if self.config.save_ckpt_interval and self.current_step % self.config.save_ckpt_interval == 0:
-                            self._save_ckpt_interval_event()
+                for index, result in enumerate(fetch_result):
+                    step_run_state.run_results[index] = result
+                step_run_state.run_examples += num_batch_examples
+                step_run_state.update()
+                period_run_states += [step_run_state]
+                self.env.current_step += 1
+                if self.is_train_phase:
+                    if self.current_step % self.config.log_interval == 0:
+                        self._log_interval_event(period_run_states)
+                        global_run_states += period_run_states
+                        period_run_states = []
 
-                        if do_eval and self.current_step % self.config.eval_interval == 0:
-                            self._eval_interval_event()
+                    if self.config.save_ckpt_interval and self.current_step % self.config.save_ckpt_interval == 0:
+                        self._save_ckpt_interval_event()
 
-                    self._run_step_event(step_run_state)
-            except fluid.core.EOFException:
-                global_run_states += period_run_states
-                self.py_reader.reset()
-                '''
-                When opening use_data_parallel and use_pyreader, if the amount of data is too small,
-                the reader will have thrown EOF Exception when not fetching to the running result.
-                In this case, temporarily close the use_data_parallel to get the result.
-                '''
-                if flag:
-                    self.config._use_data_parallel = use_data_parallel_backup
-                elif len(global_run_states) == 0:
-                    flag = True
-                    self.config._use_data_parallel = False
-                    continue
-                break
+                    if do_eval and self.current_step % self.config.eval_interval == 0:
+                        self._eval_interval_event()
 
-        return global_run_states
+                self._run_step_event(step_run_state)
+
+            global_run_states += period_run_states
+            return global_run_states
+
+    # def _run_with_data_feeder(self, do_eval=False):
+    #     if self.config.use_pyreader:
+    #         data_loader = fluid.io.DataLoader.from_generator(
+    #             feed_list=self.feed_list, capacity=64, use_double_buffer=True, iterable=True)
+    #         data_reader=data_loader.set_batch_generator(self.reader(), places=self.places)
+    #     else:
+    #         data_feeder = fluid.DataFeeder(
+    #             feed_list=self.feed_list, place=self.place)
+    #         data_reader = data_feeder.decorate_reader(self.reader(), multi_devices=self.config.use_data_parallel,drop_last=True)
+    #
+    #     global_run_states = []
+    #     period_run_states = []
+    #
+    #     # parallel_batch = []
+    #     for run_step, batch in enumerate(data_reader, start=1):
+    #         # if self.config.use_data_parallel:
+    #         #     parallel_batch += batch
+    #         #     if len(parallel_batch) < self.device_count:
+    #         #         continue
+    #         #     else:
+    #         #         batch = parallel_batch
+    #         #         parallel_batch = []
+    #
+    #         step_run_state = RunState(len(self.fetch_list))
+    #         step_run_state.run_step = 1
+    #         num_batch_examples = len(batch)
+    #
+    #         fetch_result = self.exe.run(
+    #             self.main_program_to_be_run,
+    #             feed=batch,
+    #             fetch_list=self.fetch_list)
+    #
+    #         for index, result in enumerate(fetch_result):
+    #             step_run_state.run_results[index] = result
+    #         step_run_state.run_examples += num_batch_examples
+    #         step_run_state.update()
+    #         period_run_states += [step_run_state]
+    #         self.env.current_step += 1
+    #         if self.is_train_phase:
+    #             if self.current_step % self.config.log_interval == 0:
+    #                 self._log_interval_event(period_run_states)
+    #                 global_run_states += period_run_states
+    #                 period_run_states = []
+    #
+    #             if self.config.save_ckpt_interval and self.current_step % self.config.save_ckpt_interval == 0:
+    #                 self._save_ckpt_interval_event()
+    #
+    #             if do_eval and self.current_step % self.config.eval_interval == 0:
+    #                 self._eval_interval_event()
+    #
+    #         self._run_step_event(step_run_state)
+    #
+    #     global_run_states += period_run_states
+    #     return global_run_states
+    #
+    # def _run_with_py_reader(self, do_eval=False):
+    #     flag = False
+    #     use_data_parallel_backup = self.config.use_data_parallel
+    #     while True:
+    #         global_run_states = []
+    #         period_run_states = []
+    #         self.py_reader.decorate_paddle_reader(self.reader)
+    #         self.py_reader.start()
+    #         try:
+    #             while True:
+    #                 num_batch_examples = self.config.batch_size * self.device_count
+    #                 step_run_state = RunState(len(self.fetch_list))
+    #                 step_run_state.run_step = 1
+    #
+    #                 if self.is_predict_phase and self.deploy_mode !="debug":
+    #                     pass
+    #                 else:
+    #                     fetch_result = self.exe.run(
+    #                         self.main_program_to_be_run,
+    #                         fetch_list=self.fetch_list)
+    #
+    #                 for index, result in enumerate(fetch_result):
+    #                     step_run_state.run_results[index] = result
+    #                 step_run_state.run_examples += num_batch_examples
+    #                 step_run_state.update()
+    #                 period_run_states += [step_run_state]
+    #                 self.env.current_step += 1
+    #                 if self.is_train_phase:
+    #                     if self.current_step % self.config.log_interval == 0:
+    #                         self._log_interval_event(period_run_states)
+    #                         global_run_states += period_run_states
+    #                         period_run_states = []
+    #
+    #                     if self.config.save_ckpt_interval and self.current_step % self.config.save_ckpt_interval == 0:
+    #                         self._save_ckpt_interval_event()
+    #
+    #                     if do_eval and self.current_step % self.config.eval_interval == 0:
+    #                         self._eval_interval_event()
+    #
+    #                 self._run_step_event(step_run_state)
+    #         except fluid.core.EOFException:
+    #             global_run_states += period_run_states
+    #             self.py_reader.reset()
+    #             '''
+    #             When opening use_data_parallel and use_pyreader, if the amount of data is too small,
+    #             the reader will have thrown EOF Exception when not fetching to the running result.
+    #             In this case, temporarily close the use_data_parallel to get the result.
+    #             '''
+    #             if flag:
+    #                 self.config._use_data_parallel = use_data_parallel_backup
+    #             elif len(global_run_states) == 0:
+    #                 flag = True
+    #                 self.config._use_data_parallel = False
+    #                 continue
+    #             break
+
+    # return global_run_states
 
     def __repr__(self):
         return "Task: %s with metrics_choices: %s， reader: %s, %s" % (

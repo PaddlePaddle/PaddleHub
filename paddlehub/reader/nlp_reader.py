@@ -203,7 +203,8 @@ class BaseNLPReader(BaseReader):
                        batch_size=1,
                        phase='train',
                        shuffle=True,
-                       data=None):
+                       data=None,
+                       return_list=True):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is None ! It isn't allowed.")
         if phase == 'train':
@@ -255,7 +256,12 @@ class BaseNLPReader(BaseReader):
 
             for batch_data in self._prepare_batch_data(
                     examples, batch_size, phase=phase):
-                yield [batch_data]
+                if return_list:
+                    # for DataFeeder
+                    yield [batch_data]
+                else:
+                    # for DataLoader
+                    yield batch_data
 
         return wrapper
 
@@ -666,7 +672,8 @@ class RegressionReader(BaseNLPReader):
                        batch_size=1,
                        phase='train',
                        shuffle=True,
-                       data=None):
+                       data=None,
+                       return_list=True):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is none and it's not allowed.")
         if phase == 'train':
@@ -715,7 +722,12 @@ class RegressionReader(BaseNLPReader):
 
             for batch_data in self._prepare_batch_data(
                     examples, batch_size, phase=phase):
-                yield [batch_data]
+                if return_list:
+                    # for DataFeeder
+                    yield [batch_data]
+                else:
+                    # for DataLoader
+                    yield batch_data
 
         return wrapper
 
@@ -884,7 +896,8 @@ class ReadingComprehensionReader(BaseNLPReader):
                        batch_size=1,
                        phase='train',
                        shuffle=False,
-                       data=None):
+                       data=None,
+                       return_list=True):
         # we need all_examples and  all_features in write_prediction in reading_comprehension_task
         # we can also use all_examples and all_features to avoid duplicate long-time preprocessing
         examples = None
@@ -926,7 +939,12 @@ class ReadingComprehensionReader(BaseNLPReader):
 
             for batch_data in self._prepare_batch_data(
                     features, batch_size, phase=phase):
-                yield [batch_data]
+                if return_list:
+                    # for DataFeeder
+                    yield [batch_data]
+                else:
+                    # for DataLoader
+                    yield batch_data
 
         return wrapper
 
