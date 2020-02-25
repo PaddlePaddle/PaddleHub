@@ -50,7 +50,7 @@ python infer.py --models_dir=/path/to/models --img_paths=/path/to/images --video
 
 | 参数 | 是否必须|含义 |
 |-------|-------|----------|
-| models_dir | Yes|上诉导出的模型路径 |
+| models_dir | Yes|上述导出的模型路径 |
 | img_paths |img_paths/video_path 二选一|需要预测的图片目录 |
 | video_path |img_paths/video_path 二选一|需要预测的视频目录|
 | video_size |No|预测视频分辨率大小(w,h) |
