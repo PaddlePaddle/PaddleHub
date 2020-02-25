@@ -57,7 +57,7 @@ python infer.py --models_dir=/path/to/models --img_paths=/path/to/images --video
 | use_camera |No|是否打开摄像头进行预测 |
 | use_gpu |No|是否GPU，默认为False|
 
-##3. 可视化
+## 3. 可视化
 
 输入样例:
 ![avatar](./images/mask.jpg)
