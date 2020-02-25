@@ -134,6 +134,21 @@ def runnable(func):
     return _wrapper
 
 
+def moduleinfo(name, version, author, author_email, summary, type):
+    def _wrapper(cls):
+        if not issubclass(cls, Module):
+            raise RuntimeError
+        cls._name = name
+        cls._version = version
+        cls._author = author
+        cls._author_email = author_email
+        cls._summary = summary
+        cls._type = type
+        return cls
+
+    return _wrapper
+
+
 class Module(object):
     def __new__(cls,
                 name=None,
@@ -162,7 +177,7 @@ class Module(object):
         else:
             if not name and not directory:
                 directory = os.path.dirname(
-                    sys.modules[cls.__module__].__file__)
+                    os.path.abspath(sys.modules[cls.__module__].__file__))
                 module = Module.init_with_directory(
                     directory=directory, **kwargs)
             else:
@@ -188,25 +203,6 @@ class Module(object):
             self._run_func = None
         self._code_version = "v2"
         self._directory = directory
-        self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
-        self._desc = module_desc_pb2.ModuleDesc()
-        with open(self.module_desc_path, "rb") as file:
-            self._desc.ParseFromString(file.read())
-
-        module_info = self.desc.attr.map.data['module_info']
-        self._name = utils.from_module_attr_to_pyobj(
-            module_info.map.data['name'])
-        self._author = utils.from_module_attr_to_pyobj(
-            module_info.map.data['author'])
-        self._author_email = utils.from_module_attr_to_pyobj(
-            module_info.map.data['author_email'])
-        self._version = utils.from_module_attr_to_pyobj(
-            module_info.map.data['version'])
-        self._type = utils.from_module_attr_to_pyobj(
-            module_info.map.data['type'])
-        self._summary = utils.from_module_attr_to_pyobj(
-            module_info.map.data['summary'])
-
         self._initialize(**kwargs)
         self._is_initialize = True
 
@@ -232,32 +228,29 @@ class Module(object):
     @classmethod
     def init_with_directory(cls, directory, **kwargs):
         desc_file = os.path.join(directory, MODULE_DESC_PBNAME)
-        checker = ModuleChecker(directory)
-        checker.check()
+        if os.path.exists(desc_file):
+            checker = ModuleChecker(directory)
+            checker.check()
+            return ModuleV1(directory=directory, **kwargs)
 
-        module_code_version = checker.module_code_version
-        if module_code_version == "v2":
-            sys.path.insert(0, directory)
-            # clear module cache
-            if 'module' in sys.modules:
-                sys.modules.pop('module')
-            _module = importlib.import_module("module")
-            for _item, _cls in inspect.getmembers(_module, inspect.isclass):
-                _item = _module.__dict__[_item]
-                if issubclass(_item, Module):
-                    user_module = _item(directory=directory, **kwargs)
-                    break
-            sys.path.pop(0)
-            return user_module
-        return ModuleV1(directory=directory, **kwargs)
+        basename = os.path.split(directory)[-1]
+        dirname = os.path.join(*list(os.path.split(directory)[:-1]))
+        sys.path.insert(0, dirname)
+        # clear module cache
+        if 'module' in sys.modules:
+            sys.modules.pop('module')
+        _module = importlib.import_module("{}.module".format(basename))
+        for _item, _cls in inspect.getmembers(_module, inspect.isclass):
+            _item = _module.__dict__[_item]
+            if issubclass(_item, Module):
+                user_module = _item(directory=directory, **kwargs)
+                break
+        sys.path.pop(0)
+        return user_module
 
     @property
     def run_func(self):
         return self._run_func
-
-    @property
-    def desc(self):
-        return self._desc
 
     @property
     def directory(self):
@@ -265,27 +258,27 @@ class Module(object):
 
     @property
     def author(self):
-        return self._author
+        return self.__class__._author
 
     @property
     def author_email(self):
-        return self._author_email
+        return self.__class__._author_email
 
     @property
     def summary(self):
-        return self._summary
+        return self.__class__._summary
 
     @property
     def type(self):
-        return self._type
+        return self.__class__._type
 
     @property
     def version(self):
-        return self._version
+        return self.__class__._version
 
     @property
     def name(self):
-        return self._name
+        return self.__class__._name
 
     @property
     def code_version(self):
@@ -334,6 +327,26 @@ class ModuleV1(Module):
         self.processor = None
         self.extra_info = {}
 
+        # parse desc
+        self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
+        self._desc = module_desc_pb2.ModuleDesc()
+        with open(self.module_desc_path, "rb") as file:
+            self._desc.ParseFromString(file.read())
+
+        module_info = self.desc.attr.map.data['module_info']
+        self._name = utils.from_module_attr_to_pyobj(
+            module_info.map.data['name'])
+        self._author = utils.from_module_attr_to_pyobj(
+            module_info.map.data['author'])
+        self._author_email = utils.from_module_attr_to_pyobj(
+            module_info.map.data['author_email'])
+        self._version = utils.from_module_attr_to_pyobj(
+            module_info.map.data['version'])
+        self._type = utils.from_module_attr_to_pyobj(
+            module_info.map.data['type'])
+        self._summary = utils.from_module_attr_to_pyobj(
+            module_info.map.data['summary'])
+
         # cache data
         self.last_call_name = None
         self.cache_feed_dict = None
@@ -355,6 +368,34 @@ class ModuleV1(Module):
         self._generate_extra_info()
         self._restore_parameter(self.program)
         self._recover_variable_info(self.program)
+
+    @property
+    def desc(self):
+        return self._desc
+
+    @property
+    def author(self):
+        return self._author
+
+    @property
+    def author_email(self):
+        return self._author_email
+
+    @property
+    def summary(self):
+        return self._summary
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def version(self):
+        return self._version
+
+    @property
+    def name(self):
+        return self._name
 
     def _dump_processor(self):
         import inspect
