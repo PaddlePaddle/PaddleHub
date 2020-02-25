@@ -32,7 +32,7 @@
 #### 加载预训练模型
 ```python
 import paddlehub as hub
-module = hub.Module(name="pyramidbox_lite_mobile_mask") #口罩检测模型
+module = hub.Module(name="pyramidbox_lite_server_mask", version='1.1.0') #口罩检测模型
 ```
 
 >以上语句paddlehub会自动下载口罩检测模型 "pyramidbox_lite_mobile_mask" 不需要提前下载模型
