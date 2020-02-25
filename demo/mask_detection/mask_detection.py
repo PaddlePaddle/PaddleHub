@@ -40,7 +40,7 @@ index = 0
 data = []
 
 capture = cv2.VideoCapture(0)  # 打开摄像头
-#capture = cv2.VideoCapture('/Users/chenlingchi/Downloads/crowd.mp4')  # 打开视频文件
+#capture = cv2.VideoCapture('./test_video.mp4')  # 打开视频文件
 while True:
     frameData = {}
     ret, frame = capture.read()  # frame即视频的一帧数据
@@ -82,7 +82,7 @@ while True:
         maskIndex += 1
 
         color = (0, 255, 0)
-        label_cn = "戴口罩"
+        label_cn = "有口罩"
         if label == 'NO MASK':
             color = (0, 0, 255)
             label_cn = "无口罩"
