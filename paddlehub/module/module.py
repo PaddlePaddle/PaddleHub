@@ -169,9 +169,6 @@ class Module(object):
         basename = os.path.split(directory)[-1]
         dirname = os.path.join(*list(os.path.split(directory)[:-1]))
         sys.path.insert(0, dirname)
-        # clear module cache
-        if 'module' in sys.modules:
-            sys.modules.pop('module')
         _module = importlib.import_module("{}.module".format(basename))
         for _item, _cls in inspect.getmembers(_module, inspect.isclass):
             _item = _module.__dict__[_item]
