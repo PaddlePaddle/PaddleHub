@@ -793,7 +793,6 @@ class BaseTask(object):
                 logger.warning(
                     "deploy_mode [\"int8\", \"fp16\", \"fp32\"] only work with GPU"
                 )
-        predictor_config.switch_specify_input_names(True)
         predictor_config.enable_memory_optim()
         return fluid.core.create_paddle_predictor(predictor_config)
 
@@ -807,13 +806,14 @@ class BaseTask(object):
             num_batch_examples = len(batch)
 
             if not self.config.use_pyreader:
+                # if use pyreader, the nlp_reader return [batch]
                 batch = batch[0]
 
             batch = [fluid.core.PaddleTensor(data) for data in batch]
             fetch_result = self.predictor.run(batch)
             print(fetch_result)
             for index, result in enumerate(fetch_result):
-                step_run_state.run_results[index] = result
+                step_run_state.run_results[index] = result.as_ndarray()
             step_run_state.run_examples += num_batch_examples
             step_run_state.update()
             period_run_states += [step_run_state]
