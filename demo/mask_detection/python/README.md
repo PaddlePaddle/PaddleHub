@@ -56,6 +56,7 @@ python infer.py --models_dir=/path/to/models --img_paths=/path/to/images --video
 | video_size |No|预测视频分辨率大小(w,h) |
 | use_camera |No|是否打开摄像头进行预测 |
 | use_gpu |No|是否GPU，默认为False|
+
 说明：
 如果use_gpu=True，请先在命令行指定GPU,如：
 
