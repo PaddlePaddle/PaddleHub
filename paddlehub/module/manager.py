@@ -22,6 +22,9 @@ import shutil
 
 from functools import cmp_to_key
 import tarfile
+import sys
+import importlib
+import inspect
 
 import paddlehub as hub
 from paddlehub.common import utils
@@ -54,6 +57,22 @@ class LocalModuleManager(object):
                     "version"].s
                 return True, info
             else:
+                module_file = os.path.join(module_path, 'module.py')
+                if os.path.exists(module_file):
+                    basename = os.path.split(module_path)[-1]
+                    dirname = os.path.join(
+                        *list(os.path.split(module_path)[:-1]))
+                    sys.path.insert(0, dirname)
+                    _module = importlib.import_module(
+                        "{}.module".format(basename))
+                    for _item, _cls in inspect.getmembers(
+                            _module, inspect.isclass):
+                        _item = _module.__dict__[_item]
+                        if issubclass(_item, hub.Module):
+                            version = _item._version
+                            break
+                    sys.path.pop(0)
+                    return True, {'version': version}
                 logger.warning(
                     "%s does not exist, the module will be reinstalled" %
                     desc_pb_path)

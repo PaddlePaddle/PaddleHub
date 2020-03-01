@@ -46,7 +46,7 @@ class InstallCommand(BaseCommand):
             return False
         extra = {"command": "install"}
 
-        if argv[0].endswith("tar.gz") or argv[0].endswith("phm"):
+        if argv[0].endswith("tar.gz"):
             result, tips, module_dir = default_module_manager.install_module(
                 module_package=argv[0], extra=extra)
         elif os.path.exists(argv[0]) and os.path.isdir(argv[0]):
