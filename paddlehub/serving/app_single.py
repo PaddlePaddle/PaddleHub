@@ -21,13 +21,14 @@ import os
 import base64
 import logging
 import glob
-import shutil
 
 
 def predict_v2(module_info, input):
     serving_method_name = module_info["method_name"]
     serving_method = getattr(module_info["module"], serving_method_name)
-    predict_args = {"data": input}
+    predict_args = module_info["predict_args"]
+    predict_args.update({"data": input})
+
     for item in serving_method.__code__.co_varnames:
         if item in module_info.keys():
             predict_args.update({item: module_info[item]})

@@ -193,15 +193,15 @@ class ServingCommand(BaseCommand):
 
     def preinstall_modules(self):
         for key, value in self.modules_info.items():
+            init_args = value["init_args"]
             CacheUpdater(
                 "hub_serving_start",
                 module=key,
-                version=self.modules_info[key].get("version", "0.0.0")).start()
-            module_args = {}
-            for item in hub.Module.__init__.__code__.co_varnames:
-                if item in value.keys():
-                    module_args.update({item: value[item]})
-            m = hub.Module(**module_args)
+                version=init_args.get("version", "0.0.0")).start()
+
+            if "dir" not in init_args:
+                init_args.update({"name": key})
+            m = hub.Module(**init_args)
             method_name = m.serving_func_name
             if method_name is None:
                 raise RuntimeError("{} cannot be use for "
@@ -213,7 +213,8 @@ class ServingCommand(BaseCommand):
                 "code_version": m.code_version,
                 "version": m.version,
                 "category": category,
-                "module": m
+                "module": m,
+                "name": m.name
             })
 
     def start_app_with_file(self):
@@ -320,14 +321,16 @@ class ServingCommand(BaseCommand):
                     version = item.split("==")[1]
                 else:
                     module = item
-
-                self.modules_info.update(
-                    {module: {
-                        "version": version,
-                        "name": module
-                    }})
-                self.modules_info[module].update(
-                    self.args.modules_info.get(module, {}))
+                self.modules_info.update({
+                    module: {
+                        "init_args": {
+                            "version": version
+                        },
+                        "predict_args": {
+                            "use_gpu": self.args.use_gpu
+                        }
+                    }
+                })
 
     def start_serving(self):
         single_mode = self.args.use_singleprocess

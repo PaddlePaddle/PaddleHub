@@ -1,20 +1,26 @@
 {
   "modules_info": {
-
     "yolov3_darknet53_coco2017": {
-      "name": "yolov3_darknet53_coco2017",
-      "version": "1.0.0",
-      "batch_size": 1,
-      "use_gpu": false
+      "init_args": {
+        "version": "1.0.0"
+      },
+      "predict_args": {
+        "batch_size": 1,
+        "use_gpu": false
+      }
     },
-    "senta_lstm": {
-      "name": "senta_lstm",
-      "version": "1.0.0",
-      "batch_size": 1,
-      "use_gpu": false
+    "lac-v2": {
+      "init_args": {
+        "version": "2.1.0",
+        "user_dict": "./dict.txt"
+      },
+      "predict_args": {
+        "batch_size": 1,
+        "use_gpu": false
+      }
     }
   },
   "port": 8866,
-  "use_multiprocess": true,
+  "use_multiprocess": false,
   "workers": 3
 }
