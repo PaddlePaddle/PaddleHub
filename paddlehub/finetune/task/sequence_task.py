@@ -118,7 +118,8 @@ class SequenceLabelTask(BaseTask):
 
     def _add_loss(self):
         if self.add_crf:
-            labels = fluid.layers.sequence_unpad(self.labels[0], self.seq_len)
+            labels = fluid.layers.sequence_unpad(self.labels[0],
+                                                 self.seq_len_used)
             crf_cost = fluid.layers.linear_chain_crf(
                 input=self.emission,
                 label=labels,
@@ -133,7 +134,8 @@ class SequenceLabelTask(BaseTask):
 
     def _add_metrics(self):
         if self.add_crf:
-            labels = fluid.layers.sequence_unpad(self.labels[0], self.seq_len)
+            labels = fluid.layers.sequence_unpad(self.labels[0],
+                                                 self.seq_len_used)
             (precision, recall, f1_score, num_infer_chunks, num_label_chunks,
              num_correct_chunks) = fluid.layers.chunk_eval(
                  input=self.outputs[0],
@@ -146,7 +148,7 @@ class SequenceLabelTask(BaseTask):
         else:
             self.ret_labels = fluid.layers.reshape(
                 x=self.labels[0], shape=[-1, 1])
-            return [self.ret_labels, self.ret_infers, self.seq_len]
+            return [self.ret_labels, self.ret_infers, self.seq_len_used]
 
     def _calculate_metrics(self, run_states):
         total_infer = total_label = total_correct = loss_sum = 0
@@ -214,7 +216,7 @@ class SequenceLabelTask(BaseTask):
         if self.is_train_phase or self.is_test_phase:
             return [metric.name for metric in self.metrics] + [self.loss.name]
         elif self.is_predict_phase:
-            return [self.ret_infers.name] + [self.seq_len.name]
+            return [self.ret_infers.name] + [self.seq_len_used.name]
         return [output.name for output in self.outputs]
 
     def _postprocessing(self, run_states):
