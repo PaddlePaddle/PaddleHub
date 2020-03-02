@@ -452,6 +452,10 @@ class BaseTask(object):
         return _places
 
     @property
+    def return_numpy(self):
+        return True
+
+    @property
     def is_train_phase(self):
         return self.phase in ["train"]
 
