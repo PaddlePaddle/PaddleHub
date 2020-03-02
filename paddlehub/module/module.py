@@ -138,6 +138,7 @@ class Module(object):
         self._directory = directory
         self._initialize(**kwargs)
         self._is_initialize = True
+        self._code_version = "v2"
 
     @classmethod
     def init_with_name(cls, name, version=None, **kwargs):
@@ -211,6 +212,10 @@ class Module(object):
         return self.__class__._name
 
     @property
+    def code_version(self):
+        return self._code_version
+
+    @property
     def is_runnable(self):
         return self._run_func != None
 
@@ -251,6 +256,7 @@ class ModuleV1(Module):
         self.default_signature = None
         self.processor = None
         self.extra_info = {}
+        self._code_version = "v1"
 
         # parse desc
         self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
