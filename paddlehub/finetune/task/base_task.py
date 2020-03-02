@@ -1053,7 +1053,8 @@ class BaseTask(object):
                 fetch_result = self.exe.run(
                     self.main_program_to_be_run,
                     feed=batch,
-                    fetch_list=self.fetch_list)
+                    fetch_list=self.fetch_list,
+                    return_numpy=self.return_numpy)
 
                 for index, result in enumerate(fetch_result):
                     step_run_state.run_results[index] = result
