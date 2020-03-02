@@ -103,7 +103,6 @@ class SequenceLabelTask(BaseTask):
 
             self.ret_infers = fluid.layers.reshape(
                 x=fluid.layers.argmax(self.logits, axis=2), shape=[-1, 1])
-            ret_infers = fluid.layers.assign(self.ret_infers)
 
             logits = self.logits
             logits = fluid.layers.flatten(logits, axis=2)
