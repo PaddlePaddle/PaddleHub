@@ -45,6 +45,12 @@ from paddlehub.finetune.config import RunConfig
 
 class RunState(object):
     def __init__(self, length):
+        """
+        RunState is used to save the result of every running step
+
+        Args:
+            length (int): the number of fetch result
+        """
         self.run_time_begin = time.time()
         self.run_step = 0
         self.run_examples = 0
@@ -67,6 +73,9 @@ class RunState(object):
 
 class RunEnv(object):
     def __init__(self):
+        """
+        RunEnv saves the running environment of the train/dev/predict phase, including program, reader, metrics and so on.
+        """
         self.current_epoch = 0
         self.current_step = 0
         self.main_program = None
@@ -89,6 +98,9 @@ class RunEnv(object):
 
 class TaskHooks():
     def __init__(self):
+        """
+        TaskHooks can handle some tasks during the spectific event.
+        """
         self._registered_hooks = {
             "build_env_start_event": OrderedDict(),
             "build_env_end_event": OrderedDict(),
@@ -119,6 +131,14 @@ class TaskHooks():
         }
 
     def add(self, hook_type, name=None, func=None):
+        """
+        add the handler function to spectific event.
+
+        Args:
+            hook_type (str): the spectific event name
+            name (str): the handler function name, default None
+            func (func): the handler function, default None
+        """
         if not func or not callable(func):
             raise TypeError(
                 "The hook function is empty or it is not a function")
@@ -143,6 +163,13 @@ class TaskHooks():
             self._registered_hooks[hook_type][name] = func
 
     def delete(self, hook_type, name):
+        """
+        delete the handler function of spectific event.
+
+        Args:
+            hook_type (str): the spectific event name
+            name (str): the handler function name
+        """
         if self.exist(hook_type, name):
             del self._registered_hooks[hook_type][name]
         else:
@@ -151,6 +178,14 @@ class TaskHooks():
                 % (hook_type, name, hook_type))
 
     def modify(self, hook_type, name, func):
+        """
+        modify the handler function of spectific event.
+
+        Args:
+            hook_type (str): the spectific event name
+            name (str): the handler function name
+            func (func): the new handler function
+        """
         if not (isinstance(name, str) and callable(func)):
             raise TypeError(
                 "The hook name must be a string, and the hook function must be a function"
@@ -163,6 +198,16 @@ class TaskHooks():
                 % (hook_type, name, hook_type))
 
     def exist(self, hook_type, name):
+        """
+        check if the the handler function of spectific event is existing.
+
+        Args:
+            hook_type (str): the spectific event name
+            name (str): the handler function name
+
+        Returns:
+            bool: True or False
+        """
         if hook_type not in self._registered_hooks \
                 or name not in self._registered_hooks[hook_type]:
             return False
@@ -170,6 +215,15 @@ class TaskHooks():
             return True
 
     def info(self, show_default=False):
+        """
+        get the hooks information, including the source code.
+
+        Args:
+            show_default (bool): show the information of Paddlehub default hooks or not, default False
+
+        Returns:
+            str: the formatted string of the hooks information
+        """
         # formatted output the source code
         ret = ""
         for hook_type, hooks in self._registered_hooks.items():
@@ -206,6 +260,17 @@ class BaseTask(object):
                  startup_program=None,
                  config=None,
                  metrics_choices="default"):
+        """
+        BaseTask is the base class of all the task. It will complete the building of all the running environment.
+
+        Args:
+            feed_list (list): the inputs name
+            data_reader (object): data reader for the task
+            main_program (object): the customized main_program, default None
+            startup_program (object): the customized startup_program, default None
+            config (object): the config for the task, default None
+            metrics_choices (list): metrics used to the task, default None
+        """
 
         # base item
         self._base_data_reader = data_reader
@@ -315,6 +380,9 @@ class BaseTask(object):
             logger.info("The best model has been loaded")
 
     def _build_env(self):
+        """
+        building the program and strategy for specific running phase.
+        """
         if self.env.is_inititalized:
             return
 
@@ -382,10 +450,6 @@ class BaseTask(object):
         if not self.config.use_data_parallel:
             return [_places[0]]
         return _places
-
-    @property
-    def return_numpy(self):
-        return True
 
     @property
     def is_train_phase(self):
@@ -531,6 +595,9 @@ class BaseTask(object):
 
     @property
     def tb_writer(self):
+        """
+        get tb_writer for visualization.
+        """
         if not os.path.exists(self.config.checkpoint_dir):
             mkdir(self.config.checkpoint_dir)
         tb_log_dir = os.path.join(self.config.checkpoint_dir, "visualization")
@@ -539,7 +606,18 @@ class BaseTask(object):
         return self._tb_writer
 
     def create_event_function(self, hook_type):
+        """
+        create handlers for specific event.
+
+        Args:
+            hook_type (str): specific event name
+
+        Returns:
+            func: executable function, the class method will receive a parameter named self.
+        """
+
         def hook_function(self, *args):
+            # all the handler in self._hooks[hook_type] will be configured to executable
             for name, func in self._hooks[hook_type].items():
                 if inspect.ismethod(func):
                     func(*args)
@@ -552,20 +630,52 @@ class BaseTask(object):
     def hooks(self):
         return self._hooks
 
-    def hooks_info(self, only_customized=True):
-        return self._hooks.info(only_customized)
+    def hooks_info(self, show_default=False):
+        """
+        get the hooks information, including the source code.
+
+        Args:
+            show_default (bool): show the information of Paddlehub default hooks or not, default False
+
+        Returns:
+            str: the formatted string of the hooks information
+        """
+        return self._hooks.info(show_default)
 
     def add_hook(self, hook_type, name=None, func=None):
+        """
+        add the handler function to spectific event.
+
+        Args:
+            hook_type (str): the spectific event name
+            name (str): the handler function name, default None
+            func (func): the handler function, default None
+        """
         if name == None:
             name = "hook_%s" % id(func)
         self._hooks.add(hook_type, name=name, func=func)
         logger.info("Add hook %s:%s successfully" % (hook_type, name))
 
     def delete_hook(self, hook_type, name):
+        """
+        delete the handler function of spectific event.
+
+        Args:
+            hook_type (str): the spectific event name
+            name (str): the handler function name
+        """
         self._hooks.delete(hook_type, name)
         logger.info("Delete hook %s:%s successfully" % (hook_type, name))
 
     def modify_hook(self, hook_type, name, func):
+        """
+         modify the handler function of spectific event.
+
+         Args:
+             hook_type (str): the spectific event name
+             name (str): the handler function name
+             func (func): the new handler function
+         """
         self._hooks.modify(hook_type, name, func)
         logger.info("Modify hook %s:%s successfully" % (hook_type, name))
 
@@ -592,6 +702,12 @@ class BaseTask(object):
         logger.info("Evaluation on {} dataset start".format(self.phase))
 
     def _default_eval_end_event(self, run_states):
+        """
+        Paddlehub default hander for eval_end_event, it will complete visualization and metrics calculation
+
+        Args:
+            run_states (object): the results in eval phase
+        """
         eval_scores, eval_loss, run_speed = self._calculate_metrics(run_states)
         if 'train' in self._envs:
             self.tb_writer.add_scalar(
@@ -630,6 +746,12 @@ class BaseTask(object):
             self.save_inference_model(dirname=model_saved_dir)
 
     def _default_log_interval_event(self, run_states):
+        """
+        Paddlehub default hander for log_interval_event, it will complete visualization.
+
+        Args:
+            run_states (object): the results in train phase
+        """
         scores, avg_loss, run_speed = self._calculate_metrics(run_states)
         self.tb_writer.add_scalar(
             tag="Loss_{}".format(self.phase),
@@ -728,6 +850,15 @@ class BaseTask(object):
         return self.finetune(do_eval=True)
 
     def finetune(self, do_eval=False):
+        """
+        train and finetune the module parameters.
+
+        Args:
+            do_eval (bool): do eval during train phase or not
+
+        Returns:
+            RunState: the running result of train phase
+        """
 
         # Start to finetune
         with self.phase_guard(phase="train"):
@@ -752,6 +883,20 @@ class BaseTask(object):
             return run_states
 
     def eval(self, phase="dev", load_best_model=False):
+        """
+        evaluate the performance of current module.
+
+        Warning: DO NOT use eval(load_best_model=True) in finetune_and_eval
+        It will cause trainer unable to continue training from checkpoint after eval
+        More important, The model should evaluate current performance during training.
+
+        Args:
+            phase (str): current run phase
+            load_best_model (bool): load the best model or not
+
+        Returns:
+            RunState: the running result of eval phase
+        """
         # Warning: DO NOT use eval(load_best_model=True) in finetune_and_eval
         # It will cause trainer unable to continue training from checkpoint after eval
         # More important, The model should evaluate current performance during training.
@@ -766,37 +911,29 @@ class BaseTask(object):
             return run_states
 
     def _create_predictor(self):
-        # Paddle-TRT Precision Map
-        TRT_PRECISION_MAP = {
-            "int8": fluid.core.AnalysisConfig.Precision.Int8,
-            "fp32": fluid.core.AnalysisConfig.Precision.Float32,
-            "fp16": fluid.core.AnalysisConfig.Precision.Half
-        }
+        """
+        create high-performance predictor for predict.
+
+        Returns:
+            object: the high-performance predictor
+        """
         predictor_config = fluid.core.AnalysisConfig(
             os.path.join(self.config.checkpoint_dir, "best_model"))
         if self.config.use_cuda:
             predictor_config.enable_use_gpu(100, 0)
             predictor_config.switch_ir_optim(True)
-            if self.deploy_mode in ["int8", "fp16", "fp32"]:
-                precision_type = TRT_PRECISION_MAP[self.deploy_mode]
-                use_calib = (self.deploy_mode == "int8")
-                predictor_config.enable_tensorrt_engine(
-                    workspace_size=1 << 30,
-                    max_batch_size=self.config.batch_size,
-                    min_subgraph_size=40,
-                    precision_mode=precision_type,
-                    use_static=False,
-                    use_calib_mode=use_calib)
         else:
             predictor_config.disable_gpu()
-            if self.deploy_mode in ["int8", "fp16", "fp32"]:
-                logger.warning(
-                    "deploy_mode [\"int8\", \"fp16\", \"fp32\"] only work with GPU"
-                )
         predictor_config.enable_memory_optim()
         return fluid.core.create_paddle_predictor(predictor_config)
 
     def _deploy(self):
+        """
+        use high-performance predictor to make prediction.
+
+        Returns:
+            RunState: the running result of predict phase
+        """
         global_run_states = []
         period_run_states = []
 
@@ -811,7 +948,6 @@ class BaseTask(object):
 
             batch = [fluid.core.PaddleTensor(data) for data in batch]
             fetch_result = self.predictor.run(batch)
-            print(fetch_result)
             for index, result in enumerate(fetch_result):
                 step_run_state.run_results[index] = result.as_ndarray()
             step_run_state.run_examples += num_batch_examples
@@ -826,16 +962,25 @@ class BaseTask(object):
                 data,
                 load_best_model=True,
                 return_result=False,
-                deploy_mode="debug"):
-        assert deploy_mode in [
-            "debug", "limited", "int8", "fp16", "fp32"
-        ], "Invalid deploy_mode [%s], only support[\"debug\", \"limited\", \"int8\", \"fp16\", \"fp32\"]" % deploy_mode
-        self.deploy_mode = deploy_mode
+                open_predictor=False):
+        """
+        make prediction for the input data.
+
+        Args:
+            data (list): the data will be predicted.
+            load_best_model (bool): load the best model or not
+            return_result (bool): return a readable result or just the raw run result
+            open_predictor (bool): use high-performance predictor or not
+
+        Returns:
+            RunState: the running result of predict phase
+        """
+        self.open_predictor = open_predictor
 
         with self.phase_guard(phase="predict"):
             self._predict_data = data
             self._predict_start_event()
-            if self.deploy_mode == "debug":
+            if not self.open_predictor:
                 if load_best_model:
                     self.init_if_load_best_model()
                 else:
@@ -851,6 +996,15 @@ class BaseTask(object):
         return run_states
 
     def _postprocessing(self, run_states):
+        """
+        postprocessing the run result, get readable result.
+
+        Args:
+            run_states (RunState): the raw run result to be processed
+
+        Returns:
+            list: readable result
+        """
         results = []
         for batch_state in run_states:
             batch_result = batch_state.run_results[0]
@@ -858,6 +1012,15 @@ class BaseTask(object):
         return results
 
     def _run(self, do_eval=False):
+        """
+        load data and run the program.
+
+        Args:
+            do_eval (bool): do eval during train phase or not
+
+        Returns:
+            RunState: the running result of specific phase
+        """
         with fluid.program_guard(self.main_program, self.startup_program):
             if self.config.use_pyreader:
                 data_loader = fluid.io.DataLoader.from_generator(
