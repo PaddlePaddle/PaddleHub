@@ -1055,6 +1055,8 @@ class BaseTask(object):
                     feed=batch,
                     fetch_list=self.fetch_list,
                     return_numpy=self.return_numpy)
+                if not self.return_numpy:
+                    fetch_result = [np.array(x) for x in fetch_result]
 
                 for index, result in enumerate(fetch_result):
                     step_run_state.run_results[index] = result
