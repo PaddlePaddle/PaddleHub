@@ -267,7 +267,7 @@ class BaseTask(object):
             main_program (object): the customized main_program, default None
             startup_program (object): the customized startup_program, default None
             config (object): the config for the task, default None
-            metrics_choices (list): metrics used to the task, default None
+            metrics_choices (list): metrics used to the task, default ["acc"]
         """
 
         # base item
@@ -705,7 +705,7 @@ class BaseTask(object):
 
     def _default_eval_end_event(self, run_states):
         """
-        Paddlehub default hander for eval_end_event, it will complete visualization and metrics calculation
+        Paddlehub default handler for eval_end_event, it will complete visualization and metrics calculation
 
         Args:
             run_states (object): the results in eval phase
@@ -749,7 +749,7 @@ class BaseTask(object):
 
     def _default_log_interval_event(self, run_states):
         """
-        Paddlehub default hander for log_interval_event, it will complete visualization.
+        PaddleHub default handler for log_interval_event, it will complete visualization.
 
         Args:
             run_states (object): the results in train phase
@@ -888,9 +888,9 @@ class BaseTask(object):
         """
         evaluate the performance of current module.
 
-        Warning: DO NOT use eval(load_best_model=True) in finetune_and_eval
+        ** Warning: DO NOT use eval(load_best_model=True) in finetune_and_eval
         It will cause trainer unable to continue training from checkpoint after eval
-        More important, The model should evaluate current performance during training.
+        More important, The model should evaluate current performance during training. **
 
         Args:
             phase (str): current run phase
