@@ -929,7 +929,7 @@ class BaseTask(object):
         predictor_config.enable_memory_optim()
         return fluid.core.create_paddle_predictor(predictor_config)
 
-    def _deploy(self):
+    def _run_with_predictor(self):
         """
         use high-performance predictor to make prediction.
 
@@ -990,7 +990,7 @@ class BaseTask(object):
                 run_states = self._run()
             else:
                 self.predictor = self._create_predictor()
-                run_states = self._deploy()
+                run_states = self._run_with_predictor()
             self._predict_end_event(run_states)
             self._predict_data = None
             if return_result:
