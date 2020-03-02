@@ -29,3 +29,6 @@ gunicorn >= 19.10.0; sys_platform != "win32"
 
 # moviepy 1.0.1 not support imageio>2.5
 moviepy < 1.0.0 ; python_version < "3"
+
+# imageio 2.8.0 not support python2
+imageio < 2.8.0 ; python_version < "3"
