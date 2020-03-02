@@ -45,14 +45,14 @@ def parse_args():
                         type=str,
                         default='',
                         help='path of video.')
-    parser.add_argument('--video_size',
-                        type=tuple,
-                        default=(1920, 1080),
-                        help='size of video.')
     parser.add_argument('--use_camera',
                         type=bool,
                         default=False,
                         help='switch detect video or camera, default:video.')
+    parser.add_argument('--open_imshow',
+                        type=bool,
+                        default=False,
+                        help='visualize video detection results in real time.')
     parser.add_argument('--use_gpu',
                         type=bool,
                         default=False,
@@ -229,7 +229,6 @@ def predict_video(args, im_shape=(1920, 1080), use_camera=False):
         capture = cv2.VideoCapture(0)
     else:
         capture = cv2.VideoCapture(args.video_path)
-
     detector = FaceDetector(model_dir=args.models_dir + '/pyramidbox_lite/',
                             mean=[104.0, 177.0, 123.0],
                             scale=[0.007843, 0.007843, 0.007843],
@@ -246,9 +245,11 @@ def predict_video(args, im_shape=(1920, 1080), use_camera=False):
     if not isExists:
         os.makedirs(path)
     fps = 30
+    width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     writer = cv2.VideoWriter(os.path.join(path, 'result.mp4'), fourcc, fps,
-                             args.video_size)
+                             (width, height))
     import time
     start_time = time.time()
     index = 0
@@ -263,8 +264,12 @@ def predict_video(args, im_shape=(1920, 1080), use_camera=False):
         end_pre = time.time()
         im = VisualizeResult(frame, det_out)
         writer.write(im)
+        if args.open_imshow:
+            cv2.imshow('Mask Detection', im)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
     end_time = time.time()
-    print("include read time:", (end_time - start_time) / index)
+    print("Average prediction time per frame:", (end_time - start_time) / index)
     writer.release()
 
 
@@ -273,5 +278,5 @@ if __name__ == "__main__":
     print(args.models_dir)
     if args.img_paths != '':
         predict_images(args)
-    elif args.video_path != '':
+    elif args.video_path != '' or args.use_camera:
         predict_video(args)
