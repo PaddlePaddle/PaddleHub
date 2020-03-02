@@ -64,17 +64,16 @@ class SequenceLabelTask(BaseTask):
             return True
 
     def _build_net(self):
-        if version_compare(paddle.__version__, "1.6"):
-            self.seq_len = fluid.layers.data(
-                name="seq_len", shape=[-1], dtype='int64')
-        else:
-            self.seq_len = fluid.layers.data(
-                name="seq_len", shape=[1], dtype='int64')
-        seq_len = fluid.layers.assign(self.seq_len)
+        self.seq_len = fluid.layers.data(
+            name="seq_len", shape=[1], dtype='int64')
 
         if self.add_crf:
+            if version_compare(paddle.__version__, "1.6"):
+                self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])
+            else:
+                self.seq_len_used = self.seq_len
             unpad_feature = fluid.layers.sequence_unpad(
-                self.feature, length=self.seq_len)
+                self.feature, length=self.seq_len_used)
             self.emission = fluid.layers.fc(
                 size=self.num_classes,
                 input=unpad_feature,
