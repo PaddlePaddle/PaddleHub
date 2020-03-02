@@ -77,7 +77,8 @@ class ImageClassificationReader(BaseReader):
                        batch_size=1,
                        phase="train",
                        shuffle=False,
-                       data=None):
+                       data=None,
+                       return_list=True):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is none and it's not allowed!")
         if phase == "train":
@@ -139,10 +140,22 @@ class ImageClassificationReader(BaseReader):
             if phase == "predict":
                 for image_path in data:
                     image = preprocess(image_path)
-                    yield (image, )
+                    if return_list:
+                        # for DataFeeder
+                        yield [
+                            image,
+                        ]
+                    else:
+                        # for DataLoader
+                        yield image
             else:
                 for image_path, label in data:
                     image = preprocess(image_path)
-                    yield (image, label)
+                    if return_list:
+                        # for DataFeeder
+                        yield [image, label]
+                    else:
+                        # for DataLoader
+                        yield image, label
 
         return paddle.batch(_data_reader, batch_size=batch_size)
