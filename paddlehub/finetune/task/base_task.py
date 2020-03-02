@@ -21,7 +21,6 @@ import os
 import contextlib
 import time
 import copy
-import logging
 import inspect
 from functools import partial
 from collections import OrderedDict
@@ -32,12 +31,11 @@ else:
     from inspect import getfullargspec as get_args
 import numpy as np
 import paddle.fluid as fluid
-from paddle.fluid.core import PaddleDType, PaddleTensor, AnalysisConfig, create_paddle_predictor
 from tb_paddle import SummaryWriter
 
 import paddlehub as hub
 from paddlehub.common.paddle_helper import dtype_map, clone_program
-from paddlehub.common.utils import mkdir, to_list
+from paddlehub.common.utils import mkdir
 from paddlehub.common.logger import logger
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
 from paddlehub.finetune.config import RunConfig
