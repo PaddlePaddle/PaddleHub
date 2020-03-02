@@ -54,7 +54,7 @@ python infer.py --models_dir=/path/to/models --img_paths=/path/to/images --video
 | img_paths |img_paths/video_path 二选一|需要预测的图片目录 |
 | video_path |img_paths/video_path 二选一|需要预测的视频目录|
 | use_camera |No|是否打开摄像头进行预测，默认为False |
-| open_imshow |No|是否进行检测结果实时绘图，默认为False |
+| open_imshow |No|是否对视频的检测结果实时绘图，默认为False |
 | use_gpu |No|是否GPU，默认为False|
 
 说明：
