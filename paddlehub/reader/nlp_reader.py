@@ -22,7 +22,7 @@ import numpy as np
 import six
 from collections import namedtuple
 
-import paddle
+import paddle.fluid as fluid
 
 from paddlehub.reader import tokenization
 from paddlehub.common.logger import logger
@@ -1209,6 +1209,20 @@ class LACClassifyReader(BaseReader):
 
             return processed
 
+        def _to_lodtensor(data, place):
+            seq_lens = [len(seq) for seq in data]
+            cur_len = 0
+            lod = [cur_len]
+            for l in seq_lens:
+                cur_len += l
+                lod.append(cur_len)
+            flattened_data = np.concatenate(data, axis=0).astype("float32")
+            flattened_data = flattened_data.reshape([len(flattened_data), 1])
+            res = fluid.LoDTensor()
+            res.set(flattened_data, place)
+            res.set_lod([lod])
+            return res
+
         def _data_reader():
             if shuffle:
                 np.random.shuffle(data)
@@ -1242,11 +1256,12 @@ class LACClassifyReader(BaseReader):
                     if not text:
                         continue
                     texts.append(np.array(text))
-                    labels.append(int(item.label))
+                    labels.append([int(item.label)])
                     if len(texts) == batch_size:
                         if return_list:
                             yield [[texts, labels]]
                         else:
+                            texts = _to_lodtensor(texts, fluid.CPUPlace())
                             yield [texts, labels]
                         texts = []
                         labels = []
@@ -1254,6 +1269,7 @@ class LACClassifyReader(BaseReader):
                     if return_list:
                         yield [[texts, labels]]
                     else:
+                        texts = _to_lodtensor(texts, fluid.CPUPlace())
                         yield [texts, labels]
                     texts = []
                     labels = []
