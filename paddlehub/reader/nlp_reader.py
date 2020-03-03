@@ -1191,6 +1191,10 @@ class LACClassifyReader(BaseReader):
         else:
             raise ValueError(
                 "Unknown phase, which should be in ['train', 'dev', 'test'].")
+        if return_list:
+            raise ValueError(
+                "LACClassifyReader is not support Dataloader, please close use_pyreader"
+            )
 
         def preprocess(text):
             data_dict = {self.feed_key: [text]}
@@ -1209,20 +1213,6 @@ class LACClassifyReader(BaseReader):
 
             return processed
 
-        def _to_lodtensor(data, place):
-            seq_lens = [len(seq) for seq in data]
-            cur_len = 0
-            lod = [cur_len]
-            for l in seq_lens:
-                cur_len += l
-                lod.append(cur_len)
-            flattened_data = np.concatenate(data, axis=0).astype("int64")
-            flattened_data = flattened_data.reshape([len(flattened_data), 1])
-            res = fluid.LoDTensor()
-            res.set(flattened_data, place)
-            res.set_lod([lod])
-            return res
-
         def _data_reader():
             if shuffle:
                 np.random.shuffle(data)
@@ -1233,50 +1223,29 @@ class LACClassifyReader(BaseReader):
                     text = preprocess(text)
                     if not text:
                         continue
-                    texts.append(np.array(text))
+                    texts.append(text)
                     if len(texts) == batch_size:
                         # predictor must receive numpy array not list
                         texts = np.array([texts]).astype('int64')
-                        if return_list:
-                            # for DataFeeder
-                            yield [texts]
-                        else:
-                            # for DataLoader
-                            yield texts
+                        yield [texts]
                         texts = []
                 if texts:
                     texts = np.array([texts]).astype('int64')
-                    if return_list:
-                        yield [texts]
-                    else:
-                        yield texts
+                    yield [texts]
                     texts = []
             else:
                 for item in data:
                     text = preprocess(item.text_a)
                     if not text:
                         continue
-                    texts.append(texts)
+                    texts.append(text)
                     labels.append([int(item.label)])
                     if len(texts) == batch_size:
-                        if return_list:
-                            yield [[texts, labels]]
-                        else:
-                            # texts = _to_lodtensor(texts, fluid.CPUPlace())
-                            texts = fluid.create_lod_tensor(
-                                texts, [[len(seq) for seq in texts]],
-                                fluid.CPUPlace())
-                            yield [texts, labels]
+                        yield [[texts, labels]]
                         texts = []
                         labels = []
                 if texts:
-                    if return_list:
-                        yield [[texts, labels]]
-                    else:
-                        texts = fluid.create_lod_tensor(
-                            texts, [[len(seq) for seq in texts]],
-                            fluid.CPUPlace())
-                        yield [texts, labels]
+                    yield [[texts, labels]]
                     texts = []
                     labels = []
 
