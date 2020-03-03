@@ -1224,7 +1224,14 @@ class LACClassifyReader(BaseReader):
                     data[i] = preprocess(data[i])
                 else:
                     data[i].text_a = preprocess(data[i].text_a)
-                    data[i].label = int(data[i].label)
+                    if self.label_map:
+                        if data[i].label not in self.label_map:
+                            raise KeyError("example.label = {%s} not in label" %
+                                           data[i].label)
+                        label_id = self.label_map[data[i].label]
+                    else:
+                        label_id = data[i].label
+                    data[i].label = label_id
             self.has_processed[phase] = True
 
         def _data_reader():
@@ -1263,7 +1270,7 @@ class LACClassifyReader(BaseReader):
                     labels.append([item.label])
                     if len(texts) == batch_size:
                         if return_list:
-                            yield [[texts, labels]]
+                            yield list(zip(texts, labels))
                         else:
                             texts = fluid.create_lod_tensor(
                                 texts, [[len(seq) for seq in texts]],
@@ -1273,7 +1280,7 @@ class LACClassifyReader(BaseReader):
                         labels = []
                 if texts:
                     if return_list:
-                        yield [[texts, labels]]
+                        yield list(zip(texts, labels))
                     else:
                         texts = fluid.create_lod_tensor(
                             texts, [[len(seq) for seq in texts]],
