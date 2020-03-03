@@ -1240,7 +1240,7 @@ class LACClassifyReader(BaseReader):
                     if not text:
                         continue
                     texts.append(text)
-                    labels.append(item.label)
+                    labels.append(int(item.label))
                     if len(texts) == batch_size:
                         if return_list:
                             yield [[texts, labels]]
@@ -1256,7 +1256,7 @@ class LACClassifyReader(BaseReader):
                     texts = []
                     labels = []
 
-        return paddle.batch(_data_reader, batch_size=batch_size)
+        return _data_reader
 
 
 if __name__ == '__main__':
