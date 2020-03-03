@@ -1199,12 +1199,15 @@ class LACClassifyReader(BaseReader):
                 self.vocab[word] for word in processed[0]['word']
                 if word in self.vocab
             ]
+
             if len(processed) == 0:
                 if six.PY2:
                     text = text.encode(sys_stdout_encoding())
                 logger.warning(
                     "The words in text %s can't be found in the vocabulary." %
                     (text))
+
+            processed = np.array(processed)
             return processed
 
         def _data_reader():
