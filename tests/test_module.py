@@ -4,7 +4,7 @@ import unittest
 import paddlehub as hub
 
 
-class Test_HubModule(unittest.TestCase):
+class TestHubModule(unittest.TestCase):
     def test_lac(self):
         lac = hub.Module(name="lac")
         test_text = ["今天是个好日子", "天气预报说今天要下雨", "下一班地铁马上就要到了"]
