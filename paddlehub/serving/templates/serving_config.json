@@ -9,7 +9,7 @@
         "use_gpu": false
       }
     },
-    "lac-v2": {
+    "lac": {
       "init_args": {
         "version": "2.1.0",
         "user_dict": "./dict.txt"
