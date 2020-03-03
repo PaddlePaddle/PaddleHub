@@ -1217,7 +1217,8 @@ class LACClassifyReader(BaseReader):
             return processed
 
         if not self.has_processed[phase]:
-            logger.info("processing %s data now..." % phase)
+            logger.info("processing %s data now..., this may take a few minutes"
+                        % phase)
             for i in range(len(data)):
                 if phase == "predict":
                     data[i] = preprocess(data[i])
