@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -136,26 +136,35 @@ class ImageClassificationReader(BaseReader):
         def _data_reader():
             if shuffle:
                 np.random.shuffle(data)
-
+            images = []
+            labels = []
             if phase == "predict":
                 for image_path in data:
                     image = preprocess(image_path)
-                    if return_list:
-                        # for DataFeeder
-                        yield [
-                            image,
-                        ]
-                    else:
-                        # for DataLoader
-                        yield image
+                    images.append(image.astype('float32'))
+                    if len(images) == batch_size:
+                        if return_list:
+                            yield [images]
+                        else:
+                            yield images
+                        images = []
             else:
                 for image_path, label in data:
                     image = preprocess(image_path)
-                    if return_list:
-                        # for DataFeeder
-                        yield [image, label]
-                    else:
-                        # for DataLoader
-                        yield image, label
+                    images.append(image.astype('float32'))
+                    labels.append([int(label)])
 
-        return paddle.batch(_data_reader, batch_size=batch_size)
+                    if len(images) == batch_size:
+                        if return_list:
+                            yield [images, labels]
+                        else:
+                            yield images, labels
+                        images = []
+                        labels = []
+                if images:
+                    if return_list:
+                        yield [images, labels]
+                    else:
+                        yield images, labels
+
+        return _data_reader
