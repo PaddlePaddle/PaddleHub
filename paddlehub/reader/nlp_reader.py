@@ -1207,7 +1207,6 @@ class LACClassifyReader(BaseReader):
                     "The words in text %s can't be found in the vocabulary." %
                     (text))
 
-            processed = np.array(processed)
             return processed
 
         def _data_reader():
@@ -1220,7 +1219,7 @@ class LACClassifyReader(BaseReader):
                     text = preprocess(text)
                     if not text:
                         continue
-                    texts.append(text)
+                    texts.append(np.array(text))
                     if len(texts) == batch_size:
                         texts = np.array([texts]).astype('float32')
                         if return_list:
@@ -1242,7 +1241,7 @@ class LACClassifyReader(BaseReader):
                     text = preprocess(item.text_a)
                     if not text:
                         continue
-                    texts.append(text)
+                    texts.append(np.array(text))
                     labels.append(int(item.label))
                     if len(texts) == batch_size:
                         if return_list:
