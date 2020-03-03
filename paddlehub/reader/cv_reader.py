@@ -148,6 +148,11 @@ class ImageClassificationReader(BaseReader):
                         else:
                             yield images
                         images = []
+                if images:
+                    if return_list:
+                        yield [images]
+                    else:
+                        yield images
             else:
                 for image_path, label in data:
                     image = preprocess(image_path)
