@@ -143,6 +143,7 @@ class ImageClassificationReader(BaseReader):
                     image = preprocess(image_path)
                     images.append(image.astype('float32'))
                     if len(images) == batch_size:
+                        # predictor must receive numpy array not list
                         images = np.array([images]).astype('float32')
                         if return_list:
                             # for DataFeeder

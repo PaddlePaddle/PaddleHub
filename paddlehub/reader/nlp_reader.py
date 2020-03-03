@@ -1216,7 +1216,7 @@ class LACClassifyReader(BaseReader):
             for l in seq_lens:
                 cur_len += l
                 lod.append(cur_len)
-            flattened_data = np.concatenate(data, axis=0).astype("float32")
+            flattened_data = np.concatenate(data, axis=0).astype("int64")
             flattened_data = flattened_data.reshape([len(flattened_data), 1])
             res = fluid.LoDTensor()
             res.set(flattened_data, place)
@@ -1235,7 +1235,8 @@ class LACClassifyReader(BaseReader):
                         continue
                     texts.append(np.array(text))
                     if len(texts) == batch_size:
-                        texts = np.array([texts]).astype('float32')
+                        # predictor must receive numpy array not list
+                        texts = np.array([texts]).astype('int64')
                         if return_list:
                             # for DataFeeder
                             yield [texts]
@@ -1244,7 +1245,7 @@ class LACClassifyReader(BaseReader):
                             yield texts
                         texts = []
                 if texts:
-                    texts = np.array([texts]).astype('float32')
+                    texts = np.array([texts]).astype('int64')
                     if return_list:
                         yield [texts]
                     else:
@@ -1255,13 +1256,16 @@ class LACClassifyReader(BaseReader):
                     text = preprocess(item.text_a)
                     if not text:
                         continue
-                    texts.append(np.array(text))
+                    texts.append(texts)
                     labels.append([int(item.label)])
                     if len(texts) == batch_size:
                         if return_list:
                             yield [[texts, labels]]
                         else:
-                            texts = _to_lodtensor(texts, fluid.CPUPlace())
+                            # texts = _to_lodtensor(texts, fluid.CPUPlace())
+                            texts = fluid.create_lod_tensor(
+                                texts, [[len(seq) for seq in texts]],
+                                fluid.CPUPlace())
                             yield [texts, labels]
                         texts = []
                         labels = []
@@ -1269,7 +1273,9 @@ class LACClassifyReader(BaseReader):
                     if return_list:
                         yield [[texts, labels]]
                     else:
-                        texts = _to_lodtensor(texts, fluid.CPUPlace())
+                        texts = fluid.create_lod_tensor(
+                            texts, [[len(seq) for seq in texts]],
+                            fluid.CPUPlace())
                         yield [texts, labels]
                     texts = []
                     labels = []
