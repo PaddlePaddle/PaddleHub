@@ -167,6 +167,8 @@ class Module(object):
             checker.check()
             return ModuleV1(directory=directory, **kwargs)
 
+        if directory.endswith(os.sep):
+            directory = directory[:-1]
         basename = os.path.split(directory)[-1]
         dirname = os.path.join(*list(os.path.split(directory)[:-1]))
         sys.path.insert(0, dirname)
