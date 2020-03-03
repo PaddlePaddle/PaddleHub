@@ -1165,6 +1165,7 @@ class LACClassifyReader(BaseReader):
         self.feed_key = list(
             self.lac.processor.data_format(
                 sign_name="lexical_analysis").keys())[0]
+        self.has_processed = False
 
     def data_generator(self,
                        batch_size=1,
@@ -1209,12 +1210,14 @@ class LACClassifyReader(BaseReader):
 
             return processed
 
-        for i in range(len(data)):
-            if phase == "predict":
-                data[i] = preprocess(data[i])
-            else:
-                data[i].text_a = preprocess(data[i].text_a)
-                data[i].label = int(data[i].label)
+        if not self.has_processed:
+            for i in range(len(data)):
+                if phase == "predict":
+                    data[i] = preprocess(data[i])
+                else:
+                    data[i].text_a = preprocess(data[i].text_a)
+                    data[i].label = int(data[i].label)
+            self.has_processed = True
 
         def _data_reader():
             if shuffle:
