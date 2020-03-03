@@ -144,15 +144,17 @@ class ImageClassificationReader(BaseReader):
                     images.append(image.astype('float32'))
                     if len(images) == batch_size:
                         if return_list:
+                            # for DataFeeder
                             yield [[images]]
                         else:
-                            yield [images]
+                            # for DataLoader
+                            yield np.array([images]).astype('float32')
                         images = []
                 if images:
                     if return_list:
                         yield [[images]]
                     else:
-                        yield [images]
+                        yield np.array([images]).astype('float32')
             else:
                 for image_path, label in data:
                     image = preprocess(image_path)

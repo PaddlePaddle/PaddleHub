@@ -917,7 +917,7 @@ class BaseTask(object):
         create high-performance predictor for predict.
 
         Returns:
-            object: the high-performance predictor
+            PaddlePredictor: the high-performance predictor
         """
         predictor_config = fluid.core.AnalysisConfig(
             os.path.join(self.config.checkpoint_dir, "best_model"))
