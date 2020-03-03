@@ -143,18 +143,20 @@ class ImageClassificationReader(BaseReader):
                     image = preprocess(image_path)
                     images.append(image.astype('float32'))
                     if len(images) == batch_size:
+                        images = np.array([images]).astype('float32')
                         if return_list:
                             # for DataFeeder
-                            yield [[images]]
+                            yield [images]
                         else:
                             # for DataLoader
-                            yield np.array([images]).astype('float32')
+                            yield images
                         images = []
                 if images:
+                    images = np.array([images]).astype('float32')
                     if return_list:
-                        yield [[images]]
+                        yield [images]
                     else:
-                        yield np.array([images]).astype('float32')
+                        yield images
             else:
                 for image_path, label in data:
                     image = preprocess(image_path)
@@ -162,16 +164,20 @@ class ImageClassificationReader(BaseReader):
                     labels.append([int(label)])
 
                     if len(images) == batch_size:
+                        images = np.array([images]).astype('float32')
+                        labels = np.array([labels]).astype('float32')
                         if return_list:
-                            yield [[images, labels]]
-                        else:
                             yield [images, labels]
+                        else:
+                            yield images, labels
                         images = []
                         labels = []
                 if images:
+                    images = np.array([images]).astype('float32')
+                    labels = np.array([labels]).astype('float32')
                     if return_list:
-                        yield [[images, labels]]
-                    else:
                         yield [images, labels]
+                    else:
+                        yield images, labels
 
         return _data_reader
