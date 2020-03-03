@@ -1165,7 +1165,13 @@ class LACClassifyReader(BaseReader):
         self.feed_key = list(
             self.lac.processor.data_format(
                 sign_name="lexical_analysis").keys())[0]
-        self.has_processed = False
+        self.has_processed = {
+            "train": False,
+            "dev": False,
+            "val": False,
+            "test": False,
+            "predict": False
+        }
 
     def data_generator(self,
                        batch_size=1,
@@ -1210,14 +1216,15 @@ class LACClassifyReader(BaseReader):
 
             return processed
 
-        if not self.has_processed:
+        if not self.has_processed[phase]:
+            logger.info("processing %s data now..." % phase)
             for i in range(len(data)):
                 if phase == "predict":
                     data[i] = preprocess(data[i])
                 else:
                     data[i].text_a = preprocess(data[i].text_a)
                     data[i].label = int(data[i].label)
-            self.has_processed = True
+            self.has_processed[phase] = True
 
         def _data_reader():
             if shuffle:
@@ -1257,8 +1264,6 @@ class LACClassifyReader(BaseReader):
                         if return_list:
                             yield [[texts, labels]]
                         else:
-                            # texts = _to_lodtensor(texts, fluid.CPUPlace())
-                            # texts = np.array(texts).astype('int64')
                             texts = fluid.create_lod_tensor(
                                 texts, [[len(seq) for seq in texts]],
                                 fluid.CPUPlace())
