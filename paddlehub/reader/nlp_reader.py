@@ -1170,7 +1170,8 @@ class LACClassifyReader(BaseReader):
                        batch_size=1,
                        phase="train",
                        shuffle=False,
-                       data=None):
+                       data=None,
+                       return_list=True):
         if phase != "predict" and not self.dataset:
             raise ValueError("The dataset is None and it isn't allowed.")
         if phase == "train":
@@ -1209,19 +1210,51 @@ class LACClassifyReader(BaseReader):
         def _data_reader():
             if shuffle:
                 np.random.shuffle(data)
-
+            texts = []
+            labels = []
             if phase == "predict":
                 for text in data:
                     text = preprocess(text)
                     if not text:
                         continue
-                    yield (text, )
+                    texts.append(text)
+                    if len(texts) == batch_size:
+                        texts = np.array([texts]).astype('float32')
+                        if return_list:
+                            # for DataFeeder
+                            yield [texts]
+                        else:
+                            # for DataLoader
+                            yield texts
+                        texts = []
+                if texts:
+                    texts = np.array([texts]).astype('float32')
+                    if return_list:
+                        yield [texts]
+                    else:
+                        yield texts
+                    texts = []
             else:
                 for item in data:
                     text = preprocess(item.text_a)
                     if not text:
                         continue
-                    yield (text, item.label)
+                    texts.append(text)
+                    labels.append(item.label)
+                    if len(texts) == batch_size:
+                        if return_list:
+                            yield [[texts, labels]]
+                        else:
+                            yield [texts, labels]
+                        texts = []
+                        labels = []
+                if texts:
+                    if return_list:
+                        yield [[texts, labels]]
+                    else:
+                        yield [texts, labels]
+                    texts = []
+                    labels = []
 
         return paddle.batch(_data_reader, batch_size=batch_size)
 
