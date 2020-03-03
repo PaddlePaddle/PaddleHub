@@ -1243,23 +1243,29 @@ class LACClassifyReader(BaseReader):
                 for text in data:
                     if not text:
                         continue
-                    texts.append(np.array(text))
+                    texts.append(text)
                     if len(texts) == batch_size:
-                        # predictor must receive numpy array not list
-                        texts = np.array([texts]).astype('int64')
                         if return_list:
                             # for DataFeeder
-                            yield [texts]
+                            # if you want to use high-performance predictor, yield [[[t] for t in texts]]
+                            yield [[t] for t in texts]
                         else:
                             # for DataLoader
-                            yield texts
+                            # cannot use in high-performance predictor, as PaddleTensor rejects lod_tensor
+                            texts = fluid.create_lod_tensor(
+                                texts, [[len(seq) for seq in texts]],
+                                fluid.CPUPlace())
+                            yield [texts]
                         texts = []
                 if texts:
-                    texts = np.array([texts]).astype('int64')
                     if return_list:
-                        yield [texts]
+                        yield [[t] for t in texts]
                     else:
-                        yield texts
+                        texts = fluid.create_lod_tensor(
+                            texts, [[len(seq) for seq in texts]],
+                            fluid.CPUPlace())
+
+                        yield [texts]
                     texts = []
             else:
                 for item in data:

@@ -936,6 +936,11 @@ class BaseTask(object):
         Returns:
             RunState: the running result of predict phase
         """
+        if isinstance(self._base_data_reader, hub.reader.LACClassifyReader):
+            raise Exception(
+                "LACClassifyReader does not support predictor, please close open_predictor"
+            )
+
         global_run_states = []
         period_run_states = []
 
