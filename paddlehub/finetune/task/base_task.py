@@ -926,20 +926,19 @@ class BaseTask(object):
         best_model_path = os.path.join(self.config.checkpoint_dir, "best_model")
         logger.info("Try to load inference model from %s or %s." %
                     (model_path, best_model_path))
-        try:
+        if os.path.exists(os.path.join(model_path, "__model__")):
             predictor_config = fluid.core.AnalysisConfig(model_path)
             logger.info(
                 "Inference model %s has been loaded successfully" % model_path)
-        except Exception:
-            try:
-                predictor_config = fluid.core.AnalysisConfig(best_model_path)
-                logger.info("Inference model %s has been loaded successfully" %
-                            best_model_path)
-            except Exception as e:
-                logger.error(
-                    "Predictor fail to launch, please make sure %s or %s exsits the model files saved by PaddleHub version >= 1.5.0"
-                    % (model_path, best_model_path))
-                raise e
+        elif os.path.exists(
+                os.path.join(model_path, "best_model", "__model__")):
+            predictor_config = fluid.core.AnalysisConfig(best_model_path)
+            logger.info("Inference model %s has been loaded successfully" %
+                        best_model_path)
+        else:
+            raise RuntimeError(
+                "Predictor fail to launch, please make sure %s or %s exsits the model files saved by PaddleHub >= 1.5.0"
+                % (model_path, best_model_path))
 
         if self.config.use_cuda:
             predictor_config.enable_use_gpu(100, 0)
