@@ -68,6 +68,19 @@ def runnable(func):
     return _wrapper
 
 
+_module_serving_func = {}
+
+
+def serving(func):
+    mod = func.__module__ + "." + inspect.stack()[1][3]
+    _module_serving_func[mod] = func.__name__
+
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return _wrapper
+
+
 def moduleinfo(name, version, author, author_email, summary, type):
     def _wrapper(cls):
         if not issubclass(cls, Module):
@@ -135,6 +148,8 @@ class Module(object):
             self._run_func = getattr(self, _run_func_name)
         else:
             self._run_func = None
+        self._serving_func_name = _module_serving_func.get(mod, None)
+        self._code_version = "v2"
         self._directory = directory
         self._initialize(**kwargs)
         self._is_initialize = True
@@ -221,6 +236,10 @@ class Module(object):
     def is_runnable(self):
         return self._run_func != None
 
+    @property
+    def serving_func_name(self):
+        return self._serving_func_name
+
     def _initialize(self):
         pass
 
@@ -303,6 +322,10 @@ class ModuleV1(Module):
         self._recover_variable_info(self.program)
 
     @property
+    def serving_func_name(self):
+        serving_func_name = self.desc.attr.map.data['default_signature'].s
+        return serving_func_name if serving_func_name != "" else None
+
     def desc(self):
         return self._desc
 
@@ -552,6 +575,10 @@ class ModuleV1(Module):
     @property
     def is_runnable(self):
         return self.default_signature != None
+
+    @property
+    def code_version(self):
+        return self._code_version
 
     def context(self,
                 sign_name=None,
