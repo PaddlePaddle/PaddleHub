@@ -957,7 +957,9 @@ class BaseTask(object):
             RunState: the running result of predict phase
         """
         if not version_compare(paddle.__version__, "1.6.2"):
-            logger.warning("Paddle version < 1.6.2 may not work properly.")
+            logger.warning(
+                "accelerate_mode may not work properly in PaddlePaddle < 1.6.2. Please close accelerate_mode or upgrade PaddlePaddle."
+            )
 
         if isinstance(self._base_data_reader, hub.reader.LACClassifyReader):
             raise Exception(
