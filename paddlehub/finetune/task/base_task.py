@@ -337,7 +337,7 @@ class BaseTask(object):
 
         # accelerate predict
         self.is_best_model_loaded = False
-        self.is_predictor_created = False
+        self._predictor = None
 
         # set default phase
         self.enter_phase("train")
@@ -922,14 +922,24 @@ class BaseTask(object):
         Returns:
             PaddlePredictor: the high-performance predictor
         """
-        model_path = os.path.join(self.config.checkpoint_dir, "best_model")
+        model_path = self.config.checkpoint_dir
+        best_model_path = os.path.join(self.config.checkpoint_dir, "best_model")
+        logger.info("Try to load inference model from %s or %s." %
+                    (model_path, best_model_path))
         try:
             predictor_config = fluid.core.AnalysisConfig(model_path)
-        except Exception as e:
-            logger.error(
-                "Predictor fail to launch, please make sure %s is created by PaddleHub version >= 1.5.0"
-                % model_path)
-            raise e
+            logger.info(
+                "Inference model %s has been loaded successfully" % model_path)
+        except Exception:
+            try:
+                predictor_config = fluid.core.AnalysisConfig(best_model_path)
+                logger.info("Inference model %s has been loaded successfully" %
+                            best_model_path)
+            except Exception as e:
+                logger.error(
+                    "Predictor fail to launch, please make sure %s or %s exsits the model files saved by PaddleHub version >= 1.5.0"
+                    % (model_path, best_model_path))
+                raise e
 
         if self.config.use_cuda:
             predictor_config.enable_use_gpu(100, 0)
@@ -964,7 +974,7 @@ class BaseTask(object):
                 batch = batch[0]
 
             batch = [fluid.core.PaddleTensor(data) for data in batch]
-            fetch_result = self.predictor.run(batch)
+            fetch_result = self._predictor.run(batch)
             for index, result in enumerate(fetch_result):
                 step_run_state.run_results[index] = result.as_ndarray()
             step_run_state.run_examples += num_batch_examples
@@ -1004,9 +1014,8 @@ class BaseTask(object):
                     self.init_if_necessary()
                 run_states = self._run()
             else:
-                if not self.is_predictor_created:
-                    self.predictor = self._create_predictor()
-                    self.is_predictor_created = True
+                if not self._predictor:
+                    self._predictor = self._create_predictor()
                 run_states = self._run_with_predictor()
 
             self._predict_end_event(run_states)
