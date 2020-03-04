@@ -51,6 +51,7 @@ def predict_nlp(module_info, input_text, req_id, extra=None):
 
     if module_info["name"] == "lac" and extra.get("user_dict", []) != []:
         predict_args.update({"user_dict": extra.get("user_dict", [])[0]})
+
     try:
         res = predict_method(**predict_args)
     except Exception as err:
