@@ -42,13 +42,14 @@ from paddlehub.finetune.config import RunConfig
 
 
 class RunState(object):
-    def __init__(self, length):
-        """
-        RunState is used to save the result of every running step
+    """
+    RunState is used to save the result of every running step
 
-        Args:
-            length (int): the number of fetch result
-        """
+    Args:
+        length (int): the number of fetch result
+    """
+
+    def __init__(self, length):
         self.run_time_begin = time.time()
         self.run_step = 0
         self.run_examples = 0
@@ -70,10 +71,11 @@ class RunState(object):
 
 
 class RunEnv(object):
+    """
+    RunEnv saves the running environment of the train/dev/predict phase, including program, reader, metrics and so on.
+    """
+
     def __init__(self):
-        """
-        RunEnv saves the running environment of the train/dev/predict phase, including program, reader, metrics and so on.
-        """
         self.current_epoch = 0
         self.current_step = 0
         self.main_program = None
@@ -95,10 +97,11 @@ class RunEnv(object):
 
 
 class TaskHooks():
+    """
+    TaskHooks can handle some tasks during the spectific event.
+    """
+
     def __init__(self):
-        """
-        TaskHooks can handle some tasks during the spectific event.
-        """
         self._registered_hooks = {
             "build_env_start_event": OrderedDict(),
             "build_env_end_event": OrderedDict(),
@@ -251,6 +254,18 @@ class TaskHooks():
 
 
 class BaseTask(object):
+    """
+    BaseTask is the base class of all the task. It will complete the building of all the running environment.
+
+    Args:
+        feed_list (list): the inputs name
+        data_reader (object): data reader for the task
+        main_program (object): the customized main_program, default None
+        startup_program (object): the customized startup_program, default None
+        config (object): the config for the task, default None
+        metrics_choices (list): metrics used to the task, default ["acc"]
+    """
+
     def __init__(self,
                  feed_list,
                  data_reader,
@@ -258,18 +273,6 @@ class BaseTask(object):
                  startup_program=None,
                  config=None,
                  metrics_choices="default"):
-        """
-        BaseTask is the base class of all the task. It will complete the building of all the running environment.
-
-        Args:
-            feed_list (list): the inputs name
-            data_reader (object): data reader for the task
-            main_program (object): the customized main_program, default None
-            startup_program (object): the customized startup_program, default None
-            config (object): the config for the task, default None
-            metrics_choices (list): metrics used to the task, default ["acc"]
-        """
-
         # base item
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
@@ -334,6 +337,7 @@ class BaseTask(object):
 
         # accelerate predict
         self.is_best_model_loaded = False
+        self.is_predictor_created = False
 
         # set default phase
         self.enter_phase("train")
@@ -875,6 +879,9 @@ class BaseTask(object):
 
                 # Final evaluation
                 if self._base_data_reader.get_dev_examples() != []:
+                    # Warning: DO NOT use self.eval(phase="dev", load_best_model=True) during training.
+                    # It will cause trainer unable to continue training from checkpoint after eval.
+                    # More important, The model should evaluate current performance during training.
                     self.eval(phase="dev")
                 if self._base_data_reader.get_test_examples() != []:
                     self.eval(phase="test", load_best_model=True)
@@ -887,10 +894,6 @@ class BaseTask(object):
     def eval(self, phase="dev", load_best_model=False):
         """
         evaluate the performance of current module.
-
-        ** Warning: DO NOT use eval(load_best_model=True) in finetune_and_eval
-        It will cause trainer unable to continue training from checkpoint after eval
-        More important, The model should evaluate current performance during training. **
 
         Args:
             phase (str): current run phase
@@ -919,8 +922,15 @@ class BaseTask(object):
         Returns:
             PaddlePredictor: the high-performance predictor
         """
-        predictor_config = fluid.core.AnalysisConfig(
-            os.path.join(self.config.checkpoint_dir, "best_model"))
+        model_path = os.path.join(self.config.checkpoint_dir, "best_model")
+        try:
+            predictor_config = fluid.core.AnalysisConfig(model_path)
+        except Exception as e:
+            logger.error(
+                "Predictor fail to launch, please make sure %s is created by PaddleHub version >= 1.5.0"
+                % model_path)
+            raise e
+
         if self.config.use_cuda:
             predictor_config.enable_use_gpu(100, 0)
             predictor_config.switch_ir_optim(True)
@@ -994,8 +1004,11 @@ class BaseTask(object):
                     self.init_if_necessary()
                 run_states = self._run()
             else:
-                self.predictor = self._create_predictor()
+                if not self.is_predictor_created:
+                    self.predictor = self._create_predictor()
+                    self.is_predictor_created = True
                 run_states = self._run_with_predictor()
+
             self._predict_end_event(run_states)
             self._predict_data = None
             if return_result:
