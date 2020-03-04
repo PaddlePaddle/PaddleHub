@@ -51,7 +51,7 @@ def version_compare(version1, version2):
             return True
         elif vn1 < vn2:
             return False
-    return len(version1) > len(version2)
+    return len(version1) >= len(version2)
 
 
 def base64s_to_cvmats(base64s):

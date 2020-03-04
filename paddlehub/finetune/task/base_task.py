@@ -33,9 +33,10 @@ import numpy as np
 import paddle.fluid as fluid
 from tb_paddle import SummaryWriter
 
+import paddle
 import paddlehub as hub
 from paddlehub.common.paddle_helper import dtype_map, clone_program
-from paddlehub.common.utils import mkdir
+from paddlehub.common.utils import mkdir, version_compare
 from paddlehub.common.logger import logger
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
 from paddlehub.finetune.config import RunConfig
@@ -955,9 +956,12 @@ class BaseTask(object):
         Returns:
             RunState: the running result of predict phase
         """
+        if not version_compare(paddle.__version__, "1.6.2"):
+            logger.warning("Paddle version < 1.6.2 may not work properly.")
+
         if isinstance(self._base_data_reader, hub.reader.LACClassifyReader):
             raise Exception(
-                "LACClassifyReader does not support predictor, please close open_predictor"
+                "LACClassifyReader does not support predictor, please close accelerate_mode"
             )
 
         global_run_states = []
@@ -988,7 +992,7 @@ class BaseTask(object):
                 data,
                 load_best_model=True,
                 return_result=False,
-                open_predictor=False):
+                accelerate_mode=False):
         """
         make prediction for the input data.
 
@@ -996,17 +1000,17 @@ class BaseTask(object):
             data (list): the data will be predicted.
             load_best_model (bool): load the best model or not
             return_result (bool): return a readable result or just the raw run result
-            open_predictor (bool): use high-performance predictor or not
+            accelerate_mode (bool): use high-performance predictor or not
 
         Returns:
             RunState: the running result of predict phase
         """
-        self.open_predictor = open_predictor
+        self.accelerate_mode = accelerate_mode
 
         with self.phase_guard(phase="predict"):
             self._predict_data = data
             self._predict_start_event()
-            if not self.open_predictor:
+            if not self.accelerate_mode:
                 if load_best_model:
                     self.init_if_load_best_model()
                 else:
