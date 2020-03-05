@@ -33,10 +33,10 @@ import numpy as np
 import paddle.fluid as fluid
 from tb_paddle import SummaryWriter
 
-import paddle
 import paddlehub as hub
 from paddlehub.common.paddle_helper import dtype_map, clone_program
-from paddlehub.common.utils import mkdir, version_compare
+from paddlehub.common.utils import mkdir
+from paddlehub.common.dir import tmp_dir
 from paddlehub.common.logger import logger
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
 from paddlehub.finetune.config import RunConfig
@@ -923,30 +923,16 @@ class BaseTask(object):
         Returns:
             PaddlePredictor: the high-performance predictor
         """
-        model_path = self.config.checkpoint_dir
-        best_model_path = os.path.join(self.config.checkpoint_dir, "best_model")
-        logger.info("Try to load inference model from %s or %s." %
-                    (model_path, best_model_path))
-        if os.path.exists(os.path.join(model_path, "__model__")):
-            predictor_config = fluid.core.AnalysisConfig(model_path)
-            logger.info(
-                "Inference model %s has been loaded successfully" % model_path)
-        elif os.path.exists(
-                os.path.join(model_path, "best_model", "__model__")):
-            predictor_config = fluid.core.AnalysisConfig(best_model_path)
-            logger.info("Inference model %s has been loaded successfully" %
-                        best_model_path)
-        else:
-            raise RuntimeError(
-                "Predictor fail to launch, please make sure %s or %s exsits the model files saved by PaddleHub >= 1.5.0"
-                % (model_path, best_model_path))
+        with tmp_dir() as _dir:
+            self.save_inference_model(dirname=_dir)
+            predictor_config = fluid.core.AnalysisConfig(_dir)
 
-        if self.config.use_cuda:
-            predictor_config.enable_use_gpu(100, 0)
-            predictor_config.switch_ir_optim(True)
-        else:
-            predictor_config.disable_gpu()
-        predictor_config.enable_memory_optim()
+            if self.config.use_cuda:
+                predictor_config.enable_use_gpu(100, 0)
+                predictor_config.switch_ir_optim(True)
+            else:
+                predictor_config.disable_gpu()
+            predictor_config.enable_memory_optim()
         return fluid.core.create_paddle_predictor(predictor_config)
 
     def _run_with_predictor(self):
@@ -956,10 +942,6 @@ class BaseTask(object):
         Returns:
             RunState: the running result of predict phase
         """
-        if not version_compare(paddle.__version__, "1.6.2"):
-            logger.warning(
-                "accelerate_mode may not work properly in PaddlePaddle < 1.6.2. Please close accelerate_mode or upgrade PaddlePaddle."
-            )
 
         if isinstance(self._base_data_reader, hub.reader.LACClassifyReader):
             raise Exception(
@@ -1012,11 +994,12 @@ class BaseTask(object):
         with self.phase_guard(phase="predict"):
             self._predict_data = data
             self._predict_start_event()
+
+            if load_best_model:
+                self.init_if_load_best_model()
+            else:
+                self.init_if_necessary()
             if not self.accelerate_mode:
-                if load_best_model:
-                    self.init_if_load_best_model()
-                else:
-                    self.init_if_necessary()
                 run_states = self._run()
             else:
                 if not self._predictor:
