@@ -202,9 +202,13 @@ class CombinedStrategy(DefaultStrategy):
             "noam_decay": False,
             "discriminative": {
                 "blocks": 0,
+                "params_layer": None,
                 "factor": 2.6
             },
-            "gradual_unfreeze": 0,
+            "gradual_unfreeze": {
+                "blocks": 0,
+                "params_layer": None,
+            },
             "slanted_triangle": {
                 "cut_fraction": 0.0,
                 "ratio": 32
@@ -234,6 +238,38 @@ class CombinedStrategy(DefaultStrategy):
         for name in clip:
             self.check_assign(self.clip, name, clip[name])
 
+        # resolve the conflict
+        if self.scheduler["discriminative"]["params_layer"] and self.scheduler[
+                "discriminative"]["blocks"]:
+            logger.warning(
+                "Both params_layer and blocks have been set in discriminative, only params_layer will take effect"
+            )
+            self.scheduler["discriminative"]["blocks"] = 0
+
+        if self.scheduler["gradual_unfreeze"][
+                "params_layer"] and self.scheduler["gradual_unfreeze"]["blocks"]:
+            logger.warning(
+                "Both params_layer and blocks have been set in gradual_unfreeze, only params_layer will take effect"
+            )
+            self.scheduler["gradual_unfreeze"]["blocks"] = 0
+
+        if self.scheduler["slanted_triangle"]["cut_fraction"] and (
+                self.scheduler["warmup"] or self.scheduler["noam_decay"]
+                or self.scheduler["linear_decay"]["start_point"] < 1):
+            logger.warning(
+                "You are using slanted_triangle learning rate strategy, "
+                "which will make warmup, noam_decay and linear_decay useless")
+            self.scheduler["warmup"] = 0.0
+            self.scheduler["noam_decay"] = False
+            self.scheduler["linear_decay"]["start_point"] = 1
+
+        if self.scheduler["noam_decay"] and self.scheduler["linear_decay"][
+                "start_point"]:
+            logger.warning(
+                "Both noam_decay and linear_decay have been set, only noam_decay will take effect"
+            )
+            self.scheduler["linear_decay"]["start_point"] = 1
+
         self.epoch = 0
         self.main_program = None
 
@@ -244,9 +280,9 @@ class CombinedStrategy(DefaultStrategy):
             sub_dict = dictionary[key]
             for sub_name in value:
                 self.check_assign(sub_dict, sub_name, value[sub_name])
-        elif isinstance(dictionary[key],
-                        type(value)) or (isinstance(dictionary[key], float)
-                                         and isinstance(value, (float, int))):
+        elif isinstance(dictionary[key], type(value)) or (
+                isinstance(dictionary[key], float)
+                and isinstance(value, (float, int))) or dictionary[key] == None:
             dictionary[key] = value
         else:
             if isinstance(dictionary[key], dict):
@@ -283,52 +319,49 @@ class CombinedStrategy(DefaultStrategy):
             persistable=True,
             name="learning_rate")
 
-        if not self.scheduler["slanted_triangle"]["cut_fraction"]:
-            warmup_steps = int(max_train_steps * self.scheduler["warmup"])
-            linear_decay_start = int(
-                max_train_steps * self.scheduler["linear_decay"]["start_point"])
-            if linear_decay_start < warmup_steps:
-                logger.warning(
-                    "linear decay can not start during warmup process,"
-                    "it will start after warmup ends!")
-                linear_decay_start = warmup_steps
-            if self.scheduler["noam_decay"]:
-                if warmup_steps > 0:
-                    scheduled_lr = fluid.layers.learning_rate_scheduler \
-                        .noam_decay(1 / (warmup_steps * (self.learning_rate ** 2)),
-                                    warmup_steps)
-                else:
-                    logger.warning(
-                        "Noam decay learning rate scheduler should have positive \
-                        warmup steps, using constant learning rate instead!")
+        warmup_steps = int(max_train_steps * self.scheduler["warmup"])
 
-            if not self.scheduler["noam_decay"] and \
-                    (warmup_steps > 0 or self.scheduler["linear_decay"]["start_point"]<1):
-                with self.main_program._lr_schedule_guard():
-                    global_step = lr_scheduler._decay_step_counter()
-                    with control_flow.Switch() as switch:
-                        if warmup_steps > 0:
-                            with switch.case(global_step < warmup_steps):
-                                decayed_lr = self.learning_rate * global_step * 1.0 / warmup_steps
-                                fluid.layers.assign(decayed_lr, scheduled_lr)
-                        if self.scheduler["linear_decay"]["start_point"] < 1:
-                            with switch.case(global_step >= linear_decay_start):
-                                decayed_lr = lr_scheduler.polynomial_decay(
-                                    learning_rate=self.learning_rate,
-                                    decay_steps=max_train_steps,
-                                    end_learning_rate=self.scheduler[
-                                        "linear_decay"]["end_learning_rate"],
-                                    power=1.0,
-                                    cycle=False)
-                                fluid.layers.assign(decayed_lr, scheduled_lr)
-        else:
-            if self.scheduler["warmup"] or self.scheduler[
-                    "noam_decay"] or self.scheduler["linear_decay"][
-                        "start_point"] < 1:
+        # noam_decay (based on warmup)
+        if self.scheduler["noam_decay"]:
+            if warmup_steps > 0:
+                scheduled_lr = fluid.layers.learning_rate_scheduler \
+                    .noam_decay(1 / (warmup_steps * (self.learning_rate ** 2)),
+                                warmup_steps)
+            else:
                 logger.warning(
-                    "You are using slanted_triangle learning rate "
-                    "which will make warmup, noam_decay and linear_decay unable"
-                )
+                    "Noam decay learning rate scheduler should have positive \
+                    warmup steps, using constant learning rate instead!")
+
+        # warmup, linear_decay
+        if warmup_steps > 0 or self.scheduler["linear_decay"]["start_point"] < 1:
+            with self.main_program._lr_schedule_guard():
+                global_step = lr_scheduler._decay_step_counter()
+                with control_flow.Switch() as switch:
+                    if warmup_steps > 0:
+                        with switch.case(global_step < warmup_steps):
+                            decayed_lr = self.learning_rate * global_step * 1.0 / warmup_steps
+                            fluid.layers.assign(decayed_lr, scheduled_lr)
+                    if self.scheduler["linear_decay"]["start_point"] < 1:
+                        linear_decay_start = int(
+                            max_train_steps *
+                            self.scheduler["linear_decay"]["start_point"])
+                        if linear_decay_start < warmup_steps:
+                            logger.warning(
+                                "linear decay can not start during warmup process,"
+                                "it will start after warmup ends!")
+                            linear_decay_start = warmup_steps
+                        with switch.case(global_step >= linear_decay_start):
+                            decayed_lr = lr_scheduler.polynomial_decay(
+                                learning_rate=self.learning_rate,
+                                decay_steps=max_train_steps,
+                                end_learning_rate=self.scheduler["linear_decay"]
+                                ["end_learning_rate"],
+                                power=1.0,
+                                cycle=False)
+                            fluid.layers.assign(decayed_lr, scheduled_lr)
+
+        # slanted_triangle
+        if self.scheduler["slanted_triangle"]["cut_fraction"]:
             cut_step = int(max_train_steps *
                            self.scheduler["slanted_triangle"]["cut_fraction"])
             ratio = self.scheduler["slanted_triangle"]["ratio"]
@@ -346,9 +379,25 @@ class CombinedStrategy(DefaultStrategy):
                                                        (ratio - 1)) / ratio
                     fluid.layers.assign(decayed_lr, scheduled_lr)
 
+        # set optimizer
         super(CombinedStrategy, self).__init__(
             optimizer_name=self._optimizer_name, learning_rate=scheduled_lr)
 
+        # discriminative learning rate
+        # based on layer
+        if self.scheduler["discriminative"]["params_layer"]:
+            max_layer = max(
+                self.scheduler["discriminative"]["params_layer"].values())
+            for param in self.main_program.global_block().iter_parameters():
+                if param.name in self.scheduler["discriminative"][
+                        "params_layer"]:
+                    param_layer = self.scheduler["discriminative"][
+                        "params_layer"][param.name]
+                    param.optimize_attr["learning_rate"] *= pow(
+                        1.0 / self.scheduler["discriminative"]["factor"],
+                        max_layer - param_layer)
+
+        # based on blocks
         if self.scheduler["discriminative"]["blocks"]:
             _block_layers = math.ceil(
                 len(self.sorted_depth) /
@@ -426,13 +475,12 @@ class CombinedStrategy(DefaultStrategy):
             pass
 
         if self.scheduler["discriminative"]["blocks"] > 0 or self.scheduler[
-                "gradual_unfreeze"] > 0:
+                "gradual_unfreeze"]["blocks"] > 0:
             self.depth_params_dict = get_depth_parameter(self.main_program)
             self.sorted_depth = sorted(
                 self.depth_params_dict.keys(), reverse=True)
             self.max_depth = len(self.sorted_depth)
 
-        logger.info(self.__str__())
         # handle scheduler
         scheduled_lr = self.scheduler_handler(max_train_steps)
 
@@ -441,6 +489,8 @@ class CombinedStrategy(DefaultStrategy):
 
         # handle regularization
         self.regularization_handler(loss, scheduled_lr)
+
+        logger.info(self.__str__())
 
         return scheduled_lr, max_train_steps
 
@@ -454,25 +504,64 @@ class CombinedStrategy(DefaultStrategy):
         return False
 
     def step(self):
-        if self.scheduler["gradual_unfreeze"] > 0:
+        if self.scheduler["gradual_unfreeze"]["blocks"] > 0:
             self.epoch += 1
             if self.max_depth > 0 and self.epoch <= self.scheduler[
-                    "gradual_unfreeze"]:
+                    "gradual_unfreeze"]["blocks"]:
                 set_gradual_unfreeze(
                     self.main_program,
                     unfreeze_depths=self.
                     sorted_depth[:self.max_depth * self.epoch //
-                                 self.scheduler["gradual_unfreeze"]])
+                                 self.scheduler["gradual_unfreeze"]["blocks"]])
             else:
                 logger.warning(
                     "The max op-depth in the network is %s. That results in that can't use the gradual unfreeze finetune strategy."
                     % (self.max_depth))
+        elif self.scheduler["gradual_unfreeze"]["params_layer"]:
+            max_layer = max(
+                self.scheduler["gradual_unfreeze"]["params_layer"].values())
+            if self.epoch <= max_layer:
+                for param in self.main_program.global_block().iter_parameters():
+                    if param.name in self.scheduler["gradual_unfreeze"][
+                            "params_layer"]:
+                        param_layer = self.scheduler["gradual_unfreeze"][
+                            "params_layer"][param.name]
+                        if param_layer >= max_layer - self.epoch:
+                            param.stop_gradient = False
+                        else:
+                            param.stop_gradient = True
+            self.epoch += 1
         else:
             pass
 
     def __str__(self):
-        return "Strategy with scheduler: %s, regularization: %s and clip: %s" % (
-            self.scheduler, self.regularization, self.clip)
+        self.clip = {"GlobalNorm": 0.0, "Norm": 0.0}
+
+        strategy_name = ""
+        strategy_name += "warmup, " if self.scheduler["warmup"] else ""
+        strategy_name += "linear decay, " if self.scheduler["linear_decay"][
+            "start_point"] < 1 else ""
+        strategy_name += "noam decay, " if self.scheduler["noam_decay"] else ""
+        strategy_name += "discriminative learning rate, " if self.scheduler[
+            "discriminative"]["blocks"] or self.scheduler["discriminative"][
+                "params_layer"] else ""
+        strategy_name += "gradual unfreeze, " if self.scheduler[
+            "gradual_unfreeze"]["blocks"] or self.scheduler["gradual_unfreeze"][
+                "params_layer"] else ""
+        strategy_name += "slanted triangle learning rate, " if self.scheduler[
+            "slanted_triangle"] else ""
+
+        strategy_name += "L2 regularization, " if self.regularization[
+            "L2"] else ""
+        strategy_name += "L2SP regularization, " if self.regularization[
+            "L2SP"] else ""
+        strategy_name += "weight decay regularization, " if self.regularization[
+            "weight_decay"] else ""
+
+        strategy_name += "GlobalNorm clip, " if self.clip["GlobalNorm"] else ""
+        strategy_name += "Norm clip, " if self.clip["Norm"] else ""
+
+        return "Strategy with %s" % (strategy_name)
 
 
 class AdamWeightDecayStrategy(CombinedStrategy):
@@ -544,17 +633,22 @@ class ULMFiTStrategy(CombinedStrategy):
                  ratio=32,
                  dis_blocks=3,
                  factor=2.6,
-                 frz_blocks=3):
+                 frz_blocks=3,
+                 params_layer=None):
 
         scheduler = {
             "slanted_triangle": {
                 "cut_fraction": cut_fraction,
                 "ratio": ratio
             },
-            "gradual_unfreeze": frz_blocks,
+            "gradual_unfreeze": {
+                "blocks": frz_blocks,
+                "params_layer": params_layer
+            },
             "discriminative": {
                 "blocks": dis_blocks,
-                "factor": factor
+                "factor": factor,
+                "params_layer": params_layer
             }
         }
         regularization = {}
