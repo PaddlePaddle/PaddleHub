@@ -326,6 +326,7 @@ class ModuleV1(Module):
         serving_func_name = self.desc.attr.map.data['default_signature'].s
         return serving_func_name if serving_func_name != "" else None
 
+    @property
     def desc(self):
         return self._desc
 
