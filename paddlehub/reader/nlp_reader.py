@@ -22,7 +22,7 @@ import numpy as np
 import six
 from collections import namedtuple
 
-import paddle
+import paddle.fluid as fluid
 
 from paddlehub.reader import tokenization
 from paddlehub.common.logger import logger
@@ -203,7 +203,8 @@ class BaseNLPReader(BaseReader):
                        batch_size=1,
                        phase='train',
                        shuffle=True,
-                       data=None):
+                       data=None,
+                       return_list=True):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is None ! It isn't allowed.")
         if phase == 'train':
@@ -255,7 +256,12 @@ class BaseNLPReader(BaseReader):
 
             for batch_data in self._prepare_batch_data(
                     examples, batch_size, phase=phase):
-                yield [batch_data]
+                if return_list:
+                    # for DataFeeder
+                    yield [batch_data]
+                else:
+                    # for DataLoader
+                    yield batch_data
 
         return wrapper
 
@@ -666,7 +672,8 @@ class RegressionReader(BaseNLPReader):
                        batch_size=1,
                        phase='train',
                        shuffle=True,
-                       data=None):
+                       data=None,
+                       return_list=True):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is none and it's not allowed.")
         if phase == 'train':
@@ -715,7 +722,12 @@ class RegressionReader(BaseNLPReader):
 
             for batch_data in self._prepare_batch_data(
                     examples, batch_size, phase=phase):
-                yield [batch_data]
+                if return_list:
+                    # for DataFeeder
+                    yield [batch_data]
+                else:
+                    # for DataLoader
+                    yield batch_data
 
         return wrapper
 
@@ -884,7 +896,8 @@ class ReadingComprehensionReader(BaseNLPReader):
                        batch_size=1,
                        phase='train',
                        shuffle=False,
-                       data=None):
+                       data=None,
+                       return_list=True):
         # we need all_examples and  all_features in write_prediction in reading_comprehension_task
         # we can also use all_examples and all_features to avoid duplicate long-time preprocessing
         examples = None
@@ -926,7 +939,12 @@ class ReadingComprehensionReader(BaseNLPReader):
 
             for batch_data in self._prepare_batch_data(
                     features, batch_size, phase=phase):
-                yield [batch_data]
+                if return_list:
+                    # for DataFeeder
+                    yield [batch_data]
+                else:
+                    # for DataLoader
+                    yield batch_data
 
         return wrapper
 
@@ -1147,12 +1165,20 @@ class LACClassifyReader(BaseReader):
         self.feed_key = list(
             self.lac.processor.data_format(
                 sign_name="lexical_analysis").keys())[0]
+        self.has_processed = {
+            "train": False,
+            "dev": False,
+            "val": False,
+            "test": False,
+            "predict": False
+        }
 
     def data_generator(self,
                        batch_size=1,
                        phase="train",
                        shuffle=False,
-                       data=None):
+                       data=None,
+                       return_list=True):
         if phase != "predict" and not self.dataset:
             raise ValueError("The dataset is None and it isn't allowed.")
         if phase == "train":
@@ -1180,32 +1206,96 @@ class LACClassifyReader(BaseReader):
                 self.vocab[word] for word in processed[0]['word']
                 if word in self.vocab
             ]
+
             if len(processed) == 0:
                 if six.PY2:
                     text = text.encode(sys_stdout_encoding())
                 logger.warning(
                     "The words in text %s can't be found in the vocabulary." %
                     (text))
+
             return processed
+
+        if not self.has_processed[phase]:
+            logger.info(
+                "processing %s data now... this may take a few minutes" % phase)
+            for i in range(len(data)):
+                if phase == "predict":
+                    data[i] = preprocess(data[i])
+                else:
+                    data[i].text_a = preprocess(data[i].text_a)
+                    if self.label_map:
+                        if data[i].label not in self.label_map:
+                            raise KeyError("example.label = {%s} not in label" %
+                                           data[i].label)
+                        label_id = self.label_map[data[i].label]
+                    else:
+                        label_id = data[i].label
+                    data[i].label = label_id
+            self.has_processed[phase] = True
 
         def _data_reader():
             if shuffle:
                 np.random.shuffle(data)
-
+            texts = []
+            labels = []
             if phase == "predict":
                 for text in data:
-                    text = preprocess(text)
                     if not text:
                         continue
-                    yield (text, )
+                    texts.append(text)
+                    if len(texts) == batch_size:
+                        if return_list:
+                            # for DataFeeder
+                            # if you want to use high-performance predictor, yield [[[t] for t in texts]]
+                            yield [[t] for t in texts]
+                        else:
+                            # for DataLoader
+                            # cannot use in high-performance predictor, as PaddleTensor rejects lod_tensor
+                            texts = fluid.create_lod_tensor(
+                                texts, [[len(seq) for seq in texts]],
+                                fluid.CPUPlace())
+                            yield [texts]
+                        texts = []
+                if texts:
+                    if return_list:
+                        yield [[t] for t in texts]
+                    else:
+                        texts = fluid.create_lod_tensor(
+                            texts, [[len(seq) for seq in texts]],
+                            fluid.CPUPlace())
+
+                        yield [texts]
+                    texts = []
             else:
                 for item in data:
-                    text = preprocess(item.text_a)
+                    text = item.text_a
                     if not text:
                         continue
-                    yield (text, item.label)
+                    texts.append(text)
+                    labels.append([item.label])
+                    if len(texts) == batch_size:
+                        if return_list:
+                            yield list(zip(texts, labels))
+                        else:
+                            texts = fluid.create_lod_tensor(
+                                texts, [[len(seq) for seq in texts]],
+                                fluid.CPUPlace())
+                            yield [texts, labels]
+                        texts = []
+                        labels = []
+                if texts:
+                    if return_list:
+                        yield list(zip(texts, labels))
+                    else:
+                        texts = fluid.create_lod_tensor(
+                            texts, [[len(seq) for seq in texts]],
+                            fluid.CPUPlace())
+                        yield [texts, labels]
+                    texts = []
+                    labels = []
 
-        return paddle.batch(_data_reader, batch_size=batch_size)
+        return _data_reader
 
 
 if __name__ == '__main__':
