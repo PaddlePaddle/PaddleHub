@@ -146,7 +146,7 @@ body {
 										autoplay: true,//是否自动播放					
 										drag: 'start', //拖动的属性
 										video: [
-											['video/result/222.mp4', 'video/mp4', '中文标清', 0],
+											['video/result/1-mask_detection.mp4', 'video/mp4', '中文标清', 0],
 										]
 									};
 									var player = new ckplayer(videoObject);
