@@ -933,7 +933,7 @@ class BaseTask(object):
             else:
                 predictor_config.disable_gpu()
             predictor_config.enable_memory_optim()
-        return fluid.core.create_paddle_predictor(predictor_config)
+            return fluid.core.create_paddle_predictor(predictor_config)
 
     def _run_with_predictor(self):
         """
