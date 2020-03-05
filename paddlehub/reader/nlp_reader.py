@@ -1162,9 +1162,6 @@ class LACClassifyReader(BaseReader):
         self.tokenizer = tokenization.FullTokenizer(
             vocab_file=vocab_path, do_lower_case=False)
         self.vocab = self.tokenizer.vocab
-        self.feed_key = list(
-            self.lac.processor.data_format(
-                sign_name="lexical_analysis").keys())[0]
         self.has_processed = {
             "train": False,
             "dev": False,
@@ -1200,7 +1197,7 @@ class LACClassifyReader(BaseReader):
                 "Unknown phase, which should be in ['train', 'dev', 'test'].")
 
         def preprocess(text):
-            data_dict = {self.feed_key: [text]}
+            data_dict = {'text': [text]}
             processed = self.lac.lexical_analysis(data=data_dict)
             processed = [
                 self.vocab[word] for word in processed[0]['word']
