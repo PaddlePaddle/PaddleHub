@@ -66,7 +66,7 @@ class LocalModuleManager(object):
                     _module = importlib.import_module(
                         "{}.module".format(basename))
                     for _item, _cls in inspect.getmembers(
-                            _module, inspect.isclass):
+                            _module, inspect.isclass)[1:]:
                         _item = _module.__dict__[_item]
                         if issubclass(_item, hub.Module):
                             version = _item._version
