@@ -25,7 +25,7 @@ import paddle.fluid as fluid
 from paddlehub import logger
 
 
-class BERTEbeddingTask(hub.BaseTask):
+class BERTEmbeddingTask(hub.BaseTask):
     def __init__(self,
                  pooled_feature,
                  seq_feature,
@@ -33,7 +33,7 @@ class BERTEbeddingTask(hub.BaseTask):
                  data_reader,
                  config=None):
         main_program = pooled_feature.block.program
-        super(BERTEbeddingTask, self).__init__(
+        super(BERTEmbeddingTask, self).__init__(
             main_program=main_program,
             data_reader=data_reader,
             feed_list=feed_list,
@@ -209,7 +209,7 @@ class BERTModule(hub.Module):
 
         config = hub.RunConfig(use_data_parallel=False, use_cuda=use_gpu)
 
-        emb_task = BERTEbeddingTask(
+        emb_task = BERTEmbeddingTask(
             pooled_feature=pooled_feature,
             seq_feature=seq_feature,
             feed_list=feed_list,
