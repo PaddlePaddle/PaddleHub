@@ -212,12 +212,13 @@ class LocalModuleManager(object):
                         fp.write(md5_value)
 
                 save_path = os.path.join(MODULE_HOME, module_name)
-                if os.path.exists(save_path):
-                    shutil.rmtree(save_path)
-                if from_user_dir:
-                    shutil.copytree(module_dir, save_path)
-                else:
-                    shutil.move(module_dir, save_path)
+                if save_path != module_dir:
+                    if os.path.exists(save_path):
+                        shutil.rmtree(save_path)
+                    if from_user_dir:
+                        shutil.copytree(module_dir, save_path)
+                    else:
+                        shutil.move(module_dir, save_path)
                 module_dir = save_path
                 tips = "Successfully installed %s" % module_name
                 if installed_module_version:
