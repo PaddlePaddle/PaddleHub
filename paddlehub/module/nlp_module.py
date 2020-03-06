@@ -184,12 +184,12 @@ class BERTModule(hub.Module):
             sequence_outputs(list): its element is the whole features of each text sample.
         """
         inputs, outputs, program = self.context(
-            trainable=True, max_seq_len=self.max_seq_len)
+            trainable=True, max_seq_len=self.MAX_SEQ_LEN)
 
         reader = hub.reader.ClassifyReader(
             dataset=None,
             vocab_path=self.get_vocab_path(),
-            max_seq_len=self.max_seq_len,
+            max_seq_len=self.MAX_SEQ_LEN,
             sp_model_path=self.get_spm_path()
             if hasattr(self, "get_spm_path") else None,
             word_dict_path=self.get_word_dict_path() if hasattr(
