@@ -107,8 +107,8 @@ class BERTModule(hub.Module):
 
         """
 
-        assert max_seq_len <= self.MAX_SEQ_LENGTH and max_seq_len >= 1, "max_seq_len({}) should be in the range of [1, {}]".format(
-            max_seq_len, self.MAX_SEQ_LENGTH)
+        assert max_seq_len <= self.MAX_SEQ_LEN and max_seq_len >= 1, "max_seq_len({}) should be in the range of [1, {}]".format(
+            max_seq_len, self.MAX_SEQ_LEN)
 
         module_program = fluid.Program()
         startup_program = fluid.Program()
