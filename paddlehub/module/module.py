@@ -23,8 +23,6 @@ import sys
 import functools
 import inspect
 import importlib
-import tarfile
-import six
 import shutil
 
 import paddle
@@ -36,15 +34,10 @@ from paddlehub.common.dir import CACHE_HOME
 from paddlehub.common.lock import lock
 from paddlehub.common.logger import logger
 from paddlehub.common.hub_server import CacheUpdater
-from paddlehub.common import tmp_dir
-from paddlehub.common.downloader import progress
 from paddlehub.module import module_desc_pb2
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.checker import ModuleChecker
 from paddlehub.module.signature import Signature, create_signature
-from paddlehub.module.base_processor import BaseProcessor
-from paddlehub.io.parser import yaml_parser
-from paddlehub import version
 
 # PaddleHub module dir name
 ASSETS_DIRNAME = "assets"
@@ -188,7 +181,7 @@ class Module(object):
         dirname = os.path.join(*list(os.path.split(directory)[:-1]))
         sys.path.insert(0, dirname)
         _module = importlib.import_module("{}.module".format(basename))
-        for _item, _cls in inspect.getmembers(_module, inspect.isclass):
+        for _item, _cls in inspect.getmembers(_module, inspect.isclass)[1:]:
             _item = _module.__dict__[_item]
             if issubclass(_item, Module):
                 user_module = _item(directory=directory, **kwargs)
