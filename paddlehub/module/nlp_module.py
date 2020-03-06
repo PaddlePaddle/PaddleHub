@@ -32,7 +32,9 @@ class BERTEbeddingTask(hub.BaseTask):
                  feed_list,
                  data_reader,
                  config=None):
+        main_program = pooled_feature.block.program
         super(BERTEbeddingTask, self).__init__(
+            main_program=main_program,
             data_reader=data_reader,
             feed_list=feed_list,
             config=config,
