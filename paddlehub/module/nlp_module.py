@@ -182,8 +182,8 @@ class BERTModule(hub.Module):
             use_gpu (bool): use gpu or not
 
         Returns:
-            pooled_outputs(list): its element is the first feature of each text sample.
-            sequence_outputs(list): its element is the whole features of each text sample.
+            pooled_outputs(list): its element is a numpy array, the first feature of each text sample.
+            sequence_outputs(list): its element is a numpy array, the whole features of each text sample.
         """
         inputs, outputs, program = self.context(
             trainable=True, max_seq_len=self.MAX_SEQ_LEN)
