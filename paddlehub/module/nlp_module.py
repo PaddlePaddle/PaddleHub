@@ -205,7 +205,7 @@ class BERTModule(hub.Module):
         pooled_feature, seq_feature = outputs["pooled_output"], outputs[
             "sequence_output"]
 
-        config = hub.RunConfig(use_data_parallel=False, use_gpu=use_gpu)
+        config = hub.RunConfig(use_data_parallel=False, use_cuda=use_gpu)
 
         emb_task = BERTEbeddingTask(
             pooled_feature=pooled_feature,
