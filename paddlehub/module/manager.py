@@ -30,10 +30,12 @@ import paddlehub as hub
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import MODULE_HOME
-from paddlehub.common.cml_utils import TablePrinter
+from paddlehub.common.cml_utils import paint_modules_info
 from paddlehub.common.logger import logger
 from paddlehub.common import tmp_dir
 from paddlehub.module import module_desc_pb2
+from paddlehub.version import hub_version as sys_hub_verion
+from paddle import __version__ as sys_paddle_version
 
 
 class LocalModuleManager(object):
@@ -135,40 +137,20 @@ class LocalModuleManager(object):
                         return False, tips, None
                     module_versions_info = hub.HubServer().search_module_info(
                         module_name)
-                    if module_versions_info is not None and len(
-                            module_versions_info) > 0:
-
-                        if utils.is_windows():
-                            placeholders = [20, 8, 14, 14]
-                        else:
-                            placeholders = [30, 8, 16, 16]
-                        tp = TablePrinter(
-                            titles=[
-                                "ResourceName", "Version", "PaddlePaddle",
-                                "PaddleHub"
-                            ],
-                            placeholders=placeholders)
-                        module_versions_info.sort(
-                            key=cmp_to_key(utils.sort_version_key))
-                        for resource_name, resource_version, paddle_version, \
-                            hub_version in module_versions_info:
-                            colors = ["yellow", None, None, None]
-
-                            tp.add_line(
-                                contents=[
-                                    resource_name, resource_version,
-                                    utils.strflist_version(paddle_version),
-                                    utils.strflist_version(hub_version)
-                                ],
-                                colors=colors)
-                        tips = "The version of PaddlePaddle or PaddleHub " \
-                               "can not match module, please upgrade your " \
-                               "PaddlePaddle or PaddleHub according to the form " \
-                               "below." + tp.get_text()
+                    if module_versions_info is None:
+                        tips = "Can't find module %s, please check your spelling." \
+                               % (module_name)
+                    elif module_version is not None and module_version not in [
+                            item[1] for item in module_versions_info
+                    ]:
+                        tips = "Can't find module %s with version %s, all versions are listed below." \
+                               % (module_name, module_version)
+                        tips += paint_modules_info(module_versions_info)
                     else:
-                        tips = "Can't find module %s" % module_name
-                        if module_version:
-                            tips += " with version %s" % module_version
+                        tips = "The version of PaddlePaddle(%s) or PaddleHub(%s) can not match module, please upgrade your PaddlePaddle or PaddleHub according to the form below." \
+                               % (sys_paddle_version, sys_hub_verion)
+                        tips += paint_modules_info(module_versions_info)
+
                     return False, tips, None
 
                 result, tips, module_zip_file = default_downloader.download_file(

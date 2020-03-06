@@ -332,6 +332,20 @@ def create_app(init_flag=False, configs=None):
     def predict_image(module_name):
         if request.path.split("/")[-1] not in cv_module_info.modules_info:
             return {"error": "Module {} is not available.".format(module_name)}
+        module_info = cv_module_info.get_module_info(module_name)
+        if module_info["code_version"] == "v2":
+            results = {}
+            # results = predict_v2(module_info, inputs)
+            results.update({
+                "Warnning":
+                "This usage is out of date, please "
+                "use 'application/json' as "
+                "content-type to post to "
+                "/predict/%s. See "
+                "'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.5/docs/tutorial/serving.md' for more details."
+                % (module_name)
+            })
+            return results
         req_id = request.data.get("id")
         img_base64 = request.form.getlist("image")
         extra_info = {}
@@ -368,7 +382,6 @@ def create_app(init_flag=False, configs=None):
         # module = default_module_manager.get_module(module_name)
         # predict_func_name = cv_module_info.get_module_info(module_name)[
         #     "method_name"]
-        module_info = cv_module_info.get_module_info(module_name)
         module = module_info["module"]
         predict_func_name = cv_module_info.cv_module_method.get(module_name, "")
         if predict_func_name != "":
@@ -388,6 +401,20 @@ def create_app(init_flag=False, configs=None):
     def predict_text(module_name):
         if request.path.split("/")[-1] not in nlp_module_info.nlp_modules:
             return {"error": "Module {} is not available.".format(module_name)}
+        module_info = nlp_module_info.get_module_info(module_name)
+        if module_info["code_version"] == "v2":
+            results = {}
+            # results = predict_v2(module_info, inputs)
+            results.update({
+                "Warnning":
+                "This usage is out of date, please "
+                "use 'application/json' as "
+                "content-type to post to "
+                "/predict/%s. See "
+                "'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.5/docs/tutorial/serving.md' for more details."
+                % (module_name)
+            })
+            return results
         req_id = request.data.get("id")
         inputs = {}
         for item in list(request.form.keys()):
@@ -399,16 +426,12 @@ def create_app(init_flag=False, configs=None):
                 file_name = req_id + "_" + file.filename
                 files[file_key].append(file_name)
                 file.save(file_name)
-        module_info = nlp_module_info.get_module_info(module_name)
 
-        if module_info["code_version"] == "v2":
-            results = predict_v2(module_info, inputs)
-        else:
-            results = predict_nlp(
-                module_info=module_info,
-                input_text=inputs,
-                req_id=req_id,
-                extra=files)
+        results = predict_nlp(
+            module_info=module_info,
+            input_text=inputs,
+            req_id=req_id,
+            extra=files)
         return results
 
     @app_instance.route("/predict/<module_name>", methods=["POST"])
@@ -419,7 +442,6 @@ def create_app(init_flag=False, configs=None):
             module_info = cv_module_info.get_module_info(module_name)
         else:
             return {"Error": "Module {} is not available.".format(module_name)}
-
         inputs = request.json
         results = predict_v2_advanced(module_info, inputs)
         return results
