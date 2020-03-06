@@ -36,6 +36,20 @@ def predict_v2(module_info, input):
     return {"results": output}
 
 
+def predict_v2_advanced(module_info, input):
+    serving_method_name = module_info["method_name"]
+    serving_method = getattr(module_info["module"], serving_method_name)
+    predict_args = module_info["predict_args"]
+    predict_args.update(input)
+
+    for item in serving_method.__code__.co_varnames:
+        if item in module_info.keys():
+            predict_args.update({item: module_info[item]})
+
+    output = serving_method(**predict_args)
+    return {"results": output}
+
+
 def predict_nlp(module_info, input_text, req_id, extra=None):
     method_name = module_info["method_name"]
     predict_method = getattr(module_info["module"], method_name)
@@ -395,6 +409,19 @@ def create_app(init_flag=False, configs=None):
                 input_text=inputs,
                 req_id=req_id,
                 extra=files)
+        return results
+
+    @app_instance.route("/predict/<module_name>", methods=["POST"])
+    def predict_modulev2(module_name):
+        if module_name in nlp_module_info.nlp_modules:
+            module_info = nlp_module_info.get_module_info(module_name)
+        elif module_name in cv_module_info.cv_modules:
+            module_info = cv_module_info.get_module_info(module_name)
+        else:
+            return {"Error": "Module {} is not available.".format(module_name)}
+
+        inputs = request.json
+        results = predict_v2_advanced(module_info, inputs)
         return results
 
     return app_instance
