@@ -49,8 +49,11 @@ class _BERTEmbeddingTask(hub.BaseTask):
         results = []
         for batch_state in run_states:
             batch_result = batch_state.run_results
-            for sample_result in batch_result:
-                results.append([sample_result[0], sample_result[1]])
+            batch_pooled_features = batch_result[0]
+            batch_seq_features = batch_result[1]
+            for i in range(len(batch_pooled_features)):
+                results.append(
+                    [batch_pooled_features[i], batch_seq_features[i]])
         return results
 
 

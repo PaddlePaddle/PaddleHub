@@ -181,7 +181,6 @@ class Module(object):
         dirname = os.path.join(*list(os.path.split(directory)[:-1]))
         sys.path.insert(0, dirname)
         _module = importlib.import_module("{}.module".format(basename))
-        # TODO: get real module
         for _item, _cls in inspect.getmembers(_module, inspect.isclass):
             _item = _module.__dict__[_item]
             if issubclass(_item, Module):
