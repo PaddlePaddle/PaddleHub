@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -17,6 +17,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import argparse
+import ast
+import json
+import numpy as np
 import os
 import time
 import sys
@@ -29,6 +33,7 @@ import shutil
 
 import paddle
 import paddle.fluid as fluid
+from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 
 from paddlehub.common import utils
 from paddlehub.common import paddle_helper
@@ -43,7 +48,7 @@ from paddlehub.module.manager import default_module_manager
 from paddlehub.module.checker import ModuleChecker
 from paddlehub.module.signature import Signature, create_signature
 from paddlehub.module.base_processor import BaseProcessor
-from paddlehub.io.parser import yaml_parser
+from paddlehub.io.parser import txt_parser, yaml_parser
 from paddlehub import version
 
 # PaddleHub module dir name
@@ -94,6 +99,11 @@ def moduleinfo(name, version, author, author_email, summary, type):
         return cls
 
     return _wrapper
+
+
+class DataFormatError(Exception):
+    def __init__(self, *args):
+        self.args = args
 
 
 class Module(object):
@@ -242,6 +252,225 @@ class Module(object):
 
     def _initialize(self):
         pass
+
+
+class NLPModule(Module):
+    def _initialize(self):
+        """
+        initialize with the necessary elements
+        This method must be overrided
+        """
+        self.module_name = 'test'
+        self.pretrained_model_path = None
+        self.vocab_path = None
+        self._set_config()
+
+        raise NotImplementedError()
+
+    def _set_config(self):
+        """
+        predictor config setting
+        """
+        cpu_config = AnalysisConfig(self.pretrained_model_path)
+        cpu_config.disable_glog_info()
+        cpu_config.disable_gpu()
+        self.cpu_predictor = create_paddle_predictor(cpu_config)
+
+        try:
+            _places = os.environ["CUDA_VISIBLE_DEVICES"]
+            int(_places[0])
+            use_gpu = True
+        except:
+            use_gpu = False
+        if use_gpu:
+            gpu_config = AnalysisConfig(self.pretrained_model_path)
+            gpu_config.disable_glog_info()
+            gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
+            self.gpu_predictor = create_paddle_predictor(gpu_config)
+
+    def context(self, trainable=False):
+        """
+        Get the input ,output and program of the module
+
+        Args:
+             trainable(bool): whether fine-tune the pretrained parameters of  or not
+
+        Returns:
+             inputs(dict): the input variables of module
+             outputs(dict): the output variables of module
+             main_program(Program): the main_program of module with pretrained prameters
+        """
+        pass
+
+    def texts2tensor(self, texts):
+        """
+        Tranform the texts(dict) to PaddleTensor
+        Args:
+             texts(list): each element is a dict that must have a named 'processed' key whose value is word_ids, such as
+                          texts = [{'processed': [23, 89, 43, 906]}]
+        Returns:
+             tensor(PaddleTensor): tensor with texts data
+        """
+        lod = [0]
+        data = []
+        for i, text in enumerate(texts):
+            data += text['processed']
+            lod.append(len(text['processed']) + lod[i])
+        tensor = PaddleTensor(np.array(data).astype('int64'))
+        tensor.name = "words"
+        tensor.lod = [lod]
+        tensor.shape = [lod[-1], 1]
+        return tensor
+
+    def to_unicode(self, texts):
+        """
+        Convert each element's type(str) of texts(list) to unicode in python2.7
+        Args:
+             texts(list): each element's type is str in python2.7
+        Returns:
+             texts(list): each element's type is unicode in python2.7
+        """
+        if six.PY2:
+            unicode_texts = []
+            for text in texts:
+                if not isinstance(text, unicode):
+                    unicode_texts.append(
+                        text.decode(utils.sys_stdin_encoding()).decode("utf8"))
+                else:
+                    unicode_texts.append(text)
+            texts = unicode_texts
+        return texts
+
+    @serving
+    def predict(self, texts=[], data={}, use_gpu=False, batch_size=1):
+        """
+        Get the prediction results results with the texts as input
+
+        Firstly, the predicted data should be checked validity.
+        Then, it will be preprocossed (word_str to word_id) and
+        run predictor to get prediction results.
+        Finally, pass prediction results to postprocess to
+        get the final results (such as predcition label).
+
+        This method must be overrided.
+
+
+        Args:
+             texts(list): the input texts to be predicted, if texts not data
+             data(dict): key must be 'text', value is the texts to be predicted, if data not texts
+             use_gpu(bool): whether use gpu to predict or not
+             batch_size(int): the program deals once with one batch
+
+        Returns:
+             results(list): the prediction results
+        """
+        raise NotImplementedError()
+
+    @runnable
+    def run_cmd(self, argvs):
+        """
+        Run as a command
+        """
+        self.parser = argparse.ArgumentParser(
+            description='Run the %s module.' % self.module_name,
+            prog='hub run %s' % self.module_name,
+            usage='%(prog)s',
+            add_help=True)
+
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
+        self.arg_config_group = self.parser.add_argument_group(
+            title="Config options",
+            description=
+            "Run configuration for controlling module behavior, not required.")
+
+        self.add_module_config_arg()
+        self.add_module_input_arg()
+
+        args = self.parser.parse_args(argvs)
+
+        try:
+            input_data = self.check_input_data(args)
+        except DataFormatError and RuntimeError:
+            self.parser.print_help()
+            return None
+
+        results = self.predict(
+            texts=input_data, use_gpu=args.use_gpu, batch_size=args.batch_size)
+
+        return results
+
+    def add_module_config_arg(self):
+        """
+        Add the command config options
+        """
+        self.arg_config_group.add_argument(
+            '--use_gpu',
+            type=ast.literal_eval,
+            default=False,
+            help="whether use GPU for prediction")
+
+        self.arg_config_group.add_argument(
+            '--batch_size',
+            type=int,
+            default=1,
+            help="batch size for prediction")
+
+    def add_module_input_arg(self):
+        """
+        Add the command input options
+        """
+        self.arg_input_group.add_argument(
+            '--input_file',
+            type=str,
+            default=None,
+            help="file contain input data")
+        self.arg_input_group.add_argument(
+            '--input_text', type=str, default=None, help="text to predict")
+
+    def check_input_data(self, args):
+        input_data = []
+        if args.input_file:
+            if not os.path.exists(args.input_file):
+                print("File %s is not exist." % args.input_file)
+                raise RuntimeError
+            else:
+                input_data = txt_parser.parse(args.input_file, use_strip=True)
+        elif args.input_text:
+            if args.input_text.strip() != '':
+                if six.PY2:
+                    input_data = [
+                        args.input_text.decode(
+                            utils.sys_stdin_encoding()).decode("utf8")
+                    ]
+                else:
+                    input_data = [args.input_text]
+            else:
+                print(
+                    "ERROR: The input data is inconsistent with expectations.")
+
+        if input_data == []:
+            print("ERROR: The input data is inconsistent with expectations.")
+            raise DataFormatError
+
+        return input_data
+
+    def get_labels(self):
+        """
+        Get the labels which was used when pretraining
+        Returns:
+             labels(dict)
+        """
+        pass
+
+    def get_vocab_path(self):
+        """
+        Get the path to the vocabulary whih was used to pretrain
+
+        Returns:
+             self.vocab_path(str): the path to vocabulary
+        """
+        return self.vocab_path
 
 
 class ModuleHelper(object):
