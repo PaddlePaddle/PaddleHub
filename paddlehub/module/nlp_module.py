@@ -65,7 +65,6 @@ class BERTModule(hub.Module):
         some member variables are required, others are optional.
         """
         # required config
-        self.ernie_config = None
         self.MAX_SEQ_LEN = None
         self.params_path = None
         self.vocab_path = None
