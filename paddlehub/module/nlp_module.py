@@ -25,7 +25,7 @@ import paddle.fluid as fluid
 from paddlehub import logger
 
 
-class BERTEmbeddingTask(hub.BaseTask):
+class _BERTEmbeddingTask(hub.BaseTask):
     def __init__(self,
                  pooled_feature,
                  seq_feature,
@@ -33,7 +33,7 @@ class BERTEmbeddingTask(hub.BaseTask):
                  data_reader,
                  config=None):
         main_program = pooled_feature.block.program
-        super(BERTEmbeddingTask, self).__init__(
+        super(_BERTEmbeddingTask, self).__init__(
             main_program=main_program,
             data_reader=data_reader,
             feed_list=feed_list,
@@ -61,12 +61,12 @@ class BERTModule(hub.Module):
 
         some member variables are required, others are optional.
         """
-        # required
+        # required config
         self.ernie_config = None
         self.MAX_SEQ_LEN = None
         self.params_path = None
         self.vocab_path = None
-        # optional
+        # optional config
         self.spm_path = None
         self.word_dict_path = None
         raise NotImplementedError
@@ -171,7 +171,7 @@ class BERTModule(hub.Module):
 
         return inputs, outputs, module_program
 
-    def get_embedding(self, texts, use_gpu=True):
+    def get_embedding(self, texts, use_gpu=False, batch_size=1):
         """
         get pooled_output and sequence_output for input texts.
         Warnings: this method depends on Paddle Inference Library, it may not work properly in PaddlePaddle < 1.6.2.
@@ -179,45 +179,50 @@ class BERTModule(hub.Module):
         Args:
             texts (list): each element is a text sample, each sample include text_a and text_b where text_b can be omitted.
                           for example: [[sample0_text_a, sample0_text_b], [sample1_text_a, sample1_text_b], ...]
-            use_gpu (bool): use gpu or not
+            use_gpu (bool): use gpu or not, default False.
+            batch_size (int): the data batch size, default 1.
 
         Returns:
             pooled_outputs(list): its element is a numpy array, the first feature of each text sample.
             sequence_outputs(list): its element is a numpy array, the whole features of each text sample.
         """
-        inputs, outputs, program = self.context(
-            trainable=True, max_seq_len=self.MAX_SEQ_LEN)
+        if not hasattr(self, "emb_task"):
+            inputs, outputs, program = self.context(
+                trainable=True, max_seq_len=self.MAX_SEQ_LEN)
 
-        reader = hub.reader.ClassifyReader(
-            dataset=None,
-            vocab_path=self.get_vocab_path(),
-            max_seq_len=self.MAX_SEQ_LEN,
-            sp_model_path=self.get_spm_path()
-            if hasattr(self, "get_spm_path") else None,
-            word_dict_path=self.get_word_dict_path() if hasattr(
-                self, "word_dict_path") else None)
+            reader = hub.reader.ClassifyReader(
+                dataset=None,
+                vocab_path=self.get_vocab_path(),
+                max_seq_len=self.MAX_SEQ_LEN,
+                sp_model_path=self.get_spm_path() if hasattr(
+                    self, "get_spm_path") else None,
+                word_dict_path=self.get_word_dict_path() if hasattr(
+                    self, "word_dict_path") else None)
 
-        feed_list = [
-            inputs["input_ids"].name,
-            inputs["position_ids"].name,
-            inputs["segment_ids"].name,
-            inputs["input_mask"].name,
-        ]
+            feed_list = [
+                inputs["input_ids"].name,
+                inputs["position_ids"].name,
+                inputs["segment_ids"].name,
+                inputs["input_mask"].name,
+            ]
 
-        pooled_feature, seq_feature = outputs["pooled_output"], outputs[
-            "sequence_output"]
+            pooled_feature, seq_feature = outputs["pooled_output"], outputs[
+                "sequence_output"]
 
-        config = hub.RunConfig(use_data_parallel=False, use_cuda=use_gpu)
+            config = hub.RunConfig(
+                use_data_parallel=False,
+                use_cuda=use_gpu,
+                batch_size=batch_size)
 
-        emb_task = BERTEmbeddingTask(
-            pooled_feature=pooled_feature,
-            seq_feature=seq_feature,
-            feed_list=feed_list,
-            data_reader=reader,
-            config=config,
-        )
+            self.emb_task = _BERTEmbeddingTask(
+                pooled_feature=pooled_feature,
+                seq_feature=seq_feature,
+                feed_list=feed_list,
+                data_reader=reader,
+                config=config,
+            )
 
-        return emb_task.predict(
+        return self.emb_task.predict(
             data=texts, return_result=True, accelerate_mode=True)
 
     def get_vocab_path(self):

@@ -182,7 +182,7 @@ class Module(object):
         sys.path.insert(0, dirname)
         _module = importlib.import_module("{}.module".format(basename))
         # TODO: get real module
-        for _item, _cls in inspect.getmembers(_module, inspect.isclass)[1:]:
+        for _item, _cls in inspect.getmembers(_module, inspect.isclass):
             _item = _module.__dict__[_item]
             if issubclass(_item, Module):
                 user_module = _item(directory=directory, **kwargs)
