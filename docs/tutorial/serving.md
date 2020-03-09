@@ -53,8 +53,7 @@ $ hub serving start --config config.json
     },
     "lac": {
       "init_args": {
-        "version": "2.1.0",
-        "user_dict": "./dict.txt"
+        "version": "1.1.0"
       },
       "predict_args": {
         "batch_size": 1,

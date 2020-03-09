@@ -88,7 +88,7 @@ PaddleHub在使用过程中会产生一些缓存数据，这部分数据默认�
 
 * `hub config server==[address]`: 设置当前server地址为[address]
 
-* `hub config log==[level]`: 设置当前日志级别为[level]， 可选值为critical, error, warning, info, debug, nolog, 从走到右优先级从高到低，nolog表示不显示日志信息
+* `hub config log==[level]`: 设置当前日志级别为[level]， 可选值为critical, error, warning, info, debug, nolog, 从左到右优先级从高到低，nolog表示不显示日志信息
 
 ## `serving`
 
