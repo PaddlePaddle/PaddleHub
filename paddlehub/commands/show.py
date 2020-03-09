@@ -127,6 +127,8 @@ class ShowCommand(BaseCommand):
 
         cwd = os.getcwd()
         module_dir = default_module_manager.search_module(module_name)
+        module_dir = (os.path.join(cwd, module_name),
+                      None) if not module_dir else module_dir
         if not module_dir or not os.path.exists(module_dir[0]):
             print("%s is not existed!" % module_name)
             return True
