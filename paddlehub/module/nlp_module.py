@@ -188,7 +188,10 @@ class BERTModule(hub.Module):
             pooled_outputs(list): its element is a numpy array, the first feature of each text sample.
             sequence_outputs(list): its element is a numpy array, the whole features of each text sample.
         """
-        if not hasattr(self, "emb_job"):
+        if not hasattr(
+                self, "emb_job"
+        ) or self.emb_job["batch_size"] != batch_size or self.emb_job[
+                "use_gpu"] != use_gpu:
             inputs, outputs, program = self.context(
                 trainable=True, max_seq_len=self.MAX_SEQ_LEN)
 
@@ -211,16 +214,12 @@ class BERTModule(hub.Module):
             pooled_feature, seq_feature = outputs["pooled_output"], outputs[
                 "sequence_output"]
 
-        if not hasattr(
-                self, "emb_job"
-        ) or self.emb_job["batch_size"] != batch_size or self.emb_job[
-                "use_gpu"] != use_gpu:
             config = hub.RunConfig(
                 use_data_parallel=False,
                 use_cuda=use_gpu,
                 batch_size=batch_size)
-            if not hasattr(self, "emb_job"):
-                self.emb_job = {}
+
+            self.emb_job = {}
             self.emb_job["task"] = _BERTEmbeddingTask(
                 pooled_feature=pooled_feature,
                 seq_feature=seq_feature,
@@ -252,6 +251,6 @@ class BERTModule(hub.Module):
     def get_params_layer(self):
         if not hasattr(self, "params_layer"):
             raise AttributeError(
-                "The module has not yet been initialized. "
+                "The module has not been initialized. "
                 "Please call context() before using get_params_layer")
         return self.params_layer
