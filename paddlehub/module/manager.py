@@ -160,7 +160,7 @@ class LocalModuleManager(object):
                     print_progress=True)
                 result, tips, module_dir = default_downloader.uncompress(
                     file=module_zip_file,
-                    dirname=MODULE_HOME,
+                    dirname=os.path.join(_dir, "tmp_module"),
                     delete_file=True,
                     print_progress=True)
 
@@ -171,19 +171,21 @@ class LocalModuleManager(object):
                     module_dir = os.path.join(_dir, file_names[0])
                     for index, file_name in enumerate(file_names):
                         tar.extract(file_name, _dir)
-
-            if module_dir:
-                if not module_name:
                     module_name = hub.Module(directory=module_dir).name
+
+            if from_user_dir:
+                module_name = hub.Module(directory=module_dir).name
+                module_version = hub.Module(directory=module_dir).version
                 self.all_modules(update=False)
                 module_info = self.modules_dict.get(module_name, None)
                 if module_info:
-                    module_dir = self.modules_dict[module_name][0]
-                    module_tag = module_name if not module_version else '%s-%s' % (
-                        module_name, module_version)
-                    tips = "Module %s already installed in %s" % (module_tag,
-                                                                  module_dir)
-                    return True, tips, self.modules_dict[module_name]
+                    if module_version == module_info[1]:
+                        module_dir = self.modules_dict[module_name][0]
+                        module_tag = module_name if not module_version else '%s-%s' % (
+                            module_name, module_version)
+                        tips = "Module %s already installed in %s" % (
+                            module_tag, module_dir)
+                        return True, tips, self.modules_dict[module_name]
 
             if module_dir:
                 if md5_value:
@@ -193,12 +195,13 @@ class LocalModuleManager(object):
                         fp.write(md5_value)
 
                 save_path = os.path.join(MODULE_HOME, module_name)
-                if os.path.exists(save_path):
-                    shutil.rmtree(save_path)
-                if from_user_dir:
-                    shutil.copytree(module_dir, save_path)
-                else:
-                    shutil.move(module_dir, save_path)
+                if save_path != module_dir:
+                    if os.path.exists(save_path):
+                        shutil.rmtree(save_path)
+                    if from_user_dir:
+                        shutil.copytree(module_dir, save_path)
+                    else:
+                        shutil.move(module_dir, save_path)
                 module_dir = save_path
                 tips = "Successfully installed %s" % module_name
                 if installed_module_version:

@@ -32,7 +32,7 @@ struct FaceResult {
   // Detection result: cv::Mat of face rectange
   cv::Mat roi_rect;
   // Classification result: confidence
-  float score;
+  float confidence;
   // Classification result : class id
   int class_id;
 };

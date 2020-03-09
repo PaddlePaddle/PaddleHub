@@ -77,7 +77,7 @@ void VisualizeResult(const cv::Mat& img,
       text = "NO MASK:  ";
       roi_color = cv::Scalar(0, 0, 255);
     }
-    text += std::to_string(static_cast<int>(results[i].score*100)) + "%";
+    text += std::to_string(static_cast<int>(results[i].confidence * 100)) + "%";
     int font_face = cv::FONT_HERSHEY_TRIPLEX;
     double font_scale = 1.f;
     float thickness = 1;
@@ -243,7 +243,7 @@ void MaskClassifier::Postprocess(std::vector<FaceResult>* faces) {
       }
     }
     (*faces)[i].class_id = best_class_id;
-    (*faces)[i].score = best_class_score;
+    (*faces)[i].confidence = best_class_score;
   }
 }
 
@@ -258,7 +258,7 @@ void MaskClassifier::Predict(std::vector<FaceResult>* faces) {
   predictor_->ZeroCopyRun();
   // Get output tensor
   auto output_names = predictor_->GetOutputNames();
-  auto out_tensor = predictor_->GetOutputTensor(output_names[1]);
+  auto out_tensor = predictor_->GetOutputTensor(output_names[0]);
   std::vector<int> output_shape = out_tensor->shape();
   // Calculate output length
   int output_size = 1;

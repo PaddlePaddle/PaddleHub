@@ -2,6 +2,9 @@
 
 目前PaddleHub有以下任务示例：
 
+* [图像分类](./mask_detection)
+  提供了基于完整的口罩人脸检测及分类的模型搭建的完整的视频级别Demo，同时提供基于飞桨高性能预测库的C++和Python部署方案。
+
 * [图像分类](./image_classification)
   该样例展示了PaddleHub如何将ResNet50、ResNet101、ResNet152、MobileNet、NasNet以及PNasNet作为预训练模型在Flowers、DogCat、Indoor67、Food101、StanfordDogs等数据集上进行图像分类的FineTune和预测。
 

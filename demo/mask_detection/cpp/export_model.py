@@ -11,17 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import paddlehub as hub
 
 # Load mask detector module from PaddleHub
-module = hub.Module(name="pyramidbox_lite_server_mask")
+module = hub.Module(name="pyramidbox_lite_server_mask", version='1.1.0')
 # Export inference model for deployment
 module.processor.save_inference_model("./pyramidbox_lite_server_mask")
 print("pyramidbox_lite_server_mask module export done!")
 
 # Load mask detector (mobile version) module from PaddleHub
-module = hub.Module(name="pyramidbox_lite_mobile_mask")
+module = hub.Module(name="pyramidbox_lite_mobile_mask", version="1.1.0")
 # Export inference model for deployment
 module.processor.save_inference_model("./pyramidbox_lite_mobile_mask")
+
 print("pyramidbox_lite_mobile_mask module export done!")

@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
            item.rect[2],
            item.rect[3],
            item.class_id,
-           item.score);
+           item.confidence);
   }
 
   // Visualization result
