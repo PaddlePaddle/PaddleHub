@@ -1,3 +1,15 @@
+# `v1.5.4`
+
+* 修复Fine-tune中断，checkpoint文件恢复训练失败的问题
+
+# `v1.5.3`
+
+* 优化口罩模型输出结果，提供更加灵活的部署及调用方式
+
+# `v1.5.2`
+
+* 优化pyramidbox_lite_server_mask、pyramidbox_lite_mobile_mask模型的服务化部署性能
+
 # `v1.5.1`
 
 * 修复加载module缺少cache目录的问题
