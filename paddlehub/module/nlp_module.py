@@ -251,6 +251,6 @@ class BERTModule(hub.Module):
     def get_params_layer(self):
         if not hasattr(self, "params_layer"):
             raise AttributeError(
-                "The module has not been initialized. "
+                "The module context has not been initialized. "
                 "Please call context() before using get_params_layer")
         return self.params_layer
