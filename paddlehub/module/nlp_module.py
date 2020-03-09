@@ -219,7 +219,7 @@ class BERTModule(hub.Module):
                 use_data_parallel=False,
                 use_cuda=use_gpu,
                 batch_size=batch_size)
-            if not hasattr(self, "emb_task"):
+            if not hasattr(self, "emb_job"):
                 self.emb_job = {}
             self.emb_job["task"] = _BERTEmbeddingTask(
                 pooled_feature=pooled_feature,
@@ -250,4 +250,8 @@ class BERTModule(hub.Module):
             return None
 
     def get_params_layer(self):
+        if not hasattr(self, "params_layer"):
+            raise AttributeError(
+                "The module has not yet been initialized. "
+                "Please call context() before using get_params_layer")
         return self.params_layer
