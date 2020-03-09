@@ -189,7 +189,7 @@ class BERTModule(hub.Module):
             pooled_outputs(list): its element is a numpy array, the first feature of each text sample.
             sequence_outputs(list): its element is a numpy array, the whole features of each text sample.
         """
-        if not hasattr(self, "emb_task"):
+        if not hasattr(self, "emb_job"):
             inputs, outputs, program = self.context(
                 trainable=True, max_seq_len=self.MAX_SEQ_LEN)
 
@@ -212,20 +212,27 @@ class BERTModule(hub.Module):
             pooled_feature, seq_feature = outputs["pooled_output"], outputs[
                 "sequence_output"]
 
+        if not hasattr(
+                self, "emb_job"
+        ) or self.emb_job["batch_size"] != batch_size or self.emb_job[
+                "use_gpu"] != use_gpu:
             config = hub.RunConfig(
                 use_data_parallel=False,
                 use_cuda=use_gpu,
                 batch_size=batch_size)
-
-            self.emb_task = _BERTEmbeddingTask(
+            if not hasattr(self, "emb_task"):
+                self.emb_job = {}
+            self.emb_job["task"] = _BERTEmbeddingTask(
                 pooled_feature=pooled_feature,
                 seq_feature=seq_feature,
                 feed_list=feed_list,
                 data_reader=reader,
                 config=config,
             )
+            self.emb_job["batch_size"] = batch_size
+            self.emb_job["use_gpu"] = use_gpu
 
-        return self.emb_task.predict(
+        return self.emb_job["task"].predict(
             data=texts, return_result=True, accelerate_mode=True)
 
     def get_vocab_path(self):
