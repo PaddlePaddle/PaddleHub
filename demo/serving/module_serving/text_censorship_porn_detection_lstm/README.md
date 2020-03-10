@@ -45,6 +45,7 @@ Loading porn_detection_lstm successful.
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 {
+    "msg": "",
     "results": [
         {
             "not_porn_probs": 0.0121,
@@ -60,7 +61,8 @@ Loading porn_detection_lstm successful.
             "porn_probs": 0.0046,
             "text": "中国黄页"
         }
-    ]
+    ],
+    "status": "0"
 }
 ```
 可以看出正确得到了两个文本的预测结果。

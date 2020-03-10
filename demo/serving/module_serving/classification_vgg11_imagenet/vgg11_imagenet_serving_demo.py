@@ -12,5 +12,7 @@ if __name__ == "__main__":
     url = "http://127.0.0.1:8866/predict/image/vgg11_imagenet"
     r = requests.post(url=url, files=files)
 
+    results = eval(r.json()["results"])
+
     # 打印预测结果
-    print(json.dumps(r.json(), indent=4, ensure_ascii=False))
+    print(json.dumps(results, indent=4, ensure_ascii=False))

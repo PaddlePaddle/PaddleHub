@@ -50,10 +50,19 @@ files = [("image", file_1), ("image", file_2)]
 vgg11_imagenent返回的结果为图像分类结果及其对应的概率，我们尝试打印接口返回结果：
 ```python
 
->>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))  
-{
-    "results": "[[{'Egyptian cat': 0.540287435054779}], [{'daisy': 0.9976677298545837}]]"
-}
+>>> print(json.dumps(results, indent=4, ensure_ascii=False))
+[
+    [
+        {
+            "Egyptian cat": 0.540287435054779
+        }
+    ],
+    [
+        {
+            "daisy": 0.9976677298545837
+        }
+    ]
+]
 ```
 
 这样我们就完成了对图像分类预测服务化部署和测试。

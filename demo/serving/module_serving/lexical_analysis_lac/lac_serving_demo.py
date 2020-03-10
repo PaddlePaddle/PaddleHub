@@ -7,7 +7,7 @@ if __name__ == "__main__":
     text_list = ["今天是个好日子", "天气预报说今天要下雨"]
     text = {"text": text_list}
     # 指定预测方法为lac并发送post请求
-    url = "http://127.0.0.1:8866/predict/text/lac"
+    url = "http://0.0.0.0:8866/predict/text/lac"
     r = requests.post(url=url, data=text)
 
     # 打印预测结果

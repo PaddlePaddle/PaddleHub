@@ -48,6 +48,7 @@ Loading lac successful.
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 {
+    "msg": "",
     "results": [
         {
             "similarity": 0.8445,
@@ -64,7 +65,8 @@ Loading lac successful.
             "text_1": "这道题太难了",
             "text_2": "这道题很有意思"
         }
-    ]
+    ],
+    "status": "0"
 }
 ```
 这样我们就完成了对语义模型simnet_bow的预测服务化部署和测试。

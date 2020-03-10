@@ -51,10 +51,10 @@ files = [("image", file_1), ("image", file_2)]
 >>> results = eval(r.json()["results"])
 >>> print(json.dumps(results, indent=4, ensure_ascii=False))
 [
-    {
-        "origin": "girl.jpg",
-        "processed": "humanseg_output/girl.png"
-    }
+        {
+            "origin": "girl.jpg",
+            "processed": "humanseg_output/girl.png"
+        }
 ]
 ```
 

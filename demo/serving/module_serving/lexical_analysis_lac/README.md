@@ -46,38 +46,26 @@ Loading lac successful.
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 {
+    "msg": "",
     "results": [
         {
             "tag": [
-                "TIME",
-                "v",
-                "q",
-                "n"
+                "TIME", "v", "q", "n"
             ],
             "word": [
-                "今天",
-                "是",
-                "个",
-                "好日子"
+                "今天", "是", "个", "好日子"
             ]
         },
         {
             "tag": [
-                "n",
-                "v",
-                "TIME",
-                "v",
-                "v"
+                "n", "v", "TIME", "v", "v"
             ],
             "word": [
-                "天气预报",
-                "说",
-                "今天",
-                "要",
-                "下雨"
+                "天气预报", "说", "今天", "要", "下雨"
             ]
         }
-    ]
+    ],
+    "status": "0"
 }
 ```
 这样我们就完成了对词法分析的预测服务化部署和测试。
@@ -99,3 +87,58 @@ Loading lac successful.
 ```
 
 完整的测试代码见[lac_with_dict_serving_demo.py](lac_with_dict_serving_demo.py)。
+
+### 客户端请求新版模型的方式
+对某些新版模型，客户端请求方式有所变化，更接近本地预测的请求方式，以降低学习成本。
+以lac(2.1.0)为例，使用上述方法进行请求将提示：
+```python
+{
+    "Warnning": "This usage is out of date, please use 'application/json' as content-type to post to /predict/lac. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details."
+}
+```
+对于lac(2.1.0)，请求的方式如下：
+```python
+# coding: utf8
+import requests
+import json
+
+if __name__ == "__main__":
+    # 指定用于预测的文本并生成字典[text_1, text_2, ... ]
+    text = ["今天是个好日子", "天气预报说今天要下雨"]
+    # 以key的方式指定text传入预测方法的时的参数，此例中为"texts"
+    # 对应本地部署，则为lac.analysis_lexical(text=[text1, text2])
+    data = {"texts": text, "batch_size": 1}
+    # 指定预测方法为lac并发送post请求
+    url = "http://127.0.0.1:8866/predict/lac"
+    # 指定post请求的headers为application/json方式
+    headers = {"Content-Type": "application/json"}
+
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+    # 打印预测结果
+    print(json.dumps(r.json(), indent=4, ensure_ascii=False))
+```
+对结果的解析等与前种方式一致，显示如下：
+```python
+{
+    "results": [
+        {
+            "tag": [
+                "TIME", "v", "q", "n"
+            ],
+            "word": [
+                "今天", "是", "个", "好日子"
+            ]
+        },
+        {
+            "tag": [
+                "n", "v", "TIME", "v", "v"
+            ],
+            "word": [
+                "天气预报", "说", "今天", "要", "下雨"
+            ]
+        }
+    ]
+}
+```
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](lac_2.1.0_serving_demo.py)。

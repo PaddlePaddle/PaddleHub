@@ -13,7 +13,6 @@ if __name__ == "__main__":
     # 指定图片生成方法为stgan_celeba并发送post请求
     url = "http://127.0.0.1:8866/predict/image/stgan_celeba"
     r = requests.post(url=url, data=data, files=files)
-    print(r.text)
 
     results = eval(r.json()["results"])
     # 保存生成的图片到output文件夹，打印模型输出结果

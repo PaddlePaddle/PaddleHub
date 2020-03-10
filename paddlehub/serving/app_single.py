@@ -23,6 +23,10 @@ import logging
 import glob
 
 
+def gen_result(status, msg, data):
+    return {"status": status, "msg": msg, "results": data}
+
+
 def predict_v2(module_info, input):
     serving_method_name = module_info["method_name"]
     serving_method = getattr(module_info["module"], serving_method_name)
@@ -32,8 +36,13 @@ def predict_v2(module_info, input):
     for item in serving_method.__code__.co_varnames:
         if item in module_info.keys():
             predict_args.update({item: module_info[item]})
-    output = serving_method(**predict_args)
-    return {"results": output}
+    try:
+        output = serving_method(**predict_args)
+    except Exception as err:
+        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(curr, " - ", err)
+        return gen_result("-1", "Please check data format!", "")
+    return gen_result("0", "", output)
 
 
 def predict_v2_advanced(module_info, input):
@@ -45,16 +54,21 @@ def predict_v2_advanced(module_info, input):
     for item in serving_method.__code__.co_varnames:
         if item in module_info.keys():
             predict_args.update({item: module_info[item]})
-
-    output = serving_method(**predict_args)
-    return {"results": output}
+    try:
+        output = serving_method(**predict_args)
+    except Exception as err:
+        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(curr, " - ", err)
+        return gen_result("-1", "Please check data format!", "")
+    return gen_result("0", "", output)
 
 
 def predict_nlp(module_info, input_text, req_id, extra=None):
     method_name = module_info["method_name"]
     predict_method = getattr(module_info["module"], method_name)
 
-    predict_args = {"data": input_text}
+    predict_args = module_info["predict_args"].copy()
+    predict_args.update({"data": input_text})
     if isinstance(predict_method, functools.partial):
         predict_method = predict_method.func
         predict_args.update({"sign_name": method_name})
@@ -71,20 +85,22 @@ def predict_nlp(module_info, input_text, req_id, extra=None):
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
-        return {"results": "Please check data format!"}
+        return gen_result("-1", "Please check data format!", "")
     finally:
         user_dict = extra.get("user_dict", [])
         for item in user_dict:
             if os.path.exists(item):
                 os.remove(item)
-    return {"results": res}
+    return gen_result("0", "", res)
 
 
 def predict_classification(module_info, input_img, id, extra={}):
     method_name = module_info["method_name"]
     module = module_info["module"]
     predict_method = getattr(module, method_name)
-    predict_args = {"data": {"image": input_img}}
+
+    predict_args = module_info["predict_args"].copy()
+    predict_args.update({"data": {"image": input_img}})
     if isinstance(predict_method, functools.partial):
         predict_method = predict_method.func
         predict_args.update({"sign_name": method_name})
@@ -96,19 +112,21 @@ def predict_classification(module_info, input_img, id, extra={}):
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
-        return {"result": "Please check data format!"}
+        return gen_result("-1", "Please check data format!", "")
     finally:
         for item in input_img:
             if os.path.exists(item):
                 os.remove(item)
-    return results
+    return gen_result("0", "", str(results))
 
 
 def predict_gan(module_info, input_img, id, extra={}):
     method_name = module_info["method_name"]
     module = module_info["module"]
     predict_method = getattr(module, method_name)
-    predict_args = {"data": {"image": input_img}}
+
+    predict_args = module_info["predict_args"].copy()
+    predict_args.update({"data": {"image": input_img}})
     predict_args["data"].update(extra)
     if isinstance(predict_method, functools.partial):
         predict_method = predict_method.func
@@ -122,7 +140,7 @@ def predict_gan(module_info, input_img, id, extra={}):
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
-        return {"result": "Please check data format!"}
+        return gen_result("-1", "Please check data format!", "")
     finally:
         base64_list = []
         results_pack = []
@@ -141,10 +159,10 @@ def predict_gan(module_info, input_img, id, extra={}):
                 results_pack.append(results[index])
             os.remove(item)
             os.remove(output_file)
-    return results_pack
+    return gen_result("0", "", str(results_pack))
 
 
-def predict_mask(module_info, input_img, id, extra=None, r_img=True):
+def predict_mask(module_info, input_img, id, extra=None, r_img=False):
     output_folder = "detection_result"
     method_name = module_info["method_name"]
     module = module_info["module"]
@@ -156,8 +174,10 @@ def predict_mask(module_info, input_img, id, extra=None, r_img=True):
         data.update(input_img)
     if extra is not None:
         data.update(extra)
-        r_img = True if "r_img" in extra.keys() else False
-    predict_args = {"data": data}
+        r_img = True if "visual_result" in extra.keys() else False
+
+    predict_args = module_info["predict_args"].copy()
+    predict_args.update({"data": data})
     if isinstance(predict_method, functools.partial):
         predict_method = predict_method.func
         predict_args.update({"sign_name": method_name})
@@ -170,7 +190,7 @@ def predict_mask(module_info, input_img, id, extra=None, r_img=True):
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
-        return {"result": "Please check data format!"}
+        return gen_result("-1", "Please check data format!", "")
     finally:
         base64_list = []
         results_pack = []
@@ -212,7 +232,7 @@ def predict_mask(module_info, input_img, id, extra=None, r_img=True):
         else:
             results_pack = results
 
-    return results_pack
+    return gen_result("0", "", str(results_pack))
 
 
 def predict_object_detection(module_info, input_img, id, extra={}):
@@ -220,7 +240,10 @@ def predict_object_detection(module_info, input_img, id, extra={}):
     method_name = module_info["method_name"]
     module = module_info["module"]
     predict_method = getattr(module, method_name)
-    predict_args = {"data": {"image": input_img}}
+
+    predict_args = module_info["predict_args"].copy()
+    predict_args.update({"data": {"image": input_img}})
+
     if isinstance(predict_method, functools.partial):
         predict_method = predict_method.func
         predict_args.update({"sign_name": method_name})
@@ -232,7 +255,7 @@ def predict_object_detection(module_info, input_img, id, extra={}):
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
-        return {"result": "Please check data format!"}
+        return gen_result("-1", "Please check data format!", "")
     finally:
         base64_list = []
         results_pack = []
@@ -250,14 +273,17 @@ def predict_object_detection(module_info, input_img, id, extra={}):
                 results_pack.append(results[index])
             os.remove(item)
             os.remove(os.path.join(output_folder, item))
-    return results_pack
+    return gen_result("0", "", str(results_pack))
 
 
 def predict_semantic_segmentation(module_info, input_img, id, extra={}):
     method_name = module_info["method_name"]
     module = module_info["module"]
     predict_method = getattr(module, method_name)
-    predict_args = {"data": {"image": input_img}}
+
+    predict_args = module_info["predict_args"].copy()
+    predict_args.update({"data": {"image": input_img}})
+
     if isinstance(predict_method, functools.partial):
         predict_method = predict_method.func
         predict_args.update({"sign_name": method_name})
@@ -269,7 +295,7 @@ def predict_semantic_segmentation(module_info, input_img, id, extra={}):
     except Exception as err:
         curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         print(curr, " - ", err)
-        return {"result": "Please check data format!"}
+        return gen_result("-1", "Please check data format!", "")
     finally:
         base64_list = []
         results_pack = []
@@ -291,7 +317,7 @@ def predict_semantic_segmentation(module_info, input_img, id, extra={}):
             os.remove(item)
             if output_file_path != "":
                 os.remove(output_file_path)
-    return results_pack
+    return gen_result("0", "", str(results_pack))
 
 
 def create_app(init_flag=False, configs=None):
@@ -342,10 +368,10 @@ def create_app(init_flag=False, configs=None):
                 "use 'application/json' as "
                 "content-type to post to "
                 "/predict/%s. See "
-                "'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.5/docs/tutorial/serving.md' for more details."
+                "'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details."
                 % (module_name)
             })
-            return results
+            return gen_result("-1", results, "")
         req_id = request.data.get("id")
         img_base64 = request.form.getlist("image")
         extra_info = {}
@@ -364,7 +390,7 @@ def create_app(init_flag=False, configs=None):
             for item in img_base64:
                 ext = item.split(";")[0].split("/")[-1]
                 if ext not in ["jpeg", "jpg", "png"]:
-                    return {"result": "Unrecognized file type"}
+                    return gen_result("-1", "Unrecognized file type", "")
                 filename = req_id + "_" \
                            + utils.md5(str(time.time()) + item[0:20]) \
                            + "." \
@@ -379,9 +405,7 @@ def create_app(init_flag=False, configs=None):
                 file_name = req_id + "_" + item.filename
                 item.save(file_name)
                 file_name_list.append(file_name)
-        # module = default_module_manager.get_module(module_name)
-        # predict_func_name = cv_module_info.get_module_info(module_name)[
-        #     "method_name"]
+
         module = module_info["module"]
         predict_func_name = cv_module_info.cv_module_method.get(module_name, "")
         if predict_func_name != "":
@@ -394,8 +418,8 @@ def create_app(init_flag=False, configs=None):
         if extra_info == {}:
             extra_info = None
         results = predict_func(module_info, file_name_list, req_id, extra_info)
-        r = {"results": str(results)}
-        return r
+
+        return results
 
     @app_instance.route("/predict/text/<module_name>", methods=["POST"])
     def predict_text(module_name):
@@ -403,18 +427,9 @@ def create_app(init_flag=False, configs=None):
             return {"error": "Module {} is not available.".format(module_name)}
         module_info = nlp_module_info.get_module_info(module_name)
         if module_info["code_version"] == "v2":
-            results = {}
-            # results = predict_v2(module_info, inputs)
-            results.update({
-                "Warnning":
-                "This usage is out of date, please "
-                "use 'application/json' as "
-                "content-type to post to "
-                "/predict/%s. See "
-                "'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.5/docs/tutorial/serving.md' for more details."
-                % (module_name)
-            })
-            return results
+            results = "This usage is out of date, please use 'application/json' as content-type to post to /predict/%s. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.5/docs/tutorial/serving.md' for more details." % (
+                module_name)
+            return gen_result("-1", results, "")
         req_id = request.data.get("id")
         inputs = {}
         for item in list(request.form.keys()):
@@ -441,8 +456,14 @@ def create_app(init_flag=False, configs=None):
         elif module_name in cv_module_info.cv_modules:
             module_info = cv_module_info.get_module_info(module_name)
         else:
-            return {"Error": "Module {} is not available.".format(module_name)}
+            msg = "Module {} is not available.".format(module_name)
+            return gen_result("-1", msg, "")
         inputs = request.json
+        if inputs is None:
+            results = "This usage is out of date, please use 'application/json' as content-type to post to /predict/%s. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.5/docs/tutorial/serving.md' for more details." % (
+                module_name)
+            return gen_result("-1", results, "")
+
         results = predict_v2_advanced(module_info, inputs)
         return results
 

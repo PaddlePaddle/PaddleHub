@@ -13,8 +13,7 @@ if __name__ == "__main__":
 
     # 指定检测方法为pyramidbox_lite_server_mask并发送post请求
     url = "http://127.0.0.1:8866/predict/image/pyramidbox_lite_server_mask"
-    r = requests.post(url=url, files=files)
-
+    r = requests.post(url=url, files=files, data={"visual_result": "True"})
     results = eval(r.json()["results"])
 
     if not os.path.exists("output"):
