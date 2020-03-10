@@ -274,7 +274,7 @@ if __name__ == "__main__":
     # 对应本地部署，则为lac.analysis_lexical(data=text)
     data = {"data": text}
     # 指定预测方法为lac并发送post请求
-    url = "http://127.0.0.1:8866/predict/porn_detection_gru"
+    url = "http://127.0.0.1:8866/lac"
     # 指定post请求的headers为application/json方式
     headers = {"Content-Type": "application/json"}
 
