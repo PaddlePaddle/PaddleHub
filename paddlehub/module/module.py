@@ -148,8 +148,6 @@ class Module(object):
             return
 
         mod = self.__class__.__module__ + "." + self.__class__.__name__
-        print(_module_runnable_func)
-        print(mod)
         if mod in _module_runnable_func:
             _run_func_name = _module_runnable_func[mod]
             self._run_func = getattr(self, _run_func_name)
