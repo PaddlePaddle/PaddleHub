@@ -313,7 +313,7 @@ class ServingCommand(BaseCommand):
                 with open(self.args.config, "r") as fp:
                     self.args.config = json.load(fp)
                 self.modules_info = self.args.config["modules_info"]
-                if isinstance(self.module_info, list):
+                if isinstance(self.modules_info, list):
                     raise RuntimeError(
                         "This configuration method is outdated, see 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details."
                     )
@@ -334,9 +334,7 @@ class ServingCommand(BaseCommand):
                         "init_args": {
                             "version": version
                         },
-                        "predict_args": {
-                            "use_gpu": self.args.use_gpu
-                        }
+                        "predict_args": {}
                     }
                 })
 

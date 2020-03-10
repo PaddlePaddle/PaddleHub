@@ -75,3 +75,36 @@ deeplabv3p_xception65_humanseg返回的结果还包括人像分割后的图像�
 这样我们就完成了对图像分割模型deeplabv3p_xception65_humanseg服务化的部署和测试。
 
 完整的测试代码见[deeplabv3p_xception65_humanseg_serving_demo.py](deeplabv3p_xception65_humanseg_serving_demo.py)。
+
+## 客户端请求新版模型的方式
+对某些新版模型，客户端请求方式有所变化，更接近本地预测的请求方式，以降低学习成本。
+以lac(2.1.0)为例，使用上述方法进行请求将提示：
+```python
+{
+    "Warnning": "This usage is out of date, please use 'application/json' as content-type to post to /predict/lac. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details."
+}
+```
+对于lac(2.1.0)，请求的方式如下：
+```python
+# coding: utf8
+import requests
+import json
+
+if __name__ == "__main__":
+    # 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
+    text = ["今天是个好日子", "天气预报说今天要下雨"]
+    # 以key的方式指定text传入预测方法的时的参数，此例中为"texts"
+    # 对应本地部署，则为lac.analysis_lexical(texts=[text1, text2])
+    data = {"texts": text}
+    # 指定预测方法为lac并发送post请求
+    url = "http://127.0.0.1:8866/predict/lac"
+    # 指定post请求的headers为application/json方式
+    headers = {"Content-Type": "application/json"}
+
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+    # 打印预测结果
+    print(json.dumps(r.json(), indent=4, ensure_ascii=False))
+```
+
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
