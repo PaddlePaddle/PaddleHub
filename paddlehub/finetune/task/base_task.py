@@ -814,6 +814,7 @@ class BaseTask(object):
                                        "step_%d" % self.current_step)
 
         logger.info("Saving model checkpoint to {}".format(model_saved_dir))
+        # to resume traning by loading ckpt, it must be save program (save_persistables)
         fluid.io.save_persistables(
             self.exe, dirname=model_saved_dir, main_program=self.main_program)
         save_checkpoint(
