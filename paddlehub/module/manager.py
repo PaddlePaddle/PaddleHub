@@ -70,7 +70,10 @@ class LocalModuleManager(object):
                     for _item, _cls in inspect.getmembers(
                             _module, inspect.isclass):
                         _item = _module.__dict__[_item]
-                        if issubclass(_item, hub.Module):
+                        _file = os.path.realpath(
+                            sys.modules[_item.__module__].__file__)
+                        if issubclass(_item,
+                                      hub.Module) and _file == module_file:
                             version = _item._version
                             break
                     sys.path.pop(0)

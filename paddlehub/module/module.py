@@ -183,7 +183,10 @@ class Module(object):
         _module = importlib.import_module("{}.module".format(basename))
         for _item, _cls in inspect.getmembers(_module, inspect.isclass):
             _item = _module.__dict__[_item]
-            if issubclass(_item, Module):
+            _file = os.path.realpath(sys.modules[_item.__module__].__file__)
+            _module_path = os.path.realpath(
+                os.path.join(directory, "module.py"))
+            if issubclass(_item, Module) and _file == _module_path:
                 user_module = _item(directory=directory, **kwargs)
                 break
         sys.path.pop(0)
