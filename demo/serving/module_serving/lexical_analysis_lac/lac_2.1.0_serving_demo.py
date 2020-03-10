@@ -4,10 +4,10 @@ import json
 
 if __name__ == "__main__":
     # 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
-    text = {"text": ["今天是个好日子", "天气预报说今天要下雨"]}
+    text = ["今天是个好日子", "天气预报说今天要下雨"]
     # 以key的方式指定text传入预测方法的时的参数，此例中为"data"
     # 对应本地部署，则为lac.analysis_lexical(data=text)
-    data = {"data": text}
+    data = {"texts": text}
     # 指定预测方法为lac并发送post请求
     url = "http://127.0.0.1:8866/predict/lac"
     # 指定post请求的headers为application/json方式

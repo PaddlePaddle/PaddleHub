@@ -79,14 +79,14 @@ PaddleHub在使用过程中会产生一些缓存数据，这部分数据默认�
 
 
 ## `config`
-用于查看和设置paddlehub相关设置，包括对server地址、日志级别的设置
+用于查看和设置paddlehub相关设置，包括对server地址、日志级别的设置：
 
 `示例`
 * `hub config`: 显示当前paddlehub的设置
 
 * `hub config reset`: 恢复当前paddlehub的设置为默认设置
 
-* `hub config server==[address]`: 设置当前server地址为[address]
+* `hub config server==[address]`: 设置当前paddlehub-server地址为[address]，paddlehub客户端从此地址获取模型信息
 
 * `hub config log==[level]`: 设置当前日志级别为[level]， 可选值为critical, error, warning, info, debug, nolog, 从左到右优先级从高到低，nolog表示不显示日志信息
 

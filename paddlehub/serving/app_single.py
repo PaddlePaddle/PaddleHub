@@ -342,7 +342,7 @@ def create_app(init_flag=False, configs=None):
                 "use 'application/json' as "
                 "content-type to post to "
                 "/predict/%s. See "
-                "'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.5/docs/tutorial/serving.md' for more details."
+                "'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details."
                 % (module_name)
             })
             return results
