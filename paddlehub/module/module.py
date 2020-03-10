@@ -148,6 +148,8 @@ class Module(object):
             return
 
         mod = self.__class__.__module__ + "." + self.__class__.__name__
+        print(_module_runnable_func)
+        print(mod)
         if mod in _module_runnable_func:
             _run_func_name = _module_runnable_func[mod]
             self._run_func = getattr(self, _run_func_name)
@@ -328,7 +330,7 @@ class NLPModule(Module):
         if six.PY2:
             unicode_texts = []
             for text in texts:
-                if not isinstance(text, unicode):
+                if not isinstance(text, six.string_types):
                     unicode_texts.append(
                         text.decode(utils.sys_stdin_encoding()).decode("utf8"))
                 else:
