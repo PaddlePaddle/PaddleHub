@@ -455,14 +455,6 @@ class NLPModule(Module):
 
         return input_data
 
-    def get_labels(self):
-        """
-        Get the labels which was used when pretraining
-        Returns:
-             labels(dict)
-        """
-        pass
-
     def get_vocab_path(self):
         """
         Get the path to the vocabulary whih was used to pretrain
