@@ -932,6 +932,7 @@ class BaseTask(object):
         with tmp_dir() as _dir:
             self.save_inference_model(dirname=_dir)
             predictor_config = fluid.core.AnalysisConfig(_dir)
+            predictor_config.disable_glog_info()
 
             if self.config.use_cuda:
                 predictor_config.enable_use_gpu(100, 0)
