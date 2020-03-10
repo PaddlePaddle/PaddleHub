@@ -44,7 +44,6 @@ $ hub serving start --config config.json
   "modules_info": {
     "yolov3_darknet53_coco2017": {
       "init_args": {
-        "directory": "./my_yolov3",
         "version": "1.0.0"
       },
       "predict_args": {
@@ -54,8 +53,7 @@ $ hub serving start --config config.json
     },
     "lac": {
       "init_args": {
-        "version": "2.1.0",
-        "user_dict": "./dict.txt"
+        "version": "1.1.0"
       },
       "predict_args": {
         "batch_size": 1,
@@ -127,16 +125,20 @@ $ hub serving start -c serving_config.json
 其中`serving_config.json`的内容如下：
 ```json
 {
-  "modules_info": [
-  {
-    "module": "lac",
-    "version": "1.0.0",
-    "batch_size": 1
-  }
-],
-  "use_gpu": false,
+  "modules_info": {
+    "lac": {
+      "init_args": {
+        "version": "1.1.0"
+      },
+      "predict_args": {
+        "batch_size": 1,
+        "use_gpu": false
+      }
+    }
+  },
   "port": 8866,
-  "use_multiprocess": false
+  "use_multiprocess": false,
+  "workers": 2
 }
 ```
 启动成功界面如图：
@@ -256,7 +258,7 @@ $ PaddleHub Serving will stop.
 以lac(2.1.0)为例，使用上述方法进行请求将提示：
 ```python
 {
-    "Warnning": "This usage is out of date, please use 'application/json' as content-type to post to /predict/lac. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.5/docs/tutorial/serving.md' for more details."
+    "Warnning": "This usage is out of date, please use 'application/json' as content-type to post to /predict/lac. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details."
 }
 ```
 对于lac(2.1.0)，请求的方式如下：
@@ -272,7 +274,7 @@ if __name__ == "__main__":
     # 对应本地部署，则为lac.analysis_lexical(data=text)
     data = {"data": text}
     # 指定预测方法为lac并发送post请求
-    url = "http://127.0.0.1:8866/predict/porn_detection_gru"
+    url = "http://127.0.0.1:8866/predict/lac"
     # 指定post请求的headers为application/json方式
     headers = {"Content-Type": "application/json"}
 
@@ -304,7 +306,7 @@ if __name__ == "__main__":
     ]
 }
 ```
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac)。
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
 
 ## Bert Service
 除了预训练模型一键服务部署功能之外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](./bert_service.md)。
