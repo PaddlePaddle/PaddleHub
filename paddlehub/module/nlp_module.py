@@ -17,21 +17,20 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-import re
-
 import argparse
 import ast
 import json
-import numpy as np
+import os
+import re
 import six
+
+import numpy as np
 import paddle.fluid as fluid
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 import paddlehub as hub
-from paddlehub import logger
+from paddlehub.common.logger import logger
 from paddlehub.common.utils import sys_stdin_encoding
 from paddlehub.io.parser import txt_parser
-from paddlehub.module.module import serving
 from paddlehub.module.module import runnable
 
 
@@ -207,15 +206,6 @@ class NLPPredictionModule(NLPBaseModule):
             raise DataFormatError
 
         return input_data
-
-    def get_vocab_path(self):
-        """
-        Get the path to the vocabulary whih was used to pretrain
-
-        Returns:
-             self.vocab_path(str): the path to vocabulary
-        """
-        return self.vocab_path
 
 
 class _TransformerEmbeddingTask(hub.BaseTask):

@@ -139,6 +139,10 @@ class Module(object):
         if mod in _module_runnable_func:
             _run_func_name = _module_runnable_func[mod]
             self._run_func = getattr(self, _run_func_name)
+        elif self.__class__.__bases__[0].__name__ == "NLPPredictionModule":
+            _run_func_name = _module_runnable_func[
+                'paddlehub.module.nlp_module.NLPPredictionModule']
+            self._run_func = getattr(self, _run_func_name)
         else:
             self._run_func = None
         self._serving_func_name = _module_serving_func.get(mod, None)
