@@ -48,6 +48,7 @@ Loading lac successful.
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 {
+    "msg": "",
     "results": [
         {
             "similarity": 0.8445,
@@ -64,7 +65,8 @@ Loading lac successful.
             "text_1": "这道题太难了",
             "text_2": "这道题很有意思"
         }
-    ]
+    ],
+    "status": "0"
 }
 ```
 这样我们就完成了对语义模型simnet_bow的预测服务化部署和测试。
@@ -102,4 +104,4 @@ if __name__ == "__main__":
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../lexical_analysis_lac/lac_2.1.0_serving_demo.py)。

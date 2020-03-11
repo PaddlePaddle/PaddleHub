@@ -56,42 +56,46 @@ files = [("image", file_1), ("image", file_2)]
 ```python
 >>> results = eval(r.json()["results"])
 >>> print(json.dumps(results, indent=4, ensure_ascii=False))
-[
-    {
-        "path": "cat.jpg",
-        "data": [
-            {
-                "left": 319.489,
-                "right": 1422.8364,
-                "top": 208.94229,
-                "bottom": 993.8552,
-                "label": "cat",
-                "confidence": 0.9174191
-            }
-        ]
-    },
-    {
-        "path": "dog.jpg",
-        "data": [
-            {
-                "left": 200.6918,
-                "right": 748.96204,
-                "top": 122.74927,
-                "bottom": 566.2066,
-                "label": "dog",
-                "confidence": 0.83619183
-            },
-            {
-                "left": 506.8462,
-                "right": 623.2322,
-                "top": 378.0084,
-                "bottom": 416.116,
-                "label": "tie",
-                "confidence": 0.5082839
-            }
-        ]
-    }
-]
+{
+    "status": "0",
+    "msg": "",
+    "results": [
+        {
+            "path": "cat.jpg",
+            "data": [
+                {
+                    "left": 319.489,
+                    "right": 1422.8364,
+                    "top": 208.94229,
+                    "bottom": 993.8552,
+                    "label": "cat",
+                    "confidence": 0.9174191
+                }
+            ]
+        },
+        {
+            "path": "dog.jpg",
+            "data": [
+                {
+                    "left": 200.6918,
+                    "right": 748.96204,
+                    "top": 122.74927,
+                    "bottom": 566.2066,
+                    "label": "dog",
+                    "confidence": 0.83619183
+                },
+                {
+                    "left": 506.8462,
+                    "right": 623.2322,
+                    "top": 378.0084,
+                    "bottom": 416.116,
+                    "label": "tie",
+                    "confidence": 0.5082839
+                }
+            ]
+        }
+    ]
+}
 ```
 根据结果可以看出准确识别了请求的图片。
 
@@ -151,4 +155,4 @@ if __name__ == "__main__":
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../lexical_analysis_lac/lac_2.1.0_serving_demo.py)。

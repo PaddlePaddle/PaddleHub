@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # 保存检测生成的图片到output文件夹，打印模型输出结果
     if not os.path.exists("output"):
         os.mkdir("output")
-    for item in results:
+    for item in results["results"]:
         with open(os.path.join("output", item["path"]), "wb") as fp:
             fp.write(base64.b64decode(item["base64"].split(',')[-1]))
             item.pop("base64")

@@ -31,7 +31,7 @@ $ hub serving start --modules [Module1==Version1, Module2==Version2, ...] \
 |--use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
 |--use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式<br>*`Windows操作系统只支持单进程方式`*|
 |--workers|在并发方式下指定的并发任务数，默认为`2*cpu_count-1`，其中`cpu_count`为CPU核数|  
-
+**NOTE:** --use_gpu不可与--use_multiprocess共用。
 #### 配置文件启动
 启动命令
 ```shell
@@ -272,7 +272,7 @@ if __name__ == "__main__":
     text = ["今天是个好日子", "天气预报说今天要下雨"]
     # 以key的方式指定text传入预测方法的时的参数，此例中为"data"
     # 对应本地部署，则为lac.analysis_lexical(texts=[text1, text2])
-    data = {"texts": text}
+    data = {"texts": text, "batch_size": 2}
     # 指定预测方法为lac并发送post请求
     url = "http://127.0.0.1:8866/predict/lac"
     # 指定post请求的headers为application/json方式

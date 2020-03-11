@@ -50,9 +50,22 @@ files = [("image", file_1), ("image", file_2)]
 vgg11_imagenent返回的结果为图像分类结果及其对应的概率，我们尝试打印接口返回结果：
 ```python
 
->>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))  
+>>> print(json.dumps(results, indent=4, ensure_ascii=False))
 {
-    "results": "[[{'Egyptian cat': 0.540287435054779}], [{'daisy': 0.9976677298545837}]]"
+    "status": "0",
+    "msg": "",
+    "results": [
+        [
+            {
+                "Egyptian cat": 0.540287435054779
+            }
+        ],
+        [
+            {
+                "daisy": 0.9976677298545837
+            }
+        ]
+    ]
 }
 ```
 
@@ -91,4 +104,4 @@ if __name__ == "__main__":
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../lexical_analysis_lac/lac_2.1.0_serving_demo.py)。

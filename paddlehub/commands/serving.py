@@ -368,7 +368,7 @@ class ServingCommand(BaseCommand):
                 if self.args.use_multiprocess is True:
                     self.start_app_with_args(self.args.workers)
                 else:
-                    self.start_app_with_args(1)
+                    self.start_single_app_with_args()
 
     @staticmethod
     def show_help():

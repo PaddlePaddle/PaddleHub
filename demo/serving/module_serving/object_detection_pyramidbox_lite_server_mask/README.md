@@ -56,66 +56,78 @@ files = [("image", file_1), ("image", file_2)]
 ```python
 >>> # 指定检测方法为pyramidbox_lite_server_mask并发送post请求
 >>> url = "http://127.0.0.1:8866/predict/image/pyramidbox_lite_server_mask"
->>> r = requests.post(url=url, files=files)
+>>> r = requests.post(url=url, files=files, data={"visual_result": "True"})
 ```
 我们可以打印接口返回结果：
 ```python
 >>> results = eval(r.json()["results"])
 >>> print(json.dumps(results, indent=4, ensure_ascii=False))
-[
-    {
-        "data": [
-            {
-                "label": "MASK",
-                "left": 455.5180733203888,
-                "right": 658.8289226293564,
-                "top": 186.38022020459175,
-                "bottom": 442.67284870147705,
-                "confidence": 0.92117363
-            },
-            {
-                "label": "MASK",
-                "left": 938.9076416492462,
-                "right": 1121.0804233551025,
-                "top": 326.9856423139572,
-                "bottom": 586.0468536615372,
-                "confidence": 0.997152
-            },
-            {
-                "label": "NO MASK",
-                "left": 1166.189564704895,
-                "right": 1325.6211009025574,
-                "top": 295.55220007896423,
-                "bottom": 496.9406336545944,
-                "confidence": 0.9346678
-            }
-        ],
-        "path": "",
-        "id": 1
-    },
-    {
-        "data": [
-            {
-                "label": "MASK",
-                "left": 1346.7342281341553,
-                "right": 1593.7974529266357,
-                "top": 239.36296990513802,
-                "bottom": 574.6375751495361,
-                "confidence": 0.95378655
-            },
-            {
-                "label": "MASK",
-                "left": 840.5126552581787,
-                "right": 1083.8391423225403,
-                "top": 417.5169044137001,
-                "bottom": 733.8856244087219,
-                "confidence": 0.85434145
-            }
-        ],
-        "path": "",
-        "id": 2
-    }
-]
+{
+    "status": "0",
+    "msg": "",
+    "results": [
+        {
+            "data": [
+                {
+                    "label": "MASK",
+                    "left": 938.8167103528976,
+                    "right": 1126.8890985250473,
+                    "top": 335.8177453279495,
+                    "bottom": 586.0342741012573,
+                    "confidence": 0.9775171
+                },
+                {
+                    "label": "NO MASK",
+                    "left": 1166.563014626503,
+                    "right": 1331.2186390161514,
+                    "top": 298.1251895427704,
+                    "bottom": 496.373051404953,
+                    "confidence": 0.6512484
+                },
+                {
+                    "label": "MASK",
+                    "left": 458.2292696237564,
+                    "right": 664.9880893230438,
+                    "top": 179.45007160305977,
+                    "bottom": 446.70506715774536,
+                    "confidence": 0.98069304
+                }
+            ],
+            "path": "family_mask.jpg",
+            "id": 1
+        },
+        {
+            "data": [
+                {
+                    "label": "MASK",
+                    "left": 1340.4194090366364,
+                    "right": 1595.8429119586945,
+                    "top": 251.97067219018936,
+                    "bottom": 584.6931987404823,
+                    "confidence": 0.9681898
+                },
+                {
+                    "label": "MASK",
+                    "left": 839.8990581035614,
+                    "right": 1084.293223142624,
+                    "top": 446.8751857280731,
+                    "bottom": 758.4936121702194,
+                    "confidence": 0.9673422
+                },
+                {
+                    "label": "NO MASK",
+                    "left": 1145.4194769859314,
+                    "right": 1253.0083780288696,
+                    "top": 128.66552621126175,
+                    "bottom": 283.0486469864845,
+                    "confidence": 0.97426504
+                }
+            ],
+            "path": "woman_mask.jpg",
+            "id": 2
+        }
+    ]
+}
 ```
 根据结果可以看出准确识别了请求图片中的人脸位置及戴口罩确信度。
 
@@ -196,4 +208,4 @@ if __name__ == "__main__":
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../lexical_analysis_lac/lac_2.1.0_serving_demo.py)。

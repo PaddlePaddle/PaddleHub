@@ -45,6 +45,7 @@ Loading porn_detection_lstm successful.
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 {
+    "msg": "",
     "results": [
         {
             "not_porn_probs": 0.0121,
@@ -60,7 +61,8 @@ Loading porn_detection_lstm successful.
             "porn_probs": 0.0046,
             "text": "中国黄页"
         }
-    ]
+    ],
+    "status": "0"
 }
 ```
 可以看出正确得到了两个文本的预测结果。
@@ -100,4 +102,4 @@ if __name__ == "__main__":
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../lexical_analysis_lac/lac_2.1.0_serving_demo.py)。

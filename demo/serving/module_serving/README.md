@@ -42,7 +42,7 @@ PaddleHub Serving是基于PaddleHub的一键模型服务部署工具，能够通
 
 &emsp;&emsp;该示例展示了利用deeplabv3p_xception65_humanseg完成图像分割服务化部署和在线预测，获取识别结果和分割后的图像。
 
-* [中文情感分析-基于simnet_bow](../module_serving/semantic_model_simnet_bow)
+* [中文情感分析-基于senta_lstm](../module_serving/sentiment_analysis_senta_lstm)
 
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
 

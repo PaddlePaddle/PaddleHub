@@ -50,12 +50,16 @@ files = [("image", file_1), ("image", file_2)]
 ```python
 >>> results = eval(r.json()["results"])
 >>> print(json.dumps(results, indent=4, ensure_ascii=False))
-[
-    {
-        "origin": "girl.jpg",
-        "processed": "humanseg_output/girl.png"
-    }
-]
+{
+    "status": "0",
+    "msg": "",
+    "results": [
+        {
+            "origin": "girl.jpg",
+            "processed": "humanseg_output/girl.png"
+        }
+    ]
+}
 ```
 
 deeplabv3p_xception65_humanseg返回的结果还包括人像分割后的图像的base64编码格式，经过转换可以得到生成图像，代码如下：
@@ -107,4 +111,4 @@ if __name__ == "__main__":
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../lexical_analysis_lac/lac_2.1.0_serving_demo.py)。

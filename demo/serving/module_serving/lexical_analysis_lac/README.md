@@ -46,38 +46,26 @@ Loading lac successful.
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 {
+    "msg": "",
     "results": [
         {
             "tag": [
-                "TIME",
-                "v",
-                "q",
-                "n"
+                "TIME", "v", "q", "n"
             ],
             "word": [
-                "今天",
-                "是",
-                "个",
-                "好日子"
+                "今天", "是", "个", "好日子"
             ]
         },
         {
             "tag": [
-                "n",
-                "v",
-                "TIME",
-                "v",
-                "v"
+                "n", "v", "TIME", "v", "v"
             ],
             "word": [
-                "天气预报",
-                "说",
-                "今天",
-                "要",
-                "下雨"
+                "天气预报", "说", "今天", "要", "下雨"
             ]
         }
-    ]
+    ],
+    "status": "0"
 }
 ```
 这样我们就完成了对词法分析的预测服务化部署和测试。
@@ -119,7 +107,7 @@ if __name__ == "__main__":
     text = ["今天是个好日子", "天气预报说今天要下雨"]
     # 以key的方式指定text传入预测方法的时的参数，此例中为"texts"
     # 对应本地部署，则为lac.analysis_lexical(text=[text1, text2])
-    data = {"texts": text}
+    data = {"texts": text, "batch_size": 1}
     # 指定预测方法为lac并发送post请求
     url = "http://127.0.0.1:8866/predict/lac"
     # 指定post请求的headers为application/json方式
