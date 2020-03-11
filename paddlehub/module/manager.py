@@ -57,6 +57,8 @@ class LocalModuleManager(object):
                     desc.ParseFromString(fp.read())
                 info['version'] = desc.attr.map.data["module_info"].map.data[
                     "version"].s
+                info['name'] = desc.attr.map.data["module_info"].map.data[
+                    "name"].s
                 return True, info
             else:
                 module_file = os.path.join(module_path, 'module.py')
@@ -77,7 +79,7 @@ class LocalModuleManager(object):
                             version = _item._version
                             break
                     sys.path.pop(0)
-                    return True, {'version': version}
+                    return True, {'version': version, 'name': _item._name}
                 logger.warning(
                     "%s does not exist, the module will be reinstalled" %
                     desc_pb_path)
@@ -92,9 +94,13 @@ class LocalModuleManager(object):
         for sub_dir_name in os.listdir(self.local_modules_dir):
             sub_dir_path = os.path.join(self.local_modules_dir, sub_dir_name)
             if os.path.isdir(sub_dir_path):
+                if "-" in sub_dir_path:
+                    new_sub_dir_path = sub_dir_path.replace("-", "_")
+                    shutil.move(sub_dir_path, new_sub_dir_path)
+                    sub_dir_path = new_sub_dir_path
                 valid, info = self.check_module_valid(sub_dir_path)
                 if valid:
-                    module_name = sub_dir_name
+                    module_name = info['name']
                     self.modules_dict[module_name] = (sub_dir_path,
                                                       info['version'])
         return self.modules_dict
@@ -175,6 +181,10 @@ class LocalModuleManager(object):
                     module_dir = os.path.join(_dir, file_names[0])
                     for index, file_name in enumerate(file_names):
                         tar.extract(file_name, _dir)
+                    if "-" in module_dir:
+                        new_module_dir = module_dir.replace("-", "_")
+                        shutil.move(module_dir, new_module_dir)
+                        module_dir = new_module_dir
                     module_name = hub.Module(directory=module_dir).name
 
             if from_user_dir:
@@ -198,7 +208,8 @@ class LocalModuleManager(object):
                             "w") as fp:
                         fp.write(md5_value)
 
-                save_path = os.path.join(MODULE_HOME, module_name)
+                save_path = os.path.join(MODULE_HOME,
+                                         module_name.replace("-", "_"))
                 if save_path != module_dir:
                     if os.path.exists(save_path):
                         shutil.rmtree(save_path)
