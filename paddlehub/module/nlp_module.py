@@ -382,7 +382,7 @@ class TransformerModule(NLPBaseModule):
     def get_embedding(self, texts, use_gpu=False, batch_size=1):
         """
         get pooled_output and sequence_output for input texts.
-        Warnings: this method depends on Paddle Inference Library, it may not work properly in PaddlePaddle < 1.6.2.
+        Warnings: this method depends on Paddle Inference Library, it may not work properly in PaddlePaddle <= 1.6.2.
 
         Args:
             texts (list): each element is a text sample, each sample include text_a and text_b where text_b can be omitted.
