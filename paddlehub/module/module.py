@@ -17,13 +17,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import argparse
-import ast
-import json
-import numpy as np
 import os
 import time
-import six
 import sys
 import functools
 import inspect
@@ -43,7 +38,6 @@ from paddlehub.module import module_desc_pb2
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.checker import ModuleChecker
 from paddlehub.module.signature import Signature, create_signature
-from paddlehub.io.parser import txt_parser
 
 # PaddleHub module dir name
 ASSETS_DIRNAME = "assets"
