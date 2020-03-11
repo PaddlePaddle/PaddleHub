@@ -807,10 +807,16 @@ class BaseTask(object):
     # NOTE: current saved checkpoint machanism is not completed,
     # it can't restore dataset training status
     def save_checkpoint(self):
+        """
+        save the program of the last step in training
+        """
         model_saved_dir = os.path.join(self.config.checkpoint_dir,
                                        "step_%d" % self.current_step)
+
         logger.info("Saving model checkpoint to {}".format(model_saved_dir))
-        self.save_inference_model(dirname=model_saved_dir)
+        # to resume traning by loading ckpt, it must be save program (save_persistables)
+        fluid.io.save_persistables(
+            self.exe, dirname=model_saved_dir, main_program=self.main_program)
         save_checkpoint(
             checkpoint_dir=self.config.checkpoint_dir,
             current_epoch=self.current_epoch,
@@ -926,6 +932,7 @@ class BaseTask(object):
         with tmp_dir() as _dir:
             self.save_inference_model(dirname=_dir)
             predictor_config = fluid.core.AnalysisConfig(_dir)
+            predictor_config.disable_glog_info()
 
             if self.config.use_cuda:
                 predictor_config.enable_use_gpu(100, 0)

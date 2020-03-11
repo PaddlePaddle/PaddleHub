@@ -26,7 +26,7 @@ import glob
 def predict_v2(module_info, input):
     serving_method_name = module_info["method_name"]
     serving_method = getattr(module_info["module"], serving_method_name)
-    predict_args = module_info["predict_args"]
+    predict_args = module_info["predict_args"].copy()
     predict_args.update({"data": input})
 
     for item in serving_method.__code__.co_varnames:
@@ -39,7 +39,7 @@ def predict_v2(module_info, input):
 def predict_v2_advanced(module_info, input):
     serving_method_name = module_info["method_name"]
     serving_method = getattr(module_info["module"], serving_method_name)
-    predict_args = module_info["predict_args"]
+    predict_args = module_info["predict_args"].copy()
     predict_args.update(input)
 
     for item in serving_method.__code__.co_varnames:
