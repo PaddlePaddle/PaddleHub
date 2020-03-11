@@ -119,31 +119,6 @@ class NLPPredictionModule(NLPBaseModule):
             texts = unicode_texts
         return texts
 
-    @serving
-    def predict(self, texts=[], data={}, use_gpu=False, batch_size=1):
-        """
-        Get the prediction results results with the texts as input
-
-        Firstly, the predicted data should be checked validity.
-        Then, it will be preprocossed (word_str to word_id) and
-        run predictor to get prediction results.
-        Finally, pass prediction results to postprocess to
-        get the final results (such as predcition label).
-
-        This method must be overrided.
-
-
-        Args:
-             texts(list): the input texts to be predicted, if texts not data
-             data(dict): key must be 'text', value is the texts to be predicted, if data not texts
-             use_gpu(bool): whether use gpu to predict or not
-             batch_size(int): the program deals once with one batch
-
-        Returns:
-             results(list): the prediction results
-        """
-        raise NotImplementedError()
-
     @runnable
     def run_cmd(self, argvs):
         """
