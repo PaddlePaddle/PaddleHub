@@ -124,8 +124,8 @@ class NLPPredictionModule(NLPBaseModule):
         Run as a command
         """
         self.parser = argparse.ArgumentParser(
-            description='Run the %s module.' % self.module_name,
-            prog='hub run %s' % self.module_name,
+            description='Run the %s module.' % self.name,
+            prog='hub run %s' % self.name,
             usage='%(prog)s',
             add_help=True)
 

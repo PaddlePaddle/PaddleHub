@@ -74,8 +74,9 @@ class LocalModuleManager(object):
                         _item = _module.__dict__[_item]
                         _file = os.path.realpath(
                             sys.modules[_item.__module__].__file__)
-                        if issubclass(_item,
-                                      hub.Module) and _file == module_file:
+                        if issubclass(
+                                _item,
+                                hub.Module) and _file.startwith(module_file):
                             version = _item._version
                             break
                     sys.path.pop(0)

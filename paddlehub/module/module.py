@@ -194,7 +194,7 @@ class Module(object):
             _file = os.path.realpath(sys.modules[_item.__module__].__file__)
             _module_path = os.path.realpath(
                 os.path.join(directory, "module.py"))
-            if issubclass(_item, Module) and _file == _module_path:
+            if issubclass(_item, Module) and _file.startswith(_module_path):
                 user_module = _item(directory=directory, **kwargs)
                 break
         sys.path.pop(0)
