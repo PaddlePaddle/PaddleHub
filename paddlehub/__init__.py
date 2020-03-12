@@ -64,4 +64,4 @@ from .finetune.strategy import CombinedStrategy
 
 from .autofinetune.evaluator import report_final_result
 
-from .module.nlp_module import BERTModule
+from .module.nlp_module import NLPPredictionModule, TransformerModule

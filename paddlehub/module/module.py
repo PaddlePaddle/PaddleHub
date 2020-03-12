@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -135,18 +135,26 @@ class Module(object):
         if "_is_initialize" in self.__dict__ and self._is_initialize:
             return
 
-        mod = self.__class__.__module__ + "." + self.__class__.__name__
-        if mod in _module_runnable_func:
-            _run_func_name = _module_runnable_func[mod]
-            self._run_func = getattr(self, _run_func_name)
-        else:
-            self._run_func = None
-        self._serving_func_name = _module_serving_func.get(mod, None)
-        self._code_version = "v2"
+        _run_func_name = self._get_func_name(self.__class__,
+                                             _module_runnable_func)
+        self._run_func = getattr(self, _run_func_name)
+        self._serving_func_name = self._get_func_name(self.__class__,
+                                                      _module_serving_func)
         self._directory = directory
         self._initialize(**kwargs)
         self._is_initialize = True
         self._code_version = "v2"
+
+    def _get_func_name(self, current_cls, module_func_dict):
+        mod = current_cls.__module__ + "." + current_cls.__name__
+        if mod in module_func_dict:
+            _func_name = module_func_dict[mod]
+            return _func_name
+        elif current_cls.__bases__:
+            for base_class in current_cls.__bases__:
+                return self._get_func_name(base_class, module_func_dict)
+        else:
+            return None
 
     @classmethod
     def init_with_name(cls, name, version=None, **kwargs):
