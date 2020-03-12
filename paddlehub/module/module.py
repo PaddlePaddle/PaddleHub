@@ -135,33 +135,26 @@ class Module(object):
         if "_is_initialize" in self.__dict__ and self._is_initialize:
             return
 
-        mod = self.__class__.__module__ + "." + self.__class__.__name__
-        self._run_func = None
-        if mod in _module_runnable_func:
-            _run_func_name = _module_runnable_func[mod]
-            self._run_func = getattr(self, _run_func_name)
-        else:
-            base_classes = self._get_all_baseclasses(self.__class__)
-            for base_class in base_classes:
-                base_class_name = base_class.__name__
-                if base_class_name == "NLPPredictionModule":
-                    _run_func_name = _module_runnable_func[
-                        'paddlehub.module.nlp_module.NLPPredictionModule']
-                    self._run_func = getattr(self, _run_func_name)
-                    break
-
-        self._serving_func_name = _module_serving_func.get(mod, None)
-        self._code_version = "v2"
+        _run_func_name = self._get_func_name(self.__class__,
+                                             _module_runnable_func)
+        self._run_func = getattr(self, _run_func_name)
+        self._serving_func_name = self._get_func_name(self.__class__,
+                                                      _module_serving_func)
         self._directory = directory
         self._initialize(**kwargs)
         self._is_initialize = True
         self._code_version = "v2"
 
-    def _get_all_baseclasses(self, sup_cls):
-        return list(sup_cls.__bases__) + [
-            sup_cls for item in sup_cls.__bases__
-            for sup_cls in self._get_all_baseclasses(item)
-        ]
+    def _get_func_name(self, current_cls, module_func_dict):
+        mod = current_cls.__module__ + "." + current_cls.__name__
+        if mod in module_func_dict:
+            _func_name = module_func_dict[mod]
+            return _func_name
+        elif current_cls.__bases__:
+            for base_class in current_cls.__bases__:
+                return self._get_func_name(base_class, module_func_dict)
+        else:
+            return None
 
     @classmethod
     def init_with_name(cls, name, version=None, **kwargs):
