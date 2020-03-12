@@ -18,6 +18,12 @@ Loading vgg11_imagenet successful.
 这样就完成了一个图像分类服务化API的部署，默认端口号为8866。
 
 ## Step2：测试图像分类在线API
+首先引入需要的包：
+```python
+>>> import requests
+>>> import json
+```
+
 我们用来测试的样例图片为：  
 
 <p align="center">  
@@ -49,7 +55,7 @@ files = [("image", file_1), ("image", file_2)]
 ```
 vgg11_imagenent返回的结果为图像分类结果及其对应的概率，我们尝试打印接口返回结果：
 ```python
-
+>>> results = eval(r.json()["results"])
 >>> print(json.dumps(results, indent=4, ensure_ascii=False))
 [
     [

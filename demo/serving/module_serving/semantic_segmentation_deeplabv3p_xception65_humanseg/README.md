@@ -18,6 +18,14 @@ Loading deeplabv3p_xception65_humanseg successful.
 这样就完成了一个图像分割服务化API的部署，默认端口号为8866。
 
 ## Step2：测试图像分割在线API
+首先指定编码格式及引入需要的包：
+```python
+>>> # coding: utf8
+>>> import requests
+>>> import json
+>>> import base64
+>>> import os
+```
 我们用来测试的样例图片为：  
 
 <p align="center">  
@@ -57,9 +65,15 @@ files = [("image", file_1), ("image", file_2)]
         }
 ]
 ```
-
-deeplabv3p_xception65_humanseg返回的结果还包括人像分割后的图像的base64编码格式，经过转换可以得到生成图像，代码如下：
+deeplabv3p_xception65_humanseg返回的结果还包括人像分割后的图像的base64编码格式，经过转换可以得到生成图像。
+我们建立一个文件夹用于存放结果图片：
 ```python
+>>> if not os.path.exists("output"):
+>>>     os.mkdir("output")
+```
+然后将图片数据解码并保存，代码如下：
+```python
+>>> results = eval(r.json()["results"])
 >>> for item in results:
 ...     with open(output_path, "wb") as fp:
 ...         fp.write(base64.b64decode(item["base64"].split(',')[-1]))

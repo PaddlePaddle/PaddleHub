@@ -14,10 +14,10 @@ if __name__ == "__main__":
     url = "http://127.0.0.1:8866/predict/image/stgan_celeba"
     r = requests.post(url=url, data=data, files=files)
 
-    results = eval(r.json()["results"])
     # 保存生成的图片到output文件夹，打印模型输出结果
     if not os.path.exists("stgan_output"):
         os.mkdir("stgan_output")
+    results = eval(r.json()["results"])
     for item in results:
         output_path = os.path.join("stgan_output", item["path"].split("/")[-1])
         with open(output_path, "wb") as fp:

@@ -20,7 +20,12 @@ Loading lac successful.
 ## Step2：测试语言模型在线API
 ### 不使用自定义词典
 在服务部署好之后，我们可以进行测试，用来测试的文本为`今天是个好日子`和`天气预报说今天要下雨`。
-
+首先指定编码格式及引入需要的包：
+```python
+>>> # coding: utf8
+>>> import requests
+>>> import json
+```
 准备的数据格式为：
 ```python
 {"text": [text_1, text_2, ...]}  
