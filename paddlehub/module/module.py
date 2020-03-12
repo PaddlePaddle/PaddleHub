@@ -136,21 +136,32 @@ class Module(object):
             return
 
         mod = self.__class__.__module__ + "." + self.__class__.__name__
+        self._run_func = None
         if mod in _module_runnable_func:
             _run_func_name = _module_runnable_func[mod]
             self._run_func = getattr(self, _run_func_name)
-        elif self.__class__.__bases__[0].__name__ == "NLPPredictionModule":
-            _run_func_name = _module_runnable_func[
-                'paddlehub.module.nlp_module.NLPPredictionModule']
-            self._run_func = getattr(self, _run_func_name)
         else:
-            self._run_func = None
+            base_classes = self._get_all_baseclasses(self.__class__)
+            for base_class in base_classes:
+                base_class_name = base_class.__name__
+                if base_class_name == "NLPPredictionModule":
+                    _run_func_name = _module_runnable_func[
+                        'paddlehub.module.nlp_module.NLPPredictionModule']
+                    self._run_func = getattr(self, _run_func_name)
+                    break
+
         self._serving_func_name = _module_serving_func.get(mod, None)
         self._code_version = "v2"
         self._directory = directory
         self._initialize(**kwargs)
         self._is_initialize = True
         self._code_version = "v2"
+
+    def _get_all_baseclasses(self, sup_cls):
+        return list(sup_cls.__bases__) + [
+            sup_cls for item in sup_cls.__bases__
+            for sup_cls in self._get_all_baseclasses(item)
+        ]
 
     @classmethod
     def init_with_name(cls, name, version=None, **kwargs):
