@@ -26,6 +26,7 @@ import six
 
 import numpy as np
 import paddle.fluid as fluid
+from paddlehub.common import paddle_helper
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 import paddlehub as hub
 from paddlehub.common.logger import logger
@@ -265,6 +266,9 @@ class TransformerModule(NLPBaseModule):
         logger.info("Load pretraining parameters from {}.".format(
             pretraining_params_path))
 
+    def param_prefix(self):
+        return "@HUB_%s@" % self.name
+
     def context(
             self,
             max_seq_len=128,
@@ -330,8 +334,13 @@ class TransformerModule(NLPBaseModule):
         place = fluid.CPUPlace()
         exe = fluid.Executor(place)
 
+        # To be compatible with the module v1
+        vars = filter(lambda var: "tmp" not in var,
+                      list(module_program.global_block().vars.keys())[4:])
+        paddle_helper.add_vars_prefix(
+            program=module_program, prefix=self.param_prefix(), vars=vars)
         self.init_pretraining_params(
-            exe, self.params_path, main_program=startup_program)
+            exe, self.params_path, main_program=module_program)
 
         self.params_layer = {}
         for param in module_program.global_block().iter_parameters():

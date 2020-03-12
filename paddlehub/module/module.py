@@ -137,7 +137,8 @@ class Module(object):
 
         _run_func_name = self._get_func_name(self.__class__,
                                              _module_runnable_func)
-        self._run_func = getattr(self, _run_func_name)
+        self._run_func = getattr(self,
+                                 _run_func_name) if _run_func_name else None
         self._serving_func_name = self._get_func_name(self.__class__,
                                                       _module_serving_func)
         self._directory = directory

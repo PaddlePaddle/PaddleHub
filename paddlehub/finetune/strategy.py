@@ -120,9 +120,7 @@ def get_depth_parameter(main_program):
     return updated_depth_params_dict
 
 
-def set_gradual_unfreeze(main_program, unfreeze_depths):
-    depth_params_dict = get_depth_parameter(main_program)
-
+def set_gradual_unfreeze(depth_params_dict, unfreeze_depths):
     for depth in unfreeze_depths:
         for index, param in enumerate(depth_params_dict[depth]):
             depth_params_dict[depth][index].stop_gradient = False
@@ -509,7 +507,7 @@ class CombinedStrategy(DefaultStrategy):
             if self.max_depth > 0 and self.epoch <= self.scheduler[
                     "gradual_unfreeze"]["blocks"]:
                 set_gradual_unfreeze(
-                    self.main_program,
+                    depth_params_dict=self.depth_params_dict,
                     unfreeze_depths=self.
                     sorted_depth[:self.max_depth * self.epoch //
                                  self.scheduler["gradual_unfreeze"]["blocks"]])
