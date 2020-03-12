@@ -31,7 +31,7 @@ $ hub serving start --modules [Module1==Version1, Module2==Version2, ...] \
 |--use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
 |--use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式<br>*`Windows操作系统只支持单进程方式`*|
 |--workers|在并发方式下指定的并发任务数，默认为`2*cpu_count-1`，其中`cpu_count`为CPU核数|  
-
+**NOTE:** --use_gpu不可与--use_multiprocess共用。
 #### 配置文件启动
 启动命令
 ```shell
@@ -249,7 +249,7 @@ $ PaddleHub Serving will stop.
 
 &emsp;&emsp;该示例展示了利用deeplabv3p_xception65_humanseg完成图像分割服务化部署和在线预测，获取识别结果和分割后的图像。
 
-* [中文情感分析-基于simnet_bow](../../demo/serving/module_serving/semantic_model_simnet_bow)
+* [中文情感分析-基于senta_lstm](../../demo/serving/module_serving/sentiment_analysis_senta_lstm)
 
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
 
@@ -269,10 +269,10 @@ import json
 
 if __name__ == "__main__":
     # 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
-    text = {"text": ["今天是个好日子", "天气预报说今天要下雨"]}
+    text = ["今天是个好日子", "天气预报说今天要下雨"]
     # 以key的方式指定text传入预测方法的时的参数，此例中为"data"
-    # 对应本地部署，则为lac.analysis_lexical(data=text)
-    data = {"data": text}
+    # 对应本地部署，则为lac.analysis_lexical(texts=[text1, text2])
+    data = {"texts": text, "batch_size": 2}
     # 指定预测方法为lac并发送post请求
     url = "http://127.0.0.1:8866/predict/lac"
     # 指定post请求的headers为application/json方式
@@ -283,29 +283,7 @@ if __name__ == "__main__":
     # 打印预测结果
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
-对结果的解析等与前种方式一致，显示如下：
-```python
-{
-    "results": [
-        {
-            "tag": [
-                "TIME", "v", "q", "n"
-            ],
-            "word": [
-                "今天", "是", "个", "好日子"
-            ]
-        },
-        {
-            "tag": [
-                "n", "v", "TIME", "v", "v"
-            ],
-            "word": [
-                "天气预报", "说", "今天", "要", "下雨"
-            ]
-        }
-    ]
-}
-```
+
 此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
 
 ## Bert Service

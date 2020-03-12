@@ -20,6 +20,12 @@ Loading lac successful.
 ## Step2：测试语义模型在线API
 在服务部署好之后，我们可以进行测试，用来测试的文本对分别为`[这道题太难了:这道题是上一年的考题], [这道题太难了:这道题不简单], [这道题太难了:这道题很有意思]`。
 
+首先指定编码格式及引入需要的包：
+```python
+>>> # coding: utf8
+>>> import requests
+>>> import json
+```
 准备的数据格式为：
 ```python
 {"text_1": [text_a1, text_a2, ... ], "text_2": [text_b1, text_b2, ... ]}
@@ -48,6 +54,7 @@ Loading lac successful.
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 {
+    "msg": "",
     "results": [
         {
             "similarity": 0.8445,
@@ -64,7 +71,8 @@ Loading lac successful.
             "text_1": "这道题太难了",
             "text_2": "这道题很有意思"
         }
-    ]
+    ],
+    "status": "0"
 }
 ```
 这样我们就完成了对语义模型simnet_bow的预测服务化部署和测试。

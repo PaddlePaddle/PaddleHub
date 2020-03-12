@@ -19,9 +19,16 @@ Loading porn_detection_lstm successful.
 这样就完成了一个文本审核服务化API的部署，默认端口号为8866。
 
 ## Step2：测试文本审核在线API
-在服务部署好之后，我们可以进行测试，用来测试的文本为`黄片下载`和`中国黄页`。
+在服务部署好之后，我们可以进行测试。
 
-准备的数据格式为：
+首先指定编码格式及引入需要的包：
+```python
+>>> # coding: utf8
+>>> import requests
+>>> import json
+```
+
+用来测试的文本为`黄片下载`和`中国黄页`，准备的数据格式为：
 ```python
 {"text": [text_1, text_2, ...]}  
 ```
@@ -45,6 +52,7 @@ Loading porn_detection_lstm successful.
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 {
+    "msg": "",
     "results": [
         {
             "not_porn_probs": 0.0121,
@@ -60,7 +68,8 @@ Loading porn_detection_lstm successful.
             "porn_probs": 0.0046,
             "text": "中国黄页"
         }
-    ]
+    ],
+    "status": "0"
 }
 ```
 可以看出正确得到了两个文本的预测结果。
