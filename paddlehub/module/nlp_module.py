@@ -266,6 +266,9 @@ class TransformerModule(NLPBaseModule):
         logger.info("Load pretraining parameters from {}.".format(
             pretraining_params_path))
 
+    def param_prefix(self):
+        return "@HUB_%s@" % self.name
+
     def context(
             self,
             max_seq_len=128,
@@ -332,25 +335,10 @@ class TransformerModule(NLPBaseModule):
         exe = fluid.Executor(place)
 
         # To be compatible with the module v1
-        if self.name not in [
-                "roberta_wwm_ext_chinese_L-12_H-768_A-12_distillation",
-                "roberta_wwm_ext_chinese_L-24_H-1024_A-16_distillation",
-                "bert_multi_uncased_L-12_H-768_A-12",
-                "bert_cased_L-24_H-1024_A-16"
-        ]:
-            if self.name == "ernie_tiny":
-                prefix = "@HUB_ernie-tiny@"
-            elif self.name == "ernie":
-                prefix = "@HUB_ernie-stable@"
-            elif self.name == "bert_wwm_ext_chinese_L-12_H-768_A-12":
-                prefix = "@HUB_bert_wwm_ext_chinese_L-12_H-768_A-12_wwm_ext@"
-            else:
-                prefix = "@HUB_%s@" % self.name
-
-            vars = filter(lambda var: "tmp" not in var,
-                          list(module_program.global_block().vars.keys())[4:])
-            paddle_helper.add_vars_prefix(
-                program=module_program, prefix=prefix, vars=vars)
+        vars = filter(lambda var: "tmp" not in var,
+                      list(module_program.global_block().vars.keys())[4:])
+        paddle_helper.add_vars_prefix(
+            program=module_program, prefix=self.param_prefix(), vars=vars)
         self.init_pretraining_params(
             exe, self.params_path, main_program=module_program)
 
