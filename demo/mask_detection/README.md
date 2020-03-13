@@ -8,7 +8,7 @@
 - [3. 高性能C++部署方案](#3-高性能c部署方案)
 
 ## 1. 搭建视频流场景WebDemo
-![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/BB6BC87A45D146CEBA7BF237B5383835?ynotemdtimestamp=1582271320612)
+![image](./images/web1.jpg)
 
 
 ### [>点击查看视频链接<](https://www.bilibili.com/video/av88962128)
@@ -19,7 +19,7 @@
 ### 效果分析
 可以看到识别率在80~90%之前，稍小的人脸有误识别的情况，有些挡住嘴的场景也被误识别成了戴口罩，一个人带着口罩，鼻子漏出来识别成没有戴口罩，这个是合理的因为的鼻子漏出来是佩戴不规范。这个模型应用在门口，狭长通道，人脸识别机所在位置都是可以的。
 
-![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/7E12DBD91D1D4AB5B33C84786D519065?ynotemdtimestamp=1582271320612)![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/2BD974FB990C4C448B30B04194545054?ynotemdtimestamp=1582271320612)![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/E49E34A071F8484D948511430FAB0360?ynotemdtimestamp=1582271320612)
+![image](./images/mask1.jpg)![image](./images/mask2.jpg)![image](./images/mask3.jpg)
 
 ### 1.1 部署环境
 参考： https://www.paddlepaddle.org.cn/install/quick
@@ -108,7 +108,7 @@ for result in results:
     cv2.rectangle(frame, (left, top), (right, bottom), color, 3)
     cv2.putText(frame, label + ":" + str(confidence), (left, top-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
 ```
-![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/F85FCBCA17994C8691024381CBDAFCA7?ynotemdtimestamp=1582271320612)
+![image](./images/maskdetection_1.jpg)
 
 >原DEMO中是英文+置信度显示在框的上面，尝试改为中文，遇到字体问题，以下是解决办法
 
@@ -144,7 +144,7 @@ for result in results:
     # cv2.putText(frame, label + ":" + str(confidence), (left, top-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
     frame = paint_chinese_opencv(frame, label_cn + ":" + str(confidence), (left, top-36), 24, color)
 ```
-![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/4F75E5C6F42F4C3CBE1341742D032847?ynotemdtimestamp=1582271320612)
+![image](./images/maskdetection_2.jpg)
 
 
 #### 提取头像文件
@@ -171,10 +171,10 @@ with open("./result/2-mask_detection.json","w") as f:
 
 #### python 导出的数据
 使用上面的 python 文件完整执行后会有3个种类的数据输出，放到`web/video/result`目录下
-![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/329AC9C2D89447EABE6B8C45D620441E?ynotemdtimestamp=1582271320612)
+![image](./images/result.jpg)
 
 #### json数据结构
-![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/5D46F32061B047D4AB0AC016FE2A63A5?ynotemdtimestamp=1582271320612)
+![image](./images/json.jpg)
 
 #### 使用数据渲染网页
 
@@ -182,7 +182,7 @@ with open("./result/2-mask_detection.json","w") as f:
 - 根据时间点换算为帧（1秒30帧），遍历 json 数据中的数据
 - 把数据中对应的数据输出到网页右侧 "信息区"
 
-![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/6329B326216A4950BF35E0CB37CDC58F?ynotemdtimestamp=1582271320612)
+![image](./images/web2.jpg)
 
 ## 2. 高性能Python部署方案
 
@@ -196,6 +196,6 @@ with open("./result/2-mask_detection.json","w") as f:
 
 **百度飞桨合作伙伴：**
 
-![image](https://note.youdao.com/yws/public/resource/b0a4695bc7d58aed3b1ff797409aee1e/DC72DE1CF51747138871BB0E3D54E20D?ynotemdtimestamp=1582271320612)
+![image](./images/logo.jpg)
 
 北京奇想天外科技有限公司
