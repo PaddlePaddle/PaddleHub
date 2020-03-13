@@ -294,17 +294,19 @@ def rename_var(block, old_name, new_name):
     block._rename_var(old_name, new_name)
 
 
-def add_vars_prefix(program, prefix, vars=None):
+def add_vars_prefix(program, prefix, vars=None, excludes=None):
     block = program.global_block()
     vars = list(vars) if vars else list(block.vars.keys())
+    vars = [var for var in vars if var not in excludes] if excludes else vars
     for var in vars:
         rename_var(block, var, prefix + var)
 
 
-def remove_vars_prefix(program, prefix, vars=None):
+def remove_vars_prefix(program, prefix, vars=None, excludes=None):
     block = program.global_block()
     vars = [var for var in vars if var.startswith(prefix)] if vars else [
         var for var in block.vars.keys() if var.startswith(prefix)
     ]
+    vars = [var for var in vars if var not in excludes] if excludes else vars
     for var in vars:
         rename_var(block, var, var.replace(prefix, "", 1))
