@@ -427,7 +427,7 @@ def create_app(init_flag=False, configs=None):
             return {"error": "Module {} is not available.".format(module_name)}
         module_info = nlp_module_info.get_module_info(module_name)
         if module_info["code_version"] == "v2":
-            results = "This usage is out of date, please use 'application/json' as content-type to post to /predict/%s. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.5/docs/tutorial/serving.md' for more details." % (
+            results = "This usage is out of date, please use 'application/json' as content-type to post to /predict/%s. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details." % (
                 module_name)
             return gen_result("-1", results, "")
         req_id = request.data.get("id")
@@ -460,7 +460,7 @@ def create_app(init_flag=False, configs=None):
             return gen_result("-1", msg, "")
         inputs = request.json
         if inputs is None:
-            results = "This usage is out of date, please use 'application/json' as content-type to post to /predict/%s. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.5/docs/tutorial/serving.md' for more details." % (
+            results = "This usage is out of date, please use 'application/json' as content-type to post to /predict/%s. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details." % (
                 module_name)
             return gen_result("-1", results, "")
 
