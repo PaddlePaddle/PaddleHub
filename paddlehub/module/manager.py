@@ -61,7 +61,8 @@ class LocalModuleManager(object):
                     "name"].s
                 return True, info
             else:
-                module_file = os.path.join(module_path, 'module.py')
+                module_file = os.path.realpath(
+                    os.path.join(module_path, 'module.py'))
                 if os.path.exists(module_file):
                     basename = os.path.split(module_path)[-1]
                     dirname = os.path.join(
