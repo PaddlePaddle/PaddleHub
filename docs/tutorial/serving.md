@@ -82,7 +82,7 @@ $ hub serving start --config config.json
 
 在使用PaddleHub Serving部署服务端的模型预测服务后，就可以在客户端访问预测接口以获取结果了，接口url格式为：
 
-http://0.0.0.0:8866/predict/<CATEGORY\>/\<MODULE>
+http://127.0.0.1:8866/predict/<CATEGORY\>/\<MODULE>
 
 其中，\<CATEGORY>为text或image，与模型种类对应，\<MODULE>为模型名。
 
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     text_list = ["今天是个好日子", "天气预报说今天要下雨"]
     text = {"text": text_list}
     # 指定预测方法为lac并发送post请求
-    url = "http://0.0.0.0:8866/predict/text/lac"
+    url = "http://127.0.0.1:8866/predict/text/lac"
     r = requests.post(url=url, data=text)
 
     # 打印预测结果
