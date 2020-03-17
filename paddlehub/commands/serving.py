@@ -222,6 +222,7 @@ class ServingCommand(BaseCommand):
 
     def start_app_with_file(self):
         port = self.args.config.get("port", 8866)
+        self.args.port = port
         if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
             print("Port %s is occupied, please change it." % port)
             return False
@@ -240,6 +241,7 @@ class ServingCommand(BaseCommand):
 
     def start_single_app_with_file(self):
         port = self.args.config.get("port", 8866)
+        self.args.port = port
         if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
             print("Port %s is occupied, please change it." % port)
             return False
