@@ -27,7 +27,7 @@ PaddleHub支持修改预训练模型存放路径：
 `选项`
 * `--output_path`：用于指定存放下载文件的目录，默认为当前目录
 
-* `--uncompress`：是否对下载的压缩包进行解压，默认不解压
+* `--uncompress`：是否对下载的压缩包进行解压，填写true或者false，默认false（不解压）
 
 * `--type`：指定下载的资源类型，当指定Model时，download只会下载Model的资源。默认为All，此时会优先搜索Module资源，如果没有相关的Module资源，则搜索Model
 
