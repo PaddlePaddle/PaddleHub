@@ -52,8 +52,6 @@ if __name__ == '__main__':
         sp_model_path=module.get_spm_path(),
         word_dict_path=module.get_word_dict_path())
 
-    inv_label_map = {val: key for key, val in reader.label_map.items()}
-
     # Construct transfer learning network
     # Use "sequence_output" for token-level output.
     sequence_output = outputs["sequence_output"]

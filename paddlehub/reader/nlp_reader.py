@@ -37,7 +37,7 @@ class BaseNLPReader(BaseReader):
     def __init__(self,
                  vocab_path,
                  dataset=None,
-                 label_map_config=None,
+                 label_list=None,
                  max_seq_len=512,
                  do_lower_case=True,
                  random_seed=None,
@@ -45,7 +45,7 @@ class BaseNLPReader(BaseReader):
                  sp_model_path=None,
                  word_dict_path=None,
                  in_tokens=False):
-        super(BaseNLPReader, self).__init__(dataset, random_seed)
+        super(BaseNLPReader, self).__init__(dataset, random_seed, label_list)
         self.max_seq_len = max_seq_len
         if sp_model_path and word_dict_path:
             self.tokenizer = tokenization.WSSPTokenizer(
@@ -226,7 +226,7 @@ class BaseNLPReader(BaseReader):
 
             for item in data:
                 # set label in order to run the program
-                if self.dataset:
+                if self.label_map:
                     label = list(self.label_map.keys())[0]
                 else:
                     label = 0
@@ -323,7 +323,7 @@ class SequenceLabelReader(BaseNLPReader):
     def __init__(self,
                  vocab_path,
                  dataset=None,
-                 label_map_config=None,
+                 label_list=None,
                  max_seq_len=512,
                  do_lower_case=True,
                  random_seed=None,
@@ -334,7 +334,7 @@ class SequenceLabelReader(BaseNLPReader):
         super(SequenceLabelReader, self).__init__(
             vocab_path=vocab_path,
             dataset=dataset,
-            label_map_config=label_map_config,
+            label_list=label_list,
             max_seq_len=max_seq_len,
             do_lower_case=do_lower_case,
             random_seed=random_seed,
@@ -791,7 +791,7 @@ class ReadingComprehensionReader(BaseNLPReader):
         super(ReadingComprehensionReader, self).__init__(
             vocab_path=vocab_path,
             dataset=dataset,
-            label_map_config=None,
+            label_list=None,
             max_seq_len=max_seq_len,
             do_lower_case=do_lower_case,
             random_seed=random_seed,
