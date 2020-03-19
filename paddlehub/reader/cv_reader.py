@@ -39,12 +39,14 @@ class ImageClassificationReader(BaseReader):
                  image_width,
                  image_height,
                  dataset=None,
+                 label_list=None,
                  channel_order="RGB",
                  images_mean=None,
                  images_std=None,
                  data_augmentation=False,
                  random_seed=None):
-        super(ImageClassificationReader, self).__init__(dataset, random_seed)
+        super(ImageClassificationReader, self).__init__(
+            dataset, random_seed, label_list=label_list)
         self.image_width = image_width
         self.image_height = image_height
         self.channel_order = channel_order
