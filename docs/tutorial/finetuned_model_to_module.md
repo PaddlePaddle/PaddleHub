@@ -148,7 +148,7 @@ def _initialize(self,
         metrics_choices=metrics_choices)
 ```
 
-初始化过程即为Finetune时创建Task的过程。
+初始化过程即为Fine-tune时创建Task的过程。
 
 **NOTE:** 执行类的初始化不能使用默认的__init__接口，而是应该重载实现_initialize接口。对象默认内置了directory属性，可以直接获取到Module所在路径
 
