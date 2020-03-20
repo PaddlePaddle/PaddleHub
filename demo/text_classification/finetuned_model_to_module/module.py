@@ -94,6 +94,7 @@ class ERNIE_Tiny_Finetuned(hub.Module):
             config=config,
             metrics_choices=metrics_choices)
 
+    @serving
     def predict(self, data, return_result=False, accelerate_mode=True):
         """
         Get prediction results
