@@ -984,7 +984,7 @@ class BaseTask(object):
                 data,
                 load_best_model=True,
                 return_result=False,
-                accelerate_mode=False):
+                accelerate_mode=True):
         """
         make prediction for the input data.
 
