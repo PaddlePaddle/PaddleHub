@@ -43,13 +43,6 @@ class ERNIE_Tiny_Finetuned(hub.Module):
         self.num_class = num_class
         self.MAX_SEQ_LEN = max_seq_len
 
-        self.params_path = os.path.join(self.ckpt_dir, 'best_model')
-        if not os.path.exists(self.params_path):
-            logger.error(
-                "%s doesn't contain the best_model file which saves the best parameters as fietuning."
-            )
-            exit()
-
         # Load Paddlehub ERNIE Tiny pretrained model
         self.module = hub.Module(name="ernie_tiny")
         inputs, outputs, program = self.module.context(
