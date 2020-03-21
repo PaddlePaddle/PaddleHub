@@ -44,6 +44,7 @@ PaddleHub以预训练模型为核心具备以下特点：
 
 * Python>=3.6 
 * PaddlePaddle>=1.6.1
+* 操作系统: Windows/Mac/Linux
 
 除上述依赖外，预训练模型和数据集的下载需要网络连接，请确保机器可以正常访问网络。若本地已存在相关的数据集和预训练模型，则可以离线运行PaddleHub。
 
@@ -130,29 +131,15 @@ PaddleHub还提供图像分类、语义模型、视频分类、图像生成、�
 
 ### 一键模型转服务
 
-PaddleHub提供便捷的模型转服务的能力，只需简单一行命令即可实现预训练模型的HTTP服务部署。
+PaddleHub提供便捷的模型转服务的能力，只需简单一行命令即可完成模型的HTTP服务部署。通过以下命令即可快速启动LAC词法分析服务：
+
+```shell
+$ hub serving start --modules lac
+```
+
+更多关于模型服务化使用说明参见[PaddleHub模型一键能服务化部署](./docs/tutorial/serving.md)。
 
 **PaddleHub 1.5.0版本增加文本Embedding服务[Bert Service](./docs/tutorial/bert_service.md), 轻松获取文本embedding**
-
-一键服务化启动方式有两种：
-
-* 命令行方式：
-
-```shell
-$ hub serving start --modules [Module1==Version1, Module2==Version2, ...]
-```
-
-其中选项参数`--modules/-m`表示待部署模型。
-
-* 配置文件方式：
-
-```shell
-$ hub serving start --config config.json
-```
-
-config.json文件包含待部署模型信息等，
-
-关于模型服务化使用说明参见[PaddleHub模型服务化服务化部署](./docs/tutorial/serving.md)。
 
 ### 自动超参优化
 
@@ -192,7 +179,7 @@ $ hub uninstall ernie
 ## 用户交流群
 
 * 飞桨PaddlePaddle 交流群：796771754（QQ群）
-* 飞桨 ERNIE交流群：760439550（QQ群）
+* 飞桨ERNIE交流群：760439550（QQ群）
 
 
 ## 更新历史
