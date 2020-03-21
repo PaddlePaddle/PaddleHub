@@ -9,7 +9,7 @@
 PaddleHub是飞桨生态的预训练模型应用工具，开发者可以便捷地使用高质量的预训练模型结合Fine-tune API快速完成模型迁移到部署的全流程工作。PaddleHub提供的预训练模型涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型。更多详情可查看官网：https://www.paddlepaddle.org.cn/hub **目前最新版本为1.6.0**。
 
 
-PaddleHub以预训练模型为核心具备以下特点：  
+PaddleHub以预训练模型应用为核心具备以下特点：  
 
 * **[模型即软件](#模型即软件)**，通过Python API或命令行实现模型调用，可快速体验或集成飞桨特色预训练模型。
 
@@ -43,10 +43,16 @@ PaddleHub以预训练模型为核心具备以下特点：
 ### 环境依赖
 
 * Python>=3.6 
-* PaddlePaddle>=1.6.1
+* PaddlePaddle>=1.6.1 
 * 操作系统: Windows/Mac/Linux
 
-除上述依赖外，预训练模型和数据集的下载需要网络连接，请确保机器可以正常访问网络。若本地已存在相关的数据集和预训练模型，则可以离线运行PaddleHub。
+### 安装命令
+
+```shell
+pip install paddlehub
+```
+
+除上述依赖外，预训练模型和数据集的下载需要网络连接，请确保机器可以**正常访问网络**。若本地已存在相关预训练模型目录，则可以离线使用PaddleHub。
 
 ## 特性
 
@@ -101,11 +107,11 @@ PaddleHub还提供图像分类、语义模型、视频分类、图像生成、�
 
 ### 易用的迁移学习
 
-通过PaddleHub的Fine-tune API，只需要少量代码即可完成深度学习模型在自然语言处理和计算机视觉场景下的迁移学习。
+通过Fine-tune API，只需要少量代码即可完成深度学习模型在自然语言处理和计算机视觉场景下的迁移学习。
 
 * 示例合集
 
-PaddleHub提供了使用Fine-tune API和预训练模型完成[文本分类](./demo/text_classification)、[序列标注](./demo/sequence_labeling)、[多标签分类](./demo/multi_label_classification)、[图像分类](./demo/image_classification)、[检索式问答任务](./demo/qa_classification)、[回归任务](./demo/regression)、[句子语义相似度计算](./demo/sentence_similarity)、[阅读理解任务](./demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](./demo)。
+PaddleHub提供了使用Fine-tune API和预训练模型完成[文本分类](./demo/text_classification)、[序列标注](./demo/sequence_labeling)、[多标签分类](./demo/multi_label_classification)、[图像分类](./demo/image_classification)、[检索式问答任务](./demo/qa_classification)、[回归任务](./demo/regression)、[句子语义相似度计算](./demo/sentence_similarity)、[阅读理解任务](./demo/reading_comprehension)等迁移任务的示例，更多教程请参见[demo](./demo)。
 
 * AI Studio教程
 
