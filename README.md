@@ -102,14 +102,14 @@ $ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image
 ```
 ![人脸识别结果](docs/imgs/face_detection_result.jpeg)
 
-* 使用[图像分割](https://www.paddlepaddle.org.cn/hub?filter=en_category&value=ImageSegmentation)模型ace2p对图片进行语义分割
+* 使用[图像分割](https://www.paddlepaddle.org.cn/hubdetail?name=ace2p&en_category=ImageSegmentation)模型ACE2P对进行人体部件分割
 ```shell
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 $ hub run ace2p --input_path test_image.jpg
 ```
-![图像分割结果](docs/imgs/img_seg_result.jpeg)
+![人体部件分割结果](docs/imgs/img_seg_result.jpeg)
 
-除了上述三类模型外，PaddleHub还发布了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多模型介绍，请前往 [https://www.paddlepaddle.org.cn/hub](https://www.paddlepaddle.org.cn/hub) 查看
+PaddleHub还提供图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型，更多模型介绍，请前往 [https://www.paddlepaddle.org.cn/hub](https://www.paddlepaddle.org.cn/hub) 查看
 
 ### 迁移学习
 
@@ -137,15 +137,15 @@ $ hub run ace2p --input_path test_image.jpg
 |LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215711)||
 |Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215962)||
 
-**NOTE:** [`飞桨PaddleHub`](https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927)是PaddleHub的官方账号。
+**NOTE:** [`飞桨PaddleHub`](https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927)是AI Studio的官方账号。
 
 关于PaddleHub快捷完成迁移学习，更多信息参考：
 
 [Fine-tune API](./docs/reference)
 
-[自定义数据集如何Fine-tune](./docs/tutorial/how_to_load_data.md)
+[如何对自定义数据集进行Fine-tuning](./docs/tutorial/how_to_load_data.md)
 
-[实现自定义迁移任务](./docs/tutorial/how_to_define_task.md)
+[如何自定义迁移任务](./docs/tutorial/how_to_define_task.md)
 
 [ULMFiT优化策略](./docs/tutorial/strategy_exp.md)
 
@@ -224,6 +224,6 @@ $ hub uninstall ernie
 
 ## 更新历史
 
-PaddleHub v1.5.0已发布！
+PaddleHub v1.6.0已发布！
 
 详情参考[更新历史](./RELEASE.md)
