@@ -8,8 +8,8 @@ class WinLock(object):
         pass
 
     def __init__(self):
-        self.LOCK_EX = ""
-        self.LOCK_UN = ""
+        self.LOCK_EX = "WIN_LOCK_EX"
+        self.LOCK_UN = "WIN_LOCK_UN"
 
 
 class Lock(object):
