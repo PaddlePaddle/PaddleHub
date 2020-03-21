@@ -52,8 +52,9 @@ PaddleHub以预训练模型为核心具备以下特点：
 
 ### 模型即软件
 
-PaddleHub采用 **模型即软件** 的理念，通过Python API或命令行实现快速预测，更方便地使用PaddlePaddle预训练模型。
-安装PaddleHub成功后，执行命令[hub run](./docs/tutorial/cmdintro.md)，可以快速体验PaddleHub无需代码、一键预测的命令行功能，如下三个示例：
+通过**模型即软件**的开发理念，所有的PaddleHub的预训练模型与Python软件包类似，具备版本的概念，通过`hub install/uninstall` 可以便捷完成模型的升级和卸载。还可以通过Python的API或命令行实现快速预测的软件集成，更方便地应用和集成深度学习模型。
+
+安装PaddleHub后，执行命令[hub run](./docs/tutorial/cmdintro.md)，即可快速体验无需代码、一键预测的功能：
 
 * 使用[目标检测](http://www.paddlepaddle.org.cn/hub?filter=category&value=ObjectDetection)模型pyramidbox_lite_mobile_mask对图片进行口罩检测
 ```shell
@@ -82,11 +83,13 @@ $ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image
 ![人脸识别结果](docs/imgs/face_detection_result.jpeg)
 
 * 使用[图像分割](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ImageSegmentation)模型对进行人像扣图和人体部件识别
-``、`shell
+
+```shell
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 $ hub run ace2p --input_path test_image.jpg
 $ hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg
 ```
+
 ![人体部件分割结果](docs/imgs/img_seg_result.jpeg)
 
 PaddleHub还提供图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型，更多模型介绍，请前往 [https://www.paddlepaddle.org.cn/hub](https://www.paddlepaddle.org.cn/hub) 查看
@@ -97,11 +100,11 @@ PaddleHub还提供图像分类、语义模型、视频分类、图像生成、�
 
 * 示例合集
 
-  PaddleHub提供了使用Fine-tune API和预训练模型完成[文本分类](./demo/text_classification)、[序列标注](./demo/sequence_labeling)、[多标签分类](./demo/multi_label_classification)、[图像分类](./demo/image_classification)、[检索式问答任务](./demo/qa_classification)、[回归任务](./demo/regression)、[句子语义相似度计算](./demo/sentence_similarity)、[阅读理解任务](./demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](./demo)。
+PaddleHub提供了使用Fine-tune API和预训练模型完成[文本分类](./demo/text_classification)、[序列标注](./demo/sequence_labeling)、[多标签分类](./demo/multi_label_classification)、[图像分类](./demo/image_classification)、[检索式问答任务](./demo/qa_classification)、[回归任务](./demo/regression)、[句子语义相似度计算](./demo/sentence_similarity)、[阅读理解任务](./demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](./demo)。
 
 * AI Studio教程
 
-  PaddleHub在AI Studio上提供了IPython Notebook形式的demo。用户可以直接在平台上在线体验，链接如下：
+PaddleHub在AI Studio上提供了IPython Notebook形式的demo。用户可以直接在平台上在线体验，链接如下：
 
 |预训练模型|任务类型|数据集|AIStudio链接|备注|
 |-|-|-|-|-|
