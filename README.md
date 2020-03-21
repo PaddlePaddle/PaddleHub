@@ -47,22 +47,6 @@ PaddleHub以预训练模型为核心具备以下特点：
 
 除上述依赖外，预训练模型和数据集的下载需要网络连接，请确保机器可以正常访问网络。若本地已存在相关的数据集和预训练模型，则可以离线运行PaddleHub。
 
-**NOTE:**
-1. 若是出现离线运行PaddleHub错误，请更新PaddleHub 1.1.1版本之上。
-pip安装方式如下：
-
-```shell
-$ pip install paddlehub
-```
-2. 使用PaddleHub下载数据集、预训练模型等，要求机器可以访问外网。可以使用`server_check()`可以检查本地与远端PaddleHub-Server的连接状态，使用方法如下：
-
-```python
-import paddlehub
-paddlehub.server_check()
-# 如果可以连接远端PaddleHub-Server，则显示Request Hub-Server successfully。
-# 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully。
-```
-
 ## 特性
 
 ### 模型即软件
@@ -96,10 +80,11 @@ $ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image
 ```
 ![人脸识别结果](docs/imgs/face_detection_result.jpeg)
 
-* 使用[图像分割](https://www.paddlepaddle.org.cn/hubdetail?name=ace2p&en_category=ImageSegmentation)模型ACE2P对进行人体部件分割
-```shell
+* 使用[图像分割](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ImageSegmentation)模型对进行人像扣图和人体部件识别
+``、`shell
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 $ hub run ace2p --input_path test_image.jpg
+$ hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg
 ```
 ![人体部件分割结果](docs/imgs/img_seg_result.jpeg)
 
@@ -113,9 +98,9 @@ PaddleHub还提供图像分类、语义模型、视频分类、图像生成、�
 
   PaddleHub提供了使用Fine-tune API和预训练模型完成[文本分类](./demo/text_classification)、[序列标注](./demo/sequence_labeling)、[多标签分类](./demo/multi_label_classification)、[图像分类](./demo/image_classification)、[检索式问答任务](./demo/qa_classification)、[回归任务](./demo/regression)、[句子语义相似度计算](./demo/sentence_similarity)、[阅读理解任务](./demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](./demo)。
 
-* 场景化使用
+* AI Studio教程
 
-  PaddleHub在AI Studio上提供了IPython NoteBook形式的demo。用户可以直接在平台上在线体验，链接如下：
+  PaddleHub在AI Studio上提供了IPython Notebook形式的demo。用户可以直接在平台上在线体验，链接如下：
 
 |预训练模型|任务类型|数据集|AIStudio链接|备注|
 |-|-|-|-|-|
@@ -133,7 +118,7 @@ PaddleHub还提供图像分类、语义模型、视频分类、图像生成、�
 
 **NOTE:** [`飞桨PaddleHub`](https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927)是AI Studio的官方账号。
 
-关于PaddleHub快捷完成迁移学习，更多信息参考：
+更多Fine-tune API的使用教程可参考：
 
 [Fine-tune API](./docs/reference)
 
@@ -191,22 +176,18 @@ paddlehub.server_check()
 # 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully。
 ```
 
-**Q:** 利用PaddleHub ernie/bert进行Fine-tune时，运行出错并提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息。
+**Q:** 利用PaddleHub ERNIE/BERT进行Fine-tune时，运行出错并提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息。
 
-**A:** 因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。可以将PaddlePaddle和PaddleHub升级至最新版本，同时将ernie卸载。
+**A:** 预训练模型版本与PaddlePaddle版本不匹配。可尝试将PaddlePaddle和PaddleHub升级至最新版本，并将原ERNIE模型卸载。
 ```shell
 $ pip install --upgrade paddlehub
 $ hub uninstall ernie
 ```
 
-
-**NOTE**： PaddleHub 1.1.1版本已支持离线运行Module
-
-
-**更多问题**
+**FAQ**
 
 当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-FAQ)查找解决方案。
-如果在FAQ中没有找到解决方案，欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交给我们，我们会第一时间进行跟进。
+如果在FAQ中没有找到解决方案，欢迎您将问题以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交给我们，我们会第一时间进行跟进。
 
 ## 用户交流群
 
