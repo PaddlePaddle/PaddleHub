@@ -15,7 +15,7 @@ PaddleHub以预训练模型应用为核心具备以下特点：
 
 * **[易用的迁移学习](#迁移学习)**，通过Fine-tune API，内置多种优化策略，只需少量代码即可完成预训练模型的Fine-tuning。
 
-* **[一键模型转服务](#服务化部署paddlehub-serving)**，简单一行命令即可搭建属于自己的深度学习模型API服务。
+* **[一键模型转服务](#服务化部署paddlehub-serving)**，简单一行命令即可搭建属于自己的深度学习模型API服务完成部署。
 
 * **[自动超参优化](#超参优化autodl-finetuner)**，内置AutoDL Finetuner能力，一键启动自动化超参搜索。
 
