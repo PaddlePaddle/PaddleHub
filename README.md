@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
 
-PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub开发者可以使用高质量的预训练模型结合Fine-tune API快速完成迁移学习到应用部署的全流程工作。其提供了飞桨生态下的高质量预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型。更多模型详情请查看官网：https://www.paddlepaddle.org.cn/hub
+PaddleHub是飞桨预训练模型应用工具，通过PaddleHub开发者可以使用高质量的预训练模型结合Fine-tune API快速完成迁移学习到应用部署的全流程工作。其提供了飞桨生态下的高质量预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型。更多模型详情请查看官网：https://www.paddlepaddle.org.cn/hub
 
 
 基于预训练模型，PaddleHub支持以下功能：  
@@ -73,7 +73,7 @@ paddlehub.server_check()
 
 ### 模型即软件
 
-PaddleHub提出 **模型即软件** 的理念，通过Python API或命令行实现快速预测，更方便地使用PaddlePaddle模型库。
+PaddleHub采用 **模型即软件** 的理念，通过Python API或命令行实现快速预测，更方便地使用PaddlePaddle预训练模型。
 安装PaddleHub成功后，执行命令[hub run](./docs/tutorial/cmdintro.md)，可以快速体验PaddleHub无需代码、一键预测的命令行功能，如下三个示例：
 
 * 使用[目标检测](http://www.paddlepaddle.org.cn/hub?filter=category&value=ObjectDetection)模型pyramidbox_lite_mobile_mask对图片进行口罩检测
@@ -109,15 +109,15 @@ $ hub run ace2p --input_path test_image.jpg
 ```
 ![图像分割结果](docs/imgs/img_seg_result.jpeg)
 
-除了上述三类模型外，PaddleHub还发布了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
+除了上述三类模型外，PaddleHub还发布了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多模型介绍，请前往 [https://www.paddlepaddle.org.cn/hub](https://www.paddlepaddle.org.cn/hub) 查看
 
 ### 迁移学习
 
-迁移学习(Transfer Learning)通俗来讲，就是运用已有的知识来学习新的知识，核心是找到已有知识和新知识之间的相似性。PaddleHub提供了Fine-tune API，只需要少量代码即可完成深度学习模型在自然语言处理和计算机视觉场景下的迁移学习。
+通过PaddleHub的Fine-tune API，只需要少量代码即可完成深度学习模型在自然语言处理和计算机视觉场景下的迁移学习。
 
 * 示例合集
 
-  PaddleHub提供了使用Finetune-API和预训练模型完成[文本分类](./demo/text_classification)、[序列标注](./demo/sequence_labeling)、[多标签分类](./demo/multi_label_classification)、[图像分类](./demo/image_classification)、[检索式问答任务](./demo/qa_classification)、[回归任务](./demo/regression)、[句子语义相似度计算](./demo/sentence_similarity)、[阅读理解任务](./demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](./demo)。
+  PaddleHub提供了使用Fine-tune API和预训练模型完成[文本分类](./demo/text_classification)、[序列标注](./demo/sequence_labeling)、[多标签分类](./demo/multi_label_classification)、[图像分类](./demo/image_classification)、[检索式问答任务](./demo/qa_classification)、[回归任务](./demo/regression)、[句子语义相似度计算](./demo/sentence_similarity)、[阅读理解任务](./demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](./demo)。
 
 * 场景化使用
 
@@ -149,13 +149,13 @@ $ hub run ace2p --input_path test_image.jpg
 
 [ULMFiT优化策略](./docs/tutorial/strategy_exp.md)
 
-### 服务化部署PaddleHub Serving
+### PaddleHub一键模型服务化部署
 
-PaddleHub提供便捷的服务化部署能力，简单一行命令即可实现模型部署上线以对外提供服务。
+PaddleHub提供便捷的模型转服务的能力，只需简单一行命令即可实现预训练模型的HTTP服务部署。
 
 **PaddleHub 1.5.0版本增加文本Embedding服务[Bert Service](./docs/tutorial/bert_service.md), 轻松获取文本embedding**
 
-PaddleHub Serving启动方式有两种：
+一键服务化启动方式有两种：
 
 * 命令行方式：
 
@@ -173,14 +173,13 @@ $ hub serving start --config config.json
 
 config.json文件包含待部署模型信息等，
 
-关于PaddleHub Serving详细信息参见[PaddleHub Serving一键服务化部署](./docs/tutorial/serving.md)。
+关于模型服务化使用说明参见[PaddleHub模型服务化服务化部署](./docs/tutorial/serving.md)。
 
 ### 超参优化AutoDL Finetuner
 
 深度学习模型往往包含许多的超参数，而这些超参数的取值对模型性能起着至关重要的作用。因为模型参数空间大，目前超参调整都是通过手动，依赖人工经验或者不断尝试，且不同模型、样本数据和场景下不尽相同，所以需要大量尝试，时间成本和资源成本非常浪费。PaddleHub AutoDL Finetuner可以实现自动调整超参数，使得模型性能达到最优水平。它通过多种调优的算法来搜索最优超参。
 
 AutoDL Finetuner详细信息参见[PaddleHub超参优化](./docs/tutorial/autofinetune.md)。
-
 
 ## FAQ
 
