@@ -149,7 +149,7 @@ $ hub serving start -c serving_config.json
 
 </p>  
 
-这样我们就在8866端口部署了lac的在线分词服务。
+这样我们就在8866端口成功部署了lac的在线分词服务。
 *此处warning为Flask提示，不影响使用*
 
 ### Step2：访问lac预测接口
