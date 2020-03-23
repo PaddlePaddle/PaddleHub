@@ -3,7 +3,7 @@
 * NLP Module全面升级，提升应用性和灵活性
   * lac、senta系列(bow、cnn、bilstm、gru、lstm)、simnet_bow、porn_detection系列(cnn、gru、lstm)升级高性能预测，性能提升高达50%
   * ERNIE、BERT、RoBERTa等Transformer类语义模型新增获取预训练embedding接口get_embedding，方便接入下游任务，提升应用性
-  * 新增RoBERTa通过模型结构压缩得到的3层Transformer模型[roberta_wwm_ext_chinese_L_3_H_768_A_12](https://www.paddlepaddle.org.cn/hubdetail?name=roberta_wwm_ext_chinese_L-3_H-768_A-12&en_category=SemanticModel)、[roberta_wwm_ext_chinese_L_3_H_1024_A_16](https://www.paddlepaddle.org.cn/hubdetail?name=roberta_wwm_ext_chinese_L-3_H-1024_A-16&en_category=SemanticModel)
+  * 新增RoBERTa通过模型结构压缩得到的3层Transformer模型[rbt3](https://www.paddlepaddle.org.cn/hubdetail?name=rbt3&en_category=SemanticModel)、[rbtl3](https://www.paddlepaddle.org.cn/hubdetail?name=rbtl3&en_category=SemanticModel)
 
 * Task predict接口增加高性能预测模式accelerate_mode，性能提升高达90%
 
