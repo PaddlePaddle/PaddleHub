@@ -105,6 +105,10 @@ $ hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg
 <img src="./docs/imgs/humanseg_test_res.png" width="35%" />  
 </p>  
 
+<p align='center'>
+ &#8194;&#8194;&#8194&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;ace2p分割结果展示&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;
+ humanseg分割结果展示&#8194;&#8194;&#8194;
+</p>
 
 PaddleHub还提供图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型，更多模型介绍，请前往 [https://www.paddlepaddle.org.cn/hub](https://www.paddlepaddle.org.cn/hub) 查看
 
