@@ -99,9 +99,12 @@ $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 $ hub run ace2p --input_path test_image.jpg
 $ hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg
 ```
-<p align="center">
- <img src="./docs/imgs/img_seg_result.jpeg" align="middle"  
-</p>
+
+<p align="center">  
+<img src="./docs/imgs/img_seg_result.jpeg" width="35%" />  
+<img src="./docs/imgs/humanseg_test_res.png" width="35%" />  
+</p>  
+
 
 PaddleHub还提供图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型，更多模型介绍，请前往 [https://www.paddlepaddle.org.cn/hub](https://www.paddlepaddle.org.cn/hub) 查看
 
