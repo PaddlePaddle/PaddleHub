@@ -11,7 +11,7 @@
 
     命令行工具<cmdintro>
     自定义数据<how_to_load_data>
-    Finetune模型转化为PaddleHub Module<finetuned_model_to_module.md>
+    Fine-tune模型转化为PaddleHub Module<finetuned_model_to_module.md>
     自定义任务<how_to_define_task>
     服务化部署<serving>
     文本Embedding服务<bert_service>
