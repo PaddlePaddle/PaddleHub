@@ -4,7 +4,7 @@
 
 本示例以模型ERNIE Tiny在数据集ChnSentiCorp上完成情感分类Fine-tune任务后保存的模型转化为一个PaddleHub Module。
 
-我们准备编写一个用于做情感分析的PaddleHub Module，Module的基本信息如下：
+我们准备编写一个PaddleHub Module，Module的基本信息如下：
 ```yaml
 name: ernie_tiny_finetuned
 version: 1.0.0
@@ -71,10 +71,10 @@ module.py中需要有一个继承了hub.Module的类存在，该类负责实现�
     name="ernie_tiny_finetuned",
     version="1.0.0",
     summary="ERNIE tiny which was fine-tuned on the chnsenticorp dataset.",
-    author="paddle-dev",
+    author="anonymous",
     author_email="",
     type="nlp/semantic_model")
-class ERNIE_Tiny_Finetuned(hub.Module):
+class ERNIETinyFinetuned(hub.Module):
     ...
 ```
 #### step 2_3. 执行必要的初始化
@@ -252,20 +252,20 @@ for batch_result in results:
 ```
 
 ### 调用方法3
-将finetuned_model_to_module作为路径加到环境变量中，直接加载ERNIE_Tiny_Finetuned对象
+将finetuned_model_to_module作为路径加到环境变量中，直接加载ERNIETinyFinetuned对象
 ```shell
 export PYTHONPATH=finetuned_model_to_module:$PYTHONPATH
 ```
 
 ```python
-from finetuned_model_to_module.module import ERNIE_Tiny_Finetuned
+from finetuned_model_to_module.module import ERNIETinyFinetuned
 import numpy as np
 
 # Data to be prdicted
 data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
         ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]]
 
-run_states = ERNIE_Tiny_Finetuned.predict(data=data)
+run_states = ERNIETinyFinetuned.predict(data=data)
 index = 0
 results = [run_state.run_results for run_state in run_states]
 for batch_result in results:

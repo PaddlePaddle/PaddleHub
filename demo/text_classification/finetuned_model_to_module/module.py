@@ -29,10 +29,10 @@ import paddlehub as hub
     name="ernie_tiny_finetuned",
     version="1.0.0",
     summary="ERNIE tiny which was fine-tuned on the chnsenticorp dataset.",
-    author="paddle-dev",
+    author="anonymous",
     author_email="",
     type="nlp/semantic_model")
-class ERNIE_Tiny_Finetuned(hub.Module):
+class ERNIETinyFinetuned(hub.Module):
     def _initialize(self,
                     ckpt_dir="ckpt_chnsenticorp",
                     num_class=2,
@@ -106,7 +106,7 @@ class ERNIE_Tiny_Finetuned(hub.Module):
 
 
 if __name__ == "__main__":
-    ernie_tiny = ERNIE_Tiny_Finetuned(
+    ernie_tiny = ERNIETinyFinetuned(
         ckpt_dir="../ckpt_chnsenticorp", num_class=2)
 
     # Data to be prdicted

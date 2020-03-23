@@ -2,7 +2,7 @@
 
 ## 模型基本信息
 
-我们准备编写一个用于做情感分析的PaddleHub Module，Module的基本信息如下：
+我们准备编写一个PaddleHub Module，Module的基本信息如下：
 ```yaml
 name: senta_test
 version: 1.0.0
