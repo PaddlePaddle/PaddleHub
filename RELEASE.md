@@ -1,3 +1,18 @@
+# `v1.6.0`
+
+* NLP Module全面升级，提升应用性和灵活性
+  * lac、senta系列(bow、cnn、bilstm、gru、lstm)、simnet_bow、porn_detection系列(cnn、gru、lstm)升级高性能预测，性能提升高达50%
+  * ERNIE、BERT、RoBERTa等Transformer类语义模型新增获取预训练embedding接口get_embedding，方便接入下游任务，提升应用性
+  * 新增RoBERTa通过模型结构压缩得到的3层Transformer模型[rbt3](https://www.paddlepaddle.org.cn/hubdetail?name=rbt3&en_category=SemanticModel)、[rbtl3](https://www.paddlepaddle.org.cn/hubdetail?name=rbtl3&en_category=SemanticModel)
+
+* Task predict接口增加高性能预测模式accelerate_mode，性能提升高达90%
+
+* PaddleHub Module创建流程开放，支持Fine-tune模型转化，全面提升应用性和灵活性
+  * [预训练模型转化为PaddleHub Module教程](./docs/contribution/contri_pretrained_model.md)
+  * [Fine-tune模型转化为PaddleHub Module教程](./docs/tutorial/finetuned_model_to_module.md)
+
+* [PaddleHub Serving](/docs/tutorial/serving.md)优化启动方式，支持更加灵活的参数配置
+
 # `v1.5.4`
 
 * 修复Fine-tune中断，checkpoint文件恢复训练失败的问题
