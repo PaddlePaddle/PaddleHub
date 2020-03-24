@@ -46,7 +46,7 @@
   该样例文件夹下展示了服务化部署Hub Serving如何使用，将PaddleHub支持的可预测Module如何服务化部署。
 
 * [预训练模型转化成PaddleHub Module](./senta_module_sample)
-  该样例展示了如何将一个预训练模型转化成PaddleHub Module形式，使得可以通过`paddlehub.Module(name="module_name")`实现一键加载。
+  该样例展示了如何将一个预训练模型转化成PaddleHub Module形式，使得可以通过`hub.Module(name="module_name")`实现一键加载。
   请确认转化时，使用的PaddleHub为1.6.0以上版本。
 
 **NOTE:**
