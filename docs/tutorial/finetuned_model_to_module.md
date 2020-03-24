@@ -2,9 +2,7 @@
 
 ## 模型基本信息
 
-本示例以模型ERNIE Tiny在数据集ChnSentiCorp上完成情感分类Fine-tune任务后保存的模型转化为一个PaddleHub Module。
-
-我们准备编写一个PaddleHub Module，Module的基本信息如下：
+本示例以模型ERNIE Tiny在数据集ChnSentiCorp上完成情感分类Fine-tune任务后保存的模型转化为一个PaddleHub Module，Module的基本信息如下：
 ```yaml
 name: ernie_tiny_finetuned
 version: 1.0.0
