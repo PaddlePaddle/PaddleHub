@@ -22,6 +22,7 @@
 
 * [文本分类](./text_classification)
   该样例展示了PaddleHub如何将ERNIE/BERT等Transformer类模型作为预训练模型在GLUE、ChnSentiCorp等数据集上完成文本分类的FineTune和预测。
+  **同时，该样例还展示了如何将一个Fine-tune保存的模型转化成PaddleHub Module。** 请确认转化时，使用的PaddleHub为1.6.0以上版本。
 
 * [多标签分类](./multi_label_classification)
   该样例展示了PaddleHub如何将BERT作为预训练模型在Toxic数据集上完成多标签分类的FineTune和预测。
@@ -43,6 +44,10 @@
 
 * [服务化部署Hub Serving使用](./serving)
   该样例文件夹下展示了服务化部署Hub Serving如何使用，将PaddleHub支持的可预测Module如何服务化部署。
+
+* [预训练模型转化成PaddleHub Module](./senta_module_sample)
+  该样例展示了如何将一个预训练模型转化成PaddleHub Module形式，使得可以通过`hub.Module(name="module_name")`实现一键加载。
+  请确认转化时，使用的PaddleHub为1.6.0以上版本。
 
 **NOTE:**
 以上任务示例均是利用PaddleHub提供的数据集，若您想在自定义数据集上完成相应任务，请查看[PaddleHub适配自定义数据完成Fine-tune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)。
