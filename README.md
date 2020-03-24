@@ -43,7 +43,7 @@ PaddleHub以预训练模型应用为核心具备以下特点：
 ### 环境依赖
 
 * Python >= 3.6
-* PaddlePaddle >= 1.6.1
+* PaddlePaddle >= 1.7.0
 * 操作系统: Windows/Mac/Linux
 
 ### 安装命令
