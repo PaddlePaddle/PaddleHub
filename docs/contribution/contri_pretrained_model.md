@@ -158,9 +158,9 @@ def sentiment_classify(self, texts):
 
 ### 完整代码
 
-* [module.py](./senta_test/module.py)
+* [module.py](../../demo/senta_module_sample/senta_test/module.py)
 
-* [processor.py](./senta_test/module.py)
+* [processor.py](../../demo/senta_module_sample/senta_test/module.py)
 
 <br/>
 
