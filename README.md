@@ -3,7 +3,7 @@
 </p>
 
 [![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=release/v1.6)](https://travis-ci.org/PaddlePaddle/PaddleHub)
-[![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202-red.svg)](LICENSE)
 [![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
 ![python version](https://img.shields.io/badge/python-3.6+-orange.svg)
 ![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
