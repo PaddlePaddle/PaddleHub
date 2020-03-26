@@ -96,7 +96,7 @@ $ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image
  <img src="./docs/imgs/face_detection_result.jpeg" align="middle"  
 </p>
 
-* 使用[图像分割](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ImageSegmentation)模型对进行人像扣图和人体部件识别
+* 使用[图像分割](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ImageSegmentation)模型进行人像扣图和人体部件识别
 
 ```shell
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
