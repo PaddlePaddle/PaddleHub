@@ -143,18 +143,18 @@ class ImageClassificationReader(object):
 
 class ObjectDetectionReader(ImageClassificationReader):
     def __init__(self,
-                 image_width,
-                 image_height,
                  dataset=None,
                  model_type='ssd',
                  channel_order="RGB",
-                 images_mean=None,
-                 images_std=None,
-                 data_augmentation=False):
+                 worker_num=2,
+                 use_process=False,
+                 ):
         super(ObjectDetectionReader,
-              self).__init__(image_width, image_height, dataset, channel_order,
-                             images_mean, images_std, data_augmentation)
+              self).__init__(1, 1, dataset, channel_order,
+                             None, None, None)
         self.model_type = model_type
+        self.worker_num = worker_num
+        self.use_process = use_process
 
     def data_generator(self,
                        batch_size,
@@ -187,9 +187,9 @@ class ObjectDetectionReader(ImageClassificationReader):
         data_cf = {}
         transform_config = {
             'WORKER_CONF': {
-                'bufsize': 10,
-                'worker_num': 1,
-                'use_process': False,
+                'bufsize': 20,
+                'worker_num': self.worker_num,
+                'use_process': self.use_process,
                 'memsize': '3G'
             },
             'BATCH_SIZE': batch_size,

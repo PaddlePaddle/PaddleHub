@@ -25,15 +25,16 @@ from paddlehub.dataset.base_cv_dataset import ObjectDetectionDataset
 
 class Coco10(ObjectDetectionDataset):
     def __init__(self, model_type='ssd'):
-        super(Coco10, self).__init__(model_type)
         dataset_path = os.path.join(hub.common.dir.DATA_HOME, "coco_10")
         # self.base_path = self._download_dataset(
         #     dataset_path=dataset_path,
         #     url="https://bj.bcebos.com/paddlehub-dataset/dog-cat.tar.gz")
-        self.base_path = dataset_path
-        self.train_image_dir = 'val'
-        self.train_list_file = 'annotations/val.json'
-        self.validate_image_dir = 'val'
-        self.validate_list_file = 'annotations/val.json'
-        self.test_image_dir = 'val'
-        self.test_list_file = 'annotations/val.json'
+        base_path = dataset_path
+        train_image_dir = 'val'
+        train_list_file = 'annotations/val.json'
+        validate_image_dir = 'val'
+        validate_list_file = 'annotations/val.json'
+        test_image_dir = 'val'
+        test_list_file = 'annotations/val.json'
+        super(Coco10, self).__init__(base_path, train_image_dir, train_list_file, validate_image_dir, validate_list_file,
+                                     test_image_dir, test_list_file, model_type)

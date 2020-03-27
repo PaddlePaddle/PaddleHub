@@ -119,11 +119,16 @@ class ImageClassificationDataset(object):
 
 
 class ObjectDetectionDataset(ImageClassificationDataset):
-    def __init__(self, model_type='ssd'):
+    def __init__(self, base_path, train_image_dir, train_list_file, validate_image_dir, validate_list_file,
+                 test_image_dir, test_list_file, model_type='ssd'):
         super(ObjectDetectionDataset, self).__init__()
-        self.train_image_dir = None
-        self.validate_image_dir = None
-        self.test_image_dir = None
+        self.base_path = base_path
+        self.train_image_dir = train_image_dir
+        self.train_list_file = train_list_file
+        self.validate_image_dir = validate_image_dir
+        self.validate_list_file = validate_list_file
+        self.test_image_dir = test_image_dir
+        self.test_list_file = test_list_file
         self.model_type = model_type
         self._dsc = None
         self.cid2cname = None

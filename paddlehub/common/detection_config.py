@@ -18,19 +18,19 @@ conf = {
     "ssd": {
         "with_background": True,
         "is_bbox_normalized": True,
-        "norm_type": "bn",
+        # "norm_type": "bn",
     },
     "yolo": {
         "with_background": False,
         "is_bbox_normalized": False,
-        "norm_type": "sync_bn",
-        "mixup_epoch": 250,
+        # "norm_type": "sync_bn",
+        "mixup_epoch": 10,
         "num_max_boxes": 50,
     },
     "rcnn": {
         "with_background": True,
         "is_bbox_normalized": False,
-        "norm_type": "affine_channel",
+        # "norm_type": "affine_channel",
     }
 }
 
@@ -54,7 +54,7 @@ ssd_train_ops = [
                        [1, 50, 0.3, 1.0, 0.5, 2.0, 0.0, 1.0]],
         satisfy_all=False,
         avoid_no_bbox=False),
-    dict(op='ResizeImage', target_size=300, use_cv2=False, interp=1),
+    dict(op='ResizeImage', target_size=512, use_cv2=False, interp=1),
     dict(op='RandomFlipImage', is_normalized=True),
     dict(op='Permute'),
     dict(
@@ -69,7 +69,7 @@ ssd_eval_fields = ['image', 'im_shape', 'im_id', 'gt_box', 'gt_label', 'is_diffi
 ssd_eval_ops = [
     dict(op='DecodeImage', to_rgb=True, with_mixup=False),
     dict(op='NormalizeBox'),
-    dict(op='ResizeImage', target_size=300, use_cv2=False, interp=1),
+    dict(op='ResizeImage', target_size=512, use_cv2=False, interp=1),
     dict(op='Permute'),
     dict(
         op='NormalizeImage',
@@ -81,7 +81,7 @@ ssd_eval_ops = [
 
 ssd_predict_ops = [
     dict(op='DecodeImage', to_rgb=True, with_mixup=False),
-    dict(op='ResizeImage', target_size=300, use_cv2=False, interp=1),
+    dict(op='ResizeImage', target_size=512, use_cv2=False, interp=1),
     dict(op='Permute'),
     dict(
         op='NormalizeImage',
