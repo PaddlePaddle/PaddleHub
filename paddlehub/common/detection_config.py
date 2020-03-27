@@ -200,7 +200,6 @@ feed_config = {
             "COARSEST_STRIDE": 32,
         },
         "dev": {
-            # Todo: reduce fields
             "fields": ['image', 'im_info', 'im_id', 'im_shape', 'gt_box',
                        'gt_label', 'is_difficult'],
             "OPS": rcnn_eval_ops,
@@ -220,7 +219,6 @@ feed_config = {
         "train": {
             "fields": ['image', 'gt_box', 'gt_label', 'gt_score'],
             "OPS": yolo_train_ops,
-            # Todo: handle mixup epoch and num_max_box
             "RANDOM_SHAPES": [320, 352, 384, 416, 448, 480, 512, 544, 576, 608]
         },
         "dev": {

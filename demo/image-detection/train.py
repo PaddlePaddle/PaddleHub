@@ -40,8 +40,7 @@ def finetune(args):
     val_dir = 'eval_data/images'
     val_list = 'eval_data/coco/instances_coco.json'
     ds = ObjectDetectionDataset(base_path, train_dir, train_list, val_dir, val_list, val_dir, val_list, model_type=model_type)
-    # Todo: handle ds.num_labels refresh instead of call ds.label_dict()
-    print(ds.label_dict())
+    # print(ds.label_dict())
     print("ds.num_labels", ds.num_labels)
 
     # define batch reader
@@ -55,7 +54,6 @@ def finetune(args):
     else:
         input_dict, output_dict, program = module.context(trainable=True)
         input_dict_pred = output_dict_pred = None
-    # import pdb; pdb.set_trace()
 
     feed_list, pred_feed_list = get_feed_list(module_name, input_dict, input_dict_pred)
     print("output_dict length:", len(output_dict))
@@ -86,9 +84,6 @@ def finetune(args):
         model_type=model_type,
         config=config)
     task.finetune_and_eval()
-    # self = task
-    # with self.phase_guard(phase="train"):
-    #     self.init_if_necessary()
 
 
 if __name__ == "__main__":

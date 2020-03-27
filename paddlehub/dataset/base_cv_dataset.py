@@ -132,17 +132,18 @@ class ObjectDetectionDataset(ImageClassificationDataset):
         self.model_type = model_type
         self._dsc = None
         self.cid2cname = None
-        # self.label_dict()  # refresh cid2cname and num_labels
+        self.label_dict()  # refresh cid2cname and num_labels
+        assert self.cid2cname is not None
+        assert self.num_labels > 0
 
     def label_dict(self):
         if self.cid2cname is not None:
             return self.cid2cname
-        # todo: handle this
+        # get label info from train data json
         _ = self.train_data()
         return self.cid2cname
 
     def _parse_data(self, data_path, image_dir, shuffle=False, phase=None):
-        # dataset_dir = '/home/ssd1/zhaopenghao/data/sku_detect/huihe6_data/huihe6_coco/'
         with_background = dconf.conf[self.model_type]['with_background']
         mixup_epoch = -1
         if phase == 'train':
@@ -166,7 +167,6 @@ class ObjectDetectionDataset(ImageClassificationDataset):
             cname2cid = data_source.cname2cid
             cid2cname = {v: k for k, v in cname2cid.items()}
             self.cid2cname = cid2cname
-            # xTodo: handle num labels for yolo
             if with_background:
                 self.num_labels = len(cid2cname) + 1
             else:

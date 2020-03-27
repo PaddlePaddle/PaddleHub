@@ -199,7 +199,7 @@ class DetectionTask(BasicTask):
         feature_list = self.feature
         image = self.base_feed_var_list[0]
 
-        # todo: modify according to input size
+        # fix input size according to its module
         mbox_locs, mbox_confs, box, box_var = fluid.layers.multi_box_head(
             inputs=feature_list,
             image=image,
@@ -295,7 +295,7 @@ class DetectionTask(BasicTask):
         else:
             head_feat = self.predict_feature[0]
 
-        # todo: ValueError: Variable cls_score_w has been created before.
+        # Rename following layers for: ValueError: Variable cls_score_w has been created before.
         #  the previous shape is (2048, 81); the new shape is (100352, 81).
         #  They are not matched.
         cls_score = fluid.layers.fc(input=head_feat,
@@ -449,7 +449,7 @@ class DetectionTask(BasicTask):
                 stride=1,
                 padding=0,
                 act=None,
-                # Todo: conflict with module pretrain weights?
+                # Rename for: conflict with module pretrain weights
                 param_attr=ParamAttr(name="ft_yolo_output.{}.conv.weights".format(i)),
                 bias_attr=ParamAttr(
                     regularizer=L2Decay(0.),

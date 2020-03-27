@@ -10,6 +10,7 @@ from paddlehub.reader.cv_reader import ObjectDetectionReader
 from paddlehub.dataset.base_cv_dataset import ObjectDetectionDataset
 from paddlehub.contrib.ppdet.utils.coco_eval import bbox2out
 from paddlehub.common.detection_config import get_model_type, get_feed_list, get_mid_feature
+from paddlehub.common import detection_config as dconf
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
@@ -33,9 +34,6 @@ def predict(args):
     model_type = get_model_type(module_name)  # 'yolo'
     # define data
     ds = hub.dataset.Coco10(model_type)
-    # Todo: handle ds.num_labels refresh
-    # ds.num_labels = 81
-    print(ds.label_dict())
     print("ds.num_labels", ds.num_labels)
 
     data_reader = ObjectDetectionReader(1, 1, dataset=ds, model_type=model_type)
@@ -81,7 +79,7 @@ def predict(args):
             for k, v in zip(keys, outs)
         }
         print("im_id", res['im_id'])
-        is_bbox_normalized = False
+        is_bbox_normalized = dconf.conf[model_type]['is_bbox_normalized']
         clsid2catid = {}
         for k in label_map:
             clsid2catid[k] = k
