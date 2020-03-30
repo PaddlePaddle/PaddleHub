@@ -2,7 +2,7 @@
 
 目前PaddleHub有以下任务示例：
 
-* [图像分类](./mask_detection)
+* [口罩检测](./mask_detection)
   提供了基于完整的口罩人脸检测及分类的模型搭建的完整的视频级别Demo，同时提供基于飞桨高性能预测库的C++和Python部署方案。
 
 * [图像分类](./image_classification)

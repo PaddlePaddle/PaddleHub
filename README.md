@@ -2,11 +2,13 @@
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"  
 </p>
 
-[![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=release/v1.3)](https://travis-ci.org/PaddlePaddle/PaddleHub)
-[![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
+[![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=release/v1.6)](https://travis-ci.org/PaddlePaddle/PaddleHub)
+[![License](https://img.shields.io/badge/license-Apache%202-red.svg)](LICENSE)
 [![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
+![python version](https://img.shields.io/badge/python-3.6+-orange.svg)
+![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
 
-PaddleHub是飞桨生态的预训练模型应用工具，开发者可以便捷地使用高质量的预训练模型结合Fine-tune API快速完成模型迁移到部署的全流程工作。PaddleHub提供的预训练模型涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型。更多详情可查看官网：https://www.paddlepaddle.org.cn/hub **目前最新版本为1.6.0**。
+PaddleHub是飞桨生态的预训练模型应用工具，开发者可以便捷地使用高质量的预训练模型结合Fine-tune API快速完成模型迁移到部署的全流程工作。PaddleHub提供的预训练模型涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型。更多详情可查看官网：https://www.paddlepaddle.org.cn/hub 
 
 
 PaddleHub以预训练模型应用为核心具备以下特点：  
@@ -47,6 +49,8 @@ PaddleHub以预训练模型应用为核心具备以下特点：
 * 操作系统: Windows/Mac/Linux
 
 ### 安装命令
+
+PaddlePaddle框架的安装请查阅[飞桨快速安装](https://www.paddlepaddle.org.cn/install/quick)
 
 ```shell
 pip install paddlehub
@@ -92,7 +96,7 @@ $ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image
  <img src="./docs/imgs/face_detection_result.jpeg" align="middle"  
 </p>
 
-* 使用[图像分割](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ImageSegmentation)模型对进行人像扣图和人体部件识别
+* 使用[图像分割](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ImageSegmentation)模型进行人像扣图和人体部件识别
 
 ```shell
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
