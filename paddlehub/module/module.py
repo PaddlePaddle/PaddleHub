@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -23,8 +23,6 @@ import sys
 import functools
 import inspect
 import importlib
-import tarfile
-import six
 import shutil
 
 import paddle
@@ -36,15 +34,10 @@ from paddlehub.common.dir import CACHE_HOME
 from paddlehub.common.lock import lock
 from paddlehub.common.logger import logger
 from paddlehub.common.hub_server import CacheUpdater
-from paddlehub.common import tmp_dir
-from paddlehub.common.downloader import progress
 from paddlehub.module import module_desc_pb2
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.checker import ModuleChecker
 from paddlehub.module.signature import Signature, create_signature
-from paddlehub.module.base_processor import BaseProcessor
-from paddlehub.io.parser import yaml_parser
-from paddlehub import version
 
 # PaddleHub module dir name
 ASSETS_DIRNAME = "assets"
@@ -142,18 +135,27 @@ class Module(object):
         if "_is_initialize" in self.__dict__ and self._is_initialize:
             return
 
-        mod = self.__class__.__module__ + "." + self.__class__.__name__
-        if mod in _module_runnable_func:
-            _run_func_name = _module_runnable_func[mod]
-            self._run_func = getattr(self, _run_func_name)
-        else:
-            self._run_func = None
-        self._serving_func_name = _module_serving_func.get(mod, None)
-        self._code_version = "v2"
+        _run_func_name = self._get_func_name(self.__class__,
+                                             _module_runnable_func)
+        self._run_func = getattr(self,
+                                 _run_func_name) if _run_func_name else None
+        self._serving_func_name = self._get_func_name(self.__class__,
+                                                      _module_serving_func)
         self._directory = directory
         self._initialize(**kwargs)
         self._is_initialize = True
         self._code_version = "v2"
+
+    def _get_func_name(self, current_cls, module_func_dict):
+        mod = current_cls.__module__ + "." + current_cls.__name__
+        if mod in module_func_dict:
+            _func_name = module_func_dict[mod]
+            return _func_name
+        elif current_cls.__bases__:
+            for base_class in current_cls.__bases__:
+                return self._get_func_name(base_class, module_func_dict)
+        else:
+            return None
 
     @classmethod
     def init_with_name(cls, name, version=None, **kwargs):
@@ -190,7 +192,10 @@ class Module(object):
         _module = importlib.import_module("{}.module".format(basename))
         for _item, _cls in inspect.getmembers(_module, inspect.isclass):
             _item = _module.__dict__[_item]
-            if issubclass(_item, Module):
+            _file = os.path.realpath(sys.modules[_item.__module__].__file__)
+            _module_path = os.path.realpath(
+                os.path.join(directory, "module.py"))
+            if issubclass(_item, Module) and _file.startswith(_module_path):
                 user_module = _item(directory=directory, **kwargs)
                 break
         sys.path.pop(0)

@@ -30,10 +30,12 @@ import paddlehub as hub
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.dir import MODULE_HOME
-from paddlehub.common.cml_utils import TablePrinter
+from paddlehub.common.cml_utils import paint_modules_info
 from paddlehub.common.logger import logger
 from paddlehub.common import tmp_dir
 from paddlehub.module import module_desc_pb2
+from paddlehub.version import hub_version as sys_hub_verion
+from paddle import __version__ as sys_paddle_version
 
 
 class LocalModuleManager(object):
@@ -55,9 +57,12 @@ class LocalModuleManager(object):
                     desc.ParseFromString(fp.read())
                 info['version'] = desc.attr.map.data["module_info"].map.data[
                     "version"].s
+                info['name'] = desc.attr.map.data["module_info"].map.data[
+                    "name"].s
                 return True, info
             else:
-                module_file = os.path.join(module_path, 'module.py')
+                module_file = os.path.realpath(
+                    os.path.join(module_path, 'module.py'))
                 if os.path.exists(module_file):
                     basename = os.path.split(module_path)[-1]
                     dirname = os.path.join(
@@ -68,11 +73,15 @@ class LocalModuleManager(object):
                     for _item, _cls in inspect.getmembers(
                             _module, inspect.isclass):
                         _item = _module.__dict__[_item]
-                        if issubclass(_item, hub.Module):
+                        _file = os.path.realpath(
+                            sys.modules[_item.__module__].__file__)
+                        if issubclass(
+                                _item,
+                                hub.Module) and _file.startswith(module_file):
                             version = _item._version
                             break
                     sys.path.pop(0)
-                    return True, {'version': version}
+                    return True, {'version': version, 'name': _item._name}
                 logger.warning(
                     "%s does not exist, the module will be reinstalled" %
                     desc_pb_path)
@@ -87,9 +96,13 @@ class LocalModuleManager(object):
         for sub_dir_name in os.listdir(self.local_modules_dir):
             sub_dir_path = os.path.join(self.local_modules_dir, sub_dir_name)
             if os.path.isdir(sub_dir_path):
+                if "-" in sub_dir_path:
+                    new_sub_dir_path = sub_dir_path.replace("-", "_")
+                    shutil.move(sub_dir_path, new_sub_dir_path)
+                    sub_dir_path = new_sub_dir_path
                 valid, info = self.check_module_valid(sub_dir_path)
                 if valid:
-                    module_name = sub_dir_name
+                    module_name = info['name']
                     self.modules_dict[module_name] = (sub_dir_path,
                                                       info['version'])
         return self.modules_dict
@@ -135,40 +148,20 @@ class LocalModuleManager(object):
                         return False, tips, None
                     module_versions_info = hub.HubServer().search_module_info(
                         module_name)
-                    if module_versions_info is not None and len(
-                            module_versions_info) > 0:
-
-                        if utils.is_windows():
-                            placeholders = [20, 8, 14, 14]
-                        else:
-                            placeholders = [30, 8, 16, 16]
-                        tp = TablePrinter(
-                            titles=[
-                                "ResourceName", "Version", "PaddlePaddle",
-                                "PaddleHub"
-                            ],
-                            placeholders=placeholders)
-                        module_versions_info.sort(
-                            key=cmp_to_key(utils.sort_version_key))
-                        for resource_name, resource_version, paddle_version, \
-                            hub_version in module_versions_info:
-                            colors = ["yellow", None, None, None]
-
-                            tp.add_line(
-                                contents=[
-                                    resource_name, resource_version,
-                                    utils.strflist_version(paddle_version),
-                                    utils.strflist_version(hub_version)
-                                ],
-                                colors=colors)
-                        tips = "The version of PaddlePaddle or PaddleHub " \
-                               "can not match module, please upgrade your " \
-                               "PaddlePaddle or PaddleHub according to the form " \
-                               "below." + tp.get_text()
+                    if module_versions_info is None:
+                        tips = "Can't find module %s, please check your spelling." \
+                               % (module_name)
+                    elif module_version is not None and module_version not in [
+                            item[1] for item in module_versions_info
+                    ]:
+                        tips = "Can't find module %s with version %s, all versions are listed below." \
+                               % (module_name, module_version)
+                        tips += paint_modules_info(module_versions_info)
                     else:
-                        tips = "Can't find module %s" % module_name
-                        if module_version:
-                            tips += " with version %s" % module_version
+                        tips = "The version of PaddlePaddle(%s) or PaddleHub(%s) can not match module, please upgrade your PaddlePaddle or PaddleHub according to the form below." \
+                               % (sys_paddle_version, sys_hub_verion)
+                        tips += paint_modules_info(module_versions_info)
+
                     return False, tips, None
 
                 result, tips, module_zip_file = default_downloader.download_file(
@@ -179,7 +172,7 @@ class LocalModuleManager(object):
                     print_progress=True)
                 result, tips, module_dir = default_downloader.uncompress(
                     file=module_zip_file,
-                    dirname=MODULE_HOME,
+                    dirname=os.path.join(_dir, "tmp_module"),
                     delete_file=True,
                     print_progress=True)
 
@@ -190,19 +183,25 @@ class LocalModuleManager(object):
                     module_dir = os.path.join(_dir, file_names[0])
                     for index, file_name in enumerate(file_names):
                         tar.extract(file_name, _dir)
-
-            if module_dir:
-                if not module_name:
+                    if "-" in module_dir:
+                        new_module_dir = module_dir.replace("-", "_")
+                        shutil.move(module_dir, new_module_dir)
+                        module_dir = new_module_dir
                     module_name = hub.Module(directory=module_dir).name
+
+            if from_user_dir:
+                module_name = hub.Module(directory=module_dir).name
+                module_version = hub.Module(directory=module_dir).version
                 self.all_modules(update=False)
                 module_info = self.modules_dict.get(module_name, None)
                 if module_info:
-                    module_dir = self.modules_dict[module_name][0]
-                    module_tag = module_name if not module_version else '%s-%s' % (
-                        module_name, module_version)
-                    tips = "Module %s already installed in %s" % (module_tag,
-                                                                  module_dir)
-                    return True, tips, self.modules_dict[module_name]
+                    if module_version == module_info[1]:
+                        module_dir = self.modules_dict[module_name][0]
+                        module_tag = module_name if not module_version else '%s-%s' % (
+                            module_name, module_version)
+                        tips = "Module %s already installed in %s" % (
+                            module_tag, module_dir)
+                        return True, tips, self.modules_dict[module_name]
 
             if module_dir:
                 if md5_value:
@@ -211,7 +210,8 @@ class LocalModuleManager(object):
                             "w") as fp:
                         fp.write(md5_value)
 
-                save_path = os.path.join(MODULE_HOME, module_name)
+                save_path = os.path.join(MODULE_HOME,
+                                         module_name.replace("-", "_"))
                 if save_path != module_dir:
                     if os.path.exists(save_path):
                         shutil.rmtree(save_path)

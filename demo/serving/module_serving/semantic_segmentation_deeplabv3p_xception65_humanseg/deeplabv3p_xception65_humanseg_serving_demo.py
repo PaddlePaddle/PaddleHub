@@ -12,11 +12,11 @@ if __name__ == "__main__":
     url = "http://127.0.0.1:8866/predict/image/deeplabv3p_xception65_humanseg"
     r = requests.post(url=url, files=files)
 
-    results = eval(r.json()["results"])
-
     # 保存分割后的图片到output文件夹，打印模型输出结果
     if not os.path.exists("output"):
         os.mkdir("output")
+
+    results = eval(r.json()["results"])
     for item in results:
         with open(
                 os.path.join("output", item["processed"].split("/")[-1]),

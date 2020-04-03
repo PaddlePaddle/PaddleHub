@@ -30,12 +30,13 @@ if six.PY2:
 else:
     from inspect import getfullargspec as get_args
 import numpy as np
+import paddle
 import paddle.fluid as fluid
 from tb_paddle import SummaryWriter
 
 import paddlehub as hub
 from paddlehub.common.paddle_helper import dtype_map, clone_program
-from paddlehub.common.utils import mkdir
+from paddlehub.common.utils import mkdir, version_compare
 from paddlehub.common.dir import tmp_dir
 from paddlehub.common.logger import logger
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
@@ -807,10 +808,16 @@ class BaseTask(object):
     # NOTE: current saved checkpoint machanism is not completed,
     # it can't restore dataset training status
     def save_checkpoint(self):
+        """
+        save the program of the last step in training
+        """
         model_saved_dir = os.path.join(self.config.checkpoint_dir,
                                        "step_%d" % self.current_step)
+
         logger.info("Saving model checkpoint to {}".format(model_saved_dir))
-        self.save_inference_model(dirname=model_saved_dir)
+        # to resume traning by loading ckpt, it must be save program (save_persistables)
+        fluid.io.save_persistables(
+            self.exe, dirname=model_saved_dir, main_program=self.main_program)
         save_checkpoint(
             checkpoint_dir=self.config.checkpoint_dir,
             current_epoch=self.current_epoch,
@@ -926,6 +933,7 @@ class BaseTask(object):
         with tmp_dir() as _dir:
             self.save_inference_model(dirname=_dir)
             predictor_config = fluid.core.AnalysisConfig(_dir)
+            predictor_config.disable_glog_info()
 
             if self.config.use_cuda:
                 predictor_config.enable_use_gpu(100, 0)
@@ -976,7 +984,7 @@ class BaseTask(object):
                 data,
                 load_best_model=True,
                 return_result=False,
-                accelerate_mode=False):
+                accelerate_mode=True):
         """
         make prediction for the input data.
 
@@ -989,6 +997,11 @@ class BaseTask(object):
         Returns:
             RunState: the running result of predict phase
         """
+        if not version_compare(paddle.__version__, "1.6.2") and accelerate_mode:
+            logger.warning(
+                "Fail to open predict accelerate mode as it does not support paddle < 1.6.2. Please update PaddlePaddle."
+            )
+            accelerate_mode = False
         self.accelerate_mode = accelerate_mode
 
         with self.phase_guard(phase="predict"):

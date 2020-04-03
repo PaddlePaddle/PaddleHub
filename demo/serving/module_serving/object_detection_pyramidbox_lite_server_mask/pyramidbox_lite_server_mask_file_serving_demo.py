@@ -13,12 +13,13 @@ if __name__ == "__main__":
 
     # 指定检测方法为pyramidbox_lite_server_mask并发送post请求
     url = "http://127.0.0.1:8866/predict/image/pyramidbox_lite_server_mask"
-    r = requests.post(url=url, files=files)
+    r = requests.post(url=url, files=files, data={"visual_result": "True"})
 
-    results = eval(r.json()["results"])
-
+    # 创建图片保存文件夹
     if not os.path.exists("output"):
         os.mkdir("output")
+
+    results = eval(r.json()["results"])
     for item in results:
         with open(os.path.join("output", item["path"]), "wb") as fp:
             fp.write(base64.b64decode(item["base64"].split(',')[-1]))

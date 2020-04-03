@@ -218,3 +218,9 @@ python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ## 超参优化AutoDL Finetuner
 
 PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../../docs/tutorial/autofinetune.md)。
+
+
+## Fine-tune之后保存的模型转化为PaddleHub Module
+
+代码详见[finetuned_model_to_module](./finetuned_model_to_module)文件夹下
+Fine-tune之后保存的模型转化为PaddleHub Module[教程](../../docs/tutorial/finetuned_model_to_module.md)

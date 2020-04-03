@@ -12,8 +12,6 @@ author_email:
 type: nlp/sentiment_analysis
 ```
 
-**本示例代码可以参考[senta_module_sample](../../demo/senta_module_sample/senta_test)**
-
 Module存在一个接口sentiment_classify，用于接收传入文本，并给出文本的情感倾向（正面/负面），支持python接口调用和命令行调用。
 ```python
 import paddlehub as hub
@@ -137,30 +135,13 @@ def run_cmd(self, argvs):
 ```
 #### step 3_6. 支持serving调用
 
-如果希望Module可以支持PaddleHub Serving部署预测服务，则需要提供一个经过serving修饰的接口，接口负责解析传入数据并进行预测，将结果返回。
-
-如果不需要提供PaddleHub Serving部署预测服务，则可以不需要加上serving修饰。
-
-```python
-@serving
-def sentiment_classify(self, texts):
-    results = []
-    for text in texts:
-        sentiment = "positive"
-        for word in self.vocab:
-            if word in text:
-                sentiment = "negative"
-                break
-        results.append({"text":text, "sentiment":sentiment})
-
-    return results
-```
+TODO
 
 ### 完整代码
 
-* [module.py](../../demo/senta_module_sample/senta_test/module.py)
+* [module.py](./senta_test/module.py)
 
-* [processor.py](../../demo/senta_module_sample/senta_test/processor.py)
+* [processor.py](./senta_test/module.py)
 
 <br/>
 

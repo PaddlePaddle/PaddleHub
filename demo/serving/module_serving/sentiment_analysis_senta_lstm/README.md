@@ -19,9 +19,16 @@ Loading senta_lstm successful.
 这样就完成了一个词法分析服务化API的部署，默认端口号为8866。
 
 ## Step2：测试词法分析在线API
-在服务部署好之后，我们可以进行测试，用来测试的文本为`我不爱吃甜食`和`我喜欢躺在床上看电影`。
+在服务部署好之后，我们可以进行测试。
 
-准备的数据格式为：
+首先指定编码格式及引入需要的包：
+```python
+>>> # coding: utf8
+>>> import requests
+>>> import json
+```
+
+用来测试的文本为`我不爱吃甜食`和`我喜欢躺在床上看电影`，准备的数据格式为：
 ```python
 {"text": [text_1, text_2, ...]}  
 ```
@@ -37,47 +44,33 @@ Loading senta_lstm successful.
 ## Step3：获取并验证结果
 接下来发送请求到词法分析API，并得到结果，代码如下：
 ```python
-# 指定预测方法为lac并发送post请求
+# 指定预测方法为senta_lstm并发送post请求
 >>> url = "http://127.0.0.1:8866/predict/text/senta_lstm"
 >>> r = requests.post(url=url, data=text)
 ```
-`LAC`模型返回的结果为每个文本分词后的结果，我们尝试打印接口返回结果：
+我们尝试打印接口返回结果：
 ```python
 # 打印预测结果
 >>> print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 {
+    "msg": "",
     "results": [
         {
-            "tag": [
-                "TIME",
-                "v",
-                "q",
-                "n"
-            ],
-            "word": [
-                "今天",
-                "是",
-                "个",
-                "好日子"
-            ]
+            "negative_probs": 0.7079,
+            "positive_probs": 0.2921,
+            "sentiment_key": "negative",
+            "sentiment_label": 0,
+            "text": "我不爱吃甜食"
         },
         {
-            "tag": [
-                "n",
-                "v",
-                "TIME",
-                "v",
-                "v"
-            ],
-            "word": [
-                "天气预报",
-                "说",
-                "今天",
-                "要",
-                "下雨"
-            ]
+            "negative_probs": 0.0149,
+            "positive_probs": 0.9851,
+            "sentiment_key": "positive",
+            "sentiment_label": 1,
+            "text": "我喜欢躺在床上看电影"
         }
-    ]
+    ],
+    "status": "0"
 }
 ```
 这样我们就完成了对词法分析的预测服务化部署和测试。

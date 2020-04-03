@@ -14,11 +14,11 @@ if __name__ == "__main__":
     url = "http://127.0.0.1:8866/predict/image/yolov3_darknet53_coco2017"
     r = requests.post(url=url, files=files)
 
-    results = eval(r.json()["results"])
-
     # 保存检测生成的图片到output文件夹，打印模型输出结果
     if not os.path.exists("output"):
         os.mkdir("output")
+
+    results = eval(r.json()["results"])
     for item in results:
         with open(os.path.join("output", item["path"]), "wb") as fp:
             fp.write(base64.b64decode(item["base64"].split(',')[-1]))

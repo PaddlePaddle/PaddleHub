@@ -16,7 +16,6 @@
 
 import argparse
 import ast
-import paddle.fluid as fluid
 import paddlehub as hub
 
 # yapf: disable

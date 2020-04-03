@@ -18,6 +18,9 @@ from __future__ import division
 from __future__ import print_function
 
 from paddlehub.common.utils import is_windows
+from paddlehub.common.utils import sort_version_key
+from paddlehub.common.utils import strflist_version
+from functools import cmp_to_key
 
 linux_color_dict = {
     "white": "\033[1;37m%s\033[0m",
@@ -146,3 +149,27 @@ class TablePrinter(object):
     def get_text(self):
         self.add_horizontal_line()
         return self.text
+
+
+def paint_modules_info(module_versions_info):
+    if is_windows():
+        placeholders = [20, 8, 14, 14]
+    else:
+        placeholders = [30, 8, 16, 16]
+    tp = TablePrinter(
+        titles=["ResourceName", "Version", "PaddlePaddle", "PaddleHub"],
+        placeholders=placeholders)
+    module_versions_info.sort(key=cmp_to_key(sort_version_key))
+    for resource_name, resource_version, paddle_version, \
+        hub_version in module_versions_info:
+        colors = ["yellow", None, None, None]
+
+        tp.add_line(
+            contents=[
+                resource_name, resource_version,
+                strflist_version(paddle_version),
+                strflist_version(hub_version)
+            ],
+            colors=colors)
+
+    return tp.get_text()
