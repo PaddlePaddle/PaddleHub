@@ -25,6 +25,8 @@ import paddlehub as hub
 from paddlehub.common.downloader import default_downloader
 from paddlehub.common.logger import logger
 
+from ..contrib.ppdet.data.source import build_source
+from ..common import detection_config as dconf
 
 class BaseCVDataset(BaseDataset):
     def __init__(self,
@@ -160,3 +162,86 @@ class ImageClassificationDataset(object):
 
     def get_test_examples(self):
         return self.test_examples
+
+
+class ObjectDetectionDataset(ImageClassificationDataset):
+    def __init__(self, base_path, train_image_dir, train_list_file, validate_image_dir, validate_list_file,
+                 test_image_dir, test_list_file, model_type='ssd'):
+        super(ObjectDetectionDataset, self).__init__()
+        self.base_path = base_path
+        self.train_image_dir = train_image_dir
+        self.train_list_file = train_list_file
+        self.validate_image_dir = validate_image_dir
+        self.validate_list_file = validate_list_file
+        self.test_image_dir = test_image_dir
+        self.test_list_file = test_list_file
+        self.model_type = model_type
+        self._dsc = None
+        self.cid2cname = None
+        self.label_dict()  # refresh cid2cname and num_labels
+        assert self.cid2cname is not None
+        assert self.num_labels > 0
+
+    def label_dict(self):
+        if self.cid2cname is not None:
+            return self.cid2cname
+        # get label info from train data json
+        _ = self.train_data()
+        return self.cid2cname
+
+    def _parse_data(self, data_path, image_dir, shuffle=False, phase=None):
+        with_background = dconf.conf[self.model_type]['with_background']
+        mixup_epoch = -1
+        if phase == 'train':
+            mixup_epoch = dconf.conf[self.model_type].get('mixup_epoch', -1)
+        file_conf = {
+            'ANNO_FILE': data_path,
+            'IMAGE_DIR': image_dir,
+            # 'USE_DEFAULT_LABEL': feed.dataset.use_default_label,
+            'IS_SHUFFLE': shuffle,
+            'SAMPLES': -1,
+            'WITH_BACKGROUND': with_background,
+            'MIXUP_EPOCH': mixup_epoch,
+            'TYPE': 'RoiDbSource',
+        }
+        sc_conf = {'data_cf': file_conf, 'cname2cid': None}
+        data_source = build_source(sc_conf)
+        self._dsc = data_source
+        data_source.reset()
+        data = data_source._roidb
+        if self.cid2cname is None:
+            cname2cid = data_source.cname2cid
+            cid2cname = {v: k for k, v in cname2cid.items()}
+            self.cid2cname = cid2cname
+            if with_background:
+                self.num_labels = len(cid2cname) + 1
+            else:
+                self.num_labels = len(cid2cname)
+
+        if phase == 'train':
+            self.train_examples = data
+        elif phase == 'dev':
+            self.dev_examples = data
+        elif phase == 'test':
+            self.test_examples = data
+        return data_source
+
+    def train_data(self, shuffle=True):
+        train_data_path = os.path.join(self.base_path, self.train_list_file)
+        train_image_dir = os.path.join(self.base_path, self.train_image_dir)
+        return self._parse_data(
+            train_data_path, train_image_dir, shuffle, phase='train')
+
+    def test_data(self, shuffle=False):
+        test_data_path = os.path.join(self.base_path, self.test_list_file)
+        test_image_dir = os.path.join(self.base_path, self.test_image_dir)
+        return self._parse_data(
+            test_data_path, test_image_dir, shuffle, phase='dev')
+
+    def validate_data(self, shuffle=False):
+        validate_data_path = os.path.join(self.base_path,
+                                          self.validate_list_file)
+        validate_image_dir = os.path.join(self.base_path,
+                                          self.validate_image_dir)
+        return self._parse_data(
+            validate_data_path, validate_image_dir, shuffle, phase='test')
