@@ -23,10 +23,10 @@ import numpy as np
 import paddle.fluid as fluid
 
 from paddlehub.finetune.evaluate import calculate_f1_np, matthews_corrcoef
-from .basic_task import BasicTask
+from .base_task import BaseTask
 
 
-class ClassifierTask(BasicTask):
+class ClassifierTask(BaseTask):
     def __init__(self,
                  feature,
                  num_classes,
@@ -133,6 +133,23 @@ class ClassifierTask(BasicTask):
                 raise ValueError("Not Support Metric: \"%s\"" % metric)
 
         return scores, avg_loss, run_speed
+
+    def _postprocessing(self, run_states):
+        try:
+            id2label = {
+                val: key
+                for key, val in self._base_data_reader.label_map.items()
+            }
+        except:
+            raise Exception(
+                "ImageClassificationDataset does not support postprocessing, please use BaseCVDataset instead"
+            )
+        results = []
+        for batch_state in run_states:
+            batch_result = batch_state.run_results
+            batch_infer = np.argmax(batch_result, axis=2)[0]
+            results += [id2label[sample_infer] for sample_infer in batch_infer]
+        return results
 
 
 ImageClassifierTask = ClassifierTask
@@ -300,4 +317,20 @@ class MultiLabelClassifierTask(ClassifierTask):
     def fetch_list(self):
         if self.is_train_phase or self.is_test_phase:
             return [metric.name for metric in self.metrics] + [self.loss.name]
-        return self.outputs
+        return [output.name for output in self.outputs]
+
+    def _postprocessing(self, run_states):
+        results = []
+        label_list = list(self._base_data_reader.label_map.keys())
+        for batch_state in run_states:
+            batch_result = batch_state.run_results
+            for sample_id in range(len(batch_result[0])):
+                sample_result = []
+                for category_id in range(
+                        self._base_data_reader.dataset.num_labels):
+                    sample_category_prob = batch_result[category_id][sample_id]
+                    sample_category_value = np.argmax(sample_category_prob)
+                    sample_result.append(
+                        {label_list[category_id]: sample_category_value})
+                results.append(sample_result)
+        return results

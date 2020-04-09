@@ -1,43 +1,45 @@
-# LAC
+# LAC 词法分析
 
-## 关于
 
 本示例展示如何使用LAC Module进行预测。
 
-LAC是中文词法分析模型，可以用于进行中文句子的分词/词性标注/命名实体识别等功能，关于模型的训练细节，请查看[LAC](https://github.com/baidu/lac)
+LAC是中文词法分析模型，可以用于进行中文句子的分词/词性标注/命名实体识别等功能，关于模型的细节参见[模型介绍](https://www.paddlepaddle.org.cn/hubdetail?name=lac&en_category=LexicalAnalysis)。
 
-## 准备工作
-
-在运行本目录的脚本前，需要先安装1.3.0版本以上的PaddlePaddle（如果您本地已经安装了符合条件的PaddlePaddle版本，那么可以跳过`准备工作`这一步）。
-
-如果您的机器支持GPU，我们建议下载GPU版本的PaddlePaddle，使用GPU进行训练和预测的效率都比使用CPU要高。
-```shell
-# 安装GPU版本的PaddlePaddle
-$ pip install --upgrade paddlepaddle-gpu
-```
-
-如果您的机器不支持GPU，可以通过下面的命令来安装CPU版本的PaddlePaddle
-
-```shell
-# 安装CPU版本的PaddlePaddle
-$ pip install --upgrade paddlepaddle
-```
-
-在安装过程中如果遇到问题，您可以到[Paddle官方网站](http://www.paddlepaddle.org/)上查看解决方案。
 
 ## 命令行方式预测
 
-`cli_demo.sh`给出了使用命令行接口(Command Line Interface)调用Module预测的示例脚本
-通过以下命令试验下效果
+`cli_demo.sh`给出了使用命令行接口(Command Line Interface)调用Module预测的示例脚本，
+通过以下命令试验下效果。
 
 ```shell
-$ sh cli_demo.sh
+$ hub run lac --input_text "今天是个好日子"
+$ hub run lac --input_file test.txt --user_dict user.dict
 ```
+test.txt 存放待分词文本， 如：
+
+```text
+今天是个好日子  
+今天天气晴朗
+```
+user.dict为用户自定义词典，可以不指定，当指定自定义词典时，可以干预默认分词结果。
+词典包含三列，第一列为单词，第二列为单词词性，第三列为单词词频，以水平制表符\t分隔。词频越高的单词，对分词结果影响越大，词典样例如下：
+
+```text
+天气预报        n       400000  
+经      v       1000  
+常      d       1000  
+```
+
+**NOTE:**
+
+* 该PaddleHub Module使用词典干预功能时，依赖于第三方库pyahocorasick，请自行安装；
+* 请不要直接复制示例文本使用，复制后的格式可能存在问题；
+
 
 ## 通过Python API预测
 
-`lac_demo.py`给出了使用python API调用PaddleHub LAC Module预测的示例代码
-通过以下命令试验下效果
+`lac_demo.py`给出了使用python API调用PaddleHub LAC Module预测的示例代码，
+通过以下命令试验下效果。
 
 ```shell
 python lac_demo.py

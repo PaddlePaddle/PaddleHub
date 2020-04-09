@@ -16,12 +16,6 @@ jobs:
       os: linux
       python: 3.6
       script: /bin/bash ./scripts/check_code_style.sh
-    - name: "CI on Linux/Python3.5"
-      os: linux
-      python: 3.5
-    - name: "CI on Linux/Python2.7"
-      os: linux
-      python: 2.7
 
 env:
   - PYTHONPATH=${PWD}
@@ -29,10 +23,6 @@ env:
 install:
   - pip install --upgrade paddlepaddle
   - pip install -r requirements.txt
-
-script:
-  - if [[ $TRAVIS_OS_NAME != "windows" ]]; then /bin/bash ./scripts/test_cml.sh; fi
-  - if [[ $TRAVIS_OS_NAME != "windows" ]]; then /bin/bash ./scripts/test_all_module.sh; fi
 
 notifications:
   email:

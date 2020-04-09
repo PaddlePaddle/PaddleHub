@@ -23,10 +23,10 @@ from collections import OrderedDict
 import numpy as np
 import paddle.fluid as fluid
 from scipy.stats import spearmanr
-from .basic_task import BasicTask
+from .base_task import BaseTask
 
 
-class RegressionTask(BasicTask):
+class RegressionTask(BaseTask):
     def __init__(self,
                  feature,
                  feed_list,
@@ -120,3 +120,10 @@ class RegressionTask(BasicTask):
             else:
                 raise ValueError("Not Support Metric: \"%s\"" % metric)
         return scores, avg_loss, run_speed
+
+    def _postprocessing(self, run_states):
+        results = []
+        for batch_state in run_states:
+            batch_result = batch_state.run_results[0]
+            results += [result[0] for result in batch_result]
+        return results

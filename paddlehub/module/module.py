@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -21,28 +21,23 @@ import os
 import time
 import sys
 import functools
-from shutil import copyfile
+import inspect
+import importlib
+import shutil
 
 import paddle
 import paddle.fluid as fluid
 
 from paddlehub.common import utils
 from paddlehub.common import paddle_helper
-from paddlehub.common.logger import logger
+from paddlehub.common.dir import CACHE_HOME
 from paddlehub.common.lock import lock
-from paddlehub.common.downloader import default_downloader
-from paddlehub.module import module_desc_pb2
-from paddlehub.common.dir import CONF_HOME
-from paddlehub.module import check_info_pb2
+from paddlehub.common.logger import logger
 from paddlehub.common.hub_server import CacheUpdater
-from paddlehub.module.signature import Signature, create_signature
-from paddlehub.module.checker import ModuleChecker
+from paddlehub.module import module_desc_pb2
 from paddlehub.module.manager import default_module_manager
-from paddlehub.module.base_processor import BaseProcessor
-from paddlehub.io.parser import yaml_parser
-from paddlehub import version
-
-__all__ = ['Module', 'create_module']
+from paddlehub.module.checker import ModuleChecker
+from paddlehub.module.signature import Signature, create_signature
 
 # PaddleHub module dir name
 ASSETS_DIRNAME = "assets"
@@ -53,106 +48,119 @@ PROCESSOR_NAME = "processor"
 # PaddleHub var prefix
 HUB_VAR_PREFIX = "@HUB_%s@"
 
-
-def create_module(sign_arr,
-                  module_dir,
-                  processor=None,
-                  assets=None,
-                  module_info=None,
-                  exe=None,
-                  extra_info=None):
-    sign_arr = utils.to_list(sign_arr)
-    module = Module(
-        signatures=sign_arr,
-        processor=processor,
-        assets=assets,
-        module_info=module_info,
-        extra_info=extra_info)
-    module.serialize_to_path(path=module_dir, exe=exe)
+_module_runnable_func = {}
 
 
-class ModuleHelper(object):
-    def __init__(self, module_dir):
-        self.module_dir = module_dir
+def runnable(func):
+    mod = func.__module__ + "." + inspect.stack()[1][3]
+    _module_runnable_func[mod] = func.__name__
 
-    def module_desc_path(self):
-        return os.path.join(self.module_dir, MODULE_DESC_PBNAME)
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
 
-    def model_path(self):
-        return os.path.join(self.module_dir, MODEL_DIRNAME)
+    return _wrapper
 
-    def processor_path(self):
-        return os.path.join(self.module_dir, PYTHON_DIR)
 
-    def processor_name(self):
-        return PROCESSOR_NAME
+_module_serving_func = {}
 
-    def assets_path(self):
-        return os.path.join(self.module_dir, ASSETS_DIRNAME)
+
+def serving(func):
+    mod = func.__module__ + "." + inspect.stack()[1][3]
+    _module_serving_func[mod] = func.__name__
+
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return _wrapper
+
+
+def moduleinfo(name, version, author, author_email, summary, type):
+    def _wrapper(cls):
+        if not issubclass(cls, Module):
+            raise RuntimeError
+        cls._name = name
+        cls._version = version
+        cls._author = author
+        cls._author_email = author_email
+        cls._summary = summary
+        cls._type = type
+        return cls
+
+    return _wrapper
 
 
 class Module(object):
+    def __new__(cls,
+                name=None,
+                directory=None,
+                module_dir=None,
+                version=None,
+                **kwargs):
+        if cls.__name__ == "Module":
+            if name:
+                module = cls.init_with_name(
+                    name=name, version=version, **kwargs)
+            elif directory:
+                module = cls.init_with_directory(directory=directory, **kwargs)
+            elif module_dir:
+                logger.warning(
+                    "Parameter module_dir is deprecated, please use directory to specify the path"
+                )
+                if isinstance(module_dir, list) or isinstance(
+                        module_dir, tuple):
+                    directory = module_dir[0]
+                    version = module_dir[1]
+                else:
+                    directory = module_dir
+                module = cls.init_with_directory(directory=directory, **kwargs)
+            CacheUpdater("update_cache", module.name, module.version).start()
+        else:
+            if not name and not directory:
+                directory = os.path.dirname(
+                    os.path.abspath(sys.modules[cls.__module__].__file__))
+                module = Module.init_with_directory(
+                    directory=directory, **kwargs)
+            else:
+                module = object.__new__(cls)
+
+        return module
+
     def __init__(self,
                  name=None,
+                 directory=None,
                  module_dir=None,
-                 signatures=None,
-                 module_info=None,
-                 assets=None,
-                 processor=None,
-                 extra_info=None,
-                 version=None):
-        self.desc = module_desc_pb2.ModuleDesc()
-        self.program = None
-        self.assets = []
-        self.helper = None
-        self.signatures = {}
-        self.default_signature = None
-        self.module_info = None
-        self.processor = None
-        self.extra_info = {} if extra_info is None else extra_info
-        if not isinstance(self.extra_info, dict):
-            raise TypeError(
-                "The extra_info should be an instance of python dict")
+                 version=None,
+                 **kwargs):
+        # Avoid module being initialized multiple times
+        if "_is_initialize" in self.__dict__ and self._is_initialize:
+            return
 
-        # cache data
-        self.last_call_name = None
-        self.cache_feed_dict = None
-        self.cache_fetch_dict = None
-        self.cache_program = None
+        _run_func_name = self._get_func_name(self.__class__,
+                                             _module_runnable_func)
+        self._run_func = getattr(self,
+                                 _run_func_name) if _run_func_name else None
+        self._serving_func_name = self._get_func_name(self.__class__,
+                                                      _module_serving_func)
+        self._directory = directory
+        self._initialize(**kwargs)
+        self._is_initialize = True
+        self._code_version = "v2"
 
-        fp_lock = open(os.path.join(CONF_HOME, 'config.json'))
-        lock.flock(fp_lock, lock.LOCK_EX)
-        if name:
-            self._init_with_name(name=name, version=version)
-            lock.flock(fp_lock, lock.LOCK_UN)
-        elif module_dir:
-            self._init_with_module_file(module_dir=module_dir[0])
-            lock.flock(fp_lock, lock.LOCK_UN)
-            name = module_dir[0].split("/")[-1]
-            if len(module_dir) > 1:
-                version = module_dir[1]
-            else:
-                version = default_module_manager.search_module(name)[1]
-        elif signatures:
-            if processor:
-                if not issubclass(processor, BaseProcessor):
-                    raise TypeError(
-                        "Processor shoule be an instance of paddlehub.BaseProcessor"
-                    )
-            if assets:
-                self.assets = utils.to_list(assets)
-                # for asset in assets:
-                #     utils.check_path(assets)
-            self.processor = processor
-            self._generate_module_info(module_info)
-            self._init_with_signature(signatures=signatures)
-            lock.flock(fp_lock, lock.LOCK_UN)
+    def _get_func_name(self, current_cls, module_func_dict):
+        mod = current_cls.__module__ + "." + current_cls.__name__
+        if mod in module_func_dict:
+            _func_name = module_func_dict[mod]
+            return _func_name
+        elif current_cls.__bases__:
+            for base_class in current_cls.__bases__:
+                return self._get_func_name(base_class, module_func_dict)
         else:
-            lock.flock(fp_lock, lock.LOCK_UN)
-            raise ValueError("Module initialized parameter is empty")
-        CacheUpdater(name, version).start()
+            return None
 
-    def _init_with_name(self, name, version=None):
+    @classmethod
+    def init_with_name(cls, name, version=None, **kwargs):
+        fp_lock = open(os.path.join(CACHE_HOME, name), "a")
+        lock.flock(fp_lock, lock.LOCK_EX)
         log_msg = "Installing %s module" % name
         if version:
             log_msg += "-%s" % version
@@ -163,19 +171,193 @@ class Module(object):
         if not result:
             logger.error(tips)
             raise RuntimeError(tips)
-        else:
-            logger.info(tips)
-            self._init_with_module_file(module_dir[0])
 
-    def _init_with_url(self, url):
-        utils.check_url(url)
-        result, tips, module_dir = default_downloader.download_file_and_uncompress(
-            url, save_path=".")
-        if not result:
-            logger.error(tips)
-            raise RuntimeError(tips)
-        else:
-            self._init_with_module_file(module_dir)
+        logger.info(tips)
+        lock.flock(fp_lock, lock.LOCK_UN)
+        return cls.init_with_directory(directory=module_dir[0], **kwargs)
+
+    @classmethod
+    def init_with_directory(cls, directory, **kwargs):
+        desc_file = os.path.join(directory, MODULE_DESC_PBNAME)
+        if os.path.exists(desc_file):
+            checker = ModuleChecker(directory)
+            checker.check()
+            return ModuleV1(directory=directory, **kwargs)
+
+        if directory.endswith(os.sep):
+            directory = directory[:-1]
+        basename = os.path.split(directory)[-1]
+        dirname = os.path.join(*list(os.path.split(directory)[:-1]))
+        sys.path.insert(0, dirname)
+        _module = importlib.import_module("{}.module".format(basename))
+        for _item, _cls in inspect.getmembers(_module, inspect.isclass):
+            _item = _module.__dict__[_item]
+            _file = os.path.realpath(sys.modules[_item.__module__].__file__)
+            _module_path = os.path.realpath(
+                os.path.join(directory, "module.py"))
+            if issubclass(_item, Module) and _file.startswith(_module_path):
+                user_module = _item(directory=directory, **kwargs)
+                break
+        sys.path.pop(0)
+        return user_module
+
+    @property
+    def run_func(self):
+        return self._run_func
+
+    @property
+    def directory(self):
+        return self._directory
+
+    @property
+    def author(self):
+        return self.__class__._author
+
+    @property
+    def author_email(self):
+        return self.__class__._author_email
+
+    @property
+    def summary(self):
+        return self.__class__._summary
+
+    @property
+    def type(self):
+        return self.__class__._type
+
+    @property
+    def version(self):
+        return self.__class__._version
+
+    @property
+    def name(self):
+        return self.__class__._name
+
+    @property
+    def code_version(self):
+        return self._code_version
+
+    @property
+    def is_runnable(self):
+        return self._run_func != None
+
+    @property
+    def serving_func_name(self):
+        return self._serving_func_name
+
+    def _initialize(self):
+        pass
+
+
+class ModuleHelper(object):
+    def __init__(self, directory):
+        self.directory = directory
+
+    def module_desc_path(self):
+        return os.path.join(self.directory, MODULE_DESC_PBNAME)
+
+    def model_path(self):
+        return os.path.join(self.directory, MODEL_DIRNAME)
+
+    def processor_path(self):
+        return os.path.join(self.directory, PYTHON_DIR)
+
+    def processor_name(self):
+        return PROCESSOR_NAME
+
+    def assets_path(self):
+        return os.path.join(self.directory, ASSETS_DIRNAME)
+
+
+class ModuleV1(Module):
+    def __init__(self, name=None, directory=None, module_dir=None,
+                 version=None):
+        if not directory:
+            return
+        super(ModuleV1, self).__init__(name, directory, module_dir, version)
+        self.program = None
+        self.assets = []
+        self.helper = None
+        self.signatures = {}
+        self.default_signature = None
+        self.processor = None
+        self.extra_info = {}
+        self._code_version = "v1"
+
+        # parse desc
+        self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
+        self._desc = module_desc_pb2.ModuleDesc()
+        with open(self.module_desc_path, "rb") as file:
+            self._desc.ParseFromString(file.read())
+
+        module_info = self.desc.attr.map.data['module_info']
+        self._name = utils.from_module_attr_to_pyobj(
+            module_info.map.data['name'])
+        self._author = utils.from_module_attr_to_pyobj(
+            module_info.map.data['author'])
+        self._author_email = utils.from_module_attr_to_pyobj(
+            module_info.map.data['author_email'])
+        self._version = utils.from_module_attr_to_pyobj(
+            module_info.map.data['version'])
+        self._type = utils.from_module_attr_to_pyobj(
+            module_info.map.data['type'])
+        self._summary = utils.from_module_attr_to_pyobj(
+            module_info.map.data['summary'])
+
+        # cache data
+        self.last_call_name = None
+        self.cache_feed_dict = None
+        self.cache_fetch_dict = None
+        self.cache_program = None
+
+        self.helper = ModuleHelper(directory)
+        exe = fluid.Executor(fluid.CPUPlace())
+        self.program, _, _ = fluid.io.load_inference_model(
+            self.helper.model_path(), executor=exe)
+        for block in self.program.blocks:
+            for op in block.ops:
+                if "op_callstack" in op.all_attrs():
+                    op._set_attr("op_callstack", [""])
+        self._load_processor()
+        self._load_assets()
+        self._recover_from_desc()
+        self._generate_sign_attr()
+        self._generate_extra_info()
+        self._restore_parameter(self.program)
+        self._recover_variable_info(self.program)
+
+    @property
+    def serving_func_name(self):
+        serving_func_name = self.desc.attr.map.data['default_signature'].s
+        return serving_func_name if serving_func_name != "" else None
+
+    @property
+    def desc(self):
+        return self._desc
+
+    @property
+    def author(self):
+        return self._author
+
+    @property
+    def author_email(self):
+        return self._author_email
+
+    @property
+    def summary(self):
+        return self._summary
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def version(self):
+        return self._version
+
+    @property
+    def name(self):
+        return self._name
 
     def _dump_processor(self):
         import inspect
@@ -207,7 +389,7 @@ class Module(object):
         for asset in self.assets:
             filename = os.path.basename(asset)
             newfile = os.path.join(self.helper.assets_path(), filename)
-            copyfile(asset, newfile)
+            shutil.copyfile(asset, newfile)
 
     def _load_assets(self):
         assets_path = self.helper.assets_path()
@@ -215,52 +397,6 @@ class Module(object):
         for file in os.listdir(assets_path):
             filepath = os.path.join(self.helper.assets_path(), file)
             self.assets.append(filepath)
-
-    def _init_with_module_file(self, module_dir):
-        checker = ModuleChecker(module_dir)
-        checker.check()
-
-        self.helper = ModuleHelper(module_dir)
-        with open(self.helper.module_desc_path(), "rb") as fi:
-            self.desc.ParseFromString(fi.read())
-
-        exe = fluid.Executor(fluid.CPUPlace())
-        self.program, _, _ = fluid.io.load_inference_model(
-            self.helper.model_path(), executor=exe)
-        for block in self.program.blocks:
-            for op in block.ops:
-                if "op_callstack" in op.all_attrs():
-                    op._set_attr("op_callstack", [""])
-        self._load_processor()
-        self._load_assets()
-        self._recover_from_desc()
-        self._generate_sign_attr()
-        self._generate_extra_info()
-        self._restore_parameter(self.program)
-        self._recover_variable_info(self.program)
-
-    def _init_with_signature(self, signatures):
-        self.name_prefix = HUB_VAR_PREFIX % self.name
-        self._process_signatures(signatures)
-        self._check_signatures()
-        self._generate_desc()
-        self._generate_sign_attr()
-        self._generate_extra_info()
-
-    def _init_with_program(self, program):
-        pass
-
-    def _process_signatures(self, signatures):
-        self.signatures = {}
-        self.program = signatures[0].inputs[0].block.program
-        for sign in signatures:
-            if sign.name in self.signatures:
-                raise ValueError(
-                    "Error! Signature array contains duplicated signatrues %s" %
-                    sign)
-            if self.default_signature is None and sign.for_predict:
-                self.default_signature = sign
-            self.signatures[sign.name] = sign
 
     def _restore_parameter(self, program):
         global_block = program.global_block()
@@ -301,21 +437,6 @@ class Module(object):
         for key in self.extra_info:
             self.__dict__["get_%s" % key] = functools.partial(
                 self.get_extra_info, key=key)
-
-    def _generate_module_info(self, module_info=None):
-        if not module_info:
-            self.module_info = {}
-        else:
-            if not utils.is_yaml_file(module_info):
-                logger.critical("Module info file should be yaml format")
-                exit(1)
-            self.module_info = yaml_parser.parse(module_info)
-        self.author = self.module_info.get('author', 'UNKNOWN')
-        self.author_email = self.module_info.get('author_email', 'UNKNOWN')
-        self.summary = self.module_info.get('summary', 'UNKNOWN')
-        self.type = self.module_info.get('type', 'UNKNOWN')
-        self.version = self.module_info.get('version', 'UNKNOWN')
-        self.name = self.module_info.get('name', 'UNKNOWN')
 
     def _generate_sign_attr(self):
         self._check_signatures()
@@ -369,21 +490,21 @@ class Module(object):
         default_signature_name = utils.from_module_attr_to_pyobj(
             self.desc.attr.map.data['default_signature'])
         self.default_signature = self.signatures[
-            default_signature_name] if default_signature_name else None
+            default_signature_name].name if default_signature_name else None
 
         # recover module info
         module_info = self.desc.attr.map.data['module_info']
-        self.name = utils.from_module_attr_to_pyobj(
+        self._name = utils.from_module_attr_to_pyobj(
             module_info.map.data['name'])
-        self.author = utils.from_module_attr_to_pyobj(
+        self._author = utils.from_module_attr_to_pyobj(
             module_info.map.data['author'])
-        self.author_email = utils.from_module_attr_to_pyobj(
+        self._author_email = utils.from_module_attr_to_pyobj(
             module_info.map.data['author_email'])
-        self.version = utils.from_module_attr_to_pyobj(
+        self._version = utils.from_module_attr_to_pyobj(
             module_info.map.data['version'])
-        self.type = utils.from_module_attr_to_pyobj(
+        self._type = utils.from_module_attr_to_pyobj(
             module_info.map.data['type'])
-        self.summary = utils.from_module_attr_to_pyobj(
+        self._summary = utils.from_module_attr_to_pyobj(
             module_info.map.data['summary'])
 
         # recover extra info
@@ -393,76 +514,8 @@ class Module(object):
             self.extra_info[key] = utils.from_module_attr_to_pyobj(value)
 
         # recover name prefix
-        self.name_prefix = utils.from_module_attr_to_pyobj(
+        self._name_prefix = utils.from_module_attr_to_pyobj(
             self.desc.attr.map.data["name_prefix"])
-
-    def _generate_desc(self):
-        # save fluid Parameter
-        attr = self.desc.attr
-        attr.type = module_desc_pb2.MAP
-        param_attrs = attr.map.data['param_attrs']
-        param_attrs.type = module_desc_pb2.MAP
-        for param in self.program.global_block().iter_parameters():
-            param_attr = param_attrs.map.data[param.name]
-            paddle_helper.from_param_to_module_attr(param, param_attr)
-
-        # save Variable Info
-        var_infos = attr.map.data['var_infos']
-        var_infos.type = module_desc_pb2.MAP
-        for block in self.program.blocks:
-            for var in block.vars.values():
-                var_info = var_infos.map.data[var.name]
-                var_info.type = module_desc_pb2.MAP
-                utils.from_pyobj_to_module_attr(
-                    var.stop_gradient, var_info.map.data['stop_gradient'])
-                utils.from_pyobj_to_module_attr(block.idx,
-                                                var_info.map.data['block_id'])
-
-        # save signarture info
-        for key, sign in self.signatures.items():
-            var = self.desc.sign2var[sign.name]
-            feed_desc = var.feed_desc
-            fetch_desc = var.fetch_desc
-            feed_names = sign.feed_names
-            fetch_names = sign.fetch_names
-            for index, input in enumerate(sign.inputs):
-                feed_var = feed_desc.add()
-                feed_var.var_name = self.get_var_name_with_prefix(input.name)
-                feed_var.alias = feed_names[index]
-
-            for index, output in enumerate(sign.outputs):
-                fetch_var = fetch_desc.add()
-                fetch_var.var_name = self.get_var_name_with_prefix(output.name)
-                fetch_var.alias = fetch_names[index]
-
-        # save default signature
-        utils.from_pyobj_to_module_attr(
-            self.default_signature.name if self.default_signature else None,
-            attr.map.data['default_signature'])
-
-        # save name prefix
-        utils.from_pyobj_to_module_attr(self.name_prefix,
-                                        self.desc.attr.map.data["name_prefix"])
-
-        # save module info
-        module_info = attr.map.data['module_info']
-        module_info.type = module_desc_pb2.MAP
-        utils.from_pyobj_to_module_attr(self.name, module_info.map.data['name'])
-        utils.from_pyobj_to_module_attr(self.version,
-                                        module_info.map.data['version'])
-        utils.from_pyobj_to_module_attr(self.author,
-                                        module_info.map.data['author'])
-        utils.from_pyobj_to_module_attr(self.author_email,
-                                        module_info.map.data['author_email'])
-        utils.from_pyobj_to_module_attr(self.type, module_info.map.data['type'])
-        utils.from_pyobj_to_module_attr(self.summary,
-                                        module_info.map.data['summary'])
-
-        # save extra info
-        extra_info = attr.map.data['extra_info']
-        extra_info.type = module_desc_pb2.MAP
-        for key, value in self.extra_info.items():
-            utils.from_pyobj_to_module_attr(value, extra_info.map.data[key])
 
     def __call__(self, sign_name, data, use_gpu=False, batch_size=1, **kwargs):
         self.check_processor()
@@ -524,6 +577,14 @@ class Module(object):
     def check_processor(self):
         if not self.processor:
             raise ValueError("This Module is not callable!")
+
+    @property
+    def is_runnable(self):
+        return self.default_signature != None
+
+    @property
+    def code_version(self):
+        return self._code_version
 
     def context(self,
                 sign_name=None,
@@ -612,8 +673,6 @@ class Module(object):
                     "input_ids", "position_ids", "segment_ids", "input_mask",
                     "task_ids"
                 ]
-                logger.warning("For %s, it's no necessary to feed task_ids now."
-                               % self.name)
             else:
                 feed_list = [
                     "input_ids", "position_ids", "segment_ids", "input_mask"
@@ -636,7 +695,7 @@ class Module(object):
         return feed_dict, fetch_dict, program
 
     def get_name_prefix(self):
-        return self.name_prefix
+        return self._name_prefix
 
     def get_var_name_with_prefix(self, var_name):
         return self.get_name_prefix() + var_name
@@ -664,93 +723,3 @@ class Module(object):
                     raise ValueError(
                         "All input and outputs variables in signature should come from the same Program"
                     )
-
-    def serialize_to_path(self, path=None, exe=None):
-        self._check_signatures()
-        self._generate_desc()
-        # create module path for saving
-        if path is None:
-            path = os.path.join(".", self.name)
-        self.helper = ModuleHelper(path)
-        utils.mkdir(self.helper.module_dir)
-
-        # create module pb
-        module_desc = module_desc_pb2.ModuleDesc()
-        logger.info("PaddleHub version = %s" % version.hub_version)
-        logger.info("PaddleHub Module proto version = %s" %
-                    version.module_proto_version)
-        logger.info("Paddle version = %s" % paddle.__version__)
-
-        feeded_var_names = [
-            input.name for key, sign in self.signatures.items()
-            for input in sign.inputs
-        ]
-        target_vars = [
-            output for key, sign in self.signatures.items()
-            for output in sign.outputs
-        ]
-        feeded_var_names = list(set(feeded_var_names))
-        target_vars = list(set(target_vars))
-
-        # save inference program
-        program = self.program.clone()
-
-        for block in program.blocks:
-            for op in block.ops:
-                if "op_callstack" in op.all_attrs():
-                    op._set_attr("op_callstack", [""])
-
-        if not exe:
-            place = fluid.CPUPlace()
-            exe = fluid.Executor(place=place)
-        utils.mkdir(self.helper.model_path())
-        fluid.io.save_inference_model(
-            self.helper.model_path(),
-            feeded_var_names=list(feeded_var_names),
-            target_vars=list(target_vars),
-            main_program=program,
-            executor=exe)
-
-        with open(os.path.join(self.helper.model_path(), "__model__"),
-                  "rb") as file:
-            program_desc_str = file.read()
-            rename_program = fluid.framework.Program.parse_from_string(
-                program_desc_str)
-            varlist = {
-                var: block
-                for block in rename_program.blocks for var in block.vars
-                if self.get_name_prefix() not in var
-            }
-            for var, block in varlist.items():
-                old_name = var
-                new_name = self.get_var_name_with_prefix(old_name)
-                block._rename_var(old_name, new_name)
-            utils.mkdir(self.helper.model_path())
-            with open(
-                    os.path.join(self.helper.model_path(), "__model__"),
-                    "wb") as f:
-                f.write(rename_program.desc.serialize_to_string())
-
-            for file in os.listdir(self.helper.model_path()):
-                if (file == "__model__" or self.get_name_prefix() in file):
-                    continue
-                os.rename(
-                    os.path.join(self.helper.model_path(), file),
-                    os.path.join(self.helper.model_path(),
-                                 self.get_var_name_with_prefix(file)))
-
-        # create processor file
-        if self.processor:
-            self._dump_processor()
-
-        # create assets
-        self._dump_assets()
-
-        # create check info
-        checker = ModuleChecker(self.helper.module_dir)
-        checker.generate_check_info()
-
-        # Serialize module_desc pb
-        module_pb = self.desc.SerializeToString()
-        with open(self.helper.module_desc_path(), "wb") as f:
-            f.write(module_pb)

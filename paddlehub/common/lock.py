@@ -8,8 +8,8 @@ class WinLock(object):
         pass
 
     def __init__(self):
-        self.LOCK_EX = ""
-        self.LOCK_UN = ""
+        self.LOCK_EX = "WIN_LOCK_EX"
+        self.LOCK_UN = "WIN_LOCK_UN"
 
 
 class Lock(object):
@@ -31,6 +31,7 @@ class Lock(object):
         if cmd == self.lock.LOCK_UN:
             Lock._owner = None
             self.lock.flock(fp, cmd)
+            fp.close()
         elif cmd == self.lock.LOCK_EX:
             if Lock._owner is None:
                 Lock._owner = os.getpid()

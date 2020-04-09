@@ -19,14 +19,15 @@ from __future__ import print_function
 
 import sys
 import os
-import time
 import multiprocessing
 import hashlib
 import platform
+import base64
 
-import paddle
 import paddle.fluid as fluid
 import six
+import numpy as np
+import cv2
 
 from paddlehub.module import module_desc_pb2
 from paddlehub.common.logger import logger
@@ -51,6 +52,66 @@ def version_compare(version1, version2):
         elif vn1 < vn2:
             return False
     return len(version1) > len(version2)
+
+
+def base64s_to_cvmats(base64s):
+    for index, value in enumerate(base64s):
+        if isinstance(value, str):
+            value = bytes(value, encoding="utf8")
+        value = base64.b64decode(value)
+        value = np.fromstring(value, np.uint8)
+        value = cv2.imdecode(value, 1)
+
+        base64s[index] = value
+    return base64s
+
+
+def cvmats_to_base64s(cvmats):
+    for index, value in enumerate(cvmats):
+        retval, buffer = cv2.imencode('.jpg', value)
+        pic_str = base64.b64encode(buffer)
+        value = pic_str.decode()
+
+        cvmats[index] = value
+    return cvmats
+
+
+def handle_mask_results(results, data_len):
+    result = []
+    if len(results) <= 0 and data_len != 0:
+        return [{
+            "data": "No face.",
+            "id": i,
+            "path": ""
+        } for i in range(1, data_len + 1)]
+    _id = results[0]["id"]
+    _item = {
+        "data": [],
+        "path": results[0].get("path", ""),
+        "id": results[0]["id"]
+    }
+    for item in results:
+        if item["id"] == _id:
+            _item["data"].append(item["data"])
+        else:
+            result.append(_item)
+            _id = _id + 1
+            _item = {
+                "data": [item["data"]],
+                "path": item.get("path", ""),
+                "id": item.get("id", _id)
+            }
+    result.append(_item)
+    for index in range(1, data_len + 1):
+        if index > len(result):
+            result.append({"data": "No face.", "id": index, "path": ""})
+        elif result[index - 1]["id"] != index:
+            result.insert(index - 1, {
+                "data": "No face.",
+                "id": index,
+                "path": ""
+            })
+    return result
 
 
 def get_platform():
@@ -257,3 +318,38 @@ def sys_stdout_encoding():
     if encoding is None:
         encoding = get_platform_default_encoding()
     return encoding
+
+
+def version_sum(version):
+    """
+    get sum(version), eg: version_sum(1.4.5) = 1*100*100*100 + 4*100*100 + 5*100
+    :param version: string("1.3.6")
+    :return:
+    """
+    sum = 0
+    version_list = version.split(".")
+    for i in version_list:
+        sum = (sum + int(i)) * 100
+    return sum
+
+
+def sort_version_key(version_a, version_b):
+    if version_sum(version_a[1]) > version_sum(version_b[1]):
+        return -1
+    elif version_sum(version_a[1]) == version_sum(version_b[1]):
+        return 0
+    else:
+        return 1
+
+
+def strflist_version(version_list):
+    version_list = version_list[1:-1].split(",")
+    result = ""
+    if version_list[0] != "-1.0.0":
+        result = ">=" + version_list[0]
+    if version_list[1] != "99.0.0":
+        if result != "":
+            result = result + ", " + "<=" + version_list[1]
+        else:
+            result = "<=" + version_list[1]
+    return result if result != "" else "-"

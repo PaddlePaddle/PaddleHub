@@ -32,20 +32,22 @@ FILE_SEP = "/"
 
 
 class ModuleChecker(object):
-    def __init__(self, module_path):
-        self.module_path = module_path
+    def __init__(self, directory):
+        self._directory = directory
+        self._pb_path = os.path.join(self.directory, CHECK_INFO_PB_FILENAME)
 
     def generate_check_info(self):
         check_info = check_info_pb2.CheckInfo()
         check_info.paddle_version = paddle.__version__
         check_info.hub_version = hub_version
         check_info.module_proto_version = module_proto_version
+        check_info.module_code_version = "v2"
         file_infos = check_info.file_infos
-        file_list = [file for file in os.listdir(self.module_path)]
+        file_list = [file for file in os.listdir(self.directory)]
         while file_list:
             file = file_list[0]
             file_list = file_list[1:]
-            abs_path = os.path.join(self.module_path, file)
+            abs_path = os.path.join(self.directory, file)
             if os.path.isdir(abs_path):
                 for sub_file in os.listdir(abs_path):
                     sub_file = os.path.join(file, sub_file)
@@ -62,9 +64,12 @@ class ModuleChecker(object):
                 file_info.type = check_info_pb2.FILE
                 file_info.is_need = True
 
-        with open(os.path.join(self.module_path, CHECK_INFO_PB_FILENAME),
-                  "wb") as fi:
-            fi.write(check_info.SerializeToString())
+        with open(self.pb_path, "wb") as file:
+            file.write(check_info.SerializeToString())
+
+    @property
+    def module_code_version(self):
+        return self.check_info.module_code_version
 
     @property
     def module_proto_version(self):
@@ -82,20 +87,25 @@ class ModuleChecker(object):
     def file_infos(self):
         return self.check_info.file_infos
 
+    @property
+    def directory(self):
+        return self._directory
+
+    @property
+    def pb_path(self):
+        return self._pb_path
+
     def check(self):
         result = True
-        self.check_info_pb_path = os.path.join(self.module_path,
-                                               CHECK_INFO_PB_FILENAME)
 
-        if not (os.path.exists(self.check_info_pb_path)
-                or os.path.isfile(self.check_info_pb_path)):
+        if not (os.path.exists(self.pb_path) or os.path.isfile(self.pb_path)):
             logger.warning(
                 "This module lacks core file %s" % CHECK_INFO_PB_FILENAME)
             result = False
 
         self.check_info = check_info_pb2.CheckInfo()
         try:
-            with open(self.check_info_pb_path, "rb") as fi:
+            with open(self.pb_path, "rb") as fi:
                 pb_string = fi.read()
                 result = self.check_info.ParseFromString(pb_string)
                 if len(pb_string) == 0 or (result is not None
@@ -182,7 +192,7 @@ class ModuleChecker(object):
         for file_info in self.file_infos:
             file_type = file_info.type
             file_path = file_info.file_name.replace(FILE_SEP, os.sep)
-            file_path = os.path.join(self.module_path, file_path)
+            file_path = os.path.join(self.directory, file_path)
             if not os.path.exists(file_path):
                 if file_info.is_need:
                     logger.warning(

@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -22,6 +22,7 @@ import numpy as np
 from PIL import Image
 
 import paddlehub.io.augmentation as image_augmentation
+from .base_reader import BaseReader
 
 channel_order_dict = {
     "RGB": [0, 1, 2],
@@ -33,7 +34,7 @@ channel_order_dict = {
 }
 
 
-class ImageClassificationReader(object):
+class ImageClassificationReader(BaseReader):
     def __init__(self,
                  image_width,
                  image_height,
@@ -41,15 +42,15 @@ class ImageClassificationReader(object):
                  channel_order="RGB",
                  images_mean=None,
                  images_std=None,
-                 data_augmentation=False):
+                 data_augmentation=False,
+                 random_seed=None):
+        super(ImageClassificationReader, self).__init__(dataset, random_seed)
         self.image_width = image_width
         self.image_height = image_height
         self.channel_order = channel_order
-        self.dataset = dataset
         self.data_augmentation = data_augmentation
         self.images_std = images_std
         self.images_mean = images_mean
-        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
 
         if self.images_mean is None:
             try:
@@ -73,31 +74,46 @@ class ImageClassificationReader(object):
             raise ValueError("Image width and height should not be negative.")
 
     def data_generator(self,
-                       batch_size,
+                       batch_size=1,
                        phase="train",
                        shuffle=False,
-                       data=None):
+                       data=None,
+                       return_list=True):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is none and it's not allowed!")
         if phase == "train":
-            data = self.dataset.train_data(shuffle)
-            self.num_examples['train'] = len(self.get_train_examples())
-        elif phase == "test":
-            shuffle = False
-            data = self.dataset.test_data(shuffle)
-            self.num_examples['test'] = len(self.get_test_examples())
+            shuffle = True
+            if hasattr(self.dataset, "train_data"):
+                # Compatible with ImageClassificationDataset which has done shuffle
+                self.dataset.train_data()
+                shuffle = False
+            data = self.get_train_examples()
+            self.num_examples['train'] = len(data)
         elif phase == "val" or phase == "dev":
             shuffle = False
-            data = self.dataset.validate_data(shuffle)
-            self.num_examples['dev'] = len(self.get_dev_examples())
+            if hasattr(self.dataset, "validate_data"):
+                # Compatible with ImageClassificationDataset
+                self.dataset.validate_data()
+                shuffle = False
+            data = self.get_dev_examples()
+            self.num_examples['dev'] = len(data)
+        elif phase == "test":
+            shuffle = False
+            if hasattr(self.dataset, "test_data"):
+                # Compatible with ImageClassificationDataset
+                data = self.dataset.test_data()
+                shuffle = False
+            data = self.get_test_examples()
+            self.num_examples['test'] = len(data)
         elif phase == "predict":
+            shuffle = False
             data = data
 
         def preprocess(image_path):
             image = Image.open(image_path)
             image = image_augmentation.image_resize(image, self.image_width,
                                                     self.image_height)
-            if self.data_augmentation:
+            if self.data_augmentation and phase == "train":
                 image = image_augmentation.image_random_process(
                     image, enable_resize=False, enable_crop=False)
 
@@ -118,22 +134,50 @@ class ImageClassificationReader(object):
             return image
 
         def _data_reader():
+            if shuffle:
+                np.random.shuffle(data)
+            images = []
+            labels = []
             if phase == "predict":
                 for image_path in data:
                     image = preprocess(image_path)
-                    yield (image, )
+                    images.append(image.astype('float32'))
+                    if len(images) == batch_size:
+                        # predictor must receive numpy array not list
+                        images = np.array([images]).astype('float32')
+                        if return_list:
+                            # for DataFeeder
+                            yield [images]
+                        else:
+                            # for DataLoader
+                            yield images
+                        images = []
+                if images:
+                    images = np.array([images]).astype('float32')
+                    if return_list:
+                        yield [images]
+                    else:
+                        yield images
+                    images = []
             else:
                 for image_path, label in data:
                     image = preprocess(image_path)
-                    yield (image, label)
+                    images.append(image.astype('float32'))
+                    labels.append([int(label)])
 
-        return paddle.batch(_data_reader, batch_size=batch_size)
+                    if len(images) == batch_size:
+                        if return_list:
+                            yield [[images, labels]]
+                        else:
+                            yield [images, labels]
+                        images = []
+                        labels = []
+                if images:
+                    if return_list:
+                        yield [[images, labels]]
+                    else:
+                        yield [images, labels]
+                    images = []
+                    labels = []
 
-    def get_train_examples(self):
-        return self.dataset.train_examples
-
-    def get_dev_examples(self):
-        return self.dataset.dev_examples
-
-    def get_test_examples(self):
-        return self.dataset.test_examples
+        return _data_reader

@@ -19,7 +19,6 @@ from __future__ import print_function
 
 import copy
 
-import paddle
 import paddle.fluid as fluid
 
 from paddlehub.module import module_desc_pb2
@@ -280,3 +279,34 @@ def clone_program(origin_program, for_test=False):
             ).vars[name].stop_gradient = var.stop_gradient
 
     return dest_program
+
+
+def rename_var(block, old_name, new_name):
+    for op in block.ops:
+        for input_name in op.input_arg_names:
+            if input_name == old_name:
+                op._rename_input(old_name, new_name)
+
+        for output_name in op.output_arg_names:
+            if output_name == old_name:
+                op._rename_output(old_name, new_name)
+
+    block._rename_var(old_name, new_name)
+
+
+def add_vars_prefix(program, prefix, vars=None, excludes=None):
+    block = program.global_block()
+    vars = list(vars) if vars else list(block.vars.keys())
+    vars = [var for var in vars if var not in excludes] if excludes else vars
+    for var in vars:
+        rename_var(block, var, prefix + var)
+
+
+def remove_vars_prefix(program, prefix, vars=None, excludes=None):
+    block = program.global_block()
+    vars = [var for var in vars if var.startswith(prefix)] if vars else [
+        var for var in block.vars.keys() if var.startswith(prefix)
+    ]
+    vars = [var for var in vars if var not in excludes] if excludes else vars
+    for var in vars:
+        rename_var(block, var, var.replace(prefix, "", 1))

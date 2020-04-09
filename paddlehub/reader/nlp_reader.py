@@ -18,24 +18,22 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
-import json
 import numpy as np
-import platform
 import six
-import sys
 from collections import namedtuple
 
-import paddle
+import paddle.fluid as fluid
 
 from paddlehub.reader import tokenization
 from paddlehub.common.logger import logger
 from paddlehub.common.utils import sys_stdout_encoding
 from paddlehub.dataset.dataset import InputExample
-from .batching import pad_batch_data, prepare_batch_data
+from .batching import pad_batch_data
 import paddlehub as hub
+from .base_reader import BaseReader
 
 
-class BaseReader(object):
+class BaseNLPReader(BaseReader):
     def __init__(self,
                  vocab_path,
                  dataset=None,
@@ -47,6 +45,7 @@ class BaseReader(object):
                  sp_model_path=None,
                  word_dict_path=None,
                  in_tokens=False):
+        super(BaseNLPReader, self).__init__(dataset, random_seed)
         self.max_seq_len = max_seq_len
         if sp_model_path and word_dict_path:
             self.tokenizer = tokenization.WSSPTokenizer(
@@ -55,52 +54,24 @@ class BaseReader(object):
             self.tokenizer = tokenization.FullTokenizer(
                 vocab_file=vocab_path, do_lower_case=do_lower_case)
         self.vocab = self.tokenizer.vocab
-        self.dataset = dataset
         self.pad_id = self.vocab["[PAD]"]
         self.cls_id = self.vocab["[CLS]"]
         self.sep_id = self.vocab["[SEP]"]
+        self.mask_id = self.vocab["[MASK]"]
         self.in_tokens = in_tokens
         self.use_task_id = use_task_id
 
         if self.use_task_id:
+            logger.warning(
+                "use_task_id has been de discarded since PaddleHub v1.4.0, it's no necessary to feed task_ids now."
+            )
             self.task_id = 0
 
-        np.random.seed(random_seed)
-
-        # generate label map
-        self.label_map = {}
-        if self.dataset:
-            for index, label in enumerate(self.dataset.get_labels()):
-                self.label_map[label] = index
-            logger.info("Dataset label map = {}".format(self.label_map))
-        else:
-            logger.info("Dataset is None! label map = {}".format(
-                self.label_map))
-
-        self.current_example = 0
-        self.current_epoch = 0
-
-        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
-
-    def get_train_examples(self):
-        """Gets a collection of `InputExample`s for the train set."""
-        return self.dataset.get_train_examples()
-
-    def get_dev_examples(self):
-        """Gets a collection of `InputExample`s for the dev set."""
-        return self.dataset.get_dev_examples()
-
-    def get_val_examples(self):
-        """Gets a collection of `InputExample`s for the val set."""
-        return self.dataset.get_val_examples()
-
-    def get_test_examples(self):
-        """Gets a collection of `InputExample`s for prediction."""
-        return self.dataset.get_test_examples()
-
-    def get_train_progress(self):
-        """Gets progress for training phase."""
-        return self.current_example, self.current_epoch
+        self.Record_With_Label_Id = namedtuple(
+            'Record',
+            ['token_ids', 'text_type_ids', 'position_ids', 'label_id'])
+        self.Record_Wo_Label_Id = namedtuple(
+            'Record', ['token_ids', 'text_type_ids', 'position_ids'])
 
     def _truncate_seq_pair(self, tokens_a, tokens_b, max_length):
         """Truncates a sequence pair in place to the maximum length."""
@@ -189,24 +160,14 @@ class BaseReader(object):
         else:
             label_id = example.label
 
-        Record = namedtuple(
-            'Record',
-            ['token_ids', 'text_type_ids', 'position_ids', 'label_id'])
-
         if phase != "predict":
-            Record = namedtuple(
-                'Record',
-                ['token_ids', 'text_type_ids', 'position_ids', 'label_id'])
-
-            record = Record(
+            record = self.Record_With_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids,
                 label_id=label_id)
         else:
-            Record = namedtuple('Record',
-                                ['token_ids', 'text_type_ids', 'position_ids'])
-            record = Record(
+            record = self.Record_Wo_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids)
@@ -238,19 +199,12 @@ class BaseReader(object):
         if batch_records:
             yield self._pad_batch_records(batch_records, phase)
 
-    def get_num_examples(self, phase):
-        """Get number of examples for train, dev or test."""
-        if phase not in ['train', 'val', 'dev', 'test']:
-            raise ValueError(
-                "Unknown phase, which should be in ['train', 'val'/'dev', 'test']."
-            )
-        return self.num_examples[phase]
-
     def data_generator(self,
                        batch_size=1,
                        phase='train',
                        shuffle=True,
-                       data=None):
+                       data=None,
+                       return_list=True):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is None ! It isn't allowed.")
         if phase == 'train':
@@ -302,12 +256,17 @@ class BaseReader(object):
 
             for batch_data in self._prepare_batch_data(
                     examples, batch_size, phase=phase):
-                yield [batch_data]
+                if return_list:
+                    # for DataFeeder
+                    yield [batch_data]
+                else:
+                    # for DataLoader
+                    yield batch_data
 
         return wrapper
 
 
-class ClassifyReader(BaseReader):
+class ClassifyReader(BaseNLPReader):
     def _pad_batch_records(self, batch_records, phase=None):
         batch_token_ids = [record.token_ids for record in batch_records]
         batch_text_type_ids = [record.text_type_ids for record in batch_records]
@@ -360,7 +319,7 @@ class ClassifyReader(BaseReader):
         return return_list
 
 
-class SequenceLabelReader(BaseReader):
+class SequenceLabelReader(BaseNLPReader):
     def __init__(self,
                  vocab_path,
                  dataset=None,
@@ -411,7 +370,7 @@ class SequenceLabelReader(BaseReader):
             pad_idx=self.pad_id)
 
         if phase != "predict":
-            batch_label_ids = [record.label_ids for record in batch_records]
+            batch_label_ids = [record.label_id for record in batch_records]
             padded_label_ids = pad_batch_data(
                 batch_label_ids,
                 max_seq_len=self.max_seq_len,
@@ -508,15 +467,11 @@ class SequenceLabelReader(BaseReader):
             label_ids = [no_entity_id
                          ] + [self.label_map[label]
                               for label in labels] + [no_entity_id]
-
-            Record = namedtuple(
-                'Record',
-                ['token_ids', 'text_type_ids', 'position_ids', 'label_ids'])
-            record = Record(
+            record = self.Record_With_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids,
-                label_ids=label_ids)
+                label_id=label_ids)
         else:
             tokens = self._reseg_token_label(
                 tokens=tokens, tokenizer=tokenizer, phase=phase)
@@ -529,9 +484,7 @@ class SequenceLabelReader(BaseReader):
             position_ids = list(range(len(token_ids)))
             text_type_ids = [0] * len(token_ids)
 
-            Record = namedtuple('Record',
-                                ['token_ids', 'text_type_ids', 'position_ids'])
-            record = Record(
+            record = self.Record_Wo_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids,
@@ -540,109 +493,7 @@ class SequenceLabelReader(BaseReader):
         return record
 
 
-class LACClassifyReader(object):
-    def __init__(self, vocab_path, dataset=None, in_tokens=False):
-        self.dataset = dataset
-        self.lac = hub.Module(name="lac")
-        self.tokenizer = tokenization.FullTokenizer(
-            vocab_file=vocab_path, do_lower_case=False)
-        self.vocab = self.tokenizer.vocab
-        self.feed_key = list(
-            self.lac.processor.data_format(
-                sign_name="lexical_analysis").keys())[0]
-
-        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
-        self.in_tokens = in_tokens
-
-    def get_num_examples(self, phase):
-        """Get number of examples for train, dev or test."""
-        if phase not in ['train', 'val', 'dev', 'test']:
-            raise ValueError(
-                "Unknown phase, which should be in ['train', 'val'/'dev', 'test']."
-            )
-        return self.num_examples[phase]
-
-    def get_train_examples(self):
-        """Gets a collection of `InputExample`s for the train set."""
-        return self.dataset.get_train_examples()
-
-    def get_dev_examples(self):
-        """Gets a collection of `InputExample`s for the dev set."""
-        return self.dataset.get_dev_examples()
-
-    def get_val_examples(self):
-        """Gets a collection of `InputExample`s for the val set."""
-        return self.dataset.get_val_examples()
-
-    def get_test_examples(self):
-        """Gets a collection of `InputExample`s for prediction."""
-        return self.dataset.get_test_examples()
-
-    def get_train_progress(self):
-        """Gets progress for training phase."""
-        return self.current_example, self.current_epoch
-
-    def data_generator(self,
-                       batch_size=1,
-                       phase="train",
-                       shuffle=False,
-                       data=None):
-        if phase != "predict" and not self.dataset:
-            raise ValueError("The dataset is None and it isn't allowed.")
-        if phase == "train":
-            shuffle = True
-            data = self.dataset.get_train_examples()
-            self.num_examples['train'] = len(data)
-        elif phase == "test":
-            shuffle = False
-            data = self.dataset.get_test_examples()
-            self.num_examples['test'] = len(data)
-        elif phase == "val" or phase == "dev":
-            shuffle = False
-            data = self.dataset.get_dev_examples()
-            self.num_examples['dev'] = len(data)
-        elif phase == "predict":
-            data = data
-        else:
-            raise ValueError(
-                "Unknown phase, which should be in ['train', 'dev', 'test'].")
-
-        def preprocess(text):
-            data_dict = {self.feed_key: [text]}
-            processed = self.lac.lexical_analysis(data=data_dict)
-            processed = [
-                self.vocab[word] for word in processed[0]['word']
-                if word in self.vocab
-            ]
-            if len(processed) == 0:
-                if six.PY2:
-                    text = text.encode(sys_stdout_encoding())
-                logger.warning(
-                    "The words in text %s can't be found in the vocabulary." %
-                    (text))
-            return processed
-
-        def _data_reader():
-            if shuffle:
-                np.random.shuffle(data)
-
-            if phase == "predict":
-                for text in data:
-                    text = preprocess(text)
-                    if not text:
-                        continue
-                    yield (text, )
-            else:
-                for item in data:
-                    text = preprocess(item.text_a)
-                    if not text:
-                        continue
-                    yield (text, item.label)
-
-        return paddle.batch(_data_reader, batch_size=batch_size)
-
-
-class MultiLabelClassifyReader(BaseReader):
+class MultiLabelClassifyReader(BaseNLPReader):
     def _pad_batch_records(self, batch_records, phase=None):
         batch_token_ids = [record.token_ids for record in batch_records]
         batch_text_type_ids = [record.text_type_ids for record in batch_records]
@@ -664,7 +515,7 @@ class MultiLabelClassifyReader(BaseReader):
             pad_idx=self.pad_id)
 
         if phase != "predict":
-            batch_labels_ids = [record.label_ids for record in batch_records]
+            batch_labels_ids = [record.label_id for record in batch_records]
             num_label = len(self.dataset.get_labels())
             batch_labels = np.array(batch_labels_ids).astype("int64").reshape(
                 [-1, num_label])
@@ -749,19 +600,13 @@ class MultiLabelClassifyReader(BaseReader):
                 label_ids.append(int(label))
 
         if phase != "predict":
-            Record = namedtuple(
-                'Record',
-                ['token_ids', 'text_type_ids', 'position_ids', 'label_ids'])
-
-            record = Record(
+            record = self.Record_With_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids,
-                label_ids=label_ids)
+                label_id=label_ids)
         else:
-            Record = namedtuple('Record',
-                                ['token_ids', 'text_type_ids', 'position_ids'])
-            record = Record(
+            record = self.Record_Wo_Label_Id(
                 token_ids=token_ids,
                 text_type_ids=text_type_ids,
                 position_ids=position_ids)
@@ -769,39 +614,7 @@ class MultiLabelClassifyReader(BaseReader):
         return record
 
 
-class RegressionReader(BaseReader):
-    def __init__(self,
-                 vocab_path,
-                 dataset=None,
-                 label_map_config=None,
-                 max_seq_len=128,
-                 do_lower_case=True,
-                 random_seed=None,
-                 use_task_id=False):
-        self.max_seq_len = max_seq_len
-        self.tokenizer = tokenization.FullTokenizer(
-            vocab_file=vocab_path, do_lower_case=do_lower_case)
-        self.vocab = self.tokenizer.vocab
-        self.dataset = dataset
-        self.pad_id = self.vocab["[PAD]"]
-        self.cls_id = self.vocab["[CLS]"]
-        self.sep_id = self.vocab["[SEP]"]
-        self.in_tokens = False
-        self.use_task_id = use_task_id
-
-        if self.use_task_id:
-            self.task_id = 0
-
-        np.random.seed(random_seed)
-
-        # generate label map
-        self.label_map = {}  # Unlike BaseReader, it's not filled
-
-        self.current_example = 0
-        self.current_epoch = 0
-
-        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
-
+class RegressionReader(BaseNLPReader):
     def _pad_batch_records(self, batch_records, phase=None):
         batch_token_ids = [record.token_ids for record in batch_records]
         batch_text_type_ids = [record.text_type_ids for record in batch_records]
@@ -859,7 +672,8 @@ class RegressionReader(BaseReader):
                        batch_size=1,
                        phase='train',
                        shuffle=True,
-                       data=None):
+                       data=None,
+                       return_list=True):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is none and it's not allowed.")
         if phase == 'train':
@@ -881,7 +695,7 @@ class RegressionReader(BaseReader):
 
             for item in data:
                 # set label in order to run the program
-                label = -1  # different from BaseReader
+                label = -1  # different from BaseNLPReader
                 if len(item) == 1:
                     item_i = InputExample(
                         guid=seq_id, text_a=item[0], label=label)
@@ -908,7 +722,12 @@ class RegressionReader(BaseReader):
 
             for batch_data in self._prepare_batch_data(
                     examples, batch_size, phase=phase):
-                yield [batch_data]
+                if return_list:
+                    # for DataFeeder
+                    yield [batch_data]
+                else:
+                    # for DataLoader
+                    yield batch_data
 
         return wrapper
 
@@ -956,7 +775,7 @@ class Features(object):
         return s
 
 
-class ReadingComprehensionReader(BaseReader):
+class ReadingComprehensionReader(BaseNLPReader):
     def __init__(self,
                  dataset,
                  vocab_path,
@@ -965,32 +784,29 @@ class ReadingComprehensionReader(BaseReader):
                  doc_stride=128,
                  max_query_length=64,
                  random_seed=None,
-                 use_task_id=False):
-        self.dataset = dataset
-        self.tokenizer = tokenization.FullTokenizer(
-            vocab_file=vocab_path, do_lower_case=do_lower_case)
-        self.max_seq_len = max_seq_len
+                 use_task_id=False,
+                 sp_model_path=None,
+                 word_dict_path=None,
+                 in_tokens=False):
+        super(ReadingComprehensionReader, self).__init__(
+            vocab_path=vocab_path,
+            dataset=dataset,
+            label_map_config=None,
+            max_seq_len=max_seq_len,
+            do_lower_case=do_lower_case,
+            random_seed=random_seed,
+            use_task_id=use_task_id,
+            sp_model_path=sp_model_path,
+            word_dict_path=word_dict_path,
+            in_tokens=in_tokens)
+
         self.doc_stride = doc_stride
         self.max_query_length = max_query_length
-        self.use_task_id = use_task_id
-        self.in_tokens = False
+        self._DocSpan = collections.namedtuple("DocSpan", ["start", "length"])
         # self.all_examples[phase] and self.all_features[phase] will be used
         # in write_prediction in reading_comprehension_task
         self.all_features = {"train": [], "dev": [], "test": [], "predict": []}
         self.all_examples = {"train": [], "dev": [], "test": [], "predict": []}
-
-        np.random.seed(random_seed)
-
-        self.vocab = self.tokenizer.vocab
-        self.vocab_size = len(self.vocab)
-        self.pad_id = self.vocab["[PAD]"]
-        self.cls_id = self.vocab["[CLS]"]
-        self.sep_id = self.vocab["[SEP]"]
-        self.mask_id = self.vocab["[MASK]"]
-
-        self.current_train_example = 0
-
-        self.num_examples = {'train': -1, 'dev': -1, 'test': -1}
 
     def _pad_batch_records(self, batch_records, phase):
         batch_token_ids = [record.token_ids for record in batch_records]
@@ -1080,7 +896,8 @@ class ReadingComprehensionReader(BaseReader):
                        batch_size=1,
                        phase='train',
                        shuffle=False,
-                       data=None):
+                       data=None,
+                       return_list=True):
         # we need all_examples and  all_features in write_prediction in reading_comprehension_task
         # we can also use all_examples and all_features to avoid duplicate long-time preprocessing
         examples = None
@@ -1122,7 +939,12 @@ class ReadingComprehensionReader(BaseReader):
 
             for batch_data in self._prepare_batch_data(
                     features, batch_size, phase=phase):
-                yield [batch_data]
+                if return_list:
+                    # for DataFeeder
+                    yield [batch_data]
+                else:
+                    # for DataLoader
+                    yield batch_data
 
         return wrapper
 
@@ -1175,14 +997,14 @@ class ReadingComprehensionReader(BaseReader):
             # We can have documents that are longer than the maximum sequence length.
             # To deal with this we do a sliding window approach, where we take chunks
             # of the up to our max length with a stride of `doc_stride`.
-            _DocSpan = collections.namedtuple("DocSpan", ["start", "length"])
             doc_spans = []
             start_offset = 0
             while start_offset < len(all_doc_tokens):
                 length = len(all_doc_tokens) - start_offset
                 if length > max_tokens_for_doc:
                     length = max_tokens_for_doc
-                doc_spans.append(_DocSpan(start=start_offset, length=length))
+                doc_spans.append(
+                    self._DocSpan(start=start_offset, length=length))
                 if start_offset + length == len(all_doc_tokens):
                     break
                 start_offset += min(length, self.doc_stride)
@@ -1329,6 +1151,148 @@ class ReadingComprehensionReader(BaseReader):
                 best_span_index = span_index
 
         return cur_span_index == best_span_index
+
+
+class LACClassifyReader(BaseReader):
+    def __init__(self, vocab_path, dataset=None, in_tokens=False):
+        super(LACClassifyReader, self).__init__(dataset)
+        self.in_tokens = in_tokens
+
+        self.lac = hub.Module(name="lac")
+        self.tokenizer = tokenization.FullTokenizer(
+            vocab_file=vocab_path, do_lower_case=False)
+        self.vocab = self.tokenizer.vocab
+        self.has_processed = {
+            "train": False,
+            "dev": False,
+            "val": False,
+            "test": False,
+            "predict": False
+        }
+
+    def data_generator(self,
+                       batch_size=1,
+                       phase="train",
+                       shuffle=False,
+                       data=None,
+                       return_list=True):
+        if phase != "predict" and not self.dataset:
+            raise ValueError("The dataset is None and it isn't allowed.")
+        if phase == "train":
+            shuffle = True
+            data = self.dataset.get_train_examples()
+            self.num_examples['train'] = len(data)
+        elif phase == "test":
+            shuffle = False
+            data = self.dataset.get_test_examples()
+            self.num_examples['test'] = len(data)
+        elif phase == "val" or phase == "dev":
+            shuffle = False
+            data = self.dataset.get_dev_examples()
+            self.num_examples['dev'] = len(data)
+        elif phase == "predict":
+            data = data
+        else:
+            raise ValueError(
+                "Unknown phase, which should be in ['train', 'dev', 'test'].")
+
+        def preprocess(text):
+            data_dict = {'text': [text]}
+            processed = self.lac.lexical_analysis(data=data_dict)
+            processed = [
+                self.vocab[word] for word in processed[0]['word']
+                if word in self.vocab
+            ]
+
+            if len(processed) == 0:
+                if six.PY2:
+                    text = text.encode(sys_stdout_encoding())
+                logger.warning(
+                    "The words in text %s can't be found in the vocabulary." %
+                    (text))
+
+            return processed
+
+        if not self.has_processed[phase]:
+            logger.info(
+                "processing %s data now... this may take a few minutes" % phase)
+            for i in range(len(data)):
+                if phase == "predict":
+                    data[i] = preprocess(data[i])
+                else:
+                    data[i].text_a = preprocess(data[i].text_a)
+                    if self.label_map:
+                        if data[i].label not in self.label_map:
+                            raise KeyError("example.label = {%s} not in label" %
+                                           data[i].label)
+                        label_id = self.label_map[data[i].label]
+                    else:
+                        label_id = data[i].label
+                    data[i].label = label_id
+            self.has_processed[phase] = True
+
+        def _data_reader():
+            if shuffle:
+                np.random.shuffle(data)
+            texts = []
+            labels = []
+            if phase == "predict":
+                for text in data:
+                    if not text:
+                        continue
+                    texts.append(text)
+                    if len(texts) == batch_size:
+                        if return_list:
+                            # for DataFeeder
+                            # if you want to use high-performance predictor, yield [[[t] for t in texts]]
+                            yield [[t] for t in texts]
+                        else:
+                            # for DataLoader
+                            # cannot use in high-performance predictor, as PaddleTensor rejects lod_tensor
+                            texts = fluid.create_lod_tensor(
+                                texts, [[len(seq) for seq in texts]],
+                                fluid.CPUPlace())
+                            yield [texts]
+                        texts = []
+                if texts:
+                    if return_list:
+                        yield [[t] for t in texts]
+                    else:
+                        texts = fluid.create_lod_tensor(
+                            texts, [[len(seq) for seq in texts]],
+                            fluid.CPUPlace())
+
+                        yield [texts]
+                    texts = []
+            else:
+                for item in data:
+                    text = item.text_a
+                    if not text:
+                        continue
+                    texts.append(text)
+                    labels.append([item.label])
+                    if len(texts) == batch_size:
+                        if return_list:
+                            yield list(zip(texts, labels))
+                        else:
+                            texts = fluid.create_lod_tensor(
+                                texts, [[len(seq) for seq in texts]],
+                                fluid.CPUPlace())
+                            yield [texts, labels]
+                        texts = []
+                        labels = []
+                if texts:
+                    if return_list:
+                        yield list(zip(texts, labels))
+                    else:
+                        texts = fluid.create_lod_tensor(
+                            texts, [[len(seq) for seq in texts]],
+                            fluid.CPUPlace())
+                        yield [texts, labels]
+                    texts = []
+                    labels = []
+
+        return _data_reader
 
 
 if __name__ == '__main__':

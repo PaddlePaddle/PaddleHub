@@ -19,10 +19,11 @@ from __future__ import print_function
 
 import argparse
 
+import paddlehub as hub
 from paddlehub.common import utils
-from paddlehub.common.hub_server import default_hub_server
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.commands.cml_utils import TablePrinter
+from paddlehub.common.cml_utils import TablePrinter
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class SearchCommand(BaseCommand):
@@ -43,8 +44,9 @@ class SearchCommand(BaseCommand):
             argv = ['.*']
 
         resource_name = argv[0]
+        CacheUpdater("hub_search", resource_name).start()
         extra = {"command": "search"}
-        resource_list = default_hub_server.search_resource(
+        resource_list = hub.HubServer().search_resource(
             resource_name, resource_type="Module", extra=extra)
         if utils.is_windows():
             placeholders = [20, 8, 8, 20]
@@ -54,7 +56,7 @@ class SearchCommand(BaseCommand):
             titles=["ResourceName", "Type", "Version", "Summary"],
             placeholders=placeholders)
         if len(resource_list) == 0:
-            if default_hub_server._server_check() is False:
+            if hub.HubServer()._server_check() is False:
                 print(
                     "Request Hub-Server unsuccessfully, please check your network."
                 )
