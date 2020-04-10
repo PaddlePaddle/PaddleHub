@@ -48,6 +48,7 @@ from .io.type import DataType
 
 from .finetune.task import BaseTask
 from .finetune.task import ClassifierTask
+from .finetune.task import DetectionTask
 from .finetune.task import TextClassifierTask
 from .finetune.task import ImageClassifierTask
 from .finetune.task import SequenceLabelTask
