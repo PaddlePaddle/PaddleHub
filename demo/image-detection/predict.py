@@ -15,11 +15,10 @@ from paddlehub.common import detection_config as dconf
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--use_gpu",            type=ast.literal_eval,  default=False,                      help="Whether use GPU for predict.")
-parser.add_argument("--checkpoint_dir",     type=str,               default="paddlehub_finetune_ckpt_yolov3",  help="Path to save log data.")
+parser.add_argument("--checkpoint_dir",     type=str,               default="paddlehub_finetune_ckpt",  help="Path to save log data.")
 parser.add_argument("--batch_size",         type=int,               default=2,                         help="Total examples' number in batch for training.")
-parser.add_argument("--module",             type=str,               default="yolov3",                 help="Module used as a feature extractor.")
+parser.add_argument("--module",             type=str,               default="ssd",                 help="Module used as a feature extractor.")
 parser.add_argument("--dataset",            type=str,               default="coco10",                  help="Dataset to finetune.")
-parser.add_argument("--use_pyreader",       type=ast.literal_eval,  default=False,                      help="Whether use pyreader to feed data.")
 # yapf: enable.
 
 module_map = {
@@ -36,7 +35,7 @@ def predict(args):
     ds = hub.dataset.Coco10(model_type)
     print("ds.num_labels", ds.num_labels)
 
-    data_reader = ObjectDetectionReader(1, 1, dataset=ds, model_type=model_type)
+    data_reader = ObjectDetectionReader(dataset=ds, model_type=model_type)
 
     # define model(program)
     module = hub.Module(name=module_name)
@@ -51,7 +50,7 @@ def predict(args):
 
     config = hub.RunConfig(
         use_data_parallel=False,
-        use_pyreader=args.use_pyreader,
+        use_pyreader=True,
         use_cuda=args.use_gpu,
         batch_size=args.batch_size,
         enable_memory_optim=False,
@@ -70,7 +69,7 @@ def predict(args):
 
     data = ["./test/test_img_bird.jpg", "./test/test_img_cat.jpg",]
     label_map = ds.label_dict()
-    run_states = task.predict(data=data)
+    run_states = task.predict(data=data, accelerate_mode=False)
     results = [run_state.run_results for run_state in run_states]
     for outs in results:
         keys = ['im_shape', 'im_id', 'bbox']
