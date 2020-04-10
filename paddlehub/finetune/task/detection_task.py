@@ -27,7 +27,7 @@ from paddle.fluid.initializer import Normal, Xavier
 from paddle.fluid.regularizer import L2Decay
 from paddle.fluid.initializer import MSRA
 
-from .basic_task import BasicTask
+from .base_task import BaseTask
 from ...contrib.ppdet.utils.eval_utils import eval_results
 from ...common import detection_config as dconf
 from paddlehub.common.paddle_helper import clone_program
@@ -102,7 +102,7 @@ class Feed(object):
         self.with_background = True
 
 
-class DetectionTask(BasicTask):
+class DetectionTask(BaseTask):
     def __init__(self,
                  data_reader,
                  num_classes,
@@ -266,7 +266,7 @@ class DetectionTask(BasicTask):
         loss.persistable = True
         return loss
 
-    def _ssd_feed_list(self):
+    def _ssd_feed_list(self, for_export=False):
         # xTodo: update when using new module
         feed_list = [varname for varname in self.base_feed_list]
         if self.is_train_phase:
@@ -274,20 +274,28 @@ class DetectionTask(BasicTask):
         elif self.is_test_phase:
             feed_list = feed_list + [label.name for label in self.labels]
         else:  # self.is_predict_phase:
-            feed_list = [feed_list[0], self.labels[0].name, feed_list[1]]
+            if for_export:
+                feed_list = [feed_list[0]]
+            else:
+                # 'image', 'im_id', 'im_shape'
+                feed_list = [feed_list[0], self.labels[0].name, feed_list[1]]
         return feed_list
 
-    def _ssd_fetch_list(self):
+    def _ssd_fetch_list(self, for_export=False):
         # ensure fetch 'im_shape', 'im_id', 'bbox' at first three elements in test phase
         if self.is_train_phase:
             return [self.loss.name]
         elif self.is_test_phase:
             # xTodo: update when using new module
+            # im_id, bbox, dets, loss
             return [
                 self.base_feed_list[1], self.labels[0].name, self.outputs[0].name,
                 self.loss.name]
         # im_shape, im_id, bbox
-        return [self.base_feed_list[1], self.labels[0].name, self.outputs[0].name]
+        if for_export:
+            return [self.outputs[0].name]
+        else:
+            return [self.base_feed_list[1], self.labels[0].name, self.outputs[0].name]
 
     def _rcnn_build_net(self):
         if self.is_train_phase:
@@ -389,7 +397,7 @@ class DetectionTask(BasicTask):
             loss = fluid.layers.fill_constant(shape=[1], value=-1, dtype='float32')
         return loss
 
-    def _rcnn_feed_list(self):
+    def _rcnn_feed_list(self, for_export=False):
         feed_list = [varname for varname in self.base_feed_list]
         if self.is_train_phase:
             # feed_list is ['image', 'im_info', 'gt_box', 'gt_label', 'is_crowd']
@@ -398,17 +406,25 @@ class DetectionTask(BasicTask):
             # feed list is ['image', 'im_info', 'im_shape']
             return feed_list[:2] + [self.labels[0].name] + feed_list[2:] + \
                    [label.name for label in self.labels[1:]]
-        return feed_list[:2] + [self.labels[0].name] + feed_list[2:]
+        if for_export:
+            # skip im_id
+            return feed_list[:2] + feed_list[3:]
+        else:
+            return feed_list[:2] + [self.labels[0].name] + feed_list[2:]
 
-    def _rcnn_fetch_list(self):
+    def _rcnn_fetch_list(self, for_export=False):
         # ensure fetch 'im_shape', 'im_id', 'bbox' at first three elements in test phase
         if self.is_train_phase:
             return [self.loss.name]
         elif self.is_test_phase:
-            # im_shape, im_id, bbox
+                # im_shape, im_id, bbox
             return [self.feed_list[2], self.labels[0].name, self.outputs[0].name, self.loss.name]
+
         # im_shape, im_id, bbox
-        return [self.feed_list[2], self.labels[0].name, self.outputs[0].name]
+        if for_export:
+            return [self.outputs[0].name]
+        else:
+            return [self.feed_list[2], self.labels[0].name, self.outputs[0].name]
 
     def _yolo_parse_anchors(self, anchors):
         """
@@ -528,23 +544,30 @@ class DetectionTask(BasicTask):
             loss = fluid.layers.fill_constant(shape=[1], value=-1, dtype='float32')
         return loss
 
-    def _yolo_feed_list(self):
+    def _yolo_feed_list(self, for_export=False):
         feed_list = [varname for varname in self.base_feed_list]
         if self.is_train_phase:
             return [feed_list[0]] + [label.name for label in self.labels]
         elif self.is_test_phase:
             return feed_list + [label.name for label in self.labels]
-        return feed_list + [self.labels[0].name]
+        if for_export:
+            return feed_list[:2]
+        else:
+            return feed_list + [self.labels[0].name]
 
-    def _yolo_fetch_list(self):
+    def _yolo_fetch_list(self, for_export=False):
         # ensure fetch 'im_shape', 'im_id', 'bbox' at first three elements in test phase
         if self.is_train_phase:
             return [self.loss.name]
         elif self.is_test_phase:
-            # im_shape, im_id, bbox
-            return [self.feed_list[1], self.labels[0].name, self.outputs[0].name, self.loss.name]
+                # im_shape, im_id, bbox
+                return [self.feed_list[1], self.labels[0].name, self.outputs[0].name, self.loss.name]
+
         # im_shape, im_id, bbox
-        return [self.feed_list[1], self.labels[0].name, self.outputs[0].name]
+        if for_export:
+            return [self.outputs[0].name]
+        else:
+            return [self.feed_list[1], self.labels[0].name, self.outputs[0].name]
 
     def _build_net(self):
         if self.model_type == 'ssd':
@@ -584,12 +607,15 @@ class DetectionTask(BasicTask):
 
     @property
     def feed_list(self):
+        return self._feed_list(False)
+
+    def _feed_list(self, for_export=False):
         if self.model_type == 'ssd':
-            return self._ssd_feed_list()
+            return self._ssd_feed_list(for_export)
         elif self.model_type == 'rcnn':
-            return self._rcnn_feed_list()
+            return self._rcnn_feed_list(for_export)
         elif self.model_type == 'yolo':
-            return self._yolo_feed_list()
+            return self._yolo_feed_list(for_export)
         else:
             raise NotImplementedError
 
@@ -597,20 +623,43 @@ class DetectionTask(BasicTask):
     def fetch_list(self):
         # ensure fetch loss at last element in train/test phase
         # ensure fetch 'im_shape', 'im_id', 'bbox' at first three elements in test phase
+        return self._fetch_list(False)
+
+    def _fetch_list(self, for_export=False):
         if self.model_type == 'ssd':
-            return self._ssd_fetch_list()
+            return self._ssd_fetch_list(for_export)
         elif self.model_type == 'rcnn':
-            return self._rcnn_fetch_list()
+            return self._rcnn_fetch_list(for_export)
         elif self.model_type == 'yolo':
-            return self._yolo_fetch_list()
+            return self._yolo_fetch_list(for_export)
         else:
             raise NotImplementedError
+
+    @property
+    def fetch_var_list(self):
+        fetch_list = self._fetch_list(True)
+        vars = self.main_program.global_block().vars
+        return [vars[varname] for varname in fetch_list]
 
     @property
     def labels(self):
         if not self.env.is_inititalized:
             self._build_env()
         return self.env.labels
+
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None):
+        with self.phase_guard("predict"):
+            fluid.io.save_inference_model(
+                dirname=dirname,
+                executor=self.exe,
+                feeded_var_names=self._feed_list(for_export=True),
+                target_vars=self.fetch_var_list,
+                main_program=self.main_program,
+                model_filename=model_filename,
+                params_filename=params_filename)
 
     def _calculate_metrics(self, run_states):
         loss_sum = run_examples = 0

@@ -18,7 +18,6 @@ parser.add_argument("--checkpoint_dir",     type=str,               default="pad
 parser.add_argument("--batch_size",         type=int,               default=8,                         help="Total examples' number in batch for training.")
 parser.add_argument("--module",             type=str,               default="ssd",                 help="Module used as feature extractor.")
 parser.add_argument("--dataset",            type=str,               default="coco_10",                  help="Dataset to finetune.")
-parser.add_argument("--use_pyreader",       type=ast.literal_eval,  default=False,                      help="Whether use pyreader to feed data.")
 parser.add_argument("--use_data_parallel",  type=ast.literal_eval,  default=False,                      help="Whether use data parallel.")
 # yapf: enable.
 
@@ -33,13 +32,13 @@ def finetune(args):
     module_name = args.module  # 'yolov3_darknet53_coco2017'
     model_type = get_model_type(module_name)  # 'yolo'
     # define dataset
-    # ds = hub.dataset.Coco10(model_type)
-    base_path = '/home/local3/zhaopenghao/data/detect/paddle-job-84942-0'
-    train_dir = 'train_data/images'
-    train_list = 'train_data/coco/instances_coco.json'
-    val_dir = 'eval_data/images'
-    val_list = 'eval_data/coco/instances_coco.json'
-    ds = ObjectDetectionDataset(base_path, train_dir, train_list, val_dir, val_list, val_dir, val_list, model_type=model_type)
+    ds = hub.dataset.Coco10(model_type)
+    # base_path = '/home/local3/zhaopenghao/data/detect/paddle-job-84942-0'
+    # train_dir = 'train_data/images'
+    # train_list = 'train_data/coco/instances_coco.json'
+    # val_dir = 'eval_data/images'
+    # val_list = 'eval_data/coco/instances_coco.json'
+    # ds = ObjectDetectionDataset(base_path, train_dir, train_list, val_dir, val_list, val_dir, val_list, model_type=model_type)
     # print(ds.label_dict())
     print("ds.num_labels", ds.num_labels)
 
@@ -55,6 +54,8 @@ def finetune(args):
         input_dict, output_dict, program = module.context(trainable=True)
         input_dict_pred = output_dict_pred = None
 
+    print("input_dict keys", input_dict.keys())
+    print("output_dict keys", output_dict.keys())
     feed_list, pred_feed_list = get_feed_list(module_name, input_dict, input_dict_pred)
     print("output_dict length:", len(output_dict))
     print(output_dict.keys())
@@ -66,7 +67,7 @@ def finetune(args):
         log_interval=10,
         eval_interval=100,
         use_data_parallel=args.use_data_parallel,
-        use_pyreader=args.use_pyreader,
+        use_pyreader=True,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,

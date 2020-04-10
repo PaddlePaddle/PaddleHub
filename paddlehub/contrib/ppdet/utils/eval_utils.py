@@ -187,6 +187,7 @@ def eval_results(results,
     if metric == 'COCO':
         from ..utils.coco_eval import proposal_eval, bbox_eval, mask_eval
         anno_file = getattr(feed.dataset, 'annotation', None)
+        assert anno_file is not None
         with_background = getattr(feed, 'with_background', True)
         if 'proposal' in results[0]:
             output = 'proposal.json'

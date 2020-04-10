@@ -190,7 +190,7 @@ class ObjectDetectionReader(ImageClassificationReader):
                  dataset=None,
                  model_type='ssd',
                  channel_order="RGB",
-                 worker_num=2,
+                 worker_num=1,
                  use_process=False,
                  ):
         super(ObjectDetectionReader,
@@ -204,7 +204,9 @@ class ObjectDetectionReader(ImageClassificationReader):
                        batch_size,
                        phase="train",
                        shuffle=False,
-                       data=None):
+                       data=None,
+                       return_list=False
+                       ):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is none and it's not allowed!")
         drop_last = False
@@ -254,8 +256,17 @@ class ObjectDetectionReader(ImageClassificationReader):
 
         ppdet_mode = 'VAL' if phase != 'train' else 'TRAIN'
 
-        batch_reader = Reader.create(
+        _batch_reader = Reader.create(
             ppdet_mode, data_cf, transform_config, my_source=data_src)
         # return itr
-        # When call `batch_reader()`, then return generator(or iterator)
+        # When call `_batch_reader()`, then return generator(or iterator)
+
+        def batch_reader():
+            """batch reader"""
+            for b in _batch_reader():
+                if return_list:
+                    yield [b]
+                else:
+                    yield b
+        batch_reader.annotation = _batch_reader.annotation
         return batch_reader
