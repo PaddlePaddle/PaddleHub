@@ -233,7 +233,7 @@ data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来�
 
 predictions = ernie_tiny.predict(data=data)
 for index, text in enumerate(data):
-    print("%s\tpredict=%s" % (data[index][0], predictions[index][0]))
+    print("%s\tpredict=%s" % (data[index][0], predictions[index]))
 ```
 
 ### 调用方法2
@@ -251,7 +251,7 @@ data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来�
 
 predictions = ernie_tiny.predict(data=data)
 for index, text in enumerate(data):
-    print("%s\tpredict=%s" % (data[index][0], predictions[index][0]))
+    print("%s\tpredict=%s" % (data[index][0], predictions[index]))
 ```
 
 ### 调用方法3
@@ -270,7 +270,7 @@ data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来�
 
 predictions = ERNIETinyFinetuned.predict(data=data)
 for index, text in enumerate(data):
-    print("%s\tpredict=%s" % (data[index][0], predictions[index][0]))
+    print("%s\tpredict=%s" % (data[index][0], predictions[index]))
 ```
 
 
