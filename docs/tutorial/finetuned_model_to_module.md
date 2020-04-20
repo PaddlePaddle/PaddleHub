@@ -154,7 +154,6 @@ def _initialize(self,
 
 #### step 3_4. 完善预测逻辑
 ```python
-@serving
 def predict(self, data, return_result=False, accelerate_mode=True):
     """
     Get prediction results
