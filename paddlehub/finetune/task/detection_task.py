@@ -204,10 +204,13 @@ class DetectionTask(BaseTask):
             inputs=feature_list,
             image=image,
             num_classes=self.num_classes,
-            aspect_ratios=[[2.], [2., 3.], [2., 3.], [2., 3.], [2., 3.], [2.], [2.]],
+            aspect_ratios=[[2.], [2., 3.], [2., 3.], [2., 3.], [2., 3.], [2.],
+                           [2.]],
             base_size=512,  # 300,
-            min_sizes=[20.0, 51.0, 133.0, 215.0, 296.0, 378.0, 460.0],  # [60.0, 105.0, 150.0, 195.0, 240.0, 285.0],
-            max_sizes=[51.0, 133.0, 215.0, 296.0, 378.0, 460.0, 542.0],  # [[], 150.0, 195.0, 240.0, 285.0, 300.0],
+            min_sizes=[20.0, 51.0, 133.0, 215.0, 296.0, 378.0,
+                       460.0],  # [60.0, 105.0, 150.0, 195.0, 240.0, 285.0],
+            max_sizes=[51.0, 133.0, 215.0, 296.0, 378.0, 460.0,
+                       542.0],  # [[], 150.0, 195.0, 240.0, 285.0, 300.0],
             steps=[8, 16, 32, 64, 128, 256, 512],
             min_ratio=15,
             max_ratio=90,
@@ -242,7 +245,8 @@ class DetectionTask(BaseTask):
             idx_list = [1, 2]  # 'gt_box', 'gt_label'
         elif self.is_test_phase:
             # xTodo: remove 'im_shape' when using new module
-            idx_list = [2, 3, 4, 5]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
+            idx_list = [2, 3, 4,
+                        5]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
         else:
             idx_list = [1]  # im_id
         return self._add_label_by_fields(idx_list)
@@ -289,13 +293,17 @@ class DetectionTask(BaseTask):
             # xTodo: update when using new module
             # im_id, bbox, dets, loss
             return [
-                self.base_feed_list[1], self.labels[0].name, self.outputs[0].name,
-                self.loss.name]
+                self.base_feed_list[1], self.labels[0].name,
+                self.outputs[0].name, self.loss.name
+            ]
         # im_shape, im_id, bbox
         if for_export:
             return [self.outputs[0].name]
         else:
-            return [self.base_feed_list[1], self.labels[0].name, self.outputs[0].name]
+            return [
+                self.base_feed_list[1], self.labels[0].name,
+                self.outputs[0].name
+            ]
 
     def _rcnn_build_net(self):
         if self.is_train_phase:
@@ -306,30 +314,29 @@ class DetectionTask(BaseTask):
         # Rename following layers for: ValueError: Variable cls_score_w has been created before.
         #  the previous shape is (2048, 81); the new shape is (100352, 81).
         #  They are not matched.
-        cls_score = fluid.layers.fc(input=head_feat,
-                                    size=self.num_classes,
-                                    act=None,
-                                    name='my_cls_score',
-                                    param_attr=ParamAttr(
-                                        name='my_cls_score_w',
-                                        initializer=Normal(
-                                            loc=0.0, scale=0.01)),
-                                    bias_attr=ParamAttr(
-                                        name='my_cls_score_b',
-                                        learning_rate=2.,
-                                        regularizer=L2Decay(0.)))
-        bbox_pred = fluid.layers.fc(input=head_feat,
-                                    size=4 * self.num_classes,
-                                    act=None,
-                                    name='my_bbox_pred',
-                                    param_attr=ParamAttr(
-                                        name='my_bbox_pred_w',
-                                        initializer=Normal(
-                                            loc=0.0, scale=0.001)),
-                                    bias_attr=ParamAttr(
-                                        name='my_bbox_pred_b',
-                                        learning_rate=2.,
-                                        regularizer=L2Decay(0.)))
+        cls_score = fluid.layers.fc(
+            input=head_feat,
+            size=self.num_classes,
+            act=None,
+            name='my_cls_score',
+            param_attr=ParamAttr(
+                name='my_cls_score_w', initializer=Normal(loc=0.0, scale=0.01)),
+            bias_attr=ParamAttr(
+                name='my_cls_score_b',
+                learning_rate=2.,
+                regularizer=L2Decay(0.)))
+        bbox_pred = fluid.layers.fc(
+            input=head_feat,
+            size=4 * self.num_classes,
+            act=None,
+            name='my_bbox_pred',
+            param_attr=ParamAttr(
+                name='my_bbox_pred_w', initializer=Normal(loc=0.0,
+                                                          scale=0.001)),
+            bias_attr=ParamAttr(
+                name='my_bbox_pred_b',
+                learning_rate=2.,
+                regularizer=L2Decay(0.)))
 
         if self.is_train_phase:
             rpn_cls_loss, rpn_reg_loss, outs = self.feature[1:]
@@ -349,7 +356,8 @@ class DetectionTask(BaseTask):
                 outside_weight=bbox_outside_weights,
                 sigma=1.0)
             loss_bbox = fluid.layers.reduce_mean(loss_bbox)
-            total_loss = fluid.layers.sum([loss_bbox, loss_cls, rpn_cls_loss, rpn_reg_loss])
+            total_loss = fluid.layers.sum(
+                [loss_bbox, loss_cls, rpn_cls_loss, rpn_reg_loss])
             return [total_loss]
         else:
             rois = self.predict_feature[1]
@@ -359,33 +367,41 @@ class DetectionTask(BaseTask):
             im_scale = fluid.layers.sequence_expand(im_scale, rois)
             boxes = rois / im_scale
             cls_prob = fluid.layers.softmax(cls_score, use_cudnn=False)
-            bbox_pred = fluid.layers.reshape(bbox_pred, (-1, self.num_classes, 4))
+            bbox_pred = fluid.layers.reshape(bbox_pred,
+                                             (-1, self.num_classes, 4))
             # decoded_box = self.box_coder(prior_box=boxes, target_box=bbox_pred)
             decoded_box = fluid.layers.box_coder(
-                prior_box=boxes, prior_box_var=[0.1, 0.1, 0.2, 0.2],
-                target_box=bbox_pred, code_type='decode_center_size',
-                box_normalized=False, axis=1)
-            cliped_box = fluid.layers.box_clip(input=decoded_box, im_info=im_shape)
+                prior_box=boxes,
+                prior_box_var=[0.1, 0.1, 0.2, 0.2],
+                target_box=bbox_pred,
+                code_type='decode_center_size',
+                box_normalized=False,
+                axis=1)
+            cliped_box = fluid.layers.box_clip(
+                input=decoded_box, im_info=im_shape)
             # pred_result = self.nms(bboxes=cliped_box, scores=cls_prob)
             pred_result = fluid.layers.multiclass_nms(
-                bboxes=cliped_box, scores=cls_prob,
+                bboxes=cliped_box,
+                scores=cls_prob,
                 score_threshold=.05,
                 nms_top_k=-1,
                 keep_top_k=100,
                 nms_threshold=.5,
                 normalized=False,
                 nms_eta=1.0,
-                background_label=0
-            )
+                background_label=0)
             if self.is_predict_phase:
                 self.env.labels = self._rcnn_add_label()
             return [pred_result]
 
     def _rcnn_add_label(self):
         if self.is_train_phase:
-            idx_list = [2,]  # 'im_id'
+            idx_list = [
+                2,
+            ]  # 'im_id'
         elif self.is_test_phase:
-            idx_list = [2, 4, 5, 6]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
+            idx_list = [2, 4, 5,
+                        6]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
         else:  # predict
             idx_list = [2]
         return self._add_label_by_fields(idx_list)
@@ -394,7 +410,8 @@ class DetectionTask(BaseTask):
         if self.is_train_phase:
             loss = self.env.outputs[-1]
         else:
-            loss = fluid.layers.fill_constant(shape=[1], value=-1, dtype='float32')
+            loss = fluid.layers.fill_constant(
+                shape=[1], value=-1, dtype='float32')
         return loss
 
     def _rcnn_feed_list(self, for_export=False):
@@ -417,14 +434,19 @@ class DetectionTask(BaseTask):
         if self.is_train_phase:
             return [self.loss.name]
         elif self.is_test_phase:
-                # im_shape, im_id, bbox
-            return [self.feed_list[2], self.labels[0].name, self.outputs[0].name, self.loss.name]
+            # im_shape, im_id, bbox
+            return [
+                self.feed_list[2], self.labels[0].name, self.outputs[0].name,
+                self.loss.name
+            ]
 
         # im_shape, im_id, bbox
         if for_export:
             return [self.outputs[0].name]
         else:
-            return [self.feed_list[2], self.labels[0].name, self.outputs[0].name]
+            return [
+                self.feed_list[2], self.labels[0].name, self.outputs[0].name
+            ]
 
     def _yolo_parse_anchors(self, anchors):
         """
@@ -449,8 +471,8 @@ class DetectionTask(BaseTask):
 
     def _yolo_build_net(self):
         self.anchor_masks = [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
-        anchors = [[10, 13], [16, 30], [33, 23], [30, 61], [62, 45],
-                        [59, 119], [116, 90], [156, 198], [373, 326]]
+        anchors = [[10, 13], [16, 30], [33, 23], [30, 61], [62, 45], [59, 119],
+                   [116, 90], [156, 198], [373, 326]]
         self._yolo_parse_anchors(anchors)
 
         tip_list = self.feature
@@ -466,7 +488,8 @@ class DetectionTask(BaseTask):
                 padding=0,
                 act=None,
                 # Rename for: conflict with module pretrain weights
-                param_attr=ParamAttr(name="ft_yolo_output.{}.conv.weights".format(i)),
+                param_attr=ParamAttr(
+                    name="ft_yolo_output.{}.conv.weights".format(i)),
                 bias_attr=ParamAttr(
                     regularizer=L2Decay(0.),
                     name="ft_yolo_output.{}.conv.bias".format(i)))
@@ -495,7 +518,8 @@ class DetectionTask(BaseTask):
         yolo_scores = fluid.layers.concat(scores, axis=2)
         # pred = self.nms(bboxes=yolo_boxes, scores=yolo_scores)
         pred = fluid.layers.multiclass_nms(
-            bboxes=yolo_boxes, scores=yolo_scores,
+            bboxes=yolo_boxes,
+            scores=yolo_scores,
             score_threshold=.01,
             nms_top_k=1000,
             keep_top_k=100,
@@ -511,7 +535,8 @@ class DetectionTask(BaseTask):
         if self.is_train_phase:
             idx_list = [1, 2, 3]  # 'gt_box', 'gt_label', 'gt_score'
         elif self.is_test_phase:
-            idx_list = [2, 3, 4, 5]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
+            idx_list = [2, 3, 4,
+                        5]  # 'im_id', 'gt_box', 'gt_label', 'is_difficult'
         else:  # predict
             idx_list = [2]
         return self._add_label_by_fields(idx_list)
@@ -541,7 +566,8 @@ class DetectionTask(BaseTask):
 
             loss = sum(losses)
         else:
-            loss = fluid.layers.fill_constant(shape=[1], value=-1, dtype='float32')
+            loss = fluid.layers.fill_constant(
+                shape=[1], value=-1, dtype='float32')
         return loss
 
     def _yolo_feed_list(self, for_export=False):
@@ -560,14 +586,19 @@ class DetectionTask(BaseTask):
         if self.is_train_phase:
             return [self.loss.name]
         elif self.is_test_phase:
-                # im_shape, im_id, bbox
-                return [self.feed_list[1], self.labels[0].name, self.outputs[0].name, self.loss.name]
+            # im_shape, im_id, bbox
+            return [
+                self.feed_list[1], self.labels[0].name, self.outputs[0].name,
+                self.loss.name
+            ]
 
         # im_shape, im_id, bbox
         if for_export:
             return [self.outputs[0].name]
         else:
-            return [self.feed_list[1], self.labels[0].name, self.outputs[0].name]
+            return [
+                self.feed_list[1], self.labels[0].name, self.outputs[0].name
+            ]
 
     def _build_net(self):
         if self.model_type == 'ssd':
@@ -694,14 +725,15 @@ class DetectionTask(BaseTask):
 
         is_bbox_normalized = dconf.conf[self.model_type]['is_bbox_normalized']
         eval_feed = Feed()
-        eval_feed.with_background = dconf.conf[self.model_type]['with_background']
+        eval_feed.with_background = dconf.conf[
+            self.model_type]['with_background']
         eval_feed.dataset = self.reader
 
         for metric in self.metrics_choices:
             if metric == "ap":
-                box_ap_stats = eval_results(results, eval_feed, 'COCO',
-                                            self.num_classes, None,
-                                            is_bbox_normalized, None, None)
+                box_ap_stats = eval_results(
+                    results, eval_feed, 'COCO', self.num_classes, None,
+                    is_bbox_normalized, self.config.checkpoint_dir)
                 print("box_ap_stats", box_ap_stats)
                 scores["ap"] = box_ap_stats[0]
             else:

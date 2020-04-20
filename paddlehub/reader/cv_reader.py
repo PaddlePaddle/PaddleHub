@@ -185,17 +185,15 @@ class ImageClassificationReader(BaseReader):
         return _data_reader
 
 
-class ObjectDetectionReader(ImageClassificationReader):
+class ObjectDetectionReader(BaseReader):
     def __init__(self,
                  dataset=None,
                  model_type='ssd',
-                 channel_order="RGB",
                  worker_num=1,
                  use_process=False,
-                 ):
-        super(ObjectDetectionReader,
-              self).__init__(1, 1, dataset, channel_order,
-                             None, None, None)
+                 random_seed=None):
+        super(ObjectDetectionReader, self).__init__(
+            dataset, random_seed=random_seed)
         self.model_type = model_type
         self.worker_num = worker_num
         self.use_process = use_process
@@ -205,8 +203,7 @@ class ObjectDetectionReader(ImageClassificationReader):
                        phase="train",
                        shuffle=False,
                        data=None,
-                       return_list=False
-                       ):
+                       return_list=False):
         if phase != 'predict' and not self.dataset:
             raise ValueError("The dataset is none and it's not allowed!")
         drop_last = False
@@ -224,10 +221,7 @@ class ObjectDetectionReader(ImageClassificationReader):
             self.num_examples['dev'] = len(self.get_dev_examples())
         else:  # phase == "predict":
             from ..contrib.ppdet.data.source import build_source
-            data_config = {
-                "IMAGES": data,
-                "TYPE": "SimpleSource"
-            }
+            data_config = {"IMAGES": data, "TYPE": "SimpleSource"}
             data_src = build_source(data_config)
 
         data_cf = {}
@@ -243,11 +237,7 @@ class ObjectDetectionReader(ImageClassificationReader):
             'USE_PADDED_IM_INFO': False,
         }
 
-        phase_trans = {
-            "val": "dev",
-            "test": "dev",
-            "inference": "predict"
-        }
+        phase_trans = {"val": "dev", "test": "dev", "inference": "predict"}
         if phase in phase_trans:
             phase = phase_trans[phase]
         assert phase in ('train', 'dev', 'predict')
@@ -256,17 +246,8 @@ class ObjectDetectionReader(ImageClassificationReader):
 
         ppdet_mode = 'VAL' if phase != 'train' else 'TRAIN'
 
-        _batch_reader = Reader.create(
+        batch_reader = Reader.create(
             ppdet_mode, data_cf, transform_config, my_source=data_src)
         # return itr
         # When call `_batch_reader()`, then return generator(or iterator)
-
-        def batch_reader():
-            """batch reader"""
-            for b in _batch_reader():
-                if return_list:
-                    yield [b]
-                else:
-                    yield b
-        batch_reader.annotation = _batch_reader.annotation
         return batch_reader

@@ -411,8 +411,8 @@ class BaseTask(object):
 
         if self.is_predict_phase or self.is_test_phase:
             # Todo: paddle.fluid.core_avx.EnforceNotMet: Getting 'tensor_desc' is not supported by the type of var kCUDNNFwdAlgoCache. at
-            # self.env.main_program = clone_program(
-            #     self.env.main_program, for_test=True)
+            self.env.main_program = clone_program(
+                self.env.main_program, for_test=True)
             hub.common.paddle_helper.set_op_attr(
                 self.env.main_program, is_test=True)
 
@@ -1063,7 +1063,8 @@ class BaseTask(object):
                     capacity=64,
                     use_double_buffer=True,
                     iterable=True)
-                data_reader = data_loader.set_sample_list_generator(self.reader, self.places[0])
+                data_reader = data_loader.set_sample_list_generator(
+                    self.reader, self.places)
                 # data_reader = data_loader.set_batch_generator(
                 #     self.reader, places=self.places)
             else:
@@ -1090,9 +1091,8 @@ class BaseTask(object):
                         return_numpy=False)
                     # fetch_result = [x if isinstance(x,fluid.LoDTensor) else np.array(x) for x in fetch_result]
                     fetch_result = [
-                        x
-                        if hasattr(x, 'recursive_sequence_lengths') else np.array(x)
-                        for x in fetch_result
+                        x if hasattr(x, 'recursive_sequence_lengths') else
+                        np.array(x) for x in fetch_result
                     ]
                 elif self.return_numpy:
                     fetch_result = self.exe.run(

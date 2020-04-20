@@ -28,6 +28,7 @@ from paddlehub.common.logger import logger
 from ..contrib.ppdet.data.source import build_source
 from ..common import detection_config as dconf
 
+
 class BaseCVDataset(BaseDataset):
     def __init__(self,
                  base_path,
@@ -164,10 +165,21 @@ class ImageClassificationDataset(object):
         return self.test_examples
 
 
-class ObjectDetectionDataset(ImageClassificationDataset):
-    def __init__(self, base_path, train_image_dir, train_list_file, validate_image_dir, validate_list_file,
-                 test_image_dir, test_list_file, model_type='ssd'):
-        super(ObjectDetectionDataset, self).__init__()
+class ObjectDetectionDataset(BaseCVDataset):
+    def __init__(self,
+                 base_path,
+                 train_image_dir,
+                 train_list_file,
+                 validate_image_dir,
+                 validate_list_file,
+                 test_image_dir,
+                 test_list_file,
+                 model_type='ssd'):
+        super(ObjectDetectionDataset, self).__init__(
+            base_path=base_path,
+            train_list_file=train_list_file,
+            validate_list_file=validate_list_file,
+            test_list_file=test_list_file)
         self.base_path = base_path
         self.train_image_dir = train_image_dir
         self.train_list_file = train_list_file
@@ -178,16 +190,10 @@ class ObjectDetectionDataset(ImageClassificationDataset):
         self.model_type = model_type
         self._dsc = None
         self.cid2cname = None
-        self.label_dict()  # refresh cid2cname and num_labels
-        assert self.cid2cname is not None
-        assert self.num_labels > 0
-
-    def label_dict(self):
-        if self.cid2cname is not None:
-            return self.cid2cname
-        # get label info from train data json
-        _ = self.train_data()
-        return self.cid2cname
+        self._val_data = None
+        self._train_data = None
+        self._test_data = None
+        self.train_data()
 
     def _parse_data(self, data_path, image_dir, shuffle=False, phase=None):
         with_background = dconf.conf[self.model_type]['with_background']
@@ -214,9 +220,9 @@ class ObjectDetectionDataset(ImageClassificationDataset):
             cid2cname = {v: k for k, v in cname2cid.items()}
             self.cid2cname = cid2cname
             if with_background:
-                self.num_labels = len(cid2cname) + 1
+                self.label_list = ['background'] + list(self.cid2cname.values())
             else:
-                self.num_labels = len(cid2cname)
+                self.label_list = list(self.cid2cname.values())
 
         if phase == 'train':
             self.train_examples = data
@@ -229,19 +235,26 @@ class ObjectDetectionDataset(ImageClassificationDataset):
     def train_data(self, shuffle=True):
         train_data_path = os.path.join(self.base_path, self.train_list_file)
         train_image_dir = os.path.join(self.base_path, self.train_image_dir)
-        return self._parse_data(
-            train_data_path, train_image_dir, shuffle, phase='train')
+        if not self._train_data:
+            self._train_data = self._parse_data(
+                train_data_path, train_image_dir, shuffle, phase='train')
+        return self._train_data
 
     def test_data(self, shuffle=False):
         test_data_path = os.path.join(self.base_path, self.test_list_file)
         test_image_dir = os.path.join(self.base_path, self.test_image_dir)
-        return self._parse_data(
-            test_data_path, test_image_dir, shuffle, phase='dev')
+
+        if not self._test_data:
+            self._test_data = self._parse_data(
+                test_data_path, test_image_dir, shuffle, phase='test')
+        return self._test_data
 
     def validate_data(self, shuffle=False):
         validate_data_path = os.path.join(self.base_path,
                                           self.validate_list_file)
         validate_image_dir = os.path.join(self.base_path,
                                           self.validate_image_dir)
-        return self._parse_data(
-            validate_data_path, validate_image_dir, shuffle, phase='test')
+        if not self._val_data:
+            self._val_data = self._parse_data(
+                validate_data_path, validate_image_dir, shuffle, phase='dev')
+        return self._val_data
