@@ -257,8 +257,8 @@ class Module(fluid.dygraph.Layer):
     def _initialize(self):
         pass
 
-    def forward(self, *args):
-        return self.model_runner(*args)
+    def forward(self, *args, **kwargs):
+        return self.model_runner(*args, **kwargs)
 
 
 class ModuleHelper(object):

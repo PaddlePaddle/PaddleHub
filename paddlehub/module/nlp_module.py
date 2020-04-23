@@ -353,6 +353,13 @@ class TransformerModule(NLPBaseModule):
 
         return inputs, outputs, module_program
 
+    @property
+    def model_runner(self):
+        if not self._model_runner:
+            self._model_runner = fluid.dygraph.StaticModelRunner(
+                self.params_path)
+        return self._model_runner
+
     def get_embedding(self, texts, use_gpu=False, batch_size=1):
         """
         get pooled_output and sequence_output for input texts.
