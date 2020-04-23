@@ -66,7 +66,7 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 
 安装PaddleHub后，执行命令[hub run](./docs/tutorial/cmdintro.md)，即可快速体验无需代码、一键预测的功能：
 
-* 使用[目标检测](http://www.paddlepaddle.org.cn/hub?filter=category&value=ObjectDetection)模型pyramidbox_lite_mobile_mask对图片进行口罩检测
+* 使用[目标检测](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ObjectDetection)模型pyramidbox_lite_mobile_mask对图片进行口罩检测
 ```shell
 $ wget https://paddlehub.bj.bcebos.com/resources/test_mask_detection.jpg
 $ hub run pyramidbox_lite_mobile_mask --input_path test_mask_detection.jpg
@@ -75,7 +75,7 @@ $ hub run pyramidbox_lite_mobile_mask --input_path test_mask_detection.jpg
  <img src="./docs/imgs/test_mask_detection_result.jpg" align="middle"  
 </p>
 
-* 使用[词法分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=LexicalAnalysis)模型LAC进行分词
+* 使用[词法分析](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=LexicalAnalysis)模型LAC进行分词
 ```shell
 $ hub run lac --input_text "现在，慕尼黑再保险公司不仅是此类行动的倡议者，更是将其大量气候数据整合进保险产品中，并与公众共享大量天气信息，参与到新能源领域的保障中。"
 [{
@@ -84,13 +84,13 @@ $ hub run lac --input_text "现在，慕尼黑再保险公司不仅是此类行�
 }]
 ```
 
-* 使用[情感分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=SentimentAnalysis)模型Senta对句子进行情感预测
+* 使用[情感分析](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=SentimentAnalysis)模型Senta对句子进行情感预测
 ```shell
 $ hub run senta_bilstm --input_text "今天天气真好"
 {'text': '今天天气真好', 'sentiment_label': 1, 'sentiment_key': 'positive', 'positive_probs': 0.9798, 'negative_probs': 0.0202}]
 ```
 
-* 使用[目标检测](http://www.paddlepaddle.org.cn/hub?filter=category&value=ObjectDetection)模型Ultra-Light-Fast-Generic-Face-Detector-1MB对图片进行人脸识别
+* 使用[目标检测](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ObjectDetection)模型Ultra-Light-Fast-Generic-Face-Detector-1MB对图片进行人脸识别
 ```shell
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 $ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image.jpg
