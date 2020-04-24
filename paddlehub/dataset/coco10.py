@@ -36,5 +36,6 @@ class Coco10(ObjectDetectionDataset):
         validate_list_file = 'annotations/val.json'
         test_image_dir = 'val'
         test_list_file = 'annotations/val.json'
-        super(Coco10, self).__init__(base_path, train_image_dir, train_list_file, validate_image_dir, validate_list_file,
-                                     test_image_dir, test_list_file, model_type)
+        super(Coco10, self).__init__(
+            base_path, train_image_dir, train_list_file, validate_image_dir,
+            validate_list_file, test_image_dir, test_list_file, model_type)
