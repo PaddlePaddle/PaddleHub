@@ -62,7 +62,8 @@ class Logger(object):
         self.logger.setLevel(logging.DEBUG)
         self.logger.propagate = False
 
-        if os.path.exists(os.path.join(CONF_HOME, "config.json")):
+        config_path = os.path.join(CONF_HOME, "config.json")
+        if os.path.exists(config_path) and 0 < os.path.getsize(config_path):
             with open(os.path.join(CONF_HOME, "config.json"), "r") as fp:
                 level = json.load(fp).get("log_level", "DEBUG")
                 self.logLevel = level
