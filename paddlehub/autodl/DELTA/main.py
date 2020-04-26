@@ -324,8 +324,3 @@ if __name__ == '__main__':
     print(args)
     train()
     test()
-
-# srun python -u training.py --prefix 'v1' --dataset benchmark/Caltech30 --delta_reg 0.0 --wd_rate 1e-4 --batch_size 64 --outdir outdir --num_epoch 100 --use_cuda 0
-# srun python -u training.py --prefix 'v1' --dataset benchmark/Caltech30 --delta_reg 0.1 --wd_rate 1e-4 --batch_size 64 --outdir outdir --num_epoch 100 --use_cuda 0
-# srun python -u training.py --prefix 'v1' --dataset benchmark/CUB_200_2011 --delta_reg 0.0 --wd_rate 1e-4 --batch_size 64 --outdir outdir --num_epoch 100 --use_cuda 0
-# srun python -u training.py --prefix 'v1' --dataset benchmark/CUB_200_2011 --delta_reg 0.1 --wd_rate 1e-4 --batch_size 64 --outdir outdir --num_epoch 100 --use_cuda 0
