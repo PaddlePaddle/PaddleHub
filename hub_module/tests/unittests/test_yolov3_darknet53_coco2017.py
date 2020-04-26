@@ -31,15 +31,17 @@ class TestYoloV3DarkNet53(unittest.TestCase):
 
     def test_context(self):
         with fluid.program_guard(self.test_prog):
-            image = fluid.layers.data(
-                name='image', shape=[3, 608, 608], dtype='float32')
+            get_prediction = True
             inputs, outputs, program = self.yolov3.context(
-                input_image=image,
-                pretrained=False,
+                pretrained=True,
                 trainable=True,
-                param_prefix='BaiDu')
+                get_prediction=get_prediction)
             image = inputs["image"]
             im_size = inputs["im_size"]
+            if get_prediction:
+                bbox_out = outputs['bbox_out']
+            else:
+                head_features = outputs['outputs']
 
     def test_object_detection(self):
         with fluid.program_guard(self.test_prog):
