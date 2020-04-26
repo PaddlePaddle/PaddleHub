@@ -41,7 +41,7 @@ class TestYoloV3ResNet34(unittest.TestCase):
             if get_prediction:
                 bbox_out = outputs['bbox_out']
             else:
-                head_features = outputs['outputs']
+                head_features = outputs['head_features']
 
     def test_object_detection(self):
         with fluid.program_guard(self.test_prog):
@@ -57,6 +57,7 @@ class TestYoloV3ResNet34(unittest.TestCase):
                 images=zebras,
                 batch_size=2)
             print(detection_results)
+
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()

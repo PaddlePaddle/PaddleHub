@@ -41,7 +41,7 @@ class TestYoloV3DarkNet53(unittest.TestCase):
             if get_prediction:
                 bbox_out = outputs['bbox_out']
             else:
-                head_features = outputs['outputs']
+                head_features = outputs['head_features']
 
     def test_object_detection(self):
         with fluid.program_guard(self.test_prog):
