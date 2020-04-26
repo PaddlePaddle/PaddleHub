@@ -10,7 +10,7 @@ import paddlehub as hub
 image_dir = '../image_dataset/object_detection/'
 
 
-class TestSSDVGG(unittest.TestCase):
+class TestSSDVGG300(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         """Prepare the environment once before execution of all tests."""
@@ -68,7 +68,7 @@ class TestSSDVGG(unittest.TestCase):
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(TestSSDVGG('test_object_detection'))
-    suite.addTest(TestSSDVGG('test_context'))
+    suite.addTest(TestSSDVGG300('test_object_detection'))
+    suite.addTest(TestSSDVGG300('test_context'))
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
