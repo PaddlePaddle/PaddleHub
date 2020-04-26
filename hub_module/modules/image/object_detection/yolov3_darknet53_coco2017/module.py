@@ -24,10 +24,10 @@ from yolov3_darknet53_coco2017.yolo_head import MultiClassNMS, YOLOv3Head
     version="1.1.0",
     type="CV/object_detection",
     summary=
-    "Baidu's YOLOv3 model for object detection, with backbone DarkNet.",
+    "Baidu's YOLOv3 model for object detection, with backbone DarkNet53, trained with dataset coco2017.",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com")
-class YOLOv3DarkNet53Pedestrian(hub.Module):
+    author_email="")
+class YOLOv3DarkNet53Coco2017(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
             self.directory, "yolov3_darknet53_model")
@@ -226,7 +226,7 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.face_detection(images_decode, **kwargs)
+        results = self.object_detection(images_decode, **kwargs)
         return results
 
     @runnable

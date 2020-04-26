@@ -27,7 +27,7 @@ from yolov3_darknet53_vehicles.yolo_head import MultiClassNMS, YOLOv3Head
     "Baidu's YOLOv3 model for vehicles detection, with backbone DarkNet53.",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com")
-class YOLOv3DarkNet53Pedestrian(hub.Module):
+class YOLOv3DarkNet53Vehicles(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
             self.directory, "yolov3_darknet53_vehicles_model")
@@ -240,7 +240,7 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.face_detection(images_decode, **kwargs)
+        results = self.object_detection(images_decode, **kwargs)
         return results
 
     @runnable
