@@ -1,0 +1,9 @@
+name: resnet50_vd_wildanimals
+dir: "modules/image/classification/resnet50_vd_wildanimals/"
+exclude:
+    - README.md
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/cv/resnet50_vd_wildanimals.tar.gz
+    dest: model
+    uncompress: True

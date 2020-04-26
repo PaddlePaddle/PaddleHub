@@ -1,0 +1,17 @@
+SSDOutputDecoder:
+  background_label: 0
+  keep_top_k: 200
+  nms_eta: 1.0
+  nms_threshold: 0.45
+  nms_top_k: 400
+  score_threshold: 0.01
+
+MultiBoxHead:
+  aspect_ratios: [[2.], [2., 3.], [2., 3.], [2., 3.], [2., 3.], [2., 3.]]
+  base_size: 300
+  flip: true
+  max_ratio: 90
+  max_sizes: [[], 150.0, 195.0, 240.0, 285.0, 300.0]
+  min_ratio: 20
+  min_sizes: [60.0, 105.0, 150.0, 195.0, 240.0, 285.0]
+  offset: 0.5

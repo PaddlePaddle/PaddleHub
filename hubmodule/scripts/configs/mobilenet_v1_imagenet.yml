@@ -1,0 +1,7 @@
+name: mobilenet_v1_imagenet
+dir: "modules/image/classification/mobilenet_v1_imagenet"
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/cv/mobilenet_v1_model.tar.gz
+    dest: mobilenet_v1_model
+    uncompress: True

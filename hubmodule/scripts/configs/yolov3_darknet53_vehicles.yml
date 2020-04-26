@@ -1,0 +1,9 @@
+name: yolov3_darknet53_vehicles
+dir: "modules/image/object_detection/yolov3_darknet53_vehicles"
+exclude:
+  - README.md
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/hub_dev/yolov3_darknet53_vehicles_model.tar.gz
+    dest: .
+    uncompress: True

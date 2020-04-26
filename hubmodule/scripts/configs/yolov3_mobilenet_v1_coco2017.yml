@@ -1,0 +1,7 @@
+name: yolov3_mobilenet_v1_coco2017
+dir: "modules/image/object_detection/yolov3_mobilenet_v1_coco2017"
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/cv/yolov3_mobilenet_v1_model.tar.gz
+    dest: yolov3_mobilenet_v1_model
+    uncompress: True

@@ -1,0 +1,11 @@
+name: chinese-bert-wwm
+dir: "modules/text/semantic_model/chinese_bert_wwm"
+exclude:
+  - README.md
+  - test_context.py
+  - test_embedding.py
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/nlp/chinese_bert_wwm/assets.tar.gz
+    dest: assets
+    uncompress: True

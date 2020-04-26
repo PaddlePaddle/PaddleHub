@@ -1,0 +1,11 @@
+name: ernie_tiny
+dir: "modules/text/semantic_model/ernie_tiny"
+exclude:
+  - README.md
+  - test_context.py
+  - test_embedding.py
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/nlp/ernie_tiny/assets.tar.gz
+    dest: assets
+    uncompress: True

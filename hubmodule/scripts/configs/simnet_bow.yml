@@ -1,0 +1,10 @@
+name: simnet_bow
+dir: "modules/text/semantic_model/simnet_bow"
+exclude:
+  - README.md
+  - test.py
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/simnet_bow_infer_model.tar.gz
+    dest: .
+    uncompress: True

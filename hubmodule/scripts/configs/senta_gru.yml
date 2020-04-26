@@ -1,0 +1,10 @@
+name: senta_gru
+dir: "modules/text/sentiment_analysis/senta_gru"
+exclude:
+  - README.md
+  - test.py
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/senta_gru_infer_model.tar.gz
+    dest: .
+    uncompress: True

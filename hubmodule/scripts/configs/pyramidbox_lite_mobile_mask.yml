@@ -1,0 +1,9 @@
+name: pyramidbox_lite_mobile_mask
+dir: "modules/image/face_detection/pyramidbox_lite_mobile_mask"
+exclude:
+  - README.md
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/hub_dev/pyramidbox_lite_mobile_mask_model.tar.gz
+    dest: .
+    uncompress: True

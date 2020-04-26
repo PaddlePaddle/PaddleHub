@@ -1,0 +1,11 @@
+name: lac
+dir: "modules/text/lexical_analysis/lac"
+exclude:
+  - user.dict
+  - README.md
+  - test.py
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/lac_infer_model.tar.gz
+    dest: .
+    uncompress: True

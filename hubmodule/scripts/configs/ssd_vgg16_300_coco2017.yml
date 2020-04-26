@@ -1,0 +1,7 @@
+name: ssd_vgg16_300_coco2017
+dir: "modules/image/object_detection/ssd_vgg16_300_coco2017"
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/cv/ssd_vgg16_300_model.tar.gz
+    dest: ssd_vgg16_300_model
+    uncompress: True

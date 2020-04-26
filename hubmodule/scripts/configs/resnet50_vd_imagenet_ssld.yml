@@ -1,0 +1,9 @@
+name: resnet50_vd_imagenet_ssld
+dir: "modules/image/classification/resnet50_vd_imagenet_ssld"
+exclude:
+  - README.md
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/cv/resnet50_vd_imagenet_ssld_pretrained.tar.gz
+    dest: model
+    uncompress: True
