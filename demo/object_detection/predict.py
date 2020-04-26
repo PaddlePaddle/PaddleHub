@@ -40,13 +40,17 @@ def predict(args):
     # define model(program)
     module = hub.Module(name=module_name)
     if model_type == 'rcnn':
-        input_dict, output_dict, program = module.context(trainable=True, phase='train')
-        input_dict_pred, output_dict_pred, program_pred = module.context(trainable=False)
+        input_dict, output_dict, program = module.context(
+            trainable=True, phase='train')
+        input_dict_pred, output_dict_pred, program_pred = module.context(
+            trainable=False)
     else:
         input_dict, output_dict, program = module.context(trainable=True)
         input_dict_pred = output_dict_pred = None
-    feed_list, pred_feed_list = get_feed_list(module_name, input_dict, input_dict_pred)
-    feature, pred_feature = get_mid_feature(module_name, output_dict, output_dict_pred)
+    feed_list, pred_feed_list = get_feed_list(module_name, input_dict,
+                                              input_dict_pred)
+    feature, pred_feature = get_mid_feature(module_name, output_dict,
+                                            output_dict_pred)
 
     config = hub.RunConfig(
         use_data_parallel=False,
@@ -67,7 +71,10 @@ def predict(args):
         model_type=model_type,
         config=config)
 
-    data = ["./test/test_img_bird.jpg", "./test/test_img_cat.jpg",]
+    data = [
+        "./test/test_img_bird.jpg",
+        "./test/test_img_cat.jpg",
+    ]
     label_map = ds.label_dict()
     run_states = task.predict(data=data, accelerate_mode=False)
     results = [run_state.run_results for run_state in run_states]
