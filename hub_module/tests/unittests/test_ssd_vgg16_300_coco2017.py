@@ -7,6 +7,8 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
+image_dir = '../image_dataset/object_detection/'
+
 
 class TestSSDVGG(unittest.TestCase):
     @classmethod
@@ -29,28 +31,28 @@ class TestSSDVGG(unittest.TestCase):
 
     def test_context(self):
         with fluid.program_guard(self.test_prog):
-            image = fluid.layers.data(
-                name='image', shape=[3, 300, 300], dtype='float32')
+            get_prediction = True
             inputs, outputs, program = self.ssd.context(
-                input_image=image,
-                pretrained=False,
+                pretrained=True,
                 trainable=True,
-                param_prefix='BaiDu')
+                get_prediction=get_prediction)
             image = inputs["image"]
-            head_features = outputs["body_feats"]
+            im_size = inputs["im_size"]
+            if get_prediction:
+                bbox_out = outputs['bbox_out']
+            else:
+                body_features = outputs['body_features']
 
     def test_object_detection(self):
         with fluid.program_guard(self.test_prog):
-            image_dir = '../image_dataset/'
-            zebra = cv2.imread(os.path.join(image_dir,
-                                            'zebra.jpg')).astype('float32')
-            zebra = np.array([zebra, zebra])
+            zebra = cv2.imread(os.path.join(image_dir, 'zebra.jpg')).astype('float32')
+            zebras = [zebra, zebra]
             ## only paths
             print(
                 self.ssd.object_detection(
                     paths=[os.path.join(image_dir, 'cat.jpg')]))
             ## only images
-            print(self.ssd.object_detection(images=zebra))
+            print(self.ssd.object_detection(images=zebras))
             ## paths and images
             print(
                 self.ssd.object_detection(
@@ -59,7 +61,7 @@ class TestSSDVGG(unittest.TestCase):
                         os.path.join(image_dir, 'dog.jpg'),
                         os.path.join(image_dir, 'giraffe.jpg')
                     ],
-                    images=zebra,
+                    images=zebras,
                     batch_size=2,
                     score_thresh=0.5))
 
