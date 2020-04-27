@@ -143,6 +143,7 @@ class YOLOv3DarkNet53Coco2017(hub.Module):
     def object_detection(self,
                          paths=None,
                          images=None,
+                         data=None,
                          batch_size=1,
                          use_gpu=False,
                          output_dir='detection_result',
@@ -171,6 +172,9 @@ class YOLOv3DarkNet53Coco2017(hub.Module):
                 save_path (str, optional): The path to save output images.
         """
         paths = paths if paths else list()
+        if data and 'image' in data:
+            paths += data['image']
+
         data_reader = partial(reader, paths, images)
         batch_reader = fluid.io.batch(data_reader, batch_size=batch_size)
         res = []
