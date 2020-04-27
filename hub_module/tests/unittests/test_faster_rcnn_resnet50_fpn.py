@@ -14,8 +14,8 @@ class TestFasterRCNNR50FPN(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         """Prepare the environment once before execution of all tests."""
-        # self.faster_rcnn_r50_fpn = hub.Module(name="faster_rcnn_resnet50_fpn_coco2017")
-        self.faster_rcnn_r50_fpn = hub.Module(directory='/server_share/PaddleHub/hub_module/modules/image/object_detection/faster_rcnn_resnet50_fpn_coco2017')
+        self.faster_rcnn_r50_fpn = hub.Module(name="faster_rcnn_resnet50_fpn_coco2017")
+        # self.faster_rcnn_r50_fpn = hub.Module(directory='')
 
     @classmethod
     def tearDownClass(self):
@@ -67,7 +67,7 @@ class TestFasterRCNNR50FPN(unittest.TestCase):
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    # suite.addTest(TestFasterRCNNR50FPN('test_object_detection'))
+    suite.addTest(TestFasterRCNNR50FPN('test_object_detection'))
     suite.addTest(TestFasterRCNNR50FPN('test_context'))
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)

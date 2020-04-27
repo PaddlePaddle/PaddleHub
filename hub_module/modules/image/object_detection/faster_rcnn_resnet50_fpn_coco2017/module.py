@@ -22,7 +22,7 @@ from faster_rcnn_resnet50_fpn_coco2017.processor import load_label_info, postpro
 from faster_rcnn_resnet50_fpn_coco2017.data_feed import test_reader, padding_minibatch
 from faster_rcnn_resnet50_fpn_coco2017.fpn import FPN
 from faster_rcnn_resnet50_fpn_coco2017.resnet import ResNet
-from faster_rcnn_resnet50_fpn_coco2017.rpn_head import AnchorGenerator, RPNTargetAssign, GenerateProposals, RPNHead
+from faster_rcnn_resnet50_fpn_coco2017.rpn_head import AnchorGenerator, RPNTargetAssign, GenerateProposals, FPNRPNHead
 from faster_rcnn_resnet50_fpn_coco2017.bbox_head import MultiClassNMS, BBoxHead, TwoFCHead
 from faster_rcnn_resnet50_fpn_coco2017.bbox_assigner import BBoxAssigner
 from faster_rcnn_resnet50_fpn_coco2017.roi_extractor import FPNRoIAlign
@@ -41,7 +41,7 @@ class FasterRCNNResNet50RPN(hub.Module):
         # default pretrained model, Faster-RCNN with backbone ResNet50, shape of input tensor is [3, 800, 1333]
         self.default_pretrained_model_path = os.path.join(self.directory, "faster_rcnn_resnet50_fpn_model")
         self.label_names = load_label_info(os.path.join(self.directory, "label_file.txt"))
-        self._set_config()
+        # self._set_config()
 
     def _set_config(self):
         """
