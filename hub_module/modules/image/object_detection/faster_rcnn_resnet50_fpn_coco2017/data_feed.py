@@ -15,14 +15,20 @@ __all__ = ['test_reader']
 
 
 def test_reader(paths=None, images=None):
-    """data generator
-
-    :param paths: path to images.
-    :type paths: list, each element is a str
-    :param images: data of images, [N, H, W, C]
-    :type images: numpy.ndarray
     """
-    img_list = []
+    data generator
+
+    Args:
+        paths (list[str]): paths to images.
+        images (list(numpy.ndarray)): data of images, shape of each is [H, W, C]
+
+    Yield:
+        res (dict): key contains 'image', 'im_info', 'im_shape', the corresponding values is:
+            image (numpy.ndarray): the image to be fed into network
+            im_info (numpy.ndarray): the info about the preprocessed.    
+            im_shape (numpy.ndarray): the shape of image.
+    """
+    img_list = list()
     if paths:
         for img_path in paths:
             assert os.path.isfile(
@@ -87,9 +93,9 @@ def padding_minibatch(batch_data, coarsest_stride=0, use_padded_im_info=True):
     else:
         max_shape = max_shape_org.astype('int32')
 
-    padding_image = []
-    padding_info = []
-    padding_shape = []
+    padding_image = list()
+    padding_info = list()
+    padding_shape = list()
 
     for data in batch_data:
         im_c, im_h, im_w = data['image'].shape

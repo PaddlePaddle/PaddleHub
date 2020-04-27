@@ -78,26 +78,37 @@ def load_label_info(file_path):
         return label_names
 
 
-def postprocess(paths, images, data_out, score_thresh, label_names, output_dir,
-                handle_id, visualization):
-    """postprocess the lod_tensor produced by fluid.Executor.run
-
-    :param paths: the path of images.
-    :type paths: list, each element is a str
-    :param images: data of images, [N, H, W, C]
-    :type images: numpy.ndarray
-    :param data_out: data produced by executor.run
-    :type data_out: lod_tensor
-    :param score_thresh: the low limit of bounding box.
-    :type score_thresh: float
-    :param label_names: label names
-    :type label_names: list
-    :param output_dir: output directory.
-    :type output_dir: str
-    :param handle_id: The number of images that have been handled.
-    :type handle_id: int
-    :param visualization: whether to draw bbox.
-    :param visualization: bool
+def postprocess(paths,
+                images,
+                data_out,
+                score_thresh,
+                label_names,
+                output_dir,
+                handle_id,
+                visualization):
+    """
+    postprocess the lod_tensor produced by fluid.Executor.run
+        
+    Args: 
+        paths (list[str]): the path of images.
+        images (list(numpy.ndarray)):  list of images, shape of each is [H, W, C].
+        data_out (lod_tensor): data produced by executor.run.
+        score_thresh (float): the low limit of bounding box.
+        label_names (list[str]): label names.
+        output_dir (str): output directory.
+        handle_id (int): The number of images that have been handled.
+        visualization (bool): whether to save as images.
+        
+    Returns:
+        res (list[dict]): The result of vehicles detecion. keys include 'data', 'save_path', the corresponding value is:
+            data (dict): the result of object detection, keys include 'left', 'top', 'right', 'bottom', 'label', 'confidence', the corresponding value is:
+                left (float): The X coordinate of the upper left corner of the bounding box;
+                top (float): The Y coordinate of the upper left corner of the bounding box;
+                right (float): The X coordinate of the lower right corner of the bounding box;
+                bottom (float): The Y coordinate of the lower right corner of the bounding box;
+                label (str): The label of detection result;
+                confidence (float): The confidence of detection result.
+            save_path (str): The path to save output images.
     """
     lod_tensor = data_out[0]
     lod = lod_tensor.lod[0]

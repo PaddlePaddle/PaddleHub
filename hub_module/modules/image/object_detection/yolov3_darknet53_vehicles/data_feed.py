@@ -12,12 +12,15 @@ __all__ = ['reader']
 
 
 def reader(paths=[], images=None):
-    """data generator
+    """
+    data generator
 
-    :param paths: path to images.
-    :type paths: list, each element is a str
-    :param images: data of images, [N, H, W, C]
-    :type images: numpy.ndarray
+    Args:
+        paths (list[str]): paths to images.
+        images (list(numpy.ndarray)): data of images, shape of each is [H, W, C]
+
+    Yield:
+        res (list): preprocessed image and the size of original image.
     """
     img_list = []
     if paths:
