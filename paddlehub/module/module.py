@@ -131,11 +131,11 @@ class Module(fluid.dygraph.Layer):
                  module_dir=None,
                  version=None,
                  **kwargs):
-        super(Module, self).__init__()
         # Avoid module being initialized multiple times
         if "_is_initialize" in self.__dict__ and self._is_initialize:
             return
 
+        super(Module, self).__init__()
         _run_func_name = self._get_func_name(self.__class__,
                                              _module_runnable_func)
         self._run_func = getattr(self,
@@ -146,14 +146,12 @@ class Module(fluid.dygraph.Layer):
         self._initialize(**kwargs)
         self._is_initialize = True
         self._code_version = "v2"
-        self._model_runner = None
+        self.model_runner = fluid.dygraph.StaticModelRunner(
+            self.pretrained_model_path)
 
     @property
-    def model_runner(self):
-        if not self._model_runner:
-            self._model_runner = fluid.dygraph.StaticModelRunner(
-                self.default_pretrained_model_path)
-        return self._model_runner
+    def pretrained_model_path(self):
+        return self.default_pretrained_model_path
 
     def _get_func_name(self, current_cls, module_func_dict):
         mod = current_cls.__module__ + "." + current_cls.__name__

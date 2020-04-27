@@ -246,6 +246,10 @@ class TransformerModule(NLPBaseModule):
     Tranformer Module base class can be used by BERT, ERNIE, RoBERTa and so on.
     """
 
+    @property
+    def pretrained_model_path(self):
+        return self.params_path
+
     def init_pretraining_params(self, exe, pretraining_params_path,
                                 main_program):
         assert os.path.exists(
@@ -353,12 +357,13 @@ class TransformerModule(NLPBaseModule):
 
         return inputs, outputs, module_program
 
-    @property
-    def model_runner(self):
-        if not self._model_runner:
-            self._model_runner = fluid.dygraph.StaticModelRunner(
-                self.params_path)
-        return self._model_runner
+
+#     @property
+#     def model_runner(self):
+#         if not self._model_runner:
+#             self._model_runner = fluid.dygraph.StaticModelRunner(
+#                 self.params_path)
+#         return self._model_runner
 
     def get_embedding(self, texts, use_gpu=False, batch_size=1):
         """
