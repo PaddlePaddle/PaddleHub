@@ -29,30 +29,27 @@ class TestRetinaNet(unittest.TestCase):
 
     def test_context(self):
         with fluid.program_guard(self.test_prog):
-            image = fluid.layers.data(
-                name='image', shape=[3, 608, 608], dtype='float32')
             inputs, outputs, program = self.retinanet.context(
-                input_image=image,
                 pretrained=False,
-                trainable=True,
-                param_prefix='BaiDu')
+                trainable=True)
             image = inputs["image"]
             im_info = inputs["im_info"]
 
     def test_object_detection(self):
         with fluid.program_guard(self.test_prog):
-            image_dir = '../image_dataset/'
+            image_dir = '../image_dataset/object_detection'
             zebra = cv2.imread(os.path.join(image_dir,
                                             'zebra.jpg')).astype('float32')
-            zebra = np.array([zebra, zebra])
+            zebras = [zebra, zebra]
             detection_results = self.retinanet.object_detection(
                 paths=[
                     os.path.join(image_dir, 'cat.jpg'),
                     os.path.join(image_dir, 'dog.jpg'),
                     os.path.join(image_dir, 'giraffe.jpg')
                 ],
-                images=zebra,
-                batch_size=2)
+                images=zebras,
+                batch_size=2,
+                use_gpu=True)
             print(detection_results)
 
 
