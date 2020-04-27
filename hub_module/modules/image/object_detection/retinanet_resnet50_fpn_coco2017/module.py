@@ -69,16 +69,19 @@ class RetinaNetResNet50FPN(hub.Module):
                 trainable=True,
                 pretrained=True,
                 get_prediction=False):
-        """Distill the Head Features, so as to perform transfer learning.
+        """
+        Distill the Head Features, so as to perform transfer learning.
 
-        :param trainable: whether to set parameters trainable.
-        :type trainable: bool
-        :param pretrained: whether to load default pretrained model.
-        :type pretrained: bool
-        :param get_prediction: whether to get prediction,
-            if True, outputs is {'bbox_out': bbox_out},
-            if False, outputs is {'head_features': head_features}.
-        :type get_prediction: bool
+        Args:
+            trainable (bool): whether to set parameters trainable.
+            pretrained (bool): whether to load default pretrained model.
+            var_prefix (str): prefix to append to the varibles.
+            get_prediction (bool): whether to get prediction.
+
+        Returns:
+             inputs(dict): the input variables.
+             outputs(dict): the output variables.
+             context_prog (Program): the program to execute transfer learning.
         """
         context_prog = fluid.Program()
         startup_program = fluid.Program()
@@ -166,31 +169,37 @@ class RetinaNetResNet50FPN(hub.Module):
                          score_thresh=0.5,
                          visualization=True):
         """API of Object Detection.
-        :param paths: the path of images.
-        :type paths: list, each element is correspond to the path of an image.
-        :param images: data of images, [N, H, W, C]
-        :type images: numpy.ndarray
-        :param use_gpu: whether to use gpu or not.
-        :type use_gpu: bool
-        :param batch_size: bathc size.
-        :type batch_size: int
-        :param output_dir: the directory to store the detection result.
-        :type output_dir: str
-        :param score_thresh: the threshold of detection confidence.
-        :type score_thresh: float
-        :param visualization: whether to draw bounding box and save images.
-        :type visualization: bool
+
+        Args:
+            paths (list[str]): The paths of images.
+            images (list(numpy.ndarray)): images data, shape of each is [H, W, C]
+            batch_size (int): batch size.
+            use_gpu (bool): Whether to use gpu.
+            output_dir (str): The path to store output images.
+            visualization (bool): Whether to save image or not.
+            score_thresh (float): threshold for object detecion.
+
+        Returns:
+            res (list[dict]): The result of coco2017 detecion. keys include 'data', 'save_path', the corresponding value is:
+                data (dict): the result of object detection, keys include 'left', 'top', 'right', 'bottom', 'label', 'confidence', the corresponding value is:
+                    left (float): The X coordinate of the upper left corner of the bounding box;
+                    top (float): The Y coordinate of the upper left corner of the bounding box;
+                    right (float): The X coordinate of the lower right corner of the bounding box;
+                    bottom (float): The Y coordinate of the lower right corner of the bounding box;
+                    label (str): The label of detection result;
+                    confidence (float): The confidence of detection result.
+                save_path (str, optional): The path to save output images.
         """
-        all_images = []
-        paths = paths if paths else []
+        all_images = list()
+        paths = paths if paths else list()
         for yield_data in test_reader(paths, images):
             all_images.append(yield_data)
 
         images_num = len(all_images)
         loop_num = int(np.ceil(images_num / batch_size))
-        res = []
+        res = list()
         for iter_id in range(loop_num):
-            batch_data = []
+            batch_data = list()
             handle_id = iter_id * batch_size
             for image_id in range(batch_size):
                 try:
@@ -248,7 +257,7 @@ class RetinaNetResNet50FPN(hub.Module):
             help="file contain input data")
 
     def check_input_data(self, args):
-        input_data = []
+        input_data = list()
         if args.input_path:
             input_data = [args.input_path]
         elif args.input_file:

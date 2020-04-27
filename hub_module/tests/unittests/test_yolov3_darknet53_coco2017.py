@@ -7,12 +7,14 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
+image_dir = '../image_dataset/object_detection/'
 
-class TestYoloV3MoobileNetV1(unittest.TestCase):
+
+class TestYoloV3DarkNet53(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         """Prepare the environment once before execution of all tests."""
-        self.yolov3 = hub.Module(name="yolov3_mobilenet_v1_coco2017")
+        self.yolov3 = hub.Module(name="yolov3_darknet53_coco2017")
 
     @classmethod
     def tearDownClass(self):
@@ -29,36 +31,35 @@ class TestYoloV3MoobileNetV1(unittest.TestCase):
 
     def test_context(self):
         with fluid.program_guard(self.test_prog):
-            image = fluid.layers.data(
-                name='image', shape=[3, 608, 608], dtype='float32')
+            get_prediction = True
             inputs, outputs, program = self.yolov3.context(
-                input_image=image,
-                pretrained=False,
-                trainable=True,
-                param_prefix='BaiDu')
+                pretrained=True, trainable=True, get_prediction=get_prediction)
             image = inputs["image"]
             im_size = inputs["im_size"]
+            if get_prediction:
+                bbox_out = outputs['bbox_out']
+            else:
+                head_features = outputs['head_features']
 
     def test_object_detection(self):
         with fluid.program_guard(self.test_prog):
-            image_dir = '../image_dataset/'
             zebra = cv2.imread(os.path.join(image_dir,
                                             'zebra.jpg')).astype('float32')
-            zebra = np.array([zebra, zebra])
+            zebras = [zebra, zebra]
             detection_results = self.yolov3.object_detection(
                 paths=[
                     os.path.join(image_dir, 'cat.jpg'),
                     os.path.join(image_dir, 'dog.jpg'),
                     os.path.join(image_dir, 'giraffe.jpg')
                 ],
-                images=zebra,
-                batch_size=1)
+                images=zebras,
+                batch_size=2)
             print(detection_results)
 
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(TestYoloV3MoobileNetV1('test_object_detection'))
-    suite.addTest(TestYoloV3MoobileNetV1('test_context'))
+    suite.addTest(TestYoloV3DarkNet53('test_object_detection'))
+    suite.addTest(TestYoloV3DarkNet53('test_context'))
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)

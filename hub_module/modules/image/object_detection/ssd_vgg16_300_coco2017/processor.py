@@ -1,38 +1,41 @@
 # coding=utf-8
+import base64
 import os
 
+import cv2
 import numpy as np
 from PIL import Image, ImageDraw
 
-__all__ = ['load_label_info', 'postprocess']
+__all__ = ['base64_to_cv2', 'load_label_info', 'postprocess']
 
 
-def check_dir(dir_path):
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-    elif os.path.isfile(dir_path):
-        os.remove(dir_path)
-        os.makedirs(dir_path)
+def base64_to_cv2(b64str):
+    data = base64.b64decode(b64str.encode('utf8'))
+    data = np.fromstring(data, np.uint8)
+    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    return data
 
 
 def get_save_image_name(img, output_dir, image_path):
-    """Get save image name from source image path.
     """
+    Get save image name from source image path.
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     image_name = os.path.split(image_path)[-1]
     name, ext = os.path.splitext(image_name)
 
-    if ext == '':
-        if img.format == 'PNG':
+    if img.format == 'PNG':
+        ext = '.png'
+    elif img.format == 'JPEG':
+        ext = '.jpg'
+    elif img.format == 'BMP':
+        ext = '.bmp'
+    else:
+        if img.mode == "RGB" or img.mode == "L":
+            ext = ".jpg"
+        elif img.mode == "RGBA" or img.mode == "P":
             ext = '.png'
-        elif img.format == 'JPEG':
-            ext = '.jpg'
-        elif img.format == 'BMP':
-            ext = '.bmp'
-        else:
-            if img.mode == "RGB" or img.mode == "L":
-                ext = ".jpg"
-            elif img.mode == "RGBA" or img.mode == "P":
-                ext = '.png'
 
     return os.path.join(output_dir, "{}".format(name)) + ext
 
@@ -43,11 +46,13 @@ def draw_bounding_box_on_image(image_path, data_list, save_dir):
     for data in data_list:
         left, right, top, bottom = data['left'], data['right'], data[
             'top'], data['bottom']
+
         # draw bbox
         draw.line([(left, top), (left, bottom), (right, bottom), (right, top),
                    (left, top)],
                   width=2,
                   fill='red')
+
         # draw label
         if image.mode == 'RGB':
             text = data['label'] + ": %.2f%%" % (100 * data['confidence'])
@@ -63,6 +68,7 @@ def draw_bounding_box_on_image(image_path, data_list, save_dir):
         os.remove(save_name)
 
     image.save(save_name)
+
     return save_name
 
 
@@ -95,16 +101,14 @@ def postprocess(paths,
     postprocess the lod_tensor produced by fluid.Executor.run
 
     Args:
-        paths (list[str]): The paths of images.
-        images (list(numpy.ndarray)): images data, shape of each is [H, W, C]
-        data_out (lod_tensor): data output of predictor.
-        batch_size (int): batch size.
-        use_gpu (bool): Whether to use gpu.
-        output_dir (str): The path to store output images.
-        visualization (bool): Whether to save image or not.
+        paths (list[str]): the path of images.
+        images (list(numpy.ndarray)):  list of images, shape of each is [H, W, C].
+        data_out (lod_tensor): data produced by executor.run.
         score_thresh (float): the low limit of bounding box.
         label_names (list[str]): label names.
+        output_dir (str): output directory.
         handle_id (int): The number of images that have been handled.
+        visualization (bool): whether to save as images.
 
     Returns:
         res (list[dict]): The result of vehicles detecion. keys include 'data', 'save_path', the corresponding value is:
@@ -120,22 +124,19 @@ def postprocess(paths,
     lod_tensor = data_out[0]
     lod = lod_tensor.lod[0]
     results = lod_tensor.as_ndarray()
-
-    check_dir(output_dir)
-
-    assert type(paths) is list, "type(paths) is not list."
     if handle_id < len(paths):
         unhandled_paths = paths[handle_id:]
         unhandled_paths_num = len(unhandled_paths)
     else:
         unhandled_paths_num = 0
 
-    output = list()
+    output = []
     for index in range(len(lod) - 1):
         output_i = {'data': []}
         if index < unhandled_paths_num:
             org_img_path = unhandled_paths[index]
             org_img = Image.open(org_img_path)
+            output_i['path'] = org_img_path
         else:
             org_img = images[index - unhandled_paths_num]
             org_img = org_img.astype(np.uint8)
@@ -156,6 +157,10 @@ def postprocess(paths,
             category_id = int(row[0])
             confidence = row[1]
             bbox = row[2:]
+            bbox[0] = bbox[0] * org_img_width
+            bbox[1] = bbox[1] * org_img_height
+            bbox[2] = bbox[2] * org_img_width
+            bbox[3] = bbox[3] * org_img_height
             dt = {}
             dt['label'] = label_names[category_id]
             dt['confidence'] = confidence

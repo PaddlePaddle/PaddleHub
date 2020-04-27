@@ -7,6 +7,8 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
+image_dir = '../image_dataset/object_detection/'
+
 
 class TestFasterRCNNResNet50(unittest.TestCase):
     @classmethod
@@ -29,13 +31,8 @@ class TestFasterRCNNResNet50(unittest.TestCase):
 
     def test_context(self):
         with fluid.program_guard(self.test_prog):
-            input_image = fluid.layers.data(
-                name='image', shape=[3, 800, 1333], dtype='float32')
             inputs, outputs, program = self.faster_rcnn_r50.context(
-                input_image=input_image,
-                pretrained=False,
-                trainable=True,
-                phase='train')
+                pretrained=False, trainable=True, phase='train')
             image = inputs['image']
             im_info = inputs['im_info']
             im_shape = inputs['im_shape']
@@ -49,19 +46,18 @@ class TestFasterRCNNResNet50(unittest.TestCase):
 
     def test_object_detection(self):
         with fluid.program_guard(self.test_prog):
-            image_dir = '../image_dataset/'
             zebra = cv2.imread(os.path.join(image_dir,
                                             'zebra.jpg')).astype('float32')
-            zebra = np.array([zebra, zebra])
+            zebras = [zebra, zebra]
             detection_results = self.faster_rcnn_r50.object_detection(
                 paths=[
                     os.path.join(image_dir, 'cat.jpg'),
                     os.path.join(image_dir, 'dog.jpg'),
                     os.path.join(image_dir, 'giraffe.jpg')
                 ],
-                images=zebra,
+                images=zebras,
                 batch_size=2,
-                use_gpu=False,
+                use_gpu=True,
                 score_thresh=0.5)
             print(detection_results)
 

@@ -7,8 +7,10 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
+image_dir = '../image_dataset/object_detection/'
 
-class TestSSDVGG(unittest.TestCase):
+
+class TestSSDVGG512(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         """Prepare the environment once before execution of all tests."""
@@ -29,28 +31,27 @@ class TestSSDVGG(unittest.TestCase):
 
     def test_context(self):
         with fluid.program_guard(self.test_prog):
-            image = fluid.layers.data(
-                name='image', shape=[3, 512, 512], dtype='float32')
+            get_prediction = True
             inputs, outputs, program = self.ssd.context(
-                input_image=image,
-                pretrained=False,
-                trainable=True,
-                param_prefix='BaiDu')
+                pretrained=True, trainable=True, get_prediction=get_prediction)
             image = inputs["image"]
-            head_features = outputs["body_feats"]
+            im_size = inputs["im_size"]
+            if get_prediction:
+                bbox_out = outputs['bbox_out']
+            else:
+                body_features = outputs['body_features']
 
     def test_object_detection(self):
         with fluid.program_guard(self.test_prog):
-            image_dir = '../image_dataset/'
             zebra = cv2.imread(os.path.join(image_dir,
                                             'zebra.jpg')).astype('float32')
-            zebra = np.array([zebra, zebra])
+            zebras = [zebra, zebra]
             ## only paths
             print(
                 self.ssd.object_detection(
                     paths=[os.path.join(image_dir, 'cat.jpg')]))
             ## only images
-            print(self.ssd.object_detection(images=zebra))
+            print(self.ssd.object_detection(images=zebras))
             ## paths and images
             print(
                 self.ssd.object_detection(
@@ -59,14 +60,14 @@ class TestSSDVGG(unittest.TestCase):
                         os.path.join(image_dir, 'dog.jpg'),
                         os.path.join(image_dir, 'giraffe.jpg')
                     ],
-                    images=zebra,
+                    images=zebras,
                     batch_size=2,
                     score_thresh=0.5))
 
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(TestSSDVGG('test_object_detection'))
-    suite.addTest(TestSSDVGG('test_context'))
+    suite.addTest(TestSSDVGG512('test_object_detection'))
+    suite.addTest(TestSSDVGG512('test_context'))
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)

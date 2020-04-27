@@ -15,6 +15,7 @@ __all__ = ['DarkNet']
 
 class DarkNet(object):
     """DarkNet, see https://pjreddie.com/darknet/yolo/
+
     Args:
         depth (int): network depth, currently only darknet 53 is supported
         norm_type (str): normalization type, 'bn' and 'sync_bn' are supported
@@ -120,11 +121,8 @@ class DarkNet(object):
         return out
 
     def __call__(self, input):
-        """Get the backbone of DarkNet, that is output for the 5 stages.
-
-        :param input: Variable of input image
-        :type input: Variable
-        :Returns: The last variables of each stage.
+        """
+        Get the backbone of DarkNet, that is output for the 5 stages.
         """
         stages, block_func = self.depth_cfg[self.depth]
         stages = stages[0:5]

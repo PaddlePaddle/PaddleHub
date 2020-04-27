@@ -1,22 +1,22 @@
 # coding=utf-8
 from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
-import os
 import ast
 import argparse
+import os
 from functools import partial
 
+import yaml
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
-from paddlehub.module.module import moduleinfo, runnable
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
-from paddlehub.io.parser import txt_parser
-import yaml
+from paddlehub.module.module import moduleinfo, runnable, serving
+from paddlehub.common.paddle_helper import add_vars_prefix
 
 from ssd_vgg16_512_coco2017.vgg import VGG
+from ssd_vgg16_512_coco2017.processor import load_label_info, postprocess, base64_to_cv2
+from ssd_vgg16_512_coco2017.data_feed import reader
 
 
 @moduleinfo(
@@ -26,24 +26,17 @@ from ssd_vgg16_512_coco2017.vgg import VGG
     summary="SSD with backbone VGG16, trained with dataset COCO.",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com")
-class SSDVGG16(hub.Module):
+class SSDVGG16_512(hub.Module):
     def _initialize(self):
-        self.ssd = hub.Module(name="ssd")
-        # default pretrained model of SSD, the shape of input image tensor is (3, 512, 512)
         self.default_pretrained_model_path = os.path.join(
             self.directory, "ssd_vgg16_512_model")
-        self.label_names = self.ssd.load_label_info(
+        self.label_names = load_label_info(
             os.path.join(self.directory, "label_file.txt"))
-        self.infer_prog = None
-        self.image = None
-        self.bbox_out = None
+        self.model_config = None
         self._set_config()
-        self._config = None
 
     def _set_config(self):
-        """
-        predictor config setting
-        """
+        # predictor config setting.
         cpu_config = AnalysisConfig(self.default_pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
@@ -62,25 +55,36 @@ class SSDVGG16(hub.Module):
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_paddle_predictor(gpu_config)
 
+        # model config setting.
+        if not self.model_config:
+            with open(os.path.join(self.directory, 'config.yml')) as fp:
+                self.model_config = yaml.load(fp.read(), Loader=yaml.FullLoader)
+
+        self.multi_box_head_config = self.model_config['MultiBoxHead']
+        self.output_decoder_config = self.model_config['SSDOutputDecoder']
+
     def context(self,
-                num_classes=81,
                 trainable=True,
                 pretrained=True,
+                var_prefix='',
                 get_prediction=False):
-        """Distill the Head Features, so as to perform transfer learning.
-
-        :param trainable: whether to set parameters trainable.
-        :type trainable: bool
-        :param pretrained: whether to load default pretrained model.
-        :type pretrained: bool
-        :param get_prediction: whether to get prediction,
-            if True, outputs is {'bbox_out': bbox_out},
-            if False, outputs is {'head_features': head_features}.
-        :type get_prediction: bool
         """
-        wrapped_prog = fluid.Program()
+        Distill the Head Features, so as to perform transfer learning.
+
+        Args:
+            trainable (bool): whether to set parameters trainable.
+            pretrained (bool): whether to load default pretrained model.
+            var_prefix (str): prefix to append to the varibles.
+            get_prediction (bool): whether to get prediction.
+
+        Returns:
+             inputs(dict): the input variables.
+             outputs(dict): the output variables.
+             context_prog (Program): the program to execute transfer learning.
+        """
+        context_prog = fluid.Program()
         startup_program = fluid.Program()
-        with fluid.program_guard(wrapped_prog, startup_program):
+        with fluid.program_guard(context_prog, startup_program):
             with fluid.unique_name.guard():
                 # image
                 image = fluid.layers.data(
@@ -95,21 +99,61 @@ class SSDVGG16(hub.Module):
                                          [128, 256, 1, 2,
                                           3], [128, 256, 1, 2, 3],
                                          [128, 256, 1, 1, 4]])
+                # body_feats
                 body_feats = backbone(image)
-                # call ssd.context
-                inputs, outputs, context_prog = self.ssd.context(
-                    body_feats=body_feats,
-                    multi_box_head=self.ssd.MultiBoxHead(
-                        num_classes=num_classes, **self.multi_box_head_config),
-                    ssd_output_decoder=self.ssd.SSDOutputDecoder(
-                        **self.output_decoder_config),
-                    image=image,
-                    trainable=trainable,
-                    var_prefix='@HUB_{}@'.format(self.name),
-                    get_prediction=get_prediction)
+                # im_size
+                im_size = fluid.layers.data(
+                    name='im_size', shape=[2], dtype='int32')
+                # var_prefix
+                var_prefix = var_prefix if var_prefix else '@HUB_{}@'.format(
+                    self.name)
+                # names of inputs
+                inputs = {
+                    'image': var_prefix + image.name,
+                    'im_size': var_prefix + im_size.name
+                }
+                # names of outputs
+                if get_prediction:
+                    locs, confs, box, box_var = fluid.layers.multi_box_head(
+                        inputs=body_feats,
+                        image=image,
+                        num_classes=81,
+                        **self.multi_box_head_config)
+                    pred = fluid.layers.detection_output(
+                        loc=locs,
+                        scores=confs,
+                        prior_box=box,
+                        prior_box_var=box_var,
+                        **self.output_decoder_config)
+                    outputs = {'bbox_out': [var_prefix + pred.name]}
+                else:
+                    outputs = {
+                        'body_features':
+                        [var_prefix + var.name for var in body_feats]
+                    }
+
+                # add_vars_prefix
+                add_vars_prefix(context_prog, var_prefix)
+                add_vars_prefix(fluid.default_startup_program(), var_prefix)
+                # inputs
+                inputs = {
+                    key: context_prog.global_block().vars[value]
+                    for key, value in inputs.items()
+                }
+                outputs = {
+                    out_key: [
+                        context_prog.global_block().vars[varname]
+                        for varname in out_value
+                    ]
+                    for out_key, out_value in outputs.items()
+                }
+                # trainable
+                for param in context_prog.global_block().iter_parameters():
+                    param.trainable = trainable
 
                 place = fluid.CPUPlace()
                 exe = fluid.Executor(place)
+                # pretrained
                 if pretrained:
 
                     def _if_exist(var):
@@ -123,67 +167,52 @@ class SSDVGG16(hub.Module):
                         predicate=_if_exist)
                 else:
                     exe.run(startup_program)
+
                 return inputs, outputs, context_prog
-
-    @property
-    def config(self):
-        if not self._config:
-            with open(os.path.join(self.directory, 'config.yml')) as file:
-                self._config = yaml.load(file.read(), Loader=yaml.FullLoader)
-        return self._config
-
-    @property
-    def multi_box_head_config(self):
-        return self.config['MultiBoxHead']
-
-    @property
-    def output_decoder_config(self):
-        return self.config['SSDOutputDecoder']
 
     def object_detection(self,
                          paths=None,
                          images=None,
-                         use_gpu=False,
                          batch_size=1,
+                         use_gpu=False,
                          output_dir='detection_result',
                          score_thresh=0.5,
                          visualization=True):
         """API of Object Detection.
 
-        :param paths: the path of images.
-        :type paths: list, each element is correspond to the path of an image.
-        :param images: data of images, [N, H, W, C]
-        :type images: numpy.ndarray
-        :param use_gpu: whether to use gpu or not.
-        :type use_gpu: bool
-        :param batch_size: bathc size.
-        :type batch_size: int
-        :param output_dir: the directory to store the detection result.
-        :type output_dir: str
-        :param score_thresh: the threshold of detection confidence.
-        :type score_thresh: float
-        :param visualization: whether to draw bounding box and save images.
-        :type visualization: bool
+        Args:
+            paths (list[str]): The paths of images.
+            images (list(numpy.ndarray)): images data, shape of each is [H, W, C]
+            batch_size (int): batch size.
+            use_gpu (bool): Whether to use gpu.
+            output_dir (str): The path to store output images.
+            visualization (bool): Whether to save image or not.
+            score_thresh (float): threshold for object detecion.
+
+        Returns:
+            res (list[dict]): The result of coco2017 detecion. keys include 'data', 'save_path', the corresponding value is:
+                data (dict): the result of object detection, keys include 'left', 'top', 'right', 'bottom', 'label', 'confidence', the corresponding value is:
+                    left (float): The X coordinate of the upper left corner of the bounding box;
+                    top (float): The Y coordinate of the upper left corner of the bounding box;
+                    right (float): The X coordinate of the lower right corner of the bounding box;
+                    bottom (float): The Y coordinate of the lower right corner of the bounding box;
+                    label (str): The label of detection result;
+                    confidence (float): The confidence of detection result.
+                save_path (str, optional): The path to save output images.
         """
-        resize_image = self.ssd.ResizeImage(
-            target_size=300, interp=1, max_size=0, use_cv2=False)
-        data_reader = partial(
-            self.ssd.reader, paths, images, resize_image=resize_image)
+        paths = paths if paths else list()
+        data_reader = partial(reader, paths, images)
         batch_reader = fluid.io.batch(data_reader, batch_size=batch_size)
-        paths = paths if paths else []
         res = []
         for iter_id, feed_data in enumerate(batch_reader()):
-            np_data = np.array(feed_data).astype('float32')
-            if np_data.shape == 1:
-                np_data = np_data[0]
-            else:
-                np_data = np.squeeze(np_data, axis=1)
-            data_tensor = PaddleTensor(np_data.copy())
+            feed_data = np.array(feed_data)
+            image_tensor = PaddleTensor(np.array(list(feed_data[:, 0])).copy())
             if use_gpu:
-                data_out = self.gpu_predictor.run([data_tensor])
+                data_out = self.gpu_predictor.run([image_tensor])
             else:
-                data_out = self.cpu_predictor.run([data_tensor])
-            output = self.ssd.postprocess(
+                data_out = self.cpu_predictor.run([image_tensor])
+
+            output = postprocess(
                 paths=paths,
                 images=images,
                 data_out=data_out,
@@ -192,54 +221,49 @@ class SSDVGG16(hub.Module):
                 output_dir=output_dir,
                 handle_id=iter_id * batch_size,
                 visualization=visualization)
-            res += output
+            res.extend(output)
         return res
 
-    def add_module_config_arg(self):
-        """
-        Add the command config options
-        """
-        self.arg_config_group.add_argument(
-            '--use_gpu',
-            type=ast.literal_eval,
-            default=False,
-            help="whether use GPU or not")
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
+        if combined:
+            model_filename = "__model__" if not model_filename else model_filename
+            params_filename = "__params__" if not params_filename else params_filename
+        place = fluid.CPUPlace()
+        exe = fluid.Executor(place)
 
-        self.arg_config_group.add_argument(
-            '--batch_size',
-            type=int,
-            default=1,
-            help="batch size for prediction")
+        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+            dirname=self.default_pretrained_model_path, executor=exe)
 
-    def add_module_input_arg(self):
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
+
+    @serving
+    def serving_method(self, images, **kwargs):
         """
-        Add the command input options
+        Run as a service.
         """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, default=None, help="input data")
-
-        self.arg_input_group.add_argument(
-            '--input_file',
-            type=str,
-            default=None,
-            help="file contain input data")
-
-    def check_input_data(self, args):
-        input_data = []
-        if args.input_path:
-            input_data = [args.input_path]
-        elif args.input_file:
-            if not os.path.exists(args.input_file):
-                raise RuntimeError("File %s is not exist." % args.input_file)
-            else:
-                input_data = txt_parser.parse(args.input_file, use_strip=True)
-        return input_data
+        images_decode = [base64_to_cv2(image) for image in images]
+        results = self.object_detection(images_decode, **kwargs)
+        return results
 
     @runnable
     def run_cmd(self, argvs):
+        """
+        Run as a command.
+        """
         self.parser = argparse.ArgumentParser(
-            description="Run the {}".format(self.name),
-            prog="hub run {}".format(self.name),
+            description="Run the {} module.".format(self.name),
+            prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
         self.arg_input_group = self.parser.add_argument_group(
@@ -251,14 +275,48 @@ class SSDVGG16(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        input_data = self.check_input_data(args)
-        if len(input_data) == 0:
-            self.parser.print_help()
-            exit(1)
-        else:
-            for image_path in input_data:
-                if not os.path.exists(image_path):
-                    raise RuntimeError(
-                        "File %s or %s is not exist." % image_path)
-        return self.object_detection(
-            paths=input_data, use_gpu=args.use_gpu, batch_size=args.batch_size)
+        results = self.face_detection(
+            paths=[args.input_path],
+            batch_size=args.batch_size,
+            use_gpu=args.use_gpu,
+            output_dir=args.output_dir,
+            visualization=args.visualization,
+            score_thresh=args.score_thresh)
+        return results
+
+    def add_module_config_arg(self):
+        """
+        Add the command config options.
+        """
+        self.arg_config_group.add_argument(
+            '--use_gpu',
+            type=ast.literal_eval,
+            default=False,
+            help="whether use GPU or not")
+        self.arg_config_group.add_argument(
+            '--output_dir',
+            type=str,
+            default='detection_result',
+            help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--visualization',
+            type=ast.literal_eval,
+            default=False,
+            help="whether to save output as images.")
+
+    def add_module_input_arg(self):
+        """
+        Add the command input options.
+        """
+        self.arg_input_group.add_argument(
+            '--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument(
+            '--batch_size',
+            type=ast.literal_eval,
+            default=1,
+            help="batch size.")
+        self.arg_input_group.add_argument(
+            '--score_thresh',
+            type=ast.literal_eval,
+            default=0.5,
+            help="threshold for object detecion.")

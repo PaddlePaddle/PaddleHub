@@ -1,6 +1,5 @@
 # coding=utf-8
 from __future__ import absolute_import
-from __future__ import division
 
 import ast
 import argparse
@@ -12,9 +11,12 @@ import paddle.fluid as fluid
 import paddlehub as hub
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
+from paddlehub.common.paddle_helper import add_vars_prefix
 
 from yolov3_darknet53_pedestrian.darknet import DarkNet
-from yolov3_darknet53_pedestrian.serving import base64_to_cv2
+from yolov3_darknet53_pedestrian.processor import load_label_info, postprocess, base64_to_cv2
+from yolov3_darknet53_pedestrian.data_feed import reader
+from yolov3_darknet53_pedestrian.yolo_head import MultiClassNMS, YOLOv3Head
 
 
 @moduleinfo(
@@ -24,13 +26,12 @@ from yolov3_darknet53_pedestrian.serving import base64_to_cv2
     summary=
     "Baidu's YOLOv3 model for pedestrian detection, with backbone DarkNet53.",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com")
+    author_email="")
 class YOLOv3DarkNet53Pedestrian(hub.Module):
     def _initialize(self):
-        self.yolov3 = hub.Module(name="yolov3")
         self.default_pretrained_model_path = os.path.join(
             self.directory, "yolov3_darknet53_pedestrian_model")
-        self.label_names = self.yolov3.load_label_info(
+        self.label_names = load_label_info(
             os.path.join(self.directory, "label_file.txt"))
         self._set_config()
 
@@ -75,15 +76,22 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
              outputs(dict): the output variables.
              context_prog (Program): the program to execute transfer learning.
         """
-        wrapped_prog = fluid.Program()
+        context_prog = fluid.Program()
         startup_program = fluid.Program()
-        with fluid.program_guard(wrapped_prog, startup_program):
+        with fluid.program_guard(context_prog, startup_program):
             with fluid.unique_name.guard():
                 # image
                 image = fluid.layers.data(
                     name='image', shape=[3, 608, 608], dtype='float32')
+                # backbone
+                backbone = DarkNet(norm_type='sync_bn', norm_decay=0., depth=53)
+                # body_feats
+                body_feats = backbone(image)
+                # im_size
+                im_size = fluid.layers.data(
+                    name='im_size', shape=[2], dtype='int32')
                 # yolo_head
-                yolo_head = self.yolov3.YOLOv3Head(
+                yolo_head = YOLOv3Head(
                     anchor_masks=[[6, 7, 8], [3, 4, 5], [0, 1, 2]],
                     anchors=[[10, 13], [16, 30], [33, 23], [30, 61], [62, 45],
                              [59, 119], [116, 90], [156, 198], [373, 326]],
@@ -91,27 +99,58 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
                     num_classes=1,
                     ignore_thresh=0.7,
                     label_smooth=True,
-                    nms=self.yolov3.MultiClassNMS(
+                    nms=MultiClassNMS(
                         background_label=-1,
                         keep_top_k=100,
                         nms_threshold=0.45,
                         nms_top_k=1000,
                         normalized=False,
                         score_threshold=0.01))
-                backbone = DarkNet(norm_type='sync_bn', norm_decay=0., depth=53)
-                body_feats = backbone(image)
-                var_prefix = var_prefix if var_prefix else '@HUB_{}@'.format(
-                    self.name)
-                inputs, outputs, context_prog = self.yolov3.context(
-                    body_feats=body_feats,
-                    yolo_head=yolo_head,
-                    image=image,
-                    trainable=trainable,
-                    var_prefix=var_prefix,
-                    get_prediction=get_prediction)
+                # head_features
+                head_features = yolo_head._get_outputs(
+                    body_feats, is_train=trainable)
 
                 place = fluid.CPUPlace()
                 exe = fluid.Executor(place)
+                exe.run(fluid.default_startup_program())
+
+                # var_prefix
+                var_prefix = var_prefix if var_prefix else '@HUB_{}@'.format(
+                    self.name)
+                # name of inputs
+                inputs = {
+                    'image': var_prefix + image.name,
+                    'im_size': var_prefix + im_size.name
+                }
+                # name of outputs
+                if get_prediction:
+                    bbox_out = yolo_head.get_prediction(head_features, im_size)
+                    outputs = {'bbox_out': [var_prefix + bbox_out.name]}
+                else:
+                    outputs = {
+                        'head_features':
+                        [var_prefix + var.name for var in head_features]
+                    }
+                # add_vars_prefix
+                add_vars_prefix(context_prog, var_prefix)
+                add_vars_prefix(fluid.default_startup_program(), var_prefix)
+                # inputs
+                inputs = {
+                    key: context_prog.global_block().vars[value]
+                    for key, value in inputs.items()
+                }
+                # outputs
+                outputs = {
+                    key: [
+                        context_prog.global_block().vars[varname]
+                        for varname in value
+                    ]
+                    for key, value in outputs.items()
+                }
+                # trainable
+                for param in context_prog.global_block().iter_parameters():
+                    param.trainable = trainable
+                # pretrained
                 if pretrained:
 
                     def _if_exist(var):
@@ -159,7 +198,7 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
                 save_path (str, optional): The path to save output images.
         """
         paths = paths if paths else list()
-        data_reader = partial(self.yolov3.reader, paths, images)
+        data_reader = partial(reader, paths, images)
         batch_reader = fluid.io.batch(data_reader, batch_size=batch_size)
         res = []
         for iter_id, feed_data in enumerate(batch_reader()):
@@ -173,7 +212,7 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
                 data_out = self.cpu_predictor.run(
                     [image_tensor, im_size_tensor])
 
-            output = self.yolov3.postprocess(
+            output = postprocess(
                 paths=paths,
                 images=images,
                 data_out=data_out,
@@ -214,7 +253,7 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.face_detection(images_decode, **kwargs)
+        results = self.object_detection(images_decode, **kwargs)
         return results
 
     @runnable

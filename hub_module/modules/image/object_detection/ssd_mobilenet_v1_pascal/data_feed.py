@@ -9,10 +9,10 @@ from collections import OrderedDict
 
 import cv2
 import numpy as np
-from PIL import Image, ImageEnhance
+from PIL import Image
 from paddle import fluid
 
-__all__ = ['reader', 'DecodeImage', 'ResizeImage', 'NormalizeImage', 'Permute']
+__all__ = ['reader']
 
 
 class DecodeImage(object):
@@ -59,8 +59,6 @@ class ResizeImage(object):
         self.target_size = target_size
 
     def __call__(self, im):
-        """ Resize the image numpy.
-        """
         if not isinstance(im, np.ndarray):
             raise TypeError("{}: image type is not numpy.".format(self))
         if len(im.shape) != 3:
@@ -132,6 +130,7 @@ class NormalizeImage(object):
 
     def __call__(self, im):
         """Normalize the image.
+
         Operators:
             1.(optional) Scale the image to [0,1]
             2. Each pixel minus mean and is divided by std
@@ -154,6 +153,7 @@ class Permute(object):
     def __init__(self, to_bgr=True, channel_first=True):
         """
         Change the channel.
+
         Args:
             to_bgr (bool): confirm whether to convert RGB to BGR
             channel_first (bool): confirm whether to change channel
@@ -178,16 +178,16 @@ def reader(paths=[],
            permute_image=Permute(to_bgr=False),
            normalize_image=NormalizeImage(
                mean=[104, 117, 123], std=[1, 1, 1], is_scale=False)):
-    """data generator
+    """
+    data generator
 
-    :param paths: path to images.
-    :type paths: list, each element is a str
-    :param images: data of images, [N, H, W, C]
-    :type images: numpy.ndarray
-    :param decode_image: instance of <class 'DecodeImage' object>
-    :param resize_image: instance of <class 'ResizeImage' object>
-    :param permute_image: instance of <class 'Permute' object>
-    :param normalize_image: instance of <class 'NormalizeImage' object>
+    Args:
+        paths (list[str]): paths to images.
+        images (list(numpy.ndarray)): data of images, shape of each is [H, W, C]
+        decode_image (class object): instance of <class 'DecodeImage' object>
+        resize_image (class object): instance of <class 'ResizeImage' object>
+        permute_image (class object): instance of <class 'Permute' object>
+        normalize_image (class object): instance of <class 'NormalizeImage' object>
     """
     img_list = []
     if paths is not None:
@@ -200,6 +200,15 @@ def reader(paths=[],
     if images is not None:
         for img in images:
             img_list.append(img)
+
+    decode_image = DecodeImage(to_rgb=True, with_mixup=False)
+    resize_image = ResizeImage(
+        target_size=300, interp=1, max_size=0, use_cv2=False)
+    permute_image = Permute()
+    normalize_image = NormalizeImage(
+        mean=[127.5, 127.5, 127.5],
+        std=[127.502231, 127.502231, 127.502231],
+        is_scale=False)
 
     for img in img_list:
         preprocessed_img = decode_image(img)
