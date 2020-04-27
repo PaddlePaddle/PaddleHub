@@ -96,8 +96,10 @@ class LocalModuleManager(object):
         for sub_dir_name in os.listdir(self.local_modules_dir):
             sub_dir_path = os.path.join(self.local_modules_dir, sub_dir_name)
             if os.path.isdir(sub_dir_path):
-                if "-" in sub_dir_path:
-                    new_sub_dir_path = sub_dir_path.replace("-", "_")
+                if "-" in sub_dir_name:
+                    sub_dir_name = sub_dir_name.replace("-", "_")
+                    new_sub_dir_path = os.path.join(self.local_modules_dir,
+                                                    sub_dir_name)
                     shutil.move(sub_dir_path, new_sub_dir_path)
                     sub_dir_path = new_sub_dir_path
                 valid, info = self.check_module_valid(sub_dir_path)
@@ -180,11 +182,13 @@ class LocalModuleManager(object):
                 with tarfile.open(module_package, "r:gz") as tar:
                     file_names = tar.getnames()
                     size = len(file_names) - 1
-                    module_dir = os.path.join(_dir, file_names[0])
+                    module_name = file_names[0]
+                    module_dir = os.path.join(_dir, module_name)
                     for index, file_name in enumerate(file_names):
                         tar.extract(file_name, _dir)
-                    if "-" in module_dir:
-                        new_module_dir = module_dir.replace("-", "_")
+                    if "-" in module_name:
+                        module_name = module_name.replace("-", "_")
+                        new_module_dir = os.path.join(_dir, module_name)
                         shutil.move(module_dir, new_module_dir)
                         module_dir = new_module_dir
                     module_name = hub.Module(directory=module_dir).name
