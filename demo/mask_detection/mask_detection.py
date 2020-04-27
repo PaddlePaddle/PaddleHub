@@ -13,9 +13,8 @@ module = hub.Module(name="pyramidbox_lite_server_mask")
 def paint_chinese(im, chinese, position, fontsize, color_bgr):
     # 图像从OpenCV格式转换成PIL格式
     img_PIL = Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
-    font = ImageFont.truetype('SourceHanSansSC-Medium.otf',
-                              fontsize,
-                              encoding="utf-8")
+    font = ImageFont.truetype(
+        'SourceHanSansSC-Medium.otf', fontsize, encoding="utf-8")
     #color = (255,0,0) # 字体颜色
     #position = (100,100)# 文字输出位置
     color = color_bgr[::-1]

@@ -48,20 +48,24 @@ def finetune(args):
     # define model(program)
     module = hub.Module(name=module_name)
     if model_type == 'rcnn':
-        input_dict, output_dict, program = module.context(trainable=True, phase='train')
-        input_dict_pred, output_dict_pred, program_pred = module.context(trainable=False)
+        input_dict, output_dict, program = module.context(
+            trainable=True, phase='train')
+        input_dict_pred, output_dict_pred, program_pred = module.context(
+            trainable=False)
     else:
         input_dict, output_dict, program = module.context(trainable=True)
         input_dict_pred = output_dict_pred = None
 
     print("input_dict keys", input_dict.keys())
     print("output_dict keys", output_dict.keys())
-    feed_list, pred_feed_list = get_feed_list(module_name, input_dict, input_dict_pred)
+    feed_list, pred_feed_list = get_feed_list(module_name, input_dict,
+                                              input_dict_pred)
     print("output_dict length:", len(output_dict))
     print(output_dict.keys())
     if output_dict_pred is not None:
         print(output_dict_pred.keys())
-    feature, pred_feature = get_mid_feature(module_name, output_dict, output_dict_pred)
+    feature, pred_feature = get_mid_feature(module_name, output_dict,
+                                            output_dict_pred)
 
     config = hub.RunConfig(
         log_interval=10,
@@ -73,7 +77,8 @@ def finetune(args):
         batch_size=args.batch_size,
         enable_memory_optim=False,
         checkpoint_dir=args.checkpoint_dir,
-        strategy=hub.finetune.strategy.DefaultFinetuneStrategy(learning_rate=0.00025, optimizer_name="adam"))
+        strategy=hub.finetune.strategy.DefaultFinetuneStrategy(
+            learning_rate=0.00025, optimizer_name="adam"))
 
     task = hub.DetectionTask(
         data_reader=data_reader,
