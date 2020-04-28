@@ -25,7 +25,7 @@ from ssd_mobilenet_v1_pascal.data_feed import reader
     type="cv/object_detection",
     summary="SSD with backbone MobileNet_V1, trained with dataset Pasecal VOC.",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com")
+    author_email="")
 class SSDMobileNetv1(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(

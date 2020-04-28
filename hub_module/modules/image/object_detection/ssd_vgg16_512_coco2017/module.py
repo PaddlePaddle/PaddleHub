@@ -25,7 +25,7 @@ from ssd_vgg16_512_coco2017.data_feed import reader
     type="cv/object_detection",
     summary="SSD with backbone VGG16, trained with dataset COCO.",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com")
+    author_email="")
 class SSDVGG16_512(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(

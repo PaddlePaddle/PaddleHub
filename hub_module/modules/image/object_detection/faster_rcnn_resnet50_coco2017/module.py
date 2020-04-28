@@ -34,7 +34,7 @@ from faster_rcnn_resnet50_coco2017.roi_extractor import RoIAlign
     summary=
     "Baidu's Faster R-CNN model for object detection with backbone ResNet50, trained with dataset COCO2017",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com")
+    author_email="")
 class FasterRCNNResNet50(hub.Module):
     def _initialize(self):
         # default pretrained model, Faster-RCNN with backbone ResNet50, shape of input tensor is [3, 800, 1333]
