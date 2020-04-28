@@ -11,13 +11,13 @@ from functools import partial
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
-from paddlehub.module.module import moduleinfo, runnable
+from paddlehub.module.module import moduleinfo, runnable, serving
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from paddlehub.io.parser import txt_parser
 
 from retinanet_resnet50_fpn_coco2017.fpn import FPN
 from retinanet_resnet50_fpn_coco2017.retina_head import AnchorGenerator, RetinaTargetAssign, RetinaOutputDecoder, RetinaHead
-from retinanet_resnet50_fpn_coco2017.processor import load_label_info, postprocess
+from retinanet_resnet50_fpn_coco2017.processor import load_label_info, postprocess, base64_to_cv2
 from retinanet_resnet50_fpn_coco2017.data_feed import test_reader, padding_minibatch
 from retinanet_resnet50_fpn_coco2017.resnet import ResNet
 
@@ -267,6 +267,15 @@ class RetinaNetResNet50FPN(hub.Module):
             else:
                 input_data = txt_parser.parse(args.input_file, use_strip=True)
         return input_data
+
+    @serving
+    def serving_method(self, images, **kwargs):
+        """
+        Run as a service.
+        """
+        images_decode = [base64_to_cv2(image) for image in images]
+        results = self.object_detection(images_decode, **kwargs)
+        return results
 
     @runnable
     def run_cmd(self, argvs):
