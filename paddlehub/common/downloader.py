@@ -184,6 +184,11 @@ def download(name,
              decompress=True,
              resource_type='Model',
              extra=None):
+    file = os.path.join(save_path, name)
+    file = os.path.realpath(file)
+    if os.path.exists(file):
+        return
+
     if not hub.HubServer()._server_check():
         raise ServerConnectionError
 
@@ -194,12 +199,10 @@ def download(name,
         raise ResourceNotFoundError(name, version)
 
     url = search_result['url']
-    file = os.path.join(save_path, name)
-    file = os.path.realpath(file)
-    if os.path.exists(file):
-        return
 
     with tmp_dir() as _dir:
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
         _, _, savefile = default_downloader.download_file(
             url=url, save_path=_dir, print_progress=True)
         if tarfile.is_tarfile(savefile) and decompress:
