@@ -13,7 +13,6 @@ hub run yolov3_resnet34_coco2017 --input_path "/PATH/TO/IMAGE"
 ```
 def context(trainable=True,
             pretrained=True,
-            var_prefix='',
             get_prediction=False)
 ```
 
@@ -23,7 +22,6 @@ def context(trainable=True,
 
 * trainable(bool): 将参数的trainable属性设为trainable；
 * pretrained (bool): 是否加载预训练模型；
-* var\_prefix (str): 在变量的name 中加上前缀；
 * get\_prediction (bool): 是否执行预测。
 
 **返回**

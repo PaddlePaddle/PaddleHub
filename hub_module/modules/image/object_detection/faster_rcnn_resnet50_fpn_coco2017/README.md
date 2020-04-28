@@ -1,5 +1,5 @@
 ```shell
-$ hub install faster_rcnn_resnet50_fpn_coco2017==1.1.0
+$ hub install faster_rcnn_resnet50_fpn_coco2017==1.0.0
 ```
 
 ## 命令行预测
@@ -11,20 +11,20 @@ hub run faster_rcnn_resnet50_fpn_coco2017 --input_path "/PATH/TO/IMAGE"
 ## API
 
 ```
-def context(trainable=True,
+def context(num_classes=81,
+            trainable=True,
             pretrained=True,
-            var_prefix='',
-            get_prediction=False)
+            phase='train')
 ```
 
 提取头部特征，用于迁移学习。
 
 **参数**
 
-* trainable(bool): 将参数的trainable属性设为trainable；
+* num\_classes (int): 类别数；
+* trainable(bool): 将参数的trainable 属性设为trainable；
 * pretrained (bool): 是否加载预训练模型；
-* var\_prefix (str): 在变量的name 中加上前缀；
-* get\_prediction (bool): 是否执行预测。
+* phase (str): 可选值为 'train'/'predict'，'trian' 用于训练，'predict' 用于预测。
 
 **返回**
 
@@ -32,7 +32,7 @@ def context(trainable=True,
     * image (Variable): 图像变量
     * im\_size (Variable): 图片的尺寸
 * outputs (dict): 模型的输出。如果 get\_prediction 为 False，输出 'head\_fatures'，否则输出 'bbox\_out'。
-* context\_prog (Program): 用于迁移学习的 Program.
+* context\_prog (Program): 用于迁移学习的 Program。
 
 ```python
 def object_detection(paths=None,

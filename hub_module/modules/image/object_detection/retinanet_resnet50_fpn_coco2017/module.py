@@ -73,9 +73,9 @@ class RetinaNetResNet50FPN(hub.Module):
         Distill the Head Features, so as to perform transfer learning.
 
         Args:
+            num_classes (int): number of classes.
             trainable (bool): whether to set parameters trainable.
             pretrained (bool): whether to load default pretrained model.
-            var_prefix (str): prefix to append to the varibles.
             get_prediction (bool): whether to get prediction.
 
         Returns:
@@ -178,6 +178,7 @@ class RetinaNetResNet50FPN(hub.Module):
             output_dir (str): The path to store output images.
             visualization (bool): Whether to save image or not.
             score_thresh (float): threshold for object detecion.
+            visualization (bool): whether to save result as images.
 
         Returns:
             res (list[dict]): The result of coco2017 detecion. keys include 'data', 'save_path', the corresponding value is:

@@ -64,18 +64,13 @@ class SSDMobileNetv1(hub.Module):
         self.output_decoder_config = self.model_config['SSDOutputDecoder']
         self.mobilenet_config = self.model_config['MobileNet']
 
-    def context(self,
-                trainable=True,
-                pretrained=True,
-                var_prefix='',
-                get_prediction=False):
+    def context(self, trainable=True, pretrained=True, get_prediction=False):
         """
         Distill the Head Features, so as to perform transfer learning.
 
         Args:
             trainable (bool): whether to set parameters trainable.
             pretrained (bool): whether to load default pretrained model.
-            var_prefix (str): prefix to append to the varibles.
             get_prediction (bool): whether to get prediction.
 
         Returns:
@@ -98,8 +93,7 @@ class SSDMobileNetv1(hub.Module):
                 im_size = fluid.layers.data(
                     name='im_size', shape=[2], dtype='int32')
                 # var_prefix
-                var_prefix = var_prefix if var_prefix else '@HUB_{}@'.format(
-                    self.name)
+                var_prefix = '@HUB_{}@'.format(self.name)
                 # names of inputs
                 inputs = {
                     'image': var_prefix + image.name,

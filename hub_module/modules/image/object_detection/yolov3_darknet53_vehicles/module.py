@@ -57,18 +57,13 @@ class YOLOv3DarkNet53Vehicles(hub.Module):
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_paddle_predictor(gpu_config)
 
-    def context(self,
-                trainable=True,
-                pretrained=True,
-                var_prefix='',
-                get_prediction=False):
+    def context(self, trainable=True, pretrained=True, get_prediction=False):
         """
         Distill the Head Features, so as to perform transfer learning.
 
         Args:
             trainable (bool): whether to set parameters trainable.
             pretrained (bool): whether to load default pretrained model.
-            var_prefix (str): prefix to append to the varibles.
             get_prediction (bool): whether to get prediction.
 
         Returns:
@@ -115,8 +110,7 @@ class YOLOv3DarkNet53Vehicles(hub.Module):
                 exe.run(fluid.default_startup_program())
 
                 # var_prefix
-                var_prefix = var_prefix if var_prefix else '@HUB_{}@'.format(
-                    self.name)
+                var_prefix = '@HUB_{}@'.format(self.name)
                 # name of inputs
                 inputs = {
                     'image': var_prefix + image.name,

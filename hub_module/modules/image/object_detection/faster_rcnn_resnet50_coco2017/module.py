@@ -69,7 +69,6 @@ class FasterRCNNResNet50(hub.Module):
                 num_classes=81,
                 trainable=True,
                 pretrained=True,
-                var_prefix='',
                 phase='train'):
         """
         Distill the Head Features, so as to perform transfer learning.
@@ -77,8 +76,8 @@ class FasterRCNNResNet50(hub.Module):
         Args:
             trainable (bool): whether to set parameters trainable.
             pretrained (bool): whether to load default pretrained model.
-            var_prefix (str): prefix to append to the varibles.
             get_prediction (bool): whether to get prediction.
+            phase (str): optional choices are 'train' and 'predict'.
 
         Returns:
              inputs (dict): the input variables.
@@ -100,8 +99,7 @@ class FasterRCNNResNet50(hub.Module):
                 body_feats = backbone(image)
 
                 # var_prefix
-                var_prefix = var_prefix if var_prefix else '@HUB_{}@'.format(
-                    self.name)
+                var_prefix = '@HUB_{}@'.format(self.name)
                 im_info = fluid.layers.data(
                     name='im_info', shape=[3], dtype='float32', lod_level=0)
                 im_shape = fluid.layers.data(

@@ -1,11 +1,11 @@
 ```shell
-$ hub install yolov3_darknet53_coco2017==1.1.0
+$ hub install retinanet_resnet50_fpn_coco2017==1.0.0
 ```
 
 ## 命令行预测
 
 ```
-hub run yolov3_darknet53_coco2017 --input_path "/PATH/TO/IMAGE"
+hub run retinanet_resnet50_fpn_coco2017 --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
@@ -88,7 +88,7 @@ def save_inference_model(dirname,
 import paddlehub as hub
 import cv2
 
-object_detector = hub.Module(name="yolov3_darknet53_coco2017")
+object_detector = hub.Module(name="retinanet_resnet50_fpn_coco2017")
 result = object_detector.object_detection(images=[cv2.imread('/PATH/TO/IMAGE')])
 # or
 # result = object_detector.object_detection((paths=['/PATH/TO/IMAGE'])
@@ -102,7 +102,7 @@ PaddleHub Serving可以部署一个目标检测的在线服务。
 
 运行启动命令：
 ```shell
-$ hub serving start -m yolov3_darknet53_coco2017
+$ hub serving start -m retinanet_resnet50_fpn_coco2017
 ```
 
 这样就完成了一个目标检测的服务化API的部署，默认端口号为8866。
@@ -128,7 +128,7 @@ def cv2_to_base64(image):
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/yolov3_darknet53_coco2017"
+url = "http://127.0.0.1:8866/predict/retinanet_resnet50_fpn_coco2017"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
 # 打印预测结果
