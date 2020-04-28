@@ -29,7 +29,7 @@ from retinanet_resnet50_fpn_coco2017.resnet import ResNet
     summary=
     "Baidu's RetinaNet model for object detection, with backbone ResNet50 and FPN.",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com")
+    author_email="")
 class RetinaNetResNet50FPN(hub.Module):
     def _initialize(self):
         # default pretrained model of Retinanet_ResNet50_FPN, the shape of input image tensor is (3, 608, 608)
