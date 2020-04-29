@@ -17,7 +17,7 @@ def context(num_classes=81,
             phase='train')
 ```
 
-提取头部特征，用于迁移学习。
+提取特征，用于迁移学习。
 
 **参数**
 
@@ -28,10 +28,28 @@ def context(num_classes=81,
 
 **返回**
 
-* inputs (dict): 模型的输入，keys 包括 'image', 'im\_size'，相应的取值为：
-    * image (Variable): 图像变量
-    * im\_size (Variable): 图片的尺寸
-* outputs (dict): 模型的输出。如果 get\_prediction 为 False，输出 'head\_fatures'，否则输出 'bbox\_out'。
+* inputs (dict): 模型的输入，相应的取值为：
+    当 phase 为 'train'时，包含：
+        * image (Variable): 图像变量
+        * im\_size (Variable): 图像的尺寸
+        * im\_info (Variable): 图像缩放信息
+        * gt\_class (Variable): 检测框类别
+        * gt\_box (Variable): 检测框坐标
+        * is\_crowd (Variable):
+    当 phase 为 'predict'时，包含：
+        * image (Variable): 图像变量
+        * im\_size (Variable): 图像的尺寸
+        * im\_info (Variable): 图像缩放信息
+* outputs (dict): 模型的输出，相应的取值为：
+    当 phase 为 'train'时，包含：
+        * head_features (Variable): 所提取的特征
+        * rpn\_cls\_loss (Variable): 检测框分类损失
+        * rpn\_reg\_loss (Variable): 检测框回归损失
+        * generate\_proposal\_labels (Variable): 图像信息
+    当 phase 为 'predict'时，包含：
+        * head_features (Variable): 所提取的特征
+        * rois (Variable): 提取的roi
+        * bbox\_out (Variable): 预测结果
 * context\_prog (Program): 用于迁移学习的 Program。
 
 ```python

@@ -21,12 +21,12 @@ from yolov3_mobilenet_v1_coco2017.yolo_head import MultiClassNMS, YOLOv3Head
 
 @moduleinfo(
     name="yolov3_mobilenet_v1_coco2017",
-    version="1.1.0",
+    version="1.0.0",
     type="CV/object_detection",
     summary=
     "Baidu's YOLOv3 model for object detection with backbone MobileNet_V1, trained with dataset COCO2017.",
     author="paddlepaddle",
-    author_email="")
+    author_email="paddle-dev@baidu.com")
 class YOLOv3MobileNetV1Coco2017(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(

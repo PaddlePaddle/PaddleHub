@@ -34,7 +34,7 @@ from faster_rcnn_resnet50_coco2017.roi_extractor import RoIAlign
     summary=
     "Baidu's Faster R-CNN model for object detection with backbone ResNet50, trained with dataset COCO2017",
     author="paddlepaddle",
-    author_email="")
+    author_email="paddle-dev@baidu.com")
 class FasterRCNNResNet50(hub.Module):
     def _initialize(self):
         # default pretrained model, Faster-RCNN with backbone ResNet50, shape of input tensor is [3, 800, 1333]
@@ -160,7 +160,7 @@ class FasterRCNNResNet50(hub.Module):
                         'is_crowd': var_prefix + is_crowd.name
                     }
                     outputs = {
-                        'head_feat':
+                        'head_features':
                         var_prefix + head_feat.name,
                         'rpn_cls_loss':
                         var_prefix + rpn_loss['rpn_cls_loss'].name,
@@ -178,7 +178,7 @@ class FasterRCNNResNet50(hub.Module):
                         'im_shape': var_prefix + im_shape.name
                     }
                     outputs = {
-                        'head_feat': var_prefix + head_feat.name,
+                        'head_features': var_prefix + head_feat.name,
                         'rois': var_prefix + rois.name,
                         'bbox_out': var_prefix + pred.name
                     }

@@ -26,7 +26,7 @@ from yolov3_darknet53_coco2017.yolo_head import MultiClassNMS, YOLOv3Head
     summary=
     "Baidu's YOLOv3 model for object detection, with backbone DarkNet53, trained with dataset coco2017.",
     author="paddlepaddle",
-    author_email="")
+    author_email="paddle-dev@baidu.com")
 class YOLOv3DarkNet53Coco2017(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(

@@ -26,7 +26,7 @@ from yolov3_darknet53_pedestrian.yolo_head import MultiClassNMS, YOLOv3Head
     summary=
     "Baidu's YOLOv3 model for pedestrian detection, with backbone DarkNet53.",
     author="paddlepaddle",
-    author_email="")
+    author_email="paddle-dev@baidu.com")
 class YOLOv3DarkNet53Pedestrian(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
