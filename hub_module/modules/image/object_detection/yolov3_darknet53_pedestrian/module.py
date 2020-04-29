@@ -102,7 +102,7 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
                         normalized=False,
                         score_threshold=0.01))
                 # head_features
-                head_features = yolo_head._get_outputs(
+                head_features, body_features = yolo_head._get_outputs(
                     body_feats, is_train=trainable)
 
                 place = fluid.CPUPlace()
@@ -123,7 +123,9 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
                 else:
                     outputs = {
                         'head_features':
-                        [var_prefix + var.name for var in head_features]
+                        [var_prefix + var.name for var in head_features],
+                        'body_features':
+                        [var_prefix + var.name for var in body_features]
                     }
                 # add_vars_prefix
                 add_vars_prefix(context_prog, var_prefix)

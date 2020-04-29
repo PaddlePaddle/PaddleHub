@@ -227,7 +227,7 @@ class YOLOv3Head(object):
                 # upsample
                 route = self._upsample(route)
 
-        return outputs
+        return outputs, blocks
 
     def get_prediction(self, outputs, im_size):
         """

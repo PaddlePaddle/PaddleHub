@@ -1,11 +1,7 @@
-```shell
-$ hub install yolov3_darknet53_pedestrian==1.0.0
-```
-
 ## 命令行预测
 
 ```
-hub run yolov3_darknet53_pedestrian --input_path "/PATH/TO/IMAGE"
+$ hub run yolov3_darknet53_pedestrian --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
@@ -16,11 +12,11 @@ def context(trainable=True,
             get_prediction=False)
 ```
 
-特征提取，用于迁移学习。
+提取特征，用于迁移学习。
 
 **参数**
 
-* trainable(bool): 将参数的trainable属性设为trainable；
+* trainable(bool): 参数是否可训练；
 * pretrained (bool): 是否加载预训练模型；
 * get\_prediction (bool): 是否执行预测。
 
@@ -29,7 +25,7 @@ def context(trainable=True,
 * inputs (dict): 模型的输入，keys 包括 'image', 'im\_size'，相应的取值为：
     * image (Variable): 图像变量
     * im\_size (Variable): 图片的尺寸
-* outputs (dict): 模型的输出。如果 get\_prediction 为 False，输出 'head\_fatures'，否则输出 'bbox\_out'。
+* outputs (dict): 模型的输出。如果 get\_prediction 为 False，输出 'head\_features'、'body\_features'，否则输出 'bbox\_out'。
 * context\_prog (Program): 用于迁移学习的 Program.
 
 ```python

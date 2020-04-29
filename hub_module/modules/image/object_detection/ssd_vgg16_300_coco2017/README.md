@@ -1,11 +1,7 @@
-```shell
-$ hub install ssd_vgg16_300_coco2017==1.0.0
-```
-
 ## 命令行预测
 
 ```
-hub run ssd_vgg16_300_coco2017 --input_path "/PATH/TO/IMAGE"
+$ hub run ssd_vgg16_300_coco2017 --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
@@ -16,11 +12,11 @@ def context(trainable=True,
             get_prediction=False)
 ```
 
-特征提取，用于迁移学习。
+提取特征，用于迁移学习。
 
 **参数**
 
-* trainable(bool): 设置参数的 trainable 属性；
+* trainable(bool): 参数是否可训练；
 * pretrained (bool): 是否加载预训练模型；
 * get\_prediction (bool): 是否执行预测。
 

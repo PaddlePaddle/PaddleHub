@@ -1,11 +1,7 @@
-```shell
-$ hub install faster_rcnn_resnet50_fpn_coco2017==1.0.0
-```
-
 ## 命令行预测
 
 ```
-hub run faster_rcnn_resnet50_fpn_coco2017 --input_path "/PATH/TO/IMAGE"
+$ hub run faster_rcnn_resnet50_fpn_coco2017 --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
@@ -22,7 +18,7 @@ def context(num_classes=81,
 **参数**
 
 * num\_classes (int): 类别数；
-* trainable(bool): 将参数的trainable 属性设为trainable；
+* trainable(bool): 参数是否可训练；
 * pretrained (bool): 是否加载预训练模型；
 * phase (str): 可选值为 'train'/'predict'，'trian' 用于训练，'predict' 用于预测。
 
@@ -35,7 +31,7 @@ def context(num_classes=81,
         * im\_info (Variable): 图像缩放信息
         * gt\_class (Variable): 检测框类别
         * gt\_box (Variable): 检测框坐标
-        * is\_crowd (Variable):
+        * is\_crowd (Variable): 单个框内是否包含多个物体
     当 phase 为 'predict'时，包含：
         * image (Variable): 图像变量
         * im\_size (Variable): 图像的尺寸
