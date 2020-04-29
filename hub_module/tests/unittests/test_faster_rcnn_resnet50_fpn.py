@@ -7,6 +7,8 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
+image_dir = '../image_dataset/object_detection/'
+
 
 class TestFasterRCNNR50FPN(unittest.TestCase):
     @classmethod
@@ -14,6 +16,7 @@ class TestFasterRCNNR50FPN(unittest.TestCase):
         """Prepare the environment once before execution of all tests."""
         self.faster_rcnn_r50_fpn = hub.Module(
             name="faster_rcnn_resnet50_fpn_coco2017")
+        # self.faster_rcnn_r50_fpn = hub.Module(directory='')
 
     @classmethod
     def tearDownClass(self):
@@ -30,13 +33,8 @@ class TestFasterRCNNR50FPN(unittest.TestCase):
 
     def test_context(self):
         with fluid.program_guard(self.test_prog):
-            input_image = fluid.layers.data(
-                name='image', shape=[3, 800, 1333], dtype='float32')
             inputs, outputs, program = self.faster_rcnn_r50_fpn.context(
-                input_image=input_image,
-                pretrained=False,
-                trainable=True,
-                phase='train')
+                pretrained=False, trainable=True, phase='train')
             image = inputs['image']
             im_info = inputs['im_info']
             im_shape = inputs['im_shape']
@@ -50,17 +48,16 @@ class TestFasterRCNNR50FPN(unittest.TestCase):
 
     def test_object_detection(self):
         with fluid.program_guard(self.test_prog):
-            image_dir = '../image_dataset/'
             zebra = cv2.imread(os.path.join(image_dir,
                                             'zebra.jpg')).astype('float32')
-            zebra = np.array([zebra, zebra])
+            zebras = [zebra, zebra]
             detection_results = self.faster_rcnn_r50_fpn.object_detection(
                 paths=[
                     os.path.join(image_dir, 'cat.jpg'),
                     os.path.join(image_dir, 'dog.jpg'),
                     os.path.join(image_dir, 'giraffe.jpg')
                 ],
-                images=zebra,
+                images=zebras,
                 batch_size=2,
                 use_gpu=False,
                 score_thresh=0.5)

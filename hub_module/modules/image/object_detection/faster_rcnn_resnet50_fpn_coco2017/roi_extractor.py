@@ -1,19 +1,7 @@
 # coding=utf-8
 import paddle.fluid as fluid
 
-__all__ = ['RoIAlign', 'FPNRoIAlign']
-
-
-class RoIAlign(object):
-    # __op__ = fluid.layers.roi_align
-    def __init__(self, resolution=7, spatial_scale=0.0625, sampling_ratio=0):
-        super(RoIAlign, self).__init__()
-        if isinstance(resolution, int):
-            resolution = [resolution, resolution]
-        self.pooled_height = resolution[0]
-        self.pooled_width = resolution[1]
-        self.spatial_scale = spatial_scale
-        self.sampling_ratio = sampling_ratio
+__all__ = ['FPNRoIAlign']
 
 
 class FPNRoIAlign(object):

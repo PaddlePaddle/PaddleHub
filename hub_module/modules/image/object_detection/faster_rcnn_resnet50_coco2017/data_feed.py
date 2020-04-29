@@ -6,12 +6,12 @@ from __future__ import division
 import os
 from collections import OrderedDict
 
-import numpy as np
 import cv2
+import numpy as np
 from PIL import Image, ImageEnhance
 from paddle import fluid
 
-__all__ = ['test_reader', 'padding_minibatch']
+__all__ = ['test_reader']
 
 
 def test_reader(paths=None, images=None):
@@ -37,6 +37,7 @@ def test_reader(paths=None, images=None):
     if images is not None:
         for img in images:
             img_list.append(img)
+
     for im in img_list:
         im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
         im = im.astype(np.float32, copy=False)
@@ -47,11 +48,13 @@ def test_reader(paths=None, images=None):
         im = im / 255.0
         im -= mean
         im /= std
+
         target_size = 800
         max_size = 1333
+
         shape = im.shape
         # im_shape holds the original shape of image.
-        # im_shape = np.array([shape[0], shape[1], 1.0]).astype('float32')
+        im_shape = np.array([shape[0], shape[1], 1.0]).astype('float32')
         im_size_min = np.min(shape[0:2])
         im_size_max = np.max(shape[0:2])
         im_scale = float(target_size) / float(im_size_min)
@@ -74,7 +77,7 @@ def test_reader(paths=None, images=None):
         # HWC --> CHW
         im = np.swapaxes(im, 1, 2)
         im = np.swapaxes(im, 1, 0)
-        yield {'image': im, 'im_info': im_info}
+        yield {'image': im, 'im_info': im_info, 'im_shape': im_shape}
 
 
 def padding_minibatch(batch_data, coarsest_stride=0, use_padded_im_info=True):
@@ -106,7 +109,9 @@ def padding_minibatch(batch_data, coarsest_stride=0, use_padded_im_info=True):
         data['im_info'][
             1] = max_shape[2] if use_padded_im_info else max_shape_org[2]
         padding_info.append(data['im_info'])
+        padding_shape.append(data['im_shape'])
 
     padding_image = np.array(padding_image).astype('float32')
     padding_info = np.array(padding_info).astype('float32')
-    return padding_image, padding_info
+    padding_shape = np.array(padding_shape).astype('float32')
+    return padding_image, padding_info, padding_shape

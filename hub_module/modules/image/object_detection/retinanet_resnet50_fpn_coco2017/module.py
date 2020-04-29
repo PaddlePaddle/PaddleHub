@@ -11,13 +11,13 @@ from functools import partial
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
-from paddlehub.module.module import moduleinfo, runnable
+from paddlehub.module.module import moduleinfo, runnable, serving
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from paddlehub.io.parser import txt_parser
 
 from retinanet_resnet50_fpn_coco2017.fpn import FPN
 from retinanet_resnet50_fpn_coco2017.retina_head import AnchorGenerator, RetinaTargetAssign, RetinaOutputDecoder, RetinaHead
-from retinanet_resnet50_fpn_coco2017.processor import load_label_info, postprocess
+from retinanet_resnet50_fpn_coco2017.processor import load_label_info, postprocess, base64_to_cv2
 from retinanet_resnet50_fpn_coco2017.data_feed import test_reader, padding_minibatch
 from retinanet_resnet50_fpn_coco2017.resnet import ResNet
 
@@ -29,7 +29,7 @@ from retinanet_resnet50_fpn_coco2017.resnet import ResNet
     summary=
     "Baidu's RetinaNet model for object detection, with backbone ResNet50 and FPN.",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com")
+    author_email="")
 class RetinaNetResNet50FPN(hub.Module):
     def _initialize(self):
         # default pretrained model of Retinanet_ResNet50_FPN, the shape of input image tensor is (3, 608, 608)
@@ -69,16 +69,19 @@ class RetinaNetResNet50FPN(hub.Module):
                 trainable=True,
                 pretrained=True,
                 get_prediction=False):
-        """Distill the Head Features, so as to perform transfer learning.
+        """
+        Distill the Head Features, so as to perform transfer learning.
 
-        :param trainable: whether to set parameters trainable.
-        :type trainable: bool
-        :param pretrained: whether to load default pretrained model.
-        :type pretrained: bool
-        :param get_prediction: whether to get prediction,
-            if True, outputs is {'bbox_out': bbox_out},
-            if False, outputs is {'head_features': head_features}.
-        :type get_prediction: bool
+        Args:
+            num_classes (int): number of classes.
+            trainable (bool): whether to set parameters trainable.
+            pretrained (bool): whether to load default pretrained model.
+            get_prediction (bool): whether to get prediction.
+
+        Returns:
+             inputs(dict): the input variables.
+             outputs(dict): the output variables.
+             context_prog (Program): the program to execute transfer learning.
         """
         context_prog = fluid.Program()
         startup_program = fluid.Program()
@@ -166,31 +169,38 @@ class RetinaNetResNet50FPN(hub.Module):
                          score_thresh=0.5,
                          visualization=True):
         """API of Object Detection.
-        :param paths: the path of images.
-        :type paths: list, each element is correspond to the path of an image.
-        :param images: data of images, [N, H, W, C]
-        :type images: numpy.ndarray
-        :param use_gpu: whether to use gpu or not.
-        :type use_gpu: bool
-        :param batch_size: bathc size.
-        :type batch_size: int
-        :param output_dir: the directory to store the detection result.
-        :type output_dir: str
-        :param score_thresh: the threshold of detection confidence.
-        :type score_thresh: float
-        :param visualization: whether to draw bounding box and save images.
-        :type visualization: bool
+
+        Args:
+            paths (list[str]): The paths of images.
+            images (list(numpy.ndarray)): images data, shape of each is [H, W, C]
+            batch_size (int): batch size.
+            use_gpu (bool): Whether to use gpu.
+            output_dir (str): The path to store output images.
+            visualization (bool): Whether to save image or not.
+            score_thresh (float): threshold for object detecion.
+            visualization (bool): whether to save result as images.
+
+        Returns:
+            res (list[dict]): The result of coco2017 detecion. keys include 'data', 'save_path', the corresponding value is:
+                data (dict): the result of object detection, keys include 'left', 'top', 'right', 'bottom', 'label', 'confidence', the corresponding value is:
+                    left (float): The X coordinate of the upper left corner of the bounding box;
+                    top (float): The Y coordinate of the upper left corner of the bounding box;
+                    right (float): The X coordinate of the lower right corner of the bounding box;
+                    bottom (float): The Y coordinate of the lower right corner of the bounding box;
+                    label (str): The label of detection result;
+                    confidence (float): The confidence of detection result.
+                save_path (str, optional): The path to save output images.
         """
-        all_images = []
-        paths = paths if paths else []
+        all_images = list()
+        paths = paths if paths else list()
         for yield_data in test_reader(paths, images):
             all_images.append(yield_data)
 
         images_num = len(all_images)
         loop_num = int(np.ceil(images_num / batch_size))
-        res = []
+        res = list()
         for iter_id in range(loop_num):
-            batch_data = []
+            batch_data = list()
             handle_id = iter_id * batch_size
             for image_id in range(batch_size):
                 try:
@@ -248,7 +258,7 @@ class RetinaNetResNet50FPN(hub.Module):
             help="file contain input data")
 
     def check_input_data(self, args):
-        input_data = []
+        input_data = list()
         if args.input_path:
             input_data = [args.input_path]
         elif args.input_file:
@@ -257,6 +267,15 @@ class RetinaNetResNet50FPN(hub.Module):
             else:
                 input_data = txt_parser.parse(args.input_file, use_strip=True)
         return input_data
+
+    @serving
+    def serving_method(self, images, **kwargs):
+        """
+        Run as a service.
+        """
+        images_decode = [base64_to_cv2(image) for image in images]
+        results = self.object_detection(images_decode, **kwargs)
+        return results
 
     @runnable
     def run_cmd(self, argvs):

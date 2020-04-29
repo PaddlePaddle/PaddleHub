@@ -23,8 +23,11 @@ def base64_to_cv2(b64str):
 def get_save_image_name(img, output_dir, image_path):
     """Get save image name from source image path.
     """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     image_name = os.path.split(image_path)[-1]
     name, ext = os.path.splitext(image_name)
+
     if ext == '':
         if img.format == 'PNG':
             ext = '.png'
@@ -47,6 +50,7 @@ def draw_bounding_box_on_image(image_path, data_list, save_dir):
     for data in data_list:
         left, right, top, bottom = data['left'], data['right'], data[
             'top'], data['bottom']
+
         # draw bbox
         draw.line([(left, top), (left, bottom), (right, bottom), (right, top),
                    (left, top)],
@@ -66,8 +70,8 @@ def draw_bounding_box_on_image(image_path, data_list, save_dir):
     save_name = get_save_image_name(image, save_dir, image_path)
     if os.path.exists(save_name):
         os.remove(save_name)
-    image.save(save_name)
 
+    image.save(save_name)
     return save_name
 
 
@@ -88,8 +92,14 @@ def load_label_info(file_path):
         return label_names
 
 
-def postprocess(paths, images, data_out, score_thresh, label_names, output_dir,
-                handle_id, visualization):
+def postprocess(paths,
+                images,
+                data_out,
+                score_thresh,
+                label_names,
+                output_dir,
+                handle_id,
+                visualization=True):
     """
     postprocess the lod_tensor produced by fluid.Executor.run
 
@@ -124,12 +134,6 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir,
     else:
         unhandled_paths_num = 0
 
-    output_dir = output_dir if output_dir else os.path.join(
-        os.getcwd(), 'detection_result')
-    if visualization:
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
     output = []
     for index in range(len(lod) - 1):
         output_i = {'data': []}
@@ -149,7 +153,6 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir,
         org_img_height = org_img.height
         org_img_width = org_img.width
         result_i = results[lod[index]:lod[index + 1]]
-
         for row in result_i:
             if len(row) != 6:
                 continue
@@ -166,7 +169,6 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir,
             output_i['data'].append(dt)
 
         output.append(output_i)
-
         if visualization:
             output_i['save_path'] = draw_bounding_box_on_image(
                 org_img_path, output_i['data'], output_dir)

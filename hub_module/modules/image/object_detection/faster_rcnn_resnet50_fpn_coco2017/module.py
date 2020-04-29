@@ -13,12 +13,19 @@ from math import ceil
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
-from paddlehub.module.module import moduleinfo, runnable
+from paddlehub.module.module import moduleinfo, runnable, serving
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from paddlehub.io.parser import txt_parser
+from paddlehub.common.paddle_helper import add_vars_prefix
 
+from faster_rcnn_resnet50_fpn_coco2017.processor import load_label_info, postprocess, base64_to_cv2
+from faster_rcnn_resnet50_fpn_coco2017.data_feed import test_reader, padding_minibatch
 from faster_rcnn_resnet50_fpn_coco2017.fpn import FPN
-from faster_rcnn_resnet50_fpn_coco2017.resnet import ResNet, ResNetC5
+from faster_rcnn_resnet50_fpn_coco2017.resnet import ResNet
+from faster_rcnn_resnet50_fpn_coco2017.rpn_head import AnchorGenerator, RPNTargetAssign, GenerateProposals, FPNRPNHead
+from faster_rcnn_resnet50_fpn_coco2017.bbox_head import MultiClassNMS, BBoxHead, TwoFCHead
+from faster_rcnn_resnet50_fpn_coco2017.bbox_assigner import BBoxAssigner
+from faster_rcnn_resnet50_fpn_coco2017.roi_extractor import FPNRoIAlign
 
 
 @moduleinfo(
@@ -28,18 +35,15 @@ from faster_rcnn_resnet50_fpn_coco2017.resnet import ResNet, ResNetC5
     summary=
     "Baidu's Faster-RCNN model for object detection, whose backbone is ResNet50, processed with Feature Pyramid Networks",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com")
+    author_email="")
 class FasterRCNNResNet50RPN(hub.Module):
     def _initialize(self):
-        self.faster_rcnn = hub.Module(name="faster_rcnn")
         # default pretrained model, Faster-RCNN with backbone ResNet50, shape of input tensor is [3, 800, 1333]
         self.default_pretrained_model_path = os.path.join(
             self.directory, "faster_rcnn_resnet50_fpn_model")
-        self.label_names = self.faster_rcnn.load_label_info(
+        self.label_names = load_label_info(
             os.path.join(self.directory, "label_file.txt"))
-        self.infer_prog = None
-        self.bbox_out = None
-        self._set_config()
+        # self._set_config()
 
     def _set_config(self):
         """
@@ -67,18 +71,23 @@ class FasterRCNNResNet50RPN(hub.Module):
                 trainable=True,
                 pretrained=True,
                 phase='train'):
-        """Distill the Head Features, so as to perform transfer learning.
-
-        :param trainable: whether to set parameters trainable.
-        :type trainable: bool
-        :param pretrained: whether to load default pretrained model.
-        :type pretrained: bool
-        :param phase: Optional Choice: 'predict', 'train'
-        :type phase: str
         """
-        wrapped_prog = fluid.Program()
+        Distill the Head Features, so as to perform transfer learning.
+
+        Args:
+            trainable (bool): whether to set parameters trainable.
+            pretrained (bool): whether to load default pretrained model.
+            get_prediction (bool): whether to get prediction.
+            phase (str): optional choices are 'train' and 'predict'.
+
+        Returns:
+             inputs (dict): the input variables.
+             outputs (dict): the output variables.
+             context_prog (Program): the program to execute transfer learning.
+        """
+        context_prog = fluid.Program()
         startup_program = fluid.Program()
-        with fluid.program_guard(wrapped_prog, startup_program):
+        with fluid.program_guard(context_prog, startup_program):
             with fluid.unique_name.guard():
                 image = fluid.layers.data(
                     name='image', shape=[3, 800, 1333], dtype='float32')
@@ -89,25 +98,107 @@ class FasterRCNNResNet50RPN(hub.Module):
                     feature_maps=[2, 3, 4, 5],
                     freeze_at=2)
                 body_feats = backbone(image)
-                # fpn: FPN
+                # fpn
                 fpn = FPN(
                     max_level=6,
                     min_level=2,
                     num_chan=256,
                     spatial_scale=[0.03125, 0.0625, 0.125, 0.25])
+                var_prefix = '@HUB_{}@'.format(self.name)
+                im_info = fluid.layers.data(
+                    name='im_info', shape=[3], dtype='float32', lod_level=0)
+                im_shape = fluid.layers.data(
+                    name='im_shape', shape=[3], dtype='float32', lod_level=0)
+                body_feat_names = list(body_feats.keys())
+                body_feats, spatial_scale = fpn.get_output(body_feats)
+                # rpn_head: RPNHead
+                rpn_head = self.rpn_head()
+                rois = rpn_head.get_proposals(body_feats, im_info, mode=phase)
+                # train
+                if phase == 'train':
+                    gt_bbox = fluid.layers.data(
+                        name='gt_bbox', shape=[4], dtype='float32', lod_level=1)
+                    is_crowd = fluid.layers.data(
+                        name='is_crowd', shape=[1], dtype='int32', lod_level=1)
+                    gt_class = fluid.layers.data(
+                        name='gt_class', shape=[1], dtype='int32', lod_level=1)
+                    rpn_loss = rpn_head.get_loss(im_info, gt_bbox, is_crowd)
+                    # bbox_assigner: BBoxAssigner
+                    bbox_assigner = self.bbox_assigner(num_classes)
+                    outs = fluid.layers.generate_proposal_labels(
+                        rpn_rois=rois,
+                        gt_classes=gt_class,
+                        is_crowd=is_crowd,
+                        gt_boxes=gt_bbox,
+                        im_info=im_info,
+                        batch_size_per_im=bbox_assigner.batch_size_per_im,
+                        fg_fraction=bbox_assigner.fg_fraction,
+                        fg_thresh=bbox_assigner.fg_thresh,
+                        bg_thresh_hi=bbox_assigner.bg_thresh_hi,
+                        bg_thresh_lo=bbox_assigner.bg_thresh_lo,
+                        bbox_reg_weights=bbox_assigner.bbox_reg_weights,
+                        class_nums=bbox_assigner.class_nums,
+                        use_random=bbox_assigner.use_random)
+                    rois = outs[0]
 
-                # Base Class
-                inputs, outputs, context_prog = self.faster_rcnn.context(
-                    body_feats=body_feats,
-                    fpn=fpn,
-                    rpn_head=self.rpn_head(),
-                    roi_extractor=self.roi_extractor(),
-                    bbox_head=self.bbox_head(num_classes),
-                    bbox_assigner=self.bbox_assigner(num_classes),
-                    image=image,
-                    trainable=trainable,
-                    var_prefix='@HUB_{}@'.format(self.name),
-                    phase=phase)
+                roi_extractor = self.roi_extractor()
+                roi_feat = roi_extractor(
+                    head_inputs=body_feats,
+                    rois=rois,
+                    spatial_scale=spatial_scale)
+                # head_feat
+                bbox_head = self.bbox_head(num_classes)
+                head_feat = bbox_head.head(roi_feat)
+                if isinstance(head_feat, OrderedDict):
+                    head_feat = list(head_feat.values())[0]
+                if phase == 'train':
+                    inputs = {
+                        'image': var_prefix + image.name,
+                        'im_info': var_prefix + im_info.name,
+                        'im_shape': var_prefix + im_shape.name,
+                        'gt_class': var_prefix + gt_class.name,
+                        'gt_bbox': var_prefix + gt_bbox.name,
+                        'is_crowd': var_prefix + is_crowd.name
+                    }
+                    outputs = {
+                        'head_feat':
+                        var_prefix + head_feat.name,
+                        'rpn_cls_loss':
+                        var_prefix + rpn_loss['rpn_cls_loss'].name,
+                        'rpn_reg_loss':
+                        var_prefix + rpn_loss['rpn_reg_loss'].name,
+                        'generate_proposal_labels':
+                        [var_prefix + var.name for var in outs]
+                    }
+                elif phase == 'predict':
+                    pred = bbox_head.get_prediction(roi_feat, rois, im_info,
+                                                    im_shape)
+                    inputs = {
+                        'image': var_prefix + image.name,
+                        'im_info': var_prefix + im_info.name,
+                        'im_shape': var_prefix + im_shape.name
+                    }
+                    outputs = {
+                        'head_feat': var_prefix + head_feat.name,
+                        'rois': var_prefix + rois.name,
+                        'bbox_out': var_prefix + pred.name
+                    }
+                add_vars_prefix(context_prog, var_prefix)
+                add_vars_prefix(startup_program, var_prefix)
+
+                global_vars = context_prog.global_block().vars
+                inputs = {
+                    key: global_vars[value]
+                    for key, value in inputs.items()
+                }
+                outputs = {
+                    key: global_vars[value] if not isinstance(value, list) else
+                    [global_vars[var] for var in value]
+                    for key, value in outputs.items()
+                }
+
+                for param in context_prog.global_block().iter_parameters():
+                    param.trainable = trainable
 
                 place = fluid.CPUPlace()
                 exe = fluid.Executor(place)
@@ -127,24 +218,24 @@ class FasterRCNNResNet50RPN(hub.Module):
                 return inputs, outputs, context_prog
 
     def rpn_head(self):
-        return self.faster_rcnn.FPNRPNHead(
-            anchor_generator=self.faster_rcnn.AnchorGenerator(
+        return FPNRPNHead(
+            anchor_generator=AnchorGenerator(
                 anchor_sizes=[32, 64, 128, 256, 512],
                 aspect_ratios=[0.5, 1.0, 2.0],
                 stride=[16.0, 16.0],
                 variance=[1.0, 1.0, 1.0, 1.0]),
-            rpn_target_assign=self.faster_rcnn.RPNTargetAssign(
+            rpn_target_assign=RPNTargetAssign(
                 rpn_batch_size_per_im=256,
                 rpn_fg_fraction=0.5,
                 rpn_negative_overlap=0.3,
                 rpn_positive_overlap=0.7,
                 rpn_straddle_thresh=0.0),
-            train_proposal=self.faster_rcnn.GenerateProposals(
+            train_proposal=GenerateProposals(
                 min_size=0.0,
                 nms_thresh=0.7,
                 post_nms_top_n=2000,
                 pre_nms_top_n=2000),
-            test_proposal=self.faster_rcnn.GenerateProposals(
+            test_proposal=GenerateProposals(
                 min_size=0.0,
                 nms_thresh=0.7,
                 post_nms_top_n=1000,
@@ -155,7 +246,7 @@ class FasterRCNNResNet50RPN(hub.Module):
             max_level=6)
 
     def roi_extractor(self):
-        return self.faster_rcnn.FPNRoIAlign(
+        return FPNRoIAlign(
             canconical_level=4,
             canonical_size=224,
             max_level=5,
@@ -164,14 +255,14 @@ class FasterRCNNResNet50RPN(hub.Module):
             sampling_ratio=2)
 
     def bbox_head(self, num_classes):
-        return self.faster_rcnn.BBoxHead(
-            head=self.faster_rcnn.TwoFCHead(mlp_dim=1024),
-            nms=self.faster_rcnn.MultiClassNMS(
+        return BBoxHead(
+            head=TwoFCHead(mlp_dim=1024),
+            nms=MultiClassNMS(
                 keep_top_k=100, nms_threshold=0.5, score_threshold=0.05),
             num_classes=num_classes)
 
     def bbox_assigner(self, num_classes):
-        return self.faster_rcnn.BBoxAssigner(
+        return BBoxAssigner(
             batch_size_per_im=512,
             bbox_reg_weights=[0.1, 0.1, 0.2, 0.2],
             bg_thresh_hi=0.5,
@@ -183,6 +274,7 @@ class FasterRCNNResNet50RPN(hub.Module):
     def object_detection(self,
                          paths=None,
                          images=None,
+                         data=None,
                          use_gpu=False,
                          batch_size=1,
                          output_dir='detection_result',
@@ -190,37 +282,49 @@ class FasterRCNNResNet50RPN(hub.Module):
                          visualization=True):
         """API of Object Detection.
 
-        :param paths: the path of images.
-        :type paths: list, each element is correspond to the path of an image.
-        :param images: data of images, [N, H, W, C]
-        :type images: numpy.ndarray
-        :param use_gpu: whether to use gpu or not.
-        :type use_gpu: bool
-        :param batch_size: bathc size.
-        :type batch_size: int
-        :param output_dir: the directory to store the detection result.
-        :type output_dir: str
-        :param score_thresh: the threshold of detection confidence.
-        :type score_thresh: float
-        :param visualization: whether to draw box and save images.
-        :type visualization: bool
+        Args:
+            paths (list[str]): The paths of images.
+            images (list(numpy.ndarray)): images data, shape of each is [H, W, C]
+            batch_size (int): batch size.
+            use_gpu (bool): Whether to use gpu.
+            output_dir (str): The path to store output images.
+            visualization (bool): Whether to save image or not.
+            score_thresh (float): threshold for object detecion.
+
+        Returns:
+            res (list[dict]): The result of coco2017 detecion. keys include 'data', 'save_path', the corresponding value is:
+                data (dict): the result of object detection, keys include 'left', 'top', 'right', 'bottom', 'label', 'confidence', the corresponding value is:
+                    left (float): The X coordinate of the upper left corner of the bounding box;
+                    top (float): The Y coordinate of the upper left corner of the bounding box;
+                    right (float): The X coordinate of the lower right corner of the bounding box;
+                    bottom (float): The Y coordinate of the lower right corner of the bounding box;
+                    label (str): The label of detection result;
+                    confidence (float): The confidence of detection result.
+                save_path (str, optional): The path to save output images.
         """
-        all_images = []
-        paths = paths if paths else []
-        for yield_data in self.faster_rcnn.test_reader(paths, images):
+        paths = paths if paths else list()
+        if data and 'image' in data:
+            paths += data['image']
+
+        all_images = list()
+        for yield_data in test_reader(paths, images):
             all_images.append(yield_data)
+
         images_num = len(all_images)
         loop_num = ceil(images_num / batch_size)
         res = []
+
         for iter_id in range(loop_num):
             batch_data = []
             handle_id = iter_id * batch_size
+
             for image_id in range(batch_size):
                 try:
                     batch_data.append(all_images[handle_id + image_id])
                 except:
                     pass
-            padding_image, padding_info, padding_shape = self.faster_rcnn.padding_minibatch(
+
+            padding_image, padding_info, padding_shape = padding_minibatch(
                 batch_data, coarsest_stride=32, use_padded_im_info=True)
             padding_image_tensor = PaddleTensor(padding_image.copy())
             padding_info_tensor = PaddleTensor(padding_info.copy())
@@ -228,12 +332,13 @@ class FasterRCNNResNet50RPN(hub.Module):
             feed_list = [
                 padding_image_tensor, padding_info_tensor, padding_shape_tensor
             ]
+
             if use_gpu:
                 data_out = self.gpu_predictor.run(feed_list)
             else:
                 data_out = self.cpu_predictor.run(feed_list)
 
-            output = self.faster_rcnn.postprocess(
+            output = postprocess(
                 paths=paths,
                 images=images,
                 data_out=data_out,
@@ -243,6 +348,7 @@ class FasterRCNNResNet50RPN(hub.Module):
                 handle_id=handle_id,
                 visualization=visualization)
             res += output
+
         return res
 
     def add_module_config_arg(self):
@@ -269,7 +375,7 @@ class FasterRCNNResNet50RPN(hub.Module):
             '--input_path', type=str, default=None, help="input data")
 
         self.arg_input_group.add_argument(
-            '--input_path',
+            '--input_file',
             type=str,
             default=None,
             help="file contain input data")
@@ -284,6 +390,15 @@ class FasterRCNNResNet50RPN(hub.Module):
             else:
                 input_data = txt_parser.parse(args.input_file, use_strip=True)
         return input_data
+
+    @serving
+    def serving_method(self, images, **kwargs):
+        """
+        Run as a service.
+        """
+        images_decode = [base64_to_cv2(image) for image in images]
+        results = self.object_detection(images_decode, **kwargs)
+        return results
 
     @runnable
     def run_cmd(self, argvs):

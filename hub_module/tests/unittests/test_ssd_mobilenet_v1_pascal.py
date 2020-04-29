@@ -7,6 +7,8 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
+image_dir = '../image_dataset/object_detection/pascal_voc/'
+
 
 class TestSSDMobileNet(unittest.TestCase):
     @classmethod
@@ -29,22 +31,21 @@ class TestSSDMobileNet(unittest.TestCase):
 
     def test_context(self):
         with fluid.program_guard(self.test_prog):
-            image = fluid.layers.data(
-                name='image', shape=[3, 300, 300], dtype='float32')
+            get_prediction = True
             inputs, outputs, program = self.ssd.context(
-                input_image=image,
-                pretrained=False,
-                trainable=True,
-                param_prefix='BaiDu')
+                pretrained=True, trainable=True, get_prediction=get_prediction)
             image = inputs["image"]
-            head_features = outputs["body_feats"]
+            im_size = inputs["im_size"]
+            if get_prediction:
+                bbox_out = outputs['bbox_out']
+            else:
+                body_features = outputs['body_features']
 
     def test_object_detection(self):
         with fluid.program_guard(self.test_prog):
-            image_dir = '../image_dataset/pascal_voc/'
             airplane = cv2.imread(os.path.join(
                 image_dir, 'airplane.jpg')).astype('float32')
-            airplanes = np.array([airplane, airplane])
+            airplanes = [airplane, airplane]
             detection_results = self.ssd.object_detection(
                 paths=[
                     os.path.join(image_dir, 'bird.jpg'),
@@ -54,7 +55,7 @@ class TestSSDMobileNet(unittest.TestCase):
                     os.path.join(image_dir, 'train.jpg')
                 ],
                 images=airplanes,
-                batch_size=2)
+                batch_size=1)
             print(detection_results)
 
 

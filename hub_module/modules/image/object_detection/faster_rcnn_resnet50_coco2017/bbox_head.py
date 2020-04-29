@@ -53,7 +53,6 @@ class SmoothL1Loss(object):
 
 
 class BoxCoder(object):
-    # __op__ = fluid.layers.box_coder
     def __init__(self,
                  prior_box_var=[0.1, 0.1, 0.2, 0.2],
                  code_type='decode_center_size',
@@ -69,7 +68,6 @@ class BoxCoder(object):
 class TwoFCHead(object):
     """
     RCNN head with two Fully Connected layers
-
     Args:
         mlp_dim (int): num of filters for the fc layers
     """

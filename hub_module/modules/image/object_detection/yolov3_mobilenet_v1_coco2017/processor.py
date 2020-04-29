@@ -6,11 +6,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw
 
-__all__ = [
-    'base64_to_cv2',
-    'load_label_info',
-    'postprocess',
-]
+__all__ = ['base64_to_cv2', 'load_label_info', 'postprocess']
 
 
 def base64_to_cv2(b64str):
@@ -20,11 +16,20 @@ def base64_to_cv2(b64str):
     return data
 
 
+def check_dir(dir_path):
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    elif os.path.isfile(dir_path):
+        os.remove(dir_path)
+        os.makedirs(dir_path)
+
+
 def get_save_image_name(img, output_dir, image_path):
     """Get save image name from source image path.
     """
     image_name = os.path.split(image_path)[-1]
     name, ext = os.path.splitext(image_name)
+
     if ext == '':
         if img.format == 'PNG':
             ext = '.png'
@@ -52,7 +57,6 @@ def draw_bounding_box_on_image(image_path, data_list, save_dir):
                    (left, top)],
                   width=2,
                   fill='red')
-
         # draw label
         if image.mode == 'RGB':
             text = data['label'] + ": %.2f%%" % (100 * data['confidence'])
@@ -66,8 +70,8 @@ def draw_bounding_box_on_image(image_path, data_list, save_dir):
     save_name = get_save_image_name(image, save_dir, image_path)
     if os.path.exists(save_name):
         os.remove(save_name)
-    image.save(save_name)
 
+    image.save(save_name)
     return save_name
 
 
@@ -88,20 +92,28 @@ def load_label_info(file_path):
         return label_names
 
 
-def postprocess(paths, images, data_out, score_thresh, label_names, output_dir,
-                handle_id, visualization):
+def postprocess(paths,
+                images,
+                data_out,
+                score_thresh,
+                label_names,
+                output_dir,
+                handle_id,
+                visualization=True):
     """
     postprocess the lod_tensor produced by fluid.Executor.run
 
     Args:
-        paths (list[str]): the path of images.
-        images (list(numpy.ndarray)):  list of images, shape of each is [H, W, C].
-        data_out (lod_tensor): data produced by executor.run.
+        paths (list[str]): The paths of images.
+        images (list(numpy.ndarray)): images data, shape of each is [H, W, C]
+        data_out (lod_tensor): data output of predictor.
+        batch_size (int): batch size.
+        use_gpu (bool): Whether to use gpu.
+        output_dir (str): The path to store output images.
+        visualization (bool): Whether to save image or not.
         score_thresh (float): the low limit of bounding box.
         label_names (list[str]): label names.
-        output_dir (str): output directory.
         handle_id (int): The number of images that have been handled.
-        visualization (bool): whether to save as images.
 
     Returns:
         res (list[dict]): The result of vehicles detecion. keys include 'data', 'save_path', the corresponding value is:
@@ -118,25 +130,21 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir,
     lod = lod_tensor.lod[0]
     results = lod_tensor.as_ndarray()
 
+    check_dir(output_dir)
+
+    assert type(paths) is list, "type(paths) is not list."
     if handle_id < len(paths):
         unhandled_paths = paths[handle_id:]
         unhandled_paths_num = len(unhandled_paths)
     else:
         unhandled_paths_num = 0
 
-    output_dir = output_dir if output_dir else os.path.join(
-        os.getcwd(), 'detection_result')
-    if visualization:
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
-    output = []
+    output = list()
     for index in range(len(lod) - 1):
         output_i = {'data': []}
         if index < unhandled_paths_num:
             org_img_path = unhandled_paths[index]
             org_img = Image.open(org_img_path)
-            output_i['path'] = org_img_path
         else:
             org_img = images[index - unhandled_paths_num]
             org_img = org_img.astype(np.uint8)
@@ -149,7 +157,6 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir,
         org_img_height = org_img.height
         org_img_width = org_img.width
         result_i = results[lod[index]:lod[index + 1]]
-
         for row in result_i:
             if len(row) != 6:
                 continue
@@ -166,7 +173,6 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir,
             output_i['data'].append(dt)
 
         output.append(output_i)
-
         if visualization:
             output_i['save_path'] = draw_bounding_box_on_image(
                 org_img_path, output_i['data'], output_dir)
