@@ -1,4 +1,4 @@
-name: resnet50_vd_animals
+name: res2net101_vd_26w_4s_imagenet
 dir: "modules/image/classification/res2net101_vd_26w_4s_imagenet"
 exclude:
   - README.md
