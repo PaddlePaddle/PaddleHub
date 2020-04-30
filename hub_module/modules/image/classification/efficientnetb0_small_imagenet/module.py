@@ -21,8 +21,8 @@ from efficientnetb0_small_imagenet.efficientnet import EfficientNetB0_small
 @moduleinfo(
     name="efficientnetb0_small_imagenet",
     type="CV/image_classification",
-    author="baidu-vis",
-    author_email="",
+    author="paddlepaddle",
+    author_email="paddle-dev@baidu.com",
     summary=
     "ResNet18vd is a image classfication model, this module is trained with imagenet datasets.",
     version="1.0.0")

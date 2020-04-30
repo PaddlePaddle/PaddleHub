@@ -21,15 +21,15 @@ from fix_resnext101_32x48d_wsl_imagenet.resnext101_wsl import Fix_ResNeXt101_32x
 @moduleinfo(
     name="fix_resnext101_32x48d_wsl_imagenet",
     type="CV/image_classification",
-    author="baidu-vis",
-    author_email="",
+    author="paddlepaddle",
+    author_email="paddle-dev@baidu.com",
     summary=
     "fix_resnext101_32x48d_wsl is a image classfication model, this module is trained with imagenet datasets.",
     version="1.0.0")
 class FixResnext10132x48dwslImagenet(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "fix_resnext101_32x48d_wsl_imagenet_model")
+            self.directory, "model")
         label_file = os.path.join(self.directory, "label_list.txt")
         with open(label_file, 'r', encoding='utf-8') as file:
             self.label_list = file.read().split("\n")[:-1]

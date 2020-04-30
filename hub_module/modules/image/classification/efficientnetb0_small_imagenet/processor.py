@@ -49,7 +49,7 @@ def postprocess(data_out, label_list, top_k):
         output_i = {}
         indexs = np.argsort(result_i)[::-1][0:top_k]
         for index in indexs:
-            label = label_list[index]
+            label = label_list[index].split(',')[0]
             output_i[label] = float(result_i[index])
         output.append(output_i)
     return output

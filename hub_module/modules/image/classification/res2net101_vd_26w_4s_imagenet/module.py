@@ -21,8 +21,8 @@ from res2net101_vd_26w_4s_imagenet.res2net_vd import Res2Net101_vd_26w_4s
 @moduleinfo(
     name="res2net101_vd_26w_4s_imagenet",
     type="CV/image_classification",
-    author="baidu-vis",
-    author_email="",
+    author="paddlepaddle",
+    author_email="paddle-dev@baidu.com",
     summary=
     "res2net101_vd_26w_4s is a image classfication model, this module is trained with imagenet datasets.",
     version="1.0.0")

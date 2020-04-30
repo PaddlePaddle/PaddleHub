@@ -21,8 +21,8 @@ from se_resnet18_vd_imagenet.se_resnet import SE_ResNet18_vd
 @moduleinfo(
     name="se_resnet18_vd_imagenet",
     type="CV/image_classification",
-    author="baidu-vis",
-    author_email="",
+    author="paddlepaddle",
+    author_email="paddle-dev@baidu.com",
     summary=
     "SE_ResNet18_vd is a image classfication model, this module is trained with imagenet datasets.",
     version="1.0.0")
