@@ -1,17 +1,7 @@
-```shell
-$ hub install resnet50_vd_animals==1.0.0
-```
-
-<p align="center">
-<img src="http://bj.bcebos.com/ibox-thumbnail98/77fa9b7003e4665867855b2b65216519?authorization=bce-auth-v1%2Ffbe74140929444858491fbf2b6bc0935%2F2020-04-08T11%3A05%3A10Z%2F1800%2F%2F1df0ecb4a52adefeae240c9e2189e8032560333e399b3187ef1a76e4ffa5f19f"  hspace='5' width=800/> <br /> ResNet 系列的网络结构
-</p>
-
-模型的详情可参考[论文](https://arxiv.org/pdf/1812.01187.pdf)
-
 ## 命令行预测
 
 ```
-hub run resnet50_vd_animals --input_path "/PATH/TO/IMAGE"
+hub run se_resnet18_vd_imagenet --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
@@ -100,7 +90,7 @@ def save_inference_model(dirname,
 import paddlehub as hub
 import cv2
 
-classifier = hub.Module(name="resnet50_vd_animals")
+classifier = hub.Module(name="se_resnet18_vd_imagenet")
 
 result = classifier.classification(images=[cv2.imread('/PATH/TO/IMAGE')])
 # or
@@ -115,7 +105,7 @@ PaddleHub Serving可以部署一个在线动物识别服务。
 
 运行启动命令：
 ```shell
-$ hub serving start -m resnet50_vd_animals
+$ hub serving start -m se_resnet18_vd_imagenet
 ```
 
 这样就完成了一个在线动物识别服务化API的部署，默认端口号为8866。
@@ -141,7 +131,7 @@ def cv2_to_base64(image):
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/resnet50_vd_animals"
+url = "http://127.0.0.1:8866/predict/se_resnet18_vd_imagenet"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
 # 打印预测结果
@@ -150,7 +140,7 @@ print(r.json()["results"])
 
 ### 查看代码
 
-[PaddlePaddle/models 图像分类](https://github.com/PaddlePaddle/models/tree/develop/PaddleCV/image_classification)
+https://github.com/PaddlePaddle/PaddleClas
 
 ### 依赖
 
