@@ -155,6 +155,15 @@ class ResNet18vdImageNet(hub.Module):
         Returns:
             res (list[dict]): The classfication results.
         """
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                )
+
         if not self.predictor_set:
             self._set_config()
             self.predictor_set = True

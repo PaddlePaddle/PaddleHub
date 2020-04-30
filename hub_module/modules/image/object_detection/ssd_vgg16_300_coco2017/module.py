@@ -242,7 +242,7 @@ class SSDVGG16(hub.Module):
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.object_detection(images_decode, **kwargs)
+        results = self.object_detection(images=images_decode, **kwargs)
         return results
 
     @runnable

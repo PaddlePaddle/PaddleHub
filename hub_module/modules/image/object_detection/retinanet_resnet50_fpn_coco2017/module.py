@@ -14,6 +14,7 @@ import paddlehub as hub
 from paddlehub.module.module import moduleinfo, runnable, serving
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from paddlehub.io.parser import txt_parser
+from paddlehub.common.paddle_helper import add_vars_prefix
 
 from retinanet_resnet50_fpn_coco2017.fpn import FPN
 from retinanet_resnet50_fpn_coco2017.retina_head import AnchorGenerator, RetinaTargetAssign, RetinaOutputDecoder, RetinaHead
@@ -86,10 +87,11 @@ class RetinaNetResNet50FPN(hub.Module):
         context_prog = fluid.Program()
         startup_program = fluid.Program()
         with fluid.program_guard(context_prog, startup_program):
+            var_prefix = '@HUB_{}@'.format(self.name)
             # image
             image = fluid.layers.data(
                 name='image',
-                shape=[3, 800, 1333],
+                shape=[-1, 3, -1, -1],
                 dtype='float32',
                 lod_level=0)
             # im_info
@@ -133,13 +135,31 @@ class RetinaNetResNet50FPN(hub.Module):
             # body_feats
             body_feats, spatial_scale = fpn.get_output(body_feats)
             # inputs, outputs, context_prog
-            inputs = {'image': image, 'im_info': im_info}
+            inputs = {
+                'image': var_prefix + image.name,
+                'im_info': var_prefix + im_info.name
+            }
             if get_prediction:
                 pred = retina_head.get_prediction(body_feats, spatial_scale,
                                                   im_info)
-                outputs = {'bbox_out': pred}
+                outputs = {'bbox_out': var_prefix + pred.name}
             else:
-                outputs = {'body_feats': body_feats}
+                outputs = {
+                    'body_features':
+                    [var_prefix + var.name for key, var in body_feats.items()]
+                }
+
+            # add_vars_prefix
+            add_vars_prefix(context_prog, var_prefix)
+            add_vars_prefix(fluid.default_startup_program(), var_prefix)
+
+            global_vars = context_prog.global_block().vars
+            inputs = {key: global_vars[value] for key, value in inputs.items()}
+            outputs = {
+                key: global_vars[value] if not isinstance(value, list) else
+                [global_vars[var] for var in value]
+                for key, value in outputs.items()
+            }
 
             place = fluid.CPUPlace()
             exe = fluid.Executor(place)
@@ -159,6 +179,29 @@ class RetinaNetResNet50FPN(hub.Module):
             else:
                 exe.run(startup_program)
             return inputs, outputs, context_prog
+
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
+        if combined:
+            model_filename = "__model__" if not model_filename else model_filename
+            params_filename = "__params__" if not params_filename else params_filename
+        place = fluid.CPUPlace()
+        exe = fluid.Executor(place)
+
+        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+            dirname=self.default_pretrained_model_path, executor=exe)
+
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     def object_detection(self,
                          paths=None,
@@ -191,6 +234,15 @@ class RetinaNetResNet50FPN(hub.Module):
                     confidence (float): The confidence of detection result.
                 save_path (str, optional): The path to save output images.
         """
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                )
+
         all_images = list()
         paths = paths if paths else list()
         for yield_data in test_reader(paths, images):
@@ -274,7 +326,7 @@ class RetinaNetResNet50FPN(hub.Module):
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.object_detection(images_decode, **kwargs)
+        results = self.object_detection(images=images_decode, **kwargs)
         return results
 
     @runnable

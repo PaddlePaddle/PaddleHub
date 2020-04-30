@@ -24,9 +24,9 @@ from efficientnetb0_small_imagenet.efficientnet import EfficientNetB0_small
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com",
     summary=
-    "ResNet18vd is a image classfication model, this module is trained with imagenet datasets.",
+    "EfficientNetB0 is a image classfication model, this module is trained with imagenet datasets.",
     version="1.0.0")
-class ResNet18vdImageNet(hub.Module):
+class EfficientNetB0ImageNet(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
             self.directory, "efficientnetb0_small_imagenet_model")
@@ -91,8 +91,8 @@ class ResNet18vdImageNet(hub.Module):
             with fluid.unique_name.guard():
                 image = fluid.layers.data(
                     name="image", shape=[3, 224, 224], dtype="float32")
-                resnet_vd = EfficientNetB0_small()
-                output, feature_map = resnet_vd.net(
+                efficientnet_b0 = EfficientNetB0_small()
+                output, feature_map = efficientnet_b0.net(
                     input=image, class_dim=len(self.label_list))
 
                 name_prefix = '@HUB_{}@'.format(self.name)
@@ -168,6 +168,15 @@ class ResNet18vdImageNet(hub.Module):
         if not self.predictor_set:
             self._set_config()
             self.predictor_set = True
+
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                )
 
         all_data = list()
         for yield_data in reader(images, paths):

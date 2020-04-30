@@ -77,7 +77,7 @@ def clip_bbox(bbox, img_width, img_height):
     ymin = max(min(bbox[1], img_height), 0.)
     xmax = max(min(bbox[2], img_width), 0.)
     ymax = max(min(bbox[3], img_height), 0.)
-    return xmin, ymin, xmax, ymax
+    return float(xmin), float(ymin), float(xmax), float(ymax)
 
 
 def load_label_info(file_path):
@@ -163,7 +163,7 @@ def postprocess(paths,
             bbox[3] = bbox[3] * org_img_height
             dt = {}
             dt['label'] = label_names[category_id]
-            dt['confidence'] = confidence
+            dt['confidence'] = float(confidence)
             dt['left'], dt['top'], dt['right'], dt['bottom'] = clip_bbox(
                 bbox, org_img_width, org_img_height)
             output_i['data'].append(dt)

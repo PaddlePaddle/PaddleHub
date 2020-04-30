@@ -183,6 +183,15 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
                     confidence (float): The confidence of detection result.
                 save_path (str, optional): The path to save output images.
         """
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                )
+
         paths = paths if paths else list()
         data_reader = partial(reader, paths, images)
         batch_reader = fluid.io.batch(data_reader, batch_size=batch_size)
@@ -239,7 +248,7 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.face_detection(images_decode, **kwargs)
+        results = self.object_detection(images=images_decode, **kwargs)
         return results
 
     @runnable

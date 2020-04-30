@@ -74,9 +74,9 @@ class FasterRCNNResNet50(hub.Module):
         Distill the Head Features, so as to perform transfer learning.
 
         Args:
+            num_classes (int): number of categories
             trainable (bool): whether to set parameters trainable.
             pretrained (bool): whether to load default pretrained model.
-            get_prediction (bool): whether to get prediction.
             phase (str): optional choices are 'train' and 'predict'.
 
         Returns:
@@ -263,6 +263,29 @@ class FasterRCNNResNet50(hub.Module):
             fg_thresh=0.5,
             class_nums=num_classes)
 
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
+        if combined:
+            model_filename = "__model__" if not model_filename else model_filename
+            params_filename = "__params__" if not params_filename else params_filename
+        place = fluid.CPUPlace()
+        exe = fluid.Executor(place)
+
+        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+            dirname=self.default_pretrained_model_path, executor=exe)
+
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
+
     def object_detection(self,
                          paths=None,
                          images=None,
@@ -294,6 +317,14 @@ class FasterRCNNResNet50(hub.Module):
                     confidence (float): The confidence of detection result.
                 save_path (str, optional): The path to save output images.
         """
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                )
         paths = paths if paths else list()
         if data and 'image' in data:
             paths += data['image']
@@ -384,7 +415,7 @@ class FasterRCNNResNet50(hub.Module):
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.object_detection(images_decode, **kwargs)
+        results = self.object_detection(images=images_decode, **kwargs)
         return results
 
     @runnable

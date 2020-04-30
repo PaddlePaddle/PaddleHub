@@ -155,6 +155,15 @@ class ResNet50vdAnimals(hub.Module):
         Returns:
             res (list[dict]): The classfication results.
         """
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                )
+
         all_data = list()
         for yield_data in reader(images, paths):
             all_data.append(yield_data)
