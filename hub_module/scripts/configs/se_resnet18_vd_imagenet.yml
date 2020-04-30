@@ -1,0 +1,9 @@
+name: se_resnet18_vd_imagenet
+dir: "modules/image/classification/se_resnet18_vd_imagenet"
+exclude:
+  - README.md
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/hub_dev/SE_ResNet18_vd_imagenet_model.tar.gz
+    dest: se_resnet18_vd_imagenet_model
+    uncompress: True
