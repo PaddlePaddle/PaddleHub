@@ -13,9 +13,9 @@ from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predic
 from paddlehub.module.module import moduleinfo, runnable, serving
 from paddlehub.common.paddle_helper import add_vars_prefix
 
-from SE_resnet18_vd_imagenet.processor import postprocess, base64_to_cv2
-from SE_resnet18_vd_imagenet.data_feed import reader
-from SE_resnet18_vd_imagenet.se_resnet import SE_ResNet18_vd
+from se_resnet18_vd_imagenet.processor import postprocess, base64_to_cv2
+from se_resnet18_vd_imagenet.data_feed import reader
+from se_resnet18_vd_imagenet.se_resnet import SE_ResNet18_vd
 
 
 @moduleinfo(
@@ -24,12 +24,12 @@ from SE_resnet18_vd_imagenet.se_resnet import SE_ResNet18_vd
     author="baidu-vis",
     author_email="",
     summary=
-    "SE_resnet18_vd is a image classfication model, this module is trained with imagenet datasets.",
+    "SE_ResNet18_vd is a image classfication model, this module is trained with imagenet datasets.",
     version="1.0.0")
 class SEResNet18vdImageNet(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "SE_ResNet18_vd_imagenet_model")
+            self.directory, "se_resnet18_vd_imagenet_model")
         label_file = os.path.join(self.directory, "label_list.txt")
         with open(label_file, 'r', encoding='utf-8') as file:
             self.label_list = file.read().split("\n")[:-1]

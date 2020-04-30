@@ -1,4 +1,4 @@
-name: resnet50_vd_animals
+name: efficientnetb0_small_imagenet
 dir: "modules/image/classification/efficientnetb0_small_imagenet"
 exclude:
   - README.md

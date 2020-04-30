@@ -18,7 +18,7 @@ class TestSEResnet18vdImagenet(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         """Prepare the environment once before execution of all tests.\n"""
-        self.classifier = hub.Module(name='SE_resnet18_vd_imagenet')
+        self.classifier = hub.Module(name='se_resnet18_vd_imagenet')
 
     @classmethod
     def tearDownClass(self):
@@ -74,7 +74,7 @@ class TestSEResnet18vdImagenet(unittest.TestCase):
     def test_save_inference_model(self):
         with fluid.program_guard(self.test_prog):
             self.classifier.save_inference_model(
-                dirname='SE_resnet18_vd_imagenet_model',
+                dirname='se_resnet18_vd_imagenet_model',
                 model_filename='model',
                 combined=False)
 
