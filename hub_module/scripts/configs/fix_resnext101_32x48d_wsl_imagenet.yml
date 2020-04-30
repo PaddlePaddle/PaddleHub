@@ -1,4 +1,4 @@
-name: resnet50_vd_animals
+name: fix_resnext101_32x48d_wsl_imagenet
 dir: "modules/image/classification/fix_resnext101_32x48d_wsl_imagenet"
 exclude:
   - README.md
