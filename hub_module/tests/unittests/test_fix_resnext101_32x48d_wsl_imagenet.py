@@ -70,7 +70,7 @@ class TestFixResnext10132x48dwslImagenet(unittest.TestCase):
             for pic_path in pics_path_list:
                 im = cv2.cvtColor(cv2.imread(pic_path), cv2.COLOR_BGR2RGB)
                 result = self.classifier.classification(
-                    images=np.expand_dims(im, axis=0), use_gpu=False, top_k=5)
+                    images=[im], use_gpu=True, top_k=5)
                 print(result)
 
     def test_save_inference_model(self):

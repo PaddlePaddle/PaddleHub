@@ -1,7 +1,7 @@
 ## 命令行预测
 
 ```
-hub run fix_resnext101_32x48d_wsl_imagenet --input_path "/PATH/TO/IMAGE"
+hub run efficientnetb0_small_imagenet --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
@@ -90,7 +90,7 @@ def save_inference_model(dirname,
 import paddlehub as hub
 import cv2
 
-classifier = hub.Module(name="fix_resnext101_32x48d_wsl_imagenet")
+classifier = hub.Module(name="efficientnetb0_small_imagenet")
 
 result = classifier.classification(images=[cv2.imread('/PATH/TO/IMAGE')])
 # or
@@ -105,7 +105,7 @@ PaddleHub Serving可以部署一个在线图像识别服务。
 
 运行启动命令：
 ```shell
-$ hub serving start -m fix_resnext101_32x48d_wsl_imagenet
+$ hub serving start -m efficientnetb0_small_imagenet
 ```
 
 这样就完成了一个在线图像识别服务化API的部署，默认端口号为8866。
@@ -131,7 +131,7 @@ def cv2_to_base64(image):
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/fix_resnext101_32x48d_wsl_imagenet"
+url = "http://127.0.0.1:8866/predict/efficientnetb0_small_imagenet"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
 # 打印预测结果

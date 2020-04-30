@@ -13,13 +13,13 @@ from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predic
 from paddlehub.module.module import moduleinfo, runnable, serving
 from paddlehub.common.paddle_helper import add_vars_prefix
 
-from resnet18_vd_imagenet.processor import postprocess, base64_to_cv2
-from resnet18_vd_imagenet.data_feed import reader
-from resnet18_vd_imagenet.resnet_vd import ResNet18_vd
+from efficientnetb0_small_imagenet.processor import postprocess, base64_to_cv2
+from efficientnetb0_small_imagenet.data_feed import reader
+from efficientnetb0_small_imagenet.efficientnet import EfficientNetB0_small
 
 
 @moduleinfo(
-    name="resnet18_vd_imagenet",
+    name="efficientnetb0_small_imagenet",
     type="CV/image_classification",
     author="baidu-vis",
     author_email="",
@@ -29,7 +29,7 @@ from resnet18_vd_imagenet.resnet_vd import ResNet18_vd
 class ResNet18vdImageNet(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "resnet18_vd_imagenet_model")
+            self.directory, "efficientnetb0_small_imagenet_model")
         label_file = os.path.join(self.directory, "label_list.txt")
         with open(label_file, 'r', encoding='utf-8') as file:
             self.label_list = file.read().split("\n")[:-1]
@@ -91,7 +91,7 @@ class ResNet18vdImageNet(hub.Module):
             with fluid.unique_name.guard():
                 image = fluid.layers.data(
                     name="image", shape=[3, 224, 224], dtype="float32")
-                resnet_vd = ResNet18_vd()
+                resnet_vd = EfficientNetB0_small()
                 output, feature_map = resnet_vd.net(
                     input=image, class_dim=len(self.label_list))
 
@@ -129,6 +129,16 @@ class ResNet18vdImageNet(hub.Module):
                         self.default_pretrained_model_path,
                         context_prog,
                         predicate=_if_exist)
+                    print(inputs.keys())
+
+                    fluid.io.save_inference_model(
+                        dirname=os.path.join(
+                            self.directory,
+                            'efficientnetb0_small_imagenet_model'),
+                        feeded_var_names=[name_prefix + 'image'],
+                        target_vars=list(outputs.values()),
+                        executor=exe,
+                        main_program=context_prog)
                 else:
                     exe.run(startup_prog)
                 # trainable

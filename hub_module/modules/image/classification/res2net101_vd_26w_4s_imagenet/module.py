@@ -33,6 +33,7 @@ class Res2Net101vd26w4sImagenet(hub.Module):
         label_file = os.path.join(self.directory, "label_list.txt")
         with open(label_file, 'r', encoding='utf-8') as file:
             self.label_list = file.read().split("\n")[:-1]
+        self.predictor_set = False
 
     def get_expected_image_width(self):
         return 224
@@ -154,7 +155,9 @@ class Res2Net101vd26w4sImagenet(hub.Module):
         Returns:
             res (list[dict]): The classfication results.
         """
-        self._set_config()
+        if not self.predictor_set:
+            self._set_config()
+            self.predictor_set = True
 
         all_data = list()
         for yield_data in reader(images, paths):

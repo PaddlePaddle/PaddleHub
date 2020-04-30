@@ -14,11 +14,11 @@ import paddlehub as hub
 pic_dir = '../image_dataset/classification/animals/'
 
 
-class TestResNet50vdAnimal(unittest.TestCase):
+class TestEfficientnetB0SmallImagenet(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         """Prepare the environment once before execution of all tests.\n"""
-        self.classifier = hub.Module(name="res2net101_vd_26w_4s_imagenet")
+        self.classifier = hub.Module(name="efficientnetb0_small_imagenet")
 
     @classmethod
     def tearDownClass(self):
@@ -74,17 +74,17 @@ class TestResNet50vdAnimal(unittest.TestCase):
     def test_save_inference_model(self):
         with fluid.program_guard(self.test_prog):
             self.classifier.save_inference_model(
-                dirname='res2net101_vd_26w_4s_imagenet_model',
+                dirname='efficientnetb0_small_imagenet_model',
                 model_filename='__model__',
                 combined=False)
 
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(TestResNet50vdAnimal('test_context'))
-    suite.addTest(TestResNet50vdAnimal('test_single_pic'))
-    suite.addTest(TestResNet50vdAnimal('test_batch'))
-    suite.addTest(TestResNet50vdAnimal('test_ndarray'))
-    suite.addTest(TestResNet50vdAnimal('test_save_inference_model'))
+    suite.addTest(TestEfficientnetB0SmallImagenet('test_context'))
+    suite.addTest(TestEfficientnetB0SmallImagenet('test_single_pic'))
+    suite.addTest(TestEfficientnetB0SmallImagenet('test_batch'))
+    suite.addTest(TestEfficientnetB0SmallImagenet('test_ndarray'))
+    suite.addTest(TestEfficientnetB0SmallImagenet('test_save_inference_model'))
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)

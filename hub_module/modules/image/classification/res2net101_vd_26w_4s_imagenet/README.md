@@ -80,8 +80,8 @@ def save_inference_model(dirname,
 **参数**
 
 * dirname: 存在模型的目录名称
-* model_filename: 模型文件名称，默认为\_\_model\_\_
-* params_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
+* model\_filename: 模型文件名称，默认为\_\_model\_\_
+* params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
 * combined: 是否将参数保存到统一的一个文件中
 
 ## 代码示例
@@ -99,7 +99,7 @@ result = classifier.classification(images=[cv2.imread('/PATH/TO/IMAGE')])
 
 ## 服务部署
 
-PaddleHub Serving可以部署一个在线动物识别服务。
+PaddleHub Serving可以部署一个在线图像识别服务。
 
 ## 第一步：启动PaddleHub Serving
 
@@ -108,7 +108,7 @@ PaddleHub Serving可以部署一个在线动物识别服务。
 $ hub serving start -m res2net101_vd_26w_4s_imagenet
 ```
 
-这样就完成了一个在线动物识别服务化API的部署，默认端口号为8866。
+这样就完成了一个在线图像识别服务化API的部署，默认端口号为8866。
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 
