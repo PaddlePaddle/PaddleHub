@@ -8,8 +8,7 @@ chardet == 3.0.4
 requests
 flask >= 1.1.0
 flake8
-tb-paddle
-tensorboard >= 1.15
+visualdl == 2.0.0a0
 cma == 2.7.0
 sentencepiece
 nltk
