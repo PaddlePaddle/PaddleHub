@@ -32,7 +32,7 @@ else:
 import numpy as np
 import paddle
 import paddle.fluid as fluid
-from tb_paddle import SummaryWriter
+from visualdl import LogWriter
 
 import paddlehub as hub
 from paddlehub.common.paddle_helper import dtype_map, clone_program
@@ -327,7 +327,7 @@ class BaseTask(object):
         self._phases = []
         self._envs = {}
         self._predict_data = None
-        self._tb_writer = None
+        self._vdl_writer = None
 
         # event hooks
         self._hooks = TaskHooks()
@@ -607,16 +607,16 @@ class BaseTask(object):
         return [vars[varname] for varname in self.fetch_list]
 
     @property
-    def tb_writer(self):
+    def vdl_writer(self):
         """
-        get tb_writer for visualization.
+        get vdl_writer for visualization.
         """
         if not os.path.exists(self.config.checkpoint_dir):
             mkdir(self.config.checkpoint_dir)
         tb_log_dir = os.path.join(self.config.checkpoint_dir, "visualization")
-        if not self._tb_writer:
-            self._tb_writer = SummaryWriter(tb_log_dir)
-        return self._tb_writer
+        if not self._vdl_writer:
+            self._vdl_writer = LogWriter(tb_log_dir)
+        return self._vdl_writer
 
     def create_event_function(self, hook_type):
         """
@@ -723,18 +723,19 @@ class BaseTask(object):
         """
         eval_scores, eval_loss, run_speed = self._calculate_metrics(run_states)
         if 'train' in self._envs:
-            self.tb_writer.add_scalar(
+            self.vdl_writer.add_scalar(
                 tag="Loss_{}".format(self.phase),
-                scalar_value=eval_loss,
-                global_step=self._envs['train'].current_step)
+                value=eval_loss,
+                step=self._envs['train'].current_step)
 
         log_scores = ""
         for metric in eval_scores:
             if 'train' in self._envs:
-                self.tb_writer.add_scalar(
+                self.vdl_writer.add_scalar(
                     tag="{}_{}".format(metric, self.phase),
-                    scalar_value=eval_scores[metric],
-                    global_step=self._envs['train'].current_step)
+                    value=eval_scores[metric],
+                    step=self._envs['train'].current_step)
+
             log_scores += "%s=%.5f " % (metric, eval_scores[metric])
         logger.eval(
             "[%s dataset evaluation result] loss=%.5f %s[step/sec: %.2f]" %
@@ -766,16 +767,16 @@ class BaseTask(object):
             run_states (object): the results in train phase
         """
         scores, avg_loss, run_speed = self._calculate_metrics(run_states)
-        self.tb_writer.add_scalar(
+        self.vdl_writer.add_scalar(
             tag="Loss_{}".format(self.phase),
-            scalar_value=avg_loss,
-            global_step=self._envs['train'].current_step)
+            value=avg_loss,
+            step=self._envs['train'].current_step)
         log_scores = ""
         for metric in scores:
-            self.tb_writer.add_scalar(
+            self.vdl_writer.add_scalar(
                 tag="{}_{}".format(metric, self.phase),
-                scalar_value=scores[metric],
-                global_step=self._envs['train'].current_step)
+                value=scores[metric],
+                step=self._envs['train'].current_step)
             log_scores += "%s=%.5f " % (metric, scores[metric])
         logger.train("step %d / %d: loss=%.5f %s[step/sec: %.2f]" %
                      (self.current_step, self.max_train_steps, avg_loss,

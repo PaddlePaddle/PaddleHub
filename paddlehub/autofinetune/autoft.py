@@ -22,7 +22,7 @@ import os
 import six
 import time
 
-from tb_paddle import SummaryWriter
+from visualdl import LogWriter
 from paddlehub.common.logger import logger
 from paddlehub.common.utils import mkdir
 from paddlehub.autofinetune.evaluator import REWARD_SUM, TMP_HOME
@@ -67,12 +67,12 @@ class BaseTuningStrategy(object):
             self._output_dir = output_dir
 
         # record the information for the whole auto finetune
-        self.writer = SummaryWriter(logdir=self._output_dir + '/visualization')
+        self.writer = LogWriter(logdir=self._output_dir + '/visualization')
 
         # record the information for per population in all round
         self.writer_pop_trails = []
         for i in range(self.popsize):
-            writer_pop_trail = SummaryWriter(
+            writer_pop_trail = LogWriter(
                 logdir=self._output_dir + '/visualization/pop_{}'.format(i))
             self.writer_pop_trails.append(writer_pop_trail)
 
@@ -285,23 +285,23 @@ class HAZero(BaseTuningStrategy):
         for index, name in enumerate(self.hparams_name_list):
             self.writer.add_scalar(
                 tag="hyperparameter_tuning/" + name,
-                scalar_value=best_hparams[index],
-                global_step=self.round)
+                value=best_hparams[index],
+                step=self.round)
         self.writer.add_scalar(
             tag="hyperparameter_tuning/best_eval_value",
-            scalar_value=self.get_best_eval_value(),
-            global_step=self.round)
+            value=self.get_best_eval_value(),
+            step=self.round)
         for pop_num in range(self.popsize):
             params = self.evaluator.convert_params(params_list[pop_num])
             for index, name in enumerate(self.hparams_name_list):
                 self.writer_pop_trails[pop_num].add_scalar(
                     tag="population_transformation/" + name,
-                    scalar_value=params[index],
-                    global_step=self.round)
+                    value=params[index],
+                    step=self.round)
             self.writer_pop_trails[pop_num].add_scalar(
                 tag="population_transformation/eval_value",
-                scalar_value=(REWARD_SUM - reward_list[pop_num]),
-                global_step=self.round)
+                value=(REWARD_SUM - reward_list[pop_num]),
+                step=self.round)
 
         self.evolution_stratefy.tell(params_list, reward_list)
         self.evolution_stratefy.disp()
@@ -422,23 +422,23 @@ class PSHE2(BaseTuningStrategy):
         for index, name in enumerate(self.hparams_name_list):
             self.writer.add_scalar(
                 tag="hyperparameter_tuning/" + name,
-                scalar_value=best_hparams[index],
-                global_step=self.round)
+                value=best_hparams[index],
+                step=self.round)
         self.writer.add_scalar(
             tag="hyperparameter_tuning/best_eval_value",
-            scalar_value=self.get_best_eval_value(),
-            global_step=self.round)
+            value=self.get_best_eval_value(),
+            step=self.round)
         for pop_num in range(self.popsize):
             params = self.evaluator.convert_params(params_list[pop_num])
             for index, name in enumerate(self.hparams_name_list):
                 self.writer_pop_trails[pop_num].add_scalar(
                     tag="population_transformation/" + name,
-                    scalar_value=params[index],
-                    global_step=self.round)
+                    value=params[index],
+                    step=self.round)
             self.writer_pop_trails[pop_num].add_scalar(
                 tag="population_transformation/eval_value",
-                scalar_value=(REWARD_SUM - reward_list[pop_num]),
-                global_step=self.round)
+                value=(REWARD_SUM - reward_list[pop_num]),
+                step=self.round)
 
         self.estimate_momemtum()
         for i in range(self.popsize):
