@@ -21,7 +21,7 @@ from yolov3_darknet53_venus.yolo_head import MultiClassNMS, YOLOv3Head
 
 @moduleinfo(
     name="yolov3_darknet53_venus",
-    version="1.1.0",
+    version="1.0.0",
     type="CV/object_detection",
     summary=
     "Baidu's YOLOv3 model for object detection, with backbone DarkNet53, trained with Baidu self-built dataset.",
