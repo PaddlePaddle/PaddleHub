@@ -1,7 +1,7 @@
 ## 命令行预测
 
 ```shell
-$ hub run yolov3_darknet53_vehicles --input_path "/PATH/TO/IMAGE"
+$ hub run yolov3_resnet50_vd_coco2017 --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
@@ -33,12 +33,12 @@ def object_detection(paths=None,
                      images=None,
                      batch_size=1,
                      use_gpu=False,
-                     score_thresh=0.2,
-                     visualization=True,
-                     output_dir='yolov3_vehicles_detect_output')
+                     output_dir='detection_result',
+                     score_thresh=0.5,
+                     visualization=True)
 ```
 
-预测API，检测输入图片中的所有车辆的位置。
+预测API，检测输入图片中的所有目标的位置。
 
 **参数**
 
@@ -48,7 +48,7 @@ def object_detection(paths=None,
 * use\_gpu (bool): 是否使用 GPU；
 * score\_thresh (float): 识别置信度的阈值；
 * visualization (bool): 是否将识别结果保存为图片文件；
-* output\_dir (str): 图片的保存路径，默认设为 yolov3\_vehicles\_detect\_output；
+* output\_dir (str): 图片的保存路径，默认设为 detection\_result；
 
 **返回**
 
@@ -76,7 +76,7 @@ def save_inference_model(dirname,
 * dirname: 存在模型的目录名称
 * model\_filename: 模型文件名称，默认为\_\_model\_\_
 * params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
-* combined: 是否将参数保存到统一的一个文件中
+* combined: 是否将参数保存到统一的一个文件中。
 
 ## 代码示例
 
@@ -84,24 +84,24 @@ def save_inference_model(dirname,
 import paddlehub as hub
 import cv2
 
-vehicles_detector = hub.Module(name="yolov3_darknet53_vehicles")
-result = vehicles_detector.object_detection(images=[cv2.imread('/PATH/TO/IMAGE')])
+object_detector = hub.Module(name="yolov3_resnet50_vd_coco2017")
+result = object_detector.object_detection(images=[cv2.imread('/PATH/TO/IMAGE')])
 # or
-# result = vehicles_detector.object_detection((paths=['/PATH/TO/IMAGE'])
+# result = object_detector.object_detection((paths=['/PATH/TO/IMAGE'])
 ```
 
 ## 服务部署
 
-PaddleHub Serving可以部署一个车辆检测的在线服务。
+PaddleHub Serving 可以部署一个目标检测的在线服务。
 
 ## 第一步：启动PaddleHub Serving
 
 运行启动命令：
 ```shell
-$ hub serving start -m yolov3_darknet53_vehicles
+$ hub serving start -m yolov3_resnet50_vd_coco2017
 ```
 
-这样就完成了一个车辆检测的服务化API的部署，默认端口号为8866。
+这样就完成了一个目标检测的服务化API的部署，默认端口号为8866。
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 
@@ -124,7 +124,7 @@ def cv2_to_base64(image):
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/yolov3_darknet53_vehicles"
+url = "http://127.0.0.1:8866/predict/yolov3_resnet50_vd_coco2017"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
 # 打印预测结果

@@ -1,12 +1,12 @@
 ## 命令行预测
 
-```
+```shell
 $ hub run faster_rcnn_resnet50_fpn_coco2017 --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
 
-```
+```python
 def context(num_classes=81,
             trainable=True,
             pretrained=True,

@@ -1,12 +1,12 @@
 ## 命令行预测
 
-```
+```shell
 $ hub run yolov3_darknet53_coco2017 --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
 
-```
+```python
 def context(trainable=True,
             pretrained=True,
             get_prediction=False)
