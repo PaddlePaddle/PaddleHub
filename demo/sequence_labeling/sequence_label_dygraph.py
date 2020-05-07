@@ -8,6 +8,7 @@ import paddle.fluid as fluid
 from paddle.fluid.dygraph import Linear
 from paddle.fluid.dygraph.base import to_variable
 from paddle.fluid.optimizer import AdamOptimizer
+from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
@@ -20,9 +21,9 @@ parser.add_argument("--max_seq_len",        type=int,               default=512,
 # yapf: enable.
 
 
-class TransformerClassifier(fluid.dygraph.Layer):
+class TransformerSequenceLabelLayer(fluid.dygraph.Layer):
     def __init__(self, num_classes, transformer):
-        super(TransformerClassifier, self).__init__()
+        super(TransformerSequenceLabelLayer, self).__init__()
         self.num_classes = num_classes
         self.transformer = transformer
         self.fc = Linear(input_dim=768, output_dim=num_classes)
@@ -30,29 +31,27 @@ class TransformerClassifier(fluid.dygraph.Layer):
     def forward(self, input_ids, position_ids, segment_ids, input_mask):
         result = self.transformer(input_ids, position_ids, segment_ids,
                                   input_mask)
-        cls_feats = fluid.layers.dropout(
-            result['pooled_output'],
-            dropout_prob=0.1,
-            dropout_implementation="upscale_in_train")
-        cls_feats = fluid.layers.reshape(cls_feats, shape=[-1, 768])
-        pred = self.fc(cls_feats)
-        return fluid.layers.softmax(pred)
+        pred = self.fc(result['sequence_output'])
+        ret_infers = fluid.layers.reshape(
+            x=fluid.layers.argmax(pred, axis=2), shape=[-1, 1])
+        pred = fluid.layers.reshape(pred, shape=[-1, self.num_classes])
+        return fluid.layers.softmax(pred), ret_infers
 
 
 def finetune(args):
     ernie = hub.Module(name="ernie", max_seq_len=args.max_seq_len)
     with fluid.dygraph.guard():
-        dataset = hub.dataset.ChnSentiCorp()
-        tc = TransformerClassifier(
+        dataset = hub.dataset.MSRA_NER()
+        ts = TransformerSequenceLabelLayer(
             num_classes=dataset.num_labels, transformer=ernie)
-        adam = AdamOptimizer(learning_rate=1e-5, parameter_list=tc.parameters())
+        adam = AdamOptimizer(learning_rate=1e-5, parameter_list=ts.parameters())
         state_dict_path = os.path.join(args.checkpoint_dir,
                                        'dygraph_state_dict')
         if os.path.exists(state_dict_path + '.pdparams'):
             state_dict, _ = fluid.load_dygraph(state_dict_path)
-            tc.load_dict(state_dict)
+            ts.load_dict(state_dict)
 
-        reader = hub.reader.ClassifyReader(
+        reader = hub.reader.SequenceLabelReader(
             dataset=dataset,
             vocab_path=ernie.get_vocab_path(),
             max_seq_len=args.max_seq_len,
@@ -61,7 +60,7 @@ def finetune(args):
         train_reader = reader.data_generator(
             batch_size=args.batch_size, phase='train')
 
-        loss_sum = acc_sum = cnt = 0
+        loss_sum = total_infer = total_label = total_correct = cnt = 0
         # 执行epoch_num次训练
         for epoch in range(args.num_epoch):
             # 读取训练数据进行训练
@@ -70,10 +69,12 @@ def finetune(args):
                 position_ids = np.array(data[0][1]).astype(np.int64)
                 segment_ids = np.array(data[0][2]).astype(np.int64)
                 input_mask = np.array(data[0][3]).astype(np.float32)
-                labels = np.array(data[0][4]).astype(np.int64)
-                pred = tc(input_ids, position_ids, segment_ids, input_mask)
+                labels = np.array(data[0][4]).astype(np.int64).reshape(-1, 1)
+                seq_len = np.squeeze(
+                    np.array(data[0][5]).astype(np.int64), axis=1)
+                pred, ret_infers = ts(input_ids, position_ids, segment_ids,
+                                      input_mask)
 
-                acc = fluid.layers.accuracy(pred, to_variable(labels))
                 loss = fluid.layers.cross_entropy(pred, to_variable(labels))
                 avg_loss = fluid.layers.mean(loss)
                 avg_loss.backward()
@@ -81,15 +82,23 @@ def finetune(args):
                 adam.minimize(avg_loss)
 
                 loss_sum += avg_loss.numpy() * labels.shape[0]
-                acc_sum += acc.numpy() * labels.shape[0]
+                label_num, infer_num, correct_num = chunk_eval(
+                    labels, ret_infers.numpy(), seq_len, dataset.num_labels, 1)
                 cnt += labels.shape[0]
+
+                total_infer += infer_num
+                total_label += label_num
+                total_correct += correct_num
+
                 if batch_id % args.log_interval == 0:
-                    print('epoch {}: loss {}, acc {}'.format(
-                        epoch, loss_sum / cnt, acc_sum / cnt))
-                    loss_sum = acc_sum = cnt = 0
+                    precision, recall, f1 = calculate_f1(
+                        total_label, total_infer, total_correct)
+                    print('epoch {}: loss {}, f1 {} recall {} precision {}'.
+                          format(epoch, loss_sum / cnt, f1, recall, precision))
+                    loss_sum = total_infer = total_label = total_correct = cnt = 0
 
                 if batch_id % args.save_interval == 0:
-                    state_dict = tc.state_dict()
+                    state_dict = ts.state_dict()
                     fluid.save_dygraph(state_dict, state_dict_path)
 
 

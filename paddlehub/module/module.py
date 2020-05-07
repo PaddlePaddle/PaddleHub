@@ -146,12 +146,6 @@ class Module(fluid.dygraph.Layer):
         self._initialize(**kwargs)
         self._is_initialize = True
         self._code_version = "v2"
-        self.model_runner = fluid.dygraph.StaticModelRunner(
-            self.pretrained_model_path)
-
-    @property
-    def pretrained_model_path(self):
-        return self.default_pretrained_model_path
 
     def _get_func_name(self, current_cls, module_func_dict):
         mod = current_cls.__module__ + "." + current_cls.__name__
@@ -256,7 +250,8 @@ class Module(fluid.dygraph.Layer):
         pass
 
     def forward(self, *args, **kwargs):
-        return self.model_runner(*args, **kwargs)
+        raise RuntimeError('{} does not support dynamic graph mode yet.'.format(
+            self.name))
 
 
 class ModuleHelper(object):
