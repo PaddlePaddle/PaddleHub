@@ -109,4 +109,3 @@ TSN的训练数据采用由DeepMind公布的Kinetics-400动作识别数据集。
 ## 参考论文
 
 - [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859), Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoou Tang, Luc Van Gool
-
