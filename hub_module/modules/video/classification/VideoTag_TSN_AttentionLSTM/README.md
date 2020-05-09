@@ -2,7 +2,7 @@
 $ hub install VideoTag_TSN_AttentionLSTM==1.0.0
 ```
 <p align="center">
-<img src="http://bj.bcebos.com/ibox-thumbnail98/6dccffb080a6a32f8d0a44411368110b?authorization=bce-auth-v1%2Ffbe74140929444858491fbf2b6bc0935%2F2020-05-09T09%3A11%3A36Z%2F1800%2F%2F6c1b6b33cabacaa17584b52c68d2dc679f73a44a909cf9331871a7c9f12eb8c0" hspace='10'/> <br />
+<img src="https://paddlehub.bj.bcebos.com/model/video/video_classifcation/VideoTag_TSN_AttentionLSTM.png" hspace='10'/> <br />
 </p>
 具体网络结构可参考论文[TSN](https://arxiv.org/abs/1608.00859)和[AttentionLSTM](https://arxiv.org/abs/1503.08909)。
 
