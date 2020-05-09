@@ -23,7 +23,7 @@ import logging
 
 import numpy as np
 import json
-from VideoTag_TSN_AttentionLSTM.resource.metrics.youtube8m import eval_util as youtube8m_metrics
+from videotag_tsn_attention_lstm.resource.metrics.youtube8m import eval_util as youtube8m_metrics
 
 logger = logging.getLogger(__name__)
 

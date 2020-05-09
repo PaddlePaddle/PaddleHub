@@ -1,5 +1,5 @@
 ```shell
-$ hub install VideoTag_TSN_AttentionLSTM==1.0.0
+$ hub install videotag_tsn_attention_lstm==1.0.0
 ```
 <p align="center">
 <img src="https://paddlehub.bj.bcebos.com/model/video/video_classifcation/VideoTag_TSN_AttentionLSTM.png" hspace='10'/> <br />
@@ -8,7 +8,7 @@ $ hub install VideoTag_TSN_AttentionLSTM==1.0.0
 
 ## 命令行预测示例
 ```shell
-hub run VideoTag_TSN_AttentionLSTM --input_path 1.mp4 --use_gpu False
+hub run videotag_tsn_attention_lstm --input_path 1.mp4 --use_gpu False
 ```
 **参数**
 示例文件下载：
@@ -44,7 +44,7 @@ def classification(paths,
 ```python
 import paddlehub as hub
 
-videotag = hub.Module(name="VideoTag_TSN_AttentionLSTM")
+videotag = hub.Module(name="videotag_tsn_attention_lstm")
 
 # execute predict and print the result
 results = videotag.classification(paths=["1.mp4","2.mp4"], use_gpu=True, save_dir="predict_dir")

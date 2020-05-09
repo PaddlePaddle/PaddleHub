@@ -1,5 +1,5 @@
-name: VideoTag_TSN_AttentionLSTM
-dir: "modules/video/classification/VideoTag_TSN_AttentionLSTM"
+name: videotag_tsn_attention_lstm
+dir: "modules/video/classification/videotag_tsn_attention_lstm"
 exclude:
   - README.md
 resources:
