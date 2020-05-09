@@ -15,12 +15,12 @@
 import sys
 import paddle.fluid as fluid
 
-from videotag_tsn_lstm.resource.utils.config_utils import *
-import videotag_tsn_lstm.resource.models as models
-from videotag_tsn_lstm.resource.reader import get_reader
-from videotag_tsn_lstm.resource.metrics import get_metrics
-from videotag_tsn_lstm.resource.utils.utility import check_cuda
-from videotag_tsn_lstm.resource.utils.utility import check_version
+from VideoTag_TSN_AttentionLSTM.resource.utils.config_utils import *
+import VideoTag_TSN_AttentionLSTM.resource.models as models
+from VideoTag_TSN_AttentionLSTM.resource.reader import get_reader
+from VideoTag_TSN_AttentionLSTM.resource.metrics import get_metrics
+from VideoTag_TSN_AttentionLSTM.resource.utils.utility import check_cuda
+from VideoTag_TSN_AttentionLSTM.resource.utils.utility import check_version
 
 logging.root.handlers = []
 FORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'

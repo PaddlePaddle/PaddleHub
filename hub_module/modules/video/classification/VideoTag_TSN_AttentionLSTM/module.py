@@ -23,14 +23,14 @@ import os
 import paddlehub as hub
 from paddlehub.module.module import moduleinfo, runnable
 
-from videotag_tsn_lstm.resource.predict import predict
+from VideoTag_TSN_AttentionLSTM.resource.predict import predict
 
 
 @moduleinfo(
-    name="videotag_tsn_lstm",
+    name="VideoTag_TSN_AttentionLSTM",
     version="1.0.0",
     summary=
-    "videoTag_TSN_LSTM is a video classification model, using TSN for feature extraction and AttentionLSTM for classification",
+    "VideoTag_TSN_AttentionLSTM is a video classification model, using TSN for feature extraction and AttentionLSTM for classification",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com",
     type="video/classification",
@@ -39,8 +39,8 @@ class videoTag(hub.Module):
     def _initialize(self):
         # add arg parser
         self.parser = argparse.ArgumentParser(
-            description="Run the videotag_tsn_lstm module.",
-            prog='hub run videotag_tsn_lstm',
+            description="Run the VideoTag_TSN_AttentionLSTM module.",
+            prog='hub run VideoTag_TSN_AttentionLSTM',
             usage='%(prog)s',
             add_help=True)
         self.parser.add_argument(
@@ -63,7 +63,7 @@ class videoTag(hub.Module):
 
     def classification(self, paths, use_gpu=False, top_k=10, save_dir=None):
         args = self.parser.parse_args([])
-        # config the args in videotag_tsn_lstm
+        # config the args in VideoTag_TSN_AttentionLSTM
         args.use_gpu = use_gpu
         args.save_dir = save_dir
         args.filelist = paths
