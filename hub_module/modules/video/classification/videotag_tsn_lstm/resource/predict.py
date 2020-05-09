@@ -106,8 +106,10 @@ def predict(args):
             predictor_config = parse_config(args.predictor_config)
             predictor_infer_config = merge_configs(predictor_config, 'infer',
                                                    vars(args))
+
             predictor_model = models.get_model(
                 "AttentionLSTM", predictor_infer_config, mode='infer')
+            predictor_infer_config['MODEL']['topk'] = args.topk
             predictor_model.build_input(use_dataloader=False)
             predictor_model.build_model()
             predictor_feeds = predictor_model.feeds()

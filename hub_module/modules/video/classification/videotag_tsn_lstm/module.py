@@ -1,5 +1,5 @@
 # coding:utf-8
-# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import os
 
 import paddlehub as hub
 from paddlehub.module.module import moduleinfo, runnable
+
 from videotag_tsn_lstm.resource.predict import predict
 
 
@@ -48,28 +49,25 @@ class videoTag(hub.Module):
             default=False,
             help='default use gpu.')
         self.parser.add_argument(
-            '--video_path',
+            '--input_path',
             type=str,
             default=None,
             help='path of video data, single video')
-        self.parser.add_argument(
-            '--filelist',
-            type=str,
-            default=None,
-            help='path of video data, multiple video')
-        self.parser.add_argument(
-            '--save_dir', type=str, default=None, help='output file path')
 
     @runnable
     def run_cmd(self, argsv):
         args = self.parser.parse_args(argsv)
-        if args.filelist:
-            args.single_file = False
-        elif args.video_path:
-            args.single_file = True
-        else:
-            raise ValueError(
-                "Neither filelist and video_path has been specifed.")
+        results = self.classification(
+            paths=[args.input_path], use_gpu=args.use_gpu)
+        return results
+
+    def classification(self, paths, use_gpu=False, top_k=10, save_dir=None):
+        args = self.parser.parse_args()
+        # config the args in videotag_tsn_lstm
+        args.use_gpu = use_gpu
+        args.save_dir = save_dir
+        args.filelist = paths
+        args.topk = top_k
         args.extractor_config = os.path.join(self.directory, 'resource',
                                              'configs', 'tsn.yaml')
         args.predictor_config = os.path.join(self.directory, 'resource',
@@ -82,18 +80,11 @@ class videoTag(hub.Module):
         results = predict(args)
         return results
 
-    def classification(self,
-                       video_path=None,
-                       filelist=None,
-                       use_gpu=False,
-                       save_dir=None):
-        argsv = [
-            '--video_path', video_path, '--filelist', filelist, '--use_gpu',
-            str(use_gpu), '--save_dir', save_dir
-        ]
-        return self.run_cmd(argsv)
-
 
 if __name__ == '__main__':
     test_module = videoTag()
-    print(test_module.run_cmd())
+    print(
+        test_module.run_cmd(argsv=[
+            '--input_path', "1.mp4", '--use_gpu',
+            str(False), '--save_dir', "tmp0"
+        ]))

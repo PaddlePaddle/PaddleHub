@@ -1,4 +1,4 @@
-#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.
+#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
 #
 #Licensed under the Apache License, Version 2.0 (the "License");
 #you may not use this file except in compliance with the License.
@@ -67,7 +67,6 @@ class KineticsReader(DataReader):
         self.num_reader_threads = self.get_config_from_sec(
             mode, 'num_reader_threads')
         self.buf_size = self.get_config_from_sec(mode, 'buf_size')
-        self.fix_random_seed = self.get_config_from_sec(mode, 'fix_random_seed')
 
         self.img_mean = np.array(cfg.MODEL.image_mean).reshape(
             [3, 1, 1]).astype(np.float32)
@@ -76,36 +75,14 @@ class KineticsReader(DataReader):
         # set batch size and file list
         self.batch_size = cfg[mode.upper()]['batch_size']
         self.filelist = cfg[mode.upper()]['filelist']
-        self.video_path = ''
-        if self.mode == 'infer' and cfg[mode.upper()]['single_file']:
-            self.video_path = cfg[mode.upper()]['video_path']
-        if self.fix_random_seed:
-            random.seed(0)
-            np.random.seed(0)
-            self.num_reader_threads = 1
 
     def create_reader(self):
-        # if set video_path for inference mode, just load this single video
-        if (self.mode == 'infer') and (self.video_path != ''):
-            # load video from file stored at video_path
-            _reader = self._inference_reader_creator(
-                self.video_path,
-                self.mode,
-                seg_num=self.seg_num,
-                seglen=self.seglen,
-                short_size=self.short_size,
-                target_size=self.target_size,
-                img_mean=self.img_mean,
-                img_std=self.img_std)
-        else:
-            assert os.path.exists(self.filelist), \
-                        '{} not exist, please check the data list'.format(self.filelist)
-            _reader = self._reader_creator(self.filelist, self.mode, seg_num=self.seg_num, seglen = self.seglen, \
-                             short_size = self.short_size, target_size = self.target_size, \
-                             img_mean = self.img_mean, img_std = self.img_std, \
-                             shuffle = (self.mode == 'train'), \
-                             num_threads = self.num_reader_threads, \
-                             buf_size = self.buf_size, format = self.format)
+        _reader = self._reader_creator(self.filelist, self.mode, seg_num=self.seg_num, seglen = self.seglen, \
+                         short_size = self.short_size, target_size = self.target_size, \
+                         img_mean = self.img_mean, img_std = self.img_std, \
+                         shuffle = (self.mode == 'train'), \
+                         num_threads = self.num_reader_threads, \
+                         buf_size = self.buf_size, format = self.format)
 
         def _batch_reader():
             batch_out = []
@@ -201,13 +178,14 @@ class KineticsReader(DataReader):
                          short_size, target_size, img_mean, img_std, name = self.name), ret_label
 
         def reader():
-            with open(pickle_list) as flist:
-                lines = [line.strip() for line in flist]
-                if shuffle:
-                    random.shuffle(lines)
-                for line in lines:
-                    pickle_path = line.strip()
-                    yield [pickle_path]
+            # with open(pickle_list) as flist:
+            #     lines = [line.strip() for line in flist]
+            lines = [line.strip() for line in pickle_list]
+            if shuffle:
+                random.shuffle(lines)
+            for line in lines:
+                pickle_path = line.strip()
+                yield [pickle_path]
 
         if format == 'pkl':
             decode_func = decode_pickle

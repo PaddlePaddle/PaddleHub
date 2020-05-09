@@ -1,4 +1,4 @@
-#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.
+#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
 #
 #Licensed under the Apache License, Version 2.0 (the "License");
 #you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import logging
 import numpy as np
 import json
 from videotag_tsn_lstm.resource.metrics.youtube8m import eval_util as youtube8m_metrics
-from videotag_tsn_lstm.resource.metrics.kinetics import accuracy_metrics as kinetics_metrics
+# from videotag_tsn_lstm.resource.metrics.kinetics import accuracy_metrics as kinetics_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -130,78 +130,6 @@ class Youtube8mMetrics(Metrics):
             self.infer_results = []
 
 
-class Kinetics400Metrics(Metrics):
-    def __init__(self, name, mode, metrics_args):
-        self.name = name
-        self.mode = mode
-        self.topk = metrics_args['MODEL']['topk']
-        self.calculator = kinetics_metrics.MetricsCalculator(name, mode.lower())
-        if self.mode == 'infer':
-            self.infer_results = []
-            self.kinetics_labels = metrics_args['INFER']['kinetics_labels']
-            self.labels_list = json.load(open(self.kinetics_labels))
-
-    def calculate_and_log_out(self, fetch_list, info=''):
-        if len(fetch_list) == 3:
-            loss = fetch_list[0]
-            loss = np.mean(np.array(loss))
-            pred = np.array(fetch_list[1])
-            label = np.array(fetch_list[2])
-        else:
-            loss = 0.
-            pred = np.array(fetch_list[0])
-            label = np.array(fetch_list[1])
-        acc1, acc5 = self.calculator.calculate_metrics(loss, pred, label)
-        logger.info(info + '\tLoss: {},\ttop1_acc: {}, \ttop5_acc: {}'.format('%.6f' % loss, \
-                       '%.2f' % acc1, '%.2f' % acc5))
-        return loss
-
-    def accumulate(self, fetch_list, info=''):
-        if self.mode == 'infer':
-            predictions = np.array(fetch_list[0])
-            video_id = fetch_list[1]
-            for i in range(len(predictions)):
-                topk_inds = predictions[i].argsort()[0 - self.topk:]
-                topk_inds = topk_inds[::-1]
-                preds = predictions[i][topk_inds]
-                self.infer_results.append((video_id[i], topk_inds.tolist(),
-                                           preds.tolist()))
-        else:
-            if len(fetch_list) == 3:
-                loss = fetch_list[0]
-                loss = np.mean(np.array(loss))
-                pred = np.array(fetch_list[1])
-                label = np.array(fetch_list[2])
-            else:
-                loss = 0.
-                pred = np.array(fetch_list[0])
-                label = np.array(fetch_list[1])
-            self.calculator.accumulate(loss, pred, label)
-
-    def finalize_and_log_out(self, info='', savedir='./'):
-        if self.mode == 'infer':
-            for item in self.infer_results:
-                logger.info('video_id {} , topk({}) preds: \n'.format(
-                    item[0], self.topk))
-                for i in range(len(item[1])):
-                    logger.info('\t    class: {},  probability:  {} \n'.format(
-                        self.labels_list[item[1][i]], item[2][i]))
-            # save infer results
-        else:
-            self.calculator.finalize_metrics()
-            metrics_dict = self.calculator.get_computed_metrics()
-            loss = metrics_dict['avg_loss']
-            acc1 = metrics_dict['avg_acc1']
-            acc5 = metrics_dict['avg_acc5']
-            logger.info(info + '\tLoss: {},\ttop1_acc: {}, \ttop5_acc: {}'.format('%.6f' % loss, \
-                       '%.2f' % acc1, '%.2f' % acc5))
-
-    def reset(self):
-        self.calculator.reset()
-        if self.mode == 'infer':
-            self.infer_results = []
-
-
 class MetricsZoo(object):
     def __init__(self):
         self.metrics_zoo = {}
@@ -232,4 +160,3 @@ def get_metrics(name, mode, cfg):
 
 # sort by alphabet
 regist_metrics("ATTENTIONLSTM", Youtube8mMetrics)
-regist_metrics("TSN", Kinetics400Metrics)
