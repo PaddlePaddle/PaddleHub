@@ -13,24 +13,24 @@ from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predic
 from paddlehub.module.module import moduleinfo, runnable, serving
 from paddlehub.common.paddle_helper import add_vars_prefix
 
-from yolov3_resnet34_coco2017.resnet import ResNet
-from yolov3_resnet34_coco2017.processor import load_label_info, postprocess, base64_to_cv2
-from yolov3_resnet34_coco2017.data_feed import reader
-from yolov3_resnet34_coco2017.yolo_head import MultiClassNMS, YOLOv3Head
+from yolov3_resnet50_vd_coco2017.resnet import ResNet
+from yolov3_resnet50_vd_coco2017.processor import load_label_info, postprocess, base64_to_cv2
+from yolov3_resnet50_vd_coco2017.data_feed import reader
+from yolov3_resnet50_vd_coco2017.yolo_head import MultiClassNMS, YOLOv3Head
 
 
 @moduleinfo(
-    name="yolov3_resnet34_coco2017",
+    name="yolov3_resnet50_vd_coco2017",
     version="1.0.0",
     type="CV/object_detection",
     summary=
-    "Baidu's YOLOv3 model for object detection with backbone ResNet34, trained with dataset coco2017.",
+    "Baidu's YOLOv3 model for object detection with backbone ResNet50, trained with dataset coco2017.",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com")
-class YOLOv3ResNet34Coco2017(hub.Module):
+class YOLOv3ResNet50Coco2017(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "yolov3_resnet34_model")
+            self.directory, "yolov3_resnet50_model")
         self.label_names = load_label_info(
             os.path.join(self.directory, "label_file.txt"))
         self._set_config()
@@ -80,11 +80,13 @@ class YOLOv3ResNet34Coco2017(hub.Module):
                     name='image', shape=[3, 608, 608], dtype='float32')
                 # backbone
                 backbone = ResNet(
-                    norm_type='bn',
+                    norm_type='sync_bn',
                     freeze_at=0,
                     freeze_norm=False,
                     norm_decay=0.,
-                    depth=34,
+                    dcn_v2_stages=[5],
+                    depth=50,
+                    variant='d',
                     feature_maps=[3, 4, 5])
                 # body_feats
                 body_feats = backbone(image)

@@ -1,12 +1,12 @@
 ## 命令行预测
 
-```
+```shell
 $ hub run ssd_mobilenet_v1_pascal --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
 
-```
+```python
 def context(trainable=True,
             pretrained=True,
             get_prediction=False)
@@ -25,7 +25,7 @@ def context(trainable=True,
 * inputs (dict): 模型的输入，keys 包括 'image', 'im\_size'，相应的取值为：
     * image (Variable): 图像变量
     * im\_size (Variable): 图片的尺寸
-* outputs (dict): 模型的输出。如果 get\_prediction 为 False，输出 'head\_fatures'，否则输出 'bbox\_out'。
+* outputs (dict): 模型的输出。如果 get\_prediction 为 False，输出 'head\_features'，否则输出 'bbox\_out'。
 * context\_prog (Program): 用于迁移学习的 Program.
 
 ```python
