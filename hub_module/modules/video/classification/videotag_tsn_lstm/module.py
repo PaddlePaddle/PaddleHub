@@ -39,8 +39,8 @@ class videoTag(hub.Module):
     def _initialize(self):
         # add arg parser
         self.parser = argparse.ArgumentParser(
-            description="Run the videoTag_TSN_LSTM module.",
-            prog='hub run videoTag_TSN_LSTM',
+            description="Run the videotag_tsn_lstm module.",
+            prog='hub run videotag_tsn_lstm',
             usage='%(prog)s',
             add_help=True)
         self.parser.add_argument(
@@ -62,7 +62,7 @@ class videoTag(hub.Module):
         return results
 
     def classification(self, paths, use_gpu=False, top_k=10, save_dir=None):
-        args = self.parser.parse_args()
+        args = self.parser.parse_args([])
         # config the args in videotag_tsn_lstm
         args.use_gpu = use_gpu
         args.save_dir = save_dir
@@ -84,7 +84,6 @@ class videoTag(hub.Module):
 if __name__ == '__main__':
     test_module = videoTag()
     print(
-        test_module.run_cmd(argsv=[
-            '--input_path', "1.mp4", '--use_gpu',
-            str(False), '--save_dir', "tmp0"
-        ]))
+        test_module.run_cmd(
+            argsv=['--input_path', "1.mp4", '--use_gpu',
+                   str(False)]))
