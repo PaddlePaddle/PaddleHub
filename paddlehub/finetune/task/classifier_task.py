@@ -20,9 +20,12 @@ from __future__ import print_function
 import time
 from collections import OrderedDict
 import numpy as np
+import paddle
 import paddle.fluid as fluid
 
 from paddlehub.finetune.evaluate import calculate_f1_np, matthews_corrcoef
+from paddlehub.common.utils import version_compare
+import paddlehub.network as net
 from .base_task import BaseTask
 
 
@@ -104,7 +107,7 @@ class ClassifierTask(BaseTask):
             run_examples += run_state.run_examples
             run_step += run_state.run_step
             loss_sum += np.mean(
-                run_state.run_results[-1]) * run_state.run_examples
+                run_state.run_results[-2]) * run_state.run_examples
             acc_sum += np.mean(
                 run_state.run_results[2]) * run_state.run_examples
             np_labels = run_state.run_results[0]
@@ -161,6 +164,7 @@ class TextClassifierTask(ClassifierTask):
                  num_classes,
                  feed_list,
                  data_reader,
+                 network=None,
                  startup_program=None,
                  config=None,
                  hidden_units=None,
@@ -168,6 +172,7 @@ class TextClassifierTask(ClassifierTask):
 
         if metrics_choices == "default":
             metrics_choices = ["acc"]
+        self.network = network
         super(TextClassifierTask, self).__init__(
             data_reader=data_reader,
             feature=feature,
@@ -177,17 +182,42 @@ class TextClassifierTask(ClassifierTask):
             config=config,
             hidden_units=hidden_units,
             metrics_choices=metrics_choices)
+        if self.network:
+            assert self.network in [
+                'bilstm', 'bow', 'cnn', 'dpcnn', 'gru', 'lstm'
+            ], 'network choice must be one of bilstm, bow, cnn, dpcnn, gru, lstm!'
+            assert len(
+                self.feature.shape
+            ) == 3, 'The sequnece_output must be choosed rather than pooled_output of Transformer Model (ERNIE, BERT, RoBERTa and ELECTRA)!'
 
     def _build_net(self):
-        cls_feats = fluid.layers.dropout(
-            x=self.feature,
-            dropout_prob=0.1,
-            dropout_implementation="upscale_in_train")
+        self.seq_len = fluid.layers.data(
+            name="seq_len", shape=[1], dtype='int64', lod_level=0)
 
-        if self.hidden_units is not None:
-            for n_hidden in self.hidden_units:
-                cls_feats = fluid.layers.fc(
-                    input=cls_feats, size=n_hidden, act="relu")
+        if version_compare(paddle.__version__, "1.6"):
+            self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])
+        else:
+            self.seq_len_used = self.seq_len
+
+        unpad_feature = fluid.layers.sequence_unpad(
+            self.feature, length=self.seq_len_used)
+
+        if self.network:
+            net_func = getattr(net.classification, self.network)
+            if self.network == 'dpcnn':
+                cls_feats = net_func(self.feature)
+            else:
+                cls_feats = net_func(unpad_feature)
+        else:
+            cls_feats = fluid.layers.dropout(
+                x=self.feature,
+                dropout_prob=0.1,
+                dropout_implementation="upscale_in_train")
+
+            if self.hidden_units is not None:
+                for n_hidden in self.hidden_units:
+                    cls_feats = fluid.layers.fc(
+                        input=cls_feats, size=n_hidden, act="relu")
 
         logits = fluid.layers.fc(
             input=cls_feats,
@@ -203,6 +233,22 @@ class TextClassifierTask(ClassifierTask):
             x=fluid.layers.argmax(logits, axis=1), shape=[-1, 1])
 
         return [logits]
+
+    @property
+    def feed_list(self):
+        feed_list = self._base_feed_list + [self.seq_len.name]
+        if self.is_train_phase or self.is_test_phase:
+            feed_list += [self.labels[0].name]
+        return feed_list
+
+    @property
+    def fetch_list(self):
+        if self.is_train_phase or self.is_test_phase:
+            return [
+                self.labels[0].name, self.ret_infers.name, self.metrics[0].name,
+                self.loss.name, self.seq_len.name
+            ]
+        return [self.outputs[0].name, self.seq_len.name]
 
 
 class MultiLabelClassifierTask(ClassifierTask):

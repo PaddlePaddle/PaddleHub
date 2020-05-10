@@ -272,11 +272,12 @@ class ClassifyReader(BaseNLPReader):
         batch_text_type_ids = [record.text_type_ids for record in batch_records]
         batch_position_ids = [record.position_ids for record in batch_records]
 
-        padded_token_ids, input_mask = pad_batch_data(
+        padded_token_ids, input_mask, batch_seq_lens = pad_batch_data(
             batch_token_ids,
             max_seq_len=self.max_seq_len,
             pad_idx=self.pad_id,
-            return_input_mask=True)
+            return_input_mask=True,
+            return_seq_lens=True)
         padded_text_type_ids = pad_batch_data(
             batch_text_type_ids,
             max_seq_len=self.max_seq_len,
@@ -293,7 +294,7 @@ class ClassifyReader(BaseNLPReader):
 
             return_list = [
                 padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask, batch_labels
+                input_mask, batch_seq_lens, batch_labels
             ]
 
             if self.use_task_id:
@@ -301,12 +302,12 @@ class ClassifyReader(BaseNLPReader):
                     padded_token_ids, dtype="int64") * self.task_id
                 return_list = [
                     padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids, batch_labels
+                    input_mask, padded_task_ids, batch_seq_lens, batch_labels
                 ]
         else:
             return_list = [
                 padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask
+                input_mask, batch_seq_lens
             ]
 
             if self.use_task_id:
@@ -314,7 +315,7 @@ class ClassifyReader(BaseNLPReader):
                     padded_token_ids, dtype="int64") * self.task_id
                 return_list = [
                     padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids
+                    input_mask, padded_task_ids, batch_seq_lens
                 ]
         return return_list
 
