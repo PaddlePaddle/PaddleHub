@@ -89,7 +89,7 @@ def moduleinfo(name, version, author, author_email, summary, type):
     return _wrapper
 
 
-class Module(object):
+class Module(fluid.dygraph.Layer):
     def __new__(cls,
                 name=None,
                 directory=None,
@@ -121,7 +121,7 @@ class Module(object):
                 module = Module.init_with_directory(
                     directory=directory, **kwargs)
             else:
-                module = object.__new__(cls)
+                module = fluid.dygraph.Layer.__new__(cls)
 
         return module
 
@@ -135,6 +135,7 @@ class Module(object):
         if "_is_initialize" in self.__dict__ and self._is_initialize:
             return
 
+        super(Module, self).__init__()
         _run_func_name = self._get_func_name(self.__class__,
                                              _module_runnable_func)
         self._run_func = getattr(self,
@@ -247,6 +248,10 @@ class Module(object):
 
     def _initialize(self):
         pass
+
+    def forward(self, *args, **kwargs):
+        raise RuntimeError('{} does not support dynamic graph mode yet.'.format(
+            self.name))
 
 
 class ModuleHelper(object):
