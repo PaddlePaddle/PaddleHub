@@ -94,6 +94,7 @@ class ERNIETinyFinetuned(hub.Module):
             config=config,
             metrics_choices=metrics_choices)
 
+    @serving
     def predict(self, data, return_result=False, accelerate_mode=True):
         """
         Get prediction results
@@ -102,7 +103,14 @@ class ERNIETinyFinetuned(hub.Module):
             data=data,
             return_result=return_result,
             accelerate_mode=accelerate_mode)
-        return run_states
+        results = [run_state.run_results for run_state in run_states]
+        prediction = []
+        for batch_result in results:
+            # get predict index
+            batch_result = np.argmax(batch_result, axis=2)[0]
+            batch_result = batch_result.tolist()
+            prediction += batch_result
+        return prediction
 
 
 if __name__ == "__main__":
@@ -113,12 +121,6 @@ if __name__ == "__main__":
     data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
             ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]]
 
-    index = 0
-    run_states = ernie_tiny.predict(data=data)
-    results = [run_state.run_results for run_state in run_states]
-    for batch_result in results:
-        # get predict index
-        batch_result = np.argmax(batch_result, axis=2)[0]
-        for result in batch_result:
-            print("%s\tpredict=%s" % (data[index][0], result))
-            index += 1
+    predictions = ernie_tiny.predict(data=data)
+    for index, text in enumerate(data):
+        print("%s\tpredict=%s" % (data[index][0], predictions[index]))

@@ -148,7 +148,9 @@ def _initialize(self,
 
 初始化过程即为Fine-tune时创建Task的过程。
 
-**NOTE:** 执行类的初始化不能使用默认的__init__接口，而是应该重载实现_initialize接口。对象默认内置了directory属性，可以直接获取到Module所在路径
+**NOTE:**
+1. 执行类的初始化不能使用默认的__init__接口，而是应该重载实现_initialize接口。对象默认内置了directory属性，可以直接获取到Module所在路径。
+2. 使用Fine-tune保存的模型预测时，无需加载数据集Dataset，即Reader中的dataset参数可为None。
 
 #### step 3_4. 完善预测逻辑
 ```python
@@ -160,7 +162,14 @@ def predict(self, data, return_result=False, accelerate_mode=True):
         data=data,
         return_result=return_result,
         accelerate_mode=accelerate_mode)
-    return run_states
+    results = [run_state.run_results for run_state in run_states]
+    prediction = []
+    for batch_result in results:
+        # get predict index
+        batch_result = np.argmax(batch_result, axis=2)[0]
+        batch_result = batch_result.tolist()
+        prediction += batch_result
+    return prediction
 ```
 
 #### step 3_5. 支持serving调用
@@ -179,7 +188,14 @@ def predict(self, data, return_result=False, accelerate_mode=True):
         data=data,
         return_result=return_result,
         accelerate_mode=accelerate_mode)
-    return run_states
+    results = [run_state.run_results for run_state in run_states]
+    prediction = []
+    for batch_result in results:
+        # get predict index
+        batch_result = np.argmax(batch_result, axis=2)[0]
+        batch_result = batch_result.tolist()
+        prediction += batch_result
+    return prediction
 ```
 
 ### 完整代码
@@ -214,15 +230,9 @@ ernie_tiny = hub.Module(name="ernie_tiny_finetuned")
 data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
         ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]]
 
-index = 0
-run_states = ernie_tiny.predict(data=data)
-results = [run_state.run_results for run_state in run_states]
-for batch_result in results:
-    # get predict index
-    batch_result = np.argmax(batch_result, axis=2)[0]
-    for result in batch_result:
-        print("%s\tpredict=%s" % (data[index][0], result))
-        index += 1
+predictions = ernie_tiny.predict(data=data)
+for index, text in enumerate(data):
+    print("%s\tpredict=%s" % (data[index][0], predictions[index]))
 ```
 
 ### 调用方法2
@@ -238,15 +248,9 @@ ernie_tiny_finetuned = hub.Module(directory="finetuned_model_to_module/")
 data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
         ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]]
 
-index = 0
-run_states = ernie_tiny.predict(data=data)
-results = [run_state.run_results for run_state in run_states]
-for batch_result in results:
-    # get predict index
-    batch_result = np.argmax(batch_result, axis=2)[0]
-    for result in batch_result:
-        print("%s\tpredict=%s" % (data[index][0], result))
-        index += 1
+predictions = ernie_tiny.predict(data=data)
+for index, text in enumerate(data):
+    print("%s\tpredict=%s" % (data[index][0], predictions[index]))
 ```
 
 ### 调用方法3
@@ -263,13 +267,42 @@ import numpy as np
 data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
         ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]]
 
-run_states = ERNIETinyFinetuned.predict(data=data)
-index = 0
-results = [run_state.run_results for run_state in run_states]
-for batch_result in results:
-    # get predict index
-    batch_result = np.argmax(batch_result, axis=2)[0]
-    for result in batch_result:
-        print("%s\tpredict=%s" % (data[index][0], result))
-        index += 1
+predictions = ERNIETinyFinetuned.predict(data=data)
+for index, text in enumerate(data):
+    print("%s\tpredict=%s" % (data[index][0], predictions[index]))
 ```
+
+
+### PaddleHub Serving调用方法
+
+**第一步:启动预测服务**
+
+```shell
+hub serving start -m ernie_tiny_finetuned
+```
+
+**第二步:发送请求，获取预测结果**
+
+通过如下脚本既可以发送请求：
+```python
+# coding: utf8
+import requests
+import json
+
+
+# 待预测文本
+texts = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
+        ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]]
+# key为'data', 对应着预测接口predict的参数data
+data = {'data': texts}
+
+# 指定模型为ernie_tiny_finetuned并发送post请求，且请求的headers为application/json方式
+url = "http://127.0.0.1:8866/predict/ernie_tiny_finetuned"
+headers = {"Content-Type": "application/json"}
+r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+# 打印预测结果
+print(json.dumps(r.json(), indent=4, ensure_ascii=False))
+```
+
+关与PaddleHub Serving更多信息参见[Hub Serving教程](../../docs/tutorial/serving.md)以及[Demo](../../demo/serving)
