@@ -46,7 +46,8 @@ class HubServer(object):
             config_file_path = os.path.join(CONF_HOME, 'config.json')
         if not os.path.exists(CONF_HOME):
             utils.mkdir(CONF_HOME)
-        if not os.path.exists(config_file_path):
+        if not os.path.exists(config_file_path) or 0 == os.path.getsize(
+                config_file_path):
             with open(config_file_path, 'w+') as fp:
                 lock.flock(fp, lock.LOCK_EX)
                 fp.write(json.dumps(default_server_config))
