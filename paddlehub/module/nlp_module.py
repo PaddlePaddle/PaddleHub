@@ -24,13 +24,15 @@ import os
 import re
 import six
 
+import paddle
 import numpy as np
 import paddle.fluid as fluid
-from paddlehub.common import paddle_helper
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+
 import paddlehub as hub
+from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+from paddlehub.common import paddle_helper, tmp_dir
 from paddlehub.common.logger import logger
-from paddlehub.common.utils import sys_stdin_encoding
+from paddlehub.common.utils import sys_stdin_encoding, version_compare
 from paddlehub.io.parser import txt_parser
 from paddlehub.module.module import runnable
 
@@ -246,6 +248,45 @@ class TransformerModule(NLPBaseModule):
     Tranformer Module base class can be used by BERT, ERNIE, RoBERTa and so on.
     """
 
+    def __init__(self,
+                 name=None,
+                 directory=None,
+                 module_dir=None,
+                 version=None,
+                 max_seq_len=128,
+                 **kwargs):
+        if not directory:
+            return
+        super(TransformerModule, self).__init__(
+            name=name,
+            directory=directory,
+            module_dir=module_dir,
+            version=version,
+            **kwargs)
+
+        self.max_seq_len = max_seq_len
+        if version_compare(paddle.__version__, '1.8.0'):
+            with tmp_dir() as _dir:
+                input_dict, output_dict, program = self.context(
+                    max_seq_len=max_seq_len)
+                fluid.io.save_inference_model(
+                    dirname=_dir,
+                    main_program=program,
+                    feeded_var_names=[
+                        input_dict['input_ids'].name,
+                        input_dict['position_ids'].name,
+                        input_dict['segment_ids'].name,
+                        input_dict['input_mask'].name
+                    ],
+                    target_vars=[
+                        output_dict["pooled_output"],
+                        output_dict["sequence_output"]
+                    ],
+                    executor=fluid.Executor(fluid.CPUPlace()))
+
+                with fluid.dygraph.guard():
+                    self.model_runner = fluid.dygraph.StaticModelRunner(_dir)
+
     def init_pretraining_params(self, exe, pretraining_params_path,
                                 main_program):
         assert os.path.exists(
@@ -271,7 +312,7 @@ class TransformerModule(NLPBaseModule):
 
     def context(
             self,
-            max_seq_len=128,
+            max_seq_len=None,
             trainable=True,
     ):
         """
@@ -286,6 +327,9 @@ class TransformerModule(NLPBaseModule):
                  The outputs is a dict with two keys named pooled_output and sequence_output.
 
         """
+
+        if not max_seq_len:
+            max_seq_len = self.max_seq_len
 
         assert max_seq_len <= self.MAX_SEQ_LEN and max_seq_len >= 1, "max_seq_len({}) should be in the range of [1, {}]".format(
             max_seq_len, self.MAX_SEQ_LEN)
@@ -431,3 +475,16 @@ class TransformerModule(NLPBaseModule):
                 "The module context has not been initialized. "
                 "Please call context() before using get_params_layer")
         return self.params_layer
+
+    def forward(self, input_ids, position_ids, segment_ids, input_mask):
+        if version_compare(paddle.__version__, '1.8.0'):
+            pooled_output, sequence_output = self.model_runner(
+                input_ids, position_ids, segment_ids, input_mask)
+            return {
+                'pooled_output': pooled_output,
+                'sequence_output': sequence_output
+            }
+        else:
+            raise RuntimeError(
+                '{} only support dynamic graph mode in paddle >= 1.8.0'.format(
+                    self.name))

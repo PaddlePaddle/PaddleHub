@@ -165,7 +165,7 @@ class ImageClassificationReader(BaseReader):
                 for image_path, label in data:
                     image = preprocess(image_path)
                     images.append(image.astype('float32'))
-                    labels.append([int(label)])
+                    labels.append([np.int64(label)])
 
                     if len(images) == batch_size:
                         if return_list:

@@ -169,15 +169,6 @@ import paddlehub as hub
 task.predict()
 ```
 
-## Func `predict`
-根据config配置进行predict
-
-**示例**
-```python
-import paddlehub as hub
-...
-task.predict()
-```
 
 ## Property `is_train_phase`
 判断是否处于训练阶段

@@ -8,8 +8,8 @@
 hub.RunConfig(
     log_interval=10,
     eval_interval=100,
-    use_pyreader=False,
-    use_data_parallel=False,
+    use_pyreader=True,
+    use_data_parallel=True,
     save_ckpt_interval=None,
     use_cuda=False,
     checkpoint_dir=None,
@@ -22,8 +22,8 @@ hub.RunConfig(
 
 * `log_interval`: 打印训练日志的周期，默认为10。
 * `eval_interval`: 进行评估的周期，默认为100。
-* `use_pyreader`: 是否使用pyreader，默认False。
-* `use_data_parallel`: 是否使用并行计算，默认False。打开该功能依赖nccl库。
+* `use_pyreader`: 是否使用pyreader，默认True。
+* `use_data_parallel`: 是否使用并行计算，默认True。打开该功能依赖nccl库。
 * `save_ckpt_interval`: 保存checkpoint的周期，默认为None。
 * `use_cuda`: 是否使用GPU训练和评估，默认为False。
 * `checkpoint_dir`: checkpoint的保存目录，默认为None，此时会在工作目录下根据时间戳生成一个临时目录。

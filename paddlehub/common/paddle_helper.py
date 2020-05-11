@@ -19,10 +19,11 @@ from __future__ import print_function
 
 import copy
 
+import paddle
 import paddle.fluid as fluid
 
 from paddlehub.module import module_desc_pb2
-from paddlehub.common.utils import from_pyobj_to_module_attr, from_module_attr_to_pyobj
+from paddlehub.common.utils import from_pyobj_to_module_attr, from_module_attr_to_pyobj, version_compare
 from paddlehub.common.logger import logger
 
 dtype_map = {
@@ -62,7 +63,8 @@ def get_variable_info(var):
         var_info['trainable'] = var.trainable
         var_info['optimize_attr'] = var.optimize_attr
         var_info['regularizer'] = var.regularizer
-        var_info['gradient_clip_attr'] = var.gradient_clip_attr
+        if not version_compare(paddle.__version__, '1.8'):
+            var_info['gradient_clip_attr'] = var.gradient_clip_attr
         var_info['do_model_average'] = var.do_model_average
     else:
         var_info['persistable'] = var.persistable

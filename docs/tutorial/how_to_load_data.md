@@ -22,6 +22,7 @@
 
 如果您有两个输入文本text_a、text_b，则第一列为第一个输入文本text_a, 第二列应为第二个输入文本text_b，第三列文本类别label。列与列之间以Tab键分隔。数据集第一行为`text_a    text_b    label`（中间以Tab键分隔）。
 
+
 ```text
 text_a    label
 15.4寸笔记本的键盘确实爽，基本跟台式机差不多了，蛮喜欢数字小键盘，输数字特方便，样子也很美观，做工也相当不错    1
@@ -36,6 +37,7 @@ text_a    label
 * 数据集文件编码格式建议为utf8格式。
 * 如果相应的数据集文件没有上述的列说明，如train.tsv文件没有第一行的`text_a    label`，则train_file_with_header=False。
 * 如果您还有预测数据（没有文本类别），可以将预测数据存放在predict.tsv文件，文件格式和train.tsv类似。去掉label一列即可。
+* 分类任务中，数据集的label必须从0开始计数
 
 
 ```python
@@ -117,6 +119,7 @@ dog
 * 训练/验证/测试集的数据列表文件中的图片路径需要相对于dataset_dir的相对路径，例如图片的实际位置为`/test/data/dog/dog1.jpg`。base_path为`/test/data`，则文件中填写的路径应该为`dog/dog1.jpg`。
 * 如果您还有预测数据（没有文本类别），可以将预测数据存放在predict_list.txt文件，文件格式和train_list.txt类似。去掉label一列即可
 * 如果您的数据集类别较少，可以不用定义label_list.txt，可以选择定义label_list=["数据集所有类别"]。
+* 分类任务中，数据集的label必须从0开始计数
 
  ```python
 from paddlehub.dataset.base_cv_dataset import BaseCVDataset
