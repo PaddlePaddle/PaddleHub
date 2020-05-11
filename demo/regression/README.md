@@ -156,7 +156,7 @@ reg_task.finetune_and_eval()
 
 Fine-tune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令：
 ```bash
-$ tensorboard --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_NUM}
+$ visualdl --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_NUM}
 ```
 其中${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，用浏览器打开192.168.0.1:8040，即可看到训练过程中指标的变化情况。
 

@@ -159,7 +159,7 @@ $ hub autofinetune train.py --param_file=hparam.yaml --gpu=0,1 --popsize=5 --rou
 AutoDL Finetuner API在优化超参过程中会自动对关键训练指标进行打点，启动程序后执行下面命令。
 
 ```shell
-$ tensorboard --logdir ${OUTPUT}/visualization --host ${HOST_IP} --port ${PORT_NUM}
+$ visualdl --logdir ${OUTPUT}/visualization --host ${HOST_IP} --port ${PORT_NUM}
 ```
 
 其中${OUTPUT}为AutoDL Finetuner输出目录，${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，
