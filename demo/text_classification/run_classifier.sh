@@ -1,5 +1,5 @@
 export FLAGS_eager_delete_tensor_gb=0.0
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 CKPT_DIR="./ckpt_chnsenticorp"
 
@@ -12,7 +12,8 @@ python -u text_classifier.py \
                    --max_seq_len=128 \
                    --warmup_proportion=0.1 \
                    --num_epoch=3 \
-                   --use_data_parallel=True
+                   --use_data_parallel=True \
+                   --network=bilstm
 
 # The sugguested hyper parameters for difference task
 # for ChineseGLUE:

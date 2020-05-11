@@ -85,11 +85,15 @@ if __name__ == '__main__':
         strategy=strategy)
 
     # Define a classfication finetune task by PaddleHub's API
+    # network choice: bilstm, bow, cnn, dpcnn, gru, lstm
+    # If you wanna add network after ERNIE/BERT/RoBERTa/ELECTRA module,
+    # you must use the outputs["sequence_output"] as the feature of TextClassifierTask
+    # rather than outputs["pooled_output"]
     cls_task = hub.TextClassifierTask(
         data_reader=reader,
         feature=pooled_output,
         feed_list=feed_list,
-        network='dpcnn',
+        network=args.network,
         num_classes=dataset.num_labels,
         config=config,
         metrics_choices=metrics_choices)
