@@ -15,12 +15,12 @@
 import sys
 import paddle.fluid as fluid
 
-from videotag_tsn_attention_lstm.resource.utils.config_utils import *
-import videotag_tsn_attention_lstm.resource.models as models
-from videotag_tsn_attention_lstm.resource.reader import get_reader
-from videotag_tsn_attention_lstm.resource.metrics import get_metrics
-from videotag_tsn_attention_lstm.resource.utils.utility import check_cuda
-from videotag_tsn_attention_lstm.resource.utils.utility import check_version
+from videotag_tsn_lstm.resource.utils.config_utils import *
+import videotag_tsn_lstm.resource.models as models
+from videotag_tsn_lstm.resource.reader import get_reader
+from videotag_tsn_lstm.resource.metrics import get_metrics
+from videotag_tsn_lstm.resource.utils.utility import check_cuda
+from videotag_tsn_lstm.resource.utils.utility import check_version
 
 logging.root.handlers = []
 FORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 def predict(args):
     """
     Video classification of 3k Chinese tags.
-    videotag_tsn_attention_lstm (named as VideoTag_featureModel_predictModel)
+    videotag_tsn_lstm (named as VideoTag_featureModel_predictModel)
     two stages in our model:
         1. extract feature from input video(mp4 format) using TSN model
         2. predict classification results from extracted feature  using AttentionLSTM model
@@ -110,6 +110,7 @@ def predict(args):
             predictor_model = models.get_model(
                 "AttentionLSTM", predictor_infer_config, mode='infer')
             predictor_infer_config['MODEL']['topk'] = args.topk
+            predictor_infer_config['MODEL']['threshold'] = args.threshold
             predictor_model.build_input(use_dataloader=False)
             predictor_model.build_model()
             predictor_feeds = predictor_model.feeds()
@@ -143,5 +144,8 @@ def predict(args):
 
                 predictor_metrics.accumulate(final_result_list)
             res_list = predictor_metrics.finalize_and_log_out(
-                savedir=args.save_dir, label_file=args.label_file)
+                label_file=args.label_file)
+            if res_list == []:
+                logger.warning(
+                    "No prediction exceeds the threshold: %s." % args.threshold)
             return res_list

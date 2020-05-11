@@ -23,7 +23,7 @@ import logging
 
 import numpy as np
 import json
-from videotag_tsn_attention_lstm.resource.metrics.youtube8m import eval_util as youtube8m_metrics
+from videotag_tsn_lstm.resource.metrics.youtube8m import eval_util as youtube8m_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,8 @@ class Youtube8mMetrics(Metrics):
         self.mode = mode
         self.num_classes = metrics_args['MODEL']['num_classes']
         self.topk = metrics_args['MODEL']['topk']
+        self.threshold = metrics_args['MODEL']['threshold']
+
         self.calculator = youtube8m_metrics.EvaluationMetrics(
             self.num_classes, self.topk)
         if self.mode == 'infer':
@@ -88,10 +90,7 @@ class Youtube8mMetrics(Metrics):
             label = np.array(fetch_list[2])
             self.calculator.accumulate(loss, pred, label)
 
-    def finalize_and_log_out(self,
-                             info='',
-                             savedir='./data/results',
-                             label_file='./label_3396.txt'):
+    def finalize_and_log_out(self, info='', label_file='./label_3396.txt'):
         if self.mode == 'infer':
             all_res_list = []
             for index, item in enumerate(self.infer_results):
@@ -103,18 +102,10 @@ class Youtube8mMetrics(Metrics):
                 for i in range(len(item[1])):
                     class_id = item[1][i]
                     class_prob = item[2][i]
+                    if class_prob < self.threshold:
+                        continue
                     class_name = fl[class_id].split('\n')[0]
                     res_list[class_name] = class_prob
-                # save infer result into output dir
-                if savedir:
-                    if not os.path.exists(savedir):
-                        os.makedirs(savedir)
-                    with io.open(
-                            os.path.join(savedir,
-                                         'result' + str(index) + '.json'),
-                            'w',
-                            encoding='utf-8') as f:
-                        f.write(json.dumps(res_list, ensure_ascii=False))
                 all_res_list.append(res_list)
             return all_res_list
         else:

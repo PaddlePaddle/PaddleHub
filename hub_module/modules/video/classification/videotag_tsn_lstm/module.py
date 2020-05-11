@@ -23,14 +23,14 @@ import os
 import paddlehub as hub
 from paddlehub.module.module import moduleinfo, runnable
 
-from videotag_tsn_attention_lstm.resource.predict import predict
+from videotag_tsn_lstm.resource.predict import predict
 
 
 @moduleinfo(
-    name="videotag_tsn_attention_lstm",
+    name="videotag_tsn_lstm",
     version="1.0.0",
     summary=
-    "videotag_tsn_attention_lstm is a video classification model, using TSN for feature extraction and AttentionLSTM for classification",
+    "videotag_tsn_lstm is a video classification model, using TSN for feature extraction and AttentionLSTM for classification",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com",
     type="video/classification",
@@ -39,8 +39,8 @@ class videoTag(hub.Module):
     def _initialize(self):
         # add arg parser
         self.parser = argparse.ArgumentParser(
-            description="Run the videotag_tsn_attention_lstm module.",
-            prog='hub run videotag_tsn_attention_lstm',
+            description="Run the videotag_tsn_lstm module.",
+            prog='hub run videotag_tsn_lstm',
             usage='%(prog)s',
             add_help=True)
         self.parser.add_argument(
@@ -61,13 +61,13 @@ class videoTag(hub.Module):
             paths=[args.input_path], use_gpu=args.use_gpu)
         return results
 
-    def classification(self, paths, use_gpu=False, top_k=10, save_dir=None):
+    def classification(self, paths, use_gpu=False, threshold=0.5, top_k=10):
         args = self.parser.parse_args([])
-        # config the args in videotag_tsn_attention_lstm
+        # config the args in videotag_tsn_lstm
         args.use_gpu = use_gpu
-        args.save_dir = save_dir
         args.filelist = paths
         args.topk = top_k
+        args.threshold = threshold
         args.extractor_config = os.path.join(self.directory, 'resource',
                                              'configs', 'tsn.yaml')
         args.predictor_config = os.path.join(self.directory, 'resource',
