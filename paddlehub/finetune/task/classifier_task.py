@@ -150,7 +150,7 @@ class ClassifierTask(BaseTask):
         results = []
         for batch_state in run_states:
             batch_result = batch_state.run_results
-            batch_infer = np.argmax(batch_result, axis=2)[0]
+            batch_infer = np.argmax(batch_result[0], axis=1)
             results += [id2label[sample_infer] for sample_infer in batch_infer]
         return results
 
