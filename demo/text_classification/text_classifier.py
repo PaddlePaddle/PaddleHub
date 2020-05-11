@@ -28,6 +28,7 @@ parser.add_argument("--warmup_proportion", type=float, default=0.1, help="Warmup
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
+parser.add_argument("--network", type=str, default='bilstm', help="Preset network which was connected after Transformer model, such as ERNIE, BERT ,RoBERTa and ELECTRA.")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
 args = parser.parse_args()
 # yapf: enable.
@@ -57,7 +58,7 @@ if __name__ == '__main__':
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
-    pooled_output = outputs["pooled_output"]
+    pooled_output = outputs["sequence_output"]
 
     # Setup feed list for data feeder
     # Must feed all the tensor of module need
@@ -88,6 +89,7 @@ if __name__ == '__main__':
         data_reader=reader,
         feature=pooled_output,
         feed_list=feed_list,
+        network='dpcnn',
         num_classes=dataset.num_labels,
         config=config,
         metrics_choices=metrics_choices)
