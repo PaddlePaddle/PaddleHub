@@ -145,7 +145,4 @@ def predict(args):
                 predictor_metrics.accumulate(final_result_list)
             res_list = predictor_metrics.finalize_and_log_out(
                 label_file=args.label_file)
-            if res_list == []:
-                logger.warning(
-                    "No prediction exceeds the threshold: %s." % args.threshold)
             return res_list

@@ -97,16 +97,21 @@ class Youtube8mMetrics(Metrics):
                 video_id = item[0]
                 f = io.open(label_file, "r", encoding="utf-8")
                 fl = f.readlines()
-                res_list = {}
-                res_list["path"] = video_id
+                res = {}
+                res["path"] = video_id
+                res["prediction"] = {}
                 for i in range(len(item[1])):
                     class_id = item[1][i]
                     class_prob = item[2][i]
                     if class_prob < self.threshold:
                         continue
                     class_name = fl[class_id].split('\n')[0]
-                    res_list[class_name] = class_prob
-                all_res_list.append(res_list)
+                    res["prediction"][class_name] = class_prob
+                if not res["prediction"]:
+                    logger.warning(
+                        "%s: No prediction exceeds the threshold = %s." %
+                        (video_id, self.threshold))
+                all_res_list.append(res)
             return all_res_list
         else:
             epoch_info_dict = self.calculator.get()
