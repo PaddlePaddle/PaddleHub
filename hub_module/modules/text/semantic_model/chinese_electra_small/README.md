@@ -96,7 +96,7 @@ embedding_result = module.get_embedding(texts=[["Sample1_text_a"],["Sample2_text
 
 # Use "get_params_layer" to get params layer and used to ULMFiTStrategy.
 params_layer = module.get_params_layer()
-strategy = hub.finetune.strategy.ULMFiTStrategy(params_layer=params_layer)
+strategy = hub.finetune.strategy.ULMFiTStrategy(frz_params_layer=params_layer, dis_params_layer=params_layer)
 ```
 
 
