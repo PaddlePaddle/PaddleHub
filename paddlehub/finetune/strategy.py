@@ -511,10 +511,6 @@ class CombinedStrategy(DefaultStrategy):
                     unfreeze_depths=self.
                     sorted_depth[:self.max_depth * self.epoch //
                                  self.scheduler["gradual_unfreeze"]["blocks"]])
-            else:
-                logger.warning(
-                    "The max op-depth in the network is %s. That results in that can't use the gradual unfreeze finetune strategy."
-                    % (self.max_depth))
         elif self.scheduler["gradual_unfreeze"]["params_layer"]:
             max_layer = max(
                 self.scheduler["gradual_unfreeze"]["params_layer"].values())
@@ -631,8 +627,9 @@ class ULMFiTStrategy(CombinedStrategy):
                  ratio=32,
                  dis_blocks=3,
                  factor=2.6,
+                 dis_params_layer=None,
                  frz_blocks=3,
-                 params_layer=None):
+                 frz_params_layer=None):
 
         scheduler = {
             "slanted_triangle": {
@@ -641,12 +638,12 @@ class ULMFiTStrategy(CombinedStrategy):
             },
             "gradual_unfreeze": {
                 "blocks": frz_blocks,
-                "params_layer": params_layer
+                "params_layer": frz_params_layer
             },
             "discriminative": {
                 "blocks": dis_blocks,
                 "factor": factor,
-                "params_layer": params_layer
+                "params_layer": dis_params_layer
             }
         }
         regularization = {}
