@@ -397,7 +397,8 @@ class TransformerModule(NLPBaseModule):
 
         return inputs, outputs, module_program
 
-    def get_embedding(self, texts, use_gpu=False, batch_size=1):
+    def get_embedding(self, texts, max_seq_len=512, use_gpu=False,
+                      batch_size=1):
         """
         get pooled_output and sequence_output for input texts.
         Warnings: this method depends on Paddle Inference Library, it may not work properly in PaddlePaddle <= 1.6.2.
@@ -405,6 +406,7 @@ class TransformerModule(NLPBaseModule):
         Args:
             texts (list): each element is a text sample, each sample include text_a and text_b where text_b can be omitted.
                           for example: [[sample0_text_a, sample0_text_b], [sample1_text_a, sample1_text_b], ...]
+            max_seq_len (int): the max sequence length.
             use_gpu (bool): use gpu or not, default False.
             batch_size (int): the data batch size, default 1.
 
@@ -417,12 +419,12 @@ class TransformerModule(NLPBaseModule):
         ) or self.emb_job["batch_size"] != batch_size or self.emb_job[
                 "use_gpu"] != use_gpu:
             inputs, outputs, program = self.context(
-                trainable=True, max_seq_len=self.MAX_SEQ_LEN)
+                trainable=True, max_seq_len=max_seq_len)
 
             reader = hub.reader.ClassifyReader(
                 dataset=None,
                 vocab_path=self.get_vocab_path(),
-                max_seq_len=self.MAX_SEQ_LEN,
+                max_seq_len=max_seq_len,
                 sp_model_path=self.get_spm_path() if hasattr(
                     self, "get_spm_path") else None,
                 word_dict_path=self.get_word_dict_path() if hasattr(

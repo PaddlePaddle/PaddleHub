@@ -205,7 +205,7 @@ def get_predictions(all_examples, all_features, all_results, n_best_size,
         for (feature_index, feature) in enumerate(features):
             if feature.unique_id not in unique_id_to_result:
                 logger.info(
-                    "As using pyreader, the last one batch is so small that the feature %s in the last batch is discarded "
+                    "As using multidevice, the last one batch is so small that the feature %s in the last batch is discarded "
                     % feature.unique_id)
                 continue
             result = unique_id_to_result[feature.unique_id]

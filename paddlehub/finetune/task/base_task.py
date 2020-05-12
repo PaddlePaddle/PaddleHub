@@ -951,12 +951,6 @@ class BaseTask(object):
         Returns:
             RunState: the running result of predict phase
         """
-
-        if isinstance(self._base_data_reader, hub.reader.LACClassifyReader):
-            raise Exception(
-                "LACClassifyReader does not support predictor, please close accelerate_mode"
-            )
-
         global_run_states = []
         period_run_states = []
 
@@ -993,16 +987,22 @@ class BaseTask(object):
             data (list): the data will be predicted.
             load_best_model (bool): load the best model or not
             return_result (bool): return a readable result or just the raw run result
-            accelerate_mode (bool): use high-performance predictor or not
+            accelerate_mode (bool): use high-performance predictor or not.
 
         Returns:
             RunState: the running result of predict phase
         """
-        if not version_compare(paddle.__version__, "1.6.2") and accelerate_mode:
-            logger.warning(
-                "Fail to open predict accelerate mode as it does not support paddle < 1.6.2. Please update PaddlePaddle."
-            )
-            accelerate_mode = False
+        if accelerate_mode:
+            if not version_compare(paddle.__version__, "1.6.1"):
+                logger.warning(
+                    "Fail to open predict accelerate mode as it does not support paddle < 1.6.2. Please update PaddlePaddle."
+                )
+                accelerate_mode = False
+            if isinstance(self._base_data_reader, hub.reader.LACClassifyReader):
+                logger.warning(
+                    "LACClassifyReader does not support predictor, the accelerate_mode is closed now."
+                )
+                accelerate_mode = False
         self.accelerate_mode = accelerate_mode
 
         with self.phase_guard(phase="predict"):
