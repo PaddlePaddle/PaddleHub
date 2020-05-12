@@ -34,13 +34,13 @@ parser.add_argument("--batch_size",     type=int,   default=1, help="Total examp
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
 parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
-parser.add_argument("--network", type=str, default='bilstm', help="Preset network which was connected after Transformer model, such as ERNIE, BERT ,RoBERTa and ELECTRA.")
+parser.add_argument("--network", type=str, default='bilstm', help="Pre-defined network which was connected after Transformer model, such as ERNIE, BERT ,RoBERTa and ELECTRA.")
 args = parser.parse_args()
 # yapf: enable.
 
 if __name__ == '__main__':
     # Load Paddlehub ERNIE Tiny pretrained model
-    module = hub.Module(name="ernie_tiny")
+    module = hub.Module(name="ernie_v2_eng_base")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
@@ -80,7 +80,7 @@ if __name__ == '__main__':
         strategy=hub.AdamWeightDecayStrategy())
 
     # Define a classfication finetune task by PaddleHub's API
-    # network choice: bilstm, bow, cnn, dpcnn, gru, lstm
+    # network choice: bilstm, bow, cnn, dpcnn, gru, lstm (PaddleHub pre-defined network)
     # If you wanna add network after ERNIE/BERT/RoBERTa/ELECTRA module,
     # you must use the outputs["sequence_output"] as the token_feature of TextClassifierTask,
     # rather than outputs["pooled_output"], and feature is None
