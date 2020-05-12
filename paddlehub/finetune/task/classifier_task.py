@@ -25,8 +25,8 @@ import time
 
 from paddlehub.common.logger import logger
 from paddlehub.finetune.evaluate import calculate_f1_np, matthews_corrcoef
-import paddlehub.network as net
 from paddlehub.reader.nlp_reader import ClassifyReader
+import paddlehub.network as net
 
 from .base_task import BaseTask
 
