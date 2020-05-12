@@ -58,7 +58,7 @@ if __name__ == '__main__':
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
-    pooled_output = outputs["sequence_output"]
+    token_feature = outputs["sequence_output"]
 
     # Setup feed list for data feeder
     # Must feed all the tensor of module need
@@ -87,11 +87,11 @@ if __name__ == '__main__':
     # Define a classfication finetune task by PaddleHub's API
     # network choice: bilstm, bow, cnn, dpcnn, gru, lstm
     # If you wanna add network after ERNIE/BERT/RoBERTa/ELECTRA module,
-    # you must use the outputs["sequence_output"] as the feature of TextClassifierTask
-    # rather than outputs["pooled_output"]
+    # you must use the outputs["sequence_output"] as the token_feature of TextClassifierTask,
+    # rather than outputs["pooled_output"], and feature is None
     cls_task = hub.TextClassifierTask(
         data_reader=reader,
-        feature=pooled_output,
+        token_feature=token_feature,
         feed_list=feed_list,
         network=args.network,
         num_classes=dataset.num_labels,

@@ -21,43 +21,6 @@ import paddle
 import paddle.fluid as fluid
 
 
-def bilstm_net(token_embeddings, hid_dim=128, hid_dim2=96):
-    """
-    bilstm net
-    """
-    main_program = token_embeddings.block.program
-    start_program = fluid.Program()
-    with fluid.program_guard(main_program, start_program):
-        with fluid.unique_name.guard('preste_'):
-            seq_len = fluid.layers.data(
-                name="seq_len", shape=[1], dtype='int64', lod_level=0)
-
-            if version_compare(paddle.__version__, "1.6"):
-                seq_len_used = fluid.layers.squeeze(seq_len, axes=[1])
-            else:
-                seq_len_used = seq_len
-
-            unpad_feature = fluid.layers.sequence_unpad(
-                token_embeddings, length=seq_len_used)
-
-            fc0 = fluid.layers.fc(input=unpad_feature, size=hid_dim * 4)
-            rfc0 = fluid.layers.fc(input=unpad_feature, size=hid_dim * 4)
-            lstm_h, c = fluid.layers.dynamic_lstm(
-                input=fc0, size=hid_dim * 4, is_reverse=False)
-            rlstm_h, c = fluid.layers.dynamic_lstm(
-                input=rfc0, size=hid_dim * 4, is_reverse=True)
-            lstm_last = fluid.layers.sequence_last_step(input=lstm_h)
-            rlstm_last = fluid.layers.sequence_last_step(input=rlstm_h)
-            lstm_last_tanh = fluid.layers.tanh(lstm_last)
-            rlstm_last_tanh = fluid.layers.tanh(rlstm_last)
-
-        # concat layer
-        lstm_concat = fluid.layers.concat(input=[lstm_last, rlstm_last], axis=1)
-        # full connect layer
-        fc = fluid.layers.fc(input=lstm_concat, size=hid_dim2, act='tanh')
-        return seq_len, fc, start_program
-
-
 def bilstm(token_embeddings, hid_dim=128, hid_dim2=96):
     """
     bilstm net
