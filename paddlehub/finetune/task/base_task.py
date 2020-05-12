@@ -987,7 +987,7 @@ class BaseTask(object):
             data (list): the data will be predicted.
             load_best_model (bool): load the best model or not
             return_result (bool): return a readable result or just the raw run result
-            accelerate_mode (bool): use high-performance predictor or not.
+            accelerate_mode (bool): use high-performance predictor or not
 
         Returns:
             RunState: the running result of predict phase
