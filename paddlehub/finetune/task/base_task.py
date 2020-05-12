@@ -998,11 +998,6 @@ class BaseTask(object):
         Returns:
             RunState: the running result of predict phase
         """
-        if not version_compare(paddle.__version__, "1.6.2") and accelerate_mode:
-            logger.warning(
-                "Fail to open predict accelerate mode as it does not support paddle < 1.6.2. Please update PaddlePaddle."
-            )
-            accelerate_mode = False
         self.accelerate_mode = accelerate_mode
 
         with self.phase_guard(phase="predict"):

@@ -28,6 +28,7 @@ from . import io
 from . import dataset
 from . import finetune
 from . import reader
+from . import network
 
 from .common.dir import USER_HOME
 from .common.dir import HUB_HOME

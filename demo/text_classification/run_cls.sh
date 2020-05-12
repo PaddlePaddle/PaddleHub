@@ -3,16 +3,16 @@ export CUDA_VISIBLE_DEVICES=0
 
 CKPT_DIR="./ckpt_chnsenticorp"
 
-python -u text_classifier.py \
-                   --batch_size=24 \
-                   --use_gpu=True \
-                   --checkpoint_dir=${CKPT_DIR} \
-                   --learning_rate=5e-5 \
-                   --weight_decay=0.01 \
-                   --max_seq_len=128 \
-                   --warmup_proportion=0.1 \
-                   --num_epoch=3 \
-                   --use_data_parallel=True
+python -u text_cls.py \
+            --batch_size=24 \
+            --use_gpu=True \
+            --checkpoint_dir=${CKPT_DIR} \
+            --learning_rate=5e-5 \
+            --weight_decay=0.01 \
+            --max_seq_len=128 \
+            --warmup_proportion=0.1 \
+            --num_epoch=3 \
+            --use_data_parallel=True
 
 # The sugguested hyper parameters for difference task
 # for ChineseGLUE:
