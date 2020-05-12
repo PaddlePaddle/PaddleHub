@@ -16,7 +16,6 @@
 This module provide nets for text classification
 """
 
-from paddlehub.common.utils import version_compare
 import paddle
 import paddle.fluid as fluid
 

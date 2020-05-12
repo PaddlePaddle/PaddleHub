@@ -65,7 +65,6 @@ class BaseNLPReader(BaseReader):
             logger.warning(
                 "use_task_id has been de discarded since PaddleHub v1.4.0, it's no necessary to feed task_ids now."
             )
-            self.task_id = 0
 
         self.Record_With_Label_Id = namedtuple(
             'Record',
@@ -287,36 +286,16 @@ class ClassifyReader(BaseNLPReader):
             max_seq_len=self.max_seq_len,
             pad_idx=self.pad_id)
 
+        return_list = [
+            padded_token_ids, padded_position_ids, padded_text_type_ids,
+            input_mask, batch_seq_lens
+        ]
         if phase != "predict":
             batch_labels = [record.label_id for record in batch_records]
             batch_labels = np.array(batch_labels).astype("int64").reshape(
                 [-1, 1])
+            return_list += [batch_labels]
 
-            return_list = [
-                padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask, batch_seq_lens, batch_labels
-            ]
-
-            if self.use_task_id:
-                padded_task_ids = np.ones_like(
-                    padded_token_ids, dtype="int64") * self.task_id
-                return_list = [
-                    padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids, batch_seq_lens, batch_labels
-                ]
-        else:
-            return_list = [
-                padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask, batch_seq_lens
-            ]
-
-            if self.use_task_id:
-                padded_task_ids = np.ones_like(
-                    padded_token_ids, dtype="int64") * self.task_id
-                return_list = [
-                    padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids, batch_seq_lens
-                ]
         return return_list
 
 
@@ -370,40 +349,20 @@ class SequenceLabelReader(BaseNLPReader):
             max_seq_len=self.max_seq_len,
             pad_idx=self.pad_id)
 
+        return_list = [
+            padded_token_ids, padded_position_ids, padded_text_type_ids,
+            input_mask
+        ]
         if phase != "predict":
             batch_label_ids = [record.label_id for record in batch_records]
             padded_label_ids = pad_batch_data(
                 batch_label_ids,
                 max_seq_len=self.max_seq_len,
                 pad_idx=len(self.label_map) - 1)
-
-            return_list = [
-                padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask, padded_label_ids, batch_seq_lens
-            ]
-
-            if self.use_task_id:
-                padded_task_ids = np.ones_like(
-                    padded_token_ids, dtype="int64") * self.task_id
-                return_list = [
-                    padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids, padded_label_ids,
-                    batch_seq_lens
-                ]
+            return_list += [padded_label_ids, batch_seq_lens]
 
         else:
-            return_list = [
-                padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask, batch_seq_lens
-            ]
-
-            if self.use_task_id:
-                padded_task_ids = np.ones_like(
-                    padded_token_ids, dtype="int64") * self.task_id
-                return_list = [
-                    padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids, batch_seq_lens
-                ]
+            return_list += [batch_seq_lens]
 
         return return_list
 
@@ -515,37 +474,18 @@ class MultiLabelClassifyReader(BaseNLPReader):
             max_seq_len=self.max_seq_len,
             pad_idx=self.pad_id)
 
+        return_list = [
+            padded_token_ids, padded_position_ids, padded_text_type_ids,
+            input_mask
+        ]
         if phase != "predict":
             batch_labels_ids = [record.label_id for record in batch_records]
             num_label = len(self.dataset.get_labels())
             batch_labels = np.array(batch_labels_ids).astype("int64").reshape(
                 [-1, num_label])
 
-            return_list = [
-                padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask, batch_labels
-            ]
+            return_list += [batch_labels]
 
-            if self.use_task_id:
-                padded_task_ids = np.ones_like(
-                    padded_token_ids, dtype="int64") * self.task_id
-                return_list = [
-                    padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids, batch_labels
-                ]
-        else:
-            return_list = [
-                padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask
-            ]
-
-            if self.use_task_id:
-                padded_task_ids = np.ones_like(
-                    padded_token_ids, dtype="int64") * self.task_id
-                return_list = [
-                    padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids
-                ]
         return return_list
 
     def _convert_example_to_record(self,
@@ -635,37 +575,17 @@ class RegressionReader(BaseNLPReader):
             max_seq_len=self.max_seq_len,
             pad_idx=self.pad_id)
 
+        return_list = [
+            padded_token_ids, padded_position_ids, padded_text_type_ids,
+            input_mask
+        ]
         if phase != "predict":
             batch_labels = [record.label_id for record in batch_records]
             # the only diff with ClassifyReader: astype("float32")
             batch_labels = np.array(batch_labels).astype("float32").reshape(
                 [-1, 1])
 
-            return_list = [
-                padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask, batch_labels
-            ]
-
-            if self.use_task_id:
-                padded_task_ids = np.ones_like(
-                    padded_token_ids, dtype="int64") * self.task_id
-                return_list = [
-                    padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids, batch_labels
-                ]
-        else:
-            return_list = [
-                padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask
-            ]
-
-            if self.use_task_id:
-                padded_task_ids = np.ones_like(
-                    padded_token_ids, dtype="int64") * self.task_id
-                return_list = [
-                    padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids
-                ]
+            return_list += [batch_labels]
 
         return return_list
 
@@ -832,6 +752,10 @@ class ReadingComprehensionReader(BaseNLPReader):
             pad_idx=self.pad_id,
             max_seq_len=self.max_seq_len)
 
+        return_list = [
+            padded_token_ids, padded_position_ids, padded_text_type_ids,
+            input_mask, batch_unique_ids
+        ]
         if phase != "predict":
             batch_start_position = [
                 record.start_position for record in batch_records
@@ -844,33 +768,8 @@ class ReadingComprehensionReader(BaseNLPReader):
             batch_end_position = np.array(batch_end_position).astype(
                 "int64").reshape([-1, 1])
 
-            return_list = [
-                padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask, batch_unique_ids, batch_start_position,
-                batch_end_position
-            ]
+            return_list += [batch_start_position, batch_end_position]
 
-            if self.use_task_id:
-                padded_task_ids = np.ones_like(
-                    padded_token_ids, dtype="int64") * self.task_id
-                return_list = [
-                    padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids, batch_unique_ids,
-                    batch_start_position, batch_end_position
-                ]
-
-        else:
-            return_list = [
-                padded_token_ids, padded_position_ids, padded_text_type_ids,
-                input_mask, batch_unique_ids
-            ]
-            if self.use_task_id:
-                padded_task_ids = np.ones_like(
-                    padded_token_ids, dtype="int64") * self.task_id
-                return_list = [
-                    padded_token_ids, padded_position_ids, padded_text_type_ids,
-                    input_mask, padded_task_ids, batch_unique_ids
-                ]
         return return_list
 
     def _prepare_batch_data(self, records, batch_size, phase=None):

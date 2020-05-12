@@ -170,8 +170,8 @@ class TextClassifierTask(ClassifierTask):
                  num_classes,
                  feed_list,
                  data_reader,
-                 token_feature=None,
                  feature=None,
+                 token_feature=None,
                  network=None,
                  startup_program=None,
                  config=None,
@@ -182,13 +182,13 @@ class TextClassifierTask(ClassifierTask):
             num_classes: total labels of the text classification task.
             feed_list(list): the variable name that will be feeded to the main program
             data_reader(object): data reader for the task. It must be one of ClassifyReader and LACClassifyReader.
-            token_feature(Variable): the feature will be used to connect the preset net. It must be the token-level feature, shape as [-1, seq_len, emb_size]. Default None.
-            feature(Variable): the feature will be used to classify texts. It must be the sentence-level feature, shape as [-1, emb_size]. Token_feature and feature couldn't be setted as the same time. One of them must be setted as not None. Default None.
-            network(str): the preset network. Choices: 'bilstm', 'bow', 'cnn', 'dpcnn', 'gru' and 'lstm'. Default None. If network is setted, then token_feature must be seted and feature must be None.
-            main_program (object): the customized main_program, default None.
-            startup_program (object): the customized startup_program, default None.
+            feature(Variable): the `feature` will be used to classify texts. It must be the sentence-level feature, shape as [-1, emb_size]. `Token_feature` and `feature` couldn't be setted at the same time. One of them must be setted as not None. Default None.
+            token_feature(Variable): the `feature` will be used to connect the pre-defined network. It must be the token-level feature, shape as [-1, seq_len, emb_size]. Default None.
+            network(str): the pre-defined network. Choices: 'bilstm', 'bow', 'cnn', 'dpcnn', 'gru' and 'lstm'. Default None. If network is setted, then `token_feature` must be setted and `feature` must be None.
+            main_program (object): the customized main program, default None.
+            startup_program (object): the customized startup program, default None.
             config (RunConfig): run config for the task, such as batch_size, epoch, learning_rate setting and so on. Default None.
-            hidden_units(list): the element of hidden_units list is the full-connect layer size. It will add the full-connect layers to the program. Default None.
+            hidden_units(list): the element of `hidden_units` list is the full-connect layer size. It will add the full-connect layers to the program. Default None.
             metrics_choices(list): metrics used to the task, default ["acc"].
         """
         if (not feature) and (not token_feature):
@@ -247,7 +247,7 @@ class TextClassifierTask(ClassifierTask):
                 self.feature, length=self.seq_len_used)
 
         if self.network:
-            # add preset net
+            # add pre-defined net
             net_func = getattr(net.classification, self.network)
             if self.network == 'dpcnn':
                 # deepcnn network is no need to unpad
@@ -258,7 +258,7 @@ class TextClassifierTask(ClassifierTask):
             logger.info(
                 "%s has been added in the TextClassifierTask!" % self.network)
         else:
-            # not use preset net but to use fc net
+            # not use pre-defined net but to use fc net
             cls_feats = fluid.layers.dropout(
                 x=self.feature,
                 dropout_prob=0.1,
