@@ -17,12 +17,17 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import time
 from collections import OrderedDict
 import numpy as np
+import paddle
 import paddle.fluid as fluid
+import time
 
+from paddlehub.common.logger import logger
 from paddlehub.finetune.evaluate import calculate_f1_np, matthews_corrcoef
+from paddlehub.reader.nlp_reader import ClassifyReader
+import paddlehub.network as net
+
 from .base_task import BaseTask
 
 
@@ -104,7 +109,7 @@ class ClassifierTask(BaseTask):
             run_examples += run_state.run_examples
             run_step += run_state.run_step
             loss_sum += np.mean(
-                run_state.run_results[-1]) * run_state.run_examples
+                run_state.run_results[-2]) * run_state.run_examples
             acc_sum += np.mean(
                 run_state.run_results[2]) * run_state.run_examples
             np_labels = run_state.run_results[0]
@@ -147,7 +152,7 @@ class ClassifierTask(BaseTask):
         results = []
         for batch_state in run_states:
             batch_result = batch_state.run_results
-            batch_infer = np.argmax(batch_result, axis=2)[0]
+            batch_infer = np.argmax(batch_result[0], axis=1)
             results += [id2label[sample_infer] for sample_infer in batch_infer]
         return results
 
@@ -156,21 +161,73 @@ ImageClassifierTask = ClassifierTask
 
 
 class TextClassifierTask(ClassifierTask):
+    """
+    Create a text classification task.
+    It will use full-connect layer with softmax activation function to classify texts.
+    """
+
     def __init__(self,
-                 feature,
                  num_classes,
                  feed_list,
                  data_reader,
+                 feature=None,
+                 token_feature=None,
+                 network=None,
                  startup_program=None,
                  config=None,
                  hidden_units=None,
                  metrics_choices="default"):
+        """
+        Args:
+            num_classes: total labels of the text classification task.
+            feed_list(list): the variable name that will be feeded to the main program
+            data_reader(object): data reader for the task. It must be one of ClassifyReader and LACClassifyReader.
+            feature(Variable): the `feature` will be used to classify texts. It must be the sentence-level feature, shape as [-1, emb_size]. `Token_feature` and `feature` couldn't be setted at the same time. One of them must be setted as not None. Default None.
+            token_feature(Variable): the `feature` will be used to connect the pre-defined network. It must be the token-level feature, shape as [-1, seq_len, emb_size]. Default None.
+            network(str): the pre-defined network. Choices: 'bilstm', 'bow', 'cnn', 'dpcnn', 'gru' and 'lstm'. Default None. If network is setted, then `token_feature` must be setted and `feature` must be None.
+            main_program (object): the customized main program, default None.
+            startup_program (object): the customized startup program, default None.
+            config (RunConfig): run config for the task, such as batch_size, epoch, learning_rate setting and so on. Default None.
+            hidden_units(list): the element of `hidden_units` list is the full-connect layer size. It will add the full-connect layers to the program. Default None.
+            metrics_choices(list): metrics used to the task, default ["acc"].
+        """
+        if (not feature) and (not token_feature):
+            logger.error(
+                'Both token_feature and feature are None, one of them must be setted.'
+            )
+            exit(1)
+        elif feature and token_feature:
+            logger.error(
+                'Both token_feature and feature are setted. One should be setted, the other should be None.'
+            )
+            exit(1)
+
+        if network:
+            assert network in [
+                'bilstm', 'bow', 'cnn', 'dpcnn', 'gru', 'lstm'
+            ], 'network choice must be one of bilstm, bow, cnn, dpcnn, gru, lstm!'
+            assert token_feature and (
+                not feature
+            ), 'If you wanna use network, you must set token_feature ranther than feature for TextClassifierTask!'
+            assert len(
+                token_feature.shape
+            ) == 3, 'When you use network, the parameter token_feature must be the token-level feature, such as the sequence_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
+        else:
+            assert feature and (
+                not token_feature
+            ), 'If you do not use network, you must set feature ranther than token_feature for TextClassifierTask!'
+            assert len(
+                feature.shape
+            ) == 2, 'When you do not use network, the parameter feture must be the sentence-level feature, such as the pooled_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
+
+        self.network = network
 
         if metrics_choices == "default":
             metrics_choices = ["acc"]
+
         super(TextClassifierTask, self).__init__(
             data_reader=data_reader,
-            feature=feature,
+            feature=feature if feature else token_feature,
             num_classes=num_classes,
             feed_list=feed_list,
             startup_program=startup_program,
@@ -179,10 +236,33 @@ class TextClassifierTask(ClassifierTask):
             metrics_choices=metrics_choices)
 
     def _build_net(self):
-        cls_feats = fluid.layers.dropout(
-            x=self.feature,
-            dropout_prob=0.1,
-            dropout_implementation="upscale_in_train")
+        if isinstance(self._base_data_reader, ClassifyReader):
+            # ClassifyReader will return the seqence length of an input text
+            self.seq_len = fluid.layers.data(
+                name="seq_len", shape=[1], dtype='int64', lod_level=0)
+            self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])
+
+            # unpad the token_feature
+            unpad_feature = fluid.layers.sequence_unpad(
+                self.feature, length=self.seq_len_used)
+
+        if self.network:
+            # add pre-defined net
+            net_func = getattr(net.classification, self.network)
+            if self.network == 'dpcnn':
+                # deepcnn network is no need to unpad
+                cls_feats = net_func(
+                    self.feature, emb_dim=self.feature.shape[-1])
+            else:
+                cls_feats = net_func(unpad_feature)
+            logger.info(
+                "%s has been added in the TextClassifierTask!" % self.network)
+        else:
+            # not use pre-defined net but to use fc net
+            cls_feats = fluid.layers.dropout(
+                x=self.feature,
+                dropout_prob=0.1,
+                dropout_implementation="upscale_in_train")
 
         if self.hidden_units is not None:
             for n_hidden in self.hidden_units:
@@ -203,6 +283,33 @@ class TextClassifierTask(ClassifierTask):
             x=fluid.layers.argmax(logits, axis=1), shape=[-1, 1])
 
         return [logits]
+
+    @property
+    def feed_list(self):
+        feed_list = [varname for varname in self._base_feed_list]
+        if isinstance(self._base_data_reader, ClassifyReader):
+            # ClassifyReader will return the seqence length of an input text
+            feed_list += [self.seq_len.name]
+        if self.is_train_phase or self.is_test_phase:
+            feed_list += [self.labels[0].name]
+        return feed_list
+
+    @property
+    def fetch_list(self):
+        if self.is_train_phase or self.is_test_phase:
+            fetch_list = [
+                self.labels[0].name, self.ret_infers.name, self.metrics[0].name,
+                self.loss.name
+            ]
+        else:
+            # predict phase
+            fetch_list = [self.outputs[0].name]
+
+        if isinstance(self._base_data_reader, ClassifyReader):
+            # to avoid save_inference_model to prune seq_len variable
+            fetch_list += [self.seq_len.name]
+
+        return fetch_list
 
 
 class MultiLabelClassifierTask(ClassifierTask):

@@ -36,7 +36,7 @@ from visualdl import LogWriter
 
 import paddlehub as hub
 from paddlehub.common.paddle_helper import dtype_map, clone_program
-from paddlehub.common.utils import mkdir, version_compare
+from paddlehub.common.utils import mkdir
 from paddlehub.common.dir import tmp_dir
 from paddlehub.common.logger import logger
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
@@ -992,17 +992,12 @@ class BaseTask(object):
         Returns:
             RunState: the running result of predict phase
         """
-        if accelerate_mode:
-            if not version_compare(paddle.__version__, "1.6.1"):
-                logger.warning(
-                    "Fail to open predict accelerate mode as it does not support paddle < 1.6.2. Please update PaddlePaddle."
-                )
-                accelerate_mode = False
-            if isinstance(self._base_data_reader, hub.reader.LACClassifyReader):
-                logger.warning(
-                    "LACClassifyReader does not support predictor, the accelerate_mode is closed now."
-                )
-                accelerate_mode = False
+        if accelerate_mode and isinstance(self._base_data_reader,
+                                          hub.reader.LACClassifyReader):
+            logger.warning(
+                "LACClassifyReader does not support predictor, the accelerate_mode is closed now."
+            )
+            accelerate_mode = False
         self.accelerate_mode = accelerate_mode
 
         with self.phase_guard(phase="predict"):
