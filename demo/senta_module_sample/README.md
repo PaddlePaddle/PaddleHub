@@ -141,7 +141,7 @@ TODO
 
 * [module.py](./senta_test/module.py)
 
-* [processor.py](./senta_test/module.py)
+* [processor.py](./senta_test/processor.py)
 
 <br/>
 
