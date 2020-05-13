@@ -1,10 +1,12 @@
+# DELTA: DEep Learning Transfer using Feature Map with Attention for Convolutional Networks
 
-# Introduction
-This page implements the [DELTA](https://arxiv.org/abs/1901.09229) algorithm in [PaddlePaddle](https://www.paddlepaddle.org.cn/install/quick).
+## Introduction
+
+This page implements the [DELTA](https://arxiv.org/abs/1901.09229) algorithm in [PaddlePaddle](https://www.paddlepaddle.org.cn).
 
 > Li, Xingjian, et al. "DELTA: Deep learning transfer using feature map with attention for convolutional networks." ICLR 2019.
 
-# Preparation of Data and Pre-trained Model
+## Preparation of Data and Pre-trained Model
 
 - Download transfer learning target datasets, like [Caltech-256](http://www.vision.caltech.edu/Image_Datasets/Caltech256/), [CUB_200_2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html) or others. Arrange the dataset in this way:
 ```
@@ -23,7 +25,7 @@ This page implements the [DELTA](https://arxiv.org/abs/1901.09229) algorithm in 
 
 - Download [the pretrained models](https://github.com/PaddlePaddle/models/tree/release/1.7/PaddleCV/image_classification#resnet-series). We give the results of ResNet-101 below.
 
-# Running Scripts
+## Running Scripts
 
 Modify `global_data_path` in `datasets/data_path` to the path root where the dataset is.
 

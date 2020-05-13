@@ -832,7 +832,9 @@ class BaseTask(object):
             self.config.checkpoint_dir,
             self.exe,
             main_program=self.main_program)
-
+        # Revise max_train_steps when incremental training
+        self.max_train_steps = self.env.current_step + self.max_train_steps / self.config.num_epoch * (
+            self.config.num_epoch - self.env.current_epoch + 1)
         return is_load_successful
 
     def load_parameters(self, dirname):
