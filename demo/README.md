@@ -33,7 +33,7 @@
 * [阅读理解](./reading_comprehension)
   该样例展示了PaddleHub如何将BERT作为预训练模型在SQAD数据集上完成阅读理解的FineTune和预测。
 
-* [检索式问答任务](./qa_classfication)
+* [检索式问答任务](./qa_classification)
   该样例展示了PaddleHub如何将ERNIE和BERT作为预训练模型在NLPCC-DBQA等数据集上完成检索式问答任务的FineTune和预测。
 
 * [句子语义相似度计算](./sentence_similarity)
