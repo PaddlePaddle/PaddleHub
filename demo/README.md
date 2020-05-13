@@ -39,7 +39,7 @@
 * [句子语义相似度计算](./sentence_similarity)
   该样例展示了PaddleHub如何将word2vec_skipgram用于计算两个文本语义相似度。
 
-* [超参优化AutoDL Finetuner使用](./autofinetune)
+* [超参优化AutoDL Finetuner使用](./autofinetune_image_classification)
   该样例展示了PaddleHub超参优化AutoDL Finetuner如何使用，给出了自动搜素图像分类/文本分类任务的较佳超参数示例。
 
 * [服务化部署Hub Serving使用](./serving)
