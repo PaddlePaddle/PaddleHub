@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Finetuning on sequence labeling task """
+"""Fine-tuning on sequence labeling task """
 
 from __future__ import absolute_import
 from __future__ import division
@@ -27,14 +27,13 @@ import time
 import paddle
 import paddle.fluid as fluid
 import paddlehub as hub
-from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for fine-tuning, input should be True or False")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -67,7 +66,7 @@ if __name__ == '__main__':
         inputs["input_mask"].name,
     ]
 
-    # Setup runing config for PaddleHub Finetune API
+    # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
         use_data_parallel=False,
         use_cuda=args.use_gpu,
@@ -75,7 +74,7 @@ if __name__ == '__main__':
         checkpoint_dir=args.checkpoint_dir,
         strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
-    # Define a sequence labeling finetune task by PaddleHub's API
+    # Define a sequence labeling fine-tune task by PaddleHub's API
     # if add crf, the network use crf as decoder
     seq_label_task = hub.SequenceLabelTask(
         data_reader=reader,
@@ -84,7 +83,7 @@ if __name__ == '__main__':
         max_seq_len=args.max_seq_len,
         num_classes=dataset.num_labels,
         config=config,
-        add_crf=True)
+        add_crf=False)
 
     # Data to be predicted
     # If using python 2, prefix "u" is necessary

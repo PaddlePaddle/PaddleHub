@@ -14,7 +14,7 @@ parser.add_argument("--use_gpu",            type=ast.literal_eval,  default=True
 parser.add_argument("--checkpoint_dir",     type=str,               default="paddlehub_finetune_ckpt",  help="Path to save log data.")
 parser.add_argument("--batch_size",         type=int,               default=16,                         help="Total examples' number in batch for training.")
 parser.add_argument("--module",             type=str,               default="resnet50",                 help="Module used as feature extractor.")
-parser.add_argument("--dataset",            type=str,               default="flowers",                  help="Dataset to finetune.")
+parser.add_argument("--dataset",            type=str,               default="flowers",                  help="Dataset to fine-tune.")
 parser.add_argument("--use_data_parallel",  type=ast.literal_eval,  default=True,                      help="Whether use data parallel.")
 # yapf: enable.
 
@@ -60,7 +60,7 @@ def finetune(args):
     # Setup feed list for data feeder
     feed_list = [input_dict["image"].name]
 
-    # Setup runing config for PaddleHub Finetune API
+    # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
         use_data_parallel=args.use_data_parallel,
         use_cuda=args.use_gpu,
@@ -69,7 +69,7 @@ def finetune(args):
         checkpoint_dir=args.checkpoint_dir,
         strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
 
-    # Define a reading comprehension finetune task by PaddleHub's API
+    # Define a image classification task by PaddleHub Fine-tune API
     task = hub.ImageClassifierTask(
         data_reader=data_reader,
         feed_list=feed_list,
@@ -77,7 +77,7 @@ def finetune(args):
         num_classes=dataset.num_labels,
         config=config)
 
-    # Finetune by PaddleHub's API
+    # Fine-tune by PaddleHub's API
     task.finetune_and_eval()
 
 
