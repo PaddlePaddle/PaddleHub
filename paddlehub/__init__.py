@@ -22,6 +22,8 @@ if six.PY2:
     reload(sys)  # noqa
     sys.setdefaultencoding("UTF-8")
 
+from .version import hub_version as __version__
+
 from . import module
 from . import common
 from . import io
