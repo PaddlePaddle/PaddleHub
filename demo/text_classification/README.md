@@ -2,9 +2,29 @@
 
 本示例将展示如何使用PaddleHub Fine-tune API以及Transformer类预训练模型(ERNIE/BERT/RoBERTa)完成分类任务。
 
+**PaddleHub 1.7.0以上版本支持在Transformer类预训练模型之后拼接预置网络(bow, bilstm, cnn, dpcnn, gru, lstm)完成文本分类任务**
+
+## 目录结构
+.
+├── finetuned_model_to_module # PaddleHub Fine-tune得到模型如何转化为module，从而利用PaddleHub Serving部署
+│   ├── __init__.py
+│   └── module.py
+├── predict_predefine_net.py # 加入预置网络预测脚本
+├── predict.py # 不使用预置网络（使用fc网络）的预测脚本
+├── README.md # 文本分类迁移学习文档说明
+├── run_cls_predefine_net.sh # 加入预置网络的文本分类任务训练启动脚本
+├── run_cls.sh # 不使用预置网络（使用fc网络）的训练启动脚本
+├── run_predict_predefine_net.sh # 使用预置网络（使用fc网络）的预测启动脚本
+├── run_predict.sh # # 不使用预置网络（使用fc网络）的预测启动脚本
+├── text_classifier_dygraph.py # 动态图训练脚本
+├── text_cls_predefine_net.py # 加入预置网络训练脚本
+└── text_cls.py # 不使用预置网络（使用fc网络）的训练脚本
+
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用ERNIE对ChnSentiCorp数据集进行Fine-tune。
+以下例子已不使用预置网络完成文本分类任务，说明PaddleHub如何完成迁移学习。使用预置网络完成文本分类任务，步骤类似。
+
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_cls.sh`即可开始使用ERNIE对ChnSentiCorp数据集进行Fine-tune。
 
 其中脚本参数说明如下：
 
@@ -164,9 +184,26 @@ cls_task = hub.TextClassifierTask(
 cls_task.finetune_and_eval()
 ```
 **NOTE:**
-1. `outputs["pooled_output"]`返回了ERNIE/BERT模型对应的[CLS]向量,可以用于句子或句对的特征表达。
-2. `feed_list`中的inputs参数指名了ERNIE/BERT中的输入tensor的顺序，与ClassifyReader返回的结果一致。
+1. `outputs["pooled_output"]`返回了Transformer类预训练模型对应的[CLS]向量,可以用于句子或句对的特征表达。
+2. `feed_list`中的inputs参数指名了Transformer类预训练模型中的输入tensor的顺序，与ClassifyReader返回的结果一致。
 3. `hub.TextClassifierTask`通过输入特征，label与迁移的类别数，可以生成适用于文本分类的迁移任务`TextClassifierTask`。
+4. 使用预置网络与否，传入`hub.TextClassifierTask`的特征不相同。`hub.TextClassifierTask`通过参数`feature`和`token_feature`区分。
+   `feature`应是sentence-level特征，shape应为[-1, emb_size]；`token_feature`是token-levle特征，shape应为[-1, max_seq_len, emb_size]。
+   如果使用预置网络，则应取Transformer类预训练模型的sequence_output特征(`outputs["sequence_output"]`)。并且`hub.TextClassifierTask(token_feature=outputs["sequence_output"])`。
+   如果不使用预置网络，直接通过fc网络进行分类，则应取Transformer类预训练模型的pooled_output特征(`outputs["pooled_output"]`)。并且`hub.TextClassifierTask(feature=outputs["pooled_output"])`。
+5. 使用预置网络，可以通过`hub.TextClassifierTask`参数network进行指定不同的网络结构。如下代码表示选择bilstm网络拼接在Transformer类预训练模型之后。
+   PaddleHub文本分类任务预置网络支持bow，bilstm，cnn，dpcnn，gru，lstm。指定network应是其中之一。
+```python
+cls_task = hub.TextClassifierTask(
+    data_reader=reader,
+    token_feature=outputs["pooled_output"],
+    feed_list=feed_list,
+    network='bilstm',
+    num_classes=dataset.num_labels,
+    config=config,
+    metrics_choices=metrics_choices)
+```
+
 
 #### 自定义迁移任务
 
@@ -190,29 +227,9 @@ python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
 其中CKPT_DIR为Fine-tune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*
 
-参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
-如需了解更多预测步骤，请参考`predict.py`。
+参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到文本分类预测结果。
 
-```
-这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般	predict=0
-交通方便；环境很好；服务态度很好 房间较小	predict=1
-19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~	predict=0
-```
-
-我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
-
-|预训练模型|任务类型|数据集|AIStudio链接|备注|
-|-|-|-|-|-|
-|ResNet|图像分类|猫狗数据集DogCat|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147010)||
-|ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147006)||
-|ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/221999)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成文本分类迁移学习。|
-|ERNIE|序列标注|中文序列标注数据集MSRA_NER|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147009)||
-|ERNIE|序列标注|中文快递单数据集Express|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/184200)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成序列标注迁移学习。|
-|ERNIE Tiny|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/186443)||
-|Senta|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216846)|本教程讲述了任何利用Senta和Fine-tune API完成情感分类迁移学习。|
-|Senta|情感分析预测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215814)||
-|LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215711)||
-|Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215962)||
+我们在AI Studio上提供了IPython NoteBook形式的demo，点击[PaddleHub教程合集](https://aistudio.baidu.com/aistudio/projectdetail/231146)，可使用AI Studio平台提供的GPU算力进行快速尝试。
 
 
 ## 超参优化AutoDL Finetuner
