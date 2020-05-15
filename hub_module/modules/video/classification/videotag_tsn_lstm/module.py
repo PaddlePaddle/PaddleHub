@@ -126,11 +126,10 @@ class VideoTag(hub.Module):
     @runnable
     def run_cmd(self, argsv):
         args = self.parser.parse_args(argsv)
-        results = self.classification(
-            paths=[args.input_path], use_gpu=args.use_gpu)
+        results = self.classify(paths=[args.input_path], use_gpu=args.use_gpu)
         return results
 
-    def classification(self, paths, use_gpu=False, threshold=0.5, top_k=10):
+    def classify(self, paths, use_gpu=False, threshold=0.5, top_k=10):
         """
         API of Classification.
 

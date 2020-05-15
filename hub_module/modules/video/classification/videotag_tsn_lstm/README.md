@@ -15,7 +15,7 @@ hub run videotag_tsn_lstm --input_path 1.mp4 --use_gpu False
 
 ## API
 ```python
-def classification(paths,
+def classify(paths,
                    use_gpu=False,
                    threshold=0.5,
                    top_k=10)
@@ -45,7 +45,7 @@ import paddlehub as hub
 videotag = hub.Module(name="videotag_tsn_lstm")
 
 # execute predict and print the result
-results = videotag.classification(paths=["1.mp4","2.mp4"], use_gpu=True)
+results = videotag.classify(paths=["1.mp4","2.mp4"], use_gpu=True)
 print(results)
 ```
 
