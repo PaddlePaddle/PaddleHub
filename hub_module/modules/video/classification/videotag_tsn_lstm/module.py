@@ -88,12 +88,9 @@ class VideoTag(hub.Module):
                 extractor_model.load_test_weights(exe, args.extractor_weights,
                                                   extractor_main_prog)
 
-                # get reader and metrics
-                extractor_reader = get_reader("TSN", 'infer',
-                                              extractor_infer_config)
                 extractor_feeder = fluid.DataFeeder(
                     place=place, feed_list=extractor_feeds)
-        return extractor_reader, extractor_main_prog, extractor_fetch_list, extractor_feeder, extractor_scope
+        return extractor_main_prog, extractor_fetch_list, extractor_feeder, extractor_scope
 
     def _predictor(self, args, exe, place):
         predictor_scope = fluid.Scope()
@@ -129,11 +126,10 @@ class VideoTag(hub.Module):
     @runnable
     def run_cmd(self, argsv):
         args = self.parser.parse_args(argsv)
-        results = self.classification(
-            paths=[args.input_path], use_gpu=args.use_gpu)
+        results = self.classify(paths=[args.input_path], use_gpu=args.use_gpu)
         return results
 
-    def classification(self, paths, use_gpu=False, threshold=0.5, top_k=10):
+    def classify(self, paths, use_gpu=False, threshold=0.5, top_k=10):
         """
         API of Classification.
 
@@ -169,15 +165,20 @@ class VideoTag(hub.Module):
             self.place = fluid.CUDAPlace(
                 0) if args.use_gpu else fluid.CPUPlace()
             self.exe = fluid.Executor(self.place)
-            self.extractor_reader, self.extractor_main_prog, self.extractor_fetch_list, self.extractor_feeder, self.extractor_scope = self._extractor(
+            self.extractor_main_prog, self.extractor_fetch_list, self.extractor_feeder, self.extractor_scope = self._extractor(
                 args, self.exe, self.place)
             self.predictor_main_prog, self.predictor_fetch_list, self.predictor_feeder, self.predictor_scope = self._predictor(
                 args, self.exe, self.place)
             self._has_load = True
 
+        extractor_config = parse_config(args.extractor_config)
+        extractor_infer_config = merge_configs(extractor_config, 'infer',
+                                               vars(args))
+        extractor_reader = get_reader("TSN", 'infer', extractor_infer_config)
         feature_list = []
         file_list = []
-        for idx, data in enumerate(self.extractor_reader()):
+
+        for idx, data in enumerate(extractor_reader()):
             file_id = [item[-1] for item in data]
             feed_data = [item[:-1] for item in data]
             feature_out = self.exe.run(
