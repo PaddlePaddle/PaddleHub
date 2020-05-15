@@ -46,8 +46,7 @@ videotag = hub.Module(name="videotag_tsn_lstm")
 
 # execute predict and print the result
 results = videotag.classification(paths=["1.mp4","2.mp4"], use_gpu=True)
-for result in results:
-    print(result)
+print(results)
 ```
 
 ## 依赖
