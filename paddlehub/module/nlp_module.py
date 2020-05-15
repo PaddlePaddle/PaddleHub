@@ -229,6 +229,9 @@ class _TransformerEmbeddingTask(hub.BaseTask):
         self.seq_feature = seq_feature
 
     def _build_net(self):
+        # ClassifyReader will return the seqence length of an input text
+        self.seq_len = fluid.layers.data(
+            name="seq_len", shape=[1], dtype='int64', lod_level=0)
         return [self.pooled_feature, self.seq_feature]
 
     def _postprocessing(self, run_states):
@@ -241,6 +244,18 @@ class _TransformerEmbeddingTask(hub.BaseTask):
                 results.append(
                     [batch_pooled_features[i], batch_seq_features[i]])
         return results
+
+    @property
+    def feed_list(self):
+        feed_list = [varname
+                     for varname in self._base_feed_list] + [self.seq_len.name]
+        return feed_list
+
+    @property
+    def fetch_list(self):
+        fetch_list = [output.name
+                      for output in self.outputs] + [self.seq_len.name]
+        return fetch_list
 
 
 class TransformerModule(NLPBaseModule):
