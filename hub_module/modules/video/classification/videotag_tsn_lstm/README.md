@@ -16,9 +16,9 @@ hub run videotag_tsn_lstm --input_path 1.mp4 --use_gpu False
 ## API
 ```python
 def classify(paths,
-                   use_gpu=False,
-                   threshold=0.5,
-                   top_k=10)
+             use_gpu=False,
+             threshold=0.5,
+             top_k=10)
 ```
 
 用于视频分类预测
