@@ -1,9 +1,7 @@
 ```shell
 $ hub install videotag_tsn_lstm==1.0.0
 ```
-<p align="center">
-<img src="https://paddlehub.bj.bcebos.com/model/video/video_classifcation/VideoTag_TSN_AttentionLSTM.png" hspace='10'/> <br />
-</p>
+![image](https://paddlehub.bj.bcebos.com/model/video/video_classifcation/VideoTag_TSN_AttentionLSTM.png)
 具体网络结构可参考论文[TSN](https://arxiv.org/abs/1608.00859)和[AttentionLSTM](https://arxiv.org/abs/1503.08909)。
 
 ## 命令行预测示例
