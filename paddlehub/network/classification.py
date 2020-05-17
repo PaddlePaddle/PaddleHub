@@ -77,7 +77,8 @@ def dpcnn(token_embeddings,
           emb_dim=1024,
           blocks=6):
     """
-    deepcnn net
+    deepcnn net implemented as ACL2017 'Deep Pyramid Convolutional Neural Networks for Text Categorization'
+    For more information, please refer to https://www.aclweb.org/anthology/P17-1052.pdf.
     """
 
     def _block(x):

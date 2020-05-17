@@ -18,7 +18,7 @@ parser.add_argument(
     default="mobilenet",
     help="Module used as feature extractor.")
 
-# the name of hyperparameters to be searched should keep with hparam.py
+# the name of hyper-parameters to be searched should keep with hparam.py
 parser.add_argument(
     "--batch_size",
     type=int,
@@ -27,7 +27,7 @@ parser.add_argument(
 parser.add_argument(
     "--learning_rate", type=float, default=1e-4, help="learning_rate.")
 
-# saved_params_dir and model_path are needed by auto finetune
+# saved_params_dir and model_path are needed by auto fine-tune
 parser.add_argument(
     "--saved_params_dir",
     type=str,
@@ -76,7 +76,7 @@ def finetune(args):
     img = input_dict["image"]
     feed_list = [img.name]
 
-    # Select finetune strategy, setup config and finetune
+    # Select fine-tune strategy, setup config and fine-tune
     strategy = hub.DefaultFinetuneStrategy(learning_rate=args.learning_rate)
     config = hub.RunConfig(
         use_cuda=True,
@@ -100,7 +100,7 @@ def finetune(args):
             task.load_parameters(args.model_path)
             logger.info("PaddleHub has loaded model from %s" % args.model_path)
 
-    # Finetune by PaddleHub's API
+    # Fine-tune by PaddleHub's API
     task.finetune()
     # Evaluate by PaddleHub's API
     run_states = task.eval()
@@ -114,7 +114,7 @@ def finetune(args):
         shutil.copytree(best_model_dir, args.saved_params_dir)
         shutil.rmtree(config.checkpoint_dir)
 
-    # acc on dev will be used by auto finetune
+    # acc on dev will be used by auto fine-tune
     hub.report_final_result(eval_avg_score["acc"])
 
 
