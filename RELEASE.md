@@ -1,3 +1,11 @@
+## `v1.6.2`
+
+* 修复图像分类在windows下运行错误
+
+## `v1.6.1`
+
+* 修复windows下安装PaddleHub缺失config.json文件
+
 # `v1.6.0`
 
 * NLP Module全面升级，提升应用性和灵活性
