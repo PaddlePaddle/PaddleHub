@@ -1,5 +1,5 @@
 name: chinese_ocr_db_rcnn
-dir: "modules/image/text_recognization/chinese_ocr_db_rcnn"
+dir: "modules/image/text_recognition/chinese_ocr_db_rcnn"
 exclude:
   - README.md
 
