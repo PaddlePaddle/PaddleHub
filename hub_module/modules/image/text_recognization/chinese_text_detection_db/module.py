@@ -77,7 +77,7 @@ class ChineseTextDetectionDB(hub.Module):
         try:
             import shapely, pyclipper
         except:
-            logger.warning(
+            logger.error(
                 'This module requires the shapely, pyclipper tools. The running enviroment does not meet the requirments. Please install the two packages.'
             )
             exit()
