@@ -28,7 +28,7 @@ from chinese_text_detection_db.processor import DBPreProcess, DBPostProcess, dra
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
-    type="cv/object_detection")
+    type="cv/text_recognization")
 class ChineseTextDetectionDB(hub.Module):
     def _initialize(self):
         """

@@ -30,7 +30,7 @@ from chinese_ocr_db_rcnn.utils import draw_ocr, get_image_ext, sorted_boxes
     "The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions based on the differentiable_binarization_chn module. Then it recognizes the chinese texts. ",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
-    type="cv/ocr")
+    type="cv/text_recognization")
 class ChineseOCRDBRCNN(hub.Module):
     def _initialize(self):
         """

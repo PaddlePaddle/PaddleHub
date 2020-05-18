@@ -1,5 +1,5 @@
 name: chinese_text_detection_db
-dir: "modules/image/ocr/chinese_text_detection_db"
+dir: "modules/image/text_recognization/chinese_text_detection_db"
 exclude:
   - README.md
 
