@@ -4,7 +4,7 @@ yapf == 0.26.0
 six >= 1.10.0
 flask >= 1.1.0
 flake8
-visualdl == 2.0.0a0
+visualdl == 2.0.0b1
 cma >= 2.7.0
 sentencepiece
 colorlog
