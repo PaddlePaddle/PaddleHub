@@ -25,18 +25,21 @@ class TestVideoTag(unittest.TestCase):
                 for top_k in [10, 1]:
                     expect1 = {}
                     expect2 = {}
-                    for key, value in default_expect1:
+                    for key, value in default_expect1.items():
                         if value >= threshold:
                             expect1[key] = value
                         if len(expect1.keys()) >= top_k:
                             break
-                    for key, value in default_expect2:
+                    for key, value in default_expect2.items():
                         if value >= threshold:
                             expect2[key] = value
                         if len(expect2.keys()) >= top_k:
                             break
                     results = self.module.classify(
-                        paths=self.test_video, use_gpu=use_gpu)
+                        paths=self.test_video,
+                        use_gpu=use_gpu,
+                        threshold=threshold,
+                        top_k=top_k)
                     for result in results:
                         if result['path'] == '1.mp4':
                             self.assertEqual(result['prediction'], expect1)
