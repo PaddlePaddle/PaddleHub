@@ -41,7 +41,7 @@ class TestVideoTag(unittest.TestCase):
                         threshold=threshold,
                         top_k=top_k)
                     for result in results:
-                        if result['path'] == '1.mp4':
+                        if '1.mp4' in result['path']:
                             self.assertEqual(result['prediction'], expect1)
                         else:
                             self.assertEqual(result['prediction'], expect2)
