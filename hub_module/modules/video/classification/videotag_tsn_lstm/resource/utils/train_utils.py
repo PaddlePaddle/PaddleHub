@@ -14,13 +14,12 @@
 
 import os
 import sys
+import logging
+
 import time
 import numpy as np
-import paddle
 import paddle.fluid as fluid
 from paddle.fluid import profiler
-import logging
-import shutil
 
 logger = logging.getLogger(__name__)
 

@@ -13,7 +13,6 @@
 #limitations under the License.
 
 import os
-import wget
 import logging
 try:
     from configparser import ConfigParser
@@ -21,7 +20,6 @@ except:
     from ConfigParser import ConfigParser
 
 import paddle.fluid as fluid
-from .utils import download, AttrDict
 
 WEIGHT_DIR = os.path.join(os.path.expanduser('~'), '.paddle', 'weights')
 
@@ -103,21 +101,6 @@ class ModelBase(object):
         "get model weight default path and download url"
         raise NotImplementError(self, self.weights_info)
 
-    def get_weights(self):
-        "get model weight file path, download weight from Paddle if not exist"
-        path, url = self.weights_info()
-        path = os.path.join(WEIGHT_DIR, path)
-        if not os.path.isdir(WEIGHT_DIR):
-            logger.info('{} not exists, will be created automatically.'.format(
-                WEIGHT_DIR))
-            os.makedirs(WEIGHT_DIR)
-        if os.path.exists(path):
-            return path
-
-        logger.info("Download weights of {} from {}".format(self.name, url))
-        wget.download(url, path)
-        return path
-
     def dataloader(self):
         return self.dataloader
 
@@ -128,25 +111,6 @@ class ModelBase(object):
     def pretrain_info(self):
         "get pretrain base model directory"
         return (None, None)
-
-    def get_pretrain_weights(self):
-        "get model weight file path, download weight from Paddle if not exist"
-        path, url = self.pretrain_info()
-        if not path:
-            return None
-
-        path = os.path.join(WEIGHT_DIR, path)
-        if not os.path.isdir(WEIGHT_DIR):
-            logger.info('{} not exists, will be created automatically.'.format(
-                WEIGHT_DIR))
-            os.makedirs(WEIGHT_DIR)
-        if os.path.exists(path):
-            return path
-
-        logger.info("Download pretrain weights of {} from {}".format(
-            self.name, url))
-        download(url, path)
-        return path
 
     def load_pretrain_params(self, exe, pretrain, prog, place):
         logger.info("Load pretrain weights from {}".format(pretrain))
