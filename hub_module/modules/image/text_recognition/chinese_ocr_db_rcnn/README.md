@@ -18,7 +18,7 @@ $ hub run chinese_ocr_db_rcnn --input_path "/PATH/TO/IMAGE"
 ## API
 
 ```python
-def recognize_texts(images=[],
+def recognize_text(images=[],
                     paths=[],
                     use_gpu=False,
                     output_dir='ocr_result',
