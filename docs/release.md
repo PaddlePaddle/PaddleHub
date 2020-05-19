@@ -1,5 +1,17 @@
 # 更新历史
 
+## `v1.7.0`
+
+* 丰富预训练模型，提升应用性
+  * 新增VENUS系列视觉预训练模型[yolov3_darknet53_venus](https://www.paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_venus&en_category=ObjectDetection)，[faster_rcnn_resnet50_fpn_venus](https://www.paddlepaddle.org.cn/hubdetail?name=faster_rcnn_resnet50_fpn_venus&en_category=ObjectDetection)，可大幅度提升图像分类和目标检测任务的FIne-tune效果
+  * 新增工业级短视频分类模型[videotag_tsn_lstm](https://paddlepaddle.org.cn/hubdetail?name=videotag_tsn_lstm&en_category=VideoClassification)，支持3000类中文标签识别
+  * 新增轻量级中文OCR模型[chinese_ocr_db_rcnn](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_ocr_db_rcnn&en_category=TextRecognition)、[chinese_text_detection_db](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db&en_category=TextRecognition)，支持一键快速OCR识别
+  * 新增行人检测、车辆检测、动物识别、Object等工业级模型
+  
+* Fine-tune API升级
+  * 文本分类任务新增6个预置网络，包括CNN, BOW, LSTM, BiLSTM, DPCNN等 
+  * 使用VisualDL可视化训练评估性能数据
+
 ## `v1.6.2`
 
 * 修复图像分类在windows下运行错误
