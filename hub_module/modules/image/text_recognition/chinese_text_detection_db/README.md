@@ -15,7 +15,7 @@ Differentiable Binarization（简称DB）是一种基于分割的文本检测算
 $ hub run chinese_text_detection_db --input_path "/PATH/TO/IMAGE"
 ```
 
-**该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先按照shapely和pyclipper。**
+**该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**
 
 ## API
 
