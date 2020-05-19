@@ -55,7 +55,7 @@ text_detector = hub.Module(name="chinese_text_detection_db")
 result = text_detector.detect_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
 # or
-# result =text_detector.face_detection(paths=['/PATH/TO/IMAGE'])
+# result =text_detector.detect_text(paths=['/PATH/TO/IMAGE'])
 ```
 
 

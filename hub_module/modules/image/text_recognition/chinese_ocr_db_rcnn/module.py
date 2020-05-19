@@ -19,8 +19,6 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
-import sys
-sys.path.append('..')
 from chinese_ocr_db_rcnn.character import CharacterOps
 from chinese_ocr_db_rcnn.utils import draw_ocr, get_image_ext, sorted_boxes
 
@@ -152,14 +150,14 @@ class ChineseOCRDBRCNN(hub.Module):
         return padding_im
 
     @serving
-    def recognize_texts(self,
-                        images=[],
-                        paths=[],
-                        use_gpu=False,
-                        output_dir='ocr_result',
-                        visualization=False,
-                        box_thresh=0.5,
-                        text_thresh=0.5):
+    def recognize_text(self,
+                       images=[],
+                       paths=[],
+                       use_gpu=False,
+                       output_dir='ocr_result',
+                       visualization=False,
+                       box_thresh=0.5,
+                       text_thresh=0.5):
         """
         Get the chinese texts in the predicted images.
         Args:
@@ -413,6 +411,6 @@ if __name__ == '__main__':
     image_path = [
         '../doc/imgs/11.jpg', '../doc/imgs/12.jpg', '../test_image.jpg'
     ]
-    res = ocr.recognize_texts(paths=image_path, visualization=True)
+    res = ocr.recognize_text(paths=image_path, visualization=True)
     ocr.save_inference_model('save')
     print(res)

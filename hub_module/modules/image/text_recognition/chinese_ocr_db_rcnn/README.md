@@ -56,10 +56,10 @@ import paddlehub as hub
 import cv2
 
 ocr = hub.Module(name="chinese_ocr_db_rcnn")
-result = ocr.recognize_texts(images=[cv2.imread('/PATH/TO/IMAGE')])
+result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
 # or
-# result = ocr.recognize_texts(paths=['/PATH/TO/IMAGE'])
+# result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
 ```
 
 * 样例结果示例

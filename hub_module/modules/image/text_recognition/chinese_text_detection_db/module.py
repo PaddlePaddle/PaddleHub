@@ -18,8 +18,6 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
-import sys
-sys.path.append('..')
 from chinese_text_detection_db.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
 
 

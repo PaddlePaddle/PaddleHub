@@ -28,13 +28,13 @@ class ChineseOCRDBRCNNTestCase(TestCase):
         ]
 
     def test_detect_text(self):
-        results_1 = self.module.recognize_texts(
+        results_1 = self.module.recognize_text(
             paths=self.test_images, use_gpu=True)
-        results_2 = self.module.recognize_texts(
+        results_2 = self.module.recognize_text(
             paths=self.test_images, use_gpu=False)
 
         test_images = [cv2.imread(img) for img in self.test_images]
-        results_3 = self.module.recognize_texts(
+        results_3 = self.module.recognize_text(
             images=test_images, use_gpu=False)
         for i, res in enumerate(results_1):
             self.assertEqual(res['save_path'], '')
