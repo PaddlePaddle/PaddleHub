@@ -43,7 +43,7 @@ def detect_text(paths=[],
 
 * res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
     * data (list): 检测文本框结果，numpy.ndarray，表示检测得到的文本框在图片当中的位置
-    * save_path (str): 识别结果的保存路径, 如不保存图片则save_path为\'\'
+    * save_path (str): 识别结果的保存路径, 如不保存图片则save_path为''
 
 ### 代码示例
 
@@ -52,10 +52,10 @@ import paddlehub as hub
 import cv2
 
 text_detector = hub.Module(name="chinese_text_detection_db")
-
 result = text_detector.detect_text(images=[cv2.imread('/PATH/TO/IMAGE')])
+
 # or
-# result = mask_detector.face_detection(paths=['/PATH/TO/IMAGE'])
+# result =text_detector.face_detection(paths=['/PATH/TO/IMAGE'])
 ```
 
 
@@ -84,11 +84,9 @@ import json
 import cv2
 import base64
 
-
 def cv2_to_base64(image):
     data = cv2.imencode('.jpg', image)[1]
     return base64.b64encode(data.tostring()).decode('utf8')
-
 
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}

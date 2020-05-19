@@ -1,6 +1,6 @@
 ## 概述
 
-chinese_ocr_db_rcnn Module用于识别图片当中的汉字。其基于chinese_text_detection_db Module检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module支持直接预测。
+chinese_ocr_db_rcnn Module用于识别图片当中的汉字。其基于[chinese_text_detection_db Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module支持直接预测。
 
 
 <p align="center">
@@ -18,13 +18,13 @@ $ hub run chinese_ocr_db_rcnn --input_path "/PATH/TO/IMAGE"
 ## API
 
 ```python
-def recognize_texts(paths=[],
-                          images=[],
-                          use_gpu=False,
-                          output_dir='detection_result',
-                          box_thresh=0.5,
-                          text_thresh=0.5,
-                          visualization=False)
+def recognize_texts(images=[],
+                    paths=[],
+                    use_gpu=False,
+                    output_dir='ocr_result',
+                    visualization=False,
+                    box_thresh=0.5,
+                    text_thresh=0.5)
 ```
 
 预测API，检测输入图片中的所有中文文本的位置。
@@ -47,7 +47,7 @@ def recognize_texts(paths=[],
         * confidence(float): 识别文本结果置信度
         * text_box_position(numpy.ndarray): 文本框在原图中的像素坐标
       如果无识别结果则data为\[\]
-    * save_path (str, optional): 识别结果的保存路径，如不保存图片则save_path为\'\'
+    * save_path (str, optional): 识别结果的保存路径，如不保存图片则save_path为''
 
 ### 代码示例
 
@@ -56,8 +56,8 @@ import paddlehub as hub
 import cv2
 
 ocr = hub.Module(name="chinese_ocr_db_rcnn")
-
 result = ocr.recognize_texts(images=[cv2.imread('/PATH/TO/IMAGE')])
+
 # or
 # result = ocr.recognize_texts(paths=['/PATH/TO/IMAGE'])
 ```
@@ -65,14 +65,14 @@ result = ocr.recognize_texts(images=[cv2.imread('/PATH/TO/IMAGE')])
 * 样例结果示例
 
 <p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.png" hspace='10'/> <br />
+<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg" hspace='10'/> <br />
 </p>
 
 ## 服务部署
 
 PaddleHub Serving 可以部署一个目标检测的在线服务。
 
-## 第一步：启动PaddleHub Serving
+### 第一步：启动PaddleHub Serving
 
 运行启动命令：
 ```shell
@@ -83,7 +83,7 @@ $ hub serving start -m chinese_ocr_db_rcnn
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 
-## 第二步：发送预测请求
+### 第二步：发送预测请求
 
 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
@@ -93,11 +93,9 @@ import json
 import cv2
 import base64
 
-
 def cv2_to_base64(image):
     data = cv2.imencode('.jpg', image)[1]
     return base64.b64encode(data.tostring()).decode('utf8')
-
 
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
