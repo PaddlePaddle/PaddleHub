@@ -42,7 +42,7 @@ def detect_text(paths=[],
 **返回**
 
 * res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
-    * data (list): 检测文本框结果，numpy.ndarray，表示检测得到的文本框在图片当中的位置
+    * data (list): 检测文本框结果，numpy.ndarray，文本框在原图中的像素坐标，4*2的矩阵，依次表示文本框左下、右下、右上、左上顶点的坐标
     * save_path (str): 识别结果的保存路径, 如不保存图片则save_path为''
 
 ### 代码示例
