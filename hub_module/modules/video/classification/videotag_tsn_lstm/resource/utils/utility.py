@@ -16,7 +16,7 @@ import os
 import sys
 import signal
 import logging
-import paddle
+
 import paddle.fluid as fluid
 
 __all__ = ['AttrDict']

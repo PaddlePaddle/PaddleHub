@@ -12,7 +12,7 @@
 #See the License for the specific language governing permissions and
 #limitations under the License.
 
-import numpy as np
+import logging
 
 import paddle.fluid as fluid
 from paddle.fluid import ParamAttr
@@ -20,10 +20,8 @@ from paddle.fluid import ParamAttr
 from ..model import ModelBase
 from .lstm_attention import LSTMAttentionModel
 
-import logging
-logger = logging.getLogger(__name__)
-
 __all__ = ["AttentionLSTM"]
+logger = logging.getLogger(__name__)
 
 
 class AttentionLSTM(ModelBase):
@@ -51,7 +49,6 @@ class AttentionLSTM(ModelBase):
             self.feature_input.append(
                 fluid.data(
                     shape=[None, dim], lod_level=1, dtype='float32', name=name))
-#        self.label_input = None
         if use_dataloader:
             assert self.mode != 'infer', \
                     'dataloader is not recommendated when infer, please set use_dataloader to be false.'
@@ -138,15 +135,6 @@ class AttentionLSTM(ModelBase):
         )
 
     def load_pretrain_params(self, exe, pretrain, prog, place):
-        #def is_parameter(var):
-        #    return isinstance(var, fluid.framework.Parameter)
-
-        #params_list = list(filter(is_parameter, prog.list_vars()))
-        #for param in params_list:
-        #    print(param.name)
-
-        #assert False, "stop here"
-
         logger.info(
             "Load pretrain weights from {}, exclude fc layer.".format(pretrain))
 
@@ -159,18 +147,3 @@ class AttentionLSTM(ModelBase):
                     'Delete {} from pretrained parameters. Do not load it'.
                     format(name))
         fluid.set_program_state(prog, state_dict)
-
-
-#    def load_test_weights(self, exe, weights, prog):
-#        def is_parameter(var):
-#            return isinstance(var, fluid.framework.Parameter)
-#        params_list = list(filter(is_parameter, prog.list_vars()))
-
-#        state_dict = np.load(weights)
-#        for p in params_list:
-#            if p.name in state_dict.keys():
-#                logger.info('########### load param {} from file'.format(p.name))
-#            else:
-#                logger.info('----------- param {} not in file'.format(p.name))
-#        fluid.set_program_state(prog, state_dict)
-#        fluid.save(prog, './weights/attention_lstm')

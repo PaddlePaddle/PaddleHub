@@ -11,23 +11,22 @@
 #WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #See the License for the specific language governing permissions and
 #limitations under the License.
-
-import os
 import sys
-import cv2
-import math
+
 import random
 import functools
+import logging
 try:
     import cPickle as pickle
     from cStringIO import StringIO
 except ImportError:
     import pickle
     from io import BytesIO
-import numpy as np
+
 import paddle
-from PIL import Image, ImageEnhance
-import logging
+import cv2
+import numpy as np
+from PIL import Image
 
 from .reader_utils import DataReader
 

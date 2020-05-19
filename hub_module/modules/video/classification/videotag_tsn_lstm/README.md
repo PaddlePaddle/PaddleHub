@@ -51,7 +51,7 @@ print(results)
 
 ## 依赖
 
-paddlepaddle >= 1.6.2
+paddlepaddle >= 1.7.2
 
 paddlehub >= 1.6.0
 

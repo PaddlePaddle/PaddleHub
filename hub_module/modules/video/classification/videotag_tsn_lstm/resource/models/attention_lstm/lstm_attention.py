@@ -11,10 +11,8 @@
 #WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #See the License for the specific language governing permissions and
 #limitations under the License.
-
 import paddle.fluid as fluid
 from paddle.fluid import ParamAttr
-import numpy as np
 
 
 class LSTMAttentionModel(object):
@@ -39,15 +37,6 @@ class LSTMAttentionModel(object):
                 initializer=fluid.initializer.NormalInitializer(scale=0.0)),
             name='rgb_fc')
 
-        #lstm_forward_fc = fluid.layers.fc(
-        #    input=input_fc,
-        #    size=self.lstm_size * 4,
-        #    act=None,
-        #    bias_attr=ParamAttr(
-        #        regularizer=fluid.regularizer.L2Decay(0.0),
-        #        initializer=fluid.initializer.NormalInitializer(scale=0.0)),
-        #    name='rgb_fc_forward')
-
         lstm_forward_fc = fluid.layers.fc(
             input=input_fc,
             size=self.lstm_size * 4,
@@ -60,15 +49,6 @@ class LSTMAttentionModel(object):
             size=self.lstm_size * 4,
             is_reverse=False,
             name='rgb_lstm_forward')
-
-        #lsmt_backward_fc = fluid.layers.fc(
-        #    input=input_fc,
-        #    size=self.lstm_size * 4,
-        #    act=None,
-        #    bias_attr=ParamAttr(
-        #        regularizer=fluid.regularizer.L2Decay(0.0),
-        #        initializer=fluid.initializer.NormalInitializer(scale=0.0)),
-        #    name='rgb_fc_backward')
 
         lsmt_backward_fc = fluid.layers.fc(
             input=input_fc,
@@ -90,15 +70,6 @@ class LSTMAttentionModel(object):
             x=lstm_concat,
             dropout_prob=self.drop_rate,
             is_test=(not is_training))
-
-        #lstm_weight = fluid.layers.fc(
-        #    input=lstm_dropout,
-        #    size=1,
-        #    act='sequence_softmax',
-        #    bias_attr=ParamAttr(
-        #        regularizer=fluid.regularizer.L2Decay(0.0),
-        #        initializer=fluid.initializer.NormalInitializer(scale=0.0)),
-        #    name='rgb_weight')
 
         lstm_weight = fluid.layers.fc(
             input=lstm_dropout,
