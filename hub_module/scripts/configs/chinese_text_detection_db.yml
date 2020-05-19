@@ -1,0 +1,10 @@
+name: chinese_text_detection_db
+dir: "modules/image/text_recognition/chinese_text_detection_db"
+exclude:
+  - README.md
+
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/image/ocr/chinese_text_detection_db_infer_model.tar.gz
+    dest: .
+    uncompress: True
