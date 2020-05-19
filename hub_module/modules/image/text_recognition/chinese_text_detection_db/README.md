@@ -1,6 +1,6 @@
 ## 概述
 
-Differentiable Binarization（简称DB）是一种基于分割的文本检测算法。在各种文本检测算法中，基于分割的检测算法可以更好地处理弯曲等不规则形状文本，因此往往能取得更好的检测效果。但分割法后处理步骤中将分割结果转化为检测框的流程复杂，耗时严重。DB将二值化阈值加入训练中学习，可以获得更准确的检测边界，从而简化后处理流程。该Module支持直接预测。该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。
+Differentiable Binarization（简称DB）是一种基于分割的文本检测算法。在各种文本检测算法中，基于分割的检测算法可以更好地处理弯曲等不规则形状文本，因此往往能取得更好的检测效果。但分割法后处理步骤中将分割结果转化为检测框的流程复杂，耗时严重。DB将二值化阈值加入训练中学习，可以获得更准确的检测边界，从而简化后处理流程。该Module支持直接预测。
 
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/db_algo.png" hspace='10'/> <br />
@@ -43,9 +43,7 @@ def detect_text(paths=[],
 
 * res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
     * data (list): 检测文本框结果，numpy.ndarray，表示检测得到的文本框在图片当中的位置
-    * path (str): 识别结果的保存路径, 如不保存图片则path为''
-
-**该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先按照shapely和pyclipper。**
+    * save_path (str): 识别结果的保存路径, 如不保存图片则save_path为\'\'
 
 ### 代码示例
 
@@ -108,7 +106,7 @@ https://github.com/PaddlePaddle/PaddleOCR
 
 ## 依赖
 
-paddlepaddle >= 1.7.1
+paddlepaddle >= 1.7.2
 
 paddlehub >= 1.6.0
 

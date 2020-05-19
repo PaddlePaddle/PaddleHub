@@ -18,7 +18,7 @@ $ hub run chinese_ocr_db_rcnn --input_path "/PATH/TO/IMAGE"
 ## API
 
 ```python
-def convert_image_to_text(paths=[],
+def recognize_texts(paths=[],
                           images=[],
                           use_gpu=False,
                           output_dir='detection_result',
@@ -42,8 +42,12 @@ def convert_image_to_text(paths=[],
 **返回**
 
 * res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
-    * data (list): 识别得到的文本以及相应的置信度
-    * path (str, optional): 识别结果的保存路径，如不保存图片则path为''
+    * data (list\[dict\]): 识别文本结果，列表中每一个元素为 dict，各字段为：
+        * text(str): 识别得到的文本
+        * confidence(float): 识别文本结果置信度
+        * text_box_position(numpy.ndarray): 文本框在原图中的像素坐标
+      如果无识别结果则data为\[\]
+    * save_path (str, optional): 识别结果的保存路径，如不保存图片则save_path为\'\'
 
 ### 代码示例
 
@@ -53,9 +57,9 @@ import cv2
 
 ocr = hub.Module(name="chinese_ocr_db_rcnn")
 
-result = ocr.convert_image_to_text(images=[cv2.imread('/PATH/TO/IMAGE')])
+result = ocr.recognize_texts(images=[cv2.imread('/PATH/TO/IMAGE')])
 # or
-# result = ocr.convert_image_to_text(paths=['/PATH/TO/IMAGE'])
+# result = ocr.recognize_texts(paths=['/PATH/TO/IMAGE'])
 ```
 
 * 样例结果示例
@@ -111,7 +115,7 @@ https://github.com/PaddlePaddle/PaddleOCR
 
 ### 依赖
 
-paddlepaddle >= 1.7.1
+paddlepaddle >= 1.7.2
 
 paddlehub >= 1.6.0
 

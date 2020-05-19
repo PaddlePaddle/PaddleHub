@@ -18,6 +18,8 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
+import sys
+sys.path.append('..')
 from chinese_text_detection_db.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
 
 
@@ -185,10 +187,10 @@ class ChineseTextDetectionDB(hub.Module):
         all_results = []
         for original_image in predicted_data:
             im, ratio_list = preprocessor(original_image)
-            res = {}
+            res = {'save_path': ''}
             if im is None:
                 res['data'] = []
-                res['path'] = ''
+
             else:
                 im = im.copy()
                 starttime = time.time()
@@ -199,7 +201,6 @@ class ChineseTextDetectionDB(hub.Module):
                 boxes = self.filter_tag_det_res(dt_boxes_list[0],
                                                 original_image.shape)
                 res['data'] = boxes
-                res['path'] = ''
 
                 all_imgs.append(im)
                 all_ratios.append(ratio_list)
@@ -215,11 +216,39 @@ class ChineseTextDetectionDB(hub.Module):
                     cv2.imwrite(
                         os.path.join(output_dir, saved_name),
                         draw_img[:, :, ::-1])
-                    res['path'] = os.path.join(output_dir, saved_name)
+                    res['save_path'] = os.path.join(output_dir, saved_name)
 
             all_results.append(res)
 
         return all_results
+
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
+        if combined:
+            model_filename = "__model__" if not model_filename else model_filename
+            params_filename = "__params__" if not params_filename else params_filename
+        place = fluid.CPUPlace()
+        exe = fluid.Executor(place)
+
+        model_file_path = os.path.join(self.pretrained_model_path, 'model')
+        params_file_path = os.path.join(self.pretrained_model_path, 'params')
+        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+            dirname=self.pretrained_model_path,
+            model_filename=model_file_path,
+            params_filename=params_file_path,
+            executor=exe)
+
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     @runnable
     def run_cmd(self, argvs):
@@ -280,6 +309,7 @@ class ChineseTextDetectionDB(hub.Module):
 
 if __name__ == '__main__':
     db = ChineseTextDetectionDB()
-    image_path = ['./doc/imgs/11.jpg', './doc/imgs/12.jpg']
+    image_path = ['../doc/imgs/11.jpg', '../doc/imgs/12.jpg']
     res = db.detect_text(paths=image_path, visualization=True)
+    db.save_inference_model('save')
     print(res)

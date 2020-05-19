@@ -19,6 +19,8 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
+import sys
+sys.path.append('..')
 from chinese_ocr_db_rcnn.character import CharacterOps
 from chinese_ocr_db_rcnn.utils import draw_ocr, get_image_ext, sorted_boxes
 
@@ -32,7 +34,7 @@ from chinese_ocr_db_rcnn.utils import draw_ocr, get_image_ext, sorted_boxes
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
 class ChineseOCRDBRCNN(hub.Module):
-    def _initialize(self):
+    def _initialize(self, text_detector_module=None):
         """
         initialize with the necessary elements
         """
@@ -45,7 +47,7 @@ class ChineseOCRDBRCNN(hub.Module):
         }
         self.char_ops = CharacterOps(char_ops_params)
         self.rec_image_shape = [3, 32, 320]
-        self._text_detect_module = None
+        self._text_detector_module = text_detector_module
         self.font_file = os.path.join(self.directory, 'assets', 'simfang.ttf')
         self.pretrained_model_path = os.path.join(self.directory,
                                                   'inference_model')
@@ -86,14 +88,14 @@ class ChineseOCRDBRCNN(hub.Module):
             self.output_tensors.append(output_tensor)
 
     @property
-    def text_detect_module(self):
+    def text_detector_module(self):
         """
         text detect module
         """
-        if not self._text_detect_module:
-            self._text_detect_module = hub.Module(
+        if not self._text_detector_module:
+            self._text_detector_module = hub.Module(
                 name='chinese_text_detection_db')
-        return self._text_detect_module
+        return self._text_detector_module
 
     def read_images(self, paths=[]):
         images = []
@@ -150,14 +152,14 @@ class ChineseOCRDBRCNN(hub.Module):
         return padding_im
 
     @serving
-    def convert_image_to_text(self,
-                              images=[],
-                              paths=[],
-                              use_gpu=False,
-                              output_dir='ocr_result',
-                              visualization=False,
-                              box_thresh=0.5,
-                              text_thresh=0.5):
+    def recognize_texts(self,
+                        images=[],
+                        paths=[],
+                        use_gpu=False,
+                        output_dir='ocr_result',
+                        visualization=False,
+                        box_thresh=0.5,
+                        text_thresh=0.5):
         """
         Get the chinese texts in the predicted images.
         Args:
@@ -192,13 +194,13 @@ class ChineseOCRDBRCNN(hub.Module):
 
         assert predicted_data != [], "There is not any image to be predicted. Please check the input data."
 
-        detection_results = self.text_detect_module.detect_text(
+        detection_results = self.text_detector_module.detect_text(
             images=predicted_data, use_gpu=self.use_gpu, box_thresh=box_thresh)
         boxes = [item['data'] for item in detection_results]
         all_results = []
         for index, img_boxes in enumerate(boxes):
             original_image = predicted_data[index].copy()
-            result = {'path': ''}
+            result = {'save_path': ''}
             if img_boxes is None:
                 result['data'] = []
             else:
@@ -210,17 +212,21 @@ class ChineseOCRDBRCNN(hub.Module):
                         original_image, tmp_box)
                     img_crop_list.append(img_crop)
 
-                rec_results = self.recognize_texts(img_crop_list)
+                rec_results = self._recognize_text(img_crop_list)
                 # if the recognized text confidence score is lower than text_thresh, then drop it
                 rec_res_final = []
-                for res in rec_results:
+                for index, res in enumerate(rec_results):
                     text, score = res
                     if score >= text_thresh:
-                        rec_res_final.append(res)
+                        rec_res_final.append({
+                            'text': text,
+                            'confidence': score,
+                            'text_box_position': boxes[index]
+                        })
                 result['data'] = rec_res_final
 
                 if visualization and result['data']:
-                    result['path'] = self.save_result_image(
+                    result['save_path'] = self.save_result_image(
                         original_image, boxes, rec_results, output_dir,
                         text_thresh)
             all_results.append(result)
@@ -253,7 +259,7 @@ class ChineseOCRDBRCNN(hub.Module):
         cv2.imwrite(save_file_path, draw_img[:, :, ::-1])
         return save_file_path
 
-    def recognize_texts(self, image_list):
+    def _recognize_text(self, image_list):
         img_num = len(image_list)
         batch_num = 30
         rec_res = []
@@ -295,6 +301,56 @@ class ChineseOCRDBRCNN(hub.Module):
 
         return rec_res
 
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
+        detector_dir = os.path.join(dirname, 'text_detector')
+        recognizer_dir = os.path.join(dirname, 'text_recognizer')
+        self._save_detector_model(detector_dir, model_filename, params_filename,
+                                  combined)
+        self._save_recognizer_model(recognizer_dir, model_filename,
+                                    params_filename, combined)
+        logger.info("The inference model has been saved in the path {}".format(
+            os.path.realpath(dirname)))
+
+    def _save_detector_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
+        self.text_detector_module.save_inference_model(
+            dirname, model_filename, params_filename, combined)
+
+    def _save_recognizer_model(self,
+                               dirname,
+                               model_filename=None,
+                               params_filename=None,
+                               combined=True):
+        if combined:
+            model_filename = "__model__" if not model_filename else model_filename
+            params_filename = "__params__" if not params_filename else params_filename
+        place = fluid.CPUPlace()
+        exe = fluid.Executor(place)
+
+        model_file_path = os.path.join(self.pretrained_model_path, 'model')
+        params_file_path = os.path.join(self.pretrained_model_path, 'params')
+        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+            dirname=self.pretrained_model_path,
+            model_filename=model_file_path,
+            params_filename=params_file_path,
+            executor=exe)
+
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
+
     @runnable
     def run_cmd(self, argvs):
         """
@@ -317,7 +373,7 @@ class ChineseOCRDBRCNN(hub.Module):
         self.add_module_input_arg()
 
         args = self.parser.parse_args(argvs)
-        results = self.convert_image_to_text(
+        results = self.recognize_texts(
             paths=[args.input_path],
             use_gpu=args.use_gpu,
             output_dir=args.output_dir,
@@ -357,5 +413,6 @@ if __name__ == '__main__':
     image_path = [
         '../doc/imgs/11.jpg', '../doc/imgs/12.jpg', '../test_image.jpg'
     ]
-    res = ocr.convert_image_to_text(paths=image_path, visualization=True)
+    res = ocr.recognize_texts(paths=image_path, visualization=True)
+    ocr.save_inference_model('save')
     print(res)
