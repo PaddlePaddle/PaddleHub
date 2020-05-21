@@ -5,7 +5,8 @@
 **PaddleHub 1.7.0以上版本支持在Transformer类预训练模型之后拼接预置网络(bow, bilstm, cnn, dpcnn, gru, lstm)完成文本分类任务**
 
 ## 目录结构
-.
+```
+text_classification
 ├── finetuned_model_to_module # PaddleHub Fine-tune得到模型如何转化为module，从而利用PaddleHub Serving部署
 │   ├── __init__.py
 │   └── module.py
@@ -19,6 +20,7 @@
 ├── text_classifier_dygraph.py # 动态图训练脚本
 ├── text_cls_predefine_net.py # 加入预置网络训练脚本
 └── text_cls.py # 不使用预置网络（使用fc网络）的训练脚本
+```
 
 ## 如何开始Fine-tune
 
