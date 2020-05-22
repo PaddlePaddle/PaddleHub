@@ -22,7 +22,7 @@ import paddle.fluid as fluid
 
 def bilstm(token_embeddings, hid_dim=128, hid_dim2=96):
     """
-    bilstm net
+    BiLSTM network.
     """
     fc0 = fluid.layers.fc(input=token_embeddings, size=hid_dim * 4)
     rfc0 = fluid.layers.fc(input=token_embeddings, size=hid_dim * 4)
@@ -44,7 +44,7 @@ def bilstm(token_embeddings, hid_dim=128, hid_dim2=96):
 
 def bow(token_embeddings, hid_dim=128, hid_dim2=96):
     """
-    bow net
+    BOW network.
     """
     # bow layer
     bow = fluid.layers.sequence_pool(input=token_embeddings, pool_type='sum')
@@ -57,7 +57,7 @@ def bow(token_embeddings, hid_dim=128, hid_dim2=96):
 
 def cnn(token_embeddings, hid_dim=128, win_size=3):
     """
-    cnn net
+    CNN network.
     """
     # cnn layer
     conv = fluid.nets.sequence_conv_pool(
@@ -77,7 +77,7 @@ def dpcnn(token_embeddings,
           emb_dim=1024,
           blocks=6):
     """
-    deepcnn net implemented as ACL2017 'Deep Pyramid Convolutional Neural Networks for Text Categorization'
+    Deep Pyramid Convolutional Neural Networks is implemented as ACL2017 'Deep Pyramid Convolutional Neural Networks for Text Categorization'
     For more information, please refer to https://www.aclweb.org/anthology/P17-1052.pdf.
     """
 
@@ -111,7 +111,7 @@ def dpcnn(token_embeddings,
 
 def gru(token_embeddings, hid_dim=128, hid_dim2=96):
     """
-    gru net
+    GRU network.
     """
     fc0 = fluid.layers.fc(input=token_embeddings, size=hid_dim * 3)
     gru_h = fluid.layers.dynamic_gru(input=fc0, size=hid_dim, is_reverse=False)
@@ -123,7 +123,7 @@ def gru(token_embeddings, hid_dim=128, hid_dim2=96):
 
 def lstm(token_embeddings, hid_dim=128, hid_dim2=96):
     """
-    lstm net
+    LSTM network.
     """
     # lstm layer
     fc0 = fluid.layers.fc(input=token_embeddings, size=hid_dim * 4)

@@ -195,6 +195,7 @@ cls_task.finetune_and_eval()
    如果不使用预置网络，直接通过fc网络进行分类，则应取Transformer类预训练模型的pooled_output特征(`outputs["pooled_output"]`)。并且`hub.TextClassifierTask(feature=outputs["pooled_output"])`。
 5. 使用预置网络，可以通过`hub.TextClassifierTask`参数network进行指定不同的网络结构。如下代码表示选择bilstm网络拼接在Transformer类预训练模型之后。
    PaddleHub文本分类任务预置网络支持BOW，Bi-LSTM，CNN，DPCNN，GRU，LSTM。指定network应是其中之一。
+   其中DPCNN网络实现为[ACL2017-Deep Pyramid Convolutional Neural Networks for Text Categorization](https://www.aclweb.org/anthology/P17-1052.pdf)。
 ```python
 cls_task = hub.TextClassifierTask(
     data_reader=reader,
