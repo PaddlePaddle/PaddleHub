@@ -67,6 +67,18 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 
 安装PaddleHub后，执行命令[hub run](./docs/tutorial/cmdintro.md)，即可快速体验无需代码、一键预测的功能：
 
+* 使用[文字识别](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=TextRecognition)轻量级中文OCR模型chinese_ocr_db_rcnn即可一键快速识别图片中的文字。
+```shell
+$ wget https://paddlehub.bj.bcebos.com/model/image/ocr/test_ocr.jpg
+$ hub run chinese_ocr_db_rcnn --input_path test_ocr.jpg --visualization=True
+```
+
+预测结果图片保存在当前运行路径下ocr_result文件夹中，如下图所示。
+
+<p align="center">
+ <img src="./docs/imgs/ocr_res.jpg" width='70%' align="middle"  
+</p>
+
 * 使用[目标检测](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ObjectDetection)模型pyramidbox_lite_mobile_mask对图片进行口罩检测
 ```shell
 $ wget https://paddlehub.bj.bcebos.com/resources/test_mask_detection.jpg
