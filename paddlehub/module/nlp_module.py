@@ -319,8 +319,6 @@ class TransformerModule(NLPBaseModule):
             pretraining_params_path,
             main_program=main_program,
             predicate=existed_params)
-        logger.info("Load pretraining parameters from {}.".format(
-            pretraining_params_path))
 
     def param_prefix(self):
         return "@HUB_%s@" % self.name
