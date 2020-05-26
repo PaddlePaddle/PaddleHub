@@ -21,7 +21,7 @@ hub.TextClassifierTask(
 * data_reader: 提供数据的Reader，可选为ClassifyReader和LACClassifyReader。
 * feature(fluid.Variable): 输入的sentence-level特征矩阵，shape应为[-1, emb_size]。默认为None。
 * token_feature(fluid.Variable): 输入的token-level特征矩阵，shape应为[-1, seq_len, emb_size]。默认为None。feature和token_feature须指定其中一个。
-* network(str): 文本分类任务PaddleHub预置网络，支持BOW，Bi-LSTM，CNN，DPCNN，GRU，LSTM。如果指定network，则应使用token_feature作为输入特征。
+* network(str): 文本分类任务PaddleHub预置网络，支持BOW，Bi-LSTM，CNN，DPCNN，GRU，LSTM。如果指定network，则应使用token_feature作为输入特征。其中DPCNN网络实现为[ACL2017-Deep Pyramid Convolutional Neural Networks for Text Categorization](https://www.aclweb.org/anthology/P17-1052.pdf)。
 * startup_program (fluid.Program): 存储了模型参数初始化op的Program，如果未提供，则使用fluid.default_startup_program()
 * config ([RunConfig](../config.md)): 运行配置，如设置batch_size,epoch,learning_rate等。
 * hidden_units (list): TextClassifierTask最终的全连接层输出维度为label_size，是每个label的概率值。在这个全连接层之前可以设置额外的全连接层，并指定它们的输出维度，例如hidden_units=[4,2]表示先经过一层输出维度为4的全连接层，再输入一层输出维度为2的全连接层，最后再输入输出维度为label_size的全连接层。
