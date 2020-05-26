@@ -4,7 +4,7 @@ chinese_ocr_db_crnn Module用于识别图片当中的汉字。其基于[chinese_
 
 
 <p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/crnn.png" hspace='10'/> <br />
+<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/rcnn.png" hspace='10'/> <br />
 </p>
 
 更多详情参考[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
