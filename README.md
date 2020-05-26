@@ -76,9 +76,8 @@ $ hub run chinese_ocr_db_rcnn --input_path test_ocr.jpg --visualization=True
 预测结果图片保存在当前运行路径下ocr_result文件夹中，如下图所示。
 
 <p align="center">
- <img src="./docs/imgs/ocr_res.jpg" align="middle"  
+ <img src="./docs/imgs/ocr_res.jpg" width='70%' align="middle"  
 </p>
-
 
 * 使用[目标检测](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ObjectDetection)模型pyramidbox_lite_mobile_mask对图片进行口罩检测
 ```shell
