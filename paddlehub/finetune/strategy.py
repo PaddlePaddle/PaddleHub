@@ -153,10 +153,10 @@ class DefaultStrategy(object):
                 learning_rate=self.learning_rate)
         elif self._optimizer_name.lower() == "larsmomentum":
             self.optimizer = fluid.optimizer.LarsMomentum(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, momentum=0.9)
         elif self._optimizer_name.lower() == "momentum":
             self.optimizer = fluid.optimizer.Momentum(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, momentum=0.9)
         elif self._optimizer_name.lower() == "decayedadagrad":
             self.optimizer = fluid.optimizer.DecayedAdagrad(
                 learning_rate=self.learning_rate)
