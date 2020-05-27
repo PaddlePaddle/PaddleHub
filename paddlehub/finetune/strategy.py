@@ -638,8 +638,9 @@ class ULMFiTStrategy(CombinedStrategy):
                  ratio=32,
                  dis_blocks=3,
                  factor=2.6,
+                 dis_params_layer=None,
                  frz_blocks=3,
-                 params_layer=None,
+                 frz_params_layer=None,
                  **kwargs):
 
         scheduler = {
@@ -649,12 +650,12 @@ class ULMFiTStrategy(CombinedStrategy):
             },
             "gradual_unfreeze": {
                 "blocks": frz_blocks,
-                "params_layer": params_layer
+                "params_layer": frz_params_layer
             },
             "discriminative": {
                 "blocks": dis_blocks,
                 "factor": factor,
-                "params_layer": params_layer
+                "params_layer": dis_params_layer
             }
         }
         regularization = {}
