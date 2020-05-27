@@ -516,10 +516,6 @@ class CombinedStrategy(DefaultStrategy):
                     unfreeze_depths=self.
                     sorted_depth[:self.max_depth * self.epoch //
                                  self.scheduler["gradual_unfreeze"]["blocks"]])
-            else:
-                logger.warning(
-                    "The max op-depth in the network is %s. That results in that can't use the gradual unfreeze finetune strategy."
-                    % (self.max_depth))
         elif self.scheduler["gradual_unfreeze"]["params_layer"]:
             max_layer = max(
                 self.scheduler["gradual_unfreeze"]["params_layer"].values())
