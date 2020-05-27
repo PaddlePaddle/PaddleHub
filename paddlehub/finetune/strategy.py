@@ -133,39 +133,39 @@ def set_gradual_unfreeze(depth_params_dict, unfreeze_depths):
 
 
 class DefaultStrategy(object):
-    def __init__(self, learning_rate=1e-4, optimizer_name="adam"):
+    def __init__(self, learning_rate=1e-4, optimizer_name="adam", **kwargs):
         self.learning_rate = learning_rate
         self._optimizer_name = optimizer_name
         if self._optimizer_name.lower() == "sgd":
             self.optimizer = fluid.optimizer.SGD(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, **kwargs)
         elif self._optimizer_name.lower() == "adagrad":
             self.optimizer = fluid.optimizer.Adagrad(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, **kwargs)
         elif self._optimizer_name.lower() == "adamax":
             self.optimizer = fluid.optimizer.Adamax(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, **kwargs)
         elif self._optimizer_name.lower() == "decayedadagrad":
             self.optimizer = fluid.optimizer.DecayedAdagrad(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, **kwargs)
         elif self._optimizer_name.lower() == "ftrl":
             self.optimizer = fluid.optimizer.Ftrl(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, **kwargs)
         elif self._optimizer_name.lower() == "larsmomentum":
             self.optimizer = fluid.optimizer.LarsMomentum(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, **kwargs)
         elif self._optimizer_name.lower() == "momentum":
             self.optimizer = fluid.optimizer.Momentum(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, **kwargs)
         elif self._optimizer_name.lower() == "decayedadagrad":
             self.optimizer = fluid.optimizer.DecayedAdagrad(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, **kwargs)
         elif self._optimizer_name.lower() == "rmsprop":
             self.optimizer = fluid.optimizer.RMSPropOptimizer(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, **kwargs)
         else:
             self.optimizer = fluid.optimizer.Adam(
-                learning_rate=self.learning_rate)
+                learning_rate=self.learning_rate, **kwargs)
 
     def execute(self, loss, data_reader, config, dev_count):
         if self.optimizer is not None:
@@ -186,10 +186,13 @@ class CombinedStrategy(DefaultStrategy):
                  learning_rate=1e-4,
                  scheduler=None,
                  regularization=None,
-                 clip=None):
+                 clip=None,
+                 **kwargs):
         super(CombinedStrategy, self).__init__(
-            optimizer_name=optimizer_name, learning_rate=learning_rate)
-
+            optimizer_name=optimizer_name,
+            learning_rate=learning_rate,
+            **kwargs)
+        self.kwargs = kwargs
         # init set
         self.scheduler = {
             "warmup": 0.0,
@@ -379,7 +382,9 @@ class CombinedStrategy(DefaultStrategy):
 
         # set optimizer
         super(CombinedStrategy, self).__init__(
-            optimizer_name=self._optimizer_name, learning_rate=scheduled_lr)
+            optimizer_name=self._optimizer_name,
+            learning_rate=scheduled_lr,
+            **self.kwargs)
 
         # discriminative learning rate
         # based on layer
@@ -511,6 +516,10 @@ class CombinedStrategy(DefaultStrategy):
                     unfreeze_depths=self.
                     sorted_depth[:self.max_depth * self.epoch //
                                  self.scheduler["gradual_unfreeze"]["blocks"]])
+            else:
+                logger.warning(
+                    "The max op-depth in the network is %s. That results in that can't use the gradual unfreeze finetune strategy."
+                    % (self.max_depth))
         elif self.scheduler["gradual_unfreeze"]["params_layer"]:
             max_layer = max(
                 self.scheduler["gradual_unfreeze"]["params_layer"].values())
@@ -564,7 +573,8 @@ class AdamWeightDecayStrategy(CombinedStrategy):
                  lr_scheduler="linear_decay",
                  warmup_proportion=0.1,
                  weight_decay=0.01,
-                 optimizer_name="adam"):
+                 optimizer_name="adam",
+                 **kwargs):
         scheduler = {"warmup": warmup_proportion}
         if lr_scheduler == "noam_decay":
             scheduler["noam_decay"] = True
@@ -583,14 +593,16 @@ class AdamWeightDecayStrategy(CombinedStrategy):
             learning_rate=learning_rate,
             scheduler=scheduler,
             regularization=regularization,
-            clip=clip)
+            clip=clip,
+            **kwargs)
 
 
 class L2SPFinetuneStrategy(CombinedStrategy):
     def __init__(self,
                  learning_rate=1e-4,
                  optimizer_name="adam",
-                 regularization_coeff=1e-3):
+                 regularization_coeff=1e-3,
+                 **kwargs):
         scheduler = {}
         regularization = {"L2SP": regularization_coeff}
         clip = {}
@@ -599,14 +611,16 @@ class L2SPFinetuneStrategy(CombinedStrategy):
             learning_rate=learning_rate,
             scheduler=scheduler,
             regularization=regularization,
-            clip=clip)
+            clip=clip,
+            **kwargs)
 
 
 class DefaultFinetuneStrategy(CombinedStrategy):
     def __init__(self,
                  learning_rate=1e-4,
                  optimizer_name="adam",
-                 regularization_coeff=1e-3):
+                 regularization_coeff=1e-3,
+                 **kwargs):
         scheduler = {}
         regularization = {"L2": regularization_coeff}
         clip = {}
@@ -616,7 +630,8 @@ class DefaultFinetuneStrategy(CombinedStrategy):
             learning_rate=learning_rate,
             scheduler=scheduler,
             regularization=regularization,
-            clip=clip)
+            clip=clip,
+            **kwargs)
 
 
 class ULMFiTStrategy(CombinedStrategy):
@@ -627,9 +642,9 @@ class ULMFiTStrategy(CombinedStrategy):
                  ratio=32,
                  dis_blocks=3,
                  factor=2.6,
-                 dis_params_layer=None,
                  frz_blocks=3,
-                 frz_params_layer=None):
+                 params_layer=None,
+                 **kwargs):
 
         scheduler = {
             "slanted_triangle": {
@@ -638,12 +653,12 @@ class ULMFiTStrategy(CombinedStrategy):
             },
             "gradual_unfreeze": {
                 "blocks": frz_blocks,
-                "params_layer": frz_params_layer
+                "params_layer": params_layer
             },
             "discriminative": {
                 "blocks": dis_blocks,
                 "factor": factor,
-                "params_layer": dis_params_layer
+                "params_layer": params_layer
             }
         }
         regularization = {}
@@ -653,4 +668,5 @@ class ULMFiTStrategy(CombinedStrategy):
             learning_rate=learning_rate,
             scheduler=scheduler,
             regularization=regularization,
-            clip=clip)
+            clip=clip,
+            **kwargs)
