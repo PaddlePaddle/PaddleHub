@@ -19,9 +19,9 @@ import cv2
 import paddlehub as hub
 
 
-class ChineseOCRDBRCNNTestCase(TestCase):
+class ChineseOCRDBCRNNTestCase(TestCase):
     def setUp(self):
-        self.module = hub.Module(name='chinese_ocr_db_rcnn')
+        self.module = hub.Module(name='chinese_ocr_db_crnn')
         self.test_images = [
             "../image_dataset/text_recognition/11.jpg",
             "../image_dataset/text_recognition/test_image.jpg"

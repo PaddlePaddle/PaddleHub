@@ -19,19 +19,19 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
-from chinese_ocr_db_rcnn.character import CharacterOps
-from chinese_ocr_db_rcnn.utils import draw_ocr, get_image_ext, sorted_boxes
+from chinese_ocr_db_crnn.character import CharacterOps
+from chinese_ocr_db_crnn.utils import draw_ocr, get_image_ext, sorted_boxes
 
 
 @moduleinfo(
-    name="chinese_ocr_db_rcnn",
+    name="chinese_ocr_db_crnn",
     version="1.0.0",
     summary=
     "The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions based on the differentiable_binarization_chn module. Then it recognizes the chinese texts. ",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
-class ChineseOCRDBRCNN(hub.Module):
+class ChineseOCRDBCRNN(hub.Module):
     def _initialize(self, text_detector_module=None):
         """
         initialize with the necessary elements
@@ -355,8 +355,8 @@ class ChineseOCRDBRCNN(hub.Module):
         Run as a command
         """
         self.parser = argparse.ArgumentParser(
-            description="Run the chinese_ocr_db_rcnn module.",
-            prog='hub run chinese_ocr_db_rcnn',
+            description="Run the chinese_ocr_db_crnn module.",
+            prog='hub run chinese_ocr_db_crnn',
             usage='%(prog)s',
             add_help=True)
 
@@ -371,7 +371,7 @@ class ChineseOCRDBRCNN(hub.Module):
         self.add_module_input_arg()
 
         args = self.parser.parse_args(argvs)
-        results = self.recognize_texts(
+        results = self.recognize_text(
             paths=[args.input_path],
             use_gpu=args.use_gpu,
             output_dir=args.output_dir,
@@ -407,7 +407,7 @@ class ChineseOCRDBRCNN(hub.Module):
 
 
 if __name__ == '__main__':
-    ocr = ChineseOCRDBRCNN()
+    ocr = ChineseOCRDBCRNN()
     image_path = [
         '../doc/imgs/11.jpg', '../doc/imgs/12.jpg', '../test_image.jpg'
     ]

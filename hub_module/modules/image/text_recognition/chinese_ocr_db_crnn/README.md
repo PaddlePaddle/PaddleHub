@@ -1,6 +1,6 @@
 ## 概述
 
-chinese_ocr_db_rcnn Module用于识别图片当中的汉字。其基于[chinese_text_detection_db Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module支持直接预测。
+chinese_ocr_db_crnn Module用于识别图片当中的汉字。其基于[chinese_text_detection_db Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module支持直接预测。
 
 
 <p align="center">
@@ -12,7 +12,7 @@ chinese_ocr_db_rcnn Module用于识别图片当中的汉字。其基于[chinese_
 ## 命令行预测
 
 ```shell
-$ hub run chinese_ocr_db_rcnn --input_path "/PATH/TO/IMAGE"
+$ hub run chinese_ocr_db_crnn --input_path "/PATH/TO/IMAGE"
 ```
 
 ## API
@@ -55,7 +55,7 @@ def recognize_text(images=[],
 import paddlehub as hub
 import cv2
 
-ocr = hub.Module(name="chinese_ocr_db_rcnn")
+ocr = hub.Module(name="chinese_ocr_db_crnn")
 result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
 # or
@@ -76,7 +76,7 @@ PaddleHub Serving 可以部署一个目标检测的在线服务。
 
 运行启动命令：
 ```shell
-$ hub serving start -m chinese_ocr_db_rcnn
+$ hub serving start -m chinese_ocr_db_crnn
 ```
 
 这样就完成了一个目标检测的服务化API的部署，默认端口号为8866。
@@ -100,7 +100,7 @@ def cv2_to_base64(image):
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/chinese_ocr_db_rcnn"
+url = "http://127.0.0.1:8866/predict/chinese_ocr_db_crnn"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
 # 打印预测结果
