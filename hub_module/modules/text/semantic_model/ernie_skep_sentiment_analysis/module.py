@@ -121,6 +121,7 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
         tensor_data = PaddleTensor(arr_data)
         return tensor_data
 
+    @serving
     def classify_sentiment(self, texts=[], use_gpu=False):
         """
         Get the sentiment label for the predicted texts. It will be classified as positive and negative.
