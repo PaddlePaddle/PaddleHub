@@ -27,6 +27,7 @@ install:
     else
       pip install --upgrade paddlepaddle
       pip install -r requirements.txt
+    fi
 
 notifications:
   email:
