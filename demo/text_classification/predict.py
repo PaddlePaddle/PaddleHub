@@ -20,12 +20,8 @@ from __future__ import print_function
 
 import argparse
 import ast
-import numpy as np
-import os
-import time
-import paddle
-import paddle.fluid as fluid
 import paddlehub as hub
+from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
@@ -45,30 +41,33 @@ if __name__ == '__main__':
 
     # Download dataset and use accuracy as metrics
     # Choose dataset: GLUE/XNLI/ChinesesGLUE/NLPCC-DBQA/LCQMC
-    dataset = hub.dataset.ChnSentiCorp()
+    tokenizer = BertTokenizer(vocab_file=module.get_vocab_path())
+    dataset = hub.dataset.BQ(tokenizer=tokenizer, max_length=args.max_seq_len)
 
     # For ernie_tiny, it use sub-word to tokenize chinese sentence
     # If not ernie tiny, sp_model_path and word_dict_path should be set None
-    reader = hub.reader.ClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        sp_model_path=module.get_spm_path(),
-        word_dict_path=module.get_word_dict_path())
+    # reader = hub.reader.ClassifyReader(
+    #     dataset=dataset,
+    #     vocab_path=module.get_vocab_path(),
+    #     max_seq_len=args.max_seq_len,
+    #     sp_model_path=module.get_spm_path(),
+    #     word_dict_path=module.get_word_dict_path())
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
-    pooled_output = outputs["pooled_output"]
+    # pooled_output =
 
     # Setup feed list for data feeder
     # Must feed all the tensor of module need
-    feed_list = [
-        inputs["input_ids"].name,
-        inputs["position_ids"].name,
-        inputs["segment_ids"].name,
-        inputs["input_mask"].name,
-    ]
+    # feed_list = [
+    #     inputs["input_ids"].name,
+    #     inputs["position_ids"].name,
+    #     inputs["segment_ids"].name,
+    #     inputs["input_mask"].name,
+    # ]
+    # print(feed_list)
+    # exit()
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
@@ -80,14 +79,25 @@ if __name__ == '__main__':
 
     # Define a classfication fine-tune task by PaddleHub's API
     cls_task = hub.TextClassifierTask(
-        data_reader=reader,
-        feature=pooled_output,
-        feed_list=feed_list,
+        dataset=dataset,
+        feature=outputs["pooled_output"],
+        # feed_list=feed_list,
         num_classes=dataset.num_labels,
         config=config)
 
     # Data to be prdicted
-    data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
-            ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]]
-
-    print(cls_task.predict(data=data, return_result=True))
+    text_a = [
+        "这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般", "交通方便；环境很好；服务态度很好 房间较小",
+        "19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"
+    ]
+    # enconded_data = tokenizer.encode(text_a)
+    enconded_data = list(map(tokenizer.encode, text_a))
+    # print(enconded_data)
+    # cls_task.finetune_and_eval()
+    # cls_task.finetune_an
+    print(
+        cls_task.predict(
+            data=enconded_data,
+            label_list=dataset.get_labels(),
+            accelerate_mode=False))
+    # print(cls_task.predict(data=dataset.get_train_features()))

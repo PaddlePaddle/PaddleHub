@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import io
 import csv
+import numpy as np
 
 from paddlehub.dataset import InputExample, BaseDataset
 from paddlehub.common.logger import logger
@@ -36,7 +37,9 @@ class BaseNLPDataset(BaseDataset):
                  train_file_with_header=False,
                  dev_file_with_header=False,
                  test_file_with_header=False,
-                 predict_file_with_header=False):
+                 predict_file_with_header=False,
+                 tokenizer=None,
+                 max_length=None):
         super(BaseNLPDataset, self).__init__(
             base_path=base_path,
             train_file=train_file,
@@ -49,6 +52,14 @@ class BaseNLPDataset(BaseDataset):
             dev_file_with_header=dev_file_with_header,
             test_file_with_header=test_file_with_header,
             predict_file_with_header=predict_file_with_header)
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+        self.train_records = self.convert_examples_to_records(
+            self.train_examples)
+        self.dev_records = self.convert_examples_to_records(self.dev_examples)
+        self.test_records = self.convert_examples_to_records(self.test_examples)
+        self.predict_records = self.convert_examples_to_records(
+            self.predict_examples)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -96,3 +107,75 @@ class BaseNLPDataset(BaseDataset):
                             % (input_file))
                 examples.append(example)
             return examples
+
+    def convert_examples_to_records(self, examples):
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data examples, returned by _read_file.
+
+        Returns:
+            a list with all the examples record.
+        """
+        if not self.tokenizer:
+            return []
+
+        records = []
+        for example in examples:
+            record = self.tokenizer.encode(
+                text=example.text_a,
+                text_pair=example.text_b,
+                max_length=self.max_length)
+            if example.label:
+                record["label"] = example.label
+            records.append(record)
+        return records
+
+    def get_train_records(self, shuffle=False):
+        records = self.train_records
+        if shuffle:
+            np.random.shuffle(records)
+        return records
+
+    def get_dev_records(self, shuffle=False):
+        records = self.dev_records
+        if shuffle:
+            np.random.shuffle(records)
+        return records
+
+    def get_test_records(self, shuffle=False):
+        records = self.test_records
+        if shuffle:
+            np.random.shuffle(records)
+        return records
+
+    def get_val_records(self, shuffle=False):
+        records = self.get_dev_records
+        if shuffle:
+            np.random.shuffle(records)
+        return records
+
+    def get_predict_records(self, shuffle=False):
+        records = self.predict_records
+        if shuffle:
+            np.random.shuffle(records)
+        return records
+
+    def get_phase_records(self, phase, shuffle=False):
+        if phase == "train":
+            return self.get_train_records(shuffle)
+        elif phase == "dev":
+            return self.get_dev_records(shuffle)
+        elif phase == "test":
+            return self.get_test_records(shuffle)
+        elif phase == "val":
+            return self.get_val_records(shuffle)
+        elif phase == "predict":
+            return self.get_predict_records(shuffle)
+        else:
+            raise ValueError("Invalid phase: %s" % phase)
+
+    def get_phase_feed_list(self, phase):
+        feed_list = list(self.get_phase_records(phase)[0].keys())
+        return feed_list

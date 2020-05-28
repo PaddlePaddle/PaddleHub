@@ -84,7 +84,7 @@ class RunEnv(object):
         self.start_program = None
         self.main_program_compiled = None
         self.py_reader = None
-        self.reader = None
+        self.generator = None
         self.loss = None
         self.labels = None
         self.metrics = None
@@ -260,8 +260,8 @@ class BaseTask(object):
     BaseTask is the base class of all the task. It will complete the building of all the running environment.
 
     Args:
-        feed_list (list): the inputs name
-        data_reader (object): data reader for the task
+        feed_list (list): the inputs name. Deprecated in hub 1.8.
+        data_reader (object): data reader for the task. Deprecated in hub 1.8.
         main_program (object): the customized main_program, default None
         startup_program (object): the customized startup_program, default None
         config (object): the config for the task, default None
@@ -269,16 +269,13 @@ class BaseTask(object):
     """
 
     def __init__(self,
-                 feed_list,
-                 data_reader,
+                 dataset=None,
+                 feed_list=None,
+                 data_reader=None,
                  main_program=None,
                  startup_program=None,
                  config=None,
                  metrics_choices="default"):
-        # base item
-        self._base_data_reader = data_reader
-        self._base_feed_list = feed_list
-
         # metrics item
         self.best_score = -999
         if metrics_choices == "default":
@@ -293,7 +290,6 @@ class BaseTask(object):
         if main_program is None:
             self._base_main_program = clone_program(
                 fluid.default_main_program(), for_test=False)
-
         else:
             self._base_main_program = clone_program(
                 main_program, for_test=False)
@@ -343,6 +339,12 @@ class BaseTask(object):
 
         # set default phase
         self.enter_phase("train")
+
+        self.dataset = dataset
+        # Compatible code. Deprecated in hub 1.8.
+        self._base_data_reader = data_reader
+        self._base_feed_list = feed_list
+        self._compatible_mode = True if data_reader else False
 
     @contextlib.contextmanager
     def phase_guard(self, phase):
@@ -420,9 +422,29 @@ class BaseTask(object):
             with fluid.program_guard(self.env.main_program,
                                      self._base_startup_program):
                 with fluid.unique_name.guard(self.env.UNG):
+                    if self._compatible_mode:
+                        # This branch is compatible code for usage deprecated in hub 1.8.
+                        self._base_data_reader.data_generator(
+                            batch_size=self.config.batch_size,
+                            phase='train',
+                            shuffle=True)
+                        num_train_examples = self._base_data_reader.num_examples[
+                            'train']
+                        try:
+                            # nlp_reader
+                            _in_tokens = self._base_data_reader.in_tokens
+                            if _in_tokens:
+                                num_train_examples *= self._base_data_reader.max_seq_len
+                        except:
+                            # cv_reader without .in_tokens and .max_seq_len
+                            pass
+                    else:
+                        num_train_examples = len(
+                            self.dataset.get_train_records())
+
+                    max_train_steps = self.config.num_epoch * num_train_examples // self.config.batch_size // self.device_count
                     self.scheduled_lr, self.max_train_steps = self.config.strategy.execute(
-                        self.loss, self._base_data_reader, self.config,
-                        self.device_count)
+                        self.loss, max_train_steps)
 
         if self.is_train_phase:
             loss_name = self.env.loss.name
@@ -529,17 +551,37 @@ class BaseTask(object):
         return self.main_program
 
     @property
-    def reader(self):
-        if self.is_predict_phase:
-            data = self._predict_data
+    def generator(self):
+        if self._compatible_mode:
+            if self.is_predict_phase:
+                data = self._predict_data
+            else:
+                data = None
+            self.env.generator = self._base_data_reader.data_generator(
+                batch_size=self.config.batch_size,
+                phase=self.phase,
+                data=data,
+                return_list=not self.config.use_pyreader)
         else:
-            data = None
-        self.env.reader = self._base_data_reader.data_generator(
-            batch_size=self.config.batch_size,
-            phase=self.phase,
-            data=data,
-            return_list=not self.config.use_pyreader)
-        return self.env.reader
+
+            def data_generator(records):
+                def wrapper():
+                    for record in records:
+                        yield list(record.values())
+
+                return wrapper
+
+            if self.is_predict_phase:
+                records = self._predict_data
+            else:
+                if self.is_train_phase:
+                    shuffle = True
+                else:
+                    shuffle = False
+                records = self.dataset.get_phase_records(
+                    phase=self.phase, shuffle=shuffle)
+            self.env.generator = data_generator(records)
+        return self.env.generator
 
     @property
     def loss(self):
@@ -580,13 +622,22 @@ class BaseTask(object):
 
     @property
     def feed_list(self):
-        feed_list = [varname for varname in self._base_feed_list]
-        if self.is_train_phase or self.is_test_phase:
-            feed_list += [label.name for label in self.labels]
+        if self._compatible_mode:
+            feed_list = [varname for varname in self._base_feed_list]
+            if self.is_train_phase or self.is_test_phase:
+                feed_list += [label.name for label in self.labels]
+        else:
+            if self.is_predict_phase:
+                feed_list = list(self._predict_data[0].keys())
+            else:
+                feed_list = self.dataset.get_phase_feed_list(self.phase)
         return feed_list
 
     @property
     def feed_var_list(self):
+        if not self.env.is_inititalized:
+            self._build_env()
+
         vars = self.main_program.global_block().vars
         return [vars[varname] for varname in self.feed_list]
 
@@ -957,7 +1008,7 @@ class BaseTask(object):
         global_run_states = []
         period_run_states = []
 
-        for run_step, batch in enumerate(self.reader(), start=1):
+        for run_step, batch in enumerate(self.generator(), start=1):
             step_run_state = RunState(len(self.fetch_list))
             step_run_state.run_step = 1
             num_batch_examples = len(batch)
@@ -978,18 +1029,23 @@ class BaseTask(object):
         global_run_states += period_run_states
         return global_run_states
 
-    def predict(self,
-                data,
-                load_best_model=True,
-                return_result=False,
-                accelerate_mode=True):
+    def predict(
+            self,
+            data=None,
+            label_list=None,
+            load_best_model=True,
+            return_result="default",
+            accelerate_mode=True,
+    ):
         """
         make prediction for the input data.
 
         Args:
-            data (list): the data will be predicted.
+            data (list): the data will be predicted. Its element should be a record when the task is initialized without data_reader param,
+                         or a plaintext string list when the task is initialized with data_reader param (deprecated in hub 1.8).
             load_best_model (bool): load the best model or not
-            return_result (bool): return a readable result or just the raw run result
+            return_result (bool): return a readable result or just the raw run result. "default" means True when the task is initialized without data_reader param,
+                                  or False when the task is initialized with data_reader param (deprecated in hub 1.8).
             accelerate_mode (bool): use high-performance predictor or not
 
         Returns:
@@ -1002,9 +1058,15 @@ class BaseTask(object):
             )
             accelerate_mode = False
         self.accelerate_mode = accelerate_mode
+        if return_result == "default":
+            if self._compatible_mode:
+                return_result = False
+            else:
+                return_result = True
 
         with self.phase_guard(phase="predict"):
             self._predict_data = data
+            self._label_list = label_list
             self._predict_start_event()
 
             if load_best_model:
@@ -1057,15 +1119,28 @@ class BaseTask(object):
                     capacity=64,
                     use_double_buffer=True,
                     iterable=True)
-                data_reader = data_loader.set_batch_generator(
-                    self.reader, places=self.places)
+                if self._compatible_mode:
+                    data_reader = data_loader.set_batch_generator(
+                        self.generator, places=self.places)
+                else:
+                    data_reader = data_loader.set_sample_generator(
+                        self.generator,
+                        places=self.places,
+                        batch_size=self.config.batch_size)
             else:
                 data_feeder = fluid.DataFeeder(
                     feed_list=self.feed_list, place=self.place)
-                data_reader = data_feeder.decorate_reader(
-                    self.reader,
-                    multi_devices=self.config.use_data_parallel,
-                    drop_last=True)
+                if self._compatible_mode:
+                    data_reader = data_feeder.decorate_reader(
+                        self.generator,
+                        multi_devices=self.config.use_data_parallel,
+                        drop_last=True)
+                else:
+                    data_reader = data_feeder.decorate_reader(
+                        paddle.batch(
+                            self.generator, batch_size=self.config.batch_size),
+                        multi_devices=self.config.use_data_parallel,
+                        drop_last=True)
 
             global_run_states = []
             period_run_states = []
@@ -1107,6 +1182,5 @@ class BaseTask(object):
             return global_run_states
 
     def __repr__(self):
-        return "Task: %s with metrics_choices: %s， reader: %s, %s" % (
-            self.__class__.__name__, self.metrics_choices,
-            self._base_data_reader.__class__.__name__, self.config)
+        return "Task: %s with metrics_choices: %s, %s" % (
+            self.__class__.__name__, self.metrics_choices, self.config)

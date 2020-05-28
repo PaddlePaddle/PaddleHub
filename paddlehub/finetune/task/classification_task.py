@@ -19,6 +19,7 @@ from __future__ import print_function
 
 from collections import OrderedDict
 import numpy as np
+import paddle
 import paddle.fluid as fluid
 import time
 
@@ -30,13 +31,12 @@ import paddlehub.network as net
 from .base_task import BaseTask
 
 
-class ClassifierTask(BaseTask):
+class ClassificationTask(BaseTask):
     def __init__(self,
                  feature,
                  num_classes,
-                 dataset=None,
-                 feed_list=None,
-                 data_reader=None,
+                 feed_list,
+                 data_reader,
                  startup_program=None,
                  config=None,
                  hidden_units=None,
@@ -45,8 +45,7 @@ class ClassifierTask(BaseTask):
             metrics_choices = ["acc"]
 
         main_program = feature.block.program
-        super(ClassifierTask, self).__init__(
-            dataset=dataset,
+        super(ClassificationTask, self).__init__(
             data_reader=data_reader,
             main_program=main_program,
             feed_list=feed_list,
@@ -141,18 +140,15 @@ class ClassifierTask(BaseTask):
         return scores, avg_loss, run_speed
 
     def _postprocessing(self, run_states):
-        if self._compatible_mode:
-            try:
-                id2label = {
-                    val: key
-                    for key, val in self._base_data_reader.label_map.items()
-                }
-            except:
-                raise Exception(
-                    "ImageClassificationDataset does not support postprocessing, please use BaseCVDataset instead"
-                )
-        else:
-            id2label = self._label_list
+        try:
+            id2label = {
+                val: key
+                for key, val in self._base_data_reader.label_map.items()
+            }
+        except:
+            raise Exception(
+                "ImageClassificationDataset does not support postprocessing, please use BaseCVDataset instead"
+            )
         results = []
         for batch_state in run_states:
             batch_result = batch_state.run_results
@@ -161,33 +157,31 @@ class ClassifierTask(BaseTask):
         return results
 
 
-ImageClassifierTask = ClassifierTask
+ImageClassificationTask = ClassificationTask
 
 
-class TextClassifierTask(ClassifierTask):
+class TextClassificationTask(ClassificationTask):
     """
     Create a text classification task.
     It will use full-connect layer with softmax activation function to classify texts.
     """
 
-    def __init__(
-            self,
-            num_classes,
-            dataset=None,
-            feed_list=None,  # deprecated
-            data_reader=None,  # deprecated
-            feature=None,
-            token_feature=None,
-            network=None,
-            startup_program=None,
-            config=None,
-            hidden_units=None,
-            metrics_choices="default"):
+    def __init__(self,
+                 num_classes,
+                 feed_list,
+                 data_reader,
+                 feature=None,
+                 token_feature=None,
+                 network=None,
+                 startup_program=None,
+                 config=None,
+                 hidden_units=None,
+                 metrics_choices="default"):
         """
         Args:
             num_classes: total labels of the text classification task.
-            feed_list(list): the variable name that will be feeded to the main program, Deprecated in hub 1.8.
-            data_reader(object): data reader for the task. It must be one of ClassifyReader and LACClassifyReader, Deprecated in hub 1.8..
+            feed_list(list): the variable name that will be feeded to the main program
+            data_reader(object): data reader for the task. It must be one of ClassifyReader and LACClassifyReader.
             feature(Variable): the `feature` will be used to classify texts. It must be the sentence-level feature, shape as [-1, emb_size]. `Token_feature` and `feature` couldn't be setted at the same time. One of them must be setted as not None. Default None.
             token_feature(Variable): the `feature` will be used to connect the pre-defined network. It must be the token-level feature, shape as [-1, seq_len, emb_size]. Default None.
             network(str): the pre-defined network. Choices: 'bilstm', 'bow', 'cnn', 'dpcnn', 'gru' and 'lstm'. Default None. If network is setted, then `token_feature` must be setted and `feature` must be None.
@@ -214,14 +208,14 @@ class TextClassifierTask(ClassifierTask):
             ], 'network choice must be one of bilstm, bow, cnn, dpcnn, gru, lstm!'
             assert token_feature and (
                 not feature
-            ), 'If you wanna use network, you must set token_feature ranther than feature for TextClassifierTask!'
+            ), 'If you wanna use network, you must set token_feature ranther than feature for TextClassificationTask!'
             assert len(
                 token_feature.shape
             ) == 3, 'When you use network, the parameter token_feature must be the token-level feature, such as the sequence_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
         else:
             assert feature and (
                 not token_feature
-            ), 'If you do not use network, you must set feature ranther than token_feature for TextClassifierTask!'
+            ), 'If you do not use network, you must set feature ranther than token_feature for TextClassificationTask!'
             assert len(
                 feature.shape
             ) == 2, 'When you do not use network, the parameter feture must be the sentence-level feature, such as the pooled_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
@@ -231,8 +225,7 @@ class TextClassifierTask(ClassifierTask):
         if metrics_choices == "default":
             metrics_choices = ["acc"]
 
-        super(TextClassifierTask, self).__init__(
-            dataset=dataset,
+        super(TextClassificationTask, self).__init__(
             data_reader=data_reader,
             feature=feature if feature else token_feature,
             num_classes=num_classes,
@@ -243,9 +236,8 @@ class TextClassifierTask(ClassifierTask):
             metrics_choices=metrics_choices)
 
     def _build_net(self):
-        if not self._base_data_reader or isinstance(self._base_data_reader,
-                                                    ClassifyReader):
-            # ClassifyReader will return the seqence length of an input text. nonsupport Lac Reader
+        if isinstance(self._base_data_reader, ClassifyReader):
+            # ClassifyReader will return the seqence length of an input text
             self.seq_len = fluid.layers.data(
                 name="seq_len", shape=[1], dtype='int64', lod_level=0)
             self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])
@@ -263,8 +255,8 @@ class TextClassifierTask(ClassifierTask):
                     self.feature, emb_dim=self.feature.shape[-1])
             else:
                 cls_feats = net_func(unpad_feature)
-            logger.info(
-                "%s has been added in the TextClassifierTask!" % self.network)
+            logger.info("%s has been added in the TextClassificationTask!" %
+                        self.network)
         else:
             # not use pre-defined net but to use fc net
             cls_feats = fluid.layers.dropout(
@@ -294,16 +286,13 @@ class TextClassifierTask(ClassifierTask):
 
     @property
     def feed_list(self):
-        if self._compatible_mode:
-            feed_list = [varname for varname in self._base_feed_list]
-            if isinstance(self._base_data_reader, ClassifyReader):
-                # ClassifyReader will return the seqence length of an input text
-                feed_list += [self.seq_len.name]
-            if self.is_train_phase or self.is_test_phase:
-                feed_list += [self.labels[0].name]
-            return feed_list
-        else:
-            return super(TextClassifierTask, self).feed_list
+        feed_list = [varname for varname in self._base_feed_list]
+        if isinstance(self._base_data_reader, ClassifyReader):
+            # ClassifyReader will return the seqence length of an input text
+            feed_list += [self.seq_len.name]
+        if self.is_train_phase or self.is_test_phase:
+            feed_list += [self.labels[0].name]
+        return feed_list
 
     @property
     def fetch_list(self):
@@ -323,7 +312,7 @@ class TextClassifierTask(ClassifierTask):
         return fetch_list
 
 
-class MultiLabelClassifierTask(ClassifierTask):
+class MultiLabelClassificationTask(ClassificationTask):
     def __init__(self,
                  feature,
                  num_classes,
@@ -337,7 +326,7 @@ class MultiLabelClassifierTask(ClassifierTask):
             metrics_choices = ["auc"]
 
         main_program = feature.block.program
-        super(MultiLabelClassifierTask, self).__init__(
+        super(MultiLabelClassificationTask, self).__init__(
             data_reader=data_reader,
             feature=feature,
             num_classes=num_classes,
@@ -423,7 +412,7 @@ class MultiLabelClassifierTask(ClassifierTask):
         for metric in self.metrics_choices:
             if metric == "auc":
                 scores["auc"] = np.mean(auc_list)
-                # NOTE: for MultiLabelClassifierTask, the metrics will be used to evaluate all the label
+                # NOTE: for MultiLabelClassificationTask, the metrics will be used to evaluate all the label
                 #      and their mean value will also be reported.
                 for index, auc in enumerate(auc_list):
                     scores["auc_" + self.class_name[index]] = auc_list[index][0]
