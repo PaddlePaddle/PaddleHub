@@ -12,7 +12,6 @@ jobs:
     - name: "CI on MacOS/Python3.6"
       os: osx
       language: shell
-      env: TRAVIS_PYTHON_VERSION=3.6
     - name: "CI on Linux/Python3.6"
       os: linux
       python: 3.6
@@ -22,8 +21,12 @@ env:
   - PYTHONPATH=${PWD}
 
 install:
-  - pip install --upgrade paddlepaddle
-  - pip install -r requirements.txt
+  - if [[ $TRAVIS_OS_NAME == osx ]]; then
+      pip3 install --upgrade paddlepaddle
+      pip3 install -r requirements.txt
+    else
+      pip install --upgrade paddlepaddle
+      pip install -r requirements.txt
 
 notifications:
   email:
