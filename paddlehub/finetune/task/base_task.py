@@ -442,9 +442,9 @@ class BaseTask(object):
                         num_train_examples = len(
                             self.dataset.get_train_records())
 
-                    max_train_steps = self.config.num_epoch * num_train_examples // self.config.batch_size // self.device_count
-                    self.scheduled_lr, self.max_train_steps = self.config.strategy.execute(
-                        self.loss, max_train_steps)
+                    self.max_train_steps = self.config.num_epoch * num_train_examples // self.config.batch_size // self.device_count
+                    self.scheduled_lr = self.config.strategy.execute(
+                        self.loss, self.max_train_steps)
 
         if self.is_train_phase:
             loss_name = self.env.loss.name

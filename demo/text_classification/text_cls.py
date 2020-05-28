@@ -16,7 +16,9 @@
 
 import argparse
 import ast
+
 import paddlehub as hub
+from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
@@ -39,34 +41,14 @@ if __name__ == '__main__':
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use accuracy as metrics
-    # Choose dataset: GLUE/XNLI/ChinesesGLUE/NLPCC-DBQA/LCQMC
-    # metric should be acc, f1 or matthews
-    dataset = hub.dataset.ChnSentiCorp()
-    metrics_choices = ["acc"]
-
-    # For ernie_tiny, it use sub-word to tokenize chinese sentence
-    # If not ernie tiny, sp_model_path and word_dict_path should be set None
-    reader = hub.reader.ClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        sp_model_path=module.get_spm_path(),
-        word_dict_path=module.get_word_dict_path())
+    # Use the appropriate tokenizer to preprocess the data set
+    tokenizer = BertTokenizer(vocab_file=module.get_vocab_path())
+    dataset = hub.dataset.BQ(tokenizer=tokenizer, max_length=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
     pooled_output = outputs["pooled_output"]
-
-    # Setup feed list for data feeder
-    # Must feed all the tensor of module need
-    feed_list = [
-        inputs["input_ids"].name,
-        inputs["position_ids"].name,
-        inputs["segment_ids"].name,
-        inputs["input_mask"].name,
-    ]
 
     # Select fine-tune strategy, setup config and fine-tune
     strategy = hub.AdamWeightDecayStrategy(
@@ -85,12 +67,11 @@ if __name__ == '__main__':
 
     # Define a classfication fine-tune task by PaddleHub's API
     cls_task = hub.TextClassifierTask(
-        data_reader=reader,
+        dataset=dataset,
         feature=pooled_output,
-        feed_list=feed_list,
         num_classes=dataset.num_labels,
         config=config,
-        metrics_choices=metrics_choices)
+        metrics_choices=["acc"])
 
     # Fine-tune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically
