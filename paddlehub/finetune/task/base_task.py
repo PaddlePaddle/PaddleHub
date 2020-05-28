@@ -906,7 +906,6 @@ class BaseTask(object):
                              model_filename=None,
                              params_filename=None):
         with self.phase_guard("predict"):
-            import pdb
             fluid.io.save_inference_model(
                 dirname=dirname,
                 executor=self.exe,
