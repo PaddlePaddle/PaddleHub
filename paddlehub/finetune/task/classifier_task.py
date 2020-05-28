@@ -243,7 +243,7 @@ class TextClassifierTask(ClassifierTask):
             metrics_choices=metrics_choices)
 
     def _build_net(self):
-        if isinstance(self._base_data_reader, LACClassifyReader):
+        if not isinstance(self._base_data_reader, LACClassifyReader):
             # LACClassifyReader wont return the seqence length, while Dataset with tokenizer and ClassifyReader will.
             self.seq_len = fluid.layers.data(
                 name="seq_len", shape=[-1], dtype='int64', lod_level=0)
