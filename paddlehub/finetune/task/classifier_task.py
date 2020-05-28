@@ -247,12 +247,13 @@ class TextClassifierTask(ClassifierTask):
                                                     ClassifyReader):
             # ClassifyReader will return the seqence length of an input text. nonsupport Lac Reader
             self.seq_len = fluid.layers.data(
-                name="seq_len", shape=[1], dtype='int64', lod_level=0)
-            self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])
+                name="seq_len", shape=[-1], dtype='int64', lod_level=0)
+            # to avoid save_inference_model pruning seq_len variable
+            fluid.layers.assign(self.seq_len)
 
             # unpad the token_feature
             unpad_feature = fluid.layers.sequence_unpad(
-                self.feature, length=self.seq_len_used)
+                self.feature, length=self.seq_len)
 
         if self.network:
             # add pre-defined net
@@ -315,10 +316,6 @@ class TextClassifierTask(ClassifierTask):
         else:
             # predict phase
             fetch_list = [self.outputs[0].name]
-
-        if isinstance(self._base_data_reader, ClassifyReader):
-            # to avoid save_inference_model to prune seq_len variable
-            fetch_list += [self.seq_len.name]
 
         return fetch_list
 
