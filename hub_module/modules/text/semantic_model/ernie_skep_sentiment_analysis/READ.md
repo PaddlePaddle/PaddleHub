@@ -148,12 +148,6 @@ $ hub serving start -m ernie_skep_sentiment_analysis
 ```python
 import requests
 import json
-import cv2
-import base64
-
-def cv2_to_base64(image):
-    data = cv2.imencode('.jpg', image)[1]
-    return base64.b64encode(data.tostring()).decode('utf8')
 
 # 发送HTTP请求
 data = {'texts':['你不是不聪明，而是不认真', '虽然小明很努力，但是他还是没有考100分']}
