@@ -69,7 +69,7 @@ class RetinaNetResNet50FPN(hub.Module):
                 num_classes=81,
                 trainable=True,
                 pretrained=True,
-                get_prediction=False):
+                phase='train'):
         """
         Distill the Head Features, so as to perform transfer learning.
 
@@ -77,7 +77,7 @@ class RetinaNetResNet50FPN(hub.Module):
             num_classes (int): number of classes.
             trainable (bool): whether to set parameters trainable.
             pretrained (bool): whether to load default pretrained model.
-            get_prediction (bool): whether to get prediction.
+            phase (str): optional choices are 'train' and 'predict'.
 
         Returns:
              inputs(dict): the input variables.
@@ -87,97 +87,103 @@ class RetinaNetResNet50FPN(hub.Module):
         context_prog = fluid.Program()
         startup_program = fluid.Program()
         with fluid.program_guard(context_prog, startup_program):
-            var_prefix = '@HUB_{}@'.format(self.name)
-            # image
-            image = fluid.layers.data(
-                name='image',
-                shape=[-1, 3, -1, -1],
-                dtype='float32',
-                lod_level=0)
-            # im_info
-            im_info = fluid.layers.data(
-                name='im_info', shape=[3], dtype='float32', lod_level=0)
-            # backbone
-            backbone = ResNet(
-                norm_type='affine_channel',
-                freeze_at=2,
-                norm_decay=0.,
-                depth=50,
-                feature_maps=[3, 4, 5])
-            body_feats = backbone(image)
-            # retina_head
-            retina_head = RetinaHead(
-                anchor_generator=AnchorGenerator(
-                    aspect_ratios=[1.0, 2.0, 0.5],
-                    variance=[1.0, 1.0, 1.0, 1.0]),
-                target_assign=RetinaTargetAssign(
-                    positive_overlap=0.5, negative_overlap=0.4),
-                output_decoder=RetinaOutputDecoder(
-                    score_thresh=0.05,
-                    nms_thresh=0.5,
-                    pre_nms_top_n=1000,
-                    detections_per_im=100,
-                    nms_eta=1.0),
-                num_convs_per_octave=4,
-                num_chan=256,
-                max_level=7,
-                min_level=3,
-                prior_prob=0.01,
-                base_scale=4,
-                num_scales_per_octave=3)
-            # fpn
-            fpn = FPN(
-                max_level=7,
-                min_level=3,
-                num_chan=256,
-                spatial_scale=[0.03125, 0.0625, 0.125],
-                has_extra_convs=True)
-            # body_feats
-            body_feats, spatial_scale = fpn.get_output(body_feats)
-            # inputs, outputs, context_prog
-            inputs = {
-                'image': var_prefix + image.name,
-                'im_info': var_prefix + im_info.name
-            }
-            if get_prediction:
-                pred = retina_head.get_prediction(body_feats, spatial_scale,
-                                                  im_info)
-                outputs = {'bbox_out': var_prefix + pred.name}
-            else:
+            with fluid.unique_name.guard():
+                var_prefix = '@HUB_{}@'.format(self.name)
+                # image
+                image = fluid.layers.data(
+                    name='image',
+                    shape=[-1, 3, -1, -1],
+                    dtype='float32',
+                    lod_level=0)
+                # im_info
+                im_info = fluid.layers.data(
+                    name='im_info', shape=[3], dtype='float32', lod_level=0)
+                # backbone
+                backbone = ResNet(
+                    norm_type='affine_channel',
+                    freeze_at=2,
+                    norm_decay=0.,
+                    depth=50,
+                    feature_maps=[3, 4, 5])
+                body_feats = backbone(image)
+                # retina_head
+                retina_head = RetinaHead(
+                    anchor_generator=AnchorGenerator(
+                        aspect_ratios=[1.0, 2.0, 0.5],
+                        variance=[1.0, 1.0, 1.0, 1.0]),
+                    target_assign=RetinaTargetAssign(
+                        positive_overlap=0.5, negative_overlap=0.4),
+                    output_decoder=RetinaOutputDecoder(
+                        score_thresh=0.05,
+                        nms_thresh=0.5,
+                        pre_nms_top_n=1000,
+                        detections_per_im=100,
+                        nms_eta=1.0),
+                    num_convs_per_octave=4,
+                    num_chan=256,
+                    max_level=7,
+                    min_level=3,
+                    prior_prob=0.01,
+                    base_scale=4,
+                    num_scales_per_octave=3)
+                # fpn
+                fpn = FPN(
+                    max_level=7,
+                    min_level=3,
+                    num_chan=256,
+                    spatial_scale=[0.03125, 0.0625, 0.125],
+                    has_extra_convs=True)
+                # body_feats
+                body_feats, spatial_scale = fpn.get_output(body_feats)
+                # inputs, outputs, context_prog
+                inputs = {
+                    'image': var_prefix + image.name,
+                    'im_info': var_prefix + im_info.name
+                }
+                if phase == 'predict':
+                    pred = retina_head.get_prediction(body_feats, spatial_scale,
+                                                      im_info)
+                    outputs = {'bbox_out': var_prefix + pred.name}
+                else:
+                    outputs = {
+                        'body_features': [
+                            var_prefix + var.name
+                            for key, var in body_feats.items()
+                        ]
+                    }
+
+                # add_vars_prefix
+                add_vars_prefix(context_prog, var_prefix)
+                add_vars_prefix(fluid.default_startup_program(), var_prefix)
+
+                global_vars = context_prog.global_block().vars
+                inputs = {
+                    key: global_vars[value]
+                    for key, value in inputs.items()
+                }
                 outputs = {
-                    'body_features':
-                    [var_prefix + var.name for key, var in body_feats.items()]
+                    key: global_vars[value] if not isinstance(value, list) else
+                    [global_vars[var] for var in value]
+                    for key, value in outputs.items()
                 }
 
-            # add_vars_prefix
-            add_vars_prefix(context_prog, var_prefix)
-            add_vars_prefix(fluid.default_startup_program(), var_prefix)
+                place = fluid.CPUPlace()
+                exe = fluid.Executor(place)
+                for param in context_prog.global_block().iter_parameters():
+                    param.trainable = trainable
+                if pretrained:
 
-            global_vars = context_prog.global_block().vars
-            inputs = {key: global_vars[value] for key, value in inputs.items()}
-            outputs = {
-                key: global_vars[value] if not isinstance(value, list) else
-                [global_vars[var] for var in value]
-                for key, value in outputs.items()
-            }
+                    def _if_exist(var):
+                        return os.path.exists(
+                            os.path.join(self.default_pretrained_model_path,
+                                         var.name))
 
-            place = fluid.CPUPlace()
-            exe = fluid.Executor(place)
-            for param in context_prog.global_block().iter_parameters():
-                param.trainable = trainable
-            if pretrained:
-
-                def _if_exist(var):
-                    return os.path.exists(
-                        os.path.join(self.default_pretrained_model_path,
-                                     var.name))
-
-                fluid.io.load_vars(
-                    exe,
-                    self.default_pretrained_model_path,
-                    predicate=_if_exist)
-            else:
-                exe.run(startup_program)
+                    fluid.io.load_vars(
+                        exe,
+                        self.default_pretrained_model_path,
+                        predicate=_if_exist)
+                else:
+                    exe.run(startup_program)
             return inputs, outputs, context_prog
 
     def save_inference_model(self,
