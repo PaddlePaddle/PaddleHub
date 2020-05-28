@@ -818,9 +818,7 @@ class BertTokenizer(object):
 
 
 if __name__ == '__main__':
-    tokenizer = BertTokenizer(
-        vocab_file=
-        '/Users/qiujinxuan/.paddlehub/modules/ernie_tiny/assets/vocab.txt')
+    tokenizer = BertTokenizer(vocab_file='./vocab.txt')
     text_a = "你好"
     text_b = "我是abc d."
     # 切词
@@ -843,7 +841,6 @@ if __name__ == '__main__':
         token_ids_0, token_ids_1)
     print(input_ids)
     # [101, 2040, 2001, 3958, 27227, 1029, 102, 3958, 27227, 2001, 1037, 13997, 11510, 1012, 102]
-    # 这里添加了CLS SEP，可以用convert_ids_to_tokens转成tokens
     input_ids_tokens = tokenizer.convert_ids_to_tokens(input_ids)
     print(input_ids_tokens)
     # ['[CLS]', 'who', 'was', 'jim', 'henson', '?', '[SEP]', 'jim', 'henson', 'was', 'a', 'puppet', '##eer', '.', '[SEP]']
@@ -857,11 +854,6 @@ if __name__ == '__main__':
         token_ids_0, token_ids_1)
     print(text_type_ids)
     # [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]
-
-    # position_ids
-    # 未提供，可以自己用range(len(input_ids_tokens))
-
-    # 其它方法
 
     print(tokenizer.get_special_tokens_mask(token_ids_0, token_ids_1))
     encode_result = tokenizer.encode(

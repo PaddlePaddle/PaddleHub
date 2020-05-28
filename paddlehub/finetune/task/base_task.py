@@ -627,7 +627,7 @@ class BaseTask(object):
             if self.is_train_phase or self.is_test_phase:
                 feed_list += [label.name for label in self.labels]
         else:
-            if self.is_predict_phase:
+            if self._predict_data:
                 feed_list = list(self._predict_data[0].keys())
             else:
                 feed_list = self.dataset.get_phase_feed_list(self.phase)
