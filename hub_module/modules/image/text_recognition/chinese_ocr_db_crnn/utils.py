@@ -3,6 +3,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import math
+
 from PIL import Image, ImageDraw, ImageFont
 import cv2
 import numpy as np
@@ -15,57 +17,132 @@ def draw_ocr(image,
              font_file,
              draw_txt=True,
              drop_score=0.5):
-    img = image.copy()
-    draw = ImageDraw.Draw(img)
+    """
+    Visualize the results of OCR detection and recognition
+    args:
+        image(Image|array): RGB image
+        boxes(list): boxes with shape(N, 4, 2)
+        txts(list): the texts
+        scores(list): txxs corresponding scores
+        draw_txt(bool): whether draw text or not
+        drop_score(float): only scores greater than drop_threshold will be visualized
+    return(array):
+        the visualized img
+    """
     if scores is None:
         scores = [1] * len(boxes)
     for (box, score) in zip(boxes, scores):
-        if score < drop_score:
+        if score < drop_score or math.isnan(score):
             continue
-        draw.line([(box[0][0], box[0][1]), (box[1][0], box[1][1])], fill='red')
-        draw.line([(box[1][0], box[1][1]), (box[2][0], box[2][1])], fill='red')
-        draw.line([(box[2][0], box[2][1]), (box[3][0], box[3][1])], fill='red')
-        draw.line([(box[3][0], box[3][1]), (box[0][0], box[0][1])], fill='red')
-        draw.line([(box[0][0] - 1, box[0][1] + 1),
-                   (box[1][0] - 1, box[1][1] + 1)],
-                  fill='red')
-        draw.line([(box[1][0] - 1, box[1][1] + 1),
-                   (box[2][0] - 1, box[2][1] + 1)],
-                  fill='red')
-        draw.line([(box[2][0] - 1, box[2][1] + 1),
-                   (box[3][0] - 1, box[3][1] + 1)],
-                  fill='red')
-        draw.line([(box[3][0] - 1, box[3][1] + 1),
-                   (box[0][0] - 1, box[0][1] + 1)],
-                  fill='red')
+        box = np.reshape(np.array(box), [-1, 1, 2]).astype(np.int64)
+        image = cv2.polylines(np.array(image), [box], True, (255, 0, 0), 2)
 
     if draw_txt:
-        txt_color = (0, 0, 0)
-        img = np.array(resize_img(img))
-        _h = img.shape[0]
-        blank_img = np.ones(shape=[_h, 600], dtype=np.int8) * 255
+        img = np.array(resize_img(image, input_size=600))
+        txt_img = text_visual(
+            txts,
+            scores,
+            font_file,
+            img_h=img.shape[0],
+            img_w=600,
+            threshold=drop_score)
+        img = np.concatenate([np.array(img), np.array(txt_img)], axis=1)
+        return img
+    return image
+
+
+def text_visual(texts, scores, font_file, img_h=400, img_w=600, threshold=0.):
+    """
+    create new blank img and draw txt on it
+    args:
+        texts(list): the text will be draw
+        scores(list|None): corresponding score of each txt
+        img_h(int): the height of blank img
+        img_w(int): the width of blank img
+    return(array):
+    """
+    if scores is not None:
+        assert len(texts) == len(
+            scores), "The number of txts and corresponding scores must match"
+
+    def create_blank_img():
+        blank_img = np.ones(shape=[img_h, img_w], dtype=np.int8) * 255
+        blank_img[:, img_w - 1:] = 0
         blank_img = Image.fromarray(blank_img).convert("RGB")
         draw_txt = ImageDraw.Draw(blank_img)
+        return blank_img, draw_txt
 
-        font_size = 20
-        gap = 20
-        title = "index           text           score"
-        font = ImageFont.truetype(font_file, font_size, encoding="utf-8")
+    blank_img, draw_txt = create_blank_img()
 
-        draw_txt.text((20, 0), title, txt_color, font=font)
-        count = 0
-        for idx, txt in enumerate(txts):
-            if scores[idx] < drop_score:
-                continue
-            font = ImageFont.truetype(font_file, font_size, encoding="utf-8")
-            new_txt = str(count) + ':  ' + txt + '    ' + str(scores[count])
-            draw_txt.text((20, gap * (count + 1)),
-                          new_txt,
-                          txt_color,
-                          font=font)
+    font_size = 20
+    txt_color = (0, 0, 0)
+    font = ImageFont.truetype(font_file, font_size, encoding="utf-8")
+
+    gap = font_size + 5
+    txt_img_list = []
+    count, index = 1, 0
+    for idx, txt in enumerate(texts):
+        index += 1
+        if scores[idx] < threshold or math.isnan(scores[idx]):
+            index -= 1
+            continue
+        first_line = True
+        while str_count(txt) >= img_w // font_size - 4:
+            tmp = txt
+            txt = tmp[:img_w // font_size - 4]
+            if first_line:
+                new_txt = str(index) + ': ' + txt
+                first_line = False
+            else:
+                new_txt = '    ' + txt
+            draw_txt.text((0, gap * (count + 1)), new_txt, txt_color, font=font)
+            txt = tmp[img_w // font_size - 4:]
+            if count >= img_h // gap - 1:
+                txt_img_list.append(np.array(blank_img))
+                blank_img, draw_txt = create_blank_img()
+                count = 0
             count += 1
-        img = np.concatenate([np.array(img), np.array(blank_img)], axis=1)
-    return img
+        if first_line:
+            new_txt = str(index) + ': ' + txt + '   ' + '%.3f' % (scores[idx])
+        else:
+            new_txt = "  " + txt + "  " + '%.3f' % (scores[idx])
+        draw_txt.text((0, gap * count), new_txt, txt_color, font=font)
+        # whether add new blank img or not
+        if count >= img_h // gap - 1 and idx + 1 < len(texts):
+            txt_img_list.append(np.array(blank_img))
+            blank_img, draw_txt = create_blank_img()
+            count = 0
+        count += 1
+    txt_img_list.append(np.array(blank_img))
+    if len(txt_img_list) == 1:
+        blank_img = np.array(txt_img_list[0])
+    else:
+        blank_img = np.concatenate(txt_img_list, axis=1)
+    return np.array(blank_img)
+
+
+def str_count(s):
+    """
+    Count the number of Chinese characters,
+    a single English character and a single number
+    equal to half the length of Chinese characters.
+    args:
+        s(string): the input of string
+    return(int):
+        the number of Chinese characters
+    """
+    import string
+    count_zh = count_pu = 0
+    s_len = len(s)
+    en_dg_count = 0
+    for c in s:
+        if c in string.ascii_letters or c.isdigit() or c.isspace():
+            en_dg_count += 1
+        elif c.isalpha():
+            count_zh += 1
+        else:
+            count_pu += 1
+    return s_len - math.ceil(en_dg_count / 2)
 
 
 def resize_img(img, input_size=600):
