@@ -1,5 +1,5 @@
 # coding:utf-8
-# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
                 int(_places[0])
             except:
                 raise RuntimeError(
-                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES via export CUDA_VISIBLE_DEVICES=cuda_device_id."
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
                 )
 
         results = []
@@ -250,7 +250,7 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
 if __name__ == '__main__':
     test_module = ErnieSkepSentimentAnalysis()
     test_texts = ['你不是不聪明，而是不认真', '虽然小明很努力，但是他还是没有考100分']
-    results = test_module.classify_sentiment(test_texts, use_gpu=True)
+    results = test_module.classify_sentiment(test_texts, use_gpu=False)
     print(results)
     test_module.context(max_seq_len=128)
     print(test_module.get_embedding(texts=[['你不是不聪明，而是不认真']]))
