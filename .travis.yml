@@ -21,8 +21,13 @@ env:
   - PYTHONPATH=${PWD}
 
 install:
-  - pip install --upgrade paddlepaddle
-  - pip install -r requirements.txt
+  - if [[ $TRAVIS_OS_NAME == osx ]]; then
+      pip3 install --upgrade paddlepaddle;
+      pip3 install -r requirements.txt;
+    else
+      pip install --upgrade paddlepaddle;
+      pip install -r requirements.txt;
+    fi
 
 notifications:
   email:
