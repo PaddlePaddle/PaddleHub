@@ -182,5 +182,5 @@ class BaseNLPDataset(BaseDataset):
             feed_list = list(records[0].keys())
         else:
             # the last one key is "label"
-            feed_list = self.get_phase_feed_list("train")[-1]
+            feed_list = self.get_phase_feed_list("train")[:-1]
         return feed_list
