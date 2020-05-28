@@ -18,6 +18,19 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
+
+def check_requirements():
+    try:
+        import shapely, pyclipper
+    except:
+        logger.error(
+            'chinese_text_detection_db module requires the shapely, pyclipper tools. The running enviroment does not meet the requirments. Please install the two packages.'
+        )
+        exit()
+
+
+check_requirements()
+
 from chinese_text_detection_db.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
 
 
@@ -72,15 +85,6 @@ class ChineseTextDetectionDB(hub.Module):
         for output_name in output_names:
             output_tensor = self.predictor.get_output_tensor(output_name)
             self.output_tensors.append(output_tensor)
-
-    def check_requirements(self):
-        try:
-            import shapely, pyclipper
-        except:
-            logger.error(
-                'This module requires the shapely, pyclipper tools. The running enviroment does not meet the requirments. Please install the two packages.'
-            )
-            exit()
 
     def read_images(self, paths=[]):
         images = []
