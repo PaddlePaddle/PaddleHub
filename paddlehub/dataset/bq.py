@@ -42,18 +42,10 @@ class BQ(BaseNLPDataset):
 
 if __name__ == "__main__":
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
-    ds = BQ(
-        tokenizer=BertTokenizer(
-            vocab_file=
-            '/Users/qiujinxuan/.paddlehub/modules/ernie_tiny/assets/vocab.txt'),
-        max_length=10)
+    ds = BQ(tokenizer=BertTokenizer(vocab_file='vocab.txt'), max_length=10)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
     print("first 10 dev records")
     for e in ds.get_dev_records()[:10]:
         print(e)
-    # print("first 10 test")
-    # for e in ds.get_test_examples()[:10]:
-    #     print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
-    # print(ds)
