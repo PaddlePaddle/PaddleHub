@@ -37,7 +37,7 @@ from ernie_skep_sentiment_analysis.model.ernie import ErnieModel, ErnieConfig
     "SKEP: Sentiment Knowledge Enhanced Pre-training for Sentiment Analysis. Ernie_skep_sentiment_analysis module is initialize with enie_1.0_chn_large when pretraining. This module is finetuned on ChnSentiCorp dataset to do sentiment claasification. It can do sentiment analysis prediction directly, label as positive or negative.",
     author="baidu-nlp",
     author_email="",
-    type="nlp/semantic_model",
+    type="nlp/sentiment_analysis",
 )
 class ErnieSkepSentimentAnalysis(TransformerModule):
     """
@@ -122,7 +122,7 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
         return tensor_data
 
     @serving
-    def classify_sentiment(self, texts=[], use_gpu=False):
+    def predict_sentiment(self, texts=[], use_gpu=False):
         """
         Get the sentiment label for the predicted texts. It will be classified as positive and negative.
         Args:
@@ -226,7 +226,7 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
         self.add_module_input_arg()
 
         args = self.parser.parse_args(argvs)
-        results = self.classify_sentiment(
+        results = self.predict_sentiment(
             texts=[args.input_text], use_gpu=args.use_gpu)
         return results
 
@@ -251,7 +251,7 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
 if __name__ == '__main__':
     test_module = ErnieSkepSentimentAnalysis()
     test_texts = ['你不是不聪明，而是不认真', '虽然小明很努力，但是他还是没有考100分']
-    results = test_module.classify_sentiment(test_texts, use_gpu=False)
+    results = test_module.predict_sentiment(test_texts, use_gpu=False)
     print(results)
     test_module.context(max_seq_len=128)
     print(test_module.get_embedding(texts=[['你不是不聪明，而是不认真']]))

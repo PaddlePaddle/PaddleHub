@@ -1,5 +1,5 @@
 name: ernie_skep_sentiment_analysis
-dir: "modules/text/semantic_model/ernie_skep_sentiment_analysis"
+dir: "modules/text/sentiment_analysis/ernie_skep_sentiment_analysis"
 exclude:
   - README.md
 resources:

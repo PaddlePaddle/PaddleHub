@@ -19,7 +19,7 @@ $ hub run ernie_skep_sentiment_analysis --input_text='虽然小明很努力，�
 ## API
 
 ```python
-def classify_sentiment(texts=[], use_gpu=False)
+def predict_sentiment(texts=[], use_gpu=False)
 ```
 
 预测API，分类输入文本的情感极性。
@@ -90,6 +90,8 @@ def get_params_layer()
 
 **代码示例**
 
+情感极性预测代码示例：
+
 ```python
 import paddlehub as hub
 
@@ -98,33 +100,8 @@ module = hub.Module(name="ernie_skep_sentiment_analysis")
 
 # Predict sentiment label
 test_texts = ['你不是不聪明，而是不认真', '虽然小明很努力，但是他还是没有考100分']
-results = module.classify_sentiment(test_texts, use_gpu=False)
-
-# Get feature and main program of ernie_skep_sentiment_analysis
-inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
-
-# Must feed all the tensor of ernie_skep_sentiment_analysis's module need
-input_ids = inputs["input_ids"]
-position_ids = inputs["position_ids"]
-segment_ids = inputs["segment_ids"]
-input_mask = inputs["input_mask"]
-
-# Use "pooled_output" for sentence-level output.
-pooled_output = outputs["pooled_output"]
-
-# Use "sequence_output" for token-level output.
-sequence_output = outputs["sequence_output"]
-
-# Get embedding feature.
-embedding_result = module.get_embedding(texts=[["Sample1_text_a"],["Sample2_text_a","Sample2_text_b"]], use_gpu=True)
-
-# Get params layer for ULMFiTStrategy.
-params_layer = module.get_params_layer()
-strategy = hub.finetune.strategy.ULMFiTStrategy(frz_params_layer=params_layer, dis_params_layer=params_layer)
+results = module.predict_sentiment(test_texts, use_gpu=False)
 ```
-利用该PaddleHub Module Fine-tune示例，可参考[文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7.0/demo/text-classification)。
-
-**Note**：建议该PaddleHub Module在**GPU**环境中运行。如出现显存不足，可以将**batch_size**或**max_seq_len**调小。  
 
 ## 服务部署
 

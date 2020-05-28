@@ -39,10 +39,9 @@ class ErnieSkepSentimentAnalysisTestCase(TestCase):
                             'negative_probs': 0.9460846185684204
                         }]
 
-    def test_classify_sentiment(self):
-        results_1 = self.module.classify_sentiment(
-            self.test_data, use_gpu=False)
-        results_2 = self.module.classify_sentiment(self.test_data, use_gpu=True)
+    def test_predict_sentiment(self):
+        results_1 = self.module.predict_sentiment(self.test_data, use_gpu=False)
+        results_2 = self.module.predict_sentiment(self.test_data, use_gpu=True)
 
         for index, res in enumerate(results_1):
             self.assertEqual(res['text'], self.results[index]['text'])
