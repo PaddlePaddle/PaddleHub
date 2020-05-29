@@ -20,7 +20,7 @@ import paddle.fluid as fluid
 import paddlehub as hub
 
 from chinese_ocr_db_crnn.character import CharacterOps
-from chinese_ocr_db_crnn.utils import draw_ocr, get_image_ext, sorted_boxes
+from chinese_ocr_db_crnn.utils import base64_to_cv2, cv2_to_base64, draw_ocr, get_image_ext, sorted_boxes
 
 
 @moduleinfo(
@@ -149,7 +149,6 @@ class ChineseOCRDBCRNN(hub.Module):
         padding_im[:, :, 0:resized_w] = resized_image
         return padding_im
 
-    @serving
     def recognize_text(self,
                        images=[],
                        paths=[],
@@ -194,7 +193,10 @@ class ChineseOCRDBCRNN(hub.Module):
 
         detection_results = self.text_detector_module.detect_text(
             images=predicted_data, use_gpu=self.use_gpu, box_thresh=box_thresh)
-        boxes = [item['data'] for item in detection_results]
+        boxes = [
+            np.array(item['data']).astype(np.float32)
+            for item in detection_results
+        ]
         all_results = []
         for index, img_boxes in enumerate(boxes):
             original_image = predicted_data[index].copy()
@@ -217,9 +219,12 @@ class ChineseOCRDBCRNN(hub.Module):
                     text, score = res
                     if score >= text_thresh:
                         rec_res_final.append({
-                            'text': text,
-                            'confidence': score,
-                            'text_box_position': boxes[index]
+                            'text':
+                            text,
+                            'confidence':
+                            float(score),
+                            'text_box_position':
+                            boxes[index].tolist()
                         })
                 result['data'] = rec_res_final
 
@@ -230,6 +235,15 @@ class ChineseOCRDBCRNN(hub.Module):
             all_results.append(result)
 
         return all_results
+
+    @serving
+    def serving_method(self, images, **kwargs):
+        """
+        Run as a service.
+        """
+        images_decode = [base64_to_cv2(image) for image in images]
+        results = self.recognize_text(images_decode, **kwargs)
+        return results
 
     def save_result_image(self,
                           original_image,
@@ -408,9 +422,7 @@ class ChineseOCRDBCRNN(hub.Module):
 
 if __name__ == '__main__':
     ocr = ChineseOCRDBCRNN()
-    image_path = [
-        '../doc/imgs/11.jpg', '../doc/imgs/12.jpg', '../test_image.jpg'
-    ]
+    image_path = ['./imgs/11.jpg', './imgs/12.jpg', './imgs/test_image.jpg']
     res = ocr.recognize_text(paths=image_path, visualization=True)
     ocr.save_inference_model('save')
     print(res)

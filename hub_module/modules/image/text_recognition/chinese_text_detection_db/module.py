@@ -13,10 +13,18 @@ from paddle.fluid.core import AnalysisConfig, create_paddle_predictor, PaddleTen
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo, runnable, serving
 from PIL import Image
+import base64
 import cv2
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
+
+
+def base64_to_cv2(b64str):
+    data = base64.b64decode(b64str.encode('utf8'))
+    data = np.fromstring(data, np.uint8)
+    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    return data
 
 
 @moduleinfo(
@@ -136,7 +144,6 @@ class ChineseTextDetectionDB(hub.Module):
         rect = np.array([tl, tr, br, bl], dtype="float32")
         return rect
 
-    @serving
     def detect_text(self,
                     images=[],
                     paths=[],
@@ -199,7 +206,7 @@ class ChineseTextDetectionDB(hub.Module):
                 dt_boxes_list = postprocessor(data_out, [ratio_list])
                 boxes = self.filter_tag_det_res(dt_boxes_list[0],
                                                 original_image.shape)
-                res['data'] = boxes
+                res['data'] = boxes.astype(np.int).tolist()
 
                 all_imgs.append(im)
                 all_ratios.append(ratio_list)
@@ -248,6 +255,15 @@ class ChineseTextDetectionDB(hub.Module):
             target_vars=target_vars,
             model_filename=model_filename,
             params_filename=params_filename)
+
+    @serving
+    def serving_method(self, images, **kwargs):
+        """
+        Run as a service.
+        """
+        images_decode = [base64_to_cv2(image) for image in images]
+        results = self.detect_text(images=images_decode, **kwargs)
+        return results
 
     @runnable
     def run_cmd(self, argvs):
@@ -308,7 +324,6 @@ class ChineseTextDetectionDB(hub.Module):
 
 if __name__ == '__main__':
     db = ChineseTextDetectionDB()
-    image_path = ['../imgs/11.jpg', '../imgs/12.jpg']
+    image_path = ['./imgs/11.jpg', './imgs/12.jpg']
     res = db.detect_text(paths=image_path, visualization=True)
     db.save_inference_model('save')
-    print(res)
