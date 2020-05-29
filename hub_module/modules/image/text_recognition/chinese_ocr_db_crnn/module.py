@@ -25,7 +25,7 @@ from chinese_ocr_db_crnn.utils import draw_ocr, get_image_ext, sorted_boxes
 
 @moduleinfo(
     name="chinese_ocr_db_crnn",
-    version="1.0.0",
+    version="1.0.1",
     summary=
     "The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions based on the differentiable_binarization_chn module. Then it recognizes the chinese texts. ",
     author="paddle-dev",

@@ -19,24 +19,9 @@ import paddle.fluid as fluid
 import paddlehub as hub
 
 
-def check_requirements():
-    try:
-        import shapely, pyclipper
-    except:
-        logger.error(
-            'chinese_text_detection_db module requires the shapely, pyclipper tools. The running enviroment does not meet the requirments. Please install the two packages.'
-        )
-        exit()
-
-
-check_requirements()
-
-from chinese_text_detection_db.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
-
-
 @moduleinfo(
     name="chinese_text_detection_db",
-    version="1.0.0",
+    version="1.0.1",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
@@ -50,6 +35,15 @@ class ChineseTextDetectionDB(hub.Module):
         self.pretrained_model_path = os.path.join(self.directory,
                                                   'inference_model')
         self._set_config()
+
+    def check_requirements(self):
+        try:
+            import shapely, pyclipper
+        except:
+            print(
+                'This module requires the shapely, pyclipper tools. The running enviroment does not meet the requirments. Please install the two packages.'
+            )
+            exit()
 
     def _set_config(self):
         """
@@ -162,6 +156,10 @@ class ChineseTextDetectionDB(hub.Module):
         Returns:
             res (list): The result of text detection box and save path of images.
         """
+        self.check_requirements()
+
+        from chinese_text_detection_db.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
+
         if use_gpu:
             try:
                 _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -310,7 +308,7 @@ class ChineseTextDetectionDB(hub.Module):
 
 if __name__ == '__main__':
     db = ChineseTextDetectionDB()
-    image_path = ['../doc/imgs/11.jpg', '../doc/imgs/12.jpg']
+    image_path = ['../imgs/11.jpg', '../imgs/12.jpg']
     res = db.detect_text(paths=image_path, visualization=True)
     db.save_inference_model('save')
     print(res)
