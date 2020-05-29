@@ -186,7 +186,7 @@ class YOLOv3DarkNet53Coco2017(hub.Module):
                 int(_places[0])
             except:
                 raise RuntimeError(
-                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
                 )
 
         paths = paths if paths else list()
