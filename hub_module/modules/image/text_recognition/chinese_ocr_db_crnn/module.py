@@ -224,7 +224,7 @@ class ChineseOCRDBCRNN(hub.Module):
                             'confidence':
                             float(score),
                             'text_box_position':
-                            boxes[index].tolist()
+                            boxes[index].astype(np.int).tolist()
                         })
                 result['data'] = rec_res_final
 
