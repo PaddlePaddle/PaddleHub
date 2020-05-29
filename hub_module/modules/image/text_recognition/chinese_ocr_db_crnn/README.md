@@ -15,6 +15,8 @@ chinese_ocr_db_crnn Module用于识别图片当中的汉字。其基于[chinese_
 $ hub run chinese_ocr_db_crnn --input_path "/PATH/TO/IMAGE"
 ```
 
+**该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**
+
 ## API
 
 ```python
@@ -117,6 +119,9 @@ paddlepaddle >= 1.7.2
 
 paddlehub >= 1.6.0
 
+shapely
+
+pyclipper
 
 ## 更新历史
 

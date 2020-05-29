@@ -47,7 +47,6 @@ class ChineseTextDetectionDB(hub.Module):
         """
         initialize with the necessary elements
         """
-        self.check_requirements()
         self.pretrained_model_path = os.path.join(self.directory,
                                                   'inference_model')
         self._set_config()
