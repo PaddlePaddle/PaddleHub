@@ -39,7 +39,7 @@ class BaseNLPDataset(BaseDataset):
                  test_file_with_header=False,
                  predict_file_with_header=False,
                  tokenizer=None,
-                 max_length=None):
+                 max_seq_len=None):
         super(BaseNLPDataset, self).__init__(
             base_path=base_path,
             train_file=train_file,
@@ -53,7 +53,7 @@ class BaseNLPDataset(BaseDataset):
             test_file_with_header=test_file_with_header,
             predict_file_with_header=predict_file_with_header)
         self.tokenizer = tokenizer
-        self.max_length = max_length
+        self.max_seq_len = max_seq_len
         self.train_records = self.convert_examples_to_records(
             self.train_examples)
         self.dev_records = self.convert_examples_to_records(self.dev_examples)
@@ -126,7 +126,7 @@ class BaseNLPDataset(BaseDataset):
             record = self.tokenizer.encode(
                 text=example.text_a,
                 text_pair=example.text_b,
-                max_length=self.max_length)
+                max_seq_len=self.max_seq_len)
             if example.label:
                 record["label"] = example.label
             records.append(record)

@@ -297,7 +297,7 @@ class BertTokenizer(object):
             cls_token="[CLS]",
             mask_token="[MASK]",
             tokenize_chinese_chars=True,
-            model_max_length=512,
+            model_max_seq_len=512,
     ):
         self.unk_token = unk_token
         self.sep_token = sep_token
@@ -308,7 +308,7 @@ class BertTokenizer(object):
         self.all_special_tokens = [
             unk_token, sep_token, pad_token, cls_token, mask_token
         ]
-        self.model_max_length = model_max_length
+        self.model_max_seq_len = model_max_seq_len
 
         if not os.path.isfile(vocab_file):
             raise ValueError(
@@ -551,14 +551,14 @@ class BertTokenizer(object):
             num_tokens_to_remove (:obj:`int`, `optional`, defaults to ``0``):
                 number of tokens to remove using the truncation strategy
             truncation_strategy: string selected in the following options:
-                - 'longest_first' (default) Iteratively reduce the inputs sequence until the input is under max_length
+                - 'longest_first' (default) Iteratively reduce the inputs sequence until the input is under max_seq_len
                     starting from the longest one at each token (when there is a pair of input sequences).
                     Overflowing tokens only contains overflow from the first sequence.
                 - 'only_first': Only truncate the first sequence. raise an error if the first sequence is shorter or equal to than num_tokens_to_remove.
                 - 'only_second': Only truncate the second sequence
-                - 'do_not_truncate': Does not truncate (raise an error if the input sequence is longer than max_length)
+                - 'do_not_truncate': Does not truncate (raise an error if the input sequence is longer than max_seq_len)
             stride (:obj:`int`, `optional`, defaults to ``0``):
-                If set to a number along with max_length, the overflowing tokens returned will contain some tokens
+                If set to a number along with max_seq_len, the overflowing tokens returned will contain some tokens
                 from the main sequence returned. The value of this argument defines the number of additional tokens.
         """
         if num_tokens_to_remove <= 0:
@@ -587,7 +587,7 @@ class BertTokenizer(object):
             pair_ids = pair_ids[:-num_tokens_to_remove]
         elif truncation_strategy == "do_not_truncate":
             raise ValueError(
-                "Input sequence are too long for max_length. Please select a truncation strategy."
+                "Input sequence are too long for max_seq_len. Please select a truncation strategy."
             )
         else:
             raise ValueError(
@@ -599,8 +599,8 @@ class BertTokenizer(object):
             self,
             text: Union[str, List[str], List[int]],
             text_pair: Optional[Union[str, List[str], List[int]]] = None,
-            max_length: Optional[int] = None,
-            pad_to_max_length: bool = True,
+            max_seq_len: Optional[int] = None,
+            pad_to_max_seq_len: bool = True,
             truncation_strategy: str = "longest_first",
             return_position_ids: bool = True,
             return_segment_ids: bool = True,
@@ -611,7 +611,7 @@ class BertTokenizer(object):
     ):
         """
         Returns a dictionary containing the encoded sequence or sequence pair and additional information:
-        the mask for sequence classification and the overflowing elements if a ``max_length`` is specified.
+        the mask for sequence classification and the overflowing elements if a ``max_seq_len`` is specified.
 
         Args:
             text (:obj:`str`, :obj:`List[str]` or :obj:`List[int]`):
@@ -622,10 +622,10 @@ class BertTokenizer(object):
                 Optional second sequence to be encoded. This can be a string, a list of strings (tokenized
                 string using the `tokenize` method) or a list of integers (tokenized string ids using the
                 `convert_tokens_to_ids` method)
-            max_length (:obj:`int`, `optional`, defaults to :int:`None`):
+            max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
                 If set to a number, will limit the total sequence returned so that it has a maximum length.
                 If there are overflowing tokens, those will be added to the returned dictionary
-            pad_to_max_length (:obj:`bool`, `optional`, defaults to :obj:`False`):
+            pad_to_max_seq_len (:obj:`bool`, `optional`, defaults to :obj:`False`):
                 If set to True, the returned sequences will be padded according to the model's padding side and
                 padding index, up to their max length. If no max length is specified, the padding is done up to the
                 model's max length. The tokenizer padding sides are handled by the class attribute `padding_side`
@@ -637,11 +637,11 @@ class BertTokenizer(object):
             truncation_strategy (:obj:`str`, `optional`, defaults to `longest_first`):
                 String selected in the following options:
 
-                - 'longest_first' (default) Iteratively reduce the inputs sequence until the input is under max_length
+                - 'longest_first' (default) Iteratively reduce the inputs sequence until the input is under max_seq_len
                   starting from the longest one at each token (when there is a pair of input sequences)
                 - 'only_first': Only truncate the first sequence
                 - 'only_second': Only truncate the second sequence
-                - 'do_not_truncate': Does not truncate (raise an error if the input sequence is longer than max_length)
+                - 'do_not_truncate': Does not truncate (raise an error if the input sequence is longer than max_seq_len)
             return_position_ids (:obj:`bool`, `optional`, defaults to :obj:`True`):
                 Set to True to return tokens position ids (default True).
             return_segment_ids (:obj:`bool`, `optional`, defaults to :obj:`True`):
@@ -664,8 +664,8 @@ class BertTokenizer(object):
                     segment_ids: list[int] if return_segment_ids is True (default)
                     input_mask: list[int] if return_input_mask is True (default)
                     seq_len: int if return_length is True (default)
-                    overflowing_tokens: list[int] if a ``max_length`` is specified and return_overflowing_tokens is True
-                    num_truncated_tokens: int if a ``max_length`` is specified and return_overflowing_tokens is True
+                    overflowing_tokens: list[int] if a ``max_seq_len`` is specified and return_overflowing_tokens is True
+                    num_truncated_tokens: int if a ``max_seq_len`` is specified and return_overflowing_tokens is True
                     special_tokens_mask: list[int] if return_special_tokens_mask is True
                 }
 
@@ -677,7 +677,7 @@ class BertTokenizer(object):
             - ``input_mask``: list of indices specifying which tokens should be attended to by the model
             - ``length``: the input_ids length
             - ``overflowing_tokens``: list of overflowing tokens if a max length is specified.
-            - ``num_truncated_tokens``: number of overflowing tokens a ``max_length`` is specified
+            - ``num_truncated_tokens``: number of overflowing tokens a ``max_seq_len`` is specified
             - ``special_tokens_mask``: if adding special tokens, this is a list of [0, 1], with 0 specifying special added
               tokens and 1 specifying sequence tokens.
         """
@@ -711,16 +711,16 @@ class BertTokenizer(object):
         # Truncation: Handle max sequence length
         total_len = len_ids + len_pair_ids + (self.num_special_tokens_to_add(
             pair=pair))
-        if max_length and total_len > max_length:
+        if max_seq_len and total_len > max_seq_len:
             ids, pair_ids, overflowing_tokens = self.truncate_sequences(
                 ids,
                 pair_ids=pair_ids,
-                num_tokens_to_remove=total_len - max_length,
+                num_tokens_to_remove=total_len - max_seq_len,
                 truncation_strategy=truncation_strategy,
             )
             if return_overflowing_tokens:
                 encoded_inputs["overflowing_tokens"] = overflowing_tokens
-                encoded_inputs["num_truncated_tokens"] = total_len - max_length
+                encoded_inputs["num_truncated_tokens"] = total_len - max_seq_len
 
         # Add special tokens
 
@@ -737,24 +737,24 @@ class BertTokenizer(object):
                     ids, pair_ids)
 
         # Check lengths
-        assert max_length is None or len(
-            encoded_inputs["input_ids"]) <= max_length
-        if max_length is None and len(
-                encoded_inputs["input_ids"]) > self.model_max_length:
+        assert max_seq_len is None or len(
+            encoded_inputs["input_ids"]) <= max_seq_len
+        if max_seq_len is None and len(
+                encoded_inputs["input_ids"]) > self.model_max_seq_len:
             logger.warning(
                 "Token indices sequence length is longer than the specified maximum sequence length "
                 "for this model ({} > {}). Running this sequence through the model will result in "
-                "indexing errors".format(len(ids), self.model_max_length))
+                "indexing errors".format(len(ids), self.model_max_seq_len))
 
         # Padding
-        needs_to_be_padded = pad_to_max_length and (
-            max_length and len(encoded_inputs["input_ids"]) < max_length
-            or max_length is None
-            and len(encoded_inputs["input_ids"]) < self.model_max_length)
+        needs_to_be_padded = pad_to_max_seq_len and (
+            max_seq_len and len(encoded_inputs["input_ids"]) < max_seq_len
+            or max_seq_len is None
+            and len(encoded_inputs["input_ids"]) < self.model_max_seq_len)
 
         if needs_to_be_padded:
-            difference = (max_length if max_length is not None else
-                          self.model_max_length) - len(
+            difference = (max_seq_len if max_seq_len is not None else
+                          self.model_max_seq_len) - len(
                               encoded_inputs["input_ids"])
             if return_input_mask:
                 encoded_inputs["input_mask"] = [1] * len(
@@ -859,8 +859,8 @@ if __name__ == '__main__':
     encode_result = tokenizer.encode(
         text=text_a,  # 也可以是tokens、token_ids
         text_pair=text_b,  # 可以空缺。
-        max_length=20,
-        pad_to_max_length=True,
+        max_seq_len=20,
+        pad_to_max_seq_len=True,
     )
     print(encode_result['input_ids'])
     print(encode_result)

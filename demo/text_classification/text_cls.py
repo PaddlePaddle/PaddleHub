@@ -43,7 +43,8 @@ if __name__ == '__main__':
 
     # Use the appropriate tokenizer to preprocess the data set
     tokenizer = BertTokenizer(vocab_file=module.get_vocab_path())
-    dataset = hub.dataset.BQ(tokenizer=tokenizer, max_length=args.max_seq_len)
+    dataset = hub.dataset.ChnSentiCorp(
+        tokenizer=tokenizer, max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.

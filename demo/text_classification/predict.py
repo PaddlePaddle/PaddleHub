@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # Download dataset and get its label list and label num
     # For predict task, you can omit its tokenizer parameter to avoid preprocessing the train set.
-    dataset = hub.dataset.BQ()
+    dataset = hub.dataset.ChnSentiCorp()
     num_classes = dataset.num_labels
     label_list = dataset.get_labels()
 
