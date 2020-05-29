@@ -186,8 +186,8 @@ class TextClassifierTask(ClassifierTask):
         """
         Args:
             num_classes: total labels of the text classification task.
-            feed_list(list): the variable name that will be feeded to the main program, Deprecated in hub 1.8.
-            data_reader(object): data reader for the task. It must be one of ClassifyReader and LACClassifyReader, Deprecated in hub 1.8..
+            feed_list(list): the variable name that will be feeded to the main program, Deprecated in paddlehub v1.8.
+            data_reader(object): data reader for the task. It must be one of ClassifyReader and LACClassifyReader, Deprecated in paddlehub v1.8..
             feature(Variable): the `feature` will be used to classify texts. It must be the sentence-level feature, shape as [-1, emb_size]. `Token_feature` and `feature` couldn't be setted at the same time. One of them must be setted as not None. Default None.
             token_feature(Variable): the `feature` will be used to connect the pre-defined network. It must be the token-level feature, shape as [-1, seq_len, emb_size]. Default None.
             network(str): the pre-defined network. Choices: 'bilstm', 'bow', 'cnn', 'dpcnn', 'gru' and 'lstm'. Default None. If network is setted, then `token_feature` must be setted and `feature` must be None.

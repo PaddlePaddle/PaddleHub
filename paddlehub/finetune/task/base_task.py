@@ -260,8 +260,8 @@ class BaseTask(object):
     BaseTask is the base class of all the task. It will complete the building of all the running environment.
 
     Args:
-        feed_list (list): the inputs name. Deprecated in hub 1.8.
-        data_reader (object): data reader for the task. Deprecated in hub 1.8.
+        feed_list (list): the inputs name. Deprecated in paddlehub v1.8.
+        data_reader (object): data reader for the task. Deprecated in paddlehub v1.8.
         main_program (object): the customized main_program, default None
         startup_program (object): the customized startup_program, default None
         config (object): the config for the task, default None
@@ -341,7 +341,7 @@ class BaseTask(object):
         self.enter_phase("train")
 
         self.dataset = dataset
-        # Compatible code. Deprecated in hub 1.8.
+        # Compatible code for usage deprecated in paddlehub v1.8.
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
         self._compatible_mode = True if data_reader else False
@@ -423,7 +423,7 @@ class BaseTask(object):
                                      self._base_startup_program):
                 with fluid.unique_name.guard(self.env.UNG):
                     if self._compatible_mode:
-                        # This branch is compatible code for usage deprecated in hub 1.8.
+                        # This branch is compatible code for usage deprecated in paddlehub v1.8.
                         self._base_data_reader.data_generator(
                             batch_size=self.config.batch_size,
                             phase='train',
@@ -567,7 +567,10 @@ class BaseTask(object):
             def data_generator(records):
                 def wrapper():
                     for record in records:
-                        yield list(record.values())
+                        values = []
+                        for feed_name in self.feed_list:
+                            values.append(record[feed_name])
+                        yield values
 
                 return wrapper
 
@@ -627,10 +630,18 @@ class BaseTask(object):
             if self.is_train_phase or self.is_test_phase:
                 feed_list += [label.name for label in self.labels]
         else:
+            if not self.env.is_inititalized:
+                self._build_env()
+
             if self._predict_data:
                 feed_list = list(self._predict_data[0].keys())
             else:
                 feed_list = self.dataset.get_phase_feed_list(self.phase)
+
+            feed_list = [
+                feed_name for feed_name in feed_list
+                if feed_name in self.main_program.global_block().vars
+            ]
         return feed_list
 
     @property
@@ -1042,10 +1053,10 @@ class BaseTask(object):
 
         Args:
             data (list): the data will be predicted. Its element should be a record when the task is initialized without data_reader param,
-                         or a plaintext string list when the task is initialized with data_reader param (deprecated in hub 1.8).
+                         or a plaintext string list when the task is initialized with data_reader param (deprecated in paddlehub v1.8).
             load_best_model (bool): load the best model or not
             return_result (bool): return a readable result or just the raw run result. "default" means True when the task is initialized without data_reader param,
-                                  or False when the task is initialized with data_reader param (deprecated in hub 1.8).
+                                  or False when the task is initialized with data_reader param (deprecated in paddlehub v1.8).
             accelerate_mode (bool): use high-performance predictor or not
 
         Returns:
