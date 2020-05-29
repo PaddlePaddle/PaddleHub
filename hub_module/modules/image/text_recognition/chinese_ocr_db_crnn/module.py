@@ -20,7 +20,7 @@ import paddle.fluid as fluid
 import paddlehub as hub
 
 from chinese_ocr_db_crnn.character import CharacterOps
-from chinese_ocr_db_crnn.utils import base64_to_cv2, cv2_to_base64, draw_ocr, get_image_ext, sorted_boxes
+from chinese_ocr_db_crnn.utils import base64_to_cv2, draw_ocr, get_image_ext, sorted_boxes
 
 
 @moduleinfo(

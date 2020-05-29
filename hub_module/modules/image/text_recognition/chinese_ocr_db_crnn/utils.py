@@ -188,8 +188,3 @@ def base64_to_cv2(b64str):
     data = np.fromstring(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
     return data
-
-
-def cv2_to_base64(ndarray):
-    data = cv2.imencode('.jpg', ndarray)[1]
-    return base64.b64encode(data.tostring()).decode('utf8')
