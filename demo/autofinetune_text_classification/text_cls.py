@@ -13,7 +13,7 @@ from paddlehub.common.logger import logger
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--epochs", type=int, default=3, help="epochs.")
 
-# the name of hyperparameters to be searched should keep with hparam.py
+# the name of hyper-parameters to be searched should keep with hparam.py
 parser.add_argument("--batch_size", type=int, default=32, help="batch_size.")
 parser.add_argument(
     "--learning_rate", type=float, default=5e-5, help="learning_rate.")
@@ -33,7 +33,7 @@ parser.add_argument(
     default=None,
     help="Directory to model checkpoint")
 
-# saved_params_dir and model_path are needed by auto finetune
+# saved_params_dir and model_path are needed by auto fine-tune
 parser.add_argument(
     "--saved_params_dir",
     type=str,
@@ -82,14 +82,14 @@ if __name__ == '__main__':
         inputs["input_mask"].name,
     ]
 
-    # Select finetune strategy, setup config and finetune
+    # Select fine-tune strategy, setup config and fine-tune
     strategy = hub.AdamWeightDecayStrategy(
         warmup_proportion=args.warmup_prop,
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
         lr_scheduler="linear_decay")
 
-    # Setup runing config for PaddleHub Finetune API
+    # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
         checkpoint_dir=args.checkpoint_dir,
         use_cuda=True,
@@ -98,7 +98,7 @@ if __name__ == '__main__':
         enable_memory_optim=True,
         strategy=strategy)
 
-    # Define a classfication finetune task by PaddleHub's API
+    # Define a classfication fine-tune task by PaddleHub's API
     cls_task = hub.TextClassifierTask(
         data_reader=reader,
         feature=pooled_output,
@@ -125,5 +125,5 @@ if __name__ == '__main__':
         shutil.copytree(best_model_dir, args.saved_params_dir)
         shutil.rmtree(config.checkpoint_dir)
 
-    # acc on dev will be used by auto finetune
+    # acc on dev will be used by auto fine-tune
     hub.report_final_result(eval_avg_score["acc"])

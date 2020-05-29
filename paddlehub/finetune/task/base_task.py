@@ -36,7 +36,7 @@ from visualdl import LogWriter
 
 import paddlehub as hub
 from paddlehub.common.paddle_helper import dtype_map, clone_program
-from paddlehub.common.utils import mkdir, version_compare
+from paddlehub.common.utils import mkdir
 from paddlehub.common.dir import tmp_dir
 from paddlehub.common.logger import logger
 from paddlehub.finetune.checkpoint import load_checkpoint, save_checkpoint
@@ -832,7 +832,10 @@ class BaseTask(object):
             self.config.checkpoint_dir,
             self.exe,
             main_program=self.main_program)
-
+        # Revise max_train_steps when incremental training
+        if is_load_successful:
+            self.max_train_steps = self.env.current_step + self.max_train_steps / self.config.num_epoch * (
+                self.config.num_epoch - self.env.current_epoch + 1)
         return is_load_successful
 
     def load_parameters(self, dirname):
@@ -951,12 +954,6 @@ class BaseTask(object):
         Returns:
             RunState: the running result of predict phase
         """
-
-        if isinstance(self._base_data_reader, hub.reader.LACClassifyReader):
-            raise Exception(
-                "LACClassifyReader does not support predictor, please close accelerate_mode"
-            )
-
         global_run_states = []
         period_run_states = []
 
@@ -998,6 +995,12 @@ class BaseTask(object):
         Returns:
             RunState: the running result of predict phase
         """
+        if accelerate_mode and isinstance(self._base_data_reader,
+                                          hub.reader.LACClassifyReader):
+            logger.warning(
+                "LACClassifyReader does not support predictor, the accelerate_mode is closed now."
+            )
+            accelerate_mode = False
         self.accelerate_mode = accelerate_mode
 
         with self.phase_guard(phase="predict"):

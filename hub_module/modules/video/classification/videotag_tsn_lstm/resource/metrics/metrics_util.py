@@ -17,12 +17,11 @@ from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
 
-import os
 import io
 import logging
 
 import numpy as np
-import json
+
 from videotag_tsn_lstm.resource.metrics.youtube8m import eval_util as youtube8m_metrics
 
 logger = logging.getLogger(__name__)

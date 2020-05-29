@@ -229,6 +229,9 @@ class _TransformerEmbeddingTask(hub.BaseTask):
         self.seq_feature = seq_feature
 
     def _build_net(self):
+        # ClassifyReader will return the seqence length of an input text
+        self.seq_len = fluid.layers.data(
+            name="seq_len", shape=[1], dtype='int64', lod_level=0)
         return [self.pooled_feature, self.seq_feature]
 
     def _postprocessing(self, run_states):
@@ -241,6 +244,18 @@ class _TransformerEmbeddingTask(hub.BaseTask):
                 results.append(
                     [batch_pooled_features[i], batch_seq_features[i]])
         return results
+
+    @property
+    def feed_list(self):
+        feed_list = [varname
+                     for varname in self._base_feed_list] + [self.seq_len.name]
+        return feed_list
+
+    @property
+    def fetch_list(self):
+        fetch_list = [output.name
+                      for output in self.outputs] + [self.seq_len.name]
+        return fetch_list
 
 
 class TransformerModule(NLPBaseModule):
@@ -265,7 +280,7 @@ class TransformerModule(NLPBaseModule):
             **kwargs)
 
         self.max_seq_len = max_seq_len
-        if version_compare(paddle.__version__, '1.8.0'):
+        if version_compare(paddle.__version__, '1.8'):
             with tmp_dir() as _dir:
                 input_dict, output_dict, program = self.context(
                     max_seq_len=max_seq_len)
@@ -397,7 +412,8 @@ class TransformerModule(NLPBaseModule):
 
         return inputs, outputs, module_program
 
-    def get_embedding(self, texts, use_gpu=False, batch_size=1):
+    def get_embedding(self, texts, max_seq_len=512, use_gpu=False,
+                      batch_size=1):
         """
         get pooled_output and sequence_output for input texts.
         Warnings: this method depends on Paddle Inference Library, it may not work properly in PaddlePaddle <= 1.6.2.
@@ -405,6 +421,7 @@ class TransformerModule(NLPBaseModule):
         Args:
             texts (list): each element is a text sample, each sample include text_a and text_b where text_b can be omitted.
                           for example: [[sample0_text_a, sample0_text_b], [sample1_text_a, sample1_text_b], ...]
+            max_seq_len (int): the max sequence length.
             use_gpu (bool): use gpu or not, default False.
             batch_size (int): the data batch size, default 1.
 
@@ -417,12 +434,12 @@ class TransformerModule(NLPBaseModule):
         ) or self.emb_job["batch_size"] != batch_size or self.emb_job[
                 "use_gpu"] != use_gpu:
             inputs, outputs, program = self.context(
-                trainable=True, max_seq_len=self.MAX_SEQ_LEN)
+                trainable=True, max_seq_len=max_seq_len)
 
             reader = hub.reader.ClassifyReader(
                 dataset=None,
                 vocab_path=self.get_vocab_path(),
-                max_seq_len=self.MAX_SEQ_LEN,
+                max_seq_len=max_seq_len,
                 sp_model_path=self.get_spm_path() if hasattr(
                     self, "get_spm_path") else None,
                 word_dict_path=self.get_word_dict_path() if hasattr(
@@ -477,7 +494,7 @@ class TransformerModule(NLPBaseModule):
         return self.params_layer
 
     def forward(self, input_ids, position_ids, segment_ids, input_mask):
-        if version_compare(paddle.__version__, '1.8.0'):
+        if version_compare(paddle.__version__, '1.8'):
             pooled_output, sequence_output = self.model_runner(
                 input_ids, position_ids, segment_ids, input_mask)
             return {
@@ -486,5 +503,5 @@ class TransformerModule(NLPBaseModule):
             }
         else:
             raise RuntimeError(
-                '{} only support dynamic graph mode in paddle >= 1.8.0'.format(
+                '{} only support dynamic graph mode in paddle >= 1.8'.format(
                     self.name))

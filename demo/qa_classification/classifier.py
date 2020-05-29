@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Finetuning on classification task """
+"""Fine-tuning on classification task """
 
 import argparse
 import ast
@@ -23,7 +23,7 @@ import paddlehub as hub
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for fine-tuning, input should be True or False")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
 parser.add_argument("--warmup_proportion", type=float, default=0.0, help="Warmup proportion params for warmup strategy")
@@ -61,13 +61,13 @@ if __name__ == '__main__':
         inputs["input_mask"].name,
     ]
 
-    # Select finetune strategy, setup config and finetune
+    # Select fine-tune strategy, setup config and fine-tune
     strategy = hub.AdamWeightDecayStrategy(
         warmup_proportion=args.warmup_proportion,
         weight_decay=args.weight_decay,
         learning_rate=args.learning_rate)
 
-    # Setup runing config for PaddleHub Finetune API
+    # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
         use_data_parallel=args.use_data_parallel,
         use_cuda=args.use_gpu,
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         checkpoint_dir=args.checkpoint_dir,
         strategy=strategy)
 
-    # Define a classfication finetune task by PaddleHub's API
+    # Define a classfication fine-tune task by PaddleHub's API
     cls_task = hub.TextClassifierTask(
         data_reader=reader,
         feature=pooled_output,
@@ -84,6 +84,6 @@ if __name__ == '__main__':
         num_classes=dataset.num_labels,
         config=config)
 
-    # Finetune and evaluate by PaddleHub's API
+    # Fine-tune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically
     cls_task.finetune_and_eval()
