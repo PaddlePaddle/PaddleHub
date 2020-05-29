@@ -18,7 +18,6 @@ import argparse
 import ast
 
 import paddlehub as hub
-from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
@@ -42,7 +41,15 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Use the appropriate tokenizer to preprocess the data set
-    tokenizer = BertTokenizer(vocab_file=module.get_vocab_path())
+    # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
+    if module.name == "ernie_tiny":
+        tokenizer = hub.ErnieTinyTokenizer(
+            vocab_file=module.get_vocab_path(),
+            spm_path=module.get_spm_path(),
+            word_dict_path=module.get_word_dict_path())
+    else:
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+
     dataset = hub.dataset.ChnSentiCorp(
         tokenizer=tokenizer, max_seq_len=args.max_seq_len)
 

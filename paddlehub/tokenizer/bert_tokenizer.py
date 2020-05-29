@@ -18,9 +18,10 @@ import collections
 import os
 import unicodedata
 from typing import List, Optional, Union, Tuple
-from collections import OrderedDict
 
 from paddlehub.common.logger import logger
+import sentencepiece as spm
+import pickle
 
 from .tokenizer_util import load_vocab, _is_whitespace, _is_control, _is_punctuation, whitespace_tokenize
 
@@ -815,6 +816,85 @@ class BertTokenizer(object):
             return clean_text
         else:
             return text
+
+
+class ErnieTinyTokenizer(BertTokenizer):
+    def __init__(
+            self,
+            vocab_file,
+            spm_path,
+            word_dict_path,
+            do_lower_case=True,
+            unk_token="[UNK]",
+            sep_token="[SEP]",
+            pad_token="[PAD]",
+            cls_token="[CLS]",
+            mask_token="[MASK]",
+            model_max_seq_len=512,
+    ):
+        self.unk_token = unk_token
+        self.sep_token = sep_token
+        self.pad_token = pad_token
+        self.cls_token = cls_token
+        self.mask_token = mask_token
+        self.do_lower_case = do_lower_case
+        self.all_special_tokens = [
+            unk_token, sep_token, pad_token, cls_token, mask_token
+        ]
+        self.model_max_seq_len = model_max_seq_len
+
+        if not os.path.isfile(vocab_file):
+            raise ValueError(
+                "Can't find a vocabulary file at path '{}'.".format(vocab_file))
+        self.vocab = load_vocab(vocab_file)
+        self.ids_to_tokens = collections.OrderedDict(
+            [(ids, tok) for tok, ids in self.vocab.items()])
+
+        # Here is the difference with BertTokenizer.
+        self.dict = pickle.load(open(word_dict_path, 'rb'))
+        self.sp_model = spm.SentencePieceProcessor()
+        self.window_size = 5
+        self.sp_model.Load(spm_path)
+
+        self.unk_token_id = self.convert_tokens_to_ids(self.unk_token)
+        self.sep_token_id = self.convert_tokens_to_ids(self.sep_token)
+        self.pad_token_id = self.convert_tokens_to_ids(self.pad_token)
+        self.pad_token_type_id = 0
+        self.cls_token_id = self.convert_tokens_to_ids(self.cls_token)
+        self.mask_token_id = self.convert_tokens_to_ids(self.mask_token)
+        self.all_special_ids = self.convert_tokens_to_ids(
+            self.all_special_tokens)
+
+    def cut(self, chars):
+        words = []
+        idx = 0
+        while idx < len(chars):
+            matched = False
+            for i in range(self.window_size, 0, -1):
+                cand = chars[idx:idx + i]
+                if cand in self.dict:
+                    words.append(cand)
+                    matched = True
+                    break
+            if not matched:
+                i = 1
+                words.append(chars[idx])
+            idx += i
+        return words
+
+    def tokenize(self, text):
+        text = [s for s in self.cut(text) if s != ' ']
+        if self.do_lower_case:
+            text = [s.lower() for s in text]
+        text = ' '.join(text)
+        tokens = self.sp_model.EncodeAsPieces(text)
+        in_vocab_tokens = []
+        for token in tokens:
+            if token in self.vocab:
+                in_vocab_tokens.append(token)
+            else:
+                in_vocab_tokens.append(self.unk_token)
+        return in_vocab_tokens
 
 
 if __name__ == '__main__':

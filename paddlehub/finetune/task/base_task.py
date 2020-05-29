@@ -344,7 +344,15 @@ class BaseTask(object):
         # Compatible code for usage deprecated in paddlehub v1.8.
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
-        self._compatible_mode = True if data_reader else False
+        if data_reader:
+            self._compatible_mode = True
+            logger.warning(
+                "PaddleHub v1.8 has deprecated the reader and feed_list parameters in Task. We provided an easier usage,"
+                "which you can use your tokenizer to preprocess dataset and run task in a clear pipeline. "
+                "New demo see https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/demo/text_classification/text_cls.py"
+            )
+        else:
+            self._compatible_mode = False
 
     @contextlib.contextmanager
     def phase_guard(self, phase):
@@ -952,13 +960,20 @@ class BaseTask(object):
                     self.env.current_epoch += 1
 
                 # Final evaluation
-                if self._base_data_reader.get_dev_examples() != []:
+                if self._compatible_mode:
+                    dev_examples = self._base_data_reader.get_dev_examples()
+                    test_examples = self._base_data_reader.get_test_examples()
+                else:
+                    dev_examples = self.dataset.get_dev_examples()
+                    test_examples = self.dataset.get_test_examples()
+                if dev_examples != []:
                     # Warning: DO NOT use self.eval(phase="dev", load_best_model=True) during training.
                     # It will cause trainer unable to continue training from checkpoint after eval.
                     # More important, The model should evaluate current performance during training.
                     self.eval(phase="dev")
-                if self._base_data_reader.get_test_examples() != []:
+                if test_examples != []:
                     self.eval(phase="test", load_best_model=True)
+
                 # Save checkpoint after finetune
                 self.save_checkpoint()
 

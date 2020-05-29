@@ -181,6 +181,13 @@ class BaseNLPDataset(BaseDataset):
         if records:
             feed_list = list(records[0].keys())
         else:
-            # the last one key is "label"
-            feed_list = self.get_phase_feed_list("train")[:-1]
+            if phase == "predict":
+                feed_list = [
+                    feed_name for feed_name in self.get_phase_feed_list("train")
+                    if feed_name != "label"
+                ]
+            else:
+                feed_list = [
+                    feed_name for feed_name in self.get_phase_feed_list("train")
+                ]
         return feed_list

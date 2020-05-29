@@ -41,7 +41,7 @@ if __name__ == '__main__':
         trainable=True, max_seq_len=args.max_seq_len)
 
     # Download dataset and get its label list and label num
-    # For predict task, you can omit its tokenizer parameter to avoid preprocessing the train set.
+    # If you just want labels information, you can omit its tokenizer parameter to avoid preprocessing the train set.
     dataset = hub.dataset.ChnSentiCorp()
     num_classes = dataset.num_labels
     label_list = dataset.get_labels()
@@ -65,8 +65,14 @@ if __name__ == '__main__':
         "这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般", "交通方便；环境很好；服务态度很好 房间较小",
         "19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"
     ]
-    tokenizer = BertTokenizer(vocab_file=module.get_vocab_path())
+    # Use the appropriate tokenizer to preprocess the data
+    # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
+    if module.name == "ernie_tiny":
+        tokenizer = hub.ErnieTinyTokenizer(
+            vocab_file=module.get_vocab_path(),
+            spm_path=module.get_spm_path(),
+            word_dict_path=module.get_word_dict_path())
+    else:
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
     enconded_data = list(map(tokenizer.encode, text_a))
-    print(
-        cls_task.predict(
-            data=enconded_data, label_list=label_list, accelerate_mode=False))
+    print(cls_task.predict(data=enconded_data, label_list=label_list))
