@@ -39,7 +39,7 @@ def recognize_text(images=[],
 * box\_thresh (float): 检测文本框置信度的阈值；
 * text\_thresh (float): 识别中文文本置信度的阈值；
 * visualization (bool): 是否将识别结果保存为图片文件；
-* output\_dir (str): 图片的保存路径，默认设为 detection\_result；
+* output\_dir (str): 图片的保存路径，默认设为 ocr\_result；
 
 **返回**
 
