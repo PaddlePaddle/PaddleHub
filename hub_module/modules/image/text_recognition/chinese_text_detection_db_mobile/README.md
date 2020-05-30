@@ -12,7 +12,7 @@ Differentiable Binarization（简称DB）是一种基于分割的文本检测算
 ## 命令行预测
 
 ```shell
-$ hub run chinese_text_detection_db --input_path "/PATH/TO/IMAGE"
+$ hub run chinese_text_detection_db_mobile --input_path "/PATH/TO/IMAGE"
 ```
 
 **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**
@@ -51,7 +51,7 @@ def detect_text(paths=[],
 import paddlehub as hub
 import cv2
 
-text_detector = hub.Module(name="chinese_text_detection_db")
+text_detector = hub.Module(name="chinese_text_detection_db_mobile")
 result = text_detector.detect_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
 # or
@@ -67,7 +67,7 @@ PaddleHub Serving 可以部署一个目标检测的在线服务。
 
 运行启动命令：
 ```shell
-$ hub serving start -m chinese_text_detection_db
+$ hub serving start -m chinese_text_detection_db_mobile
 ```
 
 这样就完成了一个目标检测的服务化API的部署，默认端口号为8866。
@@ -91,7 +91,7 @@ def cv2_to_base64(image):
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/chinese_text_detection_db"
+url = "http://127.0.0.1:8866/predict/chinese_text_detection_db_mobile"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
 # 打印预测结果
