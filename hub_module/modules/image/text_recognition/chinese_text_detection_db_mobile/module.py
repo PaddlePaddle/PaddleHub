@@ -28,7 +28,7 @@ def base64_to_cv2(b64str):
 
 
 @moduleinfo(
-    name="chinese_text_detection_db",
+    name="chinese_text_detection_db_mobile",
     version="1.0.1",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
@@ -165,7 +165,7 @@ class ChineseTextDetectionDB(hub.Module):
         """
         self.check_requirements()
 
-        from chinese_text_detection_db.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
+        from chinese_text_detection_db_mobile.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
 
         if use_gpu:
             try:

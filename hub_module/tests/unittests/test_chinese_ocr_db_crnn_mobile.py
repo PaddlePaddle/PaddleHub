@@ -21,7 +21,7 @@ import paddlehub as hub
 
 class ChineseOCRDBCRNNTestCase(TestCase):
     def setUp(self):
-        self.module = hub.Module(name='chinese_ocr_db_crnn')
+        self.module = hub.Module(name='chinese_ocr_db_crnn_mobile')
         self.test_images = [
             "../image_dataset/text_recognition/11.jpg",
             "../image_dataset/text_recognition/test_image.jpg"
@@ -46,12 +46,10 @@ class ChineseOCRDBCRNNTestCase(TestCase):
                                  results_3[i]['data'][j]['confidence'])
                 self.assertEqual(item['text'], results_2[i]['data'][j]['text'])
                 self.assertEqual(item['text'], results_3[i]['data'][j]['text'])
-                self.assertEqual(
-                    (item['text_box_position'].all() == results_2[i]['data'][j]
-                     ['text_box_position'].all()), True)
-                self.assertEqual(
-                    (item['text_box_position'].all() == results_3[i]['data'][j]
-                     ['text_box_position'].all()), True)
+                self.assertEqual((item['text_box_position'] == results_2[i]
+                                  ['data'][j]['text_box_position']), True)
+                self.assertEqual((item['text_box_position'] == results_3[i]
+                                  ['data'][j]['text_box_position']), True)
 
 
 if __name__ == '__main__':

@@ -19,12 +19,12 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
-from chinese_ocr_db_crnn.character import CharacterOps
-from chinese_ocr_db_crnn.utils import base64_to_cv2, draw_ocr, get_image_ext, sorted_boxes
+from chinese_ocr_db_crnn_mobile.character import CharacterOps
+from chinese_ocr_db_crnn_mobile.utils import base64_to_cv2, draw_ocr, get_image_ext, sorted_boxes
 
 
 @moduleinfo(
-    name="chinese_ocr_db_crnn",
+    name="chinese_ocr_db_crnn_mobile",
     version="1.0.1",
     summary=
     "The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions based on the differentiable_binarization_chn module. Then it recognizes the chinese texts. ",

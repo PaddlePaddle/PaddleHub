@@ -37,10 +37,8 @@ class ChineseTextDetectionDBTestCase(TestCase):
         results_3 = self.module.detect_text(images=test_images, use_gpu=False)
         for index, res in enumerate(results_1):
             self.assertEqual(res['save_path'], '')
-            self.assertEqual(
-                (res['data'].all() == results_2[index]['data'].all()), True)
-            self.assertEqual(
-                (res['data'].all() == results_3[index]['data'].all()), True)
+            self.assertEqual((res['data'] == results_2[index]['data']), True)
+            self.assertEqual((res['data'] == results_3[index]['data']), True)
 
 
 if __name__ == '__main__':
