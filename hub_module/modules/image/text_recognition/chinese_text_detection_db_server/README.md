@@ -1,6 +1,6 @@
 ## 概述
 
-Differentiable Binarization（简称DB）是一种基于分割的文本检测算法。在各种文本检测算法中，基于分割的检测算法可以更好地处理弯曲等不规则形状文本，因此往往能取得更好的检测效果。但分割法后处理步骤中将分割结果转化为检测框的流程复杂，耗时严重。DB将二值化阈值加入训练中学习，可以获得更准确的检测边界，从而简化后处理流程。该Module是一个超轻量级文本检测模型，支持直接预测。
+Differentiable Binarization（简称DB）是一种基于分割的文本检测算法。在各种文本检测算法中，基于分割的检测算法可以更好地处理弯曲等不规则形状文本，因此往往能取得更好的检测效果。但分割法后处理步骤中将分割结果转化为检测框的流程复杂，耗时严重。DB将二值化阈值加入训练中学习，可以获得更准确的检测边界，从而简化后处理流程。该Module是一个通用的文本检测模型，支持直接预测。
 
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/db_algo.png" hspace='10'/> <br />
@@ -12,7 +12,7 @@ Differentiable Binarization（简称DB）是一种基于分割的文本检测算
 ## 命令行预测
 
 ```shell
-$ hub run chinese_text_detection_db_mobile --input_path "/PATH/TO/IMAGE"
+$ hub run chinese_text_detection_db_server --input_path "/PATH/TO/IMAGE"
 ```
 
 **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**
@@ -51,7 +51,7 @@ def detect_text(paths=[],
 import paddlehub as hub
 import cv2
 
-text_detector = hub.Module(name="chinese_text_detection_db_mobile")
+text_detector = hub.Module(name="chinese_text_detection_db_server")
 result = text_detector.detect_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
 # or
@@ -67,7 +67,7 @@ PaddleHub Serving 可以部署一个目标检测的在线服务。
 
 运行启动命令：
 ```shell
-$ hub serving start -m chinese_text_detection_db_mobile
+$ hub serving start -m chinese_text_detection_db_server
 ```
 
 这样就完成了一个目标检测的服务化API的部署，默认端口号为8866。
@@ -91,7 +91,7 @@ def cv2_to_base64(image):
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/chinese_text_detection_db_mobile"
+url = "http://127.0.0.1:8866/predict/chinese_text_detection_db_server"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
 # 打印预测结果
@@ -117,7 +117,3 @@ pyclipper
 * 1.0.0
 
   初始发布
-
-* 1.0.1
-
-  修复使用在线服务调用模型失败问题

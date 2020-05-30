@@ -28,20 +28,20 @@ def base64_to_cv2(b64str):
 
 
 @moduleinfo(
-    name="chinese_text_detection_db_mobile",
-    version="1.0.1",
+    name="chinese_text_detection_db_server",
+    version="1.0.0",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
-class ChineseTextDetectionDB(hub.Module):
+class ChineseTextDetectionDBServer(hub.Module):
     def _initialize(self):
         """
         initialize with the necessary elements
         """
         self.pretrained_model_path = os.path.join(self.directory,
-                                                  'inference_model')
+                                                  'ch_det_r50_vd_db')
         self._set_config()
 
     def check_requirements(self):
@@ -165,7 +165,7 @@ class ChineseTextDetectionDB(hub.Module):
         """
         self.check_requirements()
 
-        from chinese_text_detection_db_mobile.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
+        from chinese_text_detection_db_server.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
 
         if use_gpu:
             try:
@@ -323,11 +323,10 @@ class ChineseTextDetectionDB(hub.Module):
 
 
 if __name__ == '__main__':
-    db = ChineseTextDetectionDB()
+    db = ChineseTextDetectionDBServer()
     image_path = [
         '/mnt/zhangxuefei/PaddleOCR/doc/imgs/11.jpg',
-        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/12.jpg',
-        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/test_image.jpg'
+        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/12.jpg'
     ]
     res = db.detect_text(paths=image_path, visualization=True)
     db.save_inference_model('save')

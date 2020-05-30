@@ -1,6 +1,6 @@
 ## 概述
 
-chinese_ocr_db_crnn_mobile Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_mobile Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_mobile&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个超轻量级中文OCR模型，支持直接预测。
+chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_server Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_server&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个通用的OCR模型，支持直接预测。
 
 
 <p align="center">
@@ -12,7 +12,7 @@ chinese_ocr_db_crnn_mobile Module用于识别图片当中的汉字。其基于[c
 ## 命令行预测
 
 ```shell
-$ hub run chinese_ocr_db_crnn_mobile --input_path "/PATH/TO/IMAGE"
+$ hub run chinese_ocr_db_crnn_server --input_path "/PATH/TO/IMAGE"
 ```
 
 **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**
@@ -57,7 +57,7 @@ def recognize_text(images=[],
 import paddlehub as hub
 import cv2
 
-ocr = hub.Module(name="chinese_ocr_db_crnn_mobile")
+ocr = hub.Module(name="chinese_ocr_db_crnn_server")
 result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
 # or
@@ -78,7 +78,7 @@ PaddleHub Serving 可以部署一个目标检测的在线服务。
 
 运行启动命令：
 ```shell
-$ hub serving start -m chinese_ocr_db_crnn_mobile
+$ hub serving start -m chinese_ocr_db_crnn_server
 ```
 
 这样就完成了一个目标检测的服务化API的部署，默认端口号为8866。
@@ -102,7 +102,7 @@ def cv2_to_base64(image):
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/chinese_ocr_db_crnn_mobile"
+url = "http://127.0.0.1:8866/predict/chinese_ocr_db_crnn_server"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
 # 打印预测结果
@@ -128,7 +128,3 @@ pyclipper
 * 1.0.0
 
   初始发布
-
-* 1.0.1
-
-  修复使用在线服务调用模型失败问题

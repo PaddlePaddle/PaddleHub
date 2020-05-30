@@ -19,21 +19,19 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
-import sys
-sys.path.append('..')
-from chinese_ocr_db_crnn_mobile.character import CharacterOps
-from chinese_ocr_db_crnn_mobile.utils import base64_to_cv2, draw_ocr, get_image_ext, sorted_boxes
+from chinese_ocr_db_crnn_server.character import CharacterOps
+from chinese_ocr_db_crnn_server.utils import base64_to_cv2, draw_ocr, get_image_ext, sorted_boxes
 
 
 @moduleinfo(
-    name="chinese_ocr_db_crnn_mobile",
-    version="1.0.1",
+    name="chinese_ocr_db_crnn_server",
+    version="1.0.0",
     summary=
     "The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions based on the differentiable_binarization_chn module. Then it recognizes the chinese texts. ",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
-class ChineseOCRDBCRNN(hub.Module):
+class ChineseOCRDBCRNNServer(hub.Module):
     def _initialize(self, text_detector_module=None):
         """
         initialize with the necessary elements
@@ -49,8 +47,8 @@ class ChineseOCRDBCRNN(hub.Module):
         self.rec_image_shape = [3, 32, 320]
         self._text_detector_module = text_detector_module
         self.font_file = os.path.join(self.directory, 'assets', 'simfang.ttf')
-        self.pretrained_model_path = os.path.join(self.directory,
-                                                  'inference_model')
+        self.pretrained_model_path = os.path.join(self.directory, 'assets',
+                                                  'ch_rec_r34_vd_crnn')
         self._set_config()
 
     def _set_config(self):
@@ -94,7 +92,7 @@ class ChineseOCRDBCRNN(hub.Module):
         """
         if not self._text_detector_module:
             self._text_detector_module = hub.Module(
-                name='chinese_text_detection_db_mobile')
+                name='chinese_text_detection_db_server')
         return self._text_detector_module
 
     def read_images(self, paths=[]):
@@ -423,7 +421,8 @@ class ChineseOCRDBCRNN(hub.Module):
 
 
 if __name__ == '__main__':
-    ocr = ChineseOCRDBCRNN()
+    ocr = ChineseOCRDBCRNNServer()
+    print(ocr.name)
     image_path = [
         '/mnt/zhangxuefei/PaddleOCR/doc/imgs/11.jpg',
         '/mnt/zhangxuefei/PaddleOCR/doc/imgs/12.jpg',

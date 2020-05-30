@@ -46,10 +46,10 @@ class ChineseOCRDBCRNNTestCase(TestCase):
                                  results_3[i]['data'][j]['confidence'])
                 self.assertEqual(item['text'], results_2[i]['data'][j]['text'])
                 self.assertEqual(item['text'], results_3[i]['data'][j]['text'])
-                self.assertEqual((item['text_box_position'] == results_2[i]
-                                  ['data'][j]['text_box_position']), True)
-                self.assertEqual((item['text_box_position'] == results_3[i]
-                                  ['data'][j]['text_box_position']), True)
+                self.assertEqual(item['text_box_position'],
+                                 results_2[i]['data'][j]['text_box_position'])
+                self.assertEqual(item['text_box_position'],
+                                 results_3[i]['data'][j]['text_box_position'])
 
 
 if __name__ == '__main__':

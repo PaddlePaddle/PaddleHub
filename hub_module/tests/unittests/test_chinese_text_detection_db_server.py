@@ -21,7 +21,7 @@ import paddlehub as hub
 
 class ChineseTextDetectionDBTestCase(TestCase):
     def setUp(self):
-        self.module = hub.Module(name='chinese_text_detection_db_mobile')
+        self.module = hub.Module(name='chinese_text_detection_db_server')
         self.test_images = [
             "../image_dataset/text_recognition/11.jpg",
             "../image_dataset/text_recognition/test_image.jpg"
