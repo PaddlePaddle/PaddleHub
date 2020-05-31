@@ -19,8 +19,6 @@ import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
-import sys
-sys.path.append('..')
 from chinese_ocr_db_crnn_mobile.character import CharacterOps
 from chinese_ocr_db_crnn_mobile.utils import base64_to_cv2, draw_ocr, get_image_ext, sorted_boxes
 
