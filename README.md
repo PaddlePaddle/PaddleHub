@@ -50,8 +50,7 @@ PaddleHub以预训练模型应用为核心具备以下特点：
 
 ### 安装命令
 
-在安装paddlehub之前，请先安装PaddlePaddle深度学习框架。
-PaddlePaddle深度学习框架的安装请查阅[飞桨快速安装](https://www.paddlepaddle.org.cn/install/quick)
+在安装PaddleHub之前，请先安装PaddlePaddle深度学习框架，更多安装说明请查阅[飞桨快速安装](https://www.paddlepaddle.org.cn/install/quick)
 
 ```shell
 pip install paddlehub
