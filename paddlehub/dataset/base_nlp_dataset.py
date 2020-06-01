@@ -128,7 +128,7 @@ class BaseNLPDataset(BaseDataset):
                 text_pair=example.text_b,
                 max_seq_len=self.max_seq_len)
             if example.label:
-                record["label"] = example.label
+                record["label"] = self.label_list.index(example.label)
             records.append(record)
         return records
 
@@ -191,3 +191,72 @@ class BaseNLPDataset(BaseDataset):
                     feed_name for feed_name in self.get_phase_feed_list("train")
                 ]
         return feed_list
+
+
+class BaseSequenceLabelDataset(BaseNLPDataset):
+    def convert_examples_to_records(self, examples):
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data examples, returned by _read_file.
+
+        Returns:
+            a list with all the examples record.
+        """
+        if not self.tokenizer:
+            return []
+
+        records = []
+        for example in examples:
+            tokens, labels = self._reseg_token_label(
+                tokens=example.text_a.split("\002"),
+                labels=example.label.split("\002"))
+            record = self.tokenizer.encode(
+                text=tokens, max_seq_len=self.max_seq_len)
+            if labels:
+                if len(labels) > self.max_seq_len - 2:
+                    labels = labels[0:(self.max_seq_len - 2)]
+                no_entity_id = len(self.label_list) - 1
+                label_ids = [no_entity_id] + [
+                    self.label_list.index(label) for label in labels
+                ] + [no_entity_id]
+                record["label"] = label_ids
+            records.append(record)
+        return records
+
+    def _reseg_token_label(self, tokens, labels=None):
+        if labels:
+            if len(tokens) != len(labels):
+                raise ValueError(
+                    "The length of tokens must be same with labels")
+            ret_tokens = []
+            ret_labels = []
+            for token, label in zip(tokens, labels):
+                sub_token = self.tokenizer.tokenize(token)
+                if len(sub_token) == 0:
+                    continue
+                ret_tokens.extend(sub_token)
+                ret_labels.append(label)
+                if len(sub_token) < 2:
+                    continue
+                sub_label = label
+                if label.startswith("B-"):
+                    sub_label = "I-" + label[2:]
+                ret_labels.extend([sub_label] * (len(sub_token) - 1))
+
+            if len(ret_tokens) != len(ret_labels):
+                raise ValueError(
+                    "The length of ret_tokens can't match with labels")
+            return ret_tokens, ret_labels
+        else:
+            ret_tokens = []
+            for token in tokens:
+                sub_token = self.tokenizer.tokenize(token)
+                if len(sub_token) == 0:
+                    continue
+                ret_tokens.extend(sub_token)
+                if len(sub_token) < 2:
+                    continue
+
+            return ret_tokens, None
