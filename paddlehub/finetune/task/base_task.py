@@ -628,8 +628,7 @@ class BaseTask(object):
                             self.generator, batch_size=self.config.batch_size),
                         multi_devices=self.config.use_data_parallel,
                         drop_last=True)
-        for batch in data_reader():
-            yield batch
+        return data_reader
 
     @property
     def loss(self):
