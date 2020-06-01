@@ -17,11 +17,12 @@
 import collections
 import os
 import unicodedata
+import pickle
 from typing import List, Optional, Union, Tuple
 
 from paddlehub.common.logger import logger
 import sentencepiece as spm
-import pickle
+import numpy as np
 
 from .tokenizer_util import load_vocab, _is_whitespace, _is_control, _is_punctuation, whitespace_tokenize
 

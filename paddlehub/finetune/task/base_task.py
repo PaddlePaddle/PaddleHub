@@ -597,6 +597,41 @@ class BaseTask(object):
         return self.env.generator
 
     @property
+    def reader(self):
+        with fluid.program_guard(self.main_program, self.startup_program):
+            if self.config.use_pyreader:
+                data_loader = fluid.io.DataLoader.from_generator(
+                    feed_list=self.feed_var_list,
+                    capacity=64,
+                    use_double_buffer=True,
+                    iterable=True)
+                if self._compatible_mode:
+                    data_reader = data_loader.set_batch_generator(
+                        self.generator, places=self.places)
+                else:
+                    data_reader = data_loader.set_sample_generator(
+                        self.generator,
+                        places=self.places,
+                        batch_size=self.config.batch_size,
+                        drop_last=True)
+            else:
+                data_feeder = fluid.DataFeeder(
+                    feed_list=self.feed_list, place=self.place)
+                if self._compatible_mode:
+                    data_reader = data_feeder.decorate_reader(
+                        self.generator,
+                        multi_devices=self.config.use_data_parallel,
+                        drop_last=True)
+                else:
+                    data_reader = data_feeder.decorate_reader(
+                        paddle.batch(
+                            self.generator, batch_size=self.config.batch_size),
+                        multi_devices=self.config.use_data_parallel,
+                        drop_last=True)
+        for batch in data_reader():
+            yield batch
+
+    @property
     def loss(self):
         if self.is_predict_phase:
             raise RuntimeError()
@@ -1036,7 +1071,7 @@ class BaseTask(object):
         global_run_states = []
         period_run_states = []
 
-        for run_step, batch in enumerate(self.generator(), start=1):
+        for run_step, batch in enumerate(self.reader, start=1):
             step_run_state = RunState(len(self.fetch_list))
             step_run_state.run_step = 1
             num_batch_examples = len(batch)
@@ -1135,71 +1170,41 @@ class BaseTask(object):
         Returns:
             RunState: the running result of specific phase
         """
-        with fluid.program_guard(self.main_program, self.startup_program):
-            if self.config.use_pyreader:
-                data_loader = fluid.io.DataLoader.from_generator(
-                    feed_list=self.feed_var_list,
-                    capacity=64,
-                    use_double_buffer=True,
-                    iterable=True)
-                if self._compatible_mode:
-                    data_reader = data_loader.set_batch_generator(
-                        self.generator, places=self.places)
-                else:
-                    data_reader = data_loader.set_sample_generator(
-                        self.generator,
-                        places=self.places,
-                        batch_size=self.config.batch_size)
-            else:
-                data_feeder = fluid.DataFeeder(
-                    feed_list=self.feed_list, place=self.place)
-                if self._compatible_mode:
-                    data_reader = data_feeder.decorate_reader(
-                        self.generator,
-                        multi_devices=self.config.use_data_parallel,
-                        drop_last=True)
-                else:
-                    data_reader = data_feeder.decorate_reader(
-                        paddle.batch(
-                            self.generator, batch_size=self.config.batch_size),
-                        multi_devices=self.config.use_data_parallel,
-                        drop_last=True)
+        global_run_states = []
+        period_run_states = []
 
-            global_run_states = []
-            period_run_states = []
+        for run_step, batch in enumerate(self.reader, start=1):
+            step_run_state = RunState(len(self.fetch_list))
+            step_run_state.run_step = 1
+            num_batch_examples = len(batch)
 
-            for run_step, batch in enumerate(data_reader(), start=1):
-                step_run_state = RunState(len(self.fetch_list))
-                step_run_state.run_step = 1
-                num_batch_examples = len(batch)
+            fetch_result = self.exe.run(
+                self.main_program_to_be_run,
+                feed=batch,
+                fetch_list=self.fetch_list,
+                return_numpy=self.return_numpy)
+            if not self.return_numpy:
+                fetch_result = [np.array(x) for x in fetch_result]
 
-                fetch_result = self.exe.run(
-                    self.main_program_to_be_run,
-                    feed=batch,
-                    fetch_list=self.fetch_list,
-                    return_numpy=self.return_numpy)
-                if not self.return_numpy:
-                    fetch_result = [np.array(x) for x in fetch_result]
+            for index, result in enumerate(fetch_result):
+                step_run_state.run_results[index] = result
+            step_run_state.run_examples += num_batch_examples
+            step_run_state.update()
+            period_run_states += [step_run_state]
+            self.env.current_step += 1
+            if self.is_train_phase:
+                if self.current_step % self.config.log_interval == 0:
+                    self._log_interval_event(period_run_states)
+                    global_run_states += period_run_states
+                    period_run_states = []
 
-                for index, result in enumerate(fetch_result):
-                    step_run_state.run_results[index] = result
-                step_run_state.run_examples += num_batch_examples
-                step_run_state.update()
-                period_run_states += [step_run_state]
-                self.env.current_step += 1
-                if self.is_train_phase:
-                    if self.current_step % self.config.log_interval == 0:
-                        self._log_interval_event(period_run_states)
-                        global_run_states += period_run_states
-                        period_run_states = []
+                if self.config.save_ckpt_interval and self.current_step % self.config.save_ckpt_interval == 0:
+                    self._save_ckpt_interval_event()
 
-                    if self.config.save_ckpt_interval and self.current_step % self.config.save_ckpt_interval == 0:
-                        self._save_ckpt_interval_event()
+                if do_eval and self.current_step % self.config.eval_interval == 0:
+                    self._eval_interval_event()
 
-                    if do_eval and self.current_step % self.config.eval_interval == 0:
-                        self._eval_interval_event()
-
-                self._run_step_event(step_run_state)
+            self._run_step_event(step_run_state)
 
             global_run_states += period_run_states
             return global_run_states
