@@ -1172,7 +1172,7 @@ class BaseTask(object):
         global_run_states = []
         period_run_states = []
 
-        for run_step, batch in enumerate(self.reader, start=1):
+        for batch in self.reader:
             step_run_state = RunState(len(self.fetch_list))
             step_run_state.run_step = 1
             num_batch_examples = len(batch)
@@ -1205,8 +1205,8 @@ class BaseTask(object):
 
             self._run_step_event(step_run_state)
 
-            global_run_states += period_run_states
-            return global_run_states
+        global_run_states += period_run_states
+        return global_run_states
 
     def __repr__(self):
         return "Task: %s with metrics_choices: %s, %s" % (
