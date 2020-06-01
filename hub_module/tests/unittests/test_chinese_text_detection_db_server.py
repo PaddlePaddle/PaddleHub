@@ -21,7 +21,7 @@ import paddlehub as hub
 
 class ChineseTextDetectionDBTestCase(TestCase):
     def setUp(self):
-        self.module = hub.Module(name='chinese_text_detection_db')
+        self.module = hub.Module(name='chinese_text_detection_db_server')
         self.test_images = [
             "../image_dataset/text_recognition/11.jpg",
             "../image_dataset/text_recognition/test_image.jpg"
@@ -37,10 +37,8 @@ class ChineseTextDetectionDBTestCase(TestCase):
         results_3 = self.module.detect_text(images=test_images, use_gpu=False)
         for index, res in enumerate(results_1):
             self.assertEqual(res['save_path'], '')
-            self.assertEqual(
-                (res['data'].all() == results_2[index]['data'].all()), True)
-            self.assertEqual(
-                (res['data'].all() == results_3[index]['data'].all()), True)
+            self.assertEqual(res['data'], results_2[index]['data'])
+            self.assertEqual(res['data'], results_3[index]['data'])
 
 
 if __name__ == '__main__':

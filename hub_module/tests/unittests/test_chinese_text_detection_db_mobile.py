@@ -19,39 +19,26 @@ import cv2
 import paddlehub as hub
 
 
-class ChineseOCRDBCRNNTestCase(TestCase):
+class ChineseTextDetectionDBTestCase(TestCase):
     def setUp(self):
-        self.module = hub.Module(name='chinese_ocr_db_crnn')
+        self.module = hub.Module(name='chinese_text_detection_db_mobile')
         self.test_images = [
             "../image_dataset/text_recognition/11.jpg",
             "../image_dataset/text_recognition/test_image.jpg"
         ]
 
     def test_detect_text(self):
-        results_1 = self.module.recognize_text(
+        results_1 = self.module.detect_text(
             paths=self.test_images, use_gpu=True)
-        results_2 = self.module.recognize_text(
+        results_2 = self.module.detect_text(
             paths=self.test_images, use_gpu=False)
 
         test_images = [cv2.imread(img) for img in self.test_images]
-        results_3 = self.module.recognize_text(
-            images=test_images, use_gpu=False)
-        for i, res in enumerate(results_1):
+        results_3 = self.module.detect_text(images=test_images, use_gpu=False)
+        for index, res in enumerate(results_1):
             self.assertEqual(res['save_path'], '')
-
-            for j, item in enumerate(res['data']):
-                self.assertEqual(item['confidence'],
-                                 results_2[i]['data'][j]['confidence'])
-                self.assertEqual(item['confidence'],
-                                 results_3[i]['data'][j]['confidence'])
-                self.assertEqual(item['text'], results_2[i]['data'][j]['text'])
-                self.assertEqual(item['text'], results_3[i]['data'][j]['text'])
-                self.assertEqual(
-                    (item['text_box_position'].all() == results_2[i]['data'][j]
-                     ['text_box_position'].all()), True)
-                self.assertEqual(
-                    (item['text_box_position'].all() == results_3[i]['data'][j]
-                     ['text_box_position'].all()), True)
+            self.assertEqual(res['data'], results_2[index]['data'])
+            self.assertEqual(res['data'], results_3[index]['data'])
 
 
 if __name__ == '__main__':
