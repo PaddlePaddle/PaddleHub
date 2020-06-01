@@ -13,17 +13,23 @@ from paddle.fluid.core import AnalysisConfig, create_paddle_predictor, PaddleTen
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo, runnable, serving
 from PIL import Image
+import base64
 import cv2
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
 
-from chinese_text_detection_db.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
+
+def base64_to_cv2(b64str):
+    data = base64.b64decode(b64str.encode('utf8'))
+    data = np.fromstring(data, np.uint8)
+    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    return data
 
 
 @moduleinfo(
-    name="chinese_text_detection_db",
-    version="1.0.0",
+    name="chinese_text_detection_db_mobile",
+    version="1.0.1",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
@@ -34,10 +40,18 @@ class ChineseTextDetectionDB(hub.Module):
         """
         initialize with the necessary elements
         """
-        self.check_requirements()
         self.pretrained_model_path = os.path.join(self.directory,
                                                   'inference_model')
         self._set_config()
+
+    def check_requirements(self):
+        try:
+            import shapely, pyclipper
+        except:
+            print(
+                'This module requires the shapely, pyclipper tools. The running enviroment does not meet the requirments. Please install the two packages.'
+            )
+            exit()
 
     def _set_config(self):
         """
@@ -72,15 +86,6 @@ class ChineseTextDetectionDB(hub.Module):
         for output_name in output_names:
             output_tensor = self.predictor.get_output_tensor(output_name)
             self.output_tensors.append(output_tensor)
-
-    def check_requirements(self):
-        try:
-            import shapely, pyclipper
-        except:
-            logger.error(
-                'This module requires the shapely, pyclipper tools. The running enviroment does not meet the requirments. Please install the two packages.'
-            )
-            exit()
 
     def read_images(self, paths=[]):
         images = []
@@ -139,7 +144,6 @@ class ChineseTextDetectionDB(hub.Module):
         rect = np.array([tl, tr, br, bl], dtype="float32")
         return rect
 
-    @serving
     def detect_text(self,
                     images=[],
                     paths=[],
@@ -159,6 +163,10 @@ class ChineseTextDetectionDB(hub.Module):
         Returns:
             res (list): The result of text detection box and save path of images.
         """
+        self.check_requirements()
+
+        from chinese_text_detection_db_mobile.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
+
         if use_gpu:
             try:
                 _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -198,7 +206,7 @@ class ChineseTextDetectionDB(hub.Module):
                 dt_boxes_list = postprocessor(data_out, [ratio_list])
                 boxes = self.filter_tag_det_res(dt_boxes_list[0],
                                                 original_image.shape)
-                res['data'] = boxes
+                res['data'] = boxes.astype(np.int).tolist()
 
                 all_imgs.append(im)
                 all_ratios.append(ratio_list)
@@ -248,14 +256,23 @@ class ChineseTextDetectionDB(hub.Module):
             model_filename=model_filename,
             params_filename=params_filename)
 
+    @serving
+    def serving_method(self, images, **kwargs):
+        """
+        Run as a service.
+        """
+        images_decode = [base64_to_cv2(image) for image in images]
+        results = self.detect_text(images=images_decode, **kwargs)
+        return results
+
     @runnable
     def run_cmd(self, argvs):
         """
         Run as a command
         """
         self.parser = argparse.ArgumentParser(
-            description="Run the chinese_text_detection_db module.",
-            prog='hub run chinese_text_detection_db',
+            description="Run the %s module." % self.name,
+            prog='hub run %s' % self.name,
             usage='%(prog)s',
             add_help=True)
 
@@ -307,7 +324,11 @@ class ChineseTextDetectionDB(hub.Module):
 
 if __name__ == '__main__':
     db = ChineseTextDetectionDB()
-    image_path = ['../doc/imgs/11.jpg', '../doc/imgs/12.jpg']
+    image_path = [
+        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/11.jpg',
+        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/12.jpg',
+        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/test_image.jpg'
+    ]
     res = db.detect_text(paths=image_path, visualization=True)
     db.save_inference_model('save')
     print(res)

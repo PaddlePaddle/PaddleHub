@@ -1,5 +1,5 @@
-name: chinese_text_detection_db
-dir: "modules/image/text_recognition/chinese_text_detection_db"
+name: chinese_text_detection_db_mobile
+dir: "modules/image/text_recognition/chinese_text_detection_db_mobile"
 exclude:
   - README.md
 
