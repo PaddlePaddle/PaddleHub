@@ -47,11 +47,6 @@ if __name__ == '__main__':
     else:
         tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
 
-    dataset = hub.dataset.GLUE(
-        "STS-B", tokenizer=tokenizer, max_seq_len=args.max_seq_len)
-    num_classes = dataset.num_labels
-    label_list = dataset.get_labels()
-
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
@@ -73,5 +68,16 @@ if __name__ == '__main__':
 
     # STS-B has provided the predict data, and the dataset has process it. If you want to process customized data,
     # see the predict.py in text_classification demo
-    encoded_data = dataset.get_predict_records()
-    print(reg_task.predict(data=encoded_data, label_list=module.get_labels()))
+    # Use the appropriate tokenizer to preprocess the data
+    # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
+    if module.name == "ernie_tiny":
+        tokenizer = hub.ErnieTinyTokenizer(
+            vocab_file=module.get_vocab_path(),
+            spm_path=module.get_spm_path(),
+            word_dict_path=module.get_word_dict_path())
+    else:
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    dataset = hub.dataset.GLUE(
+        "STS-B", tokenizer=tokenizer, max_seq_len=args.max_seq_len)
+    encoded_data = dataset.get_predict_records()[:10]
+    print(reg_task.predict(data=encoded_data))

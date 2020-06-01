@@ -1041,7 +1041,7 @@ class BaseTask(object):
             step_run_state.run_step = 1
             num_batch_examples = len(batch)
 
-            if not self.config.use_pyreader:
+            if not self.config.use_pyreader and self._compatible_mode:
                 # if use pyreader, the nlp_reader return [batch]
                 batch = batch[0]
 
