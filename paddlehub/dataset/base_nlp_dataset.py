@@ -215,12 +215,17 @@ class BaseSequenceLabelDataset(BaseNLPDataset):
             record = self.tokenizer.encode(
                 text=tokens, max_seq_len=self.max_seq_len)
             if labels:
+                # Truncating
                 if len(labels) > self.max_seq_len - 2:
                     labels = labels[0:(self.max_seq_len - 2)]
+                # Filling
                 no_entity_id = len(self.label_list) - 1
                 label_ids = [no_entity_id] + [
                     self.label_list.index(label) for label in labels
                 ] + [no_entity_id]
+                # Padding
+                label_ids = label_ids + [no_entity_id
+                                         ] * (self.max_seq_len - len(label_ids))
                 record["label"] = label_ids
             records.append(record)
         return records

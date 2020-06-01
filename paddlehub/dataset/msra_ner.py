@@ -70,7 +70,7 @@ class MSRA_NER(BaseSequenceLabelDataset):
 if __name__ == "__main__":
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
     tokenizer = BertTokenizer(vocab_file='vocab.txt')
-    ds = MSRA_NER(tokenizer=tokenizer, max_seq_len=10)
+    ds = MSRA_NER(tokenizer=tokenizer, max_seq_len=30)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
