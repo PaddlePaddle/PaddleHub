@@ -737,6 +737,8 @@ class BertTokenizer(object):
             encoded_inputs[
                 "special_tokens_mask"] = self.get_special_tokens_mask(
                     ids, pair_ids)
+        if return_length:
+            encoded_inputs["seq_len"] = len(encoded_inputs["input_ids"])
 
         # Check lengths
         assert max_seq_len is None or len(
@@ -779,9 +781,6 @@ class BertTokenizer(object):
         if return_position_ids:
             encoded_inputs["position_ids"] = list(
                 range(len(encoded_inputs["input_ids"])))
-
-        if return_length:
-            encoded_inputs["seq_len"] = len(encoded_inputs["input_ids"])
 
         return encoded_inputs
 
