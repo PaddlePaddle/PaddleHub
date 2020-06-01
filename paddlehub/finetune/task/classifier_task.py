@@ -143,21 +143,26 @@ class ClassifierTask(BaseTask):
     def _postprocessing(self, run_states):
         if self._compatible_mode:
             try:
-                id2label = {
-                    val: key
-                    for key, val in self._base_data_reader.label_map.items()
-                }
+                label_list = list(self._base_data_reader.label_map.keys())
             except:
                 raise Exception(
                     "ImageClassificationDataset does not support postprocessing, please use BaseCVDataset instead"
                 )
         else:
-            id2label = self._label_list
+            if self._label_list:
+                label_list = self._label_list
+            else:
+                logger.warning(
+                    "Fail to postprocess the predict output. Please set label_list parameter in predict function or initialize the task with dataset parameter."
+                )
+                return run_states
         results = []
         for batch_state in run_states:
             batch_result = batch_state.run_results
             batch_infer = np.argmax(batch_result[0], axis=1)
-            results += [id2label[sample_infer] for sample_infer in batch_infer]
+            results += [
+                label_list[sample_infer] for sample_infer in batch_infer
+            ]
         return results
 
 
@@ -326,8 +331,9 @@ class MultiLabelClassifierTask(ClassifierTask):
     def __init__(self,
                  feature,
                  num_classes,
-                 feed_list,
-                 data_reader,
+                 dataset=None,
+                 feed_list=None,
+                 data_reader=None,
                  startup_program=None,
                  config=None,
                  hidden_units=None,
@@ -337,6 +343,7 @@ class MultiLabelClassifierTask(ClassifierTask):
 
         main_program = feature.block.program
         super(MultiLabelClassifierTask, self).__init__(
+            dataset=dataset,
             data_reader=data_reader,
             feature=feature,
             num_classes=num_classes,
@@ -438,7 +445,17 @@ class MultiLabelClassifierTask(ClassifierTask):
 
     def _postprocessing(self, run_states):
         results = []
-        label_list = list(self._base_data_reader.label_map.keys())
+        if self._compatible_mode:
+            label_list = list(self._base_data_reader.label_map.keys())
+        else:
+            if self._label_list:
+                label_list = self._label_list
+            else:
+                logger.warning(
+                    "Fail to postprocess the predict output. Please set label_list parameter in predict function or initialize the task with dataset parameter."
+                )
+                return run_states
+
         for batch_state in run_states:
             batch_result = batch_state.run_results
             for sample_id in range(len(batch_result[0])):

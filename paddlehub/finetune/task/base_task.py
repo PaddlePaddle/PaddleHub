@@ -341,6 +341,8 @@ class BaseTask(object):
         self.enter_phase("train")
 
         self.dataset = dataset
+        if dataset:
+            self._label_list = dataset.get_labels()
         # Compatible code for usage deprecated in paddlehub v1.8.
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
@@ -1060,7 +1062,7 @@ class BaseTask(object):
             data=None,
             label_list=None,
             load_best_model=True,
-            return_result="default",
+            return_result=False,
             accelerate_mode=True,
     ):
         """
@@ -1069,9 +1071,9 @@ class BaseTask(object):
         Args:
             data (list): the data will be predicted. Its element should be a record when the task is initialized without data_reader param,
                          or a plaintext string list when the task is initialized with data_reader param (deprecated in paddlehub v1.8).
+            label_list (list): the label list, used to proprocess the output.
             load_best_model (bool): load the best model or not
-            return_result (bool): return a readable result or just the raw run result. "default" means True when the task is initialized without data_reader param,
-                                  or False when the task is initialized with data_reader param (deprecated in paddlehub v1.8).
+            return_result (bool): return a readable result or just the raw run result. Always True when the task is not initialized with data_reader param.
             accelerate_mode (bool): use high-performance predictor or not
 
         Returns:
@@ -1084,11 +1086,6 @@ class BaseTask(object):
             )
             accelerate_mode = False
         self.accelerate_mode = accelerate_mode
-        if return_result == "default":
-            if self._compatible_mode:
-                return_result = False
-            else:
-                return_result = True
 
         with self.phase_guard(phase="predict"):
             self._predict_data = data
@@ -1108,7 +1105,7 @@ class BaseTask(object):
 
             self._predict_end_event(run_states)
             self._predict_data = None
-            if return_result:
+            if return_result or not self._compatible_mode:
                 return self._postprocessing(run_states)
         return run_states
 

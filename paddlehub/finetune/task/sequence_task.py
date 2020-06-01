@@ -21,10 +21,9 @@ import time
 from collections import OrderedDict
 
 import numpy as np
-import paddle
 import paddle.fluid as fluid
 from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
-from paddlehub.common.utils import version_compare
+from paddlehub.common.logger import logger
 from .base_task import BaseTask
 
 
@@ -33,8 +32,9 @@ class SequenceLabelTask(BaseTask):
                  feature,
                  max_seq_len,
                  num_classes,
-                 feed_list,
-                 data_reader,
+                 dataset=None,
+                 feed_list=None,
+                 data_reader=None,
                  startup_program=None,
                  config=None,
                  metrics_choices="default",
@@ -46,6 +46,7 @@ class SequenceLabelTask(BaseTask):
 
         main_program = feature.block.program
         super(SequenceLabelTask, self).__init__(
+            dataset=dataset,
             data_reader=data_reader,
             main_program=main_program,
             feed_list=feed_list,
@@ -215,10 +216,22 @@ class SequenceLabelTask(BaseTask):
         return [output.name for output in self.outputs]
 
     def _postprocessing(self, run_states):
-        id2label = {
-            val: key
-            for key, val in self._base_data_reader.label_map.items()
-        }
+        if self._compatible_mode:
+            id2label = {
+                val: key
+                for key, val in self._base_data_reader.label_map.items()
+            }
+        else:
+            if self._label_list:
+                id2label = {}
+                for index, label in enumerate(self._label_list):
+                    id2label[index] = label
+            else:
+                logger.warning(
+                    "Fail to postprocess the predict output. Please set label_list parameter in predict function or initialize the task with dataset parameter."
+                )
+                return run_states
+
         results = []
         for batch_states in run_states:
             batch_results = batch_states.run_results

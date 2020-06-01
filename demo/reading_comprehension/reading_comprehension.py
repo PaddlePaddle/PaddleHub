@@ -17,7 +17,6 @@
 import argparse
 import ast
 
-import paddle.fluid as fluid
 import paddlehub as hub
 
 hub.common.logger.logger.setLevel("INFO")
