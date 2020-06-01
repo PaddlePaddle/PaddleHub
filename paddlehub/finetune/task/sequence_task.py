@@ -200,11 +200,14 @@ class SequenceLabelTask(BaseTask):
 
     @property
     def feed_list(self):
-        feed_list = [varname for varname in self._base_feed_list]
-        if self.is_train_phase or self.is_test_phase:
-            feed_list += [self.labels[0].name, self.seq_len.name]
+        if self._compatible_mode:
+            feed_list = [varname for varname in self._base_feed_list]
+            if self.is_train_phase or self.is_test_phase:
+                feed_list += [self.labels[0].name, self.seq_len.name]
+            else:
+                feed_list += [self.seq_len.name]
         else:
-            feed_list += [self.seq_len.name]
+            feed_list = super(SequenceLabelTask, self).feed_list
         return feed_list
 
     @property

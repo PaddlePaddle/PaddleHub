@@ -306,9 +306,9 @@ class TextClassifierTask(ClassifierTask):
                 feed_list += [self.seq_len.name]
             if self.is_train_phase or self.is_test_phase:
                 feed_list += [self.labels[0].name]
-            return feed_list
         else:
-            return super(TextClassifierTask, self).feed_list
+            feed_list = super(TextClassifierTask, self).feed_list
+        return feed_list
 
     @property
     def fetch_list(self):
