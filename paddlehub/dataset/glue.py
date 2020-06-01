@@ -168,25 +168,23 @@ class GLUE(BaseNLPDataset):
 if __name__ == "__main__":
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
     tokenizer = BertTokenizer(vocab_file='vocab.txt')
-    for sub_dataset in ['STS-B']:
+    for sub_dataset in [
+            'CoLA', 'MNLI', 'MRPC', 'QNLI', 'QQP', 'RTE', 'SST-2', 'STS-B'
+    ]:
         print(sub_dataset)
         ds = GLUE(sub_dataset=sub_dataset, tokenizer=tokenizer, max_seq_len=10)
-        # for e in ds.get_train_examples()[:2]:
-        #     print(e)
-        # print()
-        # for e in ds.get_dev_examples()[:2]:
-        #     print(e)
-        # print()
-        # for e in ds.get_test_examples()[:2]:
-        #     print(e)
-        # print()
+        for e in ds.get_train_examples()[:2]:
+            print(e)
+        print()
+        for e in ds.get_dev_examples()[:2]:
+            print(e)
+        print()
+        for e in ds.get_test_examples()[:2]:
+            print(e)
+        print()
         for e in ds.get_predict_examples()[:2]:
             print(e)
-        # print()
-        # print("first 10 dev records")
-        # for e in ds.get_dev_records()[:10]:
-        #     print(e)
-        #
-        # print("first 10 dev records")
-        for e in ds.get_predict_records()[:10]:
+        print()
+        print("first 10 dev records")
+        for e in ds.get_dev_records()[:10]:
             print(e)
