@@ -21,7 +21,7 @@ from yolov3_mobilenet_v1_coco2017.yolo_head import MultiClassNMS, YOLOv3Head
 
 @moduleinfo(
     name="yolov3_mobilenet_v1_coco2017",
-    version="1.0.0",
+    version="1.0.1",
     type="CV/object_detection",
     summary=
     "Baidu's YOLOv3 model for object detection with backbone MobileNet_V1, trained with dataset COCO2017.",
@@ -189,7 +189,7 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
                 int(_places[0])
             except:
                 raise RuntimeError(
-                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
                 )
 
         paths = paths if paths else list()
@@ -270,7 +270,7 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.face_detection(
+        results = self.object_detection(
             paths=[args.input_path],
             batch_size=args.batch_size,
             use_gpu=args.use_gpu,

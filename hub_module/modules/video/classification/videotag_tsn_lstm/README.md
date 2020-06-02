@@ -1,9 +1,8 @@
 ```shell
 $ hub install videotag_tsn_lstm==1.0.0
 ```
-<p align="center">
-<img src="https://paddlehub.bj.bcebos.com/model/video/video_classifcation/VideoTag_TSN_AttentionLSTM.png" hspace='10'/> <br />
-</p>
+![image](https://paddlehub.bj.bcebos.com/model/video/video_classifcation/VideoTag_TSN_AttentionLSTM.png)
+
 具体网络结构可参考论文[TSN](https://arxiv.org/abs/1608.00859)和[AttentionLSTM](https://arxiv.org/abs/1503.08909)。
 
 ## 命令行预测示例
@@ -16,10 +15,10 @@ hub run videotag_tsn_lstm --input_path 1.mp4 --use_gpu False
 
 ## API
 ```python
-def classification(paths,
-                   use_gpu=False,
-                   threshold=0.5,
-                   top_k=10)
+def classify(paths,
+             use_gpu=False,
+             threshold=0.5,
+             top_k=10)
 ```
 
 用于视频分类预测
@@ -46,14 +45,13 @@ import paddlehub as hub
 videotag = hub.Module(name="videotag_tsn_lstm")
 
 # execute predict and print the result
-results = videotag.classification(paths=["1.mp4","2.mp4"], use_gpu=True)
-for result in results:
-    print(result)
+results = videotag.classify(paths=["1.mp4","2.mp4"], use_gpu=True)
+print(results)
 ```
 
 ## 依赖
 
-paddlepaddle >= 1.6.2
+paddlepaddle >= 1.7.2
 
 paddlehub >= 1.6.0
 

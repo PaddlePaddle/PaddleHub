@@ -50,7 +50,7 @@ PaddleHub以预训练模型应用为核心具备以下特点：
 
 ### 安装命令
 
-PaddlePaddle框架的安装请查阅[飞桨快速安装](https://www.paddlepaddle.org.cn/install/quick)
+在安装PaddleHub之前，请先安装PaddlePaddle深度学习框架，更多安装说明请查阅[飞桨快速安装](https://www.paddlepaddle.org.cn/install/quick)
 
 ```shell
 pip install paddlehub
@@ -65,6 +65,18 @@ pip install paddlehub
 PaddleHub采用模型即软件的设计理念，所有的预训练模型与Python软件包类似，具备版本的概念，通过`hub install/uninstall` 可以便捷完成模型的升级和卸载。还可以通过Python的API或命令行实现快速预测的软件集成，更方便地应用和集成深度学习模型。
 
 安装PaddleHub后，执行命令[hub run](./docs/tutorial/cmdintro.md)，即可快速体验无需代码、一键预测的功能：
+
+* 使用[文字识别](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=TextRecognition)轻量级中文OCR模型chinese_ocr_db_crnn_mobile即可一键快速识别图片中的文字。
+```shell
+$ wget https://paddlehub.bj.bcebos.com/model/image/ocr/test_ocr.jpg
+$ hub run chinese_ocr_db_crnn_mobile --input_path test_ocr.jpg --visualization=True
+```
+
+预测结果图片保存在当前运行路径下ocr_result文件夹中，如下图所示。
+
+<p align="center">
+ <img src="./docs/imgs/ocr_res.jpg" width='70%' align="middle"  
+</p>
 
 * 使用[目标检测](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ObjectDetection)模型pyramidbox_lite_mobile_mask对图片进行口罩检测
 ```shell
@@ -192,5 +204,5 @@ $ hub uninstall ernie
 
 ## 更新历史
 
-PaddleHub v1.6 已发布！
+PaddleHub v1.7 已发布！
 更多升级详情参考[更新历史](./RELEASE.md)

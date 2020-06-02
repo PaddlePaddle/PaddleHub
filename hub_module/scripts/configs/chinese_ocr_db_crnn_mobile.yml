@@ -1,0 +1,10 @@
+name: chinese_ocr_db_crnn_mobile
+dir: "modules/image/text_recognition/chinese_ocr_db_crnn_mobile"
+exclude:
+  - README.md
+
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/image/ocr/chinese_ocr_db_rcnn_infer_model.tar.gz
+    dest: .
+    uncompress: True

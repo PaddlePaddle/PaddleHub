@@ -37,6 +37,7 @@ class PyramidBoxLiteMobileMask(hub.Module):
         else:
             self.face_detector = face_detector_module
         self._set_config()
+        self.processor = self
 
     def _set_config(self):
         """
@@ -107,7 +108,7 @@ class PyramidBoxLiteMobileMask(hub.Module):
                 int(_places[0])
             except:
                 raise RuntimeError(
-                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
                 )
 
         # compatibility with older versions

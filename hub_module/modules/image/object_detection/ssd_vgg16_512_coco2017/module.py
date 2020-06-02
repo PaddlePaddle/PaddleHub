@@ -21,7 +21,7 @@ from ssd_vgg16_512_coco2017.data_feed import reader
 
 @moduleinfo(
     name="ssd_vgg16_512_coco2017",
-    version="1.0.0",
+    version="1.0.1",
     type="cv/object_detection",
     summary="SSD with backbone VGG16, trained with dataset COCO.",
     author="paddlepaddle",
@@ -200,7 +200,7 @@ class SSDVGG16_512(hub.Module):
                 int(_places[0])
             except:
                 raise RuntimeError(
-                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
                 )
 
         paths = paths if paths else list()
@@ -278,7 +278,7 @@ class SSDVGG16_512(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.face_detection(
+        results = self.object_detection(
             paths=[args.input_path],
             batch_size=args.batch_size,
             use_gpu=args.use_gpu,

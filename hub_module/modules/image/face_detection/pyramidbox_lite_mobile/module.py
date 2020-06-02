@@ -28,6 +28,7 @@ class PyramidBoxLiteMobile(hub.Module):
         self.default_pretrained_model_path = os.path.join(
             self.directory, "pyramidbox_lite_mobile_face_detection")
         self._set_config()
+        self.processor = self
 
     def _set_config(self):
         """
@@ -81,7 +82,7 @@ class PyramidBoxLiteMobile(hub.Module):
                 int(_places[0])
             except:
                 raise RuntimeError(
-                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
                 )
 
         # compatibility with older versions
@@ -129,6 +130,9 @@ class PyramidBoxLiteMobile(hub.Module):
 
         program, feeded_var_names, target_vars = fluid.io.load_inference_model(
             dirname=self.default_pretrained_model_path, executor=exe)
+
+        var = program.global_block().vars['detection_output_0.tmp_1']
+        var.desc.set_dtype(fluid.core.VarDesc.VarType.INT32)
 
         fluid.io.save_inference_model(
             dirname=dirname,

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Finetuning on sequence labeling task."""
+"""Fine-tuning on sequence labeling task."""
 
 import argparse
 import ast
@@ -23,7 +23,7 @@ import paddlehub as hub
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for fine-tuning, input should be True or False")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
 parser.add_argument("--warmup_proportion", type=float, default=0.1, help="Warmup proportion params for warmup strategy")
@@ -60,13 +60,13 @@ if __name__ == '__main__':
         inputs["segment_ids"].name, inputs["input_mask"].name
     ]
 
-    # Select a finetune strategy
+    # Select a fine-tune strategy
     strategy = hub.AdamWeightDecayStrategy(
         warmup_proportion=args.warmup_proportion,
         weight_decay=args.weight_decay,
         learning_rate=args.learning_rate)
 
-    # Setup runing config for PaddleHub Finetune API
+    # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
         use_data_parallel=args.use_data_parallel,
         use_cuda=args.use_gpu,
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         checkpoint_dir=args.checkpoint_dir,
         strategy=strategy)
 
-    # Define a sequence labeling finetune task by PaddleHub's API
+    # Define a sequence labeling fine-tune task by PaddleHub's API
     # If add crf, the network use crf as decoder
     seq_label_task = hub.SequenceLabelTask(
         data_reader=reader,
@@ -84,8 +84,8 @@ if __name__ == '__main__':
         max_seq_len=args.max_seq_len,
         num_classes=dataset.num_labels,
         config=config,
-        add_crf=True)
+        add_crf=False)
 
-    # Finetune and evaluate model by PaddleHub's API
+    # Fine-tune and evaluate model by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically
     seq_label_task.finetune_and_eval()
