@@ -42,9 +42,11 @@ PaddlePaddle 提供了丰富的模型，使得用户可以采用模块化的方�
 | 语义模型   | [ERNIE](https://www.paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel) | **SOTA 语义模型，中文任务全面优于BERT**。 |
 | 图像分类   | [菜品识别](https://www.paddlepaddle.org.cn/hubdetail?name=resnet50_vd_dishes&en_category=ImageClassification)                | 私有数据集训练，适合进一步菜品方向微调。           |
 | 图像分类   | [动物识别](https://www.paddlepaddle.org.cn/hubdetail?name=resnet50_vd_animals&en_category=ImageClassification)               | 私有数据集训练，适合进一步动物方向微调。           |
-| 目标检测   | [行人检测]（https://www.paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_pedestrian&en_category=ObjectDetection）                    | 百度自研模型，海量私有数据集训练。               |
-| 目标检测   | [车辆检测]（https://www.paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_vehicles&en_category=ObjectDetection）                                         | 百度自研模型，海量私有数据集训练。               |
-| OCR      | [超轻量中文OCR]（https://www.paddlepaddle.org.cn/hubdetail?name=chinese_ocr_db_crnn_mobile&en_category=TextRecognition）                                          | 开源模型基础上性能优化，增加私有数据集训练。          |
+| 目标检测   |
+[行人检测](https://www.paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_pedestrian&en_category=ObjectDetection)                    | 百度自研模型，海量私有数据集训练。               |
+| 目标检测   |
+[车辆检测](https://www.paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_vehicles&en_category=ObjectDetection)                                        | 百度自研模型，海量私有数据集训练。               |
+| OCR      | [超轻量中文OCR](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_ocr_db_crnn_mobile&en_category=TextRecognition)                                            | 开源模型基础上性能优化，增加私有数据集训练。          |
 | 语音合成   | WaveFlow（即将开源）                                         | 百度自研模型，海量私有数据集训练。                 |
 
 ## 图像
