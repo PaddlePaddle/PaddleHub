@@ -37,6 +37,7 @@ class PyramidBoxLiteServerMask(hub.Module):
         else:
             self.face_detector = face_detector_module
         self._set_config()
+        self.processor = self
 
     def _set_config(self):
         """

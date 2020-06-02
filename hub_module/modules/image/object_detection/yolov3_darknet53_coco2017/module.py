@@ -21,7 +21,7 @@ from yolov3_darknet53_coco2017.yolo_head import MultiClassNMS, YOLOv3Head
 
 @moduleinfo(
     name="yolov3_darknet53_coco2017",
-    version="1.1.0",
+    version="1.1.1",
     type="CV/object_detection",
     summary=
     "Baidu's YOLOv3 model for object detection, with backbone DarkNet53, trained with dataset coco2017.",
@@ -270,7 +270,7 @@ class YOLOv3DarkNet53Coco2017(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.face_detection(
+        results = self.object_detection(
             paths=[args.input_path],
             batch_size=args.batch_size,
             use_gpu=args.use_gpu,

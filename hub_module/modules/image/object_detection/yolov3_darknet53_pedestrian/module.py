@@ -21,7 +21,7 @@ from yolov3_darknet53_pedestrian.yolo_head import MultiClassNMS, YOLOv3Head
 
 @moduleinfo(
     name="yolov3_darknet53_pedestrian",
-    version="1.0.0",
+    version="1.0.1",
     type="CV/object_detection",
     summary=
     "Baidu's YOLOv3 model for pedestrian detection, with backbone DarkNet53.",
@@ -280,7 +280,7 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.face_detection(
+        results = self.object_detection(
             paths=[args.input_path],
             batch_size=args.batch_size,
             use_gpu=args.use_gpu,

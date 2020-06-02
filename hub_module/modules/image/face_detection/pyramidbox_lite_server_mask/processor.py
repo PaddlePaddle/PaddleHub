@@ -94,12 +94,12 @@ def draw_bounding_box_on_image(save_im_path, output_data):
             box_fill = (255)
             text_fill = (0)
 
-            draw.rectangle(
-                xy=(bbox['left'], bbox['top'] - (textsize_height + 5),
-                    bbox['left'] + textsize_width + 10, bbox['top'] - 3),
-                fill=box_fill)
-            draw.text(
-                xy=(bbox['left'], bbox['top'] - 15), text=text, fill=text_fill)
+        draw.rectangle(
+            xy=(bbox['left'], bbox['top'] - (textsize_height + 5),
+                bbox['left'] + textsize_width + 10, bbox['top'] - 3),
+            fill=box_fill)
+        draw.text(
+            xy=(bbox['left'], bbox['top'] - 15), text=text, fill=text_fill)
     image.save(save_im_path)
 
 
