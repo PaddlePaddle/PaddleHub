@@ -785,7 +785,7 @@ class BertTokenizer(object):
                             max_seq_len: Optional[int] = None,
                             pad_to_max_seq_len: bool = True):
         """
-        Returns a list containing the encoded token labels, usually used in sequence label task:
+        Returns a list containing the encoded token labels. BaseSequenceLabelDataset use it to encode the token labels.
 
         Args:
             labels (:obj:`str`, :obj:`List[str]` or :obj:`List[int]`):
