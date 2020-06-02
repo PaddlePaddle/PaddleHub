@@ -42,29 +42,15 @@ if __name__ == '__main__':
     module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
 
-    # Sentence labeling dataset reader
+    # Download dataset and get its label list and label num
+    # If you just want labels information, you can omit its tokenizer parameter to avoid preprocessing the train set.
     dataset = hub.dataset.MSRA_NER()
-    reader = hub.reader.SequenceLabelReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        sp_model_path=module.get_spm_path(),
-        word_dict_path=module.get_word_dict_path())
-
-    inv_label_map = {val: key for key, val in reader.label_map.items()}
+    num_classes = dataset.num_labels
+    label_list = dataset.get_labels()
 
     # Construct transfer learning network
     # Use "sequence_output" for token-level output.
     sequence_output = outputs["sequence_output"]
-
-    # Setup feed list for data feeder
-    # Must feed all the tensor of ERNIE's module need
-    feed_list = [
-        inputs["input_ids"].name,
-        inputs["position_ids"].name,
-        inputs["segment_ids"].name,
-        inputs["input_mask"].name,
-    ]
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
@@ -77,33 +63,32 @@ if __name__ == '__main__':
     # Define a sequence labeling fine-tune task by PaddleHub's API
     # if add crf, the network use crf as decoder
     seq_label_task = hub.SequenceLabelTask(
-        data_reader=reader,
         feature=sequence_output,
-        feed_list=feed_list,
         max_seq_len=args.max_seq_len,
-        num_classes=dataset.num_labels,
+        num_classes=num_classes,
         config=config,
         add_crf=False)
 
     # Data to be predicted
     # If using python 2, prefix "u" is necessary
-    data = [
-        [u"我们变而以书会友，以书结缘，把欧美、港台流行的食品类图谱、画册、工具书汇集一堂。"],
-        [u"为了跟踪国际最新食品工艺、流行趋势，大量搜集海外专业书刊资料是提高技艺的捷径。"],
-        [u"其中线装古籍逾千册；民国出版物几百种；珍本四册、稀见本四百余册，出版时间跨越三百余年。"],
-        [u"有的古木交柯，春机荣欣，从诗人句中得之，而入画中，观之令人心驰。"],
-        [u"不过重在晋趣，略增明人气息，妙在集古有道、不露痕迹罢了。"],
+    text_a = [
+        "我们变而以书会友，以书结缘，把欧美、港台流行的食品类图谱、画册、工具书汇集一堂。",
+        "为了跟踪国际最新食品工艺、流行趋势，大量搜集海外专业书刊资料是提高技艺的捷径。",
+        "其中线装古籍逾千册；民国出版物几百种；珍本四册、稀见本四百余册，出版时间跨越三百余年。",
+        "有的古木交柯，春机荣欣，从诗人句中得之，而入画中，观之令人心驰。",
+        "不过重在晋趣，略增明人气息，妙在集古有道、不露痕迹罢了。",
     ]
 
     # Add 0x02 between characters to match the format of training data,
     # otherwise the length of prediction results will not match the input string
     # if the input string contains non-Chinese characters.
-    tmp_data = []
-    for example in data:
-        formatted = []
-        for sentence in example:
-            formatted.append('\x02'.join(list(sentence)))
-        tmp_data.append(formatted)
-    data = tmp_data
+    formatted_text_a = list(map("\002".join, text_a))
 
-    print(seq_label_task.predict(data=data, return_result=True))
+    # Use the appropriate tokenizer to preprocess the data
+    # For ernie_tiny, it use BertTokenizer too.
+    tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    encoded_data = [
+        tokenizer.encode(text=text, max_seq_len=args.max_seq_len)
+        for text in formatted_text_a
+    ]
+    print(seq_label_task.predict(data=encoded_data, label_list=label_list))

@@ -31,6 +31,7 @@ from . import dataset
 from . import finetune
 from . import reader
 from . import network
+from . import tokenizer
 
 from .common.dir import USER_HOME
 from .common.dir import HUB_HOME
@@ -70,3 +71,6 @@ from .finetune.strategy import CombinedStrategy
 from .autofinetune.evaluator import report_final_result
 
 from .module.nlp_module import NLPPredictionModule, TransformerModule
+
+from .tokenizer.bert_tokenizer import BertTokenizer
+from .tokenizer.bert_tokenizer import ErnieTinyTokenizer

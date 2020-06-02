@@ -36,7 +36,7 @@ class GLUE(BaseNLPDataset):
     for more information
     """
 
-    def __init__(self, sub_dataset='SST-2'):
+    def __init__(self, sub_dataset='SST-2', tokenizer=None, max_seq_len=None):
         # sub_dataset : CoLA, MNLI, MRPC, QNLI, QQP, RTE, SST-2, STS-B
         if sub_dataset not in [
                 'CoLA', 'MNLI', 'MNLI_m', 'MNLI_mm', 'MRPC', 'QNLI', 'QQP',
@@ -85,7 +85,8 @@ class GLUE(BaseNLPDataset):
             predict_file=predict_file,
             label_file=None,
             label_list=label_list,
-        )
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -165,11 +166,13 @@ class GLUE(BaseNLPDataset):
 
 
 if __name__ == "__main__":
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
     for sub_dataset in [
             'CoLA', 'MNLI', 'MRPC', 'QNLI', 'QQP', 'RTE', 'SST-2', 'STS-B'
     ]:
         print(sub_dataset)
-        ds = GLUE(sub_dataset=sub_dataset)
+        ds = GLUE(sub_dataset=sub_dataset, tokenizer=tokenizer, max_seq_len=10)
         for e in ds.get_train_examples()[:2]:
             print(e)
         print()
@@ -182,3 +185,6 @@ if __name__ == "__main__":
         for e in ds.get_predict_examples()[:2]:
             print(e)
         print()
+        print("first 10 dev records")
+        for e in ds.get_dev_records()[:10]:
+            print(e)

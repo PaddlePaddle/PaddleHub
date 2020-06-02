@@ -459,10 +459,13 @@ class ReadingComprehensionTask(BaseTask):
 
     @property
     def feed_list(self):
-        feed_list = [varname for varname in self._base_feed_list
-                     ] + [self.unique_ids.name]
-        if self.is_train_phase or self.is_test_phase:
-            feed_list += [label.name for label in self.labels]
+        if self._compatible_mode:
+            feed_list = [varname for varname in self._base_feed_list
+                         ] + [self.unique_ids.name]
+            if self.is_train_phase or self.is_test_phase:
+                feed_list += [label.name for label in self.labels]
+        else:
+            feed_list = super(ReadingComprehensionTask, self).feed_list
         return feed_list
 
     @property

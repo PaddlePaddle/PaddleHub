@@ -167,7 +167,7 @@ class DefaultStrategy(object):
             self.optimizer = fluid.optimizer.Adam(
                 learning_rate=self.learning_rate, **kwargs)
 
-    def execute(self, loss, data_reader, config, dev_count):
+    def execute(self, loss, max_train_steps):
         if self.optimizer is not None:
             self.optimizer.minimize(loss)
         else:
@@ -456,26 +456,9 @@ class CombinedStrategy(DefaultStrategy):
                             "weight_decay"] * scheduled_lr
                     fluid.layers.assign(output=param, input=updated_param)
 
-    def execute(self, loss, data_reader, config, dev_count):
+    def execute(self, loss, max_train_steps):
         # base information
         self.main_program = loss.block.program
-        self.config = config
-
-        # self.num_examples = {'train': -1, 'dev': -1, 'test': -1} before data_generator
-        data_reader.data_generator(
-            batch_size=config.batch_size, phase='train', shuffle=True)
-        num_train_examples = data_reader.num_examples['train']
-
-        max_train_steps = config.num_epoch * num_train_examples // config.batch_size // dev_count
-
-        try:
-            # nlp_reader
-            _in_tokens = data_reader.in_tokens
-            if _in_tokens:
-                max_train_steps *= data_reader.max_seq_len
-        except:
-            # cv_reader without .in_tokens and .max_seq_len
-            pass
 
         if self.scheduler["discriminative"]["blocks"] > 0 or self.scheduler[
                 "gradual_unfreeze"]["blocks"] > 0:
@@ -494,8 +477,7 @@ class CombinedStrategy(DefaultStrategy):
         self.regularization_handler(loss, scheduled_lr)
 
         logger.info(self.__str__())
-
-        return scheduled_lr, max_train_steps
+        return scheduled_lr
 
     def exclude_from_weight_decay(self, name):
         if name.find("layer_norm") > -1:

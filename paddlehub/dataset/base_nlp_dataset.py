@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import io
 import csv
+import numpy as np
 
 from paddlehub.dataset import InputExample, BaseDataset
 from paddlehub.common.logger import logger
@@ -36,7 +37,9 @@ class BaseNLPDataset(BaseDataset):
                  train_file_with_header=False,
                  dev_file_with_header=False,
                  test_file_with_header=False,
-                 predict_file_with_header=False):
+                 predict_file_with_header=False,
+                 tokenizer=None,
+                 max_seq_len=None):
         super(BaseNLPDataset, self).__init__(
             base_path=base_path,
             train_file=train_file,
@@ -49,6 +52,24 @@ class BaseNLPDataset(BaseDataset):
             dev_file_with_header=dev_file_with_header,
             test_file_with_header=test_file_with_header,
             predict_file_with_header=predict_file_with_header)
+        self.tokenizer = tokenizer
+        self.max_seq_len = max_seq_len
+        if self.train_examples:
+            logger.info("Processing the train set...")
+            self.train_records = self.convert_examples_to_records(
+                self.train_examples)
+        if self.dev_examples:
+            logger.info("Processing the dev set...")
+            self.dev_records = self.convert_examples_to_records(
+                self.dev_examples)
+        if self.test_examples:
+            logger.info("Processing the test set...")
+            self.test_records = self.convert_examples_to_records(
+                self.test_examples)
+        if self.predict_examples:
+            logger.info("Processing the predict set...")
+            self.predict_records = self.convert_examples_to_records(
+                self.predict_examples)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -96,3 +117,184 @@ class BaseNLPDataset(BaseDataset):
                             % (input_file))
                 examples.append(example)
             return examples
+
+    def convert_examples_to_records(self, examples):
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data examples, returned by _read_file.
+
+        Returns:
+            a list with all the examples record.
+        """
+        if not self.tokenizer:
+            return []
+
+        records = []
+        for example in examples:
+            record = self.tokenizer.encode(
+                text=example.text_a,
+                text_pair=example.text_b,
+                max_seq_len=self.max_seq_len)
+            if example.label:
+                record["label"] = self.label_list.index(example.label)
+            records.append(record)
+        return records
+
+    def get_train_records(self, shuffle=False):
+        records = self.train_records
+        if shuffle:
+            np.random.shuffle(records)
+        return records
+
+    def get_dev_records(self, shuffle=False):
+        records = self.dev_records
+        if shuffle:
+            np.random.shuffle(records)
+        return records
+
+    def get_test_records(self, shuffle=False):
+        records = self.test_records
+        if shuffle:
+            np.random.shuffle(records)
+        return records
+
+    def get_val_records(self, shuffle=False):
+        records = self.get_dev_records
+        if shuffle:
+            np.random.shuffle(records)
+        return records
+
+    def get_predict_records(self, shuffle=False):
+        records = self.predict_records
+        if shuffle:
+            np.random.shuffle(records)
+        return records
+
+    def get_phase_records(self, phase, shuffle=False):
+        if phase == "train":
+            return self.get_train_records(shuffle)
+        elif phase == "dev":
+            return self.get_dev_records(shuffle)
+        elif phase == "test":
+            return self.get_test_records(shuffle)
+        elif phase == "val":
+            return self.get_val_records(shuffle)
+        elif phase == "predict":
+            return self.get_predict_records(shuffle)
+        else:
+            raise ValueError("Invalid phase: %s" % phase)
+
+    def get_phase_feed_list(self, phase):
+        records = self.get_phase_records(phase)
+        if records:
+            feed_list = list(records[0].keys())
+        else:
+            if phase == "predict":
+                feed_list = [
+                    feed_name for feed_name in self.get_phase_feed_list("train")
+                    if feed_name != "label"
+                ]
+            else:
+                feed_list = [
+                    feed_name for feed_name in self.get_phase_feed_list("train")
+                ]
+        return feed_list
+
+
+class BaseSequenceLabelDataset(BaseNLPDataset):
+    def convert_examples_to_records(self, examples):
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data examples, returned by _read_file.
+
+        Returns:
+            a list with all the examples record.
+        """
+        if not self.tokenizer:
+            return []
+
+        records = []
+        for example in examples:
+            tokens, labels = self._reseg_token_label(
+                tokens=example.text_a.split("\002"),
+                labels=example.label.split("\002"))
+            record = self.tokenizer.encode(
+                text=tokens, max_seq_len=self.max_seq_len)
+            if labels:
+                record["label"] = self.tokenizer.encode_token_labels(
+                    labels=labels,
+                    label_list=self.label_list,
+                    max_seq_len=self.max_seq_len)
+            records.append(record)
+        return records
+
+    def _reseg_token_label(self, tokens, labels=None):
+        if labels:
+            if len(tokens) != len(labels):
+                raise ValueError(
+                    "The length of tokens must be same with labels")
+            ret_tokens = []
+            ret_labels = []
+            for token, label in zip(tokens, labels):
+                sub_token = self.tokenizer.tokenize(token)
+                if len(sub_token) == 0:
+                    continue
+                ret_tokens.extend(sub_token)
+                ret_labels.append(label)
+                if len(sub_token) < 2:
+                    continue
+                sub_label = label
+                if label.startswith("B-"):
+                    sub_label = "I-" + label[2:]
+                ret_labels.extend([sub_label] * (len(sub_token) - 1))
+
+            if len(ret_tokens) != len(ret_labels):
+                raise ValueError(
+                    "The length of ret_tokens can't match with labels")
+            return ret_tokens, ret_labels
+        else:
+            ret_tokens = []
+            for token in tokens:
+                sub_token = self.tokenizer.tokenize(token)
+                if len(sub_token) == 0:
+                    continue
+                ret_tokens.extend(sub_token)
+                if len(sub_token) < 2:
+                    continue
+
+            return ret_tokens, None
+
+
+class BaseMultiLabelDataset(BaseNLPDataset):
+    def convert_examples_to_records(self, examples):
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data examples, returned by _read_file.
+
+        Returns:
+            a list with all the examples record.
+        """
+        if not self.tokenizer:
+            return []
+
+        records = []
+        for example in examples:
+            record = self.tokenizer.encode(
+                text=example.text_a,
+                text_pair=example.text_b,
+                max_seq_len=self.max_seq_len)
+            if example.label:
+                record["label"] = [int(label) for label in example.label]
+            records.append(record)
+        return records
+
+
+class BaseReadingComprehensionDataset(BaseNLPDataset):
+    def convert_examples_to_records(self, examples):
+        pass

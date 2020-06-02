@@ -20,11 +20,7 @@ from __future__ import print_function
 
 import argparse
 import ast
-import numpy as np
-import os
-import time
-import paddle
-import paddle.fluid as fluid
+
 import paddlehub as hub
 
 # yapf: disable
@@ -44,32 +40,16 @@ if __name__ == '__main__':
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use accuracy as metrics
-    # Choose dataset: GLUE/XNLI/ChinesesGLUE/NLPCC-DBQA/LCQMC
+    # Download dataset and get its label list and label num
+    # If you just want labels information, you can omit its tokenizer parameter to avoid preprocessing the train set.
     dataset = hub.dataset.ChnSentiCorp()
-
-    # For ernie_tiny, it use sub-word to tokenize chinese sentence
-    # If not ernie tiny, sp_model_path and word_dict_path should be set None
-    reader = hub.reader.ClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        sp_model_path=module.get_spm_path(),
-        word_dict_path=module.get_word_dict_path())
+    num_classes = dataset.num_labels
+    label_list = dataset.get_labels()
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
     token_feature = outputs["sequence_output"]
-
-    # Setup feed list for data feeder
-    # Must feed all the tensor of module need
-    feed_list = [
-        inputs["input_ids"].name,
-        inputs["position_ids"].name,
-        inputs["segment_ids"].name,
-        inputs["input_mask"].name,
-    ]
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
@@ -85,15 +65,27 @@ if __name__ == '__main__':
     # you must use the outputs["sequence_output"] as the token_feature of TextClassifierTask,
     # rather than outputs["pooled_output"], and feature is None
     cls_task = hub.TextClassifierTask(
-        data_reader=reader,
         token_feature=token_feature,
-        feed_list=feed_list,
         network=args.network,
         num_classes=dataset.num_labels,
         config=config)
 
     # Data to be prdicted
-    data = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
-            ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]]
-
-    print(cls_task.predict(data=data, return_result=True))
+    text_a = [
+        "这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般", "交通方便；环境很好；服务态度很好 房间较小",
+        "19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"
+    ]
+    # Use the appropriate tokenizer to preprocess the data
+    # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
+    if module.name == "ernie_tiny":
+        tokenizer = hub.ErnieTinyTokenizer(
+            vocab_file=module.get_vocab_path(),
+            spm_path=module.get_spm_path(),
+            word_dict_path=module.get_word_dict_path())
+    else:
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    encoded_data = [
+        tokenizer.encode(text=text, max_seq_len=args.max_seq_len)
+        for text in text_a
+    ]
+    print(cls_task.predict(data=encoded_data, label_list=label_list))

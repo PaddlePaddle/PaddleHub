@@ -17,7 +17,6 @@
 import argparse
 import ast
 
-import paddle.fluid as fluid
 import paddlehub as hub
 
 # yapf: disable
@@ -41,26 +40,23 @@ if __name__ == '__main__':
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use RegressionReader to read dataset
-    dataset = hub.dataset.GLUE("STS-B")
-    reader = hub.reader.RegressionReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+    # Use the appropriate tokenizer to preprocess the data set
+    # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
+    if module.name == "ernie_tiny":
+        tokenizer = hub.ErnieTinyTokenizer(
+            vocab_file=module.get_vocab_path(),
+            spm_path=module.get_spm_path(),
+            word_dict_path=module.get_word_dict_path())
+    else:
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+
+    dataset = hub.dataset.GLUE(
+        "STS-B", tokenizer=tokenizer, max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
     pooled_output = outputs["pooled_output"]
-
-    # Setup feed list for data feeder
-    # Must feed all the tensor of ERNIE's module need
-    feed_list = [
-        inputs["input_ids"].name,
-        inputs["position_ids"].name,
-        inputs["segment_ids"].name,
-        inputs["input_mask"].name,
-    ]
 
     # Select fine-tune strategy, setup config and fine-tune
     strategy = hub.AdamWeightDecayStrategy(
@@ -70,7 +66,6 @@ if __name__ == '__main__':
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
-        eval_interval=300,
         use_data_parallel=args.use_data_parallel,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
@@ -80,10 +75,7 @@ if __name__ == '__main__':
 
     # Define a regression fine-tune task by PaddleHub's API
     reg_task = hub.RegressionTask(
-        data_reader=reader,
-        feature=pooled_output,
-        feed_list=feed_list,
-        config=config)
+        dataset=dataset, feature=pooled_output, config=config)
 
     # Fine-tune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically

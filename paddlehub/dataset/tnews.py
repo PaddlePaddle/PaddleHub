@@ -20,7 +20,8 @@ from __future__ import print_function
 import io
 import os
 
-from paddlehub.dataset import InputExample, BaseDataset
+from paddlehub.dataset import InputExample
+from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
 from paddlehub.common.dir import DATA_HOME
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/tnews.tar.gz"
@@ -44,12 +45,12 @@ LABEL_NAME = {
 }
 
 
-class TNews(BaseDataset):
+class TNews(BaseNLPDataset):
     """
     TNews is the chinese news classification dataset on Jinri Toutiao App.
     """
 
-    def __init__(self):
+    def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "tnews")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         label_list = [
@@ -63,7 +64,8 @@ class TNews(BaseDataset):
             test_file="toutiao_category_test.txt",
             label_file=None,
             label_list=label_list,
-        )
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
 
     def get_label_name(self, id):
         return LABEL_NAME[id]
@@ -82,7 +84,9 @@ class TNews(BaseDataset):
 
 
 if __name__ == "__main__":
-    ds = TNews()
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = TNews(tokenizer=tokenizer, max_seq_len=10)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
@@ -93,3 +97,6 @@ if __name__ == "__main__":
     for e in ds.get_test_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
     print(ds)
+    print("first 10 dev records")
+    for e in ds.get_dev_records()[:10]:
+        print(e)
