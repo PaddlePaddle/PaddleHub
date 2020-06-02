@@ -110,7 +110,7 @@ class ClassifierTask(BaseTask):
             run_examples += run_state.run_examples
             run_step += run_state.run_step
             loss_sum += np.mean(
-                run_state.run_results[-2]) * run_state.run_examples
+                run_state.run_results[-1]) * run_state.run_examples
             acc_sum += np.mean(
                 run_state.run_results[2]) * run_state.run_examples
             np_labels = run_state.run_results[0]
@@ -341,7 +341,6 @@ class MultiLabelClassifierTask(ClassifierTask):
         if metrics_choices == "default":
             metrics_choices = ["auc"]
 
-        main_program = feature.block.program
         super(MultiLabelClassifierTask, self).__init__(
             dataset=dataset,
             data_reader=data_reader,
@@ -352,7 +351,10 @@ class MultiLabelClassifierTask(ClassifierTask):
             config=config,
             hidden_units=hidden_units,
             metrics_choices=metrics_choices)
-        self.class_name = list(data_reader.label_map.keys())
+        if self._compatible_mode:
+            self.class_name = list(data_reader.label_map.keys())
+        else:
+            self.class_name = self._label_list
 
     def _build_net(self):
         cls_feats = fluid.layers.dropout(

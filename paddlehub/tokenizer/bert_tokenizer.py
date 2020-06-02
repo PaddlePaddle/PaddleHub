@@ -22,7 +22,6 @@ from typing import List, Optional, Union, Tuple
 
 from paddlehub.common.logger import logger
 import sentencepiece as spm
-import numpy as np
 
 from .tokenizer_util import load_vocab, _is_whitespace, _is_control, _is_punctuation, whitespace_tokenize
 
@@ -37,12 +36,12 @@ class BasicTokenizer(object):
         """ Constructs a BasicTokenizer.
 
         Args:
-            **do_lower_case**: Whether to lower case the input.
-            **never_split**: (`optional`) list of str
+            do_lower_case: Whether to lower case the input.
+            never_split: (`optional`) list of str
                 Kept for backward compatibility purposes.
                 Now implemented directly at the base class level (see :func:`PreTrainedTokenizer.tokenize`)
                 List of token not to split.
-            **tokenize_chinese_chars**: (`optional`) boolean (default True)
+            tokenize_chinese_chars: (`optional`) boolean (default True)
                 Whether to tokenize Chinese characters.
                 This should likely be deactivated for Japanese:
                 see: https://github.com/huggingface/pytorch-pretrained-BERT/issues/328

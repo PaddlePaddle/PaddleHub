@@ -54,12 +54,22 @@ class BaseNLPDataset(BaseDataset):
             predict_file_with_header=predict_file_with_header)
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
-        self.train_records = self.convert_examples_to_records(
-            self.train_examples)
-        self.dev_records = self.convert_examples_to_records(self.dev_examples)
-        self.test_records = self.convert_examples_to_records(self.test_examples)
-        self.predict_records = self.convert_examples_to_records(
-            self.predict_examples)
+        if self.train_examples:
+            logger.info("Processing the train set...")
+            self.train_records = self.convert_examples_to_records(
+                self.train_examples)
+        if self.dev_examples:
+            logger.info("Processing the dev set...")
+            self.dev_records = self.convert_examples_to_records(
+                self.dev_examples)
+        if self.test_examples:
+            logger.info("Processing the test set...")
+            self.test_records = self.convert_examples_to_records(
+                self.test_examples)
+        if self.predict_examples:
+            logger.info("Processing the predict set...")
+            self.predict_records = self.convert_examples_to_records(
+                self.predict_examples)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -283,3 +293,7 @@ class BaseMultiLabelDataset(BaseNLPDataset):
                 record["label"] = [int(label) for label in example.label]
             records.append(record)
         return records
+
+
+class BaseReadingComprehensionDataset(BaseNLPDataset):
+    pass
