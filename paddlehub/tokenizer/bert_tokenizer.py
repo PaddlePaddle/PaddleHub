@@ -627,15 +627,10 @@ class BertTokenizer(object):
             max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
                 If set to a number, will limit the total sequence returned so that it has a maximum length.
                 If there are overflowing tokens, those will be added to the returned dictionary
-            pad_to_max_seq_len (:obj:`bool`, `optional`, defaults to :obj:`False`):
+            pad_to_max_seq_len (:obj:`bool`, `optional`, defaults to :obj:`True`):
                 If set to True, the returned sequences will be padded according to the model's padding side and
                 padding index, up to their max length. If no max length is specified, the padding is done up to the
-                model's max length. The tokenizer padding sides are handled by the class attribute `padding_side`
-                which can be set to the following strings:
-
-                - 'left': pads on the left of the sequences
-                - 'right': pads on the right of the sequences
-                Defaults to False: no padding.
+                model's max length.
             truncation_strategy (:obj:`str`, `optional`, defaults to `longest_first`):
                 String selected in the following options:
 
@@ -783,6 +778,69 @@ class BertTokenizer(object):
                 range(len(encoded_inputs["input_ids"])))
 
         return encoded_inputs
+
+    def encode_token_labels(self,
+                            labels: Union[str, List[str], List[int]],
+                            label_list: List[str],
+                            max_seq_len: Optional[int] = None,
+                            pad_to_max_seq_len: bool = True):
+        """
+        Returns a list containing the encoded token labels, usually used in sequence label task:
+
+        Args:
+            labels (:obj:`str`, :obj:`List[str]` or :obj:`List[int]`):
+                The token labels to be encoded. This can be a string, a list of strings (tokenized string using
+                the `split("\002")` method) or a list of integers (tokenized string ids using the label_list)
+            label_list (:obj:`List[str]`):
+                 Then label list, used to map label to label id.
+            max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
+                If set to a number, will limit the total sequence returned so that it has a maximum length.
+            pad_to_max_seq_len (:obj:`bool`, `optional`, defaults to :obj:`True`):
+                If set to True, the returned sequences will be padded according to the model's padding side and
+                padding index, up to their max length. If no max length is specified, the padding is done up to the
+                model's max length.
+        Return:
+            label_ids: list[int]
+        """
+
+        def get_input_ids(text):
+            if isinstance(text, (list, tuple)) and len(text) > 0 and isinstance(
+                    text[0], int):
+                return text
+            if isinstance(text, str):
+                text = text.split("\002")
+            if isinstance(text, (list, tuple)) and len(text) > 0 and isinstance(
+                    text[0], str):
+                return [label_list.index(label) for label in text]
+            else:
+                raise ValueError(
+                    "Input is not valid. Should be a string, a list/tuple of strings or a list/tuple of integers."
+                )
+
+        ids = get_input_ids(labels)
+
+        # Truncating
+        if max_seq_len and len(ids) > max_seq_len - 2:
+            ids = ids[0:(max_seq_len - 2)]
+        # Filling
+        no_entity_id = len(label_list) - 1
+        ids = [no_entity_id] + ids + [no_entity_id]
+        # Check lengths
+        assert max_seq_len is None or len(ids) <= max_seq_len
+        if max_seq_len is None and len(ids) > self.model_max_seq_len:
+            logger.warning(
+                "Token labels length is longer than the specified maximum sequence length "
+                "for this model ({} > {}). Running this sequence through the model will result in "
+                "indexing errors".format(len(ids), self.model_max_seq_len))
+        # Padding
+        needs_to_be_padded = pad_to_max_seq_len and (
+            max_seq_len and len(ids) < max_seq_len
+            or max_seq_len is None and len(ids) < self.model_max_seq_len)
+        if needs_to_be_padded:
+            difference = (max_seq_len if max_seq_len is not None else
+                          self.model_max_seq_len) - len(ids)
+            ids = ids + [no_entity_id] * difference
+        return ids
 
     def decode(self,
                token_ids: List[int],
