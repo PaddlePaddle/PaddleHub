@@ -38,8 +38,6 @@ class BasicTokenizer(object):
         Args:
             do_lower_case: Whether to lower case the input.
             never_split: (`optional`) list of str
-                Kept for backward compatibility purposes.
-                Now implemented directly at the base class level (see :func:`PreTrainedTokenizer.tokenize`)
                 List of token not to split.
             tokenize_chinese_chars: (`optional`) boolean (default True)
                 Whether to tokenize Chinese characters.
@@ -58,8 +56,6 @@ class BasicTokenizer(object):
 
         Args:
             **never_split**: (`optional`) list of str
-                Kept for backward compatibility purposes.
-                Now implemented directly at the base class level (see :func:`PreTrainedTokenizer.tokenize`)
                 List of token not to split.
         """
         never_split = self.never_split + (never_split
@@ -250,9 +246,6 @@ class WordpieceTokenizer(object):
 class BertTokenizer(object):
     """
     Constructs a BERT tokenizer. Based on WordPiece.
-
-    This tokenizer inherits from :class:`~transformers.PreTrainedTokenizer` which contains most of the methods. Users
-    should refer to the superclass for more information regarding methods.
 
     Args:
         vocab_file (:obj:`string`):

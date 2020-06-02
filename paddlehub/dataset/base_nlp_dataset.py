@@ -296,4 +296,5 @@ class BaseMultiLabelDataset(BaseNLPDataset):
 
 
 class BaseReadingComprehensionDataset(BaseNLPDataset):
-    pass
+    def convert_examples_to_records(self, examples):
+        pass

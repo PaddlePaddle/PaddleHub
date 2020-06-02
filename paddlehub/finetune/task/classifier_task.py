@@ -179,8 +179,8 @@ class TextClassifierTask(ClassifierTask):
             self,
             num_classes,
             dataset=None,
-            feed_list=None,  # deprecated
-            data_reader=None,  # deprecated
+            feed_list=None,  # Deprecated
+            data_reader=None,  # Deprecated
             feature=None,
             token_feature=None,
             network=None,
@@ -204,12 +204,12 @@ class TextClassifierTask(ClassifierTask):
         """
         if (not feature) and (not token_feature):
             logger.error(
-                'Both token_feature and feature are None, one of them must be setted.'
+                'Both token_feature and feature are None, one of them must be set.'
             )
             exit(1)
         elif feature and token_feature:
             logger.error(
-                'Both token_feature and feature are setted. One should be setted, the other should be None.'
+                'Both token_feature and feature are set. One should be set, the other should be None.'
             )
             exit(1)
 
