@@ -8,7 +8,7 @@ def load_vocab(vocab_file):
     with open(vocab_file, "r", encoding="utf-8") as reader:
         tokens = reader.readlines()
     for index, token in enumerate(tokens):
-        token = token.rstrip("\n")
+        token = token.rstrip("\n").split("\t")[0]
         vocab[token] = index
     return vocab
 

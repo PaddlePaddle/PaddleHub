@@ -22,7 +22,6 @@ import argparse
 import ast
 
 import paddlehub as hub
-from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)

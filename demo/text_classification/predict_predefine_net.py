@@ -20,11 +20,7 @@ from __future__ import print_function
 
 import argparse
 import ast
-import numpy as np
-import os
-import time
-import paddle
-import paddle.fluid as fluid
+
 import paddlehub as hub
 
 # yapf: disable
@@ -75,8 +71,10 @@ if __name__ == '__main__':
         config=config)
 
     # Data to be prdicted
-    text_a = [["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"], ["交通方便；环境很好；服务态度很好 房间较小"],
-              ["19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"]]
+    text_a = [
+        "这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般", "交通方便；环境很好；服务态度很好 房间较小",
+        "19天硬盘就罢工了~~~算上运来的一周都没用上15天~~~可就是不能换了~~~唉~~~~你说这算什么事呀~~~"
+    ]
     # Use the appropriate tokenizer to preprocess the data
     # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
     if module.name == "ernie_tiny":
@@ -87,4 +85,4 @@ if __name__ == '__main__':
     else:
         tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
     enconded_data = list(map(tokenizer.encode, text_a))
-    print(cls_task.predict(data=enconded_data, return_result=True))
+    print(cls_task.predict(data=enconded_data, label_list=label_list))
