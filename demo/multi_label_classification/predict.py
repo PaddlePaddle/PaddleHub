@@ -90,4 +90,5 @@ if __name__ == '__main__':
         tokenizer.encode(text=text, max_seq_len=args.max_seq_len)
         for text in data
     ]
-    print(multi_label_cls_task.predict(data=data, return_result=True))
+    print(
+        multi_label_cls_task.predict(data=encoded_data, label_list=label_list))
