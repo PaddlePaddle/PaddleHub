@@ -82,7 +82,8 @@ if __name__ == '__main__':
     else:
         tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
     encoded_data = [
-        tokenizer.encode(text=text, text_pair=text_pair)
+        tokenizer.encode(
+            text=text, text_pair=text_pair, max_seq_len=args.max_seq_len)
         for text, text_pair in data
     ]
-    print(cls_task.predict(data=data, label_list=label_list))
+    print(cls_task.predict(data=encoded_data, label_list=label_list))
