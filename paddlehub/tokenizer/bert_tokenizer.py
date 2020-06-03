@@ -18,12 +18,12 @@ import collections
 import os
 import unicodedata
 import pickle
-from typing import List, Optional, Union, Tuple
+from typing import Dict, List, Optional, Union, Tuple
 
 from paddlehub.common.logger import logger
 import sentencepiece as spm
 
-from .tokenizer_util import load_vocab, _is_whitespace, _is_control, _is_punctuation, whitespace_tokenize
+from tokenizer_util import load_vocab, _is_whitespace, _is_control, _is_punctuation, whitespace_tokenize
 
 
 class BasicTokenizer(object):
@@ -589,20 +589,18 @@ class BertTokenizer(object):
             )
         return (ids, pair_ids, overflowing_tokens)
 
-    def encode(
-            self,
-            text: Union[str, List[str], List[int]],
-            text_pair: Optional[Union[str, List[str], List[int]]] = None,
-            max_seq_len: Optional[int] = None,
-            pad_to_max_seq_len: bool = True,
-            truncation_strategy: str = "longest_first",
-            return_position_ids: bool = True,
-            return_segment_ids: bool = True,
-            return_input_mask: bool = True,
-            return_length: bool = True,
-            return_overflowing_tokens: bool = False,
-            return_special_tokens_mask: bool = False,
-    ):
+    def encode(self,
+               text: Union[str, List[str], List[int]],
+               text_pair: Optional[Union[str, List[str], List[int]]] = None,
+               max_seq_len: Optional[int] = None,
+               pad_to_max_seq_len: bool = True,
+               truncation_strategy: str = "longest_first",
+               return_position_ids: bool = True,
+               return_segment_ids: bool = True,
+               return_input_mask: bool = True,
+               return_length: bool = True,
+               return_overflowing_tokens: bool = False,
+               return_special_tokens_mask: bool = False):
         """
         Returns a dictionary containing the encoded sequence or sequence pair and additional information:
         the mask for sequence classification and the overflowing elements if a ``max_seq_len`` is specified.
@@ -835,7 +833,7 @@ class BertTokenizer(object):
         return ids
 
     def decode(self,
-               token_ids: List[int],
+               token_ids: Union[List[int], Dict],
                skip_special_tokens: bool = False,
                clean_up_tokenization_spaces: bool = True) -> str:
         """
@@ -844,10 +842,13 @@ class BertTokenizer(object):
         Similar to doing ``self.convert_tokens_to_string(self.convert_ids_to_tokens(token_ids))``.
 
         Args:
-            token_ids: list of tokenized input ids. Can be obtained using the `encode` or `encode_plus` methods.
+            token_ids: list of tokenized input ids or dict containing a key called "input_ids". Can be obtained using the `encode` methods.
             skip_special_tokens: if set to True, will replace special tokens.
             clean_up_tokenization_spaces: if set to True, will clean up the tokenization spaces.
         """
+        if isinstance(token_ids, dict):
+            token_ids = token_ids["input_ids"]
+
         filtered_tokens = self.convert_ids_to_tokens(
             token_ids, skip_special_tokens=skip_special_tokens)
 
@@ -994,3 +995,7 @@ if __name__ == '__main__':
     )
     print(encode_result['input_ids'])
     print(encode_result)
+
+    empty = tokenizer.encode(text="", text_pair="")
+    print(empty)
+    print(tokenizer.decode(empty))

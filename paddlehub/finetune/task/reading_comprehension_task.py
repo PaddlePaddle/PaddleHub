@@ -407,10 +407,10 @@ class ReadingComprehensionTask(BaseTask):
             "RawResult", ["unique_id", "start_logits", "end_logits"])
 
     def _build_net(self):
-        self.unique_ids = fluid.layers.data(
-            name="unique_ids", shape=[-1, 1], lod_level=0, dtype="int64")
+        self.unique_id = fluid.layers.data(
+            name="unique_id", shape=[-1, 1], lod_level=0, dtype="int64")
         # to avoid memory optimization
-        _ = fluid.layers.assign(self.unique_ids)
+        _ = fluid.layers.assign(self.unique_id)
         logits = fluid.layers.fc(
             input=self.feature,
             size=2,
@@ -432,24 +432,24 @@ class ReadingComprehensionTask(BaseTask):
         return [start_logits, end_logits, num_seqs]
 
     def _add_label(self):
-        start_positions = fluid.layers.data(
-            name="start_positions", shape=[-1, 1], lod_level=0, dtype="int64")
-        end_positions = fluid.layers.data(
-            name="end_positions", shape=[-1, 1], lod_level=0, dtype="int64")
-        return [start_positions, end_positions]
+        start_position = fluid.layers.data(
+            name="start_position", shape=[-1, 1], lod_level=0, dtype="int64")
+        end_position = fluid.layers.data(
+            name="end_position", shape=[-1, 1], lod_level=0, dtype="int64")
+        return [start_position, end_position]
 
     def _add_loss(self):
-        start_positions = self.labels[0]
-        end_positions = self.labels[1]
+        start_position = self.labels[0]
+        end_position = self.labels[1]
 
         start_logits = self.outputs[0]
         end_logits = self.outputs[1]
 
         start_loss = fluid.layers.softmax_with_cross_entropy(
-            logits=start_logits, label=start_positions)
+            logits=start_logits, label=start_position)
         start_loss = fluid.layers.mean(x=start_loss)
         end_loss = fluid.layers.softmax_with_cross_entropy(
-            logits=end_logits, label=end_positions)
+            logits=end_logits, label=end_position)
         end_loss = fluid.layers.mean(x=end_loss)
         total_loss = (start_loss + end_loss) / 2.0
         return total_loss
@@ -461,7 +461,7 @@ class ReadingComprehensionTask(BaseTask):
     def feed_list(self):
         if self._compatible_mode:
             feed_list = [varname for varname in self._base_feed_list
-                         ] + [self.unique_ids.name]
+                         ] + [self.unique_id.name]
             if self.is_train_phase or self.is_test_phase:
                 feed_list += [label.name for label in self.labels]
         else:
@@ -472,12 +472,12 @@ class ReadingComprehensionTask(BaseTask):
     def fetch_list(self):
         if self.is_train_phase or self.is_test_phase:
             return [
-                self.loss.name, self.outputs[-1].name, self.unique_ids.name,
+                self.loss.name, self.outputs[-1].name, self.unique_id.name,
                 self.outputs[0].name, self.outputs[1].name
             ]
         elif self.is_predict_phase:
             return [
-                self.unique_ids.name,
+                self.unique_id.name,
             ] + [output.name for output in self.outputs]
 
     def _calculate_metrics(self, run_states):
