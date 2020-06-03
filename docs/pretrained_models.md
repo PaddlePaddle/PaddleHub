@@ -1,12 +1,10 @@
-# PaddleHub 预训练模型介绍
+PaddlePaddle 提供了丰富的模型，使得用户可以采用模块化的方法解决各种学习问题。本文，我们将整体介绍PaddleHub中已经准备好的丰富的预训练模型。
 
-PaddlePaddle 提供了丰富的模型，使得用户可以采用模块化的方法解决各种学习问题。
+* 如果是想了解具体预训练模型的使用可以继续学习本课程，也可以参考 [PaddleHub预训练模型库]( https://www.paddlepaddle.org.cn/hublist )
 
-* 如果是想了解具体预训练模型的使用和间接可以继续学习本课程，也可以参考 [PaddleHub预训练模型库]( https://www.paddlepaddle.org.cn/hublist )
+* 如果想了解更多模型组网网络结构源代码请参考 [飞桨模型库](https://github.com/PaddlePaddle/models )
 
-* 如果想了解更多模型组网网络结构源代码请参考 [飞桨官方模型库](https://github.com/PaddlePaddle/models )
-
-### PaddleHub预训练模型
+## PaddleHub预训练模型库
 * [飞桨优势特色模型](#飞桨优势特色模型)
 * [图像](#图像)
   * [图像分类](#图像分类)
@@ -25,28 +23,28 @@ PaddlePaddle 提供了丰富的模型，使得用户可以采用模块化的方�
 
 ## 百度飞桨独有优势特色模型
 
-| 任务 | **模型名称**                                                 | **Master模型推荐辞**                                       |
+|            | **模型名称**                                                 | **Master模型推荐辞**                                       |
 | ---------- | :----------------------------------------------------------- | ---------------------------------------------------------- |
+| 图像分类 | [菜品识别](https://www.paddlepaddle.org.cn/hubdetail?name=resnet50_vd_dishes&en_category=ImageClassification) | 私有数据集训练，支持8416种菜品的分类识别，适合进一步菜品方向微调 |
+| 图像分类 | [动物识别](https://www.paddlepaddle.org.cn/hubdetail?name=resnet50_vd_animals&en_category=ImageClassification) | 私有数据集训练，支持7978种动物的分类识别，适合进一步动物方向微调 |
 | 目标检测   | [YOLOv3](https://www.paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_coco2017&en_category=ObjectDetection) | 实现精度相比原作者**提高5.9 个绝对百分点**，性能极致优化。 |
-| 目标检测   | [人脸检测](https://www.paddlepaddle.org.cn/hubdetail?name=pyramidbox_lite_server&en_category=ObjectDetection) | 百度自研，18年3月WIDER Face 数据集**冠军模型**，           |
-| 目标检测   | [口罩人脸检测与识别](https://github.com/PaddlePaddle/PaddleDetection) | 业界**首个开源口罩人脸检测与识别模型**，引起广泛关注。     |
-| 语义分割   | [HumanSeg](https://www.paddlepaddle.org.cn/hubdetail?name=deeplabv3p_xception65_humanseg&en_category=ImageSegmentation) | 百度**自建数据集**训练，人像分割效果卓越。                 |
-| 语义分割   | [ACE2P](https://www.paddlepaddle.org.cn/hubdetail?name=ace2p&en_category=ImageSegmentation) | CVPR2019 LIP挑战赛中**满贯三冠王**。人体解析任务必选。     |
-| 语义分割   | [Pneumonia_CT_LKM_PP](https://www.paddlepaddle.org.cn/hubdetail?name=Pneumonia_CT_LKM_PP&en_category=ImageSegmentation) | 助力连心医疗开源**业界首个**肺炎CT影像分析模型             |
-| GAN        | [stylepro_artistic](https://www.paddlepaddle.org.cn/hubdetail?name=stylepro_artistic&en_category=GANs) | 百度自研风格迁移模型，趣味模型，**推荐尝试**                         |
+| 人脸检测 | [人脸检测](https://www.paddlepaddle.org.cn/hubdetail?name=pyramidbox_lite_server&en_category=FaceDetection) | 百度自研，18年3月WIDER Face 数据集**冠军模型**，           |
+| 人脸检测 | [口罩人脸检测与识别](https://www.paddlepaddle.org.cn/hubdetail?name=pyramidbox_lite_server_mask&en_category=FaceDetection) | 业界**首个开源口罩人脸检测与识别模型**，引起广泛关注。     |
+| 目标检测 | [行人检测](https://www.paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_pedestrian&en_category=ObjectDetection) | 百度自研模型，海量私有数据集训练，可以应用于智能视频监控，人体行为分析，客流统计系统，智能交通等领域 |
+| 目标检测 | [车辆检测](https://www.paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_vehicles&en_category=ObjectDetection) | 百度自研模型，支持car (汽车)，truck (卡车)，bus (公交车)，motorbike (摩托车)，tricycle (三轮车)等车型的识别 |
+| 语义分割   | [人像分割](https://www.paddlepaddle.org.cn/hubdetail?name=deeplabv3p_xception65_humanseg&en_category=ImageSegmentation) | 百度**自建数据集**训练，人像分割效果卓越。                 |
+| 语义分割   | [人体解析](https://www.paddlepaddle.org.cn/hubdetail?name=ace2p&en_category=ImageSegmentation) | CVPR2019 LIP挑战赛中**满贯三冠王**。人体解析任务必选。     |
+| 语义分割   | [肺炎CT影像分析](https://www.paddlepaddle.org.cn/hubdetail?name=Pneumonia_CT_LKM_PP&en_category=ImageSegmentation) | 助力连心医疗开源**业界首个**肺炎CT影像分析模型             |
+| GAN        | [风格迁移](https://www.paddlepaddle.org.cn/hubdetail?name=stylepro_artistic&en_category=GANs) | 百度自研风格迁移模型，趣味模型，**推荐尝试**                         |
+| OCR | [超轻量中英文OCR文字识别](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_ocr_db_crnn_mobile&en_category=TextRecognition) | 业界开源最小，8.6M超轻量中英文识别模型。支持中英文识别；支持倾斜、竖排等多种方向文字识别，**强力推荐** |
+| 视频分类 | [超大规模视频分类](https://www.paddlepaddle.org.cn/hubdetail?name=videotag_tsn_lstm&en_category=VideoClassification) | 百度自研模型，基于千万短视频预训练的视频分类模型，可直接预测短视频的中文标签 |
 | 词法分析   | [LAC ](https://www.paddlepaddle.org.cn/hubdetail?name=lac&en_category=LexicalAnalysis) | 百度**自研中文特色**模型词法分析任务。                     |
 | 情感分析   | [Senta](https://www.paddlepaddle.org.cn/hubdetail?name=lac&en_category=LexicalAnalysis) | 百度自研情感分析模型，海量中文数据训练。                   |
 | 情绪识别   | [emotion_detection](https://www.paddlepaddle.org.cn/hubdetail?name=emotion_detection_textcnn&en_category=SentimentAnalysis) | 百度自研对话识别模型，海量中文数据训练。                   |
 | 文本相似度 | [simnet](https://www.paddlepaddle.org.cn/hubdetail?name=simnet_bow&en_category=SemanticModel) | 百度自研短文本相似度模型，海量中文数据训练。               |
 | 文本审核   | [porn_detection](https://www.paddlepaddle.org.cn/hubdetail?name=porn_detection_gru&en_category=TextCensorship) | 百度自研色情文本审核模型，海量中文数据训练。               |
-| 语义模型   | [ERNIE](https://www.paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel) | **SOTA 语义模型，中文任务全面优于BERT**。 |
-| 图像分类   | [菜品识别](https://www.paddlepaddle.org.cn/hubdetail?name=resnet50_vd_dishes&en_category=ImageClassification)                | 私有数据集训练，适合进一步菜品方向微调。           |
-| 图像分类   | [动物识别](https://www.paddlepaddle.org.cn/hubdetail?name=resnet50_vd_animals&en_category=ImageClassification)               | 私有数据集训练，适合进一步动物方向微调。           |
-|   		 |                                    			      |                         |
-| 目标检测   | 行人检测（即将开源）                                          | 百度自研模型，海量私有数据集训练。               |
-| 目标检测   | 行人检测（即将开源）                                          | 百度自研模型，海量私有数据集训练。               |
-| OCR      | 中文OCR（即将开源）                                          | 开源模型基础上性能优化，增加私有数据集训练。          |
-| 语音合成   | WaveFlow（即将开源）                                         | 百度自研模型，海量私有数据集训练。                 |
+| 语义模型   | [ERNIE](https://www.paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel) | **SOTA语义模型，中文任务全面优于BERT**。               |
+| 语音合成   | WaveFlow（即将开源）                                         | 百度自研模型，海量私有数据集训练                 |
 
 ## 图像
 
@@ -54,7 +52,7 @@ PaddlePaddle 提供了丰富的模型，使得用户可以采用模块化的方�
 
 图像分类是根据图像的语义信息对不同类别图像进行区分，是计算机视觉中重要的基础问题，是物体检测、图像分割、物体跟踪、行为分析、人脸识别等其他高层视觉任务的基础，在许多领域都有着广泛的应用。如：安防领域的人脸识别和智能视频分析等，交通领域的交通场景识别，互联网领域基于内容的图像检索和相册自动归类，医学领域的图像识别等。
 
-**注：** **如果你是资深开发者，那可以随意按需使用**，**假如你是新手，服务器端优先选择Resnet50，移动端优先选择MobileNetV2**。
+**注：** **如果你是资深开发者，那可以随意按需使用**，**假如你是新手，服务器端优先选择Resnet50，移动端优先选择MobileNetV2**
 
 | **模型名称** | **模型简介** |
 | - | - |
@@ -77,16 +75,16 @@ PaddlePaddle 提供了丰富的模型，使得用户可以采用模块化的方�
 
 #### 目标检测
 
-目标检测任务的目标是给定一张图像或是一个视频帧，让计算机找出其中所有目标的位置，并给出每个目标的具体类别。对于计算机而言，能够“看到”的是图像被编码之后的数字，但很难解图像或是视频帧中出现了人或是物体这样的高层语义概念，也就更加难以定位目标出现在图像中哪个区域。目标检测模型请参考目标检测库[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)
+目标检测任务的目标是给定一张图像或是一个视频帧，让计算机找出其中所有目标的位置，并给出每个目标的具体类别。对于计算机而言，能够“看到”的是图像被编码之后的数字，但很难解图像或是视频帧中出现了人或是物体这样的高层语义概念，也就更加难以定位目标出现在图像中哪个区域。目标检测模型请参考 (https://github.com/PaddlePaddle/PaddleDetection) 
 
 | 模型名称                                                     | 模型简介                                                     |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | [SSD](https://www.paddlepaddle.org.cn/hubdetail?name=ssd_mobilenet_v1_pascal&en_category=ObjectDetection) | 很好的继承了 MobileNet 预测速度快，易于部署的特点，能够很好的在多种设备上完成图像目标检测任务 |
 | [Faster-RCNN](https://www.paddlepaddle.org.cn/hubdetail?name=faster_rcnn_coco2017&en_category=ObjectDetection) | 创造性地采用卷积网络自行产生建议框，并且和目标检测网络共享卷积网络，建议框数目减少，质量提高 |
 | [YOLOv3](https://www.paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_coco2017&en_category=ObjectDetection) | 速度和精度均衡的目标检测网络，相比于原作者 darknet 中的 YOLO v3 实现，PaddlePaddle 实现增加了 mixup，label_smooth 等处理，精度 (mAP(0.50: 0.95)) 相比于原作者提高了 4.7 个绝对百分点，在此基础上加入 synchronize batch normalization, 最终精度相比原作者提高 5.9 个绝对百分点。 |
-| [PyramidBox人脸检测](https://www.paddlepaddle.org.cn/hubdetail?name=pyramidbox_lite_server&en_category=ObjectDetection) | **PyramidBox** **模型是百度自主研发的人脸检测模型**，利用上下文信息解决困难人脸的检测问题，网络表达能力高，鲁棒性强。于18年3月份在 WIDER Face 数据集上取得第一名 |
-| [超轻量人脸检测](https://www.paddlepaddle.org.cn/hubdetail?name=ultra_light_fast_generic_face_detector_1mb_640&en_category=ObjectDetection) | Ultra-Light-Fast-Generic-Face-Detector-1MB是针对边缘计算设备或低算力设备(如用ARM推理)设计的实时超轻量级通用人脸检测模型，可以在低算力设备中如用ARM进行实时的通用场景的人脸检测推理。该PaddleHub Module的预训练数据集为WIDER FACE数据集，可支持预测，在预测时会将图片输入缩放为640 * 480。 |
-| [人脸口罩检测](https://www.paddlepaddle.org.cn/hubdetail?name=pyramidbox_lite_server_mask&en_category=ObjectDetection) | 基于PyramidBox而研发的轻量级模型，对于光照、口罩遮挡、表情变化、尺度变化等常见问题具有很强的鲁棒性。基于WIDER FACE数据集和百度自采人脸数据集进行训练，支持预测，可用于检测人脸是否佩戴口罩。 |
+| [人脸检测](https://www.paddlepaddle.org.cn/hubdetail?name=pyramidbox_lite_server&en_category=FaceDetection) | **PyramidBox** **模型是百度自主研发的人脸检测模型**，利用上下文信息解决困难人脸的检测问题，网络表达能力高，鲁棒性强。于18年3月份在 WIDER Face 数据集上取得第一名 |
+| [超轻量人脸检测](https://www.paddlepaddle.org.cn/hubdetail?name=ultra_light_fast_generic_face_detector_1mb_640&en_category=FaceDetection) | Ultra-Light-Fast-Generic-Face-Detector-1MB是针对边缘计算设备或低算力设备(如用ARM推理)设计的实时超轻量级通用人脸检测模型，可以在低算力设备中如用ARM进行实时的通用场景的人脸检测推理。该PaddleHub Module的预训练数据集为WIDER FACE数据集，可支持预测，在预测时会将图片输入缩放为640 * 480。 |
+| [口罩人脸检测与识别](https://www.paddlepaddle.org.cn/hubdetail?name=pyramidbox_lite_server_mask&en_category=FaceDetection) | 基于PyramidBox而研发的轻量级模型，对于光照、口罩遮挡、表情变化、尺度变化等常见问题具有很强的鲁棒性。基于WIDER FACE数据集和百度自采人脸数据集进行训练，支持预测，可用于检测人脸是否佩戴口罩。 |
 
 
 #### 图像分割
@@ -106,7 +104,7 @@ PaddlePaddle 提供了丰富的模型，使得用户可以采用模块化的方�
 
 | 模型名称                                                     | 模型简介                                                     |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Pose Estimation](https://www.paddlepaddle.org.cn/hubdetail?name=pose_resnet50_mpii&en_category=KeyPointDetection) | 人体骨骼关键点检测(Pose Estimation) 是计算机视觉的基础性算法之一，在诸多计算机视觉任务起到了基础性的作用，如行为识别、人物跟踪、步态识别等相关领域。具体应用主要集中在智能视频监控，病人监护系统，人机交互，虚拟现实，人体动画，智能家居，智能安防，运动员辅助训练等等。 该模型的论文《Simple Baselines for Human Pose Estimation and Tracking》由 MSRA 发表于 ECCV18，使用 MPII 数据集训练完成。 |
+| [Pose Estimation](https://www.paddlepaddle.org.cn/hubdetail?name=human_pose_estimation_resnet50_mpii&en_category=KeyPointDetection) | 人体骨骼关键点检测(Pose Estimation) 是计算机视觉的基础性算法之一，在诸多计算机视觉任务起到了基础性的作用，如行为识别、人物跟踪、步态识别等相关领域。具体应用主要集中在智能视频监控，病人监护系统，人机交互，虚拟现实，人体动画，智能家居，智能安防，运动员辅助训练等等。 该模型的论文《Simple Baselines for Human Pose Estimation and Tracking》由 MSRA 发表于 ECCV18，使用 MPII 数据集训练完成。 |
 
 #### 图像生成
 
@@ -121,7 +119,9 @@ PaddlePaddle 提供了丰富的模型，使得用户可以采用模块化的方�
 
 
 
-## 文本
+
+
+#### 文本
 
 PaddleNLP 是基于 PaddlePaddle 深度学习框架开发的自然语言处理 (NLP) 工具，算法，模型和数据的开源项目。百度在 NLP 领域十几年的深厚积淀为 PaddleNLP 提供了强大的核心动力。
 
@@ -157,7 +157,7 @@ PaddleNLP 是基于 PaddlePaddle 深度学习框架开发的自然语言处理 (
 
 #### 语义表示
 
-[PaddleLARK](https://github.com/PaddlePaddle/models/tree/release/1.7/PaddleNLP/pretrain_language_models) 通过在大规模语料上训练得到的通用的语义表示模型，可以助益其他自然语言处理任务，是通用预训练 + 特定任务精调范式的体现。PaddleLARK 集成了 ELMO，BERT，ERNIE 1.0，ERNIE 2.0，XLNet 等热门中英文预训练模型。
+通过在大规模语料上训练得到的通用的语义表示模型，可以助益其他自然语言处理任务，是通用预训练 + 特定任务精调范式的体现。PaddleLARK 集成了 ELMO，BERT，ERNIE 1.0，ERNIE 2.0，XLNet 等热门中英文预训练模型。
 
 | 模型                                                         | 简介                                                         |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -166,13 +166,19 @@ PaddleNLP 是基于 PaddlePaddle 深度学习框架开发的自然语言处理 (
 | [RoBERTa](https://www.paddlepaddle.org.cn/hubdetail?name=rbtl3&en_category=SemanticModel) | RoBERTa (a Robustly Optimized BERT Pretraining Approach) 是BERT通用语义表示模型的一个优化版，它在BERT模型的基础上提出了Dynamic Masking方法、去除了Next Sentence Prediction目标，同时在更多的数据上采用更大的batch size训练更长的时间，在多个任务中做到了SOTA。rbtl3以roberta_wwm_ext_chinese_L-24_H-1024_A-16模型参数初始化前三层Transformer以及词向量层并在此基础上继续训练了1M步，在仅损失少量效果的情况下大幅减少参数量，得到推断速度的进一步提升。当该PaddleHub Module用于Fine-tune时，其输入是单文本（如Fine-tune的任务为情感分类等）或文本对（如Fine-tune任务为文本语义相似度匹配等），可用于文本分类、序列标注、阅读理解等任务。 |
 | [chinese-bert](https://www.paddlepaddle.org.cn/hubdetail?name=chinese-bert-wwm&en_category=SemanticModel) | chinese_bert_wwm是支持中文的BERT模型，它采用全词遮罩（Whole Word Masking）技术，考虑到了中文分词问题。预训练数据集为中文维基百科。该PaddleHub Module只支持Fine-tune。当该PaddleHub Module用于Fine-tune时，其输入是单文本（如Fine-tune的任务为情感分类等）或文本对（如Fine-tune任务为文本语义相似度匹配等），可用于文本分类、序列标注、阅读理解等任务。 |
 
+
+
 ## 视频
 
 视频数据包含语音、图像等多种信息，因此理解视频任务不仅需要处理语音和图像，还需要提取视频帧时间序列中的上下文信息。视频分类模型提供了提取全局时序特征的方法，主要方式有卷积神经网络 (C3D, I3D, C2D等)，神经网络和传统图像算法结合 (VLAD 等)，循环神经网络等建模方法。视频动作定位模型需要同时识别视频动作的类别和起止时间点，通常采用类似于图像目标检测中的算法在时间维度上进行建模。
 
+
 | 模型名称                                                     | 模型简介                                                     |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| videotag_tsn_lstm                                            | videotag_tsn_lstm是一个基于千万短视频预训练的视频分类模型，可直接预测短视频的中文标签。模型分为视频特征抽取和序列建模两个阶段，前者使用TSN网络提取视频特征，后者基于前者输出使用AttentionLSTM网络进行序列建模实现分类。模型基于百度实际短视频场景中的大规模数据训练得到，在实际业务中取得89.9%的Top-1精度，同时具有良好的泛化能力，适用于多种短视频中文标签分类场景。该PaddleHub Module可支持预测。 |
 | [TSN](https://www.paddlepaddle.org.cn/hubdetail?name=tsn_kinetics400&en_category=VideoClassification) | TSN（Temporal Segment Network）是视频分类领域经典的基于2D-CNN的解决方案。该方法主要解决视频的长时间行为判断问题，通过稀疏采样视频帧的方式代替稠密采样，既能捕获视频全局信息，也能去除冗余，降低计算量。最终将每帧特征平均融合后得到视频的整体特征，并用于分类。TSN的训练数据采用由DeepMind公布的Kinetics-400动作识别数据集。该PaddleHub Module可支持预测。 |
 | [Non-Local](https://www.paddlepaddle.org.cn/hubdetail?name=tsn_kinetics400&en_category=VideoClassification) | Non-local Neural Networks是由Xiaolong Wang等研究者在2017年提出的模型，主要特点是通过引入Non-local操作来描述距离较远的像素点之间的关联关系。其借助于传统计算机视觉中的non-local mean的思想，并将该思想扩展到神经网络中，通过定义输出位置和所有输入位置之间的关联函数，建立全局关联特性。Non-local模型的训练数据采用由DeepMind公布的Kinetics-400动作识别数据集。该PaddleHub Module可支持预测。 |
 | [StNet](https://www.paddlepaddle.org.cn/hubdetail?name=stnet_kinetics400&en_category=VideoClassification) | StNet模型框架为ActivityNet Kinetics Challenge 2018中夺冠的基础网络框架，是基于ResNet50实现的。该模型提出super-image的概念，在super-image上进行2D卷积，建模视频中局部时空相关性。另外通过temporal modeling block建模视频的全局时空依赖，最后用一个temporal Xception block对抽取的特征序列进行长时序建模。StNet的训练数据采用由DeepMind公布的Kinetics-400动作识别数据集。该PaddleHub Module可支持预测。 |
 | [TSM](https://www.paddlepaddle.org.cn/hubdetail?name=tsm_kinetics400&en_category=VideoClassification) | TSM（Temporal Shift Module）是由MIT和IBM Watson AI Lab的JiLin，ChuangGan和SongHan等人提出的通过时间位移来提高网络视频理解能力的模块。TSM的训练数据采用由DeepMind公布的Kinetics-400动作识别数据集。该PaddleHub Module可支持预测。 |
+
+
