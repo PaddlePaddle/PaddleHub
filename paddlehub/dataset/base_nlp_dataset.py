@@ -458,7 +458,7 @@ class BaseReadingComprehensionDataset(BaseNLPDataset):
                 record["unique_id"] = unique_id
                 records.append(record)
 
-                # The other information saved in _Feature, which is helpful in post-processing.
+                # The other information saved in feature, which is helpful in postprocessing.
                 # The bridge with record and feature is unique_id.
                 tokens = self.tokenizer.decode(record)
                 token_to_orig_map = {}
