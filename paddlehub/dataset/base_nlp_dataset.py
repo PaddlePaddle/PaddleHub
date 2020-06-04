@@ -259,12 +259,11 @@ class SequenceLabelDataset(BaseNLPDataset):
                     record, only_convert_to_tokens=True)
                 tokens_index = 0
                 for token in tokens_with_specical_token:
-                    if token == tokens[tokens_index]:
+                    if tokens_index < len(
+                            tokens) and token == tokens[tokens_index]:
                         record["label"].append(
                             self.label_list.index(labels[tokens_index]))
                         tokens_index += 1
-                        if tokens_index == len(tokens):
-                            break
                     else:
                         record["label"].append(
                             self.label_list.index(self.no_entity_label))
