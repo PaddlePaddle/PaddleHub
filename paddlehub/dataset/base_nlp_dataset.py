@@ -376,6 +376,9 @@ class MRCDataset(BaseNLPDataset):
             "token_to_orig_map",
             "token_is_max_context",
         ])
+        self.special_tokens_num, self.special_tokens_num_before_doc = self._get_special_tokens_num(
+        )
+
         self.train_records, self.train_features = self.convert_examples_to_records_and_features(
             self.train_examples, "train")
         self.dev_records, self.dev_features = self.convert_examples_to_records_and_features(
@@ -384,9 +387,6 @@ class MRCDataset(BaseNLPDataset):
             self.test_examples, "test")
         self.predict_records, self.predict_features = self.convert_examples_to_records_and_features(
             self.predict_examples, "predict")
-
-        self.special_tokens_num, self.special_tokens_num_before_doc = self._get_special_tokens_num(
-        )
 
     def _get_special_tokens_num(self):
         fake_question = [self.tokenizer.pad_token]
