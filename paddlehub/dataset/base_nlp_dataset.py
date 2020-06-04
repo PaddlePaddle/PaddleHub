@@ -254,19 +254,19 @@ class SequenceLabelDataset(BaseNLPDataset):
                 labels=example.label.split(self.split_char))
             record = self.tokenizer.encode(text=tokens)
             if labels:
-                record["labels"] = []
+                record["label"] = []
                 tokens_with_specical_token = self.tokenizer.decode(
                     record, only_convert_to_tokens=True)
                 tokens_index = 0
                 for token in tokens_with_specical_token:
                     if token == tokens[tokens_index]:
-                        record["labels"].append(
+                        record["label"].append(
                             self.label_list.index(labels[tokens_index]))
                         tokens_index += 1
                         if tokens_index == len(tokens):
                             break
                     else:
-                        record["labels"].append(
+                        record["label"].append(
                             self.label_list.index(self.no_entity_label))
             records.append(record)
         return records
