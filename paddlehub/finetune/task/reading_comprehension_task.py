@@ -516,7 +516,7 @@ class ReadingComprehensionTask(BaseTask):
                 dataset = self.data_reader.dataset
             else:
                 all_examples = self.dataset.get_examples(self.phase)
-                all_features = self.dataset.get_features[self.phase]
+                all_features = self.dataset.get_features(self.phase)
                 dataset = self.dataset
             all_predictions, all_nbest_json, scores_diff_json = get_predictions(
                 all_examples=all_examples,
@@ -568,7 +568,7 @@ class ReadingComprehensionTask(BaseTask):
             all_features = self.data_reader.all_features[self.phase]
         else:
             all_examples = self.dataset.get_examples(self.phase)
-            all_features = self.dataset.get_features[self.phase]
+            all_features = self.dataset.get_features(self.phase)
         all_predictions, all_nbest_json, scores_diff_json = get_predictions(
             all_examples=all_examples,
             all_features=all_features,
