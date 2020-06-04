@@ -28,6 +28,7 @@ class PyramidBoxLiteServer(hub.Module):
         self.default_pretrained_model_path = os.path.join(
             self.directory, "pyramidbox_lite_server_face_detection")
         self._set_config()
+        self.processor = self
 
     def _set_config(self):
         """

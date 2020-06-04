@@ -28,6 +28,7 @@ class PyramidBoxLiteMobile(hub.Module):
         self.default_pretrained_model_path = os.path.join(
             self.directory, "pyramidbox_lite_mobile_face_detection")
         self._set_config()
+        self.processor = self
 
     def _set_config(self):
         """
@@ -129,6 +130,9 @@ class PyramidBoxLiteMobile(hub.Module):
 
         program, feeded_var_names, target_vars = fluid.io.load_inference_model(
             dirname=self.default_pretrained_model_path, executor=exe)
+
+        var = program.global_block().vars['detection_output_0.tmp_1']
+        var.desc.set_dtype(fluid.core.VarDesc.VarType.INT32)
 
         fluid.io.save_inference_model(
             dirname=dirname,
