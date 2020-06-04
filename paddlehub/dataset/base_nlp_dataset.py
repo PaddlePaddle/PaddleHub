@@ -413,7 +413,7 @@ class MRCDataset(BaseNLPDataset):
     def convert_examples_to_records_and_features(self, examples, phase):
         """Loads a data file into a list of `InputBatch`s."""
         if not self.tokenizer or not examples:
-            return []
+            return [], []
 
         logger.info("Processing the %s set..." % phase)
 
