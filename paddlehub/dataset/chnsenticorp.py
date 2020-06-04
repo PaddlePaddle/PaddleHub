@@ -32,7 +32,7 @@ class ChnSentiCorp(TextClassificationDataset):
     opinion mining)
     """
 
-    def __init__(self, tokenizer=None, max_seq_len=None):
+    def __init__(self, tokenizer=None):
         dataset_dir = os.path.join(DATA_HOME, "chnsenticorp")
         base_path = self._download_dataset(
             dataset_dir,
@@ -44,8 +44,7 @@ class ChnSentiCorp(TextClassificationDataset):
             test_file="test.tsv",
             label_file=None,
             label_list=["0", "1"],
-            tokenizer=tokenizer,
-            max_seq_len=max_seq_len)
+            tokenizer=tokenizer)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -65,8 +64,8 @@ class ChnSentiCorp(TextClassificationDataset):
 
 if __name__ == "__main__":
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
-    tokenizer = BertTokenizer(vocab_file='vocab.txt')
-    ds = ChnSentiCorp(tokenizer=tokenizer, max_seq_len=10)
+    tokenizer = BertTokenizer(vocab_file='vocab.txt', max_seq_len=10)
+    ds = ChnSentiCorp(tokenizer=tokenizer)
 
     print("first 10 dev examples")
     for e in ds.get_dev_examples()[:10]:

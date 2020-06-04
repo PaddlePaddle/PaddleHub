@@ -72,7 +72,6 @@ class SQUAD(MRCDataset):
             self,
             version_2_with_negative=False,
             tokenizer=None,
-            max_seq_len=None,
             max_query_len=64,
             doc_stride=128,
     ):
@@ -95,7 +94,6 @@ class SQUAD(MRCDataset):
             label_file=None,
             label_list=None,
             tokenizer=tokenizer,
-            max_seq_len=max_seq_len,
             max_query_len=max_query_len,
             doc_stride=doc_stride,
         )

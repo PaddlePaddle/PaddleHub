@@ -39,8 +39,7 @@ class BaseNLPDataset(BaseDataset):
                  dev_file_with_header=False,
                  test_file_with_header=False,
                  predict_file_with_header=False,
-                 tokenizer=None,
-                 max_seq_len=128):
+                 tokenizer=None):
         super(BaseNLPDataset, self).__init__(
             base_path=base_path,
             train_file=train_file,
@@ -54,7 +53,6 @@ class BaseNLPDataset(BaseDataset):
             test_file_with_header=test_file_with_header,
             predict_file_with_header=predict_file_with_header)
         self.tokenizer = tokenizer
-        self.max_seq_len = max_seq_len
         self.train_records = self.convert_examples_to_records(
             self.train_examples, "train")
         self.dev_records = self.convert_examples_to_records(
@@ -130,9 +128,7 @@ class BaseNLPDataset(BaseDataset):
         records = []
         for example in examples:
             record = self.tokenizer.encode(
-                text=example.text_a,
-                text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
+                text=example.text_a, text_pair=example.text_b)
             if example.label:
                 record["label"] = self.label_list.index(example.label)
             records.append(record)
@@ -216,7 +212,6 @@ class SequenceLabelDataset(BaseNLPDataset):
                  test_file_with_header=False,
                  predict_file_with_header=False,
                  tokenizer=None,
-                 max_seq_len=128,
                  split_char="\002",
                  no_entity_label="O"):
         self.no_entity_label = no_entity_label
@@ -234,8 +229,7 @@ class SequenceLabelDataset(BaseNLPDataset):
             dev_file_with_header=dev_file_with_header,
             test_file_with_header=test_file_with_header,
             predict_file_with_header=predict_file_with_header,
-            tokenizer=tokenizer,
-            max_seq_len=max_seq_len)
+            tokenizer=tokenizer)
 
     def convert_examples_to_records(self, examples, phase):
         """
@@ -258,8 +252,7 @@ class SequenceLabelDataset(BaseNLPDataset):
             tokens, labels = self._reseg_token_label(
                 tokens=example.text_a.split(self.split_char),
                 labels=example.label.split(self.split_char))
-            record = self.tokenizer.encode(
-                text=tokens, max_seq_len=self.max_seq_len)
+            record = self.tokenizer.encode(text=tokens)
             if labels:
                 record["labels"] = []
                 tokens_with_specical_token = self.tokenizer.decode(
@@ -275,10 +268,6 @@ class SequenceLabelDataset(BaseNLPDataset):
                     else:
                         record["labels"].append(
                             self.label_list.index(self.no_entity_label))
-                if tokens_index != len(tokens):
-                    logger.warning(
-                        "Some errors may occur in processing the example %s" %
-                        example)
             records.append(record)
         return records
 
@@ -336,9 +325,7 @@ class MultiLabelDataset(BaseNLPDataset):
         records = []
         for example in examples:
             record = self.tokenizer.encode(
-                text=example.text_a,
-                text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
+                text=example.text_a, text_pair=example.text_b)
             if example.label:
                 record["label"] = [int(label) for label in example.label]
             records.append(record)
@@ -360,7 +347,6 @@ class MRCDataset(BaseNLPDataset):
             test_file_with_header=False,
             predict_file_with_header=False,
             tokenizer=None,
-            max_seq_len=128,
             max_query_len=64,
             doc_stride=128,
     ):
@@ -380,7 +366,6 @@ class MRCDataset(BaseNLPDataset):
         )
 
         self.tokenizer = tokenizer
-        self.max_seq_len = max_seq_len
         self.max_query_len = max_query_len
         self._DocSpan = collections.namedtuple("DocSpan", ["start", "length"])
         self.doc_stride = doc_stride
@@ -479,7 +464,7 @@ class MRCDataset(BaseNLPDataset):
             # To deal with this we do a sliding window approach, where we take chunks
             # of the up to our max length with a stride of `doc_stride`.
             # if hasattr(self.tokenizer, "num_special_tokens_to_add"):
-            max_tokens_for_doc = self.max_seq_len - len(
+            max_tokens_for_doc = self.tokenizer.max_seq_len - len(
                 query_tokens) - self.special_tokens_num
 
             doc_spans = []
@@ -522,8 +507,7 @@ class MRCDataset(BaseNLPDataset):
                 record = self.tokenizer.encode(
                     text=query_tokens,
                     text_pair=all_doc_tokens[doc_span.start:doc_span.start +
-                                             doc_span.length],
-                    max_seq_len=self.max_seq_len)
+                                             doc_span.length])
                 record["start_position"] = start_position
                 record["end_position"] = end_position
                 record["unique_id"] = unique_id

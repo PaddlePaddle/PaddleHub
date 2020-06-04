@@ -36,7 +36,7 @@ class MSRA_NER(SequenceLabelDataset):
     https://www.microsoft.com/en-us/download/details.aspx?id=52531
     """
 
-    def __init__(self, tokenizer=None, max_seq_len=None):
+    def __init__(self, tokenizer=None):
         dataset_dir = os.path.join(DATA_HOME, "msra_ner")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         super(MSRA_NER, self).__init__(
@@ -48,8 +48,7 @@ class MSRA_NER(SequenceLabelDataset):
             label_list=[
                 "B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"
             ],
-            tokenizer=tokenizer,
-            max_seq_len=max_seq_len)
+            tokenizer=tokenizer)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -69,8 +68,8 @@ class MSRA_NER(SequenceLabelDataset):
 
 if __name__ == "__main__":
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
-    tokenizer = BertTokenizer(vocab_file='vocab.txt')
-    ds = MSRA_NER(tokenizer=tokenizer, max_seq_len=30)
+    tokenizer = BertTokenizer(vocab_file='vocab.txt', max_seq_len=30)
+    ds = MSRA_NER(tokenizer=tokenizer)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

@@ -46,12 +46,13 @@ if __name__ == '__main__':
         tokenizer = hub.ErnieTinyTokenizer(
             vocab_file=module.get_vocab_path(),
             spm_path=module.get_spm_path(),
-            word_dict_path=module.get_word_dict_path())
+            word_dict_path=module.get_word_dict_path(),
+            max_seq_len=args.max_seq_len)
     else:
-        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+        tokenizer = hub.BertTokenizer(
+            vocab_file=module.get_vocab_path(), max_seq_len=args.max_seq_len)
 
-    dataset = hub.dataset.GLUE(
-        "STS-B", tokenizer=tokenizer, max_seq_len=args.max_seq_len)
+    dataset = hub.dataset.GLUE("STS-B", tokenizer=tokenizer)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.

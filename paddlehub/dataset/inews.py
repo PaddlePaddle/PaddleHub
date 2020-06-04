@@ -33,7 +33,7 @@ class INews(TextClassificationDataset):
     INews is a sentiment analysis dataset for Internet News
     """
 
-    def __init__(self, tokenizer=None, max_seq_len=None):
+    def __init__(self, tokenizer=None):
         dataset_dir = os.path.join(DATA_HOME, "inews")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         super(INews, self).__init__(
@@ -43,8 +43,7 @@ class INews(TextClassificationDataset):
             test_file="test.txt",
             label_file=None,
             label_list=["0", "1", "2"],
-            tokenizer=tokenizer,
-            max_seq_len=max_seq_len)
+            tokenizer=tokenizer)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -63,8 +62,8 @@ class INews(TextClassificationDataset):
 if __name__ == "__main__":
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
 
-    tokenizer = BertTokenizer(vocab_file='vocab.txt')
-    ds = INews(tokenizer=tokenizer, max_seq_len=10)
+    tokenizer = BertTokenizer(vocab_file='vocab.txt', max_seq_len=10)
+    ds = INews(tokenizer=tokenizer)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
