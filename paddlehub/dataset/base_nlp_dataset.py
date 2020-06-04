@@ -183,18 +183,18 @@ class BaseNLPDataset(BaseDataset):
             raise ValueError("Invalid phase: %s" % phase)
 
     def get_feed_list(self, phase):
-        records = self.get_phase_records(phase)
+        records = self.get_records(phase)
         if records:
             feed_list = list(records[0].keys())
         else:
             if phase == "predict":
                 feed_list = [
-                    feed_name for feed_name in self.get_phase_feed_list("train")
+                    feed_name for feed_name in self.get_feed_list("train")
                     if feed_name != "label"
                 ]
             else:
                 feed_list = [
-                    feed_name for feed_name in self.get_phase_feed_list("train")
+                    feed_name for feed_name in self.get_feed_list("train")
                 ]
         return feed_list
 
