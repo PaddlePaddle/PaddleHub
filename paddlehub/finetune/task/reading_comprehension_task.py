@@ -368,8 +368,9 @@ def get_predictions(all_examples, all_features, all_results, n_best_size,
 class ReadingComprehensionTask(BaseTask):
     def __init__(self,
                  feature,
-                 feed_list,
-                 data_reader,
+                 dataset=None,
+                 feed_list=None,
+                 data_reader=None,
                  startup_program=None,
                  config=None,
                  metrics_choices=None,
@@ -380,6 +381,7 @@ class ReadingComprehensionTask(BaseTask):
 
         main_program = feature.block.program
         super(ReadingComprehensionTask, self).__init__(
+            dataset=dataset,
             data_reader=data_reader,
             main_program=main_program,
             feed_list=feed_list,
@@ -387,7 +389,6 @@ class ReadingComprehensionTask(BaseTask):
             config=config,
             metrics_choices=metrics_choices)
         self.feature = feature
-        self.data_reader = data_reader
         self.sub_task = sub_task.lower()
         self.version_2_with_negative = (self.sub_task == "squad2.0")
         if self.sub_task in ["squad2.0", "squad"]:
@@ -509,8 +510,14 @@ class ReadingComprehensionTask(BaseTask):
         scores = OrderedDict()
         # If none of metrics has been implemented, loss will be used to evaluate.
         if self.is_test_phase:
-            all_examples = self.data_reader.all_examples[self.phase]
-            all_features = self.data_reader.all_features[self.phase]
+            if self._compatible_mode:
+                all_examples = self.data_reader.all_examples[self.phase]
+                all_features = self.data_reader.all_features[self.phase]
+                dataset = self.data_reader.dataset
+            else:
+                all_examples = self.dataset.get_examples(self.phase)
+                all_features = self.dataset.get_features[self.phase]
+                dataset = self.dataset
             all_predictions, all_nbest_json, scores_diff_json = get_predictions(
                 all_examples=all_examples,
                 all_features=all_features,
@@ -522,28 +529,23 @@ class ReadingComprehensionTask(BaseTask):
                 null_score_diff_threshold=self.null_score_diff_threshold,
                 is_english=self.is_english)
             if self.phase == 'val' or self.phase == 'dev':
-                with io.open(
-                        self.data_reader.dataset.dev_path, 'r',
-                        encoding="utf8") as dataset_file:
-                    dataset_json = json.load(dataset_file)
-                    dataset = dataset_json['data']
+                dataset_path = dataset.dev_path
             elif self.phase == 'test':
-                with io.open(
-                        self.data_reader.dataset.test_path, 'r',
-                        encoding="utf8") as dataset_file:
-                    dataset_json = json.load(dataset_file)
-                    dataset = dataset_json['data']
+                dataset_path = dataset.test_path
             else:
                 raise Exception("Error phase: %s when runing _calculate_metrics"
                                 % self.phase)
+            with io.open(dataset_path, 'r', encoding="utf8") as dataset_file:
+                dataset_json = json.load(dataset_file)
+                data = dataset_json['data']
 
             if self.sub_task == "squad":
-                scores = squad1_evaluate.evaluate(dataset, all_predictions)
+                scores = squad1_evaluate.evaluate(data, all_predictions)
             elif self.sub_task == "squad2.0":
-                scores = squad2_evaluate.evaluate(dataset, all_predictions,
+                scores = squad2_evaluate.evaluate(data, all_predictions,
                                                   scores_diff_json)
             elif self.sub_task in ["cmrc2018", "drcd"]:
-                scores = cmrc2018_evaluate.get_eval(dataset, all_predictions)
+                scores = cmrc2018_evaluate.get_eval(data, all_predictions)
         return scores, avg_loss, run_speed
 
     def _postprocessing(self, run_states):
@@ -561,8 +563,12 @@ class ReadingComprehensionTask(BaseTask):
                         unique_id=unique_id,
                         start_logits=start_logits,
                         end_logits=end_logits))
-        all_examples = self.data_reader.all_examples[self.phase]
-        all_features = self.data_reader.all_features[self.phase]
+        if self._compatible_mode:
+            all_examples = self.data_reader.all_examples[self.phase]
+            all_features = self.data_reader.all_features[self.phase]
+        else:
+            all_examples = self.dataset.get_examples(self.phase)
+            all_features = self.dataset.get_features[self.phase]
         all_predictions, all_nbest_json, scores_diff_json = get_predictions(
             all_examples=all_examples,
             all_features=all_features,

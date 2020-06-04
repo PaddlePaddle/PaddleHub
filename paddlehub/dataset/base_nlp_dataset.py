@@ -168,7 +168,7 @@ class BaseNLPDataset(BaseDataset):
             np.random.shuffle(records)
         return records
 
-    def get_phase_records(self, phase, shuffle=False):
+    def get_records(self, phase, shuffle=False):
         if phase == "train":
             return self.get_train_records(shuffle)
         elif phase == "dev":
@@ -182,7 +182,7 @@ class BaseNLPDataset(BaseDataset):
         else:
             raise ValueError("Invalid phase: %s" % phase)
 
-    def get_phase_feed_list(self, phase):
+    def get_feed_list(self, phase):
         records = self.get_phase_records(phase)
         if records:
             feed_list = list(records[0].keys())
@@ -199,10 +199,43 @@ class BaseNLPDataset(BaseDataset):
         return feed_list
 
 
-BaseTextClassificationDataset = BaseNLPDataset
+TextClassificationDataset = BaseNLPDataset
 
 
-class BaseSequenceLabelDataset(BaseNLPDataset):
+class SequenceLabelDataset(BaseNLPDataset):
+    def __init__(self,
+                 base_path,
+                 train_file=None,
+                 dev_file=None,
+                 test_file=None,
+                 predict_file=None,
+                 label_file=None,
+                 label_list=None,
+                 train_file_with_header=False,
+                 dev_file_with_header=False,
+                 test_file_with_header=False,
+                 predict_file_with_header=False,
+                 tokenizer=None,
+                 max_seq_len=128,
+                 split_char="\002",
+                 no_entity_label="O"):
+        super(SequenceLabelDataset, self).__init__(
+            base_path=base_path,
+            train_file=train_file,
+            dev_file=dev_file,
+            test_file=test_file,
+            predict_file=predict_file,
+            label_file=label_file,
+            label_list=label_list,
+            train_file_with_header=train_file_with_header,
+            dev_file_with_header=dev_file_with_header,
+            test_file_with_header=test_file_with_header,
+            predict_file_with_header=predict_file_with_header,
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
+        self.no_entity_label = no_entity_label
+        self.split_char = split_char
+
     def convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
@@ -222,15 +255,25 @@ class BaseSequenceLabelDataset(BaseNLPDataset):
         records = []
         for example in examples:
             tokens, labels = self._reseg_token_label(
-                tokens=example.text_a.split("\002"),
-                labels=example.label.split("\002"))
+                tokens=example.text_a.split(self.split_char),
+                labels=example.label.split(self.split_char))
             record = self.tokenizer.encode(
                 text=tokens, max_seq_len=self.max_seq_len)
             if labels:
-                record["label"] = self.tokenizer.encode_token_labels(
-                    labels=labels,
-                    label_list=self.label_list,
-                    max_seq_len=self.max_seq_len)
+                record["labels"] = []
+                tokens_with_specical_token = self.tokenizer.decode(
+                    record, only_convert_to_tokens=True)
+                tokens_index = 0
+                for token in tokens_with_specical_token:
+                    if token == tokens[tokens_index]:
+                        record["labels"].append(labels[tokens_index])
+                        tokens_index += 1
+                    else:
+                        record["labels"].append(self.no_entity_label)
+                if tokens_index != len(tokens):
+                    logger.warning(
+                        "Some errors may occur in processing the example %s" %
+                        example)
             records.append(record)
         return records
 
@@ -271,7 +314,7 @@ class BaseSequenceLabelDataset(BaseNLPDataset):
             return ret_tokens, None
 
 
-class BaseMultiLabelDataset(BaseNLPDataset):
+class MultiLabelDataset(BaseNLPDataset):
     def convert_examples_to_records(self, examples):
         """
         Returns a list[dict] including all the input information what the model need.
@@ -297,7 +340,7 @@ class BaseMultiLabelDataset(BaseNLPDataset):
         return records
 
 
-class BaseReadingComprehensionDataset(BaseNLPDataset):
+class MRCDataset(BaseNLPDataset):
     def __init__(
             self,
             base_path,
@@ -353,6 +396,31 @@ class BaseReadingComprehensionDataset(BaseNLPDataset):
         self.predict_records, self.predict_features = self.convert_examples_to_records_and_features(
             self.predict_examples, "predict")
 
+        self.special_tokens_num, self.special_tokens_num_before_doc = self._get_special_tokens_num(
+        )
+
+    def _get_special_tokens_num(self):
+        fake_question = [self.tokenizer.pad_token]
+        fake_answer = [self.tokenizer.pad_token]
+        special_tokens_num = 0
+        special_tokens_num_before_doc = 0
+        seen_pad_num = True
+        fake_record = self.tokenizer.encode(fake_question, fake_answer)
+        fake_tokens_with_special_tokens = self.tokenizer.decode(
+            fake_record, only_convert_to_tokens=True)
+        for token in fake_tokens_with_special_tokens:
+            if token == self.tokenizer.pad_token:
+                seen_pad_num += 1
+                if seen_pad_num > 2:
+                    # The third pad_token is added by padding
+                    break
+            else:
+                special_tokens_num += 1
+                if seen_pad_num < 2:
+                    # The second pad_token is the fake_answer
+                    special_tokens_num_before_doc += 1
+        return special_tokens_num, special_tokens_num_before_doc
+
     def convert_examples_to_records_and_features(self, examples, phase):
         """Loads a data file into a list of `InputBatch`s."""
         if not self.tokenizer or not examples:
@@ -405,12 +473,10 @@ class BaseReadingComprehensionDataset(BaseNLPDataset):
             # We can have documents that are longer than the maximum sequence length.
             # To deal with this we do a sliding window approach, where we take chunks
             # of the up to our max length with a stride of `doc_stride`.
-            if hasattr(self.tokenizer, "num_special_tokens_to_add"):
-                max_tokens_for_doc = self.max_seq_len - len(
-                    query_tokens) - self.tokenizer.num_special_tokens_to_add(
-                        pair=True)
-            else:
-                max_tokens_for_doc = self.max_seq_len - len(query_tokens)
+            # if hasattr(self.tokenizer, "num_special_tokens_to_add"):
+            max_tokens_for_doc = self.max_seq_len - len(
+                query_tokens) - self.special_tokens_num
+
             doc_spans = []
             start_offset = 0
             while start_offset < len(all_doc_tokens):
@@ -427,26 +493,26 @@ class BaseReadingComprehensionDataset(BaseNLPDataset):
                 # Update the start_position and end_position to doc_span
                 start_position = None
                 end_position = None
-                if phase != "predict" and not is_impossible:
-                    # For training, if our document chunk does not contain an annotation
-                    # we throw it out, since there is nothing to predict.
-                    doc_start = doc_span.start
-                    doc_end = doc_span.start + doc_span.length - 1
-                    out_of_span = False
-                    if not (tok_start_position >= doc_start
-                            and tok_end_position <= doc_end):
-                        out_of_span = True
-                    if out_of_span:
+                if phase != "predict":
+                    if is_impossible:
                         start_position = 0
                         end_position = 0
                     else:
-                        doc_offset = len(query_tokens) + 2
-                        start_position = tok_start_position - doc_start + doc_offset
-                        end_position = tok_end_position - doc_start + doc_offset
-
-                if phase != "predict" and is_impossible:
-                    start_position = 0
-                    end_position = 0
+                        # For training, if our document chunk does not contain an annotation
+                        # we throw it out, since there is nothing to predict.
+                        doc_start = doc_span.start
+                        doc_end = doc_span.start + doc_span.length - 1
+                        out_of_span = False
+                        if not (tok_start_position >= doc_start
+                                and tok_end_position <= doc_end):
+                            out_of_span = True
+                        if out_of_span:
+                            start_position = 0
+                            end_position = 0
+                        else:
+                            doc_offset = len(query_tokens) + 2
+                            start_position = tok_start_position - doc_start + doc_offset
+                            end_position = tok_end_position - doc_start + doc_offset
 
                 record = self.tokenizer.encode(
                     text=query_tokens,
@@ -460,15 +526,12 @@ class BaseReadingComprehensionDataset(BaseNLPDataset):
 
                 # The other information is saved in feature, which is helpful in postprocessing.
                 # The bridge with record and feature is unique_id.
-                tokens = self.tokenizer.decode(record)
+                tokens = self.tokenizer.decode(
+                    record, only_convert_to_tokens=True)
                 token_to_orig_map = {}
                 token_is_max_context = {}
-                if hasattr(self.tokenizer, "num_special_tokens_to_add"):
-                    doc_token_start = len(
-                        query_tokens
-                    ) + self.tokenizer.num_special_tokens_to_add(pair=False)
-                else:
-                    doc_token_start = len(query_tokens)
+                doc_token_start = len(
+                    query_tokens) + self.special_tokens_num_before_doc
                 for i in range(doc_span.length):
                     # split_token_index: the doc token position in doc after tokenize
                     # doc_token_index: the doc token position in record after encode
@@ -567,7 +630,7 @@ class BaseReadingComprehensionDataset(BaseNLPDataset):
 
         return cur_span_index == best_span_index
 
-    def get_phase_features(self, phase):
+    def get_features(self, phase):
         if phase == "train":
             return self.train_features
         elif phase == "dev":

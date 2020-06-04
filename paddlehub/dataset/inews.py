@@ -23,12 +23,12 @@ import csv
 
 from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import TextClassificationDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/inews.tar.gz"
 
 
-class INews(BaseNLPDataset):
+class INews(TextClassificationDataset):
     """
     INews is a sentiment analysis dataset for Internet News
     """

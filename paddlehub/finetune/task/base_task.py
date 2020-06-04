@@ -591,7 +591,7 @@ class BaseTask(object):
                     shuffle = True
                 else:
                     shuffle = False
-                records = self.dataset.get_phase_records(
+                records = self.dataset.get_records(
                     phase=self.phase, shuffle=shuffle)
             self.env.generator = data_generator(records)
         return self.env.generator
@@ -646,7 +646,7 @@ class BaseTask(object):
             if self._predict_data:
                 feed_list = list(self._predict_data[0].keys())
             else:
-                feed_list = self.dataset.get_phase_feed_list(self.phase)
+                feed_list = self.dataset.get_feed_list(self.phase)
 
             feed_list = [
                 feed_name for feed_name in feed_list

@@ -23,10 +23,10 @@ import csv
 
 from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import TextClassificationDataset
 
 
-class ChnSentiCorp(BaseNLPDataset):
+class ChnSentiCorp(TextClassificationDataset):
     """
     ChnSentiCorp (by Tan Songbo at ICT of Chinese Academy of Sciences, and for
     opinion mining)

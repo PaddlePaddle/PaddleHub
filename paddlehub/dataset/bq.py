@@ -20,10 +20,10 @@ from __future__ import print_function
 import os
 
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import TextClassificationDataset
 
 
-class BQ(BaseNLPDataset):
+class BQ(TextClassificationDataset):
     def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "bq")
         base_path = self._download_dataset(

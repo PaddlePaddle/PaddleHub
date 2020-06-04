@@ -22,12 +22,12 @@ import pandas as pd
 
 from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import BaseMultiLabelDataset
+from paddlehub.dataset.base_nlp_dataset import MultiLabelDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/toxic.tar.gz"
 
 
-class Toxic(BaseMultiLabelDataset):
+class Toxic(MultiLabelDataset):
     """
     The kaggle Toxic dataset:
     https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge

@@ -23,12 +23,12 @@ import csv
 
 from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import TextClassificationDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/nlpcc-dbqa.tar.gz"
 
 
-class NLPCC_DBQA(BaseNLPDataset):
+class NLPCC_DBQA(TextClassificationDataset):
     """
     Please refer to
     http://tcci.ccf.org.cn/conference/2017/dldoc/taskgline05.pdf

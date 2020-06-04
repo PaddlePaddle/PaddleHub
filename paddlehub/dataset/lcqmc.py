@@ -23,12 +23,12 @@ import csv
 
 from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import TextClassificationDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/lcqmc.tar.gz"
 
 
-class LCQMC(BaseNLPDataset):
+class LCQMC(TextClassificationDataset):
     def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "lcqmc")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)

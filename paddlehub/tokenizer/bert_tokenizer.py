@@ -23,7 +23,7 @@ from typing import Dict, List, Optional, Union, Tuple
 from paddlehub.common.logger import logger
 import sentencepiece as spm
 
-from tokenizer_util import load_vocab, _is_whitespace, _is_control, _is_punctuation, whitespace_tokenize
+from .tokenizer_util import load_vocab, _is_whitespace, _is_control, _is_punctuation, whitespace_tokenize
 
 
 class BasicTokenizer(object):
@@ -635,7 +635,7 @@ class BertTokenizer(object):
                 Whether to return token type IDs.
             return_input_mask (:obj:`bool`, `optional`, defaults to :obj:`True`):
                 Whether to return the attention mask.
-            return_lengths (:obj:`bool`, `optional`, defaults to :obj:`True`):
+            return_length (:obj:`int`, defaults to :obj:`True`):
                 If set the resulting dictionary will include the length of each encoded inputs
             return_overflowing_tokens (:obj:`bool`, `optional`, defaults to :obj:`False`):
                 Set to True to return overflowing token information (default False).
@@ -769,80 +769,20 @@ class BertTokenizer(object):
 
         return encoded_inputs
 
-    def encode_token_labels(self,
-                            labels: Union[str, List[str], List[int]],
-                            label_list: List[str],
-                            max_seq_len: Optional[int] = None,
-                            pad_to_max_seq_len: bool = True):
-        """
-        Returns a list containing the encoded token labels. BaseSequenceLabelDataset use it to encode the token labels.
-
-        Args:
-            labels (:obj:`str`, :obj:`List[str]` or :obj:`List[int]`):
-                The token labels to be encoded. This can be a string, a list of strings (tokenized string using
-                the `split("\002")` method) or a list of integers (tokenized string ids using the label_list)
-            label_list (:obj:`List[str]`):
-                 Then label list, used to map label to label id.
-            max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
-                If set to a number, will limit the total sequence returned so that it has a maximum length.
-            pad_to_max_seq_len (:obj:`bool`, `optional`, defaults to :obj:`True`):
-                If set to True, the returned sequences will be padded according to the model's padding side and
-                padding index, up to their max length. If no max length is specified, the padding is done up to the
-                model's max length.
-        Return:
-            label_ids: list[int]
-        """
-
-        def get_input_ids(text):
-            if isinstance(text, (list, tuple)) and len(text) > 0 and isinstance(
-                    text[0], int):
-                return text
-            if isinstance(text, str):
-                text = text.split("\002")
-            if isinstance(text, (list, tuple)) and len(text) > 0 and isinstance(
-                    text[0], str):
-                return [label_list.index(label) for label in text]
-            else:
-                raise ValueError(
-                    "Input is not valid. Should be a string, a list/tuple of strings or a list/tuple of integers."
-                )
-
-        ids = get_input_ids(labels)
-
-        # Truncating
-        if max_seq_len and len(ids) > max_seq_len - 2:
-            ids = ids[0:(max_seq_len - 2)]
-        # Filling
-        no_entity_id = len(label_list) - 1
-        ids = [no_entity_id] + ids + [no_entity_id]
-        # Check lengths
-        assert max_seq_len is None or len(ids) <= max_seq_len
-        if max_seq_len is None and len(ids) > self.model_max_seq_len:
-            logger.warning(
-                "Token labels length is longer than the specified maximum sequence length "
-                "for this model ({} > {}). Running this sequence through the model will result in "
-                "indexing errors".format(len(ids), self.model_max_seq_len))
-        # Padding
-        needs_to_be_padded = pad_to_max_seq_len and (
-            max_seq_len and len(ids) < max_seq_len
-            or max_seq_len is None and len(ids) < self.model_max_seq_len)
-        if needs_to_be_padded:
-            difference = (max_seq_len if max_seq_len is not None else
-                          self.model_max_seq_len) - len(ids)
-            ids = ids + [no_entity_id] * difference
-        return ids
-
     def decode(self,
                token_ids: Union[List[int], Dict],
+               only_convert_to_tokens: bool = True,
+               skip_pad_token: bool = False,
                skip_special_tokens: bool = False,
-               clean_up_tokenization_spaces: bool = True) -> str:
+               clean_up_tokenization_spaces: bool = True):
         """
-        Converts a sequence of ids (integer) in a string, using the tokenizer and vocabulary
-        with options to remove special tokens and clean up tokenization spaces.
-        Similar to doing ``self.convert_tokens_to_string(self.convert_ids_to_tokens(token_ids))``.
+        Converts a sequence of ids (integer) to a string if only_convert_to_tokens is False or a list a sequence of tokens (str)
+        when only_convert_to_tokens is True.
 
         Args:
-            token_ids: list of tokenized input ids or dict containing a key called "input_ids". Can be obtained using the `encode` methods.
+            token_ids: list of tokenized input ids or dict containing a key called "input_ids", can be obtained using the `encode` methods.
+            only_convert_to_tokens:  if set to True, will only return a list a sequence of tokens (str). `paddlehub.dataset.base_nlp_dataset` will use this optional argument.
+            skip_pad_token: if set to True, will replace pad tokens.
             skip_special_tokens: if set to True, will replace special tokens.
             clean_up_tokenization_spaces: if set to True, will clean up the tokenization spaces.
         """
@@ -854,9 +794,12 @@ class BertTokenizer(object):
 
         tokens = []
         for token in filtered_tokens:
-            if skip_special_tokens and token in self.all_special_ids:
+            if skip_pad_token and token == self.pad_token:
                 continue
             tokens.append(token)
+        if only_convert_to_tokens:
+            return tokens
+
         if tokens:
             text = " ".join(self.convert_tokens_to_string(tokens))
         else:
