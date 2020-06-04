@@ -20,6 +20,7 @@ from __future__ import print_function
 import io
 import csv
 import collections
+from tqdm import tqdm
 
 import numpy as np
 from paddlehub.dataset import InputExample, BaseDataset
@@ -421,7 +422,7 @@ class MRCDataset(BaseNLPDataset):
         records = []
         unique_id = 1000000000
 
-        for (example_index, example) in enumerate(examples):
+        for (example_index, example) in tqdm(enumerate(examples)):
             # Tokenize question_text
             query_tokens = self.tokenizer.tokenize(example.question_text)
             if len(query_tokens) > self.max_query_len:
