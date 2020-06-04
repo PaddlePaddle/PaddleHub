@@ -219,6 +219,9 @@ class SequenceLabelDataset(BaseNLPDataset):
                  max_seq_len=128,
                  split_char="\002",
                  no_entity_label="O"):
+        self.no_entity_label = no_entity_label
+        self.split_char = split_char
+
         super(SequenceLabelDataset, self).__init__(
             base_path=base_path,
             train_file=train_file,
@@ -233,8 +236,6 @@ class SequenceLabelDataset(BaseNLPDataset):
             predict_file_with_header=predict_file_with_header,
             tokenizer=tokenizer,
             max_seq_len=max_seq_len)
-        self.no_entity_label = no_entity_label
-        self.split_char = split_char
 
     def convert_examples_to_records(self, examples, phase):
         """
