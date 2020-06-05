@@ -252,6 +252,7 @@ class TextClassifierTask(ClassifierTask):
             # LACClassifyReader wont return the seqence length, while Dataset with tokenizer and ClassifyReader will.
             self.seq_len = fluid.layers.data(
                 name="seq_len", shape=[-1], dtype='int64', lod_level=0)
+            self.seq_len = fluid.layers.squeeze(self.seq_len, axes=-1)
             # unpad the token_feature
             unpad_feature = fluid.layers.sequence_unpad(
                 self.feature, length=self.seq_len)
