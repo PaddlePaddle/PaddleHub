@@ -70,7 +70,7 @@ def finetune(args):
                 position_ids = np.array(data[0][1]).astype(np.int64)
                 segment_ids = np.array(data[0][2]).astype(np.int64)
                 input_mask = np.array(data[0][3]).astype(np.float32)
-                labels = np.array(data[0][4]).astype(np.int64)
+                labels = np.array(data[0][-1]).astype(np.int64)
                 pred = tc(input_ids, position_ids, segment_ids, input_mask)
 
                 acc = fluid.layers.accuracy(pred, to_variable(labels))

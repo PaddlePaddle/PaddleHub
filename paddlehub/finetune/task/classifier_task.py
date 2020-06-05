@@ -269,8 +269,9 @@ class TextClassifierTask(ClassifierTask):
                     cls_feats = net_func(self.feature)
                 else:
                     cls_feats = net_func(unpad_feature)
-            logger.info(
-                "%s has been added in the TextClassifierTask!" % self.network)
+            if self.is_train_phase:
+                logger.info("%s has been added in the TextClassifierTask!" %
+                            self.network)
         else:
             # not use pre-defined net but to use fc net
             cls_feats = fluid.layers.dropout(
