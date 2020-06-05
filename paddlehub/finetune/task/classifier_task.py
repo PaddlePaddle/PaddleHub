@@ -251,11 +251,11 @@ class TextClassifierTask(ClassifierTask):
         if not isinstance(self._base_data_reader, LACClassifyReader):
             # LACClassifyReader wont return the seqence length, while Dataset with tokenizer and ClassifyReader will.
             self.seq_len = fluid.layers.data(
-                name="seq_len", shape=[-1], dtype='int64', lod_level=0)
-            self.seq_len = fluid.layers.squeeze(self.seq_len, axes=[-1])
+                name="seq_len", shape=[1], dtype='int64', lod_level=0)
+            self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])
             # unpad the token_feature
             unpad_feature = fluid.layers.sequence_unpad(
-                self.feature, length=self.seq_len)
+                self.feature, length=self.seq_len_used)
         if self.network:
             # add pre-defined net
             net_func = getattr(net.classification, self.network)
