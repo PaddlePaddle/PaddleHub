@@ -75,14 +75,15 @@ def finetune(args):
                 data_generator, batch_size=args.batch_size)
             for batch_id, data in enumerate(batch_generator()):
                 input_ids = np.array(data[batch_id]["input_ids"]).astype(
-                    np.int64)
+                    np.int64).reshape([-1, args.max_seq_len, 1])
                 position_ids = np.array(data[batch_id]["position_ids"]).astype(
-                    np.int64)
+                    np.int64).reshape([-1, args.max_seq_len, 1])
                 segment_ids = np.array(data[batch_id]["segment_ids"]).astype(
-                    np.int64)
+                    np.int64).reshape([-1, args.max_seq_len, 1])
                 input_mask = np.array(data[batch_id]["input_mask"]).astype(
-                    np.float32)
-                labels = np.array(data[batch_id]["label"]).astype(np.int64)
+                    np.float32).reshape([-1, args.max_seq_len, 1])
+                labels = np.array(data[batch_id]["label"]).astype(
+                    np.int64).reshape([-1, 1])
                 pred = tc(input_ids, position_ids, segment_ids, input_mask)
 
                 acc = fluid.layers.accuracy(pred, to_variable(labels))
