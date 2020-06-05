@@ -390,6 +390,8 @@ class MRCDataset(BaseNLPDataset):
             self.predict_examples, "predict")
 
     def _get_special_tokens_num(self):
+        if not self.tokenizer:
+            return None, None
         fake_question = [self.tokenizer.pad_token]
         fake_answer = [self.tokenizer.pad_token]
         special_tokens_num = 0
