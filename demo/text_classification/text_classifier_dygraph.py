@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import paddlehub as hub
+import paddle
 import paddle.fluid as fluid
 from paddle.fluid.dygraph import Linear
 from paddle.fluid.dygraph.base import to_variable
@@ -40,11 +41,23 @@ class TransformerClassifier(fluid.dygraph.Layer):
 
 
 def finetune(args):
-    ernie = hub.Module(name="ernie", max_seq_len=args.max_seq_len)
+    module = hub.Module(name="ernie", max_seq_len=args.max_seq_len)
+    # Use the appropriate tokenizer to preprocess the data set
+    # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
+    if module.name == "ernie_tiny":
+        tokenizer = hub.ErnieTinyTokenizer(
+            vocab_file=module.get_vocab_path(),
+            spm_path=module.get_spm_path(),
+            word_dict_path=module.get_word_dict_path(),
+            max_seq_len=args.max_seq_len)
+    else:
+        tokenizer = hub.BertTokenizer(
+            vocab_file=module.get_vocab_path(), max_seq_len=args.max_seq_len)
+    dataset = hub.dataset.ChnSentiCorp(tokenizer=tokenizer)
+
     with fluid.dygraph.guard():
-        dataset = hub.dataset.ChnSentiCorp()
         tc = TransformerClassifier(
-            num_classes=dataset.num_labels, transformer=ernie)
+            num_classes=dataset.num_labels, transformer=module)
         adam = AdamOptimizer(learning_rate=1e-5, parameter_list=tc.parameters())
         state_dict_path = os.path.join(args.checkpoint_dir,
                                        'dygraph_state_dict')
@@ -52,25 +65,24 @@ def finetune(args):
             state_dict, _ = fluid.load_dygraph(state_dict_path)
             tc.load_dict(state_dict)
 
-        reader = hub.reader.ClassifyReader(
-            dataset=dataset,
-            vocab_path=ernie.get_vocab_path(),
-            max_seq_len=args.max_seq_len,
-            sp_model_path=ernie.get_spm_path(),
-            word_dict_path=ernie.get_word_dict_path())
-        train_reader = reader.data_generator(
-            batch_size=args.batch_size, phase='train')
-
         loss_sum = acc_sum = cnt = 0
         # 执行epoch_num次训练
         for epoch in range(args.num_epoch):
             # 读取训练数据进行训练
-            for batch_id, data in enumerate(train_reader()):
-                input_ids = np.array(data[0][0]).astype(np.int64)
-                position_ids = np.array(data[0][1]).astype(np.int64)
-                segment_ids = np.array(data[0][2]).astype(np.int64)
-                input_mask = np.array(data[0][3]).astype(np.float32)
-                labels = np.array(data[0][-1]).astype(np.int64)
+            data_generator = lambda: (
+                record for record in dataset.get_train_records(shuffle=True))
+            batch_generator = paddle.batch(
+                data_generator, batch_size=args.batch_size)
+            for batch_id, data in enumerate(batch_generator()):
+                input_ids = np.array(data[batch_id]["input_ids"]).astype(
+                    np.int64)
+                position_ids = np.array(data[batch_id]["position_ids"]).astype(
+                    np.int64)
+                segment_ids = np.array(data[batch_id]["segment_ids"]).astype(
+                    np.int64)
+                input_mask = np.array(data[batch_id]["input_mask"]).astype(
+                    np.float32)
+                labels = np.array(data[batch_id]["label"]).astype(np.int64)
                 pred = tc(input_ids, position_ids, segment_ids, input_mask)
 
                 acc = fluid.layers.accuracy(pred, to_variable(labels))
