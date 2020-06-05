@@ -392,11 +392,12 @@ class MRCDataset(BaseNLPDataset):
     def _get_special_tokens_num(self):
         if not self.tokenizer:
             return None, None
+        # We must have a pad token, so we can use it to make fake text.
         fake_question = [self.tokenizer.pad_token]
         fake_answer = [self.tokenizer.pad_token]
         special_tokens_num = 0
         special_tokens_num_before_doc = 0
-        seen_pad_num = True
+        seen_pad_num = 0
         fake_record = self.tokenizer.encode(fake_question, fake_answer)
         fake_tokens_with_special_tokens = self.tokenizer.decode(
             fake_record, only_convert_to_tokens=True)
@@ -502,7 +503,9 @@ class MRCDataset(BaseNLPDataset):
                             start_position = 0
                             end_position = 0
                         else:
-                            doc_offset = len(query_tokens) + 2
+                            doc_offset = len(
+                                query_tokens
+                            ) + self.special_tokens_num_before_doc
                             start_position = tok_start_position - doc_start + doc_offset
                             end_position = tok_end_position - doc_start + doc_offset
 

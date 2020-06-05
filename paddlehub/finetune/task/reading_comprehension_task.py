@@ -380,6 +380,7 @@ class ReadingComprehensionTask(BaseTask):
                  max_answer_length=30):
 
         main_program = feature.block.program
+        self.data_reader = data_reader
         super(ReadingComprehensionTask, self).__init__(
             dataset=dataset,
             data_reader=data_reader,
