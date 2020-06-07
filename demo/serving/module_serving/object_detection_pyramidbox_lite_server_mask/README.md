@@ -161,4 +161,3 @@ pyramidbox_lite_server_mask返回的结果还包括标注检测框的图像的ba
 这样我们就完成了对目标检测服务化的部署和测试。
 
 完整的测试代码见[pyramidbox_lite_server_mask_file_serving_demo.py](pyramidbox_lite_server_mask_serving_demo.py)。
-
