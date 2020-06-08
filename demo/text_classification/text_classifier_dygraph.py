@@ -4,7 +4,6 @@ import os
 
 import numpy as np
 import paddlehub as hub
-import paddle
 import paddle.fluid as fluid
 from paddle.fluid.dygraph import Linear
 from paddle.fluid.dygraph.base import to_variable
