@@ -29,7 +29,7 @@ Loading pyramidbox_lite_server_mask successful.
 >>> import requests
 >>> import json
 >>> import base64
->>> import os
+>>> import cv2
 ```
 我们用来测试的样例图片为：  
 
@@ -47,23 +47,18 @@ Loading pyramidbox_lite_server_mask successful.
 
 准备的数据格式为：
 ```python
-files = [("image", file_1), ("image", file_2)]
-```
-**NOTE:** 文件列表每个元素第一个参数为"image"。
-
-代码如下：
-```python
->>> # 指定要检测的图片并生成列表[("image", img_1), ("image", img_2), ... ]
->>> file_list = ["../../../../docs/imgs/family_mask.jpg", "../../../../docs/imgs/girl_mask.jpg"]
->>> files = [("image", (open(item, "rb"))) for item in file_list]
+>>> img1 = cv2_to_base64(cv2.imread("../../../../docs/imgs/family_mask.jpg"))
+>>> img2 = cv2_to_base64(cv2.imread("../../../../docs/imgs/woman_mask.jpg"))
+>>> data = {'images': [img1, img2]}
 ```
 
 ## Step3：获取并验证结果
 通过发送请求到目标检测服务API，就可得到结果，代码如下：
 ```python
 >>> # 指定检测方法为pyramidbox_lite_server_mask并发送post请求
->>> url = "http://127.0.0.1:8866/predict/image/pyramidbox_lite_server_mask"
->>> r = requests.post(url=url, files=files, data={"visual_result": "True"})
+>>> headers = {"Content-type": "application/json"}
+>>> url = "http://127.0.0.1:8866/predict/pyramidbox_lite_server_mask"
+>>> r = requests.post(url=url, headers=headers, data=json.dumps(data))
 ```
 我们可以打印接口返回结果：
 ```python
@@ -165,24 +160,4 @@ pyramidbox_lite_server_mask返回的结果还包括标注检测框的图像的ba
 
 这样我们就完成了对目标检测服务化的部署和测试。
 
-完整的测试代码见[pyramidbox_lite_server_mask_file_serving_demo.py](pyramidbox_lite_server_mask_file_serving_demo.py)。
-
-## 进一步提升模型服务性能
-`pyramidbox_lite_server_mask`还支持直接传入opencv mat表示的图片，不产生结果文件，而是直接输出检测的人脸位置和戴口罩概率，响应时间平均提升20%以上，可用于对响应时间和性能要求更高的场景。
-
-使用直接传输数据的模式，仅需要修改上文Step2中的POST方法参数，具体如下：
-
-```python
->>> with open(file="../../../../docs/imgs/family_mask.jpg", mode="rb") as fp:
-...     base64_data = base64.b64encode(fp.read())
->>> base64_data = str(base64_data, encoding="utf8")
->>> data = {"b64s": [base64_data]}
->>> data = {"data": json.dumps(data)}
-```
-进行HTTP请求时只需将data参数传入即可，具体如下：
-```python
->>> r = requests.post(url=url, data=data)
-```
-对结果的处理与上文一致，但需注意此种方法仅输出识别结果，不产生结果文件，因此不能获得生成图片。
-
-完整的测试代码见[pyramidbox_lite_server_mask_serving_demo.py](pyramidbox_lite_server_mask_serving_demo.py)。
+完整的测试代码见[pyramidbox_lite_server_mask_file_serving_demo.py](pyramidbox_lite_server_mask_serving_demo.py)。
