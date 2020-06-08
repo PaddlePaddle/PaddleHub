@@ -75,16 +75,17 @@ def finetune(args):
                         batch_size=args.batch_size,
                         shuffle=True,
                         pad_to_batch_max_seq_len=True)):
-                input_ids = np.array(data[batch_id]["input_ids"]).astype(
-                    np.int64).reshape([-1, args.max_seq_len, 1])
-                position_ids = np.array(data[batch_id]["position_ids"]).astype(
-                    np.int64).reshape([-1, args.max_seq_len, 1])
-                segment_ids = np.array(data[batch_id]["segment_ids"]).astype(
-                    np.int64).reshape([-1, args.max_seq_len, 1])
-                input_mask = np.array(data[batch_id]["input_mask"]).astype(
-                    np.float32).reshape([-1, args.max_seq_len, 1])
-                labels = np.array(data[batch_id]["label"]).astype(
-                    np.int64).reshape([-1, 1])
+                batch_size = len(data["input_ids"])
+                input_ids = np.array(data["input_ids"]).astype(
+                    np.int64).reshape([batch_size, -1, 1])
+                position_ids = np.array(data["position_ids"]).astype(
+                    np.int64).reshape([batch_size, -1, 1])
+                segment_ids = np.array(data["segment_ids"]).astype(
+                    np.int64).reshape([batch_size, -1, 1])
+                input_mask = np.array(data["input_mask"]).astype(
+                    np.float32).reshape([batch_size, -1, 1])
+                labels = np.array(data["label"]).astype(np.int64).reshape(
+                    [batch_size, 1])
                 pred = tc(input_ids, position_ids, segment_ids, input_mask)
 
                 acc = fluid.layers.accuracy(pred, to_variable(labels))
