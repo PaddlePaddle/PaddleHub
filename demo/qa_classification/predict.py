@@ -39,7 +39,7 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     # loading Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
+    module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
 
     # Download dataset and get its label list and label num

@@ -508,6 +508,10 @@ class MRCDataset(BaseNLPDataset):
         self.special_tokens_num, self.special_tokens_num_before_doc = self._get_special_tokens_num(
         )
 
+        self._train_records = None
+        self._dev_records = None
+        self._test_records = None
+        self._predict_records = None
         self._train_features = None
         self._dev_features = None
         self._test_features = None
