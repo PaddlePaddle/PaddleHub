@@ -166,7 +166,8 @@ class BaseNLPDataset(BaseDataset):
                 text_pair=example.text_b,
                 max_seq_len=self.max_seq_len)
             if example.label:
-                record["label"] = self.label_list.index(example.label)
+                record["label"] = self.label_list.index(
+                    example.label) if self.label_list else float(example.label)
             records.append(record)
         return records
 
@@ -279,7 +280,52 @@ class BaseNLPDataset(BaseDataset):
             yield rev_batch_records
 
 
-TextClassificationDataset = BaseNLPDataset
+class TextClassificationDataset(BaseNLPDataset):
+    def _convert_examples_to_records(self, examples):
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data example, returned by _read_file.
+
+        Returns:
+            a list with all the examples record.
+        """
+
+        records = []
+        for example in examples:
+            record = self.tokenizer.encode(
+                text=example.text_a,
+                text_pair=example.text_b,
+                max_seq_len=self.max_seq_len)
+            if example.label:
+                record["label"] = self.label_list.index(example.label)
+            records.append(record)
+        return records
+
+
+class RegressionDataset(BaseNLPDataset):
+    def _convert_examples_to_records(self, examples):
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data example, returned by _read_file.
+
+        Returns:
+            a list with all the examples record.
+        """
+
+        records = []
+        for example in examples:
+            record = self.tokenizer.encode(
+                text=example.text_a,
+                text_pair=example.text_b,
+                max_seq_len=self.max_seq_len)
+            if example.label:
+                record["label"] = float(example.label)
+            records.append(record)
+        return records
 
 
 class SequenceLabelDataset(BaseNLPDataset):
