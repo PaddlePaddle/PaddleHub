@@ -188,7 +188,10 @@ class SQUAD(MRCDataset):
 
 
 if __name__ == "__main__":
-    ds = SQUAD(version_2_with_negative=True)
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = SQUAD(
+        version_2_with_negative=True, tokenizer=tokenizer, max_seq_len=512)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:2]:
         print(e)

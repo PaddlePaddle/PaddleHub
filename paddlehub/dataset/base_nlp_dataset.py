@@ -56,14 +56,54 @@ class BaseNLPDataset(BaseDataset):
             predict_file_with_header=predict_file_with_header)
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
-        self.train_records = self.convert_examples_to_records(
-            self.train_examples, "train")
-        self.dev_records = self.convert_examples_to_records(
-            self.dev_examples, "dev")
-        self.test_records = self.convert_examples_to_records(
-            self.test_examples, "test")
-        self.predict_records = self.convert_examples_to_records(
-            self.predict_examples, "predict")
+        self._train_records = None
+        self._dev_records = None
+        self._test_records = None
+        self._predict_records = None
+
+    @property
+    def train_records(self):
+        if not self._train_records:
+            examples = self.train_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the train set...")
+            self._train_records = self._convert_examples_to_records(
+                examples, max_seq_len=self.max_seq_len)
+        return self._train_records
+
+    @property
+    def dev_records(self):
+        if not self._dev_records:
+            examples = self.dev_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the dev set...")
+            self._dev_records = self._convert_examples_to_records(
+                examples, max_seq_len=self.max_seq_len)
+        return self._dev_records
+
+    @property
+    def test_records(self):
+        if not self._test_records:
+            examples = self.test_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the test set...")
+            self._test_records = self._convert_examples_to_records(
+                examples, max_seq_len=self.max_seq_len)
+        return self._test_records
+
+    @property
+    def predict_records(self):
+        if not self._predict_records:
+            examples = self.predict_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the predict set...")
+            self._predict_records = self._convert_examples_to_records(
+                examples, max_seq_len=self.max_seq_len)
+        return self._predict_records
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -112,76 +152,60 @@ class BaseNLPDataset(BaseDataset):
                 examples.append(example)
             return examples
 
-    def convert_examples_to_records(self, examples, phase):
+    def _convert_examples_to_records(self, examples, max_seq_len=None):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
-            examples (list): the data examples, returned by _read_file.
-            phase (str): the processing phase, "train", "dev", "test", or "predict"
+            examples (list): the data example, returned by _read_file.
 
         Returns:
             a list with all the examples record.
         """
-        if not self.tokenizer or not examples:
-            return []
-
-        logger.info("Processing the %s set..." % phase)
 
         records = []
         for example in examples:
             record = self.tokenizer.encode(
                 text=example.text_a,
                 text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
+                max_seq_len=max_seq_len)
             if example.label:
                 record["label"] = self.label_list.index(example.label)
             records.append(record)
         return records
 
     def get_train_records(self, shuffle=False):
-        records = self.train_records
-        if shuffle:
-            np.random.shuffle(records)
-        return records
+        return self.get_records("train", shuffle=shuffle)
 
     def get_dev_records(self, shuffle=False):
-        records = self.dev_records
-        if shuffle:
-            np.random.shuffle(records)
-        return records
+        return self.get_records("dev", shuffle=shuffle)
 
     def get_test_records(self, shuffle=False):
-        records = self.test_records
-        if shuffle:
-            np.random.shuffle(records)
-        return records
+        return self.get_records("test", shuffle=shuffle)
 
     def get_val_records(self, shuffle=False):
-        records = self.get_dev_records
-        if shuffle:
-            np.random.shuffle(records)
-        return records
+        return self.get_records("val", shuffle=shuffle)
 
     def get_predict_records(self, shuffle=False):
-        records = self.predict_records
-        if shuffle:
-            np.random.shuffle(records)
-        return records
+        return self.get_records("predict", shuffle=shuffle)
 
     def get_records(self, phase, shuffle=False):
         if phase == "train":
-            return self.get_train_records(shuffle)
+            records = self.train_records
         elif phase == "dev":
-            return self.get_dev_records(shuffle)
+            records = self.dev_records
         elif phase == "test":
-            return self.get_test_records(shuffle)
+            records = self.test_records
         elif phase == "val":
-            return self.get_val_records(shuffle)
+            records = self.dev_records
         elif phase == "predict":
-            return self.get_predict_records(shuffle)
+            records = self.predict_records
         else:
             raise ValueError("Invalid phase: %s" % phase)
+
+        if shuffle:
+            np.random.shuffle(records)
+        return records
 
     def get_feed_list(self, phase):
         records = self.get_records(phase)
@@ -198,6 +222,56 @@ class BaseNLPDataset(BaseDataset):
                     feed_name for feed_name in self.get_feed_list("train")
                 ]
         return feed_list
+
+    def batch_records_generator(self,
+                                phase,
+                                batch_size,
+                                shuffle=True,
+                                pad_to_batch_max_seq_len=False):
+        """ generate a batch of records, usually used in dygraph mode.
+
+        Args:
+            phase (str): the dataset phase, can be "train", "dev", "val", "test" or "predict".
+            batch_size (int): the data batch size
+            shuffle (bool): if set to True, will shuffle the dataset.
+            pad_to_batch_max_seq_len (bool): if set to True, will dynamically pad to the max sequence length of the batch data,
+                                             if it is less than the max sequence length set for the whole dataset.
+        """
+        records = self.get_records(phase, shuffle=shuffle)
+
+        batch_records = []
+        batch_lens = []
+        for record in records:
+            batch_records.append(record)
+            if pad_to_batch_max_seq_len:
+                # This may reduce the processing speed
+                tokens_wo_pad = [
+                    token for token in self.tokenizer.decode(
+                        record, only_convert_to_tokens=True)
+                    if token != self.tokenizer.pad_token
+                ]
+                batch_lens.append(len(tokens_wo_pad))
+            if len(batch_records) == batch_size:
+                if pad_to_batch_max_seq_len:
+                    # This may reduce the processing speed.
+                    batch_max_seq_len = max(batch_lens)
+                    for record in batch_records:
+                        for key in record.keys():
+                            if isinstance(record[key], list):
+                                record[key] = record[key][:batch_max_seq_len]
+                yield batch_records
+                batch_records = []
+                batch_lens = []
+
+        if batch_records:
+            if pad_to_batch_max_seq_len:
+                # This may reduce the processing speed.
+                batch_max_seq_len = max(batch_lens)
+                for record in batch_records:
+                    for key in record.keys():
+                        if isinstance(record[key], list):
+                            record[key] = record[key][:batch_max_seq_len]
+            yield batch_records
 
 
 TextClassificationDataset = BaseNLPDataset

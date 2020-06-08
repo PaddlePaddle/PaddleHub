@@ -201,7 +201,9 @@ class DRCD(MRCDataset):
 
 
 if __name__ == "__main__":
-    ds = DRCD()
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = DRCD(tokenizer=tokenizer, max_seq_len=50)
     print("train")
     examples = ds.get_train_examples()
     for index, e in enumerate(examples):

@@ -69,11 +69,12 @@ def finetune(args):
         # 执行epoch_num次训练
         for epoch in range(args.num_epoch):
             # 读取训练数据进行训练
-            data_generator = lambda: (
-                record for record in dataset.get_train_records(shuffle=True))
-            batch_generator = paddle.batch(
-                data_generator, batch_size=args.batch_size)
-            for batch_id, data in enumerate(batch_generator()):
+            for batch_id, data in enumerate(
+                    dataset.batch_records_generator(
+                        phase="train",
+                        batch_size=args.batch_size,
+                        shuffle=True,
+                        pad_to_batch_max_seq_len=True)):
                 input_ids = np.array(data[batch_id]["input_ids"]).astype(
                     np.int64).reshape([-1, args.max_seq_len, 1])
                 position_ids = np.array(data[batch_id]["position_ids"]).astype(

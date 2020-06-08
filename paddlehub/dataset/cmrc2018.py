@@ -209,7 +209,9 @@ class CMRC2018(MRCDataset):
 
 if __name__ == "__main__":
     print("begin")
-    ds = CMRC2018()
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = CMRC2018(tokenizer=tokenizer, max_seq_len=50)
     print("train")
     examples = ds.get_train_examples()
     for index, e in enumerate(examples):
