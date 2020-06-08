@@ -261,8 +261,8 @@ class BaseNLPDataset(BaseDataset):
                                 # This may not be universal
                                 record[key] = value[:batch_max_seq_len]
                 rev_batch_records = {
-                    key: [record[key] for record in records]
-                    for key in records[0]
+                    key: [record[key] for record in batch_records]
+                    for key in batch_records[0]
                 }
                 yield rev_batch_records
                 batch_records = []
@@ -277,8 +277,8 @@ class BaseNLPDataset(BaseDataset):
                         if isinstance(record[key], list):
                             record[key] = record[key][:batch_max_seq_len]
             rev_batch_records = {
-                key: [record[key] for record in records]
-                for key in records[0]
+                key: [record[key] for record in batch_records]
+                for key in batch_records[0]
             }
             yield rev_batch_records
 
