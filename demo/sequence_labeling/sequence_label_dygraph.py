@@ -75,9 +75,8 @@ def finetune(args):
                 input_mask = np.array(data["input_mask"]).astype(
                     np.float32).reshape([batch_size, -1, 1])
                 labels = np.array(data["label"]).astype(np.int64).reshape(-1, 1)
-                seq_len = np.squeeze(
-                    np.array(data["seq_len"]).astype(np.int64), axis=1).reshape(
-                        -1, 1)
+                seq_len = np.array(data["seq_len"]).astype(np.int64).reshape(
+                    -1, 1)
                 pred, ret_infers = ts(input_ids, position_ids, segment_ids,
                                       input_mask)
 
