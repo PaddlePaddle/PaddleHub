@@ -65,7 +65,13 @@ class DRCDExample(object):
 class DRCD(MRCDataset):
     """A single set of features of data."""
 
-    def __init__(self):
+    def __init__(
+            self,
+            tokenizer=None,
+            max_seq_len=None,
+            max_query_len=64,
+            doc_stride=128,
+    ):
         dataset_dir = os.path.join(DATA_HOME, "drcd")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         super(DRCD, self).__init__(
@@ -75,6 +81,10 @@ class DRCD(MRCDataset):
             test_file="DRCD_test.json",
             label_file=None,
             label_list=None,
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len,
+            max_query_len=max_query_len,
+            doc_stride=doc_stride,
         )
 
     def _read_file(self, input_file, phase=None):

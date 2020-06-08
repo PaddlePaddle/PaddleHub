@@ -42,9 +42,9 @@ if __name__ == '__main__':
 
     # Use the appropriate tokenizer to preprocess the data set
     # For ernie_tiny, it use BertTokenizer too.
-    tokenizer = hub.BertTokenizer(
-        vocab_file=module.get_vocab_path(), max_seq_len=args.max_seq_len)
-    dataset = hub.dataset.MSRA_NER(tokenizer=tokenizer)
+    tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    dataset = hub.dataset.MSRA_NER(
+        tokenizer=tokenizer, max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "sequence_output" for token-level output.

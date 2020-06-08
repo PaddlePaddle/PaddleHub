@@ -35,7 +35,7 @@ class NLPCC_DBQA(TextClassificationDataset):
     for more information
     """
 
-    def __init__(self, tokenizer=None):
+    def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "nlpcc-dbqa")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         super(NLPCC_DBQA, self).__init__(
@@ -45,7 +45,8 @@ class NLPCC_DBQA(TextClassificationDataset):
             test_file="test.tsv",
             label_file=None,
             label_list=["0", "1"],
-            tokenizer=tokenizer)
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -65,8 +66,8 @@ class NLPCC_DBQA(TextClassificationDataset):
 
 if __name__ == "__main__":
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
-    tokenizer = BertTokenizer(vocab_file='vocab.txt', max_seq_len=10)
-    ds = NLPCC_DBQA(tokenizer=tokenizer)
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = NLPCC_DBQA(tokenizer=tokenizer, max_seq_len=10)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

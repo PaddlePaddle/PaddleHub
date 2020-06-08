@@ -86,7 +86,9 @@ if __name__ == '__main__':
 
     # Use the appropriate tokenizer to preprocess the data
     # For ernie_tiny, it use BertTokenizer too.
-    tokenizer = hub.BertTokenizer(
-        vocab_file=module.get_vocab_path(), max_seq_len=args.max_seq_len)
-    encoded_data = [tokenizer.encode(text=text) for text in formatted_text_a]
+    tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    encoded_data = [
+        tokenizer.encode(text=text, max_seq_len=args.max_seq_len)
+        for text in formatted_text_a
+    ]
     print(seq_label_task.predict(data=encoded_data, label_list=label_list))

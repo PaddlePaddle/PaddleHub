@@ -50,7 +50,7 @@ class TNews(TextClassificationDataset):
     TNews is the chinese news classification dataset on Jinri Toutiao App.
     """
 
-    def __init__(self, tokenizer=None):
+    def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "tnews")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         label_list = [
@@ -64,7 +64,8 @@ class TNews(TextClassificationDataset):
             test_file="toutiao_category_test.txt",
             label_file=None,
             label_list=label_list,
-            tokenizer=tokenizer)
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
 
     def get_label_name(self, id):
         return LABEL_NAME[id]
@@ -84,8 +85,8 @@ class TNews(TextClassificationDataset):
 
 if __name__ == "__main__":
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
-    tokenizer = BertTokenizer(vocab_file='vocab.txt', max_seq_len=10)
-    ds = TNews(tokenizer=tokenizer)
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = TNews(tokenizer=tokenizer, max_seq_len=10)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

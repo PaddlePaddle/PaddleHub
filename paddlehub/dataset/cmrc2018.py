@@ -65,7 +65,11 @@ class CMRC2018Example(object):
 class CMRC2018(MRCDataset):
     """A single set of features of data."""
 
-    def __init__(self):
+    def __init__(self,
+                 tokenizer=None,
+                 max_seq_len=None,
+                 max_query_len=64,
+                 doc_stride=128):
         dataset_dir = os.path.join(DATA_HOME, "cmrc2018")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         super(CMRC2018, self).__init__(
@@ -75,6 +79,10 @@ class CMRC2018(MRCDataset):
             test_file=None,
             label_file=None,
             label_list=None,
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len,
+            max_query_len=max_query_len,
+            doc_stride=doc_stride,
         )
 
     def _read_file(self, input_file, phase=False):

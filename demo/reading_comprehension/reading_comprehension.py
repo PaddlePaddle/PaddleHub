@@ -47,17 +47,15 @@ if __name__ == '__main__':
         tokenizer = hub.ErnieTinyTokenizer(
             vocab_file=module.get_vocab_path(),
             spm_path=module.get_spm_path(),
-            word_dict_path=module.get_word_dict_path(),
-            max_seq_len=args.max_seq_len)
+            word_dict_path=module.get_word_dict_path())
     else:
-        tokenizer = hub.BertTokenizer(
-            vocab_file=module.get_vocab_path(), max_seq_len=args.max_seq_len)
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
 
     # If you wanna load SQuAD 2.0 dataset, just set version_2_with_negative as True
     dataset = hub.dataset.SQUAD(
         version_2_with_negative=False,
         tokenizer=tokenizer,
-    )
+        max_seq_len=args.max_seq_len)
     # dataset = hub.dataset.SQUAD(version_2_with_negative=True)
 
     # Select fine-tune strategy, setup config and fine-tune

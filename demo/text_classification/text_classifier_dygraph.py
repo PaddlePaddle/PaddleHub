@@ -49,11 +49,11 @@ def finetune(args):
             vocab_file=module.get_vocab_path(),
             spm_path=module.get_spm_path(),
             word_dict_path=module.get_word_dict_path(),
-            max_seq_len=args.max_seq_len)
+        )
     else:
-        tokenizer = hub.BertTokenizer(
-            vocab_file=module.get_vocab_path(), max_seq_len=args.max_seq_len)
-    dataset = hub.dataset.ChnSentiCorp(tokenizer=tokenizer)
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    dataset = hub.dataset.ChnSentiCorp(
+        tokenizer=tokenizer, max_seq_len=args.max_seq_len)
 
     with fluid.dygraph.guard():
         tc = TransformerClassifier(

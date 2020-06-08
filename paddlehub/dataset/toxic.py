@@ -33,7 +33,7 @@ class Toxic(MultiLabelDataset):
     https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge
     """
 
-    def __init__(self, tokenizer=None):
+    def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "toxic")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         label_list = [
@@ -47,7 +47,8 @@ class Toxic(MultiLabelDataset):
             test_file="test.csv",
             label_file=None,
             label_list=label_list,
-            tokenizer=tokenizer)
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -66,8 +67,8 @@ class Toxic(MultiLabelDataset):
 if __name__ == "__main__":
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
 
-    tokenizer = BertTokenizer(vocab_file='vocab.txt', max_seq_len=10)
-    ds = Toxic(tokenizer=tokenizer)
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = Toxic(tokenizer=tokenizer, max_seq_len=10)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

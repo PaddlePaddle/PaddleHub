@@ -24,7 +24,7 @@ from paddlehub.dataset.base_nlp_dataset import TextClassificationDataset
 
 
 class BQ(TextClassificationDataset):
-    def __init__(self, tokenizer=None):
+    def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "bq")
         base_path = self._download_dataset(
             dataset_dir,
@@ -36,12 +36,13 @@ class BQ(TextClassificationDataset):
             test_file="test.txt",
             label_file=None,
             label_list=["0", "1"],
-            tokenizer=tokenizer)
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
 
 
 if __name__ == "__main__":
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
-    ds = BQ(tokenizer=BertTokenizer(vocab_file='vocab.txt', max_seq_len=10))
+    ds = BQ(tokenizer=BertTokenizer(vocab_file='vocab.txt'), max_seq_len=10)
     print("first 10 dev examples")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

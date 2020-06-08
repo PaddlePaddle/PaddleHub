@@ -37,7 +37,7 @@ class XNLI(TextClassificationDataset):
     for more information
     """
 
-    def __init__(self, language='zh'):
+    def __init__(self, language='zh', tokenizer=None, max_seq_len=None):
         if language not in [
                 "ar", "bg", "de", "el", "en", "es", "fr", "hi", "ru", "sw",
                 "th", "tr", "ur", "vi", "zh"
@@ -55,6 +55,8 @@ class XNLI(TextClassificationDataset):
             test_file="%s_test.tsv" % language,
             label_file=None,
             label_list=["neutral", "contradiction", "entailment"],
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len,
         )
 
     def _read_file(self, input_file, phase=None):

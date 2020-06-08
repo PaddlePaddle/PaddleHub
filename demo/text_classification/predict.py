@@ -70,10 +70,11 @@ if __name__ == '__main__':
         tokenizer = hub.ErnieTinyTokenizer(
             vocab_file=module.get_vocab_path(),
             spm_path=module.get_spm_path(),
-            word_dict_path=module.get_word_dict_path(),
-            max_seq_len=args.max_seq_len)
+            word_dict_path=module.get_word_dict_path())
     else:
-        tokenizer = hub.BertTokenizer(
-            vocab_file=module.get_vocab_path(), max_seq_len=args.max_seq_len)
-    encoded_data = [tokenizer.encode(text=text) for text in text_a]
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    encoded_data = [
+        tokenizer.encode(text=text, max_seq_len=args.max_seq_len)
+        for text in text_a
+    ]
     print(cls_task.predict(data=encoded_data, label_list=label_list))

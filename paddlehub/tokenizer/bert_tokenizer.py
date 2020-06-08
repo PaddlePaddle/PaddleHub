@@ -250,8 +250,6 @@ class BertTokenizer(object):
     Args:
         vocab_file (:obj:`string`):
             File containing the vocabulary.
-        max_seq_len  (:obj:`int`, `optional`, defaults to :obj:`None`):
-            If set to a number, will limit the total sequence returned so that it has a maximum length.
         do_lower_case (:obj:`bool`, `optional`, defaults to :obj:`True`):
             Whether to lowercase the input when tokenizing.
         do_basic_tokenize (:obj:`bool`, `optional`, defaults to :obj:`True`):
@@ -284,7 +282,6 @@ class BertTokenizer(object):
     def __init__(
             self,
             vocab_file,
-            max_seq_len=None,
             do_lower_case=True,
             do_basic_tokenize=True,
             never_split=None,
@@ -304,7 +301,6 @@ class BertTokenizer(object):
         self.all_special_tokens = [
             unk_token, sep_token, pad_token, cls_token, mask_token
         ]
-        self.max_seq_len = max_seq_len
 
         if not os.path.isfile(vocab_file):
             raise ValueError(
@@ -594,6 +590,7 @@ class BertTokenizer(object):
     def encode(self,
                text: Union[str, List[str], List[int]],
                text_pair: Optional[Union[str, List[str], List[int]]] = None,
+               max_seq_len: Optional[int] = None,
                pad_to_max_seq_len: bool = True,
                truncation_strategy: str = "longest_first",
                return_position_ids: bool = True,
@@ -615,6 +612,9 @@ class BertTokenizer(object):
                 Optional second sequence to be encoded. This can be a string, a list of strings (tokenized
                 string using the `tokenize` method) or a list of integers (tokenized string ids using the
                 `convert_tokens_to_ids` method)
+            max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
+                If set to a number, will limit the total sequence returned so that it has a maximum length.
+                If there are overflowing tokens, those will be added to the returned dictionary
             pad_to_max_seq_len (:obj:`bool`, `optional`, defaults to :obj:`True`):
                 If set to True, the returned sequences will be padded according to the model's padding side and
                 padding index, up to their max length. If no max length is specified, the padding is done up to the
@@ -649,8 +649,8 @@ class BertTokenizer(object):
                     segment_ids: list[int] if return_segment_ids is True (default)
                     input_mask: list[int] if return_input_mask is True (default)
                     seq_len: int if return_length is True (default)
-                    overflowing_tokens: list[int] if return_overflowing_tokens is True
-                    num_truncated_tokens: int if return_overflowing_tokens is True
+                    overflowing_tokens: list[int] if a ``max_seq_len`` is specified and return_overflowing_tokens is True
+                    num_truncated_tokens: int if a ``max_seq_len`` is specified and return_overflowing_tokens is True
                     special_tokens_mask: list[int] if return_special_tokens_mask is True
                 }
 
@@ -696,17 +696,16 @@ class BertTokenizer(object):
         # Truncation: Handle max sequence length
         total_len = len_ids + len_pair_ids + (self.num_special_tokens_to_add(
             pair=pair))
-        if self.max_seq_len and total_len > self.max_seq_len:
+        if max_seq_len and total_len > max_seq_len:
             ids, pair_ids, overflowing_tokens = self.truncate_sequences(
                 ids,
                 pair_ids=pair_ids,
-                num_tokens_to_remove=total_len - self.max_seq_len,
+                num_tokens_to_remove=total_len - max_seq_len,
                 truncation_strategy=truncation_strategy,
             )
             if return_overflowing_tokens:
                 encoded_inputs["overflowing_tokens"] = overflowing_tokens
-                encoded_inputs[
-                    "num_truncated_tokens"] = total_len - self.max_seq_len
+                encoded_inputs["num_truncated_tokens"] = total_len - max_seq_len
 
         # Add special tokens
 
@@ -725,15 +724,15 @@ class BertTokenizer(object):
             encoded_inputs["seq_len"] = len(encoded_inputs["input_ids"])
 
         # Check lengths
-        assert self.max_seq_len is None or len(
-            encoded_inputs["input_ids"]) <= self.max_seq_len
+        assert max_seq_len is None or len(
+            encoded_inputs["input_ids"]) <= max_seq_len
 
         # Padding
         needs_to_be_padded = pad_to_max_seq_len and \
-                             self.max_seq_len and len(encoded_inputs["input_ids"]) < self.max_seq_len
+                             max_seq_len and len(encoded_inputs["input_ids"]) < max_seq_len
 
         if needs_to_be_padded:
-            difference = self.max_seq_len - len(encoded_inputs["input_ids"])
+            difference = max_seq_len - len(encoded_inputs["input_ids"])
             if return_input_mask:
                 encoded_inputs["input_mask"] = [1] * len(
                     encoded_inputs["input_ids"]) + [0] * difference
@@ -813,7 +812,6 @@ class ErnieTinyTokenizer(BertTokenizer):
             pad_token="[PAD]",
             cls_token="[CLS]",
             mask_token="[MASK]",
-            max_seq_len=512,
     ):
         self.unk_token = unk_token
         self.sep_token = sep_token
@@ -824,7 +822,6 @@ class ErnieTinyTokenizer(BertTokenizer):
         self.all_special_tokens = [
             unk_token, sep_token, pad_token, cls_token, mask_token
         ]
-        self.max_seq_len = max_seq_len
 
         if not os.path.isfile(vocab_file):
             raise ValueError(
