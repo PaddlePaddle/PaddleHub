@@ -74,7 +74,7 @@ def finetune(args):
                         phase="train",
                         batch_size=args.batch_size,
                         shuffle=True,
-                        pad_to_batch_max_seq_len=True)):
+                        pad_to_batch_max_seq_len=False)):
                 batch_size = len(data["input_ids"])
                 input_ids = np.array(data["input_ids"]).astype(
                     np.int64).reshape([batch_size, -1, 1])

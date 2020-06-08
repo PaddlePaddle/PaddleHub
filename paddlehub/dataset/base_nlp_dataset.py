@@ -68,8 +68,7 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the train set...")
-            self._train_records = self._convert_examples_to_records(
-                examples, max_seq_len=self.max_seq_len)
+            self._train_records = self._convert_examples_to_records(examples)
         return self._train_records
 
     @property
@@ -79,8 +78,7 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the dev set...")
-            self._dev_records = self._convert_examples_to_records(
-                examples, max_seq_len=self.max_seq_len)
+            self._dev_records = self._convert_examples_to_records(examples)
         return self._dev_records
 
     @property
@@ -90,8 +88,7 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the test set...")
-            self._test_records = self._convert_examples_to_records(
-                examples, max_seq_len=self.max_seq_len)
+            self._test_records = self._convert_examples_to_records(examples)
         return self._test_records
 
     @property
@@ -101,8 +98,7 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the predict set...")
-            self._predict_records = self._convert_examples_to_records(
-                examples, max_seq_len=self.max_seq_len)
+            self._predict_records = self._convert_examples_to_records(examples)
         return self._predict_records
 
     def _read_file(self, input_file, phase=None):
@@ -152,7 +148,7 @@ class BaseNLPDataset(BaseDataset):
                 examples.append(example)
             return examples
 
-    def _convert_examples_to_records(self, examples, max_seq_len=None):
+    def _convert_examples_to_records(self, examples):
         """
         Returns a list[dict] including all the input information what the model need.
 
@@ -168,7 +164,7 @@ class BaseNLPDataset(BaseDataset):
             record = self.tokenizer.encode(
                 text=example.text_a,
                 text_pair=example.text_b,
-                max_seq_len=max_seq_len)
+                max_seq_len=self.max_seq_len)
             if example.label:
                 record["label"] = self.label_list.index(example.label)
             records.append(record)
@@ -228,14 +224,14 @@ class BaseNLPDataset(BaseDataset):
                                 batch_size,
                                 shuffle=True,
                                 pad_to_batch_max_seq_len=False):
-        """ generate a batch of records, usually used in dygraph mode.
+        """ generate a batch of records, usually used in dynamic graph mode.
 
         Args:
             phase (str): the dataset phase, can be "train", "dev", "val", "test" or "predict".
             batch_size (int): the data batch size
             shuffle (bool): if set to True, will shuffle the dataset.
-            pad_to_batch_max_seq_len (bool): if set to True, will dynamically pad to the max sequence length of the batch data,
-                                             if it is less than the max sequence length set for the whole dataset.
+            pad_to_batch_max_seq_len (bool): if set to True, will dynamically pad to the max sequence length of the batch data.
+                                             Only recommended to set to True when the model has used RNN.
         """
         records = self.get_records(phase, shuffle=shuffle)
 
@@ -321,22 +317,16 @@ class SequenceLabelDataset(BaseNLPDataset):
             tokenizer=tokenizer,
             max_seq_len=max_seq_len)
 
-    def convert_examples_to_records(self, examples, phase):
+    def _convert_examples_to_records(self, examples):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data examples, returned by _read_file.
-            phase (str): the processing phase, "train", "dev", "test", or "predict"
 
         Returns:
             a list with all the examples record.
         """
-        if not self.tokenizer or not examples:
-            return []
-
-        logger.info("Processing the %s set..." % phase)
-
         records = []
         for example in examples:
             tokens, labels = self._reseg_token_label(
@@ -399,19 +389,17 @@ class SequenceLabelDataset(BaseNLPDataset):
 
 
 class MultiLabelDataset(BaseNLPDataset):
-    def convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data examples, returned by _read_file.
+            max_seq_len (int): padding to the max sequence length.
 
         Returns:
             a list with all the examples record.
         """
-        if not self.tokenizer:
-            return []
-
         records = []
         for example in examples:
             record = self.tokenizer.encode(
@@ -474,14 +462,98 @@ class MRCDataset(BaseNLPDataset):
         self.special_tokens_num, self.special_tokens_num_before_doc = self._get_special_tokens_num(
         )
 
-        self.train_records, self.train_features = self.convert_examples_to_records_and_features(
-            self.train_examples, "train")
-        self.dev_records, self.dev_features = self.convert_examples_to_records_and_features(
-            self.dev_examples, "dev")
-        self.test_records, self.test_features = self.convert_examples_to_records_and_features(
-            self.test_examples, "test")
-        self.predict_records, self.predict_features = self.convert_examples_to_records_and_features(
-            self.predict_examples, "predict")
+        self._train_features = None
+        self._dev_features = None
+        self._test_features = None
+        self._predict_features = None
+
+    @property
+    def train_records(self):
+        if not self._train_records:
+            examples = self.train_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the train set...")
+            self._train_records, self._train_features = self._convert_examples_to_records_and_features(
+                examples, "train")
+        return self._train_records
+
+    @property
+    def dev_records(self):
+        if not self._dev_records:
+            examples = self.dev_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the dev set...")
+            self._dev_records, self._dev_features = self._convert_examples_to_records_and_features(
+                examples, "dev")
+        return self._dev_records
+
+    @property
+    def test_records(self):
+        if not self._test_records:
+            examples = self.test_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the test set...")
+            self._test_records, self._test_features = self._convert_examples_to_records_and_features(
+                examples, "test")
+        return self._test_records
+
+    @property
+    def predict_records(self):
+        if not self._predict_records:
+            examples = self.predict_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the predict set...")
+            self._predict_records, self._predict_features = self._convert_examples_to_records_and_features(
+                examples, "predict")
+        return self._predict_records
+
+    @property
+    def train_features(self):
+        if not self._train_features:
+            examples = self.train_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the train set...")
+            self._train_records, self._train_features = self._convert_examples_to_records_and_features(
+                examples, "train")
+        return self._train_features
+
+    @property
+    def dev_features(self):
+        if not self._dev_features:
+            examples = self.dev_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the dev set...")
+            self._dev_records, self._dev_features = self._convert_examples_to_records_and_features(
+                examples, "dev")
+        return self._dev_features
+
+    @property
+    def test_features(self):
+        if not self._test_features:
+            examples = self.test_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the test set...")
+            self._test_records, self._test_features = self._convert_examples_to_records_and_features(
+                examples, "test")
+        return self._test_features
+
+    @property
+    def predict_features(self):
+        if not self._predict_features:
+            examples = self.predict_examples
+            if not self.tokenizer or not examples:
+                return []
+            logger.info("Processing the predict set...")
+            self._predict_records, self._predict_features = self._convert_examples_to_records_and_features(
+                examples, "predict")
+        return self._predict_features
 
     def _get_special_tokens_num(self):
         if not self.tokenizer:
@@ -508,13 +580,8 @@ class MRCDataset(BaseNLPDataset):
                     special_tokens_num_before_doc += 1
         return special_tokens_num, special_tokens_num_before_doc
 
-    def convert_examples_to_records_and_features(self, examples, phase):
+    def _convert_examples_to_records_and_features(self, examples, phase):
         """Loads a data file into a list of `InputBatch`s."""
-        if not self.tokenizer or not examples:
-            return [], []
-
-        logger.info("Processing the %s set..." % phase)
-
         features = []
         records = []
         unique_id = 1000000000
