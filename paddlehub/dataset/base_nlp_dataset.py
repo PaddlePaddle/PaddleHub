@@ -256,10 +256,15 @@ class BaseNLPDataset(BaseDataset):
                     # This may reduce the processing speed.
                     batch_max_seq_len = max(batch_lens)
                     for record in batch_records:
-                        for key in record.keys():
-                            if isinstance(record[key], list):
-                                record[key] = record[key][:batch_max_seq_len]
-                yield batch_records
+                        for key, value in record.items():
+                            if isinstance(value, list):
+                                # This may not be universal
+                                record[key] = value[:batch_max_seq_len]
+                rev_batch_records = {
+                    key: [record[key] for record in records]
+                    for key in records[0]
+                }
+                yield rev_batch_records
                 batch_records = []
                 batch_lens = []
 
@@ -271,7 +276,11 @@ class BaseNLPDataset(BaseDataset):
                     for key in record.keys():
                         if isinstance(record[key], list):
                             record[key] = record[key][:batch_max_seq_len]
-            yield batch_records
+            rev_batch_records = {
+                key: [record[key] for record in records]
+                for key in records[0]
+            }
+            yield rev_batch_records
 
 
 TextClassificationDataset = BaseNLPDataset
