@@ -1064,12 +1064,13 @@ class BaseTask(object):
                 for sample in batch:
                     for i, data in enumerate(sample):
                         processed_batch[i].append(data)
+            tensor_batch = [[] for i in range(len(self.feed_list))]
             for i in range(len(processed_batch)):
                 processed_batch[i] = np.array(processed_batch[i]).reshape(
                     feed_var_shape[i]).astype(feed_var_type[i])
-                processed_batch[i] = fluid.core.PaddleTensor(processed_batch[i])
+                tensor_batch[i] = fluid.core.PaddleTensor(processed_batch[i])
 
-            fetch_result = self._predictor.run(processed_batch)
+            fetch_result = self._predictor.run(tensor_batch)
             for index, result in enumerate(fetch_result):
                 step_run_state.run_results[index] = result.as_ndarray()
             step_run_state.run_examples += num_batch_examples
