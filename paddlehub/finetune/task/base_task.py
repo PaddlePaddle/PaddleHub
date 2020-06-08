@@ -1042,8 +1042,11 @@ class BaseTask(object):
             feed_var_shape.append(var.shape)
             feed_var_type.append(dtype_map[var.dtype])
 
-        data_reader = paddle.batch(
-            self.generator, batch_size=self.config.batch_size)
+        if self._compatible_mode:
+            data_reader = self.generator
+        else:
+            data_reader = paddle.batch(
+                self.generator, batch_size=self.config.batch_size)
         for batch in data_reader():
             if self._compatible_mode and not self.config.use_pyreader:
                 # if not use pyreader, the nlp_reader return [batch]
@@ -1055,9 +1058,12 @@ class BaseTask(object):
 
             # Preocessing data to the suitable shape and type for the model
             processed_batch = [[] for i in range(len(self.feed_list))]
-            for sample in batch:
-                for i, data in enumerate(sample):
-                    processed_batch[i].append(data)
+            if self._compatible_mode:
+                processed_batch = batch
+            else:
+                for sample in batch:
+                    for i, data in enumerate(sample):
+                        processed_batch[i].append(data)
             for i in range(len(processed_batch)):
                 processed_batch[i] = np.array(processed_batch[i]).reshape(
                     feed_var_shape[i]).astype(feed_var_type[i])
