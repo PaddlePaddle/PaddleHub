@@ -23,7 +23,7 @@ import math
 import copy
 
 import paddle.fluid as fluid
-from efficientnetb0_small_imagenet.layers import conv2d, init_batch_norm_layer, init_fc_layer
+from efficientnetb1_imagenet.layers import conv2d, init_batch_norm_layer, init_fc_layer
 
 __all__ = [
     'EfficientNet', 'EfficientNetB0_small', 'EfficientNetB0', 'EfficientNetB1',
