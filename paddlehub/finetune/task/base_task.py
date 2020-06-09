@@ -351,7 +351,7 @@ class BaseTask(object):
         if isinstance(data_reader, BaseNLPReader):
             self._compatible_mode = True
             logger.warning(
-                "PaddleHub v1.8 has deprecated the reader and feed_list parameters in Task. We provided an easier usage, "
+                "PaddleHub v1.8 has deprecated the reader and feed_list parameters in the nlp Task. We provided an easier usage, "
                 "in which you can use your tokenizer to preprocess dataset and run task in a clear flow. "
                 "New demo see https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/demo/text_classification/text_cls.py"
             )
