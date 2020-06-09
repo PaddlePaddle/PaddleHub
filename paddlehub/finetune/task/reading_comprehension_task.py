@@ -22,18 +22,18 @@ import collections
 import math
 import six
 import json
-from collections import OrderedDict
-from tqdm import tqdm
-
 import io
+
+from tqdm import tqdm
 import numpy as np
 import paddle.fluid as fluid
-from .base_task import BaseTask
+
 from paddlehub.common.logger import logger
 from paddlehub.reader import tokenization
 from paddlehub.finetune.evaluator import squad1_evaluate
 from paddlehub.finetune.evaluator import squad2_evaluate
 from paddlehub.finetune.evaluator import cmrc2018_evaluate
+from .base_task import BaseTask
 
 
 def _get_best_indexes(logits, n_best_size):
@@ -512,7 +512,7 @@ class ReadingComprehensionTask(BaseTask):
         run_time_used = time.time() - run_states[0].run_time_begin
         run_speed = run_step / run_time_used
         avg_loss = np.sum(total_cost) / np.sum(total_num_seqs)
-        scores = OrderedDict()
+        scores = collections.OrderedDict()
         # If none of metrics has been implemented, loss will be used to evaluate.
         if self.is_test_phase:
             if self._compatible_mode:

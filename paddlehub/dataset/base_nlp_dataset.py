@@ -20,8 +20,8 @@ from __future__ import print_function
 import io
 import csv
 import collections
-from tqdm import tqdm
 
+from tqdm import tqdm
 import numpy as np
 from paddlehub.dataset import InputExample, BaseDataset
 from paddlehub.common.logger import logger

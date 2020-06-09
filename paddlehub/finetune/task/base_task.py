@@ -35,6 +35,7 @@ import paddle.fluid as fluid
 from visualdl import LogWriter
 
 import paddlehub as hub
+from paddlehub.reader.nlp_reader import BaseNLPReader
 from paddlehub.common.paddle_helper import dtype_map, clone_program
 from paddlehub.common.utils import mkdir
 from paddlehub.common.dir import tmp_dir
@@ -346,7 +347,8 @@ class BaseTask(object):
         # Compatible code for usage deprecated in paddlehub v1.8.
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
-        if data_reader:
+
+        if isinstance(data_reader, BaseNLPReader):
             self._compatible_mode = True
             logger.warning(
                 "PaddleHub v1.8 has deprecated the reader and feed_list parameters in Task. We provided an easier usage, "
