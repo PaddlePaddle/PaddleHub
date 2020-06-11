@@ -328,7 +328,7 @@ class RegressionDataset(BaseNLPDataset):
         return records
 
 
-class SequenceLabelDataset(BaseNLPDataset):
+class SeqLabelingDataset(BaseNLPDataset):
     def __init__(self,
                  base_path,
                  train_file=None,
@@ -348,7 +348,7 @@ class SequenceLabelDataset(BaseNLPDataset):
         self.no_entity_label = no_entity_label
         self.split_char = split_char
 
-        super(SequenceLabelDataset, self).__init__(
+        super(SeqLabelingDataset, self).__init__(
             base_path=base_path,
             train_file=train_file,
             dev_file=dev_file,

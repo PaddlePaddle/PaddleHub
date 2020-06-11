@@ -24,6 +24,11 @@ from paddlehub.dataset.base_nlp_dataset import TextClassificationDataset
 
 
 class BQ(TextClassificationDataset):
+    """
+    The Bank Question (BQ) corpus, a Chinese corpus for sentence semantic equivalence identification (SSEI),
+    contains 120,000 question pairs from 1-year online bank custom service logs.
+    """
+
     def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "bq")
         base_path = self._download_dataset(

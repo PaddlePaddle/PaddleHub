@@ -65,9 +65,7 @@ def finetune(args):
             tc.load_dict(state_dict)
 
         loss_sum = acc_sum = cnt = 0
-        # 执行epoch_num次训练
         for epoch in range(args.num_epoch):
-            # 读取训练数据进行训练
             for batch_id, data in enumerate(
                     dataset.batch_records_generator(
                         phase="train",
@@ -91,7 +89,6 @@ def finetune(args):
                 loss = fluid.layers.cross_entropy(pred, to_variable(labels))
                 avg_loss = fluid.layers.mean(loss)
                 avg_loss.backward()
-                # 参数更新
                 adam.minimize(avg_loss)
 
                 loss_sum += avg_loss.numpy() * labels.shape[0]

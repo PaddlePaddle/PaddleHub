@@ -21,9 +21,9 @@ parser.add_argument("--max_seq_len",        type=int,               default=512,
 # yapf: enable.
 
 
-class TransformerSequenceLabelLayer(fluid.dygraph.Layer):
+class TransformerSeqLabeling(fluid.dygraph.Layer):
     def __init__(self, num_classes, transformer):
-        super(TransformerSequenceLabelLayer, self).__init__()
+        super(TransformerSeqLabeling, self).__init__()
         self.num_classes = num_classes
         self.transformer = transformer
         self.fc = Linear(input_dim=768, output_dim=num_classes)
@@ -46,7 +46,7 @@ def finetune(args):
         tokenizer=tokenizer, max_seq_len=args.max_seq_len)
 
     with fluid.dygraph.guard():
-        ts = TransformerSequenceLabelLayer(
+        ts = TransformerSeqLabeling(
             num_classes=dataset.num_labels, transformer=module)
         adam = AdamOptimizer(learning_rate=1e-5, parameter_list=ts.parameters())
         state_dict_path = os.path.join(args.checkpoint_dir,
@@ -56,9 +56,7 @@ def finetune(args):
             ts.load_dict(state_dict)
 
         loss_sum = total_infer = total_label = total_correct = cnt = 0
-        # 执行epoch_num次训练
         for epoch in range(args.num_epoch):
-            # 读取训练数据进行训练
             for batch_id, data in enumerate(
                     dataset.batch_records_generator(
                         phase="train",
@@ -83,7 +81,6 @@ def finetune(args):
                 loss = fluid.layers.cross_entropy(pred, to_variable(labels))
                 avg_loss = fluid.layers.mean(loss)
                 avg_loss.backward()
-                # 参数更新
                 adam.minimize(avg_loss)
 
                 loss_sum += avg_loss.numpy() * labels.shape[0]

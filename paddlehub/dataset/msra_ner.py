@@ -23,12 +23,12 @@ import csv
 
 from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import SequenceLabelDataset
+from paddlehub.dataset.base_nlp_dataset import SeqLabelingDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/msra_ner.tar.gz"
 
 
-class MSRA_NER(SequenceLabelDataset):
+class MSRA_NER(SeqLabelingDataset):
     """
     A set of manually annotated Chinese word-segmentation data and
     specifications for training and testing a Chinese word-segmentation system

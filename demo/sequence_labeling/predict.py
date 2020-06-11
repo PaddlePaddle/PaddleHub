@@ -70,7 +70,6 @@ if __name__ == '__main__':
         add_crf=False)
 
     # Data to be predicted
-    # If using python 2, prefix "u" is necessary
     text_a = [
         "我们变而以书会友，以书结缘，把欧美、港台流行的食品类图谱、画册、工具书汇集一堂。",
         "为了跟踪国际最新食品工艺、流行趋势，大量搜集海外专业书刊资料是提高技艺的捷径。",
