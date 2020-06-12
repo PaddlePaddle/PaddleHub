@@ -29,6 +29,7 @@ import tarfile
 from paddlehub.common import utils
 from paddlehub.common.logger import logger
 from paddlehub.common import tmp_dir
+from paddlehub.common.hub_server import CacheUpdater
 import paddlehub as hub
 
 __all__ = ['Downloader', 'progress']
@@ -197,7 +198,7 @@ def download(name,
 
     if not search_result:
         raise ResourceNotFoundError(name, version)
-
+    CacheUpdater("hub_download", name, version).start()
     url = search_result['url']
 
     with tmp_dir() as _dir:
