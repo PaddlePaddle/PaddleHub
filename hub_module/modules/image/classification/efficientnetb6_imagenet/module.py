@@ -90,7 +90,7 @@ class EfficientNetB6ImageNet(hub.Module):
                 trainable=True,
                 pretrained=True,
                 override_params=None,
-                is_test=False):
+                phase='train'):
         """context for transfer learning.
 
         Args:
@@ -104,6 +104,15 @@ class EfficientNetB6ImageNet(hub.Module):
                 'feature_map', corresponding value is the result of the layer before the fully connected layer.
             context_prog (fluid.Program): program for transfer learning.
         """
+        if phase in ["dev", "test", "predict", "eval"]:
+            is_test = False
+        elif phase in ["train"]:
+            is_test = True
+        else:
+            raise ValueError(
+                "Phase %s is error, which must be one of train, dev, test, eval and predict."
+                % phase)
+
         context_prog = fluid.Program()
         startup_prog = fluid.Program()
         with fluid.program_guard(context_prog, startup_prog):
