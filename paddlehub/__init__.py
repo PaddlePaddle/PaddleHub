@@ -41,7 +41,8 @@ from .common.logger import logger
 from .common.paddle_helper import connect_program
 from .common.hub_server import HubServer
 from .common.hub_server import server_check
-from .common.downloader import download, ResourceNotFoundError, ServerConnectionError
+from .common.paddlex_utils import download
+from .common.downloader import ResourceNotFoundError, ServerConnectionError
 
 from .module.module import Module
 from .module.base_processor import BaseProcessor
