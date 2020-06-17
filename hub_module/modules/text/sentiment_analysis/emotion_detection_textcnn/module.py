@@ -61,7 +61,7 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
              inputs(dict): the input variables of emotion_detection_textcnn (words)
              outputs(dict): the output variables of input words (word embeddings and label probilities);
                  the sentence embedding and sequence length of the first input text.
-             main_program(Program): the main_program of Senta with pretrained prameters
+             main_program(Program): the main_program of emotion_detection_textcnn with pretrained prameters
         """
         assert num_data >= 1 and num_data <= 3, "num_data(%d) must be 1, 2, or 3" % num_data
         main_program = fluid.Program()

@@ -70,7 +70,7 @@ class Word2vecSkipGram(hub.Module):
         Returns:
              inputs(dict): the input variables of word2vec_skipgram (words)
              outputs(dict): the output variables of input words (word embeddings)
-             main_program(Program): the main_program of Senta with pretrained prameters
+             main_program(Program): the main_program of word2vec_skipgram with pretrained prameters
         """
         assert num_data >= 1 and num_data <= 3, "num_data(%d) must be 1, 2, or 3" % num_data
         main_program = fluid.Program()
