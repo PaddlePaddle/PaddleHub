@@ -47,7 +47,7 @@ def download(name,
              version=None,
              decompress=True,
              resource_type='Model',
-             extra=None):
+             extra={}):
     file = os.path.join(save_path, name)
     file = os.path.realpath(file)
     if os.path.exists(file):
@@ -61,7 +61,7 @@ def download(name,
 
     if not search_result:
         raise ResourceNotFoundError(name, version)
-    CacheUpdater("hub_download", name, version).start()
+    CacheUpdater("x_download", name, version).start()
     url = search_result['url']
 
     with tmp_dir() as _dir:
