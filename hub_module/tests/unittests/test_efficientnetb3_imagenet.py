@@ -20,9 +20,9 @@ import numpy as np
 import paddlehub as hub
 
 
-class EfficientNetB0SmallTestCase(TestCase):
+class EfficientNetB3TestCase(TestCase):
     def setUp(self):
-        self.module = hub.Module(name='efficientnetb0_small_imagenet')
+        self.module = hub.Module(name='efficientnetb3_imagenet')
         self.test_images = [
             "../image_dataset/classification/animals/dog.jpeg",
             "../image_dataset/keypoint_detection/girl2.jpg"
