@@ -20,10 +20,9 @@ import unicodedata
 import pickle
 from typing import Dict, List, Optional, Union, Tuple
 
-from paddlehub.common.logger import logger
 import sentencepiece as spm
 
-from .tokenizer_util import load_vocab, _is_whitespace, _is_control, _is_punctuation, whitespace_tokenize
+from .tokenizer_util import load_vocab, is_whitespace, is_control, is_punctuation, whitespace_tokenize, is_chinese_char
 
 
 class BasicTokenizer(object):
@@ -101,7 +100,7 @@ class BasicTokenizer(object):
         output = []
         while i < len(chars):
             char = chars[i]
-            if _is_punctuation(char):
+            if is_punctuation(char):
                 output.append([char])
                 start_new_word = True
             else:
@@ -117,8 +116,7 @@ class BasicTokenizer(object):
         """Adds whitespace around any CJK character."""
         output = []
         for char in text:
-            cp = ord(char)
-            if self._is_chinese_char(cp):
+            if is_chinese_char(char):
                 output.append(" ")
                 output.append(char)
                 output.append(" ")
@@ -126,37 +124,14 @@ class BasicTokenizer(object):
                 output.append(char)
         return "".join(output)
 
-    def _is_chinese_char(self, cp):
-        """Checks whether CP is the codepoint of a CJK character."""
-        # This defines a "chinese character" as anything in the CJK Unicode block:
-        #   https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)
-        #
-        # Note that the CJK Unicode block is NOT all Japanese and Korean characters,
-        # despite its name. The modern Korean Hangul alphabet is a different block,
-        # as is Japanese Hiragana and Katakana. Those alphabets are used to write
-        # space-separated words, so they are not treated specially and handled
-        # like the all of the other languages.
-        if ((cp >= 0x4E00 and cp <= 0x9FFF)
-                or (cp >= 0x3400 and cp <= 0x4DBF)  #
-                or (cp >= 0x20000 and cp <= 0x2A6DF)  #
-                or (cp >= 0x2A700 and cp <= 0x2B73F)  #
-                or (cp >= 0x2B740 and cp <= 0x2B81F)  #
-                or (cp >= 0x2B820 and cp <= 0x2CEAF)  #
-                or (cp >= 0xF900 and cp <= 0xFAFF)
-                or (cp >= 0x2F800 and cp <= 0x2FA1F)  #
-            ):  #
-            return True
-
-        return False
-
     def _clean_text(self, text):
         """Performs invalid character removal and whitespace cleanup on text."""
         output = []
         for char in text:
             cp = ord(char)
-            if cp == 0 or cp == 0xFFFD or _is_control(char):
+            if cp == 0 or cp == 0xFFFD or is_control(char):
                 continue
-            if _is_whitespace(char):
+            if is_whitespace(char):
                 output.append(" ")
             else:
                 output.append(char)
@@ -759,7 +734,7 @@ class BertTokenizer(object):
 
     def decode(self,
                token_ids: Union[List[int], Dict],
-               only_convert_to_tokens: bool = True,
+               only_convert_to_tokens: bool = False,
                skip_pad_token: bool = False,
                skip_special_tokens: bool = False,
                clean_up_tokenization_spaces: bool = True):
@@ -789,7 +764,7 @@ class BertTokenizer(object):
             return tokens
 
         if tokens:
-            text = " ".join(self.convert_tokens_to_string(tokens))
+            text = self.convert_tokens_to_string(tokens)
         else:
             text = ""
 
