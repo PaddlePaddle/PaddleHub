@@ -2,8 +2,8 @@
 import paddle.fluid as fluid
 
 
-def textcnn_net(data,
-                dict_dim,
+def textcnn_net(emb,
+                seq_len,
                 emb_dim=128,
                 hid_dim=128,
                 hid_dim2=96,
@@ -15,14 +15,14 @@ def textcnn_net(data,
     if win_sizes is None:
         win_sizes = [1, 2, 3]
 
-    # embedding layer
-    emb = fluid.layers.embedding(input=data, size=[dict_dim, emb_dim])
+    # unpad the token_feature
+    unpad_feature = fluid.layers.sequence_unpad(emb, length=seq_len)
 
     # convolution layer
     convs = []
     for win_size in win_sizes:
         conv_h = fluid.nets.sequence_conv_pool(
-            input=emb,
+            input=unpad_feature,
             num_filters=hid_dim,
             filter_size=win_size,
             act="tanh",
