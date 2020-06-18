@@ -108,7 +108,7 @@ class Downloader(object):
 
         with tarfile.open(file, 'r:*') as tar:
             file_names = tar.getnames()
-            size = len(file_names) - 1
+            size = len(file_names)
             module_dir = os.path.join(dirname, file_names[0])
             for index, file_name in enumerate(file_names):
                 if print_progress:
