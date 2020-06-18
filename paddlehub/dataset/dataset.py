@@ -121,6 +121,20 @@ class BaseDataset(object):
     def get_predict_examples(self):
         return self.predict_examples
 
+    def get_examples(self, phase):
+        if phase == "train":
+            return self.get_train_examples()
+        elif phase == "dev":
+            return self.get_dev_examples()
+        elif phase == "test":
+            return self.get_test_examples()
+        elif phase == "val":
+            return self.get_val_examples()
+        elif phase == "predict":
+            return self.get_predict_examples()
+        else:
+            raise ValueError("Invalid phase: %s" % phase)
+
     def get_labels(self):
         return self.label_list
 

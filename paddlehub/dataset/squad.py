@@ -20,7 +20,7 @@ import os
 from paddlehub.reader import tokenization
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import MRCDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/squad.tar.gz"
 
@@ -65,10 +65,17 @@ class SquadExample(object):
         return s
 
 
-class SQUAD(BaseNLPDataset):
+class SQUAD(MRCDataset):
     """A single set of features of data."""
 
-    def __init__(self, version_2_with_negative=False):
+    def __init__(
+            self,
+            version_2_with_negative=False,
+            tokenizer=None,
+            max_seq_len=None,
+            max_query_len=64,
+            doc_stride=128,
+    ):
         self.version_2_with_negative = version_2_with_negative
         if not version_2_with_negative:
             train_file = "train-v1.1.json"
@@ -87,6 +94,10 @@ class SQUAD(BaseNLPDataset):
             test_file=None,
             label_file=None,
             label_list=None,
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len,
+            max_query_len=max_query_len,
+            doc_stride=doc_stride,
         )
 
     def _read_file(self, input_file, phase=None):
@@ -177,7 +188,10 @@ class SQUAD(BaseNLPDataset):
 
 
 if __name__ == "__main__":
-    ds = SQUAD(version_2_with_negative=True)
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = SQUAD(
+        version_2_with_negative=True, tokenizer=tokenizer, max_seq_len=512)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:2]:
         print(e)

@@ -7,5 +7,5 @@ python -u predict_predefine_net.py \
                     --checkpoint_dir=$CKPT_DIR \
                     --max_seq_len=128 \
                     --use_gpu=True \
-                    --batch_size=24 \
+                    --batch_size=1 \
                     --network=bilstm

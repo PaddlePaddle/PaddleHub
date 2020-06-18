@@ -20,7 +20,7 @@ import os
 from paddlehub.reader import tokenization
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import MRCDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/cmrc2018.tar.gz"
 SPIECE_UNDERLINE = '▁'
@@ -62,10 +62,14 @@ class CMRC2018Example(object):
         return s
 
 
-class CMRC2018(BaseNLPDataset):
+class CMRC2018(MRCDataset):
     """A single set of features of data."""
 
-    def __init__(self):
+    def __init__(self,
+                 tokenizer=None,
+                 max_seq_len=None,
+                 max_query_len=64,
+                 doc_stride=128):
         dataset_dir = os.path.join(DATA_HOME, "cmrc2018")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         super(CMRC2018, self).__init__(
@@ -75,6 +79,10 @@ class CMRC2018(BaseNLPDataset):
             test_file=None,
             label_file=None,
             label_list=None,
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len,
+            max_query_len=max_query_len,
+            doc_stride=doc_stride,
         )
 
     def _read_file(self, input_file, phase=False):
@@ -201,7 +209,9 @@ class CMRC2018(BaseNLPDataset):
 
 if __name__ == "__main__":
     print("begin")
-    ds = CMRC2018()
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = CMRC2018(tokenizer=tokenizer, max_seq_len=50)
     print("train")
     examples = ds.get_train_examples()
     for index, e in enumerate(examples):
