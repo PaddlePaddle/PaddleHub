@@ -165,6 +165,13 @@ class BaseNLPDataset(BaseDataset):
                 text=example.text_a,
                 text_pair=example.text_b,
                 max_seq_len=self.max_seq_len)
+            # CustomTokenizer will tokenize the text firstly and then look words in the vocab
+            # When all words are not found in the vocab, the text will be dropped.
+            if not record:
+                logger.info(
+                    "The text %s has been dropped as it has no words in the vocab after tokenization."
+                    % example.text_a)
+                continue
             if example.label:
                 record["label"] = self.label_list.index(
                     example.label) if self.label_list else float(example.label)

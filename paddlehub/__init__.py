@@ -74,3 +74,4 @@ from .module.nlp_module import NLPPredictionModule, TransformerModule
 
 from .tokenizer.bert_tokenizer import BertTokenizer
 from .tokenizer.bert_tokenizer import ErnieTinyTokenizer
+from .tokenizer.tokenizer import CustomTokenizer
