@@ -82,14 +82,14 @@ class FastSpeech(hub.NLPPredictionModule):
             self.config = yaml.load(f, Loader=yaml.Loader)
 
     @serving
-    def synthesize(self, texts, use_gpu=False, accelerate_rate=1.0):
+    def synthesize(self, texts, use_gpu=False, speed=1.0):
         """
         Get the sentiment prediction results results with the texts as input
 
         Args:
              texts(list): the input texts to be predicted, if texts not data
              use_gpu(bool): whether use gpu to predict or not. Default False.
-             accelerate_rate(float): Controlling the voice speed. Default 1.0.
+             speed(float): Controlling the voice speed. Default 1.0.
 
         Returns:
              wavs(str): the audio wav with sample rate . You can use soundfile.write to save it.
@@ -132,8 +132,7 @@ class FastSpeech(hub.NLPPredictionModule):
             text = dg.to_variable(text).astype(np.int64)
             pos_text = dg.to_variable(pos_text).astype(np.int64)
 
-            _, mel_output_postnet = model(
-                text, pos_text, alpha=1 / accelerate_rate)
+            _, mel_output_postnet = model(text, pos_text, alpha=1 / speed)
 
             mel_output_postnet = fluid.layers.transpose(
                 fluid.layers.squeeze(mel_output_postnet, [0]), [1, 0])
@@ -163,6 +162,6 @@ if __name__ == "__main__":
         "Hello, how do you do",
         "Parakeet stands for Paddle PARAllel text-to-speech toolkit.",
     ]
-    wavs, sample_rate = module.synthesize(texts=test_text, accelerate_rate=2)
+    wavs, sample_rate = module.synthesize(texts=test_text, speed=2)
     for index, wav in enumerate(wavs):
         sf.write(f"{index}.wav", wav, sample_rate)
