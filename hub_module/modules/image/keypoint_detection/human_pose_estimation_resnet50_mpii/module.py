@@ -24,7 +24,7 @@ from human_pose_estimation_resnet50_mpii.pose_resnet import ResNet
     author_email="paddle-dev@baidu.comi",
     summary=
     "Paddle implementation for the paper `Simple baselines for human pose estimation and tracking`, trained with the MPII dataset.",
-    version="1.1.0")
+    version="1.1.1")
 class HumanPoseEstimation(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
