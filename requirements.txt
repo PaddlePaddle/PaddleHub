@@ -9,6 +9,7 @@ cma >= 2.7.0
 sentencepiece
 colorlog
 tqdm
+nltk
 
 # pandas no longer support python2 in version 0.25 and above
 pandas ; python_version >= "3"
