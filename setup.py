@@ -41,16 +41,12 @@ setup(
     install_requires=REQUIRED_PACKAGES,
     packages=find_packages(),
     package_data={
-        'paddlehub/serving/templates': [
-            'paddlehub/serving/templates/serving_config.json',
-            'paddlehub/serving/templates/main.html'
-        ]
+        'paddlehub/serving/templates':
+        ['paddlehub/serving/templates/serving_config.json']
     },
     include_package_data=True,
-    data_files=[('paddlehub/serving/templates', [
-        'paddlehub/serving/templates/serving_config.json',
-        'paddlehub/serving/templates/main.html'
-    ])],
+    data_files=[('paddlehub/serving/templates',
+                 ['paddlehub/serving/templates/serving_config.json'])],
     include_data_files=True,
     # PyPI package information.
     classifiers=[

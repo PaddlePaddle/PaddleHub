@@ -86,19 +86,10 @@ $ hub serving start --config config.json
 
 其中，`<MODULE>`为模型名。
 
-通过发送一个POST请求，即可获取预测结果，下面我们将展示一个具体的demo，以说明使用PaddleHub Serving部署和使用流程。
+通过发送一个POST请求，即可获取预测结果。
 
 
-### Step3：利用PaddleHub Serving进行个性化开发
-使用PaddleHub Serving进行模型服务部署后，可以利用得到的接口进行开发，如对外提供web服务，或接入到应用程序中，以降低客户端预测压力，提高性能，下面展示了一个web页面demo:
-
-<p align="center">  
-
-<img src="../imgs/web_demo.png" width="60%" />  
-
-</p>  
-
-### Step4：关闭serving
+### Step3：关闭serving
 使用关闭命令即可关闭启动的serving，
 ```shell
 $ hub serving stop --port XXXX

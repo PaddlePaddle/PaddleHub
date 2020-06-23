@@ -333,10 +333,6 @@ def create_app(init_flag=False, configs=None):
     app_instance.logger.handlers = gunicorn_logger.handlers
     app_instance.logger.setLevel(gunicorn_logger.level)
 
-    @app_instance.route("/", methods=["GET", "POST"])
-    def index():
-        return render_template("main.html")
-
     @app_instance.before_request
     def before_request():
         request.data = {"id": utils.md5(request.remote_addr + str(time.time()))}
