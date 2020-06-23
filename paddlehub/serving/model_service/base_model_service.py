@@ -102,6 +102,19 @@ class NLPModuleInfo(BaseModuleInfo):
             self._modules.append(module_name)
 
 
+class V2ModuleInfo(BaseModuleInfo):
+    def __init__(self):
+        super(V2ModuleInfo, self).__init__()
+
+    @property
+    def modules(self):
+        return self._modules
+
+    def add_module(self, module_name, module_info):
+        self._modules_info.update(module_info)
+        self._modules.append(module_name)
+
+
 class BaseModelService(object):
     def _initialize(self):
         pass
@@ -121,3 +134,4 @@ class BaseModelService(object):
 
 cv_module_info = CVModuleInfo()
 nlp_module_info = NLPModuleInfo()
+v2_module_info = V2ModuleInfo()

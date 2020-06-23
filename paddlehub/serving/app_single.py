@@ -14,6 +14,7 @@
 from flask import Flask, request, render_template
 from paddlehub.serving.model_service.base_model_service import cv_module_info
 from paddlehub.serving.model_service.base_model_service import nlp_module_info
+from paddlehub.serving.model_service.base_model_service import v2_module_info
 from paddlehub.common import utils
 import functools
 import time
@@ -451,10 +452,8 @@ def create_app(init_flag=False, configs=None):
 
     @app_instance.route("/predict/<module_name>", methods=["POST"])
     def predict_modulev2(module_name):
-        if module_name in nlp_module_info.nlp_modules:
-            module_info = nlp_module_info.get_module_info(module_name)
-        elif module_name in cv_module_info.cv_modules:
-            module_info = cv_module_info.get_module_info(module_name)
+        if module_name in v2_module_info.modules:
+            module_info = v2_module_info.get_module_info(module_name)
         else:
             msg = "Module {} is not available.".format(module_name)
             return gen_result("-1", msg, "")
@@ -476,6 +475,7 @@ def config_with_file(configs):
             cv_module_info.add_module(key, {key: value})
         elif "NLP" == value["category"]:
             nlp_module_info.add_module(key, {key: value})
+        v2_module_info.add_module(key, {key: value})
         print(key, "==", value["version"])
 
 
