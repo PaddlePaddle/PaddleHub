@@ -19,7 +19,6 @@ from __future__ import print_function
 
 import argparse
 import ast
-import json
 import os
 import re
 import six
@@ -31,7 +30,6 @@ import paddle.fluid as fluid
 import paddlehub as hub
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from paddlehub.common import paddle_helper, tmp_dir
-from paddlehub.common.logger import logger
 from paddlehub.common.utils import sys_stdin_encoding, version_compare
 from paddlehub.io.parser import txt_parser
 from paddlehub.module.module import runnable

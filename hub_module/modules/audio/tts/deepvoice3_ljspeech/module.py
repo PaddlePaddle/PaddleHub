@@ -12,22 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
-import base64
+import argparse
+import ast
 import importlib.util
 
 import nltk
+import soundfile as sf
 import paddle.fluid as fluid
 import paddle.fluid.dygraph as dg
 import paddlehub as hub
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo, serving
 from paddlehub.common.dir import THIRD_PARTY_HOME
+from paddlehub.common.utils import mkdir
 from paddlehub.common.downloader import default_downloader
+from paddlehub.module.module import runnable
+from paddlehub.module.nlp_module import DataFormatError
 
 from deepvoice3_ljspeech.model import make_model
 from deepvoice3_ljspeech.utils import make_evaluator
@@ -69,7 +70,7 @@ nltk.data.path.append(nltk_path)
     version="1.0.0",
     summary=
     "Deep Voice 3, a fully-convolutional attention-based neural text-to-speech (TTS) system.",
-    author="baidu-nlp",
+    author="paddlepaddle",
     author_email="",
     type="nlp/tts",
 )
@@ -102,10 +103,8 @@ class DeepVoice3(hub.NLPPredictionModule):
             logger.warning(
                 "use_gpu has been set False as you didn't set the environment variable CUDA_VISIBLE_DEVICES while using use_gpu=True"
             )
-        if use_gpu:
-            place = fluid.CUDAPlace(0)
-        else:
-            place = fluid.CPUPlace()
+
+        place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
 
         if texts and isinstance(texts, list):
             predicted_data = texts
@@ -136,10 +135,79 @@ class DeepVoice3(hub.NLPPredictionModule):
         result = {"wavs": wavs, "sample_rate": sample_rate}
         return result
 
+    def add_module_config_arg(self):
+        """
+        Add the command config options
+        """
+        self.arg_config_group.add_argument(
+            '--use_gpu',
+            type=ast.literal_eval,
+            default=False,
+            help="whether use GPU for prediction")
+
+        self.arg_config_group.add_argument(
+            '--vocoder',
+            type=str,
+            default="griffin-lim",
+            help="the vocoder name")
+
+    def add_module_output_arg(self):
+        """
+        Add the command config options
+        """
+        self.arg_config_group.add_argument(
+            '--output_path',
+            type=str,
+            default=os.path.abspath(
+                os.path.join(os.path.curdir, f"{self.name}_prediction")),
+            help="the output directory path")
+
+    @runnable
+    def run_cmd(self, argvs):
+        """
+        Run as a command
+        """
+        self.parser = argparse.ArgumentParser(
+            description='Run the %s module.' % self.name,
+            prog='hub run %s' % self.name,
+            usage='%(prog)s',
+            add_help=True)
+
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Ouput options", description="Ouput path. Optional.")
+        self.arg_config_group = self.parser.add_argument_group(
+            title="Config options",
+            description=
+            "Run configuration for controlling module behavior, optional.")
+
+        self.add_module_config_arg()
+        self.add_module_input_arg()
+        self.add_module_output_arg()
+
+        args = self.parser.parse_args(argvs)
+
+        try:
+            input_data = self.check_input_data(args)
+        except DataFormatError and RuntimeError:
+            self.parser.print_help()
+            return None
+
+        mkdir(args.output_path)
+        wavs, sample_rate = self.synthesize(
+            texts=input_data, use_gpu=args.use_gpu, vocoder=args.vocoder)
+
+        for index, wav in enumerate(wavs):
+            sf.write(
+                os.path.join(args.output_path, f"{index}.wav"), wav,
+                sample_rate)
+
+        ret = f"The synthesized wav files have been saved in {args.output_path}"
+        return ret
+
 
 if __name__ == "__main__":
-    import soundfile as sf
-
     module = DeepVoice3()
     test_text = [
         "Simple as this proposition is, it is necessary to be stated",
