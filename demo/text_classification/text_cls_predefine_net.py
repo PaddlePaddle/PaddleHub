@@ -36,33 +36,22 @@ args = parser.parse_args()
 if __name__ == '__main__':
 
     # Load Paddlehub ERNIE Tiny pretrained model
-    module = hub.Module(name="ernie_tiny")
+    module = hub.Module(name="tencent_ailab_chinese_embedding_small")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Use the appropriate tokenizer to preprocess the data set
-    # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
-    if module.name == "ernie_tiny":
-        tokenizer = hub.ErnieTinyTokenizer(
-            vocab_file=module.get_vocab_path(),
-            spm_path=module.get_spm_path(),
-            word_dict_path=module.get_word_dict_path())
-    else:
-        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    tokenizer = hub.CustomTokenizer(vocab_file=module.get_vocab_path())
 
     dataset = hub.dataset.ChnSentiCorp(
         tokenizer=tokenizer, max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
-    # Use "pooled_output" for classification tasks on an entire sentence.
-    # Use "sequence_output" for token-level output.
-    token_feature = outputs["sequence_output"]
+    # Use "emb" for token-level output.
+    token_feature = outputs["emb_1"]
 
     # Select fine-tune strategy, setup config and fine-tune
-    strategy = hub.AdamWeightDecayStrategy(
-        warmup_proportion=args.warmup_proportion,
-        weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate)
+    strategy = hub.DefaultStrategy(
+        optimizer_name="sgd", learning_rate=args.learning_rate)
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
@@ -75,9 +64,6 @@ if __name__ == '__main__':
 
     # Define a classfication fine-tune task by PaddleHub's API
     # network choice: bilstm, bow, cnn, dpcnn, gru, lstm (PaddleHub pre-defined network)
-    # If you wanna add network after ERNIE/BERT/RoBERTa/ELECTRA module,
-    # you must use the outputs["sequence_output"] as the token_feature of TextClassifierTask,
-    # rather than outputs["pooled_output"], and feature is None
     cls_task = hub.TextClassifierTask(
         dataset=dataset,
         token_feature=token_feature,
