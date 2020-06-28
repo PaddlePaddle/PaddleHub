@@ -19,7 +19,7 @@ from senta_bow.processor import load_vocab, preprocess, postprocess
 
 @moduleinfo(
     name="senta_bow",
-    version="1.1.0",
+    version="1.2.0",
     summary="Baidu's open-source Sentiment Classification System.",
     author="baidu-nlp",
     author_email="",
@@ -47,31 +47,96 @@ class SentaBow(hub.NLPPredictionModule):
             self._word_seg_module = hub.Module(name="lac")
         return self._word_seg_module
 
-    def context(self, trainable=False):
+    def context(self, trainable=False, max_seq_len=128, num_data=1):
         """
         Get the input ,output and program of the pretrained senta_bow
 
         Args:
              trainable(bool): whether fine-tune the pretrained parameters of senta_bow or not
+             num_data(int): It's number of data inputted to the model, selectted as following options:
+
+                 - 1(default): There's only one data to be feeded in the model, e.g. the module is used for text classification task.
+                 - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
+                 - 3: There are three data to be feeded in the model, e.g. the module is used for text matching task (pair-wise).
 
         Returns:
              inputs(dict): the input variables of senta_bow (words)
-             outputs(dict): the output variables of senta_bow (the sentiment prediction results)
-             main_program(Program): the main_program of senta_bow with pretrained prameters
+             outputs(dict): the output variables of input words (word embeddings and label probilities);
+                 the sentence embedding and sequence length of the first input text.
+             main_program(Program): the main_program of Senta with pretrained prameters
         """
+        assert num_data >= 1 and num_data <= 3, "num_data(%d) must be 1, 2, or 3" % num_data
         main_program = fluid.Program()
         startup_program = fluid.Program()
         with fluid.program_guard(main_program, startup_program):
-            data = fluid.layers.data(
-                name="words", shape=[1], dtype="int64", lod_level=1)
-            data_name = data.name
+            text_1 = fluid.layers.data(
+                name="text_1",
+                shape=[-1, max_seq_len, 1],
+                dtype="int64",
+                lod_level=0)
+            seq_len = fluid.layers.data(
+                name="seq_len", shape=[1], dtype='int64', lod_level=0)
+            seq_len_used = fluid.layers.squeeze(seq_len, axes=[1])
 
-            pred, fc = bow_net(data, 1256606)
+            # Add embedding layer.
+            w_param_attrs = fluid.ParamAttr(
+                name="embedding_0.w_0",
+                initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                trainable=trainable)
+            dict_dim = 1256607
+            emb_1 = fluid.layers.embedding(
+                input=text_1,
+                size=[dict_dim, 128],
+                padding_idx=dict_dim - 1,
+                dtype='float32',
+                param_attr=w_param_attrs)
+            emb_1_name = emb_1.name
+            data_list = [text_1]
+            emb_name_list = [emb_1_name]
+
+            # Add lstm layer.
+            pred, fc = bow_net(emb_1, seq_len_used)
             pred_name = pred.name
             fc_name = fc.name
 
+            if num_data > 1:
+                text_2 = fluid.data(
+                    name='text_2',
+                    shape=[-1, max_seq_len],
+                    dtype='int64',
+                    lod_level=0)
+                emb_2 = fluid.embedding(
+                    input=text_2,
+                    size=[dict_dim, 128],
+                    padding_idx=dict_dim - 1,
+                    dtype='float32',
+                    param_attr=w_param_attrs)
+                emb_2_name = emb_2.name
+                data_list.append(text_2)
+                emb_name_list.append(emb_2_name)
+
+            if num_data > 2:
+                text_3 = fluid.data(
+                    name='text_3',
+                    shape=[-1, max_seq_len],
+                    dtype='int64',
+                    lod_level=0)
+                emb_3 = fluid.embedding(
+                    input=text_3,
+                    size=[dict_dim, 128],
+                    padding_idx=dict_dim - 1,
+                    dtype='float32',
+                    param_attr=w_param_attrs)
+                emb_3_name = emb_3.name
+                data_list.append(text_3)
+                emb_name_list.append(emb_3_name)
+
+            variable_names = filter(
+                lambda v: v not in ['text_1', 'text_2', 'text_3', "seq_len"],
+                list(main_program.global_block().vars.keys()))
             prefix_name = "@HUB_{}@".format(self.name)
-            add_vars_prefix(program=main_program, prefix=prefix_name)
+            add_vars_prefix(
+                program=main_program, prefix=prefix_name, vars=variable_names)
 
             for param in main_program.global_block().iter_parameters():
                 param.trainable = trainable
@@ -79,25 +144,29 @@ class SentaBow(hub.NLPPredictionModule):
             place = fluid.CPUPlace()
             exe = fluid.Executor(place)
 
-            # load the senta_bow pretrained model
+            # Load the senta_lstm pretrained model.
             def if_exist(var):
+                print(
+                    var.name,
+                    os.path.exists(
+                        os.path.join(self.pretrained_model_path, var.name)))
                 return os.path.exists(
                     os.path.join(self.pretrained_model_path, var.name))
 
             fluid.io.load_vars(
                 exe, self.pretrained_model_path, predicate=if_exist)
 
-            inputs = {
-                "words":
-                main_program.global_block().vars[prefix_name + data_name]
-            }
+            inputs = {'seq_len': seq_len}
             outputs = {
                 "class_probs":
                 main_program.global_block().vars[prefix_name + pred_name],
                 "sentence_feature":
                 main_program.global_block().vars[prefix_name + fc_name]
             }
-
+            for index, data in enumerate(data_list):
+                inputs['text_%s' % (index + 1)] = data
+                outputs['emb_%s' % (index + 1)] = main_program.global_block(
+                ).vars[prefix_name + emb_name_list[index]]
             return inputs, outputs, main_program
 
     @serving
@@ -165,6 +234,10 @@ class SentaBow(hub.NLPPredictionModule):
 
 if __name__ == "__main__":
     senta = SentaBow()
+    inputs, outputs, main_program = senta.context(num_data=3)
+    print(inputs)
+    print('*' * 20)
+    print(outputs)
     # Data to be predicted
     test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
 

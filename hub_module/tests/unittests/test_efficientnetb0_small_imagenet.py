@@ -1,90 +1,64 @@
-# coding=utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
+# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import os
-import unittest
+from unittest import TestCase, main
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 import cv2
 import numpy as np
-import paddle.fluid as fluid
 import paddlehub as hub
 
-pic_dir = '../image_dataset/classification/animals/'
 
-
-class TestEfficientnetB0SmallImagenet(unittest.TestCase):
-    @classmethod
-    def setUpClass(self):
-        """Prepare the environment once before execution of all tests.\n"""
-        self.classifier = hub.Module(name="efficientnetb0_small_imagenet")
-
-    @classmethod
-    def tearDownClass(self):
-        """clean up the environment after the execution of all tests.\n"""
-        self.classifier = None
-
+class EfficientNetB0SmallTestCase(TestCase):
     def setUp(self):
-        "Call setUp() to prepare environment\n"
-        self.test_prog = fluid.Program()
+        self.module = hub.Module(name='efficientnetb0_small_imagenet')
+        self.test_images = [
+            "../image_dataset/classification/animals/dog.jpeg",
+            "../image_dataset/keypoint_detection/girl2.jpg"
+        ]
+        self.true_mean = np.array([0.485, 0.456, 0.406]).reshape(1, 3).tolist()
+        self.true_std = np.array([0.229, 0.224, 0.225]).reshape(1, 3).tolist()
 
-    def tearDown(self):
-        "Call tearDown to restore environment.\n"
-        self.test_prog = None
+    def test_classifcation(self):
+        results_1 = self.module.classify(paths=self.test_images, use_gpu=True)
+        results_2 = self.module.classify(paths=self.test_images, use_gpu=False)
+        for index, res in enumerate(results_1):
+            self.assertTrue(res.keys(), results_2[index].keys())
+            diff = list(res.values())[0] - list(results_2[index].values())[0]
+            self.assertTrue((diff < 1e-5))
 
-    def test_context(self):
-        self.classifier.context(pretrained=True)
+        test_images = [cv2.imread(img) for img in self.test_images]
+        results_3 = self.module.classify(images=test_images, use_gpu=False)
+        for index, res in enumerate(results_1):
+            self.assertTrue(res.keys(), results_3[index].keys())
 
-    def test_single_pic(self):
-        with fluid.program_guard(self.test_prog):
-            pics_path_list = [
-                os.path.join(pic_dir, f) for f in os.listdir(pic_dir)
-            ]
-            print('\n')
-            for pic_path in pics_path_list:
-                print(pic_path)
-                result = self.classifier.classification(
-                    paths=[pic_path], use_gpu=False)
-                print(result)
+        results_4 = self.module.classify(
+            images=test_images, use_gpu=True, top_k=2)
+        for res in results_4:
+            self.assertEqual(len(res.keys()), 2)
 
-    def test_batch(self):
-        with fluid.program_guard(self.test_prog):
-            pics_path_list = [
-                os.path.join(pic_dir, f) for f in os.listdir(pic_dir)
-            ]
-            print('\n')
-            result = self.classifier.classification(
-                paths=pics_path_list, batch_size=3, use_gpu=False, top_k=2)
-            print(result)
+    def test_common_apis(self):
+        width = self.module.get_expected_image_width()
+        height = self.module.get_expected_image_height()
+        mean = self.module.get_pretrained_images_mean()
+        std = self.module.get_pretrained_images_std()
 
-    def test_ndarray(self):
-        with fluid.program_guard(self.test_prog):
-            pics_path_list = [
-                os.path.join(pic_dir, f) for f in os.listdir(pic_dir)
-            ]
-            pics_ndarray = list()
-            print('\n')
-            for pic_path in pics_path_list:
-                im = cv2.cvtColor(cv2.imread(pic_path), cv2.COLOR_BGR2RGB)
-                result = self.classifier.classification(
-                    images=[im], use_gpu=True, top_k=5)
-                print(result)
-
-    def test_save_inference_model(self):
-        with fluid.program_guard(self.test_prog):
-            self.classifier.save_inference_model(
-                dirname='efficientnetb0_small_imagenet_model',
-                model_filename='__model__',
-                combined=False)
+        self.assertEqual(width, 224)
+        self.assertEqual(height, 224)
+        self.assertEqual(mean.tolist(), self.true_mean)
+        self.assertEqual(std.tolist(), self.true_std)
 
 
-if __name__ == "__main__":
-    suite = unittest.TestSuite()
-    suite.addTest(TestEfficientnetB0SmallImagenet('test_context'))
-    suite.addTest(TestEfficientnetB0SmallImagenet('test_single_pic'))
-    suite.addTest(TestEfficientnetB0SmallImagenet('test_batch'))
-    suite.addTest(TestEfficientnetB0SmallImagenet('test_ndarray'))
-    suite.addTest(TestEfficientnetB0SmallImagenet('test_save_inference_model'))
-    runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
+if __name__ == '__main__':
+    main()

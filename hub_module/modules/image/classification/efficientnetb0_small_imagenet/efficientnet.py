@@ -1,3 +1,18 @@
+# -*- coding:utf-8 -*-
+# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -135,7 +150,6 @@ class EfficientNet():
             model_name, override_params)
         self._bn_mom = self._global_params.batch_norm_momentum
         self._bn_eps = self._global_params.batch_norm_epsilon
-        self.is_test = is_test
         self.padding_type = padding_type
         self.use_se = use_se
 
@@ -159,7 +173,7 @@ class EfficientNet():
         pool = fluid.layers.pool2d(
             input=conv, pool_type='avg', global_pooling=True, use_cudnn=False)
 
-        if self._global_params.dropout_rate:
+        if not is_test and self._global_params.dropout_rate:
             pool = fluid.layers.dropout(
                 pool,
                 self._global_params.dropout_rate,
@@ -335,7 +349,7 @@ class EfficientNet():
         input_filters, output_filters = block_args.input_filters, block_args.output_filters
         if id_skip and block_args.stride == 1 and input_filters == output_filters:
             if drop_connect_rate:
-                conv = self._drop_connect(conv, drop_connect_rate, self.is_test)
+                conv = self._drop_connect(conv, drop_connect_rate, is_test)
             conv = fluid.layers.elementwise_add(conv, inputs)
 
         return conv
