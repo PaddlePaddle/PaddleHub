@@ -59,20 +59,20 @@ cmudict_path = os.path.join(corpora_path, "cmudict")
 if not os.path.exists(punkt_path):
     default_downloader.download_file_and_uncompress(
         url=_PUNKT_URL, save_path=tokenizers_path, print_progress=True)
-# if not os.path.exists(cmudict_path):
-#     default_downloader.download_file_and_uncompress(
-#         url=_CMUDICT_URL, save_path=corpora_path, print_progress=True)
+if not os.path.exists(cmudict_path):
+    default_downloader.download_file_and_uncompress(
+        url=_CMUDICT_URL, save_path=corpora_path, print_progress=True)
 nltk.data.path.append(nltk_path)
 
 
 @moduleinfo(
-    name="transformer_tts",
+    name="transformer_tts_ljspeech",
     version="1.0.0",
     summary=
     "Transformer TTS introduces and adapts the multi-head attention mechanism to replace the RNN structures and also the original attention mechanism in Tacotron2. See https://arxiv.org/abs/1809.08895 for details",
     author="baidu-nlp",
     author_email="",
-    type="audio/tts",
+    type="nlp/tts",
 )
 class TransformerTTS(hub.NLPPredictionModule):
     def _initialize(self):
@@ -105,14 +105,14 @@ class TransformerTTS(hub.NLPPredictionModule):
             do_trim_silence=False,
             sound_norm=False)
 
-    @serving
-    def synthesize(self, texts, use_gpu=False):
+    def synthesize(self, texts, use_gpu=False, vocoder="griffin-lim"):
         """
         Get the sentiment prediction results results with the texts as input
 
         Args:
-             texts(list): the input texts to be predicted, if texts not data
+             texts(list): the input texts to be predicted.
              use_gpu(bool): whether use gpu to predict or not
+             vocoder(str): the vocoder name, "griffin-lim" or "waveflow"
 
         Returns:
              wavs(str): the audio wav with sample rate . You can use soundfile.write to save it.
@@ -177,15 +177,26 @@ class TransformerTTS(hub.NLPPredictionModule):
             wavs.append(wav)
         return wavs, self.config['audio']['sr']
 
+    @serving
+    def serving_method(self, texts, use_gpu=False, vocoder="griffin-lim"):
+        """
+        Run as a service.
+        """
+        wavs, sample_rate = self.synthesize(texts, use_gpu, vocoder)
+        wavs = [wav.tolist() for wav in wavs]
+        result = {"wavs": wavs, "sample_rate": sample_rate}
+        return result
+
 
 if __name__ == "__main__":
     import soundfile as sf
 
     module = TransformerTTS()
     test_text = [
-        "hello, how are you", "Hello, how do you do",
-        "Parakeet stands for Paddle PARAllel text-to-speech toolkit."
+        "Simple as this proposition is, it is necessary to be stated,",
+        "Parakeet stands for Paddle PARAllel text-to-speech toolkit.",
     ]
-    wavs, sample_rate = module.synthesize(texts=test_text)
+    wavs, sample_rate = module.synthesize(
+        texts=test_text, vocoder="griffin-lim")
     for index, wav in enumerate(wavs):
         sf.write(f"{index}.wav", wav, sample_rate)

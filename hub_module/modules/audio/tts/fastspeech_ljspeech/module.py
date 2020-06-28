@@ -55,20 +55,20 @@ cmudict_path = os.path.join(corpora_path, "cmudict")
 if not os.path.exists(punkt_path):
     default_downloader.download_file_and_uncompress(
         url=_PUNKT_URL, save_path=tokenizers_path, print_progress=True)
-# if not os.path.exists(cmudict_path):
-#     default_downloader.download_file_and_uncompress(
-#         url=_CMUDICT_URL, save_path=corpora_path, print_progress=True)
+if not os.path.exists(cmudict_path):
+    default_downloader.download_file_and_uncompress(
+        url=_CMUDICT_URL, save_path=corpora_path, print_progress=True)
 nltk.data.path.append(nltk_path)
 
 
 @moduleinfo(
-    name="fast_speech",
+    name="fastspeech_ljspeech",
     version="1.0.0",
     summary=
     "FastSpeech proposes a novel feed-forward network based on Transformer to generate mel-spectrogram in parallel for TTS. See https://arxiv.org/abs/1905.09263 for details.",
     author="baidu-nlp",
     author_email="",
-    type="audio/tts",
+    type="nlp/tts",
 )
 class FastSpeech(hub.NLPPredictionModule):
     def _initialize(self):
@@ -81,15 +81,16 @@ class FastSpeech(hub.NLPPredictionModule):
         with open(config_path, "rt") as f:
             self.config = yaml.load(f, Loader=yaml.Loader)
 
-    @serving
-    def synthesize(self, texts, use_gpu=False, speed=1.0):
+    def synthesize(self, texts, use_gpu=False, speed=1.0,
+                   vocoder="griffin-lim"):
         """
         Get the sentiment prediction results results with the texts as input
 
         Args:
-             texts(list): the input texts to be predicted, if texts not data
+             texts(list): the input texts to be predicted.
              use_gpu(bool): whether use gpu to predict or not. Default False.
              speed(float): Controlling the voice speed. Default 1.0.
+             vocoder(str): the vocoder name, "griffin-lim" or "waveflow".
 
         Returns:
              wavs(str): the audio wav with sample rate . You can use soundfile.write to save it.
@@ -151,6 +152,20 @@ class FastSpeech(hub.NLPPredictionModule):
             wavs.append(wav)
         return wavs, self.config['audio']['sr']
 
+    @serving
+    def serving_method(self,
+                       texts,
+                       use_gpu=False,
+                       speed=1.0,
+                       vocoder="griffin-lim"):
+        """
+        Run as a service.
+        """
+        wavs, sample_rate = self.synthesize(texts, use_gpu, speed, vocoder)
+        wavs = [wav.tolist() for wav in wavs]
+        result = {"wavs": wavs, "sample_rate": sample_rate}
+        return result
+
 
 if __name__ == "__main__":
     import soundfile as sf
@@ -158,10 +173,9 @@ if __name__ == "__main__":
     module = FastSpeech()
     test_text = [
         "Simple as this proposition is, it is necessary to be stated,",
-        "hello, how are you",
-        "Hello, how do you do",
         "Parakeet stands for Paddle PARAllel text-to-speech toolkit.",
     ]
-    wavs, sample_rate = module.synthesize(texts=test_text, speed=2)
+    wavs, sample_rate = module.synthesize(
+        texts=test_text, speed=2, vocoder="griffin-lim")
     for index, wav in enumerate(wavs):
         sf.write(f"{index}.wav", wav, sample_rate)

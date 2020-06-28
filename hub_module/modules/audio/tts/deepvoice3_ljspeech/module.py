@@ -17,6 +17,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import base64
 import importlib.util
 
 import nltk
@@ -28,8 +29,8 @@ from paddlehub.module.module import moduleinfo, serving
 from paddlehub.common.dir import THIRD_PARTY_HOME
 from paddlehub.common.downloader import default_downloader
 
-from deep_voice3.model import make_model
-from deep_voice3.utils import make_evaluator
+from deepvoice3_ljspeech.model import make_model
+from deepvoice3_ljspeech.utils import make_evaluator
 
 lack_dependency = []
 for dependency in ["ruamel", "parakeet"]:
@@ -57,20 +58,20 @@ cmudict_path = os.path.join(corpora_path, "cmudict")
 if not os.path.exists(punkt_path):
     default_downloader.download_file_and_uncompress(
         url=_PUNKT_URL, save_path=tokenizers_path, print_progress=True)
-# if not os.path.exists(cmudict_path):
-#     default_downloader.download_file_and_uncompress(
-#         url=_CMUDICT_URL, save_path=corpora_path, print_progress=True)
+if not os.path.exists(cmudict_path):
+    default_downloader.download_file_and_uncompress(
+        url=_CMUDICT_URL, save_path=corpora_path, print_progress=True)
 nltk.data.path.append(nltk_path)
 
 
 @moduleinfo(
-    name="deep_voice3",
+    name="deepvoice3_ljspeech",
     version="1.0.0",
     summary=
     "Deep Voice 3, a fully-convolutional attention-based neural text-to-speech (TTS) system.",
     author="baidu-nlp",
     author_email="",
-    type="audio/tts",
+    type="nlp/tts",
 )
 class DeepVoice3(hub.NLPPredictionModule):
     def _initialize(self):
@@ -83,14 +84,14 @@ class DeepVoice3(hub.NLPPredictionModule):
         with open(config_path, "rt") as f:
             self.config = ruamel.yaml.safe_load(f)
 
-    @serving
-    def synthesize(self, texts, use_gpu=False):
+    def synthesize(self, texts, use_gpu=False, vocoder="griffin-lim"):
         """
         Get the sentiment prediction results results with the texts as input
 
         Args:
-             texts(list): the input texts to be predicted, if texts not data
+             texts(list): the input texts to be predicted.
              use_gpu(bool): whether use gpu to predict or not
+             vocoder(str): the vocoder name, "griffin-lim" or "waveflow"
 
         Returns:
              wavs(str): the audio wav with sample rate . You can use soundfile.write to save it.
@@ -122,15 +123,29 @@ class DeepVoice3(hub.NLPPredictionModule):
                 layer.remove_weight_norm()
 
         evaluator = make_evaluator(self.config, predicted_data)
-        wavs = evaluator(model, iteration)
-        return wavs
+        wavs, sample_rate = evaluator(model, iteration)
+        return wavs, sample_rate
+
+    @serving
+    def serving_method(self, texts, use_gpu=False, vocoder="griffin-lim"):
+        """
+        Run as a service.
+        """
+        wavs, sample_rate = self.synthesize(texts, use_gpu, vocoder)
+        wavs = [wav.tolist() for wav in wavs]
+        result = {"wavs": wavs, "sample_rate": sample_rate}
+        return result
 
 
 if __name__ == "__main__":
     import soundfile as sf
 
     module = DeepVoice3()
-    test_text = ["hello, how are you", "Hello, how do you do"]
-    wavs, sample_rate = module.synthesize(texts=test_text)
+    test_text = [
+        "Simple as this proposition is, it is necessary to be stated",
+        "Parakeet stands for Paddle PARAllel text-to-speech toolkit.",
+    ]
+    wavs, sample_rate = module.synthesize(
+        texts=test_text, vocoder="griffin-lim")
     for index, wav in enumerate(wavs):
         sf.write(f"{index}.wav", wav, sample_rate)
