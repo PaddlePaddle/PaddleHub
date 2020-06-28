@@ -105,9 +105,9 @@ class EfficientNetB2ImageNet(hub.Module):
             context_prog (fluid.Program): program for transfer learning.
         """
         if phase in ["dev", "test", "predict", "eval"]:
-            is_test = False
-        elif phase in ["train"]:
             is_test = True
+        elif phase in ["train"]:
+            is_test = False
         else:
             raise ValueError(
                 "Phase %s is error, which must be one of train, dev, test, eval and predict."
