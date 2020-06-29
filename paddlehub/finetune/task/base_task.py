@@ -344,6 +344,8 @@ class BaseTask(object):
         self.dataset = dataset
         if dataset:
             self._label_list = dataset.get_labels()
+        else:
+            self._label_list = None
         # Compatible code for usage deprecated in paddlehub v1.8.
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
@@ -1099,23 +1101,29 @@ class BaseTask(object):
                          or a plaintext string list when the task is initialized with data_reader param (deprecated in paddlehub v1.8).
             label_list (list): the label list, used to proprocess the output.
             load_best_model (bool): load the best model or not
-            return_result (bool): return a readable result or just the raw run result. Always True when the task is not initialized with data_reader param.
+            return_result (bool): return a readable result or just the raw run result. Always True when the task is not initialized with data_reader but dataset parameter.
             accelerate_mode (bool): use high-performance predictor or not
 
         Returns:
             RunState: the running result of predict phase
         """
-        if accelerate_mode and isinstance(self._base_data_reader,
-                                          hub.reader.LACClassifyReader):
-            logger.warning(
-                "LACClassifyReader does not support predictor, the accelerate_mode is closed now."
-            )
-            accelerate_mode = False
+        if accelerate_mode:
+            if isinstance(self._base_data_reader, hub.reader.LACClassifyReader):
+                logger.warning(
+                    "LACClassifyReader does not support predictor, the accelerate_mode is closed now."
+                )
+                accelerate_mode = False
+            elif isinstance(self, hub.GenerationTask):
+                logger.warning(
+                    "GenerationTask does not support predictor, the accelerate_mode is closed now."
+                )
+                accelerate_mode = False
         self.accelerate_mode = accelerate_mode
 
         with self.phase_guard(phase="predict"):
             self._predict_data = data
-            self._label_list = label_list
+            if label_list:
+                self._label_list = label_list
             self._predict_start_event()
 
             if load_best_model:

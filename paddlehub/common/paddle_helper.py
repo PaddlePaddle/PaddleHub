@@ -146,7 +146,10 @@ def from_module_attr_to_param(module_attr):
 def _copy_vars_and_ops_in_blocks(from_block, to_block):
     for var in from_block.vars:
         var = from_block.var(var)
-        var_info = copy.deepcopy(get_variable_info(var))
+        try:
+            var_info = copy.deepcopy(get_variable_info(var))
+        except:
+            var_info = {}
         if isinstance(var, fluid.framework.Parameter):
             to_block.create_parameter(**var_info)
         else:
@@ -163,7 +166,7 @@ def _copy_vars_and_ops_in_blocks(from_block, to_block):
                 output: [to_block.var(var) for var in op.output(output)]
                 for output in op.output_names
             },
-            'attrs': copy.deepcopy(op.all_attrs())
+            'attrs': op.all_attrs()  #copy.deepcopy(op.all_attrs())
         }
         to_block.append_op(**op_info)
 
