@@ -150,10 +150,6 @@ class TencentAILabChineseEmbeddingSmall(hub.Module):
 
                 # load the pretrained model
                 def if_exist(var):
-                    print(
-                        var.name,
-                        os.path.exists(
-                            os.path.join(self.pretrained_model_path, var.name)))
                     return os.path.exists(
                         os.path.join(self.pretrained_model_path, var.name))
 
