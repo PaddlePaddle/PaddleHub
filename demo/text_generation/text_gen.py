@@ -25,7 +25,7 @@ parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches 
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for fine-tuning, input should be True or False")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
-parser.add_argument("--warmup_proportion", type=float, default=0.1, help="Warmup proportion params for warmup strategy")
+parser.add_argument("--cut_fraction", type=float, default=0.1, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
@@ -36,7 +36,7 @@ args = parser.parse_args()
 if __name__ == '__main__':
 
     # Load Paddlehub ERNIE Tiny pretrained model
-    module = hub.Module(name="ernie_tiny")
+    module = hub.Module(name="chinese-electra-base")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
@@ -53,10 +53,14 @@ if __name__ == '__main__':
     sequence_output = outputs["sequence_output"]
 
     # Select fine-tune strategy, setup config and fine-tune
-    strategy = hub.AdamWeightDecayStrategy(
-        warmup_proportion=args.warmup_proportion,
-        weight_decay=args.weight_decay,
-        learning_rate=args.learning_rate)
+    strategy = hub.ULMFiTStrategy(
+        learning_rate=args.learning_rate,
+        optimizer_name="adam",
+        cut_fraction=args.cut_fraction,
+        ratio=32,
+        factor=2.6,
+        dis_params_layer=module.get_params_layer(),
+    )
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(

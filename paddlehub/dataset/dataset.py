@@ -105,9 +105,9 @@ class BaseDataset(object):
                 logger.warning(
                     "As label_list has been assigned, label_file is noneffective"
                 )
-        if self.label_list:
-            self.label_index = dict(
-                zip(self.label_list, range(len(self.label_list))))
+
+        self.label_index = dict(
+            zip(self.label_list, range(len(self.label_list))))
 
     def get_train_examples(self):
         return self.train_examples

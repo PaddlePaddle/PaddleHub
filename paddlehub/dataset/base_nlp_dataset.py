@@ -338,28 +338,28 @@ class RegressionDataset(BaseNLPDataset):
 
 
 class GenerationDataset(BaseNLPDataset):
-    def __init__(
-            self,
-            base_path,
-            train_file=None,
-            dev_file=None,
-            test_file=None,
-            predict_file=None,
-            label_file=None,
-            label_list=None,
-            train_file_with_header=False,
-            dev_file_with_header=False,
-            test_file_with_header=False,
-            predict_file_with_header=False,
-            tokenizer=None,
-            max_seq_len=128,
-            split_char="\002",
-            start_token="<s>",
-            end_token="</s>",
-    ):
+    def __init__(self,
+                 base_path,
+                 train_file=None,
+                 dev_file=None,
+                 test_file=None,
+                 predict_file=None,
+                 label_file=None,
+                 label_list=None,
+                 train_file_with_header=False,
+                 dev_file_with_header=False,
+                 test_file_with_header=False,
+                 predict_file_with_header=False,
+                 tokenizer=None,
+                 max_seq_len=128,
+                 split_char="\002",
+                 start_token="<s>",
+                 end_token="</s>",
+                 unk_token="<unk>"):
         self.split_char = split_char
         self.start_token = start_token
         self.end_token = end_token
+        self.unk_token = unk_token
         super(GenerationDataset, self).__init__(
             base_path=base_path,
             train_file=train_file,
@@ -397,12 +397,15 @@ class GenerationDataset(BaseNLPDataset):
                 expand_label = [self.start_token] + example.label.split(
                     self.split_char)[:self.max_seq_len - 2] + [self.end_token]
                 expand_label_id = [
-                    self.label_index[label] for label in expand_label
+                    self.label_index.get(label,
+                                         self.label_index[self.unk_token])
+                    for label in expand_label
                 ]
-                record["label"] = expand_label_id[1:] + [self.end_token] * (
-                    self.max_seq_len - len(expand_label) + 1)
+                record["label"] = expand_label_id[1:] + [
+                    self.label_index[self.end_token]
+                ] * (self.max_seq_len - len(expand_label) + 1)
                 record["dec_input"] = expand_label_id[:-1] + [
-                    self.end_token
+                    self.label_index[self.end_token]
                 ] * (self.max_seq_len - len(expand_label) + 1)
             records.append(record)
         return records
