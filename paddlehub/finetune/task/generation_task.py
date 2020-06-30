@@ -98,8 +98,8 @@ class GenerationTask(BaseTask):
             dropout=0.,
             beam_size=10,
             beam_max_step_num=30,
-            beam_start_token="<s>",
-            beam_end_token="</s>",
+            start_token="<s>",
+            end_token="</s>",
             startup_program=None,
             config=None,
             metrics_choices="default",
@@ -123,8 +123,8 @@ class GenerationTask(BaseTask):
         self.num_classes = num_classes
         self.beam_size = beam_size
         self.beam_max_step_num = beam_max_step_num
-        self.beam_start_token = beam_start_token
-        self.beam_end_token = beam_end_token
+        self.start_token = start_token
+        self.end_token = end_token
 
     def _add_label(self):
         label = fluid.layers.data(
@@ -183,8 +183,8 @@ class GenerationTask(BaseTask):
                 name='target_embedding',
                 initializer=fluid.initializer.UniformInitializer(
                     low=-0.1, high=0.1)))
-        beam_start_token_id = self._label_list.index(self.beam_start_token)
-        beam_end_token_id = self._label_list.index(self.beam_end_token)
+        start_token_id = self._label_list.index(self.start_token)
+        end_token_id = self._label_list.index(self.end_token)
         if not self.is_predict_phase:
             self.dec_input = fluid.layers.data(
                 name="dec_input", shape=[self.max_seq_len], dtype='int64')
@@ -217,8 +217,8 @@ class GenerationTask(BaseTask):
                 param_attr=fluid.ParamAttr(name="output_w"))
             beam_search_decoder = BeamSearchDecoder(
                 dec_cell,
-                beam_start_token_id,
-                beam_end_token_id,
+                start_token_id,
+                end_token_id,
                 self.beam_size,
                 embedding_fn=tar_embeder,
                 output_fn=output_layer)
@@ -268,17 +268,6 @@ class GenerationTask(BaseTask):
         loss = fluid.layers.reduce_mean(loss, dim=[0])
         loss = fluid.layers.reduce_sum(loss)
         return loss
-
-    @property
-    def feed_list(self):
-        feed_list = [varname for varname in self._base_feed_list]
-        if self.is_train_phase or self.is_test_phase:
-            feed_list += [
-                self.labels[0].name, self.seq_len.name, self.dec_input
-            ]
-        else:
-            feed_list += [self.seq_len.name]
-        return feed_list
 
     @property
     def fetch_list(self):

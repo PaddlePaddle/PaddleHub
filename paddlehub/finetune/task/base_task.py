@@ -422,8 +422,9 @@ class BaseTask(object):
                     self.env.metrics = self._add_metrics()
 
         if self.is_predict_phase or self.is_test_phase:
-            self.env.main_program = clone_program(
-                self.env.main_program, for_test=True)
+            # Todo: paddle.fluid.core_avx.EnforceNotMet: Getting 'tensor_desc' is not supported by the type of var
+            # self.env.main_program = clone_program(
+            #     self.env.main_program, for_test=True)
             hub.common.paddle_helper.set_op_attr(
                 self.env.main_program, is_test=True)
 
