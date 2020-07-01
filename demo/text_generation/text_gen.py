@@ -24,7 +24,6 @@ parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
 parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for fine-tuning, input should be True or False")
 parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
-parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay rate for L2 regularizer.")
 parser.add_argument("--cut_fraction", type=float, default=0.1, help="Warmup proportion params for warmup strategy")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
@@ -60,7 +59,7 @@ if __name__ == '__main__':
         ratio=32,
         factor=2.6,
         dis_params_layer=module.get_params_layer(),
-    )
+        frz_params_layer=module.get_params_layer())
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
