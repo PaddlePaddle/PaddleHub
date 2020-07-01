@@ -233,12 +233,10 @@ def compute_bleu(reference_corpus,
     reference_length = 0
     translation_length = 0
     for (reference, translation) in zip(reference_corpus, translation_corpus):
-        # reference_length += min(len(r) for r in references)
         reference_length += len(reference)
         translation_length += len(translation)
 
         merged_ref_ngram_counts = collections.Counter()
-        # for reference in references:
         merged_ref_ngram_counts |= _get_ngrams(reference, max_order)
         translation_ngram_counts = _get_ngrams(translation, max_order)
         overlap = translation_ngram_counts & merged_ref_ngram_counts

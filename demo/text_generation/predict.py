@@ -14,10 +14,6 @@
 # limitations under the License.
 """Fine-tuning on classification task """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import argparse
 import ast
 
@@ -35,7 +31,7 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     # Load Paddlehub ERNIE Tiny pretrained model
-    module = hub.Module(name="ernie_tiny")
+    module = hub.Module(name="chinese-electra-base")
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
@@ -69,7 +65,7 @@ if __name__ == '__main__':
         metrics_choices=["bleu"])
 
     # Data to be predicted
-    text_a = ["花香鸟语人携手", "古今往来只如此"]
+    text_a = ["人增福寿年增岁", "风吹云乱天垂泪", "若有经心风过耳"]
 
     # Add 0x02 between characters to match the format of training data,
     # otherwise the length of prediction results will not match the input string

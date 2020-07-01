@@ -86,6 +86,28 @@ class AttentionDecoderCell(RNNCell):
 
 
 class GenerationTask(BaseTask):
+    """
+    GenerationTask use rnn as decoder and beam search technology when predict.
+
+    Args:
+        feature(Variable): The sentence-level feature, shape as [-1, emb_size].
+        token_feature(Variable): The token-level feature, shape as [-1, seq_len, emb_size].
+        max_seq_len(int): the decoder max sequence length.
+        num_classes(int): total labels of the task.
+        dataset(GenerationDataset): the dataset containing training set, development set and so on. If you want to finetune the model, you should set it.
+                 Otherwise, if you just want to use the model to predict, you can omit it. Default None
+        num_layers(int): the decoder rnn layers number. Default 1
+        hidden_size(int): the decoder rnn hidden size. Default 128
+        dropout(float): the decoder dropout rate. Default 0.
+        beam_size(int): the beam search size during predict phase. Default 10.
+        beam_max_step_num(int): the beam search max step number. Default 30.
+        start_token(str): the beam search start token. Default "<s>"
+        end_token(str): the beam search end token. Default "</s>"
+        startup_program(Program): the customized startup_program, default None
+        config(RunConfig): the config for the task, default None
+        metrics_choices(list): metrics used to the task, default ["bleu"]
+    """
+
     def __init__(
             self,
             feature,

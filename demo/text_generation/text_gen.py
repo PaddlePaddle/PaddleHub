@@ -56,8 +56,6 @@ if __name__ == '__main__':
         learning_rate=args.learning_rate,
         optimizer_name="adam",
         cut_fraction=args.cut_fraction,
-        ratio=32,
-        factor=2.6,
         dis_params_layer=module.get_params_layer(),
         frz_params_layer=module.get_params_layer())
 
