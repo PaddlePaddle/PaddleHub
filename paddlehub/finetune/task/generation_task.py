@@ -116,7 +116,7 @@ class GenerationTask(BaseTask):
             num_classes,
             dataset=None,
             num_layers=1,
-            hidden_size=128,
+            hidden_size=512,
             dropout=0.,
             beam_size=10,
             beam_max_step_num=30,
