@@ -884,6 +884,10 @@ class MRCDataset(BaseNLPDataset):
 
 
 class TextMatchingDataset(BaseNLPDataset):
+    """
+    Text Matching DataSet base class, including point_wise and pair_wise mode.
+    """
+
     def __init__(self,
                  base_path,
                  is_pair_wise=False,
@@ -899,6 +903,22 @@ class TextMatchingDataset(BaseNLPDataset):
                  predict_file_with_header=False,
                  tokenizer=None,
                  max_seq_len=128):
+        """
+        Args:
+            base_path(str): The directory to dataset, which includes train, dev, test or prediction data.
+            is_pair_wise(bool): The dataset is pair wise or not. Default as False.
+            train_file(str): The train data file name of the dataset.
+            dev_file(str): The development data file name of the dataset. It is optional.
+            test_file(str): The test data file name of the dataset. It is optional.
+            predict_file(str): The prediction data file name of the dataset. It is optional.
+            label_file(str): It is a file name, which contains labels of the dataset. If label file not label_list.
+            label_list(list): It is the labels of the dataset.
+            train_file_with_header(bool): The train file is with introduction of the file in the first line or not. Default as False.
+            dev_file_with_header(bool): The development file is with introduction of the file in the first line or not. Default as False.
+            test_file_with_header(bool): The test file is with introduction of the file in the first line or not. Default as False.
+            tokenizer(object): It should be hub.BertTokenizer or hub.CustomTokenizer, which tokenizes the text and encodes the data as model needed.
+            max_seq_len(int): It will limit the total sequence returned so that it has a maximum length.
+        """
         self.is_pair_wise = is_pair_wise
         super(BaseNLPDataset, self).__init__(
             base_path=base_path,
@@ -1012,7 +1032,7 @@ class TextMatchingDataset(BaseNLPDataset):
             examples (list): the data example, returned by _read_file.
 
         Returns:
-            a list with all the examples record.
+            a list with all the records, which will be feeded to the prpgram.
         """
         with tqdm(total=len(examples)) as process_bar:
             records = []

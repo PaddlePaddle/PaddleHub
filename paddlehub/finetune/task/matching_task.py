@@ -31,6 +31,10 @@ from .base_task import BaseTask
 
 
 class TextMatchingTask(BaseTask):
+    """
+    Create a text macthing task, including pair wise and point wise.
+    """
+
     def __init__(self,
                  query_feature,
                  left_feature,
@@ -39,11 +43,22 @@ class TextMatchingTask(BaseTask):
                  right_feature=None,
                  num_classes=2,
                  dataset=None,
-                 startup_program=None,
-                 hidden_units=None,
                  network=None,
                  config=None,
                  metrics_choices=['acc', 'f1']):
+        """
+        Args:
+            query_feature(Variable): It represents the query in the text matching task.
+            left_feature(Variable): It represents the left title in the text matching task.
+            tokenizer(object): tokenizer(object): It should be hub.BertTokenizer or hub.CustomTokenizer, which tokenizes the text and encodes the data as model needed.
+            is_pair_wise(bool): The dataset is pair wise or not.
+            right_feature(Variable): If the task is pair_wise, then the right_feature must be set and it represents the right title. It is optional.
+            dataset(object): The text macthing dataset.
+            network(str): The pre-defined network. Choices: 'bow', 'cnn', 'gru' and 'lstm'. Default None.
+            config (RunConfig): run config for the task, such as batch_size, epoch, learning_rate setting and so on.
+            metrics_choices(list): metrics used to the task, default ["acc", "f1"].
+        """
+
         if is_pair_wise:
             assert right_feature is not None, "The dataset is pair_wise and the right_feature of a pair-wise TextMatchingTask is None, which is illegal. The right_feature must be set as a Variable!"
         elif right_feature:
@@ -72,7 +87,7 @@ class TextMatchingTask(BaseTask):
             dataset=dataset,
             data_reader=None,
             main_program=main_program,
-            startup_program=startup_program,
+            startup_program=None,
             config=config,
             metrics_choices=metrics_choices)
 
@@ -300,7 +315,7 @@ class TextMatchingTask(BaseTask):
                 self.metrics_choice)
         return scores, avg_loss, run_speed
 
-    def encode_matching_data(self, data, max_seq_len):
+    def _encode_matching_data(self, data, max_seq_len):
         encoded_data = []
         for text_pair in data:
             record = {}
@@ -367,19 +382,18 @@ class TextMatchingTask(BaseTask):
         make prediction for the input data.
 
         Args:
-            data (list): the data will be predicted. Its element should be a record when the task is initialized without data_reader param,
-                         or a plaintext string list when the task is initialized with data_reader param (deprecated in paddlehub v1.8).
-            label_list (list): the label list, used to proprocess the output.
-            load_best_model (bool): load the best model or not
-            return_result (bool): return a readable result or just the raw run result. Always True when the task is not initialized with data_reader param.
+            data (list): The data will be predicted. It should be a text pair, such as [[query, title], ...].
+            max_seq_len(int): It will limit the total sequence returned so that it has a maximum length.
+            label_list(list): The labels which was exploited as fine-tuning. If the return_result as true, the label_list must be set.
+            load_best_model (bool): Whether loading the best model or not.
+            return_result (bool): Whether getting the final result (such as predicted labels) or not. Default as True.
             accelerate_mode (bool): use high-performance predictor or not
-
         Returns:
-            RunState: the running result of predict phase
+            RunState(object): The running result in the predict phase, which includes the fetch results as running program.
         """
         self.accelerate_mode = accelerate_mode
 
-        encoded_data = self.encode_matching_data(data, max_seq_len)
+        encoded_data = self._encode_matching_data(data, max_seq_len)
 
         with self.phase_guard(phase="predict"):
             self._predict_data = encoded_data
