@@ -21,6 +21,7 @@
     }
   },
   "port": 8866,
-  "use_multiprocess": false,
-  "workers": 2
+  "use_multiprocess": true,
+  "workers": 2,
+  "timeout": 30
 }
