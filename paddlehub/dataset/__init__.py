@@ -30,6 +30,8 @@ from .cmrc2018 import CMRC2018
 from .bq import BQ
 from .iflytek import IFLYTEK
 from .thucnews import THUCNEWS
+from .qqp import QQP
+from .duel import DuEL
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat

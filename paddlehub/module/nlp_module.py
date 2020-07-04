@@ -327,6 +327,7 @@ class TransformerModule(NLPBaseModule):
             self,
             max_seq_len=None,
             trainable=True,
+            num_data=1,
     ):
         """
         get inputs, outputs and program from pre-trained module
@@ -334,13 +335,17 @@ class TransformerModule(NLPBaseModule):
         Args:
             max_seq_len (int): the max sequence length
             trainable (bool): optimizing the pre-trained module params during training or not
+            num_data(int): It's number of data inputted to the model, selectted as following options:
+                - 1(default): There's only one data to be feeded in the model, e.g. the module is used for sentence classification task.
+                - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
+                - 3: There are three data to be feeded in the model, e.g. the module is used for text matching task (pair-wise).
 
         Returns: inputs, outputs, program.
                  The inputs is a dict with keys named input_ids, position_ids, segment_ids, input_mask and task_ids
                  The outputs is a dict with two keys named pooled_output and sequence_output.
 
         """
-
+        assert num_data >= 1 and num_data <= 3, "num_data(%d) must be 1, 2, or 3" % num_data
         if not max_seq_len:
             max_seq_len = self.max_seq_len
 
@@ -350,7 +355,7 @@ class TransformerModule(NLPBaseModule):
         module_program = fluid.Program()
         startup_program = fluid.Program()
         with fluid.program_guard(module_program, startup_program):
-            with fluid.unique_name.guard("@HUB_%s@" % self.name):
+            with fluid.unique_name.guard():
                 input_ids = fluid.layers.data(
                     name='input_ids',
                     shape=[-1, max_seq_len, 1],
@@ -374,26 +379,78 @@ class TransformerModule(NLPBaseModule):
                 pooled_output, sequence_output = self.net(
                     input_ids, position_ids, segment_ids, input_mask)
 
-        inputs = {
-            'input_ids': input_ids,
-            'position_ids': position_ids,
-            'segment_ids': segment_ids,
-            'input_mask': input_mask,
-        }
+                data_list = [(input_ids, position_ids, segment_ids, input_mask)]
+                output_name_list = [(pooled_output.name, sequence_output.name)]
 
-        outputs = {
-            "pooled_output": pooled_output,
-            "sequence_output": sequence_output,
-            0: pooled_output,
-            1: sequence_output
-        }
+                if num_data > 1:
+                    input_ids_2 = fluid.layers.data(
+                        name='input_ids_2',
+                        shape=[-1, max_seq_len, 1],
+                        dtype='int64',
+                        lod_level=0)
+                    position_ids_2 = fluid.layers.data(
+                        name='position_ids_2',
+                        shape=[-1, max_seq_len, 1],
+                        dtype='int64',
+                        lod_level=0)
+                    segment_ids_2 = fluid.layers.data(
+                        name='segment_ids_2',
+                        shape=[-1, max_seq_len, 1],
+                        dtype='int64',
+                        lod_level=0)
+                    input_mask_2 = fluid.layers.data(
+                        name='input_mask_2',
+                        shape=[-1, max_seq_len, 1],
+                        dtype='float32',
+                        lod_level=0)
+                    pooled_output_2, sequence_output_2 = self.net(
+                        input_ids_2, position_ids_2, segment_ids_2,
+                        input_mask_2)
+                    data_list.append((input_ids_2, position_ids_2,
+                                      segment_ids_2, input_mask_2))
+                    output_name_list.append((pooled_output_2.name,
+                                             sequence_output_2.name))
+
+                if num_data > 2:
+                    input_ids_3 = fluid.layers.data(
+                        name='input_ids_3',
+                        shape=[-1, max_seq_len, 1],
+                        dtype='int64',
+                        lod_level=0)
+                    position_ids_3 = fluid.layers.data(
+                        name='position_ids_3',
+                        shape=[-1, max_seq_len, 1],
+                        dtype='int64',
+                        lod_level=0)
+                    segment_ids_3 = fluid.layers.data(
+                        name='segment_ids_3',
+                        shape=[-1, max_seq_len, 1],
+                        dtype='int64',
+                        lod_level=0)
+                    input_mask_3 = fluid.layers.data(
+                        name='input_mask_3',
+                        shape=[-1, max_seq_len, 1],
+                        dtype='float32',
+                        lod_level=0)
+                    pooled_output_3, sequence_output_3 = self.net(
+                        input_ids_3, position_ids_3, segment_ids_3,
+                        input_mask_3)
+                    data_list.append((input_ids_3, position_ids_3,
+                                      segment_ids_3, input_mask_3))
+                    output_name_list.append((pooled_output_3.name,
+                                             sequence_output_3.name))
 
         place = fluid.CPUPlace()
         exe = fluid.Executor(place)
 
         # To be compatible with the module v1
-        vars = filter(lambda var: "tmp" not in var,
-                      list(module_program.global_block().vars.keys())[4:])
+        vars = filter(
+            lambda var: var not in [
+                "input_ids", "position_ids", "segment_ids", "input_mask",
+                "input_ids_2", "position_ids_2", "segment_ids_2",
+                "input_mask_2", "input_ids_3", "position_ids_3",
+                "segment_ids_3", "input_mask_3"
+            ], list(module_program.global_block().vars.keys()))
         paddle_helper.add_vars_prefix(
             program=module_program, prefix=self.param_prefix(), vars=vars)
         self.init_pretraining_params(
@@ -407,6 +464,34 @@ class TransformerModule(NLPBaseModule):
                 # layer num begins from 0
                 layer = match.group(1)
                 self.params_layer[param.name] = int(layer)
+
+        inputs = {}
+        outputs = {}
+        for index, data in enumerate(data_list):
+            if index == 0:
+                inputs['input_ids'] = data[
+                    0]  # module_program.global_block().vars[names[0]]
+                inputs['position_ids'] = data[
+                    1]  # module_program.global_block().vars[names[1]]
+                inputs['segment_ids'] = data[
+                    2]  # module_program.global_block().vars[names[2]]
+                inputs['input_mask'] = data[
+                    3]  # module_program.global_block().vars[ names[3]]
+                outputs['pooled_output'] = module_program.global_block().vars[
+                    self.param_prefix() + output_name_list[0][0]]
+                outputs["sequence_output"] = module_program.global_block().vars[
+                    self.param_prefix() + output_name_list[0][1]]
+            else:
+                inputs['input_ids_%s' % (index + 1)] = data[0]
+                inputs['position_ids_%s' % (index + 1)] = data[1]
+                inputs['segment_ids_%s' % (index + 1)] = data[2]
+                inputs['input_mask_%s' % (index + 1)] = data[3]
+                outputs['pooled_output_%s' %
+                        (index + 1)] = module_program.global_block().vars[
+                            self.param_prefix() + output_name_list[index][0]]
+                outputs["sequence_output_%s" %
+                        (index + 1)] = module_program.global_block().vars[
+                            self.param_prefix() + output_name_list[index][1]]
 
         return inputs, outputs, module_program
 

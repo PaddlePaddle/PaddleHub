@@ -194,3 +194,9 @@ def recall_nk(data, n, k, m):
         correct_num += get_p_at_n_in_m(data, n, k, ind)
 
     return correct_num / length
+
+
+def simple_accuracy(preds, labels):
+    preds = np.array(preds)
+    labels = np.array(labels)
+    return (preds == labels).mean()

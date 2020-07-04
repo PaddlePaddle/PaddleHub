@@ -216,13 +216,13 @@ class TextClassifierTask(ClassifierTask):
         if network:
             assert network in [
                 'bilstm', 'bow', 'cnn', 'dpcnn', 'gru', 'lstm'
-            ], 'network choice must be one of bilstm, bow, cnn, dpcnn, gru, lstm!'
+            ], 'network (%s) choice must be one of bilstm, bow, cnn, dpcnn, gru, lstm!' % network
             assert token_feature and (
                 not feature
             ), 'If you wanna use network, you must set token_feature ranther than feature for TextClassifierTask!'
             assert len(
                 token_feature.shape
-            ) == 3, 'When you use network, the parameter token_feature must be the token-level feature, such as the sequence_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
+            ) == 3, 'When you use network, the parameter token_feature must be the token-level feature([batch_size, max_seq_len, embedding_size]), shape as [-1, 128, 200].'
         else:
             assert feature and (
                 not token_feature
@@ -249,7 +249,7 @@ class TextClassifierTask(ClassifierTask):
 
     def _build_net(self):
         if not isinstance(self._base_data_reader, LACClassifyReader):
-            # LACClassifyReader wont return the seqence length, while Dataset with tokenizer and ClassifyReader will.
+            # LACClassifyReader won‘t return the seqence length, while Dataset with tokenizer and ClassifyReader will.
             self.seq_len = fluid.layers.data(
                 name="seq_len", shape=[1], dtype='int64', lod_level=0)
             self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])
@@ -269,7 +269,7 @@ class TextClassifierTask(ClassifierTask):
                     cls_feats = net_func(self.feature)
                 else:
                     cls_feats = net_func(unpad_feature)
-            if self.is_train_phase:
+            if self.is_train_phase or self.is_predict_phase:
                 logger.info("%s has been added in the TextClassifierTask!" %
                             self.network)
         else:
