@@ -1,19 +1,19 @@
 export FLAGS_eager_delete_tensor_gb=0.0
-# export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 
-CKPT_DIR="./ckpt_chnsenticorp_predefine_net_sgd"
+CKPT_DIR="./ckpt_chnsenticorp_predefine_net"
 
 python -u text_cls_predefine_net.py \
-                   --batch_size=128 \
-                   --use_gpu=False \
+                   --batch_size=24 \
+                   --use_gpu=True \
                    --checkpoint_dir=${CKPT_DIR} \
-                   --learning_rate=5e-3 \
+                   --learning_rate=5e-5 \
                    --weight_decay=0.01 \
                    --max_seq_len=128 \
                    --warmup_proportion=0.1 \
-                   --num_epoch=10000 \
-                   --use_data_parallel=False \
-                   --network=bow
+                   --num_epoch=3 \
+                   --use_data_parallel=True \
+                   --network=bilstm
 
 # The sugguested hyper parameters for difference task
 # for ChineseGLUE:
