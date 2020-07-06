@@ -27,23 +27,23 @@ from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predic
 from paddlehub.module.module import moduleinfo, runnable, serving
 from paddlehub.common.paddle_helper import add_vars_prefix
 
-from efficientnetb0_small_imagenet.processor import postprocess, base64_to_cv2
-from efficientnetb0_small_imagenet.data_feed import reader
-from efficientnetb0_small_imagenet.efficientnet import EfficientNetB0_small
+from efficientnetb3_imagenet.processor import postprocess, base64_to_cv2
+from efficientnetb3_imagenet.data_feed import reader
+from efficientnetb3_imagenet.efficientnet import EfficientNetB3
 
 
 @moduleinfo(
-    name="efficientnetb0_small_imagenet",
+    name="efficientnetb3_imagenet",
     type="CV/image_classification",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com",
     summary=
-    "EfficientNetB0 is a image classfication model, this module is trained with imagenet datasets.",
-    version="1.0.0")
-class EfficientNetB0SmallImageNet(hub.Module):
+    "EfficientNetB3 is a image classfication model, this module is trained with imagenet datasets.",
+    version="1.1.0")
+class EfficientNetB3ImageNet(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "efficientnetb0_small_imagenet_infer_model")
+            self.directory, "efficientnetb3_imagenet_infer_model")
         label_file = os.path.join(self.directory, "label_list.txt")
         with open(label_file, 'r', encoding='utf-8') as file:
             self.label_list = file.read().split("\n")[:-1]
@@ -119,9 +119,9 @@ class EfficientNetB0SmallImageNet(hub.Module):
             with fluid.unique_name.guard():
                 image = fluid.layers.data(
                     name="image", shape=[3, 224, 224], dtype="float32")
-                efficientnet_b0 = EfficientNetB0_small(
+                efficientnet_b3 = EfficientNetB3(
                     override_params=override_params)
-                output, feature_map = efficientnet_b0.net(
+                output, feature_map = efficientnet_b3.net(
                     input=image,
                     class_dim=len(self.label_list),
                     is_test=is_test)
@@ -310,15 +310,21 @@ class EfficientNetB0SmallImageNet(hub.Module):
 
 
 if __name__ == '__main__':
-    b0 = EfficientNetB0SmallImageNet()
-    b0.context()
+    b3 = EfficientNetB3ImageNet()
+    b3.context()
     import cv2
-    test_image = [cv2.imread('dog.jpeg')]
-    res = b0.classification(images=test_image)
+    test_image = [
+        cv2.imread(
+            '/mnt/zhangxuefei/program-paddle/PaddleHub/hub_module/tests/image_dataset/classification/animals/dog.jpeg'
+        )
+    ]
+    res = b3.classification(images=test_image)
     print(res)
-    res = b0.classification(paths=['dog.jpeg'])
+    res = b3.classification(paths=[
+        '/mnt/zhangxuefei/program-paddle/PaddleHub/hub_module/tests/image_dataset/classification/animals/dog.jpeg'
+    ])
     print(res)
-    res = b0.classification(images=test_image)
+    res = b3.classification(images=test_image)
     print(res)
-    res = b0.classify(images=test_image)
+    res = b3.classify(images=test_image)
     print(res)
