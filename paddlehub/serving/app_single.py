@@ -28,24 +28,6 @@ def gen_result(status, msg, data):
     return {"status": status, "msg": msg, "results": data}
 
 
-def predict_v2(module_info, input):
-    serving_method_name = module_info["method_name"]
-    serving_method = getattr(module_info["module"], serving_method_name)
-    predict_args = module_info["predict_args"].copy()
-    predict_args.update({"data": input})
-
-    for item in serving_method.__code__.co_varnames:
-        if item in module_info.keys():
-            predict_args.update({item: module_info[item]})
-    try:
-        output = serving_method(**predict_args)
-    except Exception as err:
-        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        print(curr, " - ", err)
-        return gen_result("-1", "Please check data format!", "")
-    return gen_result("0", "", output)
-
-
 def predict_v2_advanced(module_info, input):
     serving_method_name = module_info["method_name"]
     serving_method = getattr(module_info["module"], serving_method_name)

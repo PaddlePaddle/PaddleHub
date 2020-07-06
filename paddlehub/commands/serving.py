@@ -27,8 +27,6 @@ from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.serving import app_single as app
 from paddlehub.common.dir import CONF_HOME
 from paddlehub.common.hub_server import CacheUpdater
-from paddlehub.serving.model_service.base_model_service import cv_module_info
-from paddlehub.serving.model_service.base_model_service import nlp_module_info
 import multiprocessing
 import time
 import signal
@@ -232,7 +230,8 @@ class ServingCommand(BaseCommand):
         options = {
             "bind": "0.0.0.0:%s" % port,
             "workers": self.args.workers,
-            "pid": "./pid.txt"
+            "pid": "./pid.txt",
+            "timeout": self.args.config.get('timeout', 30)
         }
         self.dump_pid_file()
         StandaloneApplication(
@@ -249,18 +248,6 @@ class ServingCommand(BaseCommand):
         self.preinstall_modules()
         self.dump_pid_file()
         app.run(configs=self.modules_info, port=port)
-
-    @staticmethod
-    def start_multi_app_with_file(configs):
-        port = configs.get("port", 8866)
-        if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
-            print("Port %s is occupied, please change it." % port)
-            return False
-        workers = configs.get("workers", number_of_workers())
-        options = {"bind": "0.0.0.0:%s" % port, "workers": workers}
-        StandaloneApplication(
-            app.create_app(init_flag=False, configs=configs), options).run()
-        print("PaddleHub Serving has been stopped.")
 
     def start_app_with_args(self, workers):
         module = self.args.modules
