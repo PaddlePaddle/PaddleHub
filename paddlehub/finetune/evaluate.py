@@ -135,7 +135,7 @@ def calculate_f1_np(preds, labels):
     p = tp / (tp + fp) if (tp + fp) else 0
     r = tp / (tp + fn) if (tp + fn) else 0
     f1 = (2 * p * r) / (p + r) if p + r else 0
-    return f1
+    return p, r, f1
 
 
 def matthews_corrcoef(preds, labels):

@@ -29,7 +29,8 @@ class SentaGRU(hub.NLPPredictionModule):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "infer_model")
+        self.pretrained_model_path = os.path.join(self.directory, "assets",
+                                                  "infer_model")
         self.vocab_path = os.path.join(self.directory, "assets/vocab.txt")
         self.word_dict = load_vocab(self.vocab_path)
         self._word_seg_module = None
@@ -146,10 +147,6 @@ class SentaGRU(hub.NLPPredictionModule):
 
             # Load the senta_lstm pretrained model.
             def if_exist(var):
-                print(
-                    var.name,
-                    os.path.exists(
-                        os.path.join(self.pretrained_model_path, var.name)))
                 return os.path.exists(
                     os.path.join(self.pretrained_model_path, var.name))
 
@@ -184,11 +181,14 @@ class SentaGRU(hub.NLPPredictionModule):
         Returns:
              results(list): the word segmentation results
         """
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-        except:
-            use_gpu = False
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         if texts != [] and isinstance(texts, list) and data == {}:
             predicted_data = texts
@@ -234,7 +234,7 @@ class SentaGRU(hub.NLPPredictionModule):
 
 if __name__ == "__main__":
     senta = SentaGRU()
-    inputs, outputs, main_program = senta.context(num_data=3)
+    inputs, outputs, main_program = senta.context(num_slots=3)
     # Data to be predicted
     test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
 

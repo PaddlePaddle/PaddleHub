@@ -42,7 +42,8 @@ class SimnetBow(hub.Module):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "infer_model")
+        self.pretrained_model_path = os.path.join(self.directory, "assets",
+                                                  "infer_model")
         self.vocab_path = os.path.join(self.directory, "assets", "vocab.txt")
         self.vocab = load_vocab(self.vocab_path)
         self.param_file = os.path.join(self.directory, "assets", "params.txt")
@@ -81,13 +82,13 @@ class SimnetBow(hub.Module):
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_paddle_predictor(gpu_config)
 
-    def context(self, trainable=False, max_seq_len=128, num_data=1):
+    def context(self, trainable=False, max_seq_len=128, num_slots=1):
         """
         Get the input ,output and program of the pretrained simnet_bow
 
         Args:
              trainable(bool): whether fine-tune the pretrained parameters of simnet_bow or not
-             num_data(int): It's number of data inputted to the model, selectted as following options:
+             num_slots(int): It's number of data inputted to the model, selectted as following options:
 
                  - 1(default): There's only one data to be feeded in the model, e.g. the module is used for sentence classification task.
                  - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
@@ -98,7 +99,7 @@ class SimnetBow(hub.Module):
              outputs(dict): the output variables of input words (word embeddings) and sequence lenght of the first input_text
              main_program(Program): the main_program of Senta with pretrained prameters
         """
-        assert num_data >= 1 and num_data <= 3, "num_data(%d) must be 1, 2, or 3" % num_data
+        assert num_slots >= 1 and num_slots <= 3, "num_slots must be 1, 2, or 3, but the input is %d" % num_slots
         main_program = fluid.Program()
         startup_program = fluid.Program()
         with fluid.program_guard(main_program, startup_program):
@@ -127,7 +128,7 @@ class SimnetBow(hub.Module):
             data_list = [text_1]
             emb_name_list = [emb_1_name]
 
-            if num_data > 1:
+            if num_slots > 1:
                 text_2 = fluid.data(
                     name='text_2',
                     shape=[-1, max_seq_len],
@@ -143,7 +144,7 @@ class SimnetBow(hub.Module):
                 data_list.append(text_2)
                 emb_name_list.append(emb_2_name)
 
-            if num_data > 2:
+            if num_slots > 2:
                 text_3 = fluid.data(
                     name='text_3',
                     shape=[-1, max_seq_len],
@@ -174,10 +175,6 @@ class SimnetBow(hub.Module):
 
             # Load the senta_lstm pretrained model.
             def if_exist(var):
-                print(
-                    var.name,
-                    os.path.exists(
-                        os.path.join(self.pretrained_model_path, var.name)))
                 return os.path.exists(
                     os.path.join(self.pretrained_model_path, var.name))
 
@@ -278,11 +275,14 @@ class SimnetBow(hub.Module):
         Returns:
              results(list): the word segmentation results
         """
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-        except:
-            use_gpu = False
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         data = self.check_data(texts, data)
 
@@ -430,7 +430,7 @@ class SimnetBow(hub.Module):
 if __name__ == "__main__":
 
     simnet_bow = SimnetBow()
-    inputs, outputs, program = simnet_bow.context(num_data=3)
+    inputs, outputs, program = simnet_bow.context(num_slots=3)
     print(inputs)
     print(outputs)
 

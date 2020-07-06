@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 #  Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -45,7 +45,7 @@ class TextMatchingTask(BaseTask):
                  dataset=None,
                  network=None,
                  config=None,
-                 metrics_choices=['acc', 'f1']):
+                 metrics_choices=['acc', 'f1', "precision", "recall"]):
         """
         Args:
             query_feature(Variable): It represents the query in the text matching task.
@@ -56,7 +56,7 @@ class TextMatchingTask(BaseTask):
             dataset(object): The text macthing dataset.
             network(str): The pre-defined network. Choices: 'bow', 'cnn', 'gru' and 'lstm'. Default None.
             config (RunConfig): run config for the task, such as batch_size, epoch, learning_rate setting and so on.
-            metrics_choices(list): metrics used to the task, default ["acc", "f1"].
+            metrics_choices(list): metrics used to the task, default ['acc', 'f1', "precision", "recall"].
         """
 
         if is_pair_wise:
@@ -303,16 +303,22 @@ class TextMatchingTask(BaseTask):
 
         # The first key will be used as main metrics to update the best model
         scores = OrderedDict()
-        if "acc" in self.metrics_choices:
-            acc = simple_accuracy(all_infers, all_labels)
-            scores["acc"] = acc
-        if "f1" in self.metrics_choices:
-            f1 = calculate_f1_np(all_infers, all_labels)
-            scores["f1"] = f1
-        else:
-            raise ValueError(
-                "Unknown metric: %s! The chosen metrics must be acc or f1." %
-                self.metrics_choice)
+        precision, recall, f1 = calculate_f1_np(all_infers, all_labels)
+        acc = simple_accuracy(all_infers, all_labels)
+        for metric in self.metrics_choices:
+            if metric == "precision":
+                scores["precision"] = precision
+            elif metric == "recall":
+                scores["recall"] = recall
+            elif metric == "f1":
+                scores["f1"] = f1
+            elif "acc" in self.metrics_choices:
+                scores["acc"] = acc
+            else:
+                raise ValueError(
+                    "Unknown metric: %s! The chosen metrics must be acc, f1, presicion and recall."
+                    % self.metrics_choice)
+
         return scores, avg_loss, run_speed
 
     def _encode_matching_data(self, data, max_seq_len):

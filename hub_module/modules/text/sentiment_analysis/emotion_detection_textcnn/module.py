@@ -27,7 +27,8 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "infer_model")
+        self.pretrained_model_path = os.path.join(self.directory, "assets",
+                                                  "infer_model")
         self.vocab_path = os.path.join(self.directory, "assets", "vocab.txt")
         self.vocab = load_vocab(self.vocab_path)
         self._word_seg_module = None
@@ -45,13 +46,13 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
             self._word_seg_module = hub.Module(name="lac")
         return self._word_seg_module
 
-    def context(self, trainable=False, max_seq_len=128, num_data=1):
+    def context(self, trainable=False, max_seq_len=128, num_slots=1):
         """
         Get the input ,output and program of the pretrained emotion_detection_textcnn
 
         Args:
              trainable(bool): whether fine-tune the pretrained parameters of emotion_detection_textcnn or not
-             num_data(int): It's number of data inputted to the model, selectted as following options:
+             num_slots(int): It's number of data inputted to the model, selectted as following options:
 
                  - 1(default): There's only one data to be feeded in the model, e.g. the module is used for text classification task.
                  - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
@@ -63,7 +64,7 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
                  the sentence embedding and sequence length of the first input text.
              main_program(Program): the main_program of emotion_detection_textcnn with pretrained prameters
         """
-        assert num_data >= 1 and num_data <= 3, "num_data(%d) must be 1, 2, or 3" % num_data
+        assert num_slots >= 1 and num_slots <= 3, "num_slots must be 1, 2, or 3, but the input is %d" % num_slots
         main_program = fluid.Program()
         startup_program = fluid.Program()
         with fluid.program_guard(main_program, startup_program):
@@ -97,7 +98,7 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
             pred_name = pred.name
             fc_name = fc.name
 
-            if num_data > 1:
+            if num_slots > 1:
                 text_2 = fluid.data(
                     name='text_2',
                     shape=[-1, max_seq_len],
@@ -113,7 +114,7 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
                 data_list.append(text_2)
                 emb_name_list.append(emb_2_name)
 
-            if num_data > 2:
+            if num_slots > 2:
                 text_3 = fluid.data(
                     name='text_3',
                     shape=[-1, max_seq_len],
@@ -144,10 +145,6 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
 
             # Load the senta_lstm pretrained model.
             def if_exist(var):
-                print(
-                    var.name,
-                    os.path.exists(
-                        os.path.join(self.pretrained_model_path, var.name)))
                 return os.path.exists(
                     os.path.join(self.pretrained_model_path, var.name))
 
@@ -179,11 +176,14 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
         Returns:
              results(list): the emotion prediction results
         """
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-        except:
-            use_gpu = False
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         if texts != [] and isinstance(texts, list) and data == {}:
             predicted_data = texts
@@ -230,7 +230,7 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
 if __name__ == "__main__":
     emotion_detection_textcnn = EmotionDetectionTextCNN()
     inputs, outputs, main_program = emotion_detection_textcnn.context(
-        num_data=3)
+        num_slots=3)
     print(inputs)
     print(outputs)
     # Data to be predicted

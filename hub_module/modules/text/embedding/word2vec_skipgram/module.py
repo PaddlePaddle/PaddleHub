@@ -55,13 +55,13 @@ class Word2vecSkipGram(hub.Module):
         self.vocab_path = os.path.join(self.directory, "assets", "vocab.txt")
         self.vocab = load_vocab(self.vocab_path)
 
-    def context(self, trainable=False, max_seq_len=128, num_data=1):
+    def context(self, trainable=False, max_seq_len=128, num_slots=1):
         """
         Get the input ,output and program of the pretrained word2vec_skipgram
 
         Args:
              trainable(bool): whether fine-tune the pretrained parameters of simnet_bow or not
-             num_data(int): It's number of data inputted to the model, selectted as following options:
+             num_slots(int): It's number of data inputted to the model, selectted as following options:
 
                  - 1(default): There's only one data to be feeded in the model, e.g. the module is used for sentence classification task.
                  - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
@@ -72,7 +72,7 @@ class Word2vecSkipGram(hub.Module):
              outputs(dict): the output variables of input words (word embeddings)
              main_program(Program): the main_program of word2vec_skipgram with pretrained prameters
         """
-        assert num_data >= 1 and num_data <= 3, "num_data(%d) must be 1, 2, or 3" % num_data
+        assert num_slots >= 1 and num_slots <= 3, "num_slots must be 1, 2, or 3, but the input is %d" % num_slots
         main_program = fluid.Program()
         startup_program = fluid.Program()
         with fluid.program_guard(main_program, startup_program):
@@ -98,7 +98,7 @@ class Word2vecSkipGram(hub.Module):
                 data_list = [text_1]
                 emb_name_list = [emb_1_name]
 
-                if num_data > 1:
+                if num_slots > 1:
                     text_2 = fluid.data(
                         name='text_2',
                         shape=[-1, max_seq_len],
@@ -114,7 +114,7 @@ class Word2vecSkipGram(hub.Module):
                     data_list.append(text_2)
                     emb_name_list.append(emb_2_name)
 
-                if num_data > 2:
+                if num_slots > 2:
                     text_3 = fluid.data(
                         name='text_3',
                         shape=[-1, max_seq_len],
