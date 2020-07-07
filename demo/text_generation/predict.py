@@ -56,7 +56,7 @@ if __name__ == '__main__':
     sequence_output = outputs["sequence_output"]
 
     # Define a classfication fine-tune task by PaddleHub's API
-    gen_task = hub.GenerationTask(
+    gen_task = hub.TextGenerationTask(
         feature=pooled_output,
         token_feature=sequence_output,
         max_seq_len=args.max_seq_len,

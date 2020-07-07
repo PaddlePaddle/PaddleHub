@@ -1113,9 +1113,9 @@ class BaseTask(object):
                     "LACClassifyReader does not support predictor, the accelerate_mode is closed now."
                 )
                 accelerate_mode = False
-            elif isinstance(self, hub.GenerationTask):
+            elif isinstance(self, hub.TextGenerationTask):
                 logger.warning(
-                    "GenerationTask does not support predictor, the accelerate_mode is closed now."
+                    "TextGenerationTask does not support predictor, the accelerate_mode is closed now."
                 )
                 accelerate_mode = False
         self.accelerate_mode = accelerate_mode

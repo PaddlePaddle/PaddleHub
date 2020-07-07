@@ -85,9 +85,9 @@ class AttentionDecoderCell(RNNCell):
         return out, [new_lstm_states, out]
 
 
-class GenerationTask(BaseTask):
+class TextGenerationTask(BaseTask):
     """
-    GenerationTask use rnn as decoder and beam search technology when predict.
+    TextGenerationTask use rnn as decoder and beam search technology when predict.
 
     Args:
         feature(Variable): The sentence-level feature, shape as [-1, emb_size].
@@ -129,7 +129,7 @@ class GenerationTask(BaseTask):
         if metrics_choices == "default":
             metrics_choices = ["bleu"]
         main_program = feature.block.program
-        super(GenerationTask, self).__init__(
+        super(TextGenerationTask, self).__init__(
             dataset=dataset,
             main_program=main_program,
             startup_program=startup_program,

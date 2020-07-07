@@ -151,7 +151,7 @@ def matthews_corrcoef(preds, labels):
 
 
 def recall_nk(data, n, k, m):
-    '''
+    """
     This metric can be used to evaluate whether the model can find the correct response B for question A
     Note: Only applies to each question A only has one correct response B1.
 
@@ -168,7 +168,7 @@ def recall_nk(data, n, k, m):
     m: int. For every m examples, there's going to be a positive sample.
         eg. data= [A1,B1,1], [A1,B2,0], [A1,B3,0], [A2,B1,1], [A2,B2,0], [A2,B3,0]
            For every 3 examples, there will be one positive sample. so m=3, and n can be 1,2 or 3.
-    '''
+    """
 
     def get_p_at_n_in_m(data, n, k, ind):
         """
@@ -195,15 +195,18 @@ def recall_nk(data, n, k, m):
 
 
 def _get_ngrams(segment, max_order):
-    """Extracts all n-grams upto a given maximum order from an input segment.
-  Args:
-    segment: text segment from which n-grams will be extracted.
-    max_order: maximum length in tokens of the n-grams returned by this
-        methods.
-  Returns:
-    The Counter containing all n-grams upto max_order in segment
-    with a count of how many times each n-gram occurred.
-  """
+    """
+    Extracts all n-grams upto a given maximum order from an input segment.
+
+    Args:
+        segment: text segment from which n-grams will be extracted.
+        max_order: maximum length in tokens of the n-grams returned by this
+            methods.
+
+    Returns:
+        The Counter containing all n-grams upto max_order in segment
+        with a count of how many times each n-gram occurred.
+    """
     ngram_counts = collections.Counter()
     for order in range(1, max_order + 1):
         for i in range(0, len(segment) - order + 1):
@@ -216,18 +219,21 @@ def compute_bleu(reference_corpus,
                  translation_corpus,
                  max_order=4,
                  smooth=False):
-    """Computes BLEU score of translated segments against one or more references.
-  Args:
-    reference_corpus: list of lists of references for each translation. Each
-        reference should be tokenized into a list of tokens.
-    translation_corpus: list of translations to score. Each translation
-        should be tokenized into a list of tokens.
-    max_order: Maximum n-gram order to use when computing BLEU score.
-    smooth: Whether or not to apply Lin et al. 2004 smoothing.
-  Returns:
-    3-Tuple with the BLEU score, n-gram precisions, geometric mean of n-gram
-    precisions and brevity penalty.
-  """
+    """
+    Computes BLEU score of translated segments against one or more references.
+
+    Args:
+        reference_corpus: list of lists of references for each translation. Each
+            reference should be tokenized into a list of tokens.
+        translation_corpus: list of translations to score. Each translation
+            should be tokenized into a list of tokens.
+        max_order: Maximum n-gram order to use when computing BLEU score.
+        smooth: Whether or not to apply Lin et al. 2004 smoothing.
+
+    Returns:
+        3-Tuple with the BLEU score, n-gram precisions, geometric mean of n-gram
+        precisions and brevity penalty.
+    """
     matches_by_order = [0] * max_order
     possible_matches_by_order = [0] * max_order
     reference_length = 0

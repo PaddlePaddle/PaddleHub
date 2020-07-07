@@ -69,7 +69,7 @@ if __name__ == '__main__':
         strategy=strategy)
 
     # Define a classfication fine-tune task by PaddleHub's API
-    gen_task = hub.GenerationTask(
+    gen_task = hub.TextGenerationTask(
         dataset=dataset,
         feature=pooled_output,
         token_feature=sequence_output,
