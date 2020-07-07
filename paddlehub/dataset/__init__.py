@@ -31,7 +31,6 @@ from .bq import BQ
 from .iflytek import IFLYTEK
 from .thucnews import THUCNEWS
 from .couplet import Couplet
-from .poetry import Poetry
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat
