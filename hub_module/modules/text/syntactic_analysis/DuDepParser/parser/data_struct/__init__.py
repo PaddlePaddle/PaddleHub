@@ -15,13 +15,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""utils"""
+"""data_struct"""
 
-from . import corpus
-from . import field
 from . import utils
-from . import metric
-from .embedding import Embedding
-from .vocab import Vocab
 
-__all__ = ['Embedding', 'Vocab', 'corpus', 'data', 'field', 'utils', 'metric']
+from .vocab import Vocab
+from .field import Field
+from .field import SubwordField
+from .corpus import CoNLL
+from .corpus import Corpus
+from .corpus import Sentence
+from .data import batchify
+from .data import BucketsSampler
+from .data import SequentialSampler
+from .data import TextDataLoader
+from .data import TextDataset
+from .embedding import Embedding
+
+__all__ = [
+    'batchify', 'utils', 'BucketsSampler', 'Embedding', 'Field', 'Metric',
+    'SequentialSampler', 'SubwordField', 'TextDataLoader', 'TextDataset',
+    'Vocab'
+]

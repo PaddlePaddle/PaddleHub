@@ -15,9 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""
-本文件定义Vocab类
-"""
 from collections import defaultdict
 from collections.abc import Iterable
 
@@ -35,11 +32,9 @@ class Vocab(object):
         self.n_init = len(self)
 
     def __len__(self):
-        """词表大小"""
         return len(self.itos)
 
     def __getitem__(self, key):
-        """根据key或索引，返回索引和key"""
         if isinstance(key, str):
             return self.stoi[key]
         elif not isinstance(key, Iterable):
@@ -69,6 +64,5 @@ class Vocab(object):
         self.__dict__.update(state)
 
     def extend(self, tokens):
-        """将tokens追加到itos和stoi中"""
         self.itos.extend(sorted(set(tokens).difference(self.stoi)))
         self.stoi.update({token: i for i, token in enumerate(self.itos)})

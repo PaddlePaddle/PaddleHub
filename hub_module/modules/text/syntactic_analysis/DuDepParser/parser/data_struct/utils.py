@@ -26,15 +26,17 @@ import unicodedata
 
 import numpy as np
 
-from parser.nets import nn
+from DuDepParser.parser.nets import nn
 
 pad = '<pad>'
 unk = '<unk>'
 bos = '<bos>'
 
+DOWNLOAD_MODEL_PATH = "https://DuDepParser.bj.bcebos.com/DuDepParser-char-0.1.0.tar.gz"
+
 
 def kmeans(x, k):
-    """kmeans聚类算法，根据句子长度分桶
+    """kmeans
 
     Args:
         x: list, 句子的长度
@@ -224,11 +226,6 @@ class DepTree:
 def ispunct(token):
     """是否是标点"""
     return all(unicodedata.category(char).startswith('P') for char in token)
-
-
-def isdigit(token):
-    """是否是数字"""
-    return all('DIGIT' in unicodedata.name(char) for char in token)
 
 
 def istree(sequence):

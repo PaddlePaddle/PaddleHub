@@ -15,9 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""
-本文件初始化配置和环境的相关类
-"""
 
 import ast
 import argparse
@@ -25,17 +22,17 @@ import configparser
 import logging
 
 import os
-import math
 import pickle
 
 import numpy as np
 from paddle import fluid
-from paddle.fluid import dygraph
 
-from parser.utils import corpus
-from parser.utils import field
-from parser.utils import utils
-from parser.utils import Embedding
+from DuDepParser.parser.data_struct import utils
+from DuDepParser.parser.data_struct import CoNLL
+from DuDepParser.parser.data_struct import Corpus
+from DuDepParser.parser.data_struct import Embedding
+from DuDepParser.parser.data_struct import Field
+from DuDepParser.parser.data_struct import SubwordField
 
 
 class ArgumentGroup(object):
@@ -49,7 +46,7 @@ class ArgumentGroup(object):
 
 
 class ArgConfig(configparser.ConfigParser):
-    def __init__(self):
+    def __init__(self, args=None):
         """定义ArgConfig类，接收参数"""
         super(ArgConfig, self).__init__()
 
@@ -61,16 +58,16 @@ class ArgConfig(configparser.ConfigParser):
             '--mode',
             default='train',
             choices=['train', 'evaluate', 'predict', 'predict_q'],
-            help='choices of additional features')
+            help='Select task mode')
         model_g.add_arg(
             '--config_path',
             '-c',
             default='config.ini',
             help='path to config file')
         model_g.add_arg(
-            '--output_dir',
-            default='exp/baidu',
-            help='Directory path to save model and field.')
+            '--model_files',
+            default='model_files/baidu',
+            help='Directory path to save model and ')
 
         data_g = ArgumentGroup(
             parser, "data",
@@ -84,10 +81,15 @@ class ArgConfig(configparser.ConfigParser):
             "--pre_emb",
             help='path to pretrained embeddings')
         data_g.add_arg(
-            '--batch_size', default=16000, type=int, help='batch size')
+            '--batch_size', default=5000, type=int, help='batch size')
 
         log_g = ArgumentGroup(parser, "logging", "logging related")
         log_g.add_arg('--log_path', default='./log/log', help='log path')
+        log_g.add_arg(
+            '--log_level',
+            default='INFO',
+            choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'FATAL'],
+            help='log level')
         log_g.add_arg(
             '--infer_result_path',
             default='infer_result',
@@ -132,7 +134,7 @@ class ArgConfig(configparser.ConfigParser):
             choices=['pos', 'char'],
             help='choices of additional features')
         train_g.add_arg(
-            '--buckets', default=32, type=int, help='max num of buckets to use')
+            '--buckets', default=15, type=int, help='max num of buckets to use')
         train_g.add_arg(
             '--punct',
             action='store_true',
@@ -141,11 +143,11 @@ class ArgConfig(configparser.ConfigParser):
             '--unk', default='unk', help='unk token in pretrained embeddings')
 
         custom_g = ArgumentGroup(parser, "customize", "customized options.")
-        self.build_conf(parser)
+        self.build_conf(parser, args)
 
-    def build_conf(self, parser):
+    def build_conf(self, parser, args=None):
         """初始化参数，将parser解析的参数和config文件中读取的参数合并"""
-        args = parser.parse_args()
+        args = parser.parse_args(args)
         self.read(args.config_path)
         self.namespace = argparse.Namespace()
         self.update(
@@ -153,8 +155,8 @@ class ArgConfig(configparser.ConfigParser):
                  for name, value in self.items(section)))
         args.nranks = fluid.dygraph.ParallelEnv().nranks
         args.local_rank = fluid.dygraph.ParallelEnv().local_rank
-        args.fields_path = os.path.join(args.output_dir, 'fields')
-        args.model_path = os.path.join(args.output_dir, 'model')
+        args.fields_path = os.path.join(args.model_files, 'fields')
+        args.model_path = os.path.join(args.model_files, 'model')
         # update config from args
         self.update(vars(args))
         return self
@@ -196,17 +198,93 @@ class ArgConfig(configparser.ConfigParser):
 class Environment(object):
     """定义Environment类，用于初始化运行环境"""
 
-    def __init__(self, fields_path):
+    def __init__(self, args):
+        self.args = args
+        # init log
+        if self.args.log_path:
+            utils.init_log(self.args.log_path, self.args.local_rank,
+                           self.args.log_level)
         # init seed
-        fluid.default_main_program().random_seed = 1
-        np.random.seed(1)
+        fluid.default_main_program().random_seed = self.args.seed
+        np.random.seed(self.args.seed)
+        # init place
+        if self.args.use_cuda:
+            if self.args.use_data_parallel:
+                self.place = fluid.CUDAPlace(
+                    fluid.dygraph.parallel.Env().dev_id)
+            else:
+                self.place = fluid.CUDAPlace(0)
+        else:
+            self.place = fluid.CPUPlace()
 
-        os.environ['FLAGS_paddle_num_threads'] = str(16)
+        os.environ['FLAGS_paddle_num_threads'] = str(self.args.threads)
+        os.makedirs(self.args.model_files, exist_ok=True)
 
-        logging.info("loading the fields.")
-        with open(fields_path, "rb") as f:
-            self.fields = pickle.load(f)
-        self.WORD, self.FEAT = self.fields.FORM
-        self.ARC, self.REL = self.fields.HEAD, self.fields.DEPREL
+        if not os.path.exists(self.args.fields_path) or self.args.preprocess:
+            logging.info("Preprocess the data")
+            self.WORD = Field(
+                'word', pad=utils.pad, unk=utils.unk, bos=utils.bos, lower=True)
+            if self.args.feat == 'char':
+                self.FEAT = SubwordField(
+                    'chars',
+                    pad=utils.pad,
+                    unk=utils.unk,
+                    bos=utils.bos,
+                    fix_len=self.args.fix_len,
+                    tokenize=list)
+            else:
+                self.FEAT = Field('postag', bos=utils.bos)
+            self.ARC = Field(
+                'head', bos=utils.bos, use_vocab=False, fn=utils.numericalize)
+            self.REL = Field('deprel', bos=utils.bos)
+            if self.args.feat == 'char':
+                self.fields = CoNLL(
+                    FORM=(self.WORD, self.FEAT), HEAD=self.ARC, DEPREL=self.REL)
+            else:
+                self.fields = CoNLL(
+                    FORM=self.WORD,
+                    CPOS=self.FEAT,
+                    HEAD=self.ARC,
+                    DEPREL=self.REL)
+
+            train = Corpus.load(self.args.train_data_path, self.fields)
+            if self.args.pretrained_embedding_dir:
+                logging.info("loading pretrained embedding from file.")
+                embed = Embedding.load(self.args.pretrained_embedding_dir,
+                                       self.args.unk)
+            else:
+                embed = None
+            self.WORD.build(train, self.args.min_freq, embed)
+            self.FEAT.build(train)
+            self.REL.build(train)
+            if self.args.local_rank == 0:
+                with open(self.args.fields_path, "wb") as f:
+                    logging.info("dumping fileds to disk.")
+                    pickle.dump(self.fields, f, protocol=2)
+        else:
+            logging.info("loading the fields.")
+            with open(self.args.fields_path, "rb") as f:
+                self.fields = pickle.load(f)
+
+            if isinstance(self.fields.FORM, tuple):
+                self.WORD, self.FEAT = self.fields.FORM
+            else:
+                self.WORD, self.FEAT = self.fields.FORM, self.fields.CPOS
+            self.ARC, self.REL = self.fields.HEAD, self.fields.DEPREL
         self.puncts = np.array(
             [i for s, i in self.WORD.vocab.stoi.items() if utils.ispunct(s)])
+
+        if self.WORD.embed is not None:
+            self.args["pretrained_embed_shape"] = self.WORD.embed.shape
+        else:
+            self.args["pretrained_embed_shape"] = None
+
+        self.args.update({
+            'n_words': self.WORD.vocab.n_init,
+            'n_feats': len(self.FEAT.vocab),
+            'n_rels': len(self.REL.vocab),
+            'pad_index': self.WORD.pad_index,
+            'unk_index': self.WORD.unk_index,
+            'bos_index': self.WORD.bos_index,
+            'feat_pad_index': self.FEAT.pad_index
+        })

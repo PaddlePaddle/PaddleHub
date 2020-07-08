@@ -17,11 +17,15 @@
 #################################################################################
 """nets"""
 
-from . import dropouts
+from .dropouts import IndependentDropout
+from .dropouts import SharedDropout
 from .biaffine import Biaffine
 from .bilstm import BiLSTM
 from .char_lstm import CharLSTM
 from .mlp import MLP
 from .rnn import BasicLSTMUnit
 
-__all__ = ['CharLSTM', 'BasicLSTMUnit', 'MLP', 'Biaffine', 'BiLSTM', 'dropouts']
+__all__ = [
+    'BasicLSTMUnit', 'Biaffine', 'BiLSTM', 'CharLSTM', 'IndependentDropout',
+    'MLP', 'SharedDropout'
+]

@@ -15,18 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""
-本文件定义BiLSTM网络结构和相关函数
-"""
 
-import numpy as np
 from paddle.fluid import dygraph
 from paddle.fluid import initializer
 from paddle.fluid import layers
 
-from parser.nets import dropouts
-from parser.nets import rnn
-from parser.nets import nn
+from DuDepParser.parser.nets import rnn, nn
+from DuDepParser.parser.nets import SharedDropout
 
 
 class BiLSTM(dygraph.Layer):
@@ -155,7 +150,7 @@ class BiLSTM(dygraph.Layer):
         hx_n, output = [], []
         steps = reversed(range(len(x))) if reverse else range(len(x))
         if self.training and self.dropout > 0:
-            hid_mask = dropouts.SharedDropout.get_mask(hx_0[0], self.dropout)
+            hid_mask = SharedDropout.get_mask(hx_0[0], self.dropout)
 
         for t in steps:
             last_bs, bs = len(hx_i[0]), batch_sizes[t]
@@ -203,7 +198,7 @@ class BiLSTM(dygraph.Layer):
         for i in range(self.num_layers):
             x = layers.split(x, batch_sizes, dim=0)
             if self.training and self.dropout > 0:
-                mask = dropouts.SharedDropout.get_mask(x[0], self.dropout)
+                mask = SharedDropout.get_mask(x[0], self.dropout)
                 x = [j * mask[:len(j)] for j in x]
             x_f, (h_f, c_f) = self.layer_forward(
                 x=x,

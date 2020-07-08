@@ -15,15 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""
-本文件定义模型的网络及相关函数
-"""
 
 import logging
 import math
-import os
 import pickle
-import time
 
 import numpy as np
 from paddle import fluid
@@ -31,16 +26,14 @@ from paddle.fluid import dygraph
 from paddle.fluid import initializer
 from paddle.fluid import layers
 
-from parser.utils import utils
-from parser.nets import Biaffine
-from parser.nets import BiLSTM
-from parser.nets import CharLSTM
-from parser.nets import MLP
-from parser.nets import dropouts
-from parser.nets import nn
-from parser.utils import utils
-from parser.utils import Embedding
-from parser.utils.metric import Metric
+from DuDepParser.parser.data_struct import utils
+from DuDepParser.parser.nets import nn
+from DuDepParser.parser.nets import Biaffine
+from DuDepParser.parser.nets import BiLSTM
+from DuDepParser.parser.nets import CharLSTM
+from DuDepParser.parser.nets import IndependentDropout
+from DuDepParser.parser.nets import MLP
+from DuDepParser.parser.nets import SharedDropout
 
 
 class Model(dygraph.Layer):
@@ -80,7 +73,7 @@ class Model(dygraph.Layer):
         else:
             self.feat_embed = dygraph.Embedding(
                 size=(args.n_feats, args.n_feat_embed))
-        self.embed_dropout = dropouts.IndependentDropout(p=args.embed_dropout)
+        self.embed_dropout = IndependentDropout(p=args.embed_dropout)
 
         # lstm layer
         self.lstm = BiLSTM(
@@ -88,7 +81,7 @@ class Model(dygraph.Layer):
             hidden_size=args.n_lstm_hidden,
             num_layers=args.n_lstm_layers,
             dropout=args.lstm_dropout)
-        self.lstm_dropout = dropouts.SharedDropout(p=args.lstm_dropout)
+        self.lstm_dropout = SharedDropout(p=args.lstm_dropout)
 
         # mlp layer
         self.mlp_arc_h = MLP(
@@ -189,7 +182,7 @@ def epoch_evaluate(args, model, loader, puncts):
     """evaluate in one epoch"""
     model.eval()
 
-    total_loss, metric = 0, Metric()
+    total_loss = 0
 
     for words, feats, arcs, rels in loader():
         # ignore the first token of each sentence
@@ -210,16 +203,15 @@ def epoch_evaluate(args, model, loader, puncts):
                 dim=-1)
             mask = layers.logical_and(mask, punct_mask)
 
-        metric(arc_preds, rel_preds, arcs, rels, mask)
         total_loss += loss.numpy().item()
 
     total_loss /= len(loader)
 
-    return total_loss, metric
+    return total_loss, None
 
 
 @dygraph.no_grad
-def epoch_predict(env, model, loader):
+def epoch_predict(env, args, model, loader):
     """predict in one epoch"""
     model.eval()
 
@@ -227,11 +219,11 @@ def epoch_predict(env, model, loader):
     for words, feats in loader():
         # ignore the first token of each sentence
         tmp_words = layers.pad(
-            words[:, 1:], paddings=[0, 0, 1, 0], pad_value=env.WORD.pad_index)
-        mask = tmp_words != env.WORD.pad_index
+            words[:, 1:], paddings=[0, 0, 1, 0], pad_value=args.pad_index)
+        mask = tmp_words != args.pad_index
         lens = nn.reduce_sum(mask, -1)
         s_arc, s_rel = model(words, feats)
-        arc_preds, rel_preds = decode(s_arc, s_rel, mask)
+        arc_preds, rel_preds = decode(args, s_arc, s_rel, mask)
         arcs.extend(
             layers.split(
                 nn.masked_select(arc_preds, mask),
@@ -240,12 +232,14 @@ def epoch_predict(env, model, loader):
             layers.split(
                 nn.masked_select(rel_preds, mask),
                 lens.numpy().tolist()))
-        arc_probs = nn.index_sample(
-            layers.softmax(s_arc, -1), layers.unsqueeze(arc_preds, -1))
-        probs.extend(
-            layers.split(
-                nn.masked_select(layers.squeeze(arc_probs, axes=[-1]), mask),
-                lens.numpy().tolist()))
+        if args.prob:
+            arc_probs = nn.index_sample(
+                layers.softmax(s_arc, -1), layers.unsqueeze(arc_preds, -1))
+            probs.extend(
+                layers.split(
+                    nn.masked_select(
+                        layers.squeeze(arc_probs, axes=[-1]), mask),
+                    lens.numpy().tolist()))
     arcs = [seq.numpy().tolist() for seq in arcs]
     rels = [env.REL.vocab[seq.numpy().tolist()] for seq in rels]
     probs = [[round(p, 3) for p in seq.numpy().tolist()] for seq in probs]
@@ -267,14 +261,14 @@ def loss_function(s_arc, s_rel, arcs, rels, mask):
     return loss
 
 
-def decode(s_arc, s_rel, mask):
+def decode(args, s_arc, s_rel, mask):
     """解码函数"""
     mask = mask.numpy()
     lens = np.sum(mask, -1)
     # prevent self-loops
     arc_preds = layers.argmax(s_arc, -1).numpy()
     bad = [not utils.istree(seq[:i + 1]) for i, seq in zip(lens, arc_preds)]
-    if any(bad):
+    if args.tree and any(bad):
         arc_preds[bad] = utils.eisner(s_arc.numpy()[bad], mask[bad])
     arc_preds = dygraph.to_variable(arc_preds)
     rel_preds = layers.argmax(s_rel, axis=-1)

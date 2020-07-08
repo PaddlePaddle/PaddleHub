@@ -15,13 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""本文件定义全连接层"""
 
 from paddle.fluid import dygraph
 from paddle.fluid import initializer
 from paddle.fluid import layers
 
-from parser.nets import dropouts
+from DuDepParser.parser.nets import SharedDropout
 
 
 class MLP(dygraph.Layer):
@@ -38,7 +37,7 @@ class MLP(dygraph.Layer):
             param_attr=initializer.Xavier(uniform=False),
             bias_attr=None,
         )
-        self.dropout = dropouts.SharedDropout(p=dropout)
+        self.dropout = SharedDropout(p=dropout)
 
     def __repr__(self):
         """repr"""

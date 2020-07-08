@@ -15,14 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""
-本文件定义数据集相关的类和对象
-"""
 
 from collections import namedtuple
 from collections.abc import Iterable
 
-from parser.utils import field
+from DuDepParser.parser.data_struct import Field
 
 CoNLL = namedtuple(
     typename='CoNLL',
@@ -48,7 +45,6 @@ class Sentence(object):
 
     @property
     def values(self):
-        """返回一个迭代器，包含整个sentence的全部特征"""
         for field in self.fields:
             if isinstance(field, Iterable):
                 yield getattr(self, field[0].name)
@@ -56,13 +52,21 @@ class Sentence(object):
                 yield getattr(self, field.name)
 
     def __len__(self):
-        """取出句子长度"""
         return len(next(iter(self.values)))
 
     def __repr__(self):
         """repr"""
         return '\n'.join('\t'.join(map(str, line))
                          for line in zip(*self.values)) + '\n'
+
+    def json(self):
+        j = {}
+        for field in self.fields:
+            if isinstance(field, Iterable) and not field[0].name.isdigit():
+                j[field[0].name] = getattr(self, field[0].name)
+            elif not field.name.isdigit():
+                j[field.name] = getattr(self, field.name)
+        return j
 
 
 class Corpus(object):
@@ -76,7 +80,6 @@ class Corpus(object):
         self.sentences = sentences
 
     def __len__(self):
-        """返回数据集大小"""
         return len(self.sentences)
 
     def __repr__(self):
@@ -84,18 +87,15 @@ class Corpus(object):
         return '\n'.join(str(sentence) for sentence in self)
 
     def __getitem__(self, index):
-        """根据index返回sentence"""
         return self.sentences[index]
 
     def __getattr__(self, name):
-        """获取name的value，返回一个迭代器"""
         if not hasattr(self.sentences[0], name):
             raise AttributeError
         for sentence in self.sentences:
             yield getattr(sentence, name)
 
     def __setattr__(self, name, value):
-        """增加name属性，值为value"""
         if name in ['fields', 'sentences']:
             self.__dict__[name] = value
         else:
@@ -104,10 +104,9 @@ class Corpus(object):
 
     @classmethod
     def load(cls, path, fields):
-        """从path中加载数据，生成corpus对象"""
         start, sentences = 0, []
         fields = [
-            fd if fd is not None else field.Field(str(i))
+            fd if fd is not None else Field(str(i))
             for i, fd in enumerate(fields)
         ]
         with open(path, 'r') as f:
@@ -124,15 +123,18 @@ class Corpus(object):
         return cls(fields, sentences)
 
     @classmethod
-    def load_lac_rs(cls, lac_rs, fields):
-        """从lac的结果中加载数据，生成corpus对象"""
+    def load_lac_results(cls, inputs, fields):
         sentences = []
         fields = [
-            fd if fd is not None else field.Field(str(i))
+            fd if fd is not None else Field(str(i))
             for i, fd in enumerate(fields)
         ]
-        for lac_r in lac_rs:
-            tokens, poss = lac_r
+        for _input in inputs:
+            if isinstance(_input[0], list):
+                tokens, poss = _input
+            else:
+                tokens = _input
+                poss = ['-'] * len(tokens)
             values = (
                 list(range(1,
                            len(tokens) + 1)),
@@ -143,14 +145,36 @@ class Corpus(object):
                 *[['-'] * len(tokens) for _ in range(5)],
             )
             sentences.append(Sentence(fields, values))
+        return cls(fields, sentences)
 
+    @classmethod
+    def load_word_segments(cls, inputs, fields):
+        fields = [
+            fd if fd is not None else Field(str(i))
+            for i, fd in enumerate(fields)
+        ]
+        sentences = []
+        for tokens in inputs:
+            values = (
+                list(range(1,
+                           len(tokens) + 1)),
+                tokens,
+                tokens,
+                *[['-'] * len(tokens) for _ in range(7)],
+            )
+            sentences.append(Sentence(fields, values))
         return cls(fields, sentences)
 
     def save(self, path):
-        """将corpus的内容写入path"""
         with open(path, 'w') as f:
             f.write(f"{self}\n")
 
     def print(self):
         """print self"""
         print(self)
+
+    def json(self):
+        result = []
+        for sentence in self:
+            result.append(sentence.json())
+        return result

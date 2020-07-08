@@ -15,12 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""本文件自定义的网络工具函数"""
 
 import numpy as np
 
-from paddle.fluid.core_avx import VarDesc
 from paddle.fluid import layers
+from paddle.fluid.core_avx import VarDesc
 
 
 def pad_sequence(sequences, padding_value=0, fix_len=None):
@@ -109,7 +108,7 @@ def stripe(x, n, w, offset=(0, 0), dim=1):
         offset (tuple): the offset of the first two dims.
         dim (int): 0 if returns a horizontal stripe; 1 else.
 
-    Example::
+    Example:
     >>> x = np.arange(25).reshape(5, 5)
     >>> x
     tensor([[ 0,  1,  2,  3,  4],

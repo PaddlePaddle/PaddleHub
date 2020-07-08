@@ -15,14 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""本文件定义CharLSTM网络"""
 
-import numpy as np
 from paddle.fluid import dygraph
 from paddle.fluid import layers
 
-from parser.nets import BiLSTM
-from parser.nets import nn
+from DuDepParser.parser.nets import BiLSTM
+from DuDepParser.parser.nets import nn
 
 
 class CharLSTM(dygraph.Layer):

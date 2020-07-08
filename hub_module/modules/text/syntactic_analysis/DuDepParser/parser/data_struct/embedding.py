@@ -15,9 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""
-本文件定义Embedding类，用于文件中加载预训练词向量
-"""
 
 import numpy as np
 
@@ -35,16 +32,13 @@ class Embedding(object):
         self.unk = unk
 
     def __len__(self):
-        """词表大小"""
         return len(self.tokens)
 
     def __contains__(self, token):
-        """token是否在词表中"""
         return token in self.pretrained
 
     @property
     def dim(self):
-        """词向量大小"""
         return self.vectors.shape[1]
 
     @property
@@ -57,7 +51,6 @@ class Embedding(object):
 
     @classmethod
     def load(cls, path, unk=None):
-        """从path中加载embedding和token"""
         with open(path, 'r') as f:
             lines = [line for line in f.readlines()]
         splits = [line.split() for line in lines]

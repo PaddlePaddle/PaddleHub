@@ -15,22 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""
-本文件定义数据的结构
-"""
 
 from collections import Counter
 
 import numpy as np
 
-from parser.nets import nn
-from parser.utils import utils
-from parser.utils import vocab
+from DuDepParser.parser.nets import nn
+from DuDepParser.parser.data_struct import Vocab
 
 
 class RawField(object):
-    """filed的基类"""
-
     def __init__(self, name, fn=None):
         super(RawField, self).__init__()
 
@@ -42,13 +36,11 @@ class RawField(object):
         return f"({self.name}): {self.__class__.__name__}()"
 
     def preprocess(self, sequence):
-        """预处理函数"""
         if self.fn is not None:
             sequence = self.fn(sequence)
         return sequence
 
     def transform(self, sequences):
-        """转换sequences"""
         return [self.preprocess(seq) for seq in sequences]
 
 
@@ -122,7 +114,6 @@ class Field(RawField):
         return self.specials.index(self.bos)
 
     def preprocess(self, sequence):
-        """预处理函数"""
         if self.fn is not None:
             sequence = self.fn(sequence)
         if self.tokenize is not None:
@@ -133,14 +124,12 @@ class Field(RawField):
         return sequence
 
     def build(self, corpus, min_freq=1, embed=None):
-        """基于数据集建立vocab和embed对象"""
         if hasattr(self, 'vocab'):
             return
         sequences = getattr(corpus, self.name)
         counter = Counter(
             token for seq in sequences for token in self.preprocess(seq))
-        self.vocab = vocab.Vocab(counter, min_freq, self.specials,
-                                 self.unk_index)
+        self.vocab = Vocab(counter, min_freq, self.specials, self.unk_index)
 
         if not embed:
             self.embed = None
@@ -158,7 +147,6 @@ class Field(RawField):
             self.embed /= np.std(self.embed, ddof=1)
 
     def transform(self, sequences):
-        """转换sequences，如将word转化为id, 添加bos标签等"""
         sequences = [self.preprocess(seq) for seq in sequences]
         if self.use_vocab:
             sequences = [self.vocab[seq] for seq in sequences]
@@ -178,15 +166,13 @@ class SubwordField(Field):
         super(SubwordField, self).__init__(*args, **kwargs)
 
     def build(self, corpus, min_freq=1, embed=None):
-        """基于数据集建立vocab和embed对象"""
         if hasattr(self, 'vocab'):
             return
         sequences = getattr(corpus, self.name)
         counter = Counter(
             piece for seq in sequences for token in seq
             for piece in self.preprocess(token))
-        self.vocab = vocab.Vocab(counter, min_freq, self.specials,
-                                 self.unk_index)
+        self.vocab = Vocab(counter, min_freq, self.specials, self.unk_index)
 
         if not embed:
             self.embed = None
@@ -203,7 +189,6 @@ class SubwordField(Field):
             self.embed[self.vocab[tokens]] = embed.vectors
 
     def transform(self, sequences):
-        """转换sequences，如将char转化为id, 添加bos标签等"""
         sequences = [[self.preprocess(token) for token in seq]
                      for seq in sequences]
         if self.fix_len <= 0:

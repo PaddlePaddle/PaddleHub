@@ -15,20 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #################################################################################
-"""
-本文件定义dataset, dataloader, datasampler等类及函数
-"""
 
 import math
 from collections.abc import Iterable
-from itertools import chain
 
 import numpy as np
 from paddle.fluid import io
 from paddle.fluid.contrib import reader
 
-from parser.utils import utils
-from parser.nets import nn
+from DuDepParser.parser.data_struct import utils
+from DuDepParser.parser.nets import nn
 
 
 class TextDataLoader(object):
@@ -78,14 +74,13 @@ class TextDataLoader(object):
         return __reader
 
     def __len__(self):
-        """返回batch的数量"""
         return len(self.batch_sampler)
 
 
 class TextDataset(object):
     """TextDataset"""
 
-    def __init__(self, corpus, fields, n_buckets=1):
+    def __init__(self, corpus, fields, n_buckets=None):
         """init"""
         self.corpus = corpus
         self.fields = []
@@ -101,26 +96,24 @@ class TextDataset(object):
             setattr(self, field.name,
                     field.transform(getattr(corpus, field.name)))
 
-        self.lengths = [len(i) + int(bool(field.bos)) for i in corpus]
-        self.buckets = dict(zip(*utils.kmeans(self.lengths, n_buckets)))
+        if n_buckets:
+            self.lengths = [len(i) + int(bool(field.bos)) for i in corpus]
+            self.buckets = dict(zip(*utils.kmeans(self.lengths, n_buckets)))
 
     def __getitem__(self, index):
-        """返回一个迭代器，内容为某个样本的全部filed"""
         for field in self.fields:
             yield getattr(self, field.name)[index]
 
     def __len__(self):
-        """返回数据集大小"""
         return len(self.corpus)
 
     @classmethod
     def collate_fn(cls, batch):
-        """将batch大小的样本按照filed返回"""
         return (field for field in zip(*batch))
 
 
-class TextSampler(object):
-    """TextSampler"""
+class BucketsSampler(object):
+    """BucketsSampler"""
 
     def __init__(self, buckets, batch_size, shuffle=False):
         self.batch_size = batch_size
@@ -135,7 +128,6 @@ class TextSampler(object):
             self.chunks.append(chunk)
 
     def __iter__(self):
-        """返回一个迭代器，随机或顺序返回batch大小的样本id"""
         range_fn = np.random.permutation if self.shuffle else np.arange
         for i in range_fn(len(self.buckets)).tolist():
             split_sizes = [(len(self.buckets[i]) - j - 1) // self.chunks[i] + 1
@@ -150,14 +142,37 @@ class TextSampler(object):
         return sum(self.chunks)
 
 
+class SequentialSampler(object):
+    """SequentialSampler"""
+
+    def __init__(self, batch_size, corpus_length):
+        self.batch_size = batch_size
+        self.corpus_length = corpus_length
+
+    def __iter__(self):
+        batch = []
+        for i in range(self.corpus_length):
+            batch.append(i)
+            if len(batch) == self.batch_size:
+                yield batch
+                batch = []
+        else:
+            if len(batch):
+                yield batch
+
+
 def batchify(dataset,
              batch_size,
              use_data_parallel=False,
              shuffle=False,
-             use_multiprocess=True):
-    """实例化dataloader"""
-    batch_sampler = TextSampler(
-        buckets=dataset.buckets, batch_size=batch_size, shuffle=shuffle)
+             use_multiprocess=True,
+             sequential_sampler=False):
+    if sequential_sampler:
+        batch_sampler = SequentialSampler(
+            batch_size=batch_size, corpus_length=len(dataset))
+    else:
+        batch_sampler = BucketsSampler(
+            buckets=dataset.buckets, batch_size=batch_size, shuffle=shuffle)
     loader = TextDataLoader(
         dataset=dataset,
         batch_sampler=batch_sampler,
