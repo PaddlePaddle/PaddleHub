@@ -19,3 +19,4 @@ from .detection_task import DetectionTask
 from .reading_comprehension_task import ReadingComprehensionTask
 from .regression_task import RegressionTask
 from .sequence_task import SequenceLabelTask
+from .generation_task import TextGenerationTask

@@ -68,7 +68,8 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the train set...")
-            self._train_records = self._convert_examples_to_records(examples)
+            self._train_records = self._convert_examples_to_records(
+                examples, phase="train")
         return self._train_records
 
     @property
@@ -78,7 +79,8 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the dev set...")
-            self._dev_records = self._convert_examples_to_records(examples)
+            self._dev_records = self._convert_examples_to_records(
+                examples, phase="dev")
         return self._dev_records
 
     @property
@@ -88,7 +90,8 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the test set...")
-            self._test_records = self._convert_examples_to_records(examples)
+            self._test_records = self._convert_examples_to_records(
+                examples, phase="test")
         return self._test_records
 
     @property
@@ -98,7 +101,8 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the predict set...")
-            self._predict_records = self._convert_examples_to_records(examples)
+            self._predict_records = self._convert_examples_to_records(
+                examples, phase="predict")
         return self._predict_records
 
     def _read_file(self, input_file, phase=None):
@@ -148,12 +152,14 @@ class BaseNLPDataset(BaseDataset):
                 examples.append(example)
             return examples
 
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data example, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
+
 
         Returns:
             a list with all the examples record.
@@ -166,8 +172,8 @@ class BaseNLPDataset(BaseDataset):
                 text_pair=example.text_b,
                 max_seq_len=self.max_seq_len)
             if example.label:
-                record["label"] = self.label_list.index(
-                    example.label) if self.label_list else float(example.label)
+                record["label"] = self.label_index[
+                    example.label] if self.label_list else float(example.label)
             records.append(record)
         return records
 
@@ -281,12 +287,14 @@ class BaseNLPDataset(BaseDataset):
 
 
 class TextClassificationDataset(BaseNLPDataset):
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data example, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
+
 
         Returns:
             a list with all the examples record.
@@ -299,18 +307,19 @@ class TextClassificationDataset(BaseNLPDataset):
                 text_pair=example.text_b,
                 max_seq_len=self.max_seq_len)
             if example.label:
-                record["label"] = self.label_list.index(example.label)
+                record["label"] = self.label_index[example.label]
             records.append(record)
         return records
 
 
 class RegressionDataset(BaseNLPDataset):
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data example, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
 
         Returns:
             a list with all the examples record.
@@ -324,6 +333,80 @@ class RegressionDataset(BaseNLPDataset):
                 max_seq_len=self.max_seq_len)
             if example.label:
                 record["label"] = float(example.label)
+            records.append(record)
+        return records
+
+
+class GenerationDataset(BaseNLPDataset):
+    def __init__(self,
+                 base_path,
+                 train_file=None,
+                 dev_file=None,
+                 test_file=None,
+                 predict_file=None,
+                 label_file=None,
+                 label_list=None,
+                 train_file_with_header=False,
+                 dev_file_with_header=False,
+                 test_file_with_header=False,
+                 predict_file_with_header=False,
+                 tokenizer=None,
+                 max_seq_len=128,
+                 split_char="\002",
+                 start_token="<s>",
+                 end_token="</s>",
+                 unk_token="<unk>"):
+        self.split_char = split_char
+        self.start_token = start_token
+        self.end_token = end_token
+        self.unk_token = unk_token
+        super(GenerationDataset, self).__init__(
+            base_path=base_path,
+            train_file=train_file,
+            dev_file=dev_file,
+            test_file=test_file,
+            predict_file=predict_file,
+            label_file=label_file,
+            label_list=label_list,
+            train_file_with_header=train_file_with_header,
+            dev_file_with_header=dev_file_with_header,
+            test_file_with_header=test_file_with_header,
+            predict_file_with_header=predict_file_with_header,
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
+
+    def _convert_examples_to_records(self, examples, phase):
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data example, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
+
+        Returns:
+            a list with all the examples record.
+        """
+        records = []
+        for example in examples:
+            record = self.tokenizer.encode(
+                text=example.text_a.split(self.split_char),
+                text_pair=example.text_b.split(self.split_char)
+                if example.text_b else None,
+                max_seq_len=self.max_seq_len)
+            if example.label:
+                expand_label = [self.start_token] + example.label.split(
+                    self.split_char)[:self.max_seq_len - 2] + [self.end_token]
+                expand_label_id = [
+                    self.label_index.get(label,
+                                         self.label_index[self.unk_token])
+                    for label in expand_label
+                ]
+                record["label"] = expand_label_id[1:] + [
+                    self.label_index[self.end_token]
+                ] * (self.max_seq_len - len(expand_label) + 1)
+                record["dec_input"] = expand_label_id[:-1] + [
+                    self.label_index[self.end_token]
+                ] * (self.max_seq_len - len(expand_label) + 1)
             records.append(record)
         return records
 
@@ -363,12 +446,13 @@ class SeqLabelingDataset(BaseNLPDataset):
             tokenizer=tokenizer,
             max_seq_len=max_seq_len)
 
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data examples, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
 
         Returns:
             a list with all the examples record.
@@ -389,11 +473,11 @@ class SeqLabelingDataset(BaseNLPDataset):
                     if tokens_index < len(
                             tokens) and token == tokens[tokens_index]:
                         record["label"].append(
-                            self.label_list.index(labels[tokens_index]))
+                            self.label_index[labels[tokens_index]])
                         tokens_index += 1
                     else:
                         record["label"].append(
-                            self.label_list.index(self.no_entity_label))
+                            self.label_index[self.no_entity_label])
             records.append(record)
         return records
 
@@ -435,13 +519,13 @@ class SeqLabelingDataset(BaseNLPDataset):
 
 
 class MultiLabelDataset(BaseNLPDataset):
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data examples, returned by _read_file.
-            max_seq_len (int): padding to the max sequence length.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
 
         Returns:
             a list with all the examples record.
@@ -631,7 +715,16 @@ class MRCDataset(BaseNLPDataset):
         return special_tokens_num, special_tokens_num_before_doc
 
     def _convert_examples_to_records_and_features(self, examples, phase):
-        """Loads a data file into a list of `InputBatch`s."""
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data examples, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
+
+        Returns:
+            a list with all the examples record.
+        """
         features = []
         records = []
         unique_id = 1000000000
