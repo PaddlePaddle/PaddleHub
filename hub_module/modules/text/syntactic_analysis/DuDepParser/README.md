@@ -1,7 +1,7 @@
 # 命令行预测
 
 ```shell
-$ hub run du_dep_parser --input_text="百度是一家高科技公司"
+$ hub run DuDepParser --input_text="百度是一家高科技公司"
 ```
 
 # API
@@ -28,12 +28,12 @@ PaddleHub Serving可以部署一个在线情感分析服务，可以将此接口
 
 运行启动命令：
 ```shell
-$ hub serving start -m du_dep_parser
+$ hub serving start -m DuDepParser
 ```
 
 启动时会显示加载模型过程，启动成功后显示
 ```shell
-Loading du_dep_parser successful.
+Loading DuDepParser successful.
 ```
 
 这样就完成了服务化API的部署，默认端口号为8866。
@@ -45,19 +45,18 @@ Loading du_dep_parser successful.
 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
 ```python
-import request
+import requests
 import json
 
 # 待预测数据
 text = ["百度是一家高科技公司"]
 
 # 设置运行配置
-# 对应本地预测du_dep_parser.parse(texts=text, batch_size=1, use_gpu=True)
-data = {"texts": text, "batch_size": 1, "use_gpu":True}
+# 对应本地预测DuDepParser.parse(texts=text, batch_size=1, use_gpu=False)
+data = {"texts": text, "batch_size": 1, "use_gpu":False}
 
-# 指定预测方法为du_dep_parser并发送post请求，content-type类型应指定json方式
-# HOST_IP为服务器IP
-url = "http://HOST_IP:8866/predict/du_dep_parser"
+# 指定预测方法为DuDepParser并发送post请求，content-type类型应指定json方式
+url = "http://0.0.0.0:8866/predict/DuDepParser"
 headers = {"Content-Type": "application/json"}
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
