@@ -1,7 +1,3 @@
-<p align="center">
- <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"  
-</p>
-
 欢迎使用**PaddleHub**！
 
 # PaddleHub 是什么

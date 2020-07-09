@@ -1,6 +1,12 @@
 # 快速体验
 
-安装PaddleHub成功后，执行命令[hub run](tutorial/cmdintro.md)，可以快速体验PaddleHub无需代码、一键预测的命令行功能，如下三个示例：
+安装PaddleHub成功后，执行命令[hub run](tutorial/cmdintro.md)，可以快速体验PaddleHub无需代码、一键预测的命令行功能，如下示例：
+
+* 使用[文字识别](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=TextRecognition)轻量级中文OCR模型chinese_ocr_db_crnn_mobile即可一键快速识别图片中的文字。
+```shell
+$ wget https://paddlehub.bj.bcebos.com/model/image/ocr/test_ocr.jpg
+$ hub run chinese_ocr_db_crnn_mobile --input_path test_ocr.jpg --visualization=True
+```
 
 使用[词法分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=LexicalAnalysis)模型LAC进行分词
 ```shell
@@ -28,4 +34,4 @@ $ hub run ace2p --input_path test_image.jpg
 ```
 ![图像分割结果](./imgs/img_seg_result.jpeg)
 
-除了上述三类模型外，PaddleHub还发布了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
+除了上述模型外，PaddleHub还发布了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 [PaddleHub官网](https://www.paddlepaddle.org.cn/hub) 查看
