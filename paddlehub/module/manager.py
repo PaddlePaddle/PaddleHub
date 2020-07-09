@@ -86,7 +86,7 @@ class LocalModuleManager(object):
                     "%s does not exist, the module will be reinstalled" %
                     desc_pb_path)
         except:
-            pass
+            raise
         return False, None
 
     def all_modules(self, update=False):
