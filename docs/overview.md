@@ -1,6 +1,12 @@
+<p align="center">
+ <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"  
+</p>
+
 欢迎使用**PaddleHub**！
 
-PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub开发者可以使用高质量的预训练模型结合Fine-tune API快速完成迁移学习到应用部署的全流程工作。其提供了飞桨生态下的高质量预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型。更多模型详情请查看官网：https://www.paddlepaddle.org.cn/hub
+# PaddleHub 是什么
+
+PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub开发者可以使用高质量的预训练模型结合Fine-tune API快速完成迁移学习到应用部署的全流程工作。其提供了飞桨生态下的高质量预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型。更多模型详情请查看[PaddleHub官网](https://www.paddlepaddle.org.cn/hub)
 
 基于预训练模型，PaddleHub支持以下功能：
 
@@ -22,7 +28,7 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
 更加详细的使用说明可以参考
 [PaddleHub命令行工具](tutorial/cmdintro.md)。
 
-目前的预训练模型覆盖了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看。[快速体验](quickstart.md)通过命令行即可调用预训练模型进行预测。
+目前的预训练模型覆盖了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 [PaddleHub官网](https://www.paddlepaddle.org.cn/hub) 查看。[快速体验](quickstart.md)通过命令行即可调用预训练模型进行预测。
 
 ## 迁移学习
 
@@ -38,7 +44,7 @@ PaddleHub是飞桨预训练模型管理和迁移学习工具，通过PaddleHub�
  十行代码完成ERNIE工业级文本分类
 </p>
 
-  PaddleHub提供了使用Finetune-API和预训练模型完成[文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/text_classification)、[序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/sequence_labeling)、[多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/multi_label_classification)、[图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/image_classification)、[检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/qa_classification)、[回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/regression)、[句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/sentence_similarity)、[阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4/demo)。
+  PaddleHub提供了使用Finetune-API和预训练模型完成[文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/text_classification)、[序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/sequence_labeling)、[多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/multi_label_classification)、[图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/image_classification)、[检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/qa_classification)、[回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/regression)、[句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/sentence_similarity)、[阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo)。
 
 * 场景化使用
 
