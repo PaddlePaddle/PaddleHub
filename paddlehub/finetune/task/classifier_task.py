@@ -196,7 +196,6 @@ class TextClassifierTask(ClassifierTask):
             feature(Variable): the `feature` will be used to classify texts. It must be the sentence-level feature, shape as [-1, emb_size]. `Token_feature` and `feature` couldn't be setted at the same time. One of them must be setted as not None. Default None.
             token_feature(Variable): the `feature` will be used to connect the pre-defined network. It must be the token-level feature, shape as [-1, seq_len, emb_size]. Default None.
             network(str): the pre-defined network. Choices: 'bilstm', 'bow', 'cnn', 'dpcnn', 'gru' and 'lstm'. Default None. If network is setted, then `token_feature` must be setted and `feature` must be None.
-            main_program (object): the customized main program, default None.
             startup_program (object): the customized startup program, default None.
             config (RunConfig): run config for the task, such as batch_size, epoch, learning_rate setting and so on. Default None.
             hidden_units(list): the element of `hidden_units` list is the full-connect layer size. It will add the full-connect layers to the program. Default None.
