@@ -35,7 +35,7 @@ import paddle.fluid as fluid
 from visualdl import LogWriter
 
 import paddlehub as hub
-from paddlehub.reader.nlp_reader import BaseNLPReader
+from paddlehub.reader.nlp_reader import BaseReader, BaseNLPReader
 from paddlehub.common.paddle_helper import dtype_map, clone_program
 from paddlehub.common.utils import mkdir
 from paddlehub.common.dir import tmp_dir
@@ -350,13 +350,14 @@ class BaseTask(object):
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
 
-        if isinstance(data_reader, BaseNLPReader):
+        if isinstance(data_reader, BaseReader):
             self._compatible_mode = True
-            logger.warning(
-                "PaddleHub v1.8 has deprecated the reader and feed_list parameters in the nlp Task. We provided an easier usage, "
-                "in which you can use your tokenizer to preprocess dataset and run task in a clear flow. "
-                "New demo see https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/demo/text_classification/text_cls.py"
-            )
+            if isinstance(data_reader, BaseNLPReader):
+                logger.warning(
+                    "PaddleHub v1.8 has deprecated the reader and feed_list parameters in the nlp Task. We provided an easier usage, "
+                    "in which you can use your tokenizer to preprocess dataset and run task in a clear flow. "
+                    "New demo see https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/demo/text_classification/text_cls.py"
+                )
         else:
             self._compatible_mode = False
 
