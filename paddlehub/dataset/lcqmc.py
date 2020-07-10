@@ -50,10 +50,11 @@ class LCQMC(TextMatchingDataset):
 if __name__ == "__main__":
     from paddlehub.tokenizer.tokenizer import CustomTokenizer
     from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
-    tokenizer = BertTokenizer(
-        vocab_file='/mnt/zhangxuefei/.paddlehub/modules/ernie/assets/vocab.txt',
+    tokenizer = CustomTokenizer(
+        vocab_file=
+        '/mnt/zhangxuefei/.paddlehub/modules/senta_bow/assets/vocab.txt',
         tokenize_chinese_chars=True)
-    ds = LCQMC(is_pair_wise=False, tokenizer=tokenizer, max_seq_len=5)
+    ds = LCQMC(tokenizer=tokenizer, max_seq_len=60)
     print("first 10 train examples")
     for e in ds.get_train_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

@@ -1,4 +1,3 @@
-# coding:utf-8
 #   Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Fine-tuning on text matching task """
+"""Fine-tuning on pointwise text matching task """
 
 import argparse
 import ast
@@ -21,77 +20,90 @@ import paddlehub as hub
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=3, help="Number of epoches for fine-tuning.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for fine-tuning, input should be True or False")
-parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate used to train with warmup.")
 parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
 parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=32, help="Total examples' number in batch for training.")
 parser.add_argument("--network", type=str, default=None, help="Pre-defined network which was connected after module.")
-parser.add_argument("--use_data_parallel", type=ast.literal_eval, default=False, help="Whether use data parallel.")
-parser.add_argument("--is_pair_wise", type=ast.literal_eval, default=False, help="Whether use data parallel.")
 args = parser.parse_args()
 # yapf: enable.
 
+jieba_paddle = hub.Module(name='jieba_paddle')
+
+
+def cut(text):
+    res = jieba_paddle.cut(text, use_paddle=False)
+    return res
+
+
 if __name__ == '__main__':
 
-    # Load Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
+    # Load Paddlehub word embedding pretrained model
+    # module = hub.Module(name="simnet_bow")
+    # module = hub.Module(name="word2vec_skipgram")
+    module = hub.Module(name="tencent_ailab_chinese_embedding_small")
+    # module = hub.Module(name="tencent_ailab_chinese_embedding")
 
-    # Pair wise task needs: query, title_left, right_title (3 data)
-    # Point wise task needs: query, title_left (2 data)
-    if args.is_pair_wise:
-        num_data = 3
-    else:
-        num_data = 2
+    # Pointwise task needs: query, title (2 slots)
     inputs, outputs, program = module.context(
-        trainable=True, max_seq_len=args.max_seq_len, num_data=num_data)
+        trainable=True, max_seq_len=args.max_seq_len, num_slots=2)
 
     # Tokenizer tokenizes the text data and encodes the data as model needed.
     # If you use transformer modules (ernie, bert, roberta and so on), tokenizer should be hub.BertTokenizer.
-    # else tokenizer should be hub.CustomTokenizer.
-    tokenizer = hub.BertTokenizer(
-        vocab_file=module.get_vocab_path(), tokenize_chinese_chars=True)
+    # Otherwise, tokenizer should be hub.CustomTokenizer.
+    # If you choose CustomTokenizer, you can also change the chinese word segmentation tool, for example jieba.
+    tokenizer = hub.CustomTokenizer(
+        vocab_file=module.get_vocab_path(),
+        tokenize_chinese_chars=True,
+        cut_function=cut,  # jieba.cut as cut function
+    )
 
-    # Load dataset
-    if args.is_pair_wise:
-        dataset = hub.dataset.DuEL(
-            tokenizer=tokenizer, max_seq_len=args.max_seq_len)
-    else:
-        dataset = hub.dataset.LCQMC(
-            tokenizer=tokenizer, max_seq_len=args.max_seq_len)
+    dataset = hub.dataset.LCQMC(
+        tokenizer=tokenizer, max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use token-level output.
-    query = outputs["sequence_output"]
-    left = outputs['sequence_output_2']
-    right = outputs['sequence_output_3']
+    query = outputs["emb"]
+    title = outputs['emb_2']
 
     # Select fine-tune strategy
-    strategy = hub.DefaultStrategy(
-        optimizer_name="sgd", learning_rate=args.learning_rate)
+    strategy = hub.DefaultStrategy(optimizer_name="sgd")
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
-        eval_interval=300,
-        use_data_parallel=args.use_data_parallel,
-        use_cuda=args.use_gpu,
-        num_epoch=args.num_epoch,
+        use_data_parallel=False,
+        use_cuda=False,
         batch_size=args.batch_size,
         checkpoint_dir=args.checkpoint_dir,
         strategy=strategy)
 
     # Define a text matching task by PaddleHub's API
     # network choice: bow, cnn, gru, lstm (PaddleHub pre-defined network)
-    matching_task = hub.TextMatchingTask(
+    pointwise_matching_task = hub.PointwiseTextMatchingTask(
         dataset=dataset,
         query_feature=query,
-        left_feature=left,
+        title_feature=title,
         tokenizer=tokenizer,
         network=args.network,
-        is_pair_wise=args.is_pair_wise,
-        right_feature=right if args.is_pair_wise else None,
         config=config)
 
-    # Fine-tune and evaluate by PaddleHub's API
-    # will finish training, evaluation, testing, save model automatically
-    matching_task.finetune_and_eval()
+    # Prediction data sample.
+    text_pairs = [
+        [
+            "请问不是您的账户吗？",  # query
+            "您好，请问您使用的邮箱类型是？"  # title
+        ],
+        [
+            "推荐个手机游戏",  # query
+            "手机游戏推荐"  # title
+        ]
+    ]
+
+    # Predict by PaddleHub's API
+    results = pointwise_matching_task.predict(
+        data=text_pairs,
+        max_seq_len=args.max_seq_len,
+        label_list=dataset.get_labels(),
+        return_result=True,
+        accelerate_mode=True)
+    for index, text in enumerate(text_pairs):
+        print("data: %s, preidction_label: %s" % (text, results[index]))

@@ -97,14 +97,14 @@ class SimnetBow(hub.Module):
         Returns:
              inputs(dict): the input variables of senta_bow (words)
              outputs(dict): the output variables of input words (word embeddings) and sequence lenght of the first input_text
-             main_program(Program): the main_program of Senta with pretrained prameters
+             main_program(Program): the main_program of simnet_bow with pretrained prameters
         """
         assert num_slots >= 1 and num_slots <= 3, "num_slots must be 1, 2, or 3, but the input is %d" % num_slots
         main_program = fluid.Program()
         startup_program = fluid.Program()
         with fluid.program_guard(main_program, startup_program):
             text_1 = fluid.layers.data(
-                name="text_1",
+                name="text",
                 shape=[-1, max_seq_len, 1],
                 dtype="int64",
                 lod_level=0)
@@ -121,6 +121,7 @@ class SimnetBow(hub.Module):
             emb_1 = fluid.layers.embedding(
                 input=text_1,
                 size=[dict_dim, 128],
+                is_sparse=True,
                 padding_idx=dict_dim - 1,
                 dtype='float32',
                 param_attr=w_param_attrs)
@@ -161,7 +162,7 @@ class SimnetBow(hub.Module):
                 emb_name_list.append(emb_3_name)
 
             variable_names = filter(
-                lambda v: v not in ['text_1', 'text_2', 'text_3', "seq_len"],
+                lambda v: v not in ['text', 'text_2', 'text_3', "seq_len"],
                 list(main_program.global_block().vars.keys()))
             prefix_name = "@HUB_{}@".format(self.name)
             add_vars_prefix(
@@ -184,9 +185,14 @@ class SimnetBow(hub.Module):
             inputs = {'seq_len': seq_len}
             outputs = {}
             for index, data in enumerate(data_list):
-                inputs['text_%s' % (index + 1)] = data
-                outputs['emb_%s' % (index + 1)] = main_program.global_block(
-                ).vars[prefix_name + emb_name_list[index]]
+                if index == 0:
+                    inputs['text'] = data
+                    outputs['emb'] = main_program.global_block().vars[
+                        prefix_name + emb_name_list[0]]
+                else:
+                    inputs['text_%s' % (index + 1)] = data
+                    outputs['emb_%s' % (index + 1)] = main_program.global_block(
+                    ).vars[prefix_name + emb_name_list[index]]
             return inputs, outputs, main_program
 
     def texts2tensor(self, texts):

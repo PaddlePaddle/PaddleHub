@@ -84,12 +84,13 @@ class Word2vecSkipGram(hub.Module):
                     trainable=trainable)
 
                 text_1 = fluid.data(
-                    name='text_1',
+                    name='text',
                     shape=[-1, max_seq_len],
                     dtype='int64',
                     lod_level=0)
                 emb_1 = fluid.embedding(
                     input=text_1,
+                    is_sparse=True,
                     size=[len(self.vocab), 128],
                     padding_idx=len(self.vocab) - 1,
                     dtype='float32',
@@ -106,6 +107,7 @@ class Word2vecSkipGram(hub.Module):
                         lod_level=0)
                     emb_2 = fluid.embedding(
                         input=text_2,
+                        is_sparse=True,
                         size=[len(self.vocab), 128],
                         padding_idx=len(self.vocab) - 1,
                         dtype='float32',
@@ -122,6 +124,7 @@ class Word2vecSkipGram(hub.Module):
                         lod_level=0)
                     emb_3 = fluid.embedding(
                         input=text_3,
+                        is_sparse=True,
                         size=[len(self.vocab), 128],
                         padding_idx=len(self.vocab) - 1,
                         dtype='float32',
@@ -131,7 +134,7 @@ class Word2vecSkipGram(hub.Module):
                     emb_name_list.append(emb_3_name)
 
                 variable_names = filter(
-                    lambda v: v not in ['text_1', 'text_2', 'text_3'],
+                    lambda v: v not in ['text', 'text_2', 'text_3'],
                     list(main_program.global_block().vars.keys()))
 
                 prefix_name = "@HUB_{}@".format(self.name)
@@ -156,9 +159,15 @@ class Word2vecSkipGram(hub.Module):
                 inputs = {}
                 outputs = {}
                 for index, data in enumerate(data_list):
-                    inputs['text_%s' % (index + 1)] = data
-                    outputs['emb_%s' % (index + 1)] = main_program.global_block(
-                    ).vars[prefix_name + emb_name_list[index]]
+                    if index == 0:
+                        inputs['text'] = data
+                        outputs['emb'] = main_program.global_block().vars[
+                            prefix_name + emb_name_list[0]]
+                    else:
+                        inputs['text_%s' % (index + 1)] = data
+                        outputs['emb_%s' %
+                                (index + 1)] = main_program.global_block().vars[
+                                    prefix_name + emb_name_list[index]]
 
                 return inputs, outputs, main_program
 
@@ -168,5 +177,5 @@ class Word2vecSkipGram(hub.Module):
 
 if __name__ == "__main__":
     w2v = Word2vecSkipGram()
-    w2v.context()
+    i, o, p = w2v.context(num_slots=3)
     print(w2v.get_vocab_path())

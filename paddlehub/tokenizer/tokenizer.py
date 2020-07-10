@@ -18,8 +18,10 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
+import inspect
 import os
 
+from paddlehub.common.logger import logger
 import paddlehub as hub
 
 from .bert_tokenizer import BasicTokenizer
@@ -37,8 +39,7 @@ class CustomTokenizer(object):
                  do_lower_case=True,
                  pad_token="[PAD]",
                  tokenize_chinese_chars=True,
-                 cut_function=None,
-                 cut_module=None):
+                 cut_function=None):
         """ Constructs a CustomTokenizer.
 
         Args:
@@ -46,6 +47,7 @@ class CustomTokenizer(object):
             do_lower_case (:obj:`bool`, `optional`, defaults to :obj:`True`): Whether to lower case the input if the input is in English
             pad_token (:obj:`string`, `optional`, defaults to "[PAD]"): The token used for padding, for example when batching sequences of different lengths.
             tokenize_chinese_chars (:obj:`bool`, `optional`, defaults to :obj:`True`): Whether to tokenize Chinese characters.
+            cut_function: It is a function that aims to segment a chinese text and get the word segmentation result (list).
         """
 
         if not os.path.isfile(vocab_file):
@@ -65,7 +67,11 @@ class CustomTokenizer(object):
         self.cut_function = cut_function
         if not self.cut_function:
             lac = hub.Module(name='lac')
-            self.cut_function = lac.lexical_analysis
+            self.cut_function = lac.cut
+        elif inspect.isfunction(self.cut_function):
+            self.cut_function = cut_function
+        else:
+            raise RuntimeError("The cut_function (%s) is not a true function.")
 
     @property
     def vocab_size(self):
@@ -138,7 +144,7 @@ class CustomTokenizer(object):
             split_tokens (`list`): split
         """
         if self.tokenize_chinese_chars:
-            splitted_tokens = self.cut_function(texts=[text])[0]['word']
+            splitted_tokens = self.cut_function(text=text)
         else:
             splitted_tokens = self.basic_tokenizer.tokenize(text=text)
         return splitted_tokens
@@ -186,14 +192,14 @@ class CustomTokenizer(object):
             A Dictionary of shape::
 
                 {
-                    text_1: list[int],
+                    text: list[int],
                     seq_len: int if return_length is True (default)
                     overflowing_tokens: list[int] if a ``max_seq_len`` is specified and return_overflowing_tokens is True
                 }
 
             With the fields:
 
-            - ``text_1``: list of token ids to be fed to a model
+            - ``text``: list of token ids to be fed to a model
             - ``length``: the input_ids length
             - ``overflowing_tokens``: list of overflowing tokens if a max length is specified.
         """
@@ -236,10 +242,10 @@ class CustomTokenizer(object):
 
         ## Check length and Pad
         if pad_to_max_seq_len and len(ids) < max_seq_len:
-            encoded_inputs["text_1"] = ids + [self.pad_token_id
-                                              ] * (max_seq_len - len(ids))
+            encoded_inputs["text"] = ids + [self.pad_token_id
+                                            ] * (max_seq_len - len(ids))
         else:
-            encoded_inputs["text_1"] = ids
+            encoded_inputs["text"] = ids
 
         if return_length:
             encoded_inputs["seq_len"] = len(ids)
@@ -316,14 +322,14 @@ class CustomTokenizer(object):
         when only_convert_to_tokens is True.
 
         Args:
-            token_ids: list of tokenized input ids or dict with a key called "text_1", can be obtained by using the `encode` methods.
+            token_ids: list of tokenized input ids or dict with a key called "text", can be obtained by using the `encode` methods.
             only_convert_to_tokens:  if set to True, will only return a list a sequence of tokens (str). `paddlehub.dataset.base_nlp_dataset` will use this optional argument.
             skip_pad_token: if set to True, will replace pad tokens.
             skip_special_tokens: if set to True, will replace special tokens.
             clean_up_tokenization_spaces: if set to True, will clean up the tokenization spaces.
         """
         if isinstance(token_ids, dict):
-            token_ids = token_ids["text_1"]
+            token_ids = token_ids["text"]
 
         tokens = self.convert_ids_to_tokens(
             token_ids, skip_pad_token=skip_pad_token)

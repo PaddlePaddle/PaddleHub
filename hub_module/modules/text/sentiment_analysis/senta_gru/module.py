@@ -71,7 +71,7 @@ class SentaGRU(hub.NLPPredictionModule):
         startup_program = fluid.Program()
         with fluid.program_guard(main_program, startup_program):
             text_1 = fluid.layers.data(
-                name="text_1",
+                name="text",
                 shape=[-1, max_seq_len, 1],
                 dtype="int64",
                 lod_level=0)
@@ -133,7 +133,7 @@ class SentaGRU(hub.NLPPredictionModule):
                 emb_name_list.append(emb_3_name)
 
             variable_names = filter(
-                lambda v: v not in ['text_1', 'text_2', 'text_3', "seq_len"],
+                lambda v: v not in ['text', 'text_2', 'text_3', "seq_len"],
                 list(main_program.global_block().vars.keys()))
             prefix_name = "@HUB_{}@".format(self.name)
             add_vars_prefix(
@@ -161,9 +161,14 @@ class SentaGRU(hub.NLPPredictionModule):
                 main_program.global_block().vars[prefix_name + fc_name]
             }
             for index, data in enumerate(data_list):
-                inputs['text_%s' % (index + 1)] = data
-                outputs['emb_%s' % (index + 1)] = main_program.global_block(
-                ).vars[prefix_name + emb_name_list[index]]
+                if index == 0:
+                    inputs['text'] = data
+                    outputs['emb'] = main_program.global_block().vars[
+                        prefix_name + emb_name_list[0]]
+                else:
+                    inputs['text_%s' % (index + 1)] = data
+                    outputs['emb_%s' % (index + 1)] = main_program.global_block(
+                    ).vars[prefix_name + emb_name_list[index]]
             return inputs, outputs, main_program
 
     @serving

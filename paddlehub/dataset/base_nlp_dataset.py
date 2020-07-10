@@ -161,22 +161,25 @@ class BaseNLPDataset(BaseDataset):
         """
 
         records = []
-        for example in examples:
-            record = self.tokenizer.encode(
-                text=example.text_a,
-                text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
-            # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
-            # When all words are not found in the vocab, the text will be dropped.
-            if not record:
-                logger.info(
-                    "The text %s has been dropped as it has no words in the vocab after tokenization."
-                    % example.text_a)
-                continue
-            if example.label:
-                record["label"] = self.label_list.index(
-                    example.label) if self.label_list else float(example.label)
-            records.append(record)
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                record = self.tokenizer.encode(
+                    text=example.text_a,
+                    text_pair=example.text_b,
+                    max_seq_len=self.max_seq_len)
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+                if example.label:
+                    record["label"] = self.label_list.index(
+                        example.label) if self.label_list else float(
+                            example.label)
+                records.append(record)
+                process_bar.update(1)
         return records
 
     def get_train_records(self, shuffle=False):
@@ -292,21 +295,23 @@ class TextClassificationDataset(BaseNLPDataset):
             a list with all the examples record.
         """
         records = []
-        for example in examples:
-            record = self.tokenizer.encode(
-                text=example.text_a,
-                text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
-            # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
-            # When all words are not found in the vocab, the text will be dropped.
-            if not record:
-                logger.info(
-                    "The text %s has been dropped as it has no words in the vocab after tokenization."
-                    % example.text_a)
-                continue
-            if example.label:
-                record["label"] = self.label_list.index(example.label)
-            records.append(record)
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                record = self.tokenizer.encode(
+                    text=example.text_a,
+                    text_pair=example.text_b,
+                    max_seq_len=self.max_seq_len)
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+                if example.label:
+                    record["label"] = self.label_list.index(example.label)
+                records.append(record)
+                process_bar.update(1)
         return records
 
 
@@ -323,21 +328,23 @@ class RegressionDataset(BaseNLPDataset):
         """
 
         records = []
-        for example in examples:
-            record = self.tokenizer.encode(
-                text=example.text_a,
-                text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
-            # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
-            # When all words are not found in the vocab, the text will be dropped.
-            if not record:
-                logger.info(
-                    "The text %s has been dropped as it has no words in the vocab after tokenization."
-                    % example.text_a)
-                continue
-            if example.label:
-                record["label"] = float(example.label)
-            records.append(record)
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                record = self.tokenizer.encode(
+                    text=example.text_a,
+                    text_pair=example.text_b,
+                    max_seq_len=self.max_seq_len)
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+                if example.label:
+                    record["label"] = float(example.label)
+                records.append(record)
+                process_bar.update(1)
         return records
 
 
@@ -387,34 +394,36 @@ class SeqLabelingDataset(BaseNLPDataset):
             a list with all the examples record.
         """
         records = []
-        for example in examples:
-            tokens, labels = self._reseg_token_label(
-                tokens=example.text_a.split(self.split_char),
-                labels=example.label.split(self.split_char))
-            record = self.tokenizer.encode(
-                text=tokens, max_seq_len=self.max_seq_len)
-            # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
-            # When all words are not found in the vocab, the text will be dropped.
-            if not record:
-                logger.info(
-                    "The text %s has been dropped as it has no words in the vocab after tokenization."
-                    % example.text_a)
-                continue
-            if labels:
-                record["label"] = []
-                tokens_with_specical_token = self.tokenizer.decode(
-                    record, only_convert_to_tokens=True)
-                tokens_index = 0
-                for token in tokens_with_specical_token:
-                    if tokens_index < len(
-                            tokens) and token == tokens[tokens_index]:
-                        record["label"].append(
-                            self.label_list.index(labels[tokens_index]))
-                        tokens_index += 1
-                    else:
-                        record["label"].append(
-                            self.label_list.index(self.no_entity_label))
-            records.append(record)
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                tokens, labels = self._reseg_token_label(
+                    tokens=example.text_a.split(self.split_char),
+                    labels=example.label.split(self.split_char))
+                record = self.tokenizer.encode(
+                    text=tokens, max_seq_len=self.max_seq_len)
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+                if labels:
+                    record["label"] = []
+                    tokens_with_specical_token = self.tokenizer.decode(
+                        record, only_convert_to_tokens=True)
+                    tokens_index = 0
+                    for token in tokens_with_specical_token:
+                        if tokens_index < len(
+                                tokens) and token == tokens[tokens_index]:
+                            record["label"].append(
+                                self.label_list.index(labels[tokens_index]))
+                            tokens_index += 1
+                        else:
+                            record["label"].append(
+                                self.label_list.index(self.no_entity_label))
+                records.append(record)
+                process_bar.update(1)
         return records
 
     def _reseg_token_label(self, tokens, labels=None):
@@ -467,23 +476,25 @@ class MultiLabelDataset(BaseNLPDataset):
             a list with all the examples record.
         """
         records = []
-        for example in examples:
-            record = self.tokenizer.encode(
-                text=example.text_a,
-                text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                record = self.tokenizer.encode(
+                    text=example.text_a,
+                    text_pair=example.text_b,
+                    max_seq_len=self.max_seq_len)
 
-            # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
-            # When all words are not found in the vocab, the text will be dropped.
-            if not record:
-                logger.info(
-                    "The text %s has been dropped as it has no words in the vocab after tokenization."
-                    % example.text_a)
-                continue
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
 
-            if example.label:
-                record["label"] = [int(label) for label in example.label]
-            records.append(record)
+                if example.label:
+                    record["label"] = [int(label) for label in example.label]
+                records.append(record)
+                process_bar.update(1)
         return records
 
 
@@ -1034,8 +1045,8 @@ class TextMatchingDataset(BaseNLPDataset):
         Returns:
             a list with all the records, which will be feeded to the prpgram.
         """
+        records = []
         with tqdm(total=len(examples)) as process_bar:
-            records = []
             for example in examples:
                 record_a = self.tokenizer.encode(
                     text=example.text_a, max_seq_len=self.max_seq_len)
@@ -1059,9 +1070,9 @@ class TextMatchingDataset(BaseNLPDataset):
 
                 if isinstance(self.tokenizer, CustomTokenizer):
                     record = {
-                        'text_1': record_a['text_1'],
-                        'text_2': record_b['text_1'],
-                        'seq_len_1': record_a['seq_len'],
+                        'text': record_a['text'],
+                        'text_2': record_b['text'],
+                        'seq_len': record_a['seq_len'],
                         'seq_len_2': record_b['seq_len'],
                     }
 
@@ -1074,7 +1085,7 @@ class TextMatchingDataset(BaseNLPDataset):
                                 % example.text_c)
                             continue
 
-                        record['text_3'] = record_c['text_1']
+                        record['text_3'] = record_c['text']
                         record['seq_len_3'] = record_c['seq_len']
                 elif isinstance(self.tokenizer, BertTokenizer):
                     record = {
@@ -1083,7 +1094,7 @@ class TextMatchingDataset(BaseNLPDataset):
                         'segment_ids': record_a['segment_ids'],
                         'input_mask': record_a['input_mask'],
                         'position_ids': record_a['position_ids'],
-                        'seq_len_1': record_a['seq_len'],
+                        'seq_len': record_a['seq_len'],
                         # text_2
                         'input_ids_2': record_b['input_ids'],
                         'segment_ids_2': record_b['segment_ids'],
@@ -1109,6 +1120,6 @@ class TextMatchingDataset(BaseNLPDataset):
                     record['label'] = self.label_list.index(example.label)
 
                 records.append(record)
-
                 process_bar.update(1)
+
         return records

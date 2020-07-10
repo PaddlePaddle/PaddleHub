@@ -61,7 +61,7 @@ class TencentAILabChineseEmbeddingSmall(hub.Module):
         Get the input ,output and program of the pretrained word2vec_skipgram
 
         Args:
-             trainable(bool): whether fine-tune the pretrained parameters of simnet_bow or not
+             trainable(bool): Whether fine-tune the pretrained parameters of tencent_ailab_chinese_embedding_small or not.
              num_slots(int): It's number of data inputted to the model, selectted as following options:
 
                  - 1(default): There's only one data to be feeded in the model, e.g. the module is used for sentence classification task.
@@ -69,9 +69,9 @@ class TencentAILabChineseEmbeddingSmall(hub.Module):
                  - 3: There are three data to be feeded in the model, e.g. the module is used for text matching task (pair-wise).
 
         Returns:
-             inputs(dict): the input variables of word2vec_skipgram (words)
+             inputs(dict): the input variables of tencent_ailab_chinese_embedding_small (words)
              outputs(dict): the output variables of input words (word embeddings)
-             main_program(Program): the main_program of word2vec_skipgram with pretrained prameters
+             main_program(Program): the main_program of tencent_ailab_chinese_embedding_small with pretrained prameters
         """
         assert num_slots >= 1 and num_slots <= 3, "num_slots must be 1, 2, or 3, but the input is %d" % num_slots
         main_program = fluid.Program()
@@ -84,7 +84,7 @@ class TencentAILabChineseEmbeddingSmall(hub.Module):
                     trainable=trainable)
 
                 text_1 = fluid.data(
-                    name='text_1',
+                    name='text',
                     shape=[-1, max_seq_len],
                     dtype='int64',
                     lod_level=0)
@@ -134,7 +134,7 @@ class TencentAILabChineseEmbeddingSmall(hub.Module):
                     emb_name_list.append(emb_3_name)
 
                 variable_names = filter(
-                    lambda v: v not in ['text_1', 'text_2', 'text_3'],
+                    lambda v: v not in ['text', 'text_2', 'text_3'],
                     list(main_program.global_block().vars.keys()))
 
                 prefix_name = "@HUB_{}@".format(self.name)
@@ -159,9 +159,15 @@ class TencentAILabChineseEmbeddingSmall(hub.Module):
                 inputs = {}
                 outputs = {}
                 for index, data in enumerate(data_list):
-                    inputs['text_%s' % (index + 1)] = data
-                    outputs['emb_%s' % (index + 1)] = main_program.global_block(
-                    ).vars[prefix_name + emb_name_list[index]]
+                    if index == 0:
+                        inputs['text'] = data
+                        outputs['emb'] = main_program.global_block().vars[
+                            prefix_name + emb_name_list[0]]
+                    else:
+                        inputs['text_%s' % (index + 1)] = data
+                        outputs['emb_%s' %
+                                (index + 1)] = main_program.global_block().vars[
+                                    prefix_name + emb_name_list[index]]
 
                 return inputs, outputs, main_program
 

@@ -229,7 +229,7 @@ class TextClassifierTask(ClassifierTask):
             ), 'If you do not use network, you must set feature ranther than token_feature for TextClassifierTask!'
             assert len(
                 feature.shape
-            ) == 2, 'When you do not use network, the parameter feture must be the sentence-level feature, such as the pooled_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
+            ) == 2, 'When you do not use network, the parameter feture must be the sentence-level feature ([batch_size, hidden_size]), such as the pooled_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
 
         self.network = network
 

@@ -53,7 +53,7 @@ class JiebaPaddle(hub.Module):
             res = " ".join(jieba.cut(sentence, cut_all=cut_all, HMM=HMM))
             seg_list = res.strip(" ").split(" ")
 
-        return {"word": seg_list}
+        return seg_list
 
     def check_dependency(self):
         """
@@ -63,9 +63,9 @@ class JiebaPaddle(hub.Module):
             import jieba
         except ImportError:
             print(
-                "Import error, cannot find jieba module. Installing jieba tool, please wait minutes..."
+                'This module requires jieba tools. The running enviroment does not meet the requirments. Please install jieba packages.'
             )
-            os.system("pip install -r requirements.txt")
+            exit()
 
     def cut_for_search(self, sentence, HMM=True):
         """
@@ -82,7 +82,7 @@ class JiebaPaddle(hub.Module):
         jieba.setLogLevel(logging.ERROR)
         res = " ".join(jieba.cut_for_search(sentence, HMM=HMM))
         seg_list = res.strip(" ").split(" ")
-        return {"word": seg_list}
+        return seg_list
 
     def load_userdict(self, user_dict):
         '''
@@ -167,21 +167,21 @@ class JiebaPaddle(hub.Module):
 
 
 if __name__ == "__main__":
-    jb = JiebaPaddle()
-    res = jb.cut(
+    jb_pd = JiebaPaddle()
+    res = jb_pd.cut(
         sentence="我来到北京清华大学",
         use_paddle=True,
     )
     print(res)
-    res = jb.cut(sentence="我来到北京清华大学", use_paddle=False, cut_all=True)
+    res = jb_pd.cut(sentence="我来到北京清华大学", use_paddle=False, cut_all=True)
     print(res)
-    res = jb.cut(sentence="我来到北京清华大学", use_paddle=False, cut_all=False)
+    res = jb_pd.cut(sentence="我来到北京清华大学", use_paddle=False, cut_all=False)
     print(res)
-    res = jb.cut_for_search(sentence="我来到北京清华大学")
+    res = jb_pd.cut_for_search(sentence="我来到北京清华大学")
     print(res)
-    res = jb.extract_tags(sentence="我来到北京清华大学")
+    res = jb_pd.extract_tags(sentence="我来到北京清华大学")
     print(res)
-    res = jb.extract_tags(sentence="我来到北京清华大学", withWeight=True)
+    res = jb_pd.extract_tags(sentence="我来到北京清华大学", withWeight=True)
     print(res)
-    res = jb.textrank(sentence="我来到北京清华大学", withWeight=True)
+    res = jb_pd.textrank(sentence="我来到北京清华大学", withWeight=True)
     print(res)

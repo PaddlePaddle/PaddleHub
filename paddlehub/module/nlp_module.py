@@ -327,7 +327,7 @@ class TransformerModule(NLPBaseModule):
             self,
             max_seq_len=None,
             trainable=True,
-            num_data=1,
+            num_slots=1,
     ):
         """
         get inputs, outputs and program from pre-trained module
@@ -335,7 +335,7 @@ class TransformerModule(NLPBaseModule):
         Args:
             max_seq_len (int): the max sequence length
             trainable (bool): optimizing the pre-trained module params during training or not
-            num_data(int): It's number of data inputted to the model, selectted as following options:
+            num_slots(int): It's number of data inputted to the model, selectted as following options:
                 - 1(default): There's only one data to be feeded in the model, e.g. the module is used for sentence classification task.
                 - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
                 - 3: There are three data to be feeded in the model, e.g. the module is used for text matching task (pair-wise).
@@ -345,7 +345,7 @@ class TransformerModule(NLPBaseModule):
                  The outputs is a dict with two keys named pooled_output and sequence_output.
 
         """
-        assert num_data >= 1 and num_data <= 3, "num_data(%d) must be 1, 2, or 3" % num_data
+        assert num_slots >= 1 and num_slots <= 3, "num_slots must be 1, 2, or 3, but the input is %d" % num_slots
         if not max_seq_len:
             max_seq_len = self.max_seq_len
 
@@ -382,7 +382,7 @@ class TransformerModule(NLPBaseModule):
                 data_list = [(input_ids, position_ids, segment_ids, input_mask)]
                 output_name_list = [(pooled_output.name, sequence_output.name)]
 
-                if num_data > 1:
+                if num_slots > 1:
                     input_ids_2 = fluid.layers.data(
                         name='input_ids_2',
                         shape=[-1, max_seq_len, 1],
@@ -411,7 +411,7 @@ class TransformerModule(NLPBaseModule):
                     output_name_list.append((pooled_output_2.name,
                                              sequence_output_2.name))
 
-                if num_data > 2:
+                if num_slots > 2:
                     input_ids_3 = fluid.layers.data(
                         name='input_ids_3',
                         shape=[-1, max_seq_len, 1],
@@ -468,6 +468,7 @@ class TransformerModule(NLPBaseModule):
         inputs = {}
         outputs = {}
         for index, data in enumerate(data_list):
+
             if index == 0:
                 inputs['input_ids'] = data[
                     0]  # module_program.global_block().vars[names[0]]
