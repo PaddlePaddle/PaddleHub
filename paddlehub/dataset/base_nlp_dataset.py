@@ -1132,12 +1132,13 @@ class TextMatchingDataset(BaseNLPDataset):
                 examples.append(example)
             return examples
 
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model needs.
 
         Args:
             examples (list): the data example, returned by _read_file.
+            phase(str): train, dev, test or predict.
 
         Returns:
             a list with all the records, which will be feeded to the prpgram.

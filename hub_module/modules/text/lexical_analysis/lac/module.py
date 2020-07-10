@@ -33,7 +33,7 @@ class DataFormatError(Exception):
 
 @moduleinfo(
     name="lac",
-    version="2.1.",
+    version="2.2.0",
     summary=
     "Baidu's open-source lexical analysis tool for Chinese, including word segmentation, part-of-speech tagging & named entity recognition",
     author="baidu-nlp",
