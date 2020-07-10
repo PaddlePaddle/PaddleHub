@@ -16,6 +16,7 @@
 # NLP Dataset
 from .dataset import InputExample, BaseDataset
 from .chnsenticorp import ChnSentiCorp
+from .couplet import Couplet
 from .msra_ner import MSRA_NER
 from .nlpcc_dbqa import NLPCC_DBQA
 from .lcqmc import LCQMC

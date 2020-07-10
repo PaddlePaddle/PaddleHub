@@ -53,7 +53,7 @@ from .io.type import DataType
 
 from .finetune.config import RunConfig
 from .finetune.strategy import AdamWeightDecayStrategy, CombinedStrategy, DefaultFinetuneStrategy, DefaultStrategy, L2SPFinetuneStrategy, ULMFiTStrategy
-from .finetune.task import BaseTask, ClassifierTask, DetectionTask, ImageClassifierTask, MultiLabelClassifierTask, ReadingComprehensionTask, RegressionTask, SequenceLabelTask, TextClassifierTask, PairwiseTextMatchingTask, PointwiseTextMatchingTask
+from .finetune.task import BaseTask, ClassifierTask, DetectionTask, TextGenerationTask, ImageClassifierTask, MultiLabelClassifierTask, ReadingComprehensionTask, RegressionTask, SequenceLabelTask, TextClassifierTask, PairwiseTextMatchingTask, PointwiseTextMatchingTask
 
 from .autofinetune.evaluator import report_final_result
 

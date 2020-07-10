@@ -52,13 +52,19 @@ def get_variable_info(var):
 
     var_info = {
         'name': var.name,
-        'dtype': convert_dtype_to_string(var.dtype),
-        'lod_level': var.lod_level,
-        'shape': var.shape,
         'stop_gradient': var.stop_gradient,
         'is_data': var.is_data,
-        'error_clip': var.error_clip
+        'error_clip': var.error_clip,
+        'type': var.type
     }
+
+    try:
+        var_info['dtype'] = convert_dtype_to_string(var.dtype)
+        var_info['lod_level'] = var.lod_level
+        var_info['shape'] = var.shape
+    except:
+        pass
+
     if isinstance(var, fluid.framework.Parameter):
         var_info['trainable'] = var.trainable
         var_info['optimize_attr'] = var.optimize_attr
@@ -153,17 +159,34 @@ def _copy_vars_and_ops_in_blocks(from_block, to_block):
             to_block.create_var(**var_info)
 
     for op in from_block.ops:
+        all_attrs = op.all_attrs()
+        if 'sub_block' in all_attrs:
+            _sub_block = to_block.program._create_block()
+            _copy_vars_and_ops_in_blocks(all_attrs['sub_block'], _sub_block)
+            to_block.program._rollback()
+            new_attrs = {'sub_block': _sub_block}
+            for key, value in all_attrs.items():
+                if key == 'sub_block':
+                    continue
+                new_attrs[key] = copy.deepcopy(value)
+        else:
+            new_attrs = copy.deepcopy(all_attrs)
+
         op_info = {
             'type': op.type,
             'inputs': {
-                input: [to_block.var(var) for var in op.input(input)]
+                input:
+                [to_block._find_var_recursive(var) for var in op.input(input)]
                 for input in op.input_names
             },
             'outputs': {
-                output: [to_block.var(var) for var in op.output(output)]
+                output: [
+                    to_block._find_var_recursive(var)
+                    for var in op.output(output)
+                ]
                 for output in op.output_names
             },
-            'attrs': copy.deepcopy(op.all_attrs())
+            'attrs': new_attrs
         }
         to_block.append_op(**op_info)
 
