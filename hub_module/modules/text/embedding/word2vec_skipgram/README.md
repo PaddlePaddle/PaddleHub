@@ -4,9 +4,7 @@ Word2vec是常用的词嵌入（word embedding）模型。该PaddleHub Module基
 
 ## API
 
-```python
-def context(trainable=False, max_seq_len=128, num_slots=1)
-```
+### context(trainable=False, max_seq_len=128, num_slots=1)
 
 获取该Module的预训练program以及program相应的输入输出。
 
