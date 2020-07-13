@@ -73,9 +73,8 @@ if __name__ == '__main__':
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
         eval_interval=300,
-        save_ckpt_interval=100000,
         use_data_parallel=False,
-        use_cuda=True,
+        use_cuda=False,
         num_epoch=args.num_epoch,
         batch_size=args.batch_size,
         checkpoint_dir=args.checkpoint_dir,
