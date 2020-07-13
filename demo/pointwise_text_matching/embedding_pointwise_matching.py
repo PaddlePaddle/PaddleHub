@@ -67,28 +67,13 @@ if __name__ == '__main__':
     title = outputs['emb_2']
 
     # Select fine-tune strategy
-    #     strategy = hub.DefaultStrategy(
-    #         optimizer_name="sgd",
-    #         learning_rate=args.learning_rate)
-
-    scheduler = {
-        "warmup": 0.1,
-        "linear_decay": {
-            "start_point": 0.5,
-            "end_learning_rate": 0.0,
-        },
-    }
-
-    strategy = hub.CombinedStrategy(
-        optimizer_name='adam',
-        learning_rate=args.learning_rate,
-        scheduler=scheduler,
-        regularization=None)
+    strategy = hub.DefaultStrategy(
+        optimizer_name="sgd", learning_rate=args.learning_rate)
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
         eval_interval=300,
-        save_ckpt_interval=300,
+        save_ckpt_interval=100000,
         use_data_parallel=False,
         use_cuda=True,
         num_epoch=args.num_epoch,

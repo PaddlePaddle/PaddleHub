@@ -1,5 +1,5 @@
 # coding:utf-8
-#  Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+#  Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -12,21 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import time
 from collections import OrderedDict
 
-import numpy as np
-import paddle.fluid as fluid
 from paddlehub.common.logger import logger
 from paddlehub.finetune.evaluate import calculate_f1_np, simple_accuracy
 from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
 from paddlehub.tokenizer.tokenizer import CustomTokenizer
+import numpy as np
+import paddle.fluid as fluid
 import paddlehub.network as net
+
 from .base_task import BaseTask
 
 
@@ -43,7 +39,7 @@ class PairwiseTextMatchingTask(BaseTask):
                  dataset=None,
                  network=None,
                  config=None,
-                 metrics_choices=['f1', "precision", "recall", "acc"]):
+                 metrics_choices=["acc", "f1", "precision", "recall"]):
         """
         Args:
             query_feature(Variable): It represents the query in the text matching task.
@@ -381,7 +377,7 @@ class PointwiseTextMatchingTask(BaseTask):
                  dataset=None,
                  network=None,
                  config=None,
-                 metrics_choices=['f1', "precision", "recall", "acc"]):
+                 metrics_choices=["acc", 'f1', "precision", "recall"]):
         """
         Args:
             query_feature(Variable): It represents the query in the text matching task.
@@ -527,11 +523,6 @@ class PointwiseTextMatchingTask(BaseTask):
             all_infers += [int(pre) for pre in predictions]
             true_labels = [int(label[0]) for label in labels]
             all_labels += true_labels
-
-
-#             print('*'*100)
-#             print(all_infers)
-#             print(all_labels)
 
         run_time_used = time.time() - run_states[0].run_time_begin
         avg_loss = loss_sum / run_examples

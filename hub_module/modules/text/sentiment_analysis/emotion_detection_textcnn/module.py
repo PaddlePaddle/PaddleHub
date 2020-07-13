@@ -51,7 +51,8 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
         Get the input ,output and program of the pretrained emotion_detection_textcnn
 
         Args:
-             trainable(bool): whether fine-tune the pretrained parameters of emotion_detection_textcnn or not
+             trainable(bool): Whether fine-tune the pretrained parameters of emotion_detection_textcnn or not.
+             max_seq_len (int): It will limit the total sequence returned so that it has a maximum length.
              num_slots(int): It's number of data inputted to the model, selectted as following options:
 
                  - 1(default): There's only one data to be feeded in the model, e.g. the module is used for text classification task.
@@ -146,7 +147,7 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
             place = fluid.CPUPlace()
             exe = fluid.Executor(place)
 
-            # Load the senta_lstm pretrained model.
+            # Load the emotion_detection_textcnn pretrained model.
             def if_exist(var):
                 return os.path.exists(
                     os.path.join(self.pretrained_model_path, var.name))

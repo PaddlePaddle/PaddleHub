@@ -60,7 +60,8 @@ class Word2vecSkipGram(hub.Module):
         Get the input ,output and program of the pretrained word2vec_skipgram
 
         Args:
-             trainable(bool): whether fine-tune the pretrained parameters of simnet_bow or not
+             trainable(bool): whether fine-tune the pretrained parameters of word2vec_skipgram or not.
+             max_seq_len (int): It will limit the total sequence returned so that it has a maximum length.
              num_slots(int): It's number of data inputted to the model, selectted as following options:
 
                  - 1(default): There's only one data to be feeded in the model, e.g. the module is used for sentence classification task.

@@ -1,5 +1,5 @@
-export CUDA_VISIBLE_DEVICES=3
-CKPT_DIR="./ckpt_embedding_pointwise_matching_adam"
+export CUDA_VISIBLE_DEVICES=0
+CKPT_DIR="./ckpt_embedding_pointwise_matching"
 
 python -u embedding_pointwise_matching.py \
             --batch_size=128 \

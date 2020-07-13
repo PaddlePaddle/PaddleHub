@@ -12,11 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from collections import OrderedDict
 import numpy as np
 import paddle.fluid as fluid
@@ -25,6 +20,7 @@ import time
 from paddlehub.common.logger import logger
 from paddlehub.finetune.evaluate import calculate_f1_np, matthews_corrcoef
 from paddlehub.reader.nlp_reader import ClassifyReader, LACClassifyReader
+
 import paddlehub.network as net
 
 from .base_task import BaseTask
@@ -249,7 +245,7 @@ class TextClassifierTask(ClassifierTask):
 
     def _build_net(self):
         if not isinstance(self._base_data_reader, LACClassifyReader):
-            # LACClassifyReader won‘t return the seqence length, while Dataset with tokenizer and ClassifyReader will.
+            # LACClassifyReader won't return the seqence length, while Dataset with tokenizer and ClassifyReader will.
             self.seq_len = fluid.layers.data(
                 name="seq_len", shape=[1], dtype='int64', lod_level=0)
             self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])

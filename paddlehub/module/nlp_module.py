@@ -333,8 +333,8 @@ class TransformerModule(NLPBaseModule):
         get inputs, outputs and program from pre-trained module
 
         Args:
-            max_seq_len (int): the max sequence length
-            trainable (bool): optimizing the pre-trained module params during training or not
+            max_seq_len (int): It will limit the total sequence returned so that it has a maximum length.
+            trainable (bool): Whether fine-tune the pre-trained module parameters or not.
             num_slots(int): It's number of data inputted to the model, selectted as following options:
                 - 1(default): There's only one data to be feeded in the model, e.g. the module is used for sentence classification task.
                 - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
@@ -470,14 +470,10 @@ class TransformerModule(NLPBaseModule):
         for index, data in enumerate(data_list):
 
             if index == 0:
-                inputs['input_ids'] = data[
-                    0]  # module_program.global_block().vars[names[0]]
-                inputs['position_ids'] = data[
-                    1]  # module_program.global_block().vars[names[1]]
-                inputs['segment_ids'] = data[
-                    2]  # module_program.global_block().vars[names[2]]
-                inputs['input_mask'] = data[
-                    3]  # module_program.global_block().vars[ names[3]]
+                inputs['input_ids'] = data[0]
+                inputs['position_ids'] = data[1]
+                inputs['segment_ids'] = data[2]
+                inputs['input_mask'] = data[3]
                 outputs['pooled_output'] = module_program.global_block().vars[
                     self.param_prefix() + output_name_list[0][0]]
                 outputs["sequence_output"] = module_program.global_block().vars[

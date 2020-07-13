@@ -155,16 +155,6 @@ class LAC(hub.Module):
         self.custom = Customization()
         self.custom.load_customization(dict_path, sep)
 
-
-#     def load_customization(self, customization_file, sep=None):
-#         """装载用户词典
-#         Args:
-#             texts: 用户词典路径
-#             sep: 表示词典中，短语片段的分隔符，默认为空格' '或制表符'\t'
-#         """
-#         self.custom = Customization()
-#         self.custom.load_customization(customization_file, sep)
-
     def del_user_dict(self):
         """
         Delete the costomized dictionary if you don't wanna exploit the self-defined dictionary any longer
@@ -506,6 +496,7 @@ class LAC(hub.Module):
             raise DataFormatError
 
         return input_data
+
 
 if __name__ == '__main__':
     lac = LAC(user_dict="user.dict")

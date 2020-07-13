@@ -88,6 +88,6 @@ if __name__ == '__main__':
         max_seq_len=args.max_seq_len,
         label_list=dataset.get_labels(),
         return_result=True,
-        accelerate_mode=True)
+        accelerate_mode=False)
     for index, text in enumerate(text_pairs):
         print("data: %s, preidction_label: %s" % (text, results[index]))

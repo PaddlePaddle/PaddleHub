@@ -13,10 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import collections
 import inspect
 import os
@@ -47,7 +43,7 @@ class CustomTokenizer(object):
             do_lower_case (:obj:`bool`, `optional`, defaults to :obj:`True`): Whether to lower case the input if the input is in English
             pad_token (:obj:`string`, `optional`, defaults to "[PAD]"): The token used for padding, for example when batching sequences of different lengths.
             tokenize_chinese_chars (:obj:`bool`, `optional`, defaults to :obj:`True`): Whether to tokenize Chinese characters.
-            cut_function: It is a function that aims to segment a chinese text and get the word segmentation result (list).
+            cut_function(:obj:`function`): It is a function that aims to segment a chinese text and get the word segmentation result (list).
         """
 
         if not os.path.isfile(vocab_file):
@@ -101,6 +97,7 @@ class CustomTokenizer(object):
             (resp.) a sequence of tokens (str), using the vocabulary and added tokens.
 
             Args:
+                ids(:obj:`int` or :obj:`List[int]`): list of tokenized input ids.
                 skip_special_token: Don't decode special tokens (self.all_special_tokens). Default: False
         """
         if isinstance(ids, int):
@@ -138,7 +135,6 @@ class CustomTokenizer(object):
 
         Args:
             text (`string`): The sequence to be encoded.
-            cut_function (`function`): The chinese word segmentation function to cut the input text into tokens.
 
         Returns:
             split_tokens (`list`): split
