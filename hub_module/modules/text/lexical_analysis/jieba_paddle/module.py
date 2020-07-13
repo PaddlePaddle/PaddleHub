@@ -44,12 +44,10 @@ class JiebaPaddle(hub.Module):
         jieba._compat.setLogLevel(logging.ERROR)
 
         if use_paddle:
-            logger.info("Using jieba paddle mode to tokenize chinese texts!")
             jieba.enable_paddle()
             res = " ".join(jieba.cut(sentence, use_paddle=True))
             seg_list = res.strip(" ").split(" ")
         else:
-            logger.info("Using jieba basic mode to tokenize chinese texts!")
             res = " ".join(jieba.cut(sentence, cut_all=cut_all, HMM=HMM))
             seg_list = res.strip(" ").split(" ")
 
