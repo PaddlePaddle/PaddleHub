@@ -40,7 +40,7 @@ def load_vocab(file_path):
 
 @moduleinfo(
     name="word2vec_skipgram",
-    version="1.2.0",
+    version="1.1.0",
     summary="Chinese word embedding based on the SkipGram.",
     author="baidu-nlp",
     author_email="",

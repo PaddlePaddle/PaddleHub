@@ -93,3 +93,17 @@ print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
 关于PaddleHub Serving更多信息参考[服务部署](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md)
+
+## 更新历史
+
+* 1.0.0
+
+  初始发布
+
+* 1.1.0
+
+  大幅提升预测性能
+
+* 1.2.0
+
+  模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
