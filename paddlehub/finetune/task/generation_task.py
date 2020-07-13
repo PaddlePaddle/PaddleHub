@@ -164,21 +164,6 @@ class TextGenerationTask(BaseTask):
         # Define decoder and initialize it.
         dec_cell = AttentionDecoderCell(self.num_layers, self.hidden_size,
                                         self.dropout)
-        enc_last_step = fluid.layers.slice(
-            self.token_feature,
-            axes=[1],
-            starts=[-1],
-            ends=[self.token_feature.shape[1] + 1])
-        dec_init_cell = fluid.layers.fc(
-            input=enc_last_step,
-            size=self.hidden_size,
-            num_flatten_dims=1,
-            param_attr=fluid.ParamAttr(
-                name="dec_init_cell_w",
-                initializer=fluid.initializer.TruncatedNormal(scale=0.02)),
-            bias_attr=fluid.ParamAttr(
-                name="dec_init_cell_b",
-                initializer=fluid.initializer.Constant(0.)))
         dec_init_hidden = fluid.layers.fc(
             input=self.feature,
             size=self.hidden_size,
@@ -189,12 +174,14 @@ class TextGenerationTask(BaseTask):
             bias_attr=fluid.ParamAttr(
                 name="dec_init_hidden_b",
                 initializer=fluid.initializer.Constant(0.)))
-        # TODO: maybe dec_init_hidden can use self.feature, and dec_init_cell can be get_initial_states
-        dec_initial_states = [
-            [[dec_init_hidden, dec_init_cell]] * self.num_layers,
+        dec_initial_states = [[[
+            dec_init_hidden,
             dec_cell.get_initial_states(
-                batch_ref=self.token_feature, shape=[self.hidden_size])
-        ]
+                batch_ref=self.feature, shape=[self.hidden_size])
+        ]] * self.num_layers,
+                              dec_cell.get_initial_states(
+                                  batch_ref=self.feature,
+                                  shape=[self.hidden_size])]
         tar_vocab_size = len(self._label_list)
         tar_embeder = lambda x: fluid.embedding(
             input=x,
