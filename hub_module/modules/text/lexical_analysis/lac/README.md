@@ -14,7 +14,7 @@ lac预测接口，预测输入句子的分词结果
 
 **参数**
 
-* texts(str or list): 待预测数据，单句预测数据（str类型）或者批量预测（list，每个元素为str
+* text(str or list): 待预测数据，单句预测数据（str类型）或者批量预测（list，每个元素为str
 * use_gpu(bool): 是否使用GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置
 * batch_size(int): 批处理大小
 * return_tag(bool): 预测结果是否需要返回分词标签结果
