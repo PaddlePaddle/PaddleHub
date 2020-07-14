@@ -11,7 +11,7 @@ TansformerTTS 是使用了 Transformer 结构的端到端语音合成模型，�
 ## 命令行预测
 
 ```shell
-$ hub run transformer_tts_ljspeech --input_text='Simple as this proposition is, it is necessary to be stated'
+$ hub run transformer_tts_ljspeech --input_text="Life was like a box of chocolates, you never know what you're gonna get." --use_gpu True --vocoder griffin-lim
 ```
 
 ## API
@@ -43,9 +43,8 @@ import soundfile as sf
 module = hub.Module(name="transformer_tts_ljspeech")
 
 # Predict sentiment label
-test_texts = ['Simple as this proposition is, it is necessary to be stated',
-              'Parakeet stands for Paddle PARAllel text-to-speech toolkit']
-wavs, sample_rate = module.synthesize(texts=test_texts)
+test_texts = ["Life was like a box of chocolates, you never know what you're gonna get."]
+wavs, sample_rate = module.synthesize(texts=test_texts, use_gpu=True, vocoder="waveflow")
 for index, wav in enumerate(wavs):
     sf.write(f"{index}.wav", wav, sample_rate)
 ```

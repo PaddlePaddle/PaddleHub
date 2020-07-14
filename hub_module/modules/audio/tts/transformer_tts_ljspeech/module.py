@@ -12,18 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
+import ast
+import argparse
 import importlib.util
 
 import nltk
-from tqdm import tqdm
+import soundfile as sf
 
 import paddle.fluid as fluid
 import paddle.fluid.dygraph as dg
 import paddlehub as hub
+from paddlehub.module.module import runnable
+from paddlehub.common.utils import mkdir
+from paddlehub.module.nlp_module import DataFormatError
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo, serving
 from paddlehub.common.dir import THIRD_PARTY_HOME
@@ -39,9 +40,10 @@ if not lack_dependency:
     from scipy.io.wavfile import write
     from parakeet.g2p.en import text_to_sequence
     from parakeet.models.transformer_tts.utils import *
-    from parakeet import audio
     from parakeet.models.transformer_tts import TransformerTTS as TransformerTTSModel
+    from parakeet.models.waveflow import WaveFlowModule
     from parakeet.utils import io
+    from parakeet.modules.weight_norm import WeightNormWrapper
 else:
     raise ImportError(
         "The module requires additional dependencies. Please install %s via `pip install`"
@@ -65,6 +67,12 @@ if not os.path.exists(cmudict_path):
 nltk.data.path.append(nltk_path)
 
 
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
+
+
 @moduleinfo(
     name="transformer_tts_ljspeech",
     version="1.0.0",
@@ -79,31 +87,48 @@ class TransformerTTS(hub.NLPPredictionModule):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "assets",
-                                                  "step-120000")
-        config_path = os.path.join(self.directory, "assets", "config.yaml")
-        with open(config_path, "rt") as f:
-            self.config = yaml.load(f, Loader=yaml.Loader)
+        self.tts_checkpoint_path = os.path.join(self.directory, "assets", "tts",
+                                                "step-120000")
+        self.waveflow_checkpoint_path = os.path.join(self.directory, "assets",
+                                                     "vocoder", "step-2000000")
+        self.waveflow_config_path = os.path.join(
+            self.directory, "assets", "vocoder", "waveflow_ljspeech.yaml")
 
-        self._ljspeech_processor = audio.AudioProcessor(
-            sample_rate=self.config['audio']['sr'],
-            num_mels=self.config['audio']['num_mels'],
-            min_level_db=self.config['audio']['min_level_db'],
-            ref_level_db=self.config['audio']['ref_level_db'],
-            n_fft=self.config['audio']['n_fft'],
-            win_length=self.config['audio']['win_length'],
-            hop_length=self.config['audio']['hop_length'],
-            power=self.config['audio']['power'],
-            preemphasis=self.config['audio']['preemphasis'],
-            signal_norm=True,
-            symmetric_norm=False,
-            max_norm=1.,
-            mel_fmin=0,
-            mel_fmax=None,
-            clip_norm=True,
-            griffin_lim_iters=60,
-            do_trim_silence=False,
-            sound_norm=False)
+        tts_config_path = os.path.join(self.directory, "assets", "tts",
+                                       "ljspeech.yaml")
+        with open(tts_config_path) as f:
+            self.tts_config = yaml.load(f, Loader=yaml.Loader)
+
+        # The max length of audio when synthsis.
+        self.max_len = 1000
+        # The threshold of stop token which indicates the time step should stop generate spectrum or not.
+        self.stop_threshold = 0.5
+
+        with fluid.dygraph.guard(fluid.CPUPlace()):
+            # Build TTS.
+            with fluid.unique_name.guard():
+                network_cfg = self.tts_config['network']
+                self.tts_model = TransformerTTSModel(
+                    network_cfg['embedding_size'], network_cfg['hidden_size'],
+                    network_cfg['encoder_num_head'],
+                    network_cfg['encoder_n_layers'],
+                    self.tts_config['audio']['num_mels'],
+                    network_cfg['outputs_per_step'],
+                    network_cfg['decoder_num_head'],
+                    network_cfg['decoder_n_layers'])
+                io.load_parameters(
+                    model=self.tts_model,
+                    checkpoint_path=self.tts_checkpoint_path)
+
+            # Build vocoder.
+            args = AttrDict()
+            args.config = self.waveflow_config_path
+            args.use_fp16 = False
+            self.waveflow_config = io.add_yaml_config_to_args(args)
+            self.waveflow = WaveFlowModule(self.waveflow_config)
+            io.load_parameters(
+                model=self.waveflow,
+                checkpoint_path=self.waveflow_checkpoint_path)
 
     def synthesize(self, texts, use_gpu=False, vocoder="griffin-lim"):
         """
@@ -133,49 +158,80 @@ class TransformerTTS(hub.NLPPredictionModule):
         else:
             raise ValueError(
                 "The input data is inconsistent with expectations.")
-        dg.enable_dygraph(place)
-        with fluid.unique_name.guard():
-            network_cfg = self.config['network']
-            model = TransformerTTSModel(network_cfg['embedding_size'],
-                                        network_cfg['hidden_size'],
-                                        network_cfg['encoder_num_head'],
-                                        network_cfg['encoder_n_layers'],
-                                        self.config['audio']['num_mels'],
-                                        network_cfg['outputs_per_step'],
-                                        network_cfg['decoder_num_head'],
-                                        network_cfg['decoder_n_layers'])
-            # Load parameters.
-            global_step = io.load_parameters(
-                model=model, checkpoint_path=self.pretrained_model_path)
-            model.eval()
 
         wavs = []
-        for text in predicted_data:
-            # init input
-            audio_len = len(text.split()) * 40  # An empirical value
-            text = np.asarray(text_to_sequence(text))
-            text = fluid.layers.unsqueeze(
-                dg.to_variable(text).astype(np.int64), [0])
-            mel_input = dg.to_variable(np.zeros([1, 1, 80])).astype(np.float32)
-            pos_text = np.arange(1, text.shape[1] + 1)
-            pos_text = fluid.layers.unsqueeze(
-                dg.to_variable(pos_text).astype(np.int64), [0])
+        with fluid.dygraph.guard(place):
+            self.tts_model.eval()
+            self.waveflow.eval()
+            for text in predicted_data:
+                # init input
+                text = np.asarray(text_to_sequence(text))
+                text = fluid.layers.unsqueeze(
+                    dg.to_variable(text).astype(np.int64), [0])
+                mel_input = dg.to_variable(np.zeros([1, 1,
+                                                     80])).astype(np.float32)
+                pos_text = np.arange(1, text.shape[1] + 1)
+                pos_text = fluid.layers.unsqueeze(
+                    dg.to_variable(pos_text).astype(np.int64), [0])
 
-            for _ in tqdm(range(audio_len)):
-                pos_mel = np.arange(1, mel_input.shape[1] + 1)
-                pos_mel = fluid.layers.unsqueeze(
-                    dg.to_variable(pos_mel).astype(np.int64), [0])
-                mel_pred, postnet_pred, attn_probs, stop_preds, attn_enc, attn_dec = model(
-                    text, mel_input, pos_text, pos_mel)
-                mel_input = fluid.layers.concat(
-                    [mel_input, postnet_pred[:, -1:, :]], axis=1)
+                for i in range(self.max_len):
+                    pos_mel = np.arange(1, mel_input.shape[1] + 1)
+                    pos_mel = fluid.layers.unsqueeze(
+                        dg.to_variable(pos_mel).astype(np.int64), [0])
+                    mel_pred, postnet_pred, attn_probs, stop_preds, attn_enc, attn_dec = self.tts_model(
+                        text, mel_input, pos_text, pos_mel)
+                    if stop_preds.numpy()[0, -1] > self.stop_threshold:
+                        break
+                    mel_input = fluid.layers.concat(
+                        [mel_input, postnet_pred[:, -1:, :]], axis=1)
+                if vocoder == 'griffin-lim':
+                    # synthesis use griffin-lim
+                    wav = self.synthesis_with_griffinlim(
+                        postnet_pred, self.tts_config['audio'])
+                elif vocoder == 'waveflow':
+                    # synthesis use waveflow
+                    wav = self.synthesis_with_waveflow(
+                        postnet_pred, self.waveflow_config.sigma)
+                else:
+                    raise ValueError(
+                        'vocoder error, we only support griffinlim and waveflow, but recevied %s.'
+                        % vocoder)
+                wavs.append(wav)
+        return wavs, self.tts_config['audio']['sr']
 
-            # synthesis with griffin-lim
-            wav = self._ljspeech_processor.inv_melspectrogram(
-                fluid.layers.transpose(
-                    fluid.layers.squeeze(postnet_pred, [0]), [1, 0]).numpy())
-            wavs.append(wav)
-        return wavs, self.config['audio']['sr']
+    def synthesis_with_griffinlim(self, mel_output, cfg):
+        # synthesis with griffin-lim
+        mel_output = fluid.layers.transpose(
+            fluid.layers.squeeze(mel_output, [0]), [1, 0])
+        mel_output = np.exp(mel_output.numpy())
+        basis = librosa.filters.mel(
+            cfg['sr'],
+            cfg['n_fft'],
+            cfg['num_mels'],
+            fmin=cfg['fmin'],
+            fmax=cfg['fmax'])
+        inv_basis = np.linalg.pinv(basis)
+        spec = np.maximum(1e-10, np.dot(inv_basis, mel_output))
+
+        wav = librosa.core.griffinlim(
+            spec**cfg['power'],
+            hop_length=cfg['hop_length'],
+            win_length=cfg['win_length'])
+
+        return wav
+
+    def synthesis_with_waveflow(self, mel_output, sigma):
+        mel_spectrogram = fluid.layers.transpose(
+            fluid.layers.squeeze(mel_output, [0]), [1, 0])
+        mel_spectrogram = fluid.layers.unsqueeze(mel_spectrogram, [0])
+
+        for layer in self.waveflow.sublayers():
+            if isinstance(layer, WeightNormWrapper):
+                layer.remove_weight_norm()
+
+        # Run model inference.
+        wav = self.waveflow.synthesize(mel_spectrogram, sigma=sigma)
+        return wav.numpy()[0]
 
     @serving
     def serving_method(self, texts, use_gpu=False, vocoder="griffin-lim"):
@@ -187,16 +243,85 @@ class TransformerTTS(hub.NLPPredictionModule):
         result = {"wavs": wavs, "sample_rate": sample_rate}
         return result
 
+    def add_module_config_arg(self):
+        """
+        Add the command config options
+        """
+        self.arg_config_group.add_argument(
+            '--use_gpu',
+            type=ast.literal_eval,
+            default=False,
+            help="whether use GPU for prediction")
+
+        self.arg_config_group.add_argument(
+            '--vocoder',
+            type=str,
+            default="griffin-lim",
+            choices=['griffin-lim', 'waveflow'],
+            help="the vocoder name")
+
+    def add_module_output_arg(self):
+        """
+        Add the command config options
+        """
+        self.arg_config_group.add_argument(
+            '--output_path',
+            type=str,
+            default=os.path.abspath(
+                os.path.join(os.path.curdir, f"{self.name}_prediction")),
+            help="path to save experiment results")
+
+    @runnable
+    def run_cmd(self, argvs):
+        """
+        Run as a command
+        """
+        self.parser = argparse.ArgumentParser(
+            description='Run the %s module.' % self.name,
+            prog='hub run %s' % self.name,
+            usage='%(prog)s',
+            add_help=True)
+
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Ouput options", description="Ouput path. Optional.")
+        self.arg_config_group = self.parser.add_argument_group(
+            title="Config options",
+            description=
+            "Run configuration for controlling module behavior, optional.")
+
+        self.add_module_config_arg()
+        self.add_module_input_arg()
+        self.add_module_output_arg()
+
+        args = self.parser.parse_args(argvs)
+
+        try:
+            input_data = self.check_input_data(args)
+        except DataFormatError and RuntimeError:
+            self.parser.print_help()
+            return None
+
+        mkdir(args.output_path)
+        wavs, sample_rate = self.synthesize(
+            texts=input_data, use_gpu=args.use_gpu, vocoder=args.vocoder)
+
+        for index, wav in enumerate(wavs):
+            sf.write(
+                os.path.join(args.output_path, f"{index}.wav"), wav,
+                sample_rate)
+
+        ret = f"The synthesized wav files have been saved in {args.output_path}"
+        return ret
+
 
 if __name__ == "__main__":
-    import soundfile as sf
 
     module = TransformerTTS()
     test_text = [
-        "Simple as this proposition is, it is necessary to be stated,",
-        "Parakeet stands for Paddle PARAllel text-to-speech toolkit.",
+        "Life was like a box of chocolates, you never know what you're gonna get.",
     ]
-    wavs, sample_rate = module.synthesize(
-        texts=test_text, vocoder="griffin-lim")
+    wavs, sample_rate = module.synthesize(texts=test_text, vocoder="waveflow")
     for index, wav in enumerate(wavs):
         sf.write(f"{index}.wav", wav, sample_rate)

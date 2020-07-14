@@ -149,6 +149,7 @@ class DeepVoice3(hub.NLPPredictionModule):
             '--vocoder',
             type=str,
             default="griffin-lim",
+            choices=['griffin-lim', 'waveflow'],
             help="the vocoder name")
 
     def add_module_output_arg(self):
@@ -160,7 +161,7 @@ class DeepVoice3(hub.NLPPredictionModule):
             type=str,
             default=os.path.abspath(
                 os.path.join(os.path.curdir, f"{self.name}_prediction")),
-            help="the output directory path")
+            help="path to save experiment results")
 
     @runnable
     def run_cmd(self, argvs):

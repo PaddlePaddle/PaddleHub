@@ -12,16 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
+import ast
+import argparse
 import importlib.util
 
 import nltk
 import paddle.fluid as fluid
 import paddle.fluid.dygraph as dg
 import paddlehub as hub
+from paddlehub.module.module import runnable
+from paddlehub.common.utils import mkdir
+from paddlehub.module.nlp_module import DataFormatError
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo, serving
 from paddlehub.common.dir import THIRD_PARTY_HOME
@@ -80,6 +81,10 @@ class FastSpeech(hub.NLPPredictionModule):
         config_path = os.path.join(self.directory, "assets", "config.yaml")
         with open(config_path, "rt") as f:
             self.config = yaml.load(f, Loader=yaml.Loader)
+        with fluid.dygraph.guard(fluid.CPUPlace()):
+            model = FastSpeechModel(
+                self.config['network'],
+                num_mels=self.config['audio']['num_mels'])
 
     def synthesize(self, texts, use_gpu=False, speed=1.0,
                    vocoder="griffin-lim"):
@@ -111,10 +116,6 @@ class FastSpeech(hub.NLPPredictionModule):
         else:
             raise ValueError(
                 "The input data is inconsistent with expectations.")
-        dg.enable_dygraph(place)
-
-        model = FastSpeechModel(
-            self.config['network'], num_mels=self.config['audio']['num_mels'])
 
         # Load parameters.
         global_step = io.load_parameters(
@@ -165,6 +166,78 @@ class FastSpeech(hub.NLPPredictionModule):
         wavs = [wav.tolist() for wav in wavs]
         result = {"wavs": wavs, "sample_rate": sample_rate}
         return result
+
+    def add_module_config_arg(self):
+        """
+        Add the command config options
+        """
+        self.arg_config_group.add_argument(
+            '--use_gpu',
+            type=ast.literal_eval,
+            default=False,
+            help="whether use GPU for prediction")
+
+        self.arg_config_group.add_argument(
+            '--vocoder',
+            type=str,
+            default="griffin-lim",
+            choices=['griffin-lim', 'waveflow'],
+            help="the vocoder name")
+
+    def add_module_output_arg(self):
+        """
+        Add the command config options
+        """
+        self.arg_config_group.add_argument(
+            '--output_path',
+            type=str,
+            default=os.path.abspath(
+                os.path.join(os.path.curdir, f"{self.name}_prediction")),
+            help="path to save experiment results")
+
+    @runnable
+    def run_cmd(self, argvs):
+        """
+        Run as a command
+        """
+        self.parser = argparse.ArgumentParser(
+            description='Run the %s module.' % self.name,
+            prog='hub run %s' % self.name,
+            usage='%(prog)s',
+            add_help=True)
+
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Ouput options", description="Ouput path. Optional.")
+        self.arg_config_group = self.parser.add_argument_group(
+            title="Config options",
+            description=
+            "Run configuration for controlling module behavior, optional.")
+
+        self.add_module_config_arg()
+        self.add_module_input_arg()
+        self.add_module_output_arg()
+
+        args = self.parser.parse_args(argvs)
+
+        try:
+            input_data = self.check_input_data(args)
+        except DataFormatError and RuntimeError:
+            self.parser.print_help()
+            return None
+
+        mkdir(args.output_path)
+        wavs, sample_rate = self.synthesize(
+            texts=input_data, use_gpu=args.use_gpu, vocoder=args.vocoder)
+
+        for index, wav in enumerate(wavs):
+            sf.write(
+                os.path.join(args.output_path, f"{index}.wav"), wav,
+                sample_rate)
+
+        ret = f"The synthesized wav files have been saved in {args.output_path}"
+        return ret
 
 
 if __name__ == "__main__":
