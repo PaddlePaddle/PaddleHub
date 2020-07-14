@@ -52,8 +52,9 @@ def postprocess(data_out,
     for logit in data_out:
         logit = logit[1] * 255
         logit = cv2.resize(logit, (org_im_shape[1], org_im_shape[0]))
-        ret, logit = cv2.threshold(logit, thresh, 0, cv2.THRESH_TOZERO)
-        logit = 255 * (logit - thresh) / (255 - thresh)
+        logit -= thresh
+        logit[logit < 0] = 0
+        logit = 255 * logit / (255 - thresh)
         rgba = np.concatenate((org_im, np.expand_dims(logit, axis=2)), axis=2)
 
         if visualization:

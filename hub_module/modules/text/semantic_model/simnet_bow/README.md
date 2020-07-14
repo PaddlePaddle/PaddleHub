@@ -20,19 +20,21 @@ simnet_bow预测接口，计算两个句子的cosin相似度
 
 * results(list): 带预测数据的cosin相似度
 
-## context(trainable=False)
+### context(trainable=False, max_seq_len=128, num_slots=1)
 
-获取simnet_bow的预训练program以及program的输入输出变量
+获取该Module的预训练program以及program相应的输入输出。
 
 **参数**
 
-* trainable(bool): trainable=True表示program中的参数在Fine-tune时需要微调，否则保持不变
+* trainable(bool): trainable=True表示program中的参数在Fine-tune时需要微调，否则保持不变。
+* max_seq_len(int): 模型使用的最大序列长度。
+* num_slots(int): 输入到模型所需要的文本个数，如完成单句文本分类任务，则num_slots=1；完成pointwise文本匹配任务，则num_slots=2；完成pairtwise文本匹配任务，则num_slots=3；
 
 **返回**
 
 * inputs(dict): program的输入变量
 * outputs(dict): program的输出变量
-* program(Program): 带有预训练参数的program
+* main_program(Program): 带有预训练参数的program
 
 ## get_vocab_path()
 
@@ -91,3 +93,17 @@ print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
 关于PaddleHub Serving更多信息参考[服务部署](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md)
+
+## 更新历史
+
+* 1.0.0
+
+  初始发布
+
+* 1.1.0
+
+  大幅提升预测性能
+
+* 1.2.0
+
+  模型升级，支持用于文本分类，文本匹配等各种任务迁移学习

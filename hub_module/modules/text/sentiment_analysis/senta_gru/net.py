@@ -2,8 +2,8 @@
 import paddle.fluid as fluid
 
 
-def gru_net(data,
-            dict_dim,
+def gru_net(emb,
+            seq_len,
             emb_dim=128,
             hid_dim=128,
             hid_dim2=96,
@@ -12,10 +12,10 @@ def gru_net(data,
     """
     gru net
     """
-    # embedding layer
-    emb = fluid.layers.embedding(input=data, size=[dict_dim, emb_dim])
+    # unpad the token_feature
+    unpad_feature = fluid.layers.sequence_unpad(emb, length=seq_len)
 
-    fc0 = fluid.layers.fc(input=emb, size=hid_dim * 3)
+    fc0 = fluid.layers.fc(input=unpad_feature, size=hid_dim * 3)
 
     # GRU layer
     gru_h = fluid.layers.dynamic_gru(input=fc0, size=hid_dim, is_reverse=False)

@@ -51,27 +51,13 @@ from .module.manager import default_module_manager
 
 from .io.type import DataType
 
-from .finetune.task import BaseTask
-from .finetune.task import ClassifierTask
-from .finetune.task import DetectionTask
-from .finetune.task import TextClassifierTask
-from .finetune.task import ImageClassifierTask
-from .finetune.task import SequenceLabelTask
-from .finetune.task import MultiLabelClassifierTask
-from .finetune.task import RegressionTask
-from .finetune.task import ReadingComprehensionTask
-from .finetune.task import TextGenerationTask
 from .finetune.config import RunConfig
-from .finetune.strategy import AdamWeightDecayStrategy
-from .finetune.strategy import DefaultStrategy
-from .finetune.strategy import DefaultFinetuneStrategy
-from .finetune.strategy import L2SPFinetuneStrategy
-from .finetune.strategy import ULMFiTStrategy
-from .finetune.strategy import CombinedStrategy
+from .finetune.strategy import AdamWeightDecayStrategy, CombinedStrategy, DefaultFinetuneStrategy, DefaultStrategy, L2SPFinetuneStrategy, ULMFiTStrategy
+from .finetune.task import BaseTask, ClassifierTask, DetectionTask, TextGenerationTask, ImageClassifierTask, MultiLabelClassifierTask, ReadingComprehensionTask, RegressionTask, SequenceLabelTask, TextClassifierTask, PairwiseTextMatchingTask, PointwiseTextMatchingTask
 
 from .autofinetune.evaluator import report_final_result
 
 from .module.nlp_module import NLPPredictionModule, TransformerModule
 
-from .tokenizer.bert_tokenizer import BertTokenizer
-from .tokenizer.bert_tokenizer import ErnieTinyTokenizer
+from .tokenizer.bert_tokenizer import BertTokenizer, ErnieTinyTokenizer
+from .tokenizer.tokenizer import CustomTokenizer
