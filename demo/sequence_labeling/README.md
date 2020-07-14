@@ -82,11 +82,9 @@ dataset = hub.dataset.MSRA_NER(
 dataset将调用传入的tokenizer提供的encode接口对全量数据进行预处理，您可以通过以下方式观察数据的处理流程：
 ```
 single_result = tokenizer.encode(text="hello", text_pair="world", max_seq_len=10) # BertTokenizer
-print(single_result)
 # {'input_ids': [3, 1, 5, 39825, 5, 0, 0, 0, 0, 0], 'segment_ids': [0, 0, 0, 1, 1, 0, 0, 0, 0, 0], 'seq_len': 5, 'input_mask': [1, 1, 1, 1, 1, 0, 0, 0, 0, 0], 'position_ids': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
 dataset_result = dataset.get_dev_records() # set dataset max_seq_len = 10
-print(dataset_result[0])
-#
+# {'input_ids': [101, 100, 100, 1962, 100, 100, 1744, 100, 1749, 102], 'segment_ids': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'seq_len': 10, 'input_mask': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 'position_ids': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 'label': [6, 6, 6, 6, 6, 6, 6, 6, 6, 6]}
 ```
 
 #### 自定义数据集
