@@ -196,9 +196,8 @@ cls_task.finetune_and_eval()
    其中DPCNN网络实现为[ACL2017-Deep Pyramid Convolutional Neural Networks for Text Categorization](https://www.aclweb.org/anthology/P17-1052.pdf)。
 ```python
 cls_task = hub.TextClassifierTask(
-    data_reader=reader,
+    dataset=dataset,
     token_feature=outputs["sequence_output"],
-    feed_list=feed_list,
     network='bilstm',
     num_classes=dataset.num_labels,
     config=config,
