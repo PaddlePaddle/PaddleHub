@@ -29,6 +29,8 @@
 ### Step1: 加载预训练模型
 
 ```python
+import paddlehub as hub
+
 module = hub.Module(name="bert_uncased_L-12_H-768_A-12")
 inputs, outputs, program = module.context(trainable=True, max_seq_len=384)
 ```
@@ -63,15 +65,22 @@ module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
 
 ### Step2: 准备数据集并使用ReadingComprehensionReader读取数据
 ```python
+tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
 dataset = hub.dataset.SQUAD(
-    version_2_with_negative=False)
-reader = hub.reader.ReadingComprehensionReader(
-    dataset=dataset,
-    vocab_path=module.get_vocab_path(),
-    max_seq_length=384)
+    version_2_with_negative=False,
+    tokenizer=tokenizer,
+    max_seq_len=args.max_seq_len)
 ```
+如果是使用ernie_tiny预训练模型，请使用ErnieTinyTokenizer。
+```
+tokenizer = hub.ErnieTinyTokenizer(
+    vocab_file=module.get_vocab_path(),
+    spm_path=module.get_spm_path(),
+    word_dict_path=module.get_word_dict_path())
+```
+ErnieTinyTokenizer和BertTokenizer的区别在于它将按词粒度进行切分，详情请参考[文章](https://www.jiqizhixin.com/articles/2019-11-06-9)。
 
-其中数据集的准备代码可以参考 [squad.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/squad.py)。
+数据集的准备代码可以参考 [squad.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/paddlehub/dataset/squad.py)。
 
 `hub.dataset.SQUAD(version_2_with_negative=False)` 会自动从网络下载数据集SQuAD v1.1并解压到用户目录下`$HOME/.paddlehub/dataset`目录；如果想选择数据集SQuAD v2.0，则只需version_2_with_negative=True；
 
@@ -79,9 +88,15 @@ reader = hub.reader.ReadingComprehensionReader(
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致；
 
-ReadingComprehensionReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`；
-
-**NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
+dataset将调用传入的tokenizer提供的encode接口对全量数据进行预处理，您可以通过以下方式观察数据的处理流程：
+```
+single_result = tokenizer.encode(text="hello", text_pair="world", max_seq_len=10) # BertTokenizer
+print(single_result)
+# {'input_ids': [3, 1, 5, 39825, 5, 0, 0, 0, 0, 0], 'segment_ids': [0, 0, 0, 1, 1, 0, 0, 0, 0, 0], 'seq_len': 5, 'input_mask': [1, 1, 1, 1, 1, 0, 0, 0, 0, 0], 'position_ids': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
+dataset_result = dataset.get_dev_records() # set dataset max_seq_len = 10
+print(dataset_result[0])
+#
+```
 
 PaddleHub还提供了其他的阅读理解数据集，具体信息如下表：
 
@@ -140,28 +155,19 @@ PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStr
 ```python
 seq_output = outputs["sequence_output"]
 
-# feed_list的Tensor顺序不可以调整
-feed_list = [
-    inputs["input_ids"].name,
-    inputs["position_ids"].name,
-    inputs["segment_ids"].name,
-    inputs["input_mask"].name,
-]
-
 reading_comprehension_task = hub.ReadingComprehensionTask(
-    data_reader=reader,
-    feature=seq_output,
-    feed_list=feed_list,
+    dataset=dataset,
+    feature=outputs["sequence_output"],
     config=config,
-    sub_task="squad")
+    sub_task="squad",
+)
 
 reading_comprehension_task.finetune_and_eval()
 ```
 **NOTE:**
 1. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达。
-2. `feed_list`中的inputs参数指名了BERT中的输入tensor的顺序，与ReadingComprehensionReader返回的结果一致。
-3. `sub_task`指明阅读理解数据集名称，可选{squad, squad2.0, cmrc2018, drcd}, 用于适配各个数据集的模型训练过程中的评估方法。
-4.  `hub.ReadingComprehensionTask`通过输入特征、段落背景、问题和答案，可以生成适用于阅读理解迁移任务ReadingComprehensionTask。
+2. `sub_task`指明阅读理解数据集名称，可选{squad, squad2.0, cmrc2018, drcd}, 用于适配各个数据集的模型训练过程中的评估方法。
+3.  `hub.ReadingComprehensionTask`通过输入特征、段落背景、问题和答案，可以生成适用于阅读理解迁移任务ReadingComprehensionTask。
 
 
 #### 自定义迁移任务

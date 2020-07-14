@@ -75,7 +75,7 @@ reader = hub.reader.MultiLabelClassifyReader(
     max_seq_len=128)
 ```
 
-其中数据集的准备代码可以参考[toxic.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/toxic.py)。
+其中数据集的准备代码可以参考[toxic.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/paddlehub/dataset/toxic.py)。
 
 `hub.dataset.Toxic()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录；
 
