@@ -1,0 +1,9 @@
+name: slda_news
+dir: "modules/text/semantic_model/slda_news"
+exclude:
+
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/slda_news.tar.gz
+    dest: .
+    uncompress: True
