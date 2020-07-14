@@ -91,11 +91,11 @@ dataset = hub.dataset.LCQMC(tokenizer=tokenizer, max_seq_len=128)
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致；
 
-更多数据集信息参考[Dataset](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset)。
+更多数据集信息参考[Dataset](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.7/docs/reference/dataset.md)。
 
 #### 自定义数据集
 
-如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集]()
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.7/docs/tutorial/how_to_load_data.md)。
 
 ### Step3：选择优化策略和运行配置
 
@@ -118,7 +118,8 @@ config = hub.RunConfig(use_cuda=False, num_epoch=300, batch_size=128, strategy=s
 strategy = hub.AdamWeightDecayStrategy(
     warmup_proportion=0.1,
     weight_decay=0.01,
-    learning_rate=5e-5)
+    learning_rate=5e-5,
+    lr_scheduler="linear_decay")
 ```
 
 * `learning_rate`: Fine-tune过程中的最大学习率；
@@ -191,5 +192,4 @@ PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜�
 
 ## Fine-tune之后保存的模型转化为PaddleHub Module
 
-代码详见[finetuned_model_to_module](./finetuned_model_to_module)文件夹下
 Fine-tune之后保存的模型转化为PaddleHub Module[教程](../../docs/tutorial/finetuned_model_to_module.md)
