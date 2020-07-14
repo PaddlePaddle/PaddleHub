@@ -1,4 +1,3 @@
-export CUDA_VISIBLE_DEVICES=0
 CKPT_DIR="./ckpt_embedding_pointwise_matching"
 
 python -u embedding_pointwise_matching.py \

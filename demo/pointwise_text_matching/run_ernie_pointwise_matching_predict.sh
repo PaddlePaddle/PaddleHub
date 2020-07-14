@@ -1,4 +1,4 @@
-CKPT_DIR="./ckpt_ernie_pointwise_matching_tmp"
+CKPT_DIR="./ckpt_ernie_pointwise_matching"
 
 python -u ernie_pointwise_matching_predict.py \
             --batch_size=1 \

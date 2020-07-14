@@ -39,8 +39,7 @@ def cut(text):
 if __name__ == '__main__':
 
     # Load Paddlehub word embedding pretrained model
-    module = hub.Module(name="tencent_ailab_chinese_embedding_small")
-    # module = hub.Module(name="word2vec")
+    module = hub.Module(name="word2vec_skipgram")
     # module = hub.Module(name="tencent_ailab_chinese_embedding_small")
     # module = hub.Module(name="simnet_bow")
 

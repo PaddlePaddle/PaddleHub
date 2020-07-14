@@ -1,6 +1,6 @@
-export CUDA_VISIBLE_DEVICES=0,1,2
+export CUDA_VISIBLE_DEVICES=0
 
-CKPT_DIR="./ckpt_ernie_pairwise_matching_epoch3"
+CKPT_DIR="./ckpt_ernie_pairwise_matching"
 
 python -u ernie_pairwise_matching.py \
             --batch_size=32 \

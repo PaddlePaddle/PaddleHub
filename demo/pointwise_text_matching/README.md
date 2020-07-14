@@ -21,6 +21,10 @@ pointwise_text_matching
 
 以下例子以最简单的匹配网络（词向量拼接预置网络）完成文本分类任务，说明PaddleHub如何完成pointwise文本匹配迁移学习。
 
+<p align="center">
+ <img src="./docs/imgs/pointwise.png" align="middle"  
+</p>
+
 在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_embedding_pointwise_matching.sh`即可开始使用预训练embedding对LCQMC数据集进行Fine-tune。
 
 其中脚本参数说明如下：
@@ -46,7 +50,7 @@ inputs, outputs, program = module.context(trainable=True, max_seq_len=args.max_s
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值。
 
-`num_slots`: 文本匹配任务输入文本的数据量。pointwise文本匹配任务num_slots应为2。 pairtwise文本匹配任务num_slots应为3。
+`num_slots`: 文本匹配任务输入文本的数据量。pointwise文本匹配任务num_slots应为2，如上图中的query和title。 pairtwise文本匹配任务num_slots应为3。
 
 PaddleHub还提供等其他词向量预训练模型可供选择, 模型对应的加载示例如下：
 

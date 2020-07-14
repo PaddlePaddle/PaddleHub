@@ -1,5 +1,3 @@
-export CUDA_VISIBLE_DEVICES=0
-
 CKPT_DIR="./ckpt_ernie_pairwise_matching"
 
 python -u ernie_pairwise_matching_predict.py \
