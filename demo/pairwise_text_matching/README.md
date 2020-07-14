@@ -23,7 +23,7 @@ pairwise_text_matching
 
 
 <p align="center">
- <img src="./docs/imgs/pairwise.png" align="middle"  
+ <img src="../../docs/imgs/pairwise.png" align="middle"  
 </p>
 
 

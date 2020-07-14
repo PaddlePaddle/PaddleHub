@@ -22,7 +22,7 @@ pointwise_text_matching
 以下例子以最简单的匹配网络（词向量拼接预置网络）完成文本分类任务，说明PaddleHub如何完成pointwise文本匹配迁移学习。
 
 <p align="center">
- <img src="./docs/imgs/pointwise.png" align="middle"  
+ <img src="../../docs/imgs/pointwise.png" align="middle"  
 </p>
 
 在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_embedding_pointwise_matching.sh`即可开始使用预训练embedding对LCQMC数据集进行Fine-tune。
