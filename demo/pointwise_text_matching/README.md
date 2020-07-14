@@ -1,6 +1,6 @@
 # PaddleHub Pointwise 文本匹配
 
-本示例将展示如何使用PaddleHub Fine-tune API以及预训练模型(tencent_ailab_chinese_embedding_small、ERNIE等)完成pointwise文本匹配任务。
+本示例将展示如何使用PaddleHub Fine-tune API以及预训练模型(word2vec_skipgram、simnet_bow、ERNIE等)完成pointwise文本匹配任务。
 
 **PaddleHub 1.8.0以上版本支持在预训练模型之后拼接预置网络(bow, cnn, gru, lstm)完成文本匹配任务**
 

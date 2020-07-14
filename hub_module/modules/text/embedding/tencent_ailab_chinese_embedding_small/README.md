@@ -37,7 +37,7 @@ inputs, outputs, program = tencent_ailab_chinese_embedding.context(trainable=Tru
 
 ## 依赖
 
-paddlepaddle >= 1.8.2
+paddlepaddle >= 1.8.0
 
 paddlehub >= 1.8.0
 

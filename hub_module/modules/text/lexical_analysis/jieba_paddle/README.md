@@ -5,7 +5,7 @@
 
 更多信息参考：https://github.com/fxsjy/jieba
 
-## jieba_paddle API 说明
+## API 说明
 
 ### cut(sentence, use_paddle=True, cut_all=False, HMM=True)
 
@@ -121,6 +121,11 @@ print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ## 查看代码
 
 https://github.com/fxsjy/jieba
+
+## 依赖
+
+PaddlePaddle >= 1.8.0
+PaddleHub >= 1.8.0
 
 ## 更新历史
 
