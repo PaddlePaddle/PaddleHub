@@ -101,7 +101,7 @@ dataset = hub.dataset.LCQMC(tokenizer=tokenizer, max_seq_len=128)
 
 如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.7/docs/tutorial/how_to_load_data.md)。
 
-### Step3：选择优化策略和运行配置
+### Step4：选择优化策略和运行配置
 
 ```python
 strategy = hub.DefaultStrategy(optimizer_name="sgd", learning_rate=5e-2)
@@ -140,7 +140,7 @@ strategy = hub.AdamWeightDecayStrategy(
 * `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size；
 * `strategy`: Fine-tune优化策略；
 
-### Step4: 构建网络并创建pointwise文本匹配迁移任务进行Fine-tune
+### Step5: 构建网络并创建pointwise文本匹配迁移任务进行Fine-tune
 ```python
 query = outputs["emb"]
 title = outputs['emb_2']
