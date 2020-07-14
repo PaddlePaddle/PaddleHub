@@ -4,6 +4,8 @@ Tencent_AILab_ChineseEmbedding提供了基于海量中文语料训练学习得�
 
 更多详情参考: https://ai.tencent.com/ailab/nlp/en/embedding.html
 
+注：该Module由第三方开发者DesmonDay贡献。
+
 ## API
 
 ```python
