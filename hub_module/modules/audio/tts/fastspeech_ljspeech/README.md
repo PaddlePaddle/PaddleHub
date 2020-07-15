@@ -103,6 +103,15 @@ paddlepaddle >= 1.8.2
 
 paddlehub >= 1.7.0
 
+**NOTE:** 除了python依赖外还必须安装libsndfile库
+对于Ubuntu用户，请执行：
+```
+sudo apt-get install libsndfile1
+```
+对于Centos用户，请执行：
+```
+sudo yum install libsndfile
+```
 
 ## 更新历史
 

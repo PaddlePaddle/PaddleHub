@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import ast
 import argparse
 import importlib.util
@@ -29,20 +30,9 @@ from paddlehub.common.dir import THIRD_PARTY_HOME
 from paddlehub.common.downloader import default_downloader
 
 lack_dependency = []
-for dependency in ["ruamel", "parakeet"]:
+for dependency in ["ruamel", "parakeet", "soundfile", "librosa"]:
     if not importlib.util.find_spec(dependency):
         lack_dependency.append(dependency)
-
-if not lack_dependency:
-    from ruamel import yaml
-    from parakeet.models.fastspeech.fastspeech import FastSpeech as FastSpeechModel
-    from parakeet.g2p.en import text_to_sequence
-    from parakeet.models.transformer_tts.utils import *
-    from parakeet.utils import io
-else:
-    raise ImportError(
-        "The module requires additional dependencies. Please install %s via `pip install`"
-        % ", ".join(lack_dependency))
 
 # Accelerate NLTK package download via paddlehub
 _PUNKT_URL = "https://paddlehub.bj.bcebos.com/paddlehub-thirdparty/punkt.tar.gz"
@@ -61,6 +51,27 @@ if not os.path.exists(cmudict_path):
         url=_CMUDICT_URL, save_path=corpora_path, print_progress=True)
 nltk.data.path.append(nltk_path)
 
+if not lack_dependency:
+    import soundfile as sf
+    import librosa
+    from ruamel import yaml
+    from parakeet.models.fastspeech.fastspeech import FastSpeech as FastSpeechModel
+    from parakeet.g2p.en import text_to_sequence
+    from parakeet.models.transformer_tts.utils import *
+    from parakeet.utils import io
+    from parakeet.modules.weight_norm import WeightNormWrapper
+    from parakeet.models.waveflow import WaveFlowModule
+else:
+    raise ImportError(
+        "The module requires additional dependencies: %s. You can install parakeet via 'git clone https://github.com/PaddlePaddle/Parakeet && cd Parakeet && pip install -e .' and others via pip install"
+        % ", ".join(lack_dependency))
+
+
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
+
 
 @moduleinfo(
     name="fastspeech_ljspeech",
@@ -76,15 +87,33 @@ class FastSpeech(hub.NLPPredictionModule):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "assets",
-                                                  "step-130000")
-        config_path = os.path.join(self.directory, "assets", "config.yaml")
-        with open(config_path, "rt") as f:
-            self.config = yaml.load(f, Loader=yaml.Loader)
+        self.tts_checkpoint_path = os.path.join(self.directory, "assets", "tts",
+                                                "step-162000")
+        self.waveflow_checkpoint_path = os.path.join(self.directory, "assets",
+                                                     "vocoder", "step-2000000")
+        self.waveflow_config_path = os.path.join(
+            self.directory, "assets", "vocoder", "waveflow_ljspeech.yaml")
+
+        tts_config_path = os.path.join(self.directory, "assets", "tts",
+                                       "ljspeech.yaml")
+        with open(tts_config_path) as f:
+            self.tts_config = yaml.load(f, Loader=yaml.Loader)
         with fluid.dygraph.guard(fluid.CPUPlace()):
-            model = FastSpeechModel(
-                self.config['network'],
-                num_mels=self.config['audio']['num_mels'])
+            self.tts_model = FastSpeechModel(
+                self.tts_config['network'],
+                num_mels=self.tts_config['audio']['num_mels'])
+            io.load_parameters(
+                model=self.tts_model, checkpoint_path=self.tts_checkpoint_path)
+
+            # Build vocoder.
+            args = AttrDict()
+            args.config = self.waveflow_config_path
+            args.use_fp16 = False
+            self.waveflow_config = io.add_yaml_config_to_args(args)
+            self.waveflow = WaveFlowModule(self.waveflow_config)
+            io.load_parameters(
+                model=self.waveflow,
+                checkpoint_path=self.waveflow_checkpoint_path)
 
     def synthesize(self, texts, use_gpu=False, speed=1.0,
                    vocoder="griffin-lim"):
@@ -117,41 +146,71 @@ class FastSpeech(hub.NLPPredictionModule):
             raise ValueError(
                 "The input data is inconsistent with expectations.")
 
-        # Load parameters.
-        global_step = io.load_parameters(
-            model=model, checkpoint_path=self.pretrained_model_path)
-        model.eval()
-
         wavs = []
-        for text in predicted_data:
-            # init input
-            logger.info("Processing sentence: %s" % text)
-            text = np.asarray(text_to_sequence(text))
-            text = np.expand_dims(text, axis=0)
-            pos_text = np.arange(1, text.shape[1] + 1)
-            pos_text = np.expand_dims(pos_text, axis=0)
+        with fluid.dygraph.guard(place):
+            self.tts_model.eval()
+            self.waveflow.eval()
+            for text in predicted_data:
+                # init input
+                logger.info("Processing sentence: %s" % text)
+                text = np.asarray(text_to_sequence(text))
+                text = np.expand_dims(text, axis=0)
+                pos_text = np.arange(1, text.shape[1] + 1)
+                pos_text = np.expand_dims(pos_text, axis=0)
 
-            text = dg.to_variable(text).astype(np.int64)
-            pos_text = dg.to_variable(pos_text).astype(np.int64)
+                text = dg.to_variable(text).astype(np.int64)
+                pos_text = dg.to_variable(pos_text).astype(np.int64)
 
-            _, mel_output_postnet = model(text, pos_text, alpha=1 / speed)
+                _, mel_output_postnet = self.tts_model(
+                    text, pos_text, alpha=1 / speed)
 
-            mel_output_postnet = fluid.layers.transpose(
-                fluid.layers.squeeze(mel_output_postnet, [0]), [1, 0])
-            mel_output_postnet = np.exp(mel_output_postnet.numpy())
-            basis = librosa.filters.mel(self.config['audio']['sr'],
-                                        self.config['audio']['n_fft'],
-                                        self.config['audio']['num_mels'])
-            inv_basis = np.linalg.pinv(basis)
-            spec = np.maximum(1e-10, np.dot(inv_basis, mel_output_postnet))
+                if vocoder == 'griffin-lim':
+                    # synthesis use griffin-lim
+                    wav = self.synthesis_with_griffinlim(
+                        mel_output_postnet, self.tts_config['audio'])
+                elif vocoder == 'waveflow':
+                    wav = self.synthesis_with_waveflow(
+                        mel_output_postnet, self.waveflow_config.sigma)
+                else:
+                    raise ValueError(
+                        'vocoder error, we only support griffinlim and waveflow, but recevied %s.'
+                        % vocoder)
+                wavs.append(wav)
+        return wavs, self.tts_config['audio']['sr']
 
-            # synthesis with griffin-lim
-            wav = librosa.core.griffinlim(
-                spec**self.config['audio']['power'],
-                hop_length=self.config['audio']['hop_length'],
-                win_length=self.config['audio']['win_length'])
-            wavs.append(wav)
-        return wavs, self.config['audio']['sr']
+    def synthesis_with_griffinlim(self, mel_output, cfg):
+        # synthesis with griffin-lim
+        mel_output = fluid.layers.transpose(
+            fluid.layers.squeeze(mel_output, [0]), [1, 0])
+        mel_output = np.exp(mel_output.numpy())
+        basis = librosa.filters.mel(
+            cfg['sr'],
+            cfg['n_fft'],
+            cfg['num_mels'],
+            fmin=cfg['fmin'],
+            fmax=cfg['fmax'])
+        inv_basis = np.linalg.pinv(basis)
+        spec = np.maximum(1e-10, np.dot(inv_basis, mel_output))
+
+        wav = librosa.core.griffinlim(
+            spec**cfg['power'],
+            hop_length=cfg['hop_length'],
+            win_length=cfg['win_length'])
+
+        return wav
+
+    def synthesis_with_waveflow(self, mel_output, sigma):
+        mel_spectrogram = fluid.layers.transpose(
+            fluid.layers.squeeze(mel_output, [0]), [1, 0])
+        mel_spectrogram = fluid.layers.unsqueeze(mel_spectrogram, [0])
+
+        for layer in self.waveflow.sublayers():
+            if isinstance(layer, WeightNormWrapper):
+                layer.remove_weight_norm()
+
+        # Run model inference.
+        wav = self.waveflow.synthesize(mel_spectrogram, sigma=sigma)
+        return wav.numpy()[0]
 
     @serving
     def serving_method(self,
@@ -241,14 +300,12 @@ class FastSpeech(hub.NLPPredictionModule):
 
 
 if __name__ == "__main__":
-    import soundfile as sf
 
     module = FastSpeech()
     test_text = [
-        "Simple as this proposition is, it is necessary to be stated,",
-        "Parakeet stands for Paddle PARAllel text-to-speech toolkit.",
+        "Simple as this proposition is, it is necessary to be stated",
     ]
     wavs, sample_rate = module.synthesize(
-        texts=test_text, speed=2, vocoder="griffin-lim")
+        texts=test_text, speed=1, vocoder="waveflow")
     for index, wav in enumerate(wavs):
         sf.write(f"{index}.wav", wav, sample_rate)

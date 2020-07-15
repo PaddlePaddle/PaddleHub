@@ -12,13 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import ast
 import argparse
 import importlib.util
 
 import nltk
-import soundfile as sf
-
 import paddle.fluid as fluid
 import paddle.fluid.dygraph as dg
 import paddlehub as hub
@@ -31,23 +30,9 @@ from paddlehub.common.dir import THIRD_PARTY_HOME
 from paddlehub.common.downloader import default_downloader
 
 lack_dependency = []
-for dependency in ["ruamel", "parakeet", "scipy"]:
+for dependency in ["ruamel", "parakeet", "scipy", "soundfile", "librosa"]:
     if not importlib.util.find_spec(dependency):
         lack_dependency.append(dependency)
-
-if not lack_dependency:
-    from ruamel import yaml
-    from scipy.io.wavfile import write
-    from parakeet.g2p.en import text_to_sequence
-    from parakeet.models.transformer_tts.utils import *
-    from parakeet.models.transformer_tts import TransformerTTS as TransformerTTSModel
-    from parakeet.models.waveflow import WaveFlowModule
-    from parakeet.utils import io
-    from parakeet.modules.weight_norm import WeightNormWrapper
-else:
-    raise ImportError(
-        "The module requires additional dependencies. Please install %s via `pip install`"
-        % ", ".join(lack_dependency))
 
 # Accelerate NLTK package download via paddlehub
 _PUNKT_URL = "https://paddlehub.bj.bcebos.com/paddlehub-thirdparty/punkt.tar.gz"
@@ -65,6 +50,22 @@ if not os.path.exists(cmudict_path):
     default_downloader.download_file_and_uncompress(
         url=_CMUDICT_URL, save_path=corpora_path, print_progress=True)
 nltk.data.path.append(nltk_path)
+
+if not lack_dependency:
+    import soundfile as sf
+    import librosa
+    from ruamel import yaml
+    from scipy.io.wavfile import write
+    from parakeet.g2p.en import text_to_sequence
+    from parakeet.models.transformer_tts.utils import *
+    from parakeet.models.transformer_tts import TransformerTTS as TransformerTTSModel
+    from parakeet.models.waveflow import WaveFlowModule
+    from parakeet.utils import io
+    from parakeet.modules.weight_norm import WeightNormWrapper
+else:
+    raise ImportError(
+        "The module requires additional dependencies: %s. You can install parakeet via 'git clone https://github.com/PaddlePaddle/Parakeet && cd Parakeet && pip install -e .' and others via pip install"
+        % ", ".join(lack_dependency))
 
 
 class AttrDict(dict):
@@ -165,6 +166,7 @@ class TransformerTTS(hub.NLPPredictionModule):
             self.waveflow.eval()
             for text in predicted_data:
                 # init input
+                logger.info("Processing sentence: %s" % text)
                 text = np.asarray(text_to_sequence(text))
                 text = fluid.layers.unsqueeze(
                     dg.to_variable(text).astype(np.int64), [0])
