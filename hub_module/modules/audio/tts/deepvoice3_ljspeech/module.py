@@ -35,7 +35,7 @@ for dependency in ["ruamel", "parakeet", "soundfile", "librosa"]:
     if not importlib.util.find_spec(dependency):
         lack_dependency.append(dependency)
 
-# Accelerate NLTK package download via paddlehub
+# Accelerate NLTK package download via paddlehub. 'import parakeet' will use the package.
 _PUNKT_URL = "https://paddlehub.bj.bcebos.com/paddlehub-thirdparty/punkt.tar.gz"
 _CMUDICT_URL = "https://paddlehub.bj.bcebos.com/paddlehub-thirdparty/cmudict.tar.gz"
 nltk_path = os.path.join(THIRD_PARTY_HOME, "nltk_data")
@@ -199,7 +199,7 @@ class DeepVoice3(hub.NLPPredictionModule):
 
     def synthesize(self, texts, use_gpu=False, vocoder="griffin-lim"):
         """
-        Get the sentiment prediction results results with the texts as input
+        Get the synthetic wavs from the texts.
 
         Args:
              texts(list): the input texts to be predicted.
