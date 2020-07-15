@@ -12,7 +12,7 @@ author_email:
 type: nlp/semantic_model
 ```
 
-**本示例代码可以参考[finetuned_model_to_module](../../demo/text_classification/finetuned_model_to_module/)**
+**本示例代码可以参考[finetuned_model_to_module](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/text_classification/finetuned_model_to_module)**
 
 Module存在一个接口predict，用于接收带预测，并给出文本的情感倾向（正面/负面），支持python接口调用和命令行调用。
 ```python
@@ -200,9 +200,9 @@ def predict(self, data, return_result=False, accelerate_mode=True):
 
 ### 完整代码
 
-* [module.py](../../demo/text_classification/finetuned_model_to_module/module.py)
+* [module.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.7/demo/text_classification/finetuned_model_to_module/module.py)
 
-* [__init__.py](../../demo/text_classification/finetuned_model_to_module/__init__.py)
+* [__init__.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.7/demo/text_classification/finetuned_model_to_module/__init__.py)
 
 **NOTE:** `__init__.py`是空文件
 
@@ -305,4 +305,4 @@ r = requests.post(url=url, headers=headers, data=json.dumps(data))
 print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
-关与PaddleHub Serving更多信息参见[Hub Serving教程](../../docs/tutorial/serving.md)以及[Demo](../../demo/serving)
+关与PaddleHub Serving更多信息参见[Hub Serving教程](./serving.md)以及[Demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving)
