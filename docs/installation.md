@@ -2,7 +2,7 @@
 
 ## 环境依赖
 
-* Python >= 3.6 
+* Python>=3.6
 * PaddlePaddle>=1.7.0
 * 操作系统：Windows/Mac/Linux
 
