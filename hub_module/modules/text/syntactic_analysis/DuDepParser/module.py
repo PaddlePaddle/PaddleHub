@@ -21,7 +21,7 @@ from DuDepParser.parser.data_struct import Field
     version="1.0.0",
     summary="Baidu's open-source DuDepParser model based on char feature.",
     author="baidu-nlp",
-    author_email="nlp@baidu.com",
+    author_email="",
     type="nlp/syntactic_analysis")
 class DuDepParser(hub.NLPPredictionModule):
     def _initialize(self):
@@ -45,7 +45,8 @@ class DuDepParser(hub.NLPPredictionModule):
 
         with fluid.dygraph.guard(fluid.CPUPlace()):
             self.model = load(self.args.model_path)
-        self.lac = LAC.LAC(mode='lac')
+        self.lac = LAC.LAC()
+        # hub.Module(name="lac")
         self.use_pos = True
         self.env.fields = self.env.fields._replace(PHEAD=Field('prob'))
         self.env.fields = self.env.fields._replace(CPOS=Field('postag'))
@@ -90,6 +91,7 @@ class DuDepParser(hub.NLPPredictionModule):
             texts = [texts]
         if all([isinstance(i, str) and i for i in texts]):
             lac_results = self.lac.run(texts)
+            # lac_results=self.lac.lexical_analysis(data=texts, use_gpu=True, batch_size=10)
             predicts = Corpus.load_lac_results(lac_results, self.env.fields)
         else:
             raise RuntimeError("please check the foramt of your inputs.")
