@@ -92,11 +92,8 @@ http://127.0.0.1:8866/predict/<CATEGORY\>/\<MODULE>
 ### Step3：利用PaddleHub Serving进行个性化开发
 使用PaddleHub Serving进行模型服务部署后，可以利用得到的接口进行开发，如对外提供web服务，或接入到应用程序中，以降低客户端预测压力，提高性能，下面展示了一个web页面demo:
 
-<p align="center">  
+![](../imgs/web_demo.png)
 
-<img src="../imgs/web_demo.png" width="60%" />  
-
-</p>  
 
 ### Step4：关闭serving
 使用关闭命令即可关闭启动的serving，
@@ -143,11 +140,8 @@ $ hub serving start -c serving_config.json
 ```
 启动成功界面如图：
 
-<p align="center">  
+![](../imgs/start_serving_lac.png)
 
-<img src="../imgs/start_serving_lac.png" width="100%" />  
-
-</p>  
 
 这样我们就在8866端口成功部署了lac的在线分词服务。
 *此处warning为Flask提示，不影响使用*

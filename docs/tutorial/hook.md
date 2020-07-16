@@ -5,9 +5,7 @@
 
 Task定义了[组网事件]()和[运行事件]()。其中运行事件的工作流程如下图。
 
-<p align="center">
- <img src="./imgs/task_event_workflow.png" width='70%' align="middle"  
-</p>
+![](../imgs/task_event_workflow.png)
 
 
 **NOTE:**

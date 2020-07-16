@@ -16,9 +16,7 @@ PaddleHub以预训练模型应用为核心具备以下特点：
 
 * **[自动超参优化](#自动超参优化)**，内置AutoDL Finetuner能力，一键启动自动化超参搜索。
 
-<p align="center">
- <img src="imgs/paddlehub_figure.jpg" width='70%' align="middle"  
-</p>
+![PaddleHub全景图](./imgs/paddlehub_figure.jpg)
 
 
 
@@ -34,13 +32,9 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 
 迁移学习(Transfer Learning)通俗来讲，就是运用已有的知识来学习新的知识，核心是找到已有知识和新知识之间的相似性。PaddleHub提供了Fine-tune API，只需要少量代码即可完成深度学习模型在自然语言处理和计算机视觉场景下的迁移学习，可以在更短的时间完成模型的训练，同时模型具备更好的泛化能力。
 
-<p align="center">
- <img src="imgs/paddlehub_finetune.jpg" width='70%' align="middle"  
-</p>
+![PaddleHub迁移学习介绍](./imgs/paddlehub_finetune.jpg)
 
-<p align="center">
- <img src="imgs/paddlehub_finetune.gif" align="middle"  
-</p>
+![](./imgs/paddlehub_finetune.gif)
 
 <p align='center'>
  十行代码完成ERNIE工业级文本分类

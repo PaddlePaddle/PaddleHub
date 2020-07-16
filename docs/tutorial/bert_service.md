@@ -7,11 +7,8 @@
 
 整体流程图如下：  
 
-<div align="center">  
+![BS流程图](../imgs/bs.png)
 
-<img src="../imgs/bs.png" aligh="center" width="100%" alt="BS流程图" />  
-
-</div>  
 
 ### Bert Service的特点
 使用`Bert Service`能够帮助开发者在限制性较强的环境中有效获取embedding，常用于以下情景：  
@@ -103,12 +100,7 @@ Server[baidu::paddle_serving::predictor::bert_service::BertServiceImpl] is servi
 ```
 整个启动过程如下图：
 
-
-<div align="center">  
-
-&emsp;&emsp;<img src="https://github.com/ShenYuhan/ml-python/blob/master/short_start_fast.gif" aligh="center" width="70%" alt="启动BS" />  
-
-</div>  
+![](https://github.com/ShenYuhan/ml-python/blob/master/short_start_fast.gif)
 
 
 其中各参数说明如下表：
@@ -211,11 +203,8 @@ $ python bert_service_client.py
 
 运行过程如下图：
 
-<div align="center">  
+![](https://github.com/ShenYuhan/ml-python/blob/master/short_client_fast.gif)
 
-&emsp;&emsp;<img src="https://github.com/ShenYuhan/ml-python/blob/master/short_client_fast.gif" aligh="center" width="70%" alt="启动BS" />  
-
-</div>  
 
 ### Step4：关闭Bert Service服务端
 如要停止`Bert Service`服务端程序，可在其启动命令行页面使用Ctrl+C方式关闭，关闭成功会打印如下日志：
