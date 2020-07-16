@@ -4,9 +4,9 @@ import numpy as np
 from tqdm import tqdm
 from paddlehub.common.logger import logger
 
-from lda_news.document import LDADoc, SLDADoc, Token, Sentence
-from lda_news.vose_alias import VoseAlias
-from lda_news.util import rand, rand_k
+from lda_novel.document import LDADoc, SLDADoc, Token, Sentence
+from lda_novel.vose_alias import VoseAlias
+from lda_novel.util import rand, rand_k
 
 
 class Sampler(object):
@@ -65,7 +65,7 @@ class MHSampler(Sampler):
         self.__beta_alias.initialize(beta_dist)
 
     def sample_doc(self, doc):
-        if isinstance(doc, LDADoc) and not isinstance(SLDADoc):
+        if isinstance(doc, LDADoc) and not isinstance(doc, SLDADoc):
             for i in range(doc.size()):
                 new_topic = self.__sample_token(doc, doc.token(i))
                 doc.set_topic(i, new_topic)

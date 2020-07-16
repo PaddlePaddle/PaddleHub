@@ -236,7 +236,7 @@ class GibbsSampler(Sampler):
         self.__model = model
 
     def sample_doc(self, doc):
-        if isinstance(doc, LDADoc) and not isinstance(SLDADoc):
+        if isinstance(doc, LDADoc) and not isinstance(doc, SLDADoc):
             for i in range(doc.size()):
                 new_topic = self.__sample_token(doc, doc.token(i))
                 doc.set_topic(i, new_topic)

@@ -4,17 +4,20 @@ import paddlehub as hub
 from paddlehub.module.module import moduleinfo
 from paddlehub.common.logger import logger
 
+try:
+    import tqdm
+except:
+    print(
+        "This module requires the tqdm tool. The running environment does not meet the requirements. Please install this package."
+    )
+    exit()
+
 from slda_webpage.inference_engine import InferenceEngine
 from slda_webpage.document import SLDADoc
 from slda_webpage.semantic_matching import SemanticMatching, WordAndDis
 from slda_webpage.tokenizer import LACTokenizer, SimpleTokenizer
 from slda_webpage.config import ModelType
 from slda_webpage.vocab import Vocab, WordCount
-
-try:
-    import tqdm
-except:
-    raise ImportError("No module named tqdm")
 
 
 @moduleinfo(
