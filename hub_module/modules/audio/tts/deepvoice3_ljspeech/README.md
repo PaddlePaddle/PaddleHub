@@ -11,7 +11,7 @@ Deep Voice 3是百度研究院2017年发布的端到端的TTS模型（论文录�
 ## 命令行预测
 
 ```shell
-$ hub run deepvoice3_ljspeech --input_text='Simple as this proposition is, it is necessary to be stated'
+$ hub run deepvoice3_ljspeech --input_text='Simple as this proposition is, it is necessary to be stated' --use_gpu True --vocoder griffin-lim
 ```
 
 ## API
@@ -103,6 +103,7 @@ paddlepaddle >= 1.8.2
 paddlehub >= 1.7.0
 
 **NOTE:** 除了python依赖外还必须安装libsndfile库
+
 对于Ubuntu用户，请执行：
 ```
 sudo apt-get install libsndfile1

@@ -11,7 +11,7 @@ FastSpeech是基于Transformer的前馈神经网络，作者从encoder-decoder�
 ## 命令行预测
 
 ```shell
-$ hub run fastspeech_ljspeech --input_text='Simple as this proposition is, it is necessary to be stated'
+$ hub run fastspeech_ljspeech --input_text='Simple as this proposition is, it is necessary to be stated' --use_gpu True --vocoder griffin-lim
 ```
 
 ## API
@@ -104,6 +104,7 @@ paddlepaddle >= 1.8.2
 paddlehub >= 1.7.0
 
 **NOTE:** 除了python依赖外还必须安装libsndfile库
+
 对于Ubuntu用户，请执行：
 ```
 sudo apt-get install libsndfile1
