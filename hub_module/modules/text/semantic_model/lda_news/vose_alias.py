@@ -1,7 +1,4 @@
-import os
 import numpy as np
-
-from paddlehub.common.logger import logger
 
 from lda_news.util import rand, rand_k
 

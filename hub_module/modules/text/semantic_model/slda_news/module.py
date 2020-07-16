@@ -1,6 +1,4 @@
 import os
-from tqdm import tqdm
-import numpy as np
 
 import paddlehub as hub
 from paddlehub.module.module import moduleinfo
@@ -13,13 +11,18 @@ from slda_news.tokenizer import LACTokenizer, SimpleTokenizer
 from slda_news.config import ModelType
 from slda_news.vocab import Vocab, WordCount
 
+try:
+    import tqdm
+except:
+    raise ImportError("No module named tqdm")
+
 
 @moduleinfo(
     name="slda_news",
     version="1.0.0",
     summary=
     "This is a PaddleHub Module for SLDA topic model in news dataset, where we can infer the topic distribution of document.",
-    author="baidu",
+    author="DesmonDay",
     author_email="",
     type="nlp/semantic_model")
 class TopicModel(hub.Module):

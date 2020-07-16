@@ -1,6 +1,4 @@
 import os
-from tqdm import tqdm
-import numpy as np
 
 import paddlehub as hub
 from paddlehub.module.module import moduleinfo
@@ -13,13 +11,18 @@ from lda_news.tokenizer import LACTokenizer, SimpleTokenizer
 from lda_news.config import ModelType
 from lda_news.vocab import Vocab, WordCount
 
+try:
+    import tqdm
+except:
+    raise ImportError("No module named tqdm")
+
 
 @moduleinfo(
     name="lda_news",
     version="1.0.0",
     summary=
     "This is a PaddleHub Module for LDA topic model in news dataset, where we can calculate doc distance, calculate the similarity between query and document, etc",
-    author="baidu",
+    author="DesmonDay",
     author_email="",
     type="nlp/semantic_model")
 class TopicModel(hub.Module):

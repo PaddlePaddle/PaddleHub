@@ -1,8 +1,8 @@
 import os
-import numpy as np
-from tqdm import tqdm
 from collections import OrderedDict
 
+import numpy as np
+from tqdm import tqdm
 from paddlehub.common.logger import logger
 
 from slda_weibo.vocab import Vocab, WordCount

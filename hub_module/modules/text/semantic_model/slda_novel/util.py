@@ -1,7 +1,7 @@
 import time
-import numpy as np
 import yaml
 
+import numpy as np
 from paddlehub.common.logger import logger
 
 from slda_novel.config import ModelType

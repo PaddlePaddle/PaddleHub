@@ -1,7 +1,5 @@
-import os
-import numpy as np
-
-from paddlehub.common.logger import logger
+"""This file defines tokenizer class object.
+"""
 
 
 class Tokenizer(object):

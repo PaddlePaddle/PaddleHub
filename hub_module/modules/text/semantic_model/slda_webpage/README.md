@@ -1,6 +1,6 @@
 ## 模型概述
 
-本Module基于的数据集为百度自建的网页领域数据集。主题模型(Topic Model)是以无监督学习的方式对文档的隐含语义结构进行聚类的统计模型，其中SLDA(Sentence-LDA)是主题模型的一种。SLDA是LDA主题模型的扩展，LDA假设每个单词对应一个主题，而SLDA假设每个句子对应一个主题。
+主题模型(Topic Model)是以无监督学习的方式对文档的隐含语义结构进行聚类的统计模型，其中SLDA(Sentence-LDA)是主题模型的一种。SLDA是LDA主题模型的扩展，LDA假设每个单词对应一个主题，而SLDA假设每个句子对应一个主题。本Module基于的数据集为百度自建的网页领域数据集。
 
 更多详情请参考[SLDA论文](https://pdfs.semanticscholar.org/c311/778adb9484c86250e915aecd9714f4206050.pdf)。
 
@@ -61,7 +61,9 @@ https://github.com/baidu/Familia
 
 paddlepaddle >= 1.8.2
 
-paddlehub >= 1.8.0
+paddlehub >= 1.7.0
+
+tqdm
 
 ## 更新历史
 

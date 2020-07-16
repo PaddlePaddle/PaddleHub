@@ -1,7 +1,7 @@
 import os
+
 import numpy as np
 from tqdm import tqdm
-
 from paddlehub.common.logger import logger
 
 from lda_webpage.document import LDADoc, SLDADoc, Token, Sentence

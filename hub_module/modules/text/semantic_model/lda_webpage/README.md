@@ -1,6 +1,6 @@
 ## 模型概述
 
-本Module基于的数据集为百度自建的网页领域数据集。主题模型(Topic Model)是以无监督学习的方式对文档的隐含语义结构进行聚类的统计模型，其中LDA(Latent Dirichlet Allocation)算法是主题模型的一种。LDA根据对词的共现信息的分析，拟合出词-文档-主题的分布，从而将词、文本映射到一个语义空间中。
+主题模型(Topic Model)是以无监督学习的方式对文档的隐含语义结构进行聚类的统计模型，其中LDA(Latent Dirichlet Allocation)算法是主题模型的一种。LDA根据对词的共现信息的分析，拟合出词-文档-主题的分布，从而将词、文本映射到一个语义空间中。本Module基于的数据集为百度自建的网页领域数据集。
 
 更多详情请参考[LDA论文](http://www.jmlr.org/papers/volume3/blei03a/blei03a.pdf)。
 
@@ -101,7 +101,9 @@ https://github.com/baidu/Familia
 
 paddlepaddle >= 1.8.2
 
-paddlehub >= 1.8.0
+paddlehub >= 1.7.0
+
+tqdm
 
 ## 更新历史
 
