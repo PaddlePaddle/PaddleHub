@@ -95,7 +95,7 @@ label_list.txt的格式如下
 ```
 
 示例：
-以[DogCat数据集](../reference/dataset.md#class-hubdatasetdogcatdataset)为示例，train_list.txt/test_list.txt/validate_list.txt内容如下示例
+以[DogCat数据集](../reference/dataset.md)为示例，train_list.txt/test_list.txt/validate_list.txt内容如下示例
 ```
 cat/3270.jpg 0
 cat/646.jpg 0

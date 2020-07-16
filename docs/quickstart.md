@@ -11,7 +11,7 @@ $ hub run chinese_ocr_db_crnn_mobile --input_path test_ocr.jpg --visualization=T
 预测结果图片保存在当前运行路径下ocr_result文件夹中，如下图所示。
 
 <p align="center">
- <img src="./docs/imgs/ocr_res.jpg" width='70%' align="middle"  
+ <img src="imgs/ocr_res.jpg" width='70%' align="middle"  
 </p>
 
 * 使用[词法分析](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=LexicalAnalysis)模型LAC进行分词
@@ -35,7 +35,7 @@ $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 $ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image.jpg
 ```
 <p align="center">
- <img src="./docs/imgs/face_detection_result.jpeg" align="middle"  
+ <img src="imgs/face_detection_result.jpeg" align="middle"  
 </p>
 
 
@@ -48,8 +48,8 @@ $ hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg
 ```
 
 <p align="center">  
-<img src="./docs/imgs/img_seg_result.jpeg" width="35%" />  
-<img src="./docs/imgs/humanseg_test_res.png" width="35%" />  
+<img src="imgs/img_seg_result.jpeg" width="35%" />  
+<img src="imgs/humanseg_test_res.png" width="35%" />  
 </p>  
 
 <p align='center'>
