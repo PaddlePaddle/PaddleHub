@@ -1,0 +1,9 @@
+name: ace2p
+dir: "modules/audio/tts/deep_voice3"
+exclude:
+    - README.md
+resources:
+  -
+    url: https://paddlespeech.bj.bcebos.com/Parakeet/deepvoice3_ljspeech_griffin-lim_ckpt_1.0.zip
+    dest: assets
+    uncompress: True

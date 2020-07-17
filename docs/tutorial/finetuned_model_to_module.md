@@ -305,4 +305,4 @@ r = requests.post(url=url, headers=headers, data=json.dumps(data))
 print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
-关与PaddleHub Serving更多信息参见[Hub Serving教程](../../docs/tutorial/serving.md)以及[Demo](../../demo/serving)
+关与PaddleHub Serving更多信息参见[Hub Serving教程](../../docs/tutorial/serving.md)以及[Demo](../../demo/serving/README.md)

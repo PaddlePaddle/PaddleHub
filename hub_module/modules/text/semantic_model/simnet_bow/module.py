@@ -14,7 +14,7 @@ import numpy as np
 import paddle.fluid as fluid
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 import paddlehub as hub
-from paddlehub.common.paddle_helper import get_variable_info
+from paddlehub.common.paddle_helper import add_vars_prefix, get_variable_info
 from paddlehub.common.utils import sys_stdin_encoding
 from paddlehub.io.parser import txt_parser
 from paddlehub.module.module import serving
@@ -31,7 +31,7 @@ class DataFormatError(Exception):
 
 @moduleinfo(
     name="simnet_bow",
-    version="1.1.0",
+    version="1.2.0",
     summary=
     "Baidu's open-source similarity network model based on bow_pairwise.",
     author="baidu-nlp",
@@ -42,7 +42,8 @@ class SimnetBow(hub.Module):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "infer_model")
+        self.pretrained_model_path = os.path.join(self.directory, "assets",
+                                                  "infer_model")
         self.vocab_path = os.path.join(self.directory, "assets", "vocab.txt")
         self.vocab = load_vocab(self.vocab_path)
         self.param_file = os.path.join(self.directory, "assets", "params.txt")
@@ -81,47 +82,121 @@ class SimnetBow(hub.Module):
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_paddle_predictor(gpu_config)
 
-    def context(self, trainable=False):
+    def context(self, trainable=False, max_seq_len=128, num_slots=1):
         """
         Get the input ,output and program of the pretrained simnet_bow
+
         Args:
-             trainable(bool): whether fine-tune the pretrained parameters of simnet_bow or not
+             trainable(bool): whether fine-tune the pretrained parameters of simnet_bow or not。
+             max_seq_len (int): It will limit the total sequence returned so that it has a maximum length.
+             num_slots(int): It's number of data inputted to the model, selectted as following options:
+
+                 - 1(default): There's only one data to be feeded in the model, e.g. the module is used for sentence classification task.
+                 - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
+                 - 3: There are three data to be feeded in the model, e.g. the module is used for text matching task (pair-wise).
+
         Returns:
              inputs(dict): the input variables of simnet_bow (words)
-             outputs(dict): the output variables of simnet_bow (the sentiment prediction results)
-             main_program(Program): the main_program of lac with pretrained prameters
+             outputs(dict): the output variables of input words (word embeddings) and sequence lenght of the first input_text
+             main_program(Program): the main_program of simnet_bow with pretrained prameters
         """
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+        assert num_slots >= 1 and num_slots <= 3, "num_slots must be 1, 2, or 3, but the input is %d" % num_slots
+        main_program = fluid.Program()
+        startup_program = fluid.Program()
+        with fluid.program_guard(main_program, startup_program):
+            text_1 = fluid.layers.data(
+                name="text",
+                shape=[-1, max_seq_len, 1],
+                dtype="int64",
+                lod_level=0)
+            seq_len = fluid.layers.data(
+                name="seq_len", shape=[1], dtype='int64', lod_level=0)
+            seq_len_used = fluid.layers.squeeze(seq_len, axes=[1])
 
-        program, feed_target_names, fetch_targets = fluid.io.load_inference_model(
-            dirname=self.pretrained_model_path, executor=exe)
-        with open(self.param_file, 'r') as file:
-            params_list = file.readlines()
-        for param in params_list:
-            param = param.strip()
-            var = program.global_block().var(param)
-            var_info = get_variable_info(var)
+            # Add embedding layer.
+            w_param_attrs = fluid.ParamAttr(
+                name="emb",
+                initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                trainable=trainable)
+            dict_dim = 500002
+            emb_1 = fluid.layers.embedding(
+                input=text_1,
+                size=[dict_dim, 128],
+                is_sparse=True,
+                padding_idx=dict_dim - 1,
+                dtype='float32',
+                param_attr=w_param_attrs)
+            emb_1_name = emb_1.name
+            data_list = [text_1]
+            emb_name_list = [emb_1_name]
 
-            program.global_block().create_parameter(
-                shape=var_info['shape'],
-                dtype=var_info['dtype'],
-                name=var_info['name'])
+            if num_slots > 1:
+                text_2 = fluid.data(
+                    name='text_2',
+                    shape=[-1, max_seq_len],
+                    dtype='int64',
+                    lod_level=0)
+                emb_2 = fluid.embedding(
+                    input=text_2,
+                    size=[dict_dim, 128],
+                    is_sparse=True,
+                    padding_idx=dict_dim - 1,
+                    dtype='float32',
+                    param_attr=w_param_attrs)
+                emb_2_name = emb_2.name
+                data_list.append(text_2)
+                emb_name_list.append(emb_2_name)
 
-        for param in program.global_block().iter_parameters():
-            param.trainable = trainable
-        inputs = {}
-        for name, var in program.global_block().vars.items():
-            if name == feed_target_names[0]:
-                inputs["text_1"] = var
-            if name == feed_target_names[1]:
-                inputs["text_2"] = var
-            # output of sencond layer from the end prediction layer (fc-softmax)
-        outputs = {
-            "left_feature": fetch_targets[0],
-            "similarity": fetch_targets[1]
-        }
-        return inputs, outputs, program
+            if num_slots > 2:
+                text_3 = fluid.data(
+                    name='text_3',
+                    shape=[-1, max_seq_len],
+                    dtype='int64',
+                    lod_level=0)
+                emb_3 = fluid.embedding(
+                    input=text_3,
+                    size=[dict_dim, 128],
+                    is_sparse=True,
+                    padding_idx=dict_dim - 1,
+                    dtype='float32',
+                    param_attr=w_param_attrs)
+                emb_3_name = emb_3.name
+                data_list.append(text_3)
+                emb_name_list.append(emb_3_name)
+
+            variable_names = filter(
+                lambda v: v not in ['text', 'text_2', 'text_3', "seq_len"],
+                list(main_program.global_block().vars.keys()))
+            prefix_name = "@HUB_{}@".format(self.name)
+            add_vars_prefix(
+                program=main_program, prefix=prefix_name, vars=variable_names)
+
+            for param in main_program.global_block().iter_parameters():
+                param.trainable = trainable
+
+            place = fluid.CPUPlace()
+            exe = fluid.Executor(place)
+
+            # Load the senta_lstm pretrained model.
+            def if_exist(var):
+                return os.path.exists(
+                    os.path.join(self.pretrained_model_path, var.name))
+
+            fluid.io.load_vars(
+                exe, self.pretrained_model_path, predicate=if_exist)
+
+            inputs = {'seq_len': seq_len}
+            outputs = {}
+            for index, data in enumerate(data_list):
+                if index == 0:
+                    inputs['text'] = data
+                    outputs['emb'] = main_program.global_block().vars[
+                        prefix_name + emb_name_list[0]]
+                else:
+                    inputs['text_%s' % (index + 1)] = data
+                    outputs['emb_%s' % (index + 1)] = main_program.global_block(
+                    ).vars[prefix_name + emb_name_list[index]]
+            return inputs, outputs, main_program
 
     def texts2tensor(self, texts):
         """
@@ -209,11 +284,14 @@ class SimnetBow(hub.Module):
         Returns:
              results(list): the word segmentation results
         """
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-        except:
-            use_gpu = False
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         data = self.check_data(texts, data)
 
@@ -361,7 +439,10 @@ class SimnetBow(hub.Module):
 if __name__ == "__main__":
 
     simnet_bow = SimnetBow()
-    simnet_bow.context()
+    inputs, outputs, program = simnet_bow.context(num_slots=3)
+    print(inputs)
+    print(outputs)
+
     # Data to be predicted
     test_text_1 = ["这道题太难了", "这道题太难了", "这道题太难了"]
     test_text_2 = ["这道题是上一年的考题", "这道题不简单", "这道题很有意思"]

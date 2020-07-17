@@ -76,9 +76,9 @@ class EfficientNetB5ImageNet(hub.Module):
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
             int(_places[0])
-            use_gpu = True
-        except:
             use_gpu = False
+        except:
+            use_gpu = True
         if use_gpu:
             gpu_config = AnalysisConfig(self.default_pretrained_model_path)
             gpu_config.disable_glog_info()

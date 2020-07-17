@@ -285,28 +285,47 @@ def parse_result(lines, crf_decode, id2label_dict, interventer=None):
         tags = [
             id2label_dict[str(tag_id[0])] for tag_id in crf_decode[begin:end]
         ]
+
+        if interventer:
+            interventer.parse_customization(sent, tags)
+
         sent_out = []
         tags_out = []
-        parital_word = ""
         for ind, tag in enumerate(tags):
-            # for the first word
-            if parital_word == "":
-                parital_word = sent[ind]
-                tags_out.append(tag.split('-')[0])
+            # for the first char
+            if len(sent_out) == 0 or tag.endswith("B") or tag.endswith("S"):
+                sent_out.append(sent[ind])
+                tags_out.append(tag[:-2])
                 continue
-            # for the beginning of word
-            if tag.endswith("-B") or (tag == "O" and tags[ind - 1] != "O"):
-                sent_out.append(parital_word)
-                tags_out.append(tag.split('-')[0])
-                parital_word = sent[ind]
-                continue
-            parital_word += sent[ind]
-        # append the last word, except for len(tags)=0
-        if len(sent_out) < len(tags_out):
-            sent_out.append(parital_word)
+            sent_out[-1] += sent[ind]
+            tags_out[-1] = tag[:-2]
+
         seg_result = {"word": sent_out, "tag": tags_out}
-        if interventer:
-            query = Query(seg_result)
-            seg_result = interventer.run(query)
         batch_out.append(seg_result)
+
     return batch_out
+
+
+#         sent_out = []
+#         tags_out = []
+#         parital_word = ""
+#         for ind, tag in enumerate(tags):
+#             # for the first word
+#             if parital_word == "":
+#                 parital_word = sent[ind]
+#                 tags_out.append(tag.split('-')[0])
+#                 continue
+#             # for the beginning of word
+#             if tag.endswith("-B") or (tag == "O" and tags[ind - 1] != "O"):
+#                 sent_out.append(parital_word)
+#                 tags_out.append(tag.split('-')[0])
+#                 parital_word = sent[ind]
+#                 continue
+#             parital_word += sent[ind]
+#         # append the last word, except for len(tags)=0
+#         if len(sent_out) < len(tags_out):
+#             sent_out.append(parital_word)
+#         seg_result = {"word": sent_out, "tag": tags_out}
+
+#         batch_out.append(seg_result)
+#     return batch_out

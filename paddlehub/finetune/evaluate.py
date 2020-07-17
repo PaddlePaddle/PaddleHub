@@ -133,7 +133,7 @@ def calculate_f1_np(preds, labels):
     p = tp / (tp + fp) if (tp + fp) else 0
     r = tp / (tp + fn) if (tp + fn) else 0
     f1 = (2 * p * r) / (p + r) if p + r else 0
-    return f1
+    return p, r, f1
 
 
 def matthews_corrcoef(preds, labels):
@@ -192,6 +192,12 @@ def recall_nk(data, n, k, m):
         correct_num += get_p_at_n_in_m(data, n, k, ind)
 
     return correct_num / length
+
+
+def simple_accuracy(preds, labels):
+    preds = np.array(preds)
+    labels = np.array(labels)
+    return (preds == labels).mean()
 
 
 def _get_ngrams(segment, max_order):

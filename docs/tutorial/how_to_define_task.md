@@ -1,9 +1,9 @@
 # 自定义Task
 
 本节内容讲述如何实现自定义Task。在了解本节内容之前，您需要先了解以下内容：
-* 任务基类[BasicTask]()
-* 运行状态[RunState]()
-* 运行环境[RunEnv]()
+* 任务基类[BasicTask](../reference/task/base_task.md)
+* 运行状态[RunState](../reference/task/runstate.md)
+* 运行环境[RunEnv](../reference/task/runenv.md)
 
 当自定义一个Task时，我们并不需要重新实现eval、finetune等通用接口。一般来讲，新的Task与其他Task的区别在于
 * 网络结构

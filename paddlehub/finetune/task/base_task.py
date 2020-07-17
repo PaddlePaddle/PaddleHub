@@ -1181,33 +1181,29 @@ class BaseTask(object):
                     data_reader = data_loader.set_batch_generator(
                         self.generator, places=self.places)
                 else:
-                    data_reader = data_loader.set_sample_generator(
-                        self.generator,
-                        places=self.places,
-                        batch_size=self.config.batch_size,
-                        drop_last=True)
-            else:
-                data_feeder = fluid.DataFeeder(
-                    feed_list=self.feed_list, place=self.place)
-                if self._compatible_mode:
-                    data_reader = data_feeder.decorate_reader(
-                        self.generator,
-                        multi_devices=self.config.use_data_parallel,
-                        drop_last=True)
-                else:
-                    data_reader = data_feeder.decorate_reader(
-                        paddle.batch(
-                            self.generator, batch_size=self.config.batch_size),
-                        multi_devices=self.config.use_data_parallel,
-                        drop_last=True)
+                    if self.is_predict_phase:
+                        data_reader = data_loader.set_sample_generator(
+                            self.generator,
+                            places=self.places,
+                            batch_size=self.config.batch_size,
+                            drop_last=False)
+                    else:
+                        data_reader = data_loader.set_sample_generator(
+                            self.generator,
+                            places=self.places,
+                            batch_size=self.config.batch_size,
+                            drop_last=True)
 
             global_run_states = []
             period_run_states = []
-
             for batch in data_reader():
                 step_run_state = RunState(len(self.fetch_list))
                 step_run_state.run_step = 1
-                num_batch_examples = len(batch)
+
+                # get the batch_data_size
+                tmp_name = list(batch[0].keys())[0]
+                tmp = np.array(batch[0][tmp_name])
+                num_batch_examples = tmp.shape[0]
 
                 fetch_result = self.exe.run(
                     self.main_program_to_be_run,
