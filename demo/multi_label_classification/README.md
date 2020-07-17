@@ -89,9 +89,9 @@ ErnieTinyTokenizer和BertTokenizer的区别在于它将按词粒度进行切分�
 
 `module.get_vocab_path()` 会返回预训练模型对应的词表；
 
-`module.sp_model_path` 若module为ernie_tiny则返回对应的子词切分模型，否则返回None；
+`module.sp_model_path` 若module为ernie_tiny则返回对应的子词切分模型路径，否则返回None；
 
-`module.word_dict_path` 若module为ernie_tiny则返回对应的词语切分模型，否则返回None；
+`module.word_dict_path` 若module为ernie_tiny则返回对应的词语切分模型路径，否则返回None；
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致；
 
