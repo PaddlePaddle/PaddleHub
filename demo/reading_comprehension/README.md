@@ -63,13 +63,13 @@ RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L
 module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
 ```
 
-### Step2: 准备数据集并使用ReadingComprehensionReader读取数据
+### Step2: 准备数据集并使用tokenizer预处理数据
 ```python
 tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
 dataset = hub.dataset.SQUAD(
     version_2_with_negative=False,
     tokenizer=tokenizer,
-    max_seq_len=args.max_seq_len)
+    max_seq_len=128)
 ```
 如果是使用ernie_tiny预训练模型，请使用ErnieTinyTokenizer。
 ```
@@ -80,11 +80,15 @@ tokenizer = hub.ErnieTinyTokenizer(
 ```
 ErnieTinyTokenizer和BertTokenizer的区别在于它将按词粒度进行切分，详情请参考[文章](https://www.jiqizhixin.com/articles/2019-11-06-9)。
 
-数据集的准备代码可以参考 [squad.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/paddlehub/dataset/squad.py)。
+数据集的准备代码可以参考 [squad.py](../../paddlehub/dataset/squad.py)。
 
 `hub.dataset.SQUAD(version_2_with_negative=False)` 会自动从网络下载数据集SQuAD v1.1并解压到用户目录下`$HOME/.paddlehub/dataset`目录；如果想选择数据集SQuAD v2.0，则只需version_2_with_negative=True；
 
 `module.get_vocab_path()` 会返回预训练模型对应的词表；
+
+`module.sp_model_path` 若module为ernie_tiny则返回对应的子词切分模型，否则返回None；
+
+`module.word_dict_path` 若module为ernie_tiny则返回对应的词语切分模型，否则返回None；
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致；
 
@@ -105,11 +109,11 @@ SQuAD v2.0    |  hub.dataset.SQUAD(version_2_with_negative=True)                
 DRCD          |  hub.dataset.DRCD()                                                 |roberta_wwm_ext_chinese_L-24_H-1024_A-16|
 CMRC 2018     |  hub.dataset.CMRC2018()                                             |roberta_wwm_ext_chinese_L-24_H-1024_A-16|
 
-更多数据集信息参考[Dataset](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset)。
+更多数据集信息参考[Dataset](../../docs/reference/dataset.md)。
 
 #### 自定义数据集
 
-如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)。
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](../../docs/tutorial/how_to_load_data.md)。
 
 ### Step3：选择优化策略和运行配置
 
@@ -134,7 +138,7 @@ config = hub.RunConfig(use_cuda=True, num_epoch=2, batch_size=12, strategy=strat
 
 `lr_scheduler`: 有两种策略可选（1）`linear_decay`策略学习率会在最高点后以线性方式衰减; （2）`noam_decay`策略学习率会在最高点以多项式形式衰减；
 
-PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)。
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](../../docs/reference/strategy.md)。
 
 #### 运行配置
 `RunConfig` 主要控制Fine-tune的训练，包含以下可控制的参数:
@@ -170,7 +174,7 @@ reading_comprehension_task.finetune_and_eval()
 
 #### 自定义迁移任务
 
-如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)。
+如果想改变迁移任务组网，详细参见[自定义迁移任务](../../docs/tutorial/how_to_define_task.md)。
 
 ## 可视化
 

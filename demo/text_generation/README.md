@@ -69,16 +69,16 @@ RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L
 module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
 ```
 
-### Step2: 准备数据集并使用ClassifyReader读取数据
+### Step2: 准备数据集并使用tokenizer预处理数据
 ```python
 tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
 dataset = hub.dataset.Couplet(
-    tokenizer=tokenizer, max_seq_len=args.max_seq_len)
+    tokenizer=tokenizer, max_seq_len=128)
 ```
 **NOTE**:
 * 即使是使用ernie_tiny预训练模型，也请使用BertTokenizer，而不要使用ErnieTinyTokenizer。因为对联数据集中上联是按字切分并以特殊字符"\002"作为分隔符的。
 
-数据集的准备代码可以参考 [couplet.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/paddlehub/dataset/couplet.py)。
+数据集的准备代码可以参考 [couplet.py](../../paddlehub/dataset/couplet.py)。
 
 `hub.dataset.Couplet()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录；
 
@@ -96,15 +96,15 @@ dataset_result = dataset.get_dev_records() # set dataset max_seq_len = 10
 
 #### 自定义数据集
 
-如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)。
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](../../docs/tutorial/how_to_load_data.md)。
 
 ### Step3：选择优化策略和运行配置
 
 ```python
 strategy = hub.ULMFiTStrategy(
-    learning_rate=args.learning_rate,
+    learning_rate=5e-3,
     optimizer_name="adam",
-    cut_fraction=args.cut_fraction,
+    cut_fraction=0.1,
     dis_params_layer=module.get_params_layer(),
     frz_params_layer=module.get_params_layer())
 
@@ -120,7 +120,7 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 * `dis_params_layer`: 分层学习率策略需要的参数层次信息，如果设置为module.get_params_layer()，预训练模型中各层神经网络的更新速度将逐层衰减，默认每一层的学习率是上一层学习率的1/2.6；
 * `frz_params_layer`: 逐层解冻策略需要的参数层次信息，如果设置为module.get_params_layer()，预训练模型中各层神经网络将在训练过程中随着epoch的增大而参与更新，例如epoch=1时只有最上层参数会更新，epoch=2时最上2层参数都会参与更新；
 
-关于ULMFiT策略的详细说明，请参考[论文](https://arxiv.org/pdf/1801.06146.pdf)。如果您希望将ULMFiT策略与AdamWeightDecay策略进行组合实验，请参考[CombinedStrategy](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/paddlehub/finetune/strategy.py:183)
+关于ULMFiT策略的详细说明，请参考[论文](https://arxiv.org/pdf/1801.06146.pdf)。如果您希望将ULMFiT策略与AdamWeightDecay策略进行组合实验，请参考[CombinedStrategy](../../paddlehub/finetune/strategy.py:183)
 
 #### 运行配置
 `RunConfig` 主要控制Fine-tune的训练，包含以下可控制的参数:
@@ -140,7 +140,7 @@ gen_task = hub.TextGenerationTask(
     dataset=dataset,
     feature=pooled_output,
     token_feature=sequence_output,
-    max_seq_len=args.max_seq_len,
+    max_seq_len=128,
     num_classes=dataset.num_labels,
     config=config,
     metrics_choices=["bleu"])
@@ -148,13 +148,13 @@ gen_task = hub.TextGenerationTask(
 gen_task.finetune_and_eval()
 ```
 **NOTE:**
-1. `outputs["pooled_output"]`返回了Transformer类预训练模型对应的[CLS]向量,可以用于句子或句对的特征表达。
-2. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达；
-3. 当前TextGenerationTask中内置的Decoder为通用的Attention LSTM结构，如果您希望进一步增强Decoder性能，可以尝试修改[generation_task](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/paddlehub/finetune/task/generation_task.py:156)。
+1. `outputs["pooled_output"]`返回了Transformer类预训练模型对应的[CLS]向量,可以用于句子或句对的特征表达。这一特征将用于TextGenerationTask Decoder状态初始化。
+2. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达；这一特征将用于TextGenerationTask Decoder解码。
+3. 当前TextGenerationTask中内置的Decoder为通用的Attention LSTM结构，如果您希望进一步增强Decoder性能，可以尝试修改[generation_task](../../paddlehub/finetune/task/generation_task.py:156)。
 
 #### 自定义迁移任务
 
-如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)。
+如果想改变迁移任务组网，详细参见[自定义迁移任务](../../docs/tutorial/how_to_define_task.md)。
 
 ## 可视化
 
@@ -169,7 +169,7 @@ $ visualdl --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_NUM}
 通过Fine-tune完成模型训练后，在对应的ckpt目录下，会自动保存验证集上效果最好的模型。
 配置脚本参数
 ```
-CKPT_DIR="ckpt_chnsentiment/"
+CKPT_DIR="ckpt_generation/"
 python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
 ```
 其中CKPT_DIR为Fine-tune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*

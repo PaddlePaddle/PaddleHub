@@ -6,7 +6,7 @@
 如下图所示：
 
 <p align="center">
-<img src="https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.4/docs/imgs/multi-label-cls.png" hspace='10'/> <br />
+<img src="../../docs/imgs/multi-label-cls.png" hspace='10'/> <br />
 </p>
 *图片来源于https://mc.ai/building-a-multi-label-text-classifier-using-bert-and-tensorflow/*
 
@@ -68,11 +68,11 @@ RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L
 
 更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub)。
 
-### Step2: 准备数据集并使用MultiLabelClassifyReader读取数据
+### Step2: 准备数据集并使用tokenizer预处理数据
 ```python
 tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
 dataset = hub.dataset.Toxic(
-    tokenizer=tokenizer, max_seq_len=args.max_seq_len)
+    tokenizer=tokenizer, max_seq_len=128)
 ```
 如果是使用ernie_tiny预训练模型，请使用ErnieTinyTokenizer。
 ```
@@ -83,11 +83,15 @@ tokenizer = hub.ErnieTinyTokenizer(
 ```
 ErnieTinyTokenizer和BertTokenizer的区别在于它将按词粒度进行切分，详情请参考[文章](https://www.jiqizhixin.com/articles/2019-11-06-9)。
 
-数据集的准备代码可以参考[toxic.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/paddlehub/dataset/toxic.py)。
+数据集的准备代码可以参考[toxic.py](../../paddlehub/dataset/toxic.py)。
 
 `hub.dataset.Toxic()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录；
 
 `module.get_vocab_path()` 会返回预训练模型对应的词表；
+
+`module.sp_model_path` 若module为ernie_tiny则返回对应的子词切分模型，否则返回None；
+
+`module.word_dict_path` 若module为ernie_tiny则返回对应的词语切分模型，否则返回None；
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致；
 
@@ -101,7 +105,7 @@ dataset_result = dataset.get_dev_records() # set dataset max_seq_len = 10
 
 #### 自定义数据集
 
-如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90\)。
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](../../docs/tutorial/how_to_load_data.md)。
 
 ### Step3：选择优化策略和运行配置
 
@@ -124,7 +128,7 @@ config = hub.RunConfig(use_cuda=True, use_data_parallel=True, use_pyreader=True,
 * `warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate；
 * `lr_scheduler`: 有两种策略可选(1) `linear_decay`策略学习率会在最高点后以线性方式衰减; `noam_decay`策略学习率会在最高点以多项式形式衰减；
 
-PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)。
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](../../docs/reference/strategy.md)。
 
 #### 运行配置
 `RunConfig` 主要控制Fine-tune的训练，包含以下可控制的参数:
@@ -159,7 +163,7 @@ multi_label_cls_task.finetune_and_eval()
 
 #### 自定义迁移任务
 
-如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)。
+如果想改变迁移任务组网，详细参见[自定义迁移任务](../../docs/tutorial/how_to_define_task.md)。
 
 ## 可视化
 

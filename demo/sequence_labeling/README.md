@@ -62,16 +62,16 @@ RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L
 module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
 ```
 
-### Step2: 准备数据集并使用SequenceLabelReader读取数据
+### Step2: 准备数据集并使用tokenizer预处理数据
 ```python
 tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
 dataset = hub.dataset.MSRA_NER(
-    tokenizer=tokenizer, max_seq_len=args.max_seq_len)
+    tokenizer=tokenizer, max_seq_len=128)
 ```
 **NOTE**:
 * 即使是使用ernie_tiny预训练模型，也请使用BertTokenizer，而不要使用ErnieTinyTokenizer。因为序列标注任务需要为每一个字进行标注。
 
-数据集的准备代码可以参考[msra_ner.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/paddlehub/dataset/msra_ner.py)。
+数据集的准备代码可以参考[msra_ner.py](../../paddlehub/dataset/msra_ner.py)。
 
 `hub.dataset.MSRA_NER()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录；
 
@@ -89,7 +89,7 @@ dataset_result = dataset.get_dev_records() # set dataset max_seq_len = 10
 
 #### 自定义数据集
 
-如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)。
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](../../docs/tutorial/how_to_load_data.md)。
 
 ### Step3：选择优化策略和运行配置
 
@@ -105,7 +105,7 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 ```
 #### 优化策略
 
-PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)；
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](../../docs/reference/strategy.md)。
 
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`；
 
@@ -135,7 +135,7 @@ sequence_output = outputs["sequence_output"]
 seq_label_task = hub.SequenceLabelTask(
     dataset=dataset,
     feature=sequence_output,
-    max_seq_len=args.max_seq_len,
+    max_seq_len=128,
     num_classes=dataset.num_labels,
     config=config,
     add_crf=False)
@@ -150,7 +150,7 @@ seq_label_task.finetune_and_eval()
 
 #### 自定义迁移任务
 
-如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)。
+如果想改变迁移任务组网，详细参见[自定义迁移任务](../../docs/tutorial/how_to_define_task.md)。
 
 ## 可视化
 
