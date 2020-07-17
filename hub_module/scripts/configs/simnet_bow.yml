@@ -5,6 +5,6 @@ exclude:
   - test.py
 resources:
   -
-    url: https://bj.bcebos.com/paddlehub/model/nlp/simnet_bow_infer_model.tar.gz
+    url: https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/simnet_bow_assets.tar.gz
     dest: .
     uncompress: True

@@ -22,16 +22,16 @@ class LacTestCase(TestCase):
     # yapf: disable
     def setUp(self):
         self.module = hub.Module(name='lac')
-        self.user_dict_path = '../lac_user_dict/user.dict'
-        self.test_text = ["今天是个好日子", "调料份量不能多，也不能少，味道才能正好"]
+        self.user_dict_path = '../user.dict'
+        self.test_text = ["今天是个好日子", "春天的花开秋天的风以及冬天的落阳"]
         self.results_tag = [
             {
                 'word': ['今天', '是', '个', '好日子'],
                 'tag': ['TIME', 'v', 'q', 'n']
             },
             {
-                'word':['调料', '份量', '不能', '多', '，', '也', '不能少', '，', '味道', '才能', '正好'],
-                'tag': ['n', 'n', 'v', 'a', 'w', 'd', 'a', 'w', 'n', 'v', 'd']
+                'word': ['春天', '的', '花开', '秋天', '的', '风', '以及', '冬天', '的', '落阳'],
+                'tag': ['TIME', 'u', 'v', 'TIME', 'u', 'n', 'c', 'TIME', 'u', 'vn']
             }
         ]
         self.results_notag = [
@@ -39,7 +39,7 @@ class LacTestCase(TestCase):
                 'word': ['今天', '是', '个', '好日子']
             },
             {
-                'word': ['调料', '份量', '不能', '多', '，', '也', '不能少', '，', '味道', '才能', '正好']
+                'word': ['春天', '的', '花开', '秋天', '的', '风', '以及', '冬天', '的', '落阳']
             }
         ]
         self.results_notag_userdict = [
@@ -47,7 +47,7 @@ class LacTestCase(TestCase):
                 'word': ['今天', '是', '个', '好日子']
             },
             {
-                'word': ['调料', '份量', '不能', '多', '，', '也', '不能', '少', '，', '味道', '才能', '正好']
+                'word':  ['春天', '的', '花', '开', '秋天的风', '以及', '冬天', '的', '落', '阳']
             }
         ]
         self.tags = {
@@ -84,13 +84,13 @@ class LacTestCase(TestCase):
 
     def test_set_user_dict(self):
         self.module.set_user_dict(self.user_dict_path)
-        self.assertNotEqual(self.module.interventer, None)
+        self.assertNotEqual(self.module.custom, None)
 
     def test_del_user_dict(self):
         self.module.set_user_dict(self.user_dict_path)
-        self.assertNotEqual(self.module.interventer, None)
+        self.assertNotEqual(self.module.custom, None)
         self.module.del_user_dict()
-        self.assertEqual(self.module.interventer, None)
+        self.assertEqual(self.module.custom, None)
 
     def test_lexical_analysis(self):
         self.module.del_user_dict()
@@ -121,6 +121,36 @@ class LacTestCase(TestCase):
         results = self.module.lexical_analysis(
             texts=self.test_text, use_gpu=False, batch_size=1, return_tag=False)
         self.assertEqual(results, self.results_notag_userdict)
+
+    def test_cut(self):
+        # test batch_size
+        results = self.module.cut(
+            text=self.test_text, use_gpu=False, batch_size=1, return_tag=False)
+        self.assertEqual(results, self.results_notag)
+        results = self.module.cut(
+            text=self.test_text, use_gpu=False, batch_size=10, return_tag=False)
+        self.assertEqual(results, self.results_notag)
+
+        # test return_tag
+        results = self.module.cut(
+            text=self.test_text, use_gpu=False, batch_size=1, return_tag=True)
+        self.assertEqual(results, self.results_tag)
+
+        # test gpu
+        results = self.module.cut(
+            text=self.test_text, use_gpu=True, batch_size=1, return_tag=False)
+        self.assertEqual(results, self.results_notag)
+
+        # test results to add user_dict
+        self.module.set_user_dict(self.user_dict_path)
+        results = self.module.cut(
+            text=self.test_text, use_gpu=False, batch_size=1, return_tag=False)
+        self.assertEqual(results, self.results_notag_userdict)
+
+        # test single sentence
+        results = self.module.cut(
+            text="今天是个好日子", use_gpu=False, batch_size=1, return_tag=False)
+        self.assertEqual(results, ['今天', '是', '个', '好日子'])
 
     def test_get_tags(self):
         tags = self.module.get_tags()

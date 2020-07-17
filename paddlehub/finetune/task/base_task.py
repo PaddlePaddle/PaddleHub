@@ -35,7 +35,7 @@ import paddle.fluid as fluid
 from visualdl import LogWriter
 
 import paddlehub as hub
-from paddlehub.reader.nlp_reader import BaseNLPReader
+from paddlehub.reader.nlp_reader import BaseReader, BaseNLPReader
 from paddlehub.common.paddle_helper import dtype_map, clone_program
 from paddlehub.common.utils import mkdir
 from paddlehub.common.dir import tmp_dir
@@ -350,13 +350,14 @@ class BaseTask(object):
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
 
-        if isinstance(data_reader, BaseNLPReader):
+        if isinstance(data_reader, BaseReader):
             self._compatible_mode = True
-            logger.warning(
-                "PaddleHub v1.8 has deprecated the reader and feed_list parameters in the nlp Task. We provided an easier usage, "
-                "in which you can use your tokenizer to preprocess dataset and run task in a clear flow. "
-                "New demo see https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/demo/text_classification/text_cls.py"
-            )
+            if isinstance(data_reader, BaseNLPReader):
+                logger.warning(
+                    "PaddleHub v1.8 has deprecated the reader and feed_list parameters in the nlp Task. We provided an easier usage, "
+                    "in which you can use your tokenizer to preprocess dataset and run task in a clear flow. "
+                    "New demo see https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/demo/text_classification/text_cls.py"
+                )
         else:
             self._compatible_mode = False
 
@@ -1180,33 +1181,29 @@ class BaseTask(object):
                     data_reader = data_loader.set_batch_generator(
                         self.generator, places=self.places)
                 else:
-                    data_reader = data_loader.set_sample_generator(
-                        self.generator,
-                        places=self.places,
-                        batch_size=self.config.batch_size,
-                        drop_last=True)
-            else:
-                data_feeder = fluid.DataFeeder(
-                    feed_list=self.feed_list, place=self.place)
-                if self._compatible_mode:
-                    data_reader = data_feeder.decorate_reader(
-                        self.generator,
-                        multi_devices=self.config.use_data_parallel,
-                        drop_last=True)
-                else:
-                    data_reader = data_feeder.decorate_reader(
-                        paddle.batch(
-                            self.generator, batch_size=self.config.batch_size),
-                        multi_devices=self.config.use_data_parallel,
-                        drop_last=True)
+                    if self.is_predict_phase:
+                        data_reader = data_loader.set_sample_generator(
+                            self.generator,
+                            places=self.places,
+                            batch_size=self.config.batch_size,
+                            drop_last=False)
+                    else:
+                        data_reader = data_loader.set_sample_generator(
+                            self.generator,
+                            places=self.places,
+                            batch_size=self.config.batch_size,
+                            drop_last=True)
 
             global_run_states = []
             period_run_states = []
-
             for batch in data_reader():
                 step_run_state = RunState(len(self.fetch_list))
                 step_run_state.run_step = 1
-                num_batch_examples = len(batch)
+
+                # get the batch_data_size
+                tmp_name = list(batch[0].keys())[0]
+                tmp = np.array(batch[0][tmp_name])
+                num_batch_examples = tmp.shape[0]
 
                 fetch_result = self.exe.run(
                     self.main_program_to_be_run,

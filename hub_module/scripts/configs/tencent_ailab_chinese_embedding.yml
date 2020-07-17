@@ -1,0 +1,10 @@
+name: tencent_ailab_chinese_embedding
+dir: "modules/text/embedding/tencent_ailab_chinese_embedding"
+exclude:
+  - README.md
+  - test.py
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/embedding/tencent_ailab_chinese_embedding_assets.tar.gz
+    dest: .
+    uncompress: True

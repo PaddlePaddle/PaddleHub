@@ -2,20 +2,14 @@
 import paddle.fluid as fluid
 
 
-def lstm_net(data,
-             dict_dim,
-             emb_dim=128,
-             hid_dim=128,
-             hid_dim2=96,
-             class_dim=2,
-             emb_lr=30.0):
+def lstm_net(emb, seq_len, hid_dim=128, hid_dim2=96, class_dim=2, emb_lr=30.0):
     """
     Lstm net
     """
-    # embedding layer
-    emb = fluid.layers.embedding(input=data, size=[dict_dim, emb_dim])
+    # unpad the token_feature
+    unpad_feature = fluid.layers.sequence_unpad(emb, length=seq_len)
     # Lstm layer
-    fc0 = fluid.layers.fc(input=emb, size=hid_dim * 4)
+    fc0 = fluid.layers.fc(input=unpad_feature, size=hid_dim * 4)
     lstm_h, c = fluid.layers.dynamic_lstm(
         input=fc0, size=hid_dim * 4, is_reverse=False)
     # max pooling layer

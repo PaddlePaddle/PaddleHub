@@ -22,7 +22,7 @@ from deeplabv3p_xception65_humanseg.data_feed import reader
     author="baidu-vis",
     author_email="",
     summary="DeepLabv3+ is a semantic segmentation model.",
-    version="1.1.0")
+    version="1.1.1")
 class DeeplabV3pXception65HumanSeg(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
@@ -220,3 +220,11 @@ class DeeplabV3pXception65HumanSeg(hub.Module):
         """
         self.arg_input_group.add_argument(
             '--input_path', type=str, help="path to image.")
+
+
+if __name__ == "__main__":
+    m = DeeplabV3pXception65HumanSeg()
+    import cv2
+    img = cv2.imread('./meditation.jpg')
+    res = m.segmentation(images=[img])
+    print(res[0]['data'])

@@ -2,15 +2,15 @@
 import paddle.fluid as fluid
 
 
-def bow_net(data, dict_dim, emb_dim=128, hid_dim=128, hid_dim2=96, class_dim=2):
+def bow_net(emb, seq_len, hid_dim=128, hid_dim2=96, class_dim=2):
     """
     Bow net
     """
-    # embedding layer
-    emb = fluid.layers.embedding(input=data, size=[dict_dim, emb_dim])
+    # unpad the token_feature
+    unpad_feature = fluid.layers.sequence_unpad(emb, length=seq_len)
 
     # bow layer
-    bow = fluid.layers.sequence_pool(input=emb, pool_type='sum')
+    bow = fluid.layers.sequence_pool(input=unpad_feature, pool_type='sum')
     bow_tanh = fluid.layers.tanh(bow)
     # full connect layer
     fc_1 = fluid.layers.fc(input=bow_tanh, size=hid_dim, act="tanh")
