@@ -49,7 +49,7 @@ class ChineseTextDetectionDBServer(hub.Module):
             import shapely, pyclipper
         except:
             print(
-                'This module requires the shapely, pyclipper tools. The running enviroment does not meet the requirments. Please install the two packages.'
+                'This module requires the shapely, pyclipper tools. The running environment does not meet the requirements. Please install the two packages.'
             )
             exit()
 
