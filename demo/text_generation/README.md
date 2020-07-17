@@ -14,7 +14,7 @@ text_generation
 
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_cls.sh`即可开始使用ERNIE对Couplet数据集进行Fine-tune。
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_text_gen.sh`即可开始使用ERNIE对Couplet数据集进行Fine-tune。
 
 其中脚本参数说明如下：
 
