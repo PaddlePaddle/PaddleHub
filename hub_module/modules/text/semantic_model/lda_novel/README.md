@@ -2,6 +2,10 @@
 
 主题模型(Topic Model)是以无监督学习的方式对文档的隐含语义结构进行聚类的统计模型，其中LDA(Latent Dirichlet Allocation)算法是主题模型的一种。LDA根据对词的共现信息的分析，拟合出词-文档-主题的分布，从而将词、文本映射到一个语义空间中。本Module基于的数据集为百度自建的小说领域数据集。
 
+<p align="center">
+<img src="https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/lda.png" hspace='10'/> <br />
+</p>
+
 更多详情请参考[LDA论文](http://www.jmlr.org/papers/volume3/blei03a/blei03a.pdf)。
 
 注：该Module由第三方开发者DesmonDay贡献。
@@ -17,12 +21,12 @@
 
 **返回**
 
-- jsd(float): 两个文档之间的JS散度。
-- hd(float): 两个文档之间的海林格距离。
+- jsd(float): 两个文档之间的JS散度([Jensen-Shannon divergence](https://blog.csdn.net/FrankieHello/article/details/80614422?utm_source=copy))。
+- hd(float): 两个文档之间的海林格距离([Hellinger Distance](http://blog.sina.com.cn/s/blog_85f1ffb70101e65d.html))。
 
 ### cal_doc_keywords_similarity(document, top_k=10)
 
-用于查找输入文档的前k个关键词。
+用于查找输入文档的前k个关键词及对应的与原文档的相似度。
 
 **参数**
 
