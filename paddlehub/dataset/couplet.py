@@ -36,7 +36,9 @@ class Couplet(GenerationDataset):
     def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "couplet")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
-        with open(os.path.join(dataset_dir, "vocab.txt")) as vocab_file:
+        with open(
+                os.path.join(dataset_dir, "vocab.txt"),
+                encoding="utf8") as vocab_file:
             label_list = [line.strip() for line in vocab_file.readlines()]
         super(Couplet, self).__init__(
             base_path=base_path,

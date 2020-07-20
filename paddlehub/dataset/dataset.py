@@ -184,7 +184,9 @@ class BaseDataset(object):
         raise NotImplementedError
 
     def _load_label_data(self):
-        with open(os.path.join(self.base_path, self.label_file), "r") as file:
+        with open(
+                os.path.join(self.base_path, self.label_file), "r",
+                encoding="utf8") as file:
             return file.read().strip().split("\n")
 
     def __str__(self):
