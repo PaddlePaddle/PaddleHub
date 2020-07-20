@@ -22,9 +22,10 @@ import csv
 import collections
 
 from tqdm import tqdm
-import numpy as np
 from paddlehub.dataset import InputExample, BaseDataset
 from paddlehub.common.logger import logger
+from paddlehub.tokenizer import CustomTokenizer, BertTokenizer
+import numpy as np
 
 
 class BaseNLPDataset(BaseDataset):
@@ -68,7 +69,8 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the train set...")
-            self._train_records = self._convert_examples_to_records(examples)
+            self._train_records = self._convert_examples_to_records(
+                examples, phase="train")
         return self._train_records
 
     @property
@@ -78,7 +80,8 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the dev set...")
-            self._dev_records = self._convert_examples_to_records(examples)
+            self._dev_records = self._convert_examples_to_records(
+                examples, phase="dev")
         return self._dev_records
 
     @property
@@ -88,7 +91,8 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the test set...")
-            self._test_records = self._convert_examples_to_records(examples)
+            self._test_records = self._convert_examples_to_records(
+                examples, phase="test")
         return self._test_records
 
     @property
@@ -98,7 +102,8 @@ class BaseNLPDataset(BaseDataset):
             if not self.tokenizer or not examples:
                 return []
             logger.info("Processing the predict set...")
-            self._predict_records = self._convert_examples_to_records(examples)
+            self._predict_records = self._convert_examples_to_records(
+                examples, phase="predict")
         return self._predict_records
 
     def _read_file(self, input_file, phase=None):
@@ -148,27 +153,39 @@ class BaseNLPDataset(BaseDataset):
                 examples.append(example)
             return examples
 
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data example, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
+
 
         Returns:
             a list with all the examples record.
         """
 
         records = []
-        for example in examples:
-            record = self.tokenizer.encode(
-                text=example.text_a,
-                text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
-            if example.label:
-                record["label"] = self.label_list.index(
-                    example.label) if self.label_list else float(example.label)
-            records.append(record)
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                record = self.tokenizer.encode(
+                    text=example.text_a,
+                    text_pair=example.text_b,
+                    max_seq_len=self.max_seq_len)
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+                if example.label:
+                    record["label"] = self.label_list.index(
+                        example.label) if self.label_list else float(
+                            example.label)
+                records.append(record)
+                process_bar.update(1)
         return records
 
     def get_train_records(self, shuffle=False):
@@ -209,15 +226,7 @@ class BaseNLPDataset(BaseDataset):
         if records:
             feed_list = list(records[0].keys())
         else:
-            if phase == "predict":
-                feed_list = [
-                    feed_name for feed_name in self.get_feed_list("train")
-                    if feed_name != "label"
-                ]
-            else:
-                feed_list = [
-                    feed_name for feed_name in self.get_feed_list("train")
-                ]
+            feed_list = []
         return feed_list
 
     def batch_records_generator(self,
@@ -281,50 +290,148 @@ class BaseNLPDataset(BaseDataset):
 
 
 class TextClassificationDataset(BaseNLPDataset):
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data example, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
+
 
         Returns:
             a list with all the examples record.
         """
-
         records = []
-        for example in examples:
-            record = self.tokenizer.encode(
-                text=example.text_a,
-                text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
-            if example.label:
-                record["label"] = self.label_list.index(example.label)
-            records.append(record)
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                record = self.tokenizer.encode(
+                    text=example.text_a,
+                    text_pair=example.text_b,
+                    max_seq_len=self.max_seq_len)
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+                if example.label:
+                    record["label"] = self.label_list.index(example.label)
+                records.append(record)
+                process_bar.update(1)
         return records
 
 
 class RegressionDataset(BaseNLPDataset):
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data example, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
 
         Returns:
             a list with all the examples record.
         """
 
         records = []
-        for example in examples:
-            record = self.tokenizer.encode(
-                text=example.text_a,
-                text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
-            if example.label:
-                record["label"] = float(example.label)
-            records.append(record)
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                record = self.tokenizer.encode(
+                    text=example.text_a,
+                    text_pair=example.text_b,
+                    max_seq_len=self.max_seq_len)
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+                if example.label:
+                    record["label"] = float(example.label)
+                records.append(record)
+                process_bar.update(1)
+        return records
+
+
+class GenerationDataset(BaseNLPDataset):
+    def __init__(self,
+                 base_path,
+                 train_file=None,
+                 dev_file=None,
+                 test_file=None,
+                 predict_file=None,
+                 label_file=None,
+                 label_list=None,
+                 train_file_with_header=False,
+                 dev_file_with_header=False,
+                 test_file_with_header=False,
+                 predict_file_with_header=False,
+                 tokenizer=None,
+                 max_seq_len=128,
+                 split_char="\002",
+                 start_token="<s>",
+                 end_token="</s>",
+                 unk_token="<unk>"):
+        self.split_char = split_char
+        self.start_token = start_token
+        self.end_token = end_token
+        self.unk_token = unk_token
+        super(GenerationDataset, self).__init__(
+            base_path=base_path,
+            train_file=train_file,
+            dev_file=dev_file,
+            test_file=test_file,
+            predict_file=predict_file,
+            label_file=label_file,
+            label_list=label_list,
+            train_file_with_header=train_file_with_header,
+            dev_file_with_header=dev_file_with_header,
+            test_file_with_header=test_file_with_header,
+            predict_file_with_header=predict_file_with_header,
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
+
+    def _convert_examples_to_records(self, examples, phase):
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data example, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
+
+        Returns:
+            a list with all the examples record.
+        """
+        records = []
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                record = self.tokenizer.encode(
+                    text=example.text_a.split(self.split_char),
+                    text_pair=example.text_b.split(self.split_char)
+                    if example.text_b else None,
+                    max_seq_len=self.max_seq_len)
+                if example.label:
+                    expand_label = [self.start_token] + example.label.split(
+                        self.split_char)[:self.max_seq_len - 2] + [
+                            self.end_token
+                        ]
+                    expand_label_id = [
+                        self.label_index.get(label,
+                                             self.label_index[self.unk_token])
+                        for label in expand_label
+                    ]
+                    record["label"] = expand_label_id[1:] + [
+                        self.label_index[self.end_token]
+                    ] * (self.max_seq_len - len(expand_label) + 1)
+                    record["dec_input"] = expand_label_id[:-1] + [
+                        self.label_index[self.end_token]
+                    ] * (self.max_seq_len - len(expand_label) + 1)
+                records.append(record)
+                process_bar.update(1)
         return records
 
 
@@ -363,38 +470,48 @@ class SeqLabelingDataset(BaseNLPDataset):
             tokenizer=tokenizer,
             max_seq_len=max_seq_len)
 
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data examples, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
 
         Returns:
             a list with all the examples record.
         """
         records = []
-        for example in examples:
-            tokens, labels = self._reseg_token_label(
-                tokens=example.text_a.split(self.split_char),
-                labels=example.label.split(self.split_char))
-            record = self.tokenizer.encode(
-                text=tokens, max_seq_len=self.max_seq_len)
-            if labels:
-                record["label"] = []
-                tokens_with_specical_token = self.tokenizer.decode(
-                    record, only_convert_to_tokens=True)
-                tokens_index = 0
-                for token in tokens_with_specical_token:
-                    if tokens_index < len(
-                            tokens) and token == tokens[tokens_index]:
-                        record["label"].append(
-                            self.label_list.index(labels[tokens_index]))
-                        tokens_index += 1
-                    else:
-                        record["label"].append(
-                            self.label_list.index(self.no_entity_label))
-            records.append(record)
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                tokens, labels = self._reseg_token_label(
+                    tokens=example.text_a.split(self.split_char),
+                    labels=example.label.split(self.split_char))
+                record = self.tokenizer.encode(
+                    text=tokens, max_seq_len=self.max_seq_len)
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+                if labels:
+                    record["label"] = []
+                    tokens_with_specical_token = self.tokenizer.decode(
+                        record, only_convert_to_tokens=True)
+                    tokens_index = 0
+                    for token in tokens_with_specical_token:
+                        if tokens_index < len(
+                                tokens) and token == tokens[tokens_index]:
+                            record["label"].append(
+                                self.label_list.index(labels[tokens_index]))
+                            tokens_index += 1
+                        else:
+                            record["label"].append(
+                                self.label_list.index(self.no_entity_label))
+                records.append(record)
+                process_bar.update(1)
         return records
 
     def _reseg_token_label(self, tokens, labels=None):
@@ -435,26 +552,37 @@ class SeqLabelingDataset(BaseNLPDataset):
 
 
 class MultiLabelDataset(BaseNLPDataset):
-    def _convert_examples_to_records(self, examples):
+    def _convert_examples_to_records(self, examples, phase):
         """
         Returns a list[dict] including all the input information what the model need.
 
         Args:
             examples (list): the data examples, returned by _read_file.
-            max_seq_len (int): padding to the max sequence length.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
 
         Returns:
             a list with all the examples record.
         """
         records = []
-        for example in examples:
-            record = self.tokenizer.encode(
-                text=example.text_a,
-                text_pair=example.text_b,
-                max_seq_len=self.max_seq_len)
-            if example.label:
-                record["label"] = [int(label) for label in example.label]
-            records.append(record)
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                record = self.tokenizer.encode(
+                    text=example.text_a,
+                    text_pair=example.text_b,
+                    max_seq_len=self.max_seq_len)
+
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+
+                if example.label:
+                    record["label"] = [int(label) for label in example.label]
+                records.append(record)
+                process_bar.update(1)
         return records
 
 
@@ -631,7 +759,16 @@ class MRCDataset(BaseNLPDataset):
         return special_tokens_num, special_tokens_num_before_doc
 
     def _convert_examples_to_records_and_features(self, examples, phase):
-        """Loads a data file into a list of `InputBatch`s."""
+        """
+        Returns a list[dict] including all the input information what the model need.
+
+        Args:
+            examples (list): the data examples, returned by _read_file.
+            phase (str): the processing phase, can be "train" "dev" "test" or "predict".
+
+        Returns:
+            a list with all the examples record.
+        """
         features = []
         records = []
         unique_id = 1000000000
@@ -852,3 +989,235 @@ class MRCDataset(BaseNLPDataset):
             return self.predict_features
         else:
             raise ValueError("Invalid phase: %s" % phase)
+
+
+class TextMatchingDataset(BaseNLPDataset):
+    """
+    Text Matching DataSet base class, including point_wise and pair_wise mode.
+    """
+
+    def __init__(self,
+                 base_path,
+                 is_pair_wise=False,
+                 train_file=None,
+                 dev_file=None,
+                 test_file=None,
+                 predict_file=None,
+                 label_file=None,
+                 label_list=None,
+                 train_file_with_header=False,
+                 dev_file_with_header=False,
+                 test_file_with_header=False,
+                 predict_file_with_header=False,
+                 tokenizer=None,
+                 max_seq_len=128):
+        """
+        Args:
+            base_path(str): The directory to dataset, which includes train, dev, test or prediction data.
+            is_pair_wise(bool): The dataset is pair wise or not. Default as False.
+            train_file(str): The train data file name of the dataset.
+            dev_file(str): The development data file name of the dataset. It is optional.
+            test_file(str): The test data file name of the dataset. It is optional.
+            predict_file(str): The prediction data file name of the dataset. It is optional.
+            label_file(str): It is a file name, which contains labels of the dataset. If label file not label_list.
+            label_list(list): It is the labels of the dataset.
+            train_file_with_header(bool): The train file is with introduction of the file in the first line or not. Default as False.
+            dev_file_with_header(bool): The development file is with introduction of the file in the first line or not. Default as False.
+            test_file_with_header(bool): The test file is with introduction of the file in the first line or not. Default as False.
+            tokenizer(object): It should be hub.BertTokenizer or hub.CustomTokenizer, which tokenizes the text and encodes the data as model needed.
+            max_seq_len(int): It will limit the total sequence returned so that it has a maximum length.
+        """
+        self.is_pair_wise = is_pair_wise
+        super(BaseNLPDataset, self).__init__(
+            base_path=base_path,
+            train_file=train_file,
+            dev_file=dev_file,
+            test_file=test_file,
+            predict_file=predict_file,
+            label_file=label_file,
+            label_list=label_list,
+            train_file_with_header=train_file_with_header,
+            dev_file_with_header=dev_file_with_header,
+            test_file_with_header=test_file_with_header,
+            predict_file_with_header=predict_file_with_header)
+        self.tokenizer = tokenizer
+        self.max_seq_len = max_seq_len
+        self._train_records = None
+        self._dev_records = None
+        self._test_records = None
+        self._predict_records = None
+
+    def _read_file(self, input_file, phase=None):
+        """Reads a tab separated value file."""
+        has_warned = False
+        if self.is_pair_wise:
+            InputExample = collections.namedtuple(
+                'Example', ['guid', 'text_a', 'text_b', 'text_c', 'label'])
+        else:
+            InputExample = collections.namedtuple(
+                'Example', ['guid', 'text_a', 'text_b', 'label'])
+        with io.open(input_file, "r", encoding="UTF-8") as file:
+            reader = csv.reader(file, delimiter="\t", quotechar=None)
+            examples = []
+            for (i, line) in enumerate(reader):
+                if i == 0:
+                    ncol = len(line)
+                    if self.if_file_with_header[phase]:
+                        continue
+                if phase != "predict":
+                    if ncol <= 2:
+                        raise Exception(
+                            "the %s file (%s) is illegal. The %s file of a text matching task should have 3 or 4 columns. Instead, it has only %d columns. Please check the data."
+                            % (phase, input_file, phase, ncol))
+                    elif ncol == 3:
+                        if self.is_pair_wise:
+                            raise Exception(
+                                "the %s file (%s) is illegal. The %s file of a pair-wise text matching task should have 4 columns. Instead, it has only %d columns. Please check the data."
+                                % (phase, input_file, phase, ncol))
+                        else:
+                            example = InputExample(
+                                guid=i,
+                                text_a=line[0],
+                                text_b=line[1],
+                                label=line[2])
+                    elif ncol == 4 and self.is_pair_wise:
+                        example = InputExample(
+                            guid=i,
+                            text_a=line[0],
+                            text_b=line[1],
+                            text_c=line[2],
+                            label=line[3])
+                    else:
+                        raise Exception(
+                            "the %s file (%s) has too many columns (should <=4), is illegal."
+                            % (phase, input_file))
+                else:
+                    if ncol == 1:
+                        raise Exception(
+                            "the %s file (%s) is illegal. The %s file of a text matching task should have 2 columns. Instead, it has only one column. Please check the data."
+                            % (phase, input_file, phase))
+                    elif ncol == 2:
+                        if self.is_pair_wise:
+                            raise Exception(
+                                "the %s file (%s) is illegal. The %s file of a pair-wise text matching task should have 3 columns. Instead, it has only 2 columns. Please check the data."
+                                % (phase, input_file, phase))
+                            example = InputExample(
+                                guid=i,
+                                text_a=line[0],
+                                text_b=line[1],
+                                text_c=None,
+                                label=None)
+                        else:
+                            example = InputExample(
+                                guid=i,
+                                text_a=line[0],
+                                text_b=line[1],
+                                label=None)
+                    elif ncol == 3:
+                        if self.is_pair_wise:
+                            example = InputExample(
+                                guid=i,
+                                text_a=line[0],
+                                text_b=line[1],
+                                text_c=line[2],
+                                label=None)
+                        else:
+                            raise Exception(
+                                "the %s file (%s) is illegal. The %s file of a pair-wise text matching task should have 3 columns. Instead, it has only 2 columns. Please check the data."
+                                % (phase, input_file, phase))
+                    else:
+                        raise Exception(
+                            "the predict file: %s has too many columns." %
+                            (input_file))
+                examples.append(example)
+            return examples
+
+    def _convert_examples_to_records(self, examples, phase):
+        """
+        Returns a list[dict] including all the input information what the model needs.
+
+        Args:
+            examples (list): the data example, returned by _read_file.
+            phase(str): train, dev, test or predict.
+
+        Returns:
+            a list with all the records, which will be feeded to the prpgram.
+        """
+        records = []
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                record_a = self.tokenizer.encode(
+                    text=example.text_a, max_seq_len=self.max_seq_len)
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record_a:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+
+                record_b = self.tokenizer.encode(
+                    text=example.text_b, max_seq_len=self.max_seq_len)
+                if not record_b:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_b)
+                    continue
+
+                record = {}
+
+                if isinstance(self.tokenizer, CustomTokenizer):
+                    record = {
+                        'text': record_a['text'],
+                        'text_2': record_b['text'],
+                        'seq_len': record_a['seq_len'],
+                        'seq_len_2': record_b['seq_len'],
+                    }
+
+                    if self.is_pair_wise and example.text_c:
+                        record_c = self.tokenizer.encode(
+                            text=example.text_c, max_seq_len=self.max_seq_len)
+                        if not record_c:
+                            logger.info(
+                                "The text %s has been dropped as it has no words in the vocab after tokenization."
+                                % example.text_c)
+                            continue
+
+                        record['text_3'] = record_c['text']
+                        record['seq_len_3'] = record_c['seq_len']
+                elif isinstance(self.tokenizer, BertTokenizer):
+                    record = {
+                        # text_1
+                        'input_ids': record_a['input_ids'],
+                        'segment_ids': record_a['segment_ids'],
+                        'input_mask': record_a['input_mask'],
+                        'position_ids': record_a['position_ids'],
+                        'seq_len': record_a['seq_len'],
+                        # text_2
+                        'input_ids_2': record_b['input_ids'],
+                        'segment_ids_2': record_b['segment_ids'],
+                        'input_mask_2': record_b['input_mask'],
+                        'position_ids_2': record_b['position_ids'],
+                        'seq_len_2': record_b['seq_len'],
+                    }
+                    if self.is_pair_wise and example.text_c:
+                        # text_3
+                        record_c = self.tokenizer.encode(
+                            text=example.text_c, max_seq_len=self.max_seq_len)
+                        record['input_ids_3'] = record_c['input_ids']
+                        record['segment_ids_3'] = record_c['segment_ids']
+                        record['input_mask_3'] = record_c['input_mask']
+                        record['position_ids_3'] = record_c['position_ids']
+                        record['seq_len_3'] = record_c['seq_len']
+                else:
+                    raise Exception(
+                        "Unknown Tokenizer %s! Please redefine the _convert_examples_to_records method of TextMatchingDataset."
+                        % self.tokenizer.__name__)
+
+                if example.label:
+                    record['label'] = self.label_list.index(example.label)
+
+                records.append(record)
+                process_bar.update(1)
+
+        return records

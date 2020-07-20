@@ -1,0 +1,9 @@
+name: lda_webpage
+dir: "modules/text/semantic_model/lda_webpage"
+exclude:
+
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/lda_webpage.tar.gz
+    dest: .
+    uncompress: True

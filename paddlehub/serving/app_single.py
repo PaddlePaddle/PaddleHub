@@ -14,6 +14,7 @@
 from flask import Flask, request, render_template
 from paddlehub.serving.model_service.base_model_service import cv_module_info
 from paddlehub.serving.model_service.base_model_service import nlp_module_info
+from paddlehub.serving.model_service.base_model_service import v2_module_info
 from paddlehub.common import utils
 import functools
 import time
@@ -25,24 +26,6 @@ import glob
 
 def gen_result(status, msg, data):
     return {"status": status, "msg": msg, "results": data}
-
-
-def predict_v2(module_info, input):
-    serving_method_name = module_info["method_name"]
-    serving_method = getattr(module_info["module"], serving_method_name)
-    predict_args = module_info["predict_args"].copy()
-    predict_args.update({"data": input})
-
-    for item in serving_method.__code__.co_varnames:
-        if item in module_info.keys():
-            predict_args.update({item: module_info[item]})
-    try:
-        output = serving_method(**predict_args)
-    except Exception as err:
-        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        print(curr, " - ", err)
-        return gen_result("-1", "Please check data format!", "")
-    return gen_result("0", "", output)
 
 
 def predict_v2_advanced(module_info, input):
@@ -451,10 +434,8 @@ def create_app(init_flag=False, configs=None):
 
     @app_instance.route("/predict/<module_name>", methods=["POST"])
     def predict_modulev2(module_name):
-        if module_name in nlp_module_info.nlp_modules:
-            module_info = nlp_module_info.get_module_info(module_name)
-        elif module_name in cv_module_info.cv_modules:
-            module_info = cv_module_info.get_module_info(module_name)
+        if module_name in v2_module_info.modules:
+            module_info = v2_module_info.get_module_info(module_name)
         else:
             msg = "Module {} is not available.".format(module_name)
             return gen_result("-1", msg, "")
@@ -476,6 +457,7 @@ def config_with_file(configs):
             cv_module_info.add_module(key, {key: value})
         elif "NLP" == value["category"]:
             nlp_module_info.add_module(key, {key: value})
+        v2_module_info.add_module(key, {key: value})
         print(key, "==", value["version"])
 
 

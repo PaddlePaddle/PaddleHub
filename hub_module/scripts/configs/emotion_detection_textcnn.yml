@@ -1,0 +1,10 @@
+name: emotion_detection_textcnn
+dir: "modules/text/sentiment_analysis/emotion_detection_textcnn"
+exclude:
+  - README.md
+  - test.py
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/sentiment_analysis/emotion_detection_textcnn_assets.tar.gz
+    dest: .
+    uncompress: True

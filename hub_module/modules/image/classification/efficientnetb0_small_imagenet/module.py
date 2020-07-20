@@ -1,4 +1,18 @@
-# coding=utf-8
+# -*- coding:utf-8 -*-
+# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from __future__ import absolute_import
 from __future__ import division
 
@@ -26,14 +40,15 @@ from efficientnetb0_small_imagenet.efficientnet import EfficientNetB0_small
     summary=
     "EfficientNetB0 is a image classfication model, this module is trained with imagenet datasets.",
     version="1.0.0")
-class EfficientNetB0ImageNet(hub.Module):
+class EfficientNetB0SmallImageNet(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "efficientnetb0_small_imagenet_model")
+            self.directory, "efficientnetb0_small_imagenet_infer_model")
         label_file = os.path.join(self.directory, "label_list.txt")
         with open(label_file, 'r', encoding='utf-8') as file:
             self.label_list = file.read().split("\n")[:-1]
-        self.predictor_set = False
+        self.classification = self.classify
+        self._set_config()
 
     def get_expected_image_width(self):
         return 224
@@ -71,7 +86,11 @@ class EfficientNetB0ImageNet(hub.Module):
                 memory_pool_init_size_mb=1000, device_id=0)
             self.gpu_predictor = create_paddle_predictor(gpu_config)
 
-    def context(self, trainable=True, pretrained=True):
+    def context(self,
+                trainable=True,
+                pretrained=True,
+                override_params=None,
+                phase='train'):
         """context for transfer learning.
 
         Args:
@@ -85,15 +104,27 @@ class EfficientNetB0ImageNet(hub.Module):
                 'feature_map', corresponding value is the result of the layer before the fully connected layer.
             context_prog (fluid.Program): program for transfer learning.
         """
+        if phase in ["dev", "test", "predict", "eval"]:
+            is_test = True
+        elif phase in ["train"]:
+            is_test = False
+        else:
+            raise ValueError(
+                "Phase %s is error, which must be one of train, dev, test, eval and predict."
+                % phase)
+
         context_prog = fluid.Program()
         startup_prog = fluid.Program()
         with fluid.program_guard(context_prog, startup_prog):
             with fluid.unique_name.guard():
                 image = fluid.layers.data(
                     name="image", shape=[3, 224, 224], dtype="float32")
-                efficientnet_b0 = EfficientNetB0_small()
+                efficientnet_b0 = EfficientNetB0_small(
+                    override_params=override_params)
                 output, feature_map = efficientnet_b0.net(
-                    input=image, class_dim=len(self.label_list))
+                    input=image,
+                    class_dim=len(self.label_list),
+                    is_test=is_test)
 
                 name_prefix = '@HUB_{}@'.format(self.name)
                 inputs = {'image': name_prefix + image.name}
@@ -129,16 +160,6 @@ class EfficientNetB0ImageNet(hub.Module):
                         self.default_pretrained_model_path,
                         context_prog,
                         predicate=_if_exist)
-                    print(inputs.keys())
-
-                    fluid.io.save_inference_model(
-                        dirname=os.path.join(
-                            self.directory,
-                            'efficientnetb0_small_imagenet_model'),
-                        feeded_var_names=[name_prefix + 'image'],
-                        target_vars=list(outputs.values()),
-                        executor=exe,
-                        main_program=context_prog)
                 else:
                     exe.run(startup_prog)
                 # trainable
@@ -146,12 +167,12 @@ class EfficientNetB0ImageNet(hub.Module):
                     param.trainable = trainable
         return inputs, outputs, context_prog
 
-    def classification(self,
-                       images=None,
-                       paths=None,
-                       batch_size=1,
-                       use_gpu=False,
-                       top_k=1):
+    def classify(self,
+                 images=None,
+                 paths=None,
+                 batch_size=1,
+                 use_gpu=False,
+                 top_k=1):
         """
         API for image classification.
 
@@ -165,10 +186,6 @@ class EfficientNetB0ImageNet(hub.Module):
         Returns:
             res (list[dict]): The classfication results.
         """
-        if not self.predictor_set:
-            self._set_config()
-            self.predictor_set = True
-
         if use_gpu:
             try:
                 _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -236,7 +253,7 @@ class EfficientNetB0ImageNet(hub.Module):
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.classification(images=images_decode, **kwargs)
+        results = self.classify(images=images_decode, **kwargs)
         return results
 
     @runnable
@@ -258,7 +275,7 @@ class EfficientNetB0ImageNet(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.classification(
+        results = self.classify(
             paths=[args.input_path],
             batch_size=args.batch_size,
             use_gpu=args.use_gpu)
@@ -290,3 +307,18 @@ class EfficientNetB0ImageNet(hub.Module):
         """
         self.arg_input_group.add_argument(
             '--input_path', type=str, help="path to image.")
+
+
+if __name__ == '__main__':
+    b0 = EfficientNetB0SmallImageNet()
+    b0.context()
+    import cv2
+    test_image = [cv2.imread('dog.jpeg')]
+    res = b0.classification(images=test_image)
+    print(res)
+    res = b0.classification(paths=['dog.jpeg'])
+    print(res)
+    res = b0.classification(images=test_image)
+    print(res)
+    res = b0.classify(images=test_image)
+    print(res)

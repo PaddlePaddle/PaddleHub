@@ -192,7 +192,7 @@ def predict(self, data, return_result=False, accelerate_mode=True):
     prediction = []
     for batch_result in results:
         # get predict index
-        batch_result = np.argmax(batch_result, axis=2)[0]
+        batch_result = np.argmax(batch_result[0], axis=1)
         batch_result = batch_result.tolist()
         prediction += batch_result
     return prediction
@@ -305,4 +305,4 @@ r = requests.post(url=url, headers=headers, data=json.dumps(data))
 print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
-关与PaddleHub Serving更多信息参见[Hub Serving教程](../../docs/tutorial/serving.md)以及[Demo](../../demo/serving)
+关与PaddleHub Serving更多信息参见[Hub Serving教程](../../docs/tutorial/serving.md)以及[Demo](../../demo/serving/README.md)

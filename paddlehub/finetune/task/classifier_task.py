@@ -12,11 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from collections import OrderedDict
 import numpy as np
 import paddle.fluid as fluid
@@ -25,6 +20,7 @@ import time
 from paddlehub.common.logger import logger
 from paddlehub.finetune.evaluate import calculate_f1_np, matthews_corrcoef
 from paddlehub.reader.nlp_reader import ClassifyReader, LACClassifyReader
+
 import paddlehub.network as net
 
 from .base_task import BaseTask
@@ -196,7 +192,6 @@ class TextClassifierTask(ClassifierTask):
             feature(Variable): the `feature` will be used to classify texts. It must be the sentence-level feature, shape as [-1, emb_size]. `Token_feature` and `feature` couldn't be setted at the same time. One of them must be setted as not None. Default None.
             token_feature(Variable): the `feature` will be used to connect the pre-defined network. It must be the token-level feature, shape as [-1, seq_len, emb_size]. Default None.
             network(str): the pre-defined network. Choices: 'bilstm', 'bow', 'cnn', 'dpcnn', 'gru' and 'lstm'. Default None. If network is setted, then `token_feature` must be setted and `feature` must be None.
-            main_program (object): the customized main program, default None.
             startup_program (object): the customized startup program, default None.
             config (RunConfig): run config for the task, such as batch_size, epoch, learning_rate setting and so on. Default None.
             hidden_units(list): the element of `hidden_units` list is the full-connect layer size. It will add the full-connect layers to the program. Default None.
@@ -216,20 +211,20 @@ class TextClassifierTask(ClassifierTask):
         if network:
             assert network in [
                 'bilstm', 'bow', 'cnn', 'dpcnn', 'gru', 'lstm'
-            ], 'network choice must be one of bilstm, bow, cnn, dpcnn, gru, lstm!'
+            ], 'network (%s) choice must be one of bilstm, bow, cnn, dpcnn, gru, lstm!' % network
             assert token_feature and (
                 not feature
             ), 'If you wanna use network, you must set token_feature ranther than feature for TextClassifierTask!'
             assert len(
                 token_feature.shape
-            ) == 3, 'When you use network, the parameter token_feature must be the token-level feature, such as the sequence_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
+            ) == 3, 'When you use network, the parameter token_feature must be the token-level feature([batch_size, max_seq_len, embedding_size]), shape as [-1, 128, 200].'
         else:
             assert feature and (
                 not token_feature
             ), 'If you do not use network, you must set feature ranther than token_feature for TextClassifierTask!'
             assert len(
                 feature.shape
-            ) == 2, 'When you do not use network, the parameter feture must be the sentence-level feature, such as the pooled_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
+            ) == 2, 'When you do not use network, the parameter feture must be the sentence-level feature ([batch_size, hidden_size]), such as the pooled_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
 
         self.network = network
 
@@ -249,7 +244,7 @@ class TextClassifierTask(ClassifierTask):
 
     def _build_net(self):
         if not isinstance(self._base_data_reader, LACClassifyReader):
-            # LACClassifyReader wont return the seqence length, while Dataset with tokenizer and ClassifyReader will.
+            # LACClassifyReader won't return the seqence length, while Dataset with tokenizer and ClassifyReader will.
             self.seq_len = fluid.layers.data(
                 name="seq_len", shape=[1], dtype='int64', lod_level=0)
             self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])
@@ -269,7 +264,7 @@ class TextClassifierTask(ClassifierTask):
                     cls_feats = net_func(self.feature)
                 else:
                     cls_feats = net_func(unpad_feature)
-            if self.is_train_phase:
+            if self.is_train_phase or self.is_predict_phase:
                 logger.info("%s has been added in the TextClassifierTask!" %
                             self.network)
         else:

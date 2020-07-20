@@ -22,7 +22,8 @@ from paddlehub.io.parser import txt_parser
 from paddlehub.module.module import moduleinfo, runnable, serving
 
 from lac.network import lex_net
-from lac.processor import Interventer, load_kv_dict, word_to_ids, parse_result
+from lac.processor import load_kv_dict, word_to_ids, parse_result
+from lac.custom import Customization
 
 
 class DataFormatError(Exception):
@@ -32,7 +33,7 @@ class DataFormatError(Exception):
 
 @moduleinfo(
     name="lac",
-    version="2.1.1",
+    version="2.2.0",
     summary=
     "Baidu's open-source lexical analysis tool for Chinese, including word segmentation, part-of-speech tagging & named entity recognition",
     author="baidu-nlp",
@@ -58,8 +59,6 @@ class LAC(hub.Module):
             os.path.join(self.directory, "assets/tag.dic"))
         self.word_replace_dict = load_kv_dict(
             os.path.join(self.directory, "assets/q2b.dic"))
-        self.unigram_dict_path = os.path.join(self.directory,
-                                              "assets/unigram.dict")
         self.oov_id = self.word2id_dict['OOV']
         self.word_dict_len = max(map(int, self.word2id_dict.values())) + 1
         self.label_dict_len = max(map(int, self.label2id_dict.values())) + 1
@@ -68,7 +67,7 @@ class LAC(hub.Module):
         if user_dict:
             self.set_user_dict(dict_path=user_dict)
         else:
-            self.interventer = None
+            self.custom = None
 
         self._set_config()
 
@@ -143,24 +142,26 @@ class LAC(hub.Module):
                 }
                 return inputs, outputs, main_program
 
-    def set_user_dict(self, dict_path):
+    def set_user_dict(self, dict_path, sep=None):
         """
         Set the costomized dictionary if you wanna exploit the self-defined dictionary
 
         Args:
-             dict_path(str): the directory to the costomized dictionary
+             dict_path(str): The directory to the costomized dictionary.
+             sep: The seperation token in phases. Default as ' ' or '\t'.
         """
         if not os.path.exists(dict_path):
             raise RuntimeError("File %s is not exist." % dict_path)
-        self.interventer = Interventer(self.unigram_dict_path, dict_path)
+        self.custom = Customization()
+        self.custom.load_customization(dict_path, sep)
 
-    def del_user_dict(self, ):
+    def del_user_dict(self):
         """
         Delete the costomized dictionary if you don't wanna exploit the self-defined dictionary any longer
         """
 
-        if self.interventer:
-            self.interventer = None
+        if self.custom:
+            self.custom = None
             print("Successfully delete the customized dictionary!")
 
     def to_unicode(self, texts):
@@ -219,12 +220,94 @@ class LAC(hub.Module):
         return res
 
     @serving
+    def cut(self, text, use_gpu=False, batch_size=1, return_tag=True):
+        """
+        The main function that segments an entire text that contains
+        Chinese characters into separated words.
+        Args:
+            text(:obj:`str` or :obj:`List[str]`): The chinese texts to be segmented. This can be a string, a list of strings.
+            use_gpu(bool): whether use gpu to predict or not
+            batch_size(int): the program deals once with one batch
+            return_tag: Whether to get tag or not.
+
+        Returns:
+            results(dict or list): The word segmentation result of the input text, whose key is 'word', if text is a list.
+                If text is a str, the word segmentation result (list) is obtained.
+
+        """
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
+
+        if isinstance(text, list) and len(text) != 0:
+
+            predicted_data = self.to_unicode(text)
+
+            # drop the empty string like "" in predicted_data
+            empty_str_indexes = self._get_index(predicted_data)
+            predicted_data = [data for data in predicted_data if data != ""]
+
+            start_idx = 0
+            iteration = int(math.ceil(len(predicted_data) / batch_size))
+            results = []
+            for i in range(iteration):
+                if i < (iteration - 1):
+                    batch_data = predicted_data[start_idx:(
+                        start_idx + batch_size)]
+                else:
+                    batch_data = predicted_data[start_idx:]
+
+                start_idx = start_idx + batch_size
+                tensor_words = self.texts2tensor(batch_data)
+
+                if use_gpu:
+                    batch_out = self.gpu_predictor.run([tensor_words])
+                else:
+                    batch_out = self.cpu_predictor.run([tensor_words])
+                batch_result = parse_result(
+                    batch_data,
+                    batch_out[0],
+                    self.id2label_dict,
+                    interventer=self.custom)
+                results += batch_result
+
+            for index in empty_str_indexes:
+                results.insert(index, {"word": [""], "tag": [""]})
+
+            if not return_tag:
+                for result in results:
+                    result = result.pop("tag")
+                return results
+
+            return results
+        elif isinstance(text, str) and text != "":
+            tensor_words = self.texts2tensor([text])
+
+            if use_gpu:
+                batch_out = self.gpu_predictor.run([tensor_words])
+            else:
+                batch_out = self.cpu_predictor.run([tensor_words])
+            batch_result = parse_result([text],
+                                        batch_out[0],
+                                        self.id2label_dict,
+                                        interventer=self.custom)
+
+            return batch_result[0]['word']
+        elif text == "":
+            return text
+        else:
+            raise TypeError("The input data is inconsistent with expectations.")
+
     def lexical_analysis(self,
                          texts=[],
                          data={},
                          use_gpu=False,
                          batch_size=1,
-                         user_dict=None,
                          return_tag=True):
         """
         Get the word segmentation results with the texts as input
@@ -234,21 +317,20 @@ class LAC(hub.Module):
              data(dict): key must be 'text', value is the texts to be segmented, if data not texts
              use_gpu(bool): whether use gpu to predict or not
              batch_size(int): the program deals once with one batch
-             user_dict(None): the parameter is not to be recommended. Please set the dictionause the function set_user_dict()
+             return_tag: Whether to get tag or not.
 
         Returns:
              results(list): the word segmentation results
         """
-        if user_dict:
-            logger.warning(
-                "If you wanna use customized dictionary, please use the function set_user_dict() to set the dictionay. The parameter user_dict has been dropped!"
-            )
 
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-        except:
-            use_gpu = False
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         if texts != [] and isinstance(texts, list) and data == {}:
             predicted_data = texts
@@ -284,7 +366,7 @@ class LAC(hub.Module):
                 batch_data,
                 batch_out[0],
                 self.id2label_dict,
-                interventer=self.interventer)
+                interventer=self.custom)
             results += batch_result
 
         for index in empty_str_indexes:
@@ -423,12 +505,12 @@ if __name__ == '__main__':
 
     test_text = [
         "今天是个好日子", "天气预报说今天要下雨", "", "下一班地铁马上就要到了", "", "调料份量不能多，也不能少，味道才能正好",
-        "", ""
+        "", "", "春天的花开秋天的风以及冬天的落阳"
     ]
 
     # execute predict and print the result
-    results = lac.lexical_analysis(
-        data={'text': test_text}, use_gpu=True, batch_size=7, return_tag=True)
+    results = lac.cut(
+        text=test_text, use_gpu=True, batch_size=7, return_tag=True)
     for result in results:
         if six.PY2:
             print(
@@ -442,14 +524,9 @@ if __name__ == '__main__':
     # delete the costomized dictionary
     lac.del_user_dict()
 
-    results = lac.lexical_analysis(
-        texts=test_text, use_gpu=False, batch_size=1, return_tag=False)
-    for result in results:
-        if six.PY2:
-            print(
-                json.dumps(result['word'], encoding="utf8", ensure_ascii=False))
-        else:
-            print(result['word'])
+    results = lac.cut(
+        text="春天的花开秋天的风以及冬天的落阳", use_gpu=False, batch_size=1, return_tag=False)
+    print(results)
 
     # get the tags that was exploited as pretraining lac
     print(lac.get_tags())
