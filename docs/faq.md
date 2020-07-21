@@ -1,6 +1,7 @@
 # 常见问题
 
-## 使用pip install paddlehub时提示`Could not find a version that satisfies the requirement paddlehub (from versions: )`
+## 使用pip install paddlehub时提示
+`Could not find a version that satisfies the requirement paddlehub (from versions: )`
 
 这可能是因为pip指向了一个pypi的镜像源，该镜像源没有及时同步paddlehub版本导致。
 
@@ -10,7 +11,8 @@
 $ pip install -i https://pypi.org/simple/ paddlehub
 ```
 
-## 使用paddlehub时，提示`ModuleNotFoundError: No module named 'paddle'`
+## 使用paddlehub时，提示
+`ModuleNotFoundError: No module named 'paddle'`
 
 这是因为PaddleHub依赖于PaddlePaddle，用户需要自行安装合适的PaddlePaddle版本。
 如果机器不支持GPU，那么使用如下命令来安装PaddlePaddle的CPU版本：
@@ -23,7 +25,8 @@ $ pip install paddlepaddle
 $ pip install paddlepaddle-gpu
 ```
 
-## 利用PaddleHub ernie/bert进行Finetune时，提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息
+## 利用PaddleHub ernie/bert进行Finetune时，提示
+`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息
 
 这是因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。
 首先将PaddleHub升级至最新版本，同时将ernie卸载。
@@ -54,7 +57,7 @@ results = lac.lexical_analysis(data=inputs, use_gpu=True, batch_size=10)
 
 ## 如何获取输入句子经过ERNIE编码后的句子表示Embedding？
 
-具体参考[BERT Services]()使用说明
+具体参考[BERT Services](./tutorial/bert_service.md)使用说明
 
 ## 在虚拟机Python2环境中使用hub命令报错“Illegal instruction”
 

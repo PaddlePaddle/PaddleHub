@@ -92,11 +92,8 @@ http://127.0.0.1:8866/predict/<CATEGORY\>/\<MODULE>
 ### Step3：利用PaddleHub Serving进行个性化开发
 使用PaddleHub Serving进行模型服务部署后，可以利用得到的接口进行开发，如对外提供web服务，或接入到应用程序中，以降低客户端预测压力，提高性能，下面展示了一个web页面demo:
 
-<p align="center">  
+![](../imgs/web_demo.png)
 
-<img src="../imgs/web_demo.png" width="60%" />  
-
-</p>  
 
 ### Step4：关闭serving
 使用关闭命令即可关闭启动的serving，
@@ -143,11 +140,7 @@ $ hub serving start -c serving_config.json
 ```
 启动成功界面如图：
 
-<p align="center">  
-
-<img src="../imgs/start_serving_lac.png" width="100%" />  
-
-</p>  
+![](../imgs/start_serving_lac.png)
 
 这样我们就在8866端口成功部署了lac的在线分词服务。
 *此处warning为Flask提示，不影响使用*
@@ -215,41 +208,41 @@ $ PaddleHub Serving will stop.
 ```
 则serving服务已经停止。
 
-此Demo的具体信息和代码请参见[LAC Serving](../../demo/serving/module_serving/lexical_analysis_lac)。另外，下面展示了一些其他的一键服务部署Demo。
+此Demo的具体信息和代码请参见[LAC Serving](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/lexical_analysis_lac)。另外，下面展示了一些其他的一键服务部署Demo。
 
 ## Demo——其他模型的一键部署服务
 
 获取其他PaddleHub Serving的一键服务部署场景示例，可参见下列demo
 
-* [图像分类-基于vgg11_imagent](../../demo/serving/module_serving/classification_vgg11_imagenet)  
+* [图像分类-基于vgg11_imagent](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/classification_vgg11_imagenet)  
 
 &emsp;&emsp;该示例展示了利用vgg11_imagent完成图像分类服务化部署和在线预测，获取图像分类结果。
 
-* [图像生成-基于stgan_celeba](../../demo/serving/module_serving/GAN_stgan_celeba)  
+* [图像生成-基于stgan_celeba](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/GAN_stgan_celeba)  
 
 &emsp;&emsp;该示例展示了利用stgan_celeba生成图像服务化部署和在线预测，获取指定风格的生成图像。
 
-* [文本审核-基于porn_detection_lstm](../../demo/serving/module_serving/text_censorship_porn_detection_lstm)  
+* [文本审核-基于porn_detection_lstm](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/text_censorship_porn_detection_lstm)  
 
 &emsp;&emsp;该示例展示了利用porn_detection_lstm完成中文文本黄色敏感信息鉴定的服务化部署和在线预测，获取文本是否敏感及其置信度。
 
-* [中文词法分析-基于lac](../../demo/serving/module_serving/lexical_analysis_lac)
+* [中文词法分析-基于lac](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/lexical_analysis_lac)
 
 &emsp;&emsp;该示例展示了利用lac完成中文文本分词服务化部署和在线预测，获取文本的分词结果，并可通过用户自定义词典干预分词结果。
 
-* [目标检测-基于yolov3_darknet53_coco2017](../../demo/serving/module_serving/object_detection_yolov3_darknet53_coco2017)  
+* [目标检测-基于yolov3_darknet53_coco2017](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/object_detection_yolov3_darknet53_coco2017)  
 
 &emsp;&emsp;该示例展示了利用yolov3_darknet53_coco2017完成目标检测服务化部署和在线预测，获取检测结果和覆盖识别框的图片。
 
-* [中文语义分析-基于simnet_bow](../../demo/serving/module_serving/semantic_model_simnet_bow)
+* [中文语义分析-基于simnet_bow](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/semantic_model_simnet_bow)
 
 &emsp;&emsp;该示例展示了利用simnet_bow完成中文文本相似度检测服务化部署和在线预测，获取文本的相似程度。  
 
-* [图像分割-基于deeplabv3p_xception65_humanseg](../../demo/serving/module_serving/semantic_segmentation_deeplabv3p_xception65_humanseg)
+* [图像分割-基于deeplabv3p_xception65_humanseg](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/semantic_segmentation_deeplabv3p_xception65_humanseg)
 
 &emsp;&emsp;该示例展示了利用deeplabv3p_xception65_humanseg完成图像分割服务化部署和在线预测，获取识别结果和分割后的图像。
 
-* [中文情感分析-基于senta_lstm](../../demo/serving/module_serving/sentiment_analysis_senta_lstm)
+* [中文情感分析-基于senta_lstm](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/sentiment_analysis_senta_lstm)
 
 &emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
 
@@ -284,7 +277,7 @@ if __name__ == "__main__":
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
 ```
 
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.7/demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
 
 ## Bert Service
 除了预训练模型一键服务部署功能之外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](./bert_service.md)。
