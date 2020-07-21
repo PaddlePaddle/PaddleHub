@@ -4,7 +4,7 @@
 
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用ResNet对[Flowers](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset#class-hubdatasetflowersdataset)等数据集进行Fine-tune。
+在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_classifier.sh`即可开始使用ResNet对[Flowers](../../docs/reference/dataset.md#class-hubdatasetflowers)等数据集进行Fine-tune。
 
 其中脚本参数说明如下：
 
@@ -66,7 +66,7 @@ data_reader = hub.reader.ImageClassificationReader(
 
 #### 自定义数据集
 
-如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)。
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](../../docs/tutorial/how_to_load_data.md)。
 
 ### Step3：选择优化策略和运行配置
 
@@ -81,7 +81,7 @@ config = hub.RunConfig(use_cuda=True, use_data_parallel=True, num_epoch=3, batch
 
 #### 优化策略
 
-PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)。
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](../../docs/reference/strategy.md)。
 
 其中`DefaultFinetuneStrategy`:
 
@@ -125,7 +125,7 @@ task.finetune_and_eval()
 
 #### 自定义迁移任务
 
-如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)。
+如果想改变迁移任务组网，详细参见[自定义迁移任务](../../docs/tutorial/how_to_define_task.md)。
 
 ## 可视化
 
