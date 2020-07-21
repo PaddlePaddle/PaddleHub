@@ -14,29 +14,9 @@
 # limitations under the License.
 
 
-def check_platform(module):
-    pass
+class Trainer(object):
+    def __init__(self):
+        pass
 
-
-def check_py_requirements(module):
-    pass
-
-
-def check_py_requirement(module, package):
-    pass
-
-
-def get_py_requirements(module):
-    pass
-
-
-def check_hub_requirements(module):
-    pass
-
-
-def check_hub_requirement(module, r_module):
-    pass
-
-
-def get_hub_requirements(module):
-    pass
+    def train(self, dataset):
+        pass
