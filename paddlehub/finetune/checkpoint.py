@@ -74,10 +74,6 @@ def save_checkpoint(checkpoint_dir,
     ckpt = checkpoint_pb2.CheckPoint()
 
     model_saved_dir = os.path.join(checkpoint_dir, "step_%d" % global_step)
-    logger.info("Saving model checkpoint to {}".format(model_saved_dir))
-    fluid.io.save_persistables(
-        exe, dirname=model_saved_dir, main_program=main_program)
-
     ckpt.current_epoch = current_epoch
     ckpt.global_step = global_step
     ckpt.latest_model_dir = model_saved_dir

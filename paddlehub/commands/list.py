@@ -21,7 +21,8 @@ from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
 from paddlehub.module.manager import default_module_manager
 from paddlehub.commands.base_command import BaseCommand
-from paddlehub.commands.cml_utils import TablePrinter
+from paddlehub.common.cml_utils import TablePrinter
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class ListCommand(BaseCommand):
@@ -33,6 +34,7 @@ class ListCommand(BaseCommand):
         self.description = "List all installed PaddleHub modules."
 
     def execute(self, argv):
+        CacheUpdater("hub_list").start()
         all_modules = default_module_manager.all_modules()
         if utils.is_windows():
             placeholders = [20, 40]

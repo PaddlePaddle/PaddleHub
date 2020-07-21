@@ -1,0 +1,7 @@
+name: vgg16_imagenet
+dir: "modules/image/classification/vgg16_imagenet"
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/cv/vgg16_model.tar.gz
+    dest: vgg16_model
+    uncompress: True

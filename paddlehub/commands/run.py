@@ -20,20 +20,17 @@ from __future__ import print_function
 import argparse
 import json
 import os
-import sys
 import ast
 
 import six
 import pandas
 import imghdr
 import cv2
-import numpy as np
 
 from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.io.parser import yaml_parser, txt_parser
 from paddlehub.module.manager import default_module_manager
-from paddlehub.common import utils
-from paddlehub.common.arg_helper import add_argument, print_arguments
+from paddlehub.common.hub_server import CacheUpdater
 import paddlehub as hub
 
 
@@ -216,13 +213,14 @@ class RunCommand(BaseCommand):
         raise RuntimeError("ERROR: Format of %s is illegal." % file_path)
 
     def execute(self, argv):
+
         if not argv:
             print("ERROR: Please specify a module name.\n")
             self.help()
             return False
 
         module_name = argv[0]
-
+        CacheUpdater("hub_run", module_name).start()
         self.parser.prog = '%s %s %s' % (ENTRY, self.name, module_name)
         self.arg_input_group = self.parser.add_argument_group(
             title="Input options", description="Data input to the module")
@@ -236,16 +234,25 @@ class RunCommand(BaseCommand):
             return False
 
         # If the module is not executable, give an alarm and exit
+<<<<<<< HEAD
         if not self.module.is_runable:
+=======
+        if not self.module.is_runnable:
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
             print("ERROR! Module %s is not executable." % module_name)
             return False
 
         if self.module.code_version == "v2":
+<<<<<<< HEAD
             results = self.module(argv[1:])
+=======
+            results = self.module.run_func(argv[1:])
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
         else:
             self.module.check_processor()
             self.add_module_config_arg()
             self.add_module_input_arg()
+<<<<<<< HEAD
 
             if not argv[1:]:
                 self.help()
@@ -256,6 +263,18 @@ class RunCommand(BaseCommand):
             config = self.get_config()
             data = self.get_data()
 
+=======
+
+            if not argv[1:]:
+                self.help()
+                return False
+
+            self.args = self.parser.parse_args(argv[1:])
+
+            config = self.get_config()
+            data = self.get_data()
+
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
             try:
                 self.check_data(data)
             except DataFormatError:

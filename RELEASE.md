@@ -1,3 +1,72 @@
+## `v1.7.0`
+
+* 丰富预训练模型，提升应用性
+  * 新增VENUS系列视觉预训练模型[yolov3_darknet53_venus](https://www.paddlepaddle.org.cn/hubdetail?name=yolov3_darknet53_venus&en_category=ObjectDetection)，[faster_rcnn_resnet50_fpn_venus](https://www.paddlepaddle.org.cn/hubdetail?name=faster_rcnn_resnet50_fpn_venus&en_category=ObjectDetection)，可大幅度提升图像分类和目标检测任务的Fine-tune效果
+  * 新增工业级短视频分类模型[videotag_tsn_lstm](https://paddlepaddle.org.cn/hubdetail?name=videotag_tsn_lstm&en_category=VideoClassification)，支持3000类中文标签识别
+  * 新增轻量级中文OCR模型[chinese_ocr_db_rcnn](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_ocr_db_rcnn&en_category=TextRecognition)、[chinese_text_detection_db](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db&en_category=TextRecognition)，支持一键快速OCR识别
+  * 新增行人检测、车辆检测、动物识别、Object等工业级模型
+
+* Fine-tune API升级
+  * 文本分类任务新增6个预置网络，包括CNN, BOW, LSTM, BiLSTM, DPCNN等
+  * 使用VisualDL可视化训练评估性能数据
+
+## `v1.6.2`
+
+* 修复图像分类在windows下运行错误
+
+## `v1.6.1`
+
+* 修复windows下安装PaddleHub缺失config.json文件
+
+# `v1.6.0`
+
+* NLP Module全面升级，提升应用性和灵活性
+  * lac、senta系列(bow、cnn、bilstm、gru、lstm)、simnet_bow、porn_detection系列(cnn、gru、lstm)升级高性能预测，性能提升高达50%
+  * ERNIE、BERT、RoBERTa等Transformer类语义模型新增获取预训练embedding接口get_embedding，方便接入下游任务，提升应用性
+  * 新增RoBERTa通过模型结构压缩得到的3层Transformer模型[rbt3](https://www.paddlepaddle.org.cn/hubdetail?name=rbt3&en_category=SemanticModel)、[rbtl3](https://www.paddlepaddle.org.cn/hubdetail?name=rbtl3&en_category=SemanticModel)
+
+* Task predict接口增加高性能预测模式accelerate_mode，性能提升高达90%
+
+* PaddleHub Module创建流程开放，支持Fine-tune模型转化，全面提升应用性和灵活性
+  * [预训练模型转化为PaddleHub Module教程](./docs/contribution/contri_pretrained_model.md)
+  * [Fine-tune模型转化为PaddleHub Module教程](./docs/tutorial/finetuned_model_to_module.md)
+
+* [PaddleHub Serving](/docs/tutorial/serving.md)优化启动方式，支持更加灵活的参数配置
+
+# `v1.5.4`
+
+* 修复Fine-tune中断，checkpoint文件恢复训练失败的问题
+
+# `v1.5.3`
+
+* 优化口罩模型输出结果，提供更加灵活的部署及调用方式
+
+# `v1.5.2`
+
+* 优化pyramidbox_lite_server_mask、pyramidbox_lite_mobile_mask模型的服务化部署性能
+
+# `v1.5.1`
+
+* 修复加载module缺少cache目录的问题
+
+# `v1.5.0`
+
+* 升级PaddleHub Serving，提升性能和易用性
+   * 新增文本Embedding服务[Bert Service](./tutorial/bert_service.md), 轻松获取文本embedding；
+      * 代码精短，易于使用。服务端/客户端一行命令即可获取文本embedding；  
+      * 更高性能，更高效率。通过Paddle AnalysisPredictor API优化计算图，提升速度减小显存占用
+      * 随"机"应变，灵活扩展。根据机器资源和实际需求可灵活增加服务端数量，支持多显卡多模型计算任务
+   * 优化并发方式，多核环境中使用多线程并发提高整体QPS
+
+* 优化PaddleHub迁移学习组网Task功能，提升易用性
+   * 增加Hook机制，支持[修改Task内置方法](https://github.com/PaddlePaddle/PaddleHub/wiki/%E5%A6%82%E4%BD%95%E4%BF%AE%E6%94%B9Task%E5%86%85%E7%BD%AE%E6%96%B9%E6%B3%95%EF%BC%9F)
+   * 增加colorlog，支持日志彩色显示
+   * 改用save_inference_model接口保存模型，方便模型部署
+   * 优化predict接口，增加return_result参数，方便用户直接获取预测结果
+
+* 优化PaddleHub Dataset基类，加载[自定义数据](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)代码更少、更简单
+
+
 # `v1.4.1`
 
 * 修复利用Transformer类模型完成序列标注任务适配paddle1.6版本的问题
@@ -69,7 +138,7 @@
 # `v1.0.0`
 
 * 全新发布PaddleHub官网，易用性全面提升
-  * 新增网站  http://hub.paddlepaddle.org.cn  包含PaddlePaddle生态的预训练模型使用介绍
+  * 新增网站  https://www.paddlepaddle.org.cn/hub  包含PaddlePaddle生态的预训练模型使用介绍
   * 迁移学习Demo接入AI Studio与AI Book,无需安装即可快速体验
 
 * 新增29个预训练模型，覆盖文本、图像、视频三大领域；目前官方提供40个预训练模型
@@ -99,4 +168,4 @@
 
 **命令行一键使用**: 无需代码，通过命令行即可直接使用预训练模型进行预测，快速调研训练模型效果。目前版本支持以下模型：词法分析LAC；情感分析Senta；目标检测SSD；图像分类ResNet, MobileNet, NASNet等。
 
-**迁移学习**: 提供了基于预训练模型的Finetune API，用户通过少量代码即可完成迁移学习，包括BERT/ERNIE文本分类、序列标注、图像分类迁移等。
+**迁移学习**: 提供了基于预训练模型的Fine-tune API，用户通过少量代码即可完成迁移学习，包括BERT/ERNIE文本分类、序列标注、图像分类迁移等。

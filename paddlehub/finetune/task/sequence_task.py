@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 #  Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -21,20 +21,20 @@ import time
 from collections import OrderedDict
 
 import numpy as np
-import paddle
 import paddle.fluid as fluid
 from paddlehub.finetune.evaluate import chunk_eval, calculate_f1
-from paddlehub.common.utils import version_compare
-from .basic_task import BasicTask
+from paddlehub.common.logger import logger
+from .base_task import BaseTask
 
 
-class SequenceLabelTask(BasicTask):
+class SequenceLabelTask(BaseTask):
     def __init__(self,
                  feature,
                  max_seq_len,
                  num_classes,
-                 feed_list,
-                 data_reader,
+                 dataset=None,
+                 feed_list=None,
+                 data_reader=None,
                  startup_program=None,
                  config=None,
                  metrics_choices="default",
@@ -46,6 +46,7 @@ class SequenceLabelTask(BasicTask):
 
         main_program = feature.block.program
         super(SequenceLabelTask, self).__init__(
+            dataset=dataset,
             data_reader=data_reader,
             main_program=main_program,
             feed_list=feed_list,
@@ -64,17 +65,13 @@ class SequenceLabelTask(BasicTask):
             return True
 
     def _build_net(self):
-        if version_compare(paddle.__version__, "1.6"):
-            self.seq_len = fluid.layers.data(
-                name="seq_len", shape=[-1], dtype='int64')
-        else:
-            self.seq_len = fluid.layers.data(
-                name="seq_len", shape=[1], dtype='int64')
-        seq_len = fluid.layers.assign(self.seq_len)
+        self.seq_len = fluid.layers.data(
+            name="seq_len", shape=[1], dtype='int64', lod_level=0)
+        self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])
 
         if self.add_crf:
             unpad_feature = fluid.layers.sequence_unpad(
-                self.feature, length=self.seq_len)
+                self.feature, length=self.seq_len_used)
             self.emission = fluid.layers.fc(
                 size=self.num_classes,
                 input=unpad_feature,
@@ -103,7 +100,6 @@ class SequenceLabelTask(BasicTask):
 
             self.ret_infers = fluid.layers.reshape(
                 x=fluid.layers.argmax(self.logits, axis=2), shape=[-1, 1])
-            ret_infers = fluid.layers.assign(self.ret_infers)
 
             logits = self.logits
             logits = fluid.layers.flatten(logits, axis=2)
@@ -118,7 +114,8 @@ class SequenceLabelTask(BasicTask):
 
     def _add_loss(self):
         if self.add_crf:
-            labels = fluid.layers.sequence_unpad(self.labels[0], self.seq_len)
+            labels = fluid.layers.sequence_unpad(self.labels[0],
+                                                 self.seq_len_used)
             crf_cost = fluid.layers.linear_chain_crf(
                 input=self.emission,
                 label=labels,
@@ -133,7 +130,8 @@ class SequenceLabelTask(BasicTask):
 
     def _add_metrics(self):
         if self.add_crf:
-            labels = fluid.layers.sequence_unpad(self.labels[0], self.seq_len)
+            labels = fluid.layers.sequence_unpad(self.labels[0],
+                                                 self.seq_len_used)
             (precision, recall, f1_score, num_infer_chunks, num_label_chunks,
              num_correct_chunks) = fluid.layers.chunk_eval(
                  input=self.outputs[0],
@@ -146,7 +144,7 @@ class SequenceLabelTask(BasicTask):
         else:
             self.ret_labels = fluid.layers.reshape(
                 x=self.labels[0], shape=[-1, 1])
-            return [self.ret_labels, self.ret_infers, self.seq_len]
+            return [self.ret_labels, self.ret_infers, self.seq_len_used]
 
     def _calculate_metrics(self, run_states):
         total_infer = total_label = total_correct = loss_sum = 0
@@ -202,11 +200,14 @@ class SequenceLabelTask(BasicTask):
 
     @property
     def feed_list(self):
-        feed_list = [varname for varname in self._base_feed_list]
-        if self.is_train_phase or self.is_test_phase:
-            feed_list += [self.labels[0].name, self.seq_len.name]
+        if self._compatible_mode:
+            feed_list = [varname for varname in self._base_feed_list]
+            if self.is_train_phase or self.is_test_phase:
+                feed_list += [self.labels[0].name, self.seq_len.name]
+            else:
+                feed_list += [self.seq_len.name]
         else:
-            feed_list += [self.seq_len.name]
+            feed_list = super(SequenceLabelTask, self).feed_list
         return feed_list
 
     @property
@@ -214,5 +215,36 @@ class SequenceLabelTask(BasicTask):
         if self.is_train_phase or self.is_test_phase:
             return [metric.name for metric in self.metrics] + [self.loss.name]
         elif self.is_predict_phase:
-            return [self.ret_infers.name] + [self.seq_len.name]
+            return [self.ret_infers.name] + [self.seq_len_used.name]
         return [output.name for output in self.outputs]
+
+    def _postprocessing(self, run_states):
+        if self._compatible_mode:
+            id2label = {
+                val: key
+                for key, val in self._base_data_reader.label_map.items()
+            }
+        else:
+            if self._label_list:
+                id2label = {}
+                for index, label in enumerate(self._label_list):
+                    id2label[index] = label
+            else:
+                logger.warning(
+                    "Fail to postprocess the predict output. Please set label_list parameter in predict function or initialize the task with dataset parameter."
+                )
+                return run_states
+
+        results = []
+        for batch_states in run_states:
+            batch_results = batch_states.run_results
+            batch_infers = batch_results[0].reshape([-1]).astype(
+                np.int32).tolist()
+            seq_lens = batch_results[1].reshape([-1]).astype(np.int32).tolist()
+            current_id = 0
+            for length in seq_lens:
+                seq_infers = batch_infers[current_id:current_id + length]
+                seq_result = list(map(id2label.get, seq_infers[1:-1]))
+                current_id += length if self.add_crf else self.max_seq_len
+                results.append(seq_result)
+        return results

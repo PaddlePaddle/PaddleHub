@@ -14,8 +14,9 @@
 # limitations under the License.
 
 # NLP Dataset
-from .dataset import InputExample, HubDataset
+from .dataset import InputExample, BaseDataset
 from .chnsenticorp import ChnSentiCorp
+from .couplet import Couplet
 from .msra_ner import MSRA_NER
 from .nlpcc_dbqa import NLPCC_DBQA
 from .lcqmc import LCQMC
@@ -30,6 +31,7 @@ from .cmrc2018 import CMRC2018
 from .bq import BQ
 from .iflytek import IFLYTEK
 from .thucnews import THUCNEWS
+from .duel import DuEL
 
 # CV Dataset
 from .dogcat import DogCatDataset as DogCat

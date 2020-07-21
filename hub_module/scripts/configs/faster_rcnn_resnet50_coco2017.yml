@@ -1,0 +1,7 @@
+name: faster_rcnn_resnet50_coco2017
+dir: "modules/image/object_detection/faster_rcnn_resnet50_coco2017"
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/cv/faster_rcnn_resnet50_model.tar.gz
+    dest: faster_rcnn_resnet50_model
+    uncompress: True

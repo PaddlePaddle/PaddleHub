@@ -26,32 +26,36 @@ import yaml
 import random
 import threading
 
-from random import randint
 from paddlehub.common import utils, srv_utils
 from paddlehub.common.downloader import default_downloader
+from paddlehub.common.decorator_utils import singleton
 from paddlehub.common.server_config import default_server_config
 from paddlehub.io.parser import yaml_parser
 from paddlehub.common.lock import lock
 from paddlehub.common.dir import CONF_HOME, CACHE_HOME
+from paddlehub.common.srv_utils import ConfigInfo
 
 RESOURCE_LIST_FILE = "resource_list_file.yml"
 CACHE_TIME = 60 * 10
 
 
+@singleton
 class HubServer(object):
     def __init__(self, config_file_path=None):
         if not config_file_path:
             config_file_path = os.path.join(CONF_HOME, 'config.json')
         if not os.path.exists(CONF_HOME):
             utils.mkdir(CONF_HOME)
-        if not os.path.exists(config_file_path):
+        if not os.path.exists(config_file_path) or 0 == os.path.getsize(
+                config_file_path):
             with open(config_file_path, 'w+') as fp:
                 lock.flock(fp, lock.LOCK_EX)
                 fp.write(json.dumps(default_server_config))
                 lock.flock(fp, lock.LOCK_UN)
 
-        with open(config_file_path) as fp:
+        with open(config_file_path, "r") as fp:
             self.config = json.load(fp)
+
         fp_lock = open(config_file_path)
         lock.flock(fp_lock, lock.LOCK_EX)
 
@@ -147,6 +151,21 @@ class HubServer(object):
     def search_model(self, module_key, update=False):
         self.search_resource(
             resource_key=module_key, resource_type="Model", update=update)
+
+    def search_module_info(self, module_key):
+        try:
+            payload = {'name': module_key}
+            api_url = srv_utils.uri_path(self.get_server_url(), 'info')
+            r = srv_utils.hub_request(api_url, payload)
+            if r['status'] == 0 and len(r['data']) > 0:
+                return [(item['raw_name'], item['version'],
+                         item['paddle_version'], item["hub_version"])
+                        for item in r['data']["info"]]
+        except:
+            if self.config.get('debug', False):
+                raise
+            else:
+                pass
 
     def get_resource_url(self,
                          resource_name,
@@ -271,30 +290,44 @@ class HubServer(object):
 
 
 class CacheUpdater(threading.Thread):
-    def __init__(self, module, version=None):
+    def __init__(self,
+                 command="update_cache",
+                 module=None,
+                 version=None,
+                 addition=None):
         threading.Thread.__init__(self)
+        self.command = command
         self.module = module
         self.version = version
+        self.addition = addition
 
-    def update_resource_list_file(self, module, version=None):
+    def update_resource_list_file(self,
+                                  command="update_cache",
+                                  module=None,
+                                  version=None,
+                                  addition=None):
         payload = {'word': module}
         if version:
             payload['version'] = version
-        api_url = srv_utils.uri_path(default_hub_server.get_server_url(),
-                                     'search')
+        api_url = srv_utils.uri_path(HubServer().get_server_url(), 'search')
         cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
+        hub_name = ConfigInfo().get_hub_name()
         if os.path.exists(cache_path):
             extra = {
-                "command": "update_cache",
-                "mtime": os.stat(cache_path).st_mtime
+                "command": command,
+                "mtime": os.stat(cache_path).st_mtime,
+                "hub_name": hub_name
             }
         else:
             extra = {
-                "command": "update_cache",
-                "mtime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                "command": command,
+                "mtime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+                "hub_name": hub_name
             }
+        if addition is not None:
+            extra.update({"addition": addition})
         try:
-            r = srv_utils.hub_request(api_url, payload, extra)
+            r = srv_utils.hub_request(api_url, payload, extra, timeout=0.1)
             if r.get("update_cache", 0) == 1:
                 with open(cache_path, 'w+') as fp:
                     yaml.safe_dump({'resource_list': r['data']}, fp)
@@ -302,11 +335,9 @@ class CacheUpdater(threading.Thread):
             pass
 
     def run(self):
-        self.update_resource_list_file(self.module, self.version)
+        self.update_resource_list_file(self.command, self.module, self.version,
+                                       self.addition)
 
 
 def server_check():
-    default_hub_server.server_check()
-
-
-default_hub_server = HubServer()
+    HubServer().server_check()

@@ -18,26 +18,14 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-import io
-import json
-import os
-import sys
-import ast
-
-import six
 import shutil
-import pandas
-import numpy as np
 
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.common.arg_helper import add_argument, print_arguments
 from paddlehub.autofinetune.autoft import PSHE2
 from paddlehub.autofinetune.autoft import HAZero
 from paddlehub.autofinetune.evaluator import FullTrailEvaluator
 from paddlehub.autofinetune.evaluator import PopulationBasedEvaluator
-from paddlehub.common.logger import logger
-
-import paddlehub as hub
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class AutoFineTuneCommand(BaseCommand):
@@ -109,6 +97,7 @@ class AutoFineTuneCommand(BaseCommand):
         return options_str
 
     def execute(self, argv):
+        CacheUpdater("hub_autofinetune").start()
         if not argv:
             print("ERROR: Please specify a script to be finetuned in python.\n")
             self.help()
@@ -234,7 +223,7 @@ class AutoFineTuneCommand(BaseCommand):
                         "\tsaved_params_dir\n")
 
             print(
-                "The related infomation about hyperparamemters searched are saved as %s/log_file.txt ."
+                "The related information about hyperparamemters searched are saved as %s/log_file.txt ."
                 % autoft._output_dir)
             for solution, modeldir in solutions_modeldirs.items():
                 param = evaluator.convert_params(solution)

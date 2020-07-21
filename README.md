@@ -1,35 +1,40 @@
-# PaddleHub
+<p align="center">
+ <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"  
+</p>
 
-[![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=release/v1.3)](https://travis-ci.org/PaddlePaddle/PaddleHub)
-[![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
+[![Build Status](https://travis-ci.org/PaddlePaddle/PaddleHub.svg?branch=release/v1.6)](https://travis-ci.org/PaddlePaddle/PaddleHub)
+[![License](https://img.shields.io/badge/license-Apache%202-red.svg)](LICENSE)
 [![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
+![python version](https://img.shields.io/badge/python-3.6+-orange.svg)
+![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
 
-PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习工具，可以结合预训练模型更便捷地开展迁移学习工作。PaddleHub特性：
+PaddleHub是飞桨生态的预训练模型应用工具，开发者可以便捷地使用高质量的预训练模型结合Fine-tune API快速完成模型迁移到部署的全流程工作。PaddleHub提供的预训练模型涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型。更多详情可查看官网：https://www.paddlepaddle.org.cn/hub
 
-* 便捷地获取PaddlePaddle生态下的所有预训练模型，涵盖了图像分类、目标检测、词法分析、语义模型、情感分析、语言模型、视频分类、图像生成、图像分割等主流模型。
-  * 更多详情可查看官网：https://www.paddlepaddle.org.cn/hub
-* 通过PaddleHub Fine-tune API，结合少量代码即可完成**大规模预训练模型**的迁移学习，具体Demo可参考以下链接：
-  * [文本分类](./demo/text-classification)
-  * [序列标注](./demo/sequence-labeling)
-  * [多标签分类](./demo/multi-label-classification)
-  * [图像分类](./demo/image-classification)
-  * [检索式问答任务](./demo/qa_classification)
-  * [回归任务](./demo/sentence_similarity)
-  * [句子语义相似度计算](./demo/sentence_similarity)
-  * [阅读理解任务](./demo/reading-comprehension)
-* 支持超参优化（AutoDL Finetuner），自动调整超参数，给出效果较佳的超参数组合。
-  * [PaddleHub超参优化功能AutoDL Finetuner使用示例](./demo/autofinetune)
-* 引入『**模型即软件**』的设计理念，通过Python API或者命令行实现一键预测，更方便地应用PaddlePaddle模型库。
-  * [PaddleHub命令行工具介绍](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)
-* 一键Module服务化部署 - HubServing
-  * [PaddleHub-Serving一键服务部署](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Serving%E4%B8%80%E9%94%AE%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2)
-  * [使用示例](./demo/serving)
+
+PaddleHub以预训练模型应用为核心具备以下特点：  
+
+* **[模型即软件](#模型即软件)**，通过Python API或命令行实现模型调用，可快速体验或集成飞桨特色预训练模型。
+
+* **[易用的迁移学习](#易用的迁移学习)**，通过Fine-tune API，内置多种优化策略，只需少量代码即可完成预训练模型的Fine-tuning。
+
+* **[一键模型转服务](#一键模型转服务)**，简单一行命令即可搭建属于自己的深度学习模型API服务完成部署。
+
+* **[自动超参优化](#自动超参优化)**，内置AutoDL Finetuner能力，一键启动自动化超参搜索。
+
+
+<p align="center">
+ <img src="./docs/imgs/paddlehub_finetune.gif" align="middle"  
+</p>
+
+<p align='center'>
+ 十行代码完成ERNIE工业级文本分类
+</p>
+
 
 ## 目录
 
 * [安装](#%E5%AE%89%E8%A3%85)
-* [快速体验](#%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C)
-* [教程](#%E6%95%99%E7%A8%8B)
+* [特性](#特性)
 * [FAQ](#faq)
 * [用户交流群](#%E7%94%A8%E6%88%B7%E4%BA%A4%E6%B5%81%E7%BE%A4)
 * [更新历史](#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2)
@@ -38,131 +43,166 @@ PaddleHub是基于PaddlePaddle生态下的预训练模型管理和迁移学习�
 ## 安装
 
 ### 环境依赖
-* Python==2.7 or Python>=3.5 for Linux or Mac
 
-  **Python>=3.6 for Windows**
+* Python >= 3.6
+* PaddlePaddle >= 1.7.0
+* 操作系统: Windows/Mac/Linux
 
-* PaddlePaddle>=1.5
+### 安装命令
 
-除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络。若本地已存在相关的数据集和预训练模型，则可以离线运行PaddleHub。
-
-**NOTE:**
-1. 若是出现离线运行PaddleHub错误，请更新PaddleHub 1.1.1版本之上。
-pip安装方式如下：
+在安装PaddleHub之前，请先安装PaddlePaddle深度学习框架，更多安装说明请查阅[飞桨快速安装](https://www.paddlepaddle.org.cn/install/quick)
 
 ```shell
-$ pip install paddlehub
-```
-2. 下载数据集、module等，PaddleHub要求机器可以访问外网。可以使用server_check()可以检查本地与远端PaddleHub-Server的连接状态，使用方法如下：
-
-```python
-import paddlehub
-paddlehub.server_check()
-# 如果可以连接远端PaddleHub-Server，则显示Request Hub-Server successfully.
-# 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully.
+pip install paddlehub
 ```
 
+除上述依赖外，预训练模型和数据集的下载需要网络连接，请确保机器可以**正常访问网络**。若本地已存在相关预训练模型目录，则可以离线使用PaddleHub。
 
-## 快速体验
-安装成功后，执行下面的命令，可以快速体验PaddleHub无需代码、一键预测的命令行功能：
+## 特性
 
-`示例一`
+### 模型即软件
 
-使用[词法分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=LexicalAnalysis)模型LAC进行分词
+PaddleHub采用模型即软件的设计理念，所有的预训练模型与Python软件包类似，具备版本的概念，通过`hub install/uninstall` 可以便捷完成模型的升级和卸载。还可以通过Python的API或命令行实现快速预测的软件集成，更方便地应用和集成深度学习模型。
+
+安装PaddleHub后，执行命令[hub run](./docs/tutorial/cmdintro.md)，即可快速体验无需代码、一键预测的功能：
+
+* 使用[文字识别](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=TextRecognition)轻量级中文OCR模型chinese_ocr_db_crnn_mobile即可一键快速识别图片中的文字。
 ```shell
-$ hub run lac --input_text "今天是个好日子"
-[{'word': ['今天', '是', '个', '好日子'], 'tag': ['TIME', 'v', 'q', 'n']}]
+$ wget https://paddlehub.bj.bcebos.com/model/image/ocr/test_ocr.jpg
+$ hub run chinese_ocr_db_crnn_mobile --input_path test_ocr.jpg --visualization=True
 ```
 
-`示例二`
+预测结果图片保存在当前运行路径下ocr_result文件夹中，如下图所示。
 
-使用[情感分析](http://www.paddlepaddle.org.cn/hub?filter=category&value=SentimentAnalysis)模型Senta对句子进行情感预测
+<p align="center">
+ <img src="./docs/imgs/ocr_res.jpg" width='70%' align="middle"  
+</p>
+
+* 使用[目标检测](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ObjectDetection)模型pyramidbox_lite_mobile_mask对图片进行口罩检测
+```shell
+$ wget https://paddlehub.bj.bcebos.com/resources/test_mask_detection.jpg
+$ hub run pyramidbox_lite_mobile_mask --input_path test_mask_detection.jpg
+```
+<p align="center">
+ <img src="./docs/imgs/test_mask_detection_result.jpg" align="middle"  
+</p>
+
+* 使用[词法分析](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=LexicalAnalysis)模型LAC进行分词
+```shell
+$ hub run lac --input_text "现在，慕尼黑再保险公司不仅是此类行动的倡议者，更是将其大量气候数据整合进保险产品中，并与公众共享大量天气信息，参与到新能源领域的保障中。"
+[{
+    'word': ['现在', '，', '慕尼黑再保险公司', '不仅', '是', '此类', '行动', '的', '倡议者', '，', '更是', '将', '其', '大量', '气候', '数据', '整合', '进', '保险', '产品', '中', '，', '并', '与', '公众', '共享', '大量', '天气', '信息', '，', '参与', '到', '新能源', '领域', '的', '保障', '中', '。'],
+    'tag':  ['TIME', 'w', 'ORG', 'c', 'v', 'r', 'n', 'u', 'n', 'w', 'd', 'p', 'r', 'a', 'n', 'n', 'v', 'v', 'n', 'n', 'f', 'w', 'c', 'p', 'n', 'v', 'a', 'n', 'n', 'w', 'v', 'v', 'n', 'n', 'u', 'vn', 'f', 'w']
+}]
+```
+
+* 使用[情感分析](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=SentimentAnalysis)模型Senta对句子进行情感预测
 ```shell
 $ hub run senta_bilstm --input_text "今天天气真好"
 {'text': '今天天气真好', 'sentiment_label': 1, 'sentiment_key': 'positive', 'positive_probs': 0.9798, 'negative_probs': 0.0202}]
 ```
 
-`示例三`
-
-使用[目标检测](http://www.paddlepaddle.org.cn/hub?filter=category&value=ObjectDetection)模型 SSD/YOLO v3/Faster RCNN 对图片进行目标检测
+* 使用[目标检测](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ObjectDetection)模型Ultra-Light-Fast-Generic-Face-Detector-1MB对图片进行人脸识别
 ```shell
-$ wget --no-check-certificate https://paddlehub.bj.bcebos.com/resources/test_object_detection.jpg
-$ hub run ssd_mobilenet_v1_pascal --input_path test_object_detection.jpg
-$ hub run yolov3_coco2017 --input_path test_object_detection.jpg
-$ hub run faster_rcnn_coco2017 --input_path test_object_detection.jpg
+$ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
+$ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image.jpg
 ```
-![SSD检测结果](https://raw.githubusercontent.com/PaddlePaddle/PaddleHub/release/v1.3/docs/imgs/object_detection_result.png)
+<p align="center">
+ <img src="./docs/imgs/face_detection_result.jpeg" align="middle"  
+</p>
 
-除了上述三类模型外，PaddleHub还发布了语言模型、语义模型、图像分类、生成模型、视频分类等业界主流模型，更多PaddleHub已经发布的模型，请前往 https://www.paddlepaddle.org.cn/hub 查看
+* 使用[图像分割](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ImageSegmentation)模型进行人像扣图和人体部件识别
 
-同时，我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
+```shell
+$ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
+$ hub run ace2p --input_path test_image.jpg
+$ hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg
+```
 
-|类别|AIStudio链接|
-|-|-|
-|ERNIE Tiny 文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/186443)
-|ERNIE文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79380)|
-|ERNIE序列标注|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79377)|
-|ELMo文本分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79400)|
-|senta情感分类|[点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79398)|
-|图像分类| [点击体验](https://aistudio.baidu.com/aistudio/projectDetail/79378)|
-|自定义数据FineTune（序列标注任务）|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/184200)|
-|自定义数据FineTune（文本分类任务）|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/185121) |
+<p align="center">  
+<img src="./docs/imgs/img_seg_result.jpeg" width="35%" />  
+<img src="./docs/imgs/humanseg_test_res.png" width="35%" />  
+</p>  
 
+<p align='center'>
+ &#8194;&#8194;&#8194&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;ACE2P人体部件分割&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;
+ HumanSeg人像分割&#8194;&#8194;&#8194;
+</p>
 
-## 教程
+PaddleHub还提供图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等主流模型，更多模型介绍，请前往[预训练模型介绍](./docs/pretrained_models.md)或者PaddleHub官网[https://www.paddlepaddle.org.cn/hub](https://www.paddlepaddle.org.cn/hub) 查看
 
-PaddleHub Fine-tune API 详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-Finetune-API)
+### 易用的迁移学习
 
-PaddleHub如何完成迁移学习，详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E4%B8%8E%E8%BF%81%E7%A7%BB%E5%AD%A6%E4%B9%A0)
+通过Fine-tune API，只需要少量代码即可完成深度学习模型在自然语言处理和计算机视觉场景下的迁移学习。
 
-PaddleHub如何自定义迁移任务，详情参考[wiki教程](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)
+* [Demo示例](./demo)提供丰富的Fine-tune API的使用代码，包括[文本分类](./demo/text_classification)、[序列标注](./demo/sequence_labeling)、[多标签分类](./demo/multi_label_classification)、[图像分类](./demo/image_classification)、[检索式问答任务](./demo/qa_classification)、[回归任务](./demo/regression)、[句子语义相似度计算](./demo/sentence_similarity)、[阅读理解任务](./demo/reading_comprehension)等场景的模型迁移示例。
 
-PaddleHub如何自动优化超参数，详情参考[AutoDL Finetuner使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.3/tutorial/autofinetune.md)
+* 如需在线快速体验，请点击[PaddleHub教程合集](https://aistudio.baidu.com/aistudio/projectdetail/231146)，可使用AI Studio平台提供的GPU算力进行快速尝试。
 
-PaddleHub如何使用ULMFiT策略微调预训练模型，详情参考[PaddleHub 迁移学习与ULMFiT微调策略](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.3/tutorial/strategy_exp.md)
+更多Fine-tune API的使用教程可参考：
+
+* [Fine-tune API](./docs/reference)
+
+* [如何对自定义数据集进行Fine-tuning](./docs/tutorial/how_to_load_data.md)
+
+* [如何自定义迁移任务](./docs/tutorial/how_to_define_task.md)
+
+* [ULMFiT优化策略](./docs/tutorial/strategy_exp.md)
+
+### 一键模型转服务
+
+PaddleHub提供便捷的模型转服务的能力，只需简单一行命令即可完成模型的HTTP服务部署。通过以下命令即可快速启动LAC词法分析服务：
+
+```shell
+$ hub serving start --modules lac
+```
+
+更多关于模型服务化使用说明参见[PaddleHub模型一键能服务化部署](./docs/tutorial/serving.md)。
+
+**PaddleHub 1.5.0版本增加文本Embedding服务[Bert Service](./docs/tutorial/bert_service.md), 高性能地获取文本Embedding**
+
+### 自动超参优化
+
+PaddleHub内置AutoDL Finetuner能力，提供多种优化策略策略实现自动化超参搜索，使得模型在验证集上得到更好的结果，用户只需要一行命令`hub autofinetune`即可启动。更多详细使用说明请参见[PaddleHub超参优化](./docs/tutorial/autofinetune.md)。
 
 ## FAQ
 
-**Q:** 利用PaddleHub ernie/bert进行Finetune时，运行出错并提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息
+**Q:** 利用PaddleHub Fine-tune如何适配自定义数据集？
 
-**A:** 因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。可以将PaddlePaddle和PaddleHub升级至最新版本，同时将ernie卸载。
+**A:** 参考[PaddleHub适配自定义数据集完成Fine-tune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)。
+
+
+**Q:** 使用PaddleHub时，无法下载预置数据集、Module的等现象。
+
+**A:** 下载数据集、module等，PaddleHub要求机器可以访问外网。可以使用server_check()可以检查本地与远端PaddleHub-Server的连接状态，使用方法如下：
+
+```python
+import paddlehub
+paddlehub.server_check()
+# 如果可以连接远端PaddleHub-Server，则显示Request Hub-Server successfully。
+# 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully。
+```
+
+**Q:** 利用PaddleHub ERNIE/BERT进行Fine-tune时，运行出错并提示`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息。
+
+**A:** 预训练模型版本与PaddlePaddle版本不匹配。可尝试将PaddlePaddle和PaddleHub升级至最新版本，并将原ERNIE模型卸载。
 ```shell
 $ pip install --upgrade paddlehub
 $ hub uninstall ernie
 ```
 
-**Q:** 使用PaddleHub时，无法下载预置数据集、Module的等现象
-
-**A:** PaddleHub中的预训练模型和预置数据集都需要通过服务端进行下载，因此PaddleHub默认用户访问外网权限。
-可以通过以下命令确认是否可以访问外网。
-
-```python
-import requests
-
-res = requests.get('http://paddlepaddle.org.cn/paddlehub/search', {'word': 'ernie', 'type': 'Module'})
-print(res)
-
-# the common result is like this:
-# <Response [200]>
-```
-**Note：** PaddleHub 1.1.1版本已支持离线运行Module
-
-**Q:** 利用PaddleHub Finetune如何适配自定义数据集
-
-**A:** 参考[PaddleHub适配自定义数据集完成Finetune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)
-
-
-**更多问题**
+**FAQ**
 
 当安装或者使用遇到问题时，可以通过[FAQ](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-FAQ)查找解决方案。
-如果在FAQ中没有找到解决方案，欢迎您将问题和bug报告以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交给我们，我们会第一时间进行跟进
+如果在FAQ中没有找到解决方案，欢迎您将问题以[Github Issues](https://github.com/PaddlePaddle/PaddleHub/issues)的形式提交给我们，我们会第一时间进行跟进。
 
 ## 用户交流群
 
 * 飞桨PaddlePaddle 交流群：796771754（QQ群）
-* 飞桨 ERNIE交流群：760439550（QQ群）
+* 飞桨ERNIE交流群：760439550（QQ群）
 
 
 ## 更新历史
 
-详情参考[更新历史](./RELEASE.md)
+PaddleHub v1.7 已发布！
+更多升级详情参考[更新历史](./RELEASE.md)

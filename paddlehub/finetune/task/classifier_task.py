@@ -12,26 +12,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import time
 from collections import OrderedDict
 import numpy as np
 import paddle.fluid as fluid
+import time
 
+from paddlehub.common.logger import logger
 from paddlehub.finetune.evaluate import calculate_f1_np, matthews_corrcoef
-from .basic_task import BasicTask
+from paddlehub.reader.nlp_reader import ClassifyReader, LACClassifyReader
+
+import paddlehub.network as net
+
+from .base_task import BaseTask
 
 
-class ClassifierTask(BasicTask):
+class ClassifierTask(BaseTask):
     def __init__(self,
                  feature,
                  num_classes,
-                 feed_list,
-                 data_reader,
+                 dataset=None,
+                 feed_list=None,
+                 data_reader=None,
                  startup_program=None,
                  config=None,
                  hidden_units=None,
@@ -41,6 +42,7 @@ class ClassifierTask(BasicTask):
 
         main_program = feature.block.program
         super(ClassifierTask, self).__init__(
+            dataset=dataset,
             data_reader=data_reader,
             main_program=main_program,
             feed_list=feed_list,
@@ -134,26 +136,105 @@ class ClassifierTask(BasicTask):
 
         return scores, avg_loss, run_speed
 
+    def _postprocessing(self, run_states):
+        if self._compatible_mode:
+            try:
+                label_list = list(self._base_data_reader.label_map.keys())
+            except:
+                raise Exception(
+                    "ImageClassificationDataset does not support postprocessing, please use BaseCVDataset instead"
+                )
+        else:
+            if self._label_list:
+                label_list = self._label_list
+            else:
+                logger.warning(
+                    "Fail to postprocess the predict output. Please set label_list parameter in predict function or initialize the task with dataset parameter."
+                )
+                return run_states
+        results = []
+        for batch_state in run_states:
+            batch_result = batch_state.run_results
+            batch_infer = np.argmax(batch_result[0], axis=1)
+            results += [
+                label_list[sample_infer] for sample_infer in batch_infer
+            ]
+        return results
+
 
 ImageClassifierTask = ClassifierTask
 
 
 class TextClassifierTask(ClassifierTask):
-    def __init__(self,
-                 feature,
-                 num_classes,
-                 feed_list,
-                 data_reader,
-                 startup_program=None,
-                 config=None,
-                 hidden_units=None,
-                 metrics_choices="default"):
+    """
+    Create a text classification task.
+    It will use full-connect layer with softmax activation function to classify texts.
+    """
+
+    def __init__(
+            self,
+            num_classes,
+            dataset=None,
+            feed_list=None,  # Deprecated
+            data_reader=None,  # Deprecated
+            feature=None,
+            token_feature=None,
+            network=None,
+            startup_program=None,
+            config=None,
+            hidden_units=None,
+            metrics_choices="default"):
+        """
+        Args:
+            num_classes: total labels of the text classification task.
+            feed_list(list): the variable name that will be feeded to the main program, Deprecated in paddlehub v1.8.
+            data_reader(object): data reader for the task. It must be one of ClassifyReader and LACClassifyReader, Deprecated in paddlehub v1.8..
+            feature(Variable): the `feature` will be used to classify texts. It must be the sentence-level feature, shape as [-1, emb_size]. `Token_feature` and `feature` couldn't be setted at the same time. One of them must be setted as not None. Default None.
+            token_feature(Variable): the `feature` will be used to connect the pre-defined network. It must be the token-level feature, shape as [-1, seq_len, emb_size]. Default None.
+            network(str): the pre-defined network. Choices: 'bilstm', 'bow', 'cnn', 'dpcnn', 'gru' and 'lstm'. Default None. If network is setted, then `token_feature` must be setted and `feature` must be None.
+            startup_program (object): the customized startup program, default None.
+            config (RunConfig): run config for the task, such as batch_size, epoch, learning_rate setting and so on. Default None.
+            hidden_units(list): the element of `hidden_units` list is the full-connect layer size. It will add the full-connect layers to the program. Default None.
+            metrics_choices(list): metrics used to the task, default ["acc"].
+        """
+        if (not feature) and (not token_feature):
+            logger.error(
+                'Both token_feature and feature are None, one of them must be set.'
+            )
+            exit(1)
+        elif feature and token_feature:
+            logger.error(
+                'Both token_feature and feature are set. One should be set, the other should be None.'
+            )
+            exit(1)
+
+        if network:
+            assert network in [
+                'bilstm', 'bow', 'cnn', 'dpcnn', 'gru', 'lstm'
+            ], 'network (%s) choice must be one of bilstm, bow, cnn, dpcnn, gru, lstm!' % network
+            assert token_feature and (
+                not feature
+            ), 'If you wanna use network, you must set token_feature ranther than feature for TextClassifierTask!'
+            assert len(
+                token_feature.shape
+            ) == 3, 'When you use network, the parameter token_feature must be the token-level feature([batch_size, max_seq_len, embedding_size]), shape as [-1, 128, 200].'
+        else:
+            assert feature and (
+                not token_feature
+            ), 'If you do not use network, you must set feature ranther than token_feature for TextClassifierTask!'
+            assert len(
+                feature.shape
+            ) == 2, 'When you do not use network, the parameter feture must be the sentence-level feature ([batch_size, hidden_size]), such as the pooled_output of ERNIE, BERT, RoBERTa and ELECTRA module.'
+
+        self.network = network
 
         if metrics_choices == "default":
             metrics_choices = ["acc"]
+
         super(TextClassifierTask, self).__init__(
+            dataset=dataset,
             data_reader=data_reader,
-            feature=feature,
+            feature=feature if feature else token_feature,
             num_classes=num_classes,
             feed_list=feed_list,
             startup_program=startup_program,
@@ -162,10 +243,36 @@ class TextClassifierTask(ClassifierTask):
             metrics_choices=metrics_choices)
 
     def _build_net(self):
-        cls_feats = fluid.layers.dropout(
-            x=self.feature,
-            dropout_prob=0.1,
-            dropout_implementation="upscale_in_train")
+        if not isinstance(self._base_data_reader, LACClassifyReader):
+            # LACClassifyReader won't return the seqence length, while Dataset with tokenizer and ClassifyReader will.
+            self.seq_len = fluid.layers.data(
+                name="seq_len", shape=[1], dtype='int64', lod_level=0)
+            self.seq_len_used = fluid.layers.squeeze(self.seq_len, axes=[1])
+            # unpad the token_feature
+            unpad_feature = fluid.layers.sequence_unpad(
+                self.feature, length=self.seq_len_used)
+        if self.network:
+            # add pre-defined net
+            net_func = getattr(net.classification, self.network)
+            if self.network == 'dpcnn':
+                # deepcnn network is no need to unpad
+                cls_feats = net_func(
+                    self.feature, emb_dim=self.feature.shape[-1])
+            else:
+                if self._compatible_mode and isinstance(self._base_data_reader,
+                                                        LACClassifyReader):
+                    cls_feats = net_func(self.feature)
+                else:
+                    cls_feats = net_func(unpad_feature)
+            if self.is_train_phase or self.is_predict_phase:
+                logger.info("%s has been added in the TextClassifierTask!" %
+                            self.network)
+        else:
+            # not use pre-defined net but to use fc net
+            cls_feats = fluid.layers.dropout(
+                x=self.feature,
+                dropout_prob=0.1,
+                dropout_implementation="upscale_in_train")
 
         if self.hidden_units is not None:
             for n_hidden in self.hidden_units:
@@ -187,13 +294,43 @@ class TextClassifierTask(ClassifierTask):
 
         return [logits]
 
+    @property
+    def feed_list(self):
+        if self._compatible_mode:
+            feed_list = [varname for varname in self._base_feed_list]
+            if isinstance(self._base_data_reader, ClassifyReader):
+                # ClassifyReader will return the seqence length of an input text
+                feed_list += [self.seq_len.name]
+            if self.is_train_phase or self.is_test_phase:
+                feed_list += [self.labels[0].name]
+        else:
+            feed_list = super(TextClassifierTask, self).feed_list
+        return feed_list
+
+    @property
+    def fetch_list(self):
+        if self.is_train_phase or self.is_test_phase:
+            fetch_list = [
+                self.labels[0].name, self.ret_infers.name, self.metrics[0].name,
+                self.loss.name
+            ]
+        else:
+            # predict phase
+            if isinstance(self._base_data_reader, LACClassifyReader):
+                fetch_list = [self.outputs[0].name]
+            else:
+                fetch_list = [self.outputs[0].name, self.seq_len.name]
+
+        return fetch_list
+
 
 class MultiLabelClassifierTask(ClassifierTask):
     def __init__(self,
                  feature,
                  num_classes,
-                 feed_list,
-                 data_reader,
+                 dataset=None,
+                 feed_list=None,
+                 data_reader=None,
                  startup_program=None,
                  config=None,
                  hidden_units=None,
@@ -201,8 +338,8 @@ class MultiLabelClassifierTask(ClassifierTask):
         if metrics_choices == "default":
             metrics_choices = ["auc"]
 
-        main_program = feature.block.program
         super(MultiLabelClassifierTask, self).__init__(
+            dataset=dataset,
             data_reader=data_reader,
             feature=feature,
             num_classes=num_classes,
@@ -211,7 +348,10 @@ class MultiLabelClassifierTask(ClassifierTask):
             config=config,
             hidden_units=hidden_units,
             metrics_choices=metrics_choices)
-        self.class_name = list(data_reader.label_map.keys())
+        if self._compatible_mode:
+            self.class_name = list(data_reader.label_map.keys())
+        else:
+            self.class_name = self._label_list
 
     def _build_net(self):
         cls_feats = fluid.layers.dropout(
@@ -300,4 +440,29 @@ class MultiLabelClassifierTask(ClassifierTask):
     def fetch_list(self):
         if self.is_train_phase or self.is_test_phase:
             return [metric.name for metric in self.metrics] + [self.loss.name]
-        return self.outputs
+        return [output.name for output in self.outputs]
+
+    def _postprocessing(self, run_states):
+        results = []
+        if self._compatible_mode:
+            label_list = list(self._base_data_reader.label_map.keys())
+        else:
+            if self._label_list:
+                label_list = self._label_list
+            else:
+                logger.warning(
+                    "Fail to postprocess the predict output. Please set label_list parameter in predict function or initialize the task with dataset parameter."
+                )
+                return run_states
+
+        for batch_state in run_states:
+            batch_result = batch_state.run_results
+            for sample_id in range(len(batch_result[0])):
+                sample_result = []
+                for category_id in range(len(label_list)):
+                    sample_category_prob = batch_result[category_id][sample_id]
+                    sample_category_value = np.argmax(sample_category_prob)
+                    sample_result.append(
+                        {label_list[category_id]: sample_category_value})
+                results.append(sample_result)
+        return results

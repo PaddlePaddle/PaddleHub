@@ -1,0 +1,6 @@
+car
+truck
+bus
+motorbike
+tricycle
+carplate

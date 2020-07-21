@@ -18,22 +18,22 @@ from __future__ import division
 from __future__ import print_function
 
 import time
-import os
 import collections
 import math
 import six
 import json
+import io
 
-from collections import OrderedDict
-
+from tqdm import tqdm
 import numpy as np
 import paddle.fluid as fluid
-from .basic_task import BasicTask
+
 from paddlehub.common.logger import logger
 from paddlehub.reader import tokenization
 from paddlehub.finetune.evaluator import squad1_evaluate
 from paddlehub.finetune.evaluator import squad2_evaluate
 from paddlehub.finetune.evaluator import cmrc2018_evaluate
+from .base_task import BaseTask
 
 
 def _get_best_indexes(logits, n_best_size):
@@ -171,11 +171,15 @@ def get_final_text(pred_text, orig_text, do_lower_case, is_english):
     return output_text
 
 
-def write_predictions(all_examples, all_features, all_results, n_best_size,
-                      max_answer_length, do_lower_case, output_prediction_file,
-                      output_nbest_file, output_null_log_odds_file,
-                      version_2_with_negative, null_score_diff_threshold,
-                      is_english):
+def get_predictions(all_examples, all_features, all_results, n_best_size,
+                    max_answer_length, do_lower_case, version_2_with_negative,
+                    null_score_diff_threshold, is_english):
+
+    _PrelimPrediction = collections.namedtuple("PrelimPrediction", [
+        "feature_index", "start_index", "end_index", "start_logit", "end_logit"
+    ])
+    _NbestPrediction = collections.namedtuple(
+        "NbestPrediction", ["text", "start_logit", "end_logit"])
     example_index_to_features = collections.defaultdict(list)
     for feature in all_features:
         example_index_to_features[feature.example_index].append(feature)
@@ -184,211 +188,193 @@ def write_predictions(all_examples, all_features, all_results, n_best_size,
     for result in all_results:
         unique_id_to_result[result.unique_id] = result
 
-    _PrelimPrediction = collections.namedtuple("PrelimPrediction", [
-        "feature_index", "start_index", "end_index", "start_logit", "end_logit"
-    ])
-
     all_predictions = collections.OrderedDict()
     all_nbest_json = collections.OrderedDict()
     scores_diff_json = collections.OrderedDict()
 
-    for (example_index, example) in enumerate(all_examples):
-        features = example_index_to_features[example_index]
+    logger.info("Post processing...")
+    with tqdm(total=len(all_examples)) as process_bar:
+        for (example_index, example) in enumerate(all_examples):
+            features = example_index_to_features[example_index]
 
-        prelim_predictions = []
-        # keep track of the minimum score of null start+end of position 0
-        score_null = 1000000  # large and positive
-        min_null_feature_index = 0  # the paragraph slice with min mull score
-        null_start_logit = 0  # the start logit at the slice with min null score
-        null_end_logit = 0  # the end logit at the slice with min null score
-        for (feature_index, feature) in enumerate(features):
-            if feature.unique_id not in unique_id_to_result:
-                logger.info(
-                    "As using pyreader, the last one batch is so small that the feature %s in the last batch is discarded "
-                    % feature.unique_id)
-                continue
-            result = unique_id_to_result[feature.unique_id]
-            start_indexes = _get_best_indexes(result.start_logits, n_best_size)
-            end_indexes = _get_best_indexes(result.end_logits, n_best_size)
-
-            # if we could have irrelevant answers, get the min score of irrelevant
-            if version_2_with_negative:
-                feature_null_score = result.start_logits[0] + result.end_logits[
-                    0]
-                if feature_null_score < score_null:
-                    score_null = feature_null_score
-                    min_null_feature_index = feature_index
-                    null_start_logit = result.start_logits[0]
-                    null_end_logit = result.end_logits[0]
-
-            for start_index in start_indexes:
-                for end_index in end_indexes:
-                    # We could hypothetically create invalid predictions, e.g., predict
-                    # that the start of the span is in the question. We throw out all
-                    # invalid predictions.
-                    if start_index >= len(feature.tokens):
-                        continue
-                    if end_index >= len(feature.tokens):
-                        continue
-                    if start_index not in feature.token_to_orig_map:
-                        continue
-                    if end_index not in feature.token_to_orig_map:
-                        continue
-                    if not feature.token_is_max_context.get(start_index, False):
-                        continue
-                    if end_index < start_index:
-                        continue
-                    length = end_index - start_index + 1
-                    if length > max_answer_length:
-                        continue
-                    prelim_predictions.append(
-                        _PrelimPrediction(
-                            feature_index=feature_index,
-                            start_index=start_index,
-                            end_index=end_index,
-                            start_logit=result.start_logits[start_index],
-                            end_logit=result.end_logits[end_index]))
-
-        if version_2_with_negative:
-            prelim_predictions.append(
-                _PrelimPrediction(
-                    feature_index=min_null_feature_index,
-                    start_index=0,
-                    end_index=0,
-                    start_logit=null_start_logit,
-                    end_logit=null_end_logit))
-        prelim_predictions = sorted(
-            prelim_predictions,
-            key=lambda x: (x.start_logit + x.end_logit),
-            reverse=True)
-
-        _NbestPrediction = collections.namedtuple(  # pylint: disable=invalid-name
-            "NbestPrediction", ["text", "start_logit", "end_logit"])
-
-        seen_predictions = {}
-        nbest = []
-        if not prelim_predictions:
-            logger.warning(("not prelim_predictions:", example.qas_id))
-        for pred in prelim_predictions:
-            if len(nbest) >= n_best_size:
-                break
-            feature = features[pred.feature_index]
-            if pred.start_index > 0:  # this is a non-null prediction
-                tok_tokens = feature.tokens[pred.start_index:(
-                    pred.end_index + 1)]
-                orig_doc_start = feature.token_to_orig_map[pred.start_index]
-                orig_doc_end = feature.token_to_orig_map[pred.end_index]
-                orig_tokens = example.doc_tokens[orig_doc_start:(
-                    orig_doc_end + 1)]
-                if is_english:
-                    tok_text = " ".join(tok_tokens)
-                else:
-                    tok_text = "".join(tok_tokens)
-                # De-tokenize WordPieces that have been split off.
-                tok_text = tok_text.replace(" ##", "")
-                tok_text = tok_text.replace("##", "")
-
-                # Clean whitespace
-                tok_text = tok_text.strip()
-                tok_text = " ".join(tok_text.split())
-                if is_english:
-                    orig_text = " ".join(orig_tokens)
-                else:
-                    orig_text = "".join(orig_tokens)
-
-                final_text = get_final_text(tok_text, orig_text, do_lower_case,
-                                            is_english)
-                if final_text in seen_predictions:
+            prelim_predictions = []
+            # keep track of the minimum score of null start+end of position 0
+            score_null = 1000000  # large and positive
+            min_null_feature_index = 0  # the paragraph slice with min mull score
+            null_start_logit = 0  # the start logit at the slice with min null score
+            null_end_logit = 0  # the end logit at the slice with min null score
+            for (feature_index, feature) in enumerate(features):
+                if feature.unique_id not in unique_id_to_result:
+                    logger.info(
+                        "As using multidevice, the last one batch is so small that the feature %s in the last batch is discarded "
+                        % feature.unique_id)
                     continue
+                result = unique_id_to_result[feature.unique_id]
+                start_indexes = _get_best_indexes(result.start_logits,
+                                                  n_best_size)
+                end_indexes = _get_best_indexes(result.end_logits, n_best_size)
 
-                seen_predictions[final_text] = True
-            else:
-                final_text = ""
-                seen_predictions[final_text] = True
+                # if we could have irrelevant answers, get the min score of irrelevant
+                if version_2_with_negative:
+                    feature_null_score = result.start_logits[
+                        0] + result.end_logits[0]
+                    if feature_null_score < score_null:
+                        score_null = feature_null_score
+                        min_null_feature_index = feature_index
+                        null_start_logit = result.start_logits[0]
+                        null_end_logit = result.end_logits[0]
 
-            nbest.append(
-                _NbestPrediction(
-                    text=final_text,
-                    start_logit=pred.start_logit,
-                    end_logit=pred.end_logit))
+                for start_index in start_indexes:
+                    for end_index in end_indexes:
+                        # We could hypothetically create invalid predictions, e.g., predict
+                        # that the start of the span is in the question. We throw out all
+                        # invalid predictions.
+                        if start_index >= len(feature.tokens):
+                            continue
+                        if end_index >= len(feature.tokens):
+                            continue
+                        if start_index not in feature.token_to_orig_map:
+                            continue
+                        if end_index not in feature.token_to_orig_map:
+                            continue
+                        if not feature.token_is_max_context.get(
+                                start_index, False):
+                            continue
+                        if end_index < start_index:
+                            continue
+                        length = end_index - start_index + 1
+                        if length > max_answer_length:
+                            continue
+                        prelim_predictions.append(
+                            _PrelimPrediction(
+                                feature_index=feature_index,
+                                start_index=start_index,
+                                end_index=end_index,
+                                start_logit=result.start_logits[start_index],
+                                end_logit=result.end_logits[end_index]))
 
-        # if we didn't include the empty option in the n-best, include it
-        if version_2_with_negative:
-            if "" not in seen_predictions:
-                nbest.append(
-                    _NbestPrediction(
-                        text="",
+            if version_2_with_negative:
+                prelim_predictions.append(
+                    _PrelimPrediction(
+                        feature_index=min_null_feature_index,
+                        start_index=0,
+                        end_index=0,
                         start_logit=null_start_logit,
                         end_logit=null_end_logit))
-        # In very rare edge cases we could have no valid predictions. So we
-        # just create a nonce prediction in this case to avoid failure.
-        if not nbest:
-            nbest.append(
-                _NbestPrediction(text="empty", start_logit=0.0, end_logit=0.0))
+            prelim_predictions = sorted(
+                prelim_predictions,
+                key=lambda x: (x.start_logit + x.end_logit),
+                reverse=True)
 
-        assert len(nbest) >= 1
+            seen_predictions = {}
+            nbest = []
+            if not prelim_predictions:
+                logger.warning(("not prelim_predictions:", example.qas_id))
+            for pred in prelim_predictions:
+                if len(nbest) >= n_best_size:
+                    break
+                feature = features[pred.feature_index]
+                if pred.start_index > 0:  # this is a non-null prediction
+                    tok_tokens = feature.tokens[pred.start_index:(
+                        pred.end_index + 1)]
+                    orig_doc_start = feature.token_to_orig_map[pred.start_index]
+                    orig_doc_end = feature.token_to_orig_map[pred.end_index]
+                    orig_tokens = example.doc_tokens[orig_doc_start:(
+                        orig_doc_end + 1)]
+                    if is_english:
+                        tok_text = " ".join(tok_tokens)
+                    else:
+                        tok_text = "".join(tok_tokens)
+                    # De-tokenize WordPieces that have been split off.
+                    tok_text = tok_text.replace(" ##", "")
+                    tok_text = tok_text.replace("##", "")
 
-        total_scores = []
-        best_non_null_entry = None
-        for entry in nbest:
-            total_scores.append(entry.start_logit + entry.end_logit)
-            if not best_non_null_entry:
-                if entry.text:
-                    best_non_null_entry = entry
+                    # Clean whitespace
+                    tok_text = tok_text.strip()
+                    tok_text = " ".join(tok_text.split())
+                    if is_english:
+                        orig_text = " ".join(orig_tokens)
+                    else:
+                        orig_text = "".join(orig_tokens)
 
-        probs = _compute_softmax(total_scores)
+                    final_text = get_final_text(tok_text, orig_text,
+                                                do_lower_case, is_english)
+                    if final_text in seen_predictions:
+                        continue
 
-        nbest_json = []
-        for (i, entry) in enumerate(nbest):
-            output = collections.OrderedDict()
-            output["text"] = entry.text
-            output["probability"] = probs[i]
-            output["start_logit"] = entry.start_logit
-            output["end_logit"] = entry.end_logit
-            nbest_json.append(output)
+                    seen_predictions[final_text] = True
+                else:
+                    final_text = ""
+                    seen_predictions[final_text] = True
 
-        assert len(nbest_json) >= 1
+                nbest.append(
+                    _NbestPrediction(
+                        text=final_text,
+                        start_logit=pred.start_logit,
+                        end_logit=pred.end_logit))
 
-        if not version_2_with_negative:
-            all_predictions[example.qas_id] = nbest_json[0]["text"]
-        else:
-            # predict "" iff the null score - the score of best non-null > threshold
-            score_diff = score_null
-            if best_non_null_entry:
-                score_diff -= best_non_null_entry.start_logit + best_non_null_entry.end_logit
-            scores_diff_json[example.qas_id] = score_diff
-            if score_diff > null_score_diff_threshold:
-                all_predictions[example.qas_id] = ""
+            # if we didn't include the empty option in the n-best, include it
+            if version_2_with_negative:
+                if "" not in seen_predictions:
+                    nbest.append(
+                        _NbestPrediction(
+                            text="",
+                            start_logit=null_start_logit,
+                            end_logit=null_end_logit))
+            # In very rare edge cases we could have no valid predictions. So we
+            # just create a nonce prediction in this case to avoid failure.
+            if not nbest:
+                nbest.append(
+                    _NbestPrediction(
+                        text="empty", start_logit=0.0, end_logit=0.0))
+
+            assert len(nbest) >= 1
+
+            total_scores = []
+            best_non_null_entry = None
+            for entry in nbest:
+                total_scores.append(entry.start_logit + entry.end_logit)
+                if not best_non_null_entry:
+                    if entry.text:
+                        best_non_null_entry = entry
+
+            probs = _compute_softmax(total_scores)
+
+            nbest_json = []
+            for (i, entry) in enumerate(nbest):
+                output = collections.OrderedDict()
+                output["text"] = entry.text
+                output["probability"] = probs[i]
+                output["start_logit"] = entry.start_logit
+                output["end_logit"] = entry.end_logit
+                nbest_json.append(output)
+
+            assert len(nbest_json) >= 1
+
+            if not version_2_with_negative:
+                all_predictions[example.qas_id] = nbest_json[0]["text"]
             else:
-                all_predictions[example.qas_id] = best_non_null_entry.text
+                # predict "" iff the null score - the score of best non-null > threshold
+                score_diff = score_null
+                if best_non_null_entry:
+                    score_diff -= best_non_null_entry.start_logit + best_non_null_entry.end_logit
+                scores_diff_json[example.qas_id] = score_diff
+                if score_diff > null_score_diff_threshold:
+                    all_predictions[example.qas_id] = ""
+                else:
+                    all_predictions[example.qas_id] = best_non_null_entry.text
 
-        all_nbest_json[example.qas_id] = nbest_json
-    """Write final predictions to the json file and log-odds of null if needed."""
-    with open(output_prediction_file, "w") as writer:
-        logger.info("Writing predictions to: %s" % (output_prediction_file))
-        writer.write(
-            json.dumps(all_predictions, indent=4, ensure_ascii=is_english) +
-            "\n")
-
-    with open(output_nbest_file, "w") as writer:
-        logger.info("Writing nbest to: %s" % (output_nbest_file))
-        writer.write(
-            json.dumps(all_nbest_json, indent=4, ensure_ascii=is_english) +
-            "\n")
-
-    if version_2_with_negative:
-        logger.info("Writing null_log_odds to: %s" % (output_nbest_file))
-        with open(output_null_log_odds_file, "w") as writer:
-            writer.write(
-                json.dumps(scores_diff_json, indent=4, ensure_ascii=is_english)
-                + "\n")
+            all_nbest_json[example.qas_id] = nbest_json
+            process_bar.update(1)
+    return all_predictions, all_nbest_json, scores_diff_json
 
 
-class ReadingComprehensionTask(BasicTask):
+class ReadingComprehensionTask(BaseTask):
     def __init__(self,
                  feature,
-                 feed_list,
-                 data_reader,
+                 dataset=None,
+                 feed_list=None,
+                 data_reader=None,
                  startup_program=None,
                  config=None,
                  metrics_choices=None,
@@ -398,7 +384,9 @@ class ReadingComprehensionTask(BasicTask):
                  max_answer_length=30):
 
         main_program = feature.block.program
+        self.data_reader = data_reader
         super(ReadingComprehensionTask, self).__init__(
+            dataset=dataset,
             data_reader=data_reader,
             main_program=main_program,
             feed_list=feed_list,
@@ -406,7 +394,6 @@ class ReadingComprehensionTask(BasicTask):
             config=config,
             metrics_choices=metrics_choices)
         self.feature = feature
-        self.data_reader = data_reader
         self.sub_task = sub_task.lower()
         self.version_2_with_negative = (self.sub_task == "squad2.0")
         if self.sub_task in ["squad2.0", "squad"]:
@@ -419,11 +406,17 @@ class ReadingComprehensionTask(BasicTask):
         self.null_score_diff_threshold = null_score_diff_threshold
         self.n_best_size = n_best_size
         self.max_answer_length = max_answer_length
+        self.RawResult = collections.namedtuple(
+            "RawResult", ["unique_id", "start_logits", "end_logits"])
+
+        self.RawResult = collections.namedtuple(
+            "RawResult", ["unique_id", "start_logits", "end_logits"])
 
     def _build_net(self):
-        self.unique_ids = fluid.layers.data(
-            name="unique_ids", shape=[-1, 1], lod_level=0, dtype="int64")
-
+        self.unique_id = fluid.layers.data(
+            name="unique_id", shape=[-1, 1], lod_level=0, dtype="int64")
+        # to avoid memory optimization
+        _ = fluid.layers.assign(self.unique_id)
         logits = fluid.layers.fc(
             input=self.feature,
             size=2,
@@ -445,24 +438,24 @@ class ReadingComprehensionTask(BasicTask):
         return [start_logits, end_logits, num_seqs]
 
     def _add_label(self):
-        start_positions = fluid.layers.data(
-            name="start_positions", shape=[-1, 1], lod_level=0, dtype="int64")
-        end_positions = fluid.layers.data(
-            name="end_positions", shape=[-1, 1], lod_level=0, dtype="int64")
-        return [start_positions, end_positions]
+        start_position = fluid.layers.data(
+            name="start_position", shape=[-1, 1], lod_level=0, dtype="int64")
+        end_position = fluid.layers.data(
+            name="end_position", shape=[-1, 1], lod_level=0, dtype="int64")
+        return [start_position, end_position]
 
     def _add_loss(self):
-        start_positions = self.labels[0]
-        end_positions = self.labels[1]
+        start_position = self.labels[0]
+        end_position = self.labels[1]
 
         start_logits = self.outputs[0]
         end_logits = self.outputs[1]
 
         start_loss = fluid.layers.softmax_with_cross_entropy(
-            logits=start_logits, label=start_positions)
+            logits=start_logits, label=start_position)
         start_loss = fluid.layers.mean(x=start_loss)
         end_loss = fluid.layers.softmax_with_cross_entropy(
-            logits=end_logits, label=end_positions)
+            logits=end_logits, label=end_position)
         end_loss = fluid.layers.mean(x=end_loss)
         total_loss = (start_loss + end_loss) / 2.0
         return total_loss
@@ -472,29 +465,30 @@ class ReadingComprehensionTask(BasicTask):
 
     @property
     def feed_list(self):
-        feed_list = [varname for varname in self._base_feed_list
-                     ] + [self.unique_ids.name]
-        if self.is_train_phase or self.is_test_phase:
-            feed_list += [label.name for label in self.labels]
+        if self._compatible_mode:
+            feed_list = [varname for varname in self._base_feed_list
+                         ] + [self.unique_id.name]
+            if self.is_train_phase or self.is_test_phase:
+                feed_list += [label.name for label in self.labels]
+        else:
+            feed_list = super(ReadingComprehensionTask, self).feed_list
         return feed_list
 
     @property
     def fetch_list(self):
         if self.is_train_phase or self.is_test_phase:
             return [
-                self.loss.name, self.outputs[-1].name, self.unique_ids.name,
+                self.loss.name, self.outputs[-1].name, self.unique_id.name,
                 self.outputs[0].name, self.outputs[1].name
             ]
         elif self.is_predict_phase:
             return [
-                self.unique_ids.name,
+                self.unique_id.name,
             ] + [output.name for output in self.outputs]
 
     def _calculate_metrics(self, run_states):
         total_cost, total_num_seqs, all_results = [], [], []
         run_step = 0
-        RawResult = collections.namedtuple(
-            "RawResult", ["unique_id", "start_logits", "end_logits"])
         for run_state in run_states:
             np_loss = run_state.run_results[0]
             np_num_seqs = run_state.run_results[1]
@@ -510,7 +504,7 @@ class ReadingComprehensionTask(BasicTask):
                     start_logits = [float(x) for x in np_start_logits[idx].flat]
                     end_logits = [float(x) for x in np_end_logits[idx].flat]
                     all_results.append(
-                        RawResult(
+                        self.RawResult(
                             unique_id=unique_id,
                             start_logits=start_logits,
                             end_logits=end_logits))
@@ -518,67 +512,49 @@ class ReadingComprehensionTask(BasicTask):
         run_time_used = time.time() - run_states[0].run_time_begin
         run_speed = run_step / run_time_used
         avg_loss = np.sum(total_cost) / np.sum(total_num_seqs)
-        scores = OrderedDict()
+        scores = collections.OrderedDict()
         # If none of metrics has been implemented, loss will be used to evaluate.
         if self.is_test_phase:
-            output_prediction_file = os.path.join(self.config.checkpoint_dir,
-                                                  "predictions.json")
-            output_nbest_file = os.path.join(self.config.checkpoint_dir,
-                                             "nbest_predictions.json")
-            output_null_log_odds_file = os.path.join(self.config.checkpoint_dir,
-                                                     "null_odds.json")
-            all_examples = self.data_reader.all_examples[self.phase]
-            all_features = self.data_reader.all_features[self.phase]
-            write_predictions(
+            if self._compatible_mode:
+                all_examples = self.data_reader.all_examples[self.phase]
+                all_features = self.data_reader.all_features[self.phase]
+                dataset = self.data_reader.dataset
+            else:
+                all_examples = self.dataset.get_examples(self.phase)
+                all_features = self.dataset.get_features(self.phase)
+                dataset = self.dataset
+            all_predictions, all_nbest_json, scores_diff_json = get_predictions(
                 all_examples=all_examples,
                 all_features=all_features,
                 all_results=all_results,
                 n_best_size=self.n_best_size,
                 max_answer_length=self.max_answer_length,
                 do_lower_case=True,
-                output_prediction_file=output_prediction_file,
-                output_nbest_file=output_nbest_file,
-                output_null_log_odds_file=output_null_log_odds_file,
                 version_2_with_negative=self.version_2_with_negative,
                 null_score_diff_threshold=self.null_score_diff_threshold,
                 is_english=self.is_english)
             if self.phase == 'val' or self.phase == 'dev':
-                with open(
-                        self.data_reader.dataset.dev_file, 'r',
-                        encoding="utf8") as dataset_file:
-                    dataset_json = json.load(dataset_file)
-                    dataset = dataset_json['data']
+                dataset_path = dataset.dev_path
             elif self.phase == 'test':
-                with open(
-                        self.data_reader.dataset.test_file, 'r',
-                        encoding="utf8") as dataset_file:
-                    dataset_json = json.load(dataset_file)
-                    dataset = dataset_json['data']
+                dataset_path = dataset.test_path
             else:
                 raise Exception("Error phase: %s when runing _calculate_metrics"
                                 % self.phase)
-            with open(
-                    output_prediction_file, 'r',
-                    encoding="utf8") as prediction_file:
-                predictions = json.load(prediction_file)
+            with io.open(dataset_path, 'r', encoding="utf8") as dataset_file:
+                dataset_json = json.load(dataset_file)
+                data = dataset_json['data']
 
             if self.sub_task == "squad":
-                scores = squad1_evaluate.evaluate(dataset, predictions)
+                scores = squad1_evaluate.evaluate(data, all_predictions)
             elif self.sub_task == "squad2.0":
-                with open(
-                        output_null_log_odds_file, 'r',
-                        encoding="utf8") as odds_file:
-                    na_probs = json.load(odds_file)
-                scores = squad2_evaluate.evaluate(dataset, predictions,
-                                                  na_probs)
+                scores = squad2_evaluate.evaluate(data, all_predictions,
+                                                  scores_diff_json)
             elif self.sub_task in ["cmrc2018", "drcd"]:
-                scores = cmrc2018_evaluate.get_eval(dataset, predictions)
+                scores = cmrc2018_evaluate.get_eval(data, all_predictions)
         return scores, avg_loss, run_speed
 
-    def _default_predict_end_event(self, run_states):
+    def _postprocessing(self, run_states):
         all_results = []
-        RawResult = collections.namedtuple(
-            "RawResult", ["unique_id", "start_logits", "end_logits"])
         for run_state in run_states:
             np_unique_ids = run_state.run_results[0]
             np_start_logits = run_state.run_results[1]
@@ -588,33 +564,24 @@ class ReadingComprehensionTask(BasicTask):
                 start_logits = [float(x) for x in np_start_logits[idx].flat]
                 end_logits = [float(x) for x in np_end_logits[idx].flat]
                 all_results.append(
-                    RawResult(
+                    self.RawResult(
                         unique_id=unique_id,
                         start_logits=start_logits,
                         end_logits=end_logits))
-        # If none of metrics has been implemented, loss will be used to evaluate.
-        output_prediction_file = os.path.join(self.config.checkpoint_dir,
-                                              "predict_predictions.json")
-        output_nbest_file = os.path.join(self.config.checkpoint_dir,
-                                         "predict_nbest_predictions.json")
-        output_null_log_odds_file = os.path.join(self.config.checkpoint_dir,
-                                                 "predict_null_odds.json")
-        all_examples = self.data_reader.all_examples[self.phase]
-        all_features = self.data_reader.all_features[self.phase]
-        write_predictions(
+        if self._compatible_mode:
+            all_examples = self.data_reader.all_examples[self.phase]
+            all_features = self.data_reader.all_features[self.phase]
+        else:
+            all_examples = self.dataset.get_examples(self.phase)
+            all_features = self.dataset.get_features(self.phase)
+        all_predictions, all_nbest_json, scores_diff_json = get_predictions(
             all_examples=all_examples,
             all_features=all_features,
             all_results=all_results,
             n_best_size=self.n_best_size,
             max_answer_length=self.max_answer_length,
             do_lower_case=True,
-            output_prediction_file=output_prediction_file,
-            output_nbest_file=output_nbest_file,
-            output_null_log_odds_file=output_null_log_odds_file,
             version_2_with_negative=self.version_2_with_negative,
             null_score_diff_threshold=self.null_score_diff_threshold,
             is_english=self.is_english)
-
-        logger.info("PaddleHub predict finished.")
-
-        logger.info("You can see the prediction in %s" % output_prediction_file)
+        return all_predictions

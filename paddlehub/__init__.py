@@ -22,12 +22,16 @@ if six.PY2:
     reload(sys)  # noqa
     sys.setdefaultencoding("UTF-8")
 
+from .version import hub_version as __version__
+
 from . import module
 from . import common
 from . import io
 from . import dataset
 from . import finetune
 from . import reader
+from . import network
+from . import tokenizer
 
 from .common.dir import USER_HOME
 from .common.dir import HUB_HOME
@@ -36,7 +40,9 @@ from .common.dir import CACHE_HOME
 from .common.dir import CONF_HOME
 from .common.logger import logger
 from .common.paddle_helper import connect_program
-from .common.hub_server import default_hub_server
+from .common.hub_server import HubServer
+from .common.hub_server import server_check
+from .common.paddlex_utils import download, ResourceNotFoundError, ServerConnectionError
 
 from .module.module import Module
 from .module.base_processor import BaseProcessor
@@ -45,21 +51,13 @@ from .module.manager import default_module_manager
 
 from .io.type import DataType
 
-from .finetune.task import ClassifierTask
-from .finetune.task import TextClassifierTask
-from .finetune.task import ImageClassifierTask
-from .finetune.task import SequenceLabelTask
-from .finetune.task import MultiLabelClassifierTask
-from .finetune.task import RegressionTask
-from .finetune.task import ReadingComprehensionTask
 from .finetune.config import RunConfig
-from .finetune.strategy import AdamWeightDecayStrategy
-from .finetune.strategy import DefaultStrategy
-from .finetune.strategy import DefaultFinetuneStrategy
-from .finetune.strategy import L2SPFinetuneStrategy
-from .finetune.strategy import ULMFiTStrategy
-from .finetune.strategy import CombinedStrategy
+from .finetune.strategy import AdamWeightDecayStrategy, CombinedStrategy, DefaultFinetuneStrategy, DefaultStrategy, L2SPFinetuneStrategy, ULMFiTStrategy
+from .finetune.task import BaseTask, ClassifierTask, DetectionTask, TextGenerationTask, ImageClassifierTask, MultiLabelClassifierTask, ReadingComprehensionTask, RegressionTask, SequenceLabelTask, TextClassifierTask, PairwiseTextMatchingTask, PointwiseTextMatchingTask
 
 from .autofinetune.evaluator import report_final_result
 
-from .common.hub_server import server_check
+from .module.nlp_module import NLPPredictionModule, TransformerModule
+
+from .tokenizer.bert_tokenizer import BertTokenizer, ErnieTinyTokenizer
+from .tokenizer.tokenizer import CustomTokenizer

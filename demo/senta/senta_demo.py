@@ -11,10 +11,11 @@ if __name__ == "__main__":
     # Load Senta-BiLSTM module
     senta = hub.Module(name="senta_bilstm")
 
+    # Data to be predicted
     test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
 
+    # execute predict and print the result
     input_dict = {"text": test_text}
-
     results = senta.sentiment_classify(data=input_dict)
 
     for index, text in enumerate(test_text):

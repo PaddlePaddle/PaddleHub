@@ -1,0 +1,10 @@
+name: porn_detection_cnn
+dir: "modules/text/text_review/porn_detection_cnn"
+exclude:
+  - README.md
+  - test.py
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/porn_detection_cnn_infer_model.tar.gz
+    dest: .
+    uncompress: True

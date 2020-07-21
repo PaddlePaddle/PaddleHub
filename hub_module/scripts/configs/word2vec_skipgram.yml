@@ -1,0 +1,10 @@
+name: word2vec_skipgram
+dir: "modules/text/embedding/word2vec_skipgram"
+exclude:
+  - README.md
+  - test.py
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/embedding/word2vec_skipgram_assets.tar.gz
+    dest: .
+    uncompress: True

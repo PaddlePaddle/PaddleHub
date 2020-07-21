@@ -1,0 +1,11 @@
+name: bert_uncased_L_24_H_1024_A_16
+dir: "modules/text/semantic_model/bert_uncased_L_24_H_1024_A_16"
+exclude:
+  - README.md
+  - test_context.py
+  - test_embedding.py
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/nlp/bert_uncased_L_24_H_1024_A_16/assets.tar.gz
+    dest: assets
+    uncompress: True

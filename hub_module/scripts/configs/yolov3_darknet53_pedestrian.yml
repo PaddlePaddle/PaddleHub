@@ -1,0 +1,9 @@
+name: yolov3_darknet53_pedestrian
+dir: "modules/image/object_detection/yolov3_darknet53_pedestrian"
+exclude:
+  - README.md
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/hub_dev/yolov3_darknet53_pedestrian_model.tar.gz
+    dest: .
+    uncompress: True

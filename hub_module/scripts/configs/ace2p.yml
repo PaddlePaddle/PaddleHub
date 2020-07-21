@@ -1,0 +1,9 @@
+name: ace2p
+dir: "modules/image/semantic_segmentation/ace2p"
+exclude:
+    - README.md
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/hub_dev/ace2p_human_parsing.tar.gz
+    dest: .
+    uncompress: True

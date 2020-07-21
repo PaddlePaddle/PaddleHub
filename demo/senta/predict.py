@@ -16,7 +16,8 @@ import paddlehub as hub
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--checkpoint_dir", type=str,                 default=None, help="Directory to model checkpoint")
-parser.add_argument("--use_gpu",        type=ast.literal_eval,    default=True, help="Whether use GPU for finetuning, input should be True or False")
+parser.add_argument("--use_gpu",        type=ast.literal_eval,    default=True, help="Whether use GPU for fine-tuning, input should be True or False")
+parser.add_argument("--batch_size",     type=int,                 default=1,    help="Total examples' number in batch when the program predicts.")
 args = parser.parse_args()
 # yapf: enable.
 
@@ -25,31 +26,26 @@ if __name__ == '__main__':
     module = hub.Module(name="senta_bilstm")
     inputs, outputs, program = module.context(trainable=True)
 
-    # Sentence classification  dataset reader
+    # Download dataset and use LACClassifyReader to read dataset
     dataset = hub.dataset.ChnSentiCorp()
     reader = hub.reader.LACClassifyReader(
         dataset=dataset, vocab_path=module.get_vocab_path())
 
-    strategy = hub.AdamWeightDecayStrategy(
-        weight_decay=0.01,
-        warmup_proportion=0.1,
-        learning_rate=5e-5,
-        lr_scheduler="linear_decay",
-        optimizer_name="adam")
-
-    config = hub.RunConfig(
-        use_data_parallel=False,
-        use_pyreader=False,
-        use_cuda=args.use_gpu,
-        batch_size=1,
-        enable_memory_optim=False,
-        checkpoint_dir=args.checkpoint_dir,
-        strategy=strategy)
-
     sent_feature = outputs["sentence_feature"]
 
+    # Setup feed list for data feeder
+    # Must feed all the tensor of senta's module need
     feed_list = [inputs["words"].name]
 
+    # Setup RunConfig for PaddleHub Fine-tune API
+    config = hub.RunConfig(
+        use_data_parallel=False,
+        use_cuda=args.use_gpu,
+        batch_size=args.batch_size,
+        checkpoint_dir=args.checkpoint_dir,
+        strategy=hub.AdamWeightDecayStrategy())
+
+    # Define a classfication fine-tune task by PaddleHub's API
     cls_task = hub.TextClassifierTask(
         data_reader=reader,
         feature=sent_feature,
@@ -57,13 +53,7 @@ if __name__ == '__main__':
         num_classes=dataset.num_labels,
         config=config)
 
+    # Data to be predicted
     data = ["这家餐厅很好吃", "这部电影真的很差劲"]
 
-    run_states = cls_task.predict(data=data)
-    results = [run_state.run_results for run_state in run_states]
-    index = 0
-    for batch_result in results:
-        batch_result = np.argmax(batch_result, axis=2)[0]
-        for result in batch_result:
-            print("%s\tpredict=%s" % (data[index], result))
-            index += 1
+    print(cls_task.predict(data=data, return_result=True))

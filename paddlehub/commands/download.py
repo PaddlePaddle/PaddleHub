@@ -20,10 +20,11 @@ from __future__ import print_function
 import argparse
 import os
 
+import paddlehub as hub
 from paddlehub.common import utils
 from paddlehub.common.downloader import default_downloader
-from paddlehub.common.hub_server import default_hub_server
 from paddlehub.commands.base_command import BaseCommand, ENTRY
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class DownloadCommand(BaseCommand):
@@ -52,25 +53,26 @@ class DownloadCommand(BaseCommand):
         mod_name = argv[0]
         mod_version = None if "==" not in mod_name else mod_name.split("==")[1]
         mod_name = mod_name if "==" not in mod_name else mod_name.split("==")[0]
+        CacheUpdater("hub_download", mod_name, mod_version).start()
         self.args = self.parser.parse_args(argv[1:])
         self.args.type = self.check_type(self.args.type)
 
         extra = {"command": "download"}
         if self.args.type in ["Module", "Model"]:
-            search_result = default_hub_server.get_resource_url(
+            search_result = hub.HubServer().get_resource_url(
                 mod_name,
                 resource_type=self.args.type,
                 version=mod_version,
                 extra=extra)
         else:
-            search_result = default_hub_server.get_resource_url(
+            search_result = hub.HubServer().get_resource_url(
                 mod_name,
                 resource_type="Module",
                 version=mod_version,
                 extra=extra)
             self.args.type = "Module"
             if search_result == {}:
-                search_result = default_hub_server.get_resource_url(
+                search_result = hub.HubServer().get_resource_url(
                     mod_name,
                     resource_type="Model",
                     version=mod_version,
@@ -79,7 +81,7 @@ class DownloadCommand(BaseCommand):
         url = search_result.get('url', None)
         except_md5_value = search_result.get('md5', None)
         if not url:
-            if default_hub_server._server_check() is False:
+            if hub.HubServer()._server_check() is False:
                 tips = "Request Hub-Server unsuccessfully, please check your network."
             else:
                 tips = "PaddleHub can't find model/module named %s" % mod_name

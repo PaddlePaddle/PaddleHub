@@ -140,29 +140,6 @@ class FullTokenizer(object):
         return convert_by_vocab(self.inv_vocab, ids)
 
 
-class CharTokenizer(object):
-    """Runs end-to-end tokenziation."""
-
-    def __init__(self, vocab_file, do_lower_case=True):
-        self.vocab = load_vocab(vocab_file)
-        self.inv_vocab = {v: k for k, v in self.vocab.items()}
-        self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
-
-    def tokenize(self, text):
-        split_tokens = []
-        for token in text.lower().split(" "):
-            for sub_token in self.wordpiece_tokenizer.tokenize(token):
-                split_tokens.append(sub_token)
-
-        return split_tokens
-
-    def convert_tokens_to_ids(self, tokens):
-        return convert_by_vocab(self.vocab, tokens)
-
-    def convert_ids_to_tokens(self, ids):
-        return convert_by_vocab(self.inv_vocab, ids)
-
-
 class WSSPTokenizer(object):
     def __init__(self, vocab_file, sp_model_dir, word_dict, ws=True,
                  lower=True):
@@ -170,7 +147,7 @@ class WSSPTokenizer(object):
         self.inv_vocab = {v: k for k, v in self.vocab.items()}
         self.ws = ws
         self.lower = lower
-        self.dict = pickle.load(open(word_dict, 'rb'), encoding='utf8')
+        self.dict = pickle.load(open(word_dict, 'rb'))
         self.sp_model = spm.SentencePieceProcessor()
         self.window_size = 5
         self.sp_model.Load(sp_model_dir)

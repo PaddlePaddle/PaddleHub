@@ -22,10 +22,11 @@ import argparse
 
 from paddlehub.common import utils
 from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.commands.cml_utils import TablePrinter
+from paddlehub.common.cml_utils import TablePrinter
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.module import Module
 from paddlehub.io.parser import yaml_parser
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class ShowCommand(BaseCommand):
@@ -116,6 +117,7 @@ class ShowCommand(BaseCommand):
             return False
 
         module_name = argv[0]
+        CacheUpdater("hub_show", module_name).start()
 
         # nlp model
         model_info_file = os.path.join(module_name, "info.yml")

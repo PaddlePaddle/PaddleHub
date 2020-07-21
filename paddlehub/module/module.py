@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -23,9 +23,13 @@ import sys
 import functools
 import inspect
 import importlib
+<<<<<<< HEAD
 import tarfile
 from collections import defaultdict
 from shutil import copyfile
+=======
+import shutil
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
 
 import paddle
 import paddle.fluid as fluid
@@ -37,6 +41,7 @@ from paddlehub.common.lock import lock
 from paddlehub.common.logger import logger
 from paddlehub.common.hub_server import CacheUpdater
 from paddlehub.module import module_desc_pb2
+<<<<<<< HEAD
 from paddlehub.module import check_info_pb2
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.checker import ModuleChecker
@@ -44,6 +49,11 @@ from paddlehub.module.signature import Signature, create_signature
 from paddlehub.module.base_processor import BaseProcessor
 from paddlehub.io.parser import yaml_parser
 from paddlehub import version
+=======
+from paddlehub.module.manager import default_module_manager
+from paddlehub.module.checker import ModuleChecker
+from paddlehub.module.signature import Signature, create_signature
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
 
 # PaddleHub module dir name
 ASSETS_DIRNAME = "assets"
@@ -171,6 +181,7 @@ class Module(object):
             logger.error(tips)
             raise RuntimeError(tips)
 
+<<<<<<< HEAD
         logger.info(tips)
         lock.flock(fp_lock, lock.LOCK_UN)
         return cls.init_with_directory(directory=module_dir[0])
@@ -237,6 +248,212 @@ class Module(object):
 
     def _initialize(self):
         pass
+=======
+_module_runnable_func = {}
+
+
+def runnable(func):
+    mod = func.__module__ + "." + inspect.stack()[1][3]
+    _module_runnable_func[mod] = func.__name__
+
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return _wrapper
+
+
+_module_serving_func = {}
+
+
+def serving(func):
+    mod = func.__module__ + "." + inspect.stack()[1][3]
+    _module_serving_func[mod] = func.__name__
+
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return _wrapper
+
+
+def moduleinfo(name, version, author, author_email, summary, type):
+    def _wrapper(cls):
+        if not issubclass(cls, Module):
+            raise RuntimeError
+        cls._name = name
+        cls._version = version
+        cls._author = author
+        cls._author_email = author_email
+        cls._summary = summary
+        cls._type = type
+        return cls
+
+    return _wrapper
+
+
+class Module(fluid.dygraph.Layer):
+    def __new__(cls,
+                name=None,
+                directory=None,
+                module_dir=None,
+                version=None,
+                **kwargs):
+        if cls.__name__ == "Module":
+            if name:
+                module = cls.init_with_name(
+                    name=name, version=version, **kwargs)
+            elif directory:
+                module = cls.init_with_directory(directory=directory, **kwargs)
+            elif module_dir:
+                logger.warning(
+                    "Parameter module_dir is deprecated, please use directory to specify the path"
+                )
+                if isinstance(module_dir, list) or isinstance(
+                        module_dir, tuple):
+                    directory = module_dir[0]
+                    version = module_dir[1]
+                else:
+                    directory = module_dir
+                module = cls.init_with_directory(directory=directory, **kwargs)
+            CacheUpdater("update_cache", module.name, module.version).start()
+        else:
+            if not name and not directory:
+                directory = os.path.dirname(
+                    os.path.abspath(sys.modules[cls.__module__].__file__))
+                module = Module.init_with_directory(
+                    directory=directory, **kwargs)
+            else:
+                module = fluid.dygraph.Layer.__new__(cls)
+
+        return module
+
+    def __init__(self,
+                 name=None,
+                 directory=None,
+                 module_dir=None,
+                 version=None,
+                 **kwargs):
+        # Avoid module being initialized multiple times
+        if "_is_initialize" in self.__dict__ and self._is_initialize:
+            return
+
+        super(Module, self).__init__()
+        _run_func_name = self._get_func_name(self.__class__,
+                                             _module_runnable_func)
+        self._run_func = getattr(self,
+                                 _run_func_name) if _run_func_name else None
+        self._serving_func_name = self._get_func_name(self.__class__,
+                                                      _module_serving_func)
+        self._directory = directory
+        self._initialize(**kwargs)
+        self._is_initialize = True
+        self._code_version = "v2"
+
+    def _get_func_name(self, current_cls, module_func_dict):
+        mod = current_cls.__module__ + "." + current_cls.__name__
+        if mod in module_func_dict:
+            _func_name = module_func_dict[mod]
+            return _func_name
+        elif current_cls.__bases__:
+            for base_class in current_cls.__bases__:
+                return self._get_func_name(base_class, module_func_dict)
+        else:
+            return None
+
+    @classmethod
+    def init_with_name(cls, name, version=None, **kwargs):
+        fp_lock = open(os.path.join(CACHE_HOME, name), "a")
+        lock.flock(fp_lock, lock.LOCK_EX)
+        log_msg = "Installing %s module" % name
+        if version:
+            log_msg += "-%s" % version
+        logger.info(log_msg)
+        extra = {"command": "install"}
+        result, tips, module_dir = default_module_manager.install_module(
+            module_name=name, module_version=version, extra=extra)
+        if not result:
+            logger.error(tips)
+            raise RuntimeError(tips)
+
+        logger.info(tips)
+        lock.flock(fp_lock, lock.LOCK_UN)
+        return cls.init_with_directory(directory=module_dir[0], **kwargs)
+
+    @classmethod
+    def init_with_directory(cls, directory, **kwargs):
+        desc_file = os.path.join(directory, MODULE_DESC_PBNAME)
+        if os.path.exists(desc_file):
+            checker = ModuleChecker(directory)
+            checker.check()
+            return ModuleV1(directory=directory, **kwargs)
+
+        if directory.endswith(os.sep):
+            directory = directory[:-1]
+        basename = os.path.split(directory)[-1]
+        dirname = os.path.join(*list(os.path.split(directory)[:-1]))
+        sys.path.insert(0, dirname)
+        _module = importlib.import_module("{}.module".format(basename))
+        for _item, _cls in inspect.getmembers(_module, inspect.isclass):
+            _item = _module.__dict__[_item]
+            _file = os.path.realpath(sys.modules[_item.__module__].__file__)
+            _module_path = os.path.realpath(
+                os.path.join(directory, "module.py"))
+            if issubclass(_item, Module) and _file.startswith(_module_path):
+                user_module = _item(directory=directory, **kwargs)
+                break
+        sys.path.pop(0)
+        return user_module
+
+    @property
+    def run_func(self):
+        return self._run_func
+
+    @property
+    def directory(self):
+        return self._directory
+
+    @property
+    def author(self):
+        return self.__class__._author
+
+    @property
+    def author_email(self):
+        return self.__class__._author_email
+
+    @property
+    def summary(self):
+        return self.__class__._summary
+
+    @property
+    def type(self):
+        return self.__class__._type
+
+    @property
+    def version(self):
+        return self.__class__._version
+
+    @property
+    def name(self):
+        return self.__class__._name
+
+    @property
+    def code_version(self):
+        return self._code_version
+
+    @property
+    def is_runnable(self):
+        return self._run_func != None
+
+    @property
+    def serving_func_name(self):
+        return self._serving_func_name
+
+    def _initialize(self):
+        pass
+
+    def forward(self, *args, **kwargs):
+        raise RuntimeError('{} does not support dynamic graph mode yet.'.format(
+            self.name))
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
 
 
 class ModuleHelper(object):
@@ -265,7 +482,10 @@ class ModuleV1(Module):
         if not directory:
             return
         super(ModuleV1, self).__init__(name, directory, module_dir, version)
+<<<<<<< HEAD
         self._code_version = "v1"
+=======
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
         self.program = None
         self.assets = []
         self.helper = None
@@ -273,6 +493,30 @@ class ModuleV1(Module):
         self.default_signature = None
         self.processor = None
         self.extra_info = {}
+<<<<<<< HEAD
+=======
+        self._code_version = "v1"
+
+        # parse desc
+        self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
+        self._desc = module_desc_pb2.ModuleDesc()
+        with open(self.module_desc_path, "rb") as file:
+            self._desc.ParseFromString(file.read())
+
+        module_info = self.desc.attr.map.data['module_info']
+        self._name = utils.from_module_attr_to_pyobj(
+            module_info.map.data['name'])
+        self._author = utils.from_module_attr_to_pyobj(
+            module_info.map.data['author'])
+        self._author_email = utils.from_module_attr_to_pyobj(
+            module_info.map.data['author_email'])
+        self._version = utils.from_module_attr_to_pyobj(
+            module_info.map.data['version'])
+        self._type = utils.from_module_attr_to_pyobj(
+            module_info.map.data['type'])
+        self._summary = utils.from_module_attr_to_pyobj(
+            module_info.map.data['summary'])
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
 
         # cache data
         self.last_call_name = None
@@ -295,6 +539,42 @@ class ModuleV1(Module):
         self._generate_extra_info()
         self._restore_parameter(self.program)
         self._recover_variable_info(self.program)
+<<<<<<< HEAD
+=======
+
+    @property
+    def serving_func_name(self):
+        serving_func_name = self.desc.attr.map.data['default_signature'].s
+        return serving_func_name if serving_func_name != "" else None
+
+    @property
+    def desc(self):
+        return self._desc
+
+    @property
+    def author(self):
+        return self._author
+
+    @property
+    def author_email(self):
+        return self._author_email
+
+    @property
+    def summary(self):
+        return self._summary
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def version(self):
+        return self._version
+
+    @property
+    def name(self):
+        return self._name
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
 
     def _dump_processor(self):
         import inspect
@@ -326,7 +606,7 @@ class ModuleV1(Module):
         for asset in self.assets:
             filename = os.path.basename(asset)
             newfile = os.path.join(self.helper.assets_path(), filename)
-            copyfile(asset, newfile)
+            shutil.copyfile(asset, newfile)
 
     def _load_assets(self):
         assets_path = self.helper.assets_path()
@@ -516,9 +796,19 @@ class ModuleV1(Module):
             raise ValueError("This Module is not callable!")
 
     @property
+<<<<<<< HEAD
     def is_runable(self):
         return self.default_signature != None
 
+=======
+    def is_runnable(self):
+        return self.default_signature != None
+
+    @property
+    def code_version(self):
+        return self._code_version
+
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
     def context(self,
                 sign_name=None,
                 for_test=False,
@@ -606,8 +896,6 @@ class ModuleV1(Module):
                     "input_ids", "position_ids", "segment_ids", "input_mask",
                     "task_ids"
                 ]
-                logger.warning("For %s, it's no necessary to feed task_ids now."
-                               % self.name)
             else:
                 feed_list = [
                     "input_ids", "position_ids", "segment_ids", "input_mask"
@@ -630,7 +918,7 @@ class ModuleV1(Module):
         return feed_dict, fetch_dict, program
 
     def get_name_prefix(self):
-        return self.name_prefix
+        return self._name_prefix
 
     def get_var_name_with_prefix(self, var_name):
         return self.get_name_prefix() + var_name

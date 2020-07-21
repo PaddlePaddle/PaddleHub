@@ -23,6 +23,7 @@ import os
 from paddlehub.common import utils
 from paddlehub.module.manager import default_module_manager
 from paddlehub.commands.base_command import BaseCommand, ENTRY
+from paddlehub.common.hub_server import CacheUpdater
 
 
 class InstallCommand(BaseCommand):
@@ -44,7 +45,12 @@ class InstallCommand(BaseCommand):
             self.help()
             return False
         extra = {"command": "install"}
+<<<<<<< HEAD
         if argv[0].endswith("tar.gz") or argv[0].endswith("phm"):
+=======
+
+        if argv[0].endswith("tar.gz"):
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
             result, tips, module_dir = default_module_manager.install_module(
                 module_package=argv[0], extra=extra)
         elif os.path.exists(argv[0]) and os.path.isdir(argv[0]):
@@ -56,11 +62,20 @@ class InstallCommand(BaseCommand):
                 "==")[1]
             module_name = module_name if "==" not in module_name else module_name.split(
                 "==")[0]
+<<<<<<< HEAD
+=======
+            CacheUpdater("hub_install", module_name, module_version).start()
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
             result, tips, module_dir = default_module_manager.install_module(
                 module_name=module_name,
                 module_version=module_version,
                 extra=extra)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
         print(tips)
+
         return True
 
 

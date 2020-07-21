@@ -1,0 +1,11 @@
+name: chinese-roberta-wwm-ext-large
+dir: "modules/text/semantic_model/chinese_roberta_wwm_ext_large"
+exclude:
+  - README.md
+  - test_context.py
+  - test_embedding.py
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/nlp/chinese_roberta_wwm_ext_large/assets.tar.gz
+    dest: assets
+    uncompress: True
