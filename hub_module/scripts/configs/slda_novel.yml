@@ -1,0 +1,9 @@
+name: slda_novel
+dir: "modules/text/semantic_model/slda_novel"
+exclude:
+
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/slda_novel.tar.gz
+    dest: .
+    uncompress: True

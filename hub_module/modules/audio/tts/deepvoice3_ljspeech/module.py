@@ -60,6 +60,7 @@ if not lack_dependency:
     from parakeet.g2p import en
     from parakeet.models.deepvoice3 import Encoder, Decoder, PostNet, SpectraNet
     from parakeet.models.waveflow import WaveFlowModule
+    from parakeet.models.deepvoice3.weight_norm_hook import remove_weight_norm
 else:
     raise ImportError(
         "The module requires additional dependencies: %s. You can install parakeet via 'git clone https://github.com/PaddlePaddle/Parakeet && cd Parakeet && pip install -e .' and others via pip install"
@@ -186,6 +187,12 @@ class DeepVoice3(hub.NLPPredictionModule):
                                         encoder, decoder, postnet)
             io.load_parameters(
                 model=self.tts_model, checkpoint_path=self.tts_checkpoint_path)
+            for name, layer in self.tts_model.named_sublayers():
+                try:
+                    remove_weight_norm(layer)
+                except ValueError:
+                    # this layer has not weight norm hook
+                    pass
 
             self.waveflow = WaveflowVocoder(
                 config_path=self.waveflow_config_path,
