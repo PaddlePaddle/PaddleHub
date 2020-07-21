@@ -154,6 +154,7 @@ gen_task.finetune_and_eval()
 <p align="center">
  <img src="https://d2l.ai/_images/encoder-decoder.svg" width='60%' align="middle"
 </p>
+
 其中Encoder为hub.Module指定的预训练模型，Decoder为通用的Attention LSTM结构，如果您希望进一步增强Decoder性能，可以尝试修改[generation_task组网代码](../../paddlehub/finetune/task/generation_task.py:156)。
 
 #### 自定义迁移任务
