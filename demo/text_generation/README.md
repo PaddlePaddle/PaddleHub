@@ -150,7 +150,11 @@ gen_task.finetune_and_eval()
 **NOTE:**
 1. `outputs["pooled_output"]`返回了Transformer类预训练模型对应的[CLS]向量,可以用于句子或句对的特征表达。这一特征将用于TextGenerationTask Decoder状态初始化。
 2. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达；这一特征将用于TextGenerationTask Decoder解码。
-3. 当前TextGenerationTask中内置的Decoder为通用的Attention LSTM结构，如果您希望进一步增强Decoder性能，可以尝试修改[generation_task](../../paddlehub/finetune/task/generation_task.py:156)。
+3. 当前TextGenerationTask采用如下图所示的seq2seq结构：
+<p align="center">
+ <img src="https://d2l.ai/_images/encoder-decoder.svg" width='60%' align="middle"
+</p>
+其中Encoder为hub.Module指定的预训练模型，Decoder为通用的Attention LSTM结构，如果您希望进一步增强Decoder性能，可以尝试修改[generation_task组网代码](../../paddlehub/finetune/task/generation_task.py:156)。
 
 #### 自定义迁移任务
 
