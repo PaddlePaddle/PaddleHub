@@ -192,6 +192,13 @@ python embedding_pairwise_matching_predict.py --checkpoint_dir $CKPT_DIR --max_s
 
 参数配置正确后，请执行脚本`sh run_embedding_pairwise_matching_predict.sh`，即可看到文本匹配预测结果。
 
+如：
+```shell
+data: ["小品《战狼故事》中，吴京突破重重障碍解救爱人，深情告白太感人;爱人", "外文名:愛人;摘要:爱人，意思是：情人。;义项描述:日本语词汇;语言:日文;中文名:爱人;标签:文化;"], predict_label: 1
+data: ["儿子祝融被杀害，西天王大发雷霆，立即下令捉拿天庭三公主;儿子", "摘要:《儿子》是曹国昌1983年创作的木雕，收藏于中国美术馆。;材质：:木雕;作者：:曹国昌;中文名:儿子;创作年代：:1983年;义项描述:曹国昌木雕;标签:文化;"], predict_label: 1
+```
+data字段表述预测的文本对数据，predict_label为0表示语义不相关，predict_label为1表示语义相关。
+
 我们在AI Studio上提供了IPython NoteBook形式的demo，点击[PaddleHub教程合集](https://aistudio.baidu.com/aistudio/projectdetail/231146)，可使用AI Studio平台提供的GPU算力进行快速尝试。
 
 
