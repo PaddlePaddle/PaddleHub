@@ -44,13 +44,23 @@ setup(
         'paddlehub/serving/templates': [
             'paddlehub/serving/templates/serving_config.json',
             'paddlehub/serving/templates/main.html'
+        ],
+        'paddlehub/command/tmpl': [
+            'paddlehub/command/tmpl/init_py.tmpl',
+            'paddlehub/command/tmpl/serving_demo.tmpl',
+            'paddlehub/command/tmpl/x_model.tmpl'
         ]
     },
     include_package_data=True,
     data_files=[('paddlehub/serving/templates', [
         'paddlehub/serving/templates/serving_config.json',
         'paddlehub/serving/templates/main.html'
-    ])],
+    ]),
+                ('paddlehub/commands/tmpl', [
+                    'paddlehub/commands/tmpl/init_py.tmpl',
+                    'paddlehub/commands/tmpl/serving_demo.tmpl',
+                    'paddlehub/commands/tmpl/x_model.tmpl'
+                ])],
     include_data_files=True,
     # PyPI package information.
     classifiers=[
