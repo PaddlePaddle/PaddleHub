@@ -20,16 +20,6 @@ from ernie_gen_couplet.model.modeling_ernie import _build_linear, _build_ln, app
 
 
 class ErnieModelForGeneration(ErnieModel):
-    resource_map = {
-        'ernie-gen-base-en':
-        ErnieModel.bce + 'model-ernie-gen-base-en.1.tar.gz',
-        'ernie-gen-large-en':
-        ErnieModel.bce + 'model-ernie-gen-large-en.1.tar.gz',
-        'ernie-gen-large-160g-en':
-        ErnieModel.bce + 'model-ernie-gen-large-160g-en.1.tar.gz',
-        'ernie-1.0': ErnieModel.bce + 'model-ernie1.0.1.tar.gz',
-    }
-
     def __init__(self, cfg, name=None):
         cfg['return_additional_info'] = True
         cfg['has_pooler'] = False

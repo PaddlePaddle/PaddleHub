@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import six
 import re
 import logging
@@ -20,7 +19,6 @@ from functools import partial
 
 import numpy as np
 
-from ernie_gen_couplet.model.file_utils import _fetch_from_remote
 import io
 
 open = partial(io.open, encoding='utf8')
@@ -66,42 +64,6 @@ def _wordpiece(token, vocab, unk_token, prefix='##', sentencepiece_prefix=''):
 
 
 class ErnieTokenizer(object):
-    bce = 'https://ernie-github.cdn.bcebos.com/'
-    resource_map = {
-        'ernie-1.0': bce + 'model-ernie1.0.1.tar.gz',
-        'ernie-2.0-en': bce + 'model-ernie2.0-en.1.tar.gz',
-        'ernie-2.0-large-en': bce + 'model-ernie2.0-large-en.1.tar.gz',
-        'ernie-tiny': bce + 'model-ernie_tiny.1.tar.gz',
-        'ernie-gen-base-en': bce + 'model-ernie-gen-base-en.1.tar.gz',
-        'ernie-gen-large-en': bce + 'model-ernie-gen-large-en.1.tar.gz',
-    }
-
-    @classmethod
-    def from_pretrained(cls,
-                        pretrain_dir_or_url,
-                        force_download=False,
-                        **kwargs):
-        if pretrain_dir_or_url in cls.resource_map:
-            url = cls.resource_map[pretrain_dir_or_url]
-            log.info('get pretrain dir from %s' % url)
-            pretrain_dir = _fetch_from_remote(
-                url, force_download=force_download)
-        else:
-            log.info('pretrain dir %s not in %s, read from local' %
-                     (pretrain_dir_or_url, repr(cls.resource_map)))
-            pretrain_dir = pretrain_dir_or_url
-        if not os.path.exists(pretrain_dir):
-            raise ValueError('pretrain dir not found: %s' % pretrain_dir)
-        vocab_path = os.path.join(pretrain_dir, 'vocab.txt')
-        if not os.path.exists(vocab_path):
-            raise ValueError('no vocab file in pretrain dir: %s' % pretrain_dir)
-        vocab_dict = {
-            j.strip().split('\t')[0]: i
-            for i, j in enumerate(open(vocab_path).readlines())
-        }
-        t = cls(vocab_dict, **kwargs)
-        return t
-
     def __init__(self,
                  vocab,
                  unk_token='[UNK]',
@@ -207,62 +169,3 @@ class ErnieTokenizer(object):
 
         ret_id, ret_id_type = self.build_for_ernie(text_id, pair_id)
         return ret_id, ret_id_type
-
-
-class ErnieTinyTokenizer(ErnieTokenizer):
-    bce = 'https://ernie-github.cdn.bcebos.com/'
-    resource_map = {'ernie-tiny': bce + 'model-ernie_tiny.1.tar.gz'}
-
-    @classmethod
-    def from_pretrained(cls,
-                        pretrain_dir_or_url,
-                        force_download=False,
-                        **kwargs):
-        if pretrain_dir_or_url in cls.resource_map:
-            url = cls.resource_map[pretrain_dir_or_url]
-            log.info('get pretrain dir from %s' % url)
-            pretrain_dir = _fetch_from_remote(url, force_download)
-        else:
-            log.info('pretrain dir %s not in %s, read from local' %
-                     (pretrain_dir_or_url, repr(cls.resource_map)))
-            pretrain_dir = pretrain_dir_or_url
-        if not os.path.exists(pretrain_dir):
-            raise ValueError('pretrain dir not found: %s' % pretrain_dir)
-        vocab_path = os.path.join(pretrain_dir, 'vocab.txt')
-        sp_model_path = os.path.join(pretrain_dir,
-                                     'subword/spm_cased_simp_sampled.model')
-
-        if not os.path.exists(vocab_path):
-            raise ValueError('no vocab file in pretrain dir: %s' % pretrain_dir)
-        vocab_dict = {
-            j.strip().split('\t')[0]: i
-            for i, j in enumerate(open(vocab_path).readlines())
-        }
-
-        t = cls(vocab_dict, sp_model_path, **kwargs)
-        return t
-
-    def __init__(self, vocab, sp_model_path, **kwargs):
-        super(ErnieTinyTokenizer, self).__init__(vocab, **kwargs)
-        import sentencepiece as spm
-        self.sp_model = spm.SentencePieceProcessor()
-        self.window_size = 5
-        self.sp_model.Load(sp_model_path)
-        from LAC import LAC
-        self.lac = LAC()
-
-    def cut(self, sentence):
-        return self.lac.lexer(sentence)
-
-    def tokenize(self, text):
-        if len(text) == 0:
-            return []
-        if not isinstance(text, six.string_types):
-            text = text.decode(self.encoding)
-        if self.lower:
-            text = text.lower()
-
-        res = []
-        for match in self.cut(text):
-            res += self.sp_model.EncodeAsPieces(match)
-        return res
