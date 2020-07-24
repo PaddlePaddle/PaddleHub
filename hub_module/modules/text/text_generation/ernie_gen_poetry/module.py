@@ -28,16 +28,16 @@ import numpy as np
 
 import paddle.fluid.dygraph as D
 
-from ernie_gen_couplet.model.tokenizing_ernie import ErnieTokenizer
-from ernie_gen_couplet.model.decode import beam_search_infilling
-from ernie_gen_couplet.model.modeling_ernie_gen import ErnieModelForGeneration
+from ernie_gen_poetry.model.tokenizing_ernie import ErnieTokenizer
+from ernie_gen_poetry.model.decode import beam_search_infilling
+from ernie_gen_poetry.model.modeling_ernie_gen import ErnieModelForGeneration
 
 
 @moduleinfo(
-    name="ernie_gen_couplet",
+    name="ernie_gen_poetry",
     version="1.0.0",
     summary=
-    "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning. This module has fine-tuned for couplet generation task.",
+    "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning. This module has fine-tuned for poetry generation task.",
     author="baidu-nlp",
     author_email="",
     type="nlp/text_generation",
@@ -48,7 +48,7 @@ class ErnieGen(hub.NLPPredictionModule):
         initialize with the necessary elements
         """
         assets_path = os.path.join(self.directory, "assets")
-        gen_checkpoint_path = os.path.join(assets_path, "ernie_gen_couplet")
+        gen_checkpoint_path = os.path.join(assets_path, "ernie_gen_poetry")
         ernie_cfg_path = os.path.join(assets_path, 'ernie_config.json')
         ernie_cfg = dict(json.loads(open(ernie_cfg_path).read()))
         ernie_vocab_path = os.path.join(assets_path, 'vocab.txt')
@@ -72,15 +72,15 @@ class ErnieGen(hub.NLPPredictionModule):
     @serving
     def generate(self, texts, use_gpu=False, beam_width=5):
         """
-        Get the right rolls from the left rolls.
+        Get the continuation of the input poetry.
 
         Args:
-             texts(list): the left rolls.
+             texts(list): the front part of a poetry.
              use_gpu(bool): whether use gpu to predict or not
              beam_width(int): the beam search width.
 
         Returns:
-             results(list): the right rolls.
+             results(list): the poetry continuations.
         """
         if use_gpu and "CUDA_VISIBLE_DEVICES" not in os.environ:
             use_gpu = False
@@ -113,7 +113,7 @@ class ErnieGen(hub.NLPPredictionModule):
                     eos_id=self.tokenizer.sep_id,
                     sos_id=self.tokenizer.cls_id,
                     attn_id=self.tokenizer.vocab['[MASK]'],
-                    max_decode_len=20,
+                    max_decode_len=80,
                     max_encode_len=20,
                     beam_width=beam_width,
                     tgt_type_id=1)
@@ -183,5 +183,5 @@ class ErnieGen(hub.NLPPredictionModule):
 
 if __name__ == "__main__":
     module = ErnieGen()
-    for result in module.generate(['人增福寿年增岁', '风吹云乱天垂泪'], beam_width=5):
+    for result in module.generate(['宝积峰前露术香，使君行旆照晴阳。'], beam_width=5):
         print(result)

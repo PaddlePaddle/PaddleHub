@@ -10,7 +10,7 @@ ERNIE-GEN 是面向生成任务的预训练-微调框架，首次在预训练阶
 ## 命令行预测
 
 ```shell
-$ hub run ernie_gen_couplet --input_text="人增福寿年增岁" --use_gpu True --beam_width 5
+$ hub run ernie_gen_poetry --input_text="宝积峰前露术香，使君行旆照晴阳。" --use_gpu True --beam_width 5
 ```
 
 ## API
@@ -36,9 +36,9 @@ def generate(texts, use_gpu=False, beam_width=5):
 ```python
 import paddlehub as hub
 
-module = hub.Module(name="ernie_gen_couplet")
+module = hub.Module(name="ernie_gen_poetry")
 
-test_texts = ["人增福寿年增岁", "风吹云乱天垂泪"]
+test_texts = ["宝积峰前露术香，使君行旆照晴阳。"]
 results = module.genrate(texts=test_texts, use_gpu=True, beam_width=5)
 for result in results:
     print(result)
@@ -52,7 +52,7 @@ PaddleHub Serving 可以部署在线服务。
 
 运行启动命令：
 ```shell
-$ hub serving start -m ernie_gen_couplet -p 8866
+$ hub serving start -m ernie_gen_poetry -p 8866
 ```
 
 这样就完成了一个服务化API的部署，默认端口号为8866。
@@ -69,10 +69,10 @@ import json
 
 # 发送HTTP请求
 
-data = {'texts':["人增福寿年增岁", "风吹云乱天垂泪"],
+data = {'texts':["宝积峰前露术香，使君行旆照晴阳。"],
         'use_gpu':False, 'beam_width':5}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/ernie_gen_couplet"
+url = "http://127.0.0.1:8866/predict/ernie_gen_poetry"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
 # 保存结果
