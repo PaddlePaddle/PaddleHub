@@ -25,7 +25,7 @@ def generate(texts, use_gpu=False, beam_width=5):
 
 * texts (list\[str\]): 上联文本；
 * use\_gpu (bool): 是否使用 GPU；**若使用GPU，请先设置CUDA\_VISIBLE\_DEVICES环境变量**；
-* beam_width: beam search宽度，决定一个上联输出的下联数量。
+* beam_width: beam search宽度，决定每个上联输出的下联数量。
 
 **返回**
 
