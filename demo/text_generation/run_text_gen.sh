@@ -9,4 +9,5 @@ python -u text_gen.py \
                    --max_seq_len 50 \
                    --learning_rate 5e-3 \
                    --cut_fraction 0.1 \
-                   --use_data_parallel True
+                   --use_data_parallel True \
+                   --use_gpu True
