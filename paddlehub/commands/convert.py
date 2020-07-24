@@ -1,5 +1,5 @@
 #coding:utf-8
-# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import argparse
 import os
 import time
 import tarfile
 import shutil
-from paddlehub.commands.base_command import BaseCommand, ENTRY
 from string import Template
+
+from paddlehub.common import tmp_dir
+from paddlehub.commands.base_command import BaseCommand, ENTRY
+
 INIT_FILE = '__init__.py'
 MODULE_FILE = 'module.py'
 SERVING_FILE = 'serving_client_demo.py'
@@ -41,7 +40,7 @@ class ConvertCommand(BaseCommand):
             usage='%(prog)s',
             add_help=True)
         self.parser.add_argument('command')
-        self.parser.add_argument('--module_name', '-m')
+        self.parser.add_argument('--module_name', '-n')
         self.parser.add_argument(
             '--module_version', '-v', nargs='?', default='1.0.0')
         self.parser.add_argument('--model_dir', '-d')
@@ -58,6 +57,7 @@ class ConvertCommand(BaseCommand):
                     fullpath = os.path.join(root, file)
                     arcname = os.path.join(self.module, 'assets', file)
                     tfp.add(fullpath, arcname=arcname)
+
             tfp.add(
                 self.model_file, arcname=os.path.join(self.module, MODULE_FILE))
             tfp.add(
@@ -79,7 +79,8 @@ class ConvertCommand(BaseCommand):
                 SUMMARY="''",
                 VERSION="'{}'".format(self.version),
                 EMAIL="''"))
-        self.model_file = os.path.join(self.dest, MODULE_FILE)
+        # self.model_file = os.path.join(self.dest, MODULE_FILE)
+        self.model_file = os.path.join(self._tmp_dir, MODULE_FILE)
         if os.path.exists(self.model_file):
             raise RuntimeError(
                 'File `{MODULE_FILE}` is already exists in src dir.'.format(
@@ -89,7 +90,8 @@ class ConvertCommand(BaseCommand):
             fp.writelines(lines)
 
     def create_init_py(self):
-        self.init_file = os.path.join(self.dest, INIT_FILE)
+        # self.init_file = os.path.join(self.dest, INIT_FILE)
+        self.init_file = os.path.join(self._tmp_dir, INIT_FILE)
         if os.path.exists(self.init_file):
             return
         shutil.copyfile('./tmpl/init_py.tmpl', self.init_file)
@@ -100,7 +102,8 @@ class ConvertCommand(BaseCommand):
         lines = []
 
         lines.append(tmpl.substitute(MODULE_NAME=self.module))
-        self.serving_file = os.path.join(self.dest, SERVING_FILE)
+        # self.serving_file = os.path.join(self.dest, SERVING_FILE)
+        self.serving_file = os.path.join(self._tmp_dir, SERVING_FILE)
         if os.path.exists(self.serving_file):
             raise RuntimeError(
                 'File `{}` is already exists in src dir.'.format(SERVING_FILE))
@@ -124,11 +127,6 @@ class ConvertCommand(BaseCommand):
 
         return
 
-    def clear_temp(self):
-        os.remove(self.model_file)
-        os.remove(self.init_file)
-        os.remove(self.serving_file)
-
     def execute(self, argv):
         args = self.parser.parse_args()
 
@@ -143,12 +141,12 @@ class ConvertCommand(BaseCommand):
 
         os.makedirs(self.dest)
 
-        self.create_module_py()
-        self.create_init_py()
-        self.create_serving_demo_py()
-        self.create_module_tar()
-
-        self.clear_temp()
+        with tmp_dir() as _dir:
+            self._tmp_dir = _dir
+            self.create_module_py()
+            self.create_init_py()
+            self.create_serving_demo_py()
+            self.create_module_tar()
 
         print('The converted module is stored in `{}`.'.format(self.dest))
 
@@ -163,12 +161,12 @@ class ConvertCommand(BaseCommand):
 
         os.makedirs(self.dest)
 
-        self.create_module_py()
-        self.create_init_py()
-        self.create_serving_demo_py()
-        self.create_module_tar()
-
-        self.clear_temp()
+        with tmp_dir() as _dir:
+            self._tmp_dir = _dir
+            self.create_module_py()
+            self.create_init_py()
+            self.create_serving_demo_py()
+            self.create_module_tar()
 
         return True
 
