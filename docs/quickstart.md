@@ -2,6 +2,10 @@
 
 安装PaddleHub成功后，执行命令[hub run](tutorial/cmdintro.md)，可以快速体验PaddleHub无需代码、一键预测的命令行功能，如下几个示例：
 
+
+## 视觉领域场景体验
+
+
 * 使用[文字识别](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=TextRecognition)轻量级中文OCR模型chinese_ocr_db_crnn_mobile即可一键快速识别图片中的文字。
 ```shell
 $ wget https://paddlehub.bj.bcebos.com/model/image/ocr/test_ocr.jpg
@@ -10,9 +14,38 @@ $ hub run chinese_ocr_db_crnn_mobile --input_path test_ocr.jpg --visualization=T
 
 预测结果图片保存在当前运行路径下ocr_result文件夹中，如下图所示。
 
-<p align="center">
- <img src="imgs/ocr_res.jpg" width='70%' align="middle"  
+![](./imgs/ocr_res.jpg)
+
+
+* 使用[目标检测](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ObjectDetection)模型Ultra-Light-Fast-Generic-Face-Detector-1MB对图片进行人脸识别
+```shell
+$ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
+$ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image.jpg
+```
+![](./imgs/face_detection_result.jpeg)
+
+* 使用[目标检测](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ObjectDetection)模型pyramidbox_lite_mobile_mask对图片进行口罩检测
+```shell
+$ wget https://paddlehub.bj.bcebos.com/resources/test_mask_detection.jpg
+$ hub run pyramidbox_lite_mobile_mask --input_path test_mask_detection.jpg
+```
+![](./imgs/test_mask_detection_result.jpg)
+
+* 使用[图像分割](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ImageSegmentation)模型进行人像扣图和人体部件识别
+
+```shell
+$ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
+$ hub run ace2p --input_path test_image.jpg
+$ hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg
+```
+![](./imgs/img_seg_result.jpeg) ![](./imgs/humanseg_test_res.png)
+
+<p align='center'>
+ &#8194;&#8194;&#8194&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;ACE2P人体部件分割&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;
+ HumanSeg人像分割&#8194;&#8194;&#8194;
 </p>
+
+## NLP领域场景体验
 
 * 使用[词法分析](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=LexicalAnalysis)模型LAC进行分词
 ```shell
@@ -28,34 +61,5 @@ $ hub run lac --input_text "现在，慕尼黑再保险公司不仅是此类行�
 $ hub run senta_bilstm --input_text "今天天气真好"
 {'text': '今天天气真好', 'sentiment_label': 1, 'sentiment_key': 'positive', 'positive_probs': 0.9798, 'negative_probs': 0.0202}]
 ```
-
-* 使用[目标检测](http://www.paddlepaddle.org.cn/hub?filter=category&value=ObjectDetection)模型Ultra-Light-Fast-Generic-Face-Detector-1MB对图片进行人脸识别
-```shell
-$ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
-$ hub run ultra_light_fast_generic_face_detector_1mb_640 --input_path test_image.jpg
-```
-<p align="center">
- <img src="imgs/face_detection_result.jpeg" align="middle"  
-</p>
-
-
-* 使用[图像分割](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ImageSegmentation)模型进行人像扣图和人体部件识别
-
-```shell
-$ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
-$ hub run ace2p --input_path test_image.jpg
-$ hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg
-```
-
-<p align="center">  
-<img src="imgs/img_seg_result.jpeg" width="35%" />  
-<img src="imgs/humanseg_test_res.png" width="35%" />  
-</p>  
-
-<p align='center'>
- &#8194;&#8194;&#8194&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;ACE2P人体部件分割&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;&#8194;
- HumanSeg人像分割&#8194;&#8194;&#8194;
-</p>
-
 
 除了上述几类模型外，PaddleHub还发布了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 [PaddleHub官网](https://www.paddlepaddle.org.cn/hub) 查看

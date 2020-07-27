@@ -186,6 +186,13 @@ python embedding_pointwise_matching_predict.py --checkpoint_dir $CKPT_DIR --max_
 
 参数配置正确后，请执行脚本`sh run_embedding_pointwise_matching_predict.sh`，即可看到文本匹配预测结果。
 
+如：
+```shell
+data: ["请问不是您的账户吗？", "您好，请问您使用的邮箱类型是？"], predict_label: 0
+data: ["推荐个手机游戏", "手机游戏推荐"], predict_label: 1
+```
+data字段表述预测的文本对数据，predict_label为0表示语义不相关，predict_label为1表示语义相关。
+
 我们在AI Studio上提供了IPython NoteBook形式的demo，点击[PaddleHub教程合集](https://aistudio.baidu.com/aistudio/projectdetail/231146)，可使用AI Studio平台提供的GPU算力进行快速尝试。
 
 
