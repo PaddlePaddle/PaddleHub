@@ -108,4 +108,4 @@ if __name__ == '__main__':
         return_result=True,
         accelerate_mode=True)
     for index, text in enumerate(text_pairs):
-        print("data: %s, preidction_label: %s" % (text, results[index]))
+        print("data: %s, prediction_label: %s" % (text, results[index]))
