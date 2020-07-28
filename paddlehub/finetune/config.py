@@ -47,7 +47,12 @@ class RunConfig(object):
         self._checkpoint_dir = checkpoint_dir
         self._num_epoch = num_epoch
         self._batch_size = batch_size
-        self._use_pyreader = use_pyreader
+        if not use_pyreader:
+            logger.warning(
+                "The parameter use_pyreader has been dropped! PaddleHub over v1.8.0 will use pyreader by default."
+            )
+        self._use_pyreader = True
+
         self._use_data_parallel = use_data_parallel
         if strategy is None:
             self._strategy = DefaultStrategy()

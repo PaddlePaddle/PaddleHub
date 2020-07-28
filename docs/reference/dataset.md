@@ -346,6 +346,25 @@ dataset = hub.dataset.THUCNEWS()
 
 每个字段以“\_!\_”键分隔，第1列表示类别ID，第2列表示类别，第3列表示文本数据。
 
+### Class `hub.dataset.Couplet`
+
+Couplet是一个开源对联数据集，来源于https://github.com/v-zich/couplet-clean-dataset。该数据集包含74万条对联数据，已利用敏感词词库过滤、删除了低俗或敏感内容。
+
+**示例**
+
+```python
+import paddlehub as hub
+
+dataset = hub.dataset.Couplet()
+```
+数据集样例：
+
+```text
+亲情似日堪融雪	孝意如春可著花
+```
+
+上下联中每个字以不可见字符“\002”分隔，上下联之间以tab键分隔。
+
 ### Class `hub.dataset.DogCatDataset`
 
 DOGCAT是由Kaggle提供的数据集，用于图像二分类，其目标是判断一张图片是猫或是狗。

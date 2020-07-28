@@ -30,6 +30,8 @@
 ### Step1: 加载预训练模型
 
 ```python
+import paddlehub as hub
+
 module = hub.Module(name="ernie_v2_eng_base")
 inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
 ```
@@ -62,30 +64,44 @@ RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L
 module = hub.Module(name="bert_cased_L-12_H-768_A-12")
 ```
 
-### Step2: 准备数据集并使用RegressionReader读取数据
+### Step2: 准备数据集并使用tokenizer预处理数据
 ```python
-dataset = hub.dataset.GLUE("STS-B")
-reader = hub.reader.RegressionReader(
-    dataset=dataset,
-    vocab_path=module.get_vocab_path(),
-    max_seq_len=args.max_seq_len)
+tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+dataset = hub.dataset.GLUE(
+    "STS-B", tokenizer=tokenizer, max_seq_len=128)
 ```
+如果是使用ernie_tiny预训练模型，请使用ErnieTinyTokenizer。
+```
+tokenizer = hub.ErnieTinyTokenizer(
+    vocab_file=module.get_vocab_path(),
+    spm_path=module.get_spm_path(),
+    word_dict_path=module.get_word_dict_path())
+```
+ErnieTinyTokenizer和BertTokenizer的区别在于它将按词粒度进行切分，详情请参考[文章](https://www.jiqizhixin.com/articles/2019-11-06-9)。
 
-其中数据集的准备代码可以参考[glue.py](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.2/paddlehub/dataset/glue.py)。
+数据集的准备代码可以参考[glue.py](../../paddlehub/dataset/glue.py)。
 
 `hub.dataset.GLUE("STS-B")` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录；
 
 `module.get_vocab_path()` 会返回预训练模型对应的词表；
 
+`module.sp_model_path` 若module为ernie_tiny则返回对应的子词切分模型路径，否则返回None；
+
+`module.word_dict_path` 若module为ernie_tiny则返回对应的词语切分模型路径，否则返回None；
+
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致；
 
-RegressionReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回ERNIE/BERT所需要的Tensor格式，包括`input_ids`，`position_ids`，`segment_id`与序列对应的mask `input_mask`；
-
-**NOTE**: Reader返回tensor的顺序是固定的，默认按照input_ids, position_ids, segment_id, input_mask这一顺序返回。
+dataset将调用传入的tokenizer提供的encode接口对全量数据进行预处理，您可以通过以下方式观察数据的处理流程：
+```
+single_result = tokenizer.encode(text="hello", text_pair="world", max_seq_len=10) # BertTokenizer
+# {'input_ids': [3, 1, 5, 39825, 5, 0, 0, 0, 0, 0], 'segment_ids': [0, 0, 0, 1, 1, 0, 0, 0, 0, 0], 'seq_len': 5, 'input_mask': [1, 1, 1, 1, 1, 0, 0, 0, 0, 0], 'position_ids': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
+dataset_result = dataset.get_dev_records() # set dataset max_seq_len = 10
+# {'input_ids': [101, 1037, 2158, 2007, 1037, 102, 1037, 2158, 4147, 102], 'segment_ids': [0, 0, 0, 0, 0, 0, 1, 1, 1, 1], 'seq_len': 10, 'input_mask': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 'position_ids': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 'label': 5.0}
+```
 
 #### 自定义数据集
 
-如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)。
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](../../docs/tutorial/how_to_load_data.md)。
 
 ### Step3：选择优化策略和运行配置
 
@@ -102,7 +118,7 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 
 #### 优化策略
 
-PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)。
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](../../docs/reference/strategy.md)。
 
 针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`：
 
@@ -128,29 +144,17 @@ PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStr
 ```python
 pooled_output = outputs["pooled_output"]
 
-# feed_list的Tensor顺序不可以调整
-feed_list = [
-    inputs["input_ids"].name,
-    inputs["position_ids"].name,
-    inputs["segment_ids"].name,
-    inputs["input_mask"].name,
-]
-
 reg_task = hub.RegressionTask(
-    data_reader=reader,
-    feature=pooled_output,
-    feed_list=feed_list,
-    config=config)
+    dataset=dataset, feature=pooled_output, config=config)
 
 reg_task.finetune_and_eval()
 ```
 **NOTE:**
 1. `outputs["pooled_output"]`返回了ERNIE/BERT模型对应的[CLS]向量,可以用于句子或句对的特征表达。
-2. `feed_list`中的inputs参数指名了BERT中的输入tensor的顺序，与RegressionReader返回的结果一致。
 
 #### 自定义迁移任务
 
-如果想改变迁移任务组网，详细参见[自定义迁移任务](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub:-%E8%87%AA%E5%AE%9A%E4%B9%89Task)。
+如果想改变迁移任务组网，详细参见[自定义迁移任务](../../docs/tutorial/how_to_define_task.md)。
 
 ## 可视化
 

@@ -85,11 +85,11 @@ reader = hub.reader.LACClassifyReader(
 
 LACClassifyReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回Senta所需要的word id；
 
-更多数据集信息参考[Dataset](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Dataset)；
+更多数据集信息参考[Dataset](../../docs/reference/dataset.md)；
 
 #### 自定义数据集
 
-如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)。
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](../../docs/tutorial/how_to_load_data.md)。
 
 ### Step3：选择优化策略和运行配置
 
@@ -106,7 +106,7 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 
 #### 优化策略
 
-PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-Strategy)。
+PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](../../docs/reference/strategy.md)。
 
 其中`AdamWeightDecayStrategy`：
 
