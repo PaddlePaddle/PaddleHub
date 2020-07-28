@@ -25,6 +25,7 @@ from paddlehub.commands.base_command import BaseCommand, ENTRY
 INIT_FILE = '__init__.py'
 MODULE_FILE = 'module.py'
 SERVING_FILE = 'serving_client_demo.py'
+TMPL_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'tmpl')
 
 
 class ConvertCommand(BaseCommand):
@@ -67,7 +68,7 @@ class ConvertCommand(BaseCommand):
                 self.init_file, arcname=os.path.join(self.module, INIT_FILE))
 
     def create_module_py(self):
-        template_file = open('./tmpl/x_model.tmpl', 'r')
+        template_file = open(os.path.join(TMPL_DIR, 'x_model.tmpl'), 'r')
         tmpl = Template(template_file.read())
         lines = []
 
@@ -94,10 +95,10 @@ class ConvertCommand(BaseCommand):
         self.init_file = os.path.join(self._tmp_dir, INIT_FILE)
         if os.path.exists(self.init_file):
             return
-        shutil.copyfile('./tmpl/init_py.tmpl', self.init_file)
+        shutil.copyfile(os.path.join(TMPL_DIR, 'init_py.tmpl'), self.init_file)
 
     def create_serving_demo_py(self):
-        template_file = open('./tmpl/serving_demo.tmpl', 'r')
+        template_file = open(os.path.join(TMPL_DIR, 'serving_demo.tmpl'), 'r')
         tmpl = Template(template_file.read())
         lines = []
 

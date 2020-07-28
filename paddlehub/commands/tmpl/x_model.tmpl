@@ -20,8 +20,9 @@ def base64_to_cv2(b64str):
 
 
 def cv2_to_base64(image):
-    data = cv2.imencode('.jpg', image)[1]
-    return base64.b64encode(data.tostring()).decode('utf8')
+    return image.tolist()
+    # data = cv2.imencode('.jpg', image)[1]
+    # return base64.b64encode(data.tostring()).decode('utf8')
 
 
 def read_images(paths):
@@ -84,11 +85,16 @@ class MODULE(hub.Module):
                 for key, value in result.items():
                     if isinstance(value, np.ndarray):
                         result[key] = cv2_to_base64(value)
+                    elif isinstance(value, np.generic):
+                        result[key] = np.asscalar(value)
+
             elif isinstance(result, list):
                 for index in range(len(result)):
                     for key, value in result[index].items():
                         if isinstance(value, np.ndarray):
                             result[index][key] = cv2_to_base64(value)
+                        elif isinstance(value, np.generic):
+                            result[index][key] = np.asscalar(value)
             else:
                 raise RuntimeError('The result cannot be used in serving.')
             res.append(result)
