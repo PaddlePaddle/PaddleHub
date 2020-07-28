@@ -15,8 +15,8 @@
 import paddle.fluid as F
 import paddle.fluid.layers as L
 
-from ernie_gen_couplet.model.modeling_ernie import ErnieModel
-from ernie_gen_couplet.model.modeling_ernie import _build_linear, _build_ln, append_name
+from ernie_gen_poetry.model.modeling_ernie import ErnieModel
+from ernie_gen_poetry.model.modeling_ernie import _build_linear, _build_ln, append_name
 
 
 class ErnieModelForGeneration(ErnieModel):

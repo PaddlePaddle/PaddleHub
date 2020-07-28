@@ -10,7 +10,7 @@ ERNIE-GEN 是面向生成任务的预训练-微调框架，首次在预训练阶
 ## 命令行预测
 
 ```shell
-$ hub run ernie_gen_poetry --input_text="宝积峰前露术香，使君行旆照晴阳。" --use_gpu True --beam_width 5
+$ hub run ernie_gen_poetry --input_text="昔年旅南服，始识王荆州。" --use_gpu True --beam_width 5
 ```
 
 ## API
@@ -38,7 +38,7 @@ import paddlehub as hub
 
 module = hub.Module(name="ernie_gen_poetry")
 
-test_texts = ["宝积峰前露术香，使君行旆照晴阳。"]
+test_texts = ['昔年旅南服，始识王荆州。', '高名出汉阴，禅阁跨香岑。']
 results = module.genrate(texts=test_texts, use_gpu=True, beam_width=5)
 for result in results:
     print(result)
@@ -69,7 +69,7 @@ import json
 
 # 发送HTTP请求
 
-data = {'texts':["宝积峰前露术香，使君行旆照晴阳。"],
+data = {'texts':['昔年旅南服，始识王荆州。', '高名出汉阴，禅阁跨香岑。'],
         'use_gpu':False, 'beam_width':5}
 headers = {"Content-type": "application/json"}
 url = "http://127.0.0.1:8866/predict/ernie_gen_poetry"
