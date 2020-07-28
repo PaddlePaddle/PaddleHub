@@ -1,3 +1,8 @@
+## 模型概述
+```
+HumanSeg-mobile是基于HRNet(Deep High-Resolution Representation Learning for Visual Recognition)的人像分割网络。HRNet在特征提取过程中保持了高分辨率的信息，保持了物体的细节信息，并可通过控制每个分支的通道数调整模型的大小。HumanSeg-mobile采用了HRNet_w18_small_v1的网络结构，模型大小只有5.8M， 适用于移动端或服务端CPU的前置摄像头场景。
+```
+
 ## 命令行预测
 **cpu运行命令**
 ```
