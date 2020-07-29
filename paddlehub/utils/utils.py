@@ -15,6 +15,7 @@
 
 import contextlib
 import os
+import sys
 import requests
 import tempfile
 from typing import Generator
@@ -22,7 +23,7 @@ from urllib.parse import urlparse
 
 import packaging.version
 
-import paddlehub as hub
+import paddlehub.env as hubenv
 
 
 class Version(packaging.version.Version):
@@ -75,7 +76,7 @@ class Version(packaging.version.Version):
 @contextlib.contextmanager
 def generate_tempfile(directory: str = None):
     '''Generate a temporary file'''
-    directory = hub.env.TMP_HOME if not directory else directory
+    directory = hubenv.TMP_HOME if not directory else directory
     with tempfile.NamedTemporaryFile(dir=directory) as file:
         yield file
 
@@ -83,7 +84,7 @@ def generate_tempfile(directory: str = None):
 @contextlib.contextmanager
 def generate_tempdir(directory: str = None):
     '''Generate a temporary directory'''
-    directory = hub.env.TMP_HOME if not directory else directory
+    directory = hubenv.TMP_HOME if not directory else directory
     with tempfile.TemporaryDirectory(dir=directory) as _dir:
         yield _dir
 

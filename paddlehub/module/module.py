@@ -80,7 +80,7 @@ class Module(object):
         _run_func_name = self._get_func_name(self.__class__, _module_runnable_func)
         self._run_func = getattr(self, _run_func_name) if _run_func_name else None
         self._serving_func_name = self._get_func_name(self.__class__, _module_serving_func)
-        self._directory = directory
+        self.directory = directory
         self._initialize(**kwargs)
         self._is_initialize = True
 
@@ -121,16 +121,28 @@ class Module(object):
     def init_with_name(cls, name: str, version: str = None, **kwargs):
         from paddlehub.module.manager import LocalModuleManager
         manager = LocalModuleManager()
-        user_module_cls = manager.search(name)
+        search_result = manager.search(name)
+        user_module_cls = search_result.get('module', None)
+        directory = search_result.get('directory', None)
         if not user_module_cls or not user_module_cls.version.match(version):
             user_module_cls = manager.install(name, version)
 
-        return user_module_cls(name=name, version=version, **kwargs)
+        return user_module_cls(name=name, directory=directory, version=version, **kwargs)
 
     @classmethod
     def init_with_directory(cls, directory: str, **kwargs):
         user_module_cls = cls.load(directory)
         return user_module_cls(directory, **kwargs)
+
+    @classmethod
+    def get_py_requirements(cls):
+        py_module = sys.modules[cls.__module__]
+        directory = os.path.dirname(py_module.__file__)
+        req_file = os.path.join(directory, 'requirements.txt')
+        if not os.path.exists(req_file):
+            return []
+        with open(req_file, 'r') as file:
+            return file.read()
 
     @property
     def is_runnable(self) -> bool:
@@ -140,6 +152,9 @@ class Module(object):
         ...
 
 
+sys_type = type
+
+
 def moduleinfo(name: str,
                version: str,
                author: str = None,
@@ -147,14 +162,23 @@ def moduleinfo(name: str,
                summary: str = None,
                type: str = None):
     def _wrapper(cls):
+        wrap_cls = cls
         if not issubclass(cls, Module):
-            raise RuntimeError()
-        cls.name = name
-        cls.version = utils.Version(version)
-        cls.author = author
-        cls.author_email = author_email
-        cls.summary = summary
-        cls.type = type
-        return cls
+            _bases = []
+            for _b in cls.__bases__:
+                if issubclass(Module, _b):
+                    continue
+                _bases.append(_b)
+            _bases.append(Module)
+            _bases = tuple(_bases)
+            wrap_cls = sys_type(cls.__name__, _bases, {})
+
+        wrap_cls.name = name
+        wrap_cls.version = utils.Version(version)
+        wrap_cls.author = author
+        wrap_cls.author_email = author_email
+        wrap_cls.summary = summary
+        wrap_cls.type = type
+        return wrap_cls
 
     return _wrapper

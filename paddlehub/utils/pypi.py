@@ -20,60 +20,42 @@ import sys
 from pip._internal.utils.misc import get_installed_distributions
 from typing import List, Tuple
 
-from paddlehub.utils.common import Version, generate_tempfile
+from paddlehub.utils.utils import Version
+from paddlehub.utils.io import discard_oe, confirm
 
 
-class PipTool(object):
+def get_installed_packages() -> dict:
+    '''Get all packages installed in current python environment'''
+    return {item.key: Version(item.version) for item in get_installed_distributions()}
+
+
+def check(package: str, version: str = '') -> bool:
     '''
+    Check whether the locally installed python package meets the conditions. If the package is not installed
+    locally or the version number does not meet the conditions, return False, otherwise return True.
     '''
+    pdict = get_installed_packages()
+    if not package in pdict:
+        return False
+    if not version:
+        return True
+    return pdict[package].match(version)
 
-    def get_installed_packages(self) -> List[Tuple[str, str]]:
-        '''
-        '''
-        return {item.key: item.version for item in get_installed_distributions()}
 
-    def check(self, package: str, version: str = '') -> bool:
-        '''
-        '''
-        pdict = self.get_installed_packages()
-        if not package in pdict:
-            return False
-        if not version:
-            return True
-        return Version(pdict[package]).check(version)
+def install(package: str, version: str = '', upgrade=False) -> bool:
+    '''Install the python package.'''
+    with discard_oe():
+        cmds = ['install', '{}{}'.format(package, version)]
+        if upgrade:
+            cmds.append('--upgrade')
+        result = pip.main(cmds)
+    return result == 0
 
-    def install(self, package: str, version: str = '', upgrade=False) -> int:
-        '''
-        '''
-        with generate_tempfile() as file:
-            _o = sys.stdout
-            _e = sys.stderr
-            sys.stdout = sys.stderr = file
-            cmds = ['install', '{}{}'.format(package, version)]
-            if upgrade:
-                cmds.append('--upgrade')
-            result = pip.main(cmds)
-            sys.stdout = _o
-            sys.stderr = _e
-        return result
 
-    def uninstall(self, package: str) -> int:
-        '''
-        '''
-        with generate_tempfile() as file:
-            _o = sys.stdout
-            _e = sys.stderr
-            sys.stdout = sys.stderr = file
+def uninstall(package: str) -> bool:
+    '''Uninstall the python package.'''
+    with discard_oe():
+        with confirm('y'):
             cmds = ['uninstall', '{}'.format(package)]
-
-            # typein y to confirm
-            with generate_tempfile() as _input:
-                _input.write('y\n')
-                _i = sys.stdin
-                sys.stdin = _input
-                result = pip.main(cmds)
-                sys.stdin = _i
-
-            sys.stdout = _o
-            sys.stderr = _e
-        return result
+            result = pip.main(cmds)
+    return result == 0

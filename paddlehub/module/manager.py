@@ -20,7 +20,7 @@ from collections import OrderedDict
 from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import Module as HubModule
 from paddlehub.server import module_server
-from paddlehub.utils import xarfile, log, utils
+from paddlehub.utils import xarfile, log, utils, pypi
 
 
 class HubModuleNotFoundError(Exception):
@@ -194,6 +194,14 @@ class LocalModuleManager(object):
 
         shutil.copytree(directory, os.path.join(self.home, hub_module_cls.name))
         self._local_modules[hub_module_cls.name] = hub_module_cls
+
+        for py_req in hub_module_cls.get_py_requirments():
+            log.logger.info('Installing dependent packages: {}'.format(py_req))
+            result = pypi.install(py_req)
+            if result:
+                log.logger.info('Successfully installed {}'.format(py_req))
+            else:
+                log.logger.info('Some errors occurred while installing {}'.format(py_req))
 
         log.logger.info('Successfully installed {}-{}'.format(hub_module_cls.name, hub_module_cls.version))
         return hub_module_cls

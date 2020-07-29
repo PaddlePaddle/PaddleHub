@@ -15,8 +15,14 @@
 
 
 class Trainer(object):
-    def __init__(self):
+    def __init__(self, model):
         pass
 
-    def train(self, dataset):
+    def train(self, epochs, train_dataset):
+        pass
+
+    def train_and_evaluate(self, epochs, train_dataset, eval_dataset):
+        pass
+
+    def evaluate(self, eval_dataset):
         pass
