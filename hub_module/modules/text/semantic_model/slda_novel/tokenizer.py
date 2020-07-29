@@ -111,7 +111,7 @@ class LACTokenizer(Tokenizer):
 
     def tokenize(self, text):
         results = self.__lac.lexical_analysis(
-            texts=[text], use_gpu=True, batch_size=1, return_tag=True)
+            texts=[text], use_gpu=False, batch_size=1, return_tag=True)
         # Change English words to lower case.
         # And just preserve the word in vocab.
         words = results[0]["word"]
