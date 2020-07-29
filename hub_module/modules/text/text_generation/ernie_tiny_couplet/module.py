@@ -77,7 +77,7 @@ class ErnieTinyCouplet(hub.NLPPredictionModule):
             tokenizer.encode(text=text, max_seq_len=128)
             for text in formatted_text_a
         ]
-        results = self.gen_task.generate(
+        results = self.gen_task.predict(
             data=encoded_data,
             label_list=self.label_list,
             accelerate_mode=False)

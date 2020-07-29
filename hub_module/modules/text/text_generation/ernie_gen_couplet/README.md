@@ -1,8 +1,8 @@
 ## 概述
 
-ERNIE-GEN 是面向生成任务的预训练-微调框架，首次在预训练阶段加入span-by-span 生成任务，让模型每次能够生成一个语义完整的片段。在预训练和微调中通过填充式生成机制和噪声感知机制来缓解曝光偏差问题。此外, ERNIE-GEN 采样多片段-多粒度目标文本采样策略, 增强源文本和目标文本的关联性，加强了编码器和解码器的交互。
+ERNIE-GEN 是面向生成任务的预训练-微调框架，首次在预训练阶段加入span-by-span 生成任务，让模型每次能够生成一个语义完整的片段。在预训练和微调中通过填充式生成机制和噪声感知机制来缓解曝光偏差问题。此外, ERNIE-GEN 采样多片段-多粒度目标文本采样策略, 增强源文本和目标文本的关联性，加强了编码器和解码器的交互。ernie_gen_couplet采用开源对联数据集进行微调，可用于生成下联。
 <p align="center">
-<img src="https://github.com/PaddlePaddle/ERNIE/blob/repro/ernie-gen/.meta/multi-flow-attention.png" hspace='10'/> <br />
+<img src="https://paddlehub.bj.bcebos.com/resources/multi-flow-attention.png" hspace='10'/> <br />
 </p>
 
 更多详情参考论文[ERNIE-GEN:An Enhanced Multi-Flow Pre-training and Fine-tuning Framework for Natural Language Generation](https://arxiv.org/abs/2001.11314)
@@ -25,11 +25,11 @@ def generate(texts, use_gpu=False, beam_width=5):
 
 * texts (list\[str\]): 上联文本；
 * use\_gpu (bool): 是否使用 GPU；**若使用GPU，请先设置CUDA\_VISIBLE\_DEVICES环境变量**；
-* beam_width: beam search宽度，决定每个上联输出的下联数量。
+* beam\_width: beam search宽度，决定每个上联输出的下联数量。
 
 **返回**
 
-* results (list[list][str]): 下联文本，每个上联会生成beam_width个下联。
+* results (list\[list\]\[str\]): 下联文本，每个上联会生成beam_width个下联。
 
 **代码示例**
 
@@ -39,7 +39,7 @@ import paddlehub as hub
 module = hub.Module(name="ernie_gen_couplet")
 
 test_texts = ["人增福寿年增岁", "风吹云乱天垂泪"]
-results = module.genrate(texts=test_texts, use_gpu=True, beam_width=5)
+results = module.generate(texts=test_texts, use_gpu=True, beam_width=5)
 for result in results:
     print(result)
 ```

@@ -175,13 +175,6 @@ class ErnieGen(hub.NLPPredictionModule):
 
         return results
 
-    @serving
-    def serving_method(self, texts, use_gpu=False):
-        """
-        Run as a service.
-        """
-        return self.generate(texts, use_gpu)
-
 
 if __name__ == "__main__":
     module = ErnieGen()
