@@ -1,30 +1,10 @@
 # PaddleHub更多体验Demos
 
-## CV
+## PaddleHub官方Demo全集
 
-1. [图像分类任务--水果分拣实战](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-1. [目标检测任务--人脸检测实战](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-1. [AI人像抠图及图像合成](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-1. [人像美颜](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-1. [一键动物识别](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-
-## 视频
-
-1. [AI川剧变脸](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-1. [头部姿态估计](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-
-## NLP
-
-1. [词法分析LAC --词云统计实战](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-1. [文本分类任务-- 新闻分类实战](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-1. [信息抽取任务--快递单解析实战](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-1. [2020语言与智能技术竞赛：事件抽取任务](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-1. [2020语言与智能技术竞赛：阅读理解任务](https://aistudio.baidu.com/aistudio/course/introduce/1070)
-
-## 语音
-
-Demo制作ing，敬请期待...
-
+官方Demo在AI Studio中均可在线运行，类似notebook的环境，只需通过浏览器即可访问，无需准备环境，非常方便开发者快速体验。
+并将持续更新，建议收藏。
+[https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927](https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927)
 
 ## PaddleHub开发者趣味实践作品
 

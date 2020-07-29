@@ -1,4 +1,4 @@
-# 通过命令行调用方式 使用PaddleHub
+# 通过命令行调用方式使用PaddleHub
 
 本页面的代码/命令可在[AIStudio](https://aistudio.baidu.com/aistudio/projectdetail/643120)上在线运行，类似notebook的环境，只需通过浏览器即可访问，无需准备环境，非常方便开发者快速体验。
 
@@ -8,9 +8,10 @@ PaddleHub在设计时，为模型的管理和使用提供了命令行工具，�
 
 
 ```python
-# 下载安装paddlehub到最新版本，仅第一次运行项目时执行此命令
-!pip install paddlehub==1.6.1 -i https://pypi.tuna.tsinghua.edu.cn/simple #指定版本安装PaddleHub，使用清华源更稳定、更迅速
-!pip install paddlehub --upgrade -i https://pypi.tuna.tsinghua.edu.cn/simple #升级到最新版本，使用清华源更稳定、更迅速
+# 指定版本安装PaddleHub，使用清华源更稳定、更迅速
+$ pip install paddlehub==1.6.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
+#升级到最新版本，使用清华源更稳定、更迅速
+$ pip install paddlehub --upgrade -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 ### 人像扣图
@@ -18,19 +19,9 @@ PaddleHub在设计时，为模型的管理和使用提供了命令行工具，�
 
 ```python
 # 下载待测试图片
-! wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
+$ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 # 通过命令行方式实现人像扣图任务
-! hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg --visualization=True --output_dir="humanseg_output"
-# 展示预测结果
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-
-res_img_path = 'humanseg_output/test_image.png'
-img = mpimg.imread(res_img_path)
-plt.figure(figsize=(10, 10))
-plt.imshow(img)
-plt.axis('off')
-plt.show()
+$ hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg --visualization=True --output_dir="humanseg_output"
 ```
 
     --2020-07-22 12:19:52--  https://paddlehub.bj.bcebos.com/resources/test_image.jpg
@@ -54,7 +45,7 @@ plt.show()
 
 
 
-![png](./imgs/output_4_1.png)
+![png](../imgs/humanseg_test_res.png)
 
 
 ### 中文分词
@@ -62,7 +53,7 @@ plt.show()
 
 ```python
 #通过命令行方式实现文本分词任务
-!hub run lac --input_text "今天是个好日子"
+$ hub run lac --input_text "今天是个好日子"
 ```
 
     Install Module lac
@@ -75,10 +66,12 @@ plt.show()
 
 
 上面的命令中包含四个部分，分别是：
-- hub  表示PaddleHub的命令。
+- hub 表示PaddleHub的命令。
 - run 调用run执行模型的预测。
 - deeplabv3p_xception65_humanseg、lac 表示要调用的算法模型。
 - --input_path/--input_text  表示模型的输入数据，图像和文本的输入方式不同。
+
+另外，命令行中`visualization=True`表示将结果可视化输出，`output_dir="humanseg_output"`表示预测结果的保存目录，可以到该路径下查看输出的图片。
 
 再看一个文字识别和一个口罩检测的例子。
 
@@ -87,14 +80,14 @@ plt.show()
 
 ```python
 # 下载待测试的图片
-! wget https://paddlehub.bj.bcebos.com/model/image/ocr/test_ocr.jpg
+$ wget https://paddlehub.bj.bcebos.com/model/image/ocr/test_ocr.jpg
 
 # 该Module依赖于第三方库shapely和pyclipper，需提前安装
-! pip install shapely
-! pip install pyclipper
+$ pip install shapely
+$ pip install pyclipper
 
 # 通过命令行方式实现文字识别任务
-! hub run chinese_ocr_db_crnn_mobile --input_path test_ocr.jpg --visualization=True --output_dir='ocr_result'
+$ hub run chinese_ocr_db_crnn_mobile --input_path test_ocr.jpg --visualization=True --output_dir='ocr_result'
 ```
 
     --2020-07-22 15:00:50--  https://paddlehub.bj.bcebos.com/model/image/ocr/test_ocr.jpg
@@ -117,20 +110,11 @@ plt.show()
 
 
 ```python
-# 展示预测结果
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-
-res_img_path = 'ocr_result/ndarray_1595401261.294494.jpg'
-img = mpimg.imread(res_img_path)
-plt.figure(figsize=(30, 30))
-plt.imshow(img)
-plt.axis('off')
-plt.show()
+# 查看预测结果
 ```
 
 
-![png](./imgs/output_11_0.png)
+![png](../imgs/ocr_res.jpg)
 
 
 ### 口罩检测
@@ -138,10 +122,10 @@ plt.show()
 
 ```python
 # 下载待测试的图片
-! wget https://paddlehub.bj.bcebos.com/resources/test_mask_detection.jpg
+$ wget https://paddlehub.bj.bcebos.com/resources/test_mask_detection.jpg
 
 # 通过命令行方式实现文字识别任务
-! hub run pyramidbox_lite_mobile_mask --input_path test_mask_detection.jpg --visualization=True --output_dir='detection_result'
+$ hub run pyramidbox_lite_mobile_mask --input_path test_mask_detection.jpg --visualization=True --output_dir='detection_result'
 ```
 
     --2020-07-22 15:08:11--  https://paddlehub.bj.bcebos.com/resources/test_mask_detection.jpg
@@ -170,31 +154,20 @@ plt.show()
 
 
 ```python
-# 展示预测结果
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-
-res_img_path = 'detection_result/test_mask_detection.jpg'
-img = mpimg.imread(res_img_path)
-plt.figure(figsize=(20, 20))
-plt.imshow(img)
-plt.axis('off')
-plt.show()
+# 查看预测结果
 ```
 
 
-![png](./imgs/output_14_0.png)
+![png](../imgs/test_mask_detection_result.jpg)
 
 
 ### PaddleHub命令行工具简介
 
-PaddleHub的命令行工具在开发时借鉴了Anaconda和PIP等软件包管理的理念，可以方便快捷的完成模型的搜索、下载、安装、升级、预测等功能。
-可点击[Github的网址](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7)了解详情。
-下面概要介绍一下PaddleHub支持的12个命令，详细介绍可查看[命令行参考](http://)章节。：
+PaddleHub的命令行工具在开发时借鉴了Anaconda和PIP等软件包管理的理念，可以方便快捷的完成模型的搜索、下载、安装、升级、预测等功能。 下面概要介绍一下PaddleHub支持的12个命令，详细介绍可查看[命令行参考](http://)章节。：
 * install：用于将Module安装到本地，默认安装在{HUB_HOME}/.paddlehub/modules目录下；
 * uninstall：卸载本地Module；
 * show：用于查看本地已安装Module的属性或者指定目录下确定的Module的属性，包括其名字、版本、描述、作者等信息；
-* download：用于下载百度提供的Module；
+* download：用于下载百度飞桨PaddleHub提供的Module；
 * search：通过关键字在服务端检索匹配的Module，当想要查找某个特定模型的Module时，使用search命令可以快速得到结果，例如hub search ssd命令，会查找所有包含了ssd字样的Module，命令支持正则表达式，例如hub search ^s.\*搜索所有以s开头的资源；
 * list：列出本地已经安装的Module；
 * run：用于执行Module的预测；
@@ -208,4 +181,4 @@ PaddleHub的命令行工具在开发时借鉴了Anaconda和PIP等软件包管理
 ## 小结
 PaddleHub的产品理念是模型即软件，通过Python API或命令行实现模型调用，可快速体验或集成飞桨特色预训练模型。
 此外，当用户想用少量数据来优化预训练模型时，PaddleHub也支持迁移学习，通过Fine-tune API，内置多种优化策略，只需少量代码即可完成预训练模型的Fine-tuning。具体可通过后面迁移学习的章节了解。
->值得注意的是，不是所有的Module都支持通过命令行预测 (例如BERT/ERNIE Transformer类模型，一般需要搭配任务进行finetune)， 也不是所有的Module都可用于finetune（例如LAC词法分析模型，我们不建议用户用于finetune）。建议提前阅读预训练模型的介绍文档了解使用场景。
+>值得注意的是，不是所有的Module都支持通过命令行预测 (例如BERT/ERNIE Transformer类模型，一般需要搭配任务进行Fine-tune)， 也不是所有的Module都可用于Fine-tune（例如一般不建议用户使用词法分析LAC模型Fine-tune）。建议提前阅读[预训练模型的介绍文档](https://www.paddlepaddle.org.cn/hublist)了解使用场景。
