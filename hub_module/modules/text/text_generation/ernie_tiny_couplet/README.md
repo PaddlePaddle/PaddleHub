@@ -1,10 +1,13 @@
+ernie_tiny_couplet是一个对联生成模型，它由ernie_tiny预训练模型经PaddleHub TextGenerationTask微调而来，仅支持预测，如需进一步微调请参考PaddleHub text_generation demo。
+
 ```shell
 $ hub install ernie_tiny_couplet==1.0.0
 ```
 <p align="center">
 <img src="https://paddlehub.bj.bcebos.com/paddlehub-img%2Fernie_tiny_framework.PNG" hspace='10'/> <br />
 </p>
-本预测module系由TextGenerationTask微调而来，转换方式可以参考[Fine-tune保存的模型如何转化为一个PaddleHub Module](https://github.com/PaddlePaddle/PaddleHub/blob/develop/docs/tutorial/finetuned_model_to_module.md)。
+
+本预测module系ernie_tiny预训练模型经由TextGenerationTask微调而来，有关ernie\_tiny的介绍请参考[ernie_tiny module](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_tiny&en_category=SemanticModel)，微调方式请参考[text_generation demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo/text_generation)，预训练模型转换成预测module的转换方式请参考[Fine-tune保存的模型如何转化为一个PaddleHub Module](https://github.com/PaddlePaddle/PaddleHub/blob/develop/docs/tutorial/finetuned_model_to_module.md)
 
 ## 命令行预测
 
@@ -22,11 +25,11 @@ def generate(texts)
 
 **参数**
 
-> texts(list[str])： 上联文本。
+> texts(list\[str\])： 上联文本。
 
 **返回**
 
-> result(list[str]): 下联文本。每个上联会对应输出10个下联。
+> result(list\[str\]): 下联文本。每个上联会对应输出10个下联。
 
 **代码示例**
 
@@ -34,7 +37,7 @@ def generate(texts)
 import paddlehub as hub
 
 # Load ernie pretrained model
-module = hub.Module(name="ernie_tiny_couplet")
+module = hub.Module(name="ernie_tiny_couplet", use_gpu=True)
 results = module.generate(["风吹云乱天垂泪", "若有经心风过耳"])
 for result in results:
     print(result)
