@@ -12,9 +12,10 @@
     命令行工具<cmdintro>
     自定义数据<how_to_load_data>
     Fine-tune模型转化为PaddleHub Module<finetuned_model_to_module.md>
-    自定义任务<how_to_define_task>
+    迁移学习<how_to_finetune>
     服务化部署<serving>
     文本Embedding服务<bert_service>
+    自定义任务<how_to_define_task>
     语义相似度计算<sentence_sim>
     ULMFit优化策略<strategy_exp>
     超参优化<autofinetune>
