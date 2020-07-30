@@ -1,24 +1,19 @@
-## 模型概述
-
-HumanSeg-mobile是基于HRNet(Deep High-Resolution Representation Learning for Visual Recognition)的人像分割网络。HRNet在特征提取过程中保持了高分辨率的信息，保持了物体的细节信息，并可通过控制每个分支的通道数调整模型的大小。HumanSeg-mobile采用了HRNet_w18_small_v1的网络结构，模型大小只有5.8M， 适用于移动端或服务端CPU的前置摄像头场景。
-
-
 ## 命令行预测
 **cpu运行命令**
 ```
-hub run hrnet_w18_samll_v1_humanseg --input_path test.txt --visualization True --batch_size 2
+hub run humanseg_mobile --input_path path.txt --visualization True --batch_size 2
 
 ```
 **gpu运行命令**
 
 ```
-CUDA_VISIBLE_DEVICES=0 hub run hrnet_w18_samll_v1_humanseg --input_path test.txt --visualization True --batch_size 2 --use_gpu True
+CUDA_VISIBLE_DEVICES=0 hub run humanseg_mobile --input_path path.txt --visualization True --batch_size 2 --use_gpu True
 
 ```
 ## API
 
 ```python
-def segmentation(images=None,
+def segment(images=None,
                  paths=None,
                  batch_size=1,
                  use_gpu=False,
@@ -31,7 +26,7 @@ def segmentation(images=None,
 **参数**
 
 * images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
-* paths (list\[str\]): 图片的路径；
+* paths (txt文件): 写明图片的路径，保存为txt文件；
 * batch\_size (int): batch 的大小；
 * use\_gpu (bool): 是否使用 GPU；
 * visualization (bool): 是否将识别结果保存为图片文件；
@@ -65,9 +60,9 @@ def save_inference_model(dirname,
 import cv2
 import paddlehub as hub
 
-classifier = hub.Module('hrnet_w18_samll_v1_humanseg')
+classifier = hub.Module('humanseg_mobile')
 im = cv2.imread('检测照片.jpg')
-res = classifier.segmentation(images=[im],visualization=True)
+res = classifier.segment(images=[im],visualization=True)
 ```
 
 ## 服务部署
@@ -78,7 +73,7 @@ PaddleHub Serving可以部署一个人像分割的在线服务。
 
 运行启动命令：
 ```shell
-$ hub serving start -m hrnet_w18_samll_v1_humanseg
+$ hub serving start -m humanseg_mobile
 ```
 
 这样就完成了一个人像分割的服务化API的部署，默认端口号为8866。
@@ -109,7 +104,7 @@ def base64_to_cv2(b64str):
 # 发送HTTP请求
 data = {'images':[cv2_to_base64(cv2.imread("检测照片.jpg"))]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/hrnet_w18_samll_v1_humanseg"
+url = "http://127.0.0.1:8866/predict/humanseg_mobile"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
 # 打印预测结果

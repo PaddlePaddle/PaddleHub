@@ -22,36 +22,22 @@ import paddlehub as hub
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
 
-from hrnet_w18_samll_v1_humanseg.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
-from hrnet_w18_samll_v1_humanseg.data_feed import reader, readtxtpathname
+from humanseg_lite.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
+from humanseg_lite.data_feed import reader, readtxtpathname
 
 
 @moduleinfo(
-    name="hrnet_w18_samll_v1_humanseg",
+    name="humanseg_lite",
     type="CV/semantic_segmentation",
     author="paddlepaddle",
     author_email="",
-    summary="HRNet_w18_samll_v1 is a semantic segmentation model.",
+    summary="humanseg_lite is a semantic segmentation model.",
     version="1.0.0")
-class HRNetw18samllv1humanseg(hub.Module):
+class ShufflenetHumanSeg(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "humanseg_mobile_inference")
+            self.directory, "humanseg_lite_inference")
         self._set_config()
-
-    def get_expected_image_width(self):
-        return 192
-
-    def get_expected_image_height(self):
-        return 192
-
-    def get_pretrained_images_mean(self):
-        im_mean = np.array([0.5, 0.5, 0.5]).reshape(1, 3)
-        return im_mean
-
-    def get_pretrained_images_std(self):
-        im_std = np.array([0.5, 0.5, 0.5]).reshape(1, 3)
-        return im_std
 
     def _set_config(self):
         """
@@ -65,6 +51,20 @@ class HRNetw18samllv1humanseg(hub.Module):
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_paddle_predictor(cpu_config)
+
+        try:
+            _places = os.environ["CUDA_VISIBLE_DEVICES"]
+            int(_places[0])
+            use_gpu = True
+        except:
+            use_gpu = False
+        if use_gpu:
+            gpu_config = AnalysisConfig(self.model_file_path,
+                                        self.params_file_path)
+            gpu_config.disable_glog_info()
+            gpu_config.enable_use_gpu(
+                memory_pool_init_size_mb=1000, device_id=0)
+            self.gpu_predictor = create_paddle_predictor(gpu_config)
 
     def segment(self,
                 images=None,
@@ -92,15 +92,6 @@ class HRNetw18samllv1humanseg(hub.Module):
                 data (numpy.ndarray): data of post processed image.
         """
 
-        if use_gpu:
-            gpu_config = AnalysisConfig(self.model_file_path,
-                                        self.params_file_path)
-            gpu_config.disable_glog_info()
-            gpu_config.enable_use_gpu(
-                memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
-
-        # compatibility with older versions
         if paths:
             paths = readtxtpathname(paths)
 
@@ -192,6 +183,7 @@ class HRNetw18samllv1humanseg(hub.Module):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
+
         self.arg_input_group = self.parser.add_argument_group(
             title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -252,8 +244,7 @@ class HRNetw18samllv1humanseg(hub.Module):
 
 
 if __name__ == "__main__":
-    m = HRNetw18samllv1humanseg()
+    m = ShufflenetHumanSeg()
     import cv2
-    img = cv2.imread('检测照片.jpg')
-    res = m.segment(images=[img], visualization=True)
-    print(res[0]['data'])
+    img = cv2.imread('./meditation.jpg')
+    res = m.segment(images=[img])

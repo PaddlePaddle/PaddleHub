@@ -1,5 +1,5 @@
-name: human_pose_estimation_shufflenet_humanseg
-dir: "modules/image/semantic_segmentation/shufflenet_humanseg"
+name: humanseg_lite
+dir: "modules/image/semantic_segmentation/humanseg_lite"
 exclude:
     - README.md
 resources:

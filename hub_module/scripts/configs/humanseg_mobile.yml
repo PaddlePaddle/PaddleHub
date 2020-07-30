@@ -1,5 +1,5 @@
-name: human_pose_estimation_hrnet_w18_samll_v1_humanseg
-dir: "modules/image/semantic_segmentation/hrnet_w18_samll_v1_humanseg"
+name: humanseg_mobile
+dir: "modules/image/semantic_segmentation/humanseg_mobile"
 exclude:
     - README.md
 resources:
