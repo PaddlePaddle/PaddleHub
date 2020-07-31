@@ -33,14 +33,14 @@
 * [阅读理解](./reading_comprehension)
   该样例展示了PaddleHub如何将BERT作为预训练模型在SQAD数据集上完成阅读理解的FineTune和预测。
 
-* [检索式问答任务](./qa_classfication)
+* [检索式问答任务](./qa_classification)
   该样例展示了PaddleHub如何将ERNIE和BERT作为预训练模型在NLPCC-DBQA等数据集上完成检索式问答任务的FineTune和预测。
 
 * [句子语义相似度计算](./sentence_similarity)
   该样例展示了PaddleHub如何将word2vec_skipgram用于计算两个文本语义相似度。
 
-* [超参优化AutoDL Finetuner使用](./autofinetune)
-  该样例展示了PaddleHub超参优化AutoDL Finetuner如何使用，给出了自动搜素图像分类/文本分类任务的较佳超参数示例。
+* 超参优化AutoDL Finetuner使用
+  该样例展示了PaddleHub超参优化AutoDL Finetuner如何使用，给出了自动搜素[图像分类](./autofinetune_image_classification)/[文本分类](./autofinetune_text_classification)任务的较佳超参数示例。
 
 * [服务化部署Hub Serving使用](./serving)
   该样例文件夹下展示了服务化部署Hub Serving如何使用，将PaddleHub支持的可预测Module如何服务化部署。
@@ -50,7 +50,7 @@
   请确认转化时，使用的PaddleHub为1.6.0以上版本。
 
 **NOTE:**
-以上任务示例均是利用PaddleHub提供的数据集，若您想在自定义数据集上完成相应任务，请查看[PaddleHub适配自定义数据完成Fine-tune](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub%E9%80%82%E9%85%8D%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%AE%8C%E6%88%90FineTune)。
+以上任务示例均是利用PaddleHub提供的数据集，若您想在自定义数据集上完成相应任务，请查看[PaddleHub适配自定义数据完成Fine-tune](../docs/tutorial/how_to_load_data.md)。
 
 ## 在线体验
 

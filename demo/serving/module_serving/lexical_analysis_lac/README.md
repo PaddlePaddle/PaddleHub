@@ -75,7 +75,7 @@ Loading lac successful.
 ```
 这样我们就完成了对词法分析的预测服务化部署和测试。
 
-完整的测试代码见[lac_serving_demo.py](lac_serving_demo.py)。
+完整的测试代码见[lac_serving_demo.py](./lac_serving_demo.py)。
 
 ### 使用自定义词典
 `LAC`模型在预测时还可以使用自定义词典干预默认分词结果，这种情况只需要将自定义词典以文件的形式附加到request请求即可，数据格式如下：
@@ -91,7 +91,7 @@ Loading lac successful.
 >>> r = requests.post(url=url, files=file, data=text)
 ```
 
-完整的测试代码见[lac_with_dict_serving_demo.py](lac_with_dict_serving_demo.py)。
+完整的测试代码见[lac_with_dict_serving_demo.py](./lac_with_dict_serving_demo.py)。
 
 ### 客户端请求新版模型的方式
 对某些新版模型，客户端请求方式有所变化，更接近本地预测的请求方式，以降低学习成本。
@@ -146,4 +146,4 @@ if __name__ == "__main__":
     ]
 }
 ```
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](lac_2.1.0_serving_demo.py)。
+此Demo的具体信息和代码请参见[LAC Serving_2.1.0](./lac_2.1.0_serving_demo.py)。

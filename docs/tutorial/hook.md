@@ -15,7 +15,7 @@ Task定义了[组网事件](./how_to_define_task.md)和[运行事件](./how_to_d
 
 如果您需要对图中提到的事件的具体实现进行修改，可以通过Task提供的事件回调hook机制进行改写。
 
-如你想要改变任务评价指标，如下示例中将PaddleHub默认的accuracy评价指标改为F1评价指标。同时还想用自定义的可视化工具可视化模型训练过程，如下示例将可视化工具改写为tb-paddle。则你需要改写评估方法[log_interval_event]()。这时候你可以用Hook实现。具体使用方法如下：
+如你想要改变任务评价指标，如下示例中将PaddleHub默认的accuracy评价指标改为F1评价指标。同时还想用自定义的可视化工具可视化模型训练过程，如下示例将可视化工具改写为tb-paddle。则你需要改写评估方法log_interval_event。这时候你可以用Hook实现。具体使用方法如下：
 
 ```python
 import numpy as np
@@ -120,4 +120,4 @@ task.hook_info()
  "predict_start_event"，"predict_end_event"，"eval_start_event"，"eval_end_event"，
  "log_interval_event"，"save_ckpt_interval_event"，"eval_interval_event"，"run_step_event"。
 * 如果想要改写组网事件，Hook不支持。改写组网事件参见[自定义Task](./how_to_define_task.md)。
-* 如何创建Task，参见[PaddleHub迁移学习示例](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo)
+* 如何创建Task，参见[PaddleHub迁移学习示例](../../demo)

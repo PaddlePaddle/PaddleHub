@@ -1,8 +1,8 @@
 PaddlePaddle 提供了丰富的模型，使得用户可以采用模块化的方法解决各种学习问题。本文，我们将整体介绍PaddleHub中已经准备好的丰富的预训练模型。
 
-* 如果是想了解具体预训练模型的使用可以继续学习本课程，也可以参考 [PaddleHub预训练模型库]( https://www.paddlepaddle.org.cn/hublist )
+* 如果是想了解具体预训练模型的使用可以继续学习本课程，也可以参考 [PaddleHub预训练模型库](https://www.paddlepaddle.org.cn/hublist)。
 
-* 如果想了解更多模型组网网络结构源代码请参考 [飞桨模型库](https://github.com/PaddlePaddle/models )
+* 如果想了解更多模型组网网络结构源代码请参考 [飞桨模型库](https://github.com/PaddlePaddle/models)。
 
 ## PaddleHub预训练模型库
 * [飞桨优势特色模型](#飞桨优势特色模型)
