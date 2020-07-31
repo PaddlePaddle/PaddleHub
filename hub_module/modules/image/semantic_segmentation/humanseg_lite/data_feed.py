@@ -10,18 +10,6 @@ from PIL import Image
 __all__ = ['reader']
 
 
-def readtxtpathname(rootdir=None):
-    lines = []
-    with open(rootdir, 'r') as file_to_read:
-        while True:
-            line = file_to_read.readline()
-            if not line:
-                break
-            line = line.strip('\n')
-            lines.append(line)
-    return lines
-
-
 def reader(images=None, paths=None):
     """
     Preprocess to yield image.

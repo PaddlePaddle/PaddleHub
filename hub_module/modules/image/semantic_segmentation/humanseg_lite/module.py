@@ -23,7 +23,7 @@ from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predic
 from paddlehub.module.module import moduleinfo, runnable, serving
 
 from humanseg_lite.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
-from humanseg_lite.data_feed import reader, readtxtpathname
+from humanseg_lite.data_feed import reader
 
 
 @moduleinfo(
@@ -58,6 +58,7 @@ class ShufflenetHumanSeg(hub.Module):
             use_gpu = True
         except:
             use_gpu = False
+
         if use_gpu:
             gpu_config = AnalysisConfig(self.model_file_path,
                                         self.params_file_path)
@@ -72,7 +73,7 @@ class ShufflenetHumanSeg(hub.Module):
                 data=None,
                 batch_size=1,
                 use_gpu=False,
-                visualization=False,
+                visualization=True,
                 output_dir='humanseg_output'):
         """
         API for human segmentation.
@@ -92,8 +93,14 @@ class ShufflenetHumanSeg(hub.Module):
                 data (numpy.ndarray): data of post processed image.
         """
 
-        if paths:
-            paths = readtxtpathname(paths)
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         if data and 'image' in data:
             if paths is None:
@@ -227,7 +234,7 @@ class ShufflenetHumanSeg(hub.Module):
         self.arg_config_group.add_argument(
             '--visualization',
             type=ast.literal_eval,
-            default=False,
+            default=True,
             help="whether to save output as images.")
         self.arg_config_group.add_argument(
             '--batch_size',

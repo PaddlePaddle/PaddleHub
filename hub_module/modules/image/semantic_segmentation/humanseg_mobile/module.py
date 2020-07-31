@@ -23,7 +23,7 @@ from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predic
 from paddlehub.module.module import moduleinfo, runnable, serving
 
 from humanseg_mobile.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
-from humanseg_mobile.data_feed import reader, readtxtpathname
+from humanseg_mobile.data_feed import reader
 
 
 @moduleinfo(
@@ -58,6 +58,7 @@ class HRNetw18samllv1humanseg(hub.Module):
             use_gpu = True
         except:
             use_gpu = False
+
         if use_gpu:
             gpu_config = AnalysisConfig(self.model_file_path,
                                         self.params_file_path)
@@ -91,10 +92,16 @@ class HRNetw18samllv1humanseg(hub.Module):
                 save_path (str, optional): the path to save images. (Exists only if visualization is True)
                 data (numpy.ndarray): data of post processed image.
         """
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         # compatibility with older versions
-        if paths:
-            paths = readtxtpathname(paths)
 
         if data and 'image' in data:
             if paths is None:
@@ -246,6 +253,6 @@ class HRNetw18samllv1humanseg(hub.Module):
 if __name__ == "__main__":
     m = HRNetw18samllv1humanseg()
     import cv2
-    img = cv2.imread('检测照片.jpg')
+    img = cv2.imread('./meditation.jpg')
     res = m.segment(images=[img], visualization=True)
     print(res[0]['data'])

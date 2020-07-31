@@ -13,7 +13,14 @@ import paddle.fluid as fluid
 import paddlehub as hub
 
 pic_dir = '../image_dataset/human_segmentation/image/'
-path_txt = '../image_dataset/human_segmentation/path.txt'
+
+imgpath = [
+    '../image_dataset/human_segmentation/image/ache-adult-depression-expression-41253.jpg',
+    '../image_dataset/human_segmentation/image/allergy-cold-disease-flu-41284.jpg',
+    '../image_dataset/human_segmentation/image/bored-female-girl-people-41321.jpg',
+    '../image_dataset/human_segmentation/image/colors-hairdresser-cutting-colorimetry-159780.jpg',
+    '../image_dataset/human_segmentation/image/pexels-photo-206339.jpg'
+]
 
 
 class TestHumanSeg(unittest.TestCase):
@@ -49,8 +56,8 @@ class TestHumanSeg(unittest.TestCase):
     def test_batch(self):
         with fluid.program_guard(self.test_prog):
             result = self.human_seg.segment(
-                paths=path_txt,
-                batch_size=5,
+                paths=imgpath,
+                batch_size=2,
                 output_dir='batch_output_hrnet',
                 use_gpu=False,
                 visualization=True)

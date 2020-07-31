@@ -1,24 +1,23 @@
+## 模型概述
+
+HumanSeg-mobile是基于HRNet(Deep High-Resolution Representation Learning for Visual Recognition)的人像分割网络。HRNet在特征提取过程中保持了高分辨率的信息，保持了物体的细节信息，并可通过控制每个分支的通道数调整模型的大小。HumanSeg-mobile采用了HRNet_w18_small_v1的网络结构，模型大小只有5.8M， 适用于移动端或服务端CPU的前置摄像头场景。
+
 ## 命令行预测
-**cpu运行命令**
-```
-hub run humanseg_mobile --input_path path.txt --visualization True --batch_size 2
 
 ```
-**gpu运行命令**
+hub run humanseg_mobile --input_path "/PATH/TO/IMAGE"
 
 ```
-CUDA_VISIBLE_DEVICES=0 hub run humanseg_mobile --input_path path.txt --visualization True --batch_size 2 --use_gpu True
 
-```
 ## API
 
 ```python
 def segment(images=None,
-                 paths=None,
-                 batch_size=1,
-                 use_gpu=False,
-                 visualization=False,
-                 output_dir='humanseg_output')
+            paths=None,
+            batch_size=1,
+            use_gpu=False,
+            visualization=True,
+            output_dir='humanseg_output')
 ```
 
 预测API，用于人像分割。
@@ -26,9 +25,9 @@ def segment(images=None,
 **参数**
 
 * images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
-* paths (txt文件): 写明图片的路径，保存为txt文件；
+* paths (list\[str\]): 图片的路径；
 * batch\_size (int): batch 的大小；
-* use\_gpu (bool): 是否使用 GPU；
+* use\_gpu (bool): 是否使用 GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置；
 * visualization (bool): 是否将识别结果保存为图片文件；
 * output\_dir (str): 图片的保存路径。
 
@@ -60,9 +59,9 @@ def save_inference_model(dirname,
 import cv2
 import paddlehub as hub
 
-classifier = hub.Module('humanseg_mobile')
-im = cv2.imread('检测照片.jpg')
-res = classifier.segment(images=[im],visualization=True)
+human_seg = hub.Module('humanseg_mobile')
+im = cv2.imread('/PATH/TO/IMAGE')
+res = human_seg.segment(images=[im],visualization=True)
 ```
 
 ## 服务部署
@@ -72,6 +71,7 @@ PaddleHub Serving可以部署一个人像分割的在线服务。
 ## 第一步：启动PaddleHub Serving
 
 运行启动命令：
+
 ```shell
 $ hub serving start -m humanseg_mobile
 ```
@@ -102,7 +102,7 @@ def base64_to_cv2(b64str):
     return data
 
 # 发送HTTP请求
-data = {'images':[cv2_to_base64(cv2.imread("检测照片.jpg"))]}
+data = {'images':[cv2_to_base64(cv2.imread('/PATH/TO/IMAGE'))]}
 headers = {"Content-type": "application/json"}
 url = "http://127.0.0.1:8866/predict/humanseg_mobile"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
