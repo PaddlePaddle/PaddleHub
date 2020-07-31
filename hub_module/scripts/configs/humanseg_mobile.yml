@@ -1,0 +1,9 @@
+name: humanseg_mobile
+dir: "modules/image/semantic_segmentation/humanseg_mobile"
+exclude:
+    - README.md
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/image/semantic_segmentation/humanseg_mobile_inference.tar.gz
+    dest: .
+    uncompress: True
