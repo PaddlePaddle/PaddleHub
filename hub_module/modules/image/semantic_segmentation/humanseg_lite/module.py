@@ -201,7 +201,7 @@ class ShufflenetHumanSeg(hub.Module):
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
         results = self.segment(
-            paths=args.input_path,
+            paths=[args.input_path],
             batch_size=args.batch_size,
             use_gpu=args.use_gpu,
             output_dir=args.output_dir,
