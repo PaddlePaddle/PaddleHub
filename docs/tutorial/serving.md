@@ -84,9 +84,9 @@ $ hub serving start --config config.json
 
 在使用PaddleHub Serving部署服务端的模型预测服务后，就可以在客户端访问预测接口以获取结果了，接口url格式为：
 
-http://127.0.0.1:8866/predict/<CATEGORY\>/\<MODULE>
+`http://127.0.0.1:8866/predict/<MODULE>`
 
-其中，\<CATEGORY>为text或image，与模型种类对应，\<MODULE>为模型名。
+其中，`<MODULE>`为模型名。
 
 通过发送一个POST请求，即可获取预测结果，下面我们将展示一个具体的demo，以说明使用PaddleHub Serving部署和使用流程。
 
@@ -158,12 +158,17 @@ import requests
 import json
 
 if __name__ == "__main__":
-    # 指定用于用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
-    text_list = ["今天是个好日子", "天气预报说今天要下雨"]
-    text = {"text": text_list}
-    # 指定预测方法为lac并发送post请求
-    url = "http://127.0.0.1:8866/predict/text/lac"
-    r = requests.post(url=url, data=text)
+    # 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
+    text = ["今天是个好日子", "天气预报说今天要下雨"]
+    # 以key的方式指定text传入预测方法的时的参数，此例中为"data"
+    # 对应本地部署，则为lac.analysis_lexical(data=text, batch_size=1)
+    data = {"texts": text, "batch_size": 1}
+    # 指定预测方法为lac并发送post请求，content-type类型应指定json方式
+    url = "http://127.0.0.1:8866/predict/lac"
+    # 指定post请求的headers为application/json方式
+    headers = {"Content-Type": "application/json"}
+
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
@@ -173,6 +178,7 @@ if __name__ == "__main__":
 
 ```python
 {
+    "msg": "",
     "results": [
         {
             "tag": [
@@ -190,8 +196,10 @@ if __name__ == "__main__":
                 "天气预报", "说", "今天", "要", "下雨"
             ]
         }
-    ]
+    ],
+    "status": "0"
 }
+
 ```
 
 ### Step3：停止serving服务
@@ -214,48 +222,13 @@ $ PaddleHub Serving will stop.
 
 ## Demo——其他模型的一键部署服务
 
-获取其他PaddleHub Serving的一键服务部署场景示例，可参见下列demo
+* [中文词法分析-基于lac](../../demo/serving/module_serving/lexical_analysis_lac)
 
-* [中文分词](../../demo/serving/module_serving/lexical_analysis_lac)  
+&emsp;&emsp;该示例展示了利用lac完成中文文本分词服务化部署和在线预测，获取文本的分词结果，并可通过用户自定义词典干预分词结果。
 
-&emsp;&emsp;该示例展示了利用LAC模型完成中文分词服务化部署和在线预测分词结果。
+* [人脸检测-基于pyramidbox_lite_server_mask](../../demo/serving/module_serving/object_detection_pyramidbox_lite_server_mask)
 
-* [口罩检测](../../demo/serving/module_serving/object_detection_pyramidbox_lite_server_mask)  
-
-&emsp;&emsp;该示例展示了利用pyramidbox_lite_server_mask模型检测是否佩戴口罩。
-
-## 客户端请求新版模型的方式
-对某些新版模型，客户端请求方式有所变化，更接近本地预测的请求方式，以降低学习成本。
-以lac(2.1.0)为例，使用上述方法进行请求将提示：
-```python
-{
-    "Warnning": "This usage is out of date, please use 'application/json' as content-type to post to /predict/lac. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details."
-}
-```
-对于lac(2.1.0)，请求的方式如下：
-```python
-# coding: utf8
-import requests
-import json
-
-if __name__ == "__main__":
-    # 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
-    text = ["今天是个好日子", "天气预报说今天要下雨"]
-    # 以key的方式指定text传入预测方法的时的参数，此例中为"data"
-    # 对应本地部署，则为lac.analysis_lexical(texts=[text1, text2])
-    data = {"texts": text, "batch_size": 2}
-    # 指定预测方法为lac并发送post请求
-    url = "http://127.0.0.1:8866/predict/lac"
-    # 指定post请求的headers为application/json方式
-    headers = {"Content-Type": "application/json"}
-
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
-
-    # 打印预测结果
-    print(json.dumps(r.json(), indent=4, ensure_ascii=False))
-```
-
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](../../demo/serving/module_serving/lexical_analysis_lac/lac_serving_demo.py)。
+&emsp;&emsp;该示例展示了利用pyramidbox_lite_server_mask完成人脸口罩检测，检测人脸位置以及戴口枣的置信度。
 
 ## Bert Service
 除了预训练模型一键服务部署功能之外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](./bert_service.md)。
