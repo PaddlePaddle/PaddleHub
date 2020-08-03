@@ -23,17 +23,17 @@ import csv
 
 from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import TextClassificationDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/inews.tar.gz"
 
 
-class INews(BaseNLPDataset):
+class INews(TextClassificationDataset):
     """
     INews is a sentiment analysis dataset for Internet News
     """
 
-    def __init__(self):
+    def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "inews")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         super(INews, self).__init__(
@@ -43,7 +43,8 @@ class INews(BaseNLPDataset):
             test_file="test.txt",
             label_file=None,
             label_list=["0", "1", "2"],
-        )
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
 
     def _read_file(self, input_file, phase=None):
         """Reads a tab separated value file."""
@@ -60,7 +61,10 @@ class INews(BaseNLPDataset):
 
 
 if __name__ == "__main__":
-    ds = INews()
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = INews(tokenizer=tokenizer, max_seq_len=10)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
@@ -71,3 +75,6 @@ if __name__ == "__main__":
     for e in ds.get_test_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
     print(ds)
+    print("first 10 dev records")
+    for e in ds.get_dev_records()[:10]:
+        print(e)

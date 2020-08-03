@@ -1,9 +1,9 @@
 # 自定义Task
 
 本节内容讲述如何实现自定义Task。在了解本节内容之前，您需要先了解以下内容：
-* 任务基类[BasicTask]()
-* 运行状态[RunState]()
-* 运行环境[RunEnv]()
+* 任务基类[BasicTask](../reference/task/base_task.md)
+* 运行状态[RunState](../reference/task/runstate.md)
+* 运行环境[RunEnv](../reference/task/runenv.md)
 
 当自定义一个Task时，我们并不需要重新实现eval、finetune等通用接口。一般来讲，新的Task与其他Task的区别在于
 * 网络结构
@@ -139,7 +139,7 @@ def _predict_end_event(self):
 ```
 
 ###  `_log_interval_event`
-调用*finetune* 或者 *finetune_and_eval*接口时，每当命中用户设置的日志打印周期时（[RunConfig.log_interval](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-RunConfig#log_interval)）。通过继承实现该函数，用户可以在finetune过程中定期打印所需数据，例如计算运行速度、loss、准确率等
+调用*finetune* 或者 *finetune_and_eval*接口时，每当命中用户设置的日志打印周期时（[RunConfig.log_interval](../reference/config.md)）。通过继承实现该函数，用户可以在finetune过程中定期打印所需数据，例如计算运行速度、loss、准确率等
 
 ```python
 # 代码示例
@@ -153,7 +153,7 @@ def _log_interval_event(self, run_states):
 * `run_states`: 一个list对象，list中的每一个元素都是RunState对象，该list包含了整个从上一次该事件被触发到本次被触发的状态数据
 
 ###  `_save_ckpt_interval_event`
-调用*finetune* 或者 *finetune_and_eval*接口时，每当命中用户设置的保存周期时（[RunConfig.save_ckpt_interval](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-RunConfig#save_ckpt_interval)），该事件被触发。通过继承实现该函数，用户可以在定期保存checkpoint
+调用*finetune* 或者 *finetune_and_eval*接口时，每当命中用户设置的保存周期时（[RunConfig.save_ckpt_interval](../reference/config.md)），该事件被触发。通过继承实现该函数，用户可以在定期保存checkpoint
 
 ```python
 # 代码示例
@@ -162,7 +162,7 @@ def _save_ckpt_interval_event(self):
 ```
 
 ###  `_eval_interval_event`
-调用*finetune_and_eval*接口时，每当命中用户设置的评估周期时（[RunConfig.eval_interval](https://github.com/PaddlePaddle/PaddleHub/wiki/PaddleHub-API:-RunConfig#eval_interval)），该事件被触发。通过继承实现该函数，用户可以实现自定义的评估指标计算
+调用*finetune_and_eval*接口时，每当命中用户设置的评估周期时（[RunConfig.eval_interval](../reference/config.md)），该事件被触发。通过继承实现该函数，用户可以实现自定义的评估指标计算
 
 ```python
 # 代码示例

@@ -20,7 +20,7 @@ import os
 from paddlehub.reader import tokenization
 from paddlehub.common.dir import DATA_HOME
 from paddlehub.common.logger import logger
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import MRCDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/drcd.tar.gz"
 SPIECE_UNDERLINE = '▁'
@@ -62,10 +62,16 @@ class DRCDExample(object):
         return s
 
 
-class DRCD(BaseNLPDataset):
+class DRCD(MRCDataset):
     """A single set of features of data."""
 
-    def __init__(self):
+    def __init__(
+            self,
+            tokenizer=None,
+            max_seq_len=None,
+            max_query_len=64,
+            doc_stride=128,
+    ):
         dataset_dir = os.path.join(DATA_HOME, "drcd")
         base_path = self._download_dataset(dataset_dir, url=_DATA_URL)
         super(DRCD, self).__init__(
@@ -75,6 +81,10 @@ class DRCD(BaseNLPDataset):
             test_file="DRCD_test.json",
             label_file=None,
             label_list=None,
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len,
+            max_query_len=max_query_len,
+            doc_stride=doc_stride,
         )
 
     def _read_file(self, input_file, phase=None):
@@ -176,8 +186,8 @@ class DRCD(BaseNLPDataset):
                     cleaned_answer_text = "".join(
                         tokenization.whitespace_tokenize(orig_answer_text))
                     if actual_text.find(cleaned_answer_text) == -1:
-                        logger.warning((actual_text, " vs ",
-                                        cleaned_answer_text, " in ", qa))
+                        logger.warning("Could not find answer: '%s' vs. '%s'" %
+                                       (actual_text, cleaned_answer_text))
                         continue
                     example = DRCDExample(
                         qas_id=qas_id,
@@ -191,7 +201,9 @@ class DRCD(BaseNLPDataset):
 
 
 if __name__ == "__main__":
-    ds = DRCD()
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+    ds = DRCD(tokenizer=tokenizer, max_seq_len=50)
     print("train")
     examples = ds.get_train_examples()
     for index, e in enumerate(examples):

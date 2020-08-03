@@ -16,6 +16,8 @@
 from .base_task import BaseTask, RunEnv, RunState
 from .classifier_task import ClassifierTask, ImageClassifierTask, TextClassifierTask, MultiLabelClassifierTask
 from .detection_task import DetectionTask
+from .generation_task import TextGenerationTask
+from .matching_task import PairwiseTextMatchingTask, PointwiseTextMatchingTask
 from .reading_comprehension_task import ReadingComprehensionTask
 from .regression_task import RegressionTask
 from .sequence_task import SequenceLabelTask

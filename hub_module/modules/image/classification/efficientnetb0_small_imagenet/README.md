@@ -49,7 +49,7 @@ def context(trainable=True, pretrained=True)
 * context\_prog(fluid.Program): 计算图，用于迁移学习。
 
 ```python
-def classification(images=None,
+def classify(images=None,
                    paths=None,
                    batch_size=1,
                    use_gpu=False,
@@ -92,9 +92,9 @@ import cv2
 
 classifier = hub.Module(name="efficientnetb0_small_imagenet")
 
-result = classifier.classification(images=[cv2.imread('/PATH/TO/IMAGE')])
+result = classifier.classify(images=[cv2.imread('/PATH/TO/IMAGE')])
 # or
-# result = classifier.classification(paths=['/PATH/TO/IMAGE'])
+# result = classifier.classify(paths=['/PATH/TO/IMAGE'])
 ```
 
 ## 服务部署

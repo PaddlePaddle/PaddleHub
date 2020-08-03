@@ -96,7 +96,7 @@ embedding_result = module.get_embedding(texts=[["Sample1_text_a"],["Sample2_text
 params_layer = module.get_params_layer()
 strategy = hub.finetune.strategy.ULMFiTStrategy(frz_params_layer=params_layer, dis_params_layer=params_layer)
 ```
-利用该PaddleHub Module Fine-tune示例，可参考[文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.4.0/demo/text-classification)。
+利用该PaddleHub Module Fine-tune示例，可参考[文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo/text_classification)。
 
 **Note**：建议该PaddleHub Module在**GPU**环境中运行。如出现显存不足，可以将**batch_size**或**max_seq_len**调小。
 

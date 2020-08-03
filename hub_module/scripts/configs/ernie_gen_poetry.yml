@@ -1,0 +1,9 @@
+name: ernie_gen_poetry
+dir: "modules/text/text_generation/ernie_gen_poetry"
+exclude:
+  - README.md
+resources:
+  -
+    url: https://paddlehub.bj.bcebos.com/model/nlp/ernie_gen_poetry/assets.tar.gz
+    dest: assets
+    uncompress: True

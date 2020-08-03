@@ -29,8 +29,9 @@ from .base_task import BaseTask
 class RegressionTask(BaseTask):
     def __init__(self,
                  feature,
-                 feed_list,
-                 data_reader,
+                 dataset=None,
+                 feed_list=None,
+                 data_reader=None,
                  startup_program=None,
                  config=None,
                  hidden_units=None,
@@ -40,6 +41,7 @@ class RegressionTask(BaseTask):
 
         main_program = feature.block.program
         super(RegressionTask, self).__init__(
+            dataset=dataset,
             data_reader=data_reader,
             main_program=main_program,
             feed_list=feed_list,

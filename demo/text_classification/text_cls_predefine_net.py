@@ -40,34 +40,23 @@ if __name__ == '__main__':
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use accuracy as metrics
-    # Choose dataset: GLUE/XNLI/ChinesesGLUE/NLPCC-DBQA/LCQMC
-    # metric should be acc, f1 or matthews
-    dataset = hub.dataset.ChnSentiCorp()
-    metrics_choices = ["acc"]
+    # Use the appropriate tokenizer to preprocess the data set
+    # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
+    if module.name == "ernie_tiny":
+        tokenizer = hub.ErnieTinyTokenizer(
+            vocab_file=module.get_vocab_path(),
+            spm_path=module.get_spm_path(),
+            word_dict_path=module.get_word_dict_path())
+    else:
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
 
-    # For ernie_tiny, it use sub-word to tokenize chinese sentence
-    # If not ernie tiny, sp_model_path and word_dict_path should be set None
-    reader = hub.reader.ClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        sp_model_path=module.get_spm_path(),
-        word_dict_path=module.get_word_dict_path())
+    dataset = hub.dataset.ChnSentiCorp(
+        tokenizer=tokenizer, max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
     token_feature = outputs["sequence_output"]
-
-    # Setup feed list for data feeder
-    # Must feed all the tensor of module need
-    feed_list = [
-        inputs["input_ids"].name,
-        inputs["position_ids"].name,
-        inputs["segment_ids"].name,
-        inputs["input_mask"].name,
-    ]
 
     # Select fine-tune strategy, setup config and fine-tune
     strategy = hub.AdamWeightDecayStrategy(
@@ -90,13 +79,12 @@ if __name__ == '__main__':
     # you must use the outputs["sequence_output"] as the token_feature of TextClassifierTask,
     # rather than outputs["pooled_output"], and feature is None
     cls_task = hub.TextClassifierTask(
-        data_reader=reader,
+        dataset=dataset,
         token_feature=token_feature,
-        feed_list=feed_list,
         network=args.network,
         num_classes=dataset.num_labels,
         config=config,
-        metrics_choices=metrics_choices)
+        metrics_choices=["acc"])
 
     # Fine-tune and evaluate by PaddleHub's API
     # will finish training, evaluation, testing, save model automatically

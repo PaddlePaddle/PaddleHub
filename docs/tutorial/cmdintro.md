@@ -8,19 +8,19 @@ PaddleHub支持修改预训练模型存放路径：
 
 目前命令行支持以下12个命令：
 
-## `install`
+## `hub install`
 
 用于将Module安装到本地，默认安装在`${HUB_HOME}/.paddlehub/modules`目录下，当一个Module安装到本地后，用户可以通过其他命令操作该Module（例如，使用该Module进行预测），也可以使用PaddleHub提供的python API，将Module应用到自己的任务中，实现迁移学习
 
-## `uninstall`
+## `hub uninstall`
 
 用于卸载本地Module
 
-## `show`
+## `hub show`
 
 用于查看本地已安装Module的属性或者指定目录下确定的Module的属性，包括其名字、版本、描述、作者等信息
 
-## `download`
+## `hub download`
 
 用于下载百度提供的Module
 
@@ -31,36 +31,36 @@ PaddleHub支持修改预训练模型存放路径：
 
 * `--type`：指定下载的资源类型，当指定Model时，download只会下载Model的资源。默认为All，此时会优先搜索Module资源，如果没有相关的Module资源，则搜索Model
 
-## `search`
+## `hub search`
 
 通过关键字在服务端检索匹配的Module，当想要查找某个特定模型的Module时，使用search命令可以快速得到结果，例如`hub search ssd`命令，会查找所有包含了ssd字样的Module，命令支持正则表达式，例如`hub search ^s.*`搜索所有以s开头的资源。
 
 `注意`
 如果想要搜索全部的Module，使用`hub search *`并不生效，这是因为shell会自行进行通配符展开，将*替换为当前目录下的文件名。为了进行全局搜索，用户可以直接键入`hub search`
 
-## `list`
+## `hub list`
 
 列出本地已经安装的Module
 
-## `run`
+## `hub run`
 
 用于执行Module的预测，需要注意的是，并不是所有的模型都支持预测（同样，也不是所有的模型都支持迁移学习），更多关于run命令的细节，请查看下方的`关于预测`
 
-## `help`
+## `hub help`
 
 显示帮助信息
 
-## `version`
+## `hub version`
 
 显示PaddleHub版本信息
 
-## `clear`
+## `hub clear`
 
 PaddleHub在使用过程中会产生一些缓存数据，这部分数据默认存放在${HUB_HOME}/.paddlehub/cache目录下，用户可以通过clear命令来清空缓存
 
-## `autofinetune`
+## `hub autofinetune`
 
-用于自动调整Fine-tune任务的超参数，具体使用详情参考[PaddleHub AutoDL Finetuner使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.4/tutorial/autofinetune.md)
+用于自动调整Fine-tune任务的超参数，具体使用详情参考[PaddleHub AutoDL Finetuner使用教程](./autofinetune.md)
 
 `选项`
 * `--param_file`: 需要搜索的超参数信息yaml文件
@@ -78,7 +78,7 @@ PaddleHub在使用过程中会产生一些缓存数据，这部分数据默认�
 * `--strategy`: 设置自动搜索超参算法，可选hazero和pshe2，默认为hazero
 
 
-## `config`
+## `hub config`
 用于查看和设置paddlehub相关设置，包括对server地址、日志级别的设置：
 
 `示例`
@@ -90,13 +90,13 @@ PaddleHub在使用过程中会产生一些缓存数据，这部分数据默认�
 
 * `hub config log==[level]`: 设置当前日志级别为[level]， 可选值为critical, error, warning, info, debug, nolog, 从左到右优先级从高到低，nolog表示不显示日志信息
 
-## `serving`
+## `hub serving`
 
 用于一键部署Module预测服务，详细用法见[PaddleHub Serving一键服务部署](serving.md)
 
 **NOTE:**
 
-1. 在PaddleHub中，Module表示一个`可执行的神经网络模型`，一个Module可以支持直接命令行预测，也可以配合PaddleHub Finetune API，通过少量代码实现迁移学习。不是所有的Module都支持命令行预测 (例如BERT/ERNIE Transformer类模型，一般需要搭配任务进行finetune)，也不是所有的Module都可用于finetune（例如LAC词法分析模型，我们不建议用户用于finetune）。
+在PaddleHub中，Module表示一个`可执行的神经网络模型`，一个Module可以支持直接命令行预测，也可以配合PaddleHub Finetune API，通过少量代码实现迁移学习。不是所有的Module都支持命令行预测 (例如BERT/ERNIE Transformer类模型，一般需要搭配任务进行finetune)，也不是所有的Module都可用于finetune（例如LAC词法分析模型，我们不建议用户用于finetune）。
 
 PaddleHub尽量简化了用户在使用命令行预测时的理解成本，一般来讲，我们将预测分为NLP和CV两大类
 
@@ -126,11 +126,11 @@ $ hub run lac --input_file test.txt
 
 ```shell
 # 单张照片预测
-$ hub run ssd_mobilenet_v1_pascal --input_path test.jpg
+$ hub run resnet_v2_50_imagenet --input_path test.jpg
 ```
 ```shell
 # 多张照片预测
-$ hub run ssd_mobilenet_v1_pascal --input_file test.txt
+$ hub run resnet_v2_50_imagenet --input_file test.txt
 ```
 其中test.txt的格式为
 ```

@@ -40,25 +40,15 @@ if __name__ == '__main__':
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use SequenceLabelReader to read dataset
-    dataset = hub.dataset.MSRA_NER()
-    reader = hub.reader.SequenceLabelReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        sp_model_path=module.get_spm_path(),
-        word_dict_path=module.get_word_dict_path())
+    # Use the appropriate tokenizer to preprocess the data set
+    # For ernie_tiny, it use BertTokenizer too.
+    tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    dataset = hub.dataset.MSRA_NER(
+        tokenizer=tokenizer, max_seq_len=args.max_seq_len)
 
     # Construct transfer learning network
     # Use "sequence_output" for token-level output.
     sequence_output = outputs["sequence_output"]
-
-    # Setup feed list for data feeder
-    # Must feed all the tensor of module need
-    feed_list = [
-        inputs["input_ids"].name, inputs["position_ids"].name,
-        inputs["segment_ids"].name, inputs["input_mask"].name
-    ]
 
     # Select a fine-tune strategy
     strategy = hub.AdamWeightDecayStrategy(
@@ -78,9 +68,8 @@ if __name__ == '__main__':
     # Define a sequence labeling fine-tune task by PaddleHub's API
     # If add crf, the network use crf as decoder
     seq_label_task = hub.SequenceLabelTask(
-        data_reader=reader,
+        dataset=dataset,
         feature=sequence_output,
-        feed_list=feed_list,
         max_seq_len=args.max_seq_len,
         num_classes=dataset.num_labels,
         config=config,

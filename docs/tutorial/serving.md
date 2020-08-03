@@ -31,7 +31,9 @@ $ hub serving start --modules [Module1==Version1, Module2==Version2, ...] \
 |--use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
 |--use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式<br>*`Windows操作系统只支持单进程方式`*|
 |--workers|在并发方式下指定的并发任务数，默认为`2*cpu_count-1`，其中`cpu_count`为CPU核数|  
+
 **NOTE:** --use_gpu不可与--use_multiprocess共用。
+
 #### 配置文件启动
 启动命令
 ```shell
@@ -92,11 +94,8 @@ $ hub serving start --config config.json
 ### Step3：利用PaddleHub Serving进行个性化开发
 使用PaddleHub Serving进行模型服务部署后，可以利用得到的接口进行开发，如对外提供web服务，或接入到应用程序中，以降低客户端预测压力，提高性能，下面展示了一个web页面demo:
 
-<p align="center">  
+![](../imgs/web_demo.png)
 
-<img src="../imgs/web_demo.png" width="60%" />  
-
-</p>  
 
 ### Step4：关闭serving
 使用关闭命令即可关闭启动的serving，
@@ -143,11 +142,7 @@ $ hub serving start -c serving_config.json
 ```
 启动成功界面如图：
 
-<p align="center">  
-
-<img src="../imgs/start_serving_lac.png" width="100%" />  
-
-</p>  
+![](../imgs/start_serving_lac.png)
 
 这样我们就在8866端口成功部署了lac的在线分词服务。
 *此处warning为Flask提示，不影响使用*

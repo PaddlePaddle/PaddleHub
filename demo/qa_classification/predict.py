@@ -39,29 +39,19 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     # loading Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie")
+    module = hub.Module(name="ernie_tiny")
     inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
 
-    # Sentence classification  dataset reader
+    # Download dataset and get its label list and label num
+    # If you just want labels information, you can omit its tokenizer parameter to avoid preprocessing the train set.
     dataset = hub.dataset.NLPCC_DBQA()
-    reader = hub.reader.ClassifyReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len)
+    num_classes = dataset.num_labels
+    label_list = dataset.get_labels()
 
     # Construct transfer learning network
     # Use "pooled_output" for classification tasks on an entire sentence.
     # Use "sequence_output" for token-level output.
     pooled_output = outputs["pooled_output"]
-
-    # Setup feed list for data feeder
-    # Must feed all the tensor of ERNIE's module need
-    feed_list = [
-        inputs["input_ids"].name,
-        inputs["position_ids"].name,
-        inputs["segment_ids"].name,
-        inputs["input_mask"].name,
-    ]
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
@@ -73,9 +63,8 @@ if __name__ == '__main__':
 
     # Define a classfication fine-tune task by PaddleHub's API
     cls_task = hub.TextClassifierTask(
-        data_reader=reader,
+        dataset=dataset,
         feature=pooled_output,
-        feed_list=feed_list,
         num_classes=dataset.num_labels,
         config=config)
 
@@ -83,5 +72,18 @@ if __name__ == '__main__':
     data = [["北京奥运博物馆的场景效果负责人是谁？", "主要承担奥运文物征集、保管、研究和爱国主义教育基地建设相关工作。"],
             ["北京奥运博物馆的场景效果负责人是谁", "于海勃，美国加利福尼亚大学教授 场景效果负责人 总设计师"],
             ["北京奥运博物馆的场景效果负责人是谁？", "洪麦恩，清华大学美术学院教授 内容及主展线负责人 总设计师"]]
-
-    print(cls_task.predict(data=data, return_result=True))
+    # Use the appropriate tokenizer to preprocess the data
+    # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
+    if module.name == "ernie_tiny":
+        tokenizer = hub.ErnieTinyTokenizer(
+            vocab_file=module.get_vocab_path(),
+            spm_path=module.get_spm_path(),
+            word_dict_path=module.get_word_dict_path())
+    else:
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    encoded_data = [
+        tokenizer.encode(
+            text=text, text_pair=text_pair, max_seq_len=args.max_seq_len)
+        for text, text_pair in data
+    ]
+    print(cls_task.predict(data=encoded_data, label_list=label_list))

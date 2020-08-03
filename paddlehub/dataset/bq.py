@@ -20,11 +20,16 @@ from __future__ import print_function
 import os
 
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import TextClassificationDataset
 
 
-class BQ(BaseNLPDataset):
-    def __init__(self):
+class BQ(TextClassificationDataset):
+    """
+    The Bank Question (BQ) corpus, a Chinese corpus for sentence semantic equivalence identification (SSEI),
+    contains 120,000 question pairs from 1-year online bank custom service logs.
+    """
+
+    def __init__(self, tokenizer=None, max_seq_len=None):
         dataset_dir = os.path.join(DATA_HOME, "bq")
         base_path = self._download_dataset(
             dataset_dir,
@@ -36,18 +41,16 @@ class BQ(BaseNLPDataset):
             test_file="test.txt",
             label_file=None,
             label_list=["0", "1"],
-        )
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len)
 
 
 if __name__ == "__main__":
-    ds = BQ()
-    print("first 10 dev")
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+    ds = BQ(tokenizer=BertTokenizer(vocab_file='vocab.txt'), max_seq_len=10)
+    print("first 10 dev examples")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
-    print("first 10 train")
-    for e in ds.get_train_examples()[:10]:
-        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
-    print("first 10 test")
-    for e in ds.get_test_examples()[:10]:
-        print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))
-    print(ds)
+    print("first 10 dev records")
+    for e in ds.get_dev_records()[:10]:
+        print(e)

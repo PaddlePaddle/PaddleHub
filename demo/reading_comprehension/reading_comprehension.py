@@ -17,7 +17,6 @@
 import argparse
 import ast
 
-import paddle.fluid as fluid
 import paddlehub as hub
 
 hub.common.logger.logger.setLevel("INFO")
@@ -42,27 +41,22 @@ if __name__ == '__main__':
     inputs, outputs, program = module.context(
         trainable=True, max_seq_len=args.max_seq_len)
 
-    # Download dataset and use ReadingComprehensionReader to read dataset
+    # Use the appropriate tokenizer to preprocess the data set
+    # For ernie_tiny, it will do word segmentation to get subword. More details: https://www.jiqizhixin.com/articles/2019-11-06-9
+    if module.name == "ernie_tiny":
+        tokenizer = hub.ErnieTinyTokenizer(
+            vocab_file=module.get_vocab_path(),
+            spm_path=module.get_spm_path(),
+            word_dict_path=module.get_word_dict_path())
+    else:
+        tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+
     # If you wanna load SQuAD 2.0 dataset, just set version_2_with_negative as True
-    dataset = hub.dataset.SQUAD(version_2_with_negative=False)
+    dataset = hub.dataset.SQUAD(
+        version_2_with_negative=False,
+        tokenizer=tokenizer,
+        max_seq_len=args.max_seq_len)
     # dataset = hub.dataset.SQUAD(version_2_with_negative=True)
-
-    reader = hub.reader.ReadingComprehensionReader(
-        dataset=dataset,
-        vocab_path=module.get_vocab_path(),
-        max_seq_len=args.max_seq_len,
-        doc_stride=128,
-        max_query_length=64)
-
-    seq_output = outputs["sequence_output"]
-
-    # Setup feed list for data feeder
-    feed_list = [
-        inputs["input_ids"].name,
-        inputs["position_ids"].name,
-        inputs["segment_ids"].name,
-        inputs["input_mask"].name,
-    ]
 
     # Select fine-tune strategy, setup config and fine-tune
     strategy = hub.AdamWeightDecayStrategy(
@@ -72,7 +66,7 @@ if __name__ == '__main__':
 
     # Setup RunConfig for PaddleHub Fine-tune API
     config = hub.RunConfig(
-        eval_interval=300,
+        eval_interval=100,
         use_data_parallel=args.use_data_parallel,
         use_cuda=args.use_gpu,
         num_epoch=args.num_epoch,
@@ -82,9 +76,8 @@ if __name__ == '__main__':
 
     # Define a reading comprehension fine-tune task by PaddleHub's API
     reading_comprehension_task = hub.ReadingComprehensionTask(
-        data_reader=reader,
-        feature=seq_output,
-        feed_list=feed_list,
+        dataset=dataset,
+        feature=outputs["sequence_output"],
         config=config,
         sub_task="squad",
     )

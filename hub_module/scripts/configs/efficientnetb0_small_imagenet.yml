@@ -4,6 +4,6 @@ exclude:
   - README.md
 resources:
   -
-    url: https://bj.bcebos.com/paddlehub/hub_dev/efficientnetb0_small_imagenet_model.tar.gz
+    url: https://bj.bcebos.com/paddlehub/model/image/classification/efficientnetb0_small_imagenet_infer_model.tar.gz
     dest: .
     uncompress: True

@@ -7,11 +7,8 @@
 
 整体流程图如下：  
 
-<div align="center">  
+![](../imgs/bs.png)
 
-<img src="../imgs/bs.png" aligh="center" width="100%" alt="BS流程图" />  
-
-</div>  
 
 ### Bert Service的特点
 使用`Bert Service`能够帮助开发者在限制性较强的环境中有效获取embedding，常用于以下情景：  
@@ -101,14 +98,7 @@ $ hub serving start bert_service -m ernie_tiny -p 8866 --use_gpu --gpu 0
 ```shell
 Server[baidu::paddle_serving::predictor::bert_service::BertServiceImpl] is serving on port=8866.
 ```
-整个启动过程如下图：
-
-
-<div align="center">  
-
-&emsp;&emsp;<img src="https://github.com/ShenYuhan/ml-python/blob/master/short_start_fast.gif" aligh="center" width="70%" alt="启动BS" />  
-
-</div>  
+[整个启动过程动态图](https://github.com/ShenYuhan/ml-python/blob/master/short_start_fast.gif)
 
 
 其中各参数说明如下表：
@@ -203,19 +193,14 @@ result = bc.get_result(input_text=input_text)
 ```python
 [[0.9993321895599361, 0.9994612336158751, 0.9999646544456481, 0.732795298099517, -0.34387934207916204, ... ]]
 ```
-客户端代码demo文件见[示例](../../demo/serving/bert_service/bert_service_client.py)。  
+客户端代码demo文件见[示例](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.7/demo/serving/bert_service/bert_service_client.py)。  
 运行命令如下：  
 ```shell
 $ python bert_service_client.py
 ```  
 
-运行过程如下图：
+[运行过程动态图](https://github.com/ShenYuhan/ml-python/blob/master/short_client_fast.gif)
 
-<div align="center">  
-
-&emsp;&emsp;<img src="https://github.com/ShenYuhan/ml-python/blob/master/short_client_fast.gif" aligh="center" width="70%" alt="启动BS" />  
-
-</div>  
 
 ### Step4：关闭Bert Service服务端
 如要停止`Bert Service`服务端程序，可在其启动命令行页面使用Ctrl+C方式关闭，关闭成功会打印如下日志：
@@ -237,7 +222,7 @@ $ hub serving start bert_service -m bert_chinese_L-12_H-768_A-12 -p 8867
 
 Q : 启动时显示"Check out http://yq01-gpu-255-129-12-00.epc.baidu.com:8887 in web
  browser."，这个页面有什么作用。  
-A : 这是`BRPC`的内置服务，主要用于查看请求数、资源占用等信息，可对server端性能有大致了解，具体信息可查看[BRPC内置服务](https://github.com/apache/incubator-brpc/blob/master/docs/cn/builtin_service.md)。
+A : 这是`BRPC`的内置服务，主要用于查看请求数、资源占用等信息，可对server端性能有大致了解，具体信息可查看[BRPC内置服务](https://github.com/apache/incubator-brpc/tree/master/docs/cn)。
 
 Q : 为什么输入文本的格式为[["文本1"], ["文本2"], ]，而不是["文本1", "文本2", ]？  
 A : 因为Bert模型可以对一轮对话生成向量表示，例如[["问题1","回答1"],["问题2","回答2"]]，为了防止使用时混乱，每个样本使用一个list表示，一个样本list内部可以是1条string或2条string，如下面的文本：  

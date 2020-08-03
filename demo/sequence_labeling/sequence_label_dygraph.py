@@ -21,9 +21,9 @@ parser.add_argument("--max_seq_len",        type=int,               default=512,
 # yapf: enable.
 
 
-class TransformerSequenceLabelLayer(fluid.dygraph.Layer):
+class TransformerSeqLabeling(fluid.dygraph.Layer):
     def __init__(self, num_classes, transformer):
-        super(TransformerSequenceLabelLayer, self).__init__()
+        super(TransformerSeqLabeling, self).__init__()
         self.num_classes = num_classes
         self.transformer = transformer
         self.fc = Linear(input_dim=768, output_dim=num_classes)
@@ -39,11 +39,15 @@ class TransformerSequenceLabelLayer(fluid.dygraph.Layer):
 
 
 def finetune(args):
-    ernie = hub.Module(name="ernie", max_seq_len=args.max_seq_len)
+    module = hub.Module(name="ernie", max_seq_len=args.max_seq_len)
+    # Use the appropriate tokenizer to preprocess the data set
+    tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
+    dataset = hub.dataset.MSRA_NER(
+        tokenizer=tokenizer, max_seq_len=args.max_seq_len)
+
     with fluid.dygraph.guard():
-        dataset = hub.dataset.MSRA_NER()
-        ts = TransformerSequenceLabelLayer(
-            num_classes=dataset.num_labels, transformer=ernie)
+        ts = TransformerSeqLabeling(
+            num_classes=dataset.num_labels, transformer=module)
         adam = AdamOptimizer(learning_rate=1e-5, parameter_list=ts.parameters())
         state_dict_path = os.path.join(args.checkpoint_dir,
                                        'dygraph_state_dict')
@@ -51,34 +55,32 @@ def finetune(args):
             state_dict, _ = fluid.load_dygraph(state_dict_path)
             ts.load_dict(state_dict)
 
-        reader = hub.reader.SequenceLabelReader(
-            dataset=dataset,
-            vocab_path=ernie.get_vocab_path(),
-            max_seq_len=args.max_seq_len,
-            sp_model_path=ernie.get_spm_path(),
-            word_dict_path=ernie.get_word_dict_path())
-        train_reader = reader.data_generator(
-            batch_size=args.batch_size, phase='train')
-
         loss_sum = total_infer = total_label = total_correct = cnt = 0
-        # 执行epoch_num次训练
         for epoch in range(args.num_epoch):
-            # 读取训练数据进行训练
-            for batch_id, data in enumerate(train_reader()):
-                input_ids = np.array(data[0][0]).astype(np.int64)
-                position_ids = np.array(data[0][1]).astype(np.int64)
-                segment_ids = np.array(data[0][2]).astype(np.int64)
-                input_mask = np.array(data[0][3]).astype(np.float32)
-                labels = np.array(data[0][4]).astype(np.int64).reshape(-1, 1)
-                seq_len = np.squeeze(
-                    np.array(data[0][5]).astype(np.int64), axis=1)
+            for batch_id, data in enumerate(
+                    dataset.batch_records_generator(
+                        phase="train",
+                        batch_size=args.batch_size,
+                        shuffle=True,
+                        pad_to_batch_max_seq_len=False)):
+                batch_size = len(data["input_ids"])
+                input_ids = np.array(data["input_ids"]).astype(
+                    np.int64).reshape([batch_size, -1, 1])
+                position_ids = np.array(data["position_ids"]).astype(
+                    np.int64).reshape([batch_size, -1, 1])
+                segment_ids = np.array(data["segment_ids"]).astype(
+                    np.int64).reshape([batch_size, -1, 1])
+                input_mask = np.array(data["input_mask"]).astype(
+                    np.float32).reshape([batch_size, -1, 1])
+                labels = np.array(data["label"]).astype(np.int64).reshape(-1, 1)
+                seq_len = np.array(data["seq_len"]).astype(np.int64).reshape(
+                    -1, 1)
                 pred, ret_infers = ts(input_ids, position_ids, segment_ids,
                                       input_mask)
 
                 loss = fluid.layers.cross_entropy(pred, to_variable(labels))
                 avg_loss = fluid.layers.mean(loss)
                 avg_loss.backward()
-                # 参数更新
                 adam.minimize(avg_loss)
 
                 loss_sum += avg_loss.numpy() * labels.shape[0]

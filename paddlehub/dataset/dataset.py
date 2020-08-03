@@ -106,6 +106,10 @@ class BaseDataset(object):
                     "As label_list has been assigned, label_file is noneffective"
                 )
 
+        if self.label_list:
+            self.label_index = dict(
+                zip(self.label_list, range(len(self.label_list))))
+
     def get_train_examples(self):
         return self.train_examples
 
@@ -120,6 +124,20 @@ class BaseDataset(object):
 
     def get_predict_examples(self):
         return self.predict_examples
+
+    def get_examples(self, phase):
+        if phase == "train":
+            return self.get_train_examples()
+        elif phase == "dev":
+            return self.get_dev_examples()
+        elif phase == "test":
+            return self.get_test_examples()
+        elif phase == "val":
+            return self.get_val_examples()
+        elif phase == "predict":
+            return self.get_predict_examples()
+        else:
+            raise ValueError("Invalid phase: %s" % phase)
 
     def get_labels(self):
         return self.label_list
@@ -166,7 +184,9 @@ class BaseDataset(object):
         raise NotImplementedError
 
     def _load_label_data(self):
-        with open(os.path.join(self.base_path, self.label_file), "r") as file:
+        with open(
+                os.path.join(self.base_path, self.label_file), "r",
+                encoding="utf8") as file:
             return file.read().strip().split("\n")
 
     def __str__(self):

@@ -25,19 +25,19 @@ import csv
 
 from paddlehub.dataset import InputExample
 from paddlehub.common.dir import DATA_HOME
-from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
+from paddlehub.dataset.base_nlp_dataset import TextClassificationDataset
 
 _DATA_URL = "https://bj.bcebos.com/paddlehub-dataset/XNLI-lan.tar.gz"
 
 
-class XNLI(BaseNLPDataset):
+class XNLI(TextClassificationDataset):
     """
     Please refer to
     https://arxiv.org/pdf/1809.05053.pdf
     for more information
     """
 
-    def __init__(self, language='zh'):
+    def __init__(self, language='zh', tokenizer=None, max_seq_len=None):
         if language not in [
                 "ar", "bg", "de", "el", "en", "es", "fr", "hi", "ru", "sw",
                 "th", "tr", "ur", "vi", "zh"
@@ -55,6 +55,8 @@ class XNLI(BaseNLPDataset):
             test_file="%s_test.tsv" % language,
             label_file=None,
             label_list=["neutral", "contradiction", "entailment"],
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len,
         )
 
     def _read_file(self, input_file, phase=None):
@@ -74,7 +76,10 @@ class XNLI(BaseNLPDataset):
 
 
 if __name__ == "__main__":
-    ds = XNLI()
+    from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
+    tokenizer = BertTokenizer(vocab_file='vocab.txt')
+
+    ds = XNLI(tokenizer=tokenizer, max_seq_len=20)
     print("first 10 dev")
     for e in ds.get_dev_examples()[:10]:
         print("{}\t{}\t{}\t{}".format(e.guid, e.text_a, e.text_b, e.label))

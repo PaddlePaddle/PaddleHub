@@ -5,6 +5,6 @@ exclude:
   - test.py
 resources:
   -
-    url: https://bj.bcebos.com/paddlehub/model/nlp/senta_bilstm_infer_model.tar.gz
+    url: https://bj.bcebos.com/paddlehub/model/nlp/sentiment_analysis/senta_bilstm_assets.tar.gz
     dest: .
     uncompress: True
