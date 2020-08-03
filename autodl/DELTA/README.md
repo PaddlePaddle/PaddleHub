@@ -8,7 +8,7 @@ This page implements the [DELTA](https://arxiv.org/abs/1901.09229) algorithm in 
 
 ## Preparation of Data and Pre-trained Model
 
-- Download transfer learning target datasets, like [Caltech-256](http://www.vision.caltech.edu/Image_Datasets/Caltech256/), [CUB_200_2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html) or others. Arrange the dataset in this way:
+- Download transfer learning target datasets, like [Caltech-256](https://www.kaggle.com/jessicali9530/caltech256), [CUB_200_2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html) or others. Arrange the dataset in this way:
 ```
     root/train/dog/xxy.jpg
     root/train/dog/xxz.jpg

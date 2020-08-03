@@ -1,3 +1,15 @@
+## `v1.8.0`
+
+* 预训练模型丰富，一键完成更多
+  * 『[文本生成](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=TextGeneration)』新增基于ERNIE-tiny和ERNIE-gen的对联和写诗生成模型，支持一键自动写诗和对对联。
+  *  『[词法分析](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=LexicalAnalysis)』新增jieba的paddle模式切词模型，可一键完成中文分词、关键词抽取等功能。
+  * 『[语义表示](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=SemanticModel)』新增基于网页、小说、新闻三类大规模文本数据的LDA主题模型及其语义相似度计算接口。
+
+* Fine-tune API升级，提升灵活性并支持更多任务
+   * 新增Tokenizer API，支持更加灵活的切词、切字模式和自定义切词工具拓展。
+   * 新增[文本生成](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo/text_generation)任务，支持Seq2Seq任务的Fine-tuning。
+  * 新增文本匹配任务，支持[Pointwise](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo/pointwise_text_matching)、[Pairwise](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo/pairwise_text_matching)两种文本匹配训练模式，更便捷完成语义匹配任务。
+
 ## `v1.7.0`
 
 * 丰富预训练模型，提升应用性
@@ -52,7 +64,7 @@
 # `v1.5.0`
 
 * 升级PaddleHub Serving，提升性能和易用性
-   * 新增文本Embedding服务[Bert Service](./tutorial/bert_service.md), 轻松获取文本embedding；
+   * 新增文本Embedding服务[Bert Service](./docs/tutorial/bert_service.md), 轻松获取文本embedding；
       * 代码精短，易于使用。服务端/客户端一行命令即可获取文本embedding；  
       * 更高性能，更高效率。通过Paddle AnalysisPredictor API优化计算图，提升速度减小显存占用
       * 随"机"应变，灵活扩展。根据机器资源和实际需求可灵活增加服务端数量，支持多显卡多模型计算任务
