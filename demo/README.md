@@ -40,7 +40,7 @@
   该样例展示了PaddleHub如何将word2vec_skipgram用于计算两个文本语义相似度。
 
 * 超参优化AutoDL Finetuner使用
-  该样例展示了PaddleHub超参优化AutoDL Finetuner如何使用，给出了自动搜素[图像分类](./autofinetune_image_classification)/[文本分类](./autofinetune_text_classification)任务的较佳超参数示例。
+  该样例展示了PaddleHub超参优化AutoDL Finetuner如何使用，给出了自动搜索[图像分类](./autofinetune_image_classification)/[文本分类](./autofinetune_text_classification)任务的较佳超参数示例。
 
 * [服务化部署Hub Serving使用](./serving)
   该样例文件夹下展示了服务化部署Hub Serving如何使用，将PaddleHub支持的可预测Module如何服务化部署。
