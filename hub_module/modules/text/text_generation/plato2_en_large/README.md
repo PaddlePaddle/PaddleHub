@@ -1,6 +1,6 @@
 ## 概述
 
-PLATO2是一个超大规模生成式对话系统模型。它承袭了PLATO隐变量进行回复多样化生成的特性，能够就开放域话题进行流畅深入的聊天。据公开数据，其效果超越了Google 于2020年2月份发布的 Meena和Facebook AI Research于2020年4月份发布的Blender的效果。plato2_en_large包含310M参数，可用于一键预测对话回复，该Module仅支持使用GPU预测，不支持CPU。
+PLATO2是一个超大规模生成式对话系统模型。它承袭了PLATO隐变量进行回复多样化生成的特性，能够就开放域话题进行流畅深入的聊天。据公开数据，其效果超越了Google 于2020年2月份发布的 Meena和Facebook AI Research于2020年4月份发布的Blender的效果。plato2_en_large包含1.6B参数，可用于一键预测对话回复，该Module仅支持使用GPU预测，不支持CPU。
 <p align="center">
 <img src="https://image.jiqizhixin.com/uploads/editor/65107b78-0259-4121-b8c5-a090f9d3175b/640.png" hspace='10'/> <br />
 </p>
