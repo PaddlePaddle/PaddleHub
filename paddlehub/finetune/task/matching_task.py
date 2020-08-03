@@ -245,12 +245,12 @@ class PairwiseTextMatchingTask(BaseTask):
                 scores["recall"] = recall
             elif metric == "f1":
                 scores["f1"] = f1
-            elif "acc" in self.metrics_choices:
+            elif metric == "acc":
                 scores["acc"] = acc
             else:
                 raise ValueError(
-                    "Unknown metric: %s! The chosen metrics must be acc, f1, presicion and recall."
-                    % self.metrics_choice)
+                    "Unknown metric: %s! The chosen metrics must be acc, f1, presicion or recall."
+                    % metric)
 
         return scores, avg_loss, run_speed
 
@@ -539,11 +539,11 @@ class PointwiseTextMatchingTask(BaseTask):
                 scores["recall"] = recall
             elif metric == "f1":
                 scores["f1"] = f1
-            elif "acc" in self.metrics_choices:
+            elif metric == "acc":
                 scores["acc"] = acc
             else:
                 raise ValueError(
-                    "Unknown metric: %s! The chosen metrics must be acc, f1, presicion and recall."
+                    "Unknown metric: %s! The chosen metrics must be acc, f1, presicion or recall."
                     % self.metrics_choice)
 
         return scores, avg_loss, run_speed

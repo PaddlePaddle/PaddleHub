@@ -41,8 +41,6 @@ if __name__ == '__main__':
 
     dataset = hub.dataset.ChnSentiCorp(
         tokenizer=tokenizer, max_seq_len=args.max_seq_len)
-    num_classes = dataset.num_labels
-    label_list = dataset.get_labels()
 
     # Construct transfer learning network
     # Use sentence-level output.
@@ -58,14 +56,8 @@ if __name__ == '__main__':
 
     # Define a classfication fine-tune task by PaddleHub's API
     cls_task = hub.TextClassifierTask(
-        feature=sent_feature, num_classes=num_classes, config=config)
-
-    # Data to be predicted
-    data = ["这家餐厅很好吃", "这部电影真的很差劲"]
-
-    encoded_data = [
-        tokenizer.encode(text=text, max_seq_len=args.max_seq_len)
-        for text in data
-    ]
-
-    print(cls_task.predict(data=encoded_data, label_list=label_list))
+        dataset=dataset,
+        feature=sent_feature,
+        num_classes=dataset.num_labels,
+        config=config)
+    cls_task.finetune_and_eval()

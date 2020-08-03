@@ -120,19 +120,23 @@ class ClassifierTask(BaseTask):
 
         # The first key will be used as main metrics to update the best model
         scores = OrderedDict()
-
+        precision, recall, f1 = calculate_f1_np(all_infers, all_labels)
+        matthews = matthews_corrcoef(all_infers, all_labels)
         for metric in self.metrics_choices:
-            if metric == "acc":
-                avg_acc = acc_sum / run_examples
-                scores["acc"] = avg_acc
+            if metric == "precision":
+                scores["precision"] = precision
+            elif metric == "recall":
+                scores["recall"] = recall
             elif metric == "f1":
-                f1 = calculate_f1_np(all_infers, all_labels)
                 scores["f1"] = f1
+            elif metric == "acc":
+                scores["acc"] = acc_sum / run_examples
             elif metric == "matthews":
-                matthews = matthews_corrcoef(all_infers, all_labels)
                 scores["matthews"] = matthews
             else:
-                raise ValueError("Not Support Metric: \"%s\"" % metric)
+                raise ValueError(
+                    "Unknown metric: %s! The chosen metrics must be acc, f1, presicion or recall."
+                    % metric)
 
         return scores, avg_loss, run_speed
 
@@ -195,7 +199,7 @@ class TextClassifierTask(ClassifierTask):
             startup_program (object): the customized startup program, default None.
             config (RunConfig): run config for the task, such as batch_size, epoch, learning_rate setting and so on. Default None.
             hidden_units(list): the element of `hidden_units` list is the full-connect layer size. It will add the full-connect layers to the program. Default None.
-            metrics_choices(list): metrics used to the task, default ["acc"].
+            metrics_choices(list): metrics used to the task, default ["acc"]. Choices: acc, precision, recall, f1, matthews.
         """
         if (not feature) and (not token_feature):
             logger.error(
