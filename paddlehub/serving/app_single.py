@@ -318,7 +318,9 @@ def create_app(init_flag=False, configs=None):
 
     @app_instance.route("/", methods=["GET", "POST"])
     def index():
-        return '暂不提供可视化界面，请直接使用脚本进行请求。<br/>No visual interface is provided for the time being, please use the python script to make a request directly.'
+        return '暂不提供可视化界面，请直接使用脚本进行请求。<br/>No visual ' \
+               'interface is provided for the time being, please use the' \
+               ' python script to make a request directly.'
         return render_template("main.html")
 
     @app_instance.before_request
