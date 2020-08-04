@@ -120,7 +120,7 @@ config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strat
 * `dis_params_layer`: 分层学习率策略需要的参数层次信息，如果设置为module.get_params_layer()，预训练模型中各层神经网络的更新速度将逐层衰减，默认每一层的学习率是上一层学习率的1/2.6；
 * `frz_params_layer`: 逐层解冻策略需要的参数层次信息，如果设置为module.get_params_layer()，预训练模型中各层神经网络将在训练过程中随着epoch的增大而参与更新，例如epoch=1时只有最上层参数会更新，epoch=2时最上2层参数都会参与更新；
 
-关于ULMFiT策略的详细说明，请参考[论文](https://arxiv.org/pdf/1801.06146.pdf)。如果您希望将ULMFiT策略与AdamWeightDecay策略进行组合实验，请参考[CombinedStrategy](../../paddlehub/finetune/strategy.py:183)
+关于ULMFiT策略的详细说明，请参考[论文](https://arxiv.org/pdf/1801.06146.pdf)。如果您希望将ULMFiT策略与AdamWeightDecay策略进行组合实验，请参考[CombinedStrategy](../../docs/reference/strategy.md)
 
 #### 运行配置
 `RunConfig` 主要控制Fine-tune的训练，包含以下可控制的参数:
@@ -151,11 +151,12 @@ gen_task.finetune_and_eval()
 1. `outputs["pooled_output"]`返回了Transformer类预训练模型对应的[CLS]向量,可以用于句子或句对的特征表达。这一特征将用于TextGenerationTask Decoder状态初始化。
 2. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达；这一特征将用于TextGenerationTask Decoder解码。
 3. 当前TextGenerationTask采用如下图所示的seq2seq结构：
+
 <p align="center">
  <img src="https://d2l.ai/_images/encoder-decoder.svg" width='60%' align="middle"
 </p>
 
-其中Encoder为hub.Module指定的预训练模型，Decoder为通用的Attention LSTM结构，如果您希望进一步增强Decoder性能，可以尝试修改[generation_task组网代码](../../paddlehub/finetune/task/generation_task.py:156)。
+其中Encoder为hub.Module指定的预训练模型，Decoder为通用的LSTM+Attention结构.
 
 #### 自定义迁移任务
 
@@ -191,5 +192,4 @@ PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜�
 
 ## Fine-tune之后保存的模型转化为PaddleHub Module
 
-代码详见[finetuned_model_to_module](./finetuned_model_to_module)文件夹下
 Fine-tune之后保存的模型转化为PaddleHub Module[教程](../../docs/tutorial/finetuned_model_to_module.md)

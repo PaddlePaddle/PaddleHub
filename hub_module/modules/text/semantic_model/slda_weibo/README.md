@@ -37,6 +37,31 @@
 
 - results(dict): 返回对应文档的前k个关键词，以及各个关键词在文档中的出现概率。
 
+### 代码示例
+
+这里展示API的使用示例。
+
+``` python
+import paddlehub as hub
+
+slda_weibo = hub.Module(name="slda_weibo")
+
+topic_dist = slda_weibo.infer_doc_topic_distribution("百度是全球最大的中文搜索引擎、致力于让网民更便捷地获取信息，找到所求。")
+# [{'topic id': 874, 'distribution': 0.5}, {'topic id': 1764, 'distribution': 0.5}]
+
+keywords = slda_weibo.show_topic_keywords(topic_id=874)
+# {'数据': 0.07850538018570305,
+#  '更新': 0.04504777051711974,
+#  '出口': 0.023363758946167185,
+#  '信息': 0.020567061200812687,
+#  '全国': 0.015975367546781145,
+#  '双十一': 0.014998636225687216,
+#  '地理': 0.013257422965959297,
+#  '官方': 0.012913598174463106,
+#  '支持': 0.01177359809763076,
+#  '说话': 0.011205999070328388}
+
+```
 ## 查看代码
 https://github.com/baidu/Familia
 

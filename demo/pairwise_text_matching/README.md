@@ -50,7 +50,7 @@ pairwise_text_matching
 
 ```python
 module = hub.Module(name="tencent_ailab_chinese_embedding_small")
-inputs, outputs, program = module.context(trainable=True, max_seq_len=args.max_seq_len, num_slots=3)
+inputs, outputs, program = module.context(trainable=True, max_seq_len=128, num_slots=3)
 ```
 其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值。
 
@@ -99,11 +99,11 @@ dataset = hub.dataset.DuEL(tokenizer=tokenizer, max_seq_len=128)
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致；
 
-更多数据集信息参考[Dataset](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.7/docs/reference/dataset.md)。
+更多数据集信息参考[Dataset](../../docs/reference/dataset.md)。
 
 #### 自定义数据集
 
-如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.7/docs/tutorial/how_to_load_data.md)
+如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](../../docs/tutorial/how_to_load_data.md)
 
 ### Step4：选择优化策略和运行配置
 
@@ -170,7 +170,7 @@ matching_task.finetune_and_eval()
 
 #### 自定义迁移任务
 
-如果想改变迁移任务组网，详细参见[自定义迁移任务]()。
+如果想改变迁移任务组网，详细参见[自定义迁移任务](../../docs/tutorial/how_to_define_task.md)。
 
 ## 可视化
 
