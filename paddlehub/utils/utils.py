@@ -14,8 +14,10 @@
 # limitations under the License.
 
 import contextlib
+import math
 import os
 import sys
+import time
 import requests
 import tempfile
 from typing import Generator
@@ -27,9 +29,7 @@ import paddlehub.env as hubenv
 
 
 class Version(packaging.version.Version):
-    '''
-    Expand realization of packaging.version.Version
-    '''
+    '''Expand realization of packaging.version.Version'''
 
     def match(self, condition: str) -> bool:
         '''
@@ -73,6 +73,57 @@ class Version(packaging.version.Version):
         return _comp(Version(version))
 
 
+class Timer(object):
+    ''''''
+
+    def __init__(self, total_step):
+        self.total_step = total_step
+        self.last_count_step = 0
+        self.current_step = 0
+        self._is_running = True
+
+    def start(self):
+        self.last_time = time.time()
+        self.start_time = time.time()
+
+    def stop(self):
+        self._is_running = False
+        self.end_time = time.time()
+
+    def count(self):
+        run_steps = self.current_step - self.last_count_step
+        self.last_count_step = self.current_step
+        time_used = time.time() - self.last_time
+        self.last_time = time.time()
+        return time_used / run_steps
+
+    def step(self):
+        if not self.current_step >= self.total_step:
+            self.current_step += 1
+        return self.current_step
+
+    @property
+    def is_running(self):
+        return self._is_running
+
+    @property
+    def eta(self):
+        if not self.is_running:
+            return '00:00:00'
+        scale = self.total_step / self.current_step
+        remaining_time = (time.time() - self.start_time) * scale
+        return seconds_to_hms(remaining_time)
+
+
+def seconds_to_hms(seconds):
+    ''''''
+    h = math.floor(seconds / 3600)
+    m = math.floor((seconds - h * 3600) / 60)
+    s = int(seconds - h * 3600 - m * 60)
+    hms_str = '{}:{}:{}'.format(h, m, s)
+    return hms_str
+
+
 @contextlib.contextmanager
 def generate_tempfile(directory: str = None):
     '''Generate a temporary file'''
@@ -94,8 +145,8 @@ def download(url: str, path: str = None):
     Download a file
 
     Args:
-        url  (str)          : url to be downloaded
-        path (str|optional) : path to store downloaded products, default is current work directory
+        url  (str) : url to be downloaded
+        path (str, optional) : path to store downloaded products, default is current work directory
 
     Examples:
         .. code-block:: python
@@ -114,8 +165,8 @@ def download_with_progress(url: str, path: str = None) -> Generator[str, int, in
     Download a file and return the downloading progress -> Generator[filename, download_size, total_size]
 
     Args:
-        url  (str)          : url to be downloaded
-        path (str|optional) : path to store downloaded products, default is current work directory
+        url  (str) : url to be downloaded
+        path (str, optional) : path to store downloaded products, default is current work directory
 
     Examples:
         .. code-block:: python
