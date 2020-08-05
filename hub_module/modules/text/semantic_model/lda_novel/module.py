@@ -14,7 +14,7 @@ from lda_novel.vocab import Vocab, WordCount
 
 @moduleinfo(
     name="lda_novel",
-    version="1.0.0",
+    version="1.0.1",
     summary=
     "This is a PaddleHub Module for LDA topic model in novel dataset, where we can calculate doc distance, calculate the similarity between query and document, etc.",
     author="DesmonDay",
