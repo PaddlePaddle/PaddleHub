@@ -133,3 +133,7 @@ paddlehub >= 1.8.0
 * 1.0.0
 
   初始发布
+
+* 1.0.1
+
+  修复因为return的bug导致的NoneType错误
