@@ -13,13 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 import contextlib
+import cv2
 import math
 import os
 import sys
 import time
 import requests
 import tempfile
+import numpy as np
 from typing import Generator
 from urllib.parse import urlparse
 
@@ -122,6 +125,13 @@ def seconds_to_hms(seconds):
     s = int(seconds - h * 3600 - m * 60)
     hms_str = '{}:{}:{}'.format(h, m, s)
     return hms_str
+
+
+def base64_to_cv2(b64str):
+    data = base64.b64decode(b64str.encode('utf8'))
+    data = np.fromstring(data, np.uint8)
+    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    return data
 
 
 @contextlib.contextmanager

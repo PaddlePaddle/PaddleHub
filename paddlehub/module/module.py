@@ -63,37 +63,10 @@ class Module(object):
             elif directory:
                 module = cls.init_with_directory(directory=directory, **kwargs)
         else:
-            if not name and not directory:
-                directory = os.path.dirname(os.path.abspath(sys.modules[cls.__module__].__file__))
-                module = Module.init_with_directory(directory=directory, **kwargs)
-            else:
-                module = object.__new__(cls)
+            raise RuntimeError()
 
+        module.directory = directory
         return module
-
-    def __init__(self, name: str = None, directory: str = None, version: str = None, **kwargs):
-        # Avoid module being initialized multiple times
-        if '_is_initialize' in self.__dict__ and self._is_initialize:
-            return
-
-        super(Module, self).__init__()
-        _run_func_name = self._get_func_name(self.__class__, _module_runnable_func)
-        self._run_func = getattr(self, _run_func_name) if _run_func_name else None
-        self._serving_func_name = self._get_func_name(self.__class__, _module_serving_func)
-        self.directory = directory
-        self._initialize(**kwargs)
-        self._is_initialize = True
-
-    def _get_func_name(self, current_cls, module_func_dict):
-        mod = current_cls.__module__ + '.' + current_cls.__name__
-        if mod in module_func_dict:
-            _func_name = module_func_dict[mod]
-            return _func_name
-        elif current_cls.__bases__:
-            for base_class in current_cls.__bases__:
-                return self._get_func_name(base_class, module_func_dict)
-        else:
-            return None
 
     @classmethod
     def load(cls, directory: str):
@@ -108,7 +81,7 @@ class Module(object):
 
         for _item, _cls in inspect.getmembers(py_module, inspect.isclass):
             _item = py_module.__dict__[_item]
-            if issubclass(_item, Module):
+            if issubclass(_item, RunModule):
                 user_module_cls = _item
                 break
         else:
@@ -127,12 +100,36 @@ class Module(object):
         if not user_module_cls or not user_module_cls.version.match(version):
             user_module_cls = manager.install(name, version)
 
-        return user_module_cls(name=name, directory=directory, version=version, **kwargs)
+        return user_module_cls(**kwargs)
 
     @classmethod
     def init_with_directory(cls, directory: str, **kwargs):
         user_module_cls = cls.load(directory)
-        return user_module_cls(directory, **kwargs)
+        return user_module_cls(**kwargs)
+
+
+class RunModule(object):
+    def __init__(self):
+        # Avoid module being initialized multiple times
+        if '_is_initialize' in self.__dict__ and self._is_initialize:
+            return
+
+        super(Module, self).__init__()
+        _run_func_name = self._get_func_name(self.__class__, _module_runnable_func)
+        self._run_func = getattr(self, _run_func_name) if _run_func_name else None
+        self._serving_func_name = self._get_func_name(self.__class__, _module_serving_func)
+        self._is_initialize = True
+
+    def _get_func_name(self, current_cls, module_func_dict):
+        mod = current_cls.__module__ + '.' + current_cls.__name__
+        if mod in module_func_dict:
+            _func_name = module_func_dict[mod]
+            return _func_name
+        elif current_cls.__bases__:
+            for base_class in current_cls.__bases__:
+                return self._get_func_name(base_class, module_func_dict)
+        else:
+            return None
 
     @classmethod
     def get_py_requirements(cls):
@@ -148,9 +145,6 @@ class Module(object):
     def is_runnable(self) -> bool:
         return self._run_func != None
 
-    def _initialize(self):
-        ...
-
 
 sys_type = type
 
@@ -160,18 +154,20 @@ def moduleinfo(name: str,
                author: str = None,
                author_email: str = None,
                summary: str = None,
-               type: str = None):
+               type: str = None,
+               meta=None):
     def _wrapper(cls):
         wrap_cls = cls
-        if not issubclass(cls, Module):
+        _meta = RunModule if not meta else meta
+        if not issubclass(cls, _meta):
             _bases = []
             for _b in cls.__bases__:
-                if issubclass(Module, _b):
+                if issubclass(_meta, _b):
                     continue
                 _bases.append(_b)
-            _bases.append(Module)
+            _bases.append(_meta)
             _bases = tuple(_bases)
-            wrap_cls = sys_type(cls.__name__, _bases, {})
+            wrap_cls = sys_type(cls.__name__, _bases, dict(cls.__dict__))
 
         wrap_cls.name = name
         wrap_cls.version = utils.Version(version)
