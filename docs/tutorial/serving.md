@@ -228,7 +228,7 @@ $ PaddleHub Serving will stop.
 
 * [人脸检测-基于pyramidbox_lite_server_mask](../../demo/serving/module_serving/object_detection_pyramidbox_lite_server_mask)
 
-&emsp;&emsp;该示例展示了利用pyramidbox_lite_server_mask完成人脸口罩检测，检测人脸位置以及戴口枣的置信度。
+&emsp;&emsp;该示例展示了利用pyramidbox_lite_server_mask完成人脸口罩检测，检测人脸位置以及戴口罩的置信度。
 
 ## Bert Service
 除了预训练模型一键服务部署功能之外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](./bert_service.md)。
