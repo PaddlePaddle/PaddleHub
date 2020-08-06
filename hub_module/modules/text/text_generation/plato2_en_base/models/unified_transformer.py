@@ -50,7 +50,8 @@ class UnifiedTransformer(Model):
         self.n_head = args.num_attention_heads
         self.d_key = args.get("key_size", self.hidden_size // self.n_head)
         self.d_value = args.get("value_size", self.hidden_size // self.n_head)
-        self.inner_hidden_size = args.get("inner_hidden_size", self.hidden_size * 4)
+        self.inner_hidden_size = args.get("inner_hidden_size",
+                                          self.hidden_size * 4)
 
         self.vocab_size = args.vocab_size
         self.max_position_seq_len = args.max_position_embeddings
@@ -80,7 +81,6 @@ class UnifiedTransformer(Model):
 
         self.dtype = "float32"
 
-
         # Initialize all weigths by truncated normal initializer, and all biases
         # will be initialized by constant zero by default.
         self.param_initializer = fluid.initializer.TruncatedNormal(
@@ -92,11 +92,7 @@ class UnifiedTransformer(Model):
 
         super(UnifiedTransformer, self).__init__(args, place)
 
-    def _gen_input(self,
-                   token_ids,
-                   type_ids,
-                   pos_ids,
-                   input_mask,
+    def _gen_input(self, token_ids, type_ids, pos_ids, input_mask,
                    aux_emb=None):
         token_emb_out = layers.embedding(
             input=token_ids,
@@ -150,8 +146,7 @@ class UnifiedTransformer(Model):
         return emb_out, n_head_self_attn_mask
 
     def _get_pooled_output(self, enc_out, pos):
-        enc_out = layers.reshape(
-            x=enc_out, shape=[-1, self.hidden_size])
+        enc_out = layers.reshape(x=enc_out, shape=[-1, self.hidden_size])
         pos = layers.cast(x=pos, dtype="int32")
         feat = layers.gather(input=enc_out, index=pos)
 
@@ -174,10 +169,16 @@ class UnifiedTransformer(Model):
         emb_out, n_head_self_attn_mask = self._gen_input(
             token_ids, type_ids, pos_ids, generation_mask, aux_emb=aux_emb)
         return self._encode(
-            emb_out, n_head_self_attn_mask, self.generation_caches,
+            emb_out,
+            n_head_self_attn_mask,
+            self.generation_caches,
             gather_idx=gather_idx)
 
-    def _encode(self, emb_out, n_head_self_attn_mask, caches=None, gather_idx=None):
+    def _encode(self,
+                emb_out,
+                n_head_self_attn_mask,
+                caches=None,
+                gather_idx=None):
         return encoder(
             enc_input=emb_out,
             attn_bias=n_head_self_attn_mask,
@@ -199,8 +200,7 @@ class UnifiedTransformer(Model):
             name="encoder",
             caches=caches,
             gather_idx=gather_idx,
-            store=caches is not None
-        )
+            store=caches is not None)
 
     def _gumbel_softmax(self, logits, tau=0.67, eps=1e-10):
         u = layers.uniform_random_batch_size_like(
@@ -222,9 +222,12 @@ class UnifiedTransformer(Model):
             list(str): The name of each Variable in feed list.
         """
         feed_dict = {}
-        feed_dict["token_ids"] = layers.data(name="token_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
-        feed_dict["type_ids"] = layers.data(name="type_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
-        feed_dict["pos_ids"] = layers.data(name="pos_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
+        feed_dict["token_ids"] = layers.data(
+            name="token_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
+        feed_dict["type_ids"] = layers.data(
+            name="type_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
+        feed_dict["pos_ids"] = layers.data(
+            name="pos_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
 
         feed_dict["generation_mask"] = layers.data(
             name="generation_mask",
@@ -243,22 +246,22 @@ class UnifiedTransformer(Model):
                 dtype="int64",
                 lod_level=2)
             feed_dict["init_score"] = layers.data(
-                name="init_score",
-                shape=[-1, 1],
-                dtype="float32",
-                lod_level=1)
+                name="init_score", shape=[-1, 1], dtype="float32", lod_level=1)
             feed_dict["parent_idx"] = layers.data(
-                name="parent_idx",
-                shape=[-1],
-                dtype="int64")
+                name="parent_idx", shape=[-1], dtype="int64")
 
             feed_dict["tgt_generation_mask"] = layers.data(
-                name="tgt_generation_mask", shape=[-1, 1, self.max_seq_len], dtype="float32")
+                name="tgt_generation_mask",
+                shape=[-1, 1, self.max_seq_len],
+                dtype="float32")
         else:
-            feed_dict["tgt_label"] = layers.data(name="tgt_label", shape=[-1, 1], dtype="int64")
-            feed_dict["tgt_pos"] = layers.data(name="tgt_pos", shape=[-1, 1], dtype="int64")
+            feed_dict["tgt_label"] = layers.data(
+                name="tgt_label", shape=[-1, 1], dtype="int64")
+            feed_dict["tgt_pos"] = layers.data(
+                name="tgt_pos", shape=[-1, 1], dtype="int64")
 
-        feed_dict["data_id"] = layers.data(name="data_id", shape=[-1, 1], dtype="int64")
+        feed_dict["data_id"] = layers.data(
+            name="data_id", shape=[-1, 1], dtype="int64")
         return feed_dict
 
     def forward(self, inputs, is_infer=False):
@@ -289,8 +292,7 @@ class UnifiedTransformer(Model):
             type_ids=inputs["type_ids"],
             pos_ids=inputs["pos_ids"],
             generation_mask=inputs["generation_mask"],
-            gather_idx=inputs.get("parent_idx", None)
-        )
+            gather_idx=inputs.get("parent_idx", None))
 
         if not is_infer:
             outputs["checkpoints"] = generation_checkpoints
@@ -298,8 +300,7 @@ class UnifiedTransformer(Model):
 
     def _calc_logits(self, enc_out, checkpoints=None, seq_pos=None):
         """Get the logits of generation."""
-        enc_out = layers.reshape(
-            x=enc_out, shape=[-1, self.hidden_size])
+        enc_out = layers.reshape(x=enc_out, shape=[-1, self.hidden_size])
         if seq_pos is not None:
             seq_pos = layers.cast(x=seq_pos, dtype="int32")
             seq_feat = layers.gather(input=enc_out, index=seq_pos)
@@ -334,19 +335,22 @@ class UnifiedTransformer(Model):
                     attr=fluid.ParamAttr(name="mask_lm_out_fc.b_0"),
                     is_bias=True)
         else:
-            seq_out_bias_attr = fluid.ParamAttr(name="mask_lm_out_fc.b_0") if self.cls_bias else False
-            fc_out = layers.fc(input=seq_trans_feat,
-                               size=self.vocab_size,
-                               param_attr=fluid.ParamAttr(
-                                   name="mask_lm_out_fc.w_0",
-                                   initializer=self.param_initializer),
-                               bias_attr=seq_out_bias_attr)
+            seq_out_bias_attr = fluid.ParamAttr(
+                name="mask_lm_out_fc.b_0") if self.cls_bias else False
+            fc_out = layers.fc(
+                input=seq_trans_feat,
+                size=self.vocab_size,
+                param_attr=fluid.ParamAttr(
+                    name="mask_lm_out_fc.w_0",
+                    initializer=self.param_initializer),
+                bias_attr=seq_out_bias_attr)
         return fc_out
 
     def _get_metrics(self, inputs, outputs):
         metrics = {}
 
-        fc_out = self._calc_logits(outputs["enc_out"], outputs["checkpoints"], inputs["tgt_pos"])
+        fc_out = self._calc_logits(outputs["enc_out"], outputs["checkpoints"],
+                                   inputs["tgt_pos"])
         tgt_lm_loss = layers.softmax_with_cross_entropy(
             logits=fc_out, label=inputs["tgt_label"])
         mean_tgt_lm_loss = layers.mean(tgt_lm_loss)
@@ -361,10 +365,14 @@ class UnifiedTransformer(Model):
         if "tgt_label" in inputs:
             statistics["tokens_num"] = layers.reduce_sum(
                 layers.fill_constant_batch_size_like(
-                    input=inputs["tgt_label"], value=1.0, shape=[-1], dtype="int64"))
+                    input=inputs["tgt_label"],
+                    value=1.0,
+                    shape=[-1],
+                    dtype="int64"))
         statistics["batch_size"] = layers.reduce_sum(
             layers.fill_constant_batch_size_like(
-                input=inputs["token_ids"], value=1.0, shape=[-1], dtype="int64"))
+                input=inputs["token_ids"], value=1.0, shape=[-1],
+                dtype="int64"))
         return statistics
 
     def get_metrics_and_statistics(self, inputs, outputs):
@@ -400,9 +408,10 @@ class UnifiedTransformer(Model):
         data_id_list = np.array(outputs["data_id"]).reshape(-1).tolist()
         token_ids_list = np.array(outputs["token_ids"]).squeeze(2).tolist()
         seq_ids = outputs["finished_ids"]
-        seq_ids_np  = np.array(outputs["finished_ids"])
+        seq_ids_np = np.array(outputs["finished_ids"])
         seq_scores_np = np.array(outputs["finished_scores"])
-        for i, (data_id, token_ids) in enumerate(zip(data_id_list, token_ids_list)):
+        for i, (data_id, token_ids) in enumerate(
+                zip(data_id_list, token_ids_list)):
             start = seq_ids.lod()[0][i]
             end = seq_ids.lod()[0][i + 1]
             for j in range(start, end):
@@ -412,7 +421,8 @@ class UnifiedTransformer(Model):
                 info["data_id"] = data_id
                 info["decode_score"] = float(seq_scores_np[sub_end - 1])
                 info["context_token_ids"] = token_ids
-                info["response_token_ids"] = seq_ids_np[sub_start:sub_end].tolist()
+                info["response_token_ids"] = seq_ids_np[sub_start:
+                                                        sub_end].tolist()
                 predictions.append(info)
         return predictions
 
@@ -423,7 +433,8 @@ class UnifiedTransformer(Model):
         if self.do_generation:
             if self.generator.num_samples:
                 inputs = {
-                    name: repeat_array_or_tensor(array_or_tensor, self.place, self.generator.num_samples)
+                    name: repeat_array_or_tensor(array_or_tensor, self.place,
+                                                 self.generator.num_samples)
                     for name, array_or_tensor in inputs.items()
                 }
 
@@ -431,7 +442,8 @@ class UnifiedTransformer(Model):
                 predictions = []
                 for idx in range(0, len(inputs["data_id"]), self.batch_size):
                     part_inputs = {
-                        name: slice_array_or_tensor(array_or_tensor, self.place, idx, idx + self.batch_size)
+                        name: slice_array_or_tensor(array_or_tensor, self.place,
+                                                    idx, idx + self.batch_size)
                         for name, array_or_tensor in inputs.items()
                     }
                     part_outputs = self._run_generation(part_inputs)
@@ -440,7 +452,6 @@ class UnifiedTransformer(Model):
                 predictions = self._run_generation(inputs)
             return predictions
         else:
-            return self._execute(
-                self.infer_program,
-                self._get_feed(inputs, is_infer=True),
-                self.infer_fetch_dict)
+            return self._execute(self.infer_program,
+                                 self._get_feed(inputs, is_infer=True),
+                                 self.infer_fetch_dict)

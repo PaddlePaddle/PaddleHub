@@ -50,9 +50,12 @@ class Plato(UnifiedTransformer):
 
     def _get_feed_dict(self, is_infer=False):
         feed_dict = {}
-        feed_dict["token_ids"] = layers.data(name="token_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
-        feed_dict["type_ids"] = layers.data(name="type_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
-        feed_dict["pos_ids"] = layers.data(name="pos_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
+        feed_dict["token_ids"] = layers.data(
+            name="token_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
+        feed_dict["type_ids"] = layers.data(
+            name="type_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
+        feed_dict["pos_ids"] = layers.data(
+            name="pos_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
 
         if not is_infer:
             feed_dict["recognition_mask"] = layers.data(
@@ -76,36 +79,39 @@ class Plato(UnifiedTransformer):
                 dtype="int64",
                 lod_level=2)
             feed_dict["init_score"] = layers.data(
-                name="init_score",
-                shape=[-1, 1],
-                dtype="float32",
-                lod_level=1)
+                name="init_score", shape=[-1, 1], dtype="float32", lod_level=1)
             feed_dict["parent_idx"] = layers.data(
-                name="parent_idx",
-                shape=[-1],
-                dtype="int64")
+                name="parent_idx", shape=[-1], dtype="int64")
 
             feed_dict["tgt_generation_mask"] = layers.data(
-                name="tgt_generation_mask", shape=[-1, 1, self.max_seq_len + 1], dtype="float32")
-            feed_dict["latent_id"] = layers.data(name="latent_id", shape=[-1, 1], dtype="int64")
+                name="tgt_generation_mask",
+                shape=[-1, 1, self.max_seq_len + 1],
+                dtype="float32")
+            feed_dict["latent_id"] = layers.data(
+                name="latent_id", shape=[-1, 1], dtype="int64")
         else:
-            feed_dict["tgt_label"] = layers.data(name="tgt_label", shape=[-1, 1], dtype="int64")
-            feed_dict["tgt_pos"] = layers.data(name="tgt_pos", shape=[-1, 1], dtype="int64")
+            feed_dict["tgt_label"] = layers.data(
+                name="tgt_label", shape=[-1, 1], dtype="int64")
+            feed_dict["tgt_pos"] = layers.data(
+                name="tgt_pos", shape=[-1, 1], dtype="int64")
 
             if self.use_bow:
-                feed_dict["bow_label"] = layers.data(name="bow_label", shape=[-1, 1], dtype="int64")
-                feed_dict["bow_pos"] = layers.data(name="bow_pos", shape=[-1, 1], dtype="int64")
+                feed_dict["bow_label"] = layers.data(
+                    name="bow_label", shape=[-1, 1], dtype="int64")
+                feed_dict["bow_pos"] = layers.data(
+                    name="bow_pos", shape=[-1, 1], dtype="int64")
 
-        feed_dict["data_id"] = layers.data(name="data_id", shape=[-1, 1], dtype="int64")
+        feed_dict["data_id"] = layers.data(
+            name="data_id", shape=[-1, 1], dtype="int64")
         return feed_dict
 
-    def _recognition_network(self,
-                             token_ids,
-                             type_ids,
-                             pos_ids,
+    def _recognition_network(self, token_ids, type_ids, pos_ids,
                              recognition_mask):
         mask_id = layers.fill_constant_batch_size_like(
-            input=token_ids, shape=[-1, 1, 1], value=self.mask_id, dtype="int64")
+            input=token_ids,
+            shape=[-1, 1, 1],
+            value=self.mask_id,
+            dtype="int64")
         mask_emb = layers.embedding(
             input=mask_id,
             size=[self.vocab_size, self.emb_size],
@@ -115,7 +121,8 @@ class Plato(UnifiedTransformer):
         emb_out, n_head_self_attn_mask = self._gen_input(
             token_ids, type_ids, pos_ids, recognition_mask, aux_emb=mask_emb)
 
-        recognition_out, checkpoints = self._encode(emb_out, n_head_self_attn_mask)
+        recognition_out, checkpoints = self._encode(emb_out,
+                                                    n_head_self_attn_mask)
 
         recognition_feat = layers.slice(
             input=recognition_out, axes=[1], starts=[0], ends=[1])
@@ -185,7 +192,8 @@ class Plato(UnifiedTransformer):
             weights = self._gumbel_softmax(logits)
             outputs["checkpoints"] = recognition_checkpoints
 
-        latent_emb = layers.matmul(x=weights, y=latent_embeddings, transpose_y=True)
+        latent_emb = layers.matmul(
+            x=weights, y=latent_embeddings, transpose_y=True)
         outputs["enc_out"], generation_checkpoints = self._generation_network(
             token_ids=inputs["token_ids"],
             type_ids=inputs["type_ids"],
@@ -201,10 +209,8 @@ class Plato(UnifiedTransformer):
 
     def _calc_bow_logits(self, enc_out, checkpoints, bow_pos):
         """Get the logits of generation."""
-        bow_feat = layers.slice(
-            input=enc_out, axes=[1], starts=[0], ends=[1])
-        bow_feat = layers.reshape(
-            x=bow_feat, shape=[-1, self.hidden_size])
+        bow_feat = layers.slice(input=enc_out, axes=[1], starts=[0], ends=[1])
+        bow_feat = layers.reshape(x=bow_feat, shape=[-1, self.hidden_size])
         bow_pos = layers.cast(x=bow_pos, dtype="int32")
         bow_feat = layers.gather(input=bow_feat, index=bow_pos)
 
@@ -213,8 +219,7 @@ class Plato(UnifiedTransformer):
             size=self.emb_size,
             act=self.hidden_act,
             param_attr=fluid.ParamAttr(
-                name="bow_trans_fc.w_0",
-                initializer=self.param_initializer),
+                name="bow_trans_fc.w_0", initializer=self.param_initializer),
             bias_attr=fluid.ParamAttr(name="bow_trans_fc.b_0"))
 
         bow_trans_feat = pre_process_layer(
@@ -235,27 +240,30 @@ class Plato(UnifiedTransformer):
                     attr=fluid.ParamAttr(name="bow_out_fc.b_0"),
                     is_bias=True)
         else:
-            bow_out_bias_attr = fluid.ParamAttr(name="bow_out_fc.b_0") if self.cls_bias else False
-            fc_out = layers.fc(input=bow_trans_feat,
-                               size=self.vocab_size,
-                               param_attr=fluid.ParamAttr(
-                                   name="bow_out_fc.w_0",
-                                   initializer=self.param_initializer),
-                               bias_attr=bow_out_bias_attr)
+            bow_out_bias_attr = fluid.ParamAttr(
+                name="bow_out_fc.b_0") if self.cls_bias else False
+            fc_out = layers.fc(
+                input=bow_trans_feat,
+                size=self.vocab_size,
+                param_attr=fluid.ParamAttr(
+                    name="bow_out_fc.w_0", initializer=self.param_initializer),
+                bias_attr=bow_out_bias_attr)
         return fc_out
 
     def _get_metrics(self, inputs, outputs):
         metrics = super(Plato, self)._get_metrics(inputs, outputs)
 
         if self.use_bow:
-            fc_out = self._calc_bow_logits(outputs["enc_out"], outputs["checkpoints"], inputs["bow_pos"])
+            fc_out = self._calc_bow_logits(
+                outputs["enc_out"], outputs["checkpoints"], inputs["bow_pos"])
             bow_loss = layers.softmax_with_cross_entropy(
                 logits=fc_out, label=inputs["bow_label"])
             mean_bow_loss = layers.mean(bow_loss)
             metrics["token_bow_loss"] = mean_bow_loss
             metrics["loss"] = metrics["loss"] + mean_bow_loss
 
-        entropy_loss = layers.reduce_sum(outputs["post_probs"] * layers.log(outputs["post_probs"]), dim=1)
+        entropy_loss = layers.reduce_sum(
+            outputs["post_probs"] * layers.log(outputs["post_probs"]), dim=1)
         mean_entropy_loss = layers.mean(entropy_loss)
         metrics["entropy_loss"] = mean_entropy_loss
         if self.use_entropy:
@@ -270,18 +278,19 @@ class Plato(UnifiedTransformer):
             batch_size = len(inputs["data_id"])
             new_bsz = batch_size * self.latent_type_size
             inputs = {
-                name: repeat_array_or_tensor(array_or_tensor, self.place, self.latent_type_size)
+                name: repeat_array_or_tensor(array_or_tensor, self.place,
+                                             self.latent_type_size)
                 for name, array_or_tensor in inputs.items()
             }
             # Add latent_id
-            inputs["latent_id"] = np.array(
-                [i for i in range(self.latent_type_size) for _ in range(batch_size)],
-                dtype="int64"
-            ).reshape([-1, 1])
+            inputs["latent_id"] = np.array([
+                i for i in range(self.latent_type_size)
+                for _ in range(batch_size)
+            ],
+                                           dtype="int64").reshape([-1, 1])
 
             return super(Plato, self).infer_step(inputs)
         else:
-            return self._execute(
-                self.infer_program,
-                self._get_feed(inputs, is_infer=True),
-                self.infer_fetch_dict)
+            return self._execute(self.infer_program,
+                                 self._get_feed(inputs, is_infer=True),
+                                 self.infer_fetch_dict)

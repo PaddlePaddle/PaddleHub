@@ -49,27 +49,27 @@ def multi_head_attention(queries,
         """
         Add linear projection to queries, keys, and values.
         """
-        q = layers.fc(input=queries,
-                      size=d_key * n_head,
-                      num_flatten_dims=2,
-                      param_attr=fluid.ParamAttr(
-                          name=name + "_query_fc.w_0",
-                          initializer=param_initializer),
-                      bias_attr=name + "_query_fc.b_0")
-        k = layers.fc(input=keys,
-                      size=d_key * n_head,
-                      num_flatten_dims=2,
-                      param_attr=fluid.ParamAttr(
-                          name=name + "_key_fc.w_0",
-                          initializer=param_initializer),
-                      bias_attr=name + "_key_fc.b_0")
-        v = layers.fc(input=values,
-                      size=d_value * n_head,
-                      num_flatten_dims=2,
-                      param_attr=fluid.ParamAttr(
-                          name=name + "_value_fc.w_0",
-                          initializer=param_initializer),
-                      bias_attr=name + "_value_fc.b_0")
+        q = layers.fc(
+            input=queries,
+            size=d_key * n_head,
+            num_flatten_dims=2,
+            param_attr=fluid.ParamAttr(
+                name=name + "_query_fc.w_0", initializer=param_initializer),
+            bias_attr=name + "_query_fc.b_0")
+        k = layers.fc(
+            input=keys,
+            size=d_key * n_head,
+            num_flatten_dims=2,
+            param_attr=fluid.ParamAttr(
+                name=name + "_key_fc.w_0", initializer=param_initializer),
+            bias_attr=name + "_key_fc.b_0")
+        v = layers.fc(
+            input=values,
+            size=d_value * n_head,
+            num_flatten_dims=2,
+            param_attr=fluid.ParamAttr(
+                name=name + "_value_fc.w_0", initializer=param_initializer),
+            bias_attr=name + "_value_fc.b_0")
         return q, k, v
 
     def __split_heads(x, n_head):
@@ -110,7 +110,7 @@ def multi_head_attention(queries,
         """
         Scaled Dot-Product Attention
         """
-        scaled_q = layers.scale(x=q, scale=d_key ** -0.5)
+        scaled_q = layers.scale(x=q, scale=d_key**-0.5)
         product = layers.matmul(x=scaled_q, y=k, transpose_y=True)
         if attn_bias:
             product += attn_bias
@@ -136,7 +136,7 @@ def multi_head_attention(queries,
         select_k = layers.reshape(select_k, shape=[0, 0, d_key * n_head])
         select_v = layers.reshape(select_v, shape=[0, 0, d_value * n_head])
         if store:
-            k = layers.concat([select_k, k], axis=1) 
+            k = layers.concat([select_k, k], axis=1)
             v = layers.concat([select_v, v], axis=1)
             layers.assign(k, cache["k"])
             layers.assign(v, cache["v"])
@@ -160,13 +160,13 @@ def multi_head_attention(queries,
     out = __combine_heads(ctx_multiheads)
 
     # Project back to the model size.
-    proj_out = layers.fc(input=out,
-                         size=d_model,
-                         num_flatten_dims=2,
-                         param_attr=fluid.ParamAttr(
-                             name=name + "_output_fc.w_0",
-                             initializer=param_initializer),
-                         bias_attr=name + "_output_fc.b_0")
+    proj_out = layers.fc(
+        input=out,
+        size=d_model,
+        num_flatten_dims=2,
+        param_attr=fluid.ParamAttr(
+            name=name + "_output_fc.w_0", initializer=param_initializer),
+        bias_attr=name + "_output_fc.b_0")
     return proj_out
 
 
@@ -182,30 +182,36 @@ def positionwise_feed_forward(x,
     This module consists of two linear transformations with a ReLU activation
     in between, which is applied to each position separately and identically.
     """
-    hidden = layers.fc(input=x,
-                       size=d_inner_hid,
-                       num_flatten_dims=2,
-                       act=hidden_act,
-                       param_attr=fluid.ParamAttr(
-                           name=name + "_fc_0.w_0",
-                           initializer=param_initializer),
-                       bias_attr=name + "_fc_0.b_0")
+    hidden = layers.fc(
+        input=x,
+        size=d_inner_hid,
+        num_flatten_dims=2,
+        act=hidden_act,
+        param_attr=fluid.ParamAttr(
+            name=name + "_fc_0.w_0", initializer=param_initializer),
+        bias_attr=name + "_fc_0.b_0")
     if dropout_rate:
         hidden = layers.dropout(
             hidden,
             dropout_prob=dropout_rate,
             dropout_implementation="upscale_in_train",
             is_test=False)
-    out = layers.fc(input=hidden,
-                    size=d_hid,
-                    num_flatten_dims=2,
-                    param_attr=fluid.ParamAttr(
-                        name=name + "_fc_1.w_0", initializer=param_initializer),
-                    bias_attr=name + "_fc_1.b_0")
+    out = layers.fc(
+        input=hidden,
+        size=d_hid,
+        num_flatten_dims=2,
+        param_attr=fluid.ParamAttr(
+            name=name + "_fc_1.w_0", initializer=param_initializer),
+        bias_attr=name + "_fc_1.b_0")
     return out
 
 
-def pre_post_process_layer(prev_out, out, process_cmd, dropout_rate=0., epsilon=1e-5, name=""):
+def pre_post_process_layer(prev_out,
+                           out,
+                           process_cmd,
+                           dropout_rate=0.,
+                           epsilon=1e-5,
+                           name=""):
     """
     Add residual connection, layer normalization and droput to the out tensor
     optionally according to the value of process_cmd.
@@ -377,6 +383,10 @@ def encoder(enc_input,
         checkpoints.extend(cps)
         enc_input = enc_output
     enc_output = pre_process_layer(
-        enc_output, preprocess_cmd, prepostprocess_dropout, name="post_encoder", epsilon=epsilon)
+        enc_output,
+        preprocess_cmd,
+        prepostprocess_dropout,
+        name="post_encoder",
+        epsilon=epsilon)
 
     return enc_output, checkpoints

@@ -53,9 +53,7 @@ class PlatoReader(DialogReader):
             shift_len=1)
         if not is_infer:
             batch["recognition_mask"] = self._gen_self_attn_mask(
-                batch_token_ids,
-                is_unidirectional=False,
-                shift_len=1)
+                batch_token_ids, is_unidirectional=False, shift_len=1)
 
         if is_infer:
             tgt_ids = np.array([[[self.bos_id]]] * batch_size, dtype="int64")
@@ -64,12 +62,14 @@ class PlatoReader(DialogReader):
             else:
                 tgt_pos = np.zeros_like(batch_tgt_start_idx, dtype="int64")
             tgt_pos = tgt_pos.reshape(-1, 1, 1)
-            batch["init_score"] = np.zeros_like(tgt_ids, dtype="float32").reshape(-1, 1).tolist()
+            batch["init_score"] = np.zeros_like(
+                tgt_ids, dtype="float32").reshape(-1, 1).tolist()
             batch["tgt_ids"] = tgt_ids.tolist()
             batch["tgt_pos"] = tgt_pos.tolist()
             batch["parent_idx"] = np.array(range(batch_size), dtype="int32")
 
-            batch["tgt_generation_mask"] = batch["generation_mask"][:, 0:1, :].astype("float32")
+            batch["tgt_generation_mask"] = batch[
+                "generation_mask"][:, 0:1, :].astype("float32")
         else:
             mask_return_list = mask(
                 batch_tokens=batch_token_ids,
@@ -85,5 +85,6 @@ class PlatoReader(DialogReader):
                 batch["bow_pos"] = mask_return_list[3]
 
         batch_data_id = [record.data_id for record in batch_records]
-        batch["data_id"] = np.array(batch_data_id).astype("int64").reshape([-1, 1])
+        batch["data_id"] = np.array(batch_data_id).astype("int64").reshape(
+            [-1, 1])
         return batch

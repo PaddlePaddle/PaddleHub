@@ -60,8 +60,7 @@ class Args(dict):
 
     def save(self, filename):
         with open(filename, "w") as fp:
-            json.dump(self, fp, ensure_ascii=False,
-                      indent=4, sort_keys=False)
+            json.dump(self, fp, ensure_ascii=False, indent=4, sort_keys=False)
 
     def load(self, filename, group_name=None):
         if group_name is not None:

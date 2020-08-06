@@ -43,4 +43,5 @@ def create_predictor(inference_model_path, is_distributed=False):
                 fetch_list=fetch_targets,
                 return_numpy=True)
             return outputs
+
     return __predict__

@@ -127,11 +127,17 @@ def get_nsp_score_batch(nsp_predictor, predictions):
         Example = namedtuple("Example", headers)
 
         for i, info in enumerate(predictions):
-            context = post_process_context(info["context_token_ids"], reader, merge=False)
-            context_tokenized_input = " [SEP] ".join(" ".join(utt) for utt in context)
-            _, response = post_process_response(info["response_token_ids"], reader, merge=False)
+            context = post_process_context(
+                info["context_token_ids"], reader, merge=False)
+            context_tokenized_input = " [SEP] ".join(
+                " ".join(utt) for utt in context)
+            _, response = post_process_response(
+                info["response_token_ids"], reader, merge=False)
             response_tokenized_input = " ".join(response)
-            example = Example(src=context_tokenized_input, tgt=response_tokenized_input, data_id=i)
+            example = Example(
+                src=context_tokenized_input,
+                tgt=response_tokenized_input,
+                data_id=i)
             record = reader._convert_example_to_record(example, is_infer=True)
             yield record
         return
@@ -167,10 +173,10 @@ class DialogGeneration(Task):
         group.add_argument("--is_cn", type=str2bool, default=False)
 
         group.add_argument("--nsp_inference_model_path", type=str, default=None)
-        group.add_argument("--nsp_attention_style", type=str, default="bidirectional")
+        group.add_argument(
+            "--nsp_attention_style", type=str, default="bidirectional")
 
         group.add_argument("--ranking_score", type=str, default="decode_score")
-
 
         args, _ = parser.parse_known_args()
         if args.model == "Plato":
@@ -189,7 +195,8 @@ class DialogGeneration(Task):
             self.reader = DialogReader(args)
 
         if args.nsp_inference_model_path:
-            self.nsp_predictor = create_predictor(args.nsp_inference_model_path, args.is_distributed)
+            self.nsp_predictor = create_predictor(args.nsp_inference_model_path,
+                                                  args.is_distributed)
             self.nsp_attention_style = args.nsp_attention_style
         else:
             self.nsp_predictor = None
@@ -205,8 +212,10 @@ class DialogGeneration(Task):
         Calculate repetion, reranking.
         """
         for info in predictions:
-            tokens = post_process_context(info["context_token_ids"], self.reader)
-            pred_token_ids, pred_tokens = post_process_response(info["response_token_ids"], self.reader)
+            tokens = post_process_context(info["context_token_ids"],
+                                          self.reader)
+            pred_token_ids, pred_tokens = post_process_response(
+                info["response_token_ids"], self.reader)
             info["context"] = " [SEP] ".join(" ".join(u) for u in tokens)
             info["response"] = " ".join(pred_tokens)
             info["num_token"] = len(pred_token_ids)
@@ -227,7 +236,8 @@ class DialogGeneration(Task):
             infos = group[data_id]
             for info in infos:
                 info["score"] = info[self.ranking_score]
-                if self.max_dec_len is not None and info["num_token"] >= self.max_dec_len: # not ending
+                if self.max_dec_len is not None and info[
+                        "num_token"] >= self.max_dec_len:  # not ending
                     info["score"] -= 1e3
                 elif info["cross_turn_repetition"] > 0:
                     info["score"] -= 1e3
@@ -270,13 +280,11 @@ class DialogGeneration(Task):
         }
         for k in outputs:
             if k.startswith("token_"):
-                new_outputs[k] = (
-                    outputs[k] * tokens_num + part_outputs[k] * part_tokens_num
-                ) / new_outputs["tokens_num"]
+                new_outputs[k] = (outputs[k] * tokens_num + part_outputs[k] *
+                                  part_tokens_num) / new_outputs["tokens_num"]
             else:
-                new_outputs[k] = (
-                    outputs[k] * batch_size + part_outputs[k] * part_batch_size
-                ) / new_outputs["batch_size"]
+                new_outputs[k] = (outputs[k] * batch_size + part_outputs[k] *
+                                  part_batch_size) / new_outputs["batch_size"]
         return new_outputs
 
     def get_metrics(self, outputs):

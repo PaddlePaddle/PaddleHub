@@ -17,12 +17,8 @@ from plato2_en_base.models.model_base import Model
 
 MODEL_REGISTRY = {}
 
-
 __all__ = [
-    "MODEL_REGISTRY",
-    "register_model",
-    "create_model",
-    "add_cmdline_args"
+    "MODEL_REGISTRY", "register_model", "create_model", "add_cmdline_args"
 ]
 
 
@@ -35,7 +31,8 @@ def register_model(name):
         if name in MODEL_REGISTRY:
             raise ValueError(f"Cannot register duplicate model ({name})")
         if not issubclass(cls, Model):
-            raise ValueError(f"Model ({name}: {cls.__name__}) must extend Model")
+            raise ValueError(
+                f"Model ({name}: {cls.__name__}) must extend Model")
         MODEL_REGISTRY[name] = cls
         return cls
 

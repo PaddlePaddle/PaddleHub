@@ -37,22 +37,30 @@ class NSPModel(UnifiedTransformer):
             list(str): The name of each Variable in feed list.
         """
         feed_dict = {}
-        feed_dict["token_ids"] = layers.data(name="token_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
-        feed_dict["type_ids"] = layers.data(name="type_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
-        feed_dict["pos_ids"] = layers.data(name="pos_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
+        feed_dict["token_ids"] = layers.data(
+            name="token_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
+        feed_dict["type_ids"] = layers.data(
+            name="type_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
+        feed_dict["pos_ids"] = layers.data(
+            name="pos_ids", shape=[-1, self.max_seq_len, 1], dtype="int64")
 
         feed_dict["attention_mask"] = layers.data(
             name="attention_mask",
             shape=[-1, self.max_seq_len, self.max_seq_len],
             dtype=self.dtype)
-        feed_dict["label_pos"] = layers.data(name="label_pos", shape=[-1, 1], dtype="int64")
+        feed_dict["label_pos"] = layers.data(
+            name="label_pos", shape=[-1, 1], dtype="int64")
 
         if not is_infer:
-            feed_dict["label"] = layers.data(name="label", shape=[-1, 1], dtype="int64")
-            feed_dict["tgt_label"] = layers.data(name="tgt_ids", shape=[-1, 1], dtype="int64")
-            feed_dict["tgt_pos"] = layers.data(name="tgt_pos", shape=[-1, 1], dtype="int64")
+            feed_dict["label"] = layers.data(
+                name="label", shape=[-1, 1], dtype="int64")
+            feed_dict["tgt_label"] = layers.data(
+                name="tgt_ids", shape=[-1, 1], dtype="int64")
+            feed_dict["tgt_pos"] = layers.data(
+                name="tgt_pos", shape=[-1, 1], dtype="int64")
 
-        feed_dict["data_id"] = layers.data(name="data_id", shape=[-1, 1], dtype="int64")
+        feed_dict["data_id"] = layers.data(
+            name="data_id", shape=[-1, 1], dtype="int64")
         return feed_dict
 
     def _get_feed(self, inputs, is_infer=False):
@@ -65,21 +73,23 @@ class NSPModel(UnifiedTransformer):
             token_ids=inputs["token_ids"],
             type_ids=inputs["type_ids"],
             pos_ids=inputs["pos_ids"],
-            generation_mask=inputs["attention_mask"]
-        )
+            generation_mask=inputs["attention_mask"])
         return outputs
 
     def _get_metrics(self, inputs, outputs):
         metrics = {}
         fc_out = self._calc_logits(outputs["enc_out"], inputs["tgt_pos"])
-        lm_loss = layers.softmax_with_cross_entropy(logits=fc_out, label=inputs["tgt_pos"])
+        lm_loss = layers.softmax_with_cross_entropy(
+            logits=fc_out, label=inputs["tgt_pos"])
         need_cal = layers.not_equal(
-            inputs["tgt_label"], layers.fill_constant(shape=[1], dtype="int64", value=1)
-        )
+            inputs["tgt_label"],
+            layers.fill_constant(shape=[1], dtype="int64", value=1))
         need_cal = layers.cast(need_cal, self.dtype)
-        mean_lm_loss = layers.reduce_sum(lm_loss * need_cal) / (layers.reduce_sum(need_cal) + 1e-10)
+        mean_lm_loss = layers.reduce_sum(
+            lm_loss * need_cal) / (layers.reduce_sum(need_cal) + 1e-10)
 
-        pooled_out = self._get_pooled_output(outputs["enc_out"], inputs["label_pos"])
+        pooled_out = self._get_pooled_output(outputs["enc_out"],
+                                             inputs["label_pos"])
         nsp_fc_out = layers.fc(
             input=pooled_out,
             size=2,
@@ -99,7 +109,8 @@ class NSPModel(UnifiedTransformer):
         return metrics
 
     def infer(self, inputs, outputs):
-        pooled_out = self._get_pooled_output(outputs["enc_out"], inputs["label_pos"])
+        pooled_out = self._get_pooled_output(outputs["enc_out"],
+                                             inputs["label_pos"])
         nsp_fc_out = layers.fc(
             input=pooled_out,
             size=2,

@@ -67,9 +67,8 @@ class Task(ABC):
             "batch_size": batch_size + part_batch_size,
         }
         for k in outputs:
-            new_outputs[k] = (
-                outputs[k] * batch_size + part_outputs[k] * part_batch_size
-            ) / new_outputs["batch_size"]
+            new_outputs[k] = (outputs[k] * batch_size + part_outputs[k] *
+                              part_batch_size) / new_outputs["batch_size"]
         return new_outputs
 
     def get_metrics(self, outputs):
@@ -84,5 +83,6 @@ class Task(ABC):
         return outputs
 
     def get_data_loader(self, model, *args, is_infer=False, **kwargs):
-        generator = self.reader.data_generator(*args, is_infer=is_infer, **kwargs)
+        generator = self.reader.data_generator(
+            *args, is_infer=is_infer, **kwargs)
         return model.get_data_loader(generator, is_infer)

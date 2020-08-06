@@ -17,19 +17,14 @@ from .task_base import Task
 
 TASK_REGISTRY = {}
 
-
-__all__ = [
-    "TASK_REGISTRY",
-    "register_task",
-    "create_task",
-    "add_cmdline_args"
-]
+__all__ = ["TASK_REGISTRY", "register_task", "create_task", "add_cmdline_args"]
 
 
 def register_task(name):
     """
     Register a new task class.
     """
+
     def __wrapped__(cls):
         if name in TASK_REGISTRY:
             raise ValueError(f"Cannot register duplicate task ({name})")

@@ -39,14 +39,24 @@ class Model(ABC):
         group.add_argument("--init_pretraining_params", type=str, default="")
 
         # Optimizer
-        group.add_argument("-lr", "--learning_rate", type=float, default=1e-5,
-                           help="The learning rate for optimizer.")
-        group.add_argument("--warmup_steps", type=int, default=0,
-                           help="The warmup steps.")
-        group.add_argument("--weight_decay", type=float, default=0.0,
-                           help="The weight decay for optimizer.")
-        group.add_argument("--max_grad_norm", type=float, default=.1,
-                           help="The maximum norm of gradient.")
+        group.add_argument(
+            "-lr",
+            "--learning_rate",
+            type=float,
+            default=1e-5,
+            help="The learning rate for optimizer.")
+        group.add_argument(
+            "--warmup_steps", type=int, default=0, help="The warmup steps.")
+        group.add_argument(
+            "--weight_decay",
+            type=float,
+            default=0.0,
+            help="The weight decay for optimizer.")
+        group.add_argument(
+            "--max_grad_norm",
+            type=float,
+            default=.1,
+            help="The maximum norm of gradient.")
 
         group.add_argument("--use_recompute", type=str2bool, default=False)
         group.add_argument("--use_amp", type=str2bool, default=False)
@@ -86,7 +96,8 @@ class Model(ABC):
             self.infer_program = fluid.Program()
             with fluid.program_guard(self.infer_program, self.startup_program):
                 with fluid.unique_name.guard():
-                    self.infer_feed_dict = inputs = self._get_feed_dict(is_infer=True)
+                    self.infer_feed_dict = inputs = self._get_feed_dict(
+                        is_infer=True)
                     outputs = self.forward(inputs, is_infer=True)
                     predictions = self.infer(inputs, outputs)
                     self.infer_fetch_dict = predictions
@@ -106,7 +117,7 @@ class Model(ABC):
                 dist_strategy.fuse_all_reduce_ops = True
                 if self.use_recompute:
                     dist_strategy.forward_recompute = True
-                    dist_strategy.enable_sequential_execution=True
+                    dist_strategy.enable_sequential_execution = True
                 if self.use_amp:
                     dist_strategy.use_amp = True
                     dist_strategy.amp_loss_scaling = self.amp_loss_scaling
@@ -120,8 +131,10 @@ class Model(ABC):
                     self.feed_dict = inputs = self._get_feed_dict()
                     outputs = self.forward(inputs)
                     if self.is_distributed and self.use_recompute:
-                        self.dist_strategy.recompute_checkpoints = outputs["checkpoints"]
-                    metrics, statistics = self.get_metrics_and_statistics(inputs, outputs)
+                        self.dist_strategy.recompute_checkpoints = outputs[
+                            "checkpoints"]
+                    metrics, statistics = self.get_metrics_and_statistics(
+                        inputs, outputs)
 
                     # build eval program
                     self.eval_program = self.train_program.clone(for_test=True)
@@ -137,7 +150,8 @@ class Model(ABC):
 
         self.exe.run(self.startup_program)
         if self.init_pretraining_params != "":
-            init_pretraining_params(self.exe, self.init_pretraining_params, self.program)
+            init_pretraining_params(self.exe, self.init_pretraining_params,
+                                    self.program)
         elif self.init_checkpoint != "":
             init_checkpoint(self.exe, self.init_checkpoint, self.program)
         return
@@ -200,11 +214,15 @@ class Model(ABC):
             use_double_buffer=True,
             iterable=True)
         if generator is not None:
+
             def __wrapper__():
                 for batch in generator():
                     batch = self._get_feed(batch)
-                    batch = [batch[name] for name in feed_name_list if name in batch]
+                    batch = [
+                        batch[name] for name in feed_name_list if name in batch
+                    ]
                     yield batch
+
             loader.set_batch_generator(__wrapper__, self.place)
         return loader
 
@@ -236,7 +254,7 @@ class Model(ABC):
         # TODO: support dygraph
         if self.warmup_steps > 0:
             scheduled_lr = layers.learning_rate_scheduler.noam_decay(
-                1 / (self.warmup_steps * (self.learning_rate ** 2)),
+                1 / (self.warmup_steps * (self.learning_rate**2)),
                 self.warmup_steps)
         else:
             scheduled_lr = layers.create_global_var(
@@ -253,7 +271,8 @@ class Model(ABC):
             weight_decay=self.weight_decay)
 
         if self.is_distributed:
-            self.optimizer = fleet.distributed_optimizer(self.optimizer, strategy=self.dist_strategy)
+            self.optimizer = fleet.distributed_optimizer(
+                self.optimizer, strategy=self.dist_strategy)
 
         self.optimizer.minimize(metrics["loss"])
         return scheduled_lr
@@ -282,20 +301,17 @@ class Model(ABC):
         Run one evaluation step.
         """
         # TODO: support dygraph.
-        return self._execute(
-            self.eval_program,
-            self._get_feed(inputs),
-            self.eval_fetch_dict)
+        return self._execute(self.eval_program, self._get_feed(inputs),
+                             self.eval_fetch_dict)
 
     def infer_step(self, inputs):
         """
         Run one inference step.
         """
         # TODO: support dygraph.
-        return self._execute(
-            self.infer_program,
-            self._get_feed(inputs, is_infer=True),
-            self.infer_fetch_dict)
+        return self._execute(self.infer_program,
+                             self._get_feed(inputs, is_infer=True),
+                             self.infer_fetch_dict)
 
     def save_inference_model(self, inference_model_path):
         """
@@ -304,9 +320,5 @@ class Model(ABC):
         feed_list = [var.name for var in self.infer_feed_dict.values()]
         fetch_list = list(self.infer_fetch_dict.values())
 
-        fluid.io.save_inference_model(
-            inference_model_path,
-            feed_list,
-            fetch_list,
-            self.exe,
-            self.infer_program)
+        fluid.io.save_inference_model(inference_model_path, feed_list,
+                                      fetch_list, self.exe, self.infer_program)

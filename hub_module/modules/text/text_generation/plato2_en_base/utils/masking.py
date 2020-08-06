@@ -47,16 +47,19 @@ def mask(batch_tokens,
         else:
             shift_len = 0
         for sent_index, sent in enumerate(batch_tokens):
-            sent_b_index = sent_b_starts[sent_index] if sent_b_starts is not None else 0
+            sent_b_index = sent_b_starts[
+                sent_index] if sent_b_starts is not None else 0
             need_cal = True
             if labels is not None:
-                label_pos.append(sent_index * max_len + len(sent) - 1 + shift_len)
+                label_pos.append(sent_index * max_len + len(sent) - 1 +
+                                 shift_len)
                 if labels[sent_index] == 0:
                     need_cal = False
             mask_label.extend(sent[sent_b_index + 1:])
             mask_pos.extend([
                 sent_index * max_len + i + shift_len
-                for i in range(sent_b_index, len(sent) - 1)
+                for i in range(sent_b_index,
+                               len(sent) - 1)
             ])
         mask_label = np.array(mask_label).astype("int64").reshape([-1, 1])
         mask_pos = np.array(mask_pos).astype("int64").reshape([-1, 1])
@@ -67,18 +70,19 @@ def mask(batch_tokens,
             bow_label = []
             bow_pos = []
             for sent_index, sent in enumerate(batch_tokens):
-                sent_b_index = sent_b_starts[sent_index] if sent_b_starts is not None else 0
+                sent_b_index = sent_b_starts[
+                    sent_index] if sent_b_starts is not None else 0
+
                 def __filter__(tok_id):
                     # TODO: exclude [EOS] from bow loss
                     return True
+
                 bow_pos.extend([
-                    sent_index
-                    for i in range(sent_b_index + 1, len(sent))
+                    sent_index for i in range(sent_b_index + 1, len(sent))
                     if __filter__(sent[i])
                 ])
                 bow_label.extend([
-                    sent[i]
-                    for i in range(sent_b_index + 1, len(sent))
+                    sent[i] for i in range(sent_b_index + 1, len(sent))
                     if __filter__(sent[i])
                 ])
             bow_label = np.array(bow_label).astype("int64").reshape([-1, 1])
@@ -89,7 +93,8 @@ def mask(batch_tokens,
         total_token_num = sum(map(len, batch_tokens))
         prob_mask = np.random.rand(total_token_num)
         # TODO: fix replace_ids, include [UNK]
-        replace_ids = np.random.randint(3, high=vocab_size, size=total_token_num)
+        replace_ids = np.random.randint(
+            3, high=vocab_size, size=total_token_num)
         prob_index = 0
         for sent_index, sent in enumerate(batch_tokens):
             # add pair label position

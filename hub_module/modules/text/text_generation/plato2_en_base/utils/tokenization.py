@@ -21,7 +21,6 @@ import unicodedata
 
 from plato2_en_base.utils.args import str2bool
 
-
 SPIECE_UNDERLINE = u"▁".encode("utf-8")
 
 

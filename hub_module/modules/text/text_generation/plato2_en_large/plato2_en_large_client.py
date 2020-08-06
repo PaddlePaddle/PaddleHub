@@ -5,7 +5,9 @@ import argparse
 try:
     from termcolor import colored, cprint
 except:
-    raise ImportError("The module requires additional dependencies: termcolor. Please run 'pip install termcolor' to install it.")
+    raise ImportError(
+        "The module requires additional dependencies: termcolor. Please run 'pip install termcolor' to install it."
+    )
 
 # yapf: disable
 parser = argparse.ArgumentParser(__doc__)
@@ -15,7 +17,7 @@ args = parser.parse_args()
 # yapf: enable.
 
 headers = {"Content-type": "application/json"}
-url = "http://%s:%s/predict/plato2_en_large"%(args.addr, args.port)
+url = "http://%s:%s/predict/plato2_en_large" % (args.addr, args.port)
 
 context = ""
 start_info = "Enter [EXIT] to quit the interaction, [NEXT] to start a new conversation."
@@ -28,9 +30,11 @@ while True:
         context = ""
         cprint(start_info, "yellow", attrs=["bold"])
     else:
-        context+=user_utt
-        data = {'texts':[context]}
+        context += user_utt
+        data = {'texts': [context]}
         r = requests.post(url=url, headers=headers, data=json.dumps(data))
-        print(r.json()["results"])
-        print(colored("[Bot]:", "blue", attrs=["bold"]), colored(bot_response, attrs=["bold"]))
-        context += "\t%s"%bot_response
+        bot_response = r.json()["results"]
+        print(
+            colored("[Bot]:", "blue", attrs=["bold"]),
+            colored(bot_response, attrs=["bold"]))
+        context += "\t%s" % bot_response
