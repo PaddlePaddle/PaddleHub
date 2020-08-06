@@ -50,12 +50,14 @@ class ErnieGen(hub.NLPPredictionModule):
         assets_path = os.path.join(self.directory, "assets")
         gen_checkpoint_path = os.path.join(assets_path, "ernie_gen_poetry")
         ernie_cfg_path = os.path.join(assets_path, 'ernie_config.json')
-        ernie_cfg = dict(json.loads(open(ernie_cfg_path).read()))
+        with open(ernie_cfg_path) as ernie_cfg_file:
+            ernie_cfg = dict(json.loads(ernie_cfg_file.read()))
         ernie_vocab_path = os.path.join(assets_path, 'vocab.txt')
-        ernie_vocab = {
-            j.strip().split('\t')[0]: i
-            for i, j in enumerate(open(ernie_vocab_path).readlines())
-        }
+        with open(ernie_vocab_path) as ernie_vocab_file:
+            ernie_vocab = {
+                j.strip().split('\t')[0]: i
+                for i, j in enumerate(ernie_vocab_file.readlines())
+            }
 
         with fluid.dygraph.guard(fluid.CPUPlace()):
             with fluid.unique_name.guard():
@@ -183,5 +185,6 @@ class ErnieGen(hub.NLPPredictionModule):
 
 if __name__ == "__main__":
     module = ErnieGen()
-    for result in module.generate(['宝积峰前露术香，使君行旆照晴阳。'], beam_width=5):
+    for result in module.generate(['昔年旅南服，始识王荆州。', '高名出汉阴，禅阁跨香岑。'],
+                                  beam_width=5):
         print(result)
