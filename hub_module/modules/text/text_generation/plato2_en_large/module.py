@@ -17,6 +17,7 @@ import os
 import json
 import sys
 import argparse
+import contextlib
 from collections import namedtuple
 
 import paddle.fluid as fluid
@@ -25,10 +26,6 @@ from paddlehub.module.module import runnable
 from paddlehub.module.nlp_module import DataFormatError
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo, serving
-try:
-    from termcolor import colored, cprint
-except:
-    raise ImportError("The module requires additional dependencies: termcolor. Please run 'pip install termcolor' to install it.")
 
 import plato2_en_large.models as plato_models
 from plato2_en_large.tasks.dialog_generation import DialogGeneration
@@ -59,6 +56,7 @@ class Plato(hub.NLPPredictionModule):
         self.task = DialogGeneration(args)
         self.model = plato_models.create_model(args, fluid.CUDAPlace(0))
         self.Example = namedtuple("Example", ["src", "data_id"])
+        self._interactive_mode = False
 
     def setup_args(self):
         """
@@ -92,15 +90,25 @@ class Plato(hub.NLPPredictionModule):
         Get the robot responses of the input texts.
 
         Args:
-             texts(list): the chat context. sep with '\t'.
+             texts(list or str): If not in the interactive mode, texts should be a list in which every element is the chat context separated with '\t'. 
+                                 Otherwise, texts shoule be one sentence. The module can get the context automatically.
 
         Returns:
              results(list): the robot responses.
         """
-
-        if not (texts and isinstance(texts, list)):
+        if not texts:
+            return []
+        if self._interactive_mode:
+            if isinstance(texts, str):
+                self.context.append(texts.strip())
+                texts = [" [SEP] ".join(self.context[-self.max_turn:])]
+            else:
+                raise ValueError(
+                "In the interactive mode, the input data should be a string.")
+        elif not isinstance(texts, list):
             raise ValueError(
-                "The input data is inconsistent with expectations.")
+                "If not in the interactive mode, the input data should be a list.")
+
         bot_responses = []
         for i, text in enumerate(texts):
             example = self.Example(src=text.replace("\t"," [SEP] "), data_id=i)
@@ -109,28 +117,25 @@ class Plato(hub.NLPPredictionModule):
             pred = self.task.infer_step(self.model, data)[0] # batch_size is 1
             bot_response = pred["response"] # ignore data_id and score
             bot_responses.append(bot_response)
+        
+        if self._interactive_mode:
+            self.context.append(bot_responses[0].strip())
         return bot_responses
 
-    def interact(self):
+    @contextlib.contextmanager
+    def interactive_mode(self, max_turn =6):
         """
-        Start an interactive chat process.
+        Enter the interactive mode.
+
+        Args:
+            max_turn(int): the max dialogue turns. max_turn = 1 means the robot can only remember the last one utterance you have said.
         """
-        context = ""
-        start_info = "Enter [EXIT] to quit the interaction, [NEXT] to start a new conversation."
-        cprint(start_info, "yellow", attrs=["bold"])
-        while True:
-            user_utt = input(colored("[Human]: ", "red", attrs=["bold"])).strip()
-            if user_utt == "[EXIT]":
-                break
-            elif user_utt == "[NEXT]":
-                context = ""
-                cprint(start_info, "yellow", attrs=["bold"])
-            else:
-                context+=user_utt
-                bot_response = self.generate([context])[0]
-                print(colored("[Bot]:", "blue", attrs=["bold"]), colored(bot_response, attrs=["bold"]))
-                context += "\t%s"%bot_response
-        return
+        self._interactive_mode=True
+        self.max_turn = max_turn
+        self.context = []
+        yield
+        self.context = []
+        self._interactive_mode=False
 
     @runnable
     def run_cmd(self, argvs):
@@ -170,5 +175,8 @@ if __name__ == "__main__":
     module = Plato()
     for result in module.generate(["Hello","Hello\thi, nice to meet you, my name is tom\tso your name is tom?"]):
         print(result)
-    module.interact()
-
+    with module.interactive_mode(max_turn=3):
+        while True:
+            human_utterance = input()
+            robot_utterance =module.generate(human_utterance)
+            print("Robot: %s"%robot_utterance[0])

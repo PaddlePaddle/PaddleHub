@@ -23,7 +23,7 @@ def generate(texts):
 
 **参数**
 
-* texts (list\[str\]): 每个元素为一次对话的上下文，上下文应包含人类和机器人的对话内容，不同角色之间的聊天用分隔符"\t"进行分割；例如[["Hello\thi, nice to meet you\tnice to meet you"]]。这个输入中包含1次对话，机器人回复了"hi, nice to meet you"后人类回复“nice to meet you”，现在轮到机器人回复了。
+* texts (list\[str\] or str): 如果不在交互模式中，texts应为list，每个元素为一次对话的上下文，上下文应包含人类和机器人的对话内容，不同角色之间的聊天用分隔符"\t"进行分割；例如[["Hello\thi, nice to meet you\tnice to meet you"]]。这个输入中包含1次对话，机器人回复了"hi, nice to meet you"后人类回复“nice to meet you”，现在轮到机器人回复了。如果在交互模式中，texts应为str，模型将自动构建它的上下文。
 
 **返回**
 
@@ -43,10 +43,14 @@ for result in results:
 ```
 
 ```python
-def interact():
+def interactive_mode(max_turn =6):
 ```
 
-进入交互模式，交互模式中，控制台将持续监听键盘输入，机器人将即时回复消息。
+进入交互模式。交互模式中，generate接口的texts将支持字符串类型。
+
+**参数**
+
+* max_turn (int): 模型能记忆的对话轮次，当max_turn = 1时，模型只能记住当前对话，无法获知之前的对话内容。
 
 **代码示例**
 
@@ -55,7 +59,11 @@ import paddlehub as hub
 
 module = hub.Module(name="plato2_en_base")
 
-module.interact()
+with module.interactive_mode(max_turn=6):
+    while True:
+        human_utterance = input()
+        robot_utterance = module.generate(human_utterance)
+        print("Robot: %s"%robot_utterance[0])
 ```
 
 ## 服务部署
