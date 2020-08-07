@@ -19,13 +19,13 @@ except:
 
 
 @moduleinfo(
-    name="DDParser",
+    name="ddparser",
     version="1.0.0",
     summary="Baidu's open-source DDParser model.",
     author="baidu-nlp",
     author_email="",
     type="nlp/syntactic_analysis")
-class DDParser(hub.NLPPredictionModule):
+class ddparser(hub.NLPPredictionModule):
     def _initialize(self):
         """
         initialize with the necessary elements
@@ -173,7 +173,7 @@ class DDParser(hub.NLPPredictionModule):
 
 
 if __name__ == "__main__":
-    module = DDParser()
+    module = ddparser()
     # Data to be predicted
     test_text = ["百度是一家高科技公司"]
     results = module.parse(texts=test_text)

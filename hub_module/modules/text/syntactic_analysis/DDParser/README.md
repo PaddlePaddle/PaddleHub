@@ -1,7 +1,7 @@
 # 命令行预测
 
 ```shell
-$ hub run DDParser --input_text="百度是一家高科技公司"
+$ hub run ddparser --input_text="百度是一家高科技公司"
 ```
 
 # API
@@ -47,7 +47,7 @@ $ hub run DDParser --input_text="百度是一家高科技公司"
 import cv2
 import paddlehub as hub
 
-module = hub.Module(name="DDParser")
+module = hub.Module(name="ddparser")
 
 test_text = ["百度是一家高科技公司"]
 results = module.parse(texts=test_text)
@@ -70,12 +70,12 @@ PaddleHub Serving可以部署一个在线情感分析服务，可以将此接口
 
 运行启动命令：
 ```shell
-$ hub serving start -m DDParser
+$ hub serving start -m ddparser
 ```
 
 启动时会显示加载模型过程，启动成功后显示
 ```shell
-Loading DDParser successful.
+Loading ddparser successful.
 ```
 
 这样就完成了服务化API的部署，默认端口号为8866。
@@ -97,7 +97,7 @@ text = ["百度是一家高科技公司"]
 data = {"texts": text}
 
 # 指定预测方法为DuDepParser并发送post请求，content-type类型应指定json方式
-url = "http://0.0.0.0:8866/predict/DDParser"
+url = "http://0.0.0.0:8866/predict/ddparser"
 headers = {"Content-Type": "application/json"}
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
