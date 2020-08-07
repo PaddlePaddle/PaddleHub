@@ -24,6 +24,7 @@ $ hub run ddparser --input_text="百度是一家高科技公司"
       'deprel': list[str], 当前成分与支配者的依存关系。
       'prob': list[float], 从属者和支配者依存的概率。
       'postag': list[str], 词性标签，只有当texts的元素是未分词的字符串时包含这个键。
+      'visual': 图像数组，可以使用cv2.imshow显示图像或cv2.imwrite保存图像。
   }
 ```
 
@@ -90,19 +91,26 @@ Loading ddparser successful.
 import requests
 import json
 
+import numpy as np
+import cv2
+
 # 待预测数据
 text = ["百度是一家高科技公司"]
 
 # 设置运行配置
-data = {"texts": text}
+return_visual = True
+data = {"texts": text, "return_visual": return_visual}
 
 # 指定预测方法为DuDepParser并发送post请求，content-type类型应指定json方式
 url = "http://0.0.0.0:8866/predict/ddparser"
 headers = {"Content-Type": "application/json"}
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
+results, visuals = r.json()['results']
 
-# 打印预测结果
-print(json.dumps(r.json(), indent=4, ensure_ascii=False))
+for i in range(len(results)):
+  print(results[i])
+  # 不同于本地调用parse接口，serving返回的图像是list类型的，需要先用numpy加载再显示或保存。
+  cv2.imwrite('%s.jpg'%i, np.array(visuals[i]))
 ```
 
 关于PaddleHub Serving更多信息参考[服务部署](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md)

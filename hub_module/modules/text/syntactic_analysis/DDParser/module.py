@@ -35,36 +35,51 @@ class ddparser(hub.NLPPredictionModule):
             fname=os.path.join(self.directory, "SimHei.ttf"))
 
     @serving
-    def parse(self, texts=[]):
+    def serving_parse(self, texts=[], return_visual=False):
+        results, visuals = self.parse(texts, return_visual)
+        for i, visual in enumerate(visuals):
+            visuals[i] = visual.tolist()
+
+        return results, visuals
+
+    def parse(self, texts=[], return_visual=False):
         """
         parse the dependency.
 
         Args:
             texts(list[list[str] or list[list[str]]]): the input texts to be parse. It should be a list with elements: untokenized string or tokens list.
+            return_visual(bool): if set True, the result will contain the dependency visualization.
 
         Returns:
             results(list[dict]): a list, with elements corresponding to each of the elements in texts. The element is a dictionary of shape:
-
                 {
                     'word': list[str], the tokenized words.
                     'head': list[int], the head ids.
                     'deprel': list[str], the dependency relation.
                     'prob': list[float], the prediction probility of the dependency relation.
-                    'postag': list[str], the POS tag. If the element of the texts is list, the key 'postag' will not returned.
+                    'postag': list[str], the POS tag. If the element of the texts is list, the key 'postag' will not be returned.
                 }
+
+            visuals : list[numpy.array]: the dependency visualization. Use cv2.imshow to show or cv2.imwrite to save it. If return_visual=False, it will not be empty.
 
        """
 
         if not texts:
             return
         if all([isinstance(i, str) and i for i in texts]):
-            parser = self.ddp.parse
+            do_parse = self.ddp.parse
         elif all([isinstance(i, list) and i for i in texts]):
-            parser = self.ddp.parse_seg
+            do_parse = self.ddp.parse_seg
         else:
             raise ValueError("All of the elements should be string or list")
-
-        return parser(texts)
+        results = do_parse(texts)
+        visuals = []
+        if return_visual:
+            for result in results:
+                visuals.append(
+                    self.visualize(result['word'], result['head'],
+                                   result['deprel']))
+        return results, visuals
 
     @runnable
     def run_cmd(self, argvs):
@@ -184,4 +199,5 @@ if __name__ == "__main__":
     result = results[0]
     data = module.visualize(result['word'], result['head'], result['deprel'])
     import cv2
-    cv2.imwrite('test.jpg', data)
+    import numpy as np
+    cv2.imwrite('test.jpg', np.array(data))
