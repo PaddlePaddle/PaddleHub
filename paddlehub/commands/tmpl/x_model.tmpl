@@ -20,9 +20,9 @@ def base64_to_cv2(b64str):
 
 
 def cv2_to_base64(image):
-    return base64.b64encode(image)
-    # data = cv2.imencode('.jpg', image)[1]
-    # return base64.b64encode(data.tostring()).decode('utf8')
+    # return base64.b64encode(image)
+    data = cv2.imencode('.jpg', image)[1]
+    return base64.b64encode(data.tostring()).decode('utf8')
 
 
 def read_images(paths):
