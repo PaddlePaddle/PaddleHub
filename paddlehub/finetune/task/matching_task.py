@@ -111,27 +111,37 @@ class PairwiseTextMatchingTask(BaseTask):
 
             query_feats, right_feats = net_func(query_unpad, right_unpad)
             right_concat = fluid.layers.concat(
-                input=[query_feats, right_feats],
-                axis=1,
-            )
+                input=[query_feats, right_feats], axis=1)
         else:
             query_feats = fluid.layers.dropout(
                 x=self.query_feature,
                 dropout_prob=0.1,
                 dropout_implementation="upscale_in_train")
+            query_mean = fluid.layers.reduce_mean(query_feats, dim=1)
+
             left_feats = fluid.layers.dropout(
                 x=self.left_feature,
                 dropout_prob=0.1,
                 dropout_implementation="upscale_in_train")
+            left_mean = fluid.layers.reduce_mean(left_feats, dim=1)
+
+            left_sub = fluid.layers.elementwise_sub(query_mean, left_mean)
+            left_sub = fluid.layers.abs(left_sub)
+
             left_concat = fluid.layers.concat(
-                input=[query_feats, left_feats], axis=-1)
+                input=[query_mean, left_mean, left_sub], axis=-1)
 
             right_feats = fluid.layers.dropout(
                 x=self.right_feature,
                 dropout_prob=0.1,
                 dropout_implementation="upscale_in_train")
+            right_mean = fluid.layers.reduce_mean(right_feats, dim=1)
+
+            right_sub = fluid.layers.elementwise_sub(query_mean, right_mean)
+            right_sub = fluid.layers.abs(right_sub)
+
             right_concat = fluid.layers.concat(
-                input=[query_feats, right_feats],
+                input=[query_mean, right_mean, right_sub],
                 axis=-1,
             )
 
@@ -435,22 +445,91 @@ class PointwiseTextMatchingTask(BaseTask):
                     self.network)
 
             query_feats, title_feats = net_func(query_unpad, title_unpad)
+
+            query_fc = fluid.layers.fc(
+                input=query_feats,
+                size=300,
+                param_attr=fluid.ParamAttr(
+                    name="query_fc_w",
+                    initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                ),
+                bias_attr=fluid.ParamAttr(
+                    name="query_fc_b",
+                    initializer=fluid.initializer.Constant(0.),
+                ),
+                act="tanh")
+            title_fc = fluid.layers.fc(
+                input=title_feats,
+                size=300,
+                param_attr=fluid.ParamAttr(
+                    name="title_fc_w",
+                    initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                ),
+                bias_attr=fluid.ParamAttr(
+                    name="title_fc_b",
+                    initializer=fluid.initializer.Constant(0.),
+                ),
+                act="tanh")
             title_concat = fluid.layers.concat(
-                input=[query_feats, title_feats], axis=1)
+                input=[query_fc, title_fc], axis=1)
+
+            fc1 = fluid.layers.fc(
+                input=title_concat,
+                size=256,
+                param_attr=fluid.ParamAttr(
+                    name="matching_fc1_w",
+                    initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                ),
+                bias_attr=fluid.ParamAttr(
+                    name="matching_fc1_b",
+                    initializer=fluid.initializer.Constant(0.),
+                ),
+                act="tanh")
+            fc2 = fluid.layers.fc(
+                input=fc1,
+                size=128,
+                param_attr=fluid.ParamAttr(
+                    name="matching_fc2_w",
+                    initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                ),
+                bias_attr=fluid.ParamAttr(
+                    name="matching_fc2_b",
+                    initializer=fluid.initializer.Constant(0.),
+                ),
+                act="tanh")
+            projection = fluid.layers.fc(
+                input=fc2,
+                size=96,
+                param_attr=fluid.ParamAttr(
+                    name="matching_fc3_w",
+                    initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                ),
+                bias_attr=fluid.ParamAttr(
+                    name="matching_fc3_b",
+                    initializer=fluid.initializer.Constant(0.),
+                ),
+                act="tanh")
+
         else:
             query_feats = fluid.layers.dropout(
                 x=self.query_feature,
                 dropout_prob=0.1,
                 dropout_implementation="upscale_in_train")
+            query_mean = fluid.layers.reduce_mean(query_feats, dim=1)
             title_feats = fluid.layers.dropout(
                 x=self.title_feature,
                 dropout_prob=0.1,
                 dropout_implementation="upscale_in_train")
-            title_concat = fluid.layers.concat(
-                input=[query_feats, title_feats], axis=-1)
+            title_mean = fluid.layers.reduce_mean(title_feats, dim=1)
+
+            sub = fluid.layers.elementwise_sub(query_mean, title_mean)
+            sub = fluid.layers.abs(sub)
+
+            projection = fluid.layers.concat(
+                input=[query_mean, title_mean, sub], axis=-1)
 
         score = fluid.layers.fc(
-            input=title_concat,
+            input=projection,
             size=2,
             param_attr=fluid.ParamAttr(
                 name="matching_out_w",

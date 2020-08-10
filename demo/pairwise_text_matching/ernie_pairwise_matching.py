@@ -52,9 +52,9 @@ if __name__ == '__main__':
 
     # Construct transfer learning network
     # Use sequence-level output.
-    query = outputs["pooled_output"]
-    left = outputs['pooled_output_2']
-    right = outputs['pooled_output_3']
+    query = outputs["sequence_output"]
+    left = outputs['sequence_output_2']
+    right = outputs['sequence_output_3']
 
     # Select fine-tune strategy
     strategy = hub.AdamWeightDecayStrategy(

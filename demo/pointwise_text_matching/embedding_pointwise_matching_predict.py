@@ -88,12 +88,12 @@ if __name__ == '__main__':
     # Prediction data sample.
     text_pairs = [
         [
-            "请问不是您的账户吗？",  # query
-            "您好，请问您使用的邮箱类型是？"  # title
+            "淘宝上怎么用信用卡分期付款",  # query
+            "淘宝上怎么分期付款，没有信用卡",  # title
         ],
         [
-            "推荐个手机游戏",  # query
-            "手机游戏推荐"  # title
+            "山楂干怎么吃好吃？",  # query
+            "山楂怎么做好吃",  # title
         ]
     ]
 
