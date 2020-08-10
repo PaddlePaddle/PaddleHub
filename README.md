@@ -204,5 +204,4 @@ $ hub uninstall ernie
 
 ## 更新历史
 
-PaddleHub v1.7 已发布！
 更多升级详情参考[更新历史](./RELEASE.md)
