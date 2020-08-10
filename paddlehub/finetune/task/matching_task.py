@@ -106,12 +106,51 @@ class PairwiseTextMatchingTask(BaseTask):
                             % self.network)
 
             query_feats, left_feats = net_func(query_unpad, left_unpad)
+            query_feats = fluid.layers.fc(
+                input=query_feats,
+                size=300,
+                param_attr=fluid.ParamAttr(
+                    name="query_fc_w",
+                    initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                ),
+                bias_attr=fluid.ParamAttr(
+                    name="query_fc_b",
+                    initializer=fluid.initializer.Constant(0.),
+                ),
+                act="tanh")
+            left_feats = fluid.layers.fc(
+                input=left_feats,
+                size=300,
+                param_attr=fluid.ParamAttr(
+                    name="title_fc_w",
+                    initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                ),
+                bias_attr=fluid.ParamAttr(
+                    name="title_fc_b",
+                    initializer=fluid.initializer.Constant(0.),
+                ),
+                act="tanh")
+
             left_concat = fluid.layers.concat(
                 input=[query_feats, left_feats], axis=1)
 
-            query_feats, right_feats = net_func(query_unpad, right_unpad)
+            _, right_feats = net_func(query_unpad, right_unpad)
+            right_feats = fluid.layers.fc(
+                input=right_feats,
+                size=300,
+                param_attr=fluid.ParamAttr(
+                    name="title_fc_w",
+                    initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                ),
+                bias_attr=fluid.ParamAttr(
+                    name="title_fc_b",
+                    initializer=fluid.initializer.Constant(0.),
+                ),
+                act="tanh")
+
             right_concat = fluid.layers.concat(
                 input=[query_feats, right_feats], axis=1)
+
         else:
             query_feats = fluid.layers.dropout(
                 x=self.query_feature,
