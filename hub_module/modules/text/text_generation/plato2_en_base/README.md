@@ -61,9 +61,9 @@ module = hub.Module(name="plato2_en_base")
 
 with module.interactive_mode(max_turn=6):
     while True:
-        human_utterance = input()
+        human_utterance = input("[Human]: ").strip()
         robot_utterance = module.generate(human_utterance)
-        print("Robot: %s"%robot_utterance[0])
+        print("[Bot]: %s"%robot_utterance[0])
 ```
 
 ## 服务部署
@@ -106,17 +106,33 @@ for result in results:
 
 方式2： 通过交互式客户端进入交互模式
 
-下载交互式客户端：
+您可以执行以下客户端脚本进入交互模式：
 
-```
-wget https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.8/hub_module/modules/text/text_generation/plato2_en_base/plato2_en_base_client.py
-```
+```python
+import requests
+import json
 
-进入交互模式：
+ADDR = "127.0.0.1" # Your serving address
+PORT = 8866 # Your serving port
+MAX_TURN = 6 # The maximum dialogue turns
+
+headers = {"Content-type": "application/json"}
+url = "http://%s:%s/predict/plato2_en_base" % (ADDR, PORT)
+
+context = []
+while True:
+    user_utt = input("[Human]: ").strip()
+    if user_utt == "[NEXT]":
+        context = ""
+        print("Restart")
+    else:
+        context.append(user_utt)
+        data = {'texts': ["\t".join(context[-MAX_TURN:])]}
+        r = requests.post(url=url, headers=headers, data=json.dumps(data))
+        bot_response = r.json()["results"][0]
+        print("[Bot]: %s"%bot_response)
+        context.append(bot_response)
 ```
-python plato2_en_base_client.py
-```
-默认地址为127.0.0.1，您可以通过 -a 进行设置。默认端口为8866，您可以通过 -p 进行设置。
 
 ## 查看代码
 
