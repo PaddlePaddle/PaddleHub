@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=4
+export CUDA_VISIBLE_DEVICES=0
 CKPT_DIR="./ckpt_ernie_pointwise_matching"
 
 python -u ernie_pointwise_matching.py \

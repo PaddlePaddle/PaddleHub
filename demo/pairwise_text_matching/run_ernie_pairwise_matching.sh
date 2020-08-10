@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2,3
+export CUDA_VISIBLE_DEVICES=0
 
 CKPT_DIR="./ckpt_ernie_pairwise_matching"
 
