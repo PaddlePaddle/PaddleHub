@@ -17,6 +17,7 @@ from paddlehub.serving.model_service.base_model_service import nlp_module_info
 from paddlehub.serving.model_service.base_model_service import v2_module_info
 from paddlehub.common import utils
 import functools
+import traceback
 import time
 import os
 import base64
@@ -40,8 +41,7 @@ def predict_v2_advanced(module_info, input):
     try:
         output = serving_method(**predict_args)
     except Exception as err:
-        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        print(curr, " - ", err)
+        traceback.print_exc()
         return gen_result("-1", "Please check data format!", "")
     return gen_result("0", "", output)
 
@@ -66,8 +66,7 @@ def predict_nlp(module_info, input_text, req_id, extra=None):
     try:
         res = predict_method(**predict_args)
     except Exception as err:
-        curr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        print(curr, " - ", err)
+        traceback.print_exc()
         return gen_result("-1", "Please check data format!", "")
     finally:
         user_dict = extra.get("user_dict", [])
