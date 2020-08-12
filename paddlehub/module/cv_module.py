@@ -34,20 +34,21 @@ class CVModule(RunModule):
 class ImageClassifierModule(CVModule):
     def training_step(self, batch, batch_idx):
         images = batch[0]
-        label = paddle.unsqueeze(batch[1], axes=-1)
-        pred = self(images)
-        loss, _ = fluid.layers.softmax_with_cross_entropy(pred, label, return_softmax=True)
+        labels = paddle.unsqueeze(batch[1], axes=-1)
+
+        preds = self(images)
+        loss, _ = fluid.layers.softmax_with_cross_entropy(preds, labels, return_softmax=True)
         loss = fluid.layers.mean(loss)
-        acc = fluid.layers.accuracy(input, label)
+        acc = fluid.layers.accuracy(images, labels)
         return {'loss': loss, 'metrics': {'acc': acc}}
 
     def validation_step(self, batch, batch_idx):
         images = batch[0]
-        label = paddle.unsqueeze(batch[1], axes=-1)
-        pred = self(images)
-        loss, _ = fluid.layers.softmax_with_cross_entropy(pred, label, return_softmax=True, axis=1)
+        labels = paddle.unsqueeze(batch[1], axes=-1)
+        preds = self(images)
+        loss, _ = fluid.layers.softmax_with_cross_entropy(preds, labels, return_softmax=True, axis=1)
         loss = fluid.layers.mean(loss)
-        acc = fluid.layers.accuracy(input, label)
+        acc = fluid.layers.accuracy(images, labels)
         return {'loss': loss, 'metrics': {'acc': acc}}
 
     def predict(self, images, top_k=1):

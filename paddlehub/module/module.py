@@ -81,7 +81,7 @@ class Module(object):
 
         for _item, _cls in inspect.getmembers(py_module, inspect.isclass):
             _item = py_module.__dict__[_item]
-            if issubclass(_item, RunModule):
+            if hasattr(_item, '_hook_by_hub') and issubclass(_item, RunModule):
                 user_module_cls = _item
                 break
         else:
@@ -109,12 +109,12 @@ class Module(object):
 
 
 class RunModule(object):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         # Avoid module being initialized multiple times
         if '_is_initialize' in self.__dict__ and self._is_initialize:
             return
 
-        super(Module, self).__init__()
+        super(RunModule, self).__init__()
         _run_func_name = self._get_func_name(self.__class__, _module_runnable_func)
         self._run_func = getattr(self, _run_func_name) if _run_func_name else None
         self._serving_func_name = self._get_func_name(self.__class__, _module_serving_func)
@@ -175,6 +175,7 @@ def moduleinfo(name: str,
         wrap_cls.author_email = author_email
         wrap_cls.summary = summary
         wrap_cls.type = type
+        wrap_cls._hook_by_hub = True
         return wrap_cls
 
     return _wrapper

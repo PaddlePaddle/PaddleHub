@@ -54,4 +54,3 @@ class HubServer(object):
 
 module_server = HubServer()
 module_server.add_source(PADDLEHUB_PUBLIC_SERVER)
-module_server.add_source('https://github.com/nepeplwu/HubModule.git')
