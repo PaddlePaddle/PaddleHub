@@ -32,15 +32,16 @@ class ddparser(hub.NLPPredictionModule):
         """
         self.ddp = DDParserModel(prob=True, use_pos=True)
         self.font = font_manager.FontProperties(
-            fname=os.path.join(self.directory, "SimHei.ttf"))
+            fname=os.path.join(self.directory, "SourceHanSans-Regular.ttf"))
 
     @serving
     def serving_parse(self, texts=[], return_visual=False):
-        results, visuals = self.parse(texts, return_visual)
-        for i, visual in enumerate(visuals):
-            visuals[i] = visual.tolist()
+        results = self.parse(texts, return_visual)
+        if return_visual:
+            for i, result in enumerate(results):
+                result['visual'] = result['visual'].tolist()
 
-        return results, visuals
+        return results
 
     def parse(self, texts=[], return_visual=False):
         """
@@ -57,11 +58,9 @@ class ddparser(hub.NLPPredictionModule):
                     'head': list[int], the head ids.
                     'deprel': list[str], the dependency relation.
                     'prob': list[float], the prediction probility of the dependency relation.
-                    'postag': list[str], the POS tag. If the element of the texts is list, the key 'postag' will not be returned.
+                    'postag': list[str], the POS tag. If the element of the texts is list, the key 'postag' will not return.
+                    'visual' : list[numpy.array]: the dependency visualization. Use cv2.imshow to show or cv2.imwrite to save it. If return_visual=False, it will not return.
                 }
-
-            visuals : list[numpy.array]: the dependency visualization. Use cv2.imshow to show or cv2.imwrite to save it. If return_visual=False, it will not be empty.
-
        """
 
         if not texts:
@@ -73,13 +72,11 @@ class ddparser(hub.NLPPredictionModule):
         else:
             raise ValueError("All of the elements should be string or list")
         results = do_parse(texts)
-        visuals = []
         if return_visual:
             for result in results:
-                visuals.append(
-                    self.visualize(result['word'], result['head'],
-                                   result['deprel']))
-        return results, visuals
+                result['visual'] = self.visualize(
+                    result['word'], result['head'], result['deprel'])
+        return results
 
     @runnable
     def run_cmd(self, argvs):
@@ -194,10 +191,11 @@ if __name__ == "__main__":
     results = module.parse(texts=test_text)
     print(results)
     test_tokens = [['百度', '是', '一家', '高科技', '公司']]
-    results = module.parse(texts=test_text)
+    results = module.parse(texts=test_text, return_visual=True)
     print(results)
     result = results[0]
     data = module.visualize(result['word'], result['head'], result['deprel'])
     import cv2
     import numpy as np
-    cv2.imwrite('test.jpg', np.array(data))
+    cv2.imwrite('test1.jpg', data)
+    cv2.imwrite('test2.jpg', result['visual'])

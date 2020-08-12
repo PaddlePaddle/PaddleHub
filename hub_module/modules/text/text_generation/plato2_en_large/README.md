@@ -7,10 +7,12 @@ PLATO2是一个超大规模生成式对话系统模型。它承袭了PLATO隐变
 
 更多详情参考论文[PLATO-2: Towards Building an Open-Domain Chatbot via Curriculum Learning](https://arxiv.org/abs/2006.16779)
 
+**注：plato2\_en\_large 模型大小12GB,下载时间较长，请耐心等候。运行此模型要求显存至少16GB。**
+
 ## 命令行预测
 
 ```shell
-$ hub run plato2_en_large --input_text="Hello, how are you" --use_gpu
+$ hub run plato2_en_large --input_text="Hello, how are you" --use_gpu True
 ```
 
 ## API

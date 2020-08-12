@@ -10,7 +10,7 @@ PLATO2是一个超大规模生成式对话系统模型。它承袭了PLATO隐变
 ## 命令行预测
 
 ```shell
-$ hub run plato2_en_base --input_text="Hello, how are you" --use_gpu
+$ hub run plato2_en_base --input_text="Hello, how are you" --use_gpu True
 ```
 
 ## API

@@ -6,17 +6,18 @@ $ hub run ddparser --input_text="百度是一家高科技公司"
 
 # API
 
-## parse(texts=[])
+## parse(texts=[], return\_visual=False)
 
 依存分析接口，输入文本，输出依存关系。
 
 **参数**
 
-* texts(list[list[str] or list[str]]): 待预测数据。各元素可以是未分词的字符串，也可以是已分词的token列表。
+* texts(list\[list\[str\] or list\[str\]]): 待预测数据。各元素可以是未分词的字符串，也可以是已分词的token列表。
+* return\_visual(bool): 是否返回依存分析可视化结果。如果为True，返回结果中将包含'visual'字段。
 
 **返回**
 
-* results(list[dict]): 依存分析结果。每个元素都是dict类型，包含以下信息：  
+* results(list\[dict\]): 依存分析结果。每个元素都是dict类型，包含以下信息：  
 ```python
   {
       'word': list[str], 分词结果。
@@ -34,9 +35,9 @@ $ hub run ddparser --input_text="百度是一家高科技公司"
 
 **参数**
 
-* word(list[list[str]): 分词信息。
-* head(list[int]): 当前成分其支配者的id。
-* deprel(list[str]): 当前成分与支配者的依存关系。
+* word(list\[list\[str\]\): 分词信息。
+* head(list\[int\]): 当前成分其支配者的id。
+* deprel(list\[str\]): 当前成分与支配者的依存关系。
 
 **返回**
 
@@ -55,11 +56,12 @@ results = module.parse(texts=test_text)
 print(results)
 
 test_tokens = [['百度', '是', '一家', '高科技', '公司']]
-results = module.parse(texts=test_text)
+results = module.parse(texts=test_text, return_visual = True)
 print(results)
 
 result = results[0]
 data = module.visualize(result['word'],result['head'],result['deprel'])
+# or data = result['visual']
 cv2.imwrite('test.jpg',data)
 ```
 
@@ -81,7 +83,7 @@ Loading ddparser successful.
 
 这样就完成了服务化API的部署，默认端口号为8866。
 
-**NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
+**NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 
 ## 第二步：发送预测请求
 
@@ -105,12 +107,12 @@ data = {"texts": text, "return_visual": return_visual}
 url = "http://0.0.0.0:8866/predict/ddparser"
 headers = {"Content-Type": "application/json"}
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
-results, visuals = r.json()['results']
+results = r.json()['results']
 
 for i in range(len(results)):
-  print(results[i])
+  print(results[i]['word'])
   # 不同于本地调用parse接口，serving返回的图像是list类型的，需要先用numpy加载再显示或保存。
-  cv2.imwrite('%s.jpg'%i, np.array(visuals[i]))
+  cv2.imwrite('%s.jpg'%i, np.array(results[i]['visual']))
 ```
 
 关于PaddleHub Serving更多信息参考[服务部署](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md)
