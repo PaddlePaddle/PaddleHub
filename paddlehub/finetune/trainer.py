@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import time
 from collections import defaultdict
 
@@ -27,7 +28,7 @@ from paddlehub.utils.utils import Timer
 
 
 class Trainer(object):
-    def __init__(self, model, strategy, use_vdl=False, ckpt_dir=None):
+    def __init__(self, model, strategy, use_vdl=False, checkpoint_dir=None):
         self.nranks = ParallelEnv().nranks
         self.local_rank = ParallelEnv().local_rank
         self.model = model
@@ -36,7 +37,52 @@ class Trainer(object):
             context = fluid.dygraph.prepare_context()
             self.model = fluid.dygraph.DataParallel(self.model, context)
         self.use_vdl = use_vdl
-        self.ckpt_dir = ckpt_dir if ckpt_dir else 'ckpt_{}'.format(time.time())
+        self.checkpoint_dir = checkpoint_dir if checkpoint_dir else 'ckpt_{}'.format(time.time())
+        self.epoch = 0
+        self.load_checkpoint(self.checkpoint_dir)
+
+    def load_checkpoint(self, checkpoint_dir):
+        '''
+        Load checkpoint and state dict from
+
+        Args:
+            checkpoint_dir(str) : Directory where checkpoints are stored
+        '''
+        max_epoch = -1
+
+        if os.path.exists(checkpoint_dir):
+            for file in os.listdir(checkpoint_dir):
+                if not file.startswith('epoch_'):
+                    continue
+
+                _epoch = file.split('_')[-1]
+                if not _epoch.isdigit():
+                    continue
+
+                max_epoch = max(max_epoch, int(file))
+
+        if max_epoch == -1:
+            logger.warning('PaddleHub model checkpoint not found, start from scratch...')
+            return
+
+        self.epoch = max_epoch
+        logger.info('PaddleHub model checkpoint loaded. current_epoch={}'.format(self.epoch))
+
+        model_path = os.path.join('{}_{}'.format(checkpoint_dir, max_epoch, 'model'))
+        state_dict, _ = fluid.load_dygraph(model_path)
+        self.model.set_dict(state_dict)
+
+    def save_checkpoint(self, checkpoint_dir):
+        '''
+        Save model checkpoint and state dict
+
+        Args:
+            checkpoint_dir(str) : Directory where checkpoints are stored
+        '''
+        model_path = os.path.join(checkpoint_dir, '{}_{}'.format('epoch', self.epoch), 'model')
+        logger.info('Saving model checkpoint to {}'.format(model_path))
+
+        fluid.save_dygraph(self.model.state_dict(), model_path)
 
     def train(self,
               train_dataset,
@@ -45,8 +91,8 @@ class Trainer(object):
               num_workers=1,
               eval_dataset=None,
               log_interval=10,
-              save_ckpt_interval=10):
-        use_gpu = False
+              save_interval=10):
+        use_gpu = True
         place = fluid.CUDAPlace(ParallelEnv().dev_id) if use_gpu else fluid.CPUPlace()
         with fluid.dygraph.guard(place):
             batch_sampler = DistributedBatchSampler(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
@@ -59,7 +105,7 @@ class Trainer(object):
             timer = Timer(steps_per_epoch * epochs)
             timer.start()
 
-            for current_epoch in range(epochs):
+            for current_epoch in range(self.epoch, self.epoch + epochs):
                 avg_loss = 0
                 avg_metrics = defaultdict(int)
                 for batch_idx, batch in enumerate(loader):
@@ -94,9 +140,12 @@ class Trainer(object):
                         avg_loss = 0
                         avg_metrics = defaultdict(int)
 
-                    if (batch_idx + 1) % save_ckpt_interval == 0 and self.local_rank == 0:
+                    if (current_epoch +
+                            1) % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
                         if eval_dataset:
                             self.evaluate(eval_dataset, batch_size, num_workers)
+
+                        self.save_checkpoint(self.checkpoint_dir)
 
     def training_step(self, batch, batch_idx):
         result = self.model.training_step(batch, batch_idx)

@@ -18,4 +18,4 @@ if __name__ == "__main__":
         optimizer = fluid.optimizer.AdamOptimizer(learning_rate=0.001, parameter_list=model.parameters())
         trainer = Trainer(model, optimizer)
 
-        trainer.train(flowers, epochs=100, batch_size=1)
+        trainer.train(flowers, epochs=100, batch_size=32)

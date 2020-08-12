@@ -155,7 +155,7 @@ def download(url: str, path: str = None):
     Download a file
 
     Args:
-        url  (str) : url to be downloaded
+        url (str) : url to be downloaded
         path (str, optional) : path to store downloaded products, default is current work directory
 
     Examples:
@@ -175,7 +175,7 @@ def download_with_progress(url: str, path: str = None) -> Generator[str, int, in
     Download a file and return the downloading progress -> Generator[filename, download_size, total_size]
 
     Args:
-        url  (str) : url to be downloaded
+        url (str) : url to be downloaded
         path (str, optional) : path to store downloaded products, default is current work directory
 
     Examples:
