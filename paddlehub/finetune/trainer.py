@@ -82,7 +82,11 @@ class Trainer(object):
         model_path = os.path.join(checkpoint_dir, '{}_{}'.format('epoch', self.epoch), 'model')
         logger.info('Saving model checkpoint to {}'.format(model_path))
 
-        fluid.save_dygraph(self.model.state_dict(), model_path)
+        self.save_model(model_path)
+
+    def save_model(self, save_dir):
+        '''Save model'''
+        fluid.save_dygraph(self.model.state_dict(), save_dir)
 
     def train(self,
               train_dataset,
@@ -100,15 +104,16 @@ class Trainer(object):
             loader = DataLoader(
                 train_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
 
-            self.model.train()
             steps_per_epoch = len(batch_sampler)
             timer = Timer(steps_per_epoch * epochs)
             timer.start()
+            best_score = None
 
             for i in range(epochs):
                 self.epoch += 1
                 avg_loss = 0
                 avg_metrics = defaultdict(int)
+                self.model.train()
 
                 for batch_idx, batch in enumerate(loader):
                     loss, metrics = self.training_step(batch, batch_idx)
@@ -125,14 +130,12 @@ class Trainer(object):
                     if (batch_idx + 1) % log_interval == 0 and self.local_rank == 0:
                         lr = self.optimizer.current_step_lr()
                         avg_loss /= log_interval
-                        for metric, value in avg_metrics.items():
-                            value /= log_interval
 
                         print_msg = 'Epoch={}/{}, Step={}/{}'.format(self.epoch, epochs, batch_idx + 1, steps_per_epoch)
                         print_msg += ' loss={:.4f}'.format(avg_loss)
 
                         for metric, value in avg_metrics.items():
-                            print_msg += ' {}={:.4f}'.format(metric, value)
+                            print_msg += ' {}={:.4f}'.format(metric, value / log_interval)
 
                         print_msg += ' lr={:.6f}'.format(lr)
 
@@ -143,12 +146,18 @@ class Trainer(object):
 
                     if self.epoch % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
                         if eval_dataset:
-                            self.evaluate(eval_dataset, batch_size, num_workers)
+                            result = self.evaluate(eval_dataset, batch_size, num_workers)
+                            if not best_score or self.is_better_score(best_score, result):
+                                best_score = result
+                                best_model_path = os.path.join(self.checkpoint_dir, 'best_model')
+                                self.save_model(best_model_path)
+
+                                logger.info('Saving best model to {}'.format(best_model_path))
 
                         self.save_checkpoint(self.checkpoint_dir)
 
     def evaluate(self, eval_dataset, batch_size=1, num_workers=1):
-        use_gpu = False
+        use_gpu = True
         place = fluid.CUDAPlace(ParallelEnv().dev_id) if use_gpu else fluid.CPUPlace()
         with fluid.dygraph.guard(place):
             batch_sampler = DistributedBatchSampler(eval_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
@@ -160,15 +169,41 @@ class Trainer(object):
             steps = len(batch_sampler)
             timer = Timer(steps)
             timer.start()
+            avg_loss = num_samples = 0
+            avg_metrics = defaultdict(int)
 
             for batch_idx, batch in enumerate(loader):
                 result = self.validation_step(batch, batch_idx)
-                print_msg = 'Step={}/{}'.format(batch_idx, steps)
+                loss = result.get('loss', None)
+                metrics = result.get('metrics', {})
+                bs = batch[0].shape[0]
+                num_samples += bs
 
-                for metric, value in result.items():
-                    print_msg += ' {}={:.4f}'.format(metric, value)
+                print_msg = 'Step={}/{}'.format(batch_idx + 1, steps)
+
+                if loss:
+                    avg_loss += loss.numpy()[0] * bs
+                    print_msg += ' loss={:.4f}'.format(loss.numpy()[0])
+
+                for metric, value in metrics.items():
+                    avg_metrics[metric] += value.numpy()[0] * bs
+                    print_msg += ' {}={:.4f}'.format(metric, value.numpy()[0])
 
                 logger.eval(print_msg)
+
+            # print avg metrics and loss
+            print_msg = '[Evaluation result]'
+            if loss:
+                print_msg += ' avg_loss={:.4f}'.format(avg_loss / num_samples)
+
+            for metric, value in avg_metrics.items():
+                print_msg += ' avg_{}={:.4f}'.format(metric, value / num_samples)
+
+            logger.eval(print_msg)
+
+            if loss:
+                return {'loss': avg_loss, 'metrics': avg_metrics}
+            return {'metrics': avg_metrics}
 
     def training_step(self, batch, batch_idx):
         result = self.model.training_step(batch, batch_idx)
