@@ -35,7 +35,7 @@ from ernie_gen_couplet.model.modeling_ernie_gen import ErnieModelForGeneration
 
 @moduleinfo(
     name="ernie_gen_couplet",
-    version="1.0.0",
+    version="1.0.1",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning. This module has fine-tuned for couplet generation task.",
     author="baidu-nlp",
@@ -50,10 +50,10 @@ class ErnieGen(hub.NLPPredictionModule):
         assets_path = os.path.join(self.directory, "assets")
         gen_checkpoint_path = os.path.join(assets_path, "ernie_gen_couplet")
         ernie_cfg_path = os.path.join(assets_path, 'ernie_config.json')
-        with open(ernie_cfg_path) as ernie_cfg_file:
+        with open(ernie_cfg_path, encoding='utf8') as ernie_cfg_file:
             ernie_cfg = dict(json.loads(ernie_cfg_file.read()))
         ernie_vocab_path = os.path.join(assets_path, 'vocab.txt')
-        with open(ernie_vocab_path) as ernie_vocab_file:
+        with open(ernie_vocab_path, encoding='utf8') as ernie_vocab_file:
             ernie_vocab = {
                 j.strip().split('\t')[0]: i
                 for i, j in enumerate(ernie_vocab_file.readlines())
