@@ -59,7 +59,7 @@ class Trainer(object):
                 if not _epoch.isdigit():
                     continue
 
-                max_epoch = max(max_epoch, int(file))
+                max_epoch = max(max_epoch, int(_epoch))
 
         if max_epoch == -1:
             logger.warning('PaddleHub model checkpoint not found, start from scratch...')
@@ -68,7 +68,7 @@ class Trainer(object):
         self.epoch = max_epoch
         logger.info('PaddleHub model checkpoint loaded. current_epoch={}'.format(self.epoch))
 
-        model_path = os.path.join('{}_{}'.format(checkpoint_dir, max_epoch, 'model'))
+        model_path = os.path.join(checkpoint_dir, '{}_{}'.format('epoch', self.epoch), 'model')
         state_dict, _ = fluid.load_dygraph(model_path)
         self.model.set_dict(state_dict)
 
@@ -105,13 +105,15 @@ class Trainer(object):
             timer = Timer(steps_per_epoch * epochs)
             timer.start()
 
-            for current_epoch in range(self.epoch, self.epoch + epochs):
+            for i in range(epochs):
+                self.epoch += 1
                 avg_loss = 0
                 avg_metrics = defaultdict(int)
+
                 for batch_idx, batch in enumerate(loader):
                     loss, metrics = self.training_step(batch, batch_idx)
-                    self.optimizer_step(current_epoch, batch_idx, self.optimizer, loss)
-                    self.optimizer_zero_grad(current_epoch, batch_idx, self.optimizer)
+                    self.optimizer_step(self.epoch, batch_idx, self.optimizer, loss)
+                    self.optimizer_zero_grad(self.epoch, batch_idx, self.optimizer)
 
                     # calculate metrics and loss
                     avg_loss += loss.numpy()[0]
@@ -126,8 +128,7 @@ class Trainer(object):
                         for metric, value in avg_metrics.items():
                             value /= log_interval
 
-                        print_msg = 'Epoch={}/{}, Step={}/{}'.format(current_epoch + 1, epochs, batch_idx + 1,
-                                                                     steps_per_epoch)
+                        print_msg = 'Epoch={}/{}, Step={}/{}'.format(self.epoch, epochs, batch_idx + 1, steps_per_epoch)
                         print_msg += ' loss={:.4f}'.format(avg_loss)
 
                         for metric, value in avg_metrics.items():
@@ -140,12 +141,34 @@ class Trainer(object):
                         avg_loss = 0
                         avg_metrics = defaultdict(int)
 
-                    if (current_epoch +
-                            1) % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
+                    if self.epoch % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
                         if eval_dataset:
                             self.evaluate(eval_dataset, batch_size, num_workers)
 
                         self.save_checkpoint(self.checkpoint_dir)
+
+    def evaluate(self, eval_dataset, batch_size=1, num_workers=1):
+        use_gpu = False
+        place = fluid.CUDAPlace(ParallelEnv().dev_id) if use_gpu else fluid.CPUPlace()
+        with fluid.dygraph.guard(place):
+            batch_sampler = DistributedBatchSampler(eval_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+
+            loader = DataLoader(
+                eval_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
+
+            self.model.eval()
+            steps = len(batch_sampler)
+            timer = Timer(steps)
+            timer.start()
+
+            for batch_idx, batch in enumerate(loader):
+                result = self.validation_step(batch, batch_idx)
+                print_msg = 'Step={}/{}'.format(batch_idx, steps)
+
+                for metric, value in result.items():
+                    print_msg += ' {}={:.4f}'.format(metric, value)
+
+                logger.eval(print_msg)
 
     def training_step(self, batch, batch_idx):
         result = self.model.training_step(batch, batch_idx)
@@ -186,26 +209,3 @@ class Trainer(object):
 
         mainkey = list(new_score.keys())[0]
         return old_score[mainkey] < new_score[mainkey]
-
-    def evaluate(self, eval_dataset, batch_size=1, num_workers=1):
-        use_gpu = False
-        place = fluid.CUDAPlace(ParallelEnv().dev_id) if use_gpu else fluid.CPUPlace()
-        with fluid.dygraph.guard(place):
-            batch_sampler = DistributedBatchSampler(eval_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
-
-            loader = DataLoader(
-                eval_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
-
-            self.model.eval()
-            steps = len(batch_sampler)
-            timer = Timer(steps)
-            timer.start()
-
-            for batch_idx, batch in enumerate(loader):
-                result = self.validation_step(batch, batch_idx)
-                print_msg = 'Step={}/{}'.format(batch_idx, steps)
-
-                for metric, value in result.items():
-                    print_msg += ' {}={:.4f}'.format(metric, value)
-
-                logger.eval(print_msg)
