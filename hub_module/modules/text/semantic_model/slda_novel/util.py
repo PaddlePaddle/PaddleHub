@@ -14,7 +14,7 @@ def load_prototxt(config_file, config):
         config: ModelConfig class
     """
     logger.info("Loading SLDA config.")
-    with open(config_file, 'r') as f:
+    with open(config_file, 'r', encoding='utf-8') as f:
         yaml_dict = yaml.load(f, Loader=yaml.FullLoader)
 
     # Assignment.

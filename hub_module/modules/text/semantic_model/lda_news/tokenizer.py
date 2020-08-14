@@ -64,7 +64,7 @@ class SimpleTokenizer(Tokenizer):
     def __load_vocab(self, vocab_path):
         """Load the word dictionary.
         """
-        with open(vocab_path, 'r') as fin:
+        with open(vocab_path, 'r', encoding='utf-8') as fin:
             vocab_size = 0
             for line in fin.readlines():
                 fields = line.strip().split('\t')
@@ -97,7 +97,7 @@ class LACTokenizer(Tokenizer):
     def __load_vocab(self, vocab_path):
         """Load the word dictionary.
                 """
-        with open(vocab_path, 'r') as fin:
+        with open(vocab_path, 'r', encoding='utf-8') as fin:
             vocab_size = 0
             for line in fin.readlines():
                 fields = line.strip().split('\t')
