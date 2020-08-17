@@ -137,3 +137,7 @@ paddlehub >= 1.8.0
 * 1.0.1
 
   修复因为return的bug导致的NoneType错误
+
+* 1.0.2
+
+  修复由于Windows`gbk`编码导致的问题

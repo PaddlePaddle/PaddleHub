@@ -93,7 +93,7 @@ class TopicModel(object):
         """Load the word topic parameters.
         """
         logger.info("Loading word topic.")
-        with open(word_dict_path, 'r') as f:
+        with open(word_dict_path, 'r', encoding='utf-8') as f:
             for line in tqdm(f.readlines()):
                 fields = line.strip().split(" ")
                 assert len(fields) > 0, "Model file format error!"
