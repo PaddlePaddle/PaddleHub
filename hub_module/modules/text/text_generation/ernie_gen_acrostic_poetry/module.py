@@ -47,13 +47,14 @@ class ErnieGen(hub.NLPPredictionModule):
         """
         initialize with the necessary elements
         """
-        if line not in [4,8]:
+        if line not in [4, 8]:
             raise ValueError("The line could only be 4 or 8.")
-        if word not in [5,7]:
+        if word not in [5, 7]:
             raise ValueError("The word could only be 5 or 7.")
 
         assets_path = os.path.join(self.directory, "assets")
-        gen_checkpoint_path = os.path.join(assets_path, "ernie_gen_acrostic_poetry_L%sW%s"%(line,word))
+        gen_checkpoint_path = os.path.join(
+            assets_path, "ernie_gen_acrostic_poetry_L%sW%s" % (line, word))
         ernie_cfg_path = os.path.join(assets_path, 'ernie_config.json')
         with open(ernie_cfg_path, encoding='utf8') as ernie_cfg_file:
             ernie_cfg = dict(json.loads(ernie_cfg_file.read()))
@@ -146,7 +147,6 @@ class ErnieGen(hub.NLPPredictionModule):
         self.arg_config_group.add_argument(
             '--beam_width', type=int, default=5, help="the beam search width")
 
-
     @runnable
     def run_cmd(self, argvs):
         """
@@ -184,6 +184,5 @@ class ErnieGen(hub.NLPPredictionModule):
 
 if __name__ == "__main__":
     module = ErnieGen()
-    for result in module.generate(['夏雨荷', '我喜欢你'],
-                                  beam_width=5):
+    for result in module.generate(['夏雨荷', '我喜欢你'], beam_width=5):
         print(result)
