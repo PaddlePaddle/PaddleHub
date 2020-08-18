@@ -12,12 +12,12 @@ $ hub run falsr_A --input_path "/PATH/TO/IMAGE"
 ## API
 
 ```python
-def super_resolution(self,
-                     images=None,
-                     paths=None,
-                     use_gpu=False,
-                     visualization=False,
-                     output_dir="falsr_A_output")
+def reconstruct(self,
+                images=None,
+                paths=None,
+                use_gpu=False,
+                visualization=False,
+                output_dir="falsr_A_output")
 ```
 
 预测API，用于图像超分辨率。
