@@ -22,7 +22,7 @@ from paddlehub.module.module import serving, RunModule
 from paddlehub.utils.utils import base64_to_cv2
 
 
-class CVModule(RunModule):
+class ImageServing(object):
     @serving
     def serving_method(self, images, **kwargs):
         """Run as a service."""
@@ -31,7 +31,7 @@ class CVModule(RunModule):
         return results
 
 
-class ImageClassifierModule(CVModule):
+class ImageClassifierModule(RunModule, ImageServing):
     def training_step(self, batch, batch_idx):
         return self.validation_step(batch, batch_idx)
 
