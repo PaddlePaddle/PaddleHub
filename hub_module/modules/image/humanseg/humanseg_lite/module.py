@@ -35,7 +35,7 @@ from humanseg_lite.optimal import postprocess_v, threshold_mask
     author="paddlepaddle",
     author_email="",
     summary="humanseg_lite is a semantic segmentation model.",
-    version="1.0.0")
+    version="1.1.0")
 class ShufflenetHumanSeg(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
@@ -73,10 +73,9 @@ class ShufflenetHumanSeg(hub.Module):
     def segment(self,
                 images=None,
                 paths=None,
-                data=None,
                 batch_size=1,
                 use_gpu=False,
-                visualization=True,
+                visualization=False,
                 output_dir='humanseg_lite_output'):
         """
         API for human segmentation.
@@ -84,7 +83,6 @@ class ShufflenetHumanSeg(hub.Module):
         Args:
             images (list(numpy.ndarray)): images data, shape of each is [H, W, C], the color space is BGR.
             paths (list[str]): The paths of images.
-            data (dict): key is 'image', the corresponding value is the path to image.
             batch_size (int): batch size.
             use_gpu (bool): Whether to use gpu.
             visualization (bool): Whether to save image or not.
@@ -104,11 +102,6 @@ class ShufflenetHumanSeg(hub.Module):
                 raise RuntimeError(
                     "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
                 )
-
-        if data and 'image' in data:
-            if paths is None:
-                paths = list()
-            paths += data['image']
 
         all_data = list()
         for yield_data in reader(images, paths):
@@ -416,7 +409,7 @@ class ShufflenetHumanSeg(hub.Module):
         self.arg_config_group.add_argument(
             '--visualization',
             type=ast.literal_eval,
-            default=True,
+            default=False,
             help="whether to save output as images.")
         self.arg_config_group.add_argument(
             '--batch_size',

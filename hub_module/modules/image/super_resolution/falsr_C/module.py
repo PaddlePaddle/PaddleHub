@@ -29,7 +29,7 @@ from falsr_C.processor import postprocess, base64_to_cv2, cv2_to_base64, check_d
 
 @moduleinfo(
     name="falsr_C",
-    type="CV/super_resolution",
+    type="CV/image_editing",
     author="paddlepaddle",
     author_email="",
     summary="falsr_C is a super resolution model.",
@@ -63,20 +63,18 @@ class Falsr_C(hub.Module):
                 memory_pool_init_size_mb=1000, device_id=0)
             self.gpu_predictor = create_paddle_predictor(gpu_config)
 
-    def super_resolution(self,
-                         images=None,
-                         paths=None,
-                         data=None,
-                         use_gpu=False,
-                         visualization=True,
-                         output_dir="falsr_C_output"):
+    def reconstruct(self,
+                    images=None,
+                    paths=None,
+                    use_gpu=False,
+                    visualization=False,
+                    output_dir="falsr_C_output"):
         """
         API for super resolution.
 
         Args:
             images (list(numpy.ndarray)): images data, shape of each is [H, W, C], the color space is BGR.
             paths (list[str]): The paths of images.
-            data (dict): key is 'image', the corresponding value is the path to image.
             use_gpu (bool): Whether to use gpu.
             visualization (bool): Whether to save image or not.
             output_dir (str): The path to store output images.
@@ -94,11 +92,6 @@ class Falsr_C(hub.Module):
                 raise RuntimeError(
                     "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
                 )
-
-        if data and 'image' in data:
-            if paths is None:
-                paths = list()
-            paths += data['image']
 
         all_data = list()
         for yield_data in reader(images, paths):
@@ -156,7 +149,7 @@ class Falsr_C(hub.Module):
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.super_resolution(images=images_decode, **kwargs)
+        results = self.reconstruct(images=images_decode, **kwargs)
         results = [{
             'data': cv2_to_base64(result['data'])
         } for result in results]
@@ -182,7 +175,7 @@ class Falsr_C(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.super_resolution(
+        results = self.reconstruct(
             paths=[args.input_path],
             use_gpu=args.use_gpu,
             output_dir=args.output_dir,
@@ -215,7 +208,7 @@ class Falsr_C(hub.Module):
         self.arg_config_group.add_argument(
             '--visualization',
             type=ast.literal_eval,
-            default=True,
+            default=False,
             help="whether to save output as images.")
 
     def add_module_input_arg(self):
@@ -228,8 +221,8 @@ class Falsr_C(hub.Module):
 
 if __name__ == "__main__":
     module = Falsr_C()
-    #module.super_resolution(paths=["BSD100_001.png","BSD100_002.png", "Set5_003.png"])
+    #module.reconstruct(paths=["BSD100_001.png","BSD100_002.png", "Set5_003.png"])
     import cv2
     img = cv2.imread("BSD100_001.png").astype('float32')
-    res = module.super_resolution(images=[img])
+    res = module.reconstruct(images=[img])
     module.save_inference_model()

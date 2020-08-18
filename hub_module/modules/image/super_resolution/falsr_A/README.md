@@ -1,6 +1,6 @@
 ## 模型概述
 
-falsr_A是基于Fast, Accurate and Lightweight Super-Resolution with Neural Architecture Search设计的轻量化超分辨模型。该模型使用多目标方法处理超分问题，同时使用基于混合控制器的弹性搜索策略来提升模型性能。
+falsr_A是基于Fast, Accurate and Lightweight Super-Resolution with Neural Architecture Search设计的轻量化超分辨模型。该模型使用多目标方法处理超分问题，同时使用基于混合控制器的弹性搜索策略来提升模型性能。该模型提供的超分倍数为2倍。
 
 ## 命令行预测
 
@@ -15,9 +15,8 @@ $ hub run falsr_A --input_path "/PATH/TO/IMAGE"
 def super_resolution(self,
                      images=None,
                      paths=None,
-                     data=None,
                      use_gpu=False,
-                     visualization=True,
+                     visualization=False,
                      output_dir="falsr_A_output")
 ```
 
@@ -27,7 +26,6 @@ def super_resolution(self,
 
 * images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
 * paths (list\[str\]): 图片的路径；
-* data (dict): key值是'image', value值是图片的路径；
 * use\_gpu (bool): 是否使用 GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置；
 * visualization (bool): 是否将识别结果保存为图片文件；
 * output\_dir (str): 图片的保存路径。
@@ -63,7 +61,9 @@ import paddlehub as hub
 
 sr_model = hub.Module('falsr_A')
 im = cv2.imread('/PATH/TO/IMAGE').astype('float32')
-res = sr_model.super_resolution(images=[im])
+#visualization=True可以用于查看超分图片效果，可设置为False提升运行速度。
+res = sr_model.reconstruct(images=[im], visualization=True)
+print(res[0]['data'])
 sr_model.save_inference_model()
 ```
 
@@ -114,11 +114,13 @@ sr = base64_to_cv2(r.json()["results"][0]['data'])
 cv2.imwrite('falsr_A_X2.png', sr)
 print("save image as falsr_A_X2.png")
 ```
+### 查看代码
 
+<https://github.com/xiaomi-automl/FALSR>
 
 
 ### 依赖
 
-paddlepaddle >= 1.8.1
+paddlepaddle >= 1.8.0
 
 paddlehub >= 1.7.1

@@ -35,7 +35,7 @@ from humanseg_mobile.optimal import postprocess_v, threshold_mask
     author="paddlepaddle",
     author_email="",
     summary="HRNet_w18_samll_v1 is a semantic segmentation model.",
-    version="1.0.0")
+    version="1.1.0")
 class HRNetw18samllv1humanseg(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
@@ -71,10 +71,9 @@ class HRNetw18samllv1humanseg(hub.Module):
     def segment(self,
                 images=None,
                 paths=None,
-                data=None,
                 batch_size=1,
                 use_gpu=False,
-                visualization=True,
+                visualization=False,
                 output_dir='humanseg_mobile_output'):
         """
         API for human segmentation.
@@ -82,7 +81,6 @@ class HRNetw18samllv1humanseg(hub.Module):
         Args:
             images (list(numpy.ndarray)): images data, shape of each is [H, W, C], the color space is BGR.
             paths (list[str]): The paths of images.
-            data (dict): key is 'image', the corresponding value is the path to image.
             batch_size (int): batch size.
             use_gpu (bool): Whether to use gpu.
             visualization (bool): Whether to save image or not.
@@ -104,10 +102,7 @@ class HRNetw18samllv1humanseg(hub.Module):
                 )
 
         # compatibility with older versions
-        if data and 'image' in data:
-            if paths is None:
-                paths = list()
-            paths += data['image']
+
         all_data = list()
         for yield_data in reader(images, paths):
             all_data.append(yield_data)
@@ -402,7 +397,7 @@ class HRNetw18samllv1humanseg(hub.Module):
         self.arg_config_group.add_argument(
             '--visualization',
             type=ast.literal_eval,
-            default=True,
+            default=False,
             help="whether to save output as images.")
         self.arg_config_group.add_argument(
             '--batch_size',

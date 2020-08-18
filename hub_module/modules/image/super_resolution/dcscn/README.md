@@ -1,6 +1,6 @@
 ## 模型概述
 
-DCSCN是基于Fast, Fast and Accurate Image Super Resolution by Deep CNN with Skip Connection and Network in Network设计的轻量化超分辨模型。该模型使用残差结构和跳连的方式构建网络来提取局部和全局特征，同时使用并行1*1的卷积网络学习细节特征提升模型性能。
+DCSCN是基于Fast and Accurate Image Super Resolution by Deep CNN with Skip Connection and Network in Network设计的轻量化超分辨模型。该模型使用残差结构和跳连的方式构建网络来提取局部和全局特征，同时使用并行1*1的卷积网络学习细节特征提升模型性能。该模型提供的超分倍数为2倍。
 
 ## 命令行预测
 
@@ -12,13 +12,12 @@ $ hub run dcscn --input_path "/PATH/TO/IMAGE"
 ## API
 
 ```python
-def super_resolution(self,
-                     images=None,
-                     paths=None,
-                     data=None,
-                     use_gpu=False,
-                     visualization=True,
-                     output_dir="dcscn_output")
+def reconstruct(self,
+                images=None,
+                paths=None,
+                use_gpu=False,
+                visualization=False,
+                output_dir="dcscn_output")
 ```
 
 预测API，用于图像超分辨率。
@@ -27,7 +26,6 @@ def super_resolution(self,
 
 * images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
 * paths (list\[str\]): 图片的路径；
-* data (dict): key值是'image', value值是图片的路径；
 * use\_gpu (bool): 是否使用 GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置；
 * visualization (bool): 是否将识别结果保存为图片文件；
 * output\_dir (str): 图片的保存路径。
@@ -63,7 +61,9 @@ import paddlehub as hub
 
 sr_model = hub.Module('dcscn')
 im = cv2.imread('/PATH/TO/IMAGE').astype('float32')
-res = sr_model.super_resolution(images=[im])
+#visualization=True可以用于查看超分图片效果，可设置为False提升运行速度。
+res = sr_model.reconstruct(images=[im], visualization=True)
+print(res[0]['data'])
 sr_model.save_inference_model()
 ```
 
@@ -121,11 +121,14 @@ cv2.imwrite('dcscn_X2.png', combine_im)
 print("save image as dcscn_X2.png")
 
 ```
+### 查看代码
+
+<https://modelzoo.co/model/dcscn-super-resolution>
 
 
 
 ### 依赖
 
-paddlepaddle >= 1.8.1
+paddlepaddle >= 1.8.0
 
 paddlehub >= 1.7.1

@@ -21,13 +21,8 @@ def base64_to_cv2(b64str):
     return data
 
 
-def postprocess(data_out,
-                org_im,
-                org_im_shape,
-                org_im_path,
-                output_dir,
-                visualization,
-                thresh=120):
+def postprocess(data_out, org_im, org_im_shape, org_im_path, output_dir,
+                visualization):
     """
     Postprocess output of network. one image at a time.
 
@@ -38,7 +33,6 @@ def postprocess(data_out,
         org_im_path (list): path of riginal image.
         output_dir (str): output directory to store image.
         visualization (bool): whether to save image or not.
-        thresh (float): threshold.
 
     Returns:
         result (dict): The data of processed image.

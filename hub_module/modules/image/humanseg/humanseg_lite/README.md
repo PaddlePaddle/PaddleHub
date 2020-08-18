@@ -1,6 +1,6 @@
 ## 模型概述
 
-HUmanSeg_lite是在ShuffleNetV2网络结构的基础上进行优化，进一步减小了网络规模，网络大小只有541K，量化后只有187K，适用于手机自拍人像分割，且能在移动端进行实时分割。
+HumanSeg_lite是基于ShuffleNetV2网络结构的基础上进行优化的人像分割模型，进一步减小了网络规模，网络大小只有541K，量化后只有187K，适用于手机自拍人像分割等实时分割场景。
 
 
 ## 命令行预测
@@ -16,10 +16,9 @@ hub run humanseg_lite --input_path "/PATH/TO/IMAGE"
 ```python
 def segment(images=None,
             paths=None,
-            data=None,
             batch_size=1,
             use_gpu=False,
-            visualization=True,
+            visualization=False,
             output_dir='humanseg_lite_output')
 ```
 
@@ -29,7 +28,6 @@ def segment(images=None,
 
 * images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
 * paths (list\[str\]): 图片的路径；
-* data (dict): key是 "image", value是图片的路径；
 * batch\_size (int): batch 的大小；
 * use\_gpu (bool): 是否使用 GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置；
 * visualization (bool): 是否将识别结果保存为图片文件；
@@ -54,18 +52,18 @@ def video_frame(self,
 
 **参数**
 
-* frame_org (\[numpy.ndarray\]): 单帧图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
+* frame_org (numpy.ndarray): 单帧图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
 * frame_id (int): 当前帧的编号；
-* prev_gray (\[numpy.ndarray\]): 前一帧输入网络图像的灰度图；
-* prev_cfd (\[numpy.ndarray\]): 前一帧光流追踪图和预测结果融合图
+* prev_gray (numpy.ndarray): 前一帧输入网络图像的灰度图；
+* prev_cfd (numpy.ndarray): 前一帧光流追踪图和预测结果融合图
 * use\_gpu (bool): 是否使用 GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置；
 
 
 **返回**
 
-* img_matting (\[numpy.ndarray\]): 人像分割结果，仅包含Alpha通道，取值为0-1 (0为全透明，1为不透明)。
-* cur_gray (\[numpy.ndarray\]): 当前帧输入网络图像的灰度图；
-* optflow_map (\[numpy.ndarray\]): 当前帧光流追踪图和预测结果融合图
+* img_matting (numpy.ndarray): 人像分割结果，仅包含Alpha通道，取值为0-1 (0为全透明，1为不透明)。
+* cur_gray (numpy.ndarray): 当前帧输入网络图像的灰度图；
+* optflow_map (numpy.ndarray): 当前帧光流追踪图和预测结果融合图
 
 
 ```python
@@ -101,6 +99,7 @@ def save_inference_model(dirname='humanseg_lite_model',
 * combined: 是否将参数保存到统一的一个文件中
 
 ## 代码示例
+
 图片分割及视频分割代码示例：
 ```python
 import cv2
@@ -108,7 +107,9 @@ import paddlehub as hub
 
 human_seg = hub.Module('humanseg_lite')
 im = cv2.imread('/PATH/TO/IMAGE')
+#visualization=True可以用于查看超分图片效果，可设置为False提升运行速度。
 res = human_seg.segment(images=[im],visualization=True)
+print(res[0]['data'])
 human_seg.video_segment('/PATH/TO/VIDEO')
 human_seg.save_inference_model('/PATH/TO/SAVE/MODEL')
 
@@ -191,12 +192,14 @@ mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2
 rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
 cv2.imwrite("segment_human_lite.png", rgba)
 ```
+### 查看代码
 
+<https://github.com/PaddlePaddle/PaddleSeg/tree/develop/contrib/HumanSeg>
 
 
 
 ### 依赖
 
-paddlepaddle >= 1.8.1
+paddlepaddle >= 1.8.0
 
 paddlehub >= 1.7.1

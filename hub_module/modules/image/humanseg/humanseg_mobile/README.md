@@ -14,10 +14,9 @@ hub run humanseg_mobile --input_path "/PATH/TO/IMAGE"
 ```python
 def segment(images=None,
             paths=None,
-            data=None,
             batch_size=1,
             use_gpu=False,
-            visualization=True,
+            visualization=False,
             output_dir='humanseg_mobile_output')
 ```
 
@@ -27,7 +26,6 @@ def segment(images=None,
 
 * images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
 * paths (list\[str\]): 图片的路径；
-* data (dict): key是 "image", value是图片的路径；
 * batch\_size (int): batch 的大小；
 * use\_gpu (bool): 是否使用 GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置；
 * visualization (bool): 是否将识别结果保存为图片文件；
@@ -53,18 +51,18 @@ def video_frame(self,
 
 **参数**
 
-* frame_org (\[numpy.ndarray\]): 单帧图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
+* frame_org (numpy.ndarray): 单帧图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
 * frame_id (int): 当前帧的编号；
-* prev_gray (\[numpy.ndarray\]): 前一帧输入网络图像的灰度图；
-* prev_cfd (\[numpy.ndarray\]): 前一帧光流追踪图和预测结果融合图
+* prev_gray (numpy.ndarray): 前一帧输入网络图像的灰度图；
+* prev_cfd (numpy.ndarray): 前一帧光流追踪图和预测结果融合图
 * use\_gpu (bool): 是否使用 GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置；
 
 
 **返回**
 
-* img_matting (\[numpy.ndarray\]): 人像分割结果，仅包含Alpha通道，取值为0-1 (0为全透明，1为不透明)。
-* cur_gray (\[numpy.ndarray\]): 当前帧输入网络图像的灰度图；
-* optflow_map (\[numpy.ndarray\]): 当前帧光流追踪图和预测结果融合图
+* img_matting (numpy.ndarray): 人像分割结果，仅包含Alpha通道，取值为0-1 (0为全透明，1为不透明)。
+* cur_gray (numpy.ndarray): 当前帧输入网络图像的灰度图；
+* optflow_map (numpy.ndarray): 当前帧光流追踪图和预测结果融合图
 
 
 ```python
@@ -109,7 +107,9 @@ import paddlehub as hub
 
 human_seg = hub.Module('humanseg_mobile')
 im = cv2.imread('/PATH/TO/IMAGE')
+#visualization=True可以用于查看超分图片效果，可设置为False提升运行速度。
 res = human_seg.segment(images=[im],visualization=True)
+print(res[0]['data'])
 human_seg.video_segment('/PATH/TO/VIDEO')
 human_seg.save_inference_model('/PATH/TO/SAVE/MODEL')
 
@@ -196,10 +196,13 @@ rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
 cv2.imwrite("segment_human_mobile.png", rgba)
 ```
 
+### 查看代码
+
+<https://github.com/PaddlePaddle/PaddleSeg/tree/develop/contrib/HumanSeg>
 
 
 ### 依赖
 
-paddlepaddle >= 1.8.1
+paddlepaddle >= 1.8.0
 
 paddlehub >= 1.7.1
