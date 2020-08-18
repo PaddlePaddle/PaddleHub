@@ -28,7 +28,7 @@ from paddlehub.utils.utils import Timer
 
 
 class Trainer(object):
-    def __init__(self, model, strategy, use_vdl=False, checkpoint_dir=None):
+    def __init__(self, model, strategy, use_vdl=False, checkpoint_dir=None, compare_metrics=None):
         self.nranks = ParallelEnv().nranks
         self.local_rank = ParallelEnv().local_rank
         self.model = model
@@ -40,6 +40,7 @@ class Trainer(object):
         self.checkpoint_dir = checkpoint_dir if checkpoint_dir else 'ckpt_{}'.format(time.time())
         self.epoch = 0
         self.load_checkpoint(self.checkpoint_dir)
+        self.compare_metrics = self._compare_metrics if not compare_metrics else compare_metrics
 
     def load_checkpoint(self, checkpoint_dir):
         '''
@@ -146,9 +147,9 @@ class Trainer(object):
 
                     if self.epoch % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
                         if eval_dataset:
-                            result = self.evaluate(eval_dataset, batch_size, num_workers)
-                            if not best_score or self.is_better_score(best_score, result):
-                                best_score = result
+                            result = self.evaluate(eval_dataset, batch_size, num_workers)['metrics']
+                            if not best_score or self.compare_metrics(best_score, result):
+                                best_score = result['metrics']
                                 best_model_path = os.path.join(self.checkpoint_dir, 'best_model')
                                 self.save_model(best_model_path)
 
@@ -238,9 +239,6 @@ class Trainer(object):
     def optimizer_zero_grad(self, current_epoch, batch_idx, optimizer):
         self.model.clear_gradients()
 
-    def is_better_score(self, old_score, new_score):
-        if hasattr(self.model, 'is_better_score'):
-            return self.model.is_better_score(old_score, new_score)
-
-        mainkey = list(new_score.keys())[0]
-        return old_score[mainkey] < new_score[mainkey]
+    def _compare_metrics(self, old_metric, new_metric):
+        mainkey = list(new_metric.keys())[0]
+        return old_metric[mainkey] < new_metric[mainkey]
