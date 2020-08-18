@@ -133,7 +133,11 @@ def hyp_score(log_probs, length, length_penalty):
 def beam_search_step(state, logits, eos_id, beam_width, is_first_step,
                      length_penalty):
     """logits.shape == [B*W, V]"""
-    _, vocab_size = logits.shape
+    beam_size, vocab_size = logits.shape  # as batch size=1 in this hub module. the first dim means bsz * beam_size equals beam_size
+    logits_np = logits.numpy()
+    for i in range(beam_size):
+        logits_np[i][17963] = 0  # make [UNK] prob = 0
+    logits = D.to_variable(logits_np)
 
     bsz, beam_width = state.log_probs.shape
     onehot_eos = L.cast(
