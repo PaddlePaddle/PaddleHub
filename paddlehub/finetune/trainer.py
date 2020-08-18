@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import os
+import pickle
 import time
 from collections import defaultdict
 from typing import Any, Callable
@@ -49,6 +50,7 @@ class Trainer(object):
         self.use_vdl = use_vdl
         self.checkpoint_dir = checkpoint_dir if checkpoint_dir else 'ckpt_{}'.format(time.time())
         self.epoch = 0
+        self.best_metrics = defaultdict(int)
         self.load_checkpoint(self.checkpoint_dir)
         self.compare_metrics = self._compare_metrics if not compare_metrics else compare_metrics
 
@@ -76,9 +78,15 @@ class Trainer(object):
             logger.warning('PaddleHub model checkpoint not found, start from scratch...')
             return
 
-        self.epoch = max_epoch
-        logger.info('PaddleHub model checkpoint loaded. current_epoch={}'.format(self.epoch))
+        with open(os.path.join(checkpoint_dir, 'metrics.pkl'), 'rb') as file:
+            self.best_metrics = pickle.load(file)
 
+        self.epoch = max_epoch
+        metric_msg = ''
+        for metric, value in self.best_metrics.items():
+            metric_msg += '{}={:.4f} '.format(metric, value)
+
+        logger.info('PaddleHub model checkpoint loaded. current_epoch={} [{}]'.format(self.epoch, metric_msg))
         model_path = os.path.join(checkpoint_dir, '{}_{}'.format('epoch', self.epoch), 'model')
         state_dict, _ = fluid.load_dygraph(model_path)
         self.model.set_dict(state_dict)
@@ -93,9 +101,12 @@ class Trainer(object):
         model_path = os.path.join(checkpoint_dir, '{}_{}'.format('epoch', self.epoch), 'model')
         logger.info('Saving model checkpoint to {}'.format(model_path))
 
+        with open(os.path.join(checkpoint_dir, 'metrics.pkl'), 'wb') as file:
+            pickle.dump(self.best_metrics, file)
+
         self.save_model(model_path)
 
-    def save_model(self, save_dir):
+    def save_model(self, save_dir: str):
         '''Save model'''
         fluid.save_dygraph(self.model.state_dict(), save_dir)
 
@@ -130,7 +141,6 @@ class Trainer(object):
             steps_per_epoch = len(batch_sampler)
             timer = Timer(steps_per_epoch * epochs)
             timer.start()
-            best_score = None
 
             for i in range(epochs):
                 self.epoch += 1
@@ -170,13 +180,13 @@ class Trainer(object):
                     if self.epoch % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
                         if eval_dataset:
                             result = self.evaluate(eval_dataset, batch_size, num_workers)['metrics']
-                            if not best_score or self.compare_metrics(best_score, result):
-                                best_score = result
+                            if not self.best_metrics or self.compare_metrics(self.best_metrics, result):
+                                self.best_metrics = result
                                 best_model_path = os.path.join(self.checkpoint_dir, 'best_model')
                                 self.save_model(best_model_path)
 
                                 metric_msg = ''
-                                for key, value in best_score.items():
+                                for key, value in self.best_metrics.items():
                                     metric_msg += '{}={:.4f} '.format(key, value)
                                 logger.eval('Saving best model to {} [best {}]'.format(best_model_path, metric_msg))
 
