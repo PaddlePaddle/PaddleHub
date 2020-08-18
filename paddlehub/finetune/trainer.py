@@ -16,6 +16,7 @@
 import os
 import time
 from collections import defaultdict
+from typing import Any, Callable
 
 import paddle.fluid as fluid
 from paddle.fluid.dygraph.base import to_variable
@@ -28,7 +29,16 @@ from paddlehub.utils.utils import Timer
 
 
 class Trainer(object):
-    def __init__(self, model, strategy, use_vdl=False, checkpoint_dir=None, compare_metrics=None):
+    '''
+    Trainer
+    '''
+
+    def __init__(self,
+                 model: fluid.dygraph.Layer,
+                 strategy: fluid.optimizer.Optimizer,
+                 use_vdl: bool = False,
+                 checkpoint_dir: str = None,
+                 compare_metrics: Callable = None):
         self.nranks = ParallelEnv().nranks
         self.local_rank = ParallelEnv().local_rank
         self.model = model
@@ -161,11 +171,14 @@ class Trainer(object):
                         if eval_dataset:
                             result = self.evaluate(eval_dataset, batch_size, num_workers)['metrics']
                             if not best_score or self.compare_metrics(best_score, result):
-                                best_score = result['metrics']
+                                best_score = result
                                 best_model_path = os.path.join(self.checkpoint_dir, 'best_model')
                                 self.save_model(best_model_path)
 
-                                logger.info('Saving best model to {}'.format(best_model_path))
+                                metric_msg = ''
+                                for key, value in best_score.items():
+                                    metric_msg += '{}={:.4f} '.format(key, value)
+                                logger.eval('Saving best model to {} [best {}]'.format(best_model_path, metric_msg))
 
                         self.save_checkpoint(self.checkpoint_dir)
 
@@ -181,16 +194,14 @@ class Trainer(object):
         use_gpu = True
         place = fluid.CUDAPlace(ParallelEnv().dev_id) if use_gpu else fluid.CPUPlace()
         with fluid.dygraph.guard(place):
-            batch_sampler = DistributedBatchSampler(eval_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+            batch_sampler = DistributedBatchSampler(eval_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
 
             loader = DataLoader(
                 eval_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
 
             self.model.eval()
-            steps = len(batch_sampler)
-            timer = Timer(steps)
-            timer.start()
             avg_loss = num_samples = 0
+            sum_metrics = defaultdict(int)
             avg_metrics = defaultdict(int)
 
             for batch_idx, batch in enumerate(loader):
@@ -204,15 +215,17 @@ class Trainer(object):
                     avg_loss += loss.numpy()[0] * bs
 
                 for metric, value in metrics.items():
-                    avg_metrics[metric] += value.numpy()[0] * bs
+                    sum_metrics[metric] += value.numpy()[0] * bs
 
             # print avg metrics and loss
             print_msg = '[Evaluation result]'
             if loss:
-                print_msg += ' avg_loss={:.4f}'.format(avg_loss / num_samples)
+                avg_loss /= num_samples
+                print_msg += ' avg_loss={:.4f}'.format(avg_loss)
 
-            for metric, value in avg_metrics.items():
-                print_msg += ' avg_{}={:.4f}'.format(metric, value / num_samples)
+            for metric, value in sum_metrics.items():
+                avg_metrics[metric] = value / num_samples
+                print_msg += ' avg_{}={:.4f}'.format(metric, avg_metrics[metric])
 
             logger.eval(print_msg)
 
@@ -220,7 +233,7 @@ class Trainer(object):
                 return {'loss': avg_loss, 'metrics': avg_metrics}
             return {'metrics': avg_metrics}
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: Any, batch_idx: int):
         result = self.model.training_step(batch, batch_idx)
 
         # process result
@@ -243,7 +256,7 @@ class Trainer(object):
 
         return loss, metrics
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: Any, batch_idx: int):
         result = self.model.validation_step(batch, batch_idx)
         return result
 
@@ -253,7 +266,7 @@ class Trainer(object):
     def optimizer_zero_grad(self, current_epoch, batch_idx, optimizer):
         self.model.clear_gradients()
 
-    def _compare_metrics(self, old_metric, new_metric):
+    def _compare_metrics(self, old_metric: dict, new_metric: dict):
         '''Compare the whether the new metric value is better than the old one'''
         mainkey = list(new_metric.keys())[0]
         return old_metric[mainkey] < new_metric[mainkey]
