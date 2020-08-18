@@ -42,7 +42,7 @@ class Trainer(object):
         self.load_checkpoint(self.checkpoint_dir)
         self.compare_metrics = self._compare_metrics if not compare_metrics else compare_metrics
 
-    def load_checkpoint(self, checkpoint_dir):
+    def load_checkpoint(self, checkpoint_dir: str):
         '''
         Load checkpoint and state dict from
 
@@ -73,7 +73,7 @@ class Trainer(object):
         state_dict, _ = fluid.load_dygraph(model_path)
         self.model.set_dict(state_dict)
 
-    def save_checkpoint(self, checkpoint_dir):
+    def save_checkpoint(self, checkpoint_dir: str):
         '''
         Save model checkpoint and state dict
 
@@ -90,13 +90,25 @@ class Trainer(object):
         fluid.save_dygraph(self.model.state_dict(), save_dir)
 
     def train(self,
-              train_dataset,
-              epochs=1,
-              batch_size=1,
-              num_workers=1,
-              eval_dataset=None,
-              log_interval=10,
-              save_interval=10):
+              train_dataset: fluid.io.Dataset,
+              epochs: int = 1,
+              batch_size: int = 1,
+              num_workers: int = 0,
+              eval_dataset: fluid.io.Dataset = None,
+              log_interval: int = 10,
+              save_interval: int = 10):
+        '''
+        Train a model with specific config.
+
+        Args:
+            train_dataset(fluid.io.Dataset) : Dataset to train the model
+            epochs(int) : Number of training loops, default is 1.
+            batch_size(int) : Batch size of per step, default is 1.
+            num_workers(int) : Number of subprocess to load data, default is 0.
+            eval_dataset(fluid.io.Dataset) : The validation dataset, deafult is None. If set, the Trainer will execute evaluate function every `save_interval` epochs.
+            log_interval(int) : Log the train infomation every `log_interval` steps.
+            save_interval(int) : Save the checkpoint every `save_interval` epochs.
+        '''
         use_gpu = True
         place = fluid.CUDAPlace(ParallelEnv().dev_id) if use_gpu else fluid.CPUPlace()
         with fluid.dygraph.guard(place):
@@ -157,7 +169,15 @@ class Trainer(object):
 
                         self.save_checkpoint(self.checkpoint_dir)
 
-    def evaluate(self, eval_dataset, batch_size=1, num_workers=1):
+    def evaluate(self, eval_dataset: fluid.io.Dataset, batch_size: int = 1, num_workers: int = 0):
+        '''
+        Run evaluation and returns metrics.
+
+        Args:
+            eval_dataset(fluid.io.Dataset) : The validation dataset
+            batch_size(int) : Batch size of per step, default is 1.
+            num_workers(int) : Number of subprocess to load data, default is 0.
+        '''
         use_gpu = True
         place = fluid.CUDAPlace(ParallelEnv().dev_id) if use_gpu else fluid.CPUPlace()
         with fluid.dygraph.guard(place):
@@ -180,17 +200,11 @@ class Trainer(object):
                 bs = batch[0].shape[0]
                 num_samples += bs
 
-                print_msg = 'Step={}/{}'.format(batch_idx + 1, steps)
-
                 if loss:
                     avg_loss += loss.numpy()[0] * bs
-                    print_msg += ' loss={:.4f}'.format(loss.numpy()[0])
 
                 for metric, value in metrics.items():
                     avg_metrics[metric] += value.numpy()[0] * bs
-                    print_msg += ' {}={:.4f}'.format(metric, value.numpy()[0])
-
-                logger.eval(print_msg)
 
             # print avg metrics and loss
             print_msg = '[Evaluation result]'
@@ -219,7 +233,7 @@ class Trainer(object):
 
         metrics = result.get('metrics', {})
 
-        # backprop
+        # back prop
         if self.nranks > 1:
             self.model.scale_loss(loss)
             loss.backward()
@@ -240,5 +254,6 @@ class Trainer(object):
         self.model.clear_gradients()
 
     def _compare_metrics(self, old_metric, new_metric):
+        '''Compare the whether the new metric value is better than the old one'''
         mainkey = list(new_metric.keys())[0]
         return old_metric[mainkey] < new_metric[mainkey]
