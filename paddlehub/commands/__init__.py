@@ -27,3 +27,4 @@ from . import config
 from . import hub
 from . import autofinetune
 from . import serving
+from . import convert
