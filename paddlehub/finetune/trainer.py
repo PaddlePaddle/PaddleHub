@@ -44,71 +44,69 @@ class Trainer(object):
         self.local_rank = ParallelEnv().local_rank
         self.model = model
         self.optimizer = strategy
+        self.use_vdl = use_vdl
+        self.checkpoint_dir = checkpoint_dir if checkpoint_dir else 'ckpt_{}'.format(time.time())
+        if not os.path.exists(self.checkpoint_dir):
+            os.makedirs(self.checkpoint_dir)
+
+        self.current_epoch = 0
+        self.best_metrics = defaultdict(int)
+
         if self.nranks > 1:
             context = fluid.dygraph.prepare_context()
             self.model = fluid.dygraph.DataParallel(self.model, context)
-        self.use_vdl = use_vdl
-        self.checkpoint_dir = checkpoint_dir if checkpoint_dir else 'ckpt_{}'.format(time.time())
-        self.epoch = 0
-        self.best_metrics = defaultdict(int)
-        self.load_checkpoint(self.checkpoint_dir)
         self.compare_metrics = self._compare_metrics if not compare_metrics else compare_metrics
 
-    def load_checkpoint(self, checkpoint_dir: str):
-        '''
-        Load checkpoint and state dict from
+        self._load_checkpoint()
 
-        Args:
-            checkpoint_dir(str) : Directory where checkpoints are stored
-        '''
+    def _load_checkpoint(self):
+        '''Load checkpoint and state dict'''
         max_epoch = -1
 
-        if os.path.exists(checkpoint_dir):
-            for file in os.listdir(checkpoint_dir):
-                if not file.startswith('epoch_'):
-                    continue
+        for file in os.listdir(self.checkpoint_dir):
+            if not file.startswith('epoch_'):
+                continue
 
-                _epoch = file.split('_')[-1]
-                if not _epoch.isdigit():
-                    continue
+            _epoch = file.split('_')[-1]
+            if not _epoch.isdigit():
+                continue
 
-                max_epoch = max(max_epoch, int(_epoch))
+            max_epoch = max(max_epoch, int(_epoch))
 
         if max_epoch == -1:
             logger.warning('PaddleHub model checkpoint not found, start from scratch...')
             return
 
-        with open(os.path.join(checkpoint_dir, 'metrics.pkl'), 'rb') as file:
-            self.best_metrics = pickle.load(file)
+        # load best metrics
+        self._load_metrics()
 
-        self.epoch = max_epoch
-        metric_msg = ''
-        for metric, value in self.best_metrics.items():
-            metric_msg += '{}={:.4f} '.format(metric, value)
+        self.current_epoch = max_epoch
+        metric_msg = ['{}={:.4f}'.format(metric, value) for metric, value in self.best_metrics.items()]
+        metric_msg = ' '.join(metric_msg)
+        logger.info('PaddleHub model checkpoint loaded. current_epoch={} [{}]'.format(self.current_epoch, metric_msg))
 
-        logger.info('PaddleHub model checkpoint loaded. current_epoch={} [{}]'.format(self.epoch, metric_msg))
-        model_path = os.path.join(checkpoint_dir, '{}_{}'.format('epoch', self.epoch), 'model')
+        # load model from checkpoint
+        model_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch), 'model')
         state_dict, _ = fluid.load_dygraph(model_path)
         self.model.set_dict(state_dict)
 
-    def save_checkpoint(self, checkpoint_dir: str):
-        '''
-        Save model checkpoint and state dict
-
-        Args:
-            checkpoint_dir(str) : Directory where checkpoints are stored
-        '''
-        model_path = os.path.join(checkpoint_dir, '{}_{}'.format('epoch', self.epoch), 'model')
+    def _save_checkpoint(self):
+        '''Save model checkpoint and state dict'''
+        model_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch), 'model')
         logger.info('Saving model checkpoint to {}'.format(model_path))
-
-        with open(os.path.join(checkpoint_dir, 'metrics.pkl'), 'wb') as file:
-            pickle.dump(self.best_metrics, file)
-
         self.save_model(model_path)
 
     def save_model(self, save_dir: str):
         '''Save model'''
         fluid.save_dygraph(self.model.state_dict(), save_dir)
+
+    def _save_metrics(self):
+        with open(os.path.join(self.checkpoint_dir, 'metrics.pkl'), 'wb') as file:
+            pickle.dump(self.best_metrics, file)
+
+    def _load_metrics(self):
+        with open(os.path.join(self.checkpoint_dir, 'metrics.pkl'), 'rb') as file:
+            self.best_metrics = pickle.load(file)
 
     def train(self,
               train_dataset: fluid.io.Dataset,
@@ -133,8 +131,7 @@ class Trainer(object):
         use_gpu = True
         place = fluid.CUDAPlace(ParallelEnv().dev_id) if use_gpu else fluid.CPUPlace()
         with fluid.dygraph.guard(place):
-            batch_sampler = DistributedBatchSampler(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
-
+            batch_sampler = DistributedBatchSampler(train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
             loader = DataLoader(
                 train_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
 
@@ -143,54 +140,57 @@ class Trainer(object):
             timer.start()
 
             for i in range(epochs):
-                self.epoch += 1
+                self.current_epoch += 1
                 avg_loss = 0
                 avg_metrics = defaultdict(int)
                 self.model.train()
 
                 for batch_idx, batch in enumerate(loader):
                     loss, metrics = self.training_step(batch, batch_idx)
-                    self.optimizer_step(self.epoch, batch_idx, self.optimizer, loss)
-                    self.optimizer_zero_grad(self.epoch, batch_idx, self.optimizer)
+                    self.optimizer_step(self.current_epoch, batch_idx, self.optimizer, loss)
+                    self.optimizer_zero_grad(self.current_epoch, batch_idx, self.optimizer)
 
                     # calculate metrics and loss
                     avg_loss += loss.numpy()[0]
                     for metric, value in metrics.items():
                         avg_metrics[metric] += value.numpy()[0]
 
-                    timer.step()
+                    timer.count()
 
                     if (batch_idx + 1) % log_interval == 0 and self.local_rank == 0:
                         lr = self.optimizer.current_step_lr()
                         avg_loss /= log_interval
 
-                        print_msg = 'Epoch={}/{}, Step={}/{}'.format(self.epoch, epochs, batch_idx + 1, steps_per_epoch)
+                        print_msg = 'Epoch={}/{}, Step={}/{}'.format(self.current_epoch, epochs, batch_idx + 1,
+                                                                     steps_per_epoch)
                         print_msg += ' loss={:.4f}'.format(avg_loss)
 
                         for metric, value in avg_metrics.items():
                             print_msg += ' {}={:.4f}'.format(metric, value / log_interval)
 
-                        print_msg += ' lr={:.6f}'.format(lr)
+                        print_msg += ' lr={:.6f} step/sec={:.2f} | ETA {}'.format(lr, timer.timing, timer.eta)
 
                         logger.train(print_msg)
 
                         avg_loss = 0
                         avg_metrics = defaultdict(int)
 
-                    if self.epoch % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
+                    if self.current_epoch % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
                         if eval_dataset:
                             result = self.evaluate(eval_dataset, batch_size, num_workers)['metrics']
                             if not self.best_metrics or self.compare_metrics(self.best_metrics, result):
                                 self.best_metrics = result
                                 best_model_path = os.path.join(self.checkpoint_dir, 'best_model')
                                 self.save_model(best_model_path)
+                                self._save_metrics()
 
-                                metric_msg = ''
-                                for key, value in self.best_metrics.items():
-                                    metric_msg += '{}={:.4f} '.format(key, value)
+                                metric_msg = [
+                                    '{}={:.4f}'.format(metric, value) for metric, value in self.best_metrics.items()
+                                ]
+                                metric_msg = ' '.join(metric_msg)
                                 logger.eval('Saving best model to {} [best {}]'.format(best_model_path, metric_msg))
 
-                        self.save_checkpoint(self.checkpoint_dir)
+                        self._save_checkpoint()
 
     def evaluate(self, eval_dataset: fluid.io.Dataset, batch_size: int = 1, num_workers: int = 0):
         '''
@@ -270,10 +270,11 @@ class Trainer(object):
         result = self.model.validation_step(batch, batch_idx)
         return result
 
-    def optimizer_step(self, current_epoch, batch_idx, optimizer, loss):
+    def optimizer_step(self, current_epoch: int, batch_idx: int, optimizer: fluid.optimizer.Optimizer,
+                       loss: fluid.core.VarBase):
         self.optimizer.minimize(loss)
 
-    def optimizer_zero_grad(self, current_epoch, batch_idx, optimizer):
+    def optimizer_zero_grad(self, current_epoch: int, batch_idx: int, optimizer: fluid.optimizer.Optimizer):
         self.model.clear_gradients()
 
     def _compare_metrics(self, old_metric: dict, new_metric: dict):

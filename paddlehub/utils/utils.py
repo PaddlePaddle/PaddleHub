@@ -77,11 +77,11 @@ class Version(packaging.version.Version):
 
 
 class Timer(object):
-    ''''''
+    '''Calculate runing speed and estimated time of arrival(ETA)'''
 
-    def __init__(self, total_step):
+    def __init__(self, total_step: int):
         self.total_step = total_step
-        self.last_count_step = 0
+        self.last_start_step = 0
         self.current_step = 0
         self._is_running = True
 
@@ -93,24 +93,25 @@ class Timer(object):
         self._is_running = False
         self.end_time = time.time()
 
-    def count(self):
-        run_steps = self.current_step - self.last_count_step
-        self.last_count_step = self.current_step
-        time_used = time.time() - self.last_time
-        self.last_time = time.time()
-        return time_used / run_steps
-
-    def step(self):
+    def count(self) -> int:
         if not self.current_step >= self.total_step:
             self.current_step += 1
         return self.current_step
 
     @property
-    def is_running(self):
+    def timing(self) -> float:
+        run_steps = self.current_step - self.last_start_step
+        self.last_start_step = self.current_step
+        time_used = time.time() - self.last_time
+        self.last_time = time.time()
+        return run_steps / time_used
+
+    @property
+    def is_running(self) -> bool:
         return self._is_running
 
     @property
-    def eta(self):
+    def eta(self) -> str:
         if not self.is_running:
             return '00:00:00'
         scale = self.total_step / self.current_step
@@ -118,16 +119,17 @@ class Timer(object):
         return seconds_to_hms(remaining_time)
 
 
-def seconds_to_hms(seconds):
-    ''''''
+def seconds_to_hms(seconds: int):
+    '''Convert the number of seconds to hh:mm:ss'''
     h = math.floor(seconds / 3600)
     m = math.floor((seconds - h * 3600) / 60)
     s = int(seconds - h * 3600 - m * 60)
-    hms_str = '{}:{}:{}'.format(h, m, s)
+    hms_str = '{:0>2}:{:0>2}:{:0>2}'.format(h, m, s)
     return hms_str
 
 
-def base64_to_cv2(b64str):
+def base64_to_cv2(b64str: str):
+    '''Convert a string in base64 format to cv2 data'''
     data = base64.b64decode(b64str.encode('utf8'))
     data = np.fromstring(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
