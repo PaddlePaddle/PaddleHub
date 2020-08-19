@@ -46,11 +46,12 @@ class Trainer(object):
         self.model = model
         self.optimizer = strategy
         self.checkpoint_dir = checkpoint_dir if checkpoint_dir else 'ckpt_{}'.format(time.time())
-        if not os.path.exists(self.checkpoint_dir):
+
+        if self.local_rank == 0 and not os.path.exists(self.checkpoint_dir):
             os.makedirs(self.checkpoint_dir)
 
         self.use_vdl = use_vdl
-        if self.use_vdl:
+        if self.local_rank == 0 and self.use_vdl:
             vdl_dir = os.path.join(self.checkpoint_dir, 'visualization')
             self.log_writer = LogWriter(vdl_dir)
 
@@ -79,7 +80,8 @@ class Trainer(object):
             max_epoch = max(max_epoch, int(_epoch))
 
         if max_epoch == -1:
-            logger.warning('PaddleHub model checkpoint not found, start from scratch...')
+            if self.local_rank == 0:
+                logger.warning('PaddleHub model checkpoint not found, start from scratch...')
             return
 
         # load best metrics
@@ -88,7 +90,9 @@ class Trainer(object):
         self.current_epoch = max_epoch
         metric_msg = ['{}={:.4f}'.format(metric, value) for metric, value in self.best_metrics.items()]
         metric_msg = ' '.join(metric_msg)
-        logger.info('PaddleHub model checkpoint loaded. current_epoch={} [{}]'.format(self.current_epoch, metric_msg))
+        if self.local_rank == 0:
+            logger.info('PaddleHub model checkpoint loaded. current_epoch={} [{}]'.format(
+                self.current_epoch, metric_msg))
 
         # load model from checkpoint
         model_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch), 'model')
@@ -266,7 +270,10 @@ class Trainer(object):
             return {'metrics': avg_metrics}
 
     def training_step(self, batch: Any, batch_idx: int):
-        result = self.model.training_step(batch, batch_idx)
+        if self.nranks > 1:
+            result = self.model._layers.training_step(batch, batch_idx)
+        else:
+            result = self.model.training_step(batch, batch_idx)
 
         # process result
         if not isinstance(result, dict):
@@ -289,7 +296,10 @@ class Trainer(object):
         return loss, metrics
 
     def validation_step(self, batch: Any, batch_idx: int):
-        result = self.model.validation_step(batch, batch_idx)
+        if self.nranks > 1:
+            result = self.model._layers.validation_step(batch, batch_idx)
+        else:
+            result = self.model.validation_step(batch, batch_idx)
         return result
 
     def optimizer_step(self, current_epoch: int, batch_idx: int, optimizer: fluid.optimizer.Optimizer,
