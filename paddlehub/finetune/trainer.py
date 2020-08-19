@@ -24,6 +24,7 @@ from paddle.fluid.dygraph.base import to_variable
 from paddle.fluid.dygraph.parallel import ParallelEnv
 from paddle.fluid.io import DataLoader
 from paddle.incubate.hapi.distributed import DistributedBatchSampler
+from visualdl import LogWriter
 
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import Timer
@@ -37,17 +38,21 @@ class Trainer(object):
     def __init__(self,
                  model: fluid.dygraph.Layer,
                  strategy: fluid.optimizer.Optimizer,
-                 use_vdl: bool = False,
+                 use_vdl: bool = True,
                  checkpoint_dir: str = None,
                  compare_metrics: Callable = None):
         self.nranks = ParallelEnv().nranks
         self.local_rank = ParallelEnv().local_rank
         self.model = model
         self.optimizer = strategy
-        self.use_vdl = use_vdl
         self.checkpoint_dir = checkpoint_dir if checkpoint_dir else 'ckpt_{}'.format(time.time())
         if not os.path.exists(self.checkpoint_dir):
             os.makedirs(self.checkpoint_dir)
+
+        self.use_vdl = use_vdl
+        if self.use_vdl:
+            vdl_dir = os.path.join(self.checkpoint_dir, 'visualization')
+            self.log_writer = LogWriter(vdl_dir)
 
         self.current_epoch = 0
         self.best_metrics = defaultdict(int)
@@ -160,13 +165,19 @@ class Trainer(object):
                     if (batch_idx + 1) % log_interval == 0 and self.local_rank == 0:
                         lr = self.optimizer.current_step_lr()
                         avg_loss /= log_interval
+                        if self.use_vdl:
+                            self.log_writer.add_scalar(tag='TRAIN/loss', step=timer.current_step, value=avg_loss)
 
                         print_msg = 'Epoch={}/{}, Step={}/{}'.format(self.current_epoch, epochs, batch_idx + 1,
                                                                      steps_per_epoch)
                         print_msg += ' loss={:.4f}'.format(avg_loss)
 
                         for metric, value in avg_metrics.items():
-                            print_msg += ' {}={:.4f}'.format(metric, value / log_interval)
+                            value /= log_interval
+                            if self.use_vdl:
+                                self.log_writer.add_scalar(
+                                    tag='TRAIN/{}'.format(metric), step=timer.current_step, value=value)
+                            print_msg += ' {}={:.4f}'.format(metric, value)
 
                         print_msg += ' lr={:.6f} step/sec={:.2f} | ETA {}'.format(lr, timer.timing, timer.eta)
 
@@ -177,9 +188,20 @@ class Trainer(object):
 
                     if self.current_epoch % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
                         if eval_dataset:
-                            result = self.evaluate(eval_dataset, batch_size, num_workers)['metrics']
-                            if not self.best_metrics or self.compare_metrics(self.best_metrics, result):
-                                self.best_metrics = result
+                            result = self.evaluate(eval_dataset, batch_size, num_workers)
+                            eval_loss = result.get('loss', None)
+                            eval_metrics = result.get('metrics', {})
+                            if self.use_vdl:
+                                if eval_loss:
+                                    self.log_writer.add_scalar(
+                                        tag='EVAL/loss', step=timer.current_step, value=eval_loss)
+
+                                for metric, value in eval_metrics.items():
+                                    self.log_writer.add_scalar(
+                                        tag='EVAL/{}'.format(metric), step=timer.current_step, value=value)
+
+                            if not self.best_metrics or self.compare_metrics(self.best_metrics, eval_metrics):
+                                self.best_metrics = eval_metrics
                                 best_model_path = os.path.join(self.checkpoint_dir, 'best_model')
                                 self.save_model(best_model_path)
                                 self._save_metrics()
