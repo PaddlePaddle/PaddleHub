@@ -15,13 +15,14 @@
 
 import contextlib
 import sys
+from typing import IO
 
 from paddlehub.utils.utils import generate_tempfile
 
 
 @contextlib.contextmanager
-def redirect_istream(stream):
-    '''reset the standard input stream to the specified stream'''
+def redirect_istream(stream: IO):
+    '''Redirect the standard input stream to the specified stream'''
     _t = sys.stdin
     sys.stdin = stream
     yield
@@ -29,8 +30,8 @@ def redirect_istream(stream):
 
 
 @contextlib.contextmanager
-def redirect_ostream(stream):
-    '''reset the standard output stream to the specified stream'''
+def redirect_ostream(stream: IO):
+    '''Redirect the standard output stream to the specified stream'''
     _t = sys.stdout
     sys.stdout = stream
     yield
@@ -38,8 +39,8 @@ def redirect_ostream(stream):
 
 
 @contextlib.contextmanager
-def redirect_estream(stream):
-    '''reset the standard error stream to the specified stream'''
+def redirect_estream(stream: IO):
+    '''Redirect the standard error stream to the specified stream'''
     _t = sys.stderr
     sys.stderr = stream
     yield
@@ -48,6 +49,10 @@ def redirect_estream(stream):
 
 @contextlib.contextmanager
 def discard_oe():
+    '''
+    Redirect input and output stream to temporary file. In a sense,
+    it is equivalent discarded the output and error messages
+    '''
     with generate_tempfile() as _file:
         with open(_file.name, 'w') as _stream:
             with redirect_ostream(_stream):
@@ -56,11 +61,11 @@ def discard_oe():
 
 
 @contextlib.contextmanager
-def confirm(char='y'):
-    # typein char to confirm
+def typein(chars: str = 'y'):
+    # typein chars to input stream
     with generate_tempfile() as _file:
         with open(_file.name, 'w+') as _stream:
             with redirect_istream(_stream):
-                _stream.write('{}\n'.format(char))
+                _stream.write('{}\n'.format(chars))
                 _stream.seek(0)
                 yield

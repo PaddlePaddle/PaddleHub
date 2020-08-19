@@ -21,7 +21,7 @@ from pip._internal.utils.misc import get_installed_distributions
 from typing import List, Tuple
 
 from paddlehub.utils.utils import Version
-from paddlehub.utils.io import discard_oe, confirm
+from paddlehub.utils.io import discard_oe, typein
 
 
 def get_installed_packages() -> dict:
@@ -55,7 +55,8 @@ def install(package: str, version: str = '', upgrade=False) -> bool:
 def uninstall(package: str) -> bool:
     '''Uninstall the python package.'''
     with discard_oe():
-        with confirm('y'):
+        # type in 'y' to confirm the uninstall operation
+        with typein('y'):
             cmds = ['uninstall', '{}'.format(package)]
             result = pip.main(cmds)
     return result == 0
