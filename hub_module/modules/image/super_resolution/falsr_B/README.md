@@ -117,7 +117,7 @@ print("save image as falsr_B_X2.png")
 
 ### 查看代码
 
-<https://github.com/xiaomi-automl/FALSR>
+https://github.com/xiaomi-automl/FALSR
 
 ### 依赖
 
