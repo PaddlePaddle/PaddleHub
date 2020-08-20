@@ -39,12 +39,12 @@ def segment(images=None,
 
 
 ```python
-def video_frame(self,
-                frame_org,
-                frame_id,
-                prev_gray,
-                prev_cfd,
-                use_gpu=False):
+def video_stream_segment(self,
+                         frame_org,
+                         frame_id,
+                         prev_gray,
+                         prev_cfd,
+                         use_gpu=False):
 ```
 
 预测API，用于逐帧对视频人像分割。
@@ -133,7 +133,7 @@ prev_cfd = None
 while cap_video.isOpened():
     ret, frame_org = cap_video.read()
     if ret:
-        [img_matting, prev_gray, prev_cfd] = human_seg.video_frame(frame_org=frame_org, frame_id=cap_video.get(1), prev_gray=prev_gray, prev_cfd=prev_cfd)
+        [img_matting, prev_gray, prev_cfd] = human_seg.video_stream_segment(frame_org=frame_org, frame_id=cap_video.get(1), prev_gray=prev_gray, prev_cfd=prev_cfd)
         img_matting = np.repeat(img_matting[:, :, np.newaxis], 3, axis=2)
         bg_im = np.ones_like(img_matting) * 255
         comb = (img_matting * frame_org + (1 - img_matting) * bg_im).astype(np.uint8)

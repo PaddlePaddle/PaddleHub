@@ -123,7 +123,7 @@ print("save image as dcscn_X2.png")
 ```
 ### 查看代码
 
-<https://modelzoo.co/model/dcscn-super-resolution>
+https://github.com/jiny2001/dcscn-super-resolution
 
 
 

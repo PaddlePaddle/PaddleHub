@@ -211,7 +211,7 @@ class Dcscn(hub.Module):
         self.arg_config_group.add_argument(
             '--visualization',
             type=ast.literal_eval,
-            default=False,
+            default=True,
             help="whether to save output as images.")
 
     def add_module_input_arg(self):

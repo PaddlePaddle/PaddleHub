@@ -137,12 +137,12 @@ class HRNetw18samllv1humanseg(hub.Module):
                 res.append(out)
         return res
 
-    def video_frame(self,
-                    frame_org,
-                    frame_id,
-                    prev_gray,
-                    prev_cfd,
-                    use_gpu=False):
+    def video_stream_segment(self,
+                             frame_org,
+                             frame_id,
+                             prev_gray,
+                             prev_cfd,
+                             use_gpu=False):
         """
         API for human video segmentation.
 
@@ -432,7 +432,7 @@ if __name__ == "__main__":
     while cap_video.isOpened():
         ret, frame_org = cap_video.read()
         if ret:
-            [img_matting, prev_gray, prev_cfd] = m.video_frame(
+            [img_matting, prev_gray, prev_cfd] = m.video_stream_segment(
                 frame_org=frame_org,
                 frame_id=cap_video.get(1),
                 prev_gray=prev_gray,

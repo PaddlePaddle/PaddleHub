@@ -43,12 +43,12 @@ def segment(self,
   * data (numpy.ndarray): 人像分割结果，仅包含Alpha通道，取值为0-255 (0为全透明，255为不透明)，也即取值越大的像素点越可能为人体，取值越小的像素点越可能为背景。
 
 ```python
-def video_frame(self,
-                frame_org,
-                frame_id,
-                prev_gray,
-                prev_cfd,
-                use_gpu=False):
+def video_stream_segment(self,
+                         frame_org,
+                         frame_id,
+                         prev_gray,
+                         prev_cfd,
+                         use_gpu=False):
 ```
 
 预测API，用于逐帧对视频人像分割。
@@ -135,7 +135,7 @@ prev_cfd = None
 while cap_video.isOpened():
     ret, frame_org = cap_video.read()
     if ret:
-        [img_matting, prev_gray, prev_cfd] = human_seg.video_frame(frame_org=frame_org, frame_id=cap_video.get(1), prev_gray=prev_gray, prev_cfd=prev_cfd)
+        [img_matting, prev_gray, prev_cfd] = human_seg.video_stream_segment(frame_org=frame_org, frame_id=cap_video.get(1), prev_gray=prev_gray, prev_cfd=prev_cfd)
         img_matting = np.repeat(img_matting[:, :, np.newaxis], 3, axis=2)
         bg_im = np.ones_like(img_matting) * 255
         comb = (img_matting * frame_org + (1 - img_matting) * bg_im).astype(np.uint8)
@@ -200,7 +200,7 @@ cv2.imwrite("segment_human_server.png", rgba)
 
 ### 查看代码
 
-<https://github.com/PaddlePaddle/PaddleSeg/tree/develop/contrib/HumanSeg>
+https://github.com/PaddlePaddle/PaddleSeg/tree/develop/contrib/HumanSeg
 
 
 ### 依赖
