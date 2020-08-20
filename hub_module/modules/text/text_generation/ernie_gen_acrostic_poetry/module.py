@@ -35,7 +35,7 @@ from ernie_gen_acrostic_poetry.model.modeling_ernie_gen import ErnieModelForGene
 
 @moduleinfo(
     name="ernie_gen_acrostic_poetry",
-    version="1.0.0",
+    version="1.0.1",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning. This module has fine-tuned for poetry generation task.",
     author="adaxiadaxi",
@@ -90,6 +90,14 @@ class ErnieGen(hub.NLPPredictionModule):
         Returns:
              results(list): the poetry continuations.
         """
+        if texts and isinstance(texts, list) and all(texts) and all(
+            [isinstance(text, str) for text in texts]):
+            predicted_data = texts
+        else:
+            raise ValueError(
+                "The input data is unexpected. The parameter: texts should be a list with nonempty string elements."
+            )
+
         if use_gpu and "CUDA_VISIBLE_DEVICES" not in os.environ:
             use_gpu = False
             logger.warning(
@@ -99,12 +107,6 @@ class ErnieGen(hub.NLPPredictionModule):
             place = fluid.CUDAPlace(0)
         else:
             place = fluid.CPUPlace()
-
-        if texts and isinstance(texts, list):
-            predicted_data = texts
-        else:
-            raise ValueError(
-                "The input data is inconsistent with expectations.")
 
         with fluid.dygraph.guard(place):
             self.model.eval()
