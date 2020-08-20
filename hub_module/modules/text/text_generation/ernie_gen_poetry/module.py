@@ -92,21 +92,23 @@ class ErnieGen(hub.NLPPredictionModule):
                 "The input texts should be a list with nonempty string elements."
             )
         for i, text in enumerate(texts):
-            if len(text) > self.line:
+            if '，' not in text or '。' not in text:
                 logger.warning(
-                    'The input text: %s, contains more than %i characters, which will be cut off'
-                    % (text, self.line))
-                texts[i] = text[:self.line]
+                    "The input text: %s, does not contain '，' or '。', which is not a complete verse and may result in magic output"
+                    % text)
+            else:
+                front, rear = text[:-1].split('，')
+                if len(front) != len(rear):
+                    logger.warning(
+                        "The input text: %s, is no antithetical parallelism, which may result in magic output"
+                        % text)
 
             for char in text:
-                if '，' not in text or '。' not in text:
-                    logger.warning(
-                        "The input text: %s, does not contain '，' or '。', which is not a complete verse and may result in magic output"
-                        % text)
                 if not '\u4e00' <= char <= '\u9fff' and char not in ['，', '。']:
                     logger.warning(
                         "The input text: %s, contains characters not Chinese or ‘，’ '。', which may result in magic output"
                         % text)
+                break
 
         if use_gpu and "CUDA_VISIBLE_DEVICES" not in os.environ:
             use_gpu = False

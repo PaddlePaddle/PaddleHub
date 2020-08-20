@@ -97,6 +97,7 @@ class ErnieGen(hub.NLPPredictionModule):
                     logger.warning(
                         'The input text: %s, contains non-Chinese characters, which may result in magic output'
                         % text)
+                    break
 
         if use_gpu and "CUDA_VISIBLE_DEVICES" not in os.environ:
             use_gpu = False
