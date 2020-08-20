@@ -52,6 +52,7 @@ class ErnieGen(hub.NLPPredictionModule):
         if word not in [5, 7]:
             raise ValueError("The word could only be 5 or 7.")
 
+        self.line = line
         assets_path = os.path.join(self.directory, "assets")
         gen_checkpoint_path = os.path.join(
             assets_path, "ernie_gen_acrostic_poetry_L%sW%s" % (line, word))
@@ -95,8 +96,20 @@ class ErnieGen(hub.NLPPredictionModule):
             predicted_data = texts
         else:
             raise ValueError(
-                "The input data is unexpected. The parameter: texts should be a list with nonempty string elements."
+                "The input texts should be a list with nonempty string elements."
             )
+        for i, text in enumerate(texts):
+            if len(text) > self.line:
+                logger.warning(
+                    'The input text: %s, contains more than %i characters, which will be cut off'
+                    % (text, self.line))
+                texts[i] = text[:self.line]
+
+            for char in text:
+                if not '\u4e00' <= char <= '\u9fff':
+                    logger.warning(
+                        'The input text: %s, contains non-Chinese characters, which may result in magic output'
+                        % text)
 
         if use_gpu and "CUDA_VISIBLE_DEVICES" not in os.environ:
             use_gpu = False

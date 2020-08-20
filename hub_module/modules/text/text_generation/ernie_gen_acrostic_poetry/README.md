@@ -17,7 +17,7 @@ $ hub run ernie_gen_acrostic_poetry --input_text="我喜欢你" --use_gpu True -
 
 **参数**
 
-* input_text: 诗歌的藏头，长度不超过line值；
+* input_text: 诗歌的藏头，长度不应超过4，否则将被截断；
 * use\_gpu: 是否使用 GPU；**若使用GPU，请先设置CUDA\_VISIBLE\_DEVICES环境变量**；
 * beam\_width: beam search宽度，决定每个藏头输出的下文数目。
 
