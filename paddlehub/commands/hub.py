@@ -13,62 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+import argparse
+import os
 
-import six
-import sys
-
-from paddlehub.commands.base_command import BaseCommand
-
-from paddlehub.common.logger import logger
-from paddlehub.common.utils import sys_stdin_encoding
-from paddlehub.commands import help
+from paddlehub.commands import register, get_command
 
 
-class HubCommand(BaseCommand):
-    name = "hub"
-
-    def __init__(self, name):
-        super(HubCommand, self).__init__(name)
-        self.show_in_help = False
-
+@register(name='hub')
+class HubCommand:
     def execute(self, argv):
-        logger.setLevel("NOLOG")
-
-        if not argv:
-            help.command.execute(argv)
-            exit(1)
-            return False
-        sub_command = argv[0]
-        if not sub_command in BaseCommand.command_dict:
-            print("ERROR: unknown command '%s'" % sub_command)
-            help.command.execute(argv)
-            exit(1)
-            return False
-        command = BaseCommand.command_dict[sub_command]
-        return command.execute(argv[1:])
-
-
-command = HubCommand.instance()
-
-
-def main():
-    argv = []
-    for item in sys.argv:
-        if six.PY2:
-            argv.append(item.decode(sys_stdin_encoding()).decode("utf8"))
-        else:
-            argv.append(item)
-    command.execute(argv[1:])
-
-
-if __name__ == "__main__":
-    argv = []
-    for item in sys.argv:
-        if six.PY2:
-            argv.append(item.decode(sys_stdin_encoding()).decode("utf8"))
-        else:
-            argv.append(item)
-    command.execute(argv[1:])
+        help = get_command('hub.help')
+        help().execute(argv)
+        return True

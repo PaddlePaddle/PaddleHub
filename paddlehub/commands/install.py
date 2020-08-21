@@ -13,60 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import argparse
 import os
+from typing import List
 
-from paddlehub.common import utils
-from paddlehub.module.manager import default_module_manager
-from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.common.hub_server import CacheUpdater
+from paddlehub.commands import register
+from paddlehub.module.manager import LocalModuleManager
+from paddlehub.utils import xarfile
 
 
-class InstallCommand(BaseCommand):
-    name = "install"
-
-    def __init__(self, name):
-        super(InstallCommand, self).__init__(name)
-        self.show_in_help = True
-        self.description = "Install PaddleHub module."
-        self.parser = self.parser = argparse.ArgumentParser(
-            description=self.__class__.__doc__,
-            prog='%s %s <module_name>' % (ENTRY, name),
-            usage='%(prog)s',
-            add_help=False)
-
-    def execute(self, argv):
+@register(name='hub.install', description='Install PaddleHub module.')
+class InstallCommand:
+    def execute(self, argv: List) -> bool:
         if not argv:
-            print("ERROR: Please specify a module name.\n")
-            self.help()
+            print("ERROR: You must give at least one module to install.")
             return False
-        extra = {"command": "install"}
 
-        if argv[0].endswith("tar.gz"):
-            result, tips, module_dir = default_module_manager.install_module(
-                module_package=argv[0], extra=extra)
-        elif os.path.exists(argv[0]) and os.path.isdir(argv[0]):
-            result, tips, module_dir = default_module_manager.install_module(
-                module_dir=argv[0], extra=extra)
-        else:
-            module_name = argv[0]
-            module_version = None if "==" not in module_name else module_name.split(
-                "==")[1]
-            module_name = module_name if "==" not in module_name else module_name.split(
-                "==")[0]
-            CacheUpdater("hub_install", module_name, module_version).start()
-            result, tips, module_dir = default_module_manager.install_module(
-                module_name=module_name,
-                module_version=module_version,
-                extra=extra)
-
-        print(tips)
-
+        manager = LocalModuleManager()
+        for _arg in argv:
+            if os.path.exists(_arg) and os.path.isdir(_arg):
+                manager.install(directory=_arg)
+            elif os.path.exists(_arg) and xarfile.is_xarfile(_arg):
+                manager.install(archive=_arg)
+            else:
+                manager.install(name=_arg)
         return True
-
-
-command = InstallCommand.instance()
