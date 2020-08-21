@@ -23,21 +23,21 @@ import paddlehub as hub
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
 
-from falsr_C.data_feed import reader
-from falsr_C.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
+from falsr_c.data_feed import reader
+from falsr_c.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
 
 
 @moduleinfo(
-    name="falsr_C",
+    name="falsr_c",
     type="CV/image_editing",
     author="paddlepaddle",
     author_email="",
-    summary="falsr_C is a super resolution model.",
+    summary="falsr_c is a super resolution model.",
     version="1.0.0")
 class Falsr_C(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "falsr_C_model")
+            self.directory, "falsr_c_model")
         self._set_config()
 
     def _set_config(self):
@@ -68,7 +68,7 @@ class Falsr_C(hub.Module):
                     paths=None,
                     use_gpu=False,
                     visualization=False,
-                    output_dir="falsr_C_output"):
+                    output_dir="falsr_c_output"):
         """
         API for super resolution.
 
@@ -121,7 +121,7 @@ class Falsr_C(hub.Module):
         return res
 
     def save_inference_model(self,
-                             dirname='falsr_C_save_model',
+                             dirname='falsr_c_save_model',
                              model_filename=None,
                              params_filename=None,
                              combined=False):
@@ -198,12 +198,12 @@ class Falsr_C(hub.Module):
         self.arg_config_group.add_argument(
             '--output_dir',
             type=str,
-            default='falsr_C_output',
+            default='falsr_c_output',
             help="The directory to save output images.")
         self.arg_config_group.add_argument(
             '--save_dir',
             type=str,
-            default='falsr_C_save_model',
+            default='falsr_c_save_model',
             help="The directory to save model.")
         self.arg_config_group.add_argument(
             '--visualization',

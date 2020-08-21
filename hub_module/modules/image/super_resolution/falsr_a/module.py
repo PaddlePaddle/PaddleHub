@@ -23,21 +23,21 @@ import paddlehub as hub
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
 
-from falsr_B.data_feed import reader
-from falsr_B.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
+from falsr_a.data_feed import reader
+from falsr_a.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
 
 
 @moduleinfo(
-    name="falsr_B",
+    name="falsr_a",
     type="CV/image_editing",
     author="paddlepaddle",
     author_email="",
-    summary="falsr_B is a super resolution model.",
+    summary="falsr_a is a super resolution model.",
     version="1.0.0")
-class Falsr_B(hub.Module):
+class Falsr_A(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "falsr_B_model")
+            self.directory, "falsr_a_model")
         self._set_config()
 
     def _set_config(self):
@@ -68,7 +68,7 @@ class Falsr_B(hub.Module):
                     paths=None,
                     use_gpu=False,
                     visualization=False,
-                    output_dir="falsr_B_output"):
+                    output_dir="falsr_a_output"):
         """
         API for super resolution.
 
@@ -121,7 +121,7 @@ class Falsr_B(hub.Module):
         return res
 
     def save_inference_model(self,
-                             dirname='falsr_B_save_model',
+                             dirname='falsr_a_save_model',
                              model_filename=None,
                              params_filename=None,
                              combined=False):
@@ -198,12 +198,12 @@ class Falsr_B(hub.Module):
         self.arg_config_group.add_argument(
             '--output_dir',
             type=str,
-            default='falsr_B_output',
+            default='falsr_a_output',
             help="The directory to save output images.")
         self.arg_config_group.add_argument(
             '--save_dir',
             type=str,
-            default='falsr_B_save_model',
+            default='falsr_a_save_model',
             help="The directory to save model.")
         self.arg_config_group.add_argument(
             '--visualization',
@@ -220,7 +220,7 @@ class Falsr_B(hub.Module):
 
 
 if __name__ == "__main__":
-    module = Falsr_B()
+    module = Falsr_A()
     module.reconstruct(
         paths=["BSD100_001.png", "BSD100_002.png", "Set5_003.png"])
     module.save_inference_model()

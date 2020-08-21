@@ -1,11 +1,11 @@
 ## 模型概述
 
-falsr_C是基于Fast, Accurate and Lightweight Super-Resolution with Neural Architecture Search设计的轻量化超分辨模型。该模型使用多目标方法处理超分问题，同时使用基于混合控制器的弹性搜索策略来提升模型性能。该模型提供的超分倍数为2倍。
+falsr_c是基于Fast, Accurate and Lightweight Super-Resolution with Neural Architecture Search设计的轻量化超分辨模型。该模型使用多目标方法处理超分问题，同时使用基于混合控制器的弹性搜索策略来提升模型性能。该模型提供的超分倍数为2倍。
 
 ## 命令行预测
 
 ```
-$ hub run falsr_C --input_path "/PATH/TO/IMAGE"
+$ hub run falsr_c --input_path "/PATH/TO/IMAGE"
 
 ```
 
@@ -17,7 +17,7 @@ def reconstruct(self,
                 paths=None,
                 use_gpu=False,
                 visualization=False,
-                output_dir="falsr_C_output")
+                output_dir="falsr_c_output")
 ```
 
 预测API，用于图像超分辨率。
@@ -38,7 +38,7 @@ def reconstruct(self,
 
 ```python
 def save_inference_model(self,
-                         dirname='falsr_C_save_model',
+                         dirname='falsr_c_save_model',
                          model_filename=None,
                          params_filename=None,
                          combined=False)
@@ -59,7 +59,7 @@ def save_inference_model(self,
 import cv2
 import paddlehub as hub
 
-sr_model = hub.Module('falsr_C')
+sr_model = hub.Module('falsr_c')
 im = cv2.imread('/PATH/TO/IMAGE').astype('float32')
 #visualization=True可以用于查看超分图片效果，可设置为False提升运行速度。
 res = sr_model.reconstruct(images=[im], visualization=True)
@@ -76,7 +76,7 @@ PaddleHub Serving可以部署一个图像超分的在线服务。
 运行启动命令：
 
 ```shell
-$ hub serving start -m falsr_C
+$ hub serving start -m falsr_c
 ```
 
 这样就完成了一个超分任务的服务化API的部署，默认端口号为8866。
@@ -108,11 +108,11 @@ def base64_to_cv2(b64str):
 org_im = cv2.imread('/PATH/TO/IMAGE')
 data = {'images':[cv2_to_base64(org_im)]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/falsr_C"
+url = "http://127.0.0.1:8866/predict/falsr_c"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 sr = base64_to_cv2(r.json()["results"][0]['data'])
-cv2.imwrite('falsr_C_X2.png', sr)
-print("save image as falsr_C_X2.png")
+cv2.imwrite('falsr_c_X2.png', sr)
+print("save image as falsr_c_X2.png")
 ```
 
 ### 查看代码

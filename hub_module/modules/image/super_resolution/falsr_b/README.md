@@ -1,11 +1,11 @@
 ## 模型概述
 
-falsr_A是基于Fast, Accurate and Lightweight Super-Resolution with Neural Architecture Search设计的轻量化超分辨模型。该模型使用多目标方法处理超分问题，同时使用基于混合控制器的弹性搜索策略来提升模型性能。该模型提供的超分倍数为2倍。
+falsr_b是基于Fast, Accurate and Lightweight Super-Resolution with Neural Architecture Search设计的轻量化超分辨模型。falsr_b较falsr_a更轻量化。该模型使用多目标方法处理超分问题，同时使用基于混合控制器的弹性搜索策略来提升模型性能。该模型提供的超分倍数为2倍。
 
 ## 命令行预测
 
 ```
-$ hub run falsr_A --input_path "/PATH/TO/IMAGE"
+$ hub run falsr_b --input_path "/PATH/TO/IMAGE"
 
 ```
 
@@ -16,8 +16,8 @@ def reconstruct(self,
                 images=None,
                 paths=None,
                 use_gpu=False,
-                visualization=False,
-                output_dir="falsr_A_output")
+                visualization=True,
+                output_dir="falsr_b_output")
 ```
 
 预测API，用于图像超分辨率。
@@ -38,7 +38,7 @@ def reconstruct(self,
 
 ```python
 def save_inference_model(self,
-                         dirname='falsr_A_save_model',
+                         dirname='falsr_b_save_model',
                          model_filename=None,
                          params_filename=None,
                          combined=False)
@@ -59,7 +59,7 @@ def save_inference_model(self,
 import cv2
 import paddlehub as hub
 
-sr_model = hub.Module('falsr_A')
+sr_model = hub.Module('falsr_b')
 im = cv2.imread('/PATH/TO/IMAGE').astype('float32')
 #visualization=True可以用于查看超分图片效果，可设置为False提升运行速度。
 res = sr_model.reconstruct(images=[im], visualization=True)
@@ -76,7 +76,7 @@ PaddleHub Serving可以部署一个图像超分的在线服务。
 运行启动命令：
 
 ```shell
-$ hub serving start -m falsr_A
+$ hub serving start -m falsr_b
 ```
 
 这样就完成了一个超分任务的服务化API的部署，默认端口号为8866。
@@ -108,16 +108,16 @@ def base64_to_cv2(b64str):
 org_im = cv2.imread('/PATH/TO/IMAGE')
 data = {'images':[cv2_to_base64(org_im)]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/falsr_A"
+url = "http://127.0.0.1:8866/predict/falsr_b"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 sr = base64_to_cv2(r.json()["results"][0]['data'])
-cv2.imwrite('falsr_A_X2.png', sr)
-print("save image as falsr_A_X2.png")
+cv2.imwrite('falsr_b_X2.png', sr)
+print("save image as falsr_b_X2.png")
 ```
+
 ### 查看代码
 
 https://github.com/xiaomi-automl/FALSR
-
 
 ### 依赖
 

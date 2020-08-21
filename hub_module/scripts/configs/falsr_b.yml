@@ -1,5 +1,5 @@
-name: falsr_B
-dir: "modules/image/super_resolution/falsr_B"
+name: falsr_b
+dir: "modules/image/super_resolution/falsr_b"
 exclude:
     - README.md
 resources:

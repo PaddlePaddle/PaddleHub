@@ -1,9 +1,0 @@
-name: falsr_C
-dir: "modules/image/super_resolution/falsr_C"
-exclude:
-    - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/model/image/image_editing/falsr_C_model.tar.gz
-    dest: .
-    uncompress: True
