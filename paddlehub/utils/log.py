@@ -313,13 +313,4 @@ class Table(object):
             content += sepline
         return sepline + content
 
-
-# table = Table()
-# table.append('123', '234')
-# table.append('122223', '22444')
-# table.append('121111111111111111111111111111111113', '234', widths=[10, 20], colors=['red', 'yellow'], aligns=['^', '>'])
-# table.append('122223', '22444')
-# table.append('122223', '22444', '123')
-# print(table)
-
 logger = Logger()
