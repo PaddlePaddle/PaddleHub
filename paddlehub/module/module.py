@@ -88,6 +88,7 @@ class Module(object):
             raise InvalidHubModule(directory)
         sys.path.pop(0)
 
+        user_module_cls.directory = directory
         return user_module_cls
 
     @classmethod

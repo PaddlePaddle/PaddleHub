@@ -16,6 +16,7 @@
 import os
 import shutil
 from collections import OrderedDict
+from typing import List
 
 from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import Module as HubModule
@@ -138,6 +139,13 @@ class LocalModuleManager(object):
             except:
                 log.logger.warning('An error was encountered while loading {}'.format(name))
         return None
+
+    def list(self) -> List[HubModule]:
+        '''List all installed HubModule.'''
+        for subdir in os.listdir(self.home):
+            fulldir = os.path.join(self.home, subdir)
+            self._local_modules[subdir] = HubModule.load(fulldir)
+        return [module for module in self._local_modules.values()]
 
     def _install_from_url(self, url: str) -> HubModule:
         '''Install HubModule from url'''

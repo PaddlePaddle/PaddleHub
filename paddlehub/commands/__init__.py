@@ -13,4 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .log import Table, ProgressBar
+from paddlehub.commands.utils import register, get_command, execute, _commands
+
+import paddlehub.commands.clear
+import paddlehub.commands.config
+import paddlehub.commands.convert
+import paddlehub.commands.download
+import paddlehub.commands.help
+import paddlehub.commands.hub
+import paddlehub.commands.install
+import paddlehub.commands.list
+import paddlehub.commands.run
+import paddlehub.commands.search
+import paddlehub.commands.serving
+import paddlehub.commands.show
+import paddlehub.commands.uninstall
+import paddlehub.commands.version

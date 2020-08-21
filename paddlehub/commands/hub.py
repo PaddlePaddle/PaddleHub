@@ -1,5 +1,5 @@
-# coding:utf-8
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+#coding:utf-8
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -13,4 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .log import Table, ProgressBar
+import argparse
+import os
+
+from paddlehub.commands import register, get_command
+
+
+@register(name='hub')
+class HubCommand:
+    def execute(self, argv):
+        help = get_command('hub.help')
+        help().execute(argv)
+        return True

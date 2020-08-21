@@ -17,8 +17,10 @@ import functools
 import logging
 import sys
 import time
+from typing import List
 
 import colorlog
+from colorama import Fore
 
 log_config = {
     'DEBUG': {
@@ -110,42 +112,214 @@ class ProgressBar(object):
             sys.stdout.write('\n')
 
 
-class TableLogger(object):
-    def __init__(self, head=None, head_colors=None, head_aligns=None, colors=None, aligns=None, slots_len=None):
-        self.contents = []
-        self.slot_nums = -1
-        self.head = head
-        self.head_colors = head_colors
-        self.head_aligns = head_aligns
-        self.colors = colors
-        self.aligns = aligns
-        self.slots_len = slots_len
+class _FormattedText(object):
+    _MAP = {'red': Fore.RED, 'yellow': Fore.YELLOW, 'green': Fore.GREEN, 'blue': Fore.BLUE}
 
-    def __enter__(self):
-        return self
+    def __init__(self, text: str, width: int, align='<', color=None):
+        self.text = text
+        self.align = align
+        self.color = _FormattedText._MAP[color] if color else color
+        self.width = width
 
-    def __exit__(self, exit_exception, exit_value, exit_traceback):
-        if not exit_value:
-            self._print()
+    def __repr__(self):
+        form = ':{}{}'.format(self.align, self.width)
+        text = ('{' + form + '}').format(self.text)
+        if not self.color:
+            return text
+        return self.color + text + Fore.RESET
 
-    def add(self, *line):
-        self.contents.append(line)
-        self.slot_nums = max(self.slot_nums, len(line))
 
-    def _print(self):
-        slots_len = [-1] * self.slot_nums
+class TableCell(object):
+    def __init__(self, content: str = '', width: int = 0, align: str = '<', color: str = ''):
+        self._width = width if width else len(content)
+        self._width = 1 if self._width < 1 else self._width
+        self._contents = []
+        for i in range(0, len(content), self._width):
+            text = _FormattedText(content[i:i + self._width], width, align, color)
+            self._contents.append(text)
+        self.align = align
+        self.color = color
 
-        for line in self.contents:
-            for idx, item in enumerate(line):
-                slots_len[idx] = max(slots_len[idx], len(item))
+    @property
+    def width(self) -> int:
+        return self._width
 
-        formats = ['{' + ':<{}'.format(_len) + '}' for _len in slots_len]
+    @width.setter
+    def width(self, value: int):
+        self._width = value
+        for content in self._contents:
+            content.width = value
 
-        print('+'.join(['-' * _len for _len in slots_len]))
+    @property
+    def height(self) -> int:
+        return len(self._contents)
 
-        for line in self.contents:
-            print('|'.join([formats[idx].format(item) for idx, item in enumerate(line)]))
-            print('+'.join(['-' * _len for _len in slots_len]))
+    @height.setter
+    def height(self, value: int):
+        if value < self.height:
+            raise RuntimeError(self.height, value)
+        self._contents += [_FormattedText('', width=self.width, align=self.align, color=self.color)
+                           ] * (value - self.height)
 
+    def __len__(self) -> int:
+        return len(self._contents)
+
+    def __getitem__(self, idx: int) -> str:
+        return self._contents[idx]
+
+    def __repr__(self) -> str:
+        return '\n'.join([str(item) for item in self._contents])
+
+
+class TableLine(object):
+    def __init__(self):
+        self.cells = []
+
+    def append(self, cell: TableCell):
+        self.cells.append(cell)
+
+    @property
+    def width(self):
+        _width = 0
+        for cell in self.cells():
+            _width += cell.width
+        return _width
+
+    @property
+    def height(self):
+        _height = -1
+        for cell in self.cells:
+            _height = max(_height, cell.height)
+        return _height
+
+    def __len__(self):
+        return len(self.cells)
+
+    def __repr__(self):
+        content = ''
+        for i in range(self.height):
+            content += '|'
+            for cell in self.cells:
+                if i > cell.height:
+                    content = content + '|'
+                else:
+                    content = content + str(cell[i]) + '|'
+            content += '\n'
+        return content
+
+    def __getitem__(self, idx: int) -> TableCell:
+        return self.cells[idx]
+
+
+class TableRow(object):
+    def __init__(self):
+        self.cells = []
+
+    def append(self, cell: TableCell):
+        self.cells.append(cell)
+
+    @property
+    def width(self):
+        _width = -1
+        for cell in self.cells:
+            _width = max(_width, cell.width)
+        return _width
+
+    @property
+    def height(self):
+        _height = 0
+        for cell in self.cells:
+            _height += cell.height
+        return _height
+
+    def __len__(self):
+        return len(self.cells)
+
+    def __getitem__(self, idx: int) -> TableCell:
+        return self.cells[idx]
+
+
+class Table(object):
+    def __init__(self):
+        self.lines = []
+        self.rows = []
+
+    def append(self, *contents, colors: List[str] = [], aligns: List[str] = [], widths: List[int] = []):
+        newline = TableLine()
+
+        for idx, content in enumerate(contents):
+            width = widths[idx] if idx < len(widths) else len(content)
+            color = colors[idx] if idx < len(colors) else ''
+            align = aligns[idx] if idx < len(aligns) else ''
+
+            newcell = TableCell(content, width=width, color=color, align=align)
+            newline.append(newcell)
+            if idx >= len(self.rows):
+                newrow = TableRow()
+
+                for line in self.lines:
+                    cell = TableCell(width=width, color=color, align=align)
+                    line.append(cell)
+                    newrow.append(cell)
+                newrow.append(newcell)
+                self.rows.append(newrow)
+            else:
+                self.rows[idx].append(newcell)
+
+        for idx in range(len(newline), len(self.rows)):
+            width = widths[idx] if idx < len(widths) else self.rows[idx].width
+            color = colors[idx] if idx < len(colors) else ''
+            align = aligns[idx] if idx < len(aligns) else ''
+            cell = TableCell(width=width, color=color, align=align)
+            newline.append(cell)
+
+        self.lines.append(newline)
+        self._adjust()
+
+    def _adjust(self):
+        for row in self.rows:
+            _width = -1
+            for cell in row:
+                _width = max(_width, cell.width)
+            for cell in row:
+                cell.width = _width
+
+        for line in self.lines:
+            _height = -1
+            for cell in line:
+                _height = max(_height, cell.height)
+            for cell in line:
+                cell.height = _height
+
+    @property
+    def width(self):
+        _width = -1
+        for line in self.lines:
+            _width = max(_width, line.width)
+        return _width
+
+    @property
+    def height(self):
+        _height = -1
+        for row in self.rows:
+            _height = max(_height, row.height)
+        return _height
+
+    def __repr__(self):
+        sepline = '+{}+\n'.format('+'.join(['-' * row.width for row in self.rows]))
+        content = ''
+        for line in self.lines:
+            content = content + str(line)
+            content += sepline
+        return sepline + content
+
+
+# table = Table()
+# table.append('123', '234')
+# table.append('122223', '22444')
+# table.append('121111111111111111111111111111111113', '234', widths=[10, 20], colors=['red', 'yellow'], aligns=['^', '>'])
+# table.append('122223', '22444')
+# table.append('122223', '22444', '123')
+# print(table)
 
 logger = Logger()
