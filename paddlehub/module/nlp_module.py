@@ -186,7 +186,7 @@ class NLPPredictionModule(NLPBaseModule):
         if args.input_file:
             if not os.path.exists(args.input_file):
                 raise FileNotFoundError(
-                    "File %s is not exist." % args.input_file)
+                    "File %s does not exist." % args.input_file)
             else:
                 input_data = txt_parser.parse(args.input_file, use_strip=True)
         elif args.input_text:
