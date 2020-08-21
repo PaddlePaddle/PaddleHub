@@ -185,26 +185,12 @@ class NLPPredictionModule(NLPBaseModule):
         input_data = []
         if args.input_file:
             if not os.path.exists(args.input_file):
-                print("File %s is not exist." % args.input_file)
-                raise RuntimeError
+                raise FileNotFoundError(
+                    "File %s is not exist." % args.input_file)
             else:
                 input_data = txt_parser.parse(args.input_file, use_strip=True)
         elif args.input_text:
-            if args.input_text.strip() != '':
-                if six.PY2:
-                    input_data = [
-                        args.input_text.decode(
-                            sys_stdin_encoding()).decode("utf8")
-                    ]
-                else:
-                    input_data = [args.input_text]
-            else:
-                print(
-                    "ERROR: The input data is inconsistent with expectations.")
-
-        if input_data == []:
-            print("ERROR: The input data is inconsistent with expectations.")
-            raise DataFormatError
+            input_data = [args.input_text]
 
         return input_data
 
