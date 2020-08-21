@@ -35,7 +35,7 @@ from ernie_gen_couplet.model.modeling_ernie_gen import ErnieModelForGeneration
 
 @moduleinfo(
     name="ernie_gen_couplet",
-    version="1.0.1",
+    version="1.0.2",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning. This module has fine-tuned for couplet generation task.",
     author="baidu-nlp",
@@ -84,6 +84,21 @@ class ErnieGen(hub.NLPPredictionModule):
         Returns:
              results(list): the right rolls.
         """
+        if texts and isinstance(texts, list) and all(texts) and all(
+            [isinstance(text, str) for text in texts]):
+            predicted_data = texts
+        else:
+            raise ValueError(
+                "The input texts should be a list with nonempty string elements."
+            )
+        for i, text in enumerate(texts):
+            for char in text:
+                if not '\u4e00' <= char <= '\u9fff':
+                    logger.warning(
+                        'The input text: %s, contains non-Chinese characters, which may result in magic output'
+                        % text)
+                    break
+
         if use_gpu and "CUDA_VISIBLE_DEVICES" not in os.environ:
             use_gpu = False
             logger.warning(
@@ -93,12 +108,6 @@ class ErnieGen(hub.NLPPredictionModule):
             place = fluid.CUDAPlace(0)
         else:
             place = fluid.CPUPlace()
-
-        if texts and isinstance(texts, list):
-            predicted_data = texts
-        else:
-            raise ValueError(
-                "The input data is inconsistent with expectations.")
 
         with fluid.dygraph.guard(place):
             self.model.eval()

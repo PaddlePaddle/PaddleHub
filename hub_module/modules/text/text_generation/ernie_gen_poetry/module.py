@@ -35,7 +35,7 @@ from ernie_gen_poetry.model.modeling_ernie_gen import ErnieModelForGeneration
 
 @moduleinfo(
     name="ernie_gen_poetry",
-    version="1.0.1",
+    version="1.0.2",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning. This module has fine-tuned for poetry generation task.",
     author="baidu-nlp",
@@ -84,6 +84,32 @@ class ErnieGen(hub.NLPPredictionModule):
         Returns:
              results(list): the poetry continuations.
         """
+        if texts and isinstance(texts, list) and all(texts) and all(
+            [isinstance(text, str) for text in texts]):
+            predicted_data = texts
+        else:
+            raise ValueError(
+                "The input texts should be a list with nonempty string elements."
+            )
+        for i, text in enumerate(texts):
+            if '，' not in text or '。' not in text:
+                logger.warning(
+                    "The input text: %s, does not contain '，' or '。', which is not a complete verse and may result in magic output"
+                    % text)
+            else:
+                front, rear = text[:-1].split('，')
+                if len(front) != len(rear):
+                    logger.warning(
+                        "The input text: %s, is no antithetical parallelism, which may result in magic output"
+                        % text)
+
+            for char in text:
+                if not '\u4e00' <= char <= '\u9fff' and char not in ['，', '。']:
+                    logger.warning(
+                        "The input text: %s, contains characters not Chinese or ‘，’ '。', which may result in magic output"
+                        % text)
+                break
+
         if use_gpu and "CUDA_VISIBLE_DEVICES" not in os.environ:
             use_gpu = False
             logger.warning(
@@ -93,12 +119,6 @@ class ErnieGen(hub.NLPPredictionModule):
             place = fluid.CUDAPlace(0)
         else:
             place = fluid.CPUPlace()
-
-        if texts and isinstance(texts, list):
-            predicted_data = texts
-        else:
-            raise ValueError(
-                "The input data is inconsistent with expectations.")
 
         with fluid.dygraph.guard(place):
             self.model.eval()
