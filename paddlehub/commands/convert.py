@@ -21,6 +21,7 @@ from string import Template
 
 from paddlehub.common import tmp_dir
 from paddlehub.commands.base_command import BaseCommand, ENTRY
+from paddlehub.common.hub_server import CacheUpdater
 
 INIT_FILE = '__init__.py'
 MODULE_FILE = 'module.py'
@@ -140,6 +141,7 @@ class ConvertCommand(BaseCommand):
         self.dest = args.output_dir if args.output_dir is not None else os.path.join(
             '{}_{}'.format(self.module, str(time.time())))
 
+        CacheUpdater("hub_convert", self.module, self.version).start()
         os.makedirs(self.dest)
 
         with tmp_dir() as _dir:
