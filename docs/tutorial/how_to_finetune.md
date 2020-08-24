@@ -124,6 +124,8 @@ class DemoDataset(BaseNLPDataset):
 dataset = DemoDataset()
 ```
 
+然后就可以通过DemoDataset()获取自定义数据集了。进而配合数据预处理器以及预训练模型如ERNIE完成文本类任务。
+
 * 加载图像类自定义数据集。用用户仅需要继承基类BaseCVDatast，修改数据集存放地址即可，具体可以参考如下代码。  
 ```
 from paddlehub.dataset.base_cv_dataset import BaseCVDataset
@@ -145,7 +147,10 @@ class DemoDataset(BaseCVDataset):
 dataset = DemoDataset()
 ```
 
+然后就可以通过DemoDataset()获取自定义数据集了。进而配合数据预处理器以及预训练模型完成视觉类的迁移学习任务。
+
 ####  **4. 配置数据预处理器**  
+
 通过使用PaddleHub的数据预处理器API来读取NLP或CV的数据集数据。  
 
 
