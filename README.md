@@ -173,7 +173,7 @@ $ hub uninstall ernie
 ## 微信扫描二维码，欢迎加入PaddleHub技术交流群
 
 <div align="center">
-<img src="./docs/joinus.JPEG"  width = "200" height = "200" />
+<img src="./docs/imgs/joinus.JPEG"  width = "200" height = "200" />
 </div>  
 如扫码失败，请添加微信15711058002，并备注“Hub”，运营同学会邀请您入群。  
 
