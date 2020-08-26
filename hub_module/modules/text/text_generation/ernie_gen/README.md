@@ -37,39 +37,22 @@ def finetune(
 **参数**
 
 * train_path(str): 训练集路径。训练集的格式应为："序号\t输入文本\t标签"，例如："1\t床前明月光\t疑是地上霜"
-
 * dev_path(str): 验证集路径。验证集的格式应为："序号\t输入文本\t标签"，例如："1\t举头望明月\t低头思故乡"
-
 * save_dir(str): 模型保存以及验证集预测输出路径。
-
 * init_ckpt_path(str): 模型初始化加载路径，可实现增量训练。
-
 * use_gpu(bool): 是否使用GPU。
-
 * max_steps(int): 最大训练步数。
-
 * batch_size(int): 训练时的batch大小。
-
 * max_encode_len(int): 最长编码长度。
-
 * max_decode_len(int): 最长解码长度。
-
 * learning_rate(float): 学习率大小。
-
 * warmup_proportion(float): 学习率warmup比例。
-
 * weight_decay(float): 权值衰减大小。
-
 * noise_prob(float): 噪声概率，详见ernie gen论文。
-
 * label_smooth(float): 标签平滑权重。
-
 * beam_width(int): 验证集预测时的beam大小。
-
 * length_penalty(float): 验证集预测时的长度惩罚权重。
-
 * log_interval(int): 训练时的日志打印间隔步数。
-
 * save_interval(int): 训练时的模型保存间隔部署。验证集将在模型保存完毕后进行预测。
 
 **返回**
@@ -92,17 +75,11 @@ module导出API，通过此API可以一键将训练参数打包为hub module。
 **参数**
 
 * params_path(str): 模型参数路径。
-
 * module_name(str): module名称，例如"ernie_gen_couplet"。
-
 * author(str): 作者名称。
-
 * version(str): 版本号。
-
 * summary(str): module的英文简介。
-
 * author_email(str): 作者的邮箱地址。
-
 * export_path(str): module的导出路径。
 
 **代码示例**
