@@ -18,5 +18,5 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-from propeller.paddle.data.functional import *
-from propeller.paddle.data.feature_column import *
+from ernie_gen.propeller.paddle.data.functional import *
+from ernie_gen.propeller.paddle.data.feature_column import *

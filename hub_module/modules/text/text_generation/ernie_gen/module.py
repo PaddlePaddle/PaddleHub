@@ -33,8 +33,8 @@ import paddlehub as hub
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo
 
-from decode import beam_search_infilling, post_process
-import propeller.paddle as propeller
+from .decode import beam_search_infilling, post_process
+import ernie_gen.propeller.paddle as propeller
 
 
 @moduleinfo(
@@ -108,7 +108,11 @@ class ErnieGen(hub.Module):
             save_interval(int): the save interval. dev set will be evaluated after saving.
 
         Return:
-            save_path(str): the last model save path.
+            result(dict): A Dictionary of shape::
+                {
+                    last_save_path(str): last model save path.
+                    last_ppl(float): last model ppl.
+                }
         """
         self.max_encode_len = max_encode_len
         self.max_decode_len = max_decode_len
@@ -164,7 +168,9 @@ class ErnieGen(hub.Module):
                 grad_clip=g_clip)
 
             loss = None
+
             save_path = None
+            ppl = None
 
             if save_dir and not os.path.exists(save_dir):
                 os.makedirs(save_dir)
@@ -259,7 +265,13 @@ class ErnieGen(hub.Module):
                             'save the predict result in %s' % output_path)
                         with open(output_path, 'w') as fout:
                             fout.write(('\n'.join(res)))
-            return "%s.pdparams" % save_path
+
+            result = {
+                "last_save_path": save_path,
+                "last_ppl": ppl[0],
+            }
+
+            return result
 
     def export(self,
                params_path,
@@ -458,10 +470,12 @@ class ErnieGen(hub.Module):
 
 if __name__ == "__main__":
     module = ErnieGen()
-    savepath = module.finetune(
+    result = module.finetune(
         train_path='test_data/train.txt',
         dev_path='test_data/dev.txt',
         max_steps=300,
         batch_size=2)
     module.export(
-        params_path=savepath, module_name="ernie_gen_test", author="test")
+        params_path=result['last_save_path'],
+        module_name="ernie_gen_test",
+        author="test")

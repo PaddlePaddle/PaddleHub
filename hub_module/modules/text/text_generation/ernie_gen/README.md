@@ -57,7 +57,11 @@ def finetune(
 
 **返回**
 
-* save_path(str): 最后一次保存的模型参数路径。
+* result(dict): 运行结果。包含2个键:
+```
+    last_save_path(str): 训练结束时的模型保存路径。
+    last_ppl(float): 训练结束时的模型困惑度。
+```
 
 ```python
 def export(
@@ -89,14 +93,14 @@ import paddlehub as hub
 
 module = hub.Module(name="ernie_gen")
 
-savepath = module.finetune(
+result = module.finetune(
     train_path='test_data/train.txt',
     dev_path='test_data/dev.txt',
     max_steps=300,
     batch_size=2
 )
 
-module.export(params_path=savepath, module_name="ernie_gen_test", author="test")
+module.export(params_path=result['last_save_path'], module_name="ernie_gen_test", author="test")
 ```
 
 ## 使用方式
