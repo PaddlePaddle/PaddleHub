@@ -87,6 +87,8 @@ module导出API，通过此API可以一键将训练参数打包为hub module。
 ```python
 import paddlehub as hub
 
+module = hub.Module(name="ernie_gen")
+
 savepath = module.finetune(
     train_path='test_data/train.txt',
     dev_path='test_data/dev.txt',
