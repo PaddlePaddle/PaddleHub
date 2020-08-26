@@ -267,7 +267,7 @@ class ErnieGen(hub.Module):
                             fout.write(('\n'.join(res)))
 
             result = {
-                "last_save_path": save_path,
+                "last_save_path": "%s.pdparams" % save_path,
                 "last_ppl": ppl[0],
             }
 
