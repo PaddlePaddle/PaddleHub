@@ -99,9 +99,7 @@ module.export(params_path=savepath, module_name="ernie_gen_test", author="test")
 
 ## 使用方式
 
-模型转换完毕之后，可以将导出文件夹移动至 ~/.paddlehub/modules，即可通过以下2种方式调用自制module：
-
-**NOTE**: 下述`$module_name`为export指定的module_name。
+模型转换完毕之后，可以将导出的$module_name文件夹移动至 ~/.paddlehub/modules，即可通过以下2种方式调用自制module：
 
 1. 命令行预测
 
@@ -121,6 +119,10 @@ results = module.generate(texts=test_texts, use_gpu=True, beam_width=5)
 for result in results:
     print(result)
 ```
+
+**NOTE**: 上述`$module_name`为export指定的module_name。
+
+您也可以将$module_name文件夹打包为tar.gz压缩包并联系PaddleHub工作人员上传至PaddleHub模型仓库，这样更多的用户可以通过一键安装的方式使用您的模型。PaddleHub非常欢迎您的贡献，共同推动开源社区成长。
 
 ## 查看代码
 
