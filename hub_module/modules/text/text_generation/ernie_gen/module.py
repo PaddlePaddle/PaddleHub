@@ -14,6 +14,7 @@
 # limitations under the License.
 import os
 import sys
+import shutil
 from copy import deepcopy
 
 import numpy as np
@@ -41,7 +42,7 @@ import propeller.paddle as propeller
     version="1.0.0",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning.",
-    author="adaxiadaxi",
+    author="baidu",
     author_email="",
     type="nlp/text_generation",
 )
@@ -50,15 +51,22 @@ class ErnieGen(hub.Module):
         """
         initialize with the necessary elements
         """
-        self.model = ErnieModelForGeneration.from_pretrained("ernie-1.0")
         self.tokenizer = ErnieTokenizer.from_pretrained(
             "ernie-1.0", mask_token=None)
         self.rev_dict = {v: k for k, v in self.tokenizer.vocab.items()}
+        self.rev_lookup = np.vectorize(lambda i: self.rev_dict[i])
+        self._model = None
+
+    @property
+    def model(self):
+        if not self._model:
+            self._model = ErnieModelForGeneration.from_pretrained("ernie-1.0")
+        return self._model
 
     def finetune(
             self,
             train_path,
-            dev_path,
+            dev_path=None,
             save_dir="ernie_gen_result",
             init_ckpt_path=None,
             use_gpu=True,
@@ -77,12 +85,30 @@ class ErnieGen(hub.Module):
             save_interval=200,
     ):
         """
+        finetune with the specified dataset.
 
         Args:
+            train_path(str): the train dataset path.
+            dev_path(str): the dev dataset path.
+            save_dir(str): the model params and dev dataset predict result save path.
+            init_ckpt_path(str): incremental training load path.
+            use_gpu(bool): use gpu or not.
+            max_steps(int): max training steps.
+            batch_size(int): the batch size.
+            max_encode_len(int): the max encode length.
+            max_decode_len(int): the max decode length.
+            learning_rate(float): the learning rate.
+            warmup_proportion(float): the warmup proportion.
+            weight_decay(float): the weight decay magnitude.
+            noise_prob(float): the nosie probability. see the ernie gen paper for details.
+            label_smooth(float): the label smooth magnitude.
+            beam_width(int): the beam size during evaluating the dev dataset.
+            length_penalty(float): the length penalty during evaluating the dev dataset.
+            log_interval(int): the log interval.
+            save_interval(int): the save interval. dev set will be evaluated after saving.
 
-
-        Returns:
-
+        Return:
+            save_path(str): the last model save path.
         """
         self.max_encode_len = max_encode_len
         self.max_decode_len = max_decode_len
@@ -90,144 +116,210 @@ class ErnieGen(hub.Module):
 
         place = F.CUDAPlace(0) if use_gpu else F.CPUPlace()
 
-        if init_ckpt_path is not None:
-            logger.info('loading checkpoint from %s' % init_ckpt_path)
-            sd, _ = D.load_dygraph(init_ckpt_path)
-            self.model.set_dict(sd)
+        with F.dygraph.guard(place):
+            if init_ckpt_path is not None:
+                logger.info('loading checkpoint from %s' % init_ckpt_path)
+                sd, _ = D.load_dygraph(init_ckpt_path)
+                self.model.set_dict(sd)
 
-        feature_column = propeller.data.FeatureColumns([
-            propeller.data.LabelColumn('id'),
-            propeller.data.TextColumn(
-                'src',
-                unk_id=self.tokenizer.unk_id,
-                vocab_dict=self.tokenizer.vocab,
-                tokenizer=self.tokenizer.tokenize),
-            propeller.data.TextColumn(
-                'tgt',
-                unk_id=self.tokenizer.unk_id,
-                vocab_dict=self.tokenizer.vocab,
-                tokenizer=self.tokenizer.tokenize),
-        ])
+            feature_column = propeller.data.FeatureColumns([
+                propeller.data.LabelColumn('id'),
+                propeller.data.TextColumn(
+                    'src',
+                    unk_id=self.tokenizer.unk_id,
+                    vocab_dict=self.tokenizer.vocab,
+                    tokenizer=self.tokenizer.tokenize),
+                propeller.data.TextColumn(
+                    'tgt',
+                    unk_id=self.tokenizer.unk_id,
+                    vocab_dict=self.tokenizer.vocab,
+                    tokenizer=self.tokenizer.tokenize),
+            ])
 
-        train_ds = feature_column.build_dataset('train', data_dir=train_path, shuffle=False,
-                                                repeat=True, use_gz=False)\
-            .map(self.map_fn).shuffle(10000).padded_batch(batch_size).map(self.after_padding)
-        train_ds.data_shapes = [[None, None]] * 7 + [[None, None, None]] * 3 + [
-            [None]
-        ]
-        train_ds.data_types = ['int64'] * 11
+            train_ds = feature_column.build_dataset('train', data_file=train_path, shuffle=False,
+                                                    repeat=True, use_gz=False)\
+                .map(self._map_fn).shuffle(10000).padded_batch(batch_size).map(self._after_padding)
+            train_ds.data_shapes = [[None, None]] * 7 + [[None, None, None]
+                                                         ] * 3 + [[None]]
+            train_ds.data_types = ['int64'] * 11
 
-        if dev_path:
-            dev_ds = feature_column.build_dataset('dev', data_dir=dev_path, shuffle=False,
-                                                  repeat=False, use_gz=False) \
-                .map(self.map_fn) \
-                .padded_batch(1) \
-                .map(self.after_padding)
-            dev_ds.data_shapes = [[None, None]] * 7 + [[None, None, None]
-                                                       ] * 3 + [[None]]
-            dev_ds.data_types = ['int64'] * 11
+            if dev_path:
+                dev_ds = feature_column.build_dataset('dev', data_file=dev_path, shuffle=False,
+                                                    repeat=False, use_gz=False) \
+                    .map(self._map_fn) \
+                    .padded_batch(1) \
+                    .map(self._after_padding)
+                dev_ds.data_shapes = [[None, None]] * 7 + [[None, None, None]
+                                                           ] * 3 + [[None]]
+                dev_ds.data_types = ['int64'] * 11
 
-        vocab_size, _ = self.model.word_emb.weight.shape
-        g_clip = F.clip.GradientClipByGlobalNorm(1.0)
-        opt = AdamW(
-            learning_rate=LinearDecay(learning_rate,
-                                      int(warmup_proportion * max_steps),
-                                      max_steps),
-            parameter_list=self.model.parameters(),
-            weight_decay=weight_decay,
-            grad_clip=g_clip)
-        loss = None
-        for step, data in enumerate(train_ds.start(place)):
-            (example_id, src_ids, src_sids, src_pids, tgt_ids, tgt_sids,
-             tgt_pids, attn_ids, mask_src_2_src, mask_tgt_2_srctgt,
-             mask_attn_2_srctgtattn, tgt_labels) = data
+            vocab_size, _ = self.model.word_emb.weight.shape
+            g_clip = F.clip.GradientClipByGlobalNorm(1.0)
+            opt = AdamW(
+                learning_rate=LinearDecay(learning_rate,
+                                          int(warmup_proportion * max_steps),
+                                          max_steps),
+                parameter_list=self.model.parameters(),
+                weight_decay=weight_decay,
+                grad_clip=g_clip)
 
-            _, __, info = self.model(
-                src_ids,
-                sent_ids=src_sids,
-                pos_ids=src_pids,
-                attn_bias=mask_src_2_src,
-                encode_only=True)
-            cached_k, cached_v = info['caches']
-            _, __, info = self.model(
-                tgt_ids,
-                sent_ids=tgt_sids,
-                pos_ids=tgt_pids,
-                attn_bias=mask_tgt_2_srctgt,
-                past_cache=(cached_k, cached_v),
-                encode_only=True)
-            cached_k2, cached_v2 = info['caches']
-            past_cache_k = [
-                L.concat([k, k2], 1) for k, k2 in zip(cached_k, cached_k2)
-            ]
-            past_cache_v = [
-                L.concat([v, v2], 1) for v, v2 in zip(cached_v, cached_v2)
-            ]
-            if label_smooth > 0.:
-                tgt_labels = L.label_smooth(
-                    F.one_hot(tgt_labels, vocab_size), epsilon=label_smooth)
-            loss, _, __ = self.model(
-                attn_ids,
-                sent_ids=tgt_sids,
-                pos_ids=tgt_pids,
-                attn_bias=mask_attn_2_srctgtattn,
-                past_cache=(past_cache_k, past_cache_v),
-                tgt_labels=tgt_labels,
-                tgt_pos=L.where(attn_ids == self.tokenizer.vocab['[MASK]']))
+            loss = None
+            save_path = None
 
-            loss.backward()
-            opt.minimize(loss)
-            self.model.clear_gradients()
+            if save_dir and not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+            for step, data in enumerate(train_ds.start(place)):
+                (example_id, src_ids, src_sids, src_pids, tgt_ids, tgt_sids,
+                 tgt_pids, attn_ids, mask_src_2_src, mask_tgt_2_srctgt,
+                 mask_attn_2_srctgtattn, tgt_labels) = data
 
-            if step % log_interval == 0:
-                loss = loss.numpy()
-                ppl = np.exp(loss)
-                logger.info(
-                    '[step %d / %d]train loss %.5f, ppl %.5f, elr %.3e' %
-                    (step, max_steps, loss, ppl, opt.current_step_lr()))
-            if save_dir and step % save_interval == 0 and step > 0:
-                loss = loss.numpy()
-                ppl = np.exp(loss)
-                save_name = "step_%s_ppl_%s" % (step, ppl)
-                save_path = os.path.join(save_dir, save_name)
-                logger.info("save the model in %s" % save_path)
-                F.save_dygraph(self.model.state_dict(), save_path)
+                _, __, info = self.model(
+                    src_ids,
+                    sent_ids=src_sids,
+                    pos_ids=src_pids,
+                    attn_bias=mask_src_2_src,
+                    encode_only=True)
+                cached_k, cached_v = info['caches']
+                _, __, info = self.model(
+                    tgt_ids,
+                    sent_ids=tgt_sids,
+                    pos_ids=tgt_pids,
+                    attn_bias=mask_tgt_2_srctgt,
+                    past_cache=(cached_k, cached_v),
+                    encode_only=True)
+                cached_k2, cached_v2 = info['caches']
+                past_cache_k = [
+                    L.concat([k, k2], 1) for k, k2 in zip(cached_k, cached_k2)
+                ]
+                past_cache_v = [
+                    L.concat([v, v2], 1) for v, v2 in zip(cached_v, cached_v2)
+                ]
+                if label_smooth > 0.:
+                    tgt_labels = L.label_smooth(
+                        F.one_hot(tgt_labels, vocab_size), epsilon=label_smooth)
+                loss, _, __ = self.model(
+                    attn_ids,
+                    sent_ids=tgt_sids,
+                    pos_ids=tgt_pids,
+                    attn_bias=mask_attn_2_srctgtattn,
+                    past_cache=(past_cache_k, past_cache_v),
+                    tgt_labels=tgt_labels,
+                    tgt_pos=L.where(attn_ids == self.tokenizer.vocab['[MASK]']))
 
-                if dev_path:
-                    logger.info('evaluating...')
-                    res = self.evaluate(dev_ds, place, beam_width,
-                                        length_penalty)
-                    save_path = os.path.join(
-                        save_dir, "step_%s_ppl_%s_predict.txt" % (step, ppl))
-                    logger.info('save the predict result in %s' % save_path)
-                    with open(save_path, 'w') as fout:
-                        fout.write(('\n'.join(res)))
+                loss.backward()
+                opt.minimize(loss)
+                self.model.clear_gradients()
 
-            if step > max_steps:
-                break
+                if step % log_interval == 0:
+                    loss_np = loss.numpy()
+                    ppl = np.exp(loss_np)
+                    logger.info(
+                        '[step %d / %d]train loss %.5f, ppl %.5f, elr %.3e' %
+                        (step, max_steps, loss_np, ppl, opt.current_step_lr()))
+                if save_dir and step % save_interval == 0 and step > 0:
+                    loss_np = loss.numpy()
+                    ppl = np.exp(loss_np)
+                    save_name = "step_%s_ppl_%.5f" % (step, ppl)
+                    save_path = os.path.join(save_dir, save_name)
+                    logger.info("save the model in %s" % save_path)
+                    F.save_dygraph(self.model.state_dict(), save_path)
 
-        if loss:
-            loss = loss.numpy()
-            ppl = np.exp(loss)
-            logger.info('[final step %d]train loss %.5f, ppl %.5f, elr %.3e' %
-                        (step, loss, ppl, opt.current_step_lr()))
-            if save_dir:
-                save_name = "step_%s_ppl_%s" % (step, ppl)
-                save_path = os.path.join(save_dir, save_name)
-                logger.info("save the model in %s" % save_path)
-                F.save_dygraph(self.model.state_dict(), save_path)
+                    if dev_path:
+                        logger.info('evaluating...')
+                        res = self._evaluate(dev_ds, place, beam_width,
+                                             length_penalty)
+                        output_path = os.path.join(
+                            save_dir, "step_%s_ppl_%.5f.txt" % (step, ppl))
+                        logger.info(
+                            'save the predict result in %s' % output_path)
+                        with open(output_path, 'w') as fout:
+                            fout.write(('\n'.join(res)))
 
-                if dev_path:
-                    logger.info('evaluating...')
-                    res = self.evaluate(dev_ds, place, beam_width,
-                                        length_penalty)
-                    save_path = os.path.join(
-                        save_dir, "step_%s_ppl_%s_predict.txt" % (step, ppl))
-                    logger.info('save the predict result in %s' % save_path)
-                    with open(save_path, 'w') as fout:
-                        fout.write(('\n'.join(res)))
+                if step > max_steps:
+                    break
 
-    def evaluate(self, datasets, place, beam_width, length_penalty):
+            if loss:
+                loss_np = loss.numpy()
+                ppl = np.exp(loss_np)
+                logger.info('[final step %d]train loss %.5f, ppl %.5f, elr %.3e'
+                            % (step, loss_np, ppl, opt.current_step_lr()))
+                if save_dir:
+                    save_name = "step_%s_ppl_%.5f" % (step, ppl)
+                    save_path = os.path.join(save_dir, save_name)
+                    logger.info("save the model in %s" % save_path)
+                    F.save_dygraph(self.model.state_dict(), save_path)
+
+                    if dev_path:
+                        logger.info('evaluating...')
+                        res = self._evaluate(dev_ds, place, beam_width,
+                                             length_penalty)
+                        output_path = os.path.join(
+                            save_dir, "step_%s_ppl_%.5f.txt" % (step, ppl))
+                        logger.info(
+                            'save the predict result in %s' % output_path)
+                        with open(output_path, 'w') as fout:
+                            fout.write(('\n'.join(res)))
+            return "%s.pdparams" % save_path
+
+    def export(self,
+               params_path,
+               module_name,
+               author,
+               version="1.0.0",
+               summary="",
+               author_email="",
+               export_path="."):
+        """
+        export the model saved in the params_path to a hub module.
+
+        Args:
+            params_path(str): the model params save path.
+            module_name(str): the module name.
+            author(str): the author name.
+            version(str): the version information.
+            summary(str): the module brief introduction.
+            author_email(str): the author email address.
+            export_path(str): the module export path.
+        """
+        if not os.path.exists(params_path):
+            raise FileNotFoundError("The path %s does not exist." % params_path)
+        export_module_path = os.path.join(export_path, module_name)
+        if not os.path.exists(export_module_path):
+            os.makedirs(export_module_path)
+        logger.info("Begin export the model save in %s ..." % params_path)
+
+        assets_path = os.path.join(self.directory, "template", "assets")
+        model_path = os.path.join(self.directory, "template", "model")
+        init_path = os.path.join(self.directory, "template", "__init__.py")
+        module_temp_path = os.path.join(self.directory, "template",
+                                        "module.temp")
+
+        export_assets_path = os.path.join(export_module_path, "assets")
+        export_params_path = os.path.join(export_module_path, "assets",
+                                          "ernie_gen.pdparams")
+        export_init_path = os.path.join(export_module_path, "__init__.py")
+        export_model_path = os.path.join(export_module_path, "model")
+
+        shutil.copyfile(init_path, export_init_path)
+        shutil.copytree(assets_path, export_assets_path)
+        shutil.copyfile(params_path, export_params_path)
+        shutil.copytree(model_path, export_model_path)
+
+        module_path = os.path.join(export_module_path, "module.py")
+        with open(
+                module_temp_path, encoding="utf8") as ftemp, open(
+                    module_path, "w") as fmodule:
+            content = ftemp.read().replace(
+                r"{module_name}", module_name).replace(
+                    r"{author}", author).replace(r"{version}", version).replace(
+                        r"{summary}", summary).replace(r"{author_email}",
+                                                       author_email)
+            fmodule.write(content)
+
+        logger.info("The module has exported to %s" %
+                    os.path.abspath(export_module_path))
+
+    def _evaluate(self, datasets, place, beam_width, length_penalty):
         self.model.eval()
         printables = []
         for step, data in enumerate(datasets.start(place)):
@@ -239,7 +331,7 @@ class ErnieGen(hub.Module):
                 src_sids,
                 eos_id=self.tokenizer.sep_id,
                 sos_id=self.tokenizer.cls_id,
-                attn_id=self.tokenizer.vocab["MASK"],
+                attn_id=self.tokenizer.vocab["[MASK]"],
                 max_decode_len=self.max_decode_len,
                 max_encode_len=self.max_encode_len,
                 beam_width=beam_width,
@@ -256,11 +348,7 @@ class ErnieGen(hub.Module):
         self.model.train()
         return printables
 
-    @np.vectorize
-    def rev_lookup(self, i):
-        return self.rev_dict[i]
-
-    def map_fn(self, example_id, src_ids, tgt_ids):
+    def _map_fn(self, example_id, src_ids, tgt_ids):
         src_ids = src_ids[:self.max_encode_len]
         tgt_ids = tgt_ids[:self.max_decode_len]
         src_ids, src_sids = self.tokenizer.build_for_ernie(src_ids)
@@ -273,14 +361,15 @@ class ErnieGen(hub.Module):
         attn_ids = np.ones_like(tgt_ids) * self.tokenizer.vocab['[MASK]']
         if self.noise_prob > 0.:
             tgt_labels = deepcopy(tgt_ids)
-            tgt_ids = self.make_some_noise(tgt_ids, self.noise_prob)  #corrupted
+            tgt_ids = self._make_some_noise(tgt_ids,
+                                            self.noise_prob)  #corrupted
         else:
             tgt_labels = tgt_ids
 
         return (example_id, src_ids, src_pids, src_sids, tgt_ids, tgt_pids,
                 tgt_sids, attn_ids, tgt_labels)
 
-    def make_some_noise(self, ids, noise_prob):
+    def _make_some_noise(self, ids, noise_prob):
         noise_ids = np.random.randint(
             1, len(self.tokenizer.vocab), size=ids.shape)
         pos, = np.where(np.ones_like(ids))
@@ -289,8 +378,8 @@ class ErnieGen(hub.Module):
         ids[pos, ] = noise_ids[pos, ]
         return ids
 
-    def after_padding(self, example_id, src_ids, src_pids, src_sids, tgt_ids,
-                      tgt_pids, tgt_sids, attn_ids, tgt_labels):
+    def _after_padding(self, example_id, src_ids, src_pids, src_sids, tgt_ids,
+                       tgt_pids, tgt_sids, attn_ids, tgt_labels):
         '''
         attention mask:
         ***  src,  tgt, attn
@@ -313,15 +402,15 @@ class ErnieGen(hub.Module):
 
         src_len = src_ids.shape[1]
         tgt_len = tgt_ids.shape[1]
-        mask_00 = self.gen_mask(src_ids, 'bidi', query_len=src_len)
+        mask_00 = self._gen_mask(src_ids, 'bidi', query_len=src_len)
 
-        mask_10 = self.gen_mask(src_ids, 'bidi', query_len=tgt_len)
-        mask_11 = self.gen_mask(tgt_ids, 'causal', query_len=tgt_len)
+        mask_10 = self._gen_mask(src_ids, 'bidi', query_len=tgt_len)
+        mask_11 = self._gen_mask(tgt_ids, 'causal', query_len=tgt_len)
 
-        mask_20 = self.gen_mask(src_ids, 'bidi', query_len=tgt_len)
-        mask_21 = self.gen_mask(
+        mask_20 = self._gen_mask(src_ids, 'bidi', query_len=tgt_len)
+        mask_21 = self._gen_mask(
             tgt_ids, 'causal_without_diag', query_len=tgt_len)
-        mask_22 = self.gen_mask(attn_ids, 'diag', query_len=tgt_len)
+        mask_22 = self._gen_mask(attn_ids, 'diag', query_len=tgt_len)
         '''
         mask = np.concatenate([
             np.concatenate([mask_00, mask_01, mask_02], 2),
@@ -342,8 +431,11 @@ class ErnieGen(hub.Module):
                 tgt_pids, attn_ids, mask_src_2_src, mask_tgt_2_srctgt,
                 mask_attn_2_srctgtattn, tgt_labels)
 
-    def gen_mask(self, batch_ids, mask_type='bidi', query_len=None,
-                 pad_value=0):
+    def _gen_mask(self,
+                  batch_ids,
+                  mask_type='bidi',
+                  query_len=None,
+                  pad_value=0):
         if query_len is None:
             query_len = batch_ids.shape[1]
         if mask_type != 'empty':
@@ -366,7 +458,10 @@ class ErnieGen(hub.Module):
 
 if __name__ == "__main__":
     module = ErnieGen()
-    module.finetune(
+    savepath = module.finetune(
         train_path='test_data/train.txt',
         dev_path='test_data/dev.txt',
-    )
+        max_steps=300,
+        batch_size=2)
+    module.export(
+        params_path=savepath, module_name="ernie_gen_test", author="test")

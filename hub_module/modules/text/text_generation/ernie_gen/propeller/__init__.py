@@ -44,5 +44,5 @@ log.setLevel(logging.INFO)
 log.addHandler(stream_hdl)
 log.propagate = False
 
-from propeller.types import *
-from propeller.util import ArgumentParser, parse_hparam, parse_runconfig, parse_file
+from ernie_gen.propeller.types import *
+from ernie_gen.propeller.util import ArgumentParser, parse_hparam, parse_runconfig, parse_file

@@ -24,10 +24,10 @@ from time import time
 
 log = logging.getLogger(__name__)
 
-from propeller.paddle.train.monitored_executor import *
-from propeller.paddle.train.trainer import *
-from propeller.paddle.train.hooks import *
-from propeller.train.model import Model
-from propeller.paddle.train import exporter
-from propeller.paddle.train import distribution
-from propeller.paddle.train import metrics
+from ernie_gen.propeller.paddle.train.monitored_executor import *
+from ernie_gen.propeller.paddle.train.trainer import *
+from ernie_gen.propeller.paddle.train.hooks import *
+from ernie_gen.propeller.train.model import Model
+from ernie_gen.propeller.paddle.train import exporter
+from ernie_gen.propeller.paddle.train import distribution
+from ernie_gen.propeller.paddle.train import metrics
