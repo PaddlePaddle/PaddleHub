@@ -99,7 +99,7 @@ module.export(params_path=savepath, module_name="ernie_gen_test", author="test")
 
 ## 使用方式
 
-模型转换完毕之后，可以将导出的$module_name文件夹移动至 ~/.paddlehub/modules，即可通过以下2种方式调用自制module：
+模型转换完毕之后，通过`hub install $module_name`安装该模型，即可通过以下2种方式调用自制module：
 
 1. 命令行预测
 
