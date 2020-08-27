@@ -8,6 +8,7 @@
 
 ## PaddleHub开发者趣味实践作品
 
+以下为前期PaddleHub课程或活动中，开发者们基于PaddleHub创作的趣味实践作品，均收录在AI Studio中，可在线运行，欢迎访问，希望对您有所启发。
 1. [布剪刀石头【人脸识别切换本地窗口】](https://aistudio.baidu.com/aistudio/projectdetail/507630)
 1. [秋水中的鱼【yesok舞蹈背景抠图转换并动漫风格迁移】](http://aistudio.baidu.com/aistudio/projectdetail/517066)
 1. [Ninetailskim【在人脸上玩复古windows弹球】](https://aistudio.baidu.com/aistudio/projectdetail/518861)
