@@ -16,16 +16,15 @@
 ### 体验前请提前安装好PaddleHub
 
 
-```python
-# 下载安装paddlehub到最新版本，仅第一次运行项目时执行此命令
-$ pip install paddlehub==1.6.1 -i https://pypi.tuna.tsinghua.edu.cn/simple #指定版本安装PaddleHub，使用清华源更稳定、更迅速
-$ pip install paddlehub --upgrade -i https://pypi.tuna.tsinghua.edu.cn/simple #升级到最新版本，使用清华源更稳定、更迅速
+```shell
+# 安装最新版本，使用清华源更稳定、更迅速
+$ pip install paddlehub --upgrade -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 ### 原图展示
 
 
-```python
+```shell
 # 下载待测试图片
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 ```
@@ -53,7 +52,7 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 > 使用如下命令默认下载最新版本的模型，如果需要指定版本，可在后面接版本号，如`==1.1.1`。
 
 
-```python
+```shell
 #安装预训练模型，deeplabv3p_xception65_humanseg是模型名称
 $ hub install deeplabv3p_xception65_humanseg
 ```
@@ -105,7 +104,7 @@ res = module.segmentation(paths = ["./test.jpg"], visualization=True, output_dir
 ### 人体部位分割
 
 
-```python
+```shell
 #安装预训练模型
 $ hub install ace2p
 ```
@@ -147,7 +146,7 @@ res = module.segmentation(paths = ["./test_image.jpg"], visualization=True, outp
 ### 人脸检测
 
 
-```python
+```shell
 #安装预训练模型
 $ hub install ultra_light_fast_generic_face_detector_1mb_640
 ```
@@ -187,7 +186,7 @@ res = module.face_detection(paths = ["./test_image.jpg"], visualization=True, ou
 ### 关键点检测
 
 
-```python
+```shell
 #安装预训练模型
 $ hub install human_pose_estimation_resnet50_mpii
 ```
@@ -228,7 +227,7 @@ res = module.keypoint_detection(paths = ["./test_image.jpg"], visualization=True
 ### 中文分词
 
 
-```python
+```shell
 #安装预训练模型
 $ hub install lac
 ```
@@ -266,7 +265,7 @@ print("中文词法分析结果：", res)
 ### 情感分类
 
 
-```python
+```shell
 #安装预训练模型
 $ hub install senta_bilstm
 ```

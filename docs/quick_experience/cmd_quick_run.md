@@ -7,17 +7,15 @@ PaddleHub在设计时，为模型的管理和使用提供了命令行工具，�
 ### 体验前请提前安装好PaddleHub
 
 
-```python
-# 指定版本安装PaddleHub，使用清华源更稳定、更迅速
-$ pip install paddlehub==1.6.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
-#升级到最新版本，使用清华源更稳定、更迅速
+```shell
+# 安装最新版本，使用清华源更稳定、更迅速
 $ pip install paddlehub --upgrade -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 ### 人像扣图
 
 
-```python
+```shell
 # 下载待测试图片
 $ wget https://paddlehub.bj.bcebos.com/resources/test_image.jpg
 # 通过命令行方式实现人像扣图任务
@@ -51,7 +49,7 @@ $ hub run deeplabv3p_xception65_humanseg --input_path test_image.jpg --visualiza
 ### 中文分词
 
 
-```python
+```shell
 #通过命令行方式实现文本分词任务
 $ hub run lac --input_text "今天是个好日子"
 ```
@@ -78,7 +76,7 @@ $ hub run lac --input_text "今天是个好日子"
 ### OCR文字识别
 
 
-```python
+```shell
 # 下载待测试的图片
 $ wget https://paddlehub.bj.bcebos.com/model/image/ocr/test_ocr.jpg
 
@@ -109,7 +107,7 @@ $ hub run chinese_ocr_db_crnn_mobile --input_path test_ocr.jpg --visualization=T
 
 
 
-```python
+```shell
 # 查看预测结果
 ```
 
@@ -120,7 +118,7 @@ $ hub run chinese_ocr_db_crnn_mobile --input_path test_ocr.jpg --visualization=T
 ### 口罩检测
 
 
-```python
+```shell
 # 下载待测试的图片
 $ wget https://paddlehub.bj.bcebos.com/resources/test_mask_detection.jpg
 
@@ -153,7 +151,7 @@ $ hub run pyramidbox_lite_mobile_mask --input_path test_mask_detection.jpg --vis
 
 
 
-```python
+```shell
 # 查看预测结果
 ```
 
@@ -163,7 +161,7 @@ $ hub run pyramidbox_lite_mobile_mask --input_path test_mask_detection.jpg --vis
 
 ### PaddleHub命令行工具简介
 
-PaddleHub的命令行工具在开发时借鉴了Anaconda和PIP等软件包管理的理念，可以方便快捷的完成模型的搜索、下载、安装、升级、预测等功能。 下面概要介绍一下PaddleHub支持的12个命令，详细介绍可查看[命令行参考](http://)章节。：
+PaddleHub的命令行工具在开发时借鉴了Anaconda和PIP等软件包管理的理念，可以方便快捷的完成模型的搜索、下载、安装、升级、预测等功能。 下面概要介绍一下PaddleHub支持的12个命令，详细介绍可查看[命令行参考](../tutorial/cmdintro.md)章节。：
 * install：用于将Module安装到本地，默认安装在{HUB_HOME}/.paddlehub/modules目录下；
 * uninstall：卸载本地Module；
 * show：用于查看本地已安装Module的属性或者指定目录下确定的Module的属性，包括其名字、版本、描述、作者等信息；

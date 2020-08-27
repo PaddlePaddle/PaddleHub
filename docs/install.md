@@ -4,9 +4,12 @@ PaddleHub需要与飞桨一起使用，其硬件和操作系统的适用范围�
 > 注意：飞桨版本需要>= 1.7.0。  
 
 
-```python
+```shell
 # 查看是否安装飞桨
-$python # 进入python解释器
+$ python # 进入python解释器
+```
+
+```python
 import paddle.fluid
 paddle.fluid.install_check.run_check()
 ```
@@ -14,12 +17,12 @@ paddle.fluid.install_check.run_check()
 > 如果出现`Your Paddle Fluid is installed successfully`，说明飞桨已成功安装。
 
 
-```python
-$pip list | grep paddlepaddle # 查看飞桨版本。pip list查看所有的package版本，grep负责根据关键字筛选。
+```shell
+$ pip list | grep paddlepaddle # 查看飞桨版本。pip list查看所有的package版本，grep负责根据关键字筛选。
 ```
 
 ## 安装操作
-根据实际需要，执行以下命令之一进行PaddleHub的安装（推荐使用第一个）。
+使用 Python 包管理器pip安装PaddleHub。根据实际需要，在命令行下执行以下命令之一进行PaddleHub的安装（推荐使用第一个）。
 
 > 1.安装过程中需要网络连接，请确保机器可以正常访问网络。成功安装之后，可以离线使用。  
 2.如果已安装PaddleHub，再次执行安装操作将先卸载再安装。安装方式支持：安装指定版本和安装最新版本。  
@@ -31,38 +34,38 @@ $pip list | grep paddlepaddle # 查看飞桨版本。pip list查看所有的pack
   ```
 
 
-```python
-$pip install paddlehub --upgrade -i https://pypi.tuna.tsinghua.edu.cn/simple  # 安装最新版本，使用清华源
+```shell
+$ pip install paddlehub --upgrade -i https://pypi.tuna.tsinghua.edu.cn/simple  # 安装最新版本，使用清华源
 ```
 
 
-```python
-$pip install paddlehub==1.6.1 -i https://pypi.tuna.tsinghua.edu.cn/simple # 安装指定版本（==1.6.1表示PaddleHub的版本），使用清华源
+```shell
+$ pip install paddlehub==1.6.1 -i https://pypi.tuna.tsinghua.edu.cn/simple # 安装指定版本（==1.6.1表示PaddleHub的版本），使用清华源
 ```
 
 
-```python
-$pip install paddlehub --upgrade -i https://mirror.baidu.com/pypi/simple  # 安装最新版本，使用百度源
+```shell
+$ pip install paddlehub --upgrade -i https://mirror.baidu.com/pypi/simple  # 安装最新版本，使用百度源
 ```
 
 
-```python
-$pip install paddlehub==1.6.1 -i https://mirror.baidu.com/pypi/simple # 安装指定版本（==1.6.1表示PaddleHub的版本），使用百度源
+```shell
+$ pip install paddlehub==1.6.1 -i https://mirror.baidu.com/pypi/simple # 安装指定版本（==1.6.1表示PaddleHub的版本），使用百度源
 ```
 
-> 如果出现`Successfully installed paddlehub`，说明PaddleHub安装成功。
+> 等待片刻即安装完毕。如果出现`Successfully installed paddlehub`，说明PaddleHub安装成功。
 
 ## 验证安装
 检查PaddleHub是否安装成功。
 
 
-```python
-$pip list | grep paddlehub # pip list查看所有的package版本，grep负责根据关键字筛选
+```shell
+$ pip list | grep paddlehub # pip list查看所有的package版本，grep负责根据关键字筛选
 ```
 
 
-```python
-$pip show paddlehub # 查看PaddleHub详细信息
+```shell
+$ pip show paddlehub # 查看PaddleHub详细信息
 ```
 
 PaddleHub详细信息的如下面所示，可以查看显示了PaddleHub的版本、位置等信息。
@@ -83,11 +86,23 @@ Required-by:
 此卸载仅卸载PaddleHub，已下载的模型文件和数据集仍保留。
 
 
-```python
-$pip uninstall paddlehub -y  # 卸载PaddleHub
+```shell
+$ pip uninstall paddlehub -y  # 卸载PaddleHub
 ```
 
 > 如果出现`Successfully uninstalled paddlehub`,表明PaddleHub卸载成功。
+
+## pip常用命令
+pip是最为广泛使用的Python包管理器，可以帮助我们获得最新的Python包并进行管理。  
+常用命令如下：  
+```shell
+$ pip install [package-name]              # 安装名为[package-name]的包
+$ pip install [package-name]==X.X         # 安装名为[package-name]的包并指定版本X.X
+$ pip install [package-name] --proxy=代理服务器IP:端口号         # 使用代理服务器安装
+$ pip install [package-name] --upgrade    # 更新名为[package-name]的包
+$ pip uninstall [package-name]            # 删除名为[package-name]的包
+$ pip list                                # 列出当前环境下已安装的所有包
+```
 
 ## 常见问题
 1. 已安装PaddleHub，可以升级飞桨版本吗？  
