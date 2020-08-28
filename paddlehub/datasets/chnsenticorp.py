@@ -37,7 +37,7 @@ class ChnSentiCorp(TextClassificationDataset):
                 It tokenizes the text and encodes the data as model needed.
             max_seq_len (:obj:`int`, `optional`, defaults to :128):
                 The maximum length (in number of tokens) for the inputs to the selected module,
-                such as enrie, bert and so on.
+                such as ernie, bert and so on.
             mode (:obj:`str`, `optional`, defaults to `train`):
                 It identifies the dataset mode (train, test or dev).
 
