@@ -116,8 +116,8 @@ class ErnieGen(hub.NLPPredictionModule):
                     eos_id=self.tokenizer.sep_id,
                     sos_id=self.tokenizer.cls_id,
                     attn_id=self.tokenizer.vocab['[MASK]'],
-                    max_decode_len=20,
-                    max_encode_len=20,
+                    max_decode_len={max_decode_len},
+                    max_encode_len={max_encode_len},
                     beam_width=beam_width,
                     tgt_type_id=1)
                 output_str = self.rev_lookup(output_ids[0].numpy())

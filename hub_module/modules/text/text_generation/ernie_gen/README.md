@@ -18,8 +18,8 @@ def finetune(
   use_gpu=True,
   max_steps=500,
   batch_size=8,
-  max_encode_len=15,
-  max_decode_len=15,
+  max_encode_len=50,
+  max_decode_len=50,
   learning_rate=5e-5,
   warmup_proportion=0.1,
   weight_decay=0.1,
@@ -68,6 +68,8 @@ def export(
   params_path,
   module_name,
   author,
+  max_encode_len=50,
+  max_decode_len=50,
   version="1.0.0",
   summary="",
   author_email="",
@@ -81,6 +83,8 @@ module导出API，通过此API可以一键将训练参数打包为hub module。
 * params_path(str): 模型参数路径。
 * module_name(str): module名称，例如"ernie_gen_couplet"。
 * author(str): 作者名称。
+* max_encode_len(int): 最大编码长度。
+* max_decode_len(int): 最大解码长度。
 * version(str): 版本号。
 * summary(str): module的英文简介。
 * author_email(str): 作者的邮箱地址。
@@ -105,7 +109,7 @@ module.export(params_path=result['last_save_path'], module_name="ernie_gen_test"
 
 ## 使用方式
 
-模型转换完毕之后，通过`hub install $module_name`安装该模型，即可通过以下2种方式调用自制module：
+模型转换完毕之后，通过`hub install $module_name`安装该模型，即可通过以下三种方式调用自制module：
 
 1. 命令行预测
 
@@ -122,6 +126,36 @@ module = hub.Module(name="$module_name")
 test_texts = ["输入文本1", "输入文本2"]
 # generate包含3个参数，texts为输入文本列表，use_gpu指定是否使用gpu，beam_width指定beam search宽度。
 results = module.generate(texts=test_texts, use_gpu=True, beam_width=5)
+for result in results:
+    print(result)
+```
+
+3. 服务端部署
+
+服务端启动模型服务：
+
+```shell
+$ hub serving start -m $module_name -p 8866
+```
+
+**NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
+
+客户端通过以下数行代码即可实现发送预测请求，获取预测结果
+
+```python
+import requests
+import json
+
+# 发送HTTP请求
+
+data = {'texts':["输入文本1", "输入文本2"],
+        'use_gpu':True, 'beam_width':5}
+headers = {"Content-type": "application/json"}
+url = "http://127.0.0.1:8866/predict/$module_name"
+r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+# 保存结果
+results = r.json()["results"]
 for result in results:
     print(result)
 ```
@@ -146,3 +180,7 @@ paddlehub >= 1.7.0
 * 1.0.0
 
   初始发布
+
+* 1.0.1
+
+  修复模型导出bug

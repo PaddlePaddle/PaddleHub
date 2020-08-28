@@ -39,7 +39,7 @@ import ernie_gen.propeller.paddle as propeller
 
 @moduleinfo(
     name="ernie_gen",
-    version="1.0.0",
+    version="1.0.1",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning.",
     author="baidu",
@@ -72,8 +72,8 @@ class ErnieGen(hub.Module):
             use_gpu=True,
             max_steps=500,
             batch_size=8,
-            max_encode_len=15,
-            max_decode_len=15,
+            max_encode_len=50,
+            max_decode_len=50,
             learning_rate=5e-5,
             warmup_proportion=0.1,
             weight_decay=0.1,
@@ -277,6 +277,8 @@ class ErnieGen(hub.Module):
                params_path,
                module_name,
                author,
+               max_encode_len=50,
+               max_decode_len=50,
                version="1.0.0",
                summary="",
                author_email="",
@@ -288,6 +290,8 @@ class ErnieGen(hub.Module):
             params_path(str): the model params save path.
             module_name(str): the module name.
             author(str): the author name.
+            max_encode_len(int): the max encode length.
+            max_decode_len(int): the max decode length.
             version(str): the version information.
             summary(str): the module brief introduction.
             author_email(str): the author email address.
@@ -322,10 +326,13 @@ class ErnieGen(hub.Module):
                 module_temp_path, encoding="utf8") as ftemp, open(
                     module_path, "w") as fmodule:
             content = ftemp.read().replace(
-                r"{module_name}", module_name).replace(
-                    r"{author}", author).replace(r"{version}", version).replace(
-                        r"{summary}", summary).replace(r"{author_email}",
-                                                       author_email)
+                r"{module_name}",
+                module_name).replace(r"{author}", author).replace(
+                    r"{version}",
+                    version).replace(r"{summary}", summary).replace(
+                        r"{author_email}", author_email).replace(
+                            r"{max_encode_len}", str(max_encode_len)).replace(
+                                r"{max_decode_len}", str(max_decode_len))
             fmodule.write(content)
 
         logger.info("The module has exported to %s" %
