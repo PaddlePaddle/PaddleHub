@@ -217,6 +217,7 @@ def unarchive(name: str, path: str):
     '''
     with open(name, mode='r') as file:
         file.extractall(path)
+        os.remove(name)
 
 
 def unarchive_with_progress(name: str, path: str) -> Generator[str, int, int]:

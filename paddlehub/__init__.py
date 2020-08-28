@@ -15,4 +15,9 @@
 
 __version__ = '2.0.0a0'
 
+from . import datasets
+from . import tokenizer
+from . import finetune
+from . import model
+
 from .module import Module
