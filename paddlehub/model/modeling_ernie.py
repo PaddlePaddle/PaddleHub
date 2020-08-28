@@ -22,7 +22,7 @@ from paddlehub.module.module import moduleinfo, Module
 from paddlehub.tokenizer.bert_tokenizer import BertTokenizer
 
 
-class ErnieforSequenceClassification(dygraph.Layer):
+class ErnieForSequenceClassification(dygraph.Layer):
     """
     This model is customized for that enrie module does the sequence classification, such as the text sentiment classification.
     This model exploits the ernie + full-connect layers (softmax as activation) to classify the texts.

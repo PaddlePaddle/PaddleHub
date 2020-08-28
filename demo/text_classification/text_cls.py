@@ -13,7 +13,7 @@
 # limitations under the License.
 from paddlehub.datasets.chnsenticorp import ChnSentiCorp
 from paddlehub.finetune.trainer import Trainer
-from paddlehub.model.modeling_ernie import ErnieforSequenceClassification
+from paddlehub.model.modeling_ernie import ErnieForSequenceClassification
 import paddle.fluid as fluid
 import paddlehub as hub
 
@@ -29,7 +29,7 @@ if __name__ == '__main__':
         dev_dataset = ChnSentiCorp(
             tokenizer=ernie.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='dev')
 
-        model = ErnieforSequenceClassification(ernie_module=ernie, num_classes=len(train_dataset.get_labels()))
+        model = ErnieForSequenceClassification(ernie_module=ernie, num_classes=len(train_dataset.get_labels()))
 
         optimizer = fluid.optimizer.AdamOptimizer(learning_rate=5e-5, parameter_list=model.parameters())
         trainer = Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls')
