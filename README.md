@@ -184,3 +184,9 @@ $ hub uninstall ernie
 <a name="致谢"></a>
 ## 致谢
 我们非常欢迎您为PaddleHub贡献代码，也十分感谢您的反馈。
+
+* 非常感谢[Austendeng](https://github.com/Austendeng)贡献了修复SequenceLabelReader的pr
+* 非常感谢[cclauss](https://github.com/cclauss)贡献了优化travis-ci检查的pr
+* 非常感谢[奇想天外](http://www.cheerthink.com/)贡献了口罩检测的demo
+* 非常感谢[mhlwsk](https://github.com/mhlwsk)贡献了修复序列标注预测demo的pr
+* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)贡献了看图作诗的module
