@@ -100,7 +100,7 @@ dataset = hub.dataset.ChnSentiCorp()
 
 ##### **加载自定义数据集**  
 * 加载文本类自定义数据集。用户仅需要继承基类BaseNLPDatast，修改数据集存放地址以及类别即可，具体可以参考如下代码。  
-```
+```python
 from paddlehub.dataset.base_nlp_dataset import BaseNLPDataset
 # 构建数据集的类
 class DemoDataset(BaseNLPDataset):
@@ -127,7 +127,7 @@ dataset = DemoDataset()
 然后就可以通过DemoDataset()获取自定义数据集了。进而配合数据预处理器以及预训练模型如ERNIE完成文本类任务。
 
 * 加载图像类自定义数据集。用用户仅需要继承基类BaseCVDatast，修改数据集存放地址即可，具体可以参考如下代码。  
-```
+```python
 from paddlehub.dataset.base_cv_dataset import BaseCVDataset
 
 class DemoDataset(BaseCVDataset):
