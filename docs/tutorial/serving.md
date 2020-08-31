@@ -31,7 +31,9 @@ $ hub serving start --modules [Module1==Version1, Module2==Version2, ...] \
 |--use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
 |--use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式<br>*`Windows操作系统只支持单进程方式`*|
 |--workers|在并发方式下指定的并发任务数，默认为`2*cpu_count-1`，其中`cpu_count`为CPU核数|  
+
 **NOTE:** --use_gpu不可与--use_multiprocess共用。
+
 #### 配置文件启动
 启动命令
 ```shell
@@ -82,9 +84,9 @@ $ hub serving start --config config.json
 
 在使用PaddleHub Serving部署服务端的模型预测服务后，就可以在客户端访问预测接口以获取结果了，接口url格式为：
 
-http://127.0.0.1:8866/predict/<CATEGORY\>/\<MODULE>
+`http://127.0.0.1:8866/predict/<MODULE>`
 
-其中，\<CATEGORY>为text或image，与模型种类对应，\<MODULE>为模型名。
+其中，`<MODULE>`为模型名。
 
 通过发送一个POST请求，即可获取预测结果，下面我们将展示一个具体的demo，以说明使用PaddleHub Serving部署和使用流程。
 
@@ -156,12 +158,17 @@ import requests
 import json
 
 if __name__ == "__main__":
-    # 指定用于用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
-    text_list = ["今天是个好日子", "天气预报说今天要下雨"]
-    text = {"text": text_list}
-    # 指定预测方法为lac并发送post请求
-    url = "http://127.0.0.1:8866/predict/text/lac"
-    r = requests.post(url=url, data=text)
+    # 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
+    text = ["今天是个好日子", "天气预报说今天要下雨"]
+    # 以key的方式指定text传入预测方法的时的参数，此例中为"data"
+    # 对应本地部署，则为lac.analysis_lexical(data=text, batch_size=1)
+    data = {"texts": text, "batch_size": 1}
+    # 指定预测方法为lac并发送post请求，content-type类型应指定json方式
+    url = "http://127.0.0.1:8866/predict/lac"
+    # 指定post请求的headers为application/json方式
+    headers = {"Content-Type": "application/json"}
+
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
@@ -171,6 +178,7 @@ if __name__ == "__main__":
 
 ```python
 {
+    "msg": "",
     "results": [
         {
             "tag": [
@@ -188,8 +196,10 @@ if __name__ == "__main__":
                 "天气预报", "说", "今天", "要", "下雨"
             ]
         }
-    ]
+    ],
+    "status": "0"
 }
+
 ```
 
 ### Step3：停止serving服务
@@ -208,76 +218,17 @@ $ PaddleHub Serving will stop.
 ```
 则serving服务已经停止。
 
-此Demo的具体信息和代码请参见[LAC Serving](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/lexical_analysis_lac)。另外，下面展示了一些其他的一键服务部署Demo。
+此Demo的具体信息和代码请参见[LAC Serving](../../demo/serving/module_serving/lexical_analysis_lac)。另外，下面展示了一些其他的一键服务部署Demo。
 
 ## Demo——其他模型的一键部署服务
 
-获取其他PaddleHub Serving的一键服务部署场景示例，可参见下列demo
-
-* [图像分类-基于vgg11_imagent](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/classification_vgg11_imagenet)  
-
-&emsp;&emsp;该示例展示了利用vgg11_imagent完成图像分类服务化部署和在线预测，获取图像分类结果。
-
-* [图像生成-基于stgan_celeba](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/GAN_stgan_celeba)  
-
-&emsp;&emsp;该示例展示了利用stgan_celeba生成图像服务化部署和在线预测，获取指定风格的生成图像。
-
-* [文本审核-基于porn_detection_lstm](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/text_censorship_porn_detection_lstm)  
-
-&emsp;&emsp;该示例展示了利用porn_detection_lstm完成中文文本黄色敏感信息鉴定的服务化部署和在线预测，获取文本是否敏感及其置信度。
-
-* [中文词法分析-基于lac](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/lexical_analysis_lac)
+* [中文词法分析-基于lac](../../demo/serving/module_serving/lexical_analysis_lac)
 
 &emsp;&emsp;该示例展示了利用lac完成中文文本分词服务化部署和在线预测，获取文本的分词结果，并可通过用户自定义词典干预分词结果。
 
-* [目标检测-基于yolov3_darknet53_coco2017](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/object_detection_yolov3_darknet53_coco2017)  
+* [人脸检测-基于pyramidbox_lite_server_mask](../../demo/serving/module_serving/object_detection_pyramidbox_lite_server_mask)
 
-&emsp;&emsp;该示例展示了利用yolov3_darknet53_coco2017完成目标检测服务化部署和在线预测，获取检测结果和覆盖识别框的图片。
-
-* [中文语义分析-基于simnet_bow](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/semantic_model_simnet_bow)
-
-&emsp;&emsp;该示例展示了利用simnet_bow完成中文文本相似度检测服务化部署和在线预测，获取文本的相似程度。  
-
-* [图像分割-基于deeplabv3p_xception65_humanseg](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/semantic_segmentation_deeplabv3p_xception65_humanseg)
-
-&emsp;&emsp;该示例展示了利用deeplabv3p_xception65_humanseg完成图像分割服务化部署和在线预测，获取识别结果和分割后的图像。
-
-* [中文情感分析-基于senta_lstm](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/serving/module_serving/sentiment_analysis_senta_lstm)
-
-&emsp;&emsp;该示例展示了利用senta_lstm完成中文文本情感分析服务化部署和在线预测，获取文本的情感分析结果。
-
-## 客户端请求新版模型的方式
-对某些新版模型，客户端请求方式有所变化，更接近本地预测的请求方式，以降低学习成本。
-以lac(2.1.0)为例，使用上述方法进行请求将提示：
-```python
-{
-    "Warnning": "This usage is out of date, please use 'application/json' as content-type to post to /predict/lac. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details."
-}
-```
-对于lac(2.1.0)，请求的方式如下：
-```python
-# coding: utf8
-import requests
-import json
-
-if __name__ == "__main__":
-    # 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
-    text = ["今天是个好日子", "天气预报说今天要下雨"]
-    # 以key的方式指定text传入预测方法的时的参数，此例中为"data"
-    # 对应本地部署，则为lac.analysis_lexical(texts=[text1, text2])
-    data = {"texts": text, "batch_size": 2}
-    # 指定预测方法为lac并发送post请求
-    url = "http://127.0.0.1:8866/predict/lac"
-    # 指定post请求的headers为application/json方式
-    headers = {"Content-Type": "application/json"}
-
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
-
-    # 打印预测结果
-    print(json.dumps(r.json(), indent=4, ensure_ascii=False))
-```
-
-此Demo的具体信息和代码请参见[LAC Serving_2.1.0](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.7/demo/serving/module_serving/lexical_analysis_lac/lac_2.1.0_serving_demo.py)。
+&emsp;&emsp;该示例展示了利用pyramidbox_lite_server_mask完成人脸口罩检测，检测人脸位置以及戴口罩的置信度。
 
 ## Bert Service
 除了预训练模型一键服务部署功能之外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](./bert_service.md)。

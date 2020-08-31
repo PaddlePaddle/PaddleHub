@@ -48,9 +48,9 @@ if __name__ == '__main__':
 
     # Construct transfer learning network.
     # Use sequence-level output.
-    query = outputs["pooled_output"]
-    left = outputs['pooled_output_2']
-    right = outputs['pooled_output_3']
+    query = outputs["sequence_output"]
+    left = outputs['sequence_output_2']
+    right = outputs['sequence_output_3']
 
     # Select fine-tune strategy.
     strategy = hub.AdamWeightDecayStrategy()
@@ -91,6 +91,6 @@ if __name__ == '__main__':
         max_seq_len=args.max_seq_len,
         label_list=dataset.get_labels(),
         return_result=True,
-        accelerate_mode=False)
+        accelerate_mode=True)
     for index, text in enumerate(text_pairs):
         print("data: %s, prediction_label: %s" % (text, results[index]))

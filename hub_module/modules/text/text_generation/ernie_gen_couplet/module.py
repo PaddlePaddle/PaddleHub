@@ -35,7 +35,7 @@ from ernie_gen_couplet.model.modeling_ernie_gen import ErnieModelForGeneration
 
 @moduleinfo(
     name="ernie_gen_couplet",
-    version="1.0.0",
+    version="1.0.2",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning. This module has fine-tuned for couplet generation task.",
     author="baidu-nlp",
@@ -50,10 +50,10 @@ class ErnieGen(hub.NLPPredictionModule):
         assets_path = os.path.join(self.directory, "assets")
         gen_checkpoint_path = os.path.join(assets_path, "ernie_gen_couplet")
         ernie_cfg_path = os.path.join(assets_path, 'ernie_config.json')
-        with open(ernie_cfg_path) as ernie_cfg_file:
+        with open(ernie_cfg_path, encoding='utf8') as ernie_cfg_file:
             ernie_cfg = dict(json.loads(ernie_cfg_file.read()))
         ernie_vocab_path = os.path.join(assets_path, 'vocab.txt')
-        with open(ernie_vocab_path) as ernie_vocab_file:
+        with open(ernie_vocab_path, encoding='utf8') as ernie_vocab_file:
             ernie_vocab = {
                 j.strip().split('\t')[0]: i
                 for i, j in enumerate(ernie_vocab_file.readlines())
@@ -84,6 +84,21 @@ class ErnieGen(hub.NLPPredictionModule):
         Returns:
              results(list): the right rolls.
         """
+        if texts and isinstance(texts, list) and all(texts) and all(
+            [isinstance(text, str) for text in texts]):
+            predicted_data = texts
+        else:
+            raise ValueError(
+                "The input texts should be a list with nonempty string elements."
+            )
+        for i, text in enumerate(texts):
+            for char in text:
+                if not '\u4e00' <= char <= '\u9fff':
+                    logger.warning(
+                        'The input text: %s, contains non-Chinese characters, which may result in magic output'
+                        % text)
+                    break
+
         if use_gpu and "CUDA_VISIBLE_DEVICES" not in os.environ:
             use_gpu = False
             logger.warning(
@@ -93,12 +108,6 @@ class ErnieGen(hub.NLPPredictionModule):
             place = fluid.CUDAPlace(0)
         else:
             place = fluid.CPUPlace()
-
-        if texts and isinstance(texts, list):
-            predicted_data = texts
-        else:
-            raise ValueError(
-                "The input data is inconsistent with expectations.")
 
         with fluid.dygraph.guard(place):
             self.model.eval()
@@ -174,13 +183,6 @@ class ErnieGen(hub.NLPPredictionModule):
             texts=input_data, use_gpu=args.use_gpu, beam_width=args.beam_width)
 
         return results
-
-    @serving
-    def serving_method(self, texts, use_gpu=False):
-        """
-        Run as a service.
-        """
-        return self.generate(texts, use_gpu)
 
 
 if __name__ == "__main__":

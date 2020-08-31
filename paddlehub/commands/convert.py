@@ -21,6 +21,7 @@ from string import Template
 
 from paddlehub.common import tmp_dir
 from paddlehub.commands.base_command import BaseCommand, ENTRY
+from paddlehub.common.hub_server import CacheUpdater
 
 INIT_FILE = '__init__.py'
 MODULE_FILE = 'module.py'
@@ -42,8 +43,10 @@ class ConvertCommand(BaseCommand):
             add_help=True)
         self.parser.add_argument('command')
         self.parser.add_argument('--module_name', '-n')
-        self.parser.add_argument(
-            '--module_version', '-v', nargs='?', default='1.0.0')
+        self.parser.add_argument('--module_version',
+                                 '-v',
+                                 nargs='?',
+                                 default='1.0.0')
         self.parser.add_argument('--model_dir', '-d')
         self.parser.add_argument('--output_dir', '-o')
 
@@ -59,28 +62,27 @@ class ConvertCommand(BaseCommand):
                     arcname = os.path.join(self.module, 'assets', file)
                     tfp.add(fullpath, arcname=arcname)
 
-            tfp.add(
-                self.model_file, arcname=os.path.join(self.module, MODULE_FILE))
-            tfp.add(
-                self.serving_file,
-                arcname=os.path.join(self.module, SERVING_FILE))
-            tfp.add(
-                self.init_file, arcname=os.path.join(self.module, INIT_FILE))
+            tfp.add(self.model_file,
+                    arcname=os.path.join(self.module, MODULE_FILE))
+            tfp.add(self.serving_file,
+                    arcname=os.path.join(self.module, SERVING_FILE))
+            tfp.add(self.init_file,
+                    arcname=os.path.join(self.module, INIT_FILE))
 
     def create_module_py(self):
-        template_file = open(
-            os.path.join(TMPL_DIR, 'x_model.tmpl'), 'r', encoding='utf-8')
+        template_file = open(os.path.join(TMPL_DIR, 'x_model.tmpl'),
+                             'r',
+                             encoding='utf-8')
         tmpl = Template(template_file.read())
         lines = []
 
         lines.append(
-            tmpl.substitute(
-                NAME="'{}'".format(self.module),
-                TYPE="'CV'",
-                AUTHOR="'Baidu'",
-                SUMMARY="''",
-                VERSION="'{}'".format(self.version),
-                EMAIL="''"))
+            tmpl.substitute(NAME="'{}'".format(self.module),
+                            TYPE="'CV'",
+                            AUTHOR="'Baidu'",
+                            SUMMARY="''",
+                            VERSION="'{}'".format(self.version),
+                            EMAIL="''"))
         # self.model_file = os.path.join(self.dest, MODULE_FILE)
         self.model_file = os.path.join(self._tmp_dir, MODULE_FILE)
         if os.path.exists(self.model_file):
@@ -99,8 +101,9 @@ class ConvertCommand(BaseCommand):
         shutil.copyfile(os.path.join(TMPL_DIR, 'init_py.tmpl'), self.init_file)
 
     def create_serving_demo_py(self):
-        template_file = open(
-            os.path.join(TMPL_DIR, 'serving_demo.tmpl'), 'r', encoding='utf-8')
+        template_file = open(os.path.join(TMPL_DIR, 'serving_demo.tmpl'),
+                             'r',
+                             encoding='utf-8')
         tmpl = Template(template_file.read())
         lines = []
 
@@ -142,6 +145,7 @@ class ConvertCommand(BaseCommand):
         self.dest = args.output_dir if args.output_dir is not None else os.path.join(
             '{}_{}'.format(self.module, str(time.time())))
 
+        CacheUpdater("hub_convert", self.module, self.version).start()
         os.makedirs(self.dest)
 
         with tmp_dir() as _dir:

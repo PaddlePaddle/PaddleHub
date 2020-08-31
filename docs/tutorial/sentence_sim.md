@@ -72,7 +72,7 @@ def convert_tokens_to_ids(vocab, text):
         wids.append(wid)
     return wids
 
-module = hub.Module(name="word2vec_skipgram")
+module = hub.Module(name="word2vec_skipgram", version='1.0.0')
 inputs, outputs, program = module.context(trainable=False)
 vocab = load_vocab(module.get_vocab_path())
 

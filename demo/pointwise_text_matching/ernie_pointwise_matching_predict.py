@@ -48,8 +48,8 @@ if __name__ == '__main__':
 
     # Construct transfer learning network
     # Use token-level output.
-    query = outputs["pooled_output"]
-    left = outputs['pooled_output_2']
+    query = outputs["sequence_output"]
+    left = outputs['sequence_output_2']
 
     # Select fine-tune strategy
     strategy = hub.AdamWeightDecayStrategy()
@@ -73,12 +73,12 @@ if __name__ == '__main__':
     # Prediction data sample.
     text_pairs = [
         [
-            "小品《战狼故事》中，吴京突破重重障碍解救爱人，深情告白太感人;爱人",  # query
-            "外文名:愛人;摘要:爱人，意思是：情人。;义项描述:日本语词汇;语言:日文;中文名:爱人;标签:文化;",  # title
+            "淘宝上怎么用信用卡分期付款",  # query
+            "淘宝上怎么分期付款，没有信用卡",  # title
         ],
         [
-            "儿子祝融被杀害，西天王大发雷霆，立即下令捉拿天庭三公主;儿子",  # query
-            "摘要:《儿子》是曹国昌1983年创作的木雕，收藏于中国美术馆。;材质：:木雕;作者：:曹国昌;中文名:儿子;创作年代：:1983年;义项描述:曹国昌木雕;标签:文化;",  # title
+            "山楂干怎么吃好吃？",  # query
+            "山楂怎么做好吃",  # title
         ]
     ]
 
@@ -88,6 +88,6 @@ if __name__ == '__main__':
         max_seq_len=args.max_seq_len,
         label_list=dataset.get_labels(),
         return_result=True,
-        accelerate_mode=False)
+        accelerate_mode=True)
     for index, text in enumerate(text_pairs):
         print("data: %s, prediction_label: %s" % (text, results[index]))

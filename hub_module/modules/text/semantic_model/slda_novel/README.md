@@ -37,6 +37,32 @@
 
 - results(dict): 返回对应文档的前k个关键词，以及各个关键词在文档中的出现概率。
 
+### 代码示例
+
+这里展示部分API的使用示例。
+
+``` python
+import paddlehub as hub
+
+slda_novel = hub.Module("slda_novel")
+
+topic_dist = slda_novel.infer_doc_topic_distribution("妈妈告诉女儿，今天爸爸过生日，放学后要早点回家一起庆祝")
+# [{'topic id': 222, 'distribution': 0.5}, {'topic id': 362, 'distribution': 0.5}]
+
+keywords = slda_novel.show_topic_keywords(topic_id=222)
+# {'回来': 0.044502306717752,
+#  '回去': 0.036457065533017245,
+#  '回家': 0.029136327306669554,
+#  '明天': 0.028762575780517493,
+#  '休息': 0.022904260192395567,
+#  '晚上': 0.021970839714261954,
+#  '时间': 0.020756626422891028,
+#  '好好': 0.019726413882856498,
+#  '电话': 0.017195445214734463,
+#  '吃饭': 0.01521839547511471}
+
+```
+
 ## 查看代码
 https://github.com/baidu/Familia
 

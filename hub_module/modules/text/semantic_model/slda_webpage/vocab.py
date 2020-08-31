@@ -22,7 +22,7 @@ class Vocab(object):
     def load(self, vocab_file):
         self.__term2id = {}
         self.__id2term = {}
-        with open(vocab_file, 'r') as fin:
+        with open(vocab_file, 'r', encoding='utf-8') as fin:
             for line in fin.readlines():
                 fields = line.strip().split('\t')
                 assert len(

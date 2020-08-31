@@ -95,6 +95,27 @@ results = lda_webpage.cal_doc_keywords_similarity('百度首页推荐着各种�
 #   {'word': '功能', 'similarity': 0.011409342579361237},
 #   {'word': '搜索引擎', 'similarity': 0.010392479335778413}]
 
+out = lda_webpage.cal_query_doc_similarity(query='百度搜索引擎', document='百度是全球最大的中文搜索引擎、致力于让网民更便捷地获取信息，找到所求。百度超过千亿的中文网页数据库，可以瞬间找到相关的搜索结果。')
+# out = 0.0283
+
+results = lda_webpage.infer_doc_topic_distribution("百度文库非常的好用，我们不仅在里面找到需要的文档，同时可以通过续费畅读精品文档。")
+# [{'topic id': 3458, 'distribution': 0.5277777777777778},
+#  {'topic id': 1927, 'distribution': 0.17777777777777778},
+#  {'topic id': 1497, 'distribution': 0.05},
+#  {'topic id': 1901, 'distribution': 0.03333333333333333}...]
+
+keywords = lda_webpage.show_topic_keywords(3458)
+# {'price': 0.10977647395316775,
+#  '文档': 0.06445075002937038,
+#  '财富值': 0.04012675135746289,
+#  '文库': 0.03953267826572788,
+#  'len': 0.038856163693739426,
+#  'tag': 0.03868762622172197,
+#  'current': 0.03728225157463761,
+#  'cut': 0.03448665775467454,
+#  '尺寸': 0.03250387028891812,
+#  '财富': 0.02902896727051734}
+
 ```
 
 ## 查看代码
@@ -112,3 +133,11 @@ paddlehub >= 1.8.0
 * 1.0.0
 
   初始发布
+
+* 1.0.1
+
+  修复因为return的bug导致的NoneType错误
+
+* 1.0.2
+
+  修复由于Windows`gbk`编码导致的问题

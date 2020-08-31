@@ -64,7 +64,7 @@ class SimpleTokenizer(Tokenizer):
     def __load_vocab(self, vocab_path):
         """Load the word dictionary.
         """
-        with open(vocab_path, 'r') as fin:
+        with open(vocab_path, 'r', encoding='utf-8') as fin:
             vocab_size = 0
             for line in fin.readlines():
                 fields = line.strip().split('\t')
@@ -97,7 +97,7 @@ class LACTokenizer(Tokenizer):
     def __load_vocab(self, vocab_path):
         """Load the word dictionary.
                 """
-        with open(vocab_path, 'r') as fin:
+        with open(vocab_path, 'r', encoding='utf-8') as fin:
             vocab_size = 0
             for line in fin.readlines():
                 fields = line.strip().split('\t')
@@ -109,7 +109,7 @@ class LACTokenizer(Tokenizer):
 
     def tokenize(self, text):
         results = self.__lac.lexical_analysis(
-            texts=[text], use_gpu=True, batch_size=1, return_tag=True)
+            texts=[text], use_gpu=False, batch_size=1, return_tag=True)
         # Change English words to lower case.
         # And just preserve the word in vocab.
         words = results[0]["word"]

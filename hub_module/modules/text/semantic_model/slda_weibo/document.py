@@ -97,7 +97,7 @@ class LDADoc(object):
         topic_dist = []
         sum_ = np.sum(self._accum_topic_sum)
         if sum_ == 0:
-            return
+            return topic_dist
         for i in range(0, self._num_topics):
             if self._accum_topic_sum[i] == 0:
                 continue

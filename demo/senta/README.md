@@ -41,6 +41,7 @@ $ sh run_finetune.sh
 --batch_size: 批处理大小，请结合显存情况进行调整，若出现显存不足，请适当调低这一参数；
 --checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型；
 --num_epoch: Fine-tune迭代的轮数；
+--max_seq_len: 模型使用的最大序列长度， 若出现显存不足，请适当调低这一参数；
 --use_gpu: 是否使用GPU进行训练，如果机器支持GPU且安装了GPU版本的PaddlePaddle，我们建议您打开这个开关；
 ```
 
@@ -50,8 +51,10 @@ $ sh run_finetune.sh
 
 ```python
 module = hub.Module(name="senta_bilstm")
-inputs, outputs, program = module.context(trainable=True)
+inputs, outputs, program = module.context(trainable=True, max_seq_len=96)
 ```
+
+其中最大序列长度`max_seq_len`是可以调整的参数，根据任务文本长度不同可以调整该值。
 
 PaddleHub提供Senta一列模型可供选择, 模型对应的加载示例如下：
 
@@ -71,21 +74,32 @@ senta_cnn                          | `hub.Module(name='senta_cnn')`
 module = hub.Module(name="senta_gru")
 ```
 
-### Step2: 准备数据集并使用LACClassifyReader读取数据
+### Step2: 选择Tokenizer读取数据
+
 ```python
-dataset = hub.dataset.ChnSentiCorp()
-reader = hub.reader.LACClassifyReader(
-    dataset=dataset,
-    vocab_path=module.get_vocab_path())
+tokenizer = hub.CustomTokenizer(
+    vocab_file=module.get_vocab_path(),
+    tokenize_chinese_chars=True,
+)
 ```
 
-`hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录；
-
 `module.get_vocab_path()` 会返回预训练模型对应的词表；
+`tokenize_chinese_chars` 是否切分中文文本
 
-LACClassifyReader中的`data_generator`会自动按照模型对应词表对数据进行切词，以迭代器的方式返回Senta所需要的word id；
+**NOTE:**
+1. 如果使用Transformer类模型（如ERNIE、BERT、RoBerta等），则应该选择`hub.BertTokenizer`.
+2. 如果使用非Transformer类模型（如senta、word2vec_skipgram、tencent_ailab_chinese_embedding_small等），则应该选择`hub.CustomTokenizer`
 
-更多数据集信息参考[Dataset](../../docs/reference/dataset.md)；
+### Step3: 准备数据集
+```python
+dataset = hub.dataset.LCQMC(tokenizer=tokenizer, max_seq_len=128)
+```
+
+`hub.dataset.LCQMC()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录；
+
+`max_seq_len` 需要与Step1中context接口传入的序列长度保持一致；
+
+更多数据集信息参考[Dataset](../../docs/reference/dataset.md)。
 
 #### 自定义数据集
 
@@ -131,18 +145,20 @@ sent_feature = outputs["sentence_feature"]
 feed_list = [inputs["words"].name]
 
 cls_task = hub.TextClassifierTask(
-    data_reader=reader,
+    dataset=dataset,
     feature=sent_feature,
-    feed_list=feed_list,
-    num_classes=dataset.num_labels,
+    num_classes=2,
     config=config)
 
 cls_task.finetune_and_eval()
 ```
 **NOTE:**
 1. `outputs["sentence_feature"]`返回了senta模型对应的句子特征,可以用于句子的特征表达；
-2. `feed_list`中的inputs参数指名了senta中的输入tensor的顺序，与LACClassifyReader返回的结果一致；
-3. `hub.TextClassifierTask`通过输入特征，label与迁移的类别数，可以生成适用于文本分类的迁移任务`TextClassifierTask`；
+2. `hub.TextClassifierTask`通过输入特征，label与迁移的类别数，可以生成适用于文本分类的迁移任务`TextClassifierTask`；
+
+#### 自定义迁移任务
+
+如果想改变迁移任务组网，详细参见[自定义迁移任务](../../docs/tutorial/how_to_define_task.md)。
 
 ## 可视化
 
@@ -165,24 +181,7 @@ python predict.py --checkpoint_dir $CKPT_DIR
 参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
 如需了解更多预测步骤，请参考`predict.py`。
 
-
-我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
-
-|预训练模型|任务类型|数据集|AIStudio链接|备注|
-|-|-|-|-|-|
-|ResNet|图像分类|猫狗数据集DogCat|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147010)||
-|ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147006)||
-|ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/221999)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成文本分类迁移学习。|
-|ERNIE|序列标注|中文序列标注数据集MSRA_NER|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147009)||
-|ERNIE|序列标注|中文快递单数据集Express|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/184200)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成序列标注迁移学习。|
-|ERNIE Tiny|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/221971)||
-|Senta|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216846)|本教程讲述了任何利用Senta和Fine-tune API完成情感分类迁移学习。|
-|Senta|情感分析预测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215814)||
-|LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215711)||
-|Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215962)||
-
-
-
+我们在AI Studio上提供了IPython NoteBook形式的demo，点击[PaddleHub教程合集](https://aistudio.baidu.com/aistudio/projectdetail/231146)，可使用AI Studio平台提供的GPU算力进行快速尝试。
 
 ## 超参优化AutoDL Finetuner
 

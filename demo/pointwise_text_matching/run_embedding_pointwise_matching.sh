@@ -5,5 +5,5 @@ python -u embedding_pointwise_matching.py \
             --checkpoint_dir=${CKPT_DIR} \
             --learning_rate=5e-3 \
             --max_seq_len=128 \
-            --num_epoch=300 \
+            --num_epoch=100 \
             --network=bow
