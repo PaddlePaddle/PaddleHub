@@ -10,9 +10,10 @@ sentencepiece
 colorlog
 tqdm
 nltk
+opencv-python
 
 # pandas no longer support python2 in version 0.25 and above
-pandas ; python_version >= "3"
+pandas
 
 # gunicorn not support windows
 gunicorn >= 19.10.0; sys_platform != "win32"
