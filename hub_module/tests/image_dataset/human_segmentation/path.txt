@@ -1,0 +1,5 @@
+../image_dataset/human_segmentation/image/ache-adult-depression-expression-41253.jpg
+../image_dataset/human_segmentation/image/allergy-cold-disease-flu-41284.jpg
+../image_dataset/human_segmentation/image/bored-female-girl-people-41321.jpg
+../image_dataset/human_segmentation/image/colors-hairdresser-cutting-colorimetry-159780.jpg
+../image_dataset/human_segmentation/image/pexels-photo-206339.jpg
