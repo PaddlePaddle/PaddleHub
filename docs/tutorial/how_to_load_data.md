@@ -71,4 +71,3 @@ label_list.txt内容如下：
 cat
 dog
 ```
-
