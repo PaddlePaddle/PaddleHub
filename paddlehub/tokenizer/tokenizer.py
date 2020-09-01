@@ -78,11 +78,7 @@ class CustomTokenizer(object):
 
     def _convert_token_to_id(self, token):
         """ Converts a token (str) in an id using the vocab. """
-        v = self.vocab.get(token, None)
-        if v:
-            return v
-        else:
-            return 0
+        return self.vocab.get(token, None)
 
     def _convert_id_to_token(self, index):
         """Converts an index (integer) in a token (str) using the vocab."""
@@ -211,11 +207,11 @@ class CustomTokenizer(object):
                 return ids
             elif isinstance(text,
                             (list, tuple)) and len(text) > 0 and isinstance(
-                text[0], str):
+                                text[0], str):
                 return self.convert_tokens_to_ids(text)
             elif isinstance(text,
                             (list, tuple)) and len(text) > 0 and isinstance(
-                text[0], int):
+                                text[0], int):
                 return text
             else:
                 raise ValueError(
@@ -354,7 +350,7 @@ class CustomTokenizer(object):
         """
         out_string = (out_string.replace(" .", ".").replace(" ?", "?").replace(
             " !", "!").replace(" ,", ",").replace(" ' ", "'").replace(
-            " n't",
-            "n't").replace(" 'm", "'m").replace(" 's", "'s").replace(
-            " 've", "'ve").replace(" 're", "'re"))
+                " n't",
+                "n't").replace(" 'm", "'m").replace(" 's", "'s").replace(
+                    " 've", "'ve").replace(" 're", "'re"))
         return out_string
