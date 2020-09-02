@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -13,27 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from typing import List
 
-from paddlehub import version
-from paddlehub.commands.base_command import BaseCommand
-from paddlehub.common.hub_server import CacheUpdater
+import paddlehub as hub
+from paddlehub.commands import register
 
 
-class VersionCommand(BaseCommand):
-    name = "version"
-
-    def __init__(self, name):
-        super(VersionCommand, self).__init__(name)
-        self.show_in_help = True
-        self.description = "Show PaddleHub's version."
-
-    def execute(self, argv):
-        CacheUpdater("hub_version").start()
-        print("hub %s" % version.hub_version)
+@register(name='hub.version', description='Show PaddleHub\'s version.')
+class VersionCommand:
+    def execute(self, argv: List) -> bool:
+        print(hub.__version__)
         return True
-
-
-command = VersionCommand.instance()

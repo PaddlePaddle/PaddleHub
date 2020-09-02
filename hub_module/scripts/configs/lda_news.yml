@@ -1,0 +1,9 @@
+name: lda_news
+dir: "modules/text/semantic_model/lda_news"
+exclude:
+  - README.md
+resources:
+  -
+    url: https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/lda_news.tar.gz
+    dest: .
+    uncompress: True

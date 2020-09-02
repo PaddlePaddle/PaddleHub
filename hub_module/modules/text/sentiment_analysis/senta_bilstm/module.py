@@ -29,7 +29,8 @@ class SentaBiLSTM(hub.NLPPredictionModule):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "infer_model")
+        self.pretrained_model_path = os.path.join(self.directory, "assets",
+                                                  "infer_model")
         self.vocab_path = os.path.join(self.directory, "assets/vocab.txt")
         self.word_dict = load_vocab(self.vocab_path)
         self._word_seg_module = None
@@ -47,13 +48,23 @@ class SentaBiLSTM(hub.NLPPredictionModule):
             self._word_seg_module = hub.Module(name="lac")
         return self._word_seg_module
 
+<<<<<<< HEAD
     def context(self, trainable=False, max_seq_len=128, num_data=1):
+=======
+    def context(self, trainable=False, max_seq_len=128, num_slots=1):
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
         """
         Get the input ,output and program of the pretrained senta_bilstm
 
         Args:
+<<<<<<< HEAD
              trainable(bool): whether fine-tune the pretrained parameters of senta_bilstm or not
              num_data(int): It's number of data inputted to the model, selectted as following options:
+=======
+             trainable(bool): whether fine-tune the pretrained parameters of senta_bilstm or not.
+             max_seq_len (int): It will limit the total sequence returned so that it has a maximum length.
+             num_slots(int): It's number of data inputted to the model, selectted as following options:
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
 
                  - 1(default): There's only one data to be feeded in the model, e.g. the module is used for text classification task.
                  - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
@@ -65,12 +76,20 @@ class SentaBiLSTM(hub.NLPPredictionModule):
                  the sentence embedding and sequence length of the first input text.
              main_program(Program): the main_program of Senta with pretrained prameters
         """
+<<<<<<< HEAD
         assert num_data >= 1 and num_data <= 3, "num_data(%d) must be 1, 2, or 3" % num_data
+=======
+        assert num_slots >= 1 and num_slots <= 3, "num_slots must be 1, 2, or 3, but the input is %d" % num_slots
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
         main_program = fluid.Program()
         startup_program = fluid.Program()
         with fluid.program_guard(main_program, startup_program):
             text_1 = fluid.layers.data(
+<<<<<<< HEAD
                 name="text_1",
+=======
+                name="text",
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
                 shape=[-1, max_seq_len, 1],
                 dtype="int64",
                 lod_level=0)
@@ -87,6 +106,10 @@ class SentaBiLSTM(hub.NLPPredictionModule):
             emb_1 = fluid.layers.embedding(
                 input=text_1,
                 size=[dict_dim, 128],
+<<<<<<< HEAD
+=======
+                is_sparse=True,
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
                 padding_idx=dict_dim - 1,
                 dtype='float32',
                 param_attr=w_param_attrs)
@@ -99,7 +122,11 @@ class SentaBiLSTM(hub.NLPPredictionModule):
             pred_name = pred.name
             fc_name = fc.name
 
+<<<<<<< HEAD
             if num_data > 1:
+=======
+            if num_slots > 1:
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
                 text_2 = fluid.data(
                     name='text_2',
                     shape=[-1, max_seq_len],
@@ -108,6 +135,10 @@ class SentaBiLSTM(hub.NLPPredictionModule):
                 emb_2 = fluid.embedding(
                     input=text_2,
                     size=[dict_dim, 128],
+<<<<<<< HEAD
+=======
+                    is_sparse=True,
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
                     padding_idx=dict_dim - 1,
                     dtype='float32',
                     param_attr=w_param_attrs)
@@ -115,7 +146,11 @@ class SentaBiLSTM(hub.NLPPredictionModule):
                 data_list.append(text_2)
                 emb_name_list.append(emb_2_name)
 
+<<<<<<< HEAD
             if num_data > 2:
+=======
+            if num_slots > 2:
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
                 text_3 = fluid.data(
                     name='text_3',
                     shape=[-1, max_seq_len],
@@ -124,6 +159,10 @@ class SentaBiLSTM(hub.NLPPredictionModule):
                 emb_3 = fluid.embedding(
                     input=text_3,
                     size=[dict_dim, 128],
+<<<<<<< HEAD
+=======
+                    is_sparse=True,
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
                     padding_idx=dict_dim - 1,
                     dtype='float32',
                     param_attr=w_param_attrs)
@@ -132,7 +171,11 @@ class SentaBiLSTM(hub.NLPPredictionModule):
                 emb_name_list.append(emb_3_name)
 
             variable_names = filter(
+<<<<<<< HEAD
                 lambda v: v not in ['text_1', 'text_2', 'text_3', "seq_len"],
+=======
+                lambda v: v not in ['text', 'text_2', 'text_3', "seq_len"],
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
                 list(main_program.global_block().vars.keys()))
             prefix_name = "@HUB_{}@".format(self.name)
             add_vars_prefix(
@@ -160,9 +203,20 @@ class SentaBiLSTM(hub.NLPPredictionModule):
                 main_program.global_block().vars[prefix_name + fc_name]
             }
             for index, data in enumerate(data_list):
+<<<<<<< HEAD
                 inputs['text_%s' % (index + 1)] = data
                 outputs['emb_%s' % (index + 1)] = main_program.global_block(
                 ).vars[prefix_name + emb_name_list[index]]
+=======
+                if index == 0:
+                    inputs['text'] = data
+                    outputs['emb'] = main_program.global_block().vars[
+                        prefix_name + emb_name_list[0]]
+                else:
+                    inputs['text_%s' % (index + 1)] = data
+                    outputs['emb_%s' % (index + 1)] = main_program.global_block(
+                    ).vars[prefix_name + emb_name_list[index]]
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
             return inputs, outputs, main_program
 
     @serving
@@ -180,11 +234,14 @@ class SentaBiLSTM(hub.NLPPredictionModule):
         Returns:
              results(list): the word segmentation results
         """
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-        except:
-            use_gpu = False
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         if texts != [] and isinstance(texts, list) and data == {}:
             predicted_data = texts
@@ -230,7 +287,11 @@ class SentaBiLSTM(hub.NLPPredictionModule):
 
 if __name__ == "__main__":
     senta = SentaBiLSTM()
+<<<<<<< HEAD
     inputs, outputs, main_program = senta.context(num_data=3)
+=======
+    inputs, outputs, main_program = senta.context(num_slots=3)
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
     print(inputs)
     print(outputs)
     # Data to be predicted

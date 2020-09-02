@@ -1,6 +1,0 @@
-input_data:
-  image:
-    type : IMAGE
-    key : IMAGE_PATH
-config:
-    top_only : True

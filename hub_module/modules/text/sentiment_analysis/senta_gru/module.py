@@ -29,7 +29,8 @@ class SentaGRU(hub.NLPPredictionModule):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "infer_model")
+        self.pretrained_model_path = os.path.join(self.directory, "assets",
+                                                  "infer_model")
         self.vocab_path = os.path.join(self.directory, "assets/vocab.txt")
         self.word_dict = load_vocab(self.vocab_path)
         self._word_seg_module = None
@@ -52,7 +53,12 @@ class SentaGRU(hub.NLPPredictionModule):
         Get the input ,output and program of the pretrained senta_gru
 
         Args:
+<<<<<<< HEAD
              trainable(bool): whether fine-tune the pretrained parameters of senta_gru or not
+=======
+             trainable(bool): Whether fine-tune the pretrained parameters of senta_gru or not.
+             max_seq_len (int): It will limit the total sequence returned so that it has a maximum length.
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
              num_data(int): It's number of data inputted to the model, selectted as following options:
 
                  - 1(default): There's only one data to be feeded in the model, e.g. the module is used for text classification task.
@@ -70,7 +76,11 @@ class SentaGRU(hub.NLPPredictionModule):
         startup_program = fluid.Program()
         with fluid.program_guard(main_program, startup_program):
             text_1 = fluid.layers.data(
+<<<<<<< HEAD
                 name="text_1",
+=======
+                name="text",
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
                 shape=[-1, max_seq_len, 1],
                 dtype="int64",
                 lod_level=0)
@@ -132,7 +142,11 @@ class SentaGRU(hub.NLPPredictionModule):
                 emb_name_list.append(emb_3_name)
 
             variable_names = filter(
+<<<<<<< HEAD
                 lambda v: v not in ['text_1', 'text_2', 'text_3', "seq_len"],
+=======
+                lambda v: v not in ['text', 'text_2', 'text_3', "seq_len"],
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
                 list(main_program.global_block().vars.keys()))
             prefix_name = "@HUB_{}@".format(self.name)
             add_vars_prefix(
@@ -164,9 +178,20 @@ class SentaGRU(hub.NLPPredictionModule):
                 main_program.global_block().vars[prefix_name + fc_name]
             }
             for index, data in enumerate(data_list):
+<<<<<<< HEAD
                 inputs['text_%s' % (index + 1)] = data
                 outputs['emb_%s' % (index + 1)] = main_program.global_block(
                 ).vars[prefix_name + emb_name_list[index]]
+=======
+                if index == 0:
+                    inputs['text'] = data
+                    outputs['emb'] = main_program.global_block().vars[
+                        prefix_name + emb_name_list[0]]
+                else:
+                    inputs['text_%s' % (index + 1)] = data
+                    outputs['emb_%s' % (index + 1)] = main_program.global_block(
+                    ).vars[prefix_name + emb_name_list[index]]
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
             return inputs, outputs, main_program
 
     @serving
@@ -184,11 +209,14 @@ class SentaGRU(hub.NLPPredictionModule):
         Returns:
              results(list): the word segmentation results
         """
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-        except:
-            use_gpu = False
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         if texts != [] and isinstance(texts, list) and data == {}:
             predicted_data = texts
@@ -234,7 +262,11 @@ class SentaGRU(hub.NLPPredictionModule):
 
 if __name__ == "__main__":
     senta = SentaGRU()
+<<<<<<< HEAD
     inputs, outputs, main_program = senta.context(num_data=3)
+=======
+    inputs, outputs, main_program = senta.context(num_slots=3)
+>>>>>>> 9dd66ce7faee1178a436b46abdbaecaac699ca58
     # Data to be predicted
     test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
 

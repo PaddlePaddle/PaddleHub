@@ -94,6 +94,7 @@ def postprocess(out_heatmaps, org_im, org_im_shape, org_im_path, output_dir,
         print('image saved in {}'.format(save_im_name))
 
     # articulation
+    preds = list(map(lambda pred: [int(_) for _ in pred], preds))
     res['data']['left_ankle'] = list(preds[0])
     res['data']['left_knee'] = list(preds[1])
     res['data']['left_hip'] = list(preds[2])
