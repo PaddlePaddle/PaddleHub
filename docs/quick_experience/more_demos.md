@@ -2,7 +2,7 @@
 
 ## PaddleHub官方Demo全集
 
-官方Demo在AI Studio中均可在线运行，类似notebook的环境，只需通过浏览器即可访问，无需准备环境，非常方便开发者快速体验。
+官方Demo在AI Studio中均可在线运行，类似Notebook的环境，只需通过浏览器即可访问，无需准备环境，非常方便开发者快速体验。
 并将持续更新，建议收藏。
 [https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927](https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927)
 
