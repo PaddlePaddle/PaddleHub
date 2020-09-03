@@ -17,14 +17,13 @@ import inspect
 import importlib
 import os
 import sys
-
-import paddle.fluid as fluid
+from typing import Callable, List, Optional, Generic
 
 from paddlehub.utils import utils
 
 
 class InvalidHubModule(Exception):
-    def __init__(self, directory):
+    def __init__(self, directory: str):
         self.directory = directory
 
     def __str__(self):
@@ -35,7 +34,7 @@ _module_serving_func = {}
 _module_runnable_func = {}
 
 
-def runnable(func):
+def runnable(func: Callable) -> Callable:
     mod = func.__module__ + '.' + inspect.stack()[1][3]
     _module_runnable_func[mod] = func.__name__
 
@@ -45,7 +44,7 @@ def runnable(func):
     return _wrapper
 
 
-def serving(func):
+def serving(func: Callable) -> Callable:
     mod = func.__module__ + '.' + inspect.stack()[1][3]
     _module_serving_func[mod] = func.__name__
 
@@ -69,7 +68,7 @@ class Module(object):
         return module
 
     @classmethod
-    def load(cls, directory: str):
+    def load(cls, directory: str) -> Generic:
         if directory.endswith(os.sep):
             directory = directory[:-1]
 
@@ -95,9 +94,7 @@ class Module(object):
     def init_with_name(cls, name: str, version: str = None, **kwargs):
         from paddlehub.module.manager import LocalModuleManager
         manager = LocalModuleManager()
-        search_result = manager.search(name)
-        user_module_cls = search_result.get('module', None)
-        directory = search_result.get('directory', None)
+        user_module_cls = manager.search(name)
         if not user_module_cls or not user_module_cls.version.match(version):
             user_module_cls = manager.install(name, version)
 
@@ -121,7 +118,7 @@ class RunModule(object):
         self._serving_func_name = self._get_func_name(self.__class__, _module_serving_func)
         self._is_initialize = True
 
-    def _get_func_name(self, current_cls, module_func_dict):
+    def _get_func_name(self, current_cls: Generic, module_func_dict: dict) -> Optional[str]:
         mod = current_cls.__module__ + '.' + current_cls.__name__
         if mod in module_func_dict:
             _func_name = module_func_dict[mod]
@@ -133,7 +130,7 @@ class RunModule(object):
             return None
 
     @classmethod
-    def get_py_requirements(cls):
+    def get_py_requirements(cls) -> List[str]:
         py_module = sys.modules[cls.__module__]
         directory = os.path.dirname(py_module.__file__)
         req_file = os.path.join(directory, 'requirements.txt')
@@ -156,8 +153,8 @@ def moduleinfo(name: str,
                author_email: str = None,
                summary: str = None,
                type: str = None,
-               meta=None):
-    def _wrapper(cls):
+               meta=None) -> Callable:
+    def _wrapper(cls: Generic) -> Generic:
         wrap_cls = cls
         _meta = RunModule if not meta else meta
         if not issubclass(cls, _meta):

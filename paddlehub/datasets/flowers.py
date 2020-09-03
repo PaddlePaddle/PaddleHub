@@ -15,12 +15,12 @@
 
 import os
 
-import paddle.fluid as fluid
+import paddle
 
 from paddlehub.env import DATA_HOME
 
 
-class Flowers(fluid.io.Dataset):
+class Flowers(paddle.io.Dataset):
     def __init__(self, transforms=None, mode='train'):
         self.mode = mode
         self.transforms = transforms

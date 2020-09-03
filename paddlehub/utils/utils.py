@@ -18,9 +18,9 @@ import contextlib
 import cv2
 import math
 import os
+import requests
 import sys
 import time
-import requests
 import tempfile
 import numpy as np
 from typing import Generator
@@ -119,7 +119,7 @@ class Timer(object):
         return seconds_to_hms(remaining_time)
 
 
-def seconds_to_hms(seconds: int):
+def seconds_to_hms(seconds: int) -> str:
     '''Convert the number of seconds to hh:mm:ss'''
     h = math.floor(seconds / 3600)
     m = math.floor((seconds - h * 3600) / 60)
@@ -128,7 +128,7 @@ def seconds_to_hms(seconds: int):
     return hms_str
 
 
-def base64_to_cv2(b64str: str):
+def base64_to_cv2(b64str: str) -> np.ndarray:
     '''Convert a string in base64 format to cv2 data'''
     data = base64.b64decode(b64str.encode('utf8'))
     data = np.fromstring(data, np.uint8)
@@ -137,22 +137,22 @@ def base64_to_cv2(b64str: str):
 
 
 @contextlib.contextmanager
-def generate_tempfile(directory: str = None):
+def generate_tempfile(directory: str = None, **kwargs):
     '''Generate a temporary file'''
     directory = hubenv.TMP_HOME if not directory else directory
-    with tempfile.NamedTemporaryFile(dir=directory) as file:
+    with tempfile.NamedTemporaryFile(dir=directory, **kwargs) as file:
         yield file
 
 
 @contextlib.contextmanager
-def generate_tempdir(directory: str = None):
+def generate_tempdir(directory: str = None, **kwargs):
     '''Generate a temporary directory'''
     directory = hubenv.TMP_HOME if not directory else directory
-    with tempfile.TemporaryDirectory(dir=directory) as _dir:
+    with tempfile.TemporaryDirectory(dir=directory, **kwargs) as _dir:
         yield _dir
 
 
-def download(url: str, path: str = None):
+def download(url: str, path: str = None) -> str:
     '''
     Download a file
 

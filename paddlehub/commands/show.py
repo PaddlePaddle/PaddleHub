@@ -45,16 +45,16 @@ class ShowCommand:
                 print('{} is not existed!'.format(argv))
                 return False
 
-        table = log.Table()
         widths = [15, 40] if platform.is_windows else [15, 50]
         aligns = ['^', '<']
         colors = ['yellow', '']
+        table = log.Table(widths=widths, colors=colors, aligns=aligns)
 
-        table.append('ModuleName', module.name, widths=widths, colors=colors, aligns=aligns)
-        table.append('Version', str(module.version), widths=widths, colors=colors, aligns=aligns)
-        table.append('Summary', module.summary, widths=widths, colors=colors, aligns=aligns)
-        table.append('Author', module.author, widths=widths, colors=colors, aligns=aligns)
-        table.append('Author-Email', module.author_email, widths=widths, colors=colors, aligns=aligns)
-        table.append('Location', module.directory, widths=widths, colors=colors, aligns=aligns)
+        table.append('ModuleName', module.name)
+        table.append('Version', str(module.version))
+        table.append('Summary', module.summary)
+        table.append('Author', module.author)
+        table.append('Author-Email', module.author_email)
+        table.append('Location', module.directory)
         print(table)
         return True

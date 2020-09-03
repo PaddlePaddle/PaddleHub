@@ -54,9 +54,8 @@ def install(package: str, version: str = '', upgrade=False) -> bool:
 
 def uninstall(package: str) -> bool:
     '''Uninstall the python package.'''
-    with discard_oe():
+    with discard_oe(), typein('y'):
         # type in 'y' to confirm the uninstall operation
-        with typein('y'):
-            cmds = ['uninstall', '{}'.format(package)]
-            result = pip.main(cmds)
+        cmds = ['uninstall', '{}'.format(package)]
+        result = pip.main(cmds)
     return result == 0

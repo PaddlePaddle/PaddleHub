@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import functools
 import logging
 import sys
@@ -55,7 +56,14 @@ log_config = {
 
 
 class Logger(object):
-    def __init__(self, name=None):
+    '''
+    Deafult logger in PaddleHub
+
+    Args:
+        name(str) : Logger name, default is 'PaddleHub'
+    '''
+
+    def __init__(self, name: str = None):
         name = 'PaddleHub' if not name else name
         self.logger = logging.getLogger(name)
 
@@ -80,6 +88,23 @@ class Logger(object):
 
 class ProgressBar(object):
     '''
+    Progress bar printer
+
+    Args:
+        title(str) : Title text
+        flush_interval(float): Flush rate of progress bar, default is 0.1.
+
+    Examples:
+        .. code-block:: python
+        with ProgressBar('Download module') as bar:
+            for i in range(100):
+                bar.update(i / 100)
+
+        # with continuous bar.update, the progress bar in the terminal
+        # will continue to update until 100%
+        #
+        # Download module
+        # [##################################################] 100.00%
     '''
 
     def __init__(self, title: str, flush_interval: float = 0.1):
@@ -99,7 +124,9 @@ class ProgressBar(object):
         else:
             sys.stdout.write('\n')
 
-    def update(self, progress):
+    def update(self, progress: float):
+        '''
+        '''
         msg = '[{:<50}] {:.2f}%'.format('#' * int(progress * 50), progress * 100)
         need_flush = (time.time() - self.last_flush_time) >= self.flush_interval
 
@@ -112,16 +139,32 @@ class ProgressBar(object):
             sys.stdout.write('\n')
 
 
-class _FormattedText(object):
+class FormattedText(object):
+    '''
+    Cross-platform formatted string
+
+    Args:
+        text(str) : Text content
+        width(int) : Text length, if the text is less than the specified length, it will be filled with spaces
+        align(str) : it must be:
+            ========   ==================
+            Charater   Meaning
+            --------   ------------------
+            '<'        left aligned
+            '^'        middle aligned
+            '>'        right aligned
+            ========   ==================
+        color(str) : Text color, default is None(depends on terminal configuration)
+    '''
     _MAP = {'red': Fore.RED, 'yellow': Fore.YELLOW, 'green': Fore.GREEN, 'blue': Fore.BLUE}
 
-    def __init__(self, text: str, width: int, align='<', color=None):
+    def __init__(self, text: str, width: int, align: str = '<', color: str = None):
         self.text = text
         self.align = align
-        self.color = _FormattedText._MAP[color] if color else color
+        self.color = FormattedText._MAP[color] if color else color
         self.width = width
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         form = ':{}{}'.format(self.align, self.width)
         text = ('{' + form + '}').format(self.text)
         if not self.color:
@@ -130,12 +173,14 @@ class _FormattedText(object):
 
 
 class TableCell(object):
+    '''The basic components of a table'''
+
     def __init__(self, content: str = '', width: int = 0, align: str = '<', color: str = ''):
         self._width = width if width else len(content)
         self._width = 1 if self._width < 1 else self._width
         self._contents = []
         for i in range(0, len(content), self._width):
-            text = _FormattedText(content[i:i + self._width], width, align, color)
+            text = FormattedText(content[i:i + self._width], width, align, color)
             self._contents.append(text)
         self.align = align
         self.color = color
@@ -158,7 +203,7 @@ class TableCell(object):
     def height(self, value: int):
         if value < self.height:
             raise RuntimeError(self.height, value)
-        self._contents += [_FormattedText('', width=self.width, align=self.align, color=self.color)
+        self._contents += [FormattedText('', width=self.width, align=self.align, color=self.color)
                            ] * (value - self.height)
 
     def __len__(self) -> int:
@@ -171,7 +216,9 @@ class TableCell(object):
         return '\n'.join([str(item) for item in self._contents])
 
 
-class TableLine(object):
+class TableRow(object):
+    '''Table row composed of TableCell'''
+
     def __init__(self):
         self.cells = []
 
@@ -179,23 +226,23 @@ class TableLine(object):
         self.cells.append(cell)
 
     @property
-    def width(self):
+    def width(self) -> int:
         _width = 0
         for cell in self.cells():
             _width += cell.width
         return _width
 
     @property
-    def height(self):
+    def height(self) -> int:
         _height = -1
         for cell in self.cells:
             _height = max(_height, cell.height)
         return _height
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.cells)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         content = ''
         for i in range(self.height):
             content += '|'
@@ -211,7 +258,9 @@ class TableLine(object):
         return self.cells[idx]
 
 
-class TableRow(object):
+class TableColumn(object):
+    '''Table column composed of TableCell'''
+
     def __init__(self):
         self.cells = []
 
@@ -219,20 +268,20 @@ class TableRow(object):
         self.cells.append(cell)
 
     @property
-    def width(self):
+    def width(self) -> int:
         _width = -1
         for cell in self.cells:
             _width = max(_width, cell.width)
         return _width
 
     @property
-    def height(self):
+    def height(self) -> int:
         _height = 0
         for cell in self.cells:
             _height += cell.height
         return _height
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.cells)
 
     def __getitem__(self, idx: int) -> TableCell:
@@ -240,12 +289,63 @@ class TableRow(object):
 
 
 class Table(object):
-    def __init__(self):
-        self.lines = []
+    '''
+    Table with adaptive width and height
+
+    Args:
+        colors(list[str]) : Text colors of contents one by one
+        aligns(list[str]) : Text aligns of contents one by one
+        widths(list[str]) : Text widths of contents one by one
+
+    Examples:
+        .. code-block:: python
+            table = Table(widths=[12, 20])
+            table.append('name', 'PaddleHub')
+            table.append('version', '2.0.0')
+            table.append(
+                'description',
+                'PaddleHub is a pretrainied model application tool under the PaddlePaddle')
+            table.append('author')
+
+            print(table)
+
+            # the result is
+            # +------------+--------------------+
+            # |name        |PaddleHub           |
+            # +------------+--------------------+
+            # |version     |2.0.0               |
+            # +------------+--------------------+
+            # |description |PaddleHub is a pretr|
+            # |            |ainied model applica|
+            # |            |tion tool under the |
+            # |            |PaddlePaddle        |
+            # +------------+--------------------+
+            # |author      |                    |
+            # +------------+--------------------+
+    '''
+
+    def __init__(self, colors: List[str] = [], aligns: List[str] = [], widths: List[int] = []):
         self.rows = []
+        self.columns = []
+        self.colors = colors
+        self.aligns = aligns
+        self.widths = widths
 
     def append(self, *contents, colors: List[str] = [], aligns: List[str] = [], widths: List[int] = []):
-        newline = TableLine()
+        '''
+        Add a row to the table
+
+        Args:
+            *contents(*list): Contents of the row, each content will be placed in a separate cell
+            colors(list[str]) : Text colors of contents one by one, if not set, the default value will be used.
+            aligns(list[str]) : Text aligns of contents one by one, if not set, the default value will be used.
+            widths(list[str]) : Text widths of contents one by one, if not set, the default value will be used.
+        '''
+        newrow = TableRow()
+
+        widths = copy.deepcopy(self.widths) if not widths else widths
+        colors = copy.deepcopy(self.colors) if not colors else colors
+        aligns = copy.deepcopy(self.aligns) if not aligns else aligns
 
         for idx, content in enumerate(contents):
             width = widths[idx] if idx < len(widths) else len(content)
@@ -253,73 +353,66 @@ class Table(object):
             align = aligns[idx] if idx < len(aligns) else ''
 
             newcell = TableCell(content, width=width, color=color, align=align)
-            newline.append(newcell)
-            if idx >= len(self.rows):
-                newrow = TableRow()
+            newrow.append(newcell)
+            if idx >= len(self.columns):
+                newcolumn = TableColumn()
 
-                for line in self.lines:
+                for row in self.rows:
                     cell = TableCell(width=width, color=color, align=align)
-                    line.append(cell)
-                    newrow.append(cell)
-                newrow.append(newcell)
-                self.rows.append(newrow)
+                    row.append(cell)
+                    newcolumn.append(cell)
+                newcolumn.append(newcell)
+                self.columns.append(newcolumn)
             else:
-                self.rows[idx].append(newcell)
+                self.columns[idx].append(newcell)
 
-        for idx in range(len(newline), len(self.rows)):
-            width = widths[idx] if idx < len(widths) else self.rows[idx].width
+        for idx in range(len(newrow), len(self.columns)):
+            width = widths[idx] if idx < len(widths) else self.columns[idx].width
             color = colors[idx] if idx < len(colors) else ''
             align = aligns[idx] if idx < len(aligns) else ''
             cell = TableCell(width=width, color=color, align=align)
-            newline.append(cell)
+            newrow.append(cell)
 
-        self.lines.append(newline)
+        self.rows.append(newrow)
         self._adjust()
 
     def _adjust(self):
-        for row in self.rows:
+        '''Adjust the width and height of the cells in each row and column.'''
+        for column in self.columns:
             _width = -1
-            for cell in row:
+            for cell in column:
                 _width = max(_width, cell.width)
-            for cell in row:
+            for cell in column:
                 cell.width = _width
 
-        for line in self.lines:
+        for row in self.rows:
             _height = -1
-            for cell in line:
+            for cell in row:
                 _height = max(_height, cell.height)
-            for cell in line:
+            for cell in row:
                 cell.height = _height
 
     @property
-    def width(self):
+    def width(self) -> int:
         _width = -1
-        for line in self.lines:
-            _width = max(_width, line.width)
+        for row in self.rows:
+            _width = max(_width, row.width)
         return _width
 
     @property
-    def height(self):
+    def height(self) -> int:
         _height = -1
-        for row in self.rows:
-            _height = max(_height, row.height)
+        for column in self.columns:
+            _height = max(_height, column.height)
         return _height
 
-    def __repr__(self):
-        sepline = '+{}+\n'.format('+'.join(['-' * row.width for row in self.rows]))
+    def __repr__(self) -> str:
+        seprow = '+{}+\n'.format('+'.join(['-' * column.width for column in self.columns]))
         content = ''
-        for line in self.lines:
-            content = content + str(line)
-            content += sepline
-        return sepline + content
+        for row in self.rows:
+            content = content + str(row)
+            content += seprow
+        return seprow + content
 
-
-# table = Table()
-# table.append('123', '234')
-# table.append('122223', '22444')
-# table.append('121111111111111111111111111111111113', '234', widths=[10, 20], colors=['red', 'yellow'], aligns=['^', '>'])
-# table.append('122223', '22444')
-# table.append('122223', '22444', '123')
-# print(table)
 
 logger = Logger()

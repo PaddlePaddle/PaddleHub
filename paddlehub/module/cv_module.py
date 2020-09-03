@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List
+
 import numpy as np
 import paddle
-import paddle.fluid as fluid
-from paddle.fluid.dygraph import to_variable
+import paddle.nn.functional as F
 
 from paddlehub.module.module import serving, RunModule
 from paddlehub.utils.utils import base64_to_cv2
@@ -24,7 +25,7 @@ from paddlehub.utils.utils import base64_to_cv2
 
 class ImageServing(object):
     @serving
-    def serving_method(self, images, **kwargs):
+    def serving_method(self, images: List[str], **kwargs) -> List[dict]:
         """Run as a service."""
         images_decode = [base64_to_cv2(image) for image in images]
         results = self.predict(images=images_decode, **kwargs)
@@ -32,25 +33,55 @@ class ImageServing(object):
 
 
 class ImageClassifierModule(RunModule, ImageServing):
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: int, batch_idx: int) -> dict:
+        '''
+        One step for training, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Variable]): The one batch data, which contains images and labels.
+            batch_idx(int): The index of batch.
+
+        Returns:
+            results(dict) : The model outputs, such as loss and metrics.
+        '''
         return self.validation_step(batch, batch_idx)
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: int, batch_idx: int) -> dict:
+        '''
+        One step for validation, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Variable]): The one batch data, which contains images and labels.
+            batch_idx(int): The index of batch.
+
+        Returns:
+            results(dict) : The model outputs, such as metrics.
+        '''
         images = batch[0]
-        labels = paddle.unsqueeze(batch[1], axes=-1)
+        labels = paddle.unsqueeze(batch[1], axis=-1)
 
         preds = self(images)
-        loss, _ = fluid.layers.softmax_with_cross_entropy(preds, labels, return_softmax=True, axis=1)
-        loss = fluid.layers.mean(loss)
-        acc = fluid.layers.accuracy(preds, labels)
+        loss, _ = F.softmax_with_cross_entropy(preds, labels, return_softmax=True, axis=1)
+        loss = paddle.mean(loss)
+        acc = paddle.metric.accuracy(preds, labels)
         return {'loss': loss, 'metrics': {'acc': acc}}
 
-    def predict(self, images, top_k=1):
+    def predict(self, images: List[np.ndarray], top_k: int = 1) -> List[dict]:
+        '''
+        Predict images
+
+        Args:
+            images(list[numpy.ndarray]) : Images to be predicted, consist of np.ndarray in bgr format.
+            top_k(int) : Output top k result of each image.
+
+        Returns:
+            results(list[dict]) : The prediction result of each input image
+        '''
         images = self.transforms(images)
         if len(images.shape) == 3:
             images = images[np.newaxis, :]
-        preds = self(to_variable(images))
-        preds = fluid.layers.softmax(preds, axis=1).numpy()
+        preds = self(paddle.to_variable(images))
+        preds = F.softmax(preds, axis=1).numpy()
         pred_idxs = np.argsort(preds)[::-1][:, :top_k]
         res = []
         for i, pred in enumerate(pred_idxs):
@@ -61,5 +92,5 @@ class ImageClassifierModule(RunModule, ImageServing):
             res.append(res_dict)
         return res
 
-    def is_better_score(self, old_score, new_score):
+    def is_better_score(self, old_score: dict, new_score: dict):
         return old_score['acc'] < new_score['acc']

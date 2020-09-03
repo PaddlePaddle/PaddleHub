@@ -22,9 +22,7 @@ import rarfile
 
 
 class XarInfo(object):
-    '''
-    Informational class which holds the details about an archive member given by a XarFile.
-    '''
+    '''Informational class which holds the details about an archive member given by a XarFile.'''
 
     def __init__(self, _xarinfo, arctype='tar'):
         self._info = _xarinfo
@@ -136,29 +134,21 @@ class XarFile(object):
                 self._archive_fp.write(item)
 
     def extract(self, name: str, path: str):
-        '''
-        Extract a file from the archive to the specified path
-        '''
+        '''Extract a file from the archive to the specified path.'''
         return self._archive_fp.extract(name, path)
 
     def extractall(self, path: str):
-        '''
-        Extract all files from the archive to the specified path
-        '''
+        '''Extract all files from the archive to the specified path.'''
         return self._archive_fp.extractall(path)
 
     def getnames(self) -> List[str]:
-        '''
-        Return a list of file names in the archive.
-        '''
+        '''Return a list of file names in the archive.'''
         if self.arctype == 'tar':
             return self._archive_fp.getnames()
         return self._archive_fp.namelist()
 
     def getxarinfo(self, name: str) -> List[XarInfo]:
-        '''
-        Return the instance of XarInfo given 'name'.
-        '''
+        '''Return the instance of XarInfo given 'name'.'''
         if self.arctype == 'tar':
             return XarInfo(self._archive_fp.getmember(name), self.arctype)
         return XarInfo(self._archive_fp.getinfo(name), self.arctype)
