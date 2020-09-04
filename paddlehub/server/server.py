@@ -21,10 +21,12 @@ PADDLEHUB_PUBLIC_SERVER = 'http://paddlepaddle.org.cn/paddlehub'
 
 
 class HubServer(object):
+    '''PaddleHub server'''
+
     def __init__(self):
         self.sources = OrderedDict()
 
-    def _generate_source(self, url):
+    def _generate_source(self, url: str):
         if ServerSource.check(url):
             source = ServerSource(url)
         elif GitSource.check(url):
@@ -33,17 +35,34 @@ class HubServer(object):
             raise RuntimeError()
         return source
 
-    def add_source(self, url, key=None):
+    def add_source(self, url: str, key: str = None):
+        '''Add a module source(GitSource or ServerSource)'''
         key = "source_{}".format(len(self.sources)) if not key else key
         self.sources[key] = self._generate_source(url)
 
-    def remove_source(self, url=None, key=None):
+    def remove_source(self, url: str = None, key: str = None):
+        '''Remove a module source'''
         self.sources.pop(key)
 
-    def search_module(self, name, version=None, source=None):
+    def search_module(self, name: str, version: str = None, source: str = None) -> dict:
+        '''
+        Search PaddleHub module
+
+        Args:
+            name(str) : PaddleHub module name
+            version(str) : PaddleHub module version
+        '''
         return self.search_resouce(type='module', name=name, version=version, source=source)
 
-    def search_resouce(self, type, name, version=None, source=None):
+    def search_resouce(self, type: str, name: str, version: str = None, source: str = None) -> dict:
+        '''
+        Search PaddleHub Resource
+
+        Args:
+            type(str) : Resource type
+            name(str) : Resource name
+            version(str) : Resource version
+        '''
         sources = self.sources.values() if not source else [self._generate_source(source)]
         for source in sources:
             result = source.search_resouce(name=name, type=type, version=version)

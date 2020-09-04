@@ -177,7 +177,6 @@ def archive(filename: str, recursive: bool = True, exclude: Callable = None, arc
 
     Examples:
         .. code-block:: python
-            from paddlehub.utils import archive
 
             archive_path = '/PATH/TO/FILE'
             archive(archive_path, arcname='output.tar.gz', arctype='tar.gz')
@@ -200,7 +199,6 @@ def unarchive(name: str, path: str):
 
     Examples:
         .. code-block:: python
-            from paddlehub.utils import unarchive
 
             unarchive_path = '/PATH/TO/FILE'
             unarchive(unarchive_path, path='./output')
@@ -219,7 +217,6 @@ def unarchive_with_progress(name: str, path: str) -> Generator[str, int, int]:
 
     Examples:
         .. code-block:: python
-            from paddlehub.utils.xarfile import unarchive_with_progress
 
             unarchive_path = 'test.tar.gz'
             for filename, extract_size, total_szie in unarchive_with_progress(unarchive_path, path='./output'):

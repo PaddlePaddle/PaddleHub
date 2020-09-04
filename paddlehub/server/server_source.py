@@ -25,14 +25,37 @@ from paddlehub.utils import utils
 
 
 class ServerSource(object):
-    def __init__(self, url, timeout=10):
+    '''
+    PaddleHub server source
+
+    Args:
+        url(str) : Url of the server
+        timeout(int) : Request timeout
+    '''
+
+    def __init__(self, url: str, timeout: int = 10):
         self._url = url
         self._timeout = timeout
 
-    def search_module(self, name, version=None):
+    def search_module(self, name: str, version: str = None) -> dict:
+        '''
+        Search PaddleHub module
+
+        Args:
+            name(str) : PaddleHub module name
+            version(str) : PaddleHub module version
+        '''
         return self.search_resouce(type='module', name=name, version=version)
 
-    def search_resouce(self, type, name, version=None):
+    def search_resouce(self, type: str, name: str, version: str = None) -> dict:
+        '''
+        Search PaddleHub Resource
+
+        Args:
+            type(str) : Resource type
+            name(str) : Resource name
+            version(str) : Resource version
+        '''
         payload = {'environments': {}}
 
         payload['word'] = name
@@ -59,7 +82,13 @@ class ServerSource(object):
         return None
 
     @classmethod
-    def check(cls, url):
+    def check(cls, url: str) -> bool:
+        '''
+        Check if the specified url is a valid paddlehub server
+
+        Args:
+            url(str) : Url to check
+        '''
         try:
             r = requests.get(url + '/search')
             return r.status_code == 200

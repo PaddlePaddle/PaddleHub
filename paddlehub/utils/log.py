@@ -96,15 +96,16 @@ class ProgressBar(object):
 
     Examples:
         .. code-block:: python
-        with ProgressBar('Download module') as bar:
-            for i in range(100):
-                bar.update(i / 100)
 
-        # with continuous bar.update, the progress bar in the terminal
-        # will continue to update until 100%
-        #
-        # Download module
-        # [##################################################] 100.00%
+            with ProgressBar('Download module') as bar:
+                for i in range(100):
+                    bar.update(i / 100)
+
+            # with continuous bar.update, the progress bar in the terminal
+            # will continue to update until 100%
+            #
+            # Download module
+            # [##################################################] 100.00%
     '''
 
     def __init__(self, title: str, flush_interval: float = 0.1):
@@ -126,6 +127,10 @@ class ProgressBar(object):
 
     def update(self, progress: float):
         '''
+        Update progress bar
+
+        Args:
+            progress: Processing progress, from 0.0 to 1.0
         '''
         msg = '[{:<50}] {:.2f}%'.format('#' * int(progress * 50), progress * 100)
         need_flush = (time.time() - self.last_flush_time) >= self.flush_interval
@@ -146,14 +151,14 @@ class FormattedText(object):
     Args:
         text(str) : Text content
         width(int) : Text length, if the text is less than the specified length, it will be filled with spaces
-        align(str) : it must be:
-            ========   ==================
+        align(str) : Text alignment, it must be:
+            ========   ====================================
             Charater   Meaning
-            --------   ------------------
-            '<'        left aligned
-            '^'        middle aligned
-            '>'        right aligned
-            ========   ==================
+            --------   ------------------------------------
+            '<'        The text will remain left aligned
+            '^'        The text will remain middle aligned
+            '>'        The text will remain right aligned
+            ========   ====================================
         color(str) : Text color, default is None(depends on terminal configuration)
     '''
     _MAP = {'red': Fore.RED, 'yellow': Fore.YELLOW, 'green': Fore.GREEN, 'blue': Fore.BLUE}
@@ -293,12 +298,13 @@ class Table(object):
     Table with adaptive width and height
 
     Args:
-        colors(list[str]) : Text colors of contents one by one
-        aligns(list[str]) : Text aligns of contents one by one
-        widths(list[str]) : Text widths of contents one by one
+        colors(list[str]) : Text colors
+        aligns(list[str]) : Text alignments
+        widths(list[str]) : Text widths
 
     Examples:
         .. code-block:: python
+
             table = Table(widths=[12, 20])
             table.append('name', 'PaddleHub')
             table.append('version', '2.0.0')
@@ -337,9 +343,9 @@ class Table(object):
 
         Args:
             *contents(*list): Contents of the row, each content will be placed in a separate cell
-            colors(list[str]) : Text colors of contents one by one, if not set, the default value will be used.
-            aligns(list[str]) : Text aligns of contents one by one, if not set, the default value will be used.
-            widths(list[str]) : Text widths of contents one by one, if not set, the default value will be used.
+            colors(list[str]) : Text colors
+            aligns(list[str]) : Text alignments
+            widths(list[str]) : Text widths
         '''
         newrow = TableRow()
 

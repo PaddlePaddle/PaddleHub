@@ -38,8 +38,8 @@ class ImageClassifierModule(RunModule, ImageServing):
         One step for training, which should be called as forward computation.
 
         Args:
-            batch(list[paddle.Variable]): The one batch data, which contains images and labels.
-            batch_idx(int): The index of batch.
+            batch(list[paddle.Tensor]) : The one batch data, which contains images and labels.
+            batch_idx(int) : The index of batch.
 
         Returns:
             results(dict) : The model outputs, such as loss and metrics.
@@ -51,8 +51,8 @@ class ImageClassifierModule(RunModule, ImageServing):
         One step for validation, which should be called as forward computation.
 
         Args:
-            batch(list[paddle.Variable]): The one batch data, which contains images and labels.
-            batch_idx(int): The index of batch.
+            batch(list[paddle.Tensor]) : The one batch data, which contains images and labels.
+            batch_idx(int) : The index of batch.
 
         Returns:
             results(dict) : The model outputs, such as metrics.
@@ -80,7 +80,7 @@ class ImageClassifierModule(RunModule, ImageServing):
         images = self.transforms(images)
         if len(images.shape) == 3:
             images = images[np.newaxis, :]
-        preds = self(paddle.to_variable(images))
+        preds = self(paddle.to_tensor(images))
         preds = F.softmax(preds, axis=1).numpy()
         pred_idxs = np.argsort(preds)[::-1][:, :top_k]
         res = []
@@ -91,6 +91,3 @@ class ImageClassifierModule(RunModule, ImageServing):
                 res_dict[class_name] = preds[i][k]
             res.append(res_dict)
         return res
-
-    def is_better_score(self, old_score: dict, new_score: dict):
-        return old_score['acc'] < new_score['acc']

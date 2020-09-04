@@ -50,7 +50,7 @@ def redirect_estream(stream: IO):
 @contextlib.contextmanager
 def discard_oe():
     '''
-    Redirect input and output stream to temporary file. In a sense,
+    Redirect output and error stream to temporary file. In a sense,
     it is equivalent discarded the output and error messages
     '''
     with generate_tempfile(mode='w') as _stream:

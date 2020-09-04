@@ -17,7 +17,7 @@ import os
 import pickle
 import time
 from collections import defaultdict
-from typing import Any, Callable
+from typing import Any, Callable, List
 
 import paddle
 from paddle.distributed import ParallelEnv
@@ -29,7 +29,25 @@ from paddlehub.utils.utils import Timer
 
 class Trainer(object):
     '''
-    Trainer
+    Model trainer
+
+    Args:
+        model(paddle.nn.Layer) : Model to train or evaluate.
+        strategy(paddle.optimizer.Optimizer) : Optimizer strategy.
+        use_vdl(bool) : Whether to use visualdl to record training data.
+        checkpoint_dir(str) : Directory where the checkpoint is saved, and the trainer will restore the
+            state and model parameters from the checkpoint.
+        compare_metrics(callable) : The method of comparing the model metrics. If not specified, the main
+            metric return by `validation_step` will be used for comparison by default, the larger the
+            value, the better the effect. This method will affect the saving of the best model. If the
+            default behavior does not meet your requirements, please pass in a custom method.
+
+            Example:
+                .. code-block:: python
+
+                    def compare_metrics(old_metric: dict, new_metric: dict):
+                        mainkey = list(new_metric.keys())[0]
+                        return old_metric[mainkey] < new_metric[mainkey]
     '''
 
     def __init__(self,
@@ -130,7 +148,8 @@ class Trainer(object):
             epochs(int) : Number of training loops, default is 1.
             batch_size(int) : Batch size of per step, default is 1.
             num_workers(int) : Number of subprocess to load data, default is 0.
-            eval_dataset(paddle.io.Dataset) : The validation dataset, deafult is None. If set, the Trainer will execute evaluate function every `save_interval` epochs.
+            eval_dataset(paddle.io.Dataset) : The validation dataset, deafult is None. If set, the Trainer will
+                execute evaluate function every `save_interval` epochs.
             log_interval(int) : Log the train infomation every `log_interval` steps.
             save_interval(int) : Save the checkpoint every `save_interval` epochs.
         '''
@@ -269,7 +288,14 @@ class Trainer(object):
             return {'loss': avg_loss, 'metrics': avg_metrics}
         return {'metrics': avg_metrics}
 
-    def training_step(self, batch: Any, batch_idx: int):
+    def training_step(self, batch: List[paddle.Tensor], batch_idx: int):
+        '''
+        One step for training, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Tensor]) : The one batch data
+            batch_idx(int) : The index of batch.
+        '''
         if self.nranks > 1:
             result = self.model._layers.training_step(batch, batch_idx)
         else:
@@ -296,17 +322,42 @@ class Trainer(object):
         return loss, metrics
 
     def validation_step(self, batch: Any, batch_idx: int):
+        '''
+        One step for validation, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Tensor]) : The one batch data
+            batch_idx(int) : The index of batch.
+        '''
         if self.nranks > 1:
             result = self.model._layers.validation_step(batch, batch_idx)
         else:
             result = self.model.validation_step(batch, batch_idx)
         return result
 
-    def optimizer_step(self, current_epoch: int, batch_idx: int, optimizer: paddle.optimizer.Optimizer,
+    def optimizer_step(self, epoch_idx: int, batch_idx: int, optimizer: paddle.optimizer.Optimizer,
                        loss: paddle.Tensor):
+        '''
+        One step for optimize.
+
+        Args:
+            epoch_idx(int) : The index of epoch.
+            batch_idx(int) : The index of batch.
+            optimizer(paddle.optimizer.Optimizer) : Optimizer used.
+            loss(paddle.Tensor) : Loss tensor.
+        '''
         self.optimizer.minimize(loss)
 
-    def optimizer_zero_grad(self, current_epoch: int, batch_idx: int, optimizer: paddle.optimizer.Optimizer):
+    def optimizer_zero_grad(self, epoch_idx: int, batch_idx: int, optimizer: paddle.optimizer.Optimizer):
+        '''
+        One step for clear gradients.
+
+        Args:
+            epoch_idx(int) : The index of epoch.
+            batch_idx(int) : The index of batch.
+            optimizer(paddle.optimizer.Optimizer) : Optimizer used.
+            loss(paddle.Tensor) : Loss tensor.
+        '''
         self.model.clear_gradients()
 
     def _compare_metrics(self, old_metric: dict, new_metric: dict):

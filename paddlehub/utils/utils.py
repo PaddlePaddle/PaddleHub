@@ -32,7 +32,7 @@ import paddlehub.env as hubenv
 
 
 class Version(packaging.version.Version):
-    '''Expand realization of packaging.version.Version'''
+    '''Extended implementation of packaging.version.Version'''
 
     def match(self, condition: str) -> bool:
         '''
@@ -45,9 +45,9 @@ class Version(packaging.version.Version):
             bool: True if the given version condition are met, else False
 
         Examples:
-            from paddlehub.utils import Version
+            .. code-block:: python
 
-            Version('1.2.0').match('>=1.2.0a')
+                Version('1.2.0').match('>=1.2.0a')
         '''
         if not condition:
             return True
@@ -162,7 +162,6 @@ def download(url: str, path: str = None) -> str:
 
     Examples:
         .. code-block:: python
-            from paddlehub.utils.utils import download
 
             url = 'https://xxxxx.xx/xx.tar.gz'
             download(url, path='./output')
@@ -182,7 +181,6 @@ def download_with_progress(url: str, path: str = None) -> Generator[str, int, in
 
     Examples:
         .. code-block:: python
-            from paddlehub.utils.utils import download_with_progress
 
             url = 'https://xxxxx.xx/xx.tar.gz'
             for filename, download_size, total_szie in download_with_progress(url, path='./output'):

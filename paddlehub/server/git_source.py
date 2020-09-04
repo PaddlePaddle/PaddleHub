@@ -29,7 +29,15 @@ from paddlehub.utils import log
 
 
 class GitSource(object):
-    def __init__(self, url, path=None):
+    '''
+    Git source for PaddleHub module
+
+    Args:
+        url(str) : Url of git repository
+        path(str) : Path to store the git repository
+    '''
+
+    def __init__(self, url: str, path: str = None):
         self.url = url
         self._parse_result = urlparse(self.url)
 
@@ -66,10 +74,25 @@ class GitSource(object):
             log.logger.warning('An error occurred while loading {}'.format(self.path))
         sys.path.remove(self.path)
 
-    def search_module(self, name, version=None):
+    def search_module(self, name: str, version: str = None) -> dict:
+        '''
+        Search PaddleHub module
+
+        Args:
+            name(str) : PaddleHub module name
+            version(str) : PaddleHub module version
+        '''
         return self.search_resouce(type='module', name=name, version=version)
 
-    def search_resouce(self, type, name, version=None):
+    def search_resouce(self, type: str, name: str, version: str = None) -> dict:
+        '''
+        Search PaddleHub Resource
+
+        Args:
+            type(str) : Resource type
+            name(str) : Resource name
+            version(str) : Resource version
+        '''
         module = self.hub_modules.get(name, None)
         if module and module.version.match(version):
             return {
@@ -82,7 +105,13 @@ class GitSource(object):
         return None
 
     @classmethod
-    def check(cls, url):
+    def check(cls, url: str) -> bool:
+        '''
+        Check if the specified url is a valid git repository link
+
+        Args:
+            url(str) : Url to check
+        '''
         try:
             git.cmd.Git().ls_remote(url)
             return True
