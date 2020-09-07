@@ -96,3 +96,16 @@ def rotate(im, rotate_lower, rotate_upper):
     rotate_delta = np.random.uniform(rotate_lower, rotate_upper)
     im = im.rotate(int(rotate_delta))
     return im
+
+def get_img_file(file_name: str) -> list:
+    images = []
+    for parent, dirnames, filenames in os.walk(file_name):
+        for filename in dirnames:
+            img_path = os.path.join(parent, filename)
+            if os.path.exists(img_path):
+                for file in os.listdir(img_path):
+                    if file.lower().endswith(
+                            ('.bmp', '.dib', '.png', '.jpg', '.jpeg', '.pbm', '.pgm', '.ppm', '.tif', '.tiff')):
+                        images.append(os.path.join(img_path, file))
+    images.sort()
+    return images
