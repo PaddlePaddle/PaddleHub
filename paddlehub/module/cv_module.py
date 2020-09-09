@@ -13,19 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import OrderedDict
-from typing import List
 import time
+import os
+from typing import List
+from collections import OrderedDict
 
 import numpy as np
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
+from PIL import Image
 
 from paddlehub.module.module import serving, RunModule
 from paddlehub.utils.utils import base64_to_cv2
-from paddlehub.process.transforms import *
-from from paddlehub.process.functional import *
+from paddlehub.process.transforms import ConvertColorSpace, ColorPostprocess, Resize
 
 
 class ImageServing(object):
@@ -97,14 +98,16 @@ class ImageClassifierModule(RunModule, ImageServing):
             res.append(res_dict)
         return res
 
-    
+
 class ImageColorizeModule(RunModule, ImageServing):
     def training_step(self, batch: int, batch_idx: int) -> dict:
         '''
         One step for training, which should be called as forward computation.
+        
         Args:
             batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
             batch_idx(int): The index of batch.
+            
         Returns:
             results(dict) : The model outputs, such as loss and metrics.
         '''
@@ -113,20 +116,24 @@ class ImageColorizeModule(RunModule, ImageServing):
     def validation_step(self, batch: int, batch_idx: int) -> dict:
         '''
         One step for validation, which should be called as forward computation.
+        
         Args:
             batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
             batch_idx(int): The index of batch.
+            
         Returns:
             results(dict) : The model outputs, such as metrics.
         '''
         out_class, out_reg = self(batch[0], batch[1], batch[2])
+        
         criterionCE = nn.loss.CrossEntropyLoss()
         loss_ce = criterionCE(out_class, batch[4][:, 0, :, :])
         loss_G_L1_reg = paddle.sum(paddle.abs(batch[3] - out_reg), axis=1, keepdim=True)
         loss_G_L1_reg = paddle.mean(loss_G_L1_reg)
         loss = loss_ce + loss_G_L1_reg
+        
         visual_ret = OrderedDict()
-        psnrs=[]
+        psnrs = []
         lab2rgb = ConvertColorSpace(mode='LAB2RGB')
         process = ColorPostprocess()
         for i in range(batch[0].numpy().shape[0]):
@@ -143,10 +150,12 @@ class ImageColorizeModule(RunModule, ImageServing):
     def predict(self, images: List[np.ndarray], visualization: bool = True, save_path: str = 'result'):
         '''
         Colorize images
+        
         Args:
             images(list[numpy.ndarray]) : Images to be colorized, consist of np.ndarray in bgr format.
             visualization(bool): Whether to save colorized images.
             save_path(str) : Path to save colorized images.
+            
         Returns:
             results(list[dict]) : The prediction result of each input image
         '''
@@ -155,10 +164,12 @@ class ImageColorizeModule(RunModule, ImageServing):
         resize = Resize((256, 256))
         visual_ret = OrderedDict()
         im = self.transforms(images, is_train=False)
-        out_class, out_reg = self(paddle.to_tensor(im['A']), paddle.to_variable(im['hint_B']), paddle.to_variable(im['mask_B']))
+        out_class, out_reg = self(paddle.to_tensor(im['A']), paddle.to_variable(im['hint_B']),
+                                  paddle.to_variable(im['mask_B']))
         result = []
+
         for i in range(im['A'].shape[0]):
-            gray = lab2rgb(np.concatenate((im['A'],np.zeros(im['B'].shape)), axis=1))[i]
+            gray = lab2rgb(np.concatenate((im['A'], np.zeros(im['B'].shape)), axis=1))[i]
             visual_ret['gray'] = resize(process(gray))
             hint = lab2rgb(np.concatenate((im['A'], im['hint_B']), axis=1))[i]
             visual_ret['hint'] = resize(process(hint))
@@ -166,19 +177,16 @@ class ImageColorizeModule(RunModule, ImageServing):
             visual_ret['real'] = resize(process(real))
             fake = lab2rgb(np.concatenate((im['A'], out_reg.numpy()), axis=1))[i]
             visual_ret['fake_reg'] = resize(process(fake))
+            
             if visualization:
                 fake_name = "fake_" + str(time.time()) + ".png"
+                if not os.path.exists(save_path):
+                    os.mkdir(save_path)
                 fake_path = os.path.join(save_path, fake_name)
                 visual_gray = Image.fromarray(visual_ret['fake_reg'])
                 visual_gray.save(fake_path)
+                
             mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0) ** 2)
             psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             result.append(visual_ret)
         return result
-
-
-
-
-
-
-

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 import cv2
 import numpy as np
 from PIL import Image, ImageEnhance
@@ -97,15 +99,22 @@ def rotate(im, rotate_lower, rotate_upper):
     im = im.rotate(int(rotate_delta))
     return im
 
-def get_img_file(file_name: str) -> list:
+
+def is_image_file(filename: str) -> bool:
+    '''Determine whether the input file name is a valid image file name.'''
+    ext = os.path.splitext(filename)[-1].lower()
+    return ext in ['.bmp', '.dib', '.png', '.jpg', '.jpeg', '.pbm', '.pgm', '.ppm', '.tif', '.tiff']
+
+
+def get_img_file(dir_name: str) -> list:
+    '''Get all image file paths in several directories which have the same parent directory.'''
     images = []
-    for parent, dirnames, filenames in os.walk(file_name):
-        for filename in dirnames:
+    for parent, dirnames, filenames in os.walk(dir_name):
+        for filename in filenames:
+            if not is_image_file(filename):
+                continue
             img_path = os.path.join(parent, filename)
-            if os.path.exists(img_path):
-                for file in os.listdir(img_path):
-                    if file.lower().endswith(
-                            ('.bmp', '.dib', '.png', '.jpg', '.jpeg', '.pbm', '.pgm', '.ppm', '.tif', '.tiff')):
-                        images.append(os.path.join(img_path, file))
+            print(img_path)
+            images.append(img_path)
     images.sort()
     return images

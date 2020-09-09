@@ -16,9 +16,9 @@
 import random
 from collections import OrderedDict
 
+import cv2
 import numpy as np
 from PIL import Image
-import cv2
 
 from paddlehub.process.functional import *
 
@@ -407,15 +407,26 @@ class RandomDistort:
 class ConvertColorSpace:
     """
     Convert color space from RGB to LAB or from LAB to RGB.
+    
     Args:
        mode(str): Color space convert mode, it can be 'RGB2LAB' or 'LAB2RGB'.
+       
     Return:
-        img(numpy.ndarray): converted image.
+        img(np.ndarray): converted image.
     """
     def __init__(self, mode: str = 'RGB2LAB'):
         self.mode = mode
 
-    def rgb2xyz(self, rgb: numpy.ndarray):
+    def rgb2xyz(self, rgb: np.ndarray) -> np.ndarray:
+        """
+        Convert color space from RGB to XYZ.
+
+        Args:
+           img(np.ndarray): Original RGB image.
+
+        Return:
+            img(np.ndarray): Converted XYZ image.
+        """
         mask = (rgb > 0.04045)
         np.seterr(invalid='ignore')
         rgb = (((rgb + .055) / 1.055) ** 2.4) * mask + rgb / 12.92 * (1 - mask)
@@ -426,7 +437,16 @@ class ConvertColorSpace:
         out = np.concatenate((x[:, None, :, :], y[:, None, :, :], z[:, None, :, :]), axis=1)
         return out
 
-    def xyz2lab(self, xyz: numpy.ndarray):
+    def xyz2lab(self, xyz: np.ndarray) -> np.ndarray:
+        """
+        Convert color space from XYZ to LAB.
+
+        Args:
+           img(np.ndarray): Original XYZ image.
+
+        Return:
+            img(np.ndarray): Converted LAB image.
+        """
         sc = np.array((0.95047, 1., 1.08883))[None, :, None, None]
         xyz_scale = xyz / sc
         mask = (xyz_scale > .008856).astype(np.float32)
@@ -437,14 +457,32 @@ class ConvertColorSpace:
         out = np.concatenate((L[:, None, :, :], a[:, None, :, :], b[:, None, :, :]), axis=1)
         return out
 
-    def rgb2lab(self, rgb: numpy.ndarray):
+    def rgb2lab(self, rgb: np.ndarray) -> np.ndarray:
+        """
+        Convert color space from RGB to LAB.
+
+        Args:
+           img(np.ndarray): Original RGB image.
+
+        Return:
+            img(np.ndarray): Converted LAB image.
+        """
         lab = self.xyz2lab(self.rgb2xyz(rgb))
         l_rs = (lab[:, [0], :, :] - 50) / 100
         ab_rs = lab[:, 1:, :, :] / 110
         out = np.concatenate((l_rs, ab_rs), axis=1)
         return out
 
-    def xyz2rgb(self, xyz: numpy.ndarray):
+    def xyz2rgb(self, xyz: np.ndarray) -> np.ndarray:
+        """
+        Convert color space from XYZ to RGB.
+
+        Args:
+           img(np.ndarray): Original XYZ image.
+
+        Return:
+            img(np.ndarray): Converted RGB image.
+        """
         r = 3.24048134 * xyz[:, 0, :, :] - 1.53715152 * xyz[:, 1, :, :] - 0.49853633 * xyz[:, 2, :, :]
         g = -0.96925495 * xyz[:, 0, :, :] + 1.87599 * xyz[:, 1, :, :] + .04155593 * xyz[:, 2, :, :]
         b = .05564664 * xyz[:, 0, :, :] - .20404134 * xyz[:, 1, :, :] + 1.05731107 * xyz[:, 2, :, :]
@@ -456,7 +494,16 @@ class ConvertColorSpace:
         out = np.nan_to_num(out)
         return out
 
-    def lab2xyz(self, lab: numpy.ndarray):
+    def lab2xyz(self, lab: np.ndarray) -> np.ndarray:
+        """
+        Convert color space from LAB to XYZ.
+
+        Args:
+           img(np.ndarray): Original LAB image.
+
+        Return:
+            img(np.ndarray): Converted XYZ image.
+        """
         y_int = (lab[:, 0, :, :] + 16.) / 116.
         x_int = (lab[:, 1, :, :] / 500.) + y_int
         z_int = y_int - (lab[:, 2, :, :] / 200.)
@@ -470,14 +517,23 @@ class ConvertColorSpace:
         out = out * sc
         return out
 
-    def lab2rgb(self, lab_rs: numpy.ndarray):
+    def lab2rgb(self, lab_rs: np.ndarray) -> np.ndarray:
+        """
+        Convert color space from LAB to RGB.
+
+        Args:
+           img(np.ndarray): Original LAB image.
+
+        Return:
+            img(np.ndarray): Converted RGB image.
+        """
         l = lab_rs[:, [0], :, :] * 100 + 50
         ab = lab_rs[:, 1:, :, :] * 110
         lab = np.concatenate((l, ab), axis=1)
         out = self.xyz2rgb(self.lab2xyz(lab))
         return out
 
-    def __call__(self, img: numpy.ndarray):
+    def __call__(self, img: np.ndarray) -> np.ndarray:
         if self.mode == 'RGB2LAB':
             img = np.expand_dims(img / 255, 0)
             img = np.array(img).transpose(0, 3, 1, 2)
@@ -489,16 +545,19 @@ class ConvertColorSpace:
 
 
 class ColorizeHint:
-    """
-    Get hint and mask images for colorization.
+    """Get hint and mask images for colorization.
+    
+    This method is prepared for user guided colorization tasks. Take the original RGB images as imput, we will obtain the local hints and correspoding mask to guid colorization process.
+    
     Args:
        percent(float): Probability for ignoring hint in an iteration.
        num_points(int): Number of selected hints in an iteration.
        samp(str): Sample method, default is normal.
        use_avg(bool): Whether to use mean in selected hint area.
+       
     Return:
-        hint(numpy.ndarray): hint images
-        mask(numpy.ndarray): mask images
+        hint(np.ndarray): hint images
+        mask(np.ndarray): mask images
     """
     def __init__(self,  percent: float, num_points: int = None, samp: str = 'normal', use_avg: bool = True):
         self.percent = percent
@@ -506,7 +565,7 @@ class ColorizeHint:
         self.samp = samp
         self.use_avg = use_avg
 
-    def __call__(self, data: numpy.ndarray, hint: numpy.ndarray, mask: numpy.ndarray):
+    def __call__(self, data: np.ndarray, hint: np.ndarray, mask: np.ndarray):
         sample_Ps = [1, 2, 3, 4, 5, 6, 7, 8, 9, ]
         self.data = data
         self.hint = hint
@@ -550,8 +609,10 @@ class ColorizeHint:
 class SqueezeAxis:
     """
     Squeeze the specific axis when it equal to 1.
+    
     Args:
        axis(int): Which axis should be squeezed.
+       
     """
     def __init__(self, axis: int):
         self.axis = axis
@@ -566,8 +627,8 @@ class SqueezeAxis:
 
 
 class ColorizePreprocess:
-    """
-    Prepare dataset for image Colorization
+    """Prepare dataset for image Colorization.
+    
     Args:
        ab_thresh(float): Thresh value for setting mask value.
        p(float): Probability for ignoring hint in an iteration.
@@ -575,6 +636,7 @@ class ColorizePreprocess:
        samp(str): Sample method, default is normal.
        use_avg(bool): Whether to use mean in selected hint area.
        is_train(bool): Training process or not.
+       
     Return:
         data(dict)：The preprocessed data for colorization.
 
@@ -594,7 +656,16 @@ class ColorizePreprocess:
         self.gethint = ColorizeHint(percent=self.p, num_points=self.num_points, samp=self.samp, use_avg=self.use_avg)
         self.squeeze = SqueezeAxis(0)
 
-    def __call__(self, data_lab: numpy.ndarray):
+    def __call__(self, data_lab: np.ndarray):
+        """
+        This method seperates the L channel and AB channel, obtain hint, mask and real_B_enc as the input for colorization task.
+
+        Args:
+           img(np.ndarray): LAB image.
+
+        Returns:
+            data(dict)：The preprocessed data for colorization.
+        """
         data = {}
         A = 2 * 110 / 10 + 1
         data['A'] = data_lab[:, [0, ], :, :]
@@ -626,22 +697,19 @@ class ColorizePreprocess:
 
 class ColorPostprocess:
     """
-    Transform images from
+    Transform images from [0, 1] to [0, 255]
+    
     Args:
        type(type): Type of Image value.
+       
     Return:
-        img(numpy.ndarray): Image in range of 0-255.
+        img(np.ndarray): Image in range of 0-255.
     """
-    def __init__(self, type: type = numpy.uint8):
+    def __init__(self, type: type = np.uint8):
         self.type = type
 
-    def __call__(self, img: numpy.ndarray):
+    def __call__(self, img: np.ndarray):
         img = np.transpose(img, (1, 2, 0))
         img = np.clip(img, 0, 1) * 255
         img = img.astype(self.type)
         return img
-
-
-
-
-
