@@ -29,19 +29,21 @@ def base64_to_cv2(b64str):
 
 @moduleinfo(
     name="chinese_text_detection_db_mobile",
-    version="1.0.1",
+    version="1.0.2",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
 class ChineseTextDetectionDB(hub.Module):
-    def _initialize(self):
+    def _initialize(self, enable_mkldnn=False):
         """
         initialize with the necessary elements
         """
         self.pretrained_model_path = os.path.join(self.directory,
                                                   'inference_model')
+        self.enable_mkldnn = enable_mkldnn
+
         self._set_config()
 
     def check_requirements(self):
@@ -71,6 +73,8 @@ class ChineseTextDetectionDB(hub.Module):
             config.enable_use_gpu(8000, 0)
         else:
             config.disable_gpu()
+            if self.enable_mkldnn:
+                config.enable_mkldnn()
 
         config.disable_glog_info()
 
