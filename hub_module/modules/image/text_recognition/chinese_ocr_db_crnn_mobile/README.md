@@ -19,6 +19,16 @@ $ hub run chinese_ocr_db_crnn_mobile --input_path "/PATH/TO/IMAGE"
 
 ## API
 
+### \_\_init\_\_(text_detector_module=None, enable_mkldnn=False)
+
+构造ChineseOCRDBCRNN对象
+
+**参数**
+
+* text_detector_module(str): 文字检测PaddleHub Module名字，如设置为None，则默认使用[chinese_text_detection_db_mobile Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_mobile&en_category=TextRecognition)。其作用为检测图片当中的文本。
+* enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
+
+
 ```python
 def recognize_text(images=[],
                     paths=[],
