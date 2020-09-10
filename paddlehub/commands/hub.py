@@ -23,5 +23,4 @@ from paddlehub.commands import register, get_command
 class HubCommand:
     def execute(self, argv):
         help = get_command('hub.help')
-        help().execute(argv)
-        return True
+        return help().execute(argv)

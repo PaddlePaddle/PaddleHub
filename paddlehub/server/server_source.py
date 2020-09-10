@@ -18,8 +18,6 @@ import platform
 import requests
 import sys
 
-import paddle
-
 import paddlehub
 from paddlehub.utils import utils
 
@@ -32,7 +30,6 @@ class ServerSource(object):
         url(str) : Url of the server
         timeout(int) : Request timeout
     '''
-
     def __init__(self, url: str, timeout: int = 10):
         self._url = url
         self._timeout = timeout
@@ -63,6 +60,8 @@ class ServerSource(object):
         if version:
             payload['version'] = version
 
+        # Delay module loading to improve command line speed
+        import paddle
         payload['environments']['hub_version'] = paddlehub.__version__
         payload['environments']['paddle_version'] = paddle.__version__
         payload['environments']['python_version'] = '.'.join(map(str, sys.version_info[0:3]))

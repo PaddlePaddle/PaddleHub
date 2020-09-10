@@ -22,23 +22,22 @@ PADDLEHUB_PUBLIC_SERVER = 'http://paddlepaddle.org.cn/paddlehub'
 
 class HubServer(object):
     '''PaddleHub server'''
-
     def __init__(self):
         self.sources = OrderedDict()
 
-    def _generate_source(self, url: str):
-        if ServerSource.check(url):
+    def _generate_source(self, url: str, source_type: str = 'server'):
+        if source_type == 'server':
             source = ServerSource(url)
-        elif GitSource.check(url):
+        elif source_type == 'git':
             source = GitSource(url)
         else:
             raise RuntimeError()
         return source
 
-    def add_source(self, url: str, key: str = None):
+    def add_source(self, url: str, key: str = None, source_type: str = 'server'):
         '''Add a module source(GitSource or ServerSource)'''
         key = "source_{}".format(len(self.sources)) if not key else key
-        self.sources[key] = self._generate_source(url)
+        self.sources[key] = self._generate_source(url, source_type)
 
     def remove_source(self, url: str = None, key: str = None):
         '''Remove a module source'''

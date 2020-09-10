@@ -32,7 +32,6 @@ def register(name: str, description: str = '') -> Any:
         name(str) : The name of the command, separated by '.' (e.g, hub.serving)
         description(str) : The description of the specified command showd in the help command, if not description given, this command would not be shown in help command. Default is None.
     '''
-
     def _warpper(command):
         items = name.split('.')
 
@@ -66,4 +65,4 @@ def execute():
     else:
         idx += 1
 
-    exit(com['_entry']().execute(sys.argv[idx:]))
+    return com['_entry']().execute(sys.argv[idx:])

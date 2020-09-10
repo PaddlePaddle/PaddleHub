@@ -23,7 +23,7 @@ from paddlehub.commands import register, _commands
 class HelpCommand:
     def execute(self, argv: List) -> bool:
         msg = 'Usage:\n'
-        msg += '\thub <command> <options>\n\n'
+        msg += '    hub <command> <options>\n\n'
         msg += 'Commands:\n'
         for command, detail in _commands['hub'].items():
             if command.startswith('_'):
@@ -31,7 +31,7 @@ class HelpCommand:
 
             if not '_description' in detail:
                 continue
-            msg += '\t{:>15}\t\t{}\n'.format(command, detail['_description'])
+            msg += '    {:<15}        {}\n'.format(command, detail['_description'])
 
         print(msg)
         return True
