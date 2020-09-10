@@ -57,12 +57,13 @@ def serving(func: Callable) -> Callable:
 class Module(object):
     def __new__(cls, name: str = None, directory: str = None, version: str = None, **kwargs):
         if cls.__name__ == 'Module':
+            # This branch come from hub.Module(name='xxx')
             if name:
                 module = cls.init_with_name(name=name, version=version, **kwargs)
             elif directory:
                 module = cls.init_with_directory(directory=directory, **kwargs)
         else:
-            raise RuntimeError()
+            module = object.__new__(cls)
 
         module.directory = directory
         return module
@@ -104,6 +105,15 @@ class Module(object):
     def init_with_directory(cls, directory: str, **kwargs):
         user_module_cls = cls.load(directory)
         return user_module_cls(**kwargs)
+
+    @classmethod
+    def get_py_requirments(cls):
+        req_file = os.path.join(cls.directory, 'requirements.txt')
+        if not os.path.exists(req_file):
+            return []
+
+        with open(req_file, 'r') as file:
+            return file.read().split('\n')
 
 
 class RunModule(object):
