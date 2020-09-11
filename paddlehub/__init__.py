@@ -15,4 +15,6 @@
 
 __version__ = '2.0.0a0'
 
-from .module import Module
+from paddlehub.module import Module
+
+from paddlehub.compat.module.processor import BaseProcessor

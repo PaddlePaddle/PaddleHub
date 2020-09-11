@@ -20,6 +20,7 @@ import sys
 from typing import Callable, List, Optional, Generic
 
 from paddlehub.utils import utils
+from paddlehub.compat.module.module_v1 import ModuleV1
 
 
 class InvalidHubModule(Exception):
@@ -55,6 +56,8 @@ def serving(func: Callable) -> Callable:
 
 
 class Module(object):
+    '''
+    '''
     def __new__(cls, name: str = None, directory: str = None, version: str = None, **kwargs):
         if cls.__name__ == 'Module':
             # This branch come from hub.Module(name='xxx')
@@ -65,13 +68,17 @@ class Module(object):
         else:
             module = object.__new__(cls)
 
-        module.directory = directory
         return module
 
     @classmethod
     def load(cls, directory: str) -> Generic:
         if directory.endswith(os.sep):
             directory = directory[:-1]
+
+        # if module description file existed, try to load as ModuleV1
+        desc_file = os.path.join(directory, 'module_desc.pb')
+        if os.path.exists(desc_file):
+            return ModuleV1.load(desc_file)
 
         basename = os.path.split(directory)[-1]
         dirname = os.path.join(*list(os.path.split(directory)[:-1]))
@@ -99,7 +106,8 @@ class Module(object):
         if not user_module_cls or not user_module_cls.version.match(version):
             user_module_cls = manager.install(name, version)
 
-        return user_module_cls(**kwargs)
+        directory = manager._get_normalized_path(name)
+        return user_module_cls(directory=directory, **kwargs)
 
     @classmethod
     def init_with_directory(cls, directory: str, **kwargs):
@@ -107,7 +115,7 @@ class Module(object):
         return user_module_cls(**kwargs)
 
     @classmethod
-    def get_py_requirments(cls):
+    def get_py_requirements(cls):
         req_file = os.path.join(cls.directory, 'requirements.txt')
         if not os.path.exists(req_file):
             return []

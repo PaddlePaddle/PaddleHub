@@ -16,12 +16,14 @@
 import base64
 import contextlib
 import cv2
+import importlib
 import math
 import os
 import requests
 import sys
 import time
 import tempfile
+import types
 import numpy as np
 from typing import Generator
 from urllib.parse import urlparse
@@ -33,7 +35,6 @@ import paddlehub.env as hubenv
 
 class Version(packaging.version.Version):
     '''Extended implementation of packaging.version.Version'''
-
     def match(self, condition: str) -> bool:
         '''
         Determine whether the given condition are met
@@ -78,7 +79,6 @@ class Version(packaging.version.Version):
 
 class Timer(object):
     '''Calculate runing speed and estimated time of arrival(ETA)'''
-
     def __init__(self, total_step: int):
         self.total_step = total_step
         self.last_start_step = 0
@@ -202,3 +202,18 @@ def download_with_progress(url: str, path: str = None) -> Generator[str, int, in
             _file.write(data)
             download_size += len(data)
             yield savename, download_size, total_size
+
+
+def load_py_module(python_path: str, py_module_name: str) -> types.ModuleType:
+    '''
+    Load the specified python module.
+
+    Args:
+        python_path(str) : The directory where the python module is located
+        py_module_name(str) : Module name to be loaded
+    '''
+    sys.path.insert(0, python_path)
+    py_module = importlib.import_module(py_module_name)
+    sys.path.pop(0)
+
+    return py_module

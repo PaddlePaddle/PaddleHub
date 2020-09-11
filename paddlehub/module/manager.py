@@ -203,7 +203,7 @@ class LocalModuleManager(object):
         shutil.copytree(directory, os.path.join(self.home, hub_module_cls.name))
         self._local_modules[hub_module_cls.name] = hub_module_cls
 
-        for py_req in hub_module_cls.get_py_requirments():
+        for py_req in hub_module_cls.get_py_requirements():
             log.logger.info('Installing dependent packages: {}'.format(py_req))
             result = pypi.install(py_req)
             if result:
@@ -221,5 +221,5 @@ class LocalModuleManager(object):
                 for path, ds, ts in xarfile.unarchive_with_progress(archive, _tdir):
                     bar.update(float(ds) / ts)
 
-            path = os.path.split(path)[0]
+            path = path.split(os.sep)[0]
             return self._install_from_directory(os.path.join(_tdir, path))
