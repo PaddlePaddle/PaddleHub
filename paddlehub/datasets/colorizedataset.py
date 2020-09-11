@@ -5,6 +5,7 @@ import paddle
 
 from paddlehub.process.functional import get_img_file
 from paddlehub.env import DATA_HOME
+from typing import Callable
 
 class Colorizedataset(paddle.io.Dataset):
     """
@@ -15,7 +16,7 @@ class Colorizedataset(paddle.io.Dataset):
     Returns:
         DataSet: An iterable object for data iterating
     """
-    def __init__(self, transform: classmethod, mode: str = 'train'):
+    def __init__(self, transform: Callable, mode: str = 'train'):
         self.mode = mode
         self.transform = transform
         
