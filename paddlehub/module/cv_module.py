@@ -147,12 +147,12 @@ class ImageColorizeModule(RunModule, ImageServing):
         psnr = paddle.to_variable(np.array(psnrs))
         return {'loss': loss, 'metrics': {'psnr': psnr}}
 
-    def predict(self, images: List[np.ndarray], visualization: bool = True, save_path: str = 'result'):
+    def predict(self, images: str, visualization: bool = True, save_path: str = 'result'):
         '''
         Colorize images
         
         Args:
-            images(list[numpy.ndarray]) : Images to be colorized, consist of np.ndarray in bgr format.
+            images(str) : Images path to be colorized.
             visualization(bool): Whether to save colorized images.
             save_path(str) : Path to save colorized images.
             
