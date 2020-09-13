@@ -180,7 +180,7 @@ class UserGuidedColorization(nn.Layer):
             self.set_dict(model_dict)
             print("load pretrained model success")
 
-    def transforms(self, images: numpy.ndarray, is_train: bool = True) -> callable:
+    def transforms(self, images: str, is_train: bool = True) -> callable:
         if is_train:
             transform = Compose([
                 Resize((256, 256), interp="RANDOM"),
