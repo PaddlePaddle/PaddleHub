@@ -188,14 +188,16 @@ class UserGuidedColorization(nn.Layer):
                 ConvertColorSpace(mode='RGB2LAB'),
                 ColorizePreprocess(ab_thresh=0, is_train=is_train)
             ],
-                                stay_rgb=True)
+                                stay_rgb=True,
+                                is_permute=False)
         else:
             transform = Compose([
                 Resize((256, 256), interp="RANDOM"),
                 ConvertColorSpace(mode='RGB2LAB'),
                 ColorizePreprocess(ab_thresh=0, is_train=is_train)
             ],
-                                stay_rgb=True)
+                                stay_rgb=True,
+                                is_permute=False)
         return transform(images)
 
     def forward(self,
