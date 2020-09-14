@@ -1,5 +1,5 @@
-# coding:utf-8
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+#coding:utf-8
+# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = '2.0.0a0'
 
-from paddlehub.module import Module
-
-from paddlehub.compat.module.processor import BaseProcessor
-from paddlehub.compat.type import DataType
+class DataType(object):
+    IMAGE = 0
+    TEXT = 1
+    AUDIO = 2
+    VIDEO = 3
+    INT = 4
+    FLOAT = 5

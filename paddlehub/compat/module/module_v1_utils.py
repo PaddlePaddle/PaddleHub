@@ -33,12 +33,12 @@ def convert_signatures(signmaps):
     for sign, var in signmaps.items():
         _dict[sign] = EasyDict()
         for fetch_var in var.fetch_desc:
-            _dict[sign].fetch_vars = list()
-            _dict[sign].fetch_vars.append(EasyDict(name=fetch_var.var_name, alias=fetch_var.alias))
+            _dict[sign].outputs = list()
+            _dict[sign].outputs.append(EasyDict(name=fetch_var.var_name, alias=fetch_var.alias))
 
         for feed_var in var.feed_desc:
-            _dict[sign].feed_vars = list()
-            _dict[sign].feed_vars.append(EasyDict(name=feed_var.var_name, alias=feed_var.alias))
+            _dict[sign].inputs = list()
+            _dict[sign].inputs.append(EasyDict(name=feed_var.var_name, alias=feed_var.alias))
 
     return _dict
 
