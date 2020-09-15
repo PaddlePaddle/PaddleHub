@@ -47,6 +47,10 @@ class ModuleV1(object):
         self._generate_func()
 
     def _load_processor(self):
+        # Some module does not have a processor(e.g. ernie)
+        if not 'processor_info' in self.desc:
+            return
+
         python_path = os.path.join(self.directory, 'python')
         processor_name = self.desc.processor_info
         self.processor = utils.load_py_module(python_path, processor_name)

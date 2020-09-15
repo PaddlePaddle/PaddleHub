@@ -43,14 +43,14 @@ class HubModuleNotFoundError(Exception):
 
 
 class LocalModuleManager(object):
-    """
+    '''
     LocalModuleManager is used to manage PaddleHub's local Module, which supports the installation, uninstallation,
     and search of HubModule. LocalModuleManager is a singleton object related to the path, in other words, when the
     LocalModuleManager object of the same home directory is generated multiple times, the same object is returned.
 
     Args:
         home (str): The directory where PaddleHub modules are stored, the default is ~/.paddlehub/modules
-    """
+    '''
     _instance_map = {}
 
     def __new__(cls, home: str = MODULE_HOME):

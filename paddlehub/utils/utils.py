@@ -31,10 +31,12 @@ from urllib.parse import urlparse
 import packaging.version
 
 import paddlehub.env as hubenv
+import paddlehub.utils as utils
 
 
 class Version(packaging.version.Version):
     '''Extended implementation of packaging.version.Version'''
+
     def match(self, condition: str) -> bool:
         '''
         Determine whether the given condition are met
@@ -76,9 +78,35 @@ class Version(packaging.version.Version):
 
         return _comp(Version(version))
 
+    def __lt__(self, other):
+        if isinstance(other, str):
+            other = Version(other)
+        return super().__lt__(other)
+
+    def __le__(self, other):
+        if isinstance(other, str):
+            other = Version(other)
+        return super().__le__(other)
+
+    def __gt__(self, other):
+        if isinstance(other, str):
+            other = Version(other)
+        return super().__gt__(other)
+
+    def __ge__(self, other):
+        if isinstance(other, str):
+            other = Version(other)
+        return super().__ge__(other)
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            other = Version(other)
+        return super().__eq__(other)
+
 
 class Timer(object):
     '''Calculate runing speed and estimated time of arrival(ETA)'''
+
     def __init__(self, total_step: int):
         self.total_step = total_step
         self.last_start_step = 0
@@ -217,3 +245,35 @@ def load_py_module(python_path: str, py_module_name: str) -> types.ModuleType:
     sys.path.pop(0)
 
     return py_module
+
+
+def get_platform_default_encoding() -> str:
+    '''
+    '''
+    if utils.platform.is_windows():
+        return 'gbk'
+    return 'utf8'
+
+
+def sys_stdin_encoding() -> str:
+    '''
+    '''
+    encoding = sys.stdin.encoding
+    if encoding is None:
+        encoding = sys.getdefaultencoding()
+
+    if encoding is None:
+        encoding = get_platform_default_encoding()
+    return encoding
+
+
+def sys_stdout_encoding() -> str:
+    '''
+    '''
+    encoding = sys.stdout.encoding
+    if encoding is None:
+        encoding = sys.getdefaultencoding()
+
+    if encoding is None:
+        encoding = get_platform_default_encoding()
+    return encoding

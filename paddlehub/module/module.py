@@ -17,9 +17,9 @@ import inspect
 import importlib
 import os
 import sys
-from typing import Callable, List, Optional, Generic
+from typing import Callable, Generic, List, Optional
 
-from paddlehub.utils import utils
+from paddlehub.utils import log, utils
 from paddlehub.compat.module.module_v1 import ModuleV1
 
 
@@ -58,9 +58,10 @@ def serving(func: Callable) -> Callable:
 class Module(object):
     '''
     '''
+
     def __new__(cls, name: str = None, directory: str = None, version: str = None, **kwargs):
         if cls.__name__ == 'Module':
-            # This branch come from hub.Module(name='xxx')
+            # This branch come from hub.Module(name='xxx') or hub.Module(directory='xxx')
             if name:
                 module = cls.init_with_name(name=name, version=version, **kwargs)
             elif directory:
@@ -72,19 +73,19 @@ class Module(object):
 
     @classmethod
     def load(cls, directory: str) -> Generic:
+        '''
+        '''
         if directory.endswith(os.sep):
             directory = directory[:-1]
 
-        # if module description file existed, try to load as ModuleV1
+        # If module description file existed, try to load as ModuleV1
         desc_file = os.path.join(directory, 'module_desc.pb')
         if os.path.exists(desc_file):
             return ModuleV1.load(desc_file)
 
         basename = os.path.split(directory)[-1]
         dirname = os.path.join(*list(os.path.split(directory)[:-1]))
-
-        sys.path.insert(0, dirname)
-        py_module = importlib.import_module('{}.module'.format(basename))
+        py_module = utils.load_py_module(dirname, '{}.module'.format(basename))
 
         for _item, _cls in inspect.getmembers(py_module, inspect.isclass):
             _item = py_module.__dict__[_item]
@@ -93,13 +94,14 @@ class Module(object):
                 break
         else:
             raise InvalidHubModule(directory)
-        sys.path.pop(0)
 
         user_module_cls.directory = directory
         return user_module_cls
 
     @classmethod
     def init_with_name(cls, name: str, version: str = None, **kwargs):
+        '''
+        '''
         from paddlehub.module.manager import LocalModuleManager
         manager = LocalModuleManager()
         user_module_cls = manager.search(name)
@@ -107,15 +109,39 @@ class Module(object):
             user_module_cls = manager.install(name, version)
 
         directory = manager._get_normalized_path(name)
+
+        # The HubModule in the old version will use the _initialize method to initialize,
+        # this function will be obsolete in a future version
+        if hasattr(user_module_cls, '_initialize'):
+            log.logger.warning(
+                'The _initialize method in HubModule will soon be deprecated, you can use the __init__() to handle the initialization of the object'
+            )
+            user_module = user_module_cls(directory=directory)
+            user_module._initialize(**kwargs)
+            return user_module
         return user_module_cls(directory=directory, **kwargs)
 
     @classmethod
     def init_with_directory(cls, directory: str, **kwargs):
+        '''
+        '''
         user_module_cls = cls.load(directory)
-        return user_module_cls(**kwargs)
+
+        # The HubModule in the old version will use the _initialize method to initialize,
+        # this function will be obsolete in a future version
+        if hasattr(user_module_cls, '_initialize'):
+            log.logger.warning(
+                'The _initialize method in HubModule will soon be deprecated, you can use the __init__() to handle the initialization of the object'
+            )
+            user_module = user_module_cls(directory=directory)
+            user_module._initialize(**kwargs)
+            return user_module
+        return user_module_cls(directory=directory, **kwargs)
 
     @classmethod
     def get_py_requirements(cls):
+        '''
+        '''
         req_file = os.path.join(cls.directory, 'requirements.txt')
         if not os.path.exists(req_file):
             return []
@@ -125,6 +151,9 @@ class Module(object):
 
 
 class RunModule(object):
+    '''
+    '''
+
     def __init__(self, *args, **kwargs):
         # Avoid module being initialized multiple times
         if '_is_initialize' in self.__dict__ and self._is_initialize:
@@ -149,6 +178,8 @@ class RunModule(object):
 
     @classmethod
     def get_py_requirements(cls) -> List[str]:
+        '''
+        '''
         py_module = sys.modules[cls.__module__]
         directory = os.path.dirname(py_module.__file__)
         req_file = os.path.join(directory, 'requirements.txt')
@@ -172,6 +203,9 @@ def moduleinfo(name: str,
                summary: str = None,
                type: str = None,
                meta=None) -> Callable:
+    '''
+    '''
+
     def _wrapper(cls: Generic) -> Generic:
         wrap_cls = cls
         _meta = RunModule if not meta else meta

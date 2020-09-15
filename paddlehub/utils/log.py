@@ -170,8 +170,8 @@ class FormattedText(object):
         self.width = width
 
     def __repr__(self) -> str:
-        form = ':{}{}'.format(self.align, self.width)
-        text = ('{' + form + '}').format(self.text)
+        form = '{{:{}{}}}'.format(self.align, self.width)
+        text = form.format(self.text)
         if not self.color:
             return text
         return self.color + text + Fore.RESET
