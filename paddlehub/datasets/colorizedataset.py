@@ -22,6 +22,7 @@ from paddlehub.process.functional import get_img_file
 from paddlehub.env import DATA_HOME
 from typing import Callable
 
+
 class Colorizedataset(paddle.io.Dataset):
     """
     Dataset for colorization.
@@ -34,14 +35,12 @@ class Colorizedataset(paddle.io.Dataset):
     def __init__(self, transform: Callable, mode: str = 'train'):
         self.mode = mode
         self.transform = transform
-        
+
         if self.mode == 'train':
             self.file = 'train'
         elif self.mode == 'test':
             self.file = 'test'
-        else:
-            self.file = 'validation'
-            
+
         self.file = os.path.join(DATA_HOME, 'canvas', self.file)
         self.data = get_img_file(self.file)
 

@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 import paddle
 import numpy
 import paddle.nn as nn
 from paddle.nn import Conv2d, ConvTranspose2d
-from paddlehub.module.module import moduleinfo
 
+from paddlehub.module.module import moduleinfo
+from paddlehub.env import MODULE_HOME
 from paddlehub.process.transforms import Compose, Resize, RandomPaddingCrop, ConvertColorSpace, ColorizePreprocess
 from paddlehub.module.cv_module import ImageColorizeModule
 
@@ -178,24 +181,31 @@ class UserGuidedColorization(nn.Layer):
         if load_checkpoint is not None:
             model_dict = paddle.load(load_checkpoint)[0]
             self.set_dict(model_dict)
-            print("load pretrained model success")
+            print("load custom checkpoint success")
+        else:
+            checkpoint = os.path.join(MODULE_HOME, 'user_guided_colorization', 'user_guided.pdparams')
+            model_dict = paddle.load(checkpoint)[0]
+            self.set_dict(model_dict)
+            print("load pretrained checkpoint success")
 
     def transforms(self, images: str, is_train: bool = True) -> callable:
         if is_train:
             transform = Compose([
-                Resize((256, 256), interp="RANDOM"),
+                Resize((256, 256), interp='NEAREST'),
                 RandomPaddingCrop(crop_size=176),
                 ConvertColorSpace(mode='RGB2LAB'),
                 ColorizePreprocess(ab_thresh=0, is_train=is_train)
             ],
-                                stay_rgb=True)
+                                stay_rgb=True,
+                                is_permute=False)
         else:
             transform = Compose([
-                Resize((256, 256), interp="RANDOM"),
+                Resize((256, 256), interp='NEAREST'),
                 ConvertColorSpace(mode='RGB2LAB'),
                 ColorizePreprocess(ab_thresh=0, is_train=is_train)
             ],
-                                stay_rgb=True)
+                                stay_rgb=True,
+                                is_permute=False)
         return transform(images)
 
     def forward(self,
