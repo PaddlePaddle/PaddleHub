@@ -22,6 +22,15 @@ import paddlehub
 from paddlehub.utils import utils
 
 
+class ServerConnectionError(Exception):
+    def __init__(self, url: str):
+        self.url = url
+
+    def __str__(self):
+        tips = 'Can\'t connect to Hub Server: {}'.format(self.url)
+        return tips
+
+
 class ServerSource(object):
     '''
     PaddleHub server source
@@ -30,6 +39,7 @@ class ServerSource(object):
         url(str) : Url of the server
         timeout(int) : Request timeout
     '''
+
     def __init__(self, url: str, timeout: int = 10):
         self._url = url
         self._timeout = timeout
@@ -71,14 +81,20 @@ class ServerSource(object):
         payload['environments']['platform_type'] = platform.platform()
 
         api = '{}/search'.format(self._url)
-        result = requests.get(api, payload, timeout=self._timeout)
-        result = result.json()
 
-        if result['status'] == 0 and len(result['data']) > 0:
-            for item in result['data']:
-                if name.lower() == item['name'].lower() and utils.Version(item['version']).match(version):
-                    return item
-        return None
+        try:
+            result = requests.get(api, payload, timeout=self._timeout)
+            result = result.json()
+
+            if result['status'] == 0 and len(result['data']) > 0:
+                for item in result['data']:
+                    if name.lower() == item['name'].lower() and utils.Version(item['version']).match(version):
+                        return item
+            else:
+                print(result)
+            return None
+        except requests.exceptions.ConnectionError as e:
+            raise ServerConnectionError(self._url)
 
     @classmethod
     def check(cls, url: str) -> bool:
