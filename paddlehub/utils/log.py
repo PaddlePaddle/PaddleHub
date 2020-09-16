@@ -69,8 +69,8 @@ class Logger(object):
 
         for key, conf in log_config.items():
             logging.addLevelName(conf['level'], key)
-            self.__dict__[key] = functools.partial(self.logger.log, conf['level'])
-            self.__dict__[key.lower()] = functools.partial(self.logger.log, conf['level'])
+            self.__dict__[key] = functools.partial(self.__call__, conf['level'])
+            self.__dict__[key.lower()] = functools.partial(self.__call__, conf['level'])
 
         self.format = colorlog.ColoredFormatter(
             '%(log_color)s[%(asctime)-15s] [%(levelname)8s] - %(message)s',
@@ -84,6 +84,23 @@ class Logger(object):
         self.logLevel = "DEBUG"
         self.logger.setLevel(logging.DEBUG)
         self.logger.propagate = False
+        self._is_enable = True
+
+    def disable(self):
+        self._is_enable = False
+
+    def enable(self):
+        self._is_enable = True
+
+    @property
+    def is_enable(self) -> bool:
+        return self._is_enable
+
+    def __call__(self, log_level: str, msg: str):
+        if not self.is_enable:
+            return
+
+        self.logger.log(log_level, msg)
 
 
 class ProgressBar(object):
