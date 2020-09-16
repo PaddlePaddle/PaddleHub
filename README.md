@@ -42,14 +42,14 @@ PaddleHub是飞桨生态的预训练模型应用工具，开发者可以便捷�
     - [命令行工具](./docs/tutorial/cmdintro.md)
     - [自定义数据](./docs/tutorial/how_to_load_data.md)
     - [Fine-tune模型转化为PaddleHub Module](./docs/tutorial/finetuned_model_to_module.md)
-    - [自定义任务](./docs/tutorial/how_to_define_task.md)
+    - [自定义任务](./docs/Secondary_development/how_to_define_task.md)
     - [服务化部署](./docs/tutorial/serving.md)
 - 进阶指南
     - [文本Embedding服务](./docs/tutorial/bert_service.md)
     - [语义相似度计算](./docs/tutorial/sentence_sim.md)
     - [ULMFit优化策略](./docs/tutorial/strategy_exp.md)
     - [超参优化](./docs/tutorial/autofinetune.md)
-    - [Hook机制](./docs/tutorial/hook.md)
+    - [Hook机制](./docs/Secondary_development/hook.md)
 - API
     - [hub.dataset](./docs/reference/dataset.md)
     - [hub.task](./docs/reference/task/task.md)
