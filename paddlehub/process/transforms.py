@@ -42,7 +42,6 @@ class Compose:
         if im is None:
             raise ValueError('Can\'t read The image file {}!'.format(im))
         if self.to_rgb:
-
             im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
 
         for op in self.transforms:
