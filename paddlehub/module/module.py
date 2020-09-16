@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import ast
 import inspect
 import importlib
 import os
 import sys
 from typing import Callable, Generic, List, Optional
+
+from easydict import EasyDict
 
 from paddlehub.utils import log, utils
 from paddlehub.compat.module.module_v1 import ModuleV1
@@ -81,7 +84,7 @@ class Module(object):
         # If module description file existed, try to load as ModuleV1
         desc_file = os.path.join(directory, 'module_desc.pb')
         if os.path.exists(desc_file):
-            return ModuleV1.load(desc_file)
+            return ModuleV1.load(directory)
 
         basename = os.path.split(directory)[-1]
         dirname = os.path.join(*list(os.path.split(directory)[:-1]))
@@ -99,6 +102,32 @@ class Module(object):
         return user_module_cls
 
     @classmethod
+    def load_module_info(cls, directory: str) -> EasyDict:
+        # If is ModuleV1
+        desc_file = os.path.join(directory, 'module_desc.pb')
+        if os.path.exists(desc_file):
+            return ModuleV1.load_module_info(directory)
+
+        # If is ModuleV2
+        module_file = os.path.join(directory, 'module.py')
+        with open(module_file, 'r') as file:
+            pycode = file.read()
+            ast_module = ast.parse(pycode)
+
+            for _body in ast_module.body:
+                if not isinstance(_body, ast.ClassDef):
+                    continue
+
+                for _decorator in _body.decorator_list:
+                    if _decorator.func.id != 'moduleinfo':
+                        continue
+
+                    info = {key.arg: key.value.s for key in _decorator.keywords}
+                    return EasyDict(info)
+            else:
+                raise InvalidHubModule(directory)
+
+    @classmethod
     def init_with_name(cls, name: str, version: str = None, **kwargs):
         '''
         '''
@@ -108,7 +137,7 @@ class Module(object):
         if not user_module_cls or not user_module_cls.version.match(version):
             user_module_cls = manager.install(name, version)
 
-        directory = manager._get_normalized_path(name)
+        directory = manager._get_normalized_path(user_module_cls.name)
 
         # The HubModule in the old version will use the _initialize method to initialize,
         # this function will be obsolete in a future version

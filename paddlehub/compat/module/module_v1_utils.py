@@ -31,13 +31,11 @@ def convert_module_desc(desc_file):
 def convert_signatures(signmaps):
     _dict = EasyDict()
     for sign, var in signmaps.items():
-        _dict[sign] = EasyDict()
+        _dict[sign] = EasyDict(inputs=[], outputs=[])
         for fetch_var in var.fetch_desc:
-            _dict[sign].outputs = list()
             _dict[sign].outputs.append(EasyDict(name=fetch_var.var_name, alias=fetch_var.alias))
 
         for feed_var in var.feed_desc:
-            _dict[sign].inputs = list()
             _dict[sign].inputs.append(EasyDict(name=feed_var.var_name, alias=feed_var.alias))
 
     return _dict

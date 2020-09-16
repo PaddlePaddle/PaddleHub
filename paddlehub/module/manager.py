@@ -15,6 +15,7 @@
 
 import os
 import shutil
+import sys
 from collections import OrderedDict
 from typing import List
 
@@ -65,11 +66,18 @@ class LocalModuleManager(object):
         self.home = home
         self._local_modules = OrderedDict()
 
+        # Most HubModule can be regarded as a python package, so we need to add the home
+        # directory to sys.path
+        if not home in sys.path:
+            sys.path.insert(0, home)
+
     def _get_normalized_path(self, name: str) -> str:
+        return os.path.join(self.home, self._get_normalized_name(name))
+
+    def _get_normalized_name(self, name: str) -> str:
         # Some HubModules contain '-'  in name (eg roberta_wwm_ext_chinese_L-3_H-1024_A-16).
         # Replace '-' with '_' to comply with python naming conventions.
-        name = name.replace('-', '_')
-        return os.path.join(self.home, name)
+        return name.replace('-', '_')
 
     def install(self,
                 name: str = None,
@@ -194,25 +202,41 @@ class LocalModuleManager(object):
 
     def _install_from_directory(self, directory: str) -> HubModule:
         '''Install a HubModule from directory containing module.py'''
-        hub_module_cls = HubModule.load(directory)
+        module_info = HubModule.load_module_info(directory)
 
-        # Uninstall local module
-        if self.search(hub_module_cls.name):
-            self.uninstall(hub_module_cls.name)
+        # A temporary directory is copied here for two purposes:
+        # 1. Avoid affecting user-specified directory (for example, a __pycache__
+        #    directory will be generated).
+        # 2. HubModule is essentially a python package. When internal package
+        #    references are made in it, the correct package name is required.
+        with utils.generate_tempdir() as _dir:
+            tempdir = os.path.join(_dir, module_info.name)
+            tempdir = self._get_normalized_name(tempdir)
+            shutil.copytree(directory, tempdir)
 
-        shutil.copytree(directory, os.path.join(self.home, hub_module_cls.name))
-        self._local_modules[hub_module_cls.name] = hub_module_cls
+            directory = tempdir
+            hub_module_cls = HubModule.load(directory)
 
-        for py_req in hub_module_cls.get_py_requirements():
-            log.logger.info('Installing dependent packages: {}'.format(py_req))
-            result = pypi.install(py_req)
-            if result:
-                log.logger.info('Successfully installed {}'.format(py_req))
-            else:
-                log.logger.info('Some errors occurred while installing {}'.format(py_req))
+            # Uninstall local module
+            if self.search(hub_module_cls.name):
+                self.uninstall(hub_module_cls.name)
 
-        log.logger.info('Successfully installed {}-{}'.format(hub_module_cls.name, hub_module_cls.version))
-        return hub_module_cls
+            shutil.copytree(directory, self._get_normalized_path(hub_module_cls.name))
+
+            # Reload the Module object to avoid path errors
+            hub_module_cls = HubModule.load(self._get_normalized_path(hub_module_cls.name))
+            self._local_modules[hub_module_cls.name] = hub_module_cls
+
+            for py_req in hub_module_cls.get_py_requirements():
+                log.logger.info('Installing dependent packages: {}'.format(py_req))
+                result = pypi.install(py_req)
+                if result:
+                    log.logger.info('Successfully installed {}'.format(py_req))
+                else:
+                    log.logger.info('Some errors occurred while installing {}'.format(py_req))
+
+            log.logger.info('Successfully installed {}-{}'.format(hub_module_cls.name, hub_module_cls.version))
+            return hub_module_cls
 
     def _install_from_archive(self, archive: str) -> HubModule:
         '''Install HubModule from archive file (eg xxx.tar.gz)'''

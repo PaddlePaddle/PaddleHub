@@ -15,10 +15,13 @@
 
 import sys
 
+from easydict import EasyDict
+
 __version__ = '2.0.0a0'
 
 from paddlehub.utils import log, parser, utils
 from paddlehub.module import Module
+
 # In order to maintain the compatibility of the old version, we put the relevant
 # compatible code in the paddlehub/compat package, and mapped some modules referenced
 # in the old version
@@ -26,8 +29,12 @@ from paddlehub.compat import paddle_utils
 from paddlehub.compat.module.processor import BaseProcessor
 from paddlehub.compat.module.nlp_module import NLPPredictionModule, TransformerModule
 from paddlehub.compat.type import DataType
+from paddlehub.compat import task
 
 sys.modules['paddlehub.io.parser'] = parser
 sys.modules['paddlehub.common.logger'] = log
 sys.modules['paddlehub.common.paddle_helper'] = paddle_utils
 sys.modules['paddlehub.common.utils'] = utils
+sys.modules['paddlehub.reader'] = task
+
+common = EasyDict(paddle_helper=paddle_utils)

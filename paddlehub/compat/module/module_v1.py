@@ -177,16 +177,21 @@ class ModuleV1(object):
         return []
 
     @classmethod
-    def load(cls, desc_file):
-        desc = module_v1_utils.convert_module_desc(desc_file)
-
-        cls.author = desc.module_info.author
-        cls.author_email = desc.module_info.author_email
-        cls.summary = desc.module_info.summary
-        cls.type = desc.module_info.type
-        cls.name = desc.module_info.name
-        cls.version = utils.Version(desc.module_info.version)
+    def load(cls, directory: str) -> EasyDict:
+        module_info = cls.load_module_info(directory)
+        cls.name = module_info.name
+        cls.author = module_info.author
+        cls.author_email = module_info.author_email
+        cls.type = module_info.type
+        cls.summary = module_info.summary
+        cls.version = utils.Version(module_info.version)
         return cls
+
+    @classmethod
+    def load_module_info(cls, directory: str) -> EasyDict:
+        desc_file = os.path.join(directory, 'module_desc.pb')
+        desc = module_v1_utils.convert_module_desc(desc_file)
+        return desc.module_info
 
     def assets_path(self):
         return os.path.join(self.directory, 'assets')
