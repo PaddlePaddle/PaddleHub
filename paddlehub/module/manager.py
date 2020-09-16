@@ -19,7 +19,9 @@ import sys
 from collections import OrderedDict
 from typing import List
 
-from paddlehub.env import MODULE_HOME
+import filelock
+
+from paddlehub.env import MODULE_HOME, TMP_HOME
 from paddlehub.module.module import Module as HubModule
 from paddlehub.server import module_server
 from paddlehub.utils import xarfile, log, utils, pypi
@@ -100,17 +102,19 @@ class LocalModuleManager(object):
             source    (str|optional): source containing module code, use with name paramete
         '''
         if name:
-            hub_module_cls = self.search(name)
-            if hub_module_cls and hub_module_cls.version.match(version):
-                directory = self._get_normalized_path(hub_module_cls.name)
-                if version:
-                    msg = 'Module {}-{} already installed in {}'.format(hub_module_cls.name, hub_module_cls.version,
-                                                                        directory)
-                else:
-                    msg = 'Module {} already installed in {}'.format(hub_module_cls.name, directory)
-                log.logger.info(msg)
-                return hub_module_cls
-            return self._install_from_name(name, version, source)
+            lock = filelock.FileLock(os.path.join(TMP_HOME, name))
+            with lock:
+                hub_module_cls = self.search(name)
+                if hub_module_cls and hub_module_cls.version.match(version):
+                    directory = self._get_normalized_path(hub_module_cls.name)
+                    if version:
+                        msg = 'Module {}-{} already installed in {}'.format(hub_module_cls.name, hub_module_cls.version,
+                                                                            directory)
+                    else:
+                        msg = 'Module {} already installed in {}'.format(hub_module_cls.name, directory)
+                    log.logger.info(msg)
+                    return hub_module_cls
+                return self._install_from_name(name, version, source)
         elif directory:
             return self._install_from_directory(directory)
         elif archive:
