@@ -132,9 +132,7 @@ PaddleHub提供便捷的模型转服务的能力，只需简单一行命令即�
 $ hub serving start --modules lac
 ```
 
-更多关于模型服务化使用说明参见[PaddleHub模型一键能服务化部署](./docs/tutorial/serving.md)。
-
-**PaddleHub 1.5.0版本增加文本Embedding服务[Bert Service](./docs/tutorial/bert_service.md), 高性能地获取文本Embedding**
+更多关于模型服务化使用说明参见[PaddleHub模型一键服务化部署](./docs/tutorial/serving.md)。
 
 ### 4、自动超参优化
 
