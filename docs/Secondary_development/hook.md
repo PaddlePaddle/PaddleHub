@@ -18,6 +18,8 @@ Task定义了[组网事件](./how_to_define_task.md)和[运行事件](./how_to_d
 如你想要改变任务评价指标，如下示例中将PaddleHub默认的accuracy评价指标改为F1评价指标。同时还想用自定义的可视化工具可视化模型训练过程，如下示例将可视化工具改写为tb-paddle。则你需要改写评估方法log_interval_event。这时候你可以用Hook实现。具体使用方法如下：
 
 ```python
+import time
+
 import numpy as np
 
 def calculate_f1_np(preds, labels):
