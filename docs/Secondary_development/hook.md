@@ -92,7 +92,7 @@ def record_value(evaluation_scores, loss, s)
 def new_log_interval_event(self, run_states):
     # 改写的事件方法，参数列表务必与PaddleHub内置的相应方法保持一致
     print("This is the new log_interval_event!")
-    scores, avg_loss, run_speed = calculate_metrics(run_states)
+    scores, avg_loss, run_speed = calculate_metrics(self, run_states)
     record_value(scores, avg_loss, run_speed)
 
 # 利用Hook改写PaddleHub内置_log_interval_event实现，需要2步(假设task已经创建好)
