@@ -82,9 +82,9 @@ class GitSource(object):
             name(str) : PaddleHub module name
             version(str) : PaddleHub module version
         '''
-        return self.search_resouce(type='module', name=name, version=version)
+        return self.search_resource(type='module', name=name, version=version)
 
-    def search_resouce(self, type: str, name: str, version: str = None) -> dict:
+    def search_resource(self, type: str, name: str, version: str = None) -> dict:
         '''
         Search PaddleHub Resource
 

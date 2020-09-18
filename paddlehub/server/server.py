@@ -22,6 +22,7 @@ PADDLEHUB_PUBLIC_SERVER = 'http://paddlepaddle.org.cn/paddlehub'
 
 class HubServer(object):
     '''PaddleHub server'''
+
     def __init__(self):
         self.sources = OrderedDict()
 
@@ -51,9 +52,9 @@ class HubServer(object):
             name(str) : PaddleHub module name
             version(str) : PaddleHub module version
         '''
-        return self.search_resouce(type='module', name=name, version=version, source=source)
+        return self.search_resource(type='module', name=name, version=version, source=source)
 
-    def search_resouce(self, type: str, name: str, version: str = None, source: str = None) -> dict:
+    def search_resource(self, type: str, name: str, version: str = None, source: str = None) -> dict:
         '''
         Search PaddleHub Resource
 
@@ -64,10 +65,20 @@ class HubServer(object):
         '''
         sources = self.sources.values() if not source else [self._generate_source(source)]
         for source in sources:
-            result = source.search_resouce(name=name, type=type, version=version)
+            result = source.search_resource(name=name, type=type, version=version)
             if result:
                 return result
-        return None
+        return {}
+
+    def get_module_info(self, name: str, source: str = None) -> dict:
+        '''
+        '''
+        sources = self.sources.values() if not source else [self._generate_source(source)]
+        for source in sources:
+            result = source.get_module_info(name=name)
+            if result:
+                return result
+        return {}
 
 
 module_server = HubServer()

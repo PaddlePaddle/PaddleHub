@@ -28,20 +28,83 @@ from paddlehub.utils import xarfile, log, utils, pypi
 
 
 class HubModuleNotFoundError(Exception):
-    def __init__(self, name, version=None, source=None):
+    def __init__(self, name: str, info: dict = None, version: str = None, source: str = None):
         self.name = name
         self.version = version
+        self.info = info
         self.source = source
 
     def __str__(self):
         msg = '{}'.format(self.name)
         if self.version:
             msg += '-{}'.format(self.version)
-
         if self.source:
             msg += ' from {}'.format(self.source)
 
-        tips = 'No HubModule named {} was found'.format(msg)
+        tips = 'No HubModule named {} was found'.format(log.FormattedText(text=msg, color='red'))
+
+        if self.info:
+            sort_infos = sorted(self.info.items(), key=lambda x: utils.Version(x[0]))
+
+            table = log.Table()
+            table.append(
+                *['Name', 'Version', 'PaddlePaddle Version Required', 'PaddleHub Version Required'],
+                widths=[15, 10, 35, 35],
+                aligns=['^', '^', '^', '^'],
+                colors=['cyan', 'cyan', 'cyan', 'cyan'])
+
+            for _ver, info in sort_infos:
+                paddle_version = 'Any' if not info['paddle_version'] else ', '.join(info['paddle_version'])
+                hub_version = 'Any' if not info['hub_version'] else ', '.join(info['hub_version'])
+                table.append(self.name, _ver, paddle_version, hub_version, aligns=['^', '^', '^', '^'])
+
+            tips += ',  \n{}'.format(table)
+        return tips
+
+
+class EnvironmentMismatchError(Exception):
+    def __init__(self, name: str, info: dict, version: str = None):
+        self.name = name
+        self.version = version
+        self.info = info
+
+    def __str__(self):
+        msg = '{}'.format(self.name)
+        if self.version:
+            msg += '-{}'.format(self.version)
+
+        tips = '{} cannot be installed because some conditions are not met'.format(
+            log.FormattedText(text=msg, color='red'))
+
+        if self.info:
+            sort_infos = sorted(self.info.items(), key=lambda x: utils.Version(x[0]))
+
+            table = log.Table()
+            table.append(
+                *['Name', 'Version', 'PaddlePaddle Version Required', 'PaddleHub Version Required'],
+                widths=[15, 10, 35, 35],
+                aligns=['^', '^', '^', '^'],
+                colors=['cyan', 'cyan', 'cyan', 'cyan'])
+
+            import paddle
+            import paddlehub
+
+            for _ver, info in sort_infos:
+                paddle_version = 'Any' if not info['paddle_version'] else ', '.join(info['paddle_version'])
+                for version in info['paddle_version']:
+                    if not utils.Version(paddle.__version__).match(version):
+                        paddle_version = '{}(Mismatch)'.format(paddle_version)
+                        break
+
+                hub_version = 'Any' if not info['hub_version'] else ', '.join(info['hub_version'])
+                for version in info['hub_version']:
+                    if not utils.Version(paddlehub.__version__).match(version):
+                        hub_version = '{}(Mismatch)'.format(hub_version)
+                        break
+
+                table.append(self.name, _ver, paddle_version, hub_version, aligns=['^', '^', '^', '^'])
+
+            tips += ',  \n{}'.format(table)
         return tips
 
 
@@ -176,7 +239,23 @@ class LocalModuleManager(object):
 
         result = module_server.search_module(name=name, version=version, source=source)
         if not result:
-            raise HubModuleNotFoundError(name, version, source)
+            module_infos = module_server.get_module_info(name=name, source=source)
+            # The HubModule with the specified name cannot be found
+            if not module_infos:
+                raise HubModuleNotFoundError(name=name, version=version, source=source)
+
+            valid_infos = {}
+            if version:
+                for _ver, _info in module_infos.items():
+                    if utils.Version(_ver).match(version):
+                        valid_infos[_ver] = _info
+            else:
+                valid_infos = list(module_infos.keys())
+
+            # Cannot find a HubModule that meets the version
+            if valid_infos:
+                raise EnvironmentMismatchError(name=name, info=valid_infos, version=version)
+            raise HubModuleNotFoundError(name=name, info=module_infos, version=version, source=source)
 
         if source or 'source' in result:
             return self._install_from_source(result)

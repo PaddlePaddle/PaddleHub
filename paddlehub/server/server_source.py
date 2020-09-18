@@ -14,12 +14,11 @@
 # limitations under the License.
 
 import json
-import platform
 import requests
-import sys
+from typing import List
 
 import paddlehub
-from paddlehub.utils import utils
+from paddlehub.utils import utils, platform
 
 
 class ServerConnectionError(Exception):
@@ -52,9 +51,9 @@ class ServerSource(object):
             name(str) : PaddleHub module name
             version(str) : PaddleHub module version
         '''
-        return self.search_resouce(type='module', name=name, version=version)
+        return self.search_resource(type='module', name=name, version=version)
 
-    def search_resouce(self, type: str, name: str, version: str = None) -> dict:
+    def search_resource(self, type: str, name: str, version: str = None) -> dict:
         '''
         Search PaddleHub Resource
 
@@ -63,36 +62,64 @@ class ServerSource(object):
             name(str) : Resource name
             version(str) : Resource version
         '''
-        payload = {'environments': {}}
+        params = {'environments': platform.get_platform_info()}
 
-        payload['word'] = name
-        payload['type'] = type
+        params['word'] = name
+        params['type'] = type
         if version:
-            payload['version'] = version
+            params['version'] = version
 
         # Delay module loading to improve command line speed
         import paddle
-        payload['environments']['hub_version'] = paddlehub.__version__
-        payload['environments']['paddle_version'] = paddle.__version__
-        payload['environments']['python_version'] = '.'.join(map(str, sys.version_info[0:3]))
-        payload['environments']['platform_version'] = platform.version()
-        payload['environments']['platform_system'] = platform.system()
-        payload['environments']['platform_architecture'] = platform.architecture()
-        payload['environments']['platform_type'] = platform.platform()
+        params['hub_version'] = paddlehub.__version__
+        params['paddle_version'] = paddle.__version__
 
-        api = '{}/search'.format(self._url)
+        result = self.request(path='search', params=params)
+        if result['status'] == 0 and len(result['data']) > 0:
+            for item in result['data']:
+                if name.lower() == item['name'].lower() and utils.Version(item['version']).match(version):
+                    return item
+        return None
 
+    def get_module_info(self, name: str) -> dict:
+        '''
+        '''
+
+        def _convert_version(version: str) -> List:
+            result = []
+            # from [1.5.4, 2.0.0] -> 1.5.4,2.0.0
+            version = version.replace(' ', '')[1:-1]
+            version = version.split(',')
+            if version[0] != '-1.0.0':
+                result.append('>={}'.format(version[0]))
+
+            if len(version) > 1:
+                if version[1] != '99.0.0':
+                    result.append('<={}'.format(version[1]))
+
+            return result
+
+        params = {'name': name}
+        result = self.request(path='info', params=params)
+        if result['status'] == 0 and len(result['data']) > 0:
+            infos = {}
+            for _info in result['data']['info']:
+                infos[_info['version']] = {
+                    'url': _info['url'],
+                    'paddle_version': _convert_version(_info['paddle_version']),
+                    'hub_version': _convert_version(_info['hub_version'])
+                }
+            return infos
+
+        return {}
+
+    def request(self, path: str, params: dict) -> dict:
+        '''
+        '''
+        api = '{}/{}'.format(self._url, path)
         try:
-            result = requests.get(api, payload, timeout=self._timeout)
-            result = result.json()
-
-            if result['status'] == 0 and len(result['data']) > 0:
-                for item in result['data']:
-                    if name.lower() == item['name'].lower() and utils.Version(item['version']).match(version):
-                        return item
-            else:
-                print(result)
-            return None
+            result = requests.get(api, params, timeout=self._timeout)
+            return result.json()
         except requests.exceptions.ConnectionError as e:
             raise ServerConnectionError(self._url)
 
