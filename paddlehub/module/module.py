@@ -135,7 +135,7 @@ class Module(object):
         manager = LocalModuleManager()
         user_module_cls = manager.search(name)
         if not user_module_cls or not user_module_cls.version.match(version):
-            user_module_cls = manager.install(name, version)
+            user_module_cls = manager.install(name=name, version=version)
 
         directory = manager._get_normalized_path(user_module_cls.name)
 
@@ -148,7 +148,8 @@ class Module(object):
             user_module = user_module_cls(directory=directory)
             user_module._initialize(**kwargs)
             return user_module
-        return user_module_cls(directory=directory, **kwargs)
+        user_module_cls.directory = directory
+        return user_module_cls(**kwargs)
 
     @classmethod
     def init_with_directory(cls, directory: str, **kwargs):
@@ -165,7 +166,8 @@ class Module(object):
             user_module = user_module_cls(directory=directory)
             user_module._initialize(**kwargs)
             return user_module
-        return user_module_cls(directory=directory, **kwargs)
+        user_module_cls.directory = directory
+        return user_module_cls(**kwargs)
 
     @classmethod
     def get_py_requirements(cls):

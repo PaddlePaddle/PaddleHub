@@ -73,7 +73,7 @@ class Logger(object):
             self.__dict__[key.lower()] = functools.partial(self.__call__, conf['level'])
 
         self.format = colorlog.ColoredFormatter(
-            '%(log_color)s[%(asctime)-15s] [%(levelname)8s] - %(message)s',
+            '%(log_color)s[%(asctime)-15s] [%(levelname)8s]%(reset)s - %(message)s',
             log_colors={key: conf['color']
                         for key, conf in log_config.items()})
 
@@ -178,13 +178,13 @@ class FormattedText(object):
             ========   ====================================
         color(str) : Text color, default is None(depends on terminal configuration)
     '''
-    _MAP = {'red': Fore.RED, 'yellow': Fore.YELLOW, 'green': Fore.GREEN, 'blue': Fore.BLUE}
+    _MAP = {'red': Fore.RED, 'yellow': Fore.YELLOW, 'green': Fore.GREEN, 'blue': Fore.BLUE, 'cyan': Fore.CYAN}
 
-    def __init__(self, text: str, width: int, align: str = '<', color: str = None):
+    def __init__(self, text: str, width: int = None, align: str = '<', color: str = None):
         self.text = text
         self.align = align
         self.color = FormattedText._MAP[color] if color else color
-        self.width = width
+        self.width = width if width else len(self.text)
 
     def __repr__(self) -> str:
         form = '{{:{}{}}}'.format(self.align, self.width)

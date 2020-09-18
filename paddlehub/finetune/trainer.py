@@ -17,7 +17,7 @@ import os
 import pickle
 import time
 from collections import defaultdict
-from typing import Any, Callable, List
+from typing import Any, Callable, Generic, List
 
 import paddle
 from paddle.distributed import ParallelEnv
@@ -185,7 +185,7 @@ class Trainer(object):
                 timer.count()
 
                 if (batch_idx + 1) % log_interval == 0 and self.local_rank == 0:
-                    lr = self.optimizer.current_step_lr()
+                    lr = self.optimizer.get_lr()
                     avg_loss /= log_interval
                     if self.use_vdl:
                         self.log_writer.add_scalar(tag='TRAIN/loss', step=timer.current_step, value=avg_loss)
@@ -346,7 +346,12 @@ class Trainer(object):
             optimizer(paddle.optimizer.Optimizer) : Optimizer used.
             loss(paddle.Tensor) : Loss tensor.
         '''
-        self.optimizer.minimize(loss)
+        self.optimizer.step()
+        self.learning_rate_step(epoch_idx, batch_idx, self.optimizer.get_lr(), loss)
+
+    def learning_rate_step(self, epoch_idx: int, batch_idx: int, learning_rate: Generic, loss: paddle.Tensor):
+        if isinstance(learning_rate, paddle.optimizer._LRScheduler):
+            learning_rate.step()
 
     def optimizer_zero_grad(self, epoch_idx: int, batch_idx: int, optimizer: paddle.optimizer.Optimizer):
         '''
