@@ -29,7 +29,7 @@ def base64_to_cv2(b64str):
 
 @moduleinfo(
     name="chinese_text_detection_db_mobile",
-    version="1.0.2",
+    version="1.0.3",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
@@ -73,7 +73,10 @@ class ChineseTextDetectionDB(hub.Module):
             config.enable_use_gpu(8000, 0)
         else:
             config.disable_gpu()
+            config.set_cpu_math_library_num_threads(6)
             if self.enable_mkldnn:
+                # cache 10 different shapes for mkldnn to avoid memory leak
+                config.set_mkldnn_cache_capacity(10)
                 config.enable_mkldnn()
 
         config.disable_glog_info()
@@ -102,19 +105,18 @@ class ChineseTextDetectionDB(hub.Module):
             images.append(img)
         return images
 
+    def clip_det_res(self, points, img_height, img_width):
+        for pno in range(points.shape[0]):
+            points[pno, 0] = int(min(max(points[pno, 0], 0), img_width - 1))
+            points[pno, 1] = int(min(max(points[pno, 1], 0), img_height - 1))
+        return points
+
     def filter_tag_det_res(self, dt_boxes, image_shape):
         img_height, img_width = image_shape[0:2]
         dt_boxes_new = []
         for box in dt_boxes:
             box = self.order_points_clockwise(box)
-            left = int(np.min(box[:, 0]))
-            right = int(np.max(box[:, 0]))
-            top = int(np.min(box[:, 1]))
-            bottom = int(np.max(box[:, 1]))
-            bbox_height = bottom - top
-            bbox_width = right - left
-            diffh = math.fabs(box[0, 1] - box[1, 1])
-            diffw = math.fabs(box[0, 0] - box[3, 0])
+            box = self.clip_det_res(box, img_height, img_width)
             rect_width = int(np.linalg.norm(box[0] - box[1]))
             rect_height = int(np.linalg.norm(box[0] - box[3]))
             if rect_width <= 10 or rect_height <= 10:
@@ -168,7 +170,7 @@ class ChineseTextDetectionDB(hub.Module):
         """
         self.check_requirements()
 
-        from chinese_text_detection_db_mobile.processor import DBPreProcess, DBPostProcess, draw_boxes, get_image_ext
+        from chinese_text_detection_db_mobile.processor import DBProcessTest, DBPostProcess, draw_boxes, get_image_ext
 
         if use_gpu:
             try:
@@ -188,13 +190,20 @@ class ChineseTextDetectionDB(hub.Module):
 
         assert predicted_data != [], "There is not any image to be predicted. Please check the input data."
 
-        preprocessor = DBPreProcess()
-        postprocessor = DBPostProcess(box_thresh)
+        preprocessor = DBProcessTest(params={'max_side_len': 960})
+        postprocessor = DBPostProcess(
+            params={
+                'thresh': 0.3,
+                'box_thresh': 0.5,
+                'max_candidates': 1000,
+                'unclip_ratio': 2.0
+            })
 
         all_imgs = []
         all_ratios = []
         all_results = []
         for original_image in predicted_data:
+            ori_im = original_image.copy()
             im, ratio_list = preprocessor(original_image)
             res = {'save_path': ''}
             if im is None:
@@ -202,11 +211,20 @@ class ChineseTextDetectionDB(hub.Module):
 
             else:
                 im = im.copy()
-                starttime = time.time()
                 self.input_tensor.copy_from_cpu(im)
                 self.predictor.zero_copy_run()
-                data_out = self.output_tensors[0].copy_to_cpu()
-                dt_boxes_list = postprocessor(data_out, [ratio_list])
+
+                outputs = []
+                for output_tensor in self.output_tensors:
+                    output = output_tensor.copy_to_cpu()
+                    outputs.append(output)
+
+                outs_dict = {}
+                outs_dict['maps'] = outputs[0]
+
+                # data_out = self.output_tensors[0].copy_to_cpu()
+                dt_boxes_list = postprocessor(outs_dict, [ratio_list])
+                dt_boxes = dt_boxes_list[0]
                 boxes = self.filter_tag_det_res(dt_boxes_list[0],
                                                 original_image.shape)
                 res['data'] = boxes.astype(np.int).tolist()
@@ -328,7 +346,7 @@ class ChineseTextDetectionDB(hub.Module):
 if __name__ == '__main__':
     db = ChineseTextDetectionDB()
     image_path = [
-        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/11.jpg',
+        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/2.jpg',
         '/mnt/zhangxuefei/PaddleOCR/doc/imgs/12.jpg',
         '/mnt/zhangxuefei/PaddleOCR/doc/imgs/test_image.jpg'
     ]
