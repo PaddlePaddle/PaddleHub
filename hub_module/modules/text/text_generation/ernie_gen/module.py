@@ -39,7 +39,7 @@ import ernie_gen.propeller.paddle as propeller
 
 @moduleinfo(
     name="ernie_gen",
-    version="1.0.1",
+    version="1.0.2",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning.",
     author="baidu",
