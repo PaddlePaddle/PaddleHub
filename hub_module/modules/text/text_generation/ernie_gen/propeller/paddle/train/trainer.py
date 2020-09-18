@@ -48,11 +48,11 @@ __all__ = ['train_and_eval', 'Learner']
 def _get_summary_writer(path):
     summary_writer = None
     try:
-        from tensorboardX import SummaryWriter
+        from visualdl import LogWriter
         if distribution.status.is_master:
-            summary_writer = SummaryWriter(os.path.join(path))
+            summary_writer = LogWriter(os.path.join(path))
     except ImportError:
-        log.warning('tensorboardX not installed, will not log to tensorboard')
+        log.warning('VisualDL not installed, will not log to VisualDL')
     return summary_writer
 
 
@@ -69,7 +69,7 @@ def _log_eval_result(name, eval_result, swriter, state):
         printable.append('{}\t{}'.format(n, val))
         if swriter is not None:
             swriter.add_scalar(n, val, state.gstep)
-            log.debug('write to tensorboard %s' % swriter.logdir)
+            log.debug('write to VisualDL %s' % swriter.logdir)
 
     if len(printable):
         log.info('*** eval res: %10s ***' % name)
@@ -134,10 +134,10 @@ class Learner(object):
         if run_config.model_dir is None:
             raise ValueError('model_dir should specified in run_config')
 
-        if issubclass(model_class_or_model_fn, Model):
-            _model_fn = _build_model_fn(model_class_or_model_fn)
-        elif inspect.isfunction(model_class_or_model_fn):
+        if inspect.isfunction(model_class_or_model_fn):
             _model_fn = model_class_or_model_fn
+        elif issubclass(model_class_or_model_fn, Model):
+            _model_fn = _build_model_fn(model_class_or_model_fn)
         else:
             raise ValueError('unknown model %s' % model_class_or_model_fn)
 
