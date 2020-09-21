@@ -36,7 +36,8 @@ def recognize_text(images=[],
                     output_dir='ocr_result',
                     visualization=False,
                     box_thresh=0.5,
-                    text_thresh=0.5)
+                    text_thresh=0.5,
+                    angle_classification_thresh=0.9)
 ```
 
 预测API，检测输入图片中的所有中文文本的位置。
