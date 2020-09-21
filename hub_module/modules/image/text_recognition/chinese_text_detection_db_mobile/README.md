@@ -62,7 +62,7 @@ def detect_text(paths=[],
 import paddlehub as hub
 import cv2
 
-text_detector = hub.Module(name="chinese_text_detection_db_mobile", enable_mk)
+text_detector = hub.Module(name="chinese_text_detection_db_mobile", enable_mkldnn=True)
 result = text_detector.detect_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
 # or
