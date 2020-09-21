@@ -19,6 +19,17 @@ $ hub run chinese_text_detection_db_mobile --input_path "/PATH/TO/IMAGE"
 
 ## API
 
+## API
+
+### \_\_init\_\_(enable_mkldnn=False)
+
+构造ChineseTextDetectionDB对象
+
+**参数**
+
+* enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
+
+
 ```python
 def detect_text(paths=[],
                 images=[],
@@ -51,7 +62,7 @@ def detect_text(paths=[],
 import paddlehub as hub
 import cv2
 
-text_detector = hub.Module(name="chinese_text_detection_db_mobile")
+text_detector = hub.Module(name="chinese_text_detection_db_mobile", enable_mk)
 result = text_detector.detect_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
 # or

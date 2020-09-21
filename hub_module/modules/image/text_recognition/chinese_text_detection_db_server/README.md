@@ -19,6 +19,14 @@ $ hub run chinese_text_detection_db_server --input_path "/PATH/TO/IMAGE"
 
 ## API
 
+### \_\_init\_\_(enable_mkldnn=False)
+
+构造ChineseTextDetectionDBServer对象
+
+**参数**
+
+* enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
+
 ```python
 def detect_text(paths=[],
                 images=[],

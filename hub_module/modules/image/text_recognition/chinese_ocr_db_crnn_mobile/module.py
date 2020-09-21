@@ -25,14 +25,14 @@ from chinese_ocr_db_crnn_mobile.utils import base64_to_cv2, draw_ocr, get_image_
 
 @moduleinfo(
     name="chinese_ocr_db_crnn_mobile",
-    version="1.0.3",
+    version="1.0.4",
     summary=
     "The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions based on the differentiable_binarization_chn module. Then it recognizes the chinese texts. ",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
 class ChineseOCRDBCRNN(hub.Module):
-    def _initialize(self, text_detector_module=None):
+    def _initialize(self, text_detector_module=None, enable_mkldnn=False):
         """
         initialize with the necessary elements
         """
@@ -49,6 +49,7 @@ class ChineseOCRDBCRNN(hub.Module):
         self.font_file = os.path.join(self.directory, 'assets', 'simfang.ttf')
         self.pretrained_model_path = os.path.join(self.directory,
                                                   'inference_model')
+        self.enable_mkldnn = enable_mkldnn
         self._set_config()
 
     def _set_config(self):
@@ -70,6 +71,8 @@ class ChineseOCRDBCRNN(hub.Module):
             config.enable_use_gpu(8000, 0)
         else:
             config.disable_gpu()
+            if self.enable_mkldnn:
+                config.enable_mkldnn()
 
         config.disable_glog_info()
 
@@ -92,7 +95,9 @@ class ChineseOCRDBCRNN(hub.Module):
         """
         if not self._text_detector_module:
             self._text_detector_module = hub.Module(
-                name='chinese_text_detection_db_mobile')
+                name='chinese_text_detection_db_mobile',
+                enable_mkldnn=self.enable_mkldnn,
+                version='1.0.2')
         return self._text_detector_module
 
     def read_images(self, paths=[]):
