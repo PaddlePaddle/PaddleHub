@@ -203,7 +203,8 @@ class ChineseOCRDBCRNN(hub.Module):
                        output_dir='ocr_result',
                        visualization=False,
                        box_thresh=0.5,
-                       text_thresh=0.5):
+                       text_thresh=0.5,
+                       angle_classification_thresh=0.9):
         """
         Get the chinese texts in the predicted images.
         Args:
@@ -214,7 +215,9 @@ class ChineseOCRDBCRNN(hub.Module):
             output_dir (str): The directory to store output images.
             visualization (bool): Whether to save image or not.
             box_thresh(float): the threshold of the detected text box's confidence
-            text_thresh(float): the threshold of the recognize chinese texts' confidence
+            text_thresh(float): the threshold of the chinese text recognition confidence
+            angle_classification_thresh(float): the threshold of the angle classification confidence
+
         Returns:
             res (list): The result of chinese texts and save path of images.
         """
@@ -259,7 +262,9 @@ class ChineseOCRDBCRNN(hub.Module):
                     img_crop = self.get_rotate_crop_image(
                         original_image, tmp_box)
                     img_crop_list.append(img_crop)
-                img_crop_list, angle_list = self._classify_text(img_crop_list)
+                img_crop_list, angle_list = self._classify_text(
+                    img_crop_list,
+                    angle_classification_thresh=angle_classification_thresh)
                 rec_results = self._recognize_text(img_crop_list)
 
                 # if the recognized text confidence score is lower than text_thresh, then drop it
@@ -294,12 +299,14 @@ class ChineseOCRDBCRNN(hub.Module):
         results = self.recognize_text(images_decode, **kwargs)
         return results
 
-    def save_result_image(self,
-                          original_image,
-                          detection_boxes,
-                          rec_results,
-                          output_dir='ocr_result',
-                          text_thresh=0.5):
+    def save_result_image(
+            self,
+            original_image,
+            detection_boxes,
+            rec_results,
+            output_dir='ocr_result',
+            text_thresh=0.5,
+    ):
         image = Image.fromarray(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
         txts = [item[0] for item in rec_results]
         scores = [item[1] for item in rec_results]
@@ -320,7 +327,7 @@ class ChineseOCRDBCRNN(hub.Module):
         cv2.imwrite(save_file_path, draw_img[:, :, ::-1])
         return save_file_path
 
-    def _classify_text(self, image_list):
+    def _classify_text(self, image_list, angle_classification_thresh=0.9):
         img_list = copy.deepcopy(image_list)
         img_num = len(img_list)
         # Calculate the aspect ratio of all text bars
@@ -360,7 +367,7 @@ class ChineseOCRDBCRNN(hub.Module):
                 score = prob_out[rno][label_idx]
                 label = label_list[label_idx]
                 cls_res[indices[beg_img_no + rno]] = [label, score]
-                if '180' in label and score > 0.9999:
+                if '180' in label and score > angle_classification_thresh:
                     img_list[indices[beg_img_no + rno]] = cv2.rotate(
                         img_list[indices[beg_img_no + rno]], 1)
         return img_list, cls_res
