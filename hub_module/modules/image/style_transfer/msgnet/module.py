@@ -5,7 +5,6 @@ import paddle.nn as nn
 import numpy as np
 import paddle.nn.functional as F
 
-from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import moduleinfo
 from paddlehub.process.transforms import Compose, Resize, CenterCrop, SetType
 from paddlehub.module.cv_module import StyleTransferModule
@@ -95,10 +94,12 @@ class Bottleneck(nn.Layer):
         self.downsample = downsample
         if self.downsample is not None:
             self.residual_layer = nn.Conv2d(inplanes, planes * self.expansion, kernel_size=1, stride=stride)
+
         conv_block = (norm_layer(inplanes), nn.ReLU(), nn.Conv2d(inplanes, planes, kernel_size=1, stride=1),
                       norm_layer(planes), nn.ReLU(), ConvLayer(planes, planes, kernel_size=3, stride=stride),
                       norm_layer(planes), nn.ReLU(), nn.Conv2d(planes, planes * self.expansion, kernel_size=1,
                                                                stride=1))
+
         self.conv_block = nn.Sequential(*conv_block)
 
     def forward(self, x: paddle.Tensor):
@@ -134,16 +135,19 @@ class UpBottleneck(nn.Layer):
                                                 upsample=stride)
         conv_block = []
         conv_block += [norm_layer(inplanes), nn.ReLU(), nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
+
         conv_block += [
             norm_layer(planes),
             nn.ReLU(),
             UpsampleConvLayer(planes, planes, kernel_size=3, stride=1, upsample=stride)
         ]
+
         conv_block += [
             norm_layer(planes),
             nn.ReLU(),
             nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)
         ]
+
         self.conv_block = nn.Sequential(*conv_block)
 
     def forward(self, x: paddle.Tensor):
@@ -209,7 +213,7 @@ class Vgg16(nn.Layer):
         self.conv5_2 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
         self.conv5_3 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
 
-        checkpoint = os.path.join(MODULE_HOME, 'msgnet', 'vgg16.pdparams')
+        checkpoint = os.path.join(self.directory, 'vgg16.pdparams')
         if not os.path.exists(checkpoint):
             os.system('wget https://bj.bcebos.com/paddlehub/model/image/image_editing/vgg_paddle.pdparams -O ' +
                       checkpoint)
@@ -245,7 +249,7 @@ class Vgg16(nn.Layer):
 @moduleinfo(
     name="msgnet",
     type="CV/image_editing",
-    author="baidu-vis",
+    author="paddlepaddle",
     author_email="",
     summary="Msgnet is a image colorization style transfer model, this module is trained with COCO2014 dataset.",
     version="1.0.0",
@@ -313,7 +317,7 @@ class MSGNet(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(MODULE_HOME, 'msgnet', 'style_paddle.pdparams')
+            checkpoint = os.path.join(self.directory, 'style_paddle.pdparams')
             if not os.path.exists(checkpoint):
                 os.system('wget https://bj.bcebos.com/paddlehub/model/image/image_editing/style_paddle.pdparams -O ' +
                           checkpoint)
