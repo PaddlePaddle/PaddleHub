@@ -1,6 +1,6 @@
 ## 概述
 
-chinese_ocr_db_crnn_mobile Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_mobile Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_mobile&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个超轻量级中文OCR模型，支持直接预测。
+chinese_ocr_db_crnn_mobile Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_mobile Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_mobile&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。之后对检测文本框进行角度分类。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个超轻量级中文OCR模型，支持直接预测。
 
 
 <p align="center">
@@ -142,3 +142,11 @@ pyclipper
 * 1.0.1
 
   修复使用在线服务调用模型失败问题
+
+* 1.0.2
+
+  支持mkldnn加速CPU计算
+
+* 1.1.0
+
+  使用超轻量级的三阶段模型（文本框检测-角度分类-文字识别）识别图片文字。
