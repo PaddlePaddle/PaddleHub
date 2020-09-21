@@ -12,15 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import os
 import random
+import copy
+from typing import Callable
 from collections import OrderedDict
 
 import cv2
 import numpy as np
-from PIL import Image
+import matplotlib
+from PIL import Image, ImageEnhance
+from matplotlib import pyplot as plt
 
 from paddlehub.process.functional import *
+
+matplotlib.use('Agg')
 
 
 class Compose:
@@ -45,13 +51,11 @@ class Compose:
 
         for op in self.transforms:
             im = op(im)
-            
+
         if not self.stay_rgb:
             im = permute(im)
 
         return im
-
-
 
 
 class RandomHorizontalFlip:
@@ -239,8 +243,13 @@ class RandomPaddingCrop:
             pad_height = max(crop_height - img_height, 0)
             pad_width = max(crop_width - img_width, 0)
             if (pad_height > 0 or pad_width > 0):
-                im = cv2.copyMakeBorder(
-                    im, 0, pad_height, 0, pad_width, cv2.BORDER_CONSTANT, value=self.im_padding_value)
+                im = cv2.copyMakeBorder(im,
+                                        0,
+                                        pad_height,
+                                        0,
+                                        pad_width,
+                                        cv2.BORDER_CONSTANT,
+                                        value=self.im_padding_value)
 
             if crop_height > 0 and crop_width > 0:
                 h_off = np.random.randint(img_height - crop_height + 1)
@@ -295,13 +304,12 @@ class RandomRotation:
             r[0, 2] += (nw / 2) - cx
             r[1, 2] += (nh / 2) - cy
             dsize = (nw, nh)
-            im = cv2.warpAffine(
-                im,
-                r,
-                dsize=dsize,
-                flags=cv2.INTER_LINEAR,
-                borderMode=cv2.BORDER_CONSTANT,
-                borderValue=self.im_padding_value)
+            im = cv2.warpAffine(im,
+                                r,
+                                dsize=dsize,
+                                flags=cv2.INTER_LINEAR,
+                                borderMode=cv2.BORDER_CONSTANT,
+                                borderValue=self.im_padding_value)
 
         return im
 
@@ -403,14 +411,14 @@ class RandomDistort:
 
         return im
 
-    
+
 class ConvertColorSpace:
     """
     Convert color space from RGB to LAB or from LAB to RGB.
-    
+
     Args:
        mode(str): Color space convert mode, it can be 'RGB2LAB' or 'LAB2RGB'.
-       
+
     Return:
         img(np.ndarray): converted image.
     """
@@ -429,7 +437,7 @@ class ConvertColorSpace:
         """
         mask = (rgb > 0.04045)
         np.seterr(invalid='ignore')
-        rgb = (((rgb + .055) / 1.055) ** 2.4) * mask + rgb / 12.92 * (1 - mask)
+        rgb = (((rgb + .055) / 1.055)**2.4) * mask + rgb / 12.92 * (1 - mask)
         rgb = np.nan_to_num(rgb)
         x = .412453 * rgb[:, 0, :, :] + .357580 * rgb[:, 1, :, :] + .180423 * rgb[:, 2, :, :]
         y = .212671 * rgb[:, 0, :, :] + .715160 * rgb[:, 1, :, :] + .072169 * rgb[:, 2, :, :]
@@ -490,7 +498,7 @@ class ConvertColorSpace:
         rgb = np.maximum(rgb, 0)  # sometimes reaches a small negative number, which causes NaNs
         mask = (rgb > .0031308).astype(np.float32)
         np.seterr(invalid='ignore')
-        out = (1.055 * (rgb ** (1. / 2.4)) - 0.055) * mask + 12.92 * rgb * (1 - mask)
+        out = (1.055 * (rgb**(1. / 2.4)) - 0.055) * mask + 12.92 * rgb * (1 - mask)
         out = np.nan_to_num(out)
         return out
 
@@ -511,7 +519,7 @@ class ConvertColorSpace:
         out = np.concatenate((x_int[:, None, :, :], y_int[:, None, :, :], z_int[:, None, :, :]), axis=1)
         mask = (out > .2068966).astype(np.float32)
         np.seterr(invalid='ignore')
-        out = (out ** 3.) * mask + (out - 16. / 116.) / 7.787 * (1 - mask)
+        out = (out**3.) * mask + (out - 16. / 116.) / 7.787 * (1 - mask)
         out = np.nan_to_num(out)
         sc = np.array((0.95047, 1., 1.08883))[None, :, None, None]
         out = out * sc
@@ -546,27 +554,37 @@ class ConvertColorSpace:
 
 class ColorizeHint:
     """Get hint and mask images for colorization.
-    
+
     This method is prepared for user guided colorization tasks. Take the original RGB images as imput, we will obtain the local hints and correspoding mask to guid colorization process.
-    
+
     Args:
        percent(float): Probability for ignoring hint in an iteration.
        num_points(int): Number of selected hints in an iteration.
        samp(str): Sample method, default is normal.
        use_avg(bool): Whether to use mean in selected hint area.
-       
+
     Return:
         hint(np.ndarray): hint images
         mask(np.ndarray): mask images
     """
-    def __init__(self,  percent: float, num_points: int = None, samp: str = 'normal', use_avg: bool = True):
+    def __init__(self, percent: float, num_points: int = None, samp: str = 'normal', use_avg: bool = True):
         self.percent = percent
         self.num_points = num_points
         self.samp = samp
         self.use_avg = use_avg
 
     def __call__(self, data: np.ndarray, hint: np.ndarray, mask: np.ndarray):
-        sample_Ps = [1, 2, 3, 4, 5, 6, 7, 8, 9, ]
+        sample_Ps = [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+        ]
         self.data = data
         self.hint = hint
         self.mask = mask
@@ -593,9 +611,11 @@ class ColorizeHint:
                 # add color point
                 if self.use_avg:
                     # embed()
-                    hint[nn, :, h:h + P, w:w + P] = np.mean(
-                        np.mean(data[nn, :, h:h + P, w:w + P], axis=2, keepdims=True), axis=1, keepdims=True).reshape(
-                        1, C, 1, 1)
+                    hint[nn, :, h:h + P, w:w + P] = np.mean(np.mean(data[nn, :, h:h + P, w:w + P],
+                                                                    axis=2,
+                                                                    keepdims=True),
+                                                            axis=1,
+                                                            keepdims=True).reshape(1, C, 1, 1)
                 else:
                     hint[nn, :, h:h + P, w:w + P] = data[nn, :, h:h + P, w:w + P]
                 mask[nn, :, h:h + P, w:w + P] = 1
@@ -609,10 +629,10 @@ class ColorizeHint:
 class SqueezeAxis:
     """
     Squeeze the specific axis when it equal to 1.
-    
+
     Args:
        axis(int): Which axis should be squeezed.
-       
+
     """
     def __init__(self, axis: int):
         self.axis = axis
@@ -628,7 +648,7 @@ class SqueezeAxis:
 
 class ColorizePreprocess:
     """Prepare dataset for image Colorization.
-    
+
     Args:
        ab_thresh(float): Thresh value for setting mask value.
        p(float): Probability for ignoring hint in an iteration.
@@ -636,12 +656,13 @@ class ColorizePreprocess:
        samp(str): Sample method, default is normal.
        use_avg(bool): Whether to use mean in selected hint area.
        is_train(bool): Training process or not.
-       
+
     Return:
         data(dict)：The preprocessed data for colorization.
 
     """
-    def __init__(self, ab_thresh: float = 0.,
+    def __init__(self,
+                 ab_thresh: float = 0.,
                  p: float = .125,
                  num_points: int = None,
                  samp: str = 'normal',
@@ -668,11 +689,14 @@ class ColorizePreprocess:
         """
         data = {}
         A = 2 * 110 / 10 + 1
-        data['A'] = data_lab[:, [0, ], :, :]
+        data['A'] = data_lab[:, [
+            0,
+        ], :, :]
         data['B'] = data_lab[:, 1:, :, :]
         if self.ab_thresh > 0:  # mask out grayscale images
             thresh = 1. * self.ab_thresh / 110
-            mask = np.sum(np.abs(np.max(np.max(data['B'], axis=3), axis=2) - np.min(np.min(data['B'], axis=3), axis=2)),axis=1)
+            mask = np.sum(np.abs(np.max(np.max(data['B'], axis=3), axis=2) - np.min(np.min(data['B'], axis=3), axis=2)),
+                          axis=1)
             mask = (mask >= thresh)
             data['A'] = data['A'][mask, :, :, :]
             data['B'] = data['B'][mask, :, :, :]
@@ -698,10 +722,10 @@ class ColorizePreprocess:
 class ColorPostprocess:
     """
     Transform images from [0, 1] to [0, 255]
-    
+
     Args:
        type(type): Type of Image value.
-       
+
     Return:
         img(np.ndarray): Image in range of 0-255.
     """
@@ -713,3 +737,505 @@ class ColorPostprocess:
         img = np.clip(img, 0, 1) * 255
         img = img.astype(self.type)
         return img
+
+
+class DetectCatagory:
+    """Load label name, id and map from detection dataset.
+
+    Args:
+        COCO(Callable): Method for get detection attributes for images.
+        data_dir(str): Image dataset path.
+
+    Returns:
+        label_names(List(str)): The dataset label names.
+        label_ids(List(int)): The dataset label ids.
+        category_to_id_map(dict): Mapping relations of category and id for images.
+    """
+    def __init__(self, COCO: Callable, data_dir: str):
+        self.COCO = COCO
+        self.img_dir = data_dir
+
+    def __call__(self):
+        self.categories = self.COCO.loadCats(self.COCO.getCatIds())
+        self.num_category = len(self.categories)
+        label_names = []
+        label_ids = []
+        for category in self.categories:
+            label_names.append(category['name'])
+            label_ids.append(int(category['id']))
+        category_to_id_map = {v: i for i, v in enumerate(label_ids)}
+        return label_names, label_ids, category_to_id_map
+
+
+class ParseImages:
+    """Prepare images for detection.
+
+    Args:
+        COCO(Callable): Method for get detection attributes for images.
+        is_train(bool): Select the mode for train or test.
+        data_dir(str): Image dataset path.
+        category_to_id_map(dict): Mapping relations of category and id for images.
+
+    Returns:
+        imgs(dict): The input for detection model, it is a dict.
+    """
+    def __init__(self, COCO: Callable, is_train: bool, data_dir: str, category_to_id_map: dict):
+        self.COCO = COCO
+        self.is_train = is_train
+        self.img_dir = data_dir
+        self.category_to_id_map = category_to_id_map
+        self.parse_gt_annotations = GTAnotations(self.COCO, self.category_to_id_map)
+
+    def __call__(self):
+        image_ids = self.COCO.getImgIds()
+        image_ids.sort()
+        imgs = copy.deepcopy(self.COCO.loadImgs(image_ids))
+
+        for img in imgs:
+            img['image'] = os.path.join(self.img_dir, img['file_name'])
+            assert os.path.exists(img['image']), \
+                "image {} not found.".format(img['image'])
+            box_num = 50
+            img['gt_boxes'] = np.zeros((box_num, 4), dtype=np.float32)
+            img['gt_labels'] = np.zeros((box_num), dtype=np.int32)
+            if self.is_train:
+                img = self.parse_gt_annotations(img)
+
+        return imgs
+
+
+class GTAnotations:
+    """Set gt boxes and gt labels for train.
+
+    Args:
+        COCO(Callable): Method for get detection attributes for images.
+        category_to_id_map(dict): Mapping relations of category and id for images.
+        img(dict): Input for detection model.
+
+    Returns:
+        img(dict): Set specific value on the attributes of 'gt boxes' and 'gt labels' for input.
+    """
+    def __init__(self, COCO: Callable, category_to_id_map: dict):
+        self.COCO = COCO
+        self.category_to_id_map = category_to_id_map
+        self.boxtool = BoxTool()
+
+    def __call__(self, img: dict):
+        img_height = img['height']
+        img_width = img['width']
+        anno = self.COCO.loadAnns(self.COCO.getAnnIds(imgIds=img['id'], iscrowd=None))
+        gt_index = 0
+
+        for target in anno:
+            if target['area'] < -1:
+                continue
+            if 'ignore' in target and target['ignore']:
+                continue
+
+            box = self.boxtool.coco_anno_box_to_center_relative(target['bbox'], img_height, img_width)
+            if box[2] <= 0 and box[3] <= 0:
+                continue
+            img['gt_boxes'][gt_index] = box
+            img['gt_labels'][gt_index] = \
+                self.category_to_id_map[target['category_id']]
+            gt_index += 1
+            if gt_index >= 50:
+                break
+        return img
+
+
+class DetectTestReader:
+    """Preprocess for detection dataset on test mode.
+
+    Args:
+        mean(list): Mean values for normalization, default is [0.485, 0.456, 0.406].
+        std(list): Standard deviation for normalization, default is [0.229, 0.224, 0.225].
+        img(dict): Prepared input for detection model.
+        size(int): Image size for detection.
+
+    Returns:
+        out_img(np.ndarray): Normalized image, shape is [C, H, W].
+        id(int): Id number for corresponding out_img.
+        (h, w)(tuple): height and weight for corresponding out_img.
+    """
+    def __init__(self, mean: list = [0.485, 0.456, 0.406], std: list = [0.229, 0.224, 0.225]):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, img, size):
+        im_path = img['image']
+        im = cv2.imread(im_path).astype('float32')
+        im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+        h, w, _ = im.shape
+        im_scale_x = size / float(w)
+        im_scale_y = size / float(h)
+
+        out_img = cv2.resize(im, None, None, fx=im_scale_x, fy=im_scale_y, interpolation=cv2.INTER_CUBIC)
+
+        mean = np.array(self.mean).reshape((1, 1, -1))
+        std = np.array(self.std).reshape((1, 1, -1))
+        out_img = (out_img / 255.0 - mean) / std
+        out_img = out_img.transpose((2, 0, 1))
+        id = int(img['id'])
+        return out_img, id, (h, w)
+
+
+class DetectTrainReader:
+    """Preprocess for detection dataset on train mode.
+
+       Args:
+           mean(list): Mean values for normalization, default is [0.485, 0.456, 0.406].
+           std(list): Standard deviation for normalization, default is [0.229, 0.224, 0.225].
+           img(dict): Prepared input for detection model.
+           size(int): Image size for detection.
+
+       Returns:
+           out_img(np.ndarray): Normalized image, shape is [C, H, W].
+           gt_boxes(np.ndarray): Ground truth boxes information.
+           gt_labels(np.ndarray): Ground truth labels.
+           gt_scores(np.ndarray): Ground truth scores.
+       """
+    def __init__(self, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
+        self.mean = mean
+        self.std = std
+        self.boxtool = BoxTool()
+
+    def __call__(self, img, size):
+        im_path = img['image']
+        im = cv2.imread(im_path)
+        im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+        gt_boxes = img['gt_boxes'].copy()
+        gt_labels = img['gt_labels'].copy()
+        gt_scores = np.ones_like(gt_labels)
+        im, gt_boxes, gt_labels, gt_scores = self.boxtool.image_augment(im, gt_boxes, gt_labels, gt_scores, size,
+                                                                        self.mean)
+        mean = np.array(self.mean).reshape((1, 1, -1))
+        std = np.array(self.std).reshape((1, 1, -1))
+        out_img = (im / 255.0 - mean) / std
+        out_img = out_img.astype('float32').transpose((2, 0, 1))
+        return out_img, gt_boxes, gt_labels, gt_scores
+
+
+class BoxTool:
+    """This class provides common methods for box processing in detection tasks."""
+    def __init__(self):
+        super(BoxTool, self).__init__()
+
+    def coco_anno_box_to_center_relative(self, box: list, img_height: int, img_width: int) -> np.ndarray:
+        """
+        Convert COCO annotations box with format [x1, y1, w, h] to
+        center mode [center_x, center_y, w, h] and divide image width
+        and height to get relative value in range[0, 1]
+        """
+        assert len(box) == 4, "box should be a len(4) list or tuple"
+        x, y, w, h = box
+
+        x1 = max(x, 0)
+        x2 = min(x + w - 1, img_width - 1)
+        y1 = max(y, 0)
+        y2 = min(y + h - 1, img_height - 1)
+
+        x = (x1 + x2) / 2 / img_width
+        y = (y1 + y2) / 2 / img_height
+        w = (x2 - x1) / img_width
+        h = (y2 - y1) / img_height
+
+        return np.array([x, y, w, h])
+
+    def clip_relative_box_in_image(self, x: int, y: int, w: int, h: int) -> int:
+        """Clip relative box coordinates x, y, w, h to [0, 1]"""
+
+        x1 = max(x - w / 2, 0.)
+        x2 = min(x + w / 2, 1.)
+        y1 = min(y - h / 2, 0.)
+        y2 = max(y + h / 2, 1.)
+        x = (x1 + x2) / 2
+        y = (y1 + y2) / 2
+        w = x2 - x1
+        h = y2 - y1
+        return x, y, w, h
+
+    def box_xywh_to_xyxy(self, box: np.ndarray) -> np.ndarray:
+        """Change box from xywh to xyxy"""
+
+        shape = box.shape
+        assert shape[-1] == 4, "Box shape[-1] should be 4."
+
+        box = box.reshape((-1, 4))
+        box[:, 0], box[:, 2] = box[:, 0] - box[:, 2] / 2, box[:, 0] + box[:, 2] / 2
+        box[:, 1], box[:, 3] = box[:, 1] - box[:, 3] / 2, box[:, 1] + box[:, 3] / 2
+        box = box.reshape(shape)
+        return box
+
+    def box_iou_xywh(self, box1: np.ndarray, box2: np.ndarray) -> float:
+        """Calculate iou by xywh"""
+
+        assert box1.shape[-1] == 4, "Box1 shape[-1] should be 4."
+        assert box2.shape[-1] == 4, "Box2 shape[-1] should be 4."
+
+        b1_x1, b1_x2 = box1[:, 0] - box1[:, 2] / 2, box1[:, 0] + box1[:, 2] / 2
+        b1_y1, b1_y2 = box1[:, 1] - box1[:, 3] / 2, box1[:, 1] + box1[:, 3] / 2
+        b2_x1, b2_x2 = box2[:, 0] - box2[:, 2] / 2, box2[:, 0] + box2[:, 2] / 2
+        b2_y1, b2_y2 = box2[:, 1] - box2[:, 3] / 2, box2[:, 1] + box2[:, 3] / 2
+
+        inter_x1 = np.maximum(b1_x1, b2_x1)
+        inter_x2 = np.minimum(b1_x2, b2_x2)
+        inter_y1 = np.maximum(b1_y1, b2_y1)
+        inter_y2 = np.minimum(b1_y2, b2_y2)
+        inter_w = inter_x2 - inter_x1
+        inter_h = inter_y2 - inter_y1
+        inter_w[inter_w < 0] = 0
+        inter_h[inter_h < 0] = 0
+
+        inter_area = inter_w * inter_h
+        b1_area = (b1_x2 - b1_x1) * (b1_y2 - b1_y1)
+        b2_area = (b2_x2 - b2_x1) * (b2_y2 - b2_y1)
+
+        return inter_area / (b1_area + b2_area - inter_area)
+
+    def box_iou_xyxy(self, box1: np.ndarray, box2: np.ndarray) -> float:
+        """Calculate iou by xyxy"""
+
+        assert box1.shape[-1] == 4, "Box1 shape[-1] should be 4."
+        assert box2.shape[-1] == 4, "Box2 shape[-1] should be 4."
+
+        b1_x1, b1_y1, b1_x2, b1_y2 = box1[:, 0], box1[:, 1], box1[:, 2], box1[:, 3]
+        b2_x1, b2_y1, b2_x2, b2_y2 = box2[:, 0], box2[:, 1], box2[:, 2], box2[:, 3]
+
+        inter_x1 = np.maximum(b1_x1, b2_x1)
+        inter_x2 = np.minimum(b1_x2, b2_x2)
+        inter_y1 = np.maximum(b1_y1, b2_y1)
+        inter_y2 = np.minimum(b1_y2, b2_y2)
+        inter_w = inter_x2 - inter_x1
+        inter_h = inter_y2 - inter_y1
+        inter_w[inter_w < 0] = 0
+        inter_h[inter_h < 0] = 0
+
+        inter_area = inter_w * inter_h
+        b1_area = (b1_x2 - b1_x1) * (b1_y2 - b1_y1)
+        b2_area = (b2_x2 - b2_x1) * (b2_y2 - b2_y1)
+
+        return inter_area / (b1_area + b2_area - inter_area)
+
+    def box_crop(self, boxes: np.ndarray, labels: np.ndarray, scores: np.ndarray, crop: list, img_shape: list):
+        """Crop the boxes ,labels, scores according to the given shape"""
+
+        x, y, w, h = map(float, crop)
+        im_w, im_h = map(float, img_shape)
+
+        boxes = boxes.copy()
+        boxes[:, 0], boxes[:, 2] = (boxes[:, 0] - boxes[:, 2] / 2) * im_w, (boxes[:, 0] + boxes[:, 2] / 2) * im_w
+        boxes[:, 1], boxes[:, 3] = (boxes[:, 1] - boxes[:, 3] / 2) * im_h, (boxes[:, 1] + boxes[:, 3] / 2) * im_h
+
+        crop_box = np.array([x, y, x + w, y + h])
+        centers = (boxes[:, :2] + boxes[:, 2:]) / 2.0
+        mask = np.logical_and(crop_box[:2] <= centers, centers <= crop_box[2:]).all(axis=1)
+
+        boxes[:, :2] = np.maximum(boxes[:, :2], crop_box[:2])
+        boxes[:, 2:] = np.minimum(boxes[:, 2:], crop_box[2:])
+        boxes[:, :2] -= crop_box[:2]
+        boxes[:, 2:] -= crop_box[:2]
+
+        mask = np.logical_and(mask, (boxes[:, :2] < boxes[:, 2:]).all(axis=1))
+        boxes = boxes * np.expand_dims(mask.astype('float32'), axis=1)
+        labels = labels * mask.astype('float32')
+        scores = scores * mask.astype('float32')
+        boxes[:, 0], boxes[:, 2] = (boxes[:, 0] + boxes[:, 2]) / 2 / w, (boxes[:, 2] - boxes[:, 0]) / w
+        boxes[:, 1], boxes[:, 3] = (boxes[:, 1] + boxes[:, 3]) / 2 / h, (boxes[:, 3] - boxes[:, 1]) / h
+
+        return boxes, labels, scores, mask.sum()
+
+    def random_distort(self, img):
+        """ Distort the input image randomly."""
+        def random_brightness(img, lower=0.5, upper=1.5):
+            e = np.random.uniform(lower, upper)
+            return ImageEnhance.Brightness(img).enhance(e)
+
+        def random_contrast(img, lower=0.5, upper=1.5):
+            e = np.random.uniform(lower, upper)
+            return ImageEnhance.Contrast(img).enhance(e)
+
+        def random_color(img, lower=0.5, upper=1.5):
+            e = np.random.uniform(lower, upper)
+            return ImageEnhance.Color(img).enhance(e)
+
+        ops = [random_brightness, random_contrast, random_color]
+        np.random.shuffle(ops)
+
+        img = Image.fromarray(img)
+        img = ops[0](img)
+        img = ops[1](img)
+        img = ops[2](img)
+        img = np.asarray(img)
+
+        return img
+
+    def random_crop(self, img, boxes, labels, scores, scales=[0.3, 1.0], max_ratio=2.0, constraints=None, max_trial=50):
+        """Random crop the input image according to constraints."""
+        if len(boxes) == 0:
+            return img, boxes
+
+        if not constraints:
+            constraints = [(0.1, 1.0), (0.3, 1.0), (0.5, 1.0), (0.7, 1.0), (0.9, 1.0), (0.0, 1.0)]
+
+        img = Image.fromarray(img)
+        w, h = img.size
+        crops = [(0, 0, w, h)]
+        for min_iou, max_iou in constraints:
+            for _ in range(max_trial):
+                scale = random.uniform(scales[0], scales[1])
+                aspect_ratio = random.uniform(max(1 / max_ratio, scale * scale), \
+                                              min(max_ratio, 1 / scale / scale))
+                crop_h = int(h * scale / np.sqrt(aspect_ratio))
+                crop_w = int(w * scale * np.sqrt(aspect_ratio))
+                crop_x = random.randrange(w - crop_w)
+                crop_y = random.randrange(h - crop_h)
+                crop_box = np.array([[(crop_x + crop_w / 2.0) / w, (crop_y + crop_h / 2.0) / h, crop_w / float(w),
+                                      crop_h / float(h)]])
+
+                iou = self.box_iou_xywh(crop_box, boxes)
+                if min_iou <= iou.min() and max_iou >= iou.max():
+                    crops.append((crop_x, crop_y, crop_w, crop_h))
+                    break
+
+        while crops:
+            crop = crops.pop(np.random.randint(0, len(crops)))
+            crop_boxes, crop_labels, crop_scores, box_num = \
+                self.box_crop(boxes, labels, scores, crop, (w, h))
+            if box_num < 1:
+                continue
+            img = img.crop((crop[0], crop[1], crop[0] + crop[2], crop[1] + crop[3])).resize(img.size, Image.LANCZOS)
+            img = np.asarray(img)
+            return img, crop_boxes, crop_labels, crop_scores
+        img = np.asarray(img)
+        return img, boxes, labels, scores
+
+    def random_flip(self, img, gtboxes, thresh=0.5):
+        """Flip the images randomly"""
+        if random.random() > thresh:
+            img = img[:, ::-1, :]
+            gtboxes[:, 0] = 1.0 - gtboxes[:, 0]
+        return img, gtboxes
+
+    def random_interp(self, img, size, interp=None):
+        interp_method = [
+            cv2.INTER_NEAREST,
+            cv2.INTER_LINEAR,
+            cv2.INTER_AREA,
+            cv2.INTER_CUBIC,
+            cv2.INTER_LANCZOS4,
+        ]
+        if not interp or interp not in interp_method:
+            interp = interp_method[random.randint(0, len(interp_method) - 1)]
+        h, w, _ = img.shape
+        im_scale_x = size / float(w)
+        im_scale_y = size / float(h)
+        img = cv2.resize(img, None, None, fx=im_scale_x, fy=im_scale_y, interpolation=interp)
+        return img
+
+    def random_expand(self, img, gtboxes, max_ratio=4., fill=None, keep_ratio=True, thresh=0.5):
+        """Expand input image and ground truth box by random ratio."""
+        if random.random() > thresh:
+            return img, gtboxes
+
+        if max_ratio < 1.0:
+            return img, gtboxes
+
+        h, w, c = img.shape
+        ratio_x = random.uniform(1, max_ratio)
+        if keep_ratio:
+            ratio_y = ratio_x
+        else:
+            ratio_y = random.uniform(1, max_ratio)
+        oh = int(h * ratio_y)
+        ow = int(w * ratio_x)
+        off_x = random.randint(0, ow - w)
+        off_y = random.randint(0, oh - h)
+
+        out_img = np.zeros((oh, ow, c))
+        if fill and len(fill) == c:
+            for i in range(c):
+                out_img[:, :, i] = fill[i] * 255.0
+
+        out_img[off_y:off_y + h, off_x:off_x + w, :] = img
+        gtboxes[:, 0] = ((gtboxes[:, 0] * w) + off_x) / float(ow)
+        gtboxes[:, 1] = ((gtboxes[:, 1] * h) + off_y) / float(oh)
+        gtboxes[:, 2] = gtboxes[:, 2] / ratio_x
+        gtboxes[:, 3] = gtboxes[:, 3] / ratio_y
+
+        return out_img.astype('uint8'), gtboxes
+
+    def shuffle_gtbox(self, gtbox, gtlabel, gtscore):
+        """Shuffle gt box."""
+
+        gt = np.concatenate([gtbox, gtlabel[:, np.newaxis], gtscore[:, np.newaxis]], axis=1)
+        idx = np.arange(gt.shape[0])
+        np.random.shuffle(idx)
+        gt = gt[idx, :]
+        return gt[:, :4], gt[:, 4], gt[:, 5]
+
+    def image_augment(self, img, gtboxes, gtlabels, gtscores, size, means=None):
+        """Random processes for input image."""
+
+        img = self.random_distort(img)
+        img, gtboxes = self.random_expand(img, gtboxes, fill=means)
+        img, gtboxes, gtlabels, gtscores = \
+            self.random_crop(img, gtboxes, gtlabels, gtscores)
+        img = self.random_interp(img, size)
+        img, gtboxes = self.random_flip(img, gtboxes)
+        gtboxes, gtlabels, gtscores = self.shuffle_gtbox(gtboxes, gtlabels, gtscores)
+
+        return img.astype('float32'), gtboxes.astype('float32'), \
+               gtlabels.astype('int32'), gtscores.astype('float32')
+
+    def draw_boxes_on_image(self,
+                            image_path: str,
+                            boxes: np.ndarray,
+                            scores: np.ndarray,
+                            labels: np.ndarray,
+                            label_names: list,
+                            score_thresh: float = 0.5):
+        """Draw boxes on images"""
+
+        image = np.array(Image.open(image_path))
+        plt.figure()
+        _, ax = plt.subplots(1)
+        ax.imshow(image)
+
+        image_name = image_path.split('/')[-1]
+        print("Image {} detect: ".format(image_name))
+        colors = {}
+
+        for box, score, label in zip(boxes, scores, labels):
+            if score < score_thresh:
+                continue
+            if box[2] <= box[0] or box[3] <= box[1]:
+                continue
+            label = int(label)
+            if label not in colors:
+                colors[label] = plt.get_cmap('hsv')(label / len(label_names))
+            x1, y1, x2, y2 = box[0], box[1], box[2], box[3]
+            rect = plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, linewidth=2.0, edgecolor=colors[label])
+            ax.add_patch(rect)
+            ax.text(x1,
+                    y1,
+                    '{} {:.4f}'.format(label_names[label], score),
+                    verticalalignment='bottom',
+                    horizontalalignment='left',
+                    bbox={
+                        'facecolor': colors[label],
+                        'alpha': 0.5,
+                        'pad': 0
+                    },
+                    fontsize=8,
+                    color='white')
+            print("\t {:15s} at {:25} score: {:.5f}".format(label_names[int(label)], str(list(map(int, list(box)))),
+                                                            score))
+        image_name = image_name.replace('jpg', 'png')
+        plt.axis('off')
+        plt.gca().xaxis.set_major_locator(plt.NullLocator())
+        plt.gca().yaxis.set_major_locator(plt.NullLocator())
+        plt.savefig("./output/{}".format(image_name), bbox_inches='tight', pad_inches=0.0)
+        print("Detect result save at ./output/{}\n".format(image_name))
+        plt.cla()
+        plt.close('all')

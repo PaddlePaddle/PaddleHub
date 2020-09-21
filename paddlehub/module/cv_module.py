@@ -26,7 +26,7 @@ from PIL import Image
 
 from paddlehub.module.module import serving, RunModule
 from paddlehub.utils.utils import base64_to_cv2
-from paddlehub.process.transforms import ConvertColorSpace, ColorPostprocess, Resize
+from paddlehub.process.transforms import ConvertColorSpace, ColorPostprocess, Resize, BoxTool
 
 
 class ImageServing(object):
@@ -103,11 +103,11 @@ class ImageColorizeModule(RunModule, ImageServing):
     def training_step(self, batch: int, batch_idx: int) -> dict:
         '''
         One step for training, which should be called as forward computation.
-        
+
         Args:
             batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
             batch_idx(int): The index of batch.
-            
+
         Returns:
             results(dict) : The model outputs, such as loss and metrics.
         '''
@@ -116,22 +116,22 @@ class ImageColorizeModule(RunModule, ImageServing):
     def validation_step(self, batch: int, batch_idx: int) -> dict:
         '''
         One step for validation, which should be called as forward computation.
-        
+
         Args:
             batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
             batch_idx(int): The index of batch.
-            
+
         Returns:
             results(dict) : The model outputs, such as metrics.
         '''
         out_class, out_reg = self(batch[0], batch[1], batch[2])
-        
+
         criterionCE = nn.loss.CrossEntropyLoss()
         loss_ce = criterionCE(out_class, batch[4][:, 0, :, :])
         loss_G_L1_reg = paddle.sum(paddle.abs(batch[3] - out_reg), axis=1, keepdim=True)
         loss_G_L1_reg = paddle.mean(loss_G_L1_reg)
         loss = loss_ce + loss_G_L1_reg
-        
+
         visual_ret = OrderedDict()
         psnrs = []
         lab2rgb = ConvertColorSpace(mode='LAB2RGB')
@@ -141,7 +141,7 @@ class ImageColorizeModule(RunModule, ImageServing):
             visual_ret['real'] = process(real)
             fake = lab2rgb(np.concatenate((batch[0].numpy(), out_reg.numpy()), axis=1))[i]
             visual_ret['fake_reg'] = process(fake)
-            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0) ** 2)
+            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
             psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             psnrs.append(psnr_value)
         psnr = paddle.to_variable(np.array(psnrs))
@@ -150,12 +150,12 @@ class ImageColorizeModule(RunModule, ImageServing):
     def predict(self, images: str, visualization: bool = True, save_path: str = 'result'):
         '''
         Colorize images
-        
+
         Args:
             images(str) : Images path to be colorized.
             visualization(bool): Whether to save colorized images.
             save_path(str) : Path to save colorized images.
-            
+
         Returns:
             results(list[dict]) : The prediction result of each input image
         '''
@@ -177,7 +177,7 @@ class ImageColorizeModule(RunModule, ImageServing):
             visual_ret['real'] = resize(process(real))
             fake = lab2rgb(np.concatenate((im['A'], out_reg.numpy()), axis=1))[i]
             visual_ret['fake_reg'] = resize(process(fake))
-            
+
             if visualization:
                 fake_name = "fake_" + str(time.time()) + ".png"
                 if not os.path.exists(save_path):
@@ -185,8 +185,107 @@ class ImageColorizeModule(RunModule, ImageServing):
                 fake_path = os.path.join(save_path, fake_name)
                 visual_gray = Image.fromarray(visual_ret['fake_reg'])
                 visual_gray.save(fake_path)
-                
-            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0) ** 2)
+
+            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
             psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             result.append(visual_ret)
         return result
+
+
+class Yolov3Module(RunModule, ImageServing):
+    def training_step(self, batch: int, batch_idx: int) -> dict:
+        '''
+        One step for training, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Tensor]): The one batch data, which contains images, ground truth boxes, labels and scores.
+            batch_idx(int): The index of batch.
+
+        Returns:
+            results(dict): The model outputs, such as loss.
+        '''
+
+        return self.validation_step(batch, batch_idx)
+
+    def validation_step(self, batch: int, batch_idx: int) -> dict:
+        '''
+        One step for validation, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Tensor]): The one batch data, which contains images, ground truth boxes, labels and scores.
+            batch_idx(int): The index of batch.
+
+        Returns:
+            results(dict) : The model outputs, such as metrics.
+        '''
+        ious = []
+        boxtool = BoxTool()
+        img = batch[0].astype('float32')
+        B, C, W, H = img.shape
+        im_shape = np.array([(W, H)] * B).astype('int32')
+        im_shape = paddle.to_tensor(im_shape)
+
+        gt_box = batch[1].astype('float32')
+        gt_label = batch[2].astype('int32')
+        gt_score = batch[3].astype("float32")
+        loss, pred = self(img, gt_box, gt_label, gt_score, im_shape)
+
+        for i in range(len(pred)):
+            bboxes = pred[i].numpy()
+            labels = bboxes[:, 0].astype('int32')
+            scores = bboxes[:, 1].astype('float32')
+            boxes = bboxes[:, 2:].astype('float32')
+            iou = []
+
+            for j, (box, score, label) in enumerate(zip(boxes, scores, labels)):
+                x1, y1, x2, y2 = box
+                w = x2 - x1 + 1
+                h = y2 - y1 + 1
+                bbox = [x1, y1, w, h]
+                bbox = np.expand_dims(boxtool.coco_anno_box_to_center_relative(bbox, H, W), 0)
+                gt = gt_box[i].numpy()
+                iou.append(max(boxtool.box_iou_xywh(bbox, gt)))
+
+            ious.append(max(iou))
+        ious = paddle.to_tensor(np.array(ious))
+
+        return {'loss': loss, 'metrics': {'iou': ious}}
+
+    def predict(self, imgpath: str, filelist: str, visualization: bool = True, save_path: str = 'result'):
+        '''
+        Detect images
+
+        Args:
+            imgpath(str): Image path .
+            filelist(str): Path to get label name.
+            visualization(bool): Whether to save result image.
+            save_path(str) : Path to save detected images.
+
+        Returns:
+            boxes(np.ndarray): Predict box information.
+            scores(np.ndarray): Predict score.
+            labels(np.ndarray): Predict labels.
+        '''
+        boxtool = BoxTool()
+        img = {}
+        img['image'] = imgpath
+        img['id'] = 0
+        im, im_id, im_shape = self.transform(img, 416)
+        label_names = self.get_label_infos(filelist)
+        img_data = np.array([im]).astype('float32')
+        img_data = paddle.to_tensor(img_data)
+        im_shape = np.array([im_shape]).astype('int32')
+        im_shape = paddle.to_tensor(im_shape)
+
+        output, pred = self(img_data, None, None, None, im_shape)
+
+        for i in range(len(pred)):
+            bboxes = pred[i].numpy()
+            labels = bboxes[:, 0].astype('int32')
+            scores = bboxes[:, 1].astype('float32')
+            boxes = bboxes[:, 2:].astype('float32')
+
+            if visualization:
+                boxtool.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5)
+
+        return boxes, scores, labels
