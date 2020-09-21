@@ -71,8 +71,8 @@ def run_worker(model_dir, device_idx, endpoint="ipc://worker.ipc"):
             "CUDA_VISIBLE_DEVICES").split(",")[device_idx]
         log.debug('cuda_env %s' % os.environ["CUDA_VISIBLE_DEVICES"])
         import paddle.fluid as F
-        from propeller.service import interface_pb2
-        import propeller.service.utils as serv_utils
+        from ernie_gen.propeller.service import interface_pb2
+        import ernie_gen.propeller.service.utils as serv_utils
         context = zmq.Context()
         socket = context.socket(zmq.REP)
         socket.connect(endpoint)

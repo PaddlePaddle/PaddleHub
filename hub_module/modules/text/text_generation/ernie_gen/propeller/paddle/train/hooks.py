@@ -73,7 +73,7 @@ class TqdmProgressBarHook(RunHook):
         """doc"""
         self.tqdm = None
         import tqdm
-        from propeller import log as main_log
+        from ernie_gen.propeller import log as main_log
         hdl = main_log.handlers[0]
 
         class _TqdmLogginHandler(logging.Handler):
@@ -110,7 +110,7 @@ class TqdmNotebookProgressBarHook(RunHook):
         """doc"""
         self.tqdm = None
         import tqdm
-        from propeller import log as main_log
+        from ernie_gen.propeller import log as main_log
         hdl = main_log.handlers[0]
 
         class _TqdmLogginHandler(logging.Handler):
@@ -144,7 +144,7 @@ class TqdmNotebookProgressBarHook(RunHook):
 
 
 class LoggingHook(RunHook):
-    """log tensor in to screan and tensorboard"""
+    """log tensor in to screan and VisualDL"""
 
     def __init__(self,
                  loss,
@@ -205,7 +205,7 @@ class LoggingHook(RunHook):
                 speed = -1.
             self.last_state = state
 
-            # log to tensorboard
+            # log to VisualDL
             if self.writer is not None:
                 self.writer.add_scalar('loss', loss, state.gstep)
                 for name, t in zip(self.s_name, s_np):

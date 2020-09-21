@@ -39,7 +39,7 @@ import ernie_gen.propeller.paddle as propeller
 
 @moduleinfo(
     name="ernie_gen",
-    version="1.0.1",
+    version="1.0.2",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning.",
     author="baidu",
@@ -371,10 +371,11 @@ class ErnieGen(hub.Module):
         src_ids = src_ids[:self.max_encode_len]
         tgt_ids = tgt_ids[:self.max_decode_len]
         src_ids, src_sids = self.tokenizer.build_for_ernie(src_ids)
-        src_pids = np.arange(len(src_ids))
+        src_pids = np.arange(len(src_ids), dtype=np.int64)
 
         tgt_ids, tgt_sids = self.tokenizer.build_for_ernie(tgt_ids)
-        tgt_pids = np.arange(len(tgt_ids)) + len(src_ids)  # continues position
+        tgt_pids = np.arange(
+            len(tgt_ids), dtype=np.int64) + len(src_ids)  # continues position
         tgt_sids = np.ones_like(tgt_sids)
 
         attn_ids = np.ones_like(tgt_ids) * self.tokenizer.vocab['[MASK]']

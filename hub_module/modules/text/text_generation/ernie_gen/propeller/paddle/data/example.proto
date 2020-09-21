@@ -16,8 +16,8 @@
 // model training or inference.
 syntax = "proto3";
 
-import "propeller/paddle/data/feature.proto";
-package propeller;
+import "ernie_gen.propeller/paddle/data/feature.proto";
+package ernie_gen.propeller;
 
 message Example {
   Features features = 1;
