@@ -137,22 +137,3 @@ def gram_matrix(data: paddle.Tensor) -> paddle.Tensor:
     features_t = features.transpose((0, 2, 1))
     gram = features.bmm(features_t) / (ch * h * w)
     return gram
-
-
-def subtract_imagenet_mean_batch(batch: paddle.Tensor) -> paddle.Tensor:
-    """Subtract ImageNet mean pixel-wise from a BGR image."""
-    mean = np.zeros(shape=batch.shape, dtype='float32')
-    mean[:, 0, :, :] = 103.939
-    mean[:, 1, :, :] = 116.779
-    mean[:, 2, :, :] = 123.680
-    mean = paddle.to_tensor(mean)
-    return batch - mean
-
-
-def gram_matrix(data: paddle.Tensor) -> paddle.Tensor:
-    """Get gram matrix"""
-    b, ch, h, w = data.shape
-    features = data.reshape((b, ch, w * h))
-    features_t = features.transpose((0, 2, 1))
-    gram = features.bmm(features_t) / (ch * h * w)
-    return gram

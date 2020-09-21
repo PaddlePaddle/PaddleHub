@@ -18,9 +18,7 @@ import paddle
 import numpy
 import paddle.nn as nn
 from paddle.nn import Conv2d, ConvTranspose2d
-
 from paddlehub.module.module import moduleinfo
-from paddlehub.env import MODULE_HOME
 from paddlehub.process.transforms import Compose, Resize, RandomPaddingCrop, ConvertColorSpace, ColorizePreprocess
 from paddlehub.module.cv_module import ImageColorizeModule
 
@@ -183,7 +181,7 @@ class UserGuidedColorization(nn.Layer):
             self.set_dict(model_dict)
             print("load custom checkpoint success")
         else:
-            checkpoint = os.path.join(MODULE_HOME, 'user_guided_colorization', 'user_guided.pdparams')
+            checkpoint = os.path.join(self.directory, 'user_guided.pdparams')
             model_dict = paddle.load(checkpoint)[0]
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")

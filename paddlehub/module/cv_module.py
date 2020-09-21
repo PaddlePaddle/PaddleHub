@@ -220,13 +220,10 @@ class StyleTransferModule(RunModule, ImageServing):
             results(dict) : The model outputs, such as metrics.
         '''
         mse_loss = nn.MSELoss()
-
         N, C, H, W = batch[0].shape
         batch[1] = batch[1][0].unsqueeze(0)
         self.setTarget(batch[1])
-        batch[1] = subtract_imagenet_mean_batch(batch[1])
-        features_style = self.getFeature(batch[1])
-        gram_style = [gram_matrix(y) for y in features_style]
+
         y = self(batch[0])
         xc = paddle.to_tensor(batch[0].numpy().copy())
         y = subtract_imagenet_mean_batch(y)
@@ -235,11 +232,16 @@ class StyleTransferModule(RunModule, ImageServing):
         features_xc = self.getFeature(xc)
         f_xc_c = paddle.to_tensor(features_xc[1].numpy(), stop_gradient=True)
         content_loss = mse_loss(features_y[1], f_xc_c)
+
+        batch[1] = subtract_imagenet_mean_batch(batch[1])
+        features_style = self.getFeature(batch[1])
+        gram_style = [gram_matrix(y) for y in features_style]
         style_loss = 0.
         for m in range(len(features_y)):
             gram_y = gram_matrix(features_y[m])
             gram_s = paddle.to_tensor(np.tile(gram_style[m].numpy(), (N, 1, 1, 1)))
             style_loss += mse_loss(gram_y, gram_s[:N, :, :])
+
         loss = content_loss + style_loss
 
         return {'loss': loss, 'metrics': {'content gap': content_loss, 'style gap': style_loss}}
@@ -261,9 +263,11 @@ class StyleTransferModule(RunModule, ImageServing):
         style = paddle.to_tensor(self.transform(style_path))
         content = content.unsqueeze(0)
         style = style.unsqueeze(0)
+
         self.setTarget(style)
         output = self(content)
         output = paddle.clip(output[0].transpose((1, 2, 0)), 0, 255).numpy()
+
         if visualization:
             output = output.astype(np.uint8)
             style_name = "style_" + str(time.time()) + ".png"

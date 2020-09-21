@@ -572,17 +572,7 @@ class ColorizeHint:
         self.use_avg = use_avg
 
     def __call__(self, data: np.ndarray, hint: np.ndarray, mask: np.ndarray):
-        sample_Ps = [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-        ]
+        sample_Ps = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.data = data
         self.hint = hint
         self.mask = mask
