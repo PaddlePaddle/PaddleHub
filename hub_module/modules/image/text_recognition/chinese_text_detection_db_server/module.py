@@ -29,7 +29,7 @@ def base64_to_cv2(b64str):
 
 @moduleinfo(
     name="chinese_text_detection_db_server",
-    version="1.0.1",
+    version="1.0.2",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
@@ -41,7 +41,7 @@ class ChineseTextDetectionDBServer(hub.Module):
         initialize with the necessary elements
         """
         self.pretrained_model_path = os.path.join(self.directory,
-                                                  'ch_det_r50_vd_db')
+                                                  'inference_model')
         self.enable_mkldnn = enable_mkldnn
 
         self._set_config()
