@@ -35,7 +35,8 @@ def recognize_text(images=[],
                     output_dir='ocr_result',
                     visualization=False,
                     box_thresh=0.5,
-                    text_thresh=0.5)
+                    text_thresh=0.5,
+                    angle_classification_thresh=0.9)
 ```
 
 预测API，检测输入图片中的所有中文文本的位置。
@@ -47,6 +48,7 @@ def recognize_text(images=[],
 * use\_gpu (bool): 是否使用 GPU；**若使用GPU，请先设置CUDA_VISIBLE_DEVICES环境变量**
 * box\_thresh (float): 检测文本框置信度的阈值；
 * text\_thresh (float): 识别中文文本置信度的阈值；
+* angle_classification_thresh(float): 文本角度分类置信度的阈值
 * visualization (bool): 是否将识别结果保存为图片文件；
 * output\_dir (str): 图片的保存路径，默认设为 ocr\_result；
 
