@@ -286,6 +286,8 @@ class Yolov3Module(RunModule, ImageServing):
             boxes = bboxes[:, 2:].astype('float32')
 
             if visualization:
+                if not os.path.exists(save_path):
+                    os.mkdir(save_path)
                 boxtool.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5)
 
         return boxes, scores, labels
