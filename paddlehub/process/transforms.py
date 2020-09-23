@@ -24,15 +24,16 @@ from paddlehub.process.functional import *
 
 
 class Compose:
-    def __init__(self, transforms, to_rgb=True, stay_rgb=False):
+    def __init__(self, transforms, to_rgb=True, stay_rgb=False, is_permute=True):
         if not isinstance(transforms, list):
             raise TypeError('The transforms must be a list!')
         if len(transforms) < 1:
             raise ValueError('The length of transforms ' + \
-                            'must be equal or larger than 1!')
+                             'must be equal or larger than 1!')
         self.transforms = transforms
         self.to_rgb = to_rgb
         self.stay_rgb = stay_rgb
+        self.is_permute = is_permute
 
     def __call__(self, im):
         if isinstance(im, str):
@@ -45,13 +46,14 @@ class Compose:
 
         for op in self.transforms:
             im = op(im)
-            
+
         if not self.stay_rgb:
+            im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
+
+        if self.is_permute:
             im = permute(im)
 
         return im
-
-
 
 
 class RandomHorizontalFlip:
@@ -239,8 +241,13 @@ class RandomPaddingCrop:
             pad_height = max(crop_height - img_height, 0)
             pad_width = max(crop_width - img_width, 0)
             if (pad_height > 0 or pad_width > 0):
-                im = cv2.copyMakeBorder(
-                    im, 0, pad_height, 0, pad_width, cv2.BORDER_CONSTANT, value=self.im_padding_value)
+                im = cv2.copyMakeBorder(im,
+                                        0,
+                                        pad_height,
+                                        0,
+                                        pad_width,
+                                        cv2.BORDER_CONSTANT,
+                                        value=self.im_padding_value)
 
             if crop_height > 0 and crop_width > 0:
                 h_off = np.random.randint(img_height - crop_height + 1)
@@ -295,13 +302,12 @@ class RandomRotation:
             r[0, 2] += (nw / 2) - cx
             r[1, 2] += (nh / 2) - cy
             dsize = (nw, nh)
-            im = cv2.warpAffine(
-                im,
-                r,
-                dsize=dsize,
-                flags=cv2.INTER_LINEAR,
-                borderMode=cv2.BORDER_CONSTANT,
-                borderValue=self.im_padding_value)
+            im = cv2.warpAffine(im,
+                                r,
+                                dsize=dsize,
+                                flags=cv2.INTER_LINEAR,
+                                borderMode=cv2.BORDER_CONSTANT,
+                                borderValue=self.im_padding_value)
 
         return im
 
@@ -403,14 +409,14 @@ class RandomDistort:
 
         return im
 
-    
+
 class ConvertColorSpace:
     """
     Convert color space from RGB to LAB or from LAB to RGB.
-    
+
     Args:
        mode(str): Color space convert mode, it can be 'RGB2LAB' or 'LAB2RGB'.
-       
+
     Return:
         img(np.ndarray): converted image.
     """
@@ -429,7 +435,7 @@ class ConvertColorSpace:
         """
         mask = (rgb > 0.04045)
         np.seterr(invalid='ignore')
-        rgb = (((rgb + .055) / 1.055) ** 2.4) * mask + rgb / 12.92 * (1 - mask)
+        rgb = (((rgb + .055) / 1.055)**2.4) * mask + rgb / 12.92 * (1 - mask)
         rgb = np.nan_to_num(rgb)
         x = .412453 * rgb[:, 0, :, :] + .357580 * rgb[:, 1, :, :] + .180423 * rgb[:, 2, :, :]
         y = .212671 * rgb[:, 0, :, :] + .715160 * rgb[:, 1, :, :] + .072169 * rgb[:, 2, :, :]
@@ -490,7 +496,7 @@ class ConvertColorSpace:
         rgb = np.maximum(rgb, 0)  # sometimes reaches a small negative number, which causes NaNs
         mask = (rgb > .0031308).astype(np.float32)
         np.seterr(invalid='ignore')
-        out = (1.055 * (rgb ** (1. / 2.4)) - 0.055) * mask + 12.92 * rgb * (1 - mask)
+        out = (1.055 * (rgb**(1. / 2.4)) - 0.055) * mask + 12.92 * rgb * (1 - mask)
         out = np.nan_to_num(out)
         return out
 
@@ -511,7 +517,7 @@ class ConvertColorSpace:
         out = np.concatenate((x_int[:, None, :, :], y_int[:, None, :, :], z_int[:, None, :, :]), axis=1)
         mask = (out > .2068966).astype(np.float32)
         np.seterr(invalid='ignore')
-        out = (out ** 3.) * mask + (out - 16. / 116.) / 7.787 * (1 - mask)
+        out = (out**3.) * mask + (out - 16. / 116.) / 7.787 * (1 - mask)
         out = np.nan_to_num(out)
         sc = np.array((0.95047, 1., 1.08883))[None, :, None, None]
         out = out * sc
@@ -546,27 +552,27 @@ class ConvertColorSpace:
 
 class ColorizeHint:
     """Get hint and mask images for colorization.
-    
+
     This method is prepared for user guided colorization tasks. Take the original RGB images as imput, we will obtain the local hints and correspoding mask to guid colorization process.
-    
+
     Args:
        percent(float): Probability for ignoring hint in an iteration.
        num_points(int): Number of selected hints in an iteration.
        samp(str): Sample method, default is normal.
        use_avg(bool): Whether to use mean in selected hint area.
-       
+
     Return:
         hint(np.ndarray): hint images
         mask(np.ndarray): mask images
     """
-    def __init__(self,  percent: float, num_points: int = None, samp: str = 'normal', use_avg: bool = True):
+    def __init__(self, percent: float, num_points: int = None, samp: str = 'normal', use_avg: bool = True):
         self.percent = percent
         self.num_points = num_points
         self.samp = samp
         self.use_avg = use_avg
 
     def __call__(self, data: np.ndarray, hint: np.ndarray, mask: np.ndarray):
-        sample_Ps = [1, 2, 3, 4, 5, 6, 7, 8, 9, ]
+        sample_Ps = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.data = data
         self.hint = hint
         self.mask = mask
@@ -577,7 +583,7 @@ class ColorizeHint:
             while cont_cond:
                 if self.num_points is None:  # draw from geometric
                     # embed()
-                    cont_cond = np.random.rand() < (1 - self.percent)
+                    cont_cond = np.random.rand() > (1 - self.percent)
                 else:  # add certain number of points
                     cont_cond = pp < self.num_points
                 if not cont_cond:  # skip out of loop if condition not met
@@ -593,9 +599,11 @@ class ColorizeHint:
                 # add color point
                 if self.use_avg:
                     # embed()
-                    hint[nn, :, h:h + P, w:w + P] = np.mean(
-                        np.mean(data[nn, :, h:h + P, w:w + P], axis=2, keepdims=True), axis=1, keepdims=True).reshape(
-                        1, C, 1, 1)
+                    hint[nn, :, h:h + P, w:w + P] = np.mean(np.mean(data[nn, :, h:h + P, w:w + P],
+                                                                    axis=2,
+                                                                    keepdims=True),
+                                                            axis=1,
+                                                            keepdims=True).reshape(1, C, 1, 1)
                 else:
                     hint[nn, :, h:h + P, w:w + P] = data[nn, :, h:h + P, w:w + P]
                 mask[nn, :, h:h + P, w:w + P] = 1
@@ -609,10 +617,10 @@ class ColorizeHint:
 class SqueezeAxis:
     """
     Squeeze the specific axis when it equal to 1.
-    
+
     Args:
        axis(int): Which axis should be squeezed.
-       
+
     """
     def __init__(self, axis: int):
         self.axis = axis
@@ -628,7 +636,7 @@ class SqueezeAxis:
 
 class ColorizePreprocess:
     """Prepare dataset for image Colorization.
-    
+
     Args:
        ab_thresh(float): Thresh value for setting mask value.
        p(float): Probability for ignoring hint in an iteration.
@@ -636,13 +644,14 @@ class ColorizePreprocess:
        samp(str): Sample method, default is normal.
        use_avg(bool): Whether to use mean in selected hint area.
        is_train(bool): Training process or not.
-       
+
     Return:
         data(dict)：The preprocessed data for colorization.
 
     """
-    def __init__(self, ab_thresh: float = 0.,
-                 p: float = .125,
+    def __init__(self,
+                 ab_thresh: float = 0.,
+                 p: float = 0.,
                  num_points: int = None,
                  samp: str = 'normal',
                  use_avg: bool = True,
@@ -668,11 +677,14 @@ class ColorizePreprocess:
         """
         data = {}
         A = 2 * 110 / 10 + 1
-        data['A'] = data_lab[:, [0, ], :, :]
+        data['A'] = data_lab[:, [
+            0,
+        ], :, :]
         data['B'] = data_lab[:, 1:, :, :]
         if self.ab_thresh > 0:  # mask out grayscale images
             thresh = 1. * self.ab_thresh / 110
-            mask = np.sum(np.abs(np.max(np.max(data['B'], axis=3), axis=2) - np.min(np.min(data['B'], axis=3), axis=2)),axis=1)
+            mask = np.sum(np.abs(np.max(np.max(data['B'], axis=3), axis=2) - np.min(np.min(data['B'], axis=3), axis=2)),
+                          axis=1)
             mask = (mask >= thresh)
             data['A'] = data['A'][mask, :, :, :]
             data['B'] = data['B'][mask, :, :, :]
@@ -698,10 +710,10 @@ class ColorizePreprocess:
 class ColorPostprocess:
     """
     Transform images from [0, 1] to [0, 255]
-    
+
     Args:
        type(type): Type of Image value.
-       
+
     Return:
         img(np.ndarray): Image in range of 0-255.
     """
@@ -711,5 +723,43 @@ class ColorPostprocess:
     def __call__(self, img: np.ndarray):
         img = np.transpose(img, (1, 2, 0))
         img = np.clip(img, 0, 1) * 255
+        img = img.astype(self.type)
+        return img
+
+
+class CenterCrop:
+    """
+        Crop the middle part of the image to the specified size.
+
+        Args:
+           crop_size(int): Crop size.
+
+        Return:
+            img(np.ndarray): Croped image.
+    """
+    def __init__(self, crop_size: int):
+        self.crop_size = crop_size
+
+    def __call__(self, img: np.ndarray):
+        img_width, img_height, chanel = img.shape
+        crop_top = int((img_height - self.crop_size) / 2.)
+        crop_left = int((img_width - self.crop_size) / 2.)
+        return img[crop_left:crop_left + self.crop_size, crop_top:crop_top + self.crop_size, :]
+
+
+class SetType:
+    """
+    Set image type.
+
+    Args:
+       type(type): Type of Image value.
+
+    Return:
+        img(np.ndarray): Transformed image.
+    """
+    def __init__(self, datatype: type = 'float32'):
+        self.type = datatype
+
+    def __call__(self, img: np.ndarray):
         img = img.astype(self.type)
         return img
