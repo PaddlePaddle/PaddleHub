@@ -58,7 +58,7 @@ class HubModuleNotFoundError(Exception):
                 hub_version = 'Any' if not info['hub_version'] else ', '.join(info['hub_version'])
                 table.append(self.name, _ver, paddle_version, hub_version, aligns=['^', '^', '^', '^'])
 
-            tips += ',  \n{}'.format(table)
+            tips += ':\n{}'.format(table)
         return tips
 
 
@@ -104,7 +104,7 @@ class EnvironmentMismatchError(Exception):
 
                 table.append(self.name, _ver, paddle_version, hub_version, aligns=['^', '^', '^', '^'])
 
-            tips += ',  \n{}'.format(table)
+            tips += ':\n{}'.format(table)
         return tips
 
 
@@ -250,7 +250,7 @@ class LocalModuleManager(object):
                     if utils.Version(_ver).match(version):
                         valid_infos[_ver] = _info
             else:
-                valid_infos = list(module_infos.keys())
+                valid_infos = module_infos.copy()
 
             # Cannot find a HubModule that meets the version
             if valid_infos:

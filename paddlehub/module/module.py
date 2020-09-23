@@ -148,6 +148,10 @@ class Module(object):
             user_module = user_module_cls(directory=directory)
             user_module._initialize(**kwargs)
             return user_module
+
+        if user_module_cls == ModuleV1:
+            return user_module_cls(directory=directory, **kwargs)
+
         user_module_cls.directory = directory
         return user_module_cls(**kwargs)
 
@@ -166,6 +170,10 @@ class Module(object):
             user_module = user_module_cls(directory=directory)
             user_module._initialize(**kwargs)
             return user_module
+
+        if user_module_cls == ModuleV1:
+            return user_module_cls(directory=directory, **kwargs)
+
         user_module_cls.directory = directory
         return user_module_cls(**kwargs)
 
