@@ -47,7 +47,7 @@ class ShowCommand:
 
         widths = [15, 40] if platform.is_windows else [15, 50]
         aligns = ['^', '<']
-        colors = ['yellow', '']
+        colors = ['cyan', '']
         table = log.Table(widths=widths, colors=colors, aligns=aligns)
 
         table.append('ModuleName', module.name)

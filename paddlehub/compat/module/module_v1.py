@@ -185,6 +185,7 @@ class ModuleV1(object):
         cls.type = module_info.type
         cls.summary = module_info.summary
         cls.version = utils.Version(module_info.version)
+        cls.directory = directory
         return cls
 
     @classmethod
