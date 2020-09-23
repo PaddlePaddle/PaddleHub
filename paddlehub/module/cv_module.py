@@ -103,11 +103,11 @@ class ImageColorizeModule(RunModule, ImageServing):
     def training_step(self, batch: int, batch_idx: int) -> dict:
         '''
         One step for training, which should be called as forward computation.
-        
+
         Args:
             batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
             batch_idx(int): The index of batch.
-            
+
         Returns:
             results(dict) : The model outputs, such as loss and metrics.
         '''
@@ -116,46 +116,48 @@ class ImageColorizeModule(RunModule, ImageServing):
     def validation_step(self, batch: int, batch_idx: int) -> dict:
         '''
         One step for validation, which should be called as forward computation.
-        
+
         Args:
             batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
             batch_idx(int): The index of batch.
-            
+
         Returns:
             results(dict) : The model outputs, such as metrics.
         '''
         out_class, out_reg = self(batch[0], batch[1], batch[2])
-        
+
         criterionCE = nn.loss.CrossEntropyLoss()
         loss_ce = criterionCE(out_class, batch[4][:, 0, :, :])
         loss_G_L1_reg = paddle.sum(paddle.abs(batch[3] - out_reg), axis=1, keepdim=True)
         loss_G_L1_reg = paddle.mean(loss_G_L1_reg)
         loss = loss_ce + loss_G_L1_reg
-        
+
         visual_ret = OrderedDict()
         psnrs = []
         lab2rgb = ConvertColorSpace(mode='LAB2RGB')
         process = ColorPostprocess()
+
         for i in range(batch[0].numpy().shape[0]):
             real = lab2rgb(np.concatenate((batch[0].numpy(), batch[3].numpy()), axis=1))[i]
             visual_ret['real'] = process(real)
             fake = lab2rgb(np.concatenate((batch[0].numpy(), out_reg.numpy()), axis=1))[i]
             visual_ret['fake_reg'] = process(fake)
-            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0) ** 2)
+            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
             psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             psnrs.append(psnr_value)
         psnr = paddle.to_variable(np.array(psnrs))
+
         return {'loss': loss, 'metrics': {'psnr': psnr}}
 
     def predict(self, images: str, visualization: bool = True, save_path: str = 'result'):
         '''
         Colorize images
-        
+
         Args:
             images(str) : Images path to be colorized.
             visualization(bool): Whether to save colorized images.
             save_path(str) : Path to save colorized images.
-            
+
         Returns:
             results(list[dict]) : The prediction result of each input image
         '''
@@ -177,7 +179,7 @@ class ImageColorizeModule(RunModule, ImageServing):
             visual_ret['real'] = resize(process(real))
             fake = lab2rgb(np.concatenate((im['A'], out_reg.numpy()), axis=1))[i]
             visual_ret['fake_reg'] = resize(process(fake))
-            
+
             if visualization:
                 fake_name = "fake_" + str(time.time()) + ".png"
                 if not os.path.exists(save_path):
@@ -185,8 +187,8 @@ class ImageColorizeModule(RunModule, ImageServing):
                 fake_path = os.path.join(save_path, fake_name)
                 visual_gray = Image.fromarray(visual_ret['fake_reg'])
                 visual_gray.save(fake_path)
-                
-            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0) ** 2)
+
+            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
             psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             result.append(visual_ret)
         return result
