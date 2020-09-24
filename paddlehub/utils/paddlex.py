@@ -41,11 +41,17 @@ def download(name: str, save_path: str, version: str = None):
     if os.path.exists(file):
         return
 
-    resource = module_server.search_resouce(name=name, version=version, type='Model')
-    if not resource:
+    resources = module_server.search_resouce(name=name, version=version, type='Model')
+    if not resources:
         raise ResourceNotFoundError(name, version)
 
-    url = resource['url']
+    for item in resources:
+        if item['name'] == name and utils.Version(item['version']).match(version):
+            url = item['url']
+            break
+    else:
+        raise ResourceNotFoundError(name, version)
+
     with utils.generate_tempdir() as _dir:
         if not os.path.exists(save_path):
             os.makedirs(save_path)

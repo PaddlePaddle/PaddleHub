@@ -18,6 +18,7 @@ import importlib
 import os
 import sys
 from collections import OrderedDict
+from typing import List
 from urllib.parse import urlparse
 
 import git
@@ -74,7 +75,7 @@ class GitSource(object):
             log.logger.warning('An error occurred while loading {}'.format(self.path))
         sys.path.remove(self.path)
 
-    def search_module(self, name: str, version: str = None) -> dict:
+    def search_module(self, name: str, version: str = None) -> List[dict]:
         '''
         Search PaddleHub module
 
@@ -84,7 +85,7 @@ class GitSource(object):
         '''
         return self.search_resource(type='module', name=name, version=version)
 
-    def search_resource(self, type: str, name: str, version: str = None) -> dict:
+    def search_resource(self, type: str, name: str, version: str = None) -> List[dict]:
         '''
         Search PaddleHub Resource
 
@@ -95,13 +96,13 @@ class GitSource(object):
         '''
         module = self.hub_modules.get(name, None)
         if module and module.version.match(version):
-            return {
+            return [{
                 'version': module.version,
                 'name': module.name,
                 'path': self.path,
                 'class': module.__name__,
                 'source': self.url
-            }
+            }]
         return None
 
     @classmethod

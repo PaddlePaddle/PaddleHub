@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from collections import OrderedDict
+from typing import List
 
 from paddlehub.server import ServerSource, GitSource
 
@@ -44,7 +45,7 @@ class HubServer(object):
         '''Remove a module source'''
         self.sources.pop(key)
 
-    def search_module(self, name: str, version: str = None, source: str = None) -> dict:
+    def search_module(self, name: str, version: str = None, source: str = None) -> List[dict]:
         '''
         Search PaddleHub module
 
@@ -54,7 +55,7 @@ class HubServer(object):
         '''
         return self.search_resource(type='module', name=name, version=version, source=source)
 
-    def search_resource(self, type: str, name: str, version: str = None, source: str = None) -> dict:
+    def search_resource(self, type: str, name: str, version: str = None, source: str = None) -> List[dict]:
         '''
         Search PaddleHub Resource
 
@@ -68,7 +69,7 @@ class HubServer(object):
             result = source.search_resource(name=name, type=type, version=version)
             if result:
                 return result
-        return {}
+        return []
 
     def get_module_info(self, name: str, source: str = None) -> dict:
         '''
