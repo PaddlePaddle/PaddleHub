@@ -6,4 +6,4 @@ if __name__ == '__main__':
     paddle.disable_static()
     model = model = hub.Module(name='yolov3_darknet53_pascalvoc', is_train=False)
     model.eval()
-    model.predict(imgpath="/PATH/TO/IMAGE", filelist="/PATH/TO/JSON/FILE")
+    model.predict(imgpath="4026.jpeg", filelist="/PATH/TO/JSON/FILE")

@@ -7,7 +7,7 @@ from paddle.nn.initializer import Normal, Constant
 from paddle.regularizer import L2Decay
 from pycocotools.coco import COCO
 from paddlehub.module.cv_module import Yolov3Module
-from paddlehub.process.transforms import DetectTrainReader, DetectTestReader
+from paddlehub.process.detect_transforms import Compose, RandomDistort, RandomExpand, RandomCrop, Resize, RandomFlip, ShuffleBox, Normalize
 from paddlehub.module.module import moduleinfo
 
 
@@ -286,12 +286,24 @@ class YOLOv3(nn.Layer):
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
 
-    def transform(self, img: paddle.Tensor, size: int):
+    def transform(self, img):
         if self.is_train:
-            transforms = DetectTrainReader()
+            transform = Compose([
+                RandomDistort(),
+                RandomExpand(fill=[0.485, 0.456, 0.406]),
+                RandomCrop(),
+                Resize(target_size=416),
+                RandomFlip(),
+                ShuffleBox(),
+                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
         else:
-            transforms = DetectTestReader()
-        return transforms(img, size)
+            transform = Compose([
+                Resize(target_size=416, interp='CUBIC'),
+                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+
+        return transform(img)
 
     def get_label_infos(self, file_list: str):
         self.COCO = COCO(file_list)
@@ -301,23 +313,8 @@ class YOLOv3(nn.Layer):
             label_names.append(category['name'])
         return label_names
 
-    def forward(self,
-                inputs: paddle.Tensor,
-                gtbox: paddle.Tensor = None,
-                gtlabel: paddle.Tensor = None,
-                gtscore: paddle.Tensor = None,
-                im_shape: paddle.Tensor = None):
-
-        self.gtbox = gtbox
-        self.gtlabel = gtlabel
-        self.gtscore = gtscore
-        self.im_shape = im_shape
-        self.outputs = []
-        self.boxes = []
-        self.scores = []
-        self.losses = []
-        self.pred = []
-        self.downsample = 32
+    def forward(self, inputs: paddle.Tensor):
+        outputs = []
         blocks = self.block(inputs)
         route = None
         for i, block in enumerate(blocks):
@@ -325,58 +322,9 @@ class YOLOv3(nn.Layer):
                 block = paddle.concat([route, block], axis=1)
             route, tip = self.yolo_blocks[i](block)
             block_out = self.block_outputs[i](tip)
-            self.outputs.append(block_out)
+            outputs.append(block_out)
             if i < 2:
                 route = self.route_blocks_2[i](route)
                 route = self.upsample(route)
 
-        for i, out in enumerate(self.outputs):
-            anchor_mask = self.anchor_masks[i]
-
-            if self.is_train:
-                loss = F.yolov3_loss(x=out,
-                                     gt_box=self.gtbox,
-                                     gt_label=self.gtlabel,
-                                     gt_score=self.gtscore,
-                                     anchors=self.anchors,
-                                     anchor_mask=anchor_mask,
-                                     class_num=self.class_num,
-                                     ignore_thresh=self.ignore_thresh,
-                                     downsample_ratio=self.downsample,
-                                     use_label_smooth=False)
-            else:
-                loss = paddle.to_tensor(0.0)
-            self.losses.append(paddle.reduce_mean(loss))
-
-            mask_anchors = []
-            for m in anchor_mask:
-                mask_anchors.append((self.anchors[2 * m]))
-                mask_anchors.append(self.anchors[2 * m + 1])
-
-            boxes, scores = F.yolo_box(x=out,
-                                       img_size=self.im_shape,
-                                       anchors=mask_anchors,
-                                       class_num=self.class_num,
-                                       conf_thresh=self.valid_thresh,
-                                       downsample_ratio=self.downsample,
-                                       name="yolo_box" + str(i))
-
-            self.boxes.append(boxes)
-            self.scores.append(paddle.transpose(scores, perm=[0, 2, 1]))
-            self.downsample //= 2
-
-        for i in range(self.boxes[0].shape[0]):
-            yolo_boxes = paddle.unsqueeze(paddle.concat([self.boxes[0][i], self.boxes[1][i], self.boxes[2][i]], axis=0),
-                                          0)
-            yolo_scores = paddle.unsqueeze(
-                paddle.concat([self.scores[0][i], self.scores[1][i], self.scores[2][i]], axis=1), 0)
-            pred = F.multiclass_nms(bboxes=yolo_boxes,
-                                    scores=yolo_scores,
-                                    score_threshold=self.valid_thresh,
-                                    nms_top_k=self.nms_topk,
-                                    keep_top_k=self.nms_posk,
-                                    nms_threshold=self.nms_thresh,
-                                    background_label=-1)
-            self.pred.append(pred)
-
-        return sum(self.losses), self.pred
+        return outputs

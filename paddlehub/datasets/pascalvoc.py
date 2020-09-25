@@ -61,14 +61,10 @@ class DetectionData(paddle.io.Dataset):
         self.data = parse_images()
 
     def __getitem__(self, idx: int):
-        if self.mode == "train":
-            img = self.data[idx]
-            out_img, gt_boxes, gt_labels, gt_scores = self.transform(img, 416)
-            return out_img, gt_boxes, gt_labels, gt_scores
-        elif self.mode == "test":
-            img = self.data[idx]
-            out_img, id, (h, w) = self.transform(img)
-            return out_img, id, (h, w)
+        img = self.data[idx]
+        im, data = self.transform(img)
+        out_img, gt_boxes, gt_labels, gt_scores = im, data['gt_boxes'], data['gt_labels'], data['gt_scores']
+        return out_img, gt_boxes, gt_labels, gt_scores
 
     def __len__(self):
         return len(self.data)

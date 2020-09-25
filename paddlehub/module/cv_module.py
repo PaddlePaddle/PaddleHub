@@ -26,7 +26,8 @@ from PIL import Image
 
 from paddlehub.module.module import serving, RunModule
 from paddlehub.utils.utils import base64_to_cv2
-from paddlehub.process.transforms import ConvertColorSpace, ColorPostprocess, Resize, BoxTool
+from paddlehub.process.transforms import ConvertColorSpace, ColorPostprocess, Resize
+from paddlehub.process.functional import subtract_imagenet_mean_batch, gram_matrix, draw_boxes_on_image, img_shape
 
 
 class ImageServing(object):
@@ -218,38 +219,30 @@ class Yolov3Module(RunModule, ImageServing):
         Returns:
             results(dict) : The model outputs, such as metrics.
         '''
-        ious = []
-        boxtool = BoxTool()
         img = batch[0].astype('float32')
-        B, C, W, H = img.shape
-        im_shape = np.array([(W, H)] * B).astype('int32')
-        im_shape = paddle.to_tensor(im_shape)
+        gtbox = batch[1].astype('float32')
+        gtlabel = batch[2].astype('int32')
+        gtscore = batch[3].astype("float32")
+        losses = []
+        outputs = self(img)
+        self.downsample = 32
 
-        gt_box = batch[1].astype('float32')
-        gt_label = batch[2].astype('int32')
-        gt_score = batch[3].astype("float32")
-        loss, pred = self(img, gt_box, gt_label, gt_score, im_shape)
+        for i, out in enumerate(outputs):
+            anchor_mask = self.anchor_masks[i]
+            loss = F.yolov3_loss(x=out,
+                                 gt_box=gtbox,
+                                 gt_label=gtlabel,
+                                 gt_score=gtscore,
+                                 anchors=self.anchors,
+                                 anchor_mask=anchor_mask,
+                                 class_num=self.class_num,
+                                 ignore_thresh=self.ignore_thresh,
+                                 downsample_ratio=32,
+                                 use_label_smooth=False)
+            losses.append(paddle.reduce_mean(loss))
+            self.downsample //= 2
 
-        for i in range(len(pred)):
-            bboxes = pred[i].numpy()
-            labels = bboxes[:, 0].astype('int32')
-            scores = bboxes[:, 1].astype('float32')
-            boxes = bboxes[:, 2:].astype('float32')
-            iou = []
-
-            for j, (box, score, label) in enumerate(zip(boxes, scores, labels)):
-                x1, y1, x2, y2 = box
-                w = x2 - x1 + 1
-                h = y2 - y1 + 1
-                bbox = [x1, y1, w, h]
-                bbox = np.expand_dims(boxtool.coco_anno_box_to_center_relative(bbox, H, W), 0)
-                gt = gt_box[i].numpy()
-                iou.append(max(boxtool.box_iou_xywh(bbox, gt)))
-
-            ious.append(max(iou))
-        ious = paddle.to_tensor(np.array(ious))
-
-        return {'loss': loss, 'metrics': {'iou': ious}}
+        return {'loss': sum(losses)}
 
     def predict(self, imgpath: str, filelist: str, visualization: bool = True, save_path: str = 'result'):
         '''
@@ -266,28 +259,53 @@ class Yolov3Module(RunModule, ImageServing):
             scores(np.ndarray): Predict score.
             labels(np.ndarray): Predict labels.
         '''
-        boxtool = BoxTool()
-        img = {}
-        img['image'] = imgpath
-        img['id'] = 0
-        im, im_id, im_shape = self.transform(img, 416)
+        boxes = []
+        scores = []
+        self.downsample = 32
+        im = self.transform(imgpath)
+        h, w, c = img_shape(imgpath)
+        im_shape = paddle.to_tensor(np.array([[h, w]]).astype('int32'))
         label_names = self.get_label_infos(filelist)
-        img_data = np.array([im]).astype('float32')
-        img_data = paddle.to_tensor(img_data)
-        im_shape = np.array([im_shape]).astype('int32')
-        im_shape = paddle.to_tensor(im_shape)
+        img_data = paddle.to_tensor(np.array([im]).astype('float32'))
 
-        output, pred = self(img_data, None, None, None, im_shape)
+        outputs = self(img_data)
 
-        for i in range(len(pred)):
-            bboxes = pred[i].numpy()
-            labels = bboxes[:, 0].astype('int32')
-            scores = bboxes[:, 1].astype('float32')
-            boxes = bboxes[:, 2:].astype('float32')
+        for i, out in enumerate(outputs):
+            anchor_mask = self.anchor_masks[i]
+            mask_anchors = []
+            for m in anchor_mask:
+                mask_anchors.append((self.anchors[2 * m]))
+                mask_anchors.append(self.anchors[2 * m + 1])
 
-            if visualization:
-                if not os.path.exists(save_path):
-                    os.mkdir(save_path)
-                boxtool.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5)
+            box, score = F.yolo_box(x=out,
+                                    img_size=im_shape,
+                                    anchors=mask_anchors,
+                                    class_num=self.class_num,
+                                    conf_thresh=self.valid_thresh,
+                                    downsample_ratio=self.downsample,
+                                    name="yolo_box" + str(i))
+
+            boxes.append(box)
+            scores.append(paddle.transpose(score, perm=[0, 2, 1]))
+            self.downsample //= 2
+
+        yolo_boxes = paddle.concat(boxes, axis=1)
+        yolo_scores = paddle.concat(scores, axis=2)
+
+        pred = F.multiclass_nms(bboxes=yolo_boxes,
+                                scores=yolo_scores,
+                                score_threshold=self.valid_thresh,
+                                nms_top_k=self.nms_topk,
+                                keep_top_k=self.nms_posk,
+                                nms_threshold=self.nms_thresh,
+                                background_label=-1)
+
+        bboxes = pred.numpy()
+        labels = bboxes[:, 0].astype('int32')
+        scores = bboxes[:, 1].astype('float32')
+        boxes = bboxes[:, 2:].astype('float32')
+
+        if visualization:
+            draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5)
 
         return boxes, scores, labels
