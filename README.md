@@ -18,7 +18,7 @@ PaddleHub是飞桨生态的预训练模型应用工具，开发者可以便捷�
 - **自动超参优化**：内置AutoDL Finetuner能力，一键启动自动化超参搜索。
 
 
-## 文档教程[[readthedoc]](https://paddlehub.readthedocs.io/zh_CN/develop/index.html)
+## 文档教程 [[readthedocs]](https://paddlehub.readthedocs.io/zh_CN/develop/index.html)
 
 - [概述](./docs/overview.md)
 - [PIP安装](./docs/installation.md)
