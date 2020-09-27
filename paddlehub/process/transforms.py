@@ -241,12 +241,7 @@ class RandomPaddingCrop:
             pad_height = max(crop_height - img_height, 0)
             pad_width = max(crop_width - img_width, 0)
             if (pad_height > 0 or pad_width > 0):
-                im = cv2.copyMakeBorder(im,
-                                        0,
-                                        pad_height,
-                                        0,
-                                        pad_width,
-                                        cv2.BORDER_CONSTANT,
+                im = cv2.copyMakeBorder(im, 0, pad_height, 0, pad_width, cv2.BORDER_CONSTANT, \
                                         value=self.im_padding_value)
 
             if crop_height > 0 and crop_width > 0:
@@ -302,11 +297,7 @@ class RandomRotation:
             r[0, 2] += (nw / 2) - cx
             r[1, 2] += (nh / 2) - cy
             dsize = (nw, nh)
-            im = cv2.warpAffine(im,
-                                r,
-                                dsize=dsize,
-                                flags=cv2.INTER_LINEAR,
-                                borderMode=cv2.BORDER_CONSTANT,
+            im = cv2.warpAffine(im, r, dsize=dsize, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, \
                                 borderValue=self.im_padding_value)
 
         return im
@@ -371,7 +362,7 @@ class RandomDistort:
         saturation_upper = 1 + self.saturation_range
         hue_lower = -self.hue_range
         hue_upper = self.hue_range
-        ops = [brightness, contrast, saturation, hue]
+        ops = ["brightness", "contrast", "saturation", "hue"]
         random.shuffle(ops)
         params_dict = {
             'brightness': {
@@ -553,7 +544,8 @@ class ConvertColorSpace:
 class ColorizeHint:
     """Get hint and mask images for colorization.
 
-    This method is prepared for user guided colorization tasks. Take the original RGB images as imput, we will obtain the local hints and correspoding mask to guid colorization process.
+    This method is prepared for user guided colorization tasks. Take the original RGB images as imput, we will obtain
+    the local hints and correspoding mask to guid colorization process.
 
     Args:
        percent(float): Probability for ignoring hint in an iteration.
@@ -577,6 +569,7 @@ class ColorizeHint:
         self.hint = hint
         self.mask = mask
         N, C, H, W = data.shape
+
         for nn in range(N):
             pp = 0
             cont_cond = True
@@ -599,11 +592,9 @@ class ColorizeHint:
                 # add color point
                 if self.use_avg:
                     # embed()
-                    hint[nn, :, h:h + P, w:w + P] = np.mean(np.mean(data[nn, :, h:h + P, w:w + P],
-                                                                    axis=2,
-                                                                    keepdims=True),
-                                                            axis=1,
-                                                            keepdims=True).reshape(1, C, 1, 1)
+                    hint[nn, :, h:h + P, w:w + P] = \
+                        np.mean(np.mean(data[nn, :, h:h + P, w:w + P], axis=2, keepdims=True),
+                                axis=1, keepdims=True).reshape(1, C, 1, 1)
                 else:
                     hint[nn, :, h:h + P, w:w + P] = data[nn, :, h:h + P, w:w + P]
                 mask[nn, :, h:h + P, w:w + P] = 1
@@ -667,7 +658,8 @@ class ColorizePreprocess:
 
     def __call__(self, data_lab: np.ndarray):
         """
-        This method seperates the L channel and AB channel, obtain hint, mask and real_B_enc as the input for colorization task.
+        This method seperates the L channel and AB channel, obtain hint, mask and real_B_enc as the input for
+        colorization task.
 
         Args:
            img(np.ndarray): LAB image.
@@ -681,20 +673,23 @@ class ColorizePreprocess:
             0,
         ], :, :]
         data['B'] = data_lab[:, 1:, :, :]
+
         if self.ab_thresh > 0:  # mask out grayscale images
             thresh = 1. * self.ab_thresh / 110
-            mask = np.sum(np.abs(np.max(np.max(data['B'], axis=3), axis=2) - np.min(np.min(data['B'], axis=3), axis=2)),
-                          axis=1)
+            mask = np.sum(np.abs(np.max(np.max(data['B'], axis=3), axis=2) - \
+                                 np.min(np.min(data['B'], axis=3), axis=2)), axis=1)
             mask = (mask >= thresh)
             data['A'] = data['A'][mask, :, :, :]
             data['B'] = data['B'][mask, :, :, :]
             if np.sum(mask) == 0:
                 return None
+
         data_ab_rs = np.round((data['B'][:, :, ::4, ::4] * 110. + 110.) / 10.)  # normalized bin number
         data['real_B_enc'] = data_ab_rs[:, [0], :, :] * A + data_ab_rs[:, [1], :, :]
         data['hint_B'] = np.zeros(shape=data['B'].shape)
         data['mask_B'] = np.zeros(shape=data['A'].shape)
         data['hint_B'], data['mask_B'] = self.gethint(data['B'], data['hint_B'], data['mask_B'])
+
         if self.is_train:
             data = self.squeeze(data)
             data['real_B_enc'] = data['real_B_enc'].astype(np.int64)

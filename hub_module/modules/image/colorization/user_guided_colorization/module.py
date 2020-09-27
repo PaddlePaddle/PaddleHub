@@ -46,89 +46,39 @@ class UserGuidedColorization(nn.Layer):
         self.output_nc = 2
         self.classification = classification
         # Conv1
-        model1 = (
-            Conv2d(self.input_nc, 64, 3, 1, 1),
-            nn.ReLU(),
-            Conv2d(64, 64, 3, 1, 1),
-            nn.ReLU(),
-            nn.BatchNorm(64),
-        )
+        model1 = (Conv2d(self.input_nc, 64, 3, 1, 1), nn.ReLU(), Conv2d(64, 64, 3, 1, 1), nn.ReLU(), nn.BatchNorm(64))
 
         # Conv2
-        model2 = (
-            Conv2d(64, 128, 3, 1, 1),
-            nn.ReLU(),
-            Conv2d(128, 128, 3, 1, 1),
-            nn.ReLU(),
-            nn.BatchNorm(128),
-        )
+        model2 = (Conv2d(64, 128, 3, 1, 1), nn.ReLU(), Conv2d(128, 128, 3, 1, 1), nn.ReLU(), nn.BatchNorm(128))
 
         # Conv3
-        model3 = (
-            Conv2d(128, 256, 3, 1, 1),
-            nn.ReLU(),
-            Conv2d(256, 256, 3, 1, 1),
-            nn.ReLU(),
-            Conv2d(256, 256, 3, 1, 1),
-            nn.ReLU(),
-            nn.BatchNorm(256),
-        )
+        model3 = (Conv2d(128, 256, 3, 1, 1), nn.ReLU(), Conv2d(256, 256, 3, 1,
+                                                               1), nn.ReLU(), Conv2d(256, 256, 3, 1,
+                                                                                     1), nn.ReLU(), nn.BatchNorm(256))
 
         # Conv4
-        model4 = (
-            Conv2d(256, 512, 3, 1, 1),
-            nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 1),
-            nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 1),
-            nn.ReLU(),
-            nn.BatchNorm(512),
-        )
+        model4 = (Conv2d(256, 512, 3, 1, 1), nn.ReLU(), Conv2d(512, 512, 3, 1,
+                                                               1), nn.ReLU(), Conv2d(512, 512, 3, 1,
+                                                                                     1), nn.ReLU(), nn.BatchNorm(512))
 
         # Conv5
-        model5 = (
-            Conv2d(512, 512, 3, 1, 2, 2),
-            nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 2, 2),
-            nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 2, 2),
-            nn.ReLU(),
-            nn.BatchNorm(512),
-        )
+        model5 = (Conv2d(512, 512, 3, 1, 2, 2), nn.ReLU(), Conv2d(512, 512, 3, 1, 2, 2), nn.ReLU(),
+                  Conv2d(512, 512, 3, 1, 2, 2), nn.ReLU(), nn.BatchNorm(512))
 
         # Conv6
-        model6 = (
-            Conv2d(512, 512, 3, 1, 2, 2),
-            nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 2, 2),
-            nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 2, 2),
-            nn.ReLU(),
-            nn.BatchNorm(512),
-        )
+        model6 = (Conv2d(512, 512, 3, 1, 2, 2), nn.ReLU(), Conv2d(512, 512, 3, 1, 2, 2), nn.ReLU(),
+                  Conv2d(512, 512, 3, 1, 2, 2), nn.ReLU(), nn.BatchNorm(512))
 
         # Conv7
-        model7 = (
-            Conv2d(512, 512, 3, 1, 1),
-            nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 1),
-            nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 1),
-            nn.ReLU(),
-            nn.BatchNorm(512),
-        )
+        model7 = (Conv2d(512, 512, 3, 1, 1), nn.ReLU(), Conv2d(512, 512, 3, 1,
+                                                               1), nn.ReLU(), Conv2d(512, 512, 3, 1,
+                                                                                     1), nn.ReLU(), nn.BatchNorm(512))
 
         # Conv8
         model8up = (ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1), )
         model3short8 = (Conv2d(256, 256, 3, 1, 1), )
-        model8 = (
-            nn.ReLU(),
-            Conv2d(256, 256, 3, 1, 1),
-            nn.ReLU(),
-            Conv2d(256, 256, 3, 1, 1),
-            nn.ReLU(),
-            nn.BatchNorm(256),
-        )
+        model8 = (nn.ReLU(), Conv2d(256, 256, 3, 1, 1), nn.ReLU(), Conv2d(256, 256, 3, 1,
+                                                                          1), nn.ReLU(), nn.BatchNorm(256))
 
         # Conv9
         model9up = (ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1), )
@@ -138,13 +88,8 @@ class UserGuidedColorization(nn.Layer):
             3,
             1,
             1,
-        ), )
-        model9 = (
-            nn.ReLU(),
-            Conv2d(128, 128, 3, 1, 1),
-            nn.ReLU(),
-            nn.BatchNorm(128),
-        )
+        ))
+        model9 = (nn.ReLU(), Conv2d(128, 128, 3, 1, 1), nn.ReLU(), nn.BatchNorm(128))
 
         # Conv10
         model10up = (ConvTranspose2d(128, 128, kernel_size=4, stride=2, padding=1), )
@@ -212,6 +157,7 @@ class UserGuidedColorization(nn.Layer):
                 mask_B: paddle.Tensor,
                 real_b: paddle.Tensor = None,
                 real_B_enc: paddle.Tensor = None) -> paddle.Tensor:
+
         conv1_2 = self.model1(paddle.concat([input_A, input_B, mask_B], axis=1))
         conv2_2 = self.model2(conv1_2[:, :, ::2, ::2])
         conv3_3 = self.model3(conv2_2[:, :, ::2, ::2])

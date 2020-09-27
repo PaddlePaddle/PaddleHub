@@ -128,26 +128,30 @@ class ImageColorizeModule(RunModule, ImageServing):
         '''
         out_class, out_reg = self(batch[0], batch[1], batch[2])
 
+        # loss
         criterionCE = nn.loss.CrossEntropyLoss()
         loss_ce = criterionCE(out_class, batch[4][:, 0, :, :])
         loss_G_L1_reg = paddle.sum(paddle.abs(batch[3] - out_reg), axis=1, keepdim=True)
         loss_G_L1_reg = paddle.mean(loss_G_L1_reg)
         loss = loss_ce + loss_G_L1_reg
-
-        visual_ret = OrderedDict()
+        # psnr
         psnrs = []
-        lab2rgb = ConvertColorSpace(mode='LAB2RGB')
+        visual_ret = OrderedDict()
         process = ColorPostprocess()
+        lab2rgb = ConvertColorSpace(mode='LAB2RGB')
 
         for i in range(batch[0].numpy().shape[0]):
             real = lab2rgb(np.concatenate((batch[0].numpy(), batch[3].numpy()), axis=1))[i]
             visual_ret['real'] = process(real)
+
             fake = lab2rgb(np.concatenate((batch[0].numpy(), out_reg.numpy()), axis=1))[i]
             visual_ret['fake_reg'] = process(fake)
+
             mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
             psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             psnrs.append(psnr_value)
-        psnr = paddle.to_variable(np.array(psnrs))
+
+        psnr = paddle.to_tensor(np.array(psnrs))
 
         return {'loss': loss, 'metrics': {'psnr': psnr}}
 
@@ -157,28 +161,32 @@ class ImageColorizeModule(RunModule, ImageServing):
 
         Args:
             images(str) : Images path to be colorized.
-            visualization(bool): Whether to save colorized images.
-            save_path(str) : Path to save colorized images.
+            visualization(bool): Whether to save colorized images, default is True.
+            save_path(str) : Path to save colorized images, default is result/.
 
         Returns:
             results(list[dict]) : The prediction result of each input image
         '''
-        lab2rgb = ConvertColorSpace(mode='LAB2RGB')
-        process = ColorPostprocess()
-        resize = Resize((256, 256))
-        visual_ret = OrderedDict()
+
         im = self.transforms(images, is_train=False)
         out_class, out_reg = self(paddle.to_tensor(im['A']), paddle.to_variable(im['hint_B']),
                                   paddle.to_variable(im['mask_B']))
         result = []
+        lab2rgb = ConvertColorSpace(mode='LAB2RGB')
+        process = ColorPostprocess()
+        resize = Resize((256, 256))
+        visual_ret = OrderedDict()
 
         for i in range(im['A'].shape[0]):
             gray = lab2rgb(np.concatenate((im['A'], np.zeros(im['B'].shape)), axis=1))[i]
             visual_ret['gray'] = resize(process(gray))
+
             hint = lab2rgb(np.concatenate((im['A'], im['hint_B']), axis=1))[i]
             visual_ret['hint'] = resize(process(hint))
+
             real = lab2rgb(np.concatenate((im['A'], im['B']), axis=1))[i]
             visual_ret['real'] = resize(process(real))
+
             fake = lab2rgb(np.concatenate((im['A'], out_reg.numpy()), axis=1))[i]
             visual_ret['fake_reg'] = resize(process(fake))
 
@@ -190,8 +198,6 @@ class ImageColorizeModule(RunModule, ImageServing):
                 visual_gray = Image.fromarray(visual_ret['fake_reg'])
                 visual_gray.save(fake_path)
 
-            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
-            psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             result.append(visual_ret)
         return result
 
@@ -221,29 +227,31 @@ class StyleTransferModule(RunModule, ImageServing):
         Returns:
             results(dict) : The model outputs, such as metrics.
         '''
+
         mse_loss = nn.MSELoss()
         N, C, H, W = batch[0].shape
+
         batch[1] = batch[1][0].unsqueeze(0)
         self.setTarget(batch[1])
-
         y = self(batch[0])
-        xc = paddle.to_tensor(batch[0].numpy().copy())
         y = subtract_imagenet_mean_batch(y)
-        xc = subtract_imagenet_mean_batch(xc)
         features_y = self.getFeature(y)
+
+        xc = paddle.to_tensor(batch[0].numpy().copy())
+        xc = subtract_imagenet_mean_batch(xc)
         features_xc = self.getFeature(xc)
         f_xc_c = paddle.to_tensor(features_xc[1].numpy(), stop_gradient=True)
-        content_loss = mse_loss(features_y[1], f_xc_c)
 
         batch[1] = subtract_imagenet_mean_batch(batch[1])
         features_style = self.getFeature(batch[1])
         gram_style = [gram_matrix(y) for y in features_style]
+
         style_loss = 0.
         for m in range(len(features_y)):
             gram_y = gram_matrix(features_y[m])
             gram_s = paddle.to_tensor(np.tile(gram_style[m].numpy(), (N, 1, 1, 1)))
             style_loss += mse_loss(gram_y, gram_s[:N, :, :])
-
+        content_loss = mse_loss(features_y[1], f_xc_c)
         loss = content_loss + style_loss
 
         return {'loss': loss, 'metrics': {'content gap': content_loss, 'style gap': style_loss}}
@@ -261,10 +269,8 @@ class StyleTransferModule(RunModule, ImageServing):
         Returns:
             output(np.ndarray) : The style transformed images with bgr mode.
         '''
-        content = paddle.to_tensor(self.transform(origin_path))
-        style = paddle.to_tensor(self.transform(style_path))
-        content = content.unsqueeze(0)
-        style = style.unsqueeze(0)
+        content = paddle.to_tensor(self.transform(origin_path)).unsqueeze(0)
+        style = paddle.to_tensor(self.transform(style_path)).unsqueeze(0)
 
         self.setTarget(style)
         output = self(content)
