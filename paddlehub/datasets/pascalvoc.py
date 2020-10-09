@@ -22,8 +22,6 @@ import numpy as np
 from paddlehub.env import DATA_HOME
 from pycocotools.coco import COCO
 
-from paddlehub.process.transforms import DetectCatagory, ParseImages
-
 
 class DetectCatagory:
     """Load label name, id and map from detection dataset.
@@ -105,7 +103,7 @@ class GTAnotations:
             Convert COCO annotations box with format [x1, y1, w, h] to
             center mode [center_x, center_y, w, h] and divide image width
             and height to get relative value in range[0, 1]
-            """
+        """
         assert len(box) == 4, "box should be a len(4) list or tuple"
         x, y, w, h = box
 
