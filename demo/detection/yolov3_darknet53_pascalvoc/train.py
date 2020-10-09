@@ -3,20 +3,21 @@ import paddlehub as hub
 import paddle.nn as nn
 from paddlehub.finetune.trainer import Trainer
 from paddlehub.datasets.pascalvoc import DetectionData
-from paddlehub.process.detect_transforms import Compose, RandomDistort, RandomExpand, RandomCrop, RandomFlip, Normalize, Resize, ShuffleBox
-
+import paddlehub.process.detect_transforms as T
 if __name__ == "__main__":
     place = paddle.CUDAPlace(0)
     paddle.disable_static()
-    transform = Compose([
-        RandomDistort(),
-        RandomExpand(fill=[0.485, 0.456, 0.406]),
-        RandomCrop(),
-        Resize(target_size=416),
-        RandomFlip(),
-        ShuffleBox(),
-        Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+    transform = T.Compose([
+        T.RandomDistort(),
+        T.RandomExpand(fill=[0.485, 0.456, 0.406]),
+        T.RandomCrop(),
+        T.Resize(target_size=416),
+        T.RandomFlip(),
+        T.ShuffleBox(),
+        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
+
     train_reader = DetectionData(transform)
     model = hub.Module(name='yolov3_darknet53_pascalvoc')
     model.train()

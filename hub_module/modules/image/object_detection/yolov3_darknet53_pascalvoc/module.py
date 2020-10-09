@@ -7,7 +7,7 @@ from paddle.nn.initializer import Normal, Constant
 from paddle.regularizer import L2Decay
 from pycocotools.coco import COCO
 from paddlehub.module.cv_module import Yolov3Module
-from paddlehub.process.detect_transforms import Compose, RandomDistort, RandomExpand, RandomCrop, Resize, RandomFlip, ShuffleBox, Normalize
+import paddlehub.process.detect_transforms as T
 from paddlehub.module.module import moduleinfo
 
 
@@ -288,19 +288,19 @@ class YOLOv3(nn.Layer):
 
     def transform(self, img):
         if self.is_train:
-            transform = Compose([
-                RandomDistort(),
-                RandomExpand(fill=[0.485, 0.456, 0.406]),
-                RandomCrop(),
-                Resize(target_size=416),
-                RandomFlip(),
-                ShuffleBox(),
-                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            transform = T.Compose([
+                T.RandomDistort(),
+                T.RandomExpand(fill=[0.485, 0.456, 0.406]),
+                T.RandomCrop(),
+                T.Resize(target_size=416),
+                T.RandomFlip(),
+                T.ShuffleBox(),
+                T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
         else:
-            transform = Compose([
-                Resize(target_size=416, interp='CUBIC'),
-                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            transform = T.Compose([
+                T.Resize(target_size=416, interp='CUBIC'),
+                T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
 
         return transform(img)

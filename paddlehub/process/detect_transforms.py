@@ -1,4 +1,3 @@
-import copy
 import os
 import random
 from typing import Callable
@@ -15,108 +14,10 @@ from paddlehub.process.functional import *
 matplotlib.use('Agg')
 
 
-class DetectCatagory:
-    """Load label name, id and map from detection dataset.
-
-    Args:
-        attrbox(Callable): Method to get detection attributes of images.
-        data_dir(str): Image dataset path.
-
-    Returns:
-        label_names(List(str)): The dataset label names.
-        label_ids(List(int)): The dataset label ids.
-        category_to_id_map(dict): Mapping relations of category and id for images.
-    """
-    def __init__(self, attrbox: Callable, data_dir: str):
-        self.attrbox = attrbox
-        self.img_dir = data_dir
-
-    def __call__(self):
-        self.categories = self.attrbox.loadCats(self.attrbox.getCatIds())
-        self.num_category = len(self.categories)
-        label_names = []
-        label_ids = []
-        for category in self.categories:
-            label_names.append(category['name'])
-            label_ids.append(int(category['id']))
-        category_to_id_map = {v: i for i, v in enumerate(label_ids)}
-        return label_names, label_ids, category_to_id_map
-
-
-class ParseImages:
-    """Prepare images for detection.
-
-    Args:
-        attrbox(Callable): Method to get detection attributes of images.
-        is_train(bool): Select the mode for train or test.
-        data_dir(str): Image dataset path.
-        category_to_id_map(dict): Mapping relations of category and id for images.
-
-    Returns:
-        imgs(dict): The input for detection model, it is a dict.
-    """
-    def __init__(self, attrbox: Callable, data_dir: str, category_to_id_map: dict):
-        self.attrbox = attrbox
-        self.img_dir = data_dir
-        self.category_to_id_map = category_to_id_map
-        self.parse_gt_annotations = GTAnotations(self.attrbox, self.category_to_id_map)
-
-    def __call__(self):
-        image_ids = self.attrbox.getImgIds()
-        image_ids.sort()
-        imgs = copy.deepcopy(self.attrbox.loadImgs(image_ids))
-
-        for img in imgs:
-            img['image'] = os.path.join(self.img_dir, img['file_name'])
-            assert os.path.exists(img['image']), "image {} not found.".format(img['image'])
-            box_num = 50
-            img['gt_boxes'] = np.zeros((box_num, 4), dtype=np.float32)
-            img['gt_labels'] = np.zeros((box_num), dtype=np.int32)
-            img = self.parse_gt_annotations(img)
-        return imgs
-
-
-class GTAnotations:
-    """Set gt boxes and gt labels for train.
-
-    Args:
-        attrbox(Callable): Method for get detection attributes for images.
-        category_to_id_map(dict): Mapping relations of category and id for images.
-        img(dict): Input for detection model.
-
-    Returns:
-        img(dict): Set specific value on the attributes of 'gt boxes' and 'gt labels' for input.
-    """
-    def __init__(self, attrbox: Callable, category_to_id_map: dict):
-        self.attrbox = attrbox
-        self.category_to_id_map = category_to_id_map
-
-    def __call__(self, img: dict):
-        img_height = img['height']
-        img_width = img['width']
-        anno = self.attrbox.loadAnns(self.attrbox.getAnnIds(imgIds=img['id'], iscrowd=None))
-        gt_index = 0
-
-        for target in anno:
-            if target['area'] < -1:
-                continue
-            if 'ignore' in target and target['ignore']:
-                continue
-            box = coco_anno_box_to_center_relative(target['bbox'], img_height, img_width)
-
-            if box[2] <= 0 and box[3] <= 0:
-                continue
-            img['gt_boxes'][gt_index] = box
-            img['gt_labels'][gt_index] = \
-                self.category_to_id_map[target['category_id']]
-            gt_index += 1
-            if gt_index >= 50:
-                break
-        return img
-
-
 class RandomDistort:
-    """ Distort the input image randomly.
+    """
+    Distort the input image randomly.
+
     Args:
         lower(float): The lower bound value for enhancement, default is 0.5.
         upper(float): The upper bound value for enhancement, default is 1.5.
@@ -155,7 +56,9 @@ class RandomDistort:
 
 
 class RandomExpand:
-    """Randomly expand images and gt boxes by random ratio. It is a data enhancement operation for model training.
+    """
+    Randomly expand images and gt boxes by random ratio. It is a data enhancement operation for model training.
+
     Args:
         max_ratio(float): Max value for expansion ratio, default is 4.
         fill(list): Initialize the pixel value of the image with the input fill value, default is None.
@@ -213,6 +116,7 @@ class RandomExpand:
 class RandomCrop:
     """
     Random crop the input image according to constraints.
+
     Args:
         scales(list): The value of the cutting area relative to the original area, expressed in the form of \
                       [min, max]. The default value is [.3, 1.].
@@ -276,6 +180,7 @@ class RandomCrop:
             data['gt_labels'] = crop_labels
             data['gt_scores'] = crop_scores
             return img, data
+
         img = np.asarray(img)
         data['gt_boxes'] = boxes
         data['gt_labels'] = labels
@@ -285,8 +190,10 @@ class RandomCrop:
 
 class RandomFlip:
     """Flip the images and gt boxes randomly.
+
     Args:
         thresh: Probability for random flip.
+
     Returns:
         img(np.ndarray): Distorted image.
         data(dict): Image info and label info.
@@ -304,9 +211,12 @@ class RandomFlip:
 
 
 class Compose:
-    """Preprocess the input data according to the operators.
+    """
+    Preprocess the input data according to the operators.
+
     Args:
         transforms(list): Preprocessing operators.
+
     Returns:
         img(np.ndarray): Preprocessed image.
         data(dict): Image info and label info, default is None.
@@ -342,10 +252,13 @@ class Compose:
 
 
 class Resize:
-    """Resize the input images.
+    """
+    Resize the input images.
+
     Args:
         target_size(int): Targeted input size.
         interp(str): Interpolation method.
+
     Returns:
         img(np.ndarray): Preprocessed image.
         data(dict): Image info and label info, default is None.
@@ -385,10 +298,13 @@ class Resize:
 
 
 class Normalize:
-    """Normalize the input images.
+    """
+    Normalize the input images.
+
     Args:
         mean(list): Mean values for normalization, default is [0.5, 0.5, 0.5].
         std(list): Standard deviation for normalization, default is [0.5, 0.5, 0.5].
+
     Returns:
         img(np.ndarray): Preprocessed image.
         data(dict): Image info and label info, default is None.
@@ -403,20 +319,19 @@ class Normalize:
             raise ValueError('{}: std is invalid!'.format(self))
 
     def __call__(self, im, data=None):
+
+        mean = np.array(self.mean)[np.newaxis, np.newaxis, :]
+        std = np.array(self.std)[np.newaxis, np.newaxis, :]
+        im = normalize(im, mean, std)
+
         if data is not None:
-            mean = np.array(self.mean)[np.newaxis, np.newaxis, :]
-            std = np.array(self.std)[np.newaxis, np.newaxis, :]
-            im = normalize(im, mean, std)
             return im, data
         else:
-            mean = np.array(self.mean)[np.newaxis, np.newaxis, :]
-            std = np.array(self.std)[np.newaxis, np.newaxis, :]
-            im = normalize(im, mean, std)
             return im
 
 
 class ShuffleBox:
-    """Shuffle data information."""
+    """Shuffle detection information for corresponding input image."""
     def __call__(self, img, data):
         gt = np.concatenate([data['gt_boxes'], data['gt_labels'][:, np.newaxis], data['gt_scores'][:, np.newaxis]],
                             axis=1)
