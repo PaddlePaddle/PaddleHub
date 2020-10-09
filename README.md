@@ -188,3 +188,5 @@ $ hub uninstall ernie
 * 非常感谢[奇想天外](http://www.cheerthink.com/)贡献了口罩检测的demo
 * 非常感谢[mhlwsk](https://github.com/mhlwsk)贡献了修复序列标注预测demo的pr
 * 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)贡献了看图作诗的module
+* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)和[七年期限](https://github.com/1084667371)联合贡献了看图写诗中秋特别版module
+* 非常感谢[livingbody](https://github.com/livingbody)贡献了基于PaddleHub能力的风格迁移和中秋看图写诗微信小程序
