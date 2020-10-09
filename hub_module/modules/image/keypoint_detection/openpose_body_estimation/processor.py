@@ -223,8 +223,8 @@ class DrawPose:
                 mY = np.mean(Y)
                 length = ((X[0] - X[1])**2 + (Y[0] - Y[1])**2)**0.5
                 angle = math.degrees(math.atan2(X[0] - X[1], Y[0] - Y[1]))
-                polygon = cv2.ellipse2Poly((int(mY), int(mX)), (int(length / 2), self.stickwidth), int(angle), 0, 360,
-                                           1)
+                polygon = cv2.ellipse2Poly((int(mY), int(mX)), (int(length / 2), self.stickwidth), \
+                                           int(angle), 0, 360, 1)
                 cv2.fillConvexPoly(cur_canvas, polygon, self.colors[i])
                 canvas = cv2.addWeighted(canvas, 0.4, cur_canvas, 0.6, 0)
         return canvas
