@@ -265,7 +265,7 @@ class Yolov3Module(RunModule, ImageServing):
         im = self.transform(imgpath)
         h, w, c = Func.img_shape(imgpath)
         im_shape = paddle.to_tensor(np.array([[h, w]]).astype('int32'))
-        label_names = self.get_label_infos(filelist)
+        label_names = Func.get_label_infos(filelist)
         img_data = paddle.to_tensor(np.array([im]).astype('float32'))
 
         outputs = self(img_data)

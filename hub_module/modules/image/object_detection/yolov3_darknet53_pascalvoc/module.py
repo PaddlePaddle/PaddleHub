@@ -5,7 +5,6 @@ import paddle.nn as nn
 import paddle.nn.functional as F
 from paddle.nn.initializer import Normal, Constant
 from paddle.regularizer import L2Decay
-from pycocotools.coco import COCO
 from paddlehub.module.cv_module import Yolov3Module
 import paddlehub.process.detect_transforms as T
 from paddlehub.module.module import moduleinfo
@@ -274,10 +273,10 @@ class YOLOv3(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(self.directory, 'yolov3_70000.pdparams')
+            checkpoint = os.path.join(self.directory, 'yolov3_darknet53_voc.pdparams')
             if not os.path.exists(checkpoint):
                 os.system(
-                    'wget https://bj.bcebos.com/paddlehub/model/image/object_detection/yolov3_70000.pdparams -O ' \
+                    'wget https://paddlehub.bj.bcebos.com/dygraph/detection/yolov3_darknet53_voc.pdparams -O ' \
                     + checkpoint)
             model_dict = paddle.load(checkpoint)[0]
             self.set_dict(model_dict)
@@ -301,14 +300,6 @@ class YOLOv3(nn.Layer):
             ])
 
         return transform(img)
-
-    def get_label_infos(self, file_list: str):
-        self.COCO = COCO(file_list)
-        label_names = []
-        categories = self.COCO.loadCats(self.COCO.getCatIds())
-        for category in categories:
-            label_names.append(category['name'])
-        return label_names
 
     def forward(self, inputs: paddle.Tensor):
         outputs = []

@@ -5,7 +5,6 @@ from paddlehub.finetune.trainer import Trainer
 from paddlehub.datasets.pascalvoc import DetectionData
 import paddlehub.process.detect_transforms as T
 if __name__ == "__main__":
-    place = paddle.CUDAPlace(0)
     paddle.disable_static()
 
     transform = T.Compose([
@@ -20,7 +19,6 @@ if __name__ == "__main__":
 
     train_reader = DetectionData(transform)
     model = hub.Module(name='yolov3_darknet53_pascalvoc')
-    model.train()
     optimizer = paddle.optimizer.Adam(learning_rate=0.0001, parameters=model.parameters())
-    trainer = Trainer(model, optimizer, checkpoint_dir='test_ckpt_img_cls')
+    trainer = Trainer(model, optimizer, checkpoint_dir='test_ckpt_img_det')
     trainer.train(train_reader, epochs=5, batch_size=4, eval_dataset=train_reader, log_interval=1, save_interval=1)

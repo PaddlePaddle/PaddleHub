@@ -17,6 +17,7 @@ import cv2
 import paddle
 import matplotlib
 import numpy as np
+from pycocotools.coco import COCO
 from PIL import Image, ImageEnhance
 from matplotlib import pyplot as plt
 
@@ -235,3 +236,13 @@ def img_shape(img_path: str):
     im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     h, w, c = im.shape
     return h, w, c
+
+
+def get_label_infos(file_list: str):
+    """Get label names by corresponding category ids."""
+    map_label = COCO(file_list)
+    label_names = []
+    categories = map_label.loadCats(map_label.getCatIds())
+    for category in categories:
+        label_names.append(category['name'])
+    return label_names
