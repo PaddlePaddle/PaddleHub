@@ -250,9 +250,15 @@ class HubServer(object):
         if not os.path.exists(CACHE_HOME):
             utils.mkdir(CACHE_HOME)
         try:
-            r = requests.get(self.get_server_url() + '/' + 'search')
-            data = json.loads(r.text)
             cache_path = os.path.join(CACHE_HOME, RESOURCE_LIST_FILE)
+            if os.path.exists(cache_path):
+                r = requests.get(
+                    self.get_server_url() + '/' + 'search', timeout=0.5)
+            else:
+                r = requests.get(
+                    self.get_server_url() + '/' + 'search', timeout=8)
+            data = json.loads(r.text)
+
             with open(cache_path, 'w+') as fp:
                 yaml.safe_dump({'resource_list': data['data']}, fp)
             return True
