@@ -36,7 +36,7 @@ import openpose_body_estimation.processor as P
             version="1.0.0")
 class BodyPoseModel(nn.Layer):
     """
-    BodyposeModel
+    BodyPoseModel
 
     Args:
         load_checkpoint(str): Checkpoint save path, default is None.
