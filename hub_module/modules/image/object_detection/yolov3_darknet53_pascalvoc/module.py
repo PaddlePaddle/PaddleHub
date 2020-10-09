@@ -104,9 +104,6 @@ class LayerWarp(nn.Layer):
         return y
 
 
-DarkNet_cfg = {53: ([1, 2, 8, 8, 4])}
-
-
 class DarkNet53_conv_body(nn.Layer):
     """Darknet53
     Args:
@@ -115,7 +112,7 @@ class DarkNet53_conv_body(nn.Layer):
     """
     def __init__(self, ch_in: int = 3, is_test: bool = False):
         super(DarkNet53_conv_body, self).__init__()
-        self.stages = DarkNet_cfg[53]
+        self.stages = [1, 2, 8, 8, 4]
         self.stages = self.stages[0:5]
 
         self.conv0 = ConvBNLayer(ch_in=ch_in, ch_out=32, filter_size=3, stride=1, padding=1, is_test=is_test)
