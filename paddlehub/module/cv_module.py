@@ -26,8 +26,8 @@ from PIL import Image
 
 from paddlehub.module.module import serving, RunModule
 from paddlehub.utils.utils import base64_to_cv2
-from paddlehub.process.transforms import ConvertColorSpace, ColorPostprocess, Resize
-from paddlehub.process.functional import subtract_imagenet_mean_batch, gram_matrix, draw_boxes_on_image, img_shape
+import paddlehub.process.transforms as T
+import paddlehub.process.functional as Func
 
 
 class ImageServing(object):
@@ -135,8 +135,8 @@ class ImageColorizeModule(RunModule, ImageServing):
 
         visual_ret = OrderedDict()
         psnrs = []
-        lab2rgb = ConvertColorSpace(mode='LAB2RGB')
-        process = ColorPostprocess()
+        lab2rgb = T.ConvertColorSpace(mode='LAB2RGB')
+        process = T.ColorPostprocess()
         for i in range(batch[0].numpy().shape[0]):
             real = lab2rgb(np.concatenate((batch[0].numpy(), batch[3].numpy()), axis=1))[i]
             visual_ret['real'] = process(real)
@@ -160,9 +160,9 @@ class ImageColorizeModule(RunModule, ImageServing):
         Returns:
             results(list[dict]) : The prediction result of each input image
         '''
-        lab2rgb = ConvertColorSpace(mode='LAB2RGB')
-        process = ColorPostprocess()
-        resize = Resize((256, 256))
+        lab2rgb = T.ConvertColorSpace(mode='LAB2RGB')
+        process = T.ColorPostprocess()
+        resize = T.Resize((256, 256))
         visual_ret = OrderedDict()
         im = self.transforms(images, is_train=False)
         out_class, out_reg = self(paddle.to_tensor(im['A']), paddle.to_variable(im['hint_B']),
@@ -263,7 +263,7 @@ class Yolov3Module(RunModule, ImageServing):
         scores = []
         self.downsample = 32
         im = self.transform(imgpath)
-        h, w, c = img_shape(imgpath)
+        h, w, c = Func.img_shape(imgpath)
         im_shape = paddle.to_tensor(np.array([[h, w]]).astype('int32'))
         label_names = self.get_label_infos(filelist)
         img_data = paddle.to_tensor(np.array([im]).astype('float32'))
@@ -306,6 +306,6 @@ class Yolov3Module(RunModule, ImageServing):
         boxes = bboxes[:, 2:].astype('float32')
 
         if visualization:
-            draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5)
+            Func.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5)
 
         return boxes, scores, labels
