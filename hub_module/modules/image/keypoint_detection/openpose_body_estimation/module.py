@@ -121,11 +121,9 @@ class BodyPoseModel(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(self.directory, 'body_estimation.pdparams')
+            checkpoint = os.path.join(self.directory, 'openpose_body.pdparams')
             if not os.path.exists(checkpoint):
-                os.system(
-                    'wget https://bj.bcebos.com/paddlehub/model/image/keypoint_detection/body_estimation.pdparams -O ' +
-                    checkpoint)
+                os.system('wget https://paddlehub.bj.bcebos.com/dygraph/pose/openpose_body.pdparams -O ' + checkpoint)
             model_dict = paddle.load(checkpoint)[0]
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
