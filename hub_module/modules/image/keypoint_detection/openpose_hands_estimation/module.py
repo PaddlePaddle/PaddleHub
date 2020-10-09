@@ -1,3 +1,18 @@
+# coding:utf-8
+# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import copy
 from collections import OrderedDict
@@ -11,7 +26,9 @@ from skimage.measure import label
 from scipy.ndimage.filters import gaussian_filter
 from paddlehub.module.module import moduleinfo
 from paddlehub.process.functional import npmax
-from paddlehub.process.transforms import HandDetect, ResizeScaling, PadDownRight, RemovePadding, DrawPose, DrawHandPose, Normalize
+import paddlehub.process.transforms as T
+
+import openpose_hands_estimation.processor as P
 
 
 @moduleinfo(name="openpose_hands_estimation",
@@ -21,22 +38,25 @@ from paddlehub.process.transforms import HandDetect, ResizeScaling, PadDownRight
             summary="Openpose_hands_estimation is a hand pose estimation model based on Hand Keypoint Detection in \
             Single Images using Multiview Bootstrapping.",
             version="1.0.0")
-class HandposeModel(nn.Layer):
-    """HandposeModel
+class HandPoseModel(nn.Layer):
+    """
+    HandPoseModel
+
     Args:
         load_checkpoint(str): Checkpoint save path, default is None.
         visualization (bool): Whether to save the estimation result. Default is True.
     """
     def __init__(self, load_checkpoint: str = None, visualization: bool = True):
-        super(HandposeModel, self).__init__()
+        super(HandPoseModel, self).__init__()
+
         self.visualization = visualization
-        self.hand_detect = HandDetect()
-        self.resize_func = ResizeScaling()
-        self.pad_func = PadDownRight()
-        self.remove_pad = RemovePadding()
-        self.draw_pose = DrawPose()
-        self.draw_hand = DrawHandPose()
-        self.norm_func = Normalize(std=[1, 1, 1])
+        self.resize_func = T.ResizeScaling()
+        self.norm_func = T.Normalize(std=[1, 1, 1])
+        self.hand_detect = P.HandDetect()
+        self.pad_func = P.PadDownRight()
+        self.remove_pad = P.RemovePadding()
+        self.draw_pose = P.DrawPose()
+        self.draw_hand = P.DrawHandPose()
         no_relu_layers = ['conv6_2_CPM', 'Mconv7_stage2', 'Mconv7_stage3', \
                           'Mconv7_stage4', 'Mconv7_stage5', 'Mconv7_stage6']
 
@@ -179,9 +199,7 @@ class HandposeModel(nn.Layer):
 
 
 if __name__ == "__main__":
-    import numpy as np
-
     paddle.disable_static()
-    model = HandposeModel()
+    model = HandPoseModel()
     model.eval()
     out1 = model.predict("detect_hand4.jpg")

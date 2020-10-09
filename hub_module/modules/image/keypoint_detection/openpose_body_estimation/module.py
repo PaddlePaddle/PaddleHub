@@ -1,3 +1,18 @@
+# coding:utf-8
+# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import copy
 from collections import OrderedDict
@@ -7,7 +22,9 @@ import paddle
 import paddle.nn as nn
 import numpy as np
 from paddlehub.module.module import moduleinfo
-from paddlehub.process.transforms import ResizeScaling, PadDownRight, Normalize, RemovePadding, GetPeak, Connection, DrawPose, Candidate
+import paddlehub.process.transforms as T
+
+import openpose_body_estimation.processor as P
 
 
 @moduleinfo(name="openpose_body_estimation",
@@ -17,23 +34,25 @@ from paddlehub.process.transforms import ResizeScaling, PadDownRight, Normalize,
             summary="Openpose_body_estimation is a body pose estimation model based on Realtime Multi-Person 2D Pose \
             Estimation using Part Affinity Fields.",
             version="1.0.0")
-class BodyposeModel(nn.Layer):
-    """BodyposeModel
+class BodyPoseModel(nn.Layer):
+    """
+    BodyposeModel
+
     Args:
         load_checkpoint(str): Checkpoint save path, default is None.
         visualization (bool): Whether to save the estimation result. Default is True.
     """
     def __init__(self, load_checkpoint: str = None, visualization: bool = True):
-        super(BodyposeModel, self).__init__()
+        super(BodyPoseModel, self).__init__()
 
-        self.resize_func = ResizeScaling()
-        self.pad_func = PadDownRight()
-        self.norm_func = Normalize(std=[1, 1, 1])
-        self.remove_pad = RemovePadding()
-        self.get_peak = GetPeak()
-        self.get_connection = Connection()
-        self.get_candidate = Candidate()
-        self.draw_pose = DrawPose()
+        self.resize_func = T.ResizeScaling()
+        self.norm_func = T.Normalize(std=[1, 1, 1])
+        self.pad_func = P.PadDownRight()
+        self.remove_pad = P.RemovePadding()
+        self.get_peak = P.GetPeak()
+        self.get_connection = P.Connection()
+        self.get_candidate = P.Candidate()
+        self.draw_pose = P.DrawPose()
         self.visualization = visualization
 
         no_relu_layers = ['conv5_5_CPM_L1', 'conv5_5_CPM_L2', 'Mconv7_stage2_L1', \
@@ -187,10 +206,8 @@ class BodyposeModel(nn.Layer):
 
 
 if __name__ == "__main__":
-    import numpy as np
 
     paddle.disable_static()
-    model = BodyposeModel()
+    model = BodyPoseModel()
     model.eval()
     out1, out2 = model.predict("demo.jpg")
-    print(out1.shape)
