@@ -26,15 +26,16 @@ from paddlehub.process.functional import *
 
 
 class Compose:
-    def __init__(self, transforms, to_rgb=True, stay_rgb=False):
+    def __init__(self, transforms, to_rgb=True, stay_rgb=False, is_permute=True):
         if not isinstance(transforms, list):
             raise TypeError('The transforms must be a list!')
         if len(transforms) < 1:
             raise ValueError('The length of transforms ' + \
-                            'must be equal or larger than 1!')
+                             'must be equal or larger than 1!')
         self.transforms = transforms
         self.to_rgb = to_rgb
         self.stay_rgb = stay_rgb
+        self.is_permute = is_permute
 
     def __call__(self, im):
         if isinstance(im, str):
@@ -49,6 +50,9 @@ class Compose:
             im = op(im)
 
         if not self.stay_rgb:
+            im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
+
+        if self.is_permute:
             im = permute(im)
 
         return im
@@ -570,17 +574,7 @@ class ColorizeHint:
         self.use_avg = use_avg
 
     def __call__(self, data: np.ndarray, hint: np.ndarray, mask: np.ndarray):
-        sample_Ps = [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-        ]
+        sample_Ps = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.data = data
         self.hint = hint
         self.mask = mask
@@ -591,7 +585,7 @@ class ColorizeHint:
             while cont_cond:
                 if self.num_points is None:  # draw from geometric
                     # embed()
-                    cont_cond = np.random.rand() < (1 - self.percent)
+                    cont_cond = np.random.rand() > (1 - self.percent)
                 else:  # add certain number of points
                     cont_cond = pp < self.num_points
                 if not cont_cond:  # skip out of loop if condition not met
@@ -659,7 +653,7 @@ class ColorizePreprocess:
     """
     def __init__(self,
                  ab_thresh: float = 0.,
-                 p: float = .125,
+                 p: float = 0.,
                  num_points: int = None,
                  samp: str = 'normal',
                  use_avg: bool = True,
@@ -731,5 +725,43 @@ class ColorPostprocess:
     def __call__(self, img: np.ndarray):
         img = np.transpose(img, (1, 2, 0))
         img = np.clip(img, 0, 1) * 255
+        img = img.astype(self.type)
+        return img
+
+
+class CenterCrop:
+    """
+        Crop the middle part of the image to the specified size.
+
+        Args:
+           crop_size(int): Crop size.
+
+        Return:
+            img(np.ndarray): Croped image.
+    """
+    def __init__(self, crop_size: int):
+        self.crop_size = crop_size
+
+    def __call__(self, img: np.ndarray):
+        img_width, img_height, chanel = img.shape
+        crop_top = int((img_height - self.crop_size) / 2.)
+        crop_left = int((img_width - self.crop_size) / 2.)
+        return img[crop_left:crop_left + self.crop_size, crop_top:crop_top + self.crop_size, :]
+
+
+class SetType:
+    """
+    Set image type.
+
+    Args:
+       type(type): Type of Image value.
+
+    Return:
+        img(np.ndarray): Transformed image.
+    """
+    def __init__(self, datatype: type = 'float32'):
+        self.type = datatype
+
+    def __call__(self, img: np.ndarray):
         img = img.astype(self.type)
         return img

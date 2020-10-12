@@ -43,7 +43,7 @@ class ServerSource(object):
         self._url = url
         self._timeout = timeout
 
-    def search_module(self, name: str, version: str = None) -> dict:
+    def search_module(self, name: str, version: str = None) -> List[dict]:
         '''
         Search PaddleHub module
 
@@ -53,7 +53,7 @@ class ServerSource(object):
         '''
         return self.search_resource(type='module', name=name, version=version)
 
-    def search_resource(self, type: str, name: str, version: str = None) -> dict:
+    def search_resource(self, type: str, name: str, version: str = None) -> List[dict]:
         '''
         Search PaddleHub Resource
 
@@ -76,9 +76,7 @@ class ServerSource(object):
 
         result = self.request(path='search', params=params)
         if result['status'] == 0 and len(result['data']) > 0:
-            for item in result['data']:
-                if name.lower() == item['name'].lower() and utils.Version(item['version']).match(version):
-                    return item
+            return result['data']
         return None
 
     def get_module_info(self, name: str) -> dict:

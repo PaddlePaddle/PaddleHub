@@ -37,6 +37,7 @@ class ModuleV1(object):
         self.desc = module_v1_utils.convert_module_desc(desc_file)
         self.helper = self
         self.signatures = self.desc.signatures
+        self.default_signature = self.desc.default_signature
 
         self.directory = directory
         self._load_model()
@@ -185,6 +186,7 @@ class ModuleV1(object):
         cls.type = module_info.type
         cls.summary = module_info.summary
         cls.version = utils.Version(module_info.version)
+        cls.directory = directory
         return cls
 
     @classmethod
@@ -195,3 +197,7 @@ class ModuleV1(object):
 
     def assets_path(self):
         return os.path.join(self.directory, 'assets')
+
+    @property
+    def is_runnable(self):
+        return self.default_signature != None

@@ -58,7 +58,7 @@ class HubModuleNotFoundError(Exception):
                 hub_version = 'Any' if not info['hub_version'] else ', '.join(info['hub_version'])
                 table.append(self.name, _ver, paddle_version, hub_version, aligns=['^', '^', '^', '^'])
 
-            tips += ',  \n{}'.format(table)
+            tips += ':\n{}'.format(table)
         return tips
 
 
@@ -104,7 +104,7 @@ class EnvironmentMismatchError(Exception):
 
                 table.append(self.name, _ver, paddle_version, hub_version, aligns=['^', '^', '^', '^'])
 
-            tips += ',  \n{}'.format(table)
+            tips += ':\n{}'.format(table)
         return tips
 
 
@@ -238,28 +238,29 @@ class LocalModuleManager(object):
                 return self._local_modules[name]
 
         result = module_server.search_module(name=name, version=version, source=source)
-        if not result:
-            module_infos = module_server.get_module_info(name=name, source=source)
-            # The HubModule with the specified name cannot be found
-            if not module_infos:
-                raise HubModuleNotFoundError(name=name, version=version, source=source)
+        for item in result:
+            if name.lower() == item['name'].lower() and utils.Version(item['version']).match(version):
+                if source or 'source' in item:
+                    return self._install_from_source(result)
+                return self._install_from_url(item['url'])
 
-            valid_infos = {}
-            if version:
-                for _ver, _info in module_infos.items():
-                    if utils.Version(_ver).match(version):
-                        valid_infos[_ver] = _info
-            else:
-                valid_infos = list(module_infos.keys())
+        module_infos = module_server.get_module_info(name=name, source=source)
+        # The HubModule with the specified name cannot be found
+        if not module_infos:
+            raise HubModuleNotFoundError(name=name, version=version, source=source)
 
-            # Cannot find a HubModule that meets the version
-            if valid_infos:
-                raise EnvironmentMismatchError(name=name, info=valid_infos, version=version)
-            raise HubModuleNotFoundError(name=name, info=module_infos, version=version, source=source)
+        valid_infos = {}
+        if version:
+            for _ver, _info in module_infos.items():
+                if utils.Version(_ver).match(version):
+                    valid_infos[_ver] = _info
+        else:
+            valid_infos = module_infos.copy()
 
-        if source or 'source' in result:
-            return self._install_from_source(result)
-        return self._install_from_url(result['url'])
+        # Cannot find a HubModule that meets the version
+        if valid_infos:
+            raise EnvironmentMismatchError(name=name, info=valid_infos, version=version)
+        raise HubModuleNotFoundError(name=name, info=module_infos, version=version, source=source)
 
     def _install_from_source(self, source: str) -> HubModule:
         '''Install a HubModule from Git Repo'''

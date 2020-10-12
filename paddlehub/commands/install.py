@@ -36,5 +36,8 @@ class InstallCommand:
             elif os.path.exists(_arg) and xarfile.is_xarfile(_arg):
                 manager.install(archive=_arg)
             else:
-                manager.install(name=_arg)
+                _arg = _arg.split('==')
+                name = _arg[0]
+                version = None if len(_arg) == 1 else _arg[1]
+                manager.install(name=name, version=version)
         return True

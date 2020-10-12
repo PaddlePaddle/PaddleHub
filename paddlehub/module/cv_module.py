@@ -18,6 +18,7 @@ import os
 from typing import List
 from collections import OrderedDict
 
+import cv2
 import numpy as np
 import paddle
 import paddle.nn as nn
@@ -137,6 +138,7 @@ class ImageColorizeModule(RunModule, ImageServing):
         psnrs = []
         lab2rgb = T.ConvertColorSpace(mode='LAB2RGB')
         process = T.ColorPostprocess()
+
         for i in range(batch[0].numpy().shape[0]):
             real = lab2rgb(np.concatenate((batch[0].numpy(), batch[3].numpy()), axis=1))[i]
             visual_ret['real'] = process(real)
@@ -146,6 +148,7 @@ class ImageColorizeModule(RunModule, ImageServing):
             psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             psnrs.append(psnr_value)
         psnr = paddle.to_variable(np.array(psnrs))
+
         return {'loss': loss, 'metrics': {'psnr': psnr}}
 
     def predict(self, images: str, visualization: bool = True, save_path: str = 'result'):
@@ -309,3 +312,87 @@ class Yolov3Module(RunModule, ImageServing):
             Func.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5)
 
         return boxes, scores, labels
+
+
+class StyleTransferModule(RunModule, ImageServing):
+    def training_step(self, batch: int, batch_idx: int) -> dict:
+        '''
+        One step for training, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
+            batch_idx(int): The index of batch.
+
+        Returns:
+            results(dict) : The model outputs, such as loss and metrics.
+        '''
+        return self.validation_step(batch, batch_idx)
+
+    def validation_step(self, batch: int, batch_idx: int) -> dict:
+        '''
+        One step for validation, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
+            batch_idx(int): The index of batch.
+
+        Returns:
+            results(dict) : The model outputs, such as metrics.
+        '''
+        mse_loss = nn.MSELoss()
+        N, C, H, W = batch[0].shape
+        batch[1] = batch[1][0].unsqueeze(0)
+        self.setTarget(batch[1])
+
+        y = self(batch[0])
+        xc = paddle.to_tensor(batch[0].numpy().copy())
+        y = Func.subtract_imagenet_mean_batch(y)
+        xc = Func.subtract_imagenet_mean_batch(xc)
+        features_y = self.getFeature(y)
+        features_xc = self.getFeature(xc)
+        f_xc_c = paddle.to_tensor(features_xc[1].numpy(), stop_gradient=True)
+        content_loss = mse_loss(features_y[1], f_xc_c)
+
+        batch[1] = Func.subtract_imagenet_mean_batch(batch[1])
+        features_style = self.getFeature(batch[1])
+        gram_style = [Func.gram_matrix(y) for y in features_style]
+        style_loss = 0.
+        for m in range(len(features_y)):
+            gram_y = Func.gram_matrix(features_y[m])
+            gram_s = paddle.to_tensor(np.tile(gram_style[m].numpy(), (N, 1, 1, 1)))
+            style_loss += mse_loss(gram_y, gram_s[:N, :, :])
+
+        loss = content_loss + style_loss
+
+        return {'loss': loss, 'metrics': {'content gap': content_loss, 'style gap': style_loss}}
+
+    def predict(self, origin_path: str, style_path: str, visualization: bool = True, save_path: str = 'result'):
+        '''
+        Colorize images
+
+        Args:
+            origin_path(str): Content image path .
+            style_path(str): Style image path.
+            visualization(bool): Whether to save colorized images.
+            save_path(str) : Path to save colorized images.
+
+        Returns:
+            output(np.ndarray) : The style transformed images with bgr mode.
+        '''
+        content = paddle.to_tensor(self.transform(origin_path))
+        style = paddle.to_tensor(self.transform(style_path))
+        content = content.unsqueeze(0)
+        style = style.unsqueeze(0)
+
+        self.setTarget(style)
+        output = self(content)
+        output = paddle.clip(output[0].transpose((1, 2, 0)), 0, 255).numpy()
+
+        if visualization:
+            output = output.astype(np.uint8)
+            style_name = "style_" + str(time.time()) + ".png"
+            if not os.path.exists(save_path):
+                os.mkdir(save_path)
+            path = os.path.join(save_path, style_name)
+            cv2.imwrite(path, output)
+        return output

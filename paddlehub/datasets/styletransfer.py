@@ -14,21 +14,21 @@
 # limitations under the License.
 
 import os
-
-import numpy
-import paddle
-
-from paddlehub.process.functional import get_img_file
-from paddlehub.env import DATA_HOME
 from typing import Callable
 
+import paddle
+from paddlehub.process.functional import get_img_file
+from paddlehub.env import DATA_HOME
 
-class Colorizedataset(paddle.io.Dataset):
+
+class StyleTransferData(paddle.io.Dataset):
     """
-    Dataset for colorization.
+    Dataset for Style transfer.
+
     Args:
        transform(callmethod) : The method of preprocess images.
        mode(str): The mode for preparing dataset.
+
     Returns:
         DataSet: An iterable object for data iterating
     """
@@ -40,14 +40,19 @@ class Colorizedataset(paddle.io.Dataset):
             self.file = 'train'
         elif self.mode == 'test':
             self.file = 'test'
-
-        self.file = os.path.join(DATA_HOME, 'canvas', self.file)
+        self.file = os.path.join(DATA_HOME, 'minicoco', self.file)
+        self.style_file = os.path.join(DATA_HOME, 'minicoco', '21styles')
         self.data = get_img_file(self.file)
+        self.style = get_img_file(self.style_file)
 
-    def __getitem__(self, idx: int) -> numpy.ndarray:
+    def __getitem__(self, idx: int):
+
         img_path = self.data[idx]
         im = self.transform(img_path)
-        return im['A'], im['hint_B'], im['mask_B'], im['B'], im['real_B_enc']
+        style_idx = idx % len(self.style)
+        style_path = self.style[style_idx]
+        style = self.transform(style_path)
+        return im, style
 
     def __len__(self):
         return len(self.data)
