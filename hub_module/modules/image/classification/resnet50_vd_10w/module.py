@@ -223,7 +223,7 @@ class ResNet50_vd(nn.Layer):
             checkpoint = os.path.join(self.directory, 'resnet50_vd_10w.pdparams')
             if not os.path.exists(checkpoint):
                 os.system(
-                    'wget https://bj.bcebos.com/paddlehub/model/image/object_detection/yolov3_70000.pdparams -O ' +
+                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/resnet50_vd_10w.pdparams -O ' +
                     checkpoint)
             model_dict = paddle.load(checkpoint)[0]
             self.set_dict(model_dict)
