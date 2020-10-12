@@ -180,6 +180,7 @@ class BodyPoseModel(nn.Layer):
         return out6_1, out6_2
 
     def predict(self, img_path: str, save_path: str = "result"):
+        self.eval()
         orgImg = cv2.imread(img_path)
         data, imageToTest_padded, pad = self.transform(orgImg)
         Mconv7_stage6_L1, Mconv7_stage6_L2 = self.forward(paddle.to_tensor(data))

@@ -170,6 +170,7 @@ class HandPoseModel(nn.Layer):
         return np.array(all_peaks)
 
     def predict(self, img_path: str, save_path: str = 'result', scale: list = [0.5, 1.0, 1.5, 2.0]):
+        self.eval()
         self.body_model = hub.Module(name='openpose_body_estimation')
         self.body_model.eval()
         org_img = cv2.imread(img_path)
