@@ -124,11 +124,11 @@ class MobileNetV3Small(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(self.directory, 'MobileNetV3_small_x1_0_ssld_pretrained.pdparams')
+            checkpoint = os.path.join(self.directory, 'mobilenet_v3_small_ssld.pdparams')
             if not os.path.exists(checkpoint):
                 os.system(
-                    'wget https://bj.bcebos.com/paddlehub/model/image/object_detection/yolov3_70000.pdparams -O ' +
-                    checkpoint)
+                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/mobilenet_v3_small_ssld.pdparams -O '
+                    + checkpoint)
             model_dict = paddle.load(checkpoint)[0]
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
