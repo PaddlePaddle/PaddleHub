@@ -39,7 +39,7 @@ def make_divisible(v, divisor=8, min_value=None):
             author_email="",
             summary="mobilenet_v3_small_imagenet_ssld is a classification model, "
             "this module is trained with Imagenet dataset.",
-            version="1.0.0",
+            version="1.1.0",
             meta=ImageClassifierModule)
 class MobileNetV3Small(nn.Layer):
     """MobileNetV3Small module."""
