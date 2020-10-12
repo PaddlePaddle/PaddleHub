@@ -189,7 +189,7 @@ class MobileNet(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(self.directory, 'MobileNetV2_ssld_pretrained.pdparams')
+            checkpoint = os.path.join(self.directory, 'mobilenet_v2_ssld.pdparams.pdparams')
             if not os.path.exists(checkpoint):
                 os.system(
                     'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/mobilenet_v2_ssld.pdparams -O ' +
