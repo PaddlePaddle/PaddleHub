@@ -192,7 +192,7 @@ class MobileNet(nn.Layer):
             checkpoint = os.path.join(self.directory, 'MobileNetV2_ssld_pretrained.pdparams')
             if not os.path.exists(checkpoint):
                 os.system(
-                    'wget https://bj.bcebos.com/paddlehub/model/image/object_detection/yolov3_70000.pdparams -O ' +
+                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/mobilenet_v2_ssld.pdparams -O ' +
                     checkpoint)
             model_dict = paddle.load(checkpoint)[0]
             self.set_dict(model_dict)
