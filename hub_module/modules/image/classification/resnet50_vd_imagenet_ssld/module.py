@@ -171,7 +171,7 @@ class BasicBlock(nn.Layer):
             author_email="",
             summary="resnet50_vd_imagenet_ssld is a classification model, "
             "this module is trained with Imagenet dataset.",
-            version="1.0.0",
+            version="1.1.0",
             meta=ImageClassifierModule)
 class ResNet50_vd(nn.Layer):
     """ResNet50_vd model."""
