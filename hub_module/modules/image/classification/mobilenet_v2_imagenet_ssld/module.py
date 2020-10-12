@@ -138,7 +138,7 @@ class InversiBlocks(nn.Layer):
             author_email="",
             summary="mobilenet_v2_imagenet_ssld is a classification model, "
             "this module is trained with Imagenet dataset.",
-            version="1.0.0",
+            version="1.1.0",
             meta=ImageClassifierModule)
 class MobileNet(nn.Layer):
     """MobileNetV2"""
