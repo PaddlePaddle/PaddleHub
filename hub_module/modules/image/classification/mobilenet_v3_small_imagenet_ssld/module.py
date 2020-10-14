@@ -1,278 +1,276 @@
-# coding=utf-8
-from __future__ import absolute_import
-from __future__ import division
-
-import ast
-import argparse
+# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import os
 
-import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
-from paddlehub.module.module import moduleinfo, runnable, serving
-from paddlehub.common.paddle_helper import add_vars_prefix
+import paddle
+from paddle import ParamAttr
+import paddle.nn as nn
+import paddle.nn.functional as F
+from paddle.nn import Conv2d, BatchNorm, Linear, Dropout
+from paddle.nn import AdaptiveAvgPool2d, MaxPool2d, AvgPool2d
+from paddle.regularizer import L2Decay
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.cv_module import ImageClassifierModule
 
-from mobilenet_v3_small_imagenet_ssld.processor import postprocess, base64_to_cv2
-from mobilenet_v3_small_imagenet_ssld.data_feed import reader
-from mobilenet_v3_small_imagenet_ssld.mobilenet_v3 import MobileNetV3
+
+def make_divisible(v, divisor=8, min_value=None):
+    if min_value is None:
+        min_value = divisor
+    new_v = max(min_value, int(v + divisor / 2) // divisor * divisor)
+    if new_v < 0.9 * v:
+        new_v += divisor
+    return new_v
 
 
-@moduleinfo(
-    name="mobilenet_v3_small_imagenet_ssld",
-    type="CV/image_classification",
-    author="paddlepaddle",
-    author_email="paddle-dev@baidu.com",
-    summary=
-    "Mobilenet_V3_Small is a image classfication model, this module is trained with ImageNet-2012 dataset.",
-    version="1.0.0")
-class MobileNetV3Small(hub.Module):
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(
-            self.directory, "model")
-        label_file = os.path.join(self.directory, "label_list.txt")
-        with open(label_file, 'r', encoding='utf-8') as file:
-            self.label_list = file.read().split("\n")[:-1]
-        self._set_config()
+@moduleinfo(name="mobilenet_v3_small_imagenet_ssld",
+            type="cv/classification",
+            author="paddlepaddle",
+            author_email="",
+            summary="mobilenet_v3_small_imagenet_ssld is a classification model, "
+            "this module is trained with Imagenet dataset.",
+            version="1.1.0",
+            meta=ImageClassifierModule)
+class MobileNetV3Small(nn.Layer):
+    """MobileNetV3Small module."""
+    def __init__(self, dropout_prob: float = 0.2, class_dim: int = 1000, load_checkpoint: str = None):
+        super(MobileNetV3Small, self).__init__()
 
-    def get_expected_image_width(self):
-        return 224
+        inplanes = 16
+        self.cfg = [
+            # k, exp, c,  se,     nl,  s,
+            [3, 16, 16, True, "relu", 2],
+            [3, 72, 24, False, "relu", 2],
+            [3, 88, 24, False, "relu", 1],
+            [5, 96, 40, True, "hard_swish", 2],
+            [5, 240, 40, True, "hard_swish", 1],
+            [5, 240, 40, True, "hard_swish", 1],
+            [5, 120, 48, True, "hard_swish", 1],
+            [5, 144, 48, True, "hard_swish", 1],
+            [5, 288, 96, True, "hard_swish", 2],
+            [5, 576, 96, True, "hard_swish", 1],
+            [5, 576, 96, True, "hard_swish", 1],
+        ]
+        self.cls_ch_squeeze = 576
+        self.cls_ch_expand = 1280
 
-    def get_expected_image_height(self):
-        return 224
+        self.conv1 = ConvBNLayer(in_c=3,
+                                 out_c=make_divisible(inplanes),
+                                 filter_size=3,
+                                 stride=2,
+                                 padding=1,
+                                 num_groups=1,
+                                 if_act=True,
+                                 act="hard_swish",
+                                 name="conv1")
 
-    def get_pretrained_images_mean(self):
-        im_mean = np.array([0.485, 0.456, 0.406]).reshape(1, 3)
-        return im_mean
+        self.block_list = []
+        i = 0
+        inplanes = make_divisible(inplanes)
+        for (k, exp, c, se, nl, s) in self.cfg:
+            self.block_list.append(
+                ResidualUnit(in_c=inplanes,
+                             mid_c=make_divisible(exp),
+                             out_c=make_divisible(c),
+                             filter_size=k,
+                             stride=s,
+                             use_se=se,
+                             act=nl,
+                             name="conv" + str(i + 2)))
+            self.add_sublayer(sublayer=self.block_list[-1], name="conv" + str(i + 2))
+            inplanes = make_divisible(c)
+            i += 1
 
-    def get_pretrained_images_std(self):
-        im_std = np.array([0.229, 0.224, 0.225]).reshape(1, 3)
-        return im_std
+        self.last_second_conv = ConvBNLayer(in_c=inplanes,
+                                            out_c=make_divisible(self.cls_ch_squeeze),
+                                            filter_size=1,
+                                            stride=1,
+                                            padding=0,
+                                            num_groups=1,
+                                            if_act=True,
+                                            act="hard_swish",
+                                            name="conv_last")
 
-    def _set_config(self):
-        """
-        predictor config setting
-        """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
-        cpu_config.disable_glog_info()
-        cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.pool = AdaptiveAvgPool2d(1)
 
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-            use_gpu = True
-        except:
-            use_gpu = False
-        if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
-            gpu_config.disable_glog_info()
-            gpu_config.enable_use_gpu(
-                memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+        self.last_conv = Conv2d(in_channels=make_divisible(self.cls_ch_squeeze),
+                                out_channels=self.cls_ch_expand,
+                                kernel_size=1,
+                                stride=1,
+                                padding=0,
+                                weight_attr=ParamAttr(name="last_1x1_conv_weights"),
+                                bias_attr=False)
 
-    def context(self, trainable=True, pretrained=True):
-        """context for transfer learning.
+        self.dropout = Dropout(p=dropout_prob, mode="downscale_in_infer")
 
-        Args:
-            trainable (bool): Set parameters in program to be trainable.
-            pretrained (bool) : Whether to load pretrained model.
+        self.out = Linear(self.cls_ch_expand,
+                          class_dim,
+                          weight_attr=ParamAttr("fc_weights"),
+                          bias_attr=ParamAttr(name="fc_offset"))
 
-        Returns:
-            inputs (dict): key is 'image', corresponding vaule is image tensor.
-            outputs (dict): key is :
-                'classification', corresponding value is the result of classification.
-                'feature_map', corresponding value is the result of the layer before the fully connected layer.
-            context_prog (fluid.Program): program for transfer learning.
-        """
-        context_prog = fluid.Program()
-        startup_prog = fluid.Program()
-        with fluid.program_guard(context_prog, startup_prog):
-            with fluid.unique_name.guard():
-                image = fluid.layers.data(
-                    name="image", shape=[3, 224, 224], dtype="float32")
-                mobile_net = MobileNetV3()
-                output, feature_map = mobile_net.net(
-                    input=image, class_dim=len(self.label_list))
+        if load_checkpoint is not None:
+            model_dict = paddle.load(load_checkpoint)[0]
+            self.set_dict(model_dict)
+            print("load custom checkpoint success")
 
-                name_prefix = '@HUB_{}@'.format(self.name)
-                inputs = {'image': name_prefix + image.name}
-                outputs = {
-                    'classification': name_prefix + output.name,
-                    'feature_map': name_prefix + feature_map.name
-                }
-                add_vars_prefix(context_prog, name_prefix)
-                add_vars_prefix(startup_prog, name_prefix)
-                global_vars = context_prog.global_block().vars
-                inputs = {
-                    key: global_vars[value]
-                    for key, value in inputs.items()
-                }
-                outputs = {
-                    key: global_vars[value]
-                    for key, value in outputs.items()
-                }
+        else:
+            checkpoint = os.path.join(self.directory, 'mobilenet_v3_small_ssld.pdparams')
+            if not os.path.exists(checkpoint):
+                os.system(
+                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/mobilenet_v3_small_ssld.pdparams -O '
+                    + checkpoint)
+            model_dict = paddle.load(checkpoint)[0]
+            self.set_dict(model_dict)
+            print("load pretrained checkpoint success")
 
-                place = fluid.CPUPlace()
-                exe = fluid.Executor(place)
-                # pretrained
-                if pretrained:
+    def forward(self, inputs: paddle.Tensor):
+        x = self.conv1(inputs)
+        for block in self.block_list:
+            x = block(x)
 
-                    def _if_exist(var):
-                        b = os.path.exists(
-                            os.path.join(self.default_pretrained_model_path,
-                                         var.name))
-                        return b
+        x = self.last_second_conv(x)
+        x = self.pool(x)
 
-                    fluid.io.load_vars(
-                        exe,
-                        self.default_pretrained_model_path,
-                        context_prog,
-                        predicate=_if_exist)
-                else:
-                    exe.run(startup_prog)
-                # trainable
-                for param in context_prog.global_block().iter_parameters():
-                    param.trainable = trainable
-        return inputs, outputs, context_prog
+        x = self.last_conv(x)
+        x = F.hard_swish(x)
+        x = self.dropout(x)
+        x = paddle.reshape(x, shape=[x.shape[0], x.shape[1]])
+        x = self.out(x)
+        return x
 
-    def classification(self,
-                       images=None,
-                       paths=None,
-                       batch_size=1,
-                       use_gpu=False,
-                       top_k=1):
-        """
-        API for image classification.
 
-        Args:
-            images (numpy.ndarray): data of images, shape of each is [H, W, C], color space must be BGR.
-            paths (list[str]): The paths of images.
-            batch_size (int): batch size.
-            use_gpu (bool): Whether to use gpu.
-            top_k (int): Return top k results.
+class ConvBNLayer(nn.Layer):
+    """Basic conv bn layer."""
+    def __init__(self,
+                 in_c: int,
+                 out_c: int,
+                 filter_size: int,
+                 stride: int,
+                 padding: int,
+                 num_groups: int = 1,
+                 if_act: bool = True,
+                 act: str = None,
+                 name: str = ""):
+        super(ConvBNLayer, self).__init__()
+        self.if_act = if_act
+        self.act = act
+        self.conv = Conv2d(in_channels=in_c,
+                           out_channels=out_c,
+                           kernel_size=filter_size,
+                           stride=stride,
+                           padding=padding,
+                           groups=num_groups,
+                           weight_attr=ParamAttr(name=name + "_weights"),
+                           bias_attr=False)
+        self.bn = BatchNorm(num_channels=out_c,
+                            act=None,
+                            param_attr=ParamAttr(name=name + "_bn_scale", regularizer=L2Decay(0.0)),
+                            bias_attr=ParamAttr(name=name + "_bn_offset", regularizer=L2Decay(0.0)),
+                            moving_mean_name=name + "_bn_mean",
+                            moving_variance_name=name + "_bn_variance")
 
-        Returns:
-            res (list[dict]): The classfication results.
-        """
-        if use_gpu:
-            try:
-                _places = os.environ["CUDA_VISIBLE_DEVICES"]
-                int(_places[0])
-            except:
-                raise RuntimeError(
-                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
-                )
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        if self.if_act:
+            if self.act == "relu":
+                x = F.relu(x)
+            elif self.act == "hard_swish":
+                x = F.hard_swish(x)
+            else:
+                print("The activation function is selected incorrectly.")
+                exit()
+        return x
 
-        all_data = list()
-        for yield_data in reader(images, paths):
-            all_data.append(yield_data)
 
-        total_num = len(all_data)
-        loop_num = int(np.ceil(total_num / batch_size))
+class ResidualUnit(nn.Layer):
+    """Residual unit for MobileNetV3."""
+    def __init__(self,
+                 in_c: int,
+                 mid_c: int,
+                 out_c: int,
+                 filter_size: int,
+                 stride: int,
+                 use_se: bool,
+                 act: str = None,
+                 name: str = ''):
+        super(ResidualUnit, self).__init__()
+        self.if_shortcut = stride == 1 and in_c == out_c
+        self.if_se = use_se
 
-        res = list()
-        for iter_id in range(loop_num):
-            batch_data = list()
-            handle_id = iter_id * batch_size
-            for image_id in range(batch_size):
-                try:
-                    batch_data.append(all_data[handle_id + image_id])
-                except:
-                    pass
-            # feed batch image
-            batch_image = np.array([data['image'] for data in batch_data])
-            batch_image = PaddleTensor(batch_image.copy())
-            predictor_output = self.gpu_predictor.run([
-                batch_image
-            ]) if use_gpu else self.cpu_predictor.run([batch_image])
-            out = postprocess(
-                data_out=predictor_output[0].as_ndarray(),
-                label_list=self.label_list,
-                top_k=top_k)
-            res += out
-        return res
+        self.expand_conv = ConvBNLayer(in_c=in_c,
+                                       out_c=mid_c,
+                                       filter_size=1,
+                                       stride=1,
+                                       padding=0,
+                                       if_act=True,
+                                       act=act,
+                                       name=name + "_expand")
+        self.bottleneck_conv = ConvBNLayer(in_c=mid_c,
+                                           out_c=mid_c,
+                                           filter_size=filter_size,
+                                           stride=stride,
+                                           padding=int((filter_size - 1) // 2),
+                                           num_groups=mid_c,
+                                           if_act=True,
+                                           act=act,
+                                           name=name + "_depthwise")
+        if self.if_se:
+            self.mid_se = SEModule(mid_c, name=name + "_se")
+        self.linear_conv = ConvBNLayer(in_c=mid_c,
+                                       out_c=out_c,
+                                       filter_size=1,
+                                       stride=1,
+                                       padding=0,
+                                       if_act=False,
+                                       act=None,
+                                       name=name + "_linear")
 
-    def save_inference_model(self,
-                             dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+    def forward(self, inputs: paddle.Tensor):
+        x = self.expand_conv(inputs)
+        x = self.bottleneck_conv(x)
+        if self.if_se:
+            x = self.mid_se(x)
+        x = self.linear_conv(x)
+        if self.if_shortcut:
+            x = paddle.elementwise_add(inputs, x)
+        return x
 
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+class SEModule(nn.Layer):
+    """Basic model for ResidualUnit."""
+    def __init__(self, channel: int, reduction: int = 4, name: str = ""):
+        super(SEModule, self).__init__()
+        self.avg_pool = AdaptiveAvgPool2d(1)
+        self.conv1 = Conv2d(in_channels=channel,
+                            out_channels=channel // reduction,
+                            kernel_size=1,
+                            stride=1,
+                            padding=0,
+                            weight_attr=ParamAttr(name=name + "_1_weights"),
+                            bias_attr=ParamAttr(name=name + "_1_offset"))
+        self.conv2 = Conv2d(in_channels=channel // reduction,
+                            out_channels=channel,
+                            kernel_size=1,
+                            stride=1,
+                            padding=0,
+                            weight_attr=ParamAttr(name + "_2_weights"),
+                            bias_attr=ParamAttr(name=name + "_2_offset"))
 
-    @serving
-    def serving_method(self, images, **kwargs):
-        """
-        Run as a service.
-        """
-        images_decode = [base64_to_cv2(image) for image in images]
-        results = self.classification(images=images_decode, **kwargs)
-        return results
-
-    @runnable
-    def run_cmd(self, argvs):
-        """
-        Run as a command.
-        """
-        self.parser = argparse.ArgumentParser(
-            description="Run the {} module.".format(self.name),
-            prog='hub run {}'.format(self.name),
-            usage='%(prog)s',
-            add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
-        self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
-        self.add_module_config_arg()
-        self.add_module_input_arg()
-        args = self.parser.parse_args(argvs)
-        results = self.classification(
-            paths=[args.input_path],
-            batch_size=args.batch_size,
-            use_gpu=args.use_gpu)
-        return results
-
-    def add_module_config_arg(self):
-        """
-        Add the command config options.
-        """
-        self.arg_config_group.add_argument(
-            '--use_gpu',
-            type=ast.literal_eval,
-            default=False,
-            help="whether use GPU or not.")
-        self.arg_config_group.add_argument(
-            '--batch_size',
-            type=ast.literal_eval,
-            default=1,
-            help="batch size.")
-        self.arg_config_group.add_argument(
-            '--top_k',
-            type=ast.literal_eval,
-            default=1,
-            help="Return top k results.")
-
-    def add_module_input_arg(self):
-        """
-        Add the command input options.
-        """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
+    def forward(self, inputs: paddle.Tensor):
+        outputs = self.avg_pool(inputs)
+        outputs = self.conv1(outputs)
+        outputs = F.relu(outputs)
+        outputs = self.conv2(outputs)
+        outputs = F.hard_sigmoid(outputs)
+        return paddle.multiply(x=inputs, y=outputs, axis=0)

@@ -27,8 +27,8 @@ from PIL import Image
 
 from paddlehub.module.module import serving, RunModule
 from paddlehub.utils.utils import base64_to_cv2
-from paddlehub.process.transforms import ConvertColorSpace, ColorPostprocess, Resize
-from paddlehub.process.functional import subtract_imagenet_mean_batch, gram_matrix
+import paddlehub.process.transforms as T
+import paddlehub.process.functional as Func
 
 
 class ImageServing(object):
@@ -136,8 +136,8 @@ class ImageColorizeModule(RunModule, ImageServing):
 
         visual_ret = OrderedDict()
         psnrs = []
-        lab2rgb = ConvertColorSpace(mode='LAB2RGB')
-        process = ColorPostprocess()
+        lab2rgb = T.ConvertColorSpace(mode='LAB2RGB')
+        process = T.ColorPostprocess()
 
         for i in range(batch[0].numpy().shape[0]):
             real = lab2rgb(np.concatenate((batch[0].numpy(), batch[3].numpy()), axis=1))[i]
@@ -163,9 +163,9 @@ class ImageColorizeModule(RunModule, ImageServing):
         Returns:
             results(list[dict]) : The prediction result of each input image
         '''
-        lab2rgb = ConvertColorSpace(mode='LAB2RGB')
-        process = ColorPostprocess()
-        resize = Resize((256, 256))
+        lab2rgb = T.ConvertColorSpace(mode='LAB2RGB')
+        process = T.ColorPostprocess()
+        resize = T.Resize((256, 256))
         visual_ret = OrderedDict()
         im = self.transforms(images, is_train=False)
         out_class, out_reg = self(paddle.to_tensor(im['A']), paddle.to_variable(im['hint_B']),
@@ -194,6 +194,124 @@ class ImageColorizeModule(RunModule, ImageServing):
             psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             result.append(visual_ret)
         return result
+
+
+class Yolov3Module(RunModule, ImageServing):
+    def training_step(self, batch: int, batch_idx: int) -> dict:
+        '''
+        One step for training, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Tensor]): The one batch data, which contains images, ground truth boxes, labels and scores.
+            batch_idx(int): The index of batch.
+
+        Returns:
+            results(dict): The model outputs, such as loss.
+        '''
+
+        return self.validation_step(batch, batch_idx)
+
+    def validation_step(self, batch: int, batch_idx: int) -> dict:
+        '''
+        One step for validation, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Tensor]): The one batch data, which contains images, ground truth boxes, labels and scores.
+            batch_idx(int): The index of batch.
+
+        Returns:
+            results(dict) : The model outputs, such as metrics.
+        '''
+        img = batch[0].astype('float32')
+        gtbox = batch[1].astype('float32')
+        gtlabel = batch[2].astype('int32')
+        gtscore = batch[3].astype("float32")
+        losses = []
+        outputs = self(img)
+        self.downsample = 32
+
+        for i, out in enumerate(outputs):
+            anchor_mask = self.anchor_masks[i]
+            loss = F.yolov3_loss(x=out,
+                                 gt_box=gtbox,
+                                 gt_label=gtlabel,
+                                 gt_score=gtscore,
+                                 anchors=self.anchors,
+                                 anchor_mask=anchor_mask,
+                                 class_num=self.class_num,
+                                 ignore_thresh=self.ignore_thresh,
+                                 downsample_ratio=32,
+                                 use_label_smooth=False)
+            losses.append(paddle.reduce_mean(loss))
+            self.downsample //= 2
+
+        return {'loss': sum(losses)}
+
+    def predict(self, imgpath: str, filelist: str, visualization: bool = True, save_path: str = 'result'):
+        '''
+        Detect images
+
+        Args:
+            imgpath(str): Image path .
+            filelist(str): Path to get label name.
+            visualization(bool): Whether to save result image.
+            save_path(str) : Path to save detected images.
+
+        Returns:
+            boxes(np.ndarray): Predict box information.
+            scores(np.ndarray): Predict score.
+            labels(np.ndarray): Predict labels.
+        '''
+        boxes = []
+        scores = []
+        self.downsample = 32
+        im = self.transform(imgpath)
+        h, w, c = Func.img_shape(imgpath)
+        im_shape = paddle.to_tensor(np.array([[h, w]]).astype('int32'))
+        label_names = Func.get_label_infos(filelist)
+        img_data = paddle.to_tensor(np.array([im]).astype('float32'))
+
+        outputs = self(img_data)
+
+        for i, out in enumerate(outputs):
+            anchor_mask = self.anchor_masks[i]
+            mask_anchors = []
+            for m in anchor_mask:
+                mask_anchors.append((self.anchors[2 * m]))
+                mask_anchors.append(self.anchors[2 * m + 1])
+
+            box, score = F.yolo_box(x=out,
+                                    img_size=im_shape,
+                                    anchors=mask_anchors,
+                                    class_num=self.class_num,
+                                    conf_thresh=self.valid_thresh,
+                                    downsample_ratio=self.downsample,
+                                    name="yolo_box" + str(i))
+
+            boxes.append(box)
+            scores.append(paddle.transpose(score, perm=[0, 2, 1]))
+            self.downsample //= 2
+
+        yolo_boxes = paddle.concat(boxes, axis=1)
+        yolo_scores = paddle.concat(scores, axis=2)
+
+        pred = F.multiclass_nms(bboxes=yolo_boxes,
+                                scores=yolo_scores,
+                                score_threshold=self.valid_thresh,
+                                nms_top_k=self.nms_topk,
+                                keep_top_k=self.nms_posk,
+                                nms_threshold=self.nms_thresh,
+                                background_label=-1)
+
+        bboxes = pred.numpy()
+        labels = bboxes[:, 0].astype('int32')
+        scores = bboxes[:, 1].astype('float32')
+        boxes = bboxes[:, 2:].astype('float32')
+
+        if visualization:
+            Func.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5)
+
+        return boxes, scores, labels
 
 
 class StyleTransferModule(RunModule, ImageServing):
@@ -228,19 +346,19 @@ class StyleTransferModule(RunModule, ImageServing):
 
         y = self(batch[0])
         xc = paddle.to_tensor(batch[0].numpy().copy())
-        y = subtract_imagenet_mean_batch(y)
-        xc = subtract_imagenet_mean_batch(xc)
+        y = Func.subtract_imagenet_mean_batch(y)
+        xc = Func.subtract_imagenet_mean_batch(xc)
         features_y = self.getFeature(y)
         features_xc = self.getFeature(xc)
         f_xc_c = paddle.to_tensor(features_xc[1].numpy(), stop_gradient=True)
         content_loss = mse_loss(features_y[1], f_xc_c)
 
-        batch[1] = subtract_imagenet_mean_batch(batch[1])
+        batch[1] = Func.subtract_imagenet_mean_batch(batch[1])
         features_style = self.getFeature(batch[1])
-        gram_style = [gram_matrix(y) for y in features_style]
+        gram_style = [Func.gram_matrix(y) for y in features_style]
         style_loss = 0.
         for m in range(len(features_y)):
-            gram_y = gram_matrix(features_y[m])
+            gram_y = Func.gram_matrix(features_y[m])
             gram_s = paddle.to_tensor(np.tile(gram_style[m].numpy(), (N, 1, 1, 1)))
             style_loss += mse_loss(gram_y, gram_s[:N, :, :])
 
