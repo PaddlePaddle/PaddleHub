@@ -140,6 +140,9 @@ class ConvertCommand(BaseCommand):
         self.module = args.module_name
         self.version = args.module_version if args.module_version is not None else '1.0.0'
         self.src = args.model_dir
+        if not os.path.isdir(self.src):
+            print('`{}` is not exists or not a directory path'.format(self.src))
+            return False
         self.dest = args.output_dir if args.output_dir is not None else os.path.join(
             '{}_{}'.format(self.module, str(time.time())))
 
