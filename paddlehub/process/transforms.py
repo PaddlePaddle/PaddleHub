@@ -12,13 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import os
 import random
+import copy
+from typing import Callable
 from collections import OrderedDict
 
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 from paddlehub.process.functional import *
 
