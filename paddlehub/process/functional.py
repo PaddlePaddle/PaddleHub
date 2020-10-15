@@ -264,3 +264,12 @@ def gram_matrix(data: paddle.Tensor) -> paddle.Tensor:
     features_t = features.transpose((0, 2, 1))
     gram = features.bmm(features_t) / (ch * h * w)
     return gram
+
+
+def npmax(array: np.ndarray):
+    """Get max value and index."""
+    arrayindex = array.argmax(1)
+    arrayvalue = array.max(1)
+    i = arrayvalue.argmax()
+    j = arrayindex[i]
+    return i, j

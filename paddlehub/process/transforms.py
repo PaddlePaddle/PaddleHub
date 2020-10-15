@@ -12,7 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import os
+import math
+
 import random
 import copy
 from typing import Callable
@@ -20,9 +23,15 @@ from collections import OrderedDict
 
 import cv2
 import numpy as np
+import matplotlib
 from PIL import Image, ImageEnhance
-
+from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
+from scipy.ndimage.filters import gaussian_filter
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from paddlehub.process.functional import *
+
+matplotlib.use('Agg')
 
 
 class Compose:
@@ -765,3 +774,20 @@ class SetType:
     def __call__(self, img: np.ndarray):
         img = img.astype(self.type)
         return img
+
+
+class ResizeScaling:
+    """Resize images by scaling method.
+
+    Args:
+        target(int): Target image size.
+        interp(Callable): Interpolation method.
+    """
+    def __init__(self, target: int = 368, interp: Callable = cv2.INTER_CUBIC):
+        self.target = target
+        self.interp = interp
+
+    def __call__(self, img, scale_search):
+        scale = scale_search * self.target / img.shape[0]
+        resize_img = cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=self.interp)
+        return resize_img
