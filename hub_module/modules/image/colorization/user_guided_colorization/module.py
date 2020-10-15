@@ -15,12 +15,12 @@
 import os
 
 import paddle
-import numpy
 import paddle.nn as nn
 from paddle.nn import Conv2d, ConvTranspose2d
 from paddlehub.module.module import moduleinfo
-from paddlehub.process.transforms import Compose, Resize, RandomPaddingCrop, ConvertColorSpace, ColorizePreprocess
+import paddlehub.process.transforms as T
 from paddlehub.module.cv_module import ImageColorizeModule
+from user_guided_colorization.data_feed import ColorizePreprocess
 
 
 @moduleinfo(
@@ -32,7 +32,8 @@ from paddlehub.module.cv_module import ImageColorizeModule
     version="1.0.0",
     meta=ImageColorizeModule)
 class UserGuidedColorization(nn.Layer):
-    """Userguidedcolorization, see https://github.com/haoyuying/colorization-pytorch
+    """
+    Userguidedcolorization, see https://github.com/haoyuying/colorization-pytorch
 
     Args:
         use_tanh (bool): Whether to use tanh as final activation function.
@@ -139,12 +140,7 @@ class UserGuidedColorization(nn.Layer):
             1,
             1,
         ), )
-        model9 = (
-            nn.ReLU(),
-            Conv2d(128, 128, 3, 1, 1),
-            nn.ReLU(),
-            nn.BatchNorm(128),
-        )
+        model9 = (nn.ReLU(), Conv2d(128, 128, 3, 1, 1), nn.ReLU(), nn.BatchNorm(128))
 
         # Conv10
         model10up = (ConvTranspose2d(128, 128, kernel_size=4, stride=2, padding=1), )
@@ -188,23 +184,22 @@ class UserGuidedColorization(nn.Layer):
 
     def transforms(self, images: str, is_train: bool = True) -> callable:
         if is_train:
-            transform = Compose([
-                Resize((256, 256), interp='NEAREST'),
-                RandomPaddingCrop(crop_size=176),
-                ConvertColorSpace(mode='RGB2LAB'),
-                ColorizePreprocess(ab_thresh=0, is_train=is_train)
-            ],
-                                stay_rgb=True,
-                                is_permute=False)
+            transform = T.Compose(
+                [T.Resize((256, 256), interp='NEAREST'),
+                 T.RandomPaddingCrop(crop_size=176),
+                 T.RGB2LAB()],
+                stay_rgb=True,
+                is_permute=False)
         else:
-            transform = Compose([
-                Resize((256, 256), interp='NEAREST'),
-                ConvertColorSpace(mode='RGB2LAB'),
-                ColorizePreprocess(ab_thresh=0, is_train=is_train)
-            ],
-                                stay_rgb=True,
-                                is_permute=False)
+            transform = T.Compose([T.Resize(
+                (256, 256), interp='NEAREST'), T.RGB2LAB()],
+                                  stay_rgb=True,
+                                  is_permute=False)
         return transform(images)
+
+    def preprocess(self, inputs: paddle.Tensor, ab_thresh: float = 0., prob: float = 0.):
+        self.preprocess = ColorizePreprocess(ab_thresh=ab_thresh, p=prob)
+        return self.preprocess(inputs)
 
     def forward(self,
                 input_A: paddle.Tensor,

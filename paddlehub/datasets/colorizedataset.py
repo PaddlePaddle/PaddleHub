@@ -15,7 +15,7 @@
 
 import os
 
-import numpy
+import numpy as np
 import paddle
 
 from paddlehub.process.functional import get_img_file
@@ -26,9 +26,11 @@ from typing import Callable
 class Colorizedataset(paddle.io.Dataset):
     """
     Dataset for colorization.
+
     Args:
        transform(callmethod) : The method of preprocess images.
        mode(str): The mode for preparing dataset.
+
     Returns:
         DataSet: An iterable object for data iterating
     """
@@ -44,10 +46,10 @@ class Colorizedataset(paddle.io.Dataset):
         self.file = os.path.join(DATA_HOME, 'canvas', self.file)
         self.data = get_img_file(self.file)
 
-    def __getitem__(self, idx: int) -> numpy.ndarray:
+    def __getitem__(self, idx: int) -> np.ndarray:
         img_path = self.data[idx]
         im = self.transform(img_path)
-        return im['A'], im['hint_B'], im['mask_B'], im['B'], im['real_B_enc']
+        return im
 
     def __len__(self):
         return len(self.data)
