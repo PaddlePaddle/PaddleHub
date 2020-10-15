@@ -102,6 +102,8 @@ def get_depth_parameter(main_program):
     depth_list = sorted(depth_params_dict.keys())
     len_depth_list = len(depth_list)
     for index, depth in enumerate(depth_list):
+        if depth not in updated_depth_params_dict:
+            continue
         for param in depth_params_dict[depth]:
             prefix = param.name.split(".")[0]
             if index < len_depth_list - 1:
