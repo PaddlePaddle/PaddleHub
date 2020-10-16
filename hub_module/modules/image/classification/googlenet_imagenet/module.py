@@ -103,7 +103,7 @@ class Inception(nn.Layer):
             author_email="",
             summary="GoogleNet_imagenet is a classification model, "
             "this module is trained with Imagenet dataset.",
-            version="1.0.0",
+            version="1.1.0",
             meta=ImageClassifierModule)
 class GoogleNet(nn.Layer):
     """GoogleNet model"""
