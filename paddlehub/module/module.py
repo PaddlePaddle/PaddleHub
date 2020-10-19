@@ -122,7 +122,7 @@ class Module(object):
                     if _decorator.func.id != 'moduleinfo':
                         continue
 
-                    info = {key.arg: key.value.s for key in _decorator.keywords}
+                    info = {key.arg: key.value.s for key in _decorator.keywords if key.arg != 'meta'}
                     return EasyDict(info)
             else:
                 raise InvalidHubModule(directory)
