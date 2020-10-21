@@ -118,7 +118,7 @@ class XarFile(object):
         should return True for each filename to be excluded.
         '''
         if self.arctype == 'tar':
-            self._archive_fp.add(name, arcname, recursive, exclude)
+            self._archive_fp.add(name, arcname, recursive, filter=exclude)
         else:
             self._archive_fp.write(name)
             if not recursive or not os.path.isdir(name):

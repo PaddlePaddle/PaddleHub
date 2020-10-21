@@ -41,16 +41,12 @@ class Version(packaging.version.Version):
     def match(self, condition: str) -> bool:
         '''
         Determine whether the given condition are met
-
         Args:
             condition(str) : conditions for judgment
-
         Returns:
             bool: True if the given version condition are met, else False
-
         Examples:
             .. code-block:: python
-
                 Version('1.2.0').match('>=1.2.0a')
         '''
         if not condition:
@@ -184,14 +180,11 @@ def generate_tempdir(directory: str = None, **kwargs):
 def download(url: str, path: str = None) -> str:
     '''
     Download a file
-
     Args:
         url (str) : url to be downloaded
         path (str, optional) : path to store downloaded products, default is current work directory
-
     Examples:
         .. code-block:: python
-
             url = 'https://xxxxx.xx/xx.tar.gz'
             download(url, path='./output')
     '''
@@ -203,14 +196,11 @@ def download(url: str, path: str = None) -> str:
 def download_with_progress(url: str, path: str = None) -> Generator[str, int, int]:
     '''
     Download a file and return the downloading progress -> Generator[filename, download_size, total_size]
-
     Args:
         url (str) : url to be downloaded
         path (str, optional) : path to store downloaded products, default is current work directory
-
     Examples:
         .. code-block:: python
-
             url = 'https://xxxxx.xx/xx.tar.gz'
             for filename, download_size, total_szie in download_with_progress(url, path='./output'):
                 print(filename, download_size, total_size)
@@ -236,7 +226,6 @@ def download_with_progress(url: str, path: str = None) -> Generator[str, int, in
 def load_py_module(python_path: str, py_module_name: str) -> types.ModuleType:
     '''
     Load the specified python module.
-
     Args:
         python_path(str) : The directory where the python module is located
         py_module_name(str) : Module name to be loaded
