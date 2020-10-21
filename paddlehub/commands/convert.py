@@ -45,16 +45,16 @@ class ConvertCommand:
             os.makedirs(self.dest)
         tar_file = os.path.join(self.dest, '{}.tar.gz'.format(self.module))
         tfp = XarFile(tar_file, 'w', 'tar.gz')
-        tfp.add(self.dest, recursive=False, arcname=self.module)
+        tfp.add(self.dest, self.module, False)
         for root, dir, files in os.walk(self.src):
             for file in files:
                 fullpath = os.path.join(root, file)
                 arcname = os.path.join(self.module, 'assets', file)
                 tfp.add(fullpath, arcname=arcname)
 
-        tfp.add(self.model_file, arcname=os.path.join(self.module, MODULE_FILE))
-        tfp.add(self.serving_file, arcname=os.path.join(self.module, SERVING_FILE))
-        tfp.add(self.init_file, arcname=os.path.join(self.module, INIT_FILE))
+        tfp.add(name=self.model_file, arcname=os.path.join(self.module, MODULE_FILE))
+        tfp.add(name=self.serving_file, arcname=os.path.join(self.module, SERVING_FILE))
+        tfp.add(name=self.init_file, arcname=os.path.join(self.module, INIT_FILE))
 
     def create_module_py(self):
         template_file = open(os.path.join(TMPL_DIR, 'x_model.tmpl'), 'r', encoding='utf-8')
@@ -62,12 +62,13 @@ class ConvertCommand:
         lines = []
 
         lines.append(
-            tmpl.substitute(NAME="'{}'".format(self.module),
-                            TYPE="'CV'",
-                            AUTHOR="'Baidu'",
-                            SUMMARY="''",
-                            VERSION="'{}'".format(self.version),
-                            EMAIL="''"))
+            tmpl.substitute(
+                NAME="'{}'".format(self.module),
+                TYPE="'CV'",
+                AUTHOR="'Baidu'",
+                SUMMARY="''",
+                VERSION="'{}'".format(self.version),
+                EMAIL="''"))
         self.model_file = os.path.join(self._tmp_dir, MODULE_FILE)
 
         with open(self.model_file, 'w', encoding='utf-8') as fp:

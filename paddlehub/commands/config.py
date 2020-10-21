@@ -23,15 +23,7 @@ import time
 
 from paddlehub.env import CONF_HOME
 from paddlehub.commands import register
-
-
-def md5(text):
-    if isinstance(text, str):
-        text = text.encode("utf8")
-    md5 = hashlib.md5()
-    md5.update(text)
-    return md5.hexdigest()
-
+from paddlehub.utils.utils import md5
 
 default_server_config = {
     "server_url": ["http://paddlepaddle.org.cn/paddlehub"],

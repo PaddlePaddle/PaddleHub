@@ -16,6 +16,7 @@
 import base64
 import contextlib
 import cv2
+import hashlib
 import importlib
 import math
 import os
@@ -24,10 +25,10 @@ import sys
 import time
 import tempfile
 import types
-import numpy as np
 from typing import Generator
 from urllib.parse import urlparse
 
+import numpy as np
 import packaging.version
 
 import paddlehub.env as hubenv
@@ -40,16 +41,12 @@ class Version(packaging.version.Version):
     def match(self, condition: str) -> bool:
         '''
         Determine whether the given condition are met
-
         Args:
             condition(str) : conditions for judgment
-
         Returns:
             bool: True if the given version condition are met, else False
-
         Examples:
             .. code-block:: python
-
                 Version('1.2.0').match('>=1.2.0a')
         '''
         if not condition:
@@ -183,14 +180,11 @@ def generate_tempdir(directory: str = None, **kwargs):
 def download(url: str, path: str = None) -> str:
     '''
     Download a file
-
     Args:
         url (str) : url to be downloaded
         path (str, optional) : path to store downloaded products, default is current work directory
-
     Examples:
         .. code-block:: python
-
             url = 'https://xxxxx.xx/xx.tar.gz'
             download(url, path='./output')
     '''
@@ -202,14 +196,11 @@ def download(url: str, path: str = None) -> str:
 def download_with_progress(url: str, path: str = None) -> Generator[str, int, int]:
     '''
     Download a file and return the downloading progress -> Generator[filename, download_size, total_size]
-
     Args:
         url (str) : url to be downloaded
         path (str, optional) : path to store downloaded products, default is current work directory
-
     Examples:
         .. code-block:: python
-
             url = 'https://xxxxx.xx/xx.tar.gz'
             for filename, download_size, total_szie in download_with_progress(url, path='./output'):
                 print(filename, download_size, total_size)
@@ -235,12 +226,18 @@ def download_with_progress(url: str, path: str = None) -> Generator[str, int, in
 def load_py_module(python_path: str, py_module_name: str) -> types.ModuleType:
     '''
     Load the specified python module.
-
     Args:
         python_path(str) : The directory where the python module is located
         py_module_name(str) : Module name to be loaded
     '''
     sys.path.insert(0, python_path)
+
+    # Delete the cache module to avoid hazards. For example, when the user reinstalls a HubModule,
+    # if the cache is not cleared, then what the user gets at this time is actually the HubModule
+    # before uninstallation, this can cause some strange problems, e.g, fail to load model parameters.
+    if py_module_name in sys.modules:
+        sys.modules.pop(py_module_name)
+
     py_module = importlib.import_module(py_module_name)
     sys.path.pop(0)
 
@@ -277,3 +274,10 @@ def sys_stdout_encoding() -> str:
     if encoding is None:
         encoding = get_platform_default_encoding()
     return encoding
+
+
+def md5(text: str):
+    '''
+    '''
+    md5code = hashlib.md5(text.encode())
+    return md5code.hexdigest()
