@@ -22,7 +22,7 @@ from typing import Callable, Generic, List, Optional
 
 from easydict import EasyDict
 
-from paddlehub.utils import log, utils
+from paddlehub.utils import parser, log, utils
 from paddlehub.compat.module.module_v1 import ModuleV1
 
 
@@ -62,11 +62,17 @@ class Module(object):
     '''
     '''
 
-    def __new__(cls, name: str = None, directory: str = None, version: str = None, **kwargs):
+    def __new__(cls,
+                name: str = None,
+                directory: str = None,
+                version: str = None,
+                source: str = None,
+                update: bool = False,
+                **kwargs):
         if cls.__name__ == 'Module':
             # This branch come from hub.Module(name='xxx') or hub.Module(directory='xxx')
             if name:
-                module = cls.init_with_name(name=name, version=version, **kwargs)
+                module = cls.init_with_name(name=name, version=version, source=source, update=update, **kwargs)
             elif directory:
                 module = cls.init_with_directory(directory=directory, **kwargs)
         else:
@@ -81,7 +87,7 @@ class Module(object):
         if directory.endswith(os.sep):
             directory = directory[:-1]
 
-        # If module description file existed, try to load as ModuleV1
+        # If the module description file existed, try to load as ModuleV1
         desc_file = os.path.join(directory, 'module_desc.pb')
         if os.path.exists(desc_file):
             return ModuleV1.load(directory)
@@ -99,6 +105,15 @@ class Module(object):
             raise InvalidHubModule(directory)
 
         user_module_cls.directory = directory
+
+        source_info_file = os.path.join(directory, '_source_info.yaml')
+        if os.path.exists(source_info_file):
+            info = parser.yaml_parser.parse(source_info_file)
+            user_module_cls.source = info.get('source', '')
+            user_module_cls.branch = info.get('branch', '')
+        else:
+            user_module_cls.source = ''
+            user_module_cls.branch = ''
         return user_module_cls
 
     @classmethod
@@ -128,14 +143,20 @@ class Module(object):
                 raise InvalidHubModule(directory)
 
     @classmethod
-    def init_with_name(cls, name: str, version: str = None, **kwargs):
+    def init_with_name(cls,
+                       name: str,
+                       version: str = None,
+                       source: str = None,
+                       update: bool = False,
+                       branch: str = None,
+                       **kwargs):
         '''
         '''
         from paddlehub.module.manager import LocalModuleManager
         manager = LocalModuleManager()
-        user_module_cls = manager.search(name)
+        user_module_cls = manager.search(name, source=source, branch=branch)
         if not user_module_cls or not user_module_cls.version.match(version):
-            user_module_cls = manager.install(name=name, version=version)
+            user_module_cls = manager.install(name=name, version=version, source=source, update=update, branch=branch)
 
         directory = manager._get_normalized_path(user_module_cls.name)
 

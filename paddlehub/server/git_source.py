@@ -19,14 +19,13 @@ import os
 import sys
 from collections import OrderedDict
 from typing import List
-from urllib.parse import urlparse
 
 import git
 from git import Repo
 
-from paddlehub.module.module import Module as HubModule
+from paddlehub.module.module import RunModule
 from paddlehub.env import SOURCES_HOME
-from paddlehub.utils import log
+from paddlehub.utils import log, utils
 
 
 class GitSource(object):
@@ -40,9 +39,8 @@ class GitSource(object):
 
     def __init__(self, url: str, path: str = None):
         self.url = url
-        self._parse_result = urlparse(self.url)
+        self.path = os.path.join(SOURCES_HOME, utils.md5(url))
 
-        self.path = os.path.join(SOURCES_HOME, self._parse_result.path[1:])
         if self.path.endswith('.git'):
             self.path = self.path[:-4]
 
@@ -56,8 +54,21 @@ class GitSource(object):
         self.hub_modules = OrderedDict()
         self.load_hub_modules()
 
+    def checkout(self, branch: str):
+        try:
+            self.repo.git.checkout(branch)
+            # reload modules
+            self.load_hub_modules()
+        except:
+            log.logger.warning('An error occurred while checkout {}'.format(self.path))
+
     def update(self):
-        self.repo.remote().pull()
+        try:
+            self.repo.remote().pull(self.repo.branches[0])
+            # reload modules
+            self.load_hub_modules()
+        except:
+            log.logger.warning('An error occurred while update {}'.format(self.path))
 
     def load_hub_modules(self):
         if 'hubconf' in sys.modules:
@@ -68,11 +79,12 @@ class GitSource(object):
             py_module = importlib.import_module('hubconf')
             for _item, _cls in inspect.getmembers(py_module, inspect.isclass):
                 _item = py_module.__dict__[_item]
-                if issubclass(_item, HubModule):
+                if issubclass(_item, RunModule):
                     self.hub_modules[_item.name] = _item
         except:
-            raise
+            self.hub_modules = OrderedDict()
             log.logger.warning('An error occurred while loading {}'.format(self.path))
+
         sys.path.remove(self.path)
 
     def search_module(self, name: str, version: str = None) -> List[dict]:

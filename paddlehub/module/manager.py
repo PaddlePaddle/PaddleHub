@@ -150,7 +150,9 @@ class LocalModuleManager(object):
                 archive: str = None,
                 url: str = None,
                 version: str = None,
-                source: str = None) -> HubModule:
+                source: str = None,
+                update: bool = False,
+                branch: str = None) -> HubModule:
         '''
         Install a HubModule from name or directory or archive file or url. When installing with the name parameter, if a
         module that meets the conditions (both name and version) already installed, the installation step will be
@@ -167,7 +169,7 @@ class LocalModuleManager(object):
         if name:
             lock = filelock.FileLock(os.path.join(TMP_HOME, name))
             with lock:
-                hub_module_cls = self.search(name)
+                hub_module_cls = self.search(name, source, branch)
                 if hub_module_cls and hub_module_cls.version.match(version):
                     directory = self._get_normalized_path(hub_module_cls.name)
                     if version:
@@ -177,7 +179,9 @@ class LocalModuleManager(object):
                         msg = 'Module {} already installed in {}'.format(hub_module_cls.name, directory)
                     log.logger.info(msg)
                     return hub_module_cls
-                return self._install_from_name(name, version, source)
+                if source:
+                    return self._install_from_source(name, version, source, update, branch)
+                return self._install_from_name(name, version)
         elif directory:
             return self._install_from_directory(directory)
         elif archive:
@@ -201,19 +205,30 @@ class LocalModuleManager(object):
             log.logger.info('Successfully uninstalled {}'.format(name))
         return True
 
-    def search(self, name: str) -> HubModule:
+    def search(self, name: str, source: str = None, branch: str = None) -> HubModule:
         '''Return HubModule If a HubModule with a specific name is found, otherwise None.'''
-        if name in self._local_modules:
-            return self._local_modules[name]
+        module = None
 
-        module_dir = self._get_normalized_path(name)
-        if os.path.exists(module_dir):
-            try:
-                self._local_modules[name] = HubModule.load(module_dir)
-                return self._local_modules[name]
-            except:
-                log.logger.warning('An error was encountered while loading {}'.format(name))
-        return None
+        if name in self._local_modules:
+            module = self._local_modules[name]
+        else:
+            module_dir = self._get_normalized_path(name)
+            if os.path.exists(module_dir):
+                try:
+                    module = self._local_modules[name] = HubModule.load(module_dir)
+                except:
+                    log.logger.warning('An error was encountered while loading {}'.format(name))
+
+        if not module:
+            return None
+
+        if source and source != module.source:
+            return None
+
+        if branch and branch != module.branch:
+            return None
+
+        return module
 
     def list(self) -> List[HubModule]:
         '''List all installed HubModule.'''
@@ -231,23 +246,17 @@ class LocalModuleManager(object):
 
             return self._install_from_archive(file)
 
-    def _install_from_name(self, name: str, version: str = None, source: str = None) -> HubModule:
+    def _install_from_name(self, name: str, version: str = None) -> HubModule:
         '''Install HubModule by name search result'''
-        if name in self._local_modules:
-            if self._local_modules[name].version.match(version):
-                return self._local_modules[name]
-
-        result = module_server.search_module(name=name, version=version, source=source)
+        result = module_server.search_module(name=name, version=version)
         for item in result:
             if name.lower() == item['name'].lower() and utils.Version(item['version']).match(version):
-                if source or 'source' in item:
-                    return self._install_from_source(result)
                 return self._install_from_url(item['url'])
 
-        module_infos = module_server.get_module_info(name=name, source=source)
+        module_infos = module_server.get_module_info(name=name)
         # The HubModule with the specified name cannot be found
         if not module_infos:
-            raise HubModuleNotFoundError(name=name, version=version, source=source)
+            raise HubModuleNotFoundError(name=name, version=version)
 
         valid_infos = {}
         if version:
@@ -260,29 +269,43 @@ class LocalModuleManager(object):
         # Cannot find a HubModule that meets the version
         if valid_infos:
             raise EnvironmentMismatchError(name=name, info=valid_infos, version=version)
-        raise HubModuleNotFoundError(name=name, info=module_infos, version=version, source=source)
+        raise HubModuleNotFoundError(name=name, info=module_infos, version=version)
 
-    def _install_from_source(self, source: str) -> HubModule:
+    def _install_from_source(self, name: str, version: str, source: str, update: bool = False,
+                             branch: str = None) -> HubModule:
         '''Install a HubModule from Git Repo'''
-        name = source['name']
-        cls_name = source['class']
-        path = source['path']
-        # uninstall local module
-        if self.search(name):
-            self.uninstall(name)
+        result = module_server.search_module(name=name, source=source, version=version, update=update, branch=branch)
+        for item in result:
+            if item['name'] == name and item['version'].match(version):
 
-        os.makedirs(self._get_normalized_path(name))
-        module_file = os.path.join(self._get_normalized_path(name), 'module.py')
+                # uninstall local module
+                if self.search(name):
+                    self.uninstall(name)
 
-        # Generate a module.py file to reference objects from Git Repo
-        with open(module_file, 'w') as file:
-            file.write('import sys\n\n')
-            file.write('sys.path.insert(0, \'{}\')\n'.format(path))
-            file.write('from hubconf import {}\n'.format(cls_name))
-            file.write('sys.path.pop(0)\n')
+                installed_path = self._get_normalized_path(name)
+                if not os.path.exists(installed_path):
+                    os.makedirs(installed_path)
+                module_file = os.path.join(installed_path, 'module.py')
 
-        self._local_modules[name] = HubModule.load(self._get_normalized_path(name))
-        return self._local_modules[name]
+                # Generate a module.py file to reference objects from Git Repo
+                with open(module_file, 'w') as file:
+                    file.write('import sys\n\n')
+                    file.write('sys.path.insert(0, \'{}\')\n'.format(item['path']))
+                    file.write('from hubconf import {}\n'.format(item['class']))
+                    file.write('sys.path.pop(0)\n')
+
+                source_info_file = os.path.join(installed_path, '_source_info.yaml')
+                with open(source_info_file, 'w') as file:
+                    file.write('source: {}\n'.format(source))
+                    file.write('branch: {}'.format(branch))
+
+                self._local_modules[name] = HubModule.load(installed_path)
+                if version:
+                    log.logger.info('Successfully installed {}-{}'.format(name, version))
+                else:
+                    log.logger.info('Successfully installed {}'.format(name))
+                return self._local_modules[name]
+        raise HubModuleNotFoundError(name=name, version=version, source=source)
 
     def _install_from_directory(self, directory: str) -> HubModule:
         '''Install a HubModule from directory containing module.py'''
