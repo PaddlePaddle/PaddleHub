@@ -96,11 +96,11 @@ class DepthwiseSeparable(nn.Layer):
         return y
 
 
-@moduleinfo(name="mobilenet_v1_imagenet",
+@moduleinfo(name="mobilenet_v1_imagenet_ssld",
             type="cv/classification",
             author="paddlepaddle",
             author_email="",
-            summary="mobilenet_v1_imagenet is a classification model, "
+            summary="mobilenet_v1_imagenet_ssld is a classification model, "
             "this module is trained with Imagenet dataset.",
             version="1.1.0",
             meta=ImageClassifierModule)
@@ -222,10 +222,10 @@ class MobileNetV1(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(self.directory, 'mobilenet_v1_imagenet.pdparams')
+            checkpoint = os.path.join(self.directory, 'mobilenet_v1_ssld_imagenet.pdparams')
             if not os.path.exists(checkpoint):
                 os.system(
-                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/mobilenet_v1_imagenet.pdparams -O '
+                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/mobilenet_v1_ssld_imagenet.pdparams -O '
                     + checkpoint)
             model_dict = paddle.load(checkpoint)[0]
             self.set_dict(model_dict)
