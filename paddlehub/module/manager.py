@@ -234,7 +234,11 @@ class LocalModuleManager(object):
         '''List all installed HubModule.'''
         for subdir in os.listdir(self.home):
             fulldir = os.path.join(self.home, subdir)
-            self._local_modules[subdir] = HubModule.load(fulldir)
+            try:
+                self._local_modules[subdir] = HubModule.load(fulldir)
+            except:
+                log.logger.warning('An error was encountered while loading {}'.format(subdir))
+
         return [module for module in self._local_modules.values()]
 
     def _install_from_url(self, url: str) -> HubModule:

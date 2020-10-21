@@ -180,6 +180,14 @@ class ModuleV1(object):
     @classmethod
     def load(cls, directory: str) -> EasyDict:
         module_info = cls.load_module_info(directory)
+
+        # Generate a uuid based on the class information, and dynamically create a new type.
+        # If we do not do this, the information generated later will overwrite the information
+        # previously generated.
+        cls_uuid = utils.md5(module_info.name + module_info.author + module_info.author_email + module_info.type +
+                             module_info.summary + module_info.version + directory)
+        cls = type(cls_uuid, (cls, ), {})
+
         cls.name = module_info.name
         cls.author = module_info.author
         cls.author_email = module_info.author_email
