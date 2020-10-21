@@ -21,6 +21,7 @@ from string import Template
 
 from paddlehub.env import TMP_HOME as tmp_dir
 from paddlehub.commands import register
+from paddlehub.utils.xarfile import XarFile
 
 INIT_FILE = '__init__.py'
 MODULE_FILE = 'module.py'
@@ -32,8 +33,6 @@ TMPL_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'tmpl')
 class ConvertCommand:
     def __init__(self):
         super(ConvertCommand, self).__init__()
-        self.show_in_help = True
-        self.description = "Convert model to PaddleHub-Module."
         self.parser = argparse.ArgumentParser()
         self.parser.add_argument('command')
         self.parser.add_argument('--module_name', '-n')
@@ -45,17 +44,17 @@ class ConvertCommand:
         if not os.path.exists(self.dest):
             os.makedirs(self.dest)
         tar_file = os.path.join(self.dest, '{}.tar.gz'.format(self.module))
-        with tarfile.open(tar_file, 'w:gz') as tfp:
-            tfp.add(self.dest, recursive=False, arcname=self.module)
-            for root, dir, files in os.walk(self.src):
-                for file in files:
-                    fullpath = os.path.join(root, file)
-                    arcname = os.path.join(self.module, 'assets', file)
-                    tfp.add(fullpath, arcname=arcname)
+        tfp = XarFile(tar_file, 'w', 'tar.gz')
+        tfp.add(self.dest, recursive=False, arcname=self.module)
+        for root, dir, files in os.walk(self.src):
+            for file in files:
+                fullpath = os.path.join(root, file)
+                arcname = os.path.join(self.module, 'assets', file)
+                tfp.add(fullpath, arcname=arcname)
 
-            tfp.add(self.model_file, arcname=os.path.join(self.module, MODULE_FILE))
-            tfp.add(self.serving_file, arcname=os.path.join(self.module, SERVING_FILE))
-            tfp.add(self.init_file, arcname=os.path.join(self.module, INIT_FILE))
+        tfp.add(self.model_file, arcname=os.path.join(self.module, MODULE_FILE))
+        tfp.add(self.serving_file, arcname=os.path.join(self.module, SERVING_FILE))
+        tfp.add(self.init_file, arcname=os.path.join(self.module, INIT_FILE))
 
     def create_module_py(self):
         template_file = open(os.path.join(TMPL_DIR, 'x_model.tmpl'), 'r', encoding='utf-8')
