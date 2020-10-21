@@ -111,7 +111,7 @@ class ImageColorizeModule(RunModule, ImageServing):
             batch_idx(int): The index of batch.
 
         Returns:
-            results(dict) : The model outputs, such as loss and metrics.
+            results(dict): The model outputs, such as loss and metrics.
         '''
         return self.validation_step(batch, batch_idx)
 
@@ -126,29 +126,30 @@ class ImageColorizeModule(RunModule, ImageServing):
         Returns:
             results(dict) : The model outputs, such as metrics.
         '''
-        out_class, out_reg = self(batch[0], batch[1], batch[2])
+        img = self.preprocess(batch[0])
+        out_class, out_reg = self(img['A'], img['hint_B'], img['mask_B'])
 
+        # loss
         criterionCE = nn.loss.CrossEntropyLoss()
-        loss_ce = criterionCE(out_class, batch[4][:, 0, :, :])
-        loss_G_L1_reg = paddle.sum(paddle.abs(batch[3] - out_reg), axis=1, keepdim=True)
+        loss_ce = criterionCE(out_class, img['real_B_enc'][:, 0, :, :])
+        loss_G_L1_reg = paddle.sum(paddle.abs(img['B'] - out_reg), axis=1, keepdim=True)
         loss_G_L1_reg = paddle.mean(loss_G_L1_reg)
         loss = loss_ce + loss_G_L1_reg
 
+        #calculate psnr
         visual_ret = OrderedDict()
         psnrs = []
-        lab2rgb = T.ConvertColorSpace(mode='LAB2RGB')
+        lab2rgb = T.LAB2RGB()
         process = T.ColorPostprocess()
-
-        for i in range(batch[0].numpy().shape[0]):
-            real = lab2rgb(np.concatenate((batch[0].numpy(), batch[3].numpy()), axis=1))[i]
+        for i in range(img['A'].numpy().shape[0]):
+            real = lab2rgb(np.concatenate((img['A'].numpy(), img['B'].numpy()), axis=1))[i]
             visual_ret['real'] = process(real)
-            fake = lab2rgb(np.concatenate((batch[0].numpy(), out_reg.numpy()), axis=1))[i]
+            fake = lab2rgb(np.concatenate((img['A'].numpy(), out_reg.numpy()), axis=1))[i]
             visual_ret['fake_reg'] = process(fake)
             mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
             psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             psnrs.append(psnr_value)
         psnr = paddle.to_variable(np.array(psnrs))
-
         return {'loss': loss, 'metrics': {'psnr': psnr}}
 
     def predict(self, images: str, visualization: bool = True, save_path: str = 'result'):
@@ -163,23 +164,26 @@ class ImageColorizeModule(RunModule, ImageServing):
         Returns:
             results(list[dict]) : The prediction result of each input image
         '''
-        lab2rgb = T.ConvertColorSpace(mode='LAB2RGB')
+
+        lab2rgb = T.LAB2RGB()
         process = T.ColorPostprocess()
         resize = T.Resize((256, 256))
-        visual_ret = OrderedDict()
-        im = self.transforms(images, is_train=False)
-        out_class, out_reg = self(paddle.to_tensor(im['A']), paddle.to_variable(im['hint_B']),
-                                  paddle.to_variable(im['mask_B']))
-        result = []
 
+        im = self.transforms(images, is_train=False)
+        im = im[np.newaxis, :, :, :]
+        im = self.preprocess(im)
+        out_class, out_reg = self(im['A'], im['hint_B'], im['mask_B'])
+
+        result = []
+        visual_ret = OrderedDict()
         for i in range(im['A'].shape[0]):
-            gray = lab2rgb(np.concatenate((im['A'], np.zeros(im['B'].shape)), axis=1))[i]
+            gray = lab2rgb(np.concatenate((im['A'].numpy(), np.zeros(im['B'].shape)), axis=1))[i]
             visual_ret['gray'] = resize(process(gray))
-            hint = lab2rgb(np.concatenate((im['A'], im['hint_B']), axis=1))[i]
+            hint = lab2rgb(np.concatenate((im['A'].numpy(), im['hint_B'].numpy()), axis=1))[i]
             visual_ret['hint'] = resize(process(hint))
-            real = lab2rgb(np.concatenate((im['A'], im['B']), axis=1))[i]
+            real = lab2rgb(np.concatenate((im['A'].numpy(), im['B'].numpy()), axis=1))[i]
             visual_ret['real'] = resize(process(real))
-            fake = lab2rgb(np.concatenate((im['A'], out_reg.numpy()), axis=1))[i]
+            fake = lab2rgb(np.concatenate((im['A'].numpy(), out_reg.numpy()), axis=1))[i]
             visual_ret['fake_reg'] = resize(process(fake))
 
             if visualization:
@@ -232,16 +236,17 @@ class Yolov3Module(RunModule, ImageServing):
 
         for i, out in enumerate(outputs):
             anchor_mask = self.anchor_masks[i]
-            loss = F.yolov3_loss(x=out,
-                                 gt_box=gtbox,
-                                 gt_label=gtlabel,
-                                 gt_score=gtscore,
-                                 anchors=self.anchors,
-                                 anchor_mask=anchor_mask,
-                                 class_num=self.class_num,
-                                 ignore_thresh=self.ignore_thresh,
-                                 downsample_ratio=32,
-                                 use_label_smooth=False)
+            loss = F.yolov3_loss(
+                x=out,
+                gt_box=gtbox,
+                gt_label=gtlabel,
+                gt_score=gtscore,
+                anchors=self.anchors,
+                anchor_mask=anchor_mask,
+                class_num=self.class_num,
+                ignore_thresh=self.ignore_thresh,
+                downsample_ratio=32,
+                use_label_smooth=False)
             losses.append(paddle.reduce_mean(loss))
             self.downsample //= 2
 
@@ -280,13 +285,14 @@ class Yolov3Module(RunModule, ImageServing):
                 mask_anchors.append((self.anchors[2 * m]))
                 mask_anchors.append(self.anchors[2 * m + 1])
 
-            box, score = F.yolo_box(x=out,
-                                    img_size=im_shape,
-                                    anchors=mask_anchors,
-                                    class_num=self.class_num,
-                                    conf_thresh=self.valid_thresh,
-                                    downsample_ratio=self.downsample,
-                                    name="yolo_box" + str(i))
+            box, score = F.yolo_box(
+                x=out,
+                img_size=im_shape,
+                anchors=mask_anchors,
+                class_num=self.class_num,
+                conf_thresh=self.valid_thresh,
+                downsample_ratio=self.downsample,
+                name="yolo_box" + str(i))
 
             boxes.append(box)
             scores.append(paddle.transpose(score, perm=[0, 2, 1]))
@@ -295,13 +301,14 @@ class Yolov3Module(RunModule, ImageServing):
         yolo_boxes = paddle.concat(boxes, axis=1)
         yolo_scores = paddle.concat(scores, axis=2)
 
-        pred = F.multiclass_nms(bboxes=yolo_boxes,
-                                scores=yolo_scores,
-                                score_threshold=self.valid_thresh,
-                                nms_top_k=self.nms_topk,
-                                keep_top_k=self.nms_posk,
-                                nms_threshold=self.nms_thresh,
-                                background_label=-1)
+        pred = F.multiclass_nms(
+            bboxes=yolo_boxes,
+            scores=yolo_scores,
+            score_threshold=self.valid_thresh,
+            nms_top_k=self.nms_topk,
+            keep_top_k=self.nms_posk,
+            nms_threshold=self.nms_thresh,
+            background_label=-1)
 
         bboxes = pred.numpy()
         labels = bboxes[:, 0].astype('int32')
@@ -309,7 +316,9 @@ class Yolov3Module(RunModule, ImageServing):
         boxes = bboxes[:, 2:].astype('float32')
 
         if visualization:
-            Func.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5)
+            if not os.path.exists(save_path):
+                os.mkdir(save_path)
+            Func.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5, save_path)
 
         return boxes, scores, labels
 

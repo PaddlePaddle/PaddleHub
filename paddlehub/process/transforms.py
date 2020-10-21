@@ -382,7 +382,7 @@ class RandomDistort:
         saturation_upper = 1 + self.saturation_range
         hue_lower = -self.hue_range
         hue_upper = self.hue_range
-        ops = [brightness, contrast, saturation, hue]
+        ops = ['brightness', 'contrast', 'saturation', 'hue']
         random.shuffle(ops)
         params_dict = {
             'brightness': {
@@ -421,19 +421,10 @@ class RandomDistort:
         return im
 
 
-class ConvertColorSpace:
+class RGB2LAB:
     """
-    Convert color space from RGB to LAB or from LAB to RGB.
-
-    Args:
-       mode(str): Color space convert mode, it can be 'RGB2LAB' or 'LAB2RGB'.
-
-    Return:
-        img(np.ndarray): converted image.
+    Convert color space from RGB to LAB.
     """
-    def __init__(self, mode: str = 'RGB2LAB'):
-        self.mode = mode
-
     def rgb2xyz(self, rgb: np.ndarray) -> np.ndarray:
         """
         Convert color space from RGB to XYZ.
@@ -448,10 +439,10 @@ class ConvertColorSpace:
         np.seterr(invalid='ignore')
         rgb = (((rgb + .055) / 1.055)**2.4) * mask + rgb / 12.92 * (1 - mask)
         rgb = np.nan_to_num(rgb)
-        x = .412453 * rgb[:, 0, :, :] + .357580 * rgb[:, 1, :, :] + .180423 * rgb[:, 2, :, :]
-        y = .212671 * rgb[:, 0, :, :] + .715160 * rgb[:, 1, :, :] + .072169 * rgb[:, 2, :, :]
-        z = .019334 * rgb[:, 0, :, :] + .119193 * rgb[:, 1, :, :] + .950227 * rgb[:, 2, :, :]
-        out = np.concatenate((x[:, None, :, :], y[:, None, :, :], z[:, None, :, :]), axis=1)
+        x = .412453 * rgb[0, :, :] + .357580 * rgb[1, :, :] + .180423 * rgb[2, :, :]
+        y = .212671 * rgb[0, :, :] + .715160 * rgb[1, :, :] + .072169 * rgb[2, :, :]
+        z = .019334 * rgb[0, :, :] + .119193 * rgb[1, :, :] + .950227 * rgb[2, :, :]
+        out = np.concatenate((x[None, :, :], y[None, :, :], z[None, :, :]), axis=0)
         return out
 
     def xyz2lab(self, xyz: np.ndarray) -> np.ndarray:
@@ -464,14 +455,14 @@ class ConvertColorSpace:
         Return:
             img(np.ndarray): Converted LAB image.
         """
-        sc = np.array((0.95047, 1., 1.08883))[None, :, None, None]
+        sc = np.array((0.95047, 1., 1.08883))[:, None, None]
         xyz_scale = xyz / sc
         mask = (xyz_scale > .008856).astype(np.float32)
         xyz_int = np.cbrt(xyz_scale) * mask + (7.787 * xyz_scale + 16. / 116.) * (1 - mask)
-        L = 116. * xyz_int[:, 1, :, :] - 16.
-        a = 500. * (xyz_int[:, 0, :, :] - xyz_int[:, 1, :, :])
-        b = 200. * (xyz_int[:, 1, :, :] - xyz_int[:, 2, :, :])
-        out = np.concatenate((L[:, None, :, :], a[:, None, :, :], b[:, None, :, :]), axis=1)
+        L = 116. * xyz_int[1, :, :] - 16.
+        a = 500. * (xyz_int[0, :, :] - xyz_int[1, :, :])
+        b = 200. * (xyz_int[1, :, :] - xyz_int[2, :, :])
+        out = np.concatenate((L[None, :, :], a[None, :, :], b[None, :, :]), axis=0)
         return out
 
     def rgb2lab(self, rgb: np.ndarray) -> np.ndarray:
@@ -485,10 +476,23 @@ class ConvertColorSpace:
             img(np.ndarray): Converted LAB image.
         """
         lab = self.xyz2lab(self.rgb2xyz(rgb))
-        l_rs = (lab[:, [0], :, :] - 50) / 100
-        ab_rs = lab[:, 1:, :, :] / 110
-        out = np.concatenate((l_rs, ab_rs), axis=1)
+        l_rs = (lab[[0], :, :] - 50) / 100
+        ab_rs = lab[1:, :, :] / 110
+        out = np.concatenate((l_rs, ab_rs), axis=0)
         return out
+
+    def __call__(self, img: np.ndarray) -> np.ndarray:
+        img = img / 255
+        img = np.array(img).transpose(2, 0, 1)
+        return self.rgb2lab(img)
+
+
+class LAB2RGB:
+    """
+    Convert color space from LAB to RGB.
+    """
+    def __init__(self, mode: str = 'RGB2LAB'):
+        self.mode = mode
 
     def xyz2rgb(self, xyz: np.ndarray) -> np.ndarray:
         """
@@ -551,171 +555,7 @@ class ConvertColorSpace:
         return out
 
     def __call__(self, img: np.ndarray) -> np.ndarray:
-        if self.mode == 'RGB2LAB':
-            img = np.expand_dims(img / 255, 0)
-            img = np.array(img).transpose(0, 3, 1, 2)
-            return self.rgb2lab(img)
-        elif self.mode == 'LAB2RGB':
-            return self.lab2rgb(img)
-        else:
-            raise ValueError('The mode should be RGB2LAB or LAB2RGB')
-
-
-class ColorizeHint:
-    """Get hint and mask images for colorization.
-
-    This method is prepared for user guided colorization tasks. Take the original RGB images as imput, we will obtain the local hints and correspoding mask to guid colorization process.
-
-    Args:
-       percent(float): Probability for ignoring hint in an iteration.
-       num_points(int): Number of selected hints in an iteration.
-       samp(str): Sample method, default is normal.
-       use_avg(bool): Whether to use mean in selected hint area.
-
-    Return:
-        hint(np.ndarray): hint images
-        mask(np.ndarray): mask images
-    """
-    def __init__(self, percent: float, num_points: int = None, samp: str = 'normal', use_avg: bool = True):
-        self.percent = percent
-        self.num_points = num_points
-        self.samp = samp
-        self.use_avg = use_avg
-
-    def __call__(self, data: np.ndarray, hint: np.ndarray, mask: np.ndarray):
-        sample_Ps = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        self.data = data
-        self.hint = hint
-        self.mask = mask
-        N, C, H, W = data.shape
-        for nn in range(N):
-            pp = 0
-            cont_cond = True
-            while cont_cond:
-                if self.num_points is None:  # draw from geometric
-                    # embed()
-                    cont_cond = np.random.rand() > (1 - self.percent)
-                else:  # add certain number of points
-                    cont_cond = pp < self.num_points
-                if not cont_cond:  # skip out of loop if condition not met
-                    continue
-                P = np.random.choice(sample_Ps)  # patch size
-                # sample location
-                if self.samp == 'normal':  # geometric distribution
-                    h = int(np.clip(np.random.normal((H - P + 1) / 2., (H - P + 1) / 4.), 0, H - P))
-                    w = int(np.clip(np.random.normal((W - P + 1) / 2., (W - P + 1) / 4.), 0, W - P))
-                else:  # uniform distribution
-                    h = np.random.randint(H - P + 1)
-                    w = np.random.randint(W - P + 1)
-                # add color point
-                if self.use_avg:
-                    # embed()
-                    hint[nn, :, h:h + P, w:w + P] = np.mean(np.mean(data[nn, :, h:h + P, w:w + P],
-                                                                    axis=2,
-                                                                    keepdims=True),
-                                                            axis=1,
-                                                            keepdims=True).reshape(1, C, 1, 1)
-                else:
-                    hint[nn, :, h:h + P, w:w + P] = data[nn, :, h:h + P, w:w + P]
-                mask[nn, :, h:h + P, w:w + P] = 1
-                # increment counter
-                pp += 1
-
-        mask -= 0.5
-        return hint, mask
-
-
-class SqueezeAxis:
-    """
-    Squeeze the specific axis when it equal to 1.
-
-    Args:
-       axis(int): Which axis should be squeezed.
-
-    """
-    def __init__(self, axis: int):
-        self.axis = axis
-
-    def __call__(self, data: dict):
-        if isinstance(data, dict):
-            for key in data.keys():
-                data[key] = np.squeeze(data[key], 0).astype(np.float32)
-            return data
-        else:
-            raise TypeError("Type of data is invalid. Must be Dict or List or tuple, now is {}".format(type(data)))
-
-
-class ColorizePreprocess:
-    """Prepare dataset for image Colorization.
-
-    Args:
-       ab_thresh(float): Thresh value for setting mask value.
-       p(float): Probability for ignoring hint in an iteration.
-       num_points(int): Number of selected hints in an iteration.
-       samp(str): Sample method, default is normal.
-       use_avg(bool): Whether to use mean in selected hint area.
-       is_train(bool): Training process or not.
-
-    Return:
-        data(dict)：The preprocessed data for colorization.
-
-    """
-    def __init__(self,
-                 ab_thresh: float = 0.,
-                 p: float = 0.,
-                 num_points: int = None,
-                 samp: str = 'normal',
-                 use_avg: bool = True,
-                 is_train: bool = True):
-        self.ab_thresh = ab_thresh
-        self.p = p
-        self.num_points = num_points
-        self.samp = samp
-        self.use_avg = use_avg
-        self.is_train = is_train
-        self.gethint = ColorizeHint(percent=self.p, num_points=self.num_points, samp=self.samp, use_avg=self.use_avg)
-        self.squeeze = SqueezeAxis(0)
-
-    def __call__(self, data_lab: np.ndarray):
-        """
-        This method seperates the L channel and AB channel, obtain hint, mask and real_B_enc as the input for colorization task.
-
-        Args:
-           img(np.ndarray): LAB image.
-
-        Returns:
-            data(dict)：The preprocessed data for colorization.
-        """
-        data = {}
-        A = 2 * 110 / 10 + 1
-        data['A'] = data_lab[:, [
-            0,
-        ], :, :]
-        data['B'] = data_lab[:, 1:, :, :]
-        if self.ab_thresh > 0:  # mask out grayscale images
-            thresh = 1. * self.ab_thresh / 110
-            mask = np.sum(np.abs(np.max(np.max(data['B'], axis=3), axis=2) - np.min(np.min(data['B'], axis=3), axis=2)),
-                          axis=1)
-            mask = (mask >= thresh)
-            data['A'] = data['A'][mask, :, :, :]
-            data['B'] = data['B'][mask, :, :, :]
-            if np.sum(mask) == 0:
-                return None
-        data_ab_rs = np.round((data['B'][:, :, ::4, ::4] * 110. + 110.) / 10.)  # normalized bin number
-        data['real_B_enc'] = data_ab_rs[:, [0], :, :] * A + data_ab_rs[:, [1], :, :]
-        data['hint_B'] = np.zeros(shape=data['B'].shape)
-        data['mask_B'] = np.zeros(shape=data['A'].shape)
-        data['hint_B'], data['mask_B'] = self.gethint(data['B'], data['hint_B'], data['mask_B'])
-        if self.is_train:
-            data = self.squeeze(data)
-            data['real_B_enc'] = data['real_B_enc'].astype(np.int64)
-        else:
-            data['A'] = data['A'].astype(np.float32)
-            data['B'] = data['B'].astype(np.float32)
-            data['real_B_enc'] = data['real_B_enc'].astype(np.int64)
-            data['hint_B'] = data['hint_B'].astype(np.float32)
-            data['mask_B'] = data['mask_B'].astype(np.float32)
-        return data
+        return self.lab2rgb(img)
 
 
 class ColorPostprocess:
