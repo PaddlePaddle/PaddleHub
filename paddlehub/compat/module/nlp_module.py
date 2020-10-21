@@ -50,10 +50,10 @@ class NLPBaseModule(RunModule):
 class NLPPredictionModule(NLPBaseModule):
     def _set_config(self):
         '''predictor config setting'''
-        cpu_config = paddle.device.core.AnalysisConfig(self.pretrained_model_path)
+        cpu_config = paddle.fluid.core.AnalysisConfig(self.pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = paddle.device.core.create_paddle_predictor(cpu_config)
+        self.cpu_predictor = paddle.fluid.core.create_paddle_predictor(cpu_config)
 
         try:
             _places = os.environ['CUDA_VISIBLE_DEVICES']
@@ -62,10 +62,10 @@ class NLPPredictionModule(NLPBaseModule):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = paddle.device.core.AnalysisConfig(self.pretrained_model_path)
+            gpu_config = paddle.fluid.core.AnalysisConfig(self.pretrained_model_path)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
-            self.gpu_predictor = paddle.device.core.create_paddle_predictor(gpu_config)
+            self.gpu_predictor = paddle.fluid.core.create_paddle_predictor(gpu_config)
 
     def texts2tensor(self, texts: List[dict]) -> paddle.Tensor:
         '''
@@ -81,7 +81,7 @@ class NLPPredictionModule(NLPBaseModule):
         for i, text in enumerate(texts):
             data += text['processed']
             lod.append(len(text['processed']) + lod[i])
-        tensor = paddle.device.core.PaddleTensor(np.array(data).astype('int64'))
+        tensor = paddle.fluid.core.PaddleTensor(np.array(data).astype('int64'))
         tensor.name = 'words'
         tensor.lod = [lod]
         tensor.shape = [lod[-1], 1]

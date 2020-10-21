@@ -621,7 +621,7 @@ class BaseTask(object):
             self._eval_end_event(run_states)
             return run_states
 
-    def _create_predictor(self) -> paddle.device.core.PaddlePredictor:
+    def _create_predictor(self) -> paddle.fluid.core.PaddlePredictor:
         '''
         create high-performance predictor for predict.
         Returns:
@@ -629,7 +629,7 @@ class BaseTask(object):
         '''
         with generate_tempdir() as _dir:
             self.save_inference_model(dirname=_dir)
-            predictor_config = paddle.device.core.AnalysisConfig(_dir)
+            predictor_config = paddle.fluid.core.AnalysisConfig(_dir)
             predictor_config.disable_glog_info()
 
             if self.config.use_cuda:
@@ -638,7 +638,7 @@ class BaseTask(object):
             else:
                 predictor_config.disable_gpu()
             predictor_config.enable_memory_optim()
-            return paddle.device.core.create_paddle_predictor(predictor_config)
+            return paddle.fluid.core.create_paddle_predictor(predictor_config)
 
     def _run_with_predictor(self) -> List[RunState]:
         '''
@@ -671,7 +671,7 @@ class BaseTask(object):
             tensor_batch = [[] for i in range(len(self.feed_list))]
             for i in range(len(processed_batch)):
                 processed_batch[i] = np.array(processed_batch[i]).reshape(feed_var_shape[i]).astype(feed_var_type[i])
-                tensor_batch[i] = paddle.device.core.PaddleTensor(processed_batch[i])
+                tensor_batch[i] = paddle.fluid.core.PaddleTensor(processed_batch[i])
 
             fetch_result = self._predictor.run(tensor_batch)
             for index, result in enumerate(fetch_result):

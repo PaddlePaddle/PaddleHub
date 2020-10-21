@@ -21,20 +21,20 @@ import paddle
 from paddlehub.utils.utils import Version
 
 dtype_map = {
-    paddle.device.core.VarDesc.VarType.FP32: "float32",
-    paddle.device.core.VarDesc.VarType.FP64: "float64",
-    paddle.device.core.VarDesc.VarType.FP16: "float16",
-    paddle.device.core.VarDesc.VarType.INT32: "int32",
-    paddle.device.core.VarDesc.VarType.INT16: "int16",
-    paddle.device.core.VarDesc.VarType.INT64: "int64",
-    paddle.device.core.VarDesc.VarType.BOOL: "bool",
-    paddle.device.core.VarDesc.VarType.INT16: "int16",
-    paddle.device.core.VarDesc.VarType.UINT8: "uint8",
-    paddle.device.core.VarDesc.VarType.INT8: "int8",
+    paddle.fluid.core.VarDesc.VarType.FP32: "float32",
+    paddle.fluid.core.VarDesc.VarType.FP64: "float64",
+    paddle.fluid.core.VarDesc.VarType.FP16: "float16",
+    paddle.fluid.core.VarDesc.VarType.INT32: "int32",
+    paddle.fluid.core.VarDesc.VarType.INT16: "int16",
+    paddle.fluid.core.VarDesc.VarType.INT64: "int64",
+    paddle.fluid.core.VarDesc.VarType.BOOL: "bool",
+    paddle.fluid.core.VarDesc.VarType.INT16: "int16",
+    paddle.fluid.core.VarDesc.VarType.UINT8: "uint8",
+    paddle.fluid.core.VarDesc.VarType.INT8: "int8",
 }
 
 
-def convert_dtype_to_string(dtype: str) -> paddle.device.core.VarDesc.VarType:
+def convert_dtype_to_string(dtype: str) -> paddle.fluid.core.VarDesc.VarType:
     if dtype in dtype_map:
         return dtype_map[dtype]
     raise TypeError("dtype shoule in %s" % list(dtype_map.keys()))
