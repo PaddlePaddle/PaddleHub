@@ -16,6 +16,7 @@
 import os
 import shutil
 import sys
+import traceback
 from collections import OrderedDict
 from typing import List
 
@@ -216,8 +217,12 @@ class LocalModuleManager(object):
             if os.path.exists(module_dir):
                 try:
                     module = self._local_modules[name] = HubModule.load(module_dir)
-                except:
-                    log.logger.warning('An error was encountered while loading {}'.format(name))
+                except Exception as e:
+                    msg = traceback.format_exc()
+                    file = utils.record(msg)
+                    log.logger.warning(
+                        'An error was encountered while loading {}. Detailed error information can be found in the {}.'.
+                        format(name, file))
 
         if not module:
             return None
@@ -236,8 +241,12 @@ class LocalModuleManager(object):
             fulldir = os.path.join(self.home, subdir)
             try:
                 self._local_modules[subdir] = HubModule.load(fulldir)
-            except:
-                log.logger.warning('An error was encountered while loading {}'.format(subdir))
+            except Exception as e:
+                msg = traceback.format_exc()
+                file = utils.record(msg)
+                log.logger.warning(
+                    'An error was encountered while loading {}. Detailed error information can be found in the {}.'.
+                    format(subdir, file))
 
         return [module for module in self._local_modules.values()]
 

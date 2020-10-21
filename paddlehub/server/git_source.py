@@ -17,6 +17,7 @@ import inspect
 import importlib
 import os
 import sys
+import traceback
 from collections import OrderedDict
 from typing import List
 
@@ -67,8 +68,13 @@ class GitSource(object):
             self.repo.remote().pull(self.repo.branches[0])
             # reload modules
             self.load_hub_modules()
-        except:
-            log.logger.warning('An error occurred while update {}'.format(self.path))
+        except Exception as e:
+            self.hub_modules = OrderedDict()
+            msg = traceback.format_exc()
+            file = utils.record(msg)
+            log.logger.warning(
+                'An error occurred while update {}. Detailed error information can be found in the {}.'.format(
+                    self.path, file))
 
     def load_hub_modules(self):
         if 'hubconf' in sys.modules:
@@ -81,9 +87,13 @@ class GitSource(object):
                 _item = py_module.__dict__[_item]
                 if issubclass(_item, RunModule):
                     self.hub_modules[_item.name] = _item
-        except:
+        except Exception as e:
             self.hub_modules = OrderedDict()
-            log.logger.warning('An error occurred while loading {}'.format(self.path))
+            msg = traceback.format_exc()
+            file = utils.record(msg)
+            log.logger.warning(
+                'An error occurred while loading {}. Detailed error information can be found in the {}.'.format(
+                    self.path, file))
 
         sys.path.remove(self.path)
 

@@ -281,3 +281,16 @@ def md5(text: str):
     '''
     md5code = hashlib.md5(text.encode())
     return md5code.hexdigest()
+
+
+def record(msg: str) -> str:
+    '''
+    '''
+    logfile = os.path.join(hubenv.LOG_HOME, time.strftime('%Y%m%d.log'))
+    with open(logfile, 'a') as file:
+        file.write('=' * 50 + '\n')
+        file.write('Record at ' + time.strftime('%Y-%m-%d %H:%M:%S') + '\n')
+        file.write('=' * 50 + '\n')
+        file.write(str(msg) + '\n' * 3)
+
+    return logfile
