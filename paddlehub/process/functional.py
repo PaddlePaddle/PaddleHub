@@ -185,7 +185,8 @@ def draw_boxes_on_image(image_path: str,
                         scores: np.ndarray,
                         labels: np.ndarray,
                         label_names: list,
-                        score_thresh: float = 0.5):
+                        score_thresh: float = 0.5,
+                        save_path: str = 'result'):
     """Draw boxes on images."""
     image = np.array(Image.open(image_path))
     plt.figure()
@@ -206,25 +207,25 @@ def draw_boxes_on_image(image_path: str,
         x1, y1, x2, y2 = box[0], box[1], box[2], box[3]
         rect = plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, linewidth=2.0, edgecolor=colors[label])
         ax.add_patch(rect)
-        ax.text(x1,
-                y1,
-                '{} {:.4f}'.format(label_names[label], score),
-                verticalalignment='bottom',
-                horizontalalignment='left',
-                bbox={
-                    'facecolor': colors[label],
-                    'alpha': 0.5,
-                    'pad': 0
-                },
-                fontsize=8,
-                color='white')
+        ax.text(
+            x1,
+            y1,
+            '{} {:.4f}'.format(label_names[label], score),
+            verticalalignment='bottom',
+            horizontalalignment='left',
+            bbox={
+                'facecolor': colors[label],
+                'alpha': 0.5,
+                'pad': 0
+            },
+            fontsize=8,
+            color='white')
         print("\t {:15s} at {:25} score: {:.5f}".format(label_names[int(label)], str(list(map(int, list(box)))), score))
     image_name = image_name.replace('jpg', 'png')
     plt.axis('off')
     plt.gca().xaxis.set_major_locator(plt.NullLocator())
     plt.gca().yaxis.set_major_locator(plt.NullLocator())
-    plt.savefig("./output/{}".format(image_name), bbox_inches='tight', pad_inches=0.0)
-    print("Detect result save at ./output/{}\n".format(image_name))
+    plt.savefig("{}/{}".format(save_path, image_name), bbox_inches='tight', pad_inches=0.0)
     plt.cla()
     plt.close('all')
 
