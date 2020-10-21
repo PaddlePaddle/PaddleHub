@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import ast
+import builtins
 import inspect
 import importlib
 import os
@@ -253,9 +254,6 @@ class RunModule(object):
         return self._run_func != None
 
 
-sys_type = type
-
-
 def moduleinfo(name: str,
                version: str,
                author: str = None,
@@ -277,7 +275,7 @@ def moduleinfo(name: str,
                 _bases.append(_b)
             _bases.append(_meta)
             _bases = tuple(_bases)
-            wrap_cls = sys_type(cls.__name__, _bases, dict(cls.__dict__))
+            wrap_cls = builtins.type(cls.__name__, _bases, dict(cls.__dict__))
 
         wrap_cls.name = name
         wrap_cls.version = utils.Version(version)
