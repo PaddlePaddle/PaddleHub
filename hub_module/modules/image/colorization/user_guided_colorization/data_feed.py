@@ -95,7 +95,7 @@ class ColorizePreprocess:
         self.use_avg = use_avg
         self.gethint = ColorizeHint(percent=self.p, num_points=self.num_points, samp=self.samp, use_avg=self.use_avg)
 
-    def __call__(self, data_lab: (np.ndarray | paddle.Tensor)):
+    def __call__(self, data_lab):
         """
         This method seperates the L channel and AB channel, obtain hint, mask and real_B_enc as the input for colorization task.
 
