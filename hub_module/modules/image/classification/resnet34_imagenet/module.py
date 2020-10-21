@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import os
 import math
 
@@ -27,21 +28,16 @@ from paddlehub.module.cv_module import ImageClassifierModule
 
 class ConvBNLayer(nn.Layer):
     """Basic conv bn layer."""
-    def __init__(
-        self,
-        num_channels: int,
-        num_filters: int,
-        filter_size: int,
-        stride: int = 1,
-        groups: int = 1,
-        is_vd_mode: bool = False,
-        act: str = None,
-        name: str = None,
-    ):
+    def __init__(self,
+                 num_channels: int,
+                 num_filters: int,
+                 filter_size: int,
+                 stride: int = 1,
+                 groups: int = 1,
+                 act: str = None,
+                 name: str = None):
         super(ConvBNLayer, self).__init__()
 
-        self.is_vd_mode = is_vd_mode
-        self._pool2d_avg = AvgPool2d(kernel_size=2, stride=2, padding=0, ceil_mode=True)
         self._conv = Conv2d(in_channels=num_channels,
                             out_channels=num_filters,
                             kernel_size=filter_size,
@@ -56,40 +52,32 @@ class ConvBNLayer(nn.Layer):
             bn_name = "bn" + name[3:]
         self._batch_norm = BatchNorm(num_filters,
                                      act=act,
-                                     param_attr=ParamAttr(name=bn_name + '_scale'),
-                                     bias_attr=ParamAttr(bn_name + '_offset'),
-                                     moving_mean_name=bn_name + '_mean',
-                                     moving_variance_name=bn_name + '_variance')
+                                     param_attr=ParamAttr(name=bn_name + "_scale"),
+                                     bias_attr=ParamAttr(bn_name + "_offset"),
+                                     moving_mean_name=bn_name + "_mean",
+                                     moving_variance_name=bn_name + "_variance")
 
     def forward(self, inputs: paddle.Tensor):
-        if self.is_vd_mode:
-            inputs = self._pool2d_avg(inputs)
         y = self._conv(inputs)
         y = self._batch_norm(y)
         return y
 
 
 class BottleneckBlock(nn.Layer):
-    """Bottleneck Block for ResNet18_vd."""
-    def __init__(self,
-                 num_channels: int,
-                 num_filters: int,
-                 stride: int,
-                 shortcut: bool = True,
-                 if_first: bool = False,
-                 name: str = None):
+    """Bottleneck Block for ResNet34."""
+    def __init__(self, num_channels: int, num_filters: int, stride: int, shortcut: bool = True, name: str = None):
         super(BottleneckBlock, self).__init__()
 
         self.conv0 = ConvBNLayer(num_channels=num_channels,
                                  num_filters=num_filters,
                                  filter_size=1,
-                                 act='relu',
+                                 act="relu",
                                  name=name + "_branch2a")
         self.conv1 = ConvBNLayer(num_channels=num_filters,
                                  num_filters=num_filters,
                                  filter_size=3,
                                  stride=stride,
-                                 act='relu',
+                                 act="relu",
                                  name=name + "_branch2b")
         self.conv2 = ConvBNLayer(num_channels=num_filters,
                                  num_filters=num_filters * 4,
@@ -101,11 +89,12 @@ class BottleneckBlock(nn.Layer):
             self.short = ConvBNLayer(num_channels=num_channels,
                                      num_filters=num_filters * 4,
                                      filter_size=1,
-                                     stride=1,
-                                     is_vd_mode=False if if_first else True,
+                                     stride=stride,
                                      name=name + "_branch1")
 
         self.shortcut = shortcut
+
+        self._num_channels_out = num_filters * 4
 
     def forward(self, inputs: paddle.Tensor):
         y = self.conv0(inputs)
@@ -116,26 +105,21 @@ class BottleneckBlock(nn.Layer):
             short = inputs
         else:
             short = self.short(inputs)
-        y = paddle.elementwise_add(x=short, y=conv2, act='relu')
+
+        y = paddle.elementwise_add(x=short, y=conv2, act="relu")
         return y
 
 
 class BasicBlock(nn.Layer):
-    """Basic block for ResNet18_vd."""
-    def __init__(self,
-                 num_channels: int,
-                 num_filters: int,
-                 stride: int,
-                 shortcut: bool = True,
-                 if_first: bool = False,
-                 name: str = None):
+    """Basic block for ResNet34."""
+    def __init__(self, num_channels: int, num_filters: int, stride: int, shortcut: bool = True, name: str = None):
         super(BasicBlock, self).__init__()
         self.stride = stride
         self.conv0 = ConvBNLayer(num_channels=num_channels,
                                  num_filters=num_filters,
                                  filter_size=3,
                                  stride=stride,
-                                 act='relu',
+                                 act="relu",
                                  name=name + "_branch2a")
         self.conv1 = ConvBNLayer(num_channels=num_filters,
                                  num_filters=num_filters,
@@ -147,8 +131,7 @@ class BasicBlock(nn.Layer):
             self.short = ConvBNLayer(num_channels=num_channels,
                                      num_filters=num_filters,
                                      filter_size=1,
-                                     stride=1,
-                                     is_vd_mode=False if if_first else True,
+                                     stride=stride,
                                      name=name + "_branch1")
 
         self.shortcut = shortcut
@@ -161,31 +144,29 @@ class BasicBlock(nn.Layer):
             short = inputs
         else:
             short = self.short(inputs)
-        y = paddle.elementwise_add(x=short, y=conv1, act='relu')
+        y = paddle.elementwise_add(x=short, y=conv1, act="relu")
         return y
 
 
-@moduleinfo(name="resnet18_vd_imagenet",
+@moduleinfo(name="resnet34_imagenet",
             type="CV/classification",
             author="paddlepaddle",
             author_email="",
-            summary="resnet18_vd_imagenet is a classification model, "
+            summary="resnet34_imagenet is a classification model, "
             "this module is trained with Baidu open sourced dataset.",
             version="1.1.0",
             meta=ImageClassifierModule)
-class ResNet18_vd(nn.Layer):
-    """ResNet18_vd model."""
+class ResNet34(nn.Layer):
+    """ResNet34 model."""
     def __init__(self, class_dim: int = 1000, load_checkpoint: str = None):
-        super(ResNet18_vd, self).__init__()
+        super(ResNet34, self).__init__()
 
-        self.layers = 18
-        depth = [2, 2, 2, 2]
+        self.layers = 34
+        depth = [3, 4, 6, 3]
         num_channels = [64, 64, 128, 256]
         num_filters = [64, 128, 256, 512]
 
-        self.conv1_1 = ConvBNLayer(num_channels=3, num_filters=32, filter_size=3, stride=2, act='relu', name="conv1_1")
-        self.conv1_2 = ConvBNLayer(num_channels=32, num_filters=32, filter_size=3, stride=1, act='relu', name="conv1_2")
-        self.conv1_3 = ConvBNLayer(num_channels=32, num_filters=64, filter_size=3, stride=1, act='relu', name="conv1_3")
+        self.conv = ConvBNLayer(num_channels=3, num_filters=64, filter_size=7, stride=2, act="relu", name="conv1")
         self.pool2d_max = MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         self.block_list = []
@@ -195,18 +176,19 @@ class ResNet18_vd(nn.Layer):
             for i in range(depth[block]):
                 conv_name = "res" + str(block + 2) + chr(97 + i)
                 basic_block = self.add_sublayer(
-                    'bb_%d_%d' % (block, i),
+                    conv_name,
                     BasicBlock(num_channels=num_channels[block] if i == 0 else num_filters[block],
                                num_filters=num_filters[block],
                                stride=2 if i == 0 and block != 0 else 1,
                                shortcut=shortcut,
-                               if_first=block == i == 0,
                                name=conv_name))
                 self.block_list.append(basic_block)
                 shortcut = True
 
         self.pool2d_avg = AdaptiveAvgPool2d(1)
+
         self.pool2d_avg_channels = num_channels[-1] * 2
+
         stdv = 1.0 / math.sqrt(self.pool2d_avg_channels * 1.0)
 
         self.out = Linear(self.pool2d_avg_channels,
@@ -220,19 +202,17 @@ class ResNet18_vd(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(self.directory, 'resnet18_vd_imagenet.pdparams')
+            checkpoint = os.path.join(self.directory, 'resnet34_imagenet.pdparams')
             if not os.path.exists(checkpoint):
                 os.system(
-                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/resnet18_vd_imagenet.pdparams -O '
-                    + checkpoint)
+                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/resnet34_imagenet.pdparams -O ' +
+                    checkpoint)
             model_dict = paddle.load(checkpoint)[0]
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
 
     def forward(self, inputs: paddle.Tensor):
-        y = self.conv1_1(inputs)
-        y = self.conv1_2(y)
-        y = self.conv1_3(y)
+        y = self.conv(inputs)
         y = self.pool2d_max(y)
         for block in self.block_list:
             y = block(y)

@@ -70,7 +70,7 @@ class ConvBNLayer(nn.Layer):
 
 
 class BottleneckBlock(nn.Layer):
-    """Bottleneck Block for ResNet18_vd."""
+    """Bottleneck Block for ResNet101_vd."""
     def __init__(self,
                  num_channels: int,
                  num_filters: int,
@@ -121,7 +121,7 @@ class BottleneckBlock(nn.Layer):
 
 
 class BasicBlock(nn.Layer):
-    """Basic block for ResNet18_vd."""
+    """Basic block for ResNet101_vd."""
     def __init__(self,
                  num_channels: int,
                  num_filters: int,
@@ -165,22 +165,23 @@ class BasicBlock(nn.Layer):
         return y
 
 
-@moduleinfo(name="resnet18_vd_imagenet",
+@moduleinfo(name="resnet101_vd_imagenet_ssld",
             type="CV/classification",
             author="paddlepaddle",
             author_email="",
-            summary="resnet18_vd_imagenet is a classification model, "
-            "this module is trained with Baidu open sourced dataset.",
+            summary="resnet101_vd_imagenet_ssld is a classification model, "
+            "this module is trained with Imagenet dataset.",
             version="1.1.0",
             meta=ImageClassifierModule)
-class ResNet18_vd(nn.Layer):
-    """ResNet18_vd model."""
+class ResNet101_vd(nn.Layer):
+    """ResNet101_vd model."""
     def __init__(self, class_dim: int = 1000, load_checkpoint: str = None):
-        super(ResNet18_vd, self).__init__()
+        super(ResNet101_vd, self).__init__()
 
-        self.layers = 18
-        depth = [2, 2, 2, 2]
-        num_channels = [64, 64, 128, 256]
+        self.layers = 101
+
+        depth = [3, 4, 23, 3]
+        num_channels = [64, 256, 512, 1024]
         num_filters = [64, 128, 256, 512]
 
         self.conv1_1 = ConvBNLayer(num_channels=3, num_filters=32, filter_size=3, stride=2, act='relu', name="conv1_1")
@@ -193,16 +194,23 @@ class ResNet18_vd(nn.Layer):
         for block in range(len(depth)):
             shortcut = False
             for i in range(depth[block]):
-                conv_name = "res" + str(block + 2) + chr(97 + i)
-                basic_block = self.add_sublayer(
+                if block == 2:
+                    if i == 0:
+                        conv_name = "res" + str(block + 2) + "a"
+                    else:
+                        conv_name = "res" + str(block + 2) + "b" + str(i)
+                else:
+                    conv_name = "res" + str(block + 2) + chr(97 + i)
+
+                bottleneck_block = self.add_sublayer(
                     'bb_%d_%d' % (block, i),
-                    BasicBlock(num_channels=num_channels[block] if i == 0 else num_filters[block],
-                               num_filters=num_filters[block],
-                               stride=2 if i == 0 and block != 0 else 1,
-                               shortcut=shortcut,
-                               if_first=block == i == 0,
-                               name=conv_name))
-                self.block_list.append(basic_block)
+                    BottleneckBlock(num_channels=num_channels[block] if i == 0 else num_filters[block] * 4,
+                                    num_filters=num_filters[block],
+                                    stride=2 if i == 0 and block != 0 else 1,
+                                    shortcut=shortcut,
+                                    if_first=block == i == 0,
+                                    name=conv_name))
+                self.block_list.append(bottleneck_block)
                 shortcut = True
 
         self.pool2d_avg = AdaptiveAvgPool2d(1)
@@ -220,10 +228,10 @@ class ResNet18_vd(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(self.directory, 'resnet18_vd_imagenet.pdparams')
+            checkpoint = os.path.join(self.directory, 'resnet101_vd_ssld_imagenet.pdparams')
             if not os.path.exists(checkpoint):
                 os.system(
-                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/resnet18_vd_imagenet.pdparams -O '
+                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/resnet101_vd_ssld_imagenet.pdparams -O '
                     + checkpoint)
             model_dict = paddle.load(checkpoint)[0]
             self.set_dict(model_dict)

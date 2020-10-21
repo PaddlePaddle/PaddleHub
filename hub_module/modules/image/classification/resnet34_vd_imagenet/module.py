@@ -70,7 +70,7 @@ class ConvBNLayer(nn.Layer):
 
 
 class BottleneckBlock(nn.Layer):
-    """Bottleneck Block for ResNet18_vd."""
+    """Bottleneck Block for ResNet34_vd."""
     def __init__(self,
                  num_channels: int,
                  num_filters: int,
@@ -121,7 +121,7 @@ class BottleneckBlock(nn.Layer):
 
 
 class BasicBlock(nn.Layer):
-    """Basic block for ResNet18_vd."""
+    """Basic block for ResNet34_vd."""
     def __init__(self,
                  num_channels: int,
                  num_filters: int,
@@ -165,21 +165,21 @@ class BasicBlock(nn.Layer):
         return y
 
 
-@moduleinfo(name="resnet18_vd_imagenet",
+@moduleinfo(name="resnet34_vd_imagenet",
             type="CV/classification",
             author="paddlepaddle",
             author_email="",
-            summary="resnet18_vd_imagenet is a classification model, "
+            summary="resnet34_vd_imagenet is a classification model, "
             "this module is trained with Baidu open sourced dataset.",
             version="1.1.0",
             meta=ImageClassifierModule)
-class ResNet18_vd(nn.Layer):
-    """ResNet18_vd model."""
+class ResNet34_vd(nn.Layer):
+    """ResNet34_vd model."""
     def __init__(self, class_dim: int = 1000, load_checkpoint: str = None):
-        super(ResNet18_vd, self).__init__()
+        super(ResNet34_vd, self).__init__()
 
-        self.layers = 18
-        depth = [2, 2, 2, 2]
+        self.layers = 34
+        depth = [3, 4, 6, 3]
         num_channels = [64, 64, 128, 256]
         num_filters = [64, 128, 256, 512]
 
@@ -220,10 +220,10 @@ class ResNet18_vd(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(self.directory, 'resnet18_vd_imagenet.pdparams')
+            checkpoint = os.path.join(self.directory, 'resnet34_vd_imagenet.pdparams')
             if not os.path.exists(checkpoint):
                 os.system(
-                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/resnet18_vd_imagenet.pdparams -O '
+                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/resnet34_vd_imagenet.pdparams -O '
                     + checkpoint)
             model_dict = paddle.load(checkpoint)[0]
             self.set_dict(model_dict)
