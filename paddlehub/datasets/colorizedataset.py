@@ -14,15 +14,17 @@
 # limitations under the License.
 
 import os
+from typing import Callable
 
 import numpy as np
 import paddle
 
 from paddlehub.process.functional import get_img_file
 from paddlehub.env import DATA_HOME
-from typing import Callable
+from paddlehub.utils.download import download_data
 
 
+@download_data(name='canvas', url='https://paddlehub.bj.bcebos.com/dygraph/datasets/canvas.tar.gz')
 class Colorizedataset(paddle.io.Dataset):
     """
     Dataset for colorization.
@@ -34,6 +36,7 @@ class Colorizedataset(paddle.io.Dataset):
     Returns:
         DataSet: An iterable object for data iterating
     """
+
     def __init__(self, transform: Callable, mode: str = 'train'):
         self.mode = mode
         self.transform = transform

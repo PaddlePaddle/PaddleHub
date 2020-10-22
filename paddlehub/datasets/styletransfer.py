@@ -19,8 +19,10 @@ from typing import Callable
 import paddle
 from paddlehub.process.functional import get_img_file
 from paddlehub.env import DATA_HOME
+from paddlehub.utils.download import download_data
 
 
+@download_data(name='minicoco', url='https://paddlehub.bj.bcebos.com/dygraph/datasets/minicoco.tar.gz')
 class StyleTransferData(paddle.io.Dataset):
     """
     Dataset for Style transfer.
@@ -32,6 +34,7 @@ class StyleTransferData(paddle.io.Dataset):
     Returns:
         DataSet: An iterable object for data iterating
     """
+
     def __init__(self, transform: Callable, mode: str = 'train'):
         self.mode = mode
         self.transform = transform
