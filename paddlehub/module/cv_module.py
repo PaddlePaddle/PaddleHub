@@ -187,11 +187,14 @@ class ImageColorizeModule(RunModule, ImageServing):
             visual_ret['fake_reg'] = resize(process(fake))
 
             if visualization:
+                img = Image.open(images)
+                w, h = img.size[0], img.size[1]
                 fake_name = "fake_" + str(time.time()) + ".png"
                 if not os.path.exists(save_path):
                     os.mkdir(save_path)
                 fake_path = os.path.join(save_path, fake_name)
                 visual_gray = Image.fromarray(visual_ret['fake_reg'])
+                visual_gray = visual_gray.resize((w, h), Image.BILINEAR)
                 visual_gray.save(fake_path)
 
             mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
@@ -236,17 +239,16 @@ class Yolov3Module(RunModule, ImageServing):
 
         for i, out in enumerate(outputs):
             anchor_mask = self.anchor_masks[i]
-            loss = F.yolov3_loss(
-                x=out,
-                gt_box=gtbox,
-                gt_label=gtlabel,
-                gt_score=gtscore,
-                anchors=self.anchors,
-                anchor_mask=anchor_mask,
-                class_num=self.class_num,
-                ignore_thresh=self.ignore_thresh,
-                downsample_ratio=32,
-                use_label_smooth=False)
+            loss = F.yolov3_loss(x=out,
+                                 gt_box=gtbox,
+                                 gt_label=gtlabel,
+                                 gt_score=gtscore,
+                                 anchors=self.anchors,
+                                 anchor_mask=anchor_mask,
+                                 class_num=self.class_num,
+                                 ignore_thresh=self.ignore_thresh,
+                                 downsample_ratio=32,
+                                 use_label_smooth=False)
             losses.append(paddle.reduce_mean(loss))
             self.downsample //= 2
 
@@ -285,14 +287,13 @@ class Yolov3Module(RunModule, ImageServing):
                 mask_anchors.append((self.anchors[2 * m]))
                 mask_anchors.append(self.anchors[2 * m + 1])
 
-            box, score = F.yolo_box(
-                x=out,
-                img_size=im_shape,
-                anchors=mask_anchors,
-                class_num=self.class_num,
-                conf_thresh=self.valid_thresh,
-                downsample_ratio=self.downsample,
-                name="yolo_box" + str(i))
+            box, score = F.yolo_box(x=out,
+                                    img_size=im_shape,
+                                    anchors=mask_anchors,
+                                    class_num=self.class_num,
+                                    conf_thresh=self.valid_thresh,
+                                    downsample_ratio=self.downsample,
+                                    name="yolo_box" + str(i))
 
             boxes.append(box)
             scores.append(paddle.transpose(score, perm=[0, 2, 1]))
@@ -301,14 +302,13 @@ class Yolov3Module(RunModule, ImageServing):
         yolo_boxes = paddle.concat(boxes, axis=1)
         yolo_scores = paddle.concat(scores, axis=2)
 
-        pred = F.multiclass_nms(
-            bboxes=yolo_boxes,
-            scores=yolo_scores,
-            score_threshold=self.valid_thresh,
-            nms_top_k=self.nms_topk,
-            keep_top_k=self.nms_posk,
-            nms_threshold=self.nms_thresh,
-            background_label=-1)
+        pred = F.multiclass_nms(bboxes=yolo_boxes,
+                                scores=yolo_scores,
+                                score_threshold=self.valid_thresh,
+                                nms_top_k=self.nms_topk,
+                                keep_top_k=self.nms_posk,
+                                nms_threshold=self.nms_thresh,
+                                background_label=-1)
 
         bboxes = pred.numpy()
         labels = bboxes[:, 0].astype('int32')
