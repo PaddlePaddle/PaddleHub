@@ -27,6 +27,7 @@ from paddlehub.commands.base_command import BaseCommand, ENTRY
 from paddlehub.serving import app_single as app
 from paddlehub.common.dir import CONF_HOME
 from paddlehub.common.hub_server import CacheUpdater
+from paddlehub.serving.v3.http_server import run_all
 import multiprocessing
 import time
 import signal
@@ -208,6 +209,7 @@ class ServingCommand(BaseCommand):
                 raise RuntimeError("{} cannot be use for "
                                    "predicting".format(key))
                 exit(1)
+            serving_method = getattr(m, method_name)
             category = str(m.type).split("/")[0].upper()
             self.modules_info[key].update({
                 "method_name": method_name,
@@ -215,7 +217,8 @@ class ServingCommand(BaseCommand):
                 "version": m.version,
                 "category": category,
                 "module": m,
-                "name": m.name
+                "name": m.name,
+                "serving_method": serving_method
             })
 
     def start_app_with_file(self):
@@ -262,6 +265,24 @@ class ServingCommand(BaseCommand):
             StandaloneApplication(
                 app.create_app(init_flag=False, configs=self.modules_info),
                 options).run()
+        else:
+            print("Lack of necessary parameters!")
+
+    def start_zmq_serving_with_args(self):
+        module = self.args.modules
+        if module is not None:
+            front_port = self.args.port
+            if ServingCommand.is_port_occupied("127.0.0.1", front_port) is True:
+                print("Port %s is occupied, please change it." % front_port)
+                return False
+            back_port = str(int(front_port) + 1)
+            for index in range(100):
+                if ServingCommand.is_port_occupied("127.0.0.1", back_port):
+                    break
+                else:
+                    back_port = str(int(back_port) + 1)
+            run_all(module, self.gpus, front_port, back_port)
+
         else:
             print("Lack of necessary parameters!")
 
@@ -359,6 +380,13 @@ class ServingCommand(BaseCommand):
                 else:
                     self.start_single_app_with_args()
 
+    def start_zmq_serving(self):
+        if self.args.config is None:
+            self.start_zmq_serving_with_args()
+        else:
+
+            pass
+
     @staticmethod
     def show_help():
         str = "serving <option>\n"
@@ -406,13 +434,18 @@ class ServingCommand(BaseCommand):
             ServingCommand.show_help()
             return False
         if self.args.sub_command == "start":
-            if self.args.bert_service == "bert_service":
-                ServingCommand.start_bert_serving(self.args)
-            elif self.args.bert_service is None:
-                self.link_module_info()
-                self.start_serving()
+            if self.args.use_gpu is True:
+                self.gpus = self.args.gpu.split(
+                    ',') if self.args.gpu is not None else ['0']
+                self.start_zmq_serving()
             else:
-                ServingCommand.show_help()
+                if self.args.bert_service == "bert_service":
+                    ServingCommand.start_bert_serving(self.args)
+                elif self.args.bert_service is None:
+                    self.link_module_info()
+                    self.start_serving()
+                else:
+                    ServingCommand.show_help()
         elif self.args.sub_command == "stop":
             if self.args.bert_service == "bert_service":
                 print("Please stop Bert Service by kill process by yourself")
