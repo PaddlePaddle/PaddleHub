@@ -15,7 +15,6 @@
 
 from flask import Flask, request
 import multiprocessing
-import paddlehub as hub
 from paddlehub.serving.v3.device import InferenceServer, gen_result
 from paddlehub.serving.v3.client import InferenceClient
 from paddlehub.common import utils
