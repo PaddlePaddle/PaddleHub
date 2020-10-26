@@ -124,7 +124,7 @@ class BaseTask(object):
 
     def enter_phase(self, phase: str):
         if phase not in ['train', 'val', 'dev', 'test', 'predict', 'inference']:
-            raise RuntimeError()
+            raise RuntimeError('Unknown phase {}.'.format(phase))
         if phase in ['val', 'dev']:
             phase = 'dev'
         elif phase in ['predict', 'inference']:
@@ -289,7 +289,7 @@ class BaseTask(object):
     @property
     def loss(self) -> paddle.static.Variable:
         if self.is_predict_phase:
-            raise RuntimeError()
+            raise RuntimeError('Loss cannot be obtained in the prediction phase.')
 
         if not self.env.is_inititalized:
             self._build_env()
@@ -298,7 +298,7 @@ class BaseTask(object):
     @property
     def labels(self) -> List[paddle.static.Variable]:
         if self.is_predict_phase:
-            raise RuntimeError()
+            raise RuntimeError('Labels cannot be obtained in the prediction phase.')
 
         if not self.env.is_inititalized:
             self._build_env()
@@ -313,7 +313,7 @@ class BaseTask(object):
     @property
     def metrics(self) -> List[str]:
         if self.is_predict_phase:
-            raise RuntimeError()
+            raise RuntimeError('Metrics cannot be obtained in the prediction phase.')
 
         if not self.env.is_inititalized:
             self._build_env()

@@ -314,11 +314,12 @@ class Trainer(object):
 
         # process result
         if not isinstance(result, dict):
-            raise RuntimeError()
+            raise RuntimeError('The return value of `trainning_step` in {} is not a dict'.format(self.model.__class__))
 
         loss = result.get('loss', None)
         if not loss:
-            raise RuntimeError()
+            raise RuntimeError('Cannot find loss attribute in the return value of `trainning_step` of {}'.format(
+                self.model.__class__))
 
         metrics = result.get('metrics', {})
 

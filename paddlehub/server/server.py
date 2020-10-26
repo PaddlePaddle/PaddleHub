@@ -34,7 +34,7 @@ class HubServer(object):
         elif source_type == 'git':
             source = GitSource(url)
         else:
-            raise RuntimeError()
+            raise RuntimeError('Unknown source type {}.'.format(source_type))
         return source
 
     def _get_source_key(self, url: str):
