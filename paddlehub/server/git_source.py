@@ -61,7 +61,11 @@ class GitSource(object):
             # reload modules
             self.load_hub_modules()
         except:
-            log.logger.warning('An error occurred while checkout {}'.format(self.path))
+            msg = traceback.format_exc()
+            file = utils.record(msg)
+            log.logger.warning(
+                'An error occurred while checkout {}. Detailed error information can be found in the {}.'.format(
+                    self.path, file))
 
     def update(self):
         try:
