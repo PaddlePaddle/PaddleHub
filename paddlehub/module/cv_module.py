@@ -239,17 +239,18 @@ class Yolov3Module(RunModule, ImageServing):
 
         for i, out in enumerate(outputs):
             anchor_mask = self.anchor_masks[i]
-            loss = F.yolov3_loss(x=out,
-                                 gt_box=gtbox,
-                                 gt_label=gtlabel,
-                                 gt_score=gtscore,
-                                 anchors=self.anchors,
-                                 anchor_mask=anchor_mask,
-                                 class_num=self.class_num,
-                                 ignore_thresh=self.ignore_thresh,
-                                 downsample_ratio=32,
-                                 use_label_smooth=False)
-            losses.append(paddle.reduce_mean(loss))
+            loss = F.yolov3_loss(
+                x=out,
+                gt_box=gtbox,
+                gt_label=gtlabel,
+                gt_score=gtscore,
+                anchors=self.anchors,
+                anchor_mask=anchor_mask,
+                class_num=self.class_num,
+                ignore_thresh=self.ignore_thresh,
+                downsample_ratio=32,
+                use_label_smooth=False)
+            losses.append(paddle.mean(loss))
             self.downsample //= 2
 
         return {'loss': sum(losses)}
@@ -287,13 +288,14 @@ class Yolov3Module(RunModule, ImageServing):
                 mask_anchors.append((self.anchors[2 * m]))
                 mask_anchors.append(self.anchors[2 * m + 1])
 
-            box, score = F.yolo_box(x=out,
-                                    img_size=im_shape,
-                                    anchors=mask_anchors,
-                                    class_num=self.class_num,
-                                    conf_thresh=self.valid_thresh,
-                                    downsample_ratio=self.downsample,
-                                    name="yolo_box" + str(i))
+            box, score = F.yolo_box(
+                x=out,
+                img_size=im_shape,
+                anchors=mask_anchors,
+                class_num=self.class_num,
+                conf_thresh=self.valid_thresh,
+                downsample_ratio=self.downsample,
+                name="yolo_box" + str(i))
 
             boxes.append(box)
             scores.append(paddle.transpose(score, perm=[0, 2, 1]))
@@ -302,13 +304,14 @@ class Yolov3Module(RunModule, ImageServing):
         yolo_boxes = paddle.concat(boxes, axis=1)
         yolo_scores = paddle.concat(scores, axis=2)
 
-        pred = F.multiclass_nms(bboxes=yolo_boxes,
-                                scores=yolo_scores,
-                                score_threshold=self.valid_thresh,
-                                nms_top_k=self.nms_topk,
-                                keep_top_k=self.nms_posk,
-                                nms_threshold=self.nms_thresh,
-                                background_label=-1)
+        pred = F.multiclass_nms(
+            bboxes=yolo_boxes,
+            scores=yolo_scores,
+            score_threshold=self.valid_thresh,
+            nms_top_k=self.nms_topk,
+            keep_top_k=self.nms_posk,
+            nms_threshold=self.nms_thresh,
+            background_label=-1)
 
         bboxes = pred.numpy()
         labels = bboxes[:, 0].astype('int32')

@@ -287,7 +287,7 @@ class BaseTask(object):
         return self.env.generator
 
     @property
-    def loss(self) -> paddle.Variable:
+    def loss(self) -> paddle.static.Variable:
         if self.is_predict_phase:
             raise RuntimeError()
 
@@ -296,7 +296,7 @@ class BaseTask(object):
         return self.env.loss
 
     @property
-    def labels(self) -> List[paddle.Variable]:
+    def labels(self) -> List[paddle.static.Variable]:
         if self.is_predict_phase:
             raise RuntimeError()
 
@@ -305,7 +305,7 @@ class BaseTask(object):
         return self.env.labels
 
     @property
-    def outputs(self) -> List[paddle.Variable]:
+    def outputs(self) -> List[paddle.static.Variable]:
         if not self.env.is_inititalized:
             self._build_env()
         return self.env.outputs
@@ -342,7 +342,7 @@ class BaseTask(object):
         return feed_list
 
     @property
-    def feed_var_list(self) -> List[paddle.Variable]:
+    def feed_var_list(self) -> List[paddle.static.Variable]:
         if not self.env.is_inititalized:
             self._build_env()
 
@@ -356,7 +356,7 @@ class BaseTask(object):
         return [output.name for output in self.outputs]
 
     @property
-    def fetch_var_list(self) -> List[paddle.Variable]:
+    def fetch_var_list(self) -> List[paddle.static.Variable]:
         vars = self.main_program.global_block().vars
         return [vars[varname] for varname in self.fetch_list]
 

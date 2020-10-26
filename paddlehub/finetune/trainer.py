@@ -74,8 +74,9 @@ class Trainer(object):
         self.best_metrics = defaultdict(int)
 
         if self.nranks > 1:
-            context = paddle.distributed.init_parallel_env()
-            self.model = paddle.DataParallel(self.model, context)
+            paddle.distributed.init_parallel_env()
+            strategy = paddle.distributed.prepare_context()
+            self.model = paddle.DataParallel(self.model, strategy)
         self.compare_metrics = self._compare_metrics if not compare_metrics else compare_metrics
 
         self._load_checkpoint()
@@ -109,10 +110,17 @@ class Trainer(object):
             logger.info('PaddleHub model checkpoint loaded. current_epoch={} [{}]'.format(
                 self.current_epoch, metric_msg))
 
-        # load model from checkpoint
-        model_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch), 'model')
-        state_dict, _ = paddle.load(model_path)
+        # load model checkpoint
+        model_params_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch),
+                                         'model.pdparmas')
+        state_dict = paddle.load(model_params_path)
         self.model.set_dict(state_dict)
+
+        # load optimizer checkpoint
+        optim_params_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch),
+                                         'model.pdopt')
+        state_dict = paddle.load(optim_params_path)
+        self.optimizer.set_dict(state_dict)
 
     def _save_checkpoint(self):
         '''Save model checkpoint and state dict'''
@@ -122,7 +130,10 @@ class Trainer(object):
 
     def save_model(self, save_dir: str):
         '''Save model'''
-        paddle.save(self.model.state_dict(), save_dir)
+        model_params_path = os.path.join(save_dir, 'model.pdparams')
+        optim_params_path = os.path.join(save_dir, 'model.pdopt')
+        paddle.save(self.model.state_dict(), model_params_path)
+        paddle.save(self.model.state_dict(), optim_params_path)
 
     def _save_metrics(self):
         with open(os.path.join(self.checkpoint_dir, 'metrics.pkl'), 'wb') as file:
@@ -154,8 +165,8 @@ class Trainer(object):
             save_interval(int) : Save the checkpoint every `save_interval` epochs.
         '''
         use_gpu = True
-        place = paddle.CUDAPlace(ParallelEnv().dev_id) if use_gpu else paddle.CPUPlace()
-        paddle.disable_static(place)
+        place = 'gpu' if use_gpu else 'cpu'
+        paddle.set_device(place)
 
         batch_sampler = paddle.io.DistributedBatchSampler(
             train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
@@ -245,8 +256,8 @@ class Trainer(object):
             num_workers(int) : Number of subprocess to load data, default is 0.
         '''
         use_gpu = True
-        place = paddle.CUDAPlace(ParallelEnv().dev_id) if use_gpu else paddle.CPUPlace()
-        paddle.disable_static(place)
+        place = 'gpu' if use_gpu else 'cpu'
+        paddle.set_device(place)
 
         batch_sampler = paddle.io.DistributedBatchSampler(
             eval_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
@@ -312,12 +323,7 @@ class Trainer(object):
         metrics = result.get('metrics', {})
 
         # back prop
-        if self.nranks > 1:
-            self.model.scale_loss(loss)
-            loss.backward()
-            self.model.apply_collective_grads()
-        else:
-            loss.backward()
+        loss.backward()
 
         return loss, metrics
 
@@ -350,7 +356,7 @@ class Trainer(object):
         self.learning_rate_step(epoch_idx, batch_idx, self.optimizer.get_lr(), loss)
 
     def learning_rate_step(self, epoch_idx: int, batch_idx: int, learning_rate: Generic, loss: paddle.Tensor):
-        if isinstance(learning_rate, paddle.optimizer._LRScheduler):
+        if isinstance(learning_rate, paddle.optimizer.lr.LRScheduler):
             learning_rate.step()
 
     def optimizer_zero_grad(self, epoch_idx: int, batch_idx: int, optimizer: paddle.optimizer.Optimizer):

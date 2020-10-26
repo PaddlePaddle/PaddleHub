@@ -40,9 +40,9 @@ def convert_dtype_to_string(dtype: str) -> paddle.fluid.core.VarDesc.VarType:
     raise TypeError("dtype shoule in %s" % list(dtype_map.keys()))
 
 
-def get_variable_info(var: paddle.Variable) -> dict:
-    if not isinstance(var, paddle.Variable):
-        raise TypeError("var shoule be an instance of paddle.Variable")
+def get_variable_info(var: paddle.static.Variable) -> dict:
+    if not isinstance(var, paddle.static.Variable):
+        raise TypeError("var shoule be an instance of paddle.static.Variable")
 
     var_info = {
         'name': var.name,
@@ -114,7 +114,7 @@ def rename_var(block: paddle.device.framework.Block, old_name: str, new_name: st
 
 def add_vars_prefix(program: paddle.static.Program,
                     prefix: str,
-                    vars: List[paddle.Variable] = None,
+                    vars: List[paddle.static.Variable] = None,
                     excludes: Callable = None):
     '''
     '''
@@ -127,7 +127,7 @@ def add_vars_prefix(program: paddle.static.Program,
 
 def remove_vars_prefix(program: paddle.static.Program,
                        prefix: str,
-                       vars: List[paddle.Variable] = None,
+                       vars: List[paddle.static.Variable] = None,
                        excludes: Callable = None):
     '''
     '''

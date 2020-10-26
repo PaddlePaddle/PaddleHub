@@ -25,8 +25,8 @@ from paddlehub.compat.task.task_utils import RunState
 
 class TransformerEmbeddingTask(BaseTask):
     def __init__(self,
-                 pooled_feature: paddle.Variable,
-                 seq_feature: paddle.Variable,
+                 pooled_feature: paddle.static.Variable,
+                 seq_feature: paddle.static.Variable,
                  feed_list: List[str],
                  data_reader: Generic,
                  config: RunConfig = None):
@@ -36,7 +36,7 @@ class TransformerEmbeddingTask(BaseTask):
         self.pooled_feature = pooled_feature
         self.seq_feature = seq_feature
 
-    def _build_net(self) -> List[paddle.Variable]:
+    def _build_net(self) -> List[paddle.static.Variable]:
         # ClassifyReader will return the seqence length of an input text
         self.seq_len = paddle.data(name='seq_len', shape=[1], dtype='int64', lod_level=0)
         return [self.pooled_feature, self.seq_feature]
