@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 import copy
 import functools
 import logging
 import sys
 import time
+import threading
 from typing import List
 
 import colorlog
@@ -102,6 +104,13 @@ class Logger(object):
 
         self.logger.log(log_level, msg)
 
+    @contextlib.contextmanager
+    def use_terminator(self, terminator: str):
+        old_terminator = self.handler.terminator
+        self.handler.terminator = terminator
+        yield
+        self.handler.terminator = old_terminator
+
 
 class ProgressBar(object):
     '''
@@ -159,6 +168,28 @@ class ProgressBar(object):
 
         if self._end:
             sys.stdout.write('\n')
+
+
+@contextlib.contextmanager
+def processing(msg: str, interval: float = 0.1):
+    '''
+    '''
+    end = False
+
+    def _printer():
+        index = 0
+        flags = ['\\', '|', '/', '-']
+        while not end:
+            flag = flags[index % len(flags)]
+            with logger.use_terminator('\r'):
+                logger.info('{}: {}'.format(msg, flag))
+            time.sleep(interval)
+            index += 1
+
+    t = threading.Thread(target=_printer)
+    t.start()
+    yield
+    end = True
 
 
 class FormattedText(object):
