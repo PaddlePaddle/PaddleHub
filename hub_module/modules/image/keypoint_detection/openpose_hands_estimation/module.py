@@ -1,3 +1,17 @@
+# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import copy
 from collections import OrderedDict
@@ -24,7 +38,9 @@ import openpose_hands_estimation.processor as P
             Single Images using Multiview Bootstrapping.",
             version="1.0.0")
 class HandPoseModel(nn.Layer):
-    """HandposeModel
+    """
+    HandposeModel
+
     Args:
         load_checkpoint(str): Checkpoint save path, default is None.
         visualization (bool): Whether to save the estimation result. Default is True.
@@ -176,12 +192,3 @@ class HandPoseModel(nn.Layer):
             save_path = os.path.join(save_path, img_path.rsplit("/", 1)[-1])
             cv2.imwrite(save_path, canvas)
         return all_hand_peaks
-
-
-if __name__ == "__main__":
-    import numpy as np
-
-    paddle.disable_static()
-    model = HandPoseModel()
-    model.eval()
-    out1 = model.predict("detect_hand4.jpg")
