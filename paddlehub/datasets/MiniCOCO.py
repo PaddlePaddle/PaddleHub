@@ -14,18 +14,19 @@
 # limitations under the License.
 
 import os
-
-import numpy as np
-import paddle
-
-from paddlehub.process.functional import get_img_file
-from paddlehub.env import DATA_HOME
 from typing import Callable
 
+import paddle
+from paddlehub.process.functional import get_img_file
+from paddlehub.env import DATA_HOME
+from paddlehub.utils.download import download_data
 
-class Colorizedataset(paddle.io.Dataset):
+
+@download_data(url='https://paddlehub.bj.bcebos.com/dygraph/datasets/minicoco.tar.gz')
+class MiniCOCO(paddle.io.Dataset):
     """
-    Dataset for colorization.
+    Dataset for Style transfer. The dataset contains 2001 images for training set and 200 images for testing set.
+    They are derived form COCO2014. Meanwhile, it contains 21 different style pictures in file "21styles".
 
     Args:
        transform(callmethod) : The method of preprocess images.
@@ -34,6 +35,7 @@ class Colorizedataset(paddle.io.Dataset):
     Returns:
         DataSet: An iterable object for data iterating
     """
+
     def __init__(self, transform: Callable, mode: str = 'train'):
         self.mode = mode
         self.transform = transform
@@ -42,14 +44,19 @@ class Colorizedataset(paddle.io.Dataset):
             self.file = 'train'
         elif self.mode == 'test':
             self.file = 'test'
-
-        self.file = os.path.join(DATA_HOME, 'canvas', self.file)
+        self.file = os.path.join(DATA_HOME, 'minicoco', self.file)
+        self.style_file = os.path.join(DATA_HOME, 'minicoco', '21styles')
         self.data = get_img_file(self.file)
+        self.style = get_img_file(self.style_file)
 
-    def __getitem__(self, idx: int) -> np.ndarray:
+    def __getitem__(self, idx: int):
+
         img_path = self.data[idx]
         im = self.transform(img_path)
-        return im
+        style_idx = idx % len(self.style)
+        style_path = self.style[style_idx]
+        style = self.transform(style_path)
+        return im, style
 
     def __len__(self):
         return len(self.data)
