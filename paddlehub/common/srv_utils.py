@@ -40,7 +40,7 @@ def uri_path(server_url, api):
 
 def hub_request(api, params, extra=None, timeout=8):
     params['hub_version'] = version.hub_version
-    params['paddle_version'] = paddle.__version__
+    params['paddle_version'] = paddle.__version__.split('-')[0]
     params["extra"] = json.dumps(extra)
     r = requests.get(api, params, timeout=timeout)
     return r.json()
