@@ -210,9 +210,6 @@ class Vgg16(nn.Layer):
         self.conv5_3 = nn.Conv2D(512, 512, kernel_size=3, stride=1, padding=1)
 
         checkpoint = os.path.join(MODULE_HOME, 'msgnet', 'vgg16.pdparams')
-        if not os.path.exists(checkpoint):
-            os.system('wget https://bj.bcebos.com/paddlehub/model/image/image_editing/vgg_paddle.pdparams -O ' +
-                      checkpoint)
         model_dict = paddle.load(checkpoint)
         self.set_dict(model_dict)
         print("load pretrained vgg16 checkpoint success")

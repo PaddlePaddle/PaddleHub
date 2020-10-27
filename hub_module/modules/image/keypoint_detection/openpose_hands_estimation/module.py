@@ -87,8 +87,6 @@ class HandPoseModel(nn.Layer):
 
         else:
             checkpoint = os.path.join(self.directory, 'openpose_hand.pdparams')
-            if not os.path.exists(checkpoint):
-                os.system('wget https://paddlehub.bj.bcebos.com/dygraph/pose/openpose_hand.pdparams -O ' + checkpoint)
             model_dict = paddle.load(checkpoint)
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
