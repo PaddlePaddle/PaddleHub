@@ -111,20 +111,18 @@ class Trainer(object):
                 self.current_epoch, metric_msg))
 
         # load model checkpoint
-        model_params_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch),
-                                         'model.pdparmas')
+        model_params_path = os.path.join(self.checkpoint_dir, 'epoch_{}'.format(self.current_epoch), 'model.pdparmas')
         state_dict = paddle.load(model_params_path)
         self.model.set_dict(state_dict)
 
         # load optimizer checkpoint
-        optim_params_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch),
-                                         'model.pdopt')
+        optim_params_path = os.path.join(self.checkpoint_dir, 'epoch_{}'.format(self.current_epoch), 'model.pdopt')
         state_dict = paddle.load(optim_params_path)
         self.optimizer.set_dict(state_dict)
 
     def _save_checkpoint(self):
         '''Save model checkpoint and state dict'''
-        model_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch), 'model')
+        model_path = os.path.join(self.checkpoint_dir, 'epoch_{}'.format(self.current_epoch))
         logger.info('Saving model checkpoint to {}'.format(model_path))
         self.save_model(model_path)
 
@@ -171,7 +169,7 @@ class Trainer(object):
         batch_sampler = paddle.io.DistributedBatchSampler(
             train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
         loader = paddle.io.DataLoader(
-            train_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
+            train_dataset, batch_sampler=batch_sampler, num_workers=num_workers, return_list=True)
 
         steps_per_epoch = len(batch_sampler)
         timer = Timer(steps_per_epoch * epochs)
@@ -263,7 +261,7 @@ class Trainer(object):
             eval_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
 
         loader = paddle.io.DataLoader(
-            eval_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
+            eval_dataset, batch_sampler=batch_sampler, num_workers=num_workers, return_list=True)
 
         self.model.eval()
         avg_loss = num_samples = 0
