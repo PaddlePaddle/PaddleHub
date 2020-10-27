@@ -1,7 +1,0 @@
-name: darknet53_imagenet
-dir: "modules/image/classification/darknet53_imagenet"
-resources:
-  -
-    url: https://paddlehub.bj.bcebos.com/model/cv/darknet53_model.tar.gz
-    dest: darknet53_model
-    uncompress: True

@@ -1,7 +1,0 @@
-name: resnet50_v2_imagenet
-dir: "modules/image/classification/resnet50_v2_imagenet"
-resources:
-  -
-    url: https://paddlehub.bj.bcebos.com/model/cv/resnet50_v2_model.tar.gz
-    dest: resnet50_v2_model
-    uncompress: True

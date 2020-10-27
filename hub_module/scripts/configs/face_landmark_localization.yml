@@ -1,9 +1,0 @@
-name: face_landmark_localization
-dir: "modules/image/keypoint_detection/face_landmark_localization"
-exclude:
-    - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/hub_dev/face_landmark_localization.tar.gz
-    dest: .
-    uncompress: True
