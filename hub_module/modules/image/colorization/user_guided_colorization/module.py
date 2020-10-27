@@ -16,7 +16,7 @@ import os
 
 import paddle
 import paddle.nn as nn
-from paddle.nn import Conv2d, ConvTranspose2d
+from paddle.nn import Conv2D, Conv2DTranspose
 from paddlehub.module.module import moduleinfo
 import paddlehub.process.transforms as T
 from paddlehub.module.cv_module import ImageColorizeModule
@@ -48,110 +48,110 @@ class UserGuidedColorization(nn.Layer):
         self.classification = classification
         # Conv1
         model1 = (
-            Conv2d(self.input_nc, 64, 3, 1, 1),
+            Conv2D(self.input_nc, 64, 3, 1, 1),
             nn.ReLU(),
-            Conv2d(64, 64, 3, 1, 1),
+            Conv2D(64, 64, 3, 1, 1),
             nn.ReLU(),
             nn.BatchNorm(64),
         )
 
         # Conv2
         model2 = (
-            Conv2d(64, 128, 3, 1, 1),
+            Conv2D(64, 128, 3, 1, 1),
             nn.ReLU(),
-            Conv2d(128, 128, 3, 1, 1),
+            Conv2D(128, 128, 3, 1, 1),
             nn.ReLU(),
             nn.BatchNorm(128),
         )
 
         # Conv3
         model3 = (
-            Conv2d(128, 256, 3, 1, 1),
+            Conv2D(128, 256, 3, 1, 1),
             nn.ReLU(),
-            Conv2d(256, 256, 3, 1, 1),
+            Conv2D(256, 256, 3, 1, 1),
             nn.ReLU(),
-            Conv2d(256, 256, 3, 1, 1),
+            Conv2D(256, 256, 3, 1, 1),
             nn.ReLU(),
             nn.BatchNorm(256),
         )
 
         # Conv4
         model4 = (
-            Conv2d(256, 512, 3, 1, 1),
+            Conv2D(256, 512, 3, 1, 1),
             nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 1),
+            Conv2D(512, 512, 3, 1, 1),
             nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 1),
+            Conv2D(512, 512, 3, 1, 1),
             nn.ReLU(),
             nn.BatchNorm(512),
         )
 
         # Conv5
         model5 = (
-            Conv2d(512, 512, 3, 1, 2, 2),
+            Conv2D(512, 512, 3, 1, 2, 2),
             nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 2, 2),
+            Conv2D(512, 512, 3, 1, 2, 2),
             nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 2, 2),
+            Conv2D(512, 512, 3, 1, 2, 2),
             nn.ReLU(),
             nn.BatchNorm(512),
         )
 
         # Conv6
         model6 = (
-            Conv2d(512, 512, 3, 1, 2, 2),
+            Conv2D(512, 512, 3, 1, 2, 2),
             nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 2, 2),
+            Conv2D(512, 512, 3, 1, 2, 2),
             nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 2, 2),
+            Conv2D(512, 512, 3, 1, 2, 2),
             nn.ReLU(),
             nn.BatchNorm(512),
         )
 
         # Conv7
         model7 = (
-            Conv2d(512, 512, 3, 1, 1),
+            Conv2D(512, 512, 3, 1, 1),
             nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 1),
+            Conv2D(512, 512, 3, 1, 1),
             nn.ReLU(),
-            Conv2d(512, 512, 3, 1, 1),
+            Conv2D(512, 512, 3, 1, 1),
             nn.ReLU(),
             nn.BatchNorm(512),
         )
 
         # Conv8
-        model8up = (ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1), )
-        model3short8 = (Conv2d(256, 256, 3, 1, 1), )
+        model8up = (Conv2DTranspose(512, 256, kernel_size=4, stride=2, padding=1), )
+        model3short8 = (Conv2D(256, 256, 3, 1, 1), )
         model8 = (
             nn.ReLU(),
-            Conv2d(256, 256, 3, 1, 1),
+            Conv2D(256, 256, 3, 1, 1),
             nn.ReLU(),
-            Conv2d(256, 256, 3, 1, 1),
+            Conv2D(256, 256, 3, 1, 1),
             nn.ReLU(),
             nn.BatchNorm(256),
         )
 
         # Conv9
-        model9up = (ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1), )
-        model2short9 = (Conv2d(
+        model9up = (Conv2DTranspose(256, 128, kernel_size=4, stride=2, padding=1), )
+        model2short9 = (Conv2D(
             128,
             128,
             3,
             1,
             1,
         ), )
-        model9 = (nn.ReLU(), Conv2d(128, 128, 3, 1, 1), nn.ReLU(), nn.BatchNorm(128))
+        model9 = (nn.ReLU(), Conv2D(128, 128, 3, 1, 1), nn.ReLU(), nn.BatchNorm(128))
 
         # Conv10
-        model10up = (ConvTranspose2d(128, 128, kernel_size=4, stride=2, padding=1), )
-        model1short10 = (Conv2d(64, 128, 3, 1, 1), )
-        model10 = (nn.ReLU(), Conv2d(128, 128, 3, 1, 1), nn.LeakyReLU(negative_slope=0.2))
-        model_class = (Conv2d(256, 529, 1), )
+        model10up = (Conv2DTranspose(128, 128, kernel_size=4, stride=2, padding=1), )
+        model1short10 = (Conv2D(64, 128, 3, 1, 1), )
+        model10 = (nn.ReLU(), Conv2D(128, 128, 3, 1, 1), nn.LeakyReLU(negative_slope=0.2))
+        model_class = (Conv2D(256, 529, 1), )
 
         if use_tanh:
-            model_out = (Conv2d(128, 2, 1, 1, 0, 1), nn.Tanh())
+            model_out = (Conv2D(128, 2, 1, 1, 0, 1), nn.Tanh())
         else:
-            model_out = (Conv2d(128, 2, 1, 1, 0, 1), )
+            model_out = (Conv2D(128, 2, 1, 1, 0, 1), )
 
         self.model1 = nn.Sequential(*model1)
         self.model2 = nn.Sequential(*model2)
@@ -173,7 +173,7 @@ class UserGuidedColorization(nn.Layer):
         self.model_out = nn.Sequential(*model_out)
 
         if load_checkpoint is not None:
-            model_dict = paddle.load(load_checkpoint)[0]
+            model_dict = paddle.load(load_checkpoint)
             self.set_dict(model_dict)
             print("load custom checkpoint success")
         else:
@@ -181,7 +181,8 @@ class UserGuidedColorization(nn.Layer):
             if not os.path.exists(checkpoint):
                 os.system('wget https://paddlehub.bj.bcebos.com/dygraph/image_colorization/user_guided.pdparams -O ' +
                           checkpoint)
-            model_dict = paddle.load(checkpoint)[0]
+            model_dict = paddle.load(checkpoint)
+
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
 
