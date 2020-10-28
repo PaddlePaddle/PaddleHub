@@ -30,13 +30,14 @@ import paddlehub.process.transforms as T
 import openpose_hands_estimation.processor as P
 
 
-@moduleinfo(name="openpose_hands_estimation",
-            type="CV/image_editing",
-            author="paddlepaddle",
-            author_email="",
-            summary="Openpose_hands_estimation is a hand pose estimation model based on Hand Keypoint Detection in \
+@moduleinfo(
+    name="openpose_hands_estimation",
+    type="CV/image_editing",
+    author="paddlepaddle",
+    author_email="",
+    summary="Openpose_hands_estimation is a hand pose estimation model based on Hand Keypoint Detection in \
             Single Images using Multiview Bootstrapping.",
-            version="1.0.0")
+    version="1.0.0")
 class HandPoseModel(nn.Layer):
     """
     HandposeModel
@@ -45,6 +46,7 @@ class HandPoseModel(nn.Layer):
         load_checkpoint(str): Checkpoint save path, default is None.
         visualization (bool): Whether to save the estimation result. Default is True.
     """
+
     def __init__(self, load_checkpoint: str = None, visualization: bool = True):
         super(HandPoseModel, self).__init__()
         self.visualization = visualization
@@ -168,6 +170,7 @@ class HandPoseModel(nn.Layer):
         return np.array(all_peaks)
 
     def predict(self, img_path: str, save_path: str = 'result', scale: list = [0.5, 1.0, 1.5, 2.0]):
+        self.eval()
         self.body_model = hub.Module(name='openpose_body_estimation')
         self.body_model.eval()
         org_img = cv2.imread(img_path)
