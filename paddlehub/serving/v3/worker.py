@@ -19,7 +19,24 @@ import traceback
 import sys
 
 
-def run_worker(modules_info, gpu_index, addr):
+def run_worker(modules_info: dict, gpu_index: int, addr: str):
+    '''
+    Start zmq.REP as backend on specified GPU.
+
+    Args:
+        modules_info(dict): module name to serving method
+        gpu_index(int): GPU device index to use
+        addr(str): address of zmq.REP
+
+    Examples:
+        .. code-block:: python
+
+            modules_info = {'lac': lexical_analise}
+            run_worker(modules_info=modules_info,
+                       gpu_index=0,
+                       addr='ipc://backend.ipc')
+
+    '''
     context = zmq.Context(1)
     socket = context.socket(zmq.REP)
     socket.connect(addr)
@@ -36,7 +53,7 @@ def run_worker(modules_info, gpu_index, addr):
 
         except Exception as err:
             traceback.print_exc()
-            output = gen_result("-1", str(err), "")
+            output = package_result("-1", str(err), "")
         socket.send_json(output)
 
 
@@ -48,7 +65,7 @@ if __name__ == '__main__':
 
     os.environ['CUDA_VISIBLE_DEVICES'] = gpu_index
     import paddlehub as hub
-    from paddlehub.serving.v3.http_server import gen_result
+    from paddlehub.serving.v3.http_server import package_result
 
     modules_info = {}
     for module_name in modules:

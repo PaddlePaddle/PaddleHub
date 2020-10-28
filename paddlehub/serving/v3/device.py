@@ -19,44 +19,20 @@ import traceback
 import subprocess
 
 
-def gen_result(status, msg, data):
-    return {"status": status, "msg": msg, "results": data}
-
-
-def run_worker(modules_info, gpu_index, addr):
-    context = zmq.Context(1)
-    socket = context.socket(zmq.REP)
-    socket.connect(addr)
-
-    print('Using GPU device index:', gpu_index)
-    os.environ['DEVICE_INDEX'] = gpu_index
-    while True:
-        try:
-            message = socket.recv_json()
-            inputs = message['inputs']
-            import paddlehub as hub
-            module = hub.Module(name='lac')
-
-            method_name = module.serving_func_name
-            if method_name is None:
-                raise RuntimeError("{} cannot be use for " "predicting".format(module))
-                exit(1)
-            serving_method = getattr(module, method_name)
-            methood = serving_method
-            output = methood(**inputs)
-
-        except Exception as err:
-            traceback.print_exc()
-            output = gen_result("-1", "Please check data format!", "")
-        socket.send_json(output)
-
-
 class InferenceDevice(object):
+    '''
+    The InferenceDevice class provides zmq.device to connect with frontend and
+    backend.
+    '''
+
     def __init__(self):
         self.frontend = None
         self.backend = None
 
-    def listen(self, frontend_addr, backend_addr):
+    def listen(self, frontend_addr: str, backend_addr: str):
+        '''
+        Start zmq.device to listen from frontend address to backend address.
+        '''
         try:
             context = zmq.Context(1)
 
@@ -75,36 +51,45 @@ class InferenceDevice(object):
             context.term()
 
 
-class InferenceWorker(object):
-    def __init__(self, modules_name, gpus, backend_addr):
-        self.modules_name = modules_name
-        self.gpus = gpus
-        self.backend_addr = backend_addr
-        self.process = []
-        self.modules_str = ''
-        for module_name in self.modules_name:
-            self.modules_str += ',%s' % module_name
-        work_file = os.path.join(os.path.split(os.path.realpath(__file__))[0], 'worker.py')
-        for index in range(len(self.gpus)):
-            subprocess.Popen(['python', work_file, self.modules_str[1:], self.gpus[index], self.backend_addr])
+def start_workers(modules_name: list, gpus: list, backend_addr: str):
+    '''
+    InferenceWorker class provides workers for different GPU device.
 
-    def listen(self):
-        for p in self.process:
-            p.start()
+    Args:
+        modules_name(list): modules name
+        gpus(list): GPU devices index
+        backend_addr(str): the port of PaddleHub-Serving zmq backend address
 
-    def term(self):
-        for p in self.process:
-            p.terminate()
+    Examples:
+    .. code-block:: python
+
+        modules_name = ['lac', 'yolov3_darknet53_coco2017']
+        start_workers(modules_name, ['0', '1', '2'], 'ipc://backend.ipc')
+
+    '''
+    modules_str = ''
+    for module_name in modules_name:
+        modules_str += ',%s' % module_name
+    work_file = os.path.join(os.path.split(os.path.realpath(__file__))[0], 'worker.py')
+    for index in range(len(gpus)):
+        subprocess.Popen(['python', work_file, modules_str[1:], gpus[index], backend_addr])
 
 
 class InferenceServer(object):
-    def __init__(self, modules_name, gpus):
+    '''
+    InferenceServer class starts zmq.rep as backend.
+
+    Args:
+        modules_name(list): modules name
+        gpus(list): GPU devices index
+    '''
+
+    def __init__(self, modules_name: list, gpus: list):
         self.modules_name = modules_name
         self.gpus = gpus
 
-    def listen(self, port):
+    def listen(self, port: int):
         backend = "ipc://backend.ipc"
-        iw = InferenceWorker(modules_name=self.modules_name, gpus=self.gpus, backend_addr=backend)
-        iw.listen()
+        start_workers(modules_name=self.modules_name, gpus=self.gpus, backend_addr=backend)
         d = InferenceDevice()
         d.listen('tcp://*:%s' % port, backend)
