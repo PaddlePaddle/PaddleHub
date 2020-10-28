@@ -17,7 +17,6 @@ import inspect
 import importlib
 import os
 import sys
-import traceback
 from collections import OrderedDict
 from typing import List
 
@@ -61,11 +60,7 @@ class GitSource(object):
             # reload modules
             self.load_hub_modules()
         except:
-            msg = traceback.format_exc()
-            file = utils.record(msg)
-            log.logger.warning(
-                'An error occurred while checkout {}. Detailed error information can be found in the {}.'.format(
-                    self.path, file))
+            utils.record_exception('An error occurred while checkout {}.'.format(self.path))
 
     def update(self):
         try:
@@ -74,11 +69,7 @@ class GitSource(object):
             self.load_hub_modules()
         except Exception as e:
             self.hub_modules = OrderedDict()
-            msg = traceback.format_exc()
-            file = utils.record(msg)
-            log.logger.warning(
-                'An error occurred while update {}. Detailed error information can be found in the {}.'.format(
-                    self.path, file))
+            utils.record_exception('An error occurred while update {}.'.format(self.path))
 
     def load_hub_modules(self):
         if 'hubconf' in sys.modules:
@@ -93,11 +84,7 @@ class GitSource(object):
                     self.hub_modules[_item.name] = _item
         except Exception as e:
             self.hub_modules = OrderedDict()
-            msg = traceback.format_exc()
-            file = utils.record(msg)
-            log.logger.warning(
-                'An error occurred while loading {}. Detailed error information can be found in the {}.'.format(
-                    self.path, file))
+            utils.record_exception('An error occurred while loading {}.'.format(self.path))
 
         sys.path.remove(self.path)
 

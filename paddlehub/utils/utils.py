@@ -24,6 +24,7 @@ import requests
 import sys
 import time
 import tempfile
+import traceback
 import types
 from typing import Generator
 from urllib.parse import urlparse
@@ -294,3 +295,11 @@ def record(msg: str) -> str:
         file.write(str(msg) + '\n' * 3)
 
     return logfile
+
+
+def record_exception(msg: str) -> str:
+    '''
+    '''
+    tb = traceback.format_exc()
+    file = record(tb)
+    utils.log.logger.warning('{}. Detailed error information can be found in the {}.'.format(msg, file))

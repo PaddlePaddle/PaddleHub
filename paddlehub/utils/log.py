@@ -25,6 +25,8 @@ from typing import List
 import colorlog
 from colorama import Fore
 
+import paddlehub.config as hubconf
+
 log_config = {
     'DEBUG': {
         'level': 10,
@@ -83,10 +85,10 @@ class Logger(object):
         self.handler.setFormatter(self.format)
 
         self.logger.addHandler(self.handler)
-        self.logLevel = "DEBUG"
+        self.logLevel = hubconf.log_level
         self.logger.setLevel(logging.DEBUG)
         self.logger.propagate = False
-        self._is_enable = True
+        self._is_enable = hubconf.log_enable
 
     def disable(self):
         self._is_enable = False
