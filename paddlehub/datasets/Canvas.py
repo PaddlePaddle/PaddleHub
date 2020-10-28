@@ -14,16 +14,21 @@
 # limitations under the License.
 
 import os
-from typing import Callable
 
+import numpy as np
 import paddle
+
 from paddlehub.process.functional import get_img_file
 from paddlehub.env import DATA_HOME
+from typing import Callable
+from paddlehub.utils.download import download_data
 
 
-class StyleTransferData(paddle.io.Dataset):
+@download_data(url='https://paddlehub.bj.bcebos.com/dygraph/datasets/canvas.tar.gz')
+class Canvas(paddle.io.Dataset):
     """
-    Dataset for Style transfer.
+    Dataset for colorization. It contains 1193 and 400 pictures for Monet and Vango paintings style, respectively.
+    We collected data from https://people.eecs.berkeley.edu/~taesung_park/CycleGAN/datasets/.
 
     Args:
        transform(callmethod) : The method of preprocess images.
@@ -32,6 +37,7 @@ class StyleTransferData(paddle.io.Dataset):
     Returns:
         DataSet: An iterable object for data iterating
     """
+
     def __init__(self, transform: Callable, mode: str = 'train'):
         self.mode = mode
         self.transform = transform
@@ -40,19 +46,14 @@ class StyleTransferData(paddle.io.Dataset):
             self.file = 'train'
         elif self.mode == 'test':
             self.file = 'test'
-        self.file = os.path.join(DATA_HOME, 'minicoco', self.file)
-        self.style_file = os.path.join(DATA_HOME, 'minicoco', '21styles')
+
+        self.file = os.path.join(DATA_HOME, 'canvas', self.file)
         self.data = get_img_file(self.file)
-        self.style = get_img_file(self.style_file)
 
-    def __getitem__(self, idx: int):
-
+    def __getitem__(self, idx: int) -> np.ndarray:
         img_path = self.data[idx]
         im = self.transform(img_path)
-        style_idx = idx % len(self.style)
-        style_path = self.style[style_idx]
-        style = self.transform(style_path)
-        return im, style
+        return im
 
     def __len__(self):
         return len(self.data)
