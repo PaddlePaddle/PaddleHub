@@ -2,7 +2,7 @@ import paddle
 import paddlehub as hub
 import paddlehub.process.transforms as T
 from paddlehub.finetune.trainer import Trainer
-from paddlehub.datasets.flowers import Flowers
+from paddlehub.datasets import Flowers
 
 if __name__ == '__main__':
     transforms = T.Compose([T.Resize((224, 224)), T.Normalize()])

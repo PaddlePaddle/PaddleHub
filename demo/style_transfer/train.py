@@ -2,7 +2,7 @@ import paddle
 import paddlehub as hub
 import paddlehub.process.transforms as T
 from paddlehub.finetune.trainer import Trainer
-from paddlehub.datasets.MiniCOCO import MiniCOCO
+from paddlehub.datasets import MiniCOCO
 
 if __name__ == "__main__":
     model = hub.Module(name='msgnet')
