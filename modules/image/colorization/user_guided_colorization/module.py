@@ -179,11 +179,7 @@ class UserGuidedColorization(nn.Layer):
             print("load custom checkpoint success")
         else:
             checkpoint = os.path.join(self.directory, 'user_guided.pdparams')
-            if not os.path.exists(checkpoint):
-                os.system('wget https://paddlehub.bj.bcebos.com/dygraph/image_colorization/user_guided.pdparams -O ' +
-                          checkpoint)
             model_dict = paddle.load(checkpoint)
-
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
 
