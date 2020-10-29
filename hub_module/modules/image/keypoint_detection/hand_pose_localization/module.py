@@ -4,8 +4,8 @@ import os, shutil
 from paddlehub import Module
 from paddlehub.module.module import moduleinfo, serving
 
-from .model import Model
-from .processor import base64_to_cv2, Processor
+from hand_pose_localization.model import Model
+from hand_pose_localization.processor import base64_to_cv2, Processor
 
 @moduleinfo(
     name="hand_pose_localization", # 模型名称
