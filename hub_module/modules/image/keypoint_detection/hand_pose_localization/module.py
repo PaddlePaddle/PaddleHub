@@ -1,5 +1,5 @@
 # coding=utf-8
-import os, shutil
+import os
 
 from paddlehub import Module
 from paddlehub.module.module import moduleinfo, serving

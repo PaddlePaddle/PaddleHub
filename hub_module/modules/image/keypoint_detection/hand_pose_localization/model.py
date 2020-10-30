@@ -24,8 +24,8 @@ class Model():
             try:
                 places = os.environ["CUDA_VISIBLE_DEVICES"]
                 places = int(places[0])
-            except:
-                print('Please set the environment variables "CUDA_VISIBLE_DEVICES"')
+            except Exception as e:
+                print('Error: %s. Please set the environment variables "CUDA_VISIBLE_DEVICES".' % e)
                 use_gpu = False
         
         # 预训练模型路径
