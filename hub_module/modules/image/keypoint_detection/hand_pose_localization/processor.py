@@ -15,6 +15,7 @@ def check_dir(dir_path):
         os.makedirs(dir_path)
 
 def base64_to_cv2(b64str):
+    # base64转cv2函数
     data = base64.b64decode(b64str.encode('utf8'))
     data = np.fromstring(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
