@@ -18,12 +18,15 @@ import builtins
 import inspect
 import importlib
 import os
+import re
 import sys
 from typing import Callable, Generic, List, Optional
 
 from easydict import EasyDict
 
+import paddle
 from paddlehub.utils import parser, log, utils
+from paddlehub.compat import paddle_utils
 from paddlehub.compat.module.module_v1 import ModuleV1
 
 
@@ -171,7 +174,7 @@ class Module(object):
             user_module._initialize(**kwargs)
             return user_module
 
-        if user_module_cls == ModuleV1:
+        if issubclass(user_module_cls, ModuleV1):
             return user_module_cls(directory=directory, **kwargs)
 
         user_module_cls.directory = directory
@@ -193,7 +196,7 @@ class Module(object):
             user_module._initialize(**kwargs)
             return user_module
 
-        if user_module_cls == ModuleV1:
+        if issubclass(user_module_cls, ModuleV1):
             return user_module_cls(directory=directory, **kwargs)
 
         user_module_cls.directory = directory
@@ -236,6 +239,23 @@ class RunModule(object):
                 return self._get_func_name(base_class, module_func_dict)
         else:
             return None
+
+    # After the 2.0.0rc version, paddle uses the dynamic graph mode by default, which will cause the
+    # execution of the static graph model to fail, so compatibility protection is required.
+    def __getattribute__(self, attr):
+        _attr = object.__getattribute__(self, attr)
+
+        # If the acquired attribute is a built-in property of the object, skip it.
+        if re.match('__.*__', attr):
+            return _attr
+        # If the module is a dygraph model, skip it.
+        elif isinstance(self, paddle.nn.Layer):
+            return _attr
+        # If the acquired attribute is not a class method, skip it.
+        elif not inspect.ismethod(_attr):
+            return _attr
+
+        return paddle_utils.run_in_static_mode(_attr)
 
     @classmethod
     def get_py_requirements(cls) -> List[str]:

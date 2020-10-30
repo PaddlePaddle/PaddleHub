@@ -29,6 +29,7 @@ class ModuleV1(object):
     '''
     '''
 
+    @paddle_utils.run_in_static_mode
     def __init__(self, name: str = None, directory: str = None, version: str = None):
         if not directory:
             return
@@ -101,7 +102,7 @@ class ModuleV1(object):
     def _load_model(self):
         model_path = os.path.join(self.directory, 'model')
         exe = paddle.static.Executor(paddle.CPUPlace())
-        self.program, _, _ = paddle.io.load_inference_model(model_path, executor=exe)
+        self.program, _, _ = paddle.static.load_inference_model(model_path, executor=exe)
 
         # Clear the callstack since it may leak the privacy of the creator.
         for block in self.program.blocks:
@@ -110,6 +111,7 @@ class ModuleV1(object):
                     continue
                 op._set_attr('op_callstack', [''])
 
+    @paddle_utils.run_in_static_mode
     def context(self, signature: str = None, for_test: bool = False,
                 trainable: bool = True) -> Tuple[dict, dict, paddle.static.Program]:
         '''
@@ -136,6 +138,7 @@ class ModuleV1(object):
 
         return feed_dict, fetch_dict, program
 
+    @paddle_utils.run_in_static_mode
     def __call__(self, sign_name: str, data: dict, use_gpu: bool = False, batch_size: int = 1, **kwargs):
         '''
         '''
@@ -186,7 +189,7 @@ class ModuleV1(object):
         # previously generated.
         cls_uuid = utils.md5(module_info.name + module_info.author + module_info.author_email + module_info.type +
                              module_info.summary + module_info.version + directory)
-        cls = type(cls_uuid, (cls, ), {})
+        cls = type('ModuleV1_{}'.format(cls_uuid), (cls, ), {})
 
         cls.name = module_info.name
         cls.author = module_info.author

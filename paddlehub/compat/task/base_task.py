@@ -546,7 +546,7 @@ class BaseTask(object):
 
     def save_inference_model(self, dirname: str, model_filename: str = None, params_filename: str = None):
         with self.phase_guard('predict'):
-            paddle.io.save_inference_model(
+            paddle.static.save_inference_model(
                 dirname=dirname,
                 executor=self.exe,
                 main_program=self.main_program,

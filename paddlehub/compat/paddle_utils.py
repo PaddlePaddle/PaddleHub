@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 import copy
 from typing import Callable, List
 
@@ -195,3 +196,27 @@ def set_op_attr(program: paddle.static.Program, is_test: bool = False):
                 continue
 
             op._set_attr('is_test', is_test)
+
+
+@contextlib.contextmanager
+def static_mode_guard():
+    ''''''
+    premode = 'static' if not paddle.in_dynamic_mode() else 'dynamic'
+
+    if premode == 'dynamic':
+        paddle.enable_static()
+
+    yield
+
+    if premode == 'dynamic':
+        paddle.disable_static()
+
+
+def run_in_static_mode(func):
+    ''''''
+
+    def runner(*args, **kwargs):
+        with static_mode_guard():
+            return func(*args, **kwargs)
+
+    return runner

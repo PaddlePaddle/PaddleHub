@@ -145,6 +145,7 @@ class LocalModuleManager(object):
         return name.replace('-', '_')
 
     def install(self,
+                *,
                 name: str = None,
                 directory: str = None,
                 archive: str = None,
@@ -356,5 +357,7 @@ class LocalModuleManager(object):
                 for path, ds, ts in xarfile.unarchive_with_progress(archive, _tdir):
                     bar.update(float(ds) / ts)
 
-            path = path.split(os.sep)[0]
-            return self._install_from_directory(os.path.join(_tdir, path))
+            # Sometimes the path contains '.'
+            path = os.path.normpath(path)
+            directory = os.path.join(_tdir, path.split(os.sep)[0])
+            return self._install_from_directory(directory)
