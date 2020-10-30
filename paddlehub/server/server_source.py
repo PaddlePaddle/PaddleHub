@@ -71,8 +71,8 @@ class ServerSource(object):
 
         # Delay module loading to improve command line speed
         import paddle
-        params['hub_version'] = paddlehub.__version__
-        params['paddle_version'] = paddle.__version__
+        params['hub_version'] = paddlehub.__version__.split('-')[0]
+        params['paddle_version'] = paddle.__version__.split('-')[0]
 
         result = self.request(path='search', params=params)
         if result['status'] == 0 and len(result['data']) > 0:
