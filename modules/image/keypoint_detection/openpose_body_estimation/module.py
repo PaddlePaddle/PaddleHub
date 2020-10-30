@@ -20,18 +20,19 @@ import cv2
 import paddle
 import paddle.nn as nn
 import numpy as np
-from paddlehub.module.module import moduleinfo
-import paddlehub.process.transforms as T
+from paddlehub.transforms.module import moduleinfo
+import paddlehub.transforms.transforms as T
 import openpose_body_estimation.processor as P
 
 
-@moduleinfo(name="openpose_body_estimation",
-            type="CV/image_editing",
-            author="paddlepaddle",
-            author_email="",
-            summary="Openpose_body_estimation is a body pose estimation model based on Realtime Multi-Person 2D Pose \
+@moduleinfo(
+    name="openpose_body_estimation",
+    type="CV/image_editing",
+    author="paddlepaddle",
+    author_email="",
+    summary="Openpose_body_estimation is a body pose estimation model based on Realtime Multi-Person 2D Pose \
             Estimation using Part Affinity Fields.",
-            version="1.0.0")
+    version="1.0.0")
 class BodyPoseModel(nn.Layer):
     """
     BodyposeModel
@@ -40,6 +41,7 @@ class BodyPoseModel(nn.Layer):
         load_checkpoint(str): Checkpoint save path, default is None.
         visualization (bool): Whether to save the estimation result. Default is True.
     """
+
     def __init__(self, load_checkpoint: str = None, visualization: bool = True):
         super(BodyPoseModel, self).__init__()
 

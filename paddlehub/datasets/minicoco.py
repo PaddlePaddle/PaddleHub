@@ -17,7 +17,7 @@ import os
 from typing import Callable
 
 import paddle
-from paddlehub.process.functional import get_img_file
+from paddlehub.transforms.functional import get_img_file
 from paddlehub.env import DATA_HOME
 from paddlehub.utils.download import download_data
 

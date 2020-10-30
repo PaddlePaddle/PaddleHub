@@ -27,8 +27,8 @@ from PIL import Image
 
 from paddlehub.module.module import serving, RunModule
 from paddlehub.utils.utils import base64_to_cv2
-import paddlehub.process.transforms as T
-import paddlehub.process.functional as Func
+import paddlehub.transforms.transforms as T
+import paddlehub.transforms.functional as Func
 
 
 class ImageServing(object):

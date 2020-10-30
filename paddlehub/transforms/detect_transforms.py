@@ -9,7 +9,7 @@ import PIL
 from PIL import Image, ImageEnhance
 from matplotlib import pyplot as plt
 
-from paddlehub.process.functional import *
+from paddlehub.transforms.functional import *
 
 matplotlib.use('Agg')
 
@@ -27,6 +27,7 @@ class RandomDistort:
         data(dict): Image info and label info.
 
     """
+
     def __init__(self, lower: float = 0.5, upper: float = 1.5):
         self.lower = lower
         self.upper = upper
@@ -70,6 +71,7 @@ class RandomExpand:
         data(dict): Image info and label info.
 
     """
+
     def __init__(self, max_ratio: float = 4., fill: list = None, keep_ratio: bool = True, thresh: float = 0.5):
 
         self.max_ratio = max_ratio
@@ -129,10 +131,8 @@ class RandomCrop:
         data(dict): Image info and label info.
 
     """
-    def __init__(self,
-                 scales: list = [0.3, 1.0],
-                 max_ratio: float = 2.0,
-                 constraints: list = None,
+
+    def __init__(self, scales: list = [0.3, 1.0], max_ratio: float = 2.0, constraints: list = None,
                  max_trial: int = 50):
         self.scales = scales
         self.max_ratio = max_ratio
@@ -198,6 +198,7 @@ class RandomFlip:
         img(np.ndarray): Distorted image.
         data(dict): Image info and label info.
     """
+
     def __init__(self, thresh: float = 0.5):
         self.thresh = thresh
 
@@ -221,6 +222,7 @@ class Compose:
         img(np.ndarray): Preprocessed image.
         data(dict): Image info and label info, default is None.
     """
+
     def __init__(self, transforms: list):
         if not isinstance(transforms, list):
             raise TypeError('The transforms must be a list!')
@@ -263,6 +265,7 @@ class Resize:
         img(np.ndarray): Preprocessed image.
         data(dict): Image info and label info, default is None.
     """
+
     def __init__(self, target_size: int = 512, interp: str = 'RANDOM'):
         self.interp_dict = {
             'NEAREST': cv2.INTER_NEAREST,
@@ -309,6 +312,7 @@ class Normalize:
         img(np.ndarray): Preprocessed image.
         data(dict): Image info and label info, default is None.
     """
+
     def __init__(self, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]):
         self.mean = mean
         self.std = std
@@ -332,6 +336,7 @@ class Normalize:
 
 class ShuffleBox:
     """Shuffle detection information for corresponding input image."""
+
     def __call__(self, img, data):
         gt = np.concatenate([data['gt_boxes'], data['gt_labels'][:, np.newaxis], data['gt_scores'][:, np.newaxis]],
                             axis=1)

@@ -29,7 +29,7 @@ from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 from scipy.ndimage.filters import gaussian_filter
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from paddlehub.process.functional import *
+from paddlehub.transforms.functional import *
 
 matplotlib.use('Agg')
 
@@ -252,13 +252,8 @@ class RandomPaddingCrop:
             pad_height = max(crop_height - img_height, 0)
             pad_width = max(crop_width - img_width, 0)
             if (pad_height > 0 or pad_width > 0):
-                im = cv2.copyMakeBorder(im,
-                                        0,
-                                        pad_height,
-                                        0,
-                                        pad_width,
-                                        cv2.BORDER_CONSTANT,
-                                        value=self.im_padding_value)
+                im = cv2.copyMakeBorder(
+                    im, 0, pad_height, 0, pad_width, cv2.BORDER_CONSTANT, value=self.im_padding_value)
 
             if crop_height > 0 and crop_width > 0:
                 h_off = np.random.randint(img_height - crop_height + 1)
@@ -313,12 +308,13 @@ class RandomRotation:
             r[0, 2] += (nw / 2) - cx
             r[1, 2] += (nh / 2) - cy
             dsize = (nw, nh)
-            im = cv2.warpAffine(im,
-                                r,
-                                dsize=dsize,
-                                flags=cv2.INTER_LINEAR,
-                                borderMode=cv2.BORDER_CONSTANT,
-                                borderValue=self.im_padding_value)
+            im = cv2.warpAffine(
+                im,
+                r,
+                dsize=dsize,
+                flags=cv2.INTER_LINEAR,
+                borderMode=cv2.BORDER_CONSTANT,
+                borderValue=self.im_padding_value)
 
         return im
 
@@ -425,6 +421,7 @@ class RGB2LAB:
     """
     Convert color space from RGB to LAB.
     """
+
     def rgb2xyz(self, rgb: np.ndarray) -> np.ndarray:
         """
         Convert color space from RGB to XYZ.
@@ -491,6 +488,7 @@ class LAB2RGB:
     """
     Convert color space from LAB to RGB.
     """
+
     def __init__(self, mode: str = 'RGB2LAB'):
         self.mode = mode
 
@@ -568,6 +566,7 @@ class ColorPostprocess:
     Return:
         img(np.ndarray): Image in range of 0-255.
     """
+
     def __init__(self, type: type = np.uint8):
         self.type = type
 
@@ -588,6 +587,7 @@ class CenterCrop:
         Return:
             img(np.ndarray): Croped image.
     """
+
     def __init__(self, crop_size: int):
         self.crop_size = crop_size
 
@@ -608,6 +608,7 @@ class SetType:
     Return:
         img(np.ndarray): Transformed image.
     """
+
     def __init__(self, datatype: type = 'float32'):
         self.type = datatype
 
@@ -623,6 +624,7 @@ class ResizeScaling:
         target(int): Target image size.
         interp(Callable): Interpolation method.
     """
+
     def __init__(self, target: int = 368, interp: Callable = cv2.INTER_CUBIC):
         self.target = target
         self.interp = interp

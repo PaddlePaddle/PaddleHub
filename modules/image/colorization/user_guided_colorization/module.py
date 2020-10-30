@@ -18,7 +18,7 @@ import paddle
 import paddle.nn as nn
 from paddle.nn import Conv2D, Conv2DTranspose
 from paddlehub.module.module import moduleinfo
-import paddlehub.process.transforms as T
+import paddlehub.transforms.transforms as T
 from paddlehub.module.cv_module import ImageColorizeModule
 from user_guided_colorization.data_feed import ColorizePreprocess
 

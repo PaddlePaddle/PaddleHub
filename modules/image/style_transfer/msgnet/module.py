@@ -7,12 +7,13 @@ import paddle.nn.functional as F
 
 from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import moduleinfo
-from paddlehub.process.transforms import Compose, Resize, CenterCrop, SetType
+from paddlehub.transforms.transforms import Compose, Resize, CenterCrop, SetType
 from paddlehub.module.cv_module import StyleTransferModule
 
 
 class GramMatrix(nn.Layer):
     """Calculate gram matrix"""
+
     def forward(self, y):
         (b, ch, h, w) = y.shape
         features = y.reshape((b, ch, w * h))
@@ -23,6 +24,7 @@ class GramMatrix(nn.Layer):
 
 class ConvLayer(nn.Layer):
     """Basic conv layer with reflection padding layer"""
+
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int, stride: int):
         super(ConvLayer, self).__init__()
         pad = int(np.floor(kernel_size / 2))
@@ -50,6 +52,7 @@ class UpsampleConvLayer(nn.Layer):
     Return:
         img(paddle.Tensor): UpsampleConvLayer output.
     """
+
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int, stride: int, upsample=None):
         super(UpsampleConvLayer, self).__init__()
         self.upsample = upsample
@@ -84,6 +87,7 @@ class Bottleneck(nn.Layer):
     Return:
         img(paddle.Tensor): Bottleneck output.
     """
+
     def __init__(self,
                  inplanes: int,
                  planes: int,
@@ -97,8 +101,8 @@ class Bottleneck(nn.Layer):
             self.residual_layer = nn.Conv2D(inplanes, planes * self.expansion, kernel_size=1, stride=stride)
         conv_block = (norm_layer(inplanes), nn.ReLU(), nn.Conv2D(inplanes, planes, kernel_size=1, stride=1),
                       norm_layer(planes), nn.ReLU(), ConvLayer(planes, planes, kernel_size=3, stride=stride),
-                      norm_layer(planes), nn.ReLU(), nn.Conv2D(planes, planes * self.expansion, kernel_size=1,
-                                                               stride=1))
+                      norm_layer(planes), nn.ReLU(), nn.Conv2D(
+                          planes, planes * self.expansion, kernel_size=1, stride=1))
         self.conv_block = nn.Sequential(*conv_block)
 
     def forward(self, x: paddle.Tensor):
@@ -124,14 +128,12 @@ class UpBottleneck(nn.Layer):
     Return:
         img(paddle.Tensor): UpBottleneck output.
     """
+
     def __init__(self, inplanes: int, planes: int, stride: int = 2, norm_layer: nn.Layer = nn.BatchNorm2D):
         super(UpBottleneck, self).__init__()
         self.expansion = 4
-        self.residual_layer = UpsampleConvLayer(inplanes,
-                                                planes * self.expansion,
-                                                kernel_size=1,
-                                                stride=1,
-                                                upsample=stride)
+        self.residual_layer = UpsampleConvLayer(
+            inplanes, planes * self.expansion, kernel_size=1, stride=1, upsample=stride)
         conv_block = []
         conv_block += [norm_layer(inplanes), nn.ReLU(), nn.Conv2D(inplanes, planes, kernel_size=1, stride=1)]
         conv_block += [
@@ -162,6 +164,7 @@ class Inspiration(nn.Layer):
     Return:
         img(paddle.Tensor): UpBottleneck output.
     """
+
     def __init__(self, C: int, B: int = 1):
         super(Inspiration, self).__init__()
 
@@ -178,8 +181,8 @@ class Inspiration(nn.Layer):
         self.P = paddle.bmm(self.weight.expand_as(self.G), self.G)
 
         x = paddle.bmm(
-            self.P.transpose((0, 2, 1)).expand((X.shape[0], self.C, self.C)), X.reshape(
-                (X.shape[0], X.shape[1], -1))).reshape(X.shape)
+            self.P.transpose((0, 2, 1)).expand((X.shape[0], self.C, self.C)), X.reshape((X.shape[0], X.shape[1],
+                                                                                         -1))).reshape(X.shape)
         return x
 
     def __repr__(self):
@@ -189,6 +192,7 @@ class Inspiration(nn.Layer):
 
 class Vgg16(nn.Layer):
     """ First four layers from Vgg16."""
+
     def __init__(self):
         super(Vgg16, self).__init__()
         self.conv1_1 = nn.Conv2D(3, 64, kernel_size=3, stride=1, padding=1)
@@ -263,12 +267,8 @@ class MSGNet(nn.Layer):
     Return:
         img(paddle.Tensor): MSGNet output.
     """
-    def __init__(self,
-                 input_nc=3,
-                 output_nc=3,
-                 ngf=128,
-                 n_blocks=6,
-                 norm_layer=nn.InstanceNorm2D,
+
+    def __init__(self, input_nc=3, output_nc=3, ngf=128, n_blocks=6, norm_layer=nn.InstanceNorm2D,
                  load_checkpoint=None):
         super(MSGNet, self).__init__()
         self.gram = GramMatrix()

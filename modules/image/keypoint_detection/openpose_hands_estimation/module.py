@@ -25,18 +25,19 @@ from skimage.measure import label
 from scipy.ndimage.filters import gaussian_filter
 from paddlehub.module.module import moduleinfo
 from paddlehub.process.functional import npmax
-import paddlehub.process.transforms as T
+import paddlehub.transforms.transforms as T
 
 import openpose_hands_estimation.processor as P
 
 
-@moduleinfo(name="openpose_hands_estimation",
-            type="CV/image_editing",
-            author="paddlepaddle",
-            author_email="",
-            summary="Openpose_hands_estimation is a hand pose estimation model based on Hand Keypoint Detection in \
+@moduleinfo(
+    name="openpose_hands_estimation",
+    type="CV/image_editing",
+    author="paddlepaddle",
+    author_email="",
+    summary="Openpose_hands_estimation is a hand pose estimation model based on Hand Keypoint Detection in \
             Single Images using Multiview Bootstrapping.",
-            version="1.0.0")
+    version="1.0.0")
 class HandPoseModel(nn.Layer):
     """
     HandposeModel
@@ -45,6 +46,7 @@ class HandPoseModel(nn.Layer):
         load_checkpoint(str): Checkpoint save path, default is None.
         visualization (bool): Whether to save the estimation result. Default is True.
     """
+
     def __init__(self, load_checkpoint: str = None, visualization: bool = True):
         super(HandPoseModel, self).__init__()
         self.visualization = visualization
