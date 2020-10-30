@@ -1,9 +1,0 @@
-name: ultra_light_fast_generic_face_detector_1mb_640
-dir: "modules/image/face_detection/ultra_light_fast_generic_face_detector_1mb_640"
-exclude:
-    - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/hub_dev/ultra_light_fast_generic_face_detector_1mb_640.tar.gz
-    dest: .
-    uncompress: True

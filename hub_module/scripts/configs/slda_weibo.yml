@@ -1,9 +1,0 @@
-name: slda_weibo
-dir: "modules/text/semantic_model/slda_weibo"
-exclude:
-  - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/slda_weibo.tar.gz
-    dest: .
-    uncompress: True

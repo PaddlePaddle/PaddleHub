@@ -1,9 +1,0 @@
-name: pyramidbox_face_detection
-dir: "modules/image/face_detection/pyramidbox_face_detection"
-exclude:
-    - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/hub_dev/pyramidbox_face_detection_widerface.tar.gz
-    dest: .
-    uncompress: True

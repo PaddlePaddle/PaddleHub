@@ -10,7 +10,6 @@ def download_data(url):
 
     if not os.path.exists(output_path):
         get_path_from_url(url, DATA_HOME)
-        os.remove(os.path.join(DATA_HOME, os.path.basename(url)))
 
     def _wrapper(Dataset):
         return Dataset

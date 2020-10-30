@@ -1,9 +1,0 @@
-name: fix_resnext101_32x48d_wsl_imagenet
-dir: "modules/image/classification/fix_resnext101_32x48d_wsl_imagenet"
-exclude:
-  - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/hub_dev/fix_resnext101_32x48d_wsl_imagenet_model.tar.gz
-    dest: model
-    uncompress: True
