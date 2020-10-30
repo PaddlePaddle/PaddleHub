@@ -1,11 +1,10 @@
-# coding:utf-8
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,27 +30,25 @@ import paddlehub.process.transforms as T
 import openpose_hands_estimation.processor as P
 
 
-@moduleinfo(
-    name="openpose_hands_estimation",
-    type="CV/image_editing",
-    author="paddlepaddle",
-    author_email="",
-    summary="Openpose_hands_estimation is a hand pose estimation model based on Hand Keypoint Detection in \
+@moduleinfo(name="openpose_hands_estimation",
+            type="CV/image_editing",
+            author="paddlepaddle",
+            author_email="",
+            summary="Openpose_hands_estimation is a hand pose estimation model based on Hand Keypoint Detection in \
             Single Images using Multiview Bootstrapping.",
-    version="1.0.0")
+            version="1.0.0")
 class HandPoseModel(nn.Layer):
     """
-    HandPoseModel
+    HandposeModel
 
     Args:
         load_checkpoint(str): Checkpoint save path, default is None.
         visualization (bool): Whether to save the estimation result. Default is True.
     """
-
     def __init__(self, load_checkpoint: str = None, visualization: bool = True):
         super(HandPoseModel, self).__init__()
-
         self.visualization = visualization
+
         self.resize_func = T.ResizeScaling()
         self.norm_func = T.Normalize(std=[1, 1, 1])
         self.hand_detect = P.HandDetect()
@@ -59,6 +56,7 @@ class HandPoseModel(nn.Layer):
         self.remove_pad = P.RemovePadding()
         self.draw_pose = P.DrawPose()
         self.draw_hand = P.DrawHandPose()
+
         no_relu_layers = ['conv6_2_CPM', 'Mconv7_stage2', 'Mconv7_stage3', \
                           'Mconv7_stage4', 'Mconv7_stage5', 'Mconv7_stage6']
 
@@ -105,9 +103,7 @@ class HandPoseModel(nn.Layer):
 
         else:
             checkpoint = os.path.join(self.directory, 'openpose_hand.pdparams')
-            if not os.path.exists(checkpoint):
-                os.system('wget https://paddlehub.bj.bcebos.com/dygraph/pose/openpose_hand.pdparams -O ' + checkpoint)
-            model_dict = paddle.load(checkpoint)[0]
+            model_dict = paddle.load(checkpoint)
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
 
@@ -115,10 +111,10 @@ class HandPoseModel(nn.Layer):
         layers = []
         for layer_name, v in block.items():
             if 'pool' in layer_name:
-                layer = nn.MaxPool2d(kernel_size=v[0], stride=v[1], padding=v[2])
+                layer = nn.MaxPool2D(kernel_size=v[0], stride=v[1], padding=v[2])
                 layers.append((layer_name, layer))
             else:
-                conv2d = nn.Conv2d(in_channels=v[0], out_channels=v[1], kernel_size=v[2], stride=v[3], padding=v[4])
+                conv2d = nn.Conv2D(in_channels=v[0], out_channels=v[1], kernel_size=v[2], stride=v[3], padding=v[4])
                 layers.append((layer_name, conv2d))
                 if layer_name not in no_relu_layers:
                     layers.append(('relu_' + layer_name, nn.ReLU()))
@@ -197,10 +193,3 @@ class HandPoseModel(nn.Layer):
             save_path = os.path.join(save_path, img_path.rsplit("/", 1)[-1])
             cv2.imwrite(save_path, canvas)
         return all_hand_peaks
-
-
-if __name__ == "__main__":
-    paddle.disable_static()
-    model = HandPoseModel()
-    model.eval()
-    out1 = model.predict("detect_hand4.jpg")

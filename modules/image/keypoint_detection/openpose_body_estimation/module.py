@@ -1,11 +1,10 @@
-# coding:utf-8
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,27 +22,24 @@ import paddle.nn as nn
 import numpy as np
 from paddlehub.module.module import moduleinfo
 import paddlehub.process.transforms as T
-
 import openpose_body_estimation.processor as P
 
 
-@moduleinfo(
-    name="openpose_body_estimation",
-    type="CV/image_editing",
-    author="paddlepaddle",
-    author_email="",
-    summary="Openpose_body_estimation is a body pose estimation model based on Realtime Multi-Person 2D Pose \
+@moduleinfo(name="openpose_body_estimation",
+            type="CV/image_editing",
+            author="paddlepaddle",
+            author_email="",
+            summary="Openpose_body_estimation is a body pose estimation model based on Realtime Multi-Person 2D Pose \
             Estimation using Part Affinity Fields.",
-    version="1.0.0")
+            version="1.0.0")
 class BodyPoseModel(nn.Layer):
     """
-    BodyPoseModel
+    BodyposeModel
 
     Args:
         load_checkpoint(str): Checkpoint save path, default is None.
         visualization (bool): Whether to save the estimation result. Default is True.
     """
-
     def __init__(self, load_checkpoint: str = None, visualization: bool = True):
         super(BodyPoseModel, self).__init__()
 
@@ -118,15 +114,13 @@ class BodyPoseModel(nn.Layer):
         self.model6_2 = blocks['block6_2']
 
         if load_checkpoint is not None:
-            model_dict = paddle.load(load_checkpoint)[0]
+            model_dict = paddle.load(load_checkpoint)
             self.set_dict(model_dict)
             print("load custom checkpoint success")
 
         else:
             checkpoint = os.path.join(self.directory, 'openpose_body.pdparams')
-            if not os.path.exists(checkpoint):
-                os.system('wget https://paddlehub.bj.bcebos.com/dygraph/pose/openpose_body.pdparams -O ' + checkpoint)
-            model_dict = paddle.load(checkpoint)[0]
+            model_dict = paddle.load(checkpoint)
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
 
@@ -134,10 +128,10 @@ class BodyPoseModel(nn.Layer):
         layers = []
         for layer_name, v in block.items():
             if 'pool' in layer_name:
-                layer = nn.MaxPool2d(kernel_size=v[0], stride=v[1], padding=v[2])
+                layer = nn.MaxPool2D(kernel_size=v[0], stride=v[1], padding=v[2])
                 layers.append((layer_name, layer))
             else:
-                conv2d = nn.Conv2d(in_channels=v[0], out_channels=v[1], kernel_size=v[2], stride=v[3], padding=v[4])
+                conv2d = nn.Conv2D(in_channels=v[0], out_channels=v[1], kernel_size=v[2], stride=v[3], padding=v[4])
                 layers.append((layer_name, conv2d))
                 if layer_name not in no_relu_layers:
                     layers.append(('relu_' + layer_name, nn.ReLU()))
@@ -204,11 +198,3 @@ class BodyPoseModel(nn.Layer):
             save_path = os.path.join(save_path, img_path.rsplit("/", 1)[-1])
             cv2.imwrite(save_path, canvas)
         return candidate, subset
-
-
-if __name__ == "__main__":
-
-    paddle.disable_static()
-    model = BodyPoseModel()
-    model.eval()
-    out1, out2 = model.predict("demo.jpg")
