@@ -314,9 +314,6 @@ class MSGNet(nn.Layer):
 
         else:
             checkpoint = os.path.join(self.directory, 'style_paddle.pdparams')
-            if not os.path.exists(checkpoint):
-                os.system('wget https://bj.bcebos.com/paddlehub/model/image/image_editing/style_paddle.pdparams -O ' +
-                          checkpoint)
             model_dict = paddle.load(checkpoint)
             model_dict_clone = model_dict.copy()
             for key, value in model_dict_clone.items():
