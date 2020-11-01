@@ -106,7 +106,7 @@ class Processor():
                 minVal, prob, minLoc, point = cv2.minMaxLoc(probMap)
 
                 if prob > self.threshold:
-                    points.append((int(point[0]), int(point[1])))
+                    points.append([int(point[0]), int(point[1])])
                 else:
                     points.append(None)
 
@@ -135,8 +135,8 @@ class Processor():
             partB = pair[1]
 
             if points[partA] and points[partB]:
-                cv2.line(img, points[partA], points[partB], (0, 255, 255), 3)
-                cv2.circle(img, points[partA], 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+                cv2.line(img, tuple(points[partA]), tuple(points[partB]), (0, 255, 255), 3)
+                cv2.circle(img, tuple(points[partA]), 8, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
         
         # 可视化图像保存
         cv2.imwrite(os.path.join(self.output_dir, '%d_%d.jpg' % (im_id, time.time())), img)
