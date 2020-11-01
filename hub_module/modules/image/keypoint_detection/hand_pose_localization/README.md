@@ -17,11 +17,11 @@ def keypoint_detection(
 
 **参数**
 
-* images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]；
-* paths (list\[str\]): 图片的路径；
-* batch\_size (int): batch 的大小；
-* visualization (bool): 是否将识别结果保存为图片文件；
-* output\_dir (str): 图片的保存路径，默认设为 output\_pose。
+* images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\], 默认设为 None；
+* paths (list\[str\]): 图片的路径, 默认设为 None；
+* batch\_size (int): batch 的大小，默认设为 1；
+* visualization (bool): 是否将识别结果保存为图片文件，默认设为 False；
+* output\_dir (str): 图片的保存路径，默认设为 output。
 
 **返回**
 
@@ -49,7 +49,7 @@ print(result)
 
 ## 服务部署
 
-PaddleHub Serving可以部署一个在线人脸关键点检测服务。
+PaddleHub Serving可以部署一个在线人体手部关键点检测服务。
 
 ## 第一步：启动PaddleHub Serving
 
@@ -58,7 +58,7 @@ PaddleHub Serving可以部署一个在线人脸关键点检测服务。
 $ hub serving start -m hand_pose_localization
 ```
 
-这样就完成了一个人体骨骼关键点识别的在线服务API的部署，默认端口号为8866。
+这样就完成了一个人体手部关键点检测的在线服务API的部署，默认端口号为8866。
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 
