@@ -166,7 +166,7 @@ def create_app(init_flag: bool = False, configs: dict = None):
 
 def config_with_file(configs: dict):
     '''
-    Config `cv_module_info` and `cv_module_info` by configs.
+    Config `cv_module_info` and `nlp_module_info` by configs.
 
     Args:
         configs(dict): Module info and configs
