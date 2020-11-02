@@ -217,7 +217,7 @@ class LocalModuleManager(object):
             if os.path.exists(module_dir):
                 try:
                     module = self._local_modules[name] = HubModule.load(module_dir)
-                except Exception as e:
+                except:
                     utils.record_exception('An error was encountered while loading {}.'.format(name))
 
         if not module:
@@ -237,7 +237,7 @@ class LocalModuleManager(object):
             fulldir = os.path.join(self.home, subdir)
             try:
                 self._local_modules[subdir] = HubModule.load(fulldir)
-            except Exception as e:
+            except:
                 utils.record_exception('An error was encountered while loading {}.'.format(subdir))
 
         return [module for module in self._local_modules.values()]
@@ -258,7 +258,7 @@ class LocalModuleManager(object):
             if name.lower() == item['name'].lower() and utils.Version(item['version']).match(version):
                 return self._install_from_url(item['url'])
 
-        module_infos = module_server.get_module_info(name=name)
+        module_infos = module_server.get_module_compat_info(name=name)
         # The HubModule with the specified name cannot be found
         if not module_infos:
             raise HubModuleNotFoundError(name=name, version=version)

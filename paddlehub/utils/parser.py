@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import codecs
-import sys
 from typing import List
 
 import yaml

@@ -15,7 +15,6 @@
 
 import os
 import json
-from typing import Any
 
 import yaml
 from easydict import EasyDict
@@ -25,6 +24,9 @@ import paddlehub.env as hubenv
 
 class HubConfig:
     '''
+    PaddleHub configuration management class. Each time the PaddleHub package is loaded, PaddleHub will set the
+    corresponding functions according to the configuration obtained in HubConfig, such as the log level of printing,
+    server address and so on. When the configuration is modified, PaddleHub needs to be reloaded to take effect.
     '''
 
     def __init__(self):
@@ -38,6 +40,7 @@ class HubConfig:
                 ...
 
     def _initialize(self):
+        # Set default configuration values.
         self.data = EasyDict()
         self.data.server = 'http://paddlepaddle.org.cn/paddlehub'
         self.data.log = EasyDict()
@@ -45,24 +48,30 @@ class HubConfig:
         self.data.log.level = 'DEBUG'
 
     def reset(self):
+        '''Reset configuration to default.'''
         self._initialize()
         self.flush()
 
     @property
     def log_level(self):
+        '''
+        The lowest output level of PaddleHub logger. Logs below the specified level will not be displayed. The default
+        is Debug.
+        '''
         return self.data.log.level
 
     @log_level.setter
     def log_level(self, level: str):
         from paddlehub.utils import log
         if not level in log.log_config.keys():
-            raise ValueError('Unknown log level {}.'.format(level))
+            raise ValueError('Unknown log level {}. The valid values are {}'.format(level, list(log.log_config.keys())))
 
         self.data.log.level = level
         self.flush()
 
     @property
     def log_enable(self):
+        '''Whether to enable the PaddleHub logger to take effect. The default is True.'''
         return self.data.log.enable
 
     @log_enable.setter
@@ -72,6 +81,7 @@ class HubConfig:
 
     @property
     def server(self):
+        '''PaddleHub Module server url.'''
         return self.data.server
 
     @server.setter
@@ -80,6 +90,7 @@ class HubConfig:
         self.flush()
 
     def flush(self):
+        '''Flush the current configuration into the configuration file.'''
         with open(self.file, 'w') as file:
             # convert EasyDict to dict
             cfg = json.loads(json.dumps(self.data))

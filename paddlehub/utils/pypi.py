@@ -13,12 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import optparse
-import os
 import pip
-import sys
 from pip._internal.utils.misc import get_installed_distributions
-from typing import List, Tuple
 
 from paddlehub.utils.utils import Version
 from paddlehub.utils.io import discard_oe, typein

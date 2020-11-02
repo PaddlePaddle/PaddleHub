@@ -22,7 +22,7 @@ from typing import Any, Callable, Generic, List
 import paddle
 from visualdl import LogWriter
 
-from paddlehub.utils.log import logger, processing
+from paddlehub.utils.log import logger
 from paddlehub.utils.utils import Timer
 
 
@@ -163,7 +163,11 @@ class Trainer(object):
         batch_sampler = paddle.io.DistributedBatchSampler(
             train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
         loader = paddle.io.DataLoader(
-            train_dataset, batch_sampler=batch_sampler, num_workers=num_workers, return_list=True)
+            train_dataset,
+            batch_sampler=batch_sampler,
+            num_workers=num_workers,
+            return_list=True,
+            use_buffer_reader=True)
 
         steps_per_epoch = len(batch_sampler)
         timer = Timer(steps_per_epoch * epochs)
@@ -258,7 +262,7 @@ class Trainer(object):
         sum_metrics = defaultdict(int)
         avg_metrics = defaultdict(int)
 
-        with processing('Evaluation on validation dataset'):
+        with logger.processing('Evaluation on validation dataset'):
             for batch_idx, batch in enumerate(loader):
                 result = self.validation_step(batch, batch_idx)
                 loss = result.get('loss', None)

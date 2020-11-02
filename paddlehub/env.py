@@ -12,9 +12,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''
+This module is used to store environmental variables in PaddleHub.
+
+
+HUB_HOME              -->  the root directory for storing PaddleHub related data. Default to ~/.paddlehub. Users can change the
+├                          default value through the HUB_HOME environment variable.
+├── MODULE_HOME       -->  Store the installed PaddleHub Module.
+├── CACHE_HOME        -->  Store the cached data.
+├── DATA_HOME         -->  Store the automatically downloaded datasets.
+├── CONF_HOME         -->  Store the default configuration files.
+├── THIRD_PARTY_HOME  -->  Store third-party libraries.
+├── TMP_HOME          -->  Store temporary files generated during running, such as intermediate products of installing modules,
+├                          files in this directory will generally be automatically cleared.
+├── SOURCES_HOME      -->  Store the installed code sources.
+└── LOG_HOME          -->  Store log files generated during operation, including some non-fatal errors. The log will be stored
+                           daily.
+'''
 
 import os
-import shutil
 
 
 def _get_user_home():

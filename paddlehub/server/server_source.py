@@ -18,7 +18,7 @@ import requests
 from typing import List
 
 import paddlehub
-from paddlehub.utils import utils, platform
+from paddlehub.utils import platform
 
 
 class ServerConnectionError(Exception):
@@ -79,9 +79,8 @@ class ServerSource(object):
             return result['data']
         return None
 
-    def get_module_info(self, name: str) -> dict:
-        '''
-        '''
+    def get_module_compat_info(self, name: str) -> dict:
+        '''Get the version compatibility information of the model.'''
 
         def _convert_version(version: str) -> List:
             result = []
@@ -112,8 +111,7 @@ class ServerSource(object):
         return {}
 
     def request(self, path: str, params: dict) -> dict:
-        '''
-        '''
+        '''Request server.'''
         api = '{}/{}'.format(self._url, path)
         try:
             result = requests.get(api, params, timeout=self._timeout)

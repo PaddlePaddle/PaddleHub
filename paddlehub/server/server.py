@@ -51,14 +51,14 @@ class HubServer(object):
         self.sources.pop(key)
 
     def get_source(self, url: str):
-        ''''''
+        '''Get a module source by url'''
         key = self.keysmap.get(url)
         if not key:
             return None
         return self.sources.get(key)
 
     def get_source_by_key(self, key: str):
-        ''''''
+        '''Get a module source by key'''
         return self.sources.get(key)
 
     def search_module(self,
@@ -105,9 +105,8 @@ class HubServer(object):
                 return result
         return []
 
-    def get_module_info(self, name: str, source: str = None) -> dict:
-        '''
-        '''
+    def get_module_compat_info(self, name: str, source: str = None) -> dict:
+        '''Get the version compatibility information of the model.'''
         sources = self.sources.values() if not source else [self._generate_source(source)]
         for source in sources:
             result = source.get_module_info(name=name)

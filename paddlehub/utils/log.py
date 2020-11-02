@@ -113,6 +113,32 @@ class Logger(object):
         yield
         self.handler.terminator = old_terminator
 
+    @contextlib.contextmanager
+    def processing(self, msg: str, interval: float = 0.1):
+        '''
+        Continuously print a progress bar with rotating special effects.
+
+        Args:
+            msg(str): Message to be printed.
+            interval(float): Rotation interval. Default to 0.1.
+        '''
+        end = False
+
+        def _printer():
+            index = 0
+            flags = ['\\', '|', '/', '-']
+            while not end:
+                flag = flags[index % len(flags)]
+                with self.use_terminator('\r'):
+                    self.info('{}: {}'.format(msg, flag))
+                time.sleep(interval)
+                index += 1
+
+        t = threading.Thread(target=_printer)
+        t.start()
+        yield
+        end = True
+
 
 class ProgressBar(object):
     '''
@@ -170,28 +196,6 @@ class ProgressBar(object):
 
         if self._end:
             sys.stdout.write('\n')
-
-
-@contextlib.contextmanager
-def processing(msg: str, interval: float = 0.1):
-    '''
-    '''
-    end = False
-
-    def _printer():
-        index = 0
-        flags = ['\\', '|', '/', '-']
-        while not end:
-            flag = flags[index % len(flags)]
-            with logger.use_terminator('\r'):
-                logger.info('{}: {}'.format(msg, flag))
-            time.sleep(interval)
-            index += 1
-
-    t = threading.Thread(target=_printer)
-    t.start()
-    yield
-    end = True
 
 
 class FormattedText(object):

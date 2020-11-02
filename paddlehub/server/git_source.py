@@ -55,6 +55,7 @@ class GitSource(object):
         self.load_hub_modules()
 
     def checkout(self, branch: str):
+        '''Checkout the current repo to the specified branch.'''
         try:
             self.repo.git.checkout(branch)
             # reload modules
@@ -63,11 +64,12 @@ class GitSource(object):
             utils.record_exception('An error occurred while checkout {}.'.format(self.path))
 
     def update(self):
+        '''Update the current repo.'''
         try:
             self.repo.remote().pull(self.repo.branches[0])
             # reload modules
             self.load_hub_modules()
-        except Exception as e:
+        except:
             self.hub_modules = OrderedDict()
             utils.record_exception('An error occurred while update {}.'.format(self.path))
 
@@ -82,7 +84,7 @@ class GitSource(object):
                 _item = py_module.__dict__[_item]
                 if issubclass(_item, RunModule):
                     self.hub_modules[_item.name] = _item
-        except Exception as e:
+        except:
             self.hub_modules = OrderedDict()
             utils.record_exception('An error occurred while loading {}.'.format(self.path))
 
@@ -117,6 +119,10 @@ class GitSource(object):
                 'source': self.url
             }]
         return None
+
+    def get_module_compat_info(self, name: str) -> dict:
+        '''Get the version compatibility information of the model.'''
+        return {}
 
     @classmethod
     def check(cls, url: str) -> bool:
