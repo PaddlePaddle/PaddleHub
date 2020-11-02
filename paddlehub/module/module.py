@@ -114,7 +114,7 @@ class RunModule(object):
         if not os.path.exists(req_file):
             return []
         with open(req_file, 'r') as file:
-            return file.read()
+            return file.read().split('\n')
 
     @property
     def is_runnable(self) -> bool:
@@ -149,6 +149,7 @@ class Module(object):
     '''
 
     def __new__(cls,
+                *,
                 name: str = None,
                 directory: str = None,
                 version: str = None,

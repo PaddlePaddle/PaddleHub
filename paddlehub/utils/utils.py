@@ -282,7 +282,7 @@ def md5(text: str):
 
 def record(msg: str) -> str:
     '''Record the specified text into the PaddleHub log file witch will be automatically stored according to date.'''
-    logfile = os.path.join(hubenv.LOG_HOME, time.strftime('%Y%m%d.log'))
+    logfile = get_record_file()
     with open(logfile, 'a') as file:
         file.write('=' * 50 + '\n')
         file.write('Record at ' + time.strftime('%Y-%m-%d %H:%M:%S') + '\n')
@@ -297,3 +297,7 @@ def record_exception(msg: str) -> str:
     tb = traceback.format_exc()
     file = record(tb)
     utils.log.logger.warning('{}. Detailed error information can be found in the {}.'.format(msg, file))
+
+
+def get_record_file():
+    return os.path.join(hubenv.LOG_HOME, time.strftime('%Y%m%d.log'))
