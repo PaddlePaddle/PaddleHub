@@ -347,7 +347,7 @@ class Trainer(object):
             loss(paddle.Tensor) : Loss tensor.
         '''
         self.optimizer.step()
-        self.learning_rate_step(epoch_idx, batch_idx, self.optimizer.get_lr(), loss)
+        self.learning_rate_step(epoch_idx, batch_idx, self.optimizer._learning_rate, loss)
 
     def learning_rate_step(self, epoch_idx: int, batch_idx: int, learning_rate: Generic, loss: paddle.Tensor):
         if isinstance(learning_rate, paddle.optimizer.lr.LRScheduler):
