@@ -237,6 +237,10 @@ class RunModule(object):
         else:
             return None
 
+    @property
+    def serving_func_name(self):
+        return self._serving_func_name
+
     @classmethod
     def get_py_requirements(cls) -> List[str]:
         '''

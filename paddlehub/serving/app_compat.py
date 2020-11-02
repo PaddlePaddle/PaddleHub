@@ -13,14 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Flask, request
-from paddlehub.serving.model_service.base_model_service import cv_module_info
-from paddlehub.serving.model_service.base_model_service import nlp_module_info
-from paddlehub.serving.model_service.base_model_service import v2_module_info
-from paddlehub.common import utils
 import traceback
 import time
 import logging
+
+from flask import Flask, request
+
+from paddlehub.serving.model_service.base_model_service import cv_module_info
+from paddlehub.serving.model_service.base_model_service import nlp_module_info
+from paddlehub.serving.model_service.base_model_service import v2_module_info
+from paddlehub.utils import utils, log
 
 
 def package_result(status: str, msg: str, data: dict):
@@ -29,6 +31,14 @@ def package_result(status: str, msg: str, data: dict):
 
     Args:
          status(str): Error code
+            ========   ==============================================================================================
+            Code       Meaning
+            --------   ----------------------------------------------------------------------------------------------
+            '000'      Return results normally
+            '101'      An error occurred in the predicting method
+            '111'      Module is not available
+            '112'      Use outdated and abandoned HTTP protocol format
+            ========   ===============================================================================================
          msg(str): Detailed info for error
          data(dict): Result of predict api.
 
@@ -39,7 +49,7 @@ def package_result(status: str, msg: str, data: dict):
         .. code-block:: python
 
             data = {'result': 0.002}
-            package_result(status='000000', msg='', data=data)
+            package_result(status='000', msg='', data=data)
     '''
     return {"status": status, "msg": msg, "results": data}
 
@@ -75,9 +85,10 @@ def predict_v2(module_info: dict, input: dict):
     try:
         output = serving_method(**predict_args)
     except Exception as err:
-        traceback.print_exc()
-        return package_result("-1", "Please check data format!", "")
-    return package_result("0", "", output)
+        log.logger.error(traceback.format_exc())
+        return package_result("101", err, "")
+
+    return package_result("000", "", output)
 
 
 def create_app(init_flag: bool = False, configs: dict = None):
@@ -140,12 +151,12 @@ def create_app(init_flag: bool = False, configs: dict = None):
             module_info = v2_module_info.get_module_info(module_name)
         else:
             msg = "Module {} is not available.".format(module_name)
-            return package_result("-1", msg, "")
+            return package_result("111", msg, "")
         inputs = request.json
         if inputs is None:
             results = "This usage is out of date, please use 'application/json' as content-type to post to /predict/%s. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details." % (
                 module_name)
-            return package_result("-1", results, "")
+            return package_result("112", results, "")
 
         results = predict_v2(module_info, inputs)
         return results
@@ -172,7 +183,7 @@ def config_with_file(configs: dict):
         elif "NLP" == value["category"]:
             nlp_module_info.add_module(key, {key: value})
         v2_module_info.add_module(key, {key: value})
-        print(key, "==", value["version"])
+        log.logger.info("%s==%s" % (key, value["version"]))
 
 
 def run(configs: dict = None, port: int = 8866):
@@ -192,8 +203,8 @@ def run(configs: dict = None, port: int = 8866):
     if configs is not None:
         config_with_file(configs)
     else:
-        print("Start failed cause of missing configuration.")
+        log.logger.error("Start failed cause of missing configuration.")
         return
     my_app = create_app(init_flag=True)
     my_app.run(host="0.0.0.0", port=port, debug=False, threaded=False)
-    print("PaddleHub-Serving has been stopped.")
+    log.logger.info("PaddleHub-Serving has been stopped.")

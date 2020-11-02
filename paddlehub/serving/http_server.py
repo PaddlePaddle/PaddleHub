@@ -13,13 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Flask, request
-import multiprocessing
-from paddlehub.serving.v3.device import InferenceServer
-from paddlehub.serving.v3.client import InferenceClient
-from paddlehub.common import utils
 import time
 import logging
+import multiprocessing
+
+from flask import Flask, request
+
+from paddlehub.serving.v3.device import InferenceServer
+from paddlehub.serving.v3.client import InferenceClient
+from paddlehub.utils import utils, log
 
 
 def package_result(status: str, msg: str, data: dict):
@@ -28,6 +30,14 @@ def package_result(status: str, msg: str, data: dict):
 
     Args:
          status(str): Error code
+            ========   ==============================================================================================
+            Code       Meaning
+            --------   ----------------------------------------------------------------------------------------------
+            '000'      Return results normally
+            '101'      An error occurred in the predicting method
+            '111'      Module is not available
+            '112'      Use outdated and abandoned HTTP protocol format
+            ========   ===============================================================================================
          msg(str): Detailed info for error
          data(dict): Result of predict api.
 
@@ -38,17 +48,18 @@ def package_result(status: str, msg: str, data: dict):
         .. code-block:: python
 
             data = {'result': 0.002}
-            package_result(status='000000', msg='', data=data)
+            package_result(status='000', msg='', data=data)
     '''
     return {"status": status, "msg": msg, "results": data}
 
 
-def create_app(client_port: int = 5559):
+def create_app(client_port: int = 5559, modules_name: list = []):
     '''
     Start one flask instance and ready for HTTP requests.
 
     Args:
          client_port(str): port of zmq backend address
+         modules_name(list): the name list of modules
 
     Returns:
         One flask instance.
@@ -95,11 +106,14 @@ def create_app(client_port: int = 5559):
         Returns:
             Result of predicting after packaging.
         '''
+        if module_name not in modules_name:
+            msg = "Module {} is not available.".format(module_name)
+            return package_result("111", "", msg)
         inputs = request.json
         if inputs is None:
             results = "This usage is out of date, please use 'application/json' as content-type to post to /predict/%s. See 'https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md' for more details." % (
                 module_name)
-            return package_result("-1", results, "")
+            return package_result("112", results, "")
         inputs = {'module_name': module_name, 'inputs': inputs}
 
         results = client.send_req(inputs)
@@ -109,31 +123,34 @@ def create_app(client_port: int = 5559):
     return app_instance
 
 
-def run(port: int = 8866, client_port: int = 5559):
+def run(port: int = 8866, client_port: int = 5559, names: list = []):
     '''
     Run flask instance for PaddleHub-Serving
 
     Args:
          port(int): the port of the webserver
          client_port(int): the port of zmq backend address
+         names(list): the name list of modules
 
     Examples:
         .. code-block:: python
 
             run(port=8866, client_port='5559')
     '''
-    my_app = create_app(client_port)
+    my_app = create_app(client_port, modules_name=names)
     my_app.run(host="0.0.0.0", port=port, debug=False, threaded=False)
-    print("PaddleHub-Serving has been stopped.")
+
+    log.logger.info("PaddleHub-Serving has been stopped.")
 
 
-def run_http_server(port: int = 8866, client_port: int = 5559):
+def run_http_server(port: int = 8866, client_port: int = 5559, names: list = []):
     '''
     Start subprocess to run function `run`
 
     Args:
         port(int): the port of the webserver
         client_port(int): the port of zmq backend address
+        names(list): the name list of moduels
 
     Returns:
         process id of subprocess
@@ -141,20 +158,20 @@ def run_http_server(port: int = 8866, client_port: int = 5559):
     Examples:
         .. code-block:: python
 
-            run_http_server(port=8866, client_port='5559')
+            run_http_server(port=8866, client_port='5559', names=['lac'])
     '''
-    p = multiprocessing.Process(target=run, args=(port, client_port))
+    p = multiprocessing.Process(target=run, args=(port, client_port, names))
     p.start()
     return p.pid
 
 
-def run_all(modules_name: list, gpus: list, frontend_port: int, backend_port: int):
+def run_all(modules_info: dict, gpus: list, frontend_port: int, backend_port: int):
     '''
     Run flask instance for frontend HTTP request and zmq device for backend zmq
     request.
 
     Args:
-        modules_name(list): modules name
+        modules_info(dict): modules info, include module name, version
         gpus(list): GPU devices index
         frontend_port(int): the port of PaddleHub-Serving frontend address
         backend_port(int): the port of PaddleHub-Serving zmq backend address
@@ -162,9 +179,10 @@ def run_all(modules_name: list, gpus: list, frontend_port: int, backend_port: in
     Examples:
         .. code-block:: python
 
-            modules_name = ['lac', 'yolov3_darknet53_coco2017']
-            run_all(modules_name, ['0', '1', '2'], 8866, 8867)
+            modules_info = {'lac': {'init_args': {'version': '2.1.0'},
+                                    'predict_args': {'batch_size': 1}}}
+            run_all(modules_info, ['0', '1', '2'], 8866, 8867)
     '''
-    run_http_server(frontend_port, backend_port)
-    MyIS = InferenceServer(modules_name, gpus)
+    run_http_server(frontend_port, backend_port, modules_info.keys())
+    MyIS = InferenceServer(modules_info, gpus)
     MyIS.listen(backend_port)

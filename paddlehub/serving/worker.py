@@ -15,8 +15,11 @@
 
 import zmq
 import os
+import json
 import traceback
 import sys
+
+from paddlehub.utils import log
 
 
 def run_worker(modules_info: dict, gpu_index: int, addr: str):
@@ -40,26 +43,28 @@ def run_worker(modules_info: dict, gpu_index: int, addr: str):
     context = zmq.Context(1)
     socket = context.socket(zmq.REP)
     socket.connect(addr)
-    print('Using GPU device index:', gpu_index)
+
+    log.logger.info("Using GPU device index:%d" % gpu_index)
     while True:
         try:
             message = socket.recv_json()
-            module_name = message['module_name']
             inputs = message['inputs']
+            module_name = message['module_name']
+            inputs.update(modules_info[module_name]['predict_args'])
             inputs.update({'use_gpu': True})
-            method = modules_info[module_name]
+            method = modules_info[module_name]['serving_method']
             os.environ['CUDA_VISIBLE_DEVICES'] = gpu_index
             output = method(**inputs)
 
         except Exception as err:
-            traceback.print_exc()
-            output = package_result("-1", str(err), "")
+            log.logger.error(traceback.format_exc())
+            output = package_result("101", str(err), "")
         socket.send_json(output)
 
 
 if __name__ == '__main__':
     argv = sys.argv
-    modules = argv[1].split(',')
+    modules_info = json.loads(argv[1])
     gpu_index = argv[2]
     addr = argv[3]
 
@@ -67,11 +72,14 @@ if __name__ == '__main__':
     import paddlehub as hub
     from paddlehub.serving.v3.http_server import package_result
 
-    modules_info = {}
-    for module_name in modules:
-        module = hub.Module(name=module_name)
+    modules_pred_info = {}
+    for module_name, module_info in modules_info.items():
+        init_args = module_info.get('init_args', {})
+        init_args.update({'name': module_name})
+        module = hub.Module(**init_args)
         method_name = module.serving_func_name
         serving_method = getattr(module, method_name)
-        modules_info.update({module_name: serving_method})
+        predict_args = module_info.get('predict_args', {})
+        modules_pred_info.update({module_name: {'predict_args': predict_args, 'serving_method': serving_method}})
 
-    run_worker(modules_info, gpu_index, addr)
+    run_worker(modules_pred_info, gpu_index, addr)

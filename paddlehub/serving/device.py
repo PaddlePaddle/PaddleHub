@@ -15,8 +15,11 @@
 
 import zmq
 import os
+import json
 import traceback
 import subprocess
+
+from paddlehub.utils import log
 
 
 class InferenceDevice(object):
@@ -44,35 +47,34 @@ class InferenceDevice(object):
 
             zmq.device(zmq.QUEUE, self.frontend, self.backend)
         except Exception as e:
-            traceback.print_exc()
+            log.logger.error(traceback.format_exc())
         finally:
             self.frontend.close()
             self.backend.close()
             context.term()
 
 
-def start_workers(modules_name: list, gpus: list, backend_addr: str):
+def start_workers(modules_info: dict, gpus: list, backend_addr: str):
     '''
     InferenceWorker class provides workers for different GPU device.
 
     Args:
-        modules_name(list): modules name
+        modules_info(dict): modules info, include module name, version
         gpus(list): GPU devices index
         backend_addr(str): the port of PaddleHub-Serving zmq backend address
 
     Examples:
     .. code-block:: python
 
-        modules_name = ['lac', 'yolov3_darknet53_coco2017']
+        modules_info = {'lac': {'init_args': {'version': '2.1.0'},
+                                'predict_args': {'batch_size': 1}}}
         start_workers(modules_name, ['0', '1', '2'], 'ipc://backend.ipc')
 
     '''
-    modules_str = ''
-    for module_name in modules_name:
-        modules_str += ',%s' % module_name
     work_file = os.path.join(os.path.split(os.path.realpath(__file__))[0], 'worker.py')
+    modules_info = json.dumps(modules_info)
     for index in range(len(gpus)):
-        subprocess.Popen(['python', work_file, modules_str[1:], gpus[index], backend_addr])
+        subprocess.Popen(['python', work_file, modules_info, gpus[index], backend_addr])
 
 
 class InferenceServer(object):
@@ -84,12 +86,12 @@ class InferenceServer(object):
         gpus(list): GPU devices index
     '''
 
-    def __init__(self, modules_name: list, gpus: list):
-        self.modules_name = modules_name
+    def __init__(self, modules_info: dict, gpus: list):
+        self.modules_info = modules_info
         self.gpus = gpus
 
     def listen(self, port: int):
         backend = "ipc://backend.ipc"
-        start_workers(modules_name=self.modules_name, gpus=self.gpus, backend_addr=backend)
+        start_workers(modules_info=self.modules_info, gpus=self.gpus, backend_addr=backend)
         d = InferenceDevice()
         d.listen('tcp://*:%s' % port, backend)
