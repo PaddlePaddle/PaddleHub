@@ -32,6 +32,11 @@ class HubConfig:
     def __init__(self):
         self._initialize()
         self.file = os.path.join(hubenv.CONF_HOME, 'config.yaml')
+
+        if not os.path.exists(self.file):
+            self.flush()
+            return
+
         with open(self.file, 'r') as file:
             try:
                 cfg = yaml.load(file, Loader=yaml.FullLoader)
