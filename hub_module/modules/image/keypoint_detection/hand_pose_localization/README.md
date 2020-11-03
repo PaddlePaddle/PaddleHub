@@ -6,7 +6,7 @@ openpose 手部关键点检测模型
 ## 模型安装
 
 ```shell
-$hub install pyramidbox_face_detection==1.1.0
+$hub install hand_pose_localization
 ```
 
 ## API 说明
