@@ -1,13 +1,13 @@
 import paddle
 import paddlehub as hub
-import paddlehub.transforms.transforms as T
+import paddlehub.vision.transforms as T
 from paddlehub.finetune.trainer import Trainer
 from paddlehub.datasets import MiniCOCO
 
 if __name__ == "__main__":
     model = hub.Module(name='msgnet')
     transform = T.Compose([T.Resize(
-        (256, 256), interp='LINEAR'), T.CenterCrop(crop_size=256)], T.SetType(datatype='float32'))
+        (256, 256), interpolation='LINEAR'), T.CenterCrop(crop_size=256)], T.SetType(datatype='float32'))
 
     styledata = MiniCOCO(transform)
     optimizer = paddle.optimizer.Adam(learning_rate=0.0001, parameters=model.parameters())

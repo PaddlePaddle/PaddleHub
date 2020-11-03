@@ -17,7 +17,9 @@ import os
 from typing import Callable
 
 import paddle
-from paddlehub.transforms.functional import get_img_file
+import numpy as np
+
+from paddlehub.vision.utils import get_img_file
 from paddlehub.env import DATA_HOME
 from paddlehub.utils.download import download_data
 
@@ -49,7 +51,7 @@ class MiniCOCO(paddle.io.Dataset):
         self.data = get_img_file(self.file)
         self.style = get_img_file(self.style_file)
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> np.ndarray:
 
         img_path = self.data[idx]
         im = self.transform(img_path)

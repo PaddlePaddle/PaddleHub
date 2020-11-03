@@ -13,25 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import math
-
 import random
-import copy
 from typing import Callable
-from collections import OrderedDict
 
 import cv2
+import PIL
 import numpy as np
-import matplotlib
-from PIL import Image, ImageEnhance
-from matplotlib import pyplot as plt
-from matplotlib.figure import Figure
-from scipy.ndimage.filters import gaussian_filter
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from paddlehub.transforms.functional import *
-
-matplotlib.use('Agg')
+import paddlehub.vision.functional as F
 
 
 class Compose:
@@ -62,7 +50,7 @@ class Compose:
             im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
 
         if self.is_permute:
-            im = permute(im)
+            im = F.permute(im)
 
         return im
 
@@ -73,7 +61,7 @@ class RandomHorizontalFlip:
 
     def __call__(self, im):
         if random.random() < self.prob:
-            im = horizontal_flip(im)
+            im = F.horizontal_flip(im)
         return im
 
 
@@ -83,13 +71,13 @@ class RandomVerticalFlip:
 
     def __call__(self, im):
         if random.random() < self.prob:
-            im = vertical_flip(im)
+            im = F.vertical_flip(im)
         return im
 
 
 class Resize:
     # The interpolation mode
-    interp_dict = {
+    interpolation_dict = {
         'NEAREST': cv2.INTER_NEAREST,
         'LINEAR': cv2.INTER_LINEAR,
         'CUBIC': cv2.INTER_CUBIC,
@@ -97,10 +85,10 @@ class Resize:
         'LANCZOS4': cv2.INTER_LANCZOS4
     }
 
-    def __init__(self, target_size=512, interp='LINEAR'):
-        self.interp = interp
-        if not (interp == "RANDOM" or interp in self.interp_dict):
-            raise ValueError("interp should be one of {}".format(self.interp_dict.keys()))
+    def __init__(self, target_size=512, interpolation='LINEAR'):
+        self.interpolation = interpolation
+        if not (interpolation == "RANDOM" or interpolation in self.interpolation_dict):
+            raise ValueError("interpolation should be one of {}".format(self.interpolation_dict.keys()))
         if isinstance(target_size, list) or isinstance(target_size, tuple):
             if len(target_size) != 2:
                 raise TypeError(
@@ -112,11 +100,11 @@ class Resize:
         self.target_size = target_size
 
     def __call__(self, im):
-        if self.interp == "RANDOM":
-            interp = random.choice(list(self.interp_dict.keys()))
+        if self.interpolation == "RANDOM":
+            interpolation = random.choice(list(self.interpolation_dict.keys()))
         else:
-            interp = self.interp
-        im = resize(im, self.target_size, self.interp_dict[interp])
+            interpolation = self.interpolation
+        im = F.resize(im, self.target_size, self.interpolation_dict[interpolation])
         return im
 
 
@@ -125,7 +113,7 @@ class ResizeByLong:
         self.long_size = long_size
 
     def __call__(self, im):
-        im = resize_long(im, self.long_size)
+        im = F.resize_long(im, self.long_size)
         return im
 
 
@@ -142,7 +130,7 @@ class ResizeRangeScaling:
             random_size = self.max_value
         else:
             random_size = int(np.random.uniform(self.min_value, self.max_value) + 0.5)
-        im = resize_long(im, random_size, cv2.INTER_LINEAR)
+        im = F.resize_long(im, random_size, cv2.INTER_LINEAR)
         return im
 
 
@@ -170,7 +158,7 @@ class ResizeStepScaling:
         w = int(round(scale_factor * im.shape[1]))
         h = int(round(scale_factor * im.shape[0]))
 
-        im = resize(im, (w, h), cv2.INTER_LINEAR)
+        im = F.resize(im, (w, h), cv2.INTER_LINEAR)
         return im
 
 
@@ -187,7 +175,7 @@ class Normalize:
     def __call__(self, im):
         mean = np.array(self.mean)[np.newaxis, np.newaxis, :]
         std = np.array(self.std)[np.newaxis, np.newaxis, :]
-        im = normalize(im, mean, std)
+        im = F.normalize(im, mean, std)
         return im
 
 
@@ -405,7 +393,7 @@ class RandomDistort:
             'hue': self.hue_prob
         }
         im = im.astype('uint8')
-        im = Image.fromarray(im)
+        im = PIL.Image.fromarray(im)
         for id in range(4):
             params = params_dict[ops[id].__name__]
             prob = prob_dict[ops[id].__name__]
@@ -592,7 +580,7 @@ class CenterCrop:
         self.crop_size = crop_size
 
     def __call__(self, img: np.ndarray):
-        img_width, img_height, chanel = img.shape
+        img_width, img_height, _ = img.shape
         crop_top = int((img_height - self.crop_size) / 2.)
         crop_left = int((img_width - self.crop_size) / 2.)
         return img[crop_left:crop_left + self.crop_size, crop_top:crop_top + self.crop_size, :]
@@ -622,14 +610,14 @@ class ResizeScaling:
 
     Args:
         target(int): Target image size.
-        interp(Callable): Interpolation method.
+        interpolation(Callable): Interpolation method.
     """
 
-    def __init__(self, target: int = 368, interp: Callable = cv2.INTER_CUBIC):
+    def __init__(self, target: int = 368, interpolation: Callable = cv2.INTER_CUBIC):
         self.target = target
-        self.interp = interp
+        self.interpolation = interpolation
 
     def __call__(self, img, scale_search):
         scale = scale_search * self.target / img.shape[0]
-        resize_img = cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=self.interp)
+        resize_img = cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=self.interpolation)
         return resize_img

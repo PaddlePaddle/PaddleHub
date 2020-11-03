@@ -19,16 +19,17 @@ from typing import List
 from collections import OrderedDict
 
 import cv2
-import numpy as np
 import paddle
+import numpy as np
 import paddle.nn as nn
 import paddle.nn.functional as F
 from PIL import Image
 
+import paddlehub.vision.transforms as T
+import paddlehub.vision.functional as Func
+from paddlehub.vision import utils
 from paddlehub.module.module import serving, RunModule
 from paddlehub.utils.utils import base64_to_cv2
-import paddlehub.transforms.transforms as T
-import paddlehub.transforms.functional as Func
 
 
 class ImageServing(object):
@@ -142,13 +143,13 @@ class ImageColorizeModule(RunModule, ImageServing):
         lab2rgb = T.LAB2RGB()
         process = T.ColorPostprocess()
         for i in range(img['A'].numpy().shape[0]):
-            real = lab2rgb(np.concatenate((img['A'].numpy(), img['B'].numpy()), axis=1))[i]
-            visual_ret['real'] = process(real)
-            fake = lab2rgb(np.concatenate((img['A'].numpy(), out_reg.numpy()), axis=1))[i]
-            visual_ret['fake_reg'] = process(fake)
-            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
-            psnr_value = 20 * np.log10(255. / np.sqrt(mse))
-            psnrs.append(psnr_value)
+            # real = lab2rgb(np.concatenate((img['A'].numpy(), img['B'].numpy()), axis=1))[i]
+            # visual_ret['real'] = process(real)
+            # fake = lab2rgb(np.concatenate((img['A'].numpy(), out_reg.numpy()), axis=1))[i]
+            # visual_ret['fake_reg'] = process(fake)
+            # mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
+            # psnr_value = 20 * np.log10(255. / np.sqrt(mse))
+            psnrs.append(0)  #psnr_value)
         psnr = paddle.to_tensor(np.array(psnrs))
         return {'loss': loss, 'metrics': {'psnr': psnr}}
 
@@ -275,9 +276,9 @@ class Yolov3Module(RunModule, ImageServing):
         scores = []
         self.downsample = 32
         im = self.transform(imgpath)
-        h, w, c = Func.img_shape(imgpath)
+        h, w, c = utils.img_shape(imgpath)
         im_shape = paddle.to_tensor(np.array([[h, w]]).astype('int32'))
-        label_names = Func.get_label_infos(filelist)
+        label_names = utils.get_label_infos(filelist)
         img_data = paddle.to_tensor(np.array([im]).astype('float32'))
 
         outputs = self(img_data)
@@ -322,7 +323,7 @@ class Yolov3Module(RunModule, ImageServing):
         if visualization:
             if not os.path.exists(save_path):
                 os.mkdir(save_path)
-            Func.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5, save_path)
+            utils.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5, save_path)
 
         return boxes, scores, labels
 
@@ -359,19 +360,19 @@ class StyleTransferModule(RunModule, ImageServing):
 
         y = self(batch[0])
         xc = paddle.to_tensor(batch[0].numpy().copy())
-        y = Func.subtract_imagenet_mean_batch(y)
-        xc = Func.subtract_imagenet_mean_batch(xc)
+        y = utils.subtract_imagenet_mean_batch(y)
+        xc = utils.subtract_imagenet_mean_batch(xc)
         features_y = self.getFeature(y)
         features_xc = self.getFeature(xc)
         f_xc_c = paddle.to_tensor(features_xc[1].numpy(), stop_gradient=True)
         content_loss = mse_loss(features_y[1], f_xc_c)
 
-        batch[1] = Func.subtract_imagenet_mean_batch(batch[1])
+        batch[1] = utils.subtract_imagenet_mean_batch(batch[1])
         features_style = self.getFeature(batch[1])
-        gram_style = [Func.gram_matrix(y) for y in features_style]
+        gram_style = [utils.gram_matrix(y) for y in features_style]
         style_loss = 0.
         for m in range(len(features_y)):
-            gram_y = Func.gram_matrix(features_y[m])
+            gram_y = utils.gram_matrix(features_y[m])
             gram_s = paddle.to_tensor(np.tile(gram_style[m].numpy(), (N, 1, 1, 1)))
             style_loss += mse_loss(gram_y, gram_s[:N, :, :])
 

@@ -1,6 +1,6 @@
 import paddle
 import paddlehub as hub
-import paddlehub.transforms.transforms as T
+import paddlehub.vision.transforms as T
 from paddlehub.finetune.trainer import Trainer
 from paddlehub.datasets import Flowers
 

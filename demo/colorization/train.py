@@ -1,17 +1,18 @@
 import paddle
 import paddlehub as hub
-import paddlehub.transforms.transforms as T
+import paddlehub.vision.transforms as T
 from paddlehub.finetune.trainer import Trainer
 from paddlehub.datasets import Canvas
 
 if __name__ == '__main__':
 
     model = hub.Module(name='user_guided_colorization')
-    transform = T.Compose([T.Resize((256, 256), interp='NEAREST'),
-                           T.RandomPaddingCrop(crop_size=176),
-                           T.RGB2LAB()],
-                          stay_rgb=True,
-                          is_permute=False)
+    transform = T.Compose(
+        [T.Resize((256, 256), interpolation='NEAREST'),
+         T.RandomPaddingCrop(crop_size=176),
+         T.RGB2LAB()],
+        stay_rgb=True,
+        is_permute=False)
 
     color_set = Canvas(transform=transform, mode='train')
     optimizer = paddle.optimizer.Adam(learning_rate=0.0001, parameters=model.parameters())

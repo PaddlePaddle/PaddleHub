@@ -1,17 +1,27 @@
+# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import random
 from typing import Callable
 
 import cv2
-import numpy as np
-import matplotlib
 import PIL
-from PIL import Image, ImageEnhance
-from matplotlib import pyplot as plt
+import numpy as np
 
-from paddlehub.transforms.functional import *
-
-matplotlib.use('Agg')
+import paddlehub.vision.transforms.functional as F
+from paddlehub.vision.utils import box_crop, box_iou_xywh
 
 
 class RandomDistort:
@@ -34,20 +44,20 @@ class RandomDistort:
 
     def random_brightness(self, img: PIL.Image):
         e = np.random.uniform(self.lower, self.upper)
-        return ImageEnhance.Brightness(img).enhance(e)
+        return PIL.ImageEnhance.Brightness(img).enhance(e)
 
     def random_contrast(self, img: PIL.Image):
         e = np.random.uniform(self.lower, self.upper)
-        return ImageEnhance.Contrast(img).enhance(e)
+        return PIL.ImageEnhance.Contrast(img).enhance(e)
 
     def random_color(self, img: PIL.Image):
         e = np.random.uniform(self.lower, self.upper)
-        return ImageEnhance.Color(img).enhance(e)
+        return PIL.ImageEnhance.Color(img).enhance(e)
 
     def __call__(self, img: np.ndarray, data: dict):
         ops = [self.random_brightness, self.random_contrast, self.random_color]
         np.random.shuffle(ops)
-        img = Image.fromarray(img)
+        img = PIL.Image.fromarray(img)
         img = ops[0](img)
         img = ops[1](img)
         img = ops[2](img)
@@ -149,7 +159,7 @@ class RandomCrop:
         if not self.constraints:
             self.constraints = [(0.1, 1.0), (0.3, 1.0), (0.5, 1.0), (0.7, 1.0), (0.9, 1.0), (0.0, 1.0)]
 
-        img = Image.fromarray(img)
+        img = PIL.Image.fromarray(img)
         w, h = img.size
         crops = [(0, 0, w, h)]
         for min_iou, max_iou in self.constraints:
@@ -174,7 +184,7 @@ class RandomCrop:
 
             if box_num < 1:
                 continue
-            img = img.crop((crop[0], crop[1], crop[0] + crop[2], crop[1] + crop[3])).resize(img.size, Image.LANCZOS)
+            img = img.crop((crop[0], crop[1], crop[0] + crop[2], crop[1] + crop[3])).resize(img.size, PIL.Image.LANCZOS)
             img = np.asarray(img)
             data['gt_boxes'] = crop_boxes
             data['gt_labels'] = crop_labels
@@ -293,7 +303,7 @@ class Resize:
             interp = random.choice(list(self.interp_dict.keys()))
         else:
             interp = self.interp
-        img = resize(img, self.target_size, self.interp_dict[interp])
+        img = F.resize(img, self.target_size, self.interp_dict[interp])
         if data is not None:
             return img, data
         else:
@@ -326,7 +336,7 @@ class Normalize:
 
         mean = np.array(self.mean)[np.newaxis, np.newaxis, :]
         std = np.array(self.std)[np.newaxis, np.newaxis, :]
-        im = normalize(im, mean, std)
+        im = F.normalize(im, mean, std)
 
         if data is not None:
             return im, data

@@ -11,98 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import os
 
-import cv2
 import paddle
-import matplotlib
+import PIL
 import numpy as np
-from pycocotools.coco import COCO
-from PIL import Image, ImageEnhance
-from matplotlib import pyplot as plt
-
-matplotlib.use('Agg')
-
-
-def normalize(im, mean, std):
-    im = im.astype(np.float32, copy=False) / 255.0
-    im -= mean
-    im /= std
-    return im
-
-
-def permute(im):
-    im = np.transpose(im, (2, 0, 1))
-    return im
-
-
-def resize(im, target_size=608, interp=cv2.INTER_LINEAR):
-    if isinstance(target_size, list) or isinstance(target_size, tuple):
-        w = target_size[0]
-        h = target_size[1]
-    else:
-        w = target_size
-        h = target_size
-    im = cv2.resize(im, (w, h), interpolation=interp)
-    return im
-
-
-def resize_long(im, long_size=224, interpolation=cv2.INTER_LINEAR):
-    value = max(im.shape[0], im.shape[1])
-    scale = float(long_size) / float(value)
-    resized_width = int(round(im.shape[1] * scale))
-    resized_height = int(round(im.shape[0] * scale))
-
-    im = cv2.resize(im, (resized_width, resized_height), interpolation=interpolation)
-    return im
-
-
-def horizontal_flip(im):
-    if len(im.shape) == 3:
-        im = im[:, ::-1, :]
-    elif len(im.shape) == 2:
-        im = im[:, ::-1]
-    return im
-
-
-def vertical_flip(im):
-    if len(im.shape) == 3:
-        im = im[::-1, :, :]
-    elif len(im.shape) == 2:
-        im = im[::-1, :]
-    return im
-
-
-def brightness(im, brightness_lower, brightness_upper):
-    brightness_delta = np.random.uniform(brightness_lower, brightness_upper)
-    im = ImageEnhance.Brightness(im).enhance(brightness_delta)
-    return im
-
-
-def contrast(im, contrast_lower, contrast_upper):
-    contrast_delta = np.random.uniform(contrast_lower, contrast_upper)
-    im = ImageEnhance.Contrast(im).enhance(contrast_delta)
-    return im
-
-
-def saturation(im, saturation_lower, saturation_upper):
-    saturation_delta = np.random.uniform(saturation_lower, saturation_upper)
-    im = ImageEnhance.Color(im).enhance(saturation_delta)
-    return im
-
-
-def hue(im, hue_lower, hue_upper):
-    hue_delta = np.random.uniform(hue_lower, hue_upper)
-    im = np.array(im.convert('HSV'))
-    im[:, :, 0] = im[:, :, 0] + hue_delta
-    im = Image.fromarray(im, mode='HSV').convert('RGB')
-    return im
-
-
-def rotate(im, rotate_lower, rotate_upper):
-    rotate_delta = np.random.uniform(rotate_lower, rotate_upper)
-    im = im.rotate(int(rotate_delta))
-    return im
+import matplotlib as plt
 
 
 def is_image_file(filename: str) -> bool:
@@ -114,13 +29,13 @@ def is_image_file(filename: str) -> bool:
 def get_img_file(dir_name: str) -> list:
     '''Get all image file paths in several directories which have the same parent directory.'''
     images = []
-    for parent, dirnames, filenames in os.walk(dir_name):
+    for parent, _, filenames in os.walk(dir_name):
         for filename in filenames:
             if not is_image_file(filename):
                 continue
             img_path = os.path.join(parent, filename)
             images.append(img_path)
-    images.sort()
+
     return images
 
 
@@ -188,7 +103,7 @@ def draw_boxes_on_image(image_path: str,
                         score_thresh: float = 0.5,
                         save_path: str = 'result'):
     """Draw boxes on images."""
-    image = np.array(Image.open(image_path))
+    image = np.array(PIL.Image.open(image_path))
     plt.figure()
     _, ax = plt.subplots(1)
     ax.imshow(image)
@@ -230,16 +145,9 @@ def draw_boxes_on_image(image_path: str,
     plt.close('all')
 
 
-def img_shape(img_path: str):
-    """Get image shape."""
-    im = cv2.imread(img_path)
-    im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-    h, w, c = im.shape
-    return h, w, c
-
-
 def get_label_infos(file_list: str):
     """Get label names by corresponding category ids."""
+    from pycocotools.coco import COCO
     map_label = COCO(file_list)
     label_names = []
     categories = map_label.loadCats(map_label.getCatIds())

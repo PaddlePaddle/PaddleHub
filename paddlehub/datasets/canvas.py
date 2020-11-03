@@ -14,13 +14,13 @@
 # limitations under the License.
 
 import os
-
-import numpy as np
-import paddle
-
-from paddlehub.transforms.functional import get_img_file
-from paddlehub.env import DATA_HOME
 from typing import Callable
+
+import paddle
+import numpy as np
+
+from paddlehub.vision.utils import get_img_file
+from paddlehub.env import DATA_HOME
 from paddlehub.utils.download import download_data
 
 

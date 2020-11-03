@@ -18,7 +18,7 @@ import paddle
 import paddle.nn as nn
 from paddle.nn import Conv2D, Conv2DTranspose
 from paddlehub.module.module import moduleinfo
-import paddlehub.transforms.transforms as T
+import paddlehub.vision.transforms as T
 from paddlehub.module.cv_module import ImageColorizeModule
 from user_guided_colorization.data_feed import ColorizePreprocess
 
@@ -186,14 +186,14 @@ class UserGuidedColorization(nn.Layer):
     def transforms(self, images: str, is_train: bool = True) -> callable:
         if is_train:
             transform = T.Compose(
-                [T.Resize((256, 256), interp='NEAREST'),
+                [T.Resize((256, 256), interpolation='NEAREST'),
                  T.RandomPaddingCrop(crop_size=176),
                  T.RGB2LAB()],
                 stay_rgb=True,
                 is_permute=False)
         else:
             transform = T.Compose([T.Resize(
-                (256, 256), interp='NEAREST'), T.RGB2LAB()],
+                (256, 256), interpolation='NEAREST'), T.RGB2LAB()],
                                   stay_rgb=True,
                                   is_permute=False)
         return transform(images)
