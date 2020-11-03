@@ -218,7 +218,7 @@ class LocalModuleManager(object):
                 try:
                     module = self._local_modules[name] = HubModule.load(module_dir)
                 except:
-                    utils.record_exception('An error was encountered while loading {}.'.format(name))
+                    utils.record_exception('An error was encountered while loading {}'.format(name))
 
         if not module:
             return None
@@ -238,7 +238,7 @@ class LocalModuleManager(object):
             try:
                 self._local_modules[subdir] = HubModule.load(fulldir)
             except:
-                utils.record_exception('An error was encountered while loading {}.'.format(subdir))
+                utils.record_exception('An error was encountered while loading {}'.format(subdir))
 
         return [module for module in self._local_modules.values()]
 
@@ -339,7 +339,7 @@ class LocalModuleManager(object):
             hub_module_cls = HubModule.load(directory)
 
             # Uninstall local module
-            if self.search(hub_module_cls.name):
+            if os.path.exists(self._get_normalized_path(hub_module_cls.name)):
                 self.uninstall(hub_module_cls.name)
 
             shutil.copytree(directory, self._get_normalized_path(hub_module_cls.name))

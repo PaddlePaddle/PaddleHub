@@ -61,7 +61,7 @@ class GitSource(object):
             # reload modules
             self.load_hub_modules()
         except:
-            utils.record_exception('An error occurred while checkout {}.'.format(self.path))
+            utils.record_exception('An error occurred while checkout {}'.format(self.path))
 
     def update(self):
         '''Update the current repo.'''
@@ -71,7 +71,7 @@ class GitSource(object):
             self.load_hub_modules()
         except:
             self.hub_modules = OrderedDict()
-            utils.record_exception('An error occurred while update {}.'.format(self.path))
+            utils.record_exception('An error occurred while update {}'.format(self.path))
 
     def load_hub_modules(self):
         if 'hubconf' in sys.modules:
@@ -86,7 +86,7 @@ class GitSource(object):
                     self.hub_modules[_item.name] = _item
         except:
             self.hub_modules = OrderedDict()
-            utils.record_exception('An error occurred while loading {}.'.format(self.path))
+            utils.record_exception('An error occurred while loading {}'.format(self.path))
 
         sys.path.remove(self.path)
 
