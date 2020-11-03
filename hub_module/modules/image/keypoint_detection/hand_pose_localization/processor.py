@@ -23,13 +23,7 @@ def base64_to_cv2(b64str):
 
 class Processor():
     # 初始化函数
-    def __init__(
-        self, 
-        images=None, 
-        paths=None, 
-        batch_size=1, 
-        output_dir='output'
-    ):
+    def __init__(self, images=None, paths=None, batch_size=1, output_dir='output'):
         # 变量设置
         self.num_points = 21        
         self.inHeight = 368
@@ -89,11 +83,7 @@ class Processor():
         return input_datas
 
     # 结果后处理函数
-    def postprocess(
-        self, 
-        outputs, 
-        visualization
-    ):
+    def postprocess(self, outputs, visualization):
         all_points = []
 
         # 结果后处理
@@ -123,12 +113,7 @@ class Processor():
         return all_points
 
     # 结果可视化
-    def vis_pose(
-        self, 
-        img, 
-        points, 
-        im_id
-    ):
+    def vis_pose(self, img, points, im_id):
         # 根据结果绘制关键点到原图像上
         for pair in self.point_pairs:
             partA = pair[0]
