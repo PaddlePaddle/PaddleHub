@@ -1,3 +1,14 @@
+## 模型概述
+openpose 手部关键点检测模型
+
+模型详情请参考[openpose开源项目](https://github.com/CMU-Perceptual-Computing-Lab/openpose)
+
+## 模型安装
+
+```shell
+$hub install pyramidbox_face_detection==1.1.0
+```
+
 ## API 说明
 
 ```python
