@@ -202,6 +202,12 @@ class Module(object):
         else:
             user_module_cls.source = ''
             user_module_cls.branch = ''
+
+        # In the case of multiple cards, the following code can set each process to use the correct place.
+        if issubclass(user_module_cls, paddle.nn.Layer):
+            place = paddle.get_device().split(':')[0]
+            paddle.set_device(place)
+
         return user_module_cls
 
     @classmethod
