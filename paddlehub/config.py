@@ -113,7 +113,7 @@ def _load_old_config(config: HubConfig):
         with open(old_cfg_file) as file:
             try:
                 cfg = json.loads(file.read())
-                config.server = cfg['server_url']
+                config.server = cfg['server_url'][0]
                 config.log_level = cfg['log_level']
             except:
                 ...

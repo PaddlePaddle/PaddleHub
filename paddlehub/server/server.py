@@ -109,7 +109,7 @@ class HubServer(object):
         '''Get the version compatibility information of the model.'''
         sources = self.sources.values() if not source else [self._generate_source(source)]
         for source in sources:
-            result = source.get_module_info(name=name)
+            result = source.get_module_compat_info(name=name)
             if result:
                 return result
         return {}
