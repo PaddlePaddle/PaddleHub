@@ -31,11 +31,11 @@ class InferenceClient(object):
 
 
 class InferenceClientProxy(object):
-    def __init__(self):
-        self.clients = {}
+    clients = {}
 
-    def get_client(self, pid, frontend_addr):
-        if pid not in self.clients.keys():
+    @staticmethod
+    def get_client(pid, frontend_addr):
+        if pid not in InferenceClientProxy.clients.keys():
             client = InferenceClient(frontend_addr)
-            self.clients.update({pid: client})
-        return self.clients[pid]
+            InferenceClientProxy.clients.update({pid: client})
+        return InferenceClientProxy.clients[pid]
