@@ -19,8 +19,6 @@ import json
 import traceback
 import sys
 
-from paddlehub.utils import log
-
 
 def run_worker(modules_info: dict, gpu_index: int, addr: str):
     '''
@@ -44,7 +42,7 @@ def run_worker(modules_info: dict, gpu_index: int, addr: str):
     socket = context.socket(zmq.REP)
     socket.connect(addr)
 
-    log.logger.info("Using GPU device index:%d" % gpu_index)
+    log.logger.info("Using GPU device index:%s" % gpu_index)
     while True:
         try:
             message = socket.recv_json()
@@ -70,7 +68,8 @@ if __name__ == '__main__':
 
     os.environ['CUDA_VISIBLE_DEVICES'] = gpu_index
     import paddlehub as hub
-    from paddlehub.serving.v3.http_server import package_result
+    from paddlehub.serving.http_server import package_result
+    from paddlehub.utils import log
 
     modules_pred_info = {}
     for module_name, module_info in modules_info.items():

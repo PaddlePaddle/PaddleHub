@@ -37,23 +37,16 @@ setup(
     install_requires=REQUIRED_PACKAGES,
     packages=find_packages(),
     package_data={
-        'paddlehub/serving/templates': [
-            'paddlehub/serving/templates/lac_serving_config.json',
-            'paddlehub/serving/templates/lac_gpu_serving_config.json'
-        ],
         'paddlehub/command/tmpl': [
             'paddlehub/command/tmpl/init_py.tmpl', 'paddlehub/command/tmpl/serving_demo.tmpl',
             'paddlehub/command/tmpl/x_model.tmpl'
         ]
     },
     include_package_data=True,
-    data_files=[('paddlehub/serving/templates', [
-        'paddlehub/serving/templates/lac_serving_config.json', 'paddlehub/serving/templates/lac_gpu_serving_config.json'
-    ]),
-                ('paddlehub/commands/tmpl', [
-                    'paddlehub/commands/tmpl/init_py.tmpl', 'paddlehub/commands/tmpl/serving_demo.tmpl',
-                    'paddlehub/commands/tmpl/x_model.tmpl'
-                ])],
+    data_files=[('paddlehub/commands/tmpl', [
+        'paddlehub/commands/tmpl/init_py.tmpl', 'paddlehub/commands/tmpl/serving_demo.tmpl',
+        'paddlehub/commands/tmpl/x_model.tmpl'
+    ])],
     include_data_files=True,
     # PyPI package information.
     classifiers=[

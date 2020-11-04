@@ -13,10 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import argparse
 import os
 import platform
@@ -30,44 +26,8 @@ import paddlehub as hub
 from paddlehub.commands import register
 from paddlehub.serving import app_compat as app
 from paddlehub.env import CONF_HOME
-from paddlehub.serving.http_server import run_all
+from paddlehub.serving.http_server import run_all, StandaloneApplication
 from paddlehub.utils import log
-
-if platform.system() == "Windows":
-
-    class StandaloneApplication(object):
-        def __init__(self):
-            pass
-
-        def load_config(self):
-            pass
-
-        def load(self):
-            pass
-else:
-    import gunicorn.app.base
-
-    class StandaloneApplication(gunicorn.app.base.BaseApplication):
-        '''
-        StandaloneApplication class provides instance of StandaloneApplication
-        as gunicorn backend.
-        '''
-
-        def __init__(self, app, options=None):
-            self.options = options or {}
-            self.application = app
-            super(StandaloneApplication, self).__init__()
-
-        def load_config(self):
-            config = {
-                key: value
-                for key, value in self.options.items() if key in self.cfg.settings and value is not None
-            }
-            for key, value in config.items():
-                self.cfg.set(key.lower(), value)
-
-        def load(self):
-            return self.application
 
 
 def number_of_workers():

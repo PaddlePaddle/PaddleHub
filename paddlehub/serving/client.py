@@ -28,3 +28,14 @@ class InferenceClient(object):
         result = self.socket.recv_json()
 
         return result
+
+
+class InferenceClientProxy(object):
+    def __init__(self):
+        self.clients = {}
+
+    def get_client(self, pid, frontend_addr):
+        if pid not in self.clients.keys():
+            client = InferenceClient(frontend_addr)
+            self.clients.update({pid: client})
+        return self.clients[pid]

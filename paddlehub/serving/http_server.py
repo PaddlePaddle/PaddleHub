@@ -14,14 +14,52 @@
 # limitations under the License.
 
 import time
+import os
 import logging
 import multiprocessing
+import platform
 
 from flask import Flask, request
 
-from paddlehub.serving.v3.device import InferenceServer
-from paddlehub.serving.v3.client import InferenceClient
+from paddlehub.serving.device import InferenceServer
+from paddlehub.serving.client import InferenceClientProxy
 from paddlehub.utils import utils, log
+
+if platform.system() == "Windows":
+
+    class StandaloneApplication(object):
+        def __init__(self):
+            pass
+
+        def load_config(self):
+            pass
+
+        def load(self):
+            pass
+else:
+    import gunicorn.app.base
+
+    class StandaloneApplication(gunicorn.app.base.BaseApplication):
+        '''
+        StandaloneApplication class provides instance of StandaloneApplication
+        as gunicorn backend.
+        '''
+
+        def __init__(self, app, options=None):
+            self.options = options or {}
+            self.application = app
+            super(StandaloneApplication, self).__init__()
+
+        def load_config(self):
+            config = {
+                key: value
+                for key, value in self.options.items() if key in self.cfg.settings and value is not None
+            }
+            for key, value in config.items():
+                self.cfg.set(key.lower(), value)
+
+        def load(self):
+            return self.application
 
 
 def package_result(status: str, msg: str, data: dict):
@@ -72,12 +110,10 @@ def create_app(client_port: int = 5559, modules_name: list = []):
     app_instance = Flask(__name__)
     app_instance.config["JSON_AS_ASCII"] = False
     logging.basicConfig()
-    gunicorn_logger = logging.getLogger('gunicorn.error')
+    gunicorn_logger = logging.getLogger('gunicorn.info')
     app_instance.logger.handlers = gunicorn_logger.handlers
     app_instance.logger.setLevel(gunicorn_logger.level)
-
-    port_str = 'tcp://localhost:%s' % client_port
-    client = InferenceClient(port_str)
+    pid = os.getpid()
 
     @app_instance.route("/", methods=["GET", "POST"])
     def index():
@@ -106,6 +142,7 @@ def create_app(client_port: int = 5559, modules_name: list = []):
         Returns:
             Result of predicting after packaging.
         '''
+
         if module_name not in modules_name:
             msg = "Module {} is not available.".format(module_name)
             return package_result("111", "", msg)
@@ -115,15 +152,18 @@ def create_app(client_port: int = 5559, modules_name: list = []):
                 module_name)
             return package_result("112", results, "")
         inputs = {'module_name': module_name, 'inputs': inputs}
+        port_str = 'tcp://localhost:%s' % client_port
+
+        client = InferenceClientProxy.get_client(pid, port_str)
 
         results = client.send_req(inputs)
 
-        return package_result("-1", results, "")
+        return package_result("000", results, "")
 
     return app_instance
 
 
-def run(port: int = 8866, client_port: int = 5559, names: list = []):
+def run(port: int = 8866, client_port: int = 5559, names: list = [], workers: int = 1):
     '''
     Run flask instance for PaddleHub-Serving
 
@@ -131,19 +171,24 @@ def run(port: int = 8866, client_port: int = 5559, names: list = []):
          port(int): the port of the webserver
          client_port(int): the port of zmq backend address
          names(list): the name list of modules
+         workers(int): workers for every client
 
     Examples:
         .. code-block:: python
 
             run(port=8866, client_port='5559')
     '''
-    my_app = create_app(client_port, modules_name=names)
-    my_app.run(host="0.0.0.0", port=port, debug=False, threaded=False)
+    if platform.system() == "Windows":
+        my_app = create_app(client_port, modules_name=names)
+        my_app.run(host="0.0.0.0", port=port, debug=False, threaded=False)
+    else:
+        options = {"bind": "0.0.0.0:%s" % port, "workers": workers, "worker_class": "sync"}
+        StandaloneApplication(create_app(client_port, modules_name=names), options).run()
 
     log.logger.info("PaddleHub-Serving has been stopped.")
 
 
-def run_http_server(port: int = 8866, client_port: int = 5559, names: list = []):
+def run_http_server(port: int = 8866, client_port: int = 5559, names: list = [], workers: int = 1):
     '''
     Start subprocess to run function `run`
 
@@ -151,6 +196,7 @@ def run_http_server(port: int = 8866, client_port: int = 5559, names: list = [])
         port(int): the port of the webserver
         client_port(int): the port of zmq backend address
         names(list): the name list of moduels
+        workers(int): the workers for every client
 
     Returns:
         process id of subprocess
@@ -160,7 +206,7 @@ def run_http_server(port: int = 8866, client_port: int = 5559, names: list = [])
 
             run_http_server(port=8866, client_port='5559', names=['lac'])
     '''
-    p = multiprocessing.Process(target=run, args=(port, client_port, names))
+    p = multiprocessing.Process(target=run, args=(port, client_port, names, workers))
     p.start()
     return p.pid
 
@@ -183,6 +229,6 @@ def run_all(modules_info: dict, gpus: list, frontend_port: int, backend_port: in
                                     'predict_args': {'batch_size': 1}}}
             run_all(modules_info, ['0', '1', '2'], 8866, 8867)
     '''
-    run_http_server(frontend_port, backend_port, modules_info.keys())
+    run_http_server(frontend_port, backend_port, modules_info.keys(), len(gpus))
     MyIS = InferenceServer(modules_info, gpus)
     MyIS.listen(backend_port)
