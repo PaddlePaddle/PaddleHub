@@ -19,8 +19,8 @@ from typing import Callable
 import paddle
 import numpy as np
 
+import paddlehub.env as hubenv
 from paddlehub.vision.utils import get_img_file
-from paddlehub.env import DATA_HOME
 from paddlehub.utils.download import download_data
 
 
@@ -47,7 +47,7 @@ class Canvas(paddle.io.Dataset):
         elif self.mode == 'test':
             self.file = 'test'
 
-        self.file = os.path.join(DATA_HOME, 'canvas', self.file)
+        self.file = os.path.join(hubenv.DATA_HOME, 'canvas', self.file)
         self.data = get_img_file(self.file)
 
     def __getitem__(self, idx: int) -> np.ndarray:

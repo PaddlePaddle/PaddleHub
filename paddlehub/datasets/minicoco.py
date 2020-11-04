@@ -19,8 +19,8 @@ from typing import Callable
 import paddle
 import numpy as np
 
+import paddlehub.env as hubenv
 from paddlehub.vision.utils import get_img_file
-from paddlehub.env import DATA_HOME
 from paddlehub.utils.download import download_data
 
 
@@ -46,8 +46,8 @@ class MiniCOCO(paddle.io.Dataset):
             self.file = 'train'
         elif self.mode == 'test':
             self.file = 'test'
-        self.file = os.path.join(DATA_HOME, 'minicoco', self.file)
-        self.style_file = os.path.join(DATA_HOME, 'minicoco', '21styles')
+        self.file = os.path.join(hubenv.DATA_HOME, 'minicoco', self.file)
+        self.style_file = os.path.join(hubenv.DATA_HOME, 'minicoco', '21styles')
         self.data = get_img_file(self.file)
         self.style = get_img_file(self.style_file)
 
