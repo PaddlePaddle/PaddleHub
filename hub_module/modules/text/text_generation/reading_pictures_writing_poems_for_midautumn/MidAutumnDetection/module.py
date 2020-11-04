@@ -118,9 +118,7 @@ class MODULE(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.predict(
-            paths=[args.input_path],
-            use_gpu=args.use_gpu)
+        results = self.predict(paths=[args.input_path], use_gpu=args.use_gpu)
         return results
 
     def add_module_config_arg(self):

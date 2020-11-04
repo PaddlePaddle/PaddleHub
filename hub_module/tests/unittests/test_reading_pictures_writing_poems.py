@@ -13,13 +13,12 @@ class ReadingPicturesWritingPoemsTestCase(TestCase):
             'image': 'castle.jpg',
             'Poetrys': '山川山陵山，沟渠村庄沟。我来春雨余，草木亦已柔。'
         }]
-        
 
     def test_writing_poems(self):
         # test gpu
-        results = self.module.WritingPoem(
-            image=self.test_image, use_gpu=True)
+        results = self.module.WritingPoem(image=self.test_image, use_gpu=True)
         self.assertEqual(results, self.results)
+
 
 if __name__ == '__main__':
     main()

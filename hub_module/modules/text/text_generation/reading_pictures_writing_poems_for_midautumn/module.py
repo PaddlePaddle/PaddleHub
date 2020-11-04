@@ -14,6 +14,7 @@ from translate import Translator
 import reading_pictures_writing_poems_for_midautumn.MidAutumnDetection.module as MidAutumnDetection
 import reading_pictures_writing_poems_for_midautumn.MidAutumnPoetry.module as MidAutumnPoetry
 
+
 @moduleinfo(
     name="reading_pictures_writing_poems_for_midautumn",
     version="1.0.0",
@@ -26,20 +27,27 @@ class ReadingPicturesWritingPoems(hub.Module):
         """
         Initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "assets", "infer_model")
-        self.module_image = MidAutumnDetection.MODULE(directory="reading_pictures_writing_poems_for_midautumn/MidAutumnDetection") # 调用目标检测的模型
-        self.module_similar = MidAutumnPoetry.ErnieGen(directory='reading_pictures_writing_poems_for_midautumn/MidAutumnPoetry') # 调用根据关键词生成古诗上阕的模型
-        self.module_poem = hub.Module(name="ernie_gen_poetry")     # 调用古诗生成的模型
-
+        self.pretrained_model_path = os.path.join(self.directory, "assets",
+                                                  "infer_model")
+        self.module_image = MidAutumnDetection.MODULE(
+            directory=
+            "reading_pictures_writing_poems_for_midautumn/MidAutumnDetection"
+        )  # 调用目标检测的模型
+        self.module_similar = MidAutumnPoetry.ErnieGen(
+            directory=
+            'reading_pictures_writing_poems_for_midautumn/MidAutumnPoetry'
+        )  # 调用根据关键词生成古诗上阕的模型
+        self.module_poem = hub.Module(name="ernie_gen_poetry")  # 调用古诗生成的模型
 
     def WritingPoem(self, images, use_gpu=False):
         # 目标检测，输入图片，输入得分最高的标签
-        results_image = self.module_image.predict(images = images)
-        best = {'score':0, 'category':'none'}
+        results_image = self.module_image.predict(images=images)
+        best = {'score': 0, 'category': 'none'}
         for item in results_image:
             for items in item:
                 if (items['score'] > best['score']):
-                    best['score'], best['category'] = items['score'], items['category']
+                    best['score'], best['category'] = items['score'], items[
+                        'category']
         if best['category'] == 'MoonCake':
             objects = ['月饼']
         elif best['category'] == 'moon':
@@ -51,10 +59,12 @@ class ReadingPicturesWritingPoems(hub.Module):
         else:
             objects = ['中秋节']
         # 根据关键词生成古诗上阕
-        FirstPoetrys = self.module_similar.generate(texts=objects, use_gpu=True, beam_width=5)
+        FirstPoetrys = self.module_similar.generate(
+            texts=objects, use_gpu=True, beam_width=5)
         FirstPoetry = [FirstPoetrys[0][0]]
         # 调用古诗生成模型，使用上阕生成下阕
-        SecondPoetry = self.module_poem.generate(texts=FirstPoetry, use_gpu=True, beam_width=5)
+        SecondPoetry = self.module_poem.generate(
+            texts=FirstPoetry, use_gpu=True, beam_width=5)
         Poetrys = []
         Poetrys.append(FirstPoetry[0])
         Poetrys.append(SecondPoetry[0][0])
@@ -62,7 +72,7 @@ class ReadingPicturesWritingPoems(hub.Module):
             'images': images,
             'Poetrys': "{}".format(Poetrys[0] + Poetrys[1])
         }]
-        
+
         return results
 
     @runnable
@@ -117,7 +127,7 @@ class ReadingPicturesWritingPoems(hub.Module):
             type=str,
             default=None,
             help="Pictures to write poetry")
-        
+
     def check_input_data(self, args):
         input_data = []
         if args.input_image:
@@ -127,6 +137,7 @@ class ReadingPicturesWritingPoems(hub.Module):
                 input_data = args.input_image
 
         if input_data == []:
-            raise RuntimeError("The input data is inconsistent with expectations.")
+            raise RuntimeError(
+                "The input data is inconsistent with expectations.")
 
         return input_data

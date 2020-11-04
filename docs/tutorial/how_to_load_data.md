@@ -70,15 +70,14 @@ cat
 dog
 ```
 
-### 自定义数据加载	
+### 自定义数据加载
 
-加载图像类自定义数据集，用户仅需要继承基类BaseCVDatast，修改数据集存放地址即可。具体使用如下：	
+加载图像类自定义数据集，用户仅需要继承基类BaseCVDatast，修改数据集存放地址即可。具体使用如下：
 
-**NOTE:**	
-* 数据集文件编码格式建议为utf8格式。	
-* dataset_dir为数据集实际路径，需要填写全路径，以下示例以`/test/data`为例。	
-* 训练/验证/测试集的数据列表文件中的图片路径需要相对于dataset_dir的相对路径，例如图片的实际位置为`/test/data/dog/dog1.jpg`。base_path为`/test/data`，则文件中填写的路径应该为`dog/dog1.jpg`。	
-* 如果您还有预测数据（没有文本类别），可以将预测数据存放在predict_list.txt文件，文件格式和train_list.txt类似。去掉label一列即可	
-* 如果您的数据集类别较少，可以不用定义label_list.txt，可以选择定义label_list=["数据集所有类别"]。	
-* 分类任务中，数据集的label必须从0开始计数	
-
+**NOTE:**
+* 数据集文件编码格式建议为utf8格式。
+* dataset_dir为数据集实际路径，需要填写全路径，以下示例以`/test/data`为例。
+* 训练/验证/测试集的数据列表文件中的图片路径需要相对于dataset_dir的相对路径，例如图片的实际位置为`/test/data/dog/dog1.jpg`。base_path为`/test/data`，则文件中填写的路径应该为`dog/dog1.jpg`。
+* 如果您还有预测数据（没有文本类别），可以将预测数据存放在predict_list.txt文件，文件格式和train_list.txt类似。去掉label一列即可
+* 如果您的数据集类别较少，可以不用定义label_list.txt，可以选择定义label_list=["数据集所有类别"]。
+* 分类任务中，数据集的label必须从0开始计数

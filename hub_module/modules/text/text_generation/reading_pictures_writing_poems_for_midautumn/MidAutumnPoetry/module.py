@@ -174,4 +174,3 @@ class ErnieGen(hub.NLPPredictionModule):
             texts=input_data, use_gpu=args.use_gpu, beam_width=args.beam_width)
 
         return results
-        

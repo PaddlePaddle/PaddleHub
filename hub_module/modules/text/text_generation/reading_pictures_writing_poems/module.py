@@ -12,6 +12,7 @@ import paddle.fluid as fluid
 import paddlehub as hub
 from translate import Translator
 
+
 @moduleinfo(
     name="reading_pictures_writing_poems",
     version="1.0.0",
@@ -26,9 +27,9 @@ class ReadingPicturesWritingPoems(hub.Module):
         """
         self.pretrained_model_path = os.path.join(self.directory, "assets",
                                                   "infer_model")
-        self.module_image = hub.Module(name="xception71_imagenet") # 调用图像分类的模型
-        self.module_similar = hub.Module(name="ernie_gen_couplet") # 调用对联生成的模型
-        self.module_poem = hub.Module(name="ernie_gen_poetry")     # 调用古诗生成的模型
+        self.module_image = hub.Module(name="xception71_imagenet")  # 调用图像分类的模型
+        self.module_similar = hub.Module(name="ernie_gen_couplet")  # 调用对联生成的模型
+        self.module_poem = hub.Module(name="ernie_gen_poetry")  # 调用古诗生成的模型
 
     def is_chinese(self, string):
         """
@@ -38,10 +39,10 @@ class ReadingPicturesWritingPoems(hub.Module):
         Return
             bool
         """
-        if (len(string) <= 1): # 去除只有单个字或者为空的字符串
+        if (len(string) <= 1):  # 去除只有单个字或者为空的字符串
             return False
 
-        for chart in string: # 把除了中文的所有字母、数字、符号去除
+        for chart in string:  # 把除了中文的所有字母、数字、符号去除
             if (chart < u'\u4e00' or chart > u'\u9fff'):
                 return False
 
@@ -52,10 +53,12 @@ class ReadingPicturesWritingPoems(hub.Module):
         results_image = self.module_image.classification(data=input_dict)
         PictureClassification = list(results_image[0][0].keys())[0]
         translator = Translator(to_lang="chinese")
-        PictureClassification_ch = translator.translate("{}".format(PictureClassification))
+        PictureClassification_ch = translator.translate(
+            "{}".format(PictureClassification))
         texts = ["{}".format(PictureClassification_ch)]
-        results_keywords = self.module_similar.generate(texts=texts, use_gpu=use_gpu, beam_width=20)
-        Words = [] # 将符合标准的近义词保存在这里（标准：字符串为中文且长度大于1）
+        results_keywords = self.module_similar.generate(
+            texts=texts, use_gpu=use_gpu, beam_width=20)
+        Words = []  # 将符合标准的近义词保存在这里（标准：字符串为中文且长度大于1）
         for item in range(20):
             if (self.is_chinese(results_keywords[0][item])):
                 Words.append(results_keywords[0][item])
@@ -65,10 +68,11 @@ class ReadingPicturesWritingPoems(hub.Module):
         ThirdWord = Words[4] + Words[5]
         FourthWord = Words[6] + Words[7]
         # 出句和对句，也可以理解为上下句（专业讲法是出句和对句，古诗词是中国传统文化，出句和对句的英文翻译即拼音）
-        ChuJu = FirstWord + SecondWord # 出句
-        DuiJu = ThirdWord + FourthWord # 对句
-        FirstPoetry = ["{:.5}，{:.5}。".format(ChuJu, DuiJu)] # 古诗词的上阕
-        results = self.module_poem.generate(texts=FirstPoetry, use_gpu=use_gpu, beam_width=5)
+        ChuJu = FirstWord + SecondWord  # 出句
+        DuiJu = ThirdWord + FourthWord  # 对句
+        FirstPoetry = ["{:.5}，{:.5}。".format(ChuJu, DuiJu)]  # 古诗词的上阕
+        results = self.module_poem.generate(
+            texts=FirstPoetry, use_gpu=use_gpu, beam_width=5)
         SecondPoetry = ["{:.12}".format(results[0][0])]
         Poetrys = []
         Poetrys.append(FirstPoetry)
@@ -80,7 +84,7 @@ class ReadingPicturesWritingPoems(hub.Module):
             'image': image,
             'Poetrys': "{}".format(Poetrys[0][0] + Poetrys[1][0])
         }]
-        
+
         return results
 
     @runnable
@@ -135,7 +139,7 @@ class ReadingPicturesWritingPoems(hub.Module):
             type=str,
             default=None,
             help="Pictures to write poetry")
-        
+
     def check_input_data(self, args):
         input_data = []
         if args.input_image:
@@ -145,6 +149,7 @@ class ReadingPicturesWritingPoems(hub.Module):
                 input_data = args.input_image
 
         if input_data == []:
-            raise RuntimeError("The input data is inconsistent with expectations.")
+            raise RuntimeError(
+                "The input data is inconsistent with expectations.")
 
         return input_data
