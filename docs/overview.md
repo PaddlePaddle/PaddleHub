@@ -70,7 +70,7 @@ PaddleHub提供了使用Finetune-API和预训练模型完成[图像分类](./dem
 
 关于PaddleHub快捷完成迁移学习，更多信息参考：
 
-[API](./reference/ref_index.md)
+[API](./reference/ref_index.rst)
 
 [自定义数据集如何Fine-tune](tutorial/how_to_load_data.md)
 

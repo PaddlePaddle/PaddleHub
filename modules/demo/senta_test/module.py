@@ -15,8 +15,8 @@ from senta_test.processor import load_vocab
     author_email="",
     type="nlp/sentiment_analysis",
 )
-class SentaTest(hub.Module):
-    def _initialize(self):
+class SentaTest:
+    def __init__(self):
         # add arg parser
         self.parser = argparse.ArgumentParser(
             description="Run the senta_test module.", prog='hub run senta_test', usage='%(prog)s', add_help=True)

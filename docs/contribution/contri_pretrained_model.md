@@ -37,11 +37,10 @@ hub run senta_test --input_text 这部电影太差劲了
 
 ### step 1. 创建必要的目录与文件
 
-创建一个senta_test的目录，并在senta_test目录下分别创建__init__.py、module.py、processor.py、vocab.list，其中
+创建一个senta_test的目录，并在senta_test目录下分别创建module.py、processor.py、vocab.list，其中
 
 |文件名|用途|
 |-|-|
-|\_\_init\_\_.py|空文件|
 |module.py|主模块，提供Module的实现代码|
 |processor.py|辅助模块，提供词表加载的方法|
 |vocab.list|存放词表|
@@ -50,7 +49,6 @@ hub run senta_test --input_text 这部电影太差劲了
 ➜  tree senta_test
 senta_test/
 ├── vocab.list
-├── __init__.py
 ├── module.py
 └── processor.py
 ```
@@ -95,7 +93,7 @@ class SentaTest:
 ```
 #### step 3_3. 执行必要的初始化
 ```python
-def _initialize(self):
+def __init__(self):
     # add arg parser
     self.parser = argparse.ArgumentParser(
         description="Run the senta_test module.",
@@ -109,7 +107,7 @@ def _initialize(self):
     vocab_path = os.path.join(self.directory, "vocab.list")
     self.vocab = load_vocab(vocab_path)
 ```
-`注意`：执行类的初始化不能使用默认的__init__接口，而是应该重载实现_initialize接口。对象默认内置了directory属性，可以直接获取到Module所在路径
+`注意`：执行类对象默认内置了directory属性，可以直接获取到Module所在路径
 #### step 3_4. 完善预测逻辑
 ```python
 def sentiment_classify(self, texts):
@@ -158,9 +156,9 @@ def sentiment_classify(self, texts):
 
 ### 完整代码
 
-* [module.py](../../demo/senta_module_sample/senta_test/module.py)
+* [module.py](../../../modules/demo/senta_test/module.py)
 
-* [processor.py](../../demo/senta_module_sample/senta_test/processor.py)
+* [processor.py](../../../modules/demo/senta_test/processor.py)
 
 <br/>
 
@@ -172,7 +170,7 @@ def sentiment_classify(self, texts):
 
 将Module安装到本机中，再通过Hub.Module(name=...)加载
 ```shell
-hub install senta_test
+➜  hub install senta_test
 ```
 
 ```python
@@ -195,7 +193,7 @@ senta_test.sentiment_classify(texts=["这部电影太差劲了"])
 ### 调用方法3
 将senta_test作为路径加到环境变量中，直接加载SentaTest对象
 ```shell
-export PYTHONPATH=senta_test:$PYTHONPATH
+➜  export PYTHONPATH=senta_test:$PYTHONPATH
 ```
 
 ```python
@@ -208,6 +206,6 @@ SentaTest.sentiment_classify(texts=["这部电影太差劲了"])
 将Module安装到本机中，再通过hub run运行
 
 ```shell
-hub install senta_test
-hub run senta_test --input_text "这部电影太差劲了"
+➜  hub install senta_test
+➜  hub run senta_test --input_text "这部电影太差劲了"
 ```
