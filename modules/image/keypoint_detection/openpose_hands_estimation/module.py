@@ -24,8 +24,7 @@ import paddlehub as hub
 from skimage.measure import label
 from scipy.ndimage.filters import gaussian_filter
 from paddlehub.module.module import moduleinfo
-from paddlehub.process.functional import npmax
-import paddlehub.transforms.transforms as T
+import paddlehub.vision.transforms as T
 
 import openpose_hands_estimation.processor as P
 
@@ -50,9 +49,9 @@ class HandPoseModel(nn.Layer):
     def __init__(self, load_checkpoint: str = None, visualization: bool = True):
         super(HandPoseModel, self).__init__()
         self.visualization = visualization
-
-        self.resize_func = T.ResizeScaling()
+        
         self.norm_func = T.Normalize(std=[1, 1, 1])
+        self.resize_func = P.ResizeScaling()
         self.hand_detect = P.HandDetect()
         self.pad_func = P.PadDownRight()
         self.remove_pad = P.RemovePadding()
@@ -164,7 +163,7 @@ class HandPoseModel(nn.Layer):
             label_img[label_img != max_index] = 0
             map_ori[label_img == 0] = 0
 
-            y, x = npmax(map_ori)
+            y, x = P.npmax(map_ori)
             all_peaks.append([x, y])
 
         return np.array(all_peaks)

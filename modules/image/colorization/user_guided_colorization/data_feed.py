@@ -18,7 +18,6 @@ class ColorizeHint:
         hint(np.ndarray): hint images
         mask(np.ndarray): mask images
     """
-
     def __init__(self, percent: float, num_points: int = None, samp: str = 'normal', use_avg: bool = True):
         self.percent = percent
         self.num_points = num_points
@@ -37,7 +36,7 @@ class ColorizeHint:
             while cont_cond:
                 if self.num_points is None:  # draw from geometric
                     # embed()
-                    cont_cond = np.random.rand() > (1 - self.percent)
+                    cont_cond = np.random.rand() < (1 - self.percent)
                 else:  # add certain number of points
                     cont_cond = pp < self.num_points
                 if not cont_cond:  # skip out of loop if condition not met
@@ -53,9 +52,11 @@ class ColorizeHint:
                 # add color point
                 if self.use_avg:
                     # embed()
-                    hint[nn, :, h:h + P, w:w + P] = np.mean(
-                        np.mean(data[nn, :, h:h + P, w:w + P], axis=2, keepdims=True), axis=1, keepdims=True).reshape(
-                            1, C, 1, 1)
+                    hint[nn, :, h:h + P, w:w + P] = np.mean(np.mean(data[nn, :, h:h + P, w:w + P],
+                                                                    axis=2,
+                                                                    keepdims=True),
+                                                            axis=1,
+                                                            keepdims=True).reshape(1, C, 1, 1)
                 else:
                     hint[nn, :, h:h + P, w:w + P] = data[nn, :, h:h + P, w:w + P]
                 mask[nn, :, h:h + P, w:w + P] = 1
@@ -81,16 +82,15 @@ class ColorizePreprocess:
         data(dict)：The preprocessed data for colorization.
 
     """
-
     def __init__(self,
                  ab_thresh: float = 0.,
                  p: float = 0.,
-                 num_points: int = None,
+                 points: int = None,
                  samp: str = 'normal',
                  use_avg: bool = True):
         self.ab_thresh = ab_thresh
         self.p = p
-        self.num_points = num_points
+        self.num_points = points
         self.samp = samp
         self.use_avg = use_avg
         self.gethint = ColorizeHint(percent=self.p, num_points=self.num_points, samp=self.samp, use_avg=self.use_avg)
@@ -113,8 +113,8 @@ class ColorizePreprocess:
         data['B'] = data_lab[:, 1:, :, :]
         if self.ab_thresh > 0:  # mask out grayscale images
             thresh = 1. * self.ab_thresh / 110
-            mask = np.sum(
-                np.abs(np.max(np.max(data['B'], axis=3), axis=2) - np.min(np.min(data['B'], axis=3), axis=2)), axis=1)
+            mask = np.sum(np.abs(np.max(np.max(data['B'], axis=3), axis=2) - np.min(np.min(data['B'], axis=3), axis=2)),
+                          axis=1)
             mask = (mask >= thresh)
             data['A'] = data['A'][mask, :, :, :]
             data['B'] = data['B'][mask, :, :, :]

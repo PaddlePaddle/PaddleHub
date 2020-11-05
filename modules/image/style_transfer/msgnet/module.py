@@ -7,7 +7,7 @@ import paddle.nn.functional as F
 
 from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import moduleinfo
-from paddlehub.vision.transforms import Compose, Resize, CenterCrop, SetType
+from paddlehub.vision.transforms import Compose, Resize, CenterCrop
 from paddlehub.module.cv_module import StyleTransferModule
 
 
@@ -324,8 +324,7 @@ class MSGNet(nn.Layer):
         self._vgg = None
 
     def transform(self, path: str):
-        transform = Compose([Resize(
-            (256, 256), interpolation='LINEAR'), CenterCrop(crop_size=256)], SetType(datatype='float32'))
+        transform = Compose([Resize((256, 256), interpolation='LINEAR')])
         return transform(path)
 
     def setTarget(self, Xs: paddle.Tensor):
