@@ -43,7 +43,7 @@ class HubServer(object):
     def add_source(self, url: str, source_type: str = 'git', key: str = ''):
         '''Add a module source(GitSource or ServerSource)'''
         key = self._get_source_key(url) if not key else key
-        self.keysmap[url[0]] = key
+        self.keysmap[url] = key
         self.sources[key] = self._generate_source(url, source_type)
 
     def remove_source(self, url: str = None, key: str = None):

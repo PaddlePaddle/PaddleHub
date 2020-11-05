@@ -144,7 +144,7 @@ class ImageColorizeModule(RunModule, ImageServing):
         Colorize images
 
         Args:
-            images(str|np.array) : Images path to be colorized.
+            images(str|np.ndarray) : Images path or BGR image to be colorized.
             visualization(bool): Whether to save colorized images.
             save_path(str) : Path to save colorized images.
 
