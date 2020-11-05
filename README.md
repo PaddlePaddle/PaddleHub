@@ -160,7 +160,7 @@ paddlehub.server_check()
 
 <a name="许可证书"></a>
 ## 许可证书
-本项目的发布受<a href="https://github.com/PaddlePaddle/PaddleOCR/blob/master/LICENSE">Apache 2.0 license</a>许可认证。
+本项目的发布受<a href="./LICENSE">Apache 2.0 license</a>许可认证。
 
 <a name="致谢"></a>
 ## 致谢
