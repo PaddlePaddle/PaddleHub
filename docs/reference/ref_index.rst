@@ -1,12 +1,12 @@
 参考
 ==================
 
-以下介绍了PaddleHub 数据集(dataset)、优化策略(strategy)、运行配置(config)、迁移任务(task)等API介绍。
+以下介绍了PaddleHub 数据集(datasets)、训练器(finetune.Trainer)、预训练模型(Module)、数据增强模块(vision.transforms)等API介绍。
 
 ..  toctree::
     :maxdepth: 1
     
-    hub.dataset<dataset>
-    hub.strategy<strategy>
-    hub.config<config>
-    hub.task<task_index>
+    hub.datasets<datasets_index>
+    hub.finetune.Trainer<trainer>
+    hub.Module<module>
+    hub.vision.transforms<vision>

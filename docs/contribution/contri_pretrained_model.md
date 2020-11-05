@@ -90,7 +90,7 @@ module.py中需要有一个继承了hub.Module的类存在，该类负责实现�
     author_email="",
     type="nlp/sentiment_analysis",
 )
-class SentaTest(hub.Module):
+class SentaTest:
     ...
 ```
 #### step 3_3. 执行必要的初始化
