@@ -335,18 +335,14 @@ class LocalModuleManager(object):
             tempdir = self._get_normalized_name(tempdir)
             shutil.copytree(directory, tempdir)
 
-            directory = tempdir
-            hub_module_cls = HubModule.load(directory)
-
             # Uninstall local module
-            if os.path.exists(self._get_normalized_path(hub_module_cls.name)):
-                self.uninstall(hub_module_cls.name)
+            if os.path.exists(self._get_normalized_path(module_info.name)):
+                self.uninstall(module_info.name)
 
-            shutil.copytree(directory, self._get_normalized_path(hub_module_cls.name))
+            shutil.copytree(directory, self._get_normalized_path(module_info.name))
 
-            # Reload the Module object to avoid path errors
-            hub_module_cls = HubModule.load(self._get_normalized_path(hub_module_cls.name))
-            self._local_modules[hub_module_cls.name] = hub_module_cls
+            hub_module_cls = HubModule.load(self._get_normalized_path(module_info.name))
+            self._local_modules[module_info.name] = hub_module_cls
 
             # Install python package requirements
             self._install_module_requirements(hub_module_cls)

@@ -200,7 +200,7 @@ def set_op_attr(program: paddle.static.Program, is_test: bool = False):
 
 @contextlib.contextmanager
 def static_mode_guard():
-    ''''''
+    '''enter static graph mode with `with` statement.'''
     premode = 'static' if not paddle.in_dynamic_mode() else 'dynamic'
 
     if premode == 'dynamic':
@@ -213,7 +213,7 @@ def static_mode_guard():
 
 
 def run_in_static_mode(func):
-    ''''''
+    '''Decorate a function to run in static graph mode.'''
 
     def runner(*args, **kwargs):
         with static_mode_guard():
