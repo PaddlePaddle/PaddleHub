@@ -1,7 +1,0 @@
-name: ssd_mobilenet_v1_pascal
-dir: "modules/image/object_detection/ssd_mobilenet_v1_pascal"
-resources:
-  -
-    url: https://paddlehub.bj.bcebos.com/model/cv/ssd_mobilenet_v1_model.tar.gz
-    dest: ssd_mobilenet_v1_model
-    uncompress: True

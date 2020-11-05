@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import platform
+import sys
 
 
 def get_platform() -> str:
@@ -22,3 +23,13 @@ def get_platform() -> str:
 
 def is_windows() -> str:
     return get_platform().lower().startswith("windows")
+
+
+def get_platform_info() -> dict:
+    return {
+        'python_version': '.'.join(map(str, sys.version_info[0:3])),
+        'platform_version': platform.version(),
+        'platform_system': platform.system(),
+        'platform_architecture': platform.architecture(),
+        'platform_type': platform.platform()
+    }

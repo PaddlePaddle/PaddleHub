@@ -60,7 +60,7 @@ PaddleHub在使用过程中会产生一些缓存数据，这部分数据默认�
 
 ## `hub autofinetune`
 
-用于自动调整Fine-tune任务的超参数，具体使用详情参考[PaddleHub AutoDL Finetuner使用教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.4/tutorial/autofinetune.md)
+用于自动调整Fine-tune任务的超参数，具体使用详情参考[PaddleHub AutoDL Finetuner使用教程](./autofinetune.md)
 
 `选项`
 * `--param_file`: 需要搜索的超参数信息yaml文件
@@ -96,7 +96,7 @@ PaddleHub在使用过程中会产生一些缓存数据，这部分数据默认�
 
 **NOTE:**
 
-1. 在PaddleHub中，Module表示一个`可执行的神经网络模型`，一个Module可以支持直接命令行预测，也可以配合PaddleHub Finetune API，通过少量代码实现迁移学习。不是所有的Module都支持命令行预测 (例如BERT/ERNIE Transformer类模型，一般需要搭配任务进行finetune)，也不是所有的Module都可用于finetune（例如LAC词法分析模型，我们不建议用户用于finetune）。
+在PaddleHub中，Module表示一个`可执行的神经网络模型`，一个Module可以支持直接命令行预测，也可以配合PaddleHub Finetune API，通过少量代码实现迁移学习。不是所有的Module都支持命令行预测 (例如BERT/ERNIE Transformer类模型，一般需要搭配任务进行finetune)，也不是所有的Module都可用于finetune（例如LAC词法分析模型，我们不建议用户用于finetune）。
 
 PaddleHub尽量简化了用户在使用命令行预测时的理解成本，一般来讲，我们将预测分为NLP和CV两大类
 

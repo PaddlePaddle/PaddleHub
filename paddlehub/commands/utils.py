@@ -66,4 +66,4 @@ def execute():
     else:
         idx += 1
 
-    exit(com['_entry']().execute(sys.argv[idx:]))
+    return com['_entry']().execute(sys.argv[idx:])

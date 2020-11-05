@@ -13,12 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import optparse
 import os
-import pip
-import sys
+import subprocess
 from pip._internal.utils.misc import get_installed_distributions
-from typing import List, Tuple
+from typing import IO
 
 from paddlehub.utils.utils import Version
 from paddlehub.utils.io import discard_oe, typein
@@ -42,21 +40,33 @@ def check(package: str, version: str = '') -> bool:
     return pdict[package].match(version)
 
 
-def install(package: str, version: str = '', upgrade=False) -> bool:
+def install(package: str, version: str = '', upgrade: bool = False, ostream: IO = None, estream: IO = None) -> bool:
     '''Install the python package.'''
-    with discard_oe():
-        cmds = ['install', '{}{}'.format(package, version)]
-        if upgrade:
-            cmds.append('--upgrade')
-        result = pip.main(cmds)
+    package = package.replace(' ', '')
+    if version:
+        package = '{}=={}'.format(package, version)
+
+    cmd = 'pip install "{}"'.format(package)
+
+    if upgrade:
+        cmd += ' --upgrade'
+
+    result, content = subprocess.getstatusoutput(cmd)
+    if result:
+        estream.write(content)
+    else:
+        ostream.write(content)
     return result == 0
 
 
-def uninstall(package: str) -> bool:
+def uninstall(package: str, ostream: IO = None, estream: IO = None) -> bool:
     '''Uninstall the python package.'''
-    with discard_oe():
+    with typein('y'):
         # type in 'y' to confirm the uninstall operation
-        with typein('y'):
-            cmds = ['uninstall', '{}'.format(package)]
-            result = pip.main(cmds)
+        cmd = 'pip uninstall {}'.format(package)
+        result, content = subprocess.getstatusoutput(cmd)
+        if result:
+            estream.write(content)
+        else:
+            ostream.write(content)
     return result == 0

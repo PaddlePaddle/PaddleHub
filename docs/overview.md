@@ -1,5 +1,3 @@
-欢迎使用**PaddleHub**！
-
 # 概述
 
 ## PaddleHub是什么
@@ -8,46 +6,44 @@ PaddleHub是飞桨生态的预训练模型应用工具，开发者可以便捷�
 
 PaddleHub以预训练模型应用为核心具备以下特点：  
 
-* **[模型即软件](#模型即软件)**，通过Python API或命令行实现模型调用，可快速体验或集成飞桨特色预训练模型。
+* **模型即软件：** 通过Python API或命令行实现模型调用，可快速体验或集成飞桨特色预训练模型。
 
-* **[易用的迁移学习](#易用的迁移学习)**，通过Fine-tune API，内置多种优化策略，只需少量代码即可完成预训练模型的Fine-tuning。
+* **易用的迁移学习：** 通过Fine-tune API，内置多种优化策略，只需少量代码即可完成预训练模型的Fine-tuning。
 
-* **[一键模型转服务](#一键模型转服务)**，简单一行命令即可搭建属于自己的深度学习模型API服务完成部署。
+* **一键模型转服务：** 简单一行命令即可搭建属于自己的深度学习模型API服务完成部署。
 
-* **[自动超参优化](#自动超参优化)**，内置AutoDL Finetuner能力，一键启动自动化超参搜索。
+* **自动超参优化：** 内置AutoDL Finetuner能力，一键启动自动化超参搜索。
 
-<p align="center">
- <img src="imgs/paddlehub_figure.jpg" width='70%' align="middle"  
+![](./imgs/paddlehub_figure.jpg)
+
+<p align='center'>
+ PaddleHub全景图
 </p>
-
 
 
 ## PaddleHub特性
 
 ### 一、模型即软件
 
-PaddleHub采用模型即软件的设计理念，所有的预训练模型与Python软件包类似，具备版本的概念，通过`hub install/uninstall` 可以便捷完成模型的升级和卸载。此外，还可以通过Python的API或命令行实现快速预测的软件集成，更方便地应用和管理深度学习模型，完成模型的搜索、下载、安装、升级、预测等功能。更加详细的使用说明可以参考[PaddleHub命令行工具](tutorial/cmdintro.md)。
+PaddleHub采用模型即软件的设计理念，所有的预训练模型与Python软件包类似，具备版本的概念，通过`hub install/uninstall` 可以便捷完成模型的升级和卸载。此外，还可以通过Python的API或命令行实现快速预测的软件集成，更方便地应用和管理深度学习模型，完成模型的搜索、下载、安装、升级、预测等功能。更加详细的使用说明可以参考[PaddleHub命令行工具](./tutorial/cmdintro.md)。
 
-目前的预训练模型覆盖了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 [PaddleHub官网](https://www.paddlepaddle.org.cn/hub) 查看。也可以使用[快速体验](quickstart.md)通过命令行即可调用预训练模型进行预测。
+目前的预训练模型覆盖了图像分类、语义模型、视频分类、图像生成、图像分割、文本审核、关键点检测等业界主流模型，更多PaddleHub已经发布的模型，请前往 [PaddleHub官网](https://www.paddlepaddle.org.cn/hub) 查看。也可以使用[快速体验](./quickstart.md)通过命令行即可调用预训练模型进行预测。
 
 ### 二、易用的迁移学习
 
-迁移学习(Transfer Learning)通俗来讲，就是运用已有的知识来学习新的知识，核心是找到已有知识和新知识之间的相似性。PaddleHub提供了Fine-tune API，只需要少量代码即可完成深度学习模型在自然语言处理和计算机视觉场景下的迁移学习，可以在更短的时间完成模型的训练，同时模型具备更好的泛化能力。
+迁移学习(Transfer Learning)通俗来讲，就是运用已有的知识来学习新的知识，核心是找到已有知识和新知识之间的相似性。PaddleHub提供了Fine-tune API，只需要少量代码即可完成深度学习模型在自然语言处理和计算机视觉场景下的迁移学习，可以在更短的时间完成模型的训练，同时模型具备更好的泛化能力。下图所示是基于PaddleHub，通过数十行代码完成ERNIE工业级文本分类示例：
 
-<p align="center">
- <img src="imgs/paddlehub_finetune.jpg" width='70%' align="middle"  
-</p>
-
-<p align="center">
- <img src="imgs/paddlehub_finetune.gif" align="middle"  
-</p>
+![](./imgs/paddlehub_finetune.gif)
 
 <p align='center'>
  十行代码完成ERNIE工业级文本分类
 </p>
 
 
-  PaddleHub提供了使用Finetune-API和预训练模型完成[文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/text_classification)、[序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/sequence_labeling)、[多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/multi_label_classification)、[图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/image_classification)、[检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/qa_classification)、[回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/regression)、[句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/sentence_similarity)、[阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo)。
+PaddleHub提供了使用Finetune-API和预训练模型完成[文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/text_classification)、[序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/sequence_labeling)、[多标签分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/multi_label_classification)、[图像分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/image_classification)、[检索式问答任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/qa_classification)、[回归任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/regression)、[句子语义相似度计算](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/sentence_similarity)、[阅读理解任务](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo/reading_comprehension)等迁移任务的使用示例，详细参见[demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo)。下图是PaddleHub的迁移学习全景图：
+
+![](./imgs/paddlehub_finetune.jpg)
+
 
 * 场景化使用
 
@@ -55,6 +51,12 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 
 |预训练模型|任务类型|数据集|AIStudio链接|备注|
 |-|-|-|-|-|
+|chinese_text_detection_db_mobile|ocr中文识别|icdar2015数据集|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/507159)|超轻量9M模型，火爆|
+|video_tag_lstm|短视频分类|百度自建数据集|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/509776)|大规模，多标签|
+|resnet50_vd_animals|动物识别|百度自建动物数据集|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/437648)|八千种动物识别|
+|face_landmark_localization|AI川剧变脸|AFW/AFLW|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/402892)||
+|face_landmark_localization|人像美颜|AFW/AFLW|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/389512)||
+|DeepLabv3+|人像抠图|百度自建数据集|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/341116)||
 |ResNet|图像分类|猫狗数据集DogCat|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147010)||
 |ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147006)||
 |ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/221999)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成文本分类迁移学习。|
@@ -70,7 +72,7 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 
 关于PaddleHub快捷完成迁移学习，更多信息参考：
 
-[API](reference)
+[API](./reference/ref_index.md)
 
 [自定义数据集如何Fine-tune](tutorial/how_to_load_data.md)
 

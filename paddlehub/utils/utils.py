@@ -16,38 +16,39 @@
 import base64
 import contextlib
 import cv2
+import hashlib
+import importlib
 import math
 import os
+import requests
 import sys
 import time
-import requests
 import tempfile
-import numpy as np
+import traceback
+import types
 from typing import Generator
 from urllib.parse import urlparse
 
+import numpy as np
 import packaging.version
 
 import paddlehub.env as hubenv
+import paddlehub.utils as utils
 
 
 class Version(packaging.version.Version):
-    '''Expand realization of packaging.version.Version'''
+    '''Extended implementation of packaging.version.Version'''
 
     def match(self, condition: str) -> bool:
         '''
         Determine whether the given condition are met
-
         Args:
             condition(str) : conditions for judgment
-
         Returns:
             bool: True if the given version condition are met, else False
-
         Examples:
-            from paddlehub.utils import Version
-
-            Version('1.2.0').match('>=1.2.0a')
+            .. code-block:: python
+                Version('1.2.0').match('>=1.2.0a')
         '''
         if not condition:
             return True
@@ -74,6 +75,31 @@ class Version(packaging.version.Version):
             _comp = self.__eq__
 
         return _comp(Version(version))
+
+    def __lt__(self, other):
+        if isinstance(other, str):
+            other = Version(other)
+        return super().__lt__(other)
+
+    def __le__(self, other):
+        if isinstance(other, str):
+            other = Version(other)
+        return super().__le__(other)
+
+    def __gt__(self, other):
+        if isinstance(other, str):
+            other = Version(other)
+        return super().__gt__(other)
+
+    def __ge__(self, other):
+        if isinstance(other, str):
+            other = Version(other)
+        return super().__ge__(other)
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            other = Version(other)
+        return super().__eq__(other)
 
 
 class Timer(object):
@@ -119,7 +145,7 @@ class Timer(object):
         return seconds_to_hms(remaining_time)
 
 
-def seconds_to_hms(seconds: int):
+def seconds_to_hms(seconds: int) -> str:
     '''Convert the number of seconds to hh:mm:ss'''
     h = math.floor(seconds / 3600)
     m = math.floor((seconds - h * 3600) / 60)
@@ -128,7 +154,7 @@ def seconds_to_hms(seconds: int):
     return hms_str
 
 
-def base64_to_cv2(b64str: str):
+def base64_to_cv2(b64str: str) -> np.ndarray:
     '''Convert a string in base64 format to cv2 data'''
     data = base64.b64decode(b64str.encode('utf8'))
     data = np.fromstring(data, np.uint8)
@@ -137,33 +163,29 @@ def base64_to_cv2(b64str: str):
 
 
 @contextlib.contextmanager
-def generate_tempfile(directory: str = None):
+def generate_tempfile(directory: str = None, **kwargs):
     '''Generate a temporary file'''
     directory = hubenv.TMP_HOME if not directory else directory
-    with tempfile.NamedTemporaryFile(dir=directory) as file:
+    with tempfile.NamedTemporaryFile(dir=directory, **kwargs) as file:
         yield file
 
 
 @contextlib.contextmanager
-def generate_tempdir(directory: str = None):
+def generate_tempdir(directory: str = None, **kwargs):
     '''Generate a temporary directory'''
     directory = hubenv.TMP_HOME if not directory else directory
-    with tempfile.TemporaryDirectory(dir=directory) as _dir:
+    with tempfile.TemporaryDirectory(dir=directory, **kwargs) as _dir:
         yield _dir
 
 
-def download(url: str, path: str = None):
+def download(url: str, path: str = None) -> str:
     '''
     Download a file
-
     Args:
         url (str) : url to be downloaded
         path (str, optional) : path to store downloaded products, default is current work directory
-
     Examples:
         .. code-block:: python
-            from paddlehub.utils.utils import download
-
             url = 'https://xxxxx.xx/xx.tar.gz'
             download(url, path='./output')
     '''
@@ -175,15 +197,11 @@ def download(url: str, path: str = None):
 def download_with_progress(url: str, path: str = None) -> Generator[str, int, int]:
     '''
     Download a file and return the downloading progress -> Generator[filename, download_size, total_size]
-
     Args:
         url (str) : url to be downloaded
         path (str, optional) : path to store downloaded products, default is current work directory
-
     Examples:
         .. code-block:: python
-            from paddlehub.utils.utils import download_with_progress
-
             url = 'https://xxxxx.xx/xx.tar.gz'
             for filename, download_size, total_szie in download_with_progress(url, path='./output'):
                 print(filename, download_size, total_size)
@@ -204,3 +222,83 @@ def download_with_progress(url: str, path: str = None) -> Generator[str, int, in
             _file.write(data)
             download_size += len(data)
             yield savename, download_size, total_size
+
+
+def load_py_module(python_path: str, py_module_name: str) -> types.ModuleType:
+    '''
+    Load the specified python module.
+
+    Args:
+        python_path(str) : The directory where the python module is located
+        py_module_name(str) : Module name to be loaded
+    '''
+    sys.path.insert(0, python_path)
+
+    # Delete the cache module to avoid hazards. For example, when the user reinstalls a HubModule,
+    # if the cache is not cleared, then what the user gets at this time is actually the HubModule
+    # before uninstallation, this can cause some strange problems, e.g, fail to load model parameters.
+    if py_module_name in sys.modules:
+        sys.modules.pop(py_module_name)
+
+    py_module = importlib.import_module(py_module_name)
+    sys.path.pop(0)
+
+    return py_module
+
+
+def get_platform_default_encoding() -> str:
+    '''Get the default encoding of the current platform.'''
+    if utils.platform.is_windows():
+        return 'gbk'
+    return 'utf8'
+
+
+def sys_stdin_encoding() -> str:
+    '''Get the standary input stream default encoding.'''
+    encoding = sys.stdin.encoding
+    if encoding is None:
+        encoding = sys.getdefaultencoding()
+
+    if encoding is None:
+        encoding = get_platform_default_encoding()
+    return encoding
+
+
+def sys_stdout_encoding() -> str:
+    '''Get the standary output stream default encoding.'''
+    encoding = sys.stdout.encoding
+    if encoding is None:
+        encoding = sys.getdefaultencoding()
+
+    if encoding is None:
+        encoding = get_platform_default_encoding()
+    return encoding
+
+
+def md5(text: str):
+    '''Calculate the md5 value of the input text.'''
+    md5code = hashlib.md5(text.encode())
+    return md5code.hexdigest()
+
+
+def record(msg: str) -> str:
+    '''Record the specified text into the PaddleHub log file witch will be automatically stored according to date.'''
+    logfile = get_record_file()
+    with open(logfile, 'a') as file:
+        file.write('=' * 50 + '\n')
+        file.write('Record at ' + time.strftime('%Y-%m-%d %H:%M:%S') + '\n')
+        file.write('=' * 50 + '\n')
+        file.write(str(msg) + '\n' * 3)
+
+    return logfile
+
+
+def record_exception(msg: str) -> str:
+    '''Record the current exception infomation into the PaddleHub log file witch will be automatically stored according to date.'''
+    tb = traceback.format_exc()
+    file = record(tb)
+    utils.log.logger.warning('{}. Detailed error information can be found in the {}.'.format(msg, file))
+
+
+def get_record_file():
+    return os.path.join(hubenv.LOG_HOME, time.strftime('%Y%m%d.log'))

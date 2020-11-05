@@ -18,22 +18,29 @@ import importlib
 import os
 import sys
 from collections import OrderedDict
-from urllib.parse import urlparse
+from typing import List
 
 import git
 from git import Repo
 
-from paddlehub.module.module import Module as HubModule
+from paddlehub.module.module import RunModule
 from paddlehub.env import SOURCES_HOME
-from paddlehub.utils import log
+from paddlehub.utils import log, utils
 
 
 class GitSource(object):
-    def __init__(self, url, path=None):
-        self.url = url
-        self._parse_result = urlparse(self.url)
+    '''
+    Git source for PaddleHub module
 
-        self.path = os.path.join(SOURCES_HOME, self._parse_result.path[1:])
+    Args:
+        url(str) : Url of git repository
+        path(str) : Path to store the git repository
+    '''
+
+    def __init__(self, url: str, path: str = None):
+        self.url = url
+        self.path = os.path.join(SOURCES_HOME, utils.md5(url))
+
         if self.path.endswith('.git'):
             self.path = self.path[:-4]
 
@@ -47,8 +54,24 @@ class GitSource(object):
         self.hub_modules = OrderedDict()
         self.load_hub_modules()
 
+    def checkout(self, branch: str):
+        '''Checkout the current repo to the specified branch.'''
+        try:
+            self.repo.git.checkout(branch)
+            # reload modules
+            self.load_hub_modules()
+        except:
+            utils.record_exception('An error occurred while checkout {}'.format(self.path))
+
     def update(self):
-        self.repo.remote().pull()
+        '''Update the current repo.'''
+        try:
+            self.repo.remote().pull(self.repo.branches[0])
+            # reload modules
+            self.load_hub_modules()
+        except:
+            self.hub_modules = OrderedDict()
+            utils.record_exception('An error occurred while update {}'.format(self.path))
 
     def load_hub_modules(self):
         if 'hubconf' in sys.modules:
@@ -59,30 +82,56 @@ class GitSource(object):
             py_module = importlib.import_module('hubconf')
             for _item, _cls in inspect.getmembers(py_module, inspect.isclass):
                 _item = py_module.__dict__[_item]
-                if issubclass(_item, HubModule):
+                if issubclass(_item, RunModule):
                     self.hub_modules[_item.name] = _item
         except:
-            raise
-            log.logger.warning('An error occurred while loading {}'.format(self.path))
+            self.hub_modules = OrderedDict()
+            utils.record_exception('An error occurred while loading {}'.format(self.path))
+
         sys.path.remove(self.path)
 
-    def search_module(self, name, version=None):
-        return self.search_resouce(type='module', name=name, version=version)
+    def search_module(self, name: str, version: str = None) -> List[dict]:
+        '''
+        Search PaddleHub module
 
-    def search_resouce(self, type, name, version=None):
+        Args:
+            name(str) : PaddleHub module name
+            version(str) : PaddleHub module version
+        '''
+        return self.search_resource(type='module', name=name, version=version)
+
+    def search_resource(self, type: str, name: str, version: str = None) -> List[dict]:
+        '''
+        Search PaddleHub Resource
+
+        Args:
+            type(str) : Resource type
+            name(str) : Resource name
+            version(str) : Resource version
+        '''
         module = self.hub_modules.get(name, None)
         if module and module.version.match(version):
-            return {
+            return [{
                 'version': module.version,
                 'name': module.name,
                 'path': self.path,
                 'class': module.__name__,
                 'source': self.url
-            }
+            }]
         return None
 
+    def get_module_compat_info(self, name: str) -> dict:
+        '''Get the version compatibility information of the model.'''
+        return {}
+
     @classmethod
-    def check(cls, url):
+    def check(cls, url: str) -> bool:
+        '''
+        Check if the specified url is a valid git repository link
+
+        Args:
+            url(str) : Url to check
+        '''
         try:
             git.cmd.Git().ls_remote(url)
             return True

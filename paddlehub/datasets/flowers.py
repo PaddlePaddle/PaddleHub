@@ -14,14 +14,18 @@
 # limitations under the License.
 
 import os
+from typing import Callable, Tuple
 
-import paddle.fluid as fluid
+import paddle
+import numpy as np
 
-from paddlehub.env import DATA_HOME
+import paddlehub.env as hubenv
+from paddlehub.utils.download import download_data
 
 
-class Flowers(fluid.io.Dataset):
-    def __init__(self, transforms=None, mode='train'):
+@download_data(url='https://bj.bcebos.com/paddlehub-dataset/flower_photos.tar.gz')
+class Flowers(paddle.io.Dataset):
+    def __init__(self, transforms: Callable, mode: str = 'train'):
         self.mode = mode
         self.transforms = transforms
         self.num_classes = 5
@@ -32,14 +36,15 @@ class Flowers(fluid.io.Dataset):
             self.file = 'test_list.txt'
         else:
             self.file = 'validate_list.txt'
-        self.file = os.path.join(DATA_HOME, 'flower_photos', self.file)
+
+        self.file = os.path.join(hubenv.DATA_HOME, 'flower_photos', self.file)
 
         with open(self.file, 'r') as file:
             self.data = file.read().split('\n')
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> Tuple[np.ndarray, int]:
         img_path, grt = self.data[idx].split(' ')
-        img_path = os.path.join(DATA_HOME, 'flower_photos', img_path)
+        img_path = os.path.join(hubenv.DATA_HOME, 'flower_photos', img_path)
         im = self.transforms(img_path)
         return im, int(grt)
 

@@ -25,14 +25,15 @@ from paddlehub.utils import log, platform
 class ListCommand:
     def execute(self, argv: List) -> bool:
         manager = LocalModuleManager()
-        table = log.Table()
 
         widths = [20, 40] if platform.is_windows() else [25, 50]
         aligns = ['^', '<']
-        table.append('ModuleName', 'Path', widths=widths, aligns=aligns, colors=['green', 'green'])
+        table = log.Table(widths=widths, aligns=aligns)
+
+        table.append('ModuleName', 'Path', colors=['green', 'green'])
 
         for module in manager.list():
-            table.append(module.name, module.directory, widths=widths, aligns=aligns)
+            table.append(module.name, module.directory)
 
         print(table)
         return True

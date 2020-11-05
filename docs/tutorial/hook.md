@@ -3,20 +3,19 @@
 
 了解如何修改Task内置方法，我们首先了解下Task中的事件。
 
-Task定义了[组网事件]()和[运行事件]()。其中运行事件的工作流程如下图。
+Task定义了[组网事件](./how_to_define_task.md)和[运行事件](./how_to_define_task.md)。其中运行事件的工作流程如下图。
 
-<p align="center">
- <img src="./imgs/task_event_workflow.png" width='70%' align="middle"  
-</p>
+![](../imgs/task_event_workflow.png)
 
 
 **NOTE:**
-* 图中提到的运行设置config参见[RunConfig说明]()
-* "finetune_start_event"，"finetune_end_event"，"predict_start_event"，"predict_end_event"，"eval_start_event"，"eval_end_event"等事件是用于打印相应阶段的日志信息。"save_ckpt_interval_event"事件用于保存当前训练的模型参数。"log_interval_event"事件用于计算模型评价指标以及可视化这些指标。
+* 图中提到的运行设置config参见[RunConfig说明](../reference/config.md)
+* "finetune_start_event"，"finetune_end_event"，"predict_start_event"，"predict_end_event"，
+"eval_start_event"，"eval_end_event"等事件是用于打印相应阶段的日志信息。"save_ckpt_interval_event"事件用于保存当前训练的模型参数。"log_interval_event"事件用于计算模型评价指标以及可视化这些指标。
 
 如果您需要对图中提到的事件的具体实现进行修改，可以通过Task提供的事件回调hook机制进行改写。
 
-如你想要改变任务评价指标，如下示例中将PaddleHub默认的accuracy评价指标改为F1评价指标。同时还想用自定义的可视化工具可视化模型训练过程，如下示例将可视化工具改写为tb-paddle。则你需要改写评估方法[log_interval_event]()。这时候你可以用Hook实现。具体使用方法如下：
+如你想要改变任务评价指标，如下示例中将PaddleHub默认的accuracy评价指标改为F1评价指标。同时还想用自定义的可视化工具可视化模型训练过程，如下示例将可视化工具改写为tb-paddle。则你需要改写评估方法log_interval_event。这时候你可以用Hook实现。具体使用方法如下：
 
 ```python
 import numpy as np
@@ -113,10 +112,12 @@ task.hook_info()
 ```
 
 **NOTE:**
-* 关于上述提到的run_states参见[RunEnv说明]()
-* tb-paddle详细信息参见[官方文档](https://github.com/linshuliang/tb-paddle)
+* 关于上述提到的run_states参见[RunEnv说明](../reference/task/runenv.md)
+* tb-paddle详细信息参见[官方文档](https://github.com/ShenYuhan/tb-paddle)
 * 改写的事件方法，参数列表务必与PaddleHub内置的相应方法保持一致。
 * 只支持改写/删除以下事件hook类型：
- "build_env_start_event"，"build_env_end_event"，"finetune_start_event"，"finetune_end_event"，"predict_start_event"，"predict_end_event"，"eval_start_event"，"eval_end_event"，"log_interval_event"，"save_ckpt_interval_event"，"eval_interval_event"，"run_step_event"。
-* 如果想要改写组网事件，Hook不支持。改写组网事件参见[自定义Task]()。
-* 如何创建Task，参见[PaddleHub迁移学习示例](https://github.com/PaddlePaddle/PaddleHub/tree/develop/demo)
+ "build_env_start_event"，"build_env_end_event"，"finetune_start_event"，"finetune_end_event"，
+ "predict_start_event"，"predict_end_event"，"eval_start_event"，"eval_end_event"，
+ "log_interval_event"，"save_ckpt_interval_event"，"eval_interval_event"，"run_step_event"。
+* 如果想要改写组网事件，Hook不支持。改写组网事件参见[自定义Task](./how_to_define_task.md)。
+* 如何创建Task，参见[PaddleHub迁移学习示例](../../demo)

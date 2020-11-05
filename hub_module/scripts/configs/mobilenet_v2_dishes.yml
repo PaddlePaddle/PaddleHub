@@ -1,9 +1,0 @@
-name: mobilenet_v2_dishes
-dir: "modules/image/classification/mobilenet_v2_dishes"
-exclude:
-  - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/model/cv/mobilenet_v2_dishes.tar.gz
-    dest: model
-    uncompress: True

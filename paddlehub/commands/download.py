@@ -31,7 +31,7 @@ class DownloadCommand:
         for _arg in argv:
             result = module_server.search_module(_arg)
             if result:
-                url = result['url']
+                url = result[0]['url']
                 with log.ProgressBar('Download {}'.format(url)) as bar:
                     for file, ds, ts in utils.download_with_progress(url):
                         bar.update(float(ds) / ts)
