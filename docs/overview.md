@@ -38,7 +38,7 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 </p>
 
 
-PaddleHub提供了使用Finetune-API和预训练模型完成[图像分类](./demo/image_classification)、[图像着色](./demo/colorization)、[风格迁移](./demo/style_transfer)等迁移任务的使用示例，详细参见[demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.7/demo)。下图是PaddleHub的迁移学习全景图：
+PaddleHub提供了使用Finetune-API和预训练模型完成[图像分类](../demo/image_classification)、[图像着色](../demo/colorization)、[风格迁移](../demo/style_transfer)等迁移任务的使用示例，详细参见[demo](../demo)。下图是PaddleHub的迁移学习全景图：
 
 ![](./imgs/paddlehub_finetune.jpg)
 

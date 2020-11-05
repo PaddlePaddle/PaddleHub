@@ -7,6 +7,6 @@
     :maxdepth: 1
     
     hub.datasets<datasets_index>
-    hub.finetune.Trainer<trainer>
+    hub.finetune.Trainer<finetune>
     hub.Module<module>
     hub.vision.transforms<vision>

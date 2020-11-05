@@ -31,16 +31,16 @@ class MiniCOCO(paddle.io.Dataset):
     They are derived form COCO2014. Meanwhile, it contains 21 different style pictures in file "21styles".
 
     Args:
-       transform(callmethod) : The method of preprocess images.
+       transforms(callmethod) : The method of preprocess images.
        mode(str): The mode for preparing dataset.
 
     Returns:
         DataSet: An iterable object for data iterating
     """
 
-    def __init__(self, transform: Callable, mode: str = 'train'):
+    def __init__(self, transforms: Callable, mode: str = 'train'):
         self.mode = mode
-        self.transform = transform
+        self.transforms = transforms
 
         if self.mode == 'train':
             self.file = 'train'
@@ -54,10 +54,10 @@ class MiniCOCO(paddle.io.Dataset):
     def __getitem__(self, idx: int) -> np.ndarray:
 
         img_path = self.data[idx]
-        im = self.transform(img_path)
+        im = self.transforms(img_path)
         style_idx = idx % len(self.style)
         style_path = self.style[style_idx]
-        style = self.transform(style_path)
+        style = self.transforms(style_path)
         return im, style
 
     def __len__(self):

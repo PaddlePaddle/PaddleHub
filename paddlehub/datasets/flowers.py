@@ -25,6 +25,18 @@ from paddlehub.utils.download import download_data
 
 @download_data(url='https://bj.bcebos.com/paddlehub-dataset/flower_photos.tar.gz')
 class Flowers(paddle.io.Dataset):
+    '''
+    Dataset for image classification. It contains 5 categories(roses, tulips, daisy, sunflowers, dandelion) and a total of
+    3667 pictures, of which 2914 are used for training, 382 are used for verification, and 371 are used for testing.
+
+    Args:
+       transforms(callmethod) : The method of preprocess images.
+       mode(str): The mode for preparing dataset.
+
+    Returns:
+        DataSet: An iterable object for data iterating
+    '''
+
     def __init__(self, transforms: Callable, mode: str = 'train'):
         self.mode = mode
         self.transforms = transforms

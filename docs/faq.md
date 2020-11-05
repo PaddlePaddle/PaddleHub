@@ -25,16 +25,6 @@ $ pip install paddlepaddle
 $ pip install paddlepaddle-gpu
 ```
 
-## 利用PaddleHub ernie/bert进行Finetune时，提示
-`paddle.fluid.core_avx.EnforceNotMet: Input ShapeTensor cannot be found in Op reshape2`等信息
-
-这是因为ernie/bert module的创建时和此时运行环境中PaddlePaddle版本不对应。
-首先将PaddleHub升级至最新版本，同时将ernie卸载。
-```shell
-$ pip install --upgrade paddlehub
-$ hub uninstall ernie
-```
-
 ## 使用paddlehub时，无法下载预置数据集、module的等现象
 
 下载数据集、module等，PaddleHub要求机器可以访问外网。可以使用server_check()可以检查本地与远端PaddleHub-Server的连接状态，使用方法如下：
