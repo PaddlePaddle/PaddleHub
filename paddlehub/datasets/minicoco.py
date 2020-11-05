@@ -55,9 +55,11 @@ class MiniCOCO(paddle.io.Dataset):
 
         img_path = self.data[idx]
         im = self.transform(img_path)
+        im = im.astype('float32')
         style_idx = idx % len(self.style)
         style_path = self.style[style_idx]
         style = self.transform(style_path)
+        style = style.astype('float32')
         return im, style
 
     def __len__(self):

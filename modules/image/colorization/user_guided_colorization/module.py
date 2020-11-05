@@ -42,11 +42,13 @@ class UserGuidedColorization(nn.Layer):
 
     """
 
-    def __init__(self, use_tanh: bool = True, classification: bool = True, load_checkpoint: str = None):
+    def __init__(self, use_tanh: bool = True, classification: bool = True, load_checkpoint: str = None,
+                 ab_thresh: float = 0., prob: float = 1., num_point: int = None):
         super(UserGuidedColorization, self).__init__()
         self.input_nc = 4
         self.output_nc = 2
         self.classification = classification
+        self.pre_func = ColorizePreprocess(ab_thresh=ab_thresh, p=prob, points=num_point)
         # Conv1
         model1 = (
             Conv2D(self.input_nc, 64, 3, 1, 1),
@@ -121,8 +123,8 @@ class UserGuidedColorization(nn.Layer):
         )
 
         # Conv8
-        model8up = (Conv2DTranspose(512, 256, kernel_size=4, stride=2, padding=1), )
-        model3short8 = (Conv2D(256, 256, 3, 1, 1), )
+        model8up = (Conv2DTranspose(512, 256, kernel_size=4, stride=2, padding=1),)
+        model3short8 = (Conv2D(256, 256, 3, 1, 1),)
         model8 = (
             nn.ReLU(),
             Conv2D(256, 256, 3, 1, 1),
@@ -133,26 +135,20 @@ class UserGuidedColorization(nn.Layer):
         )
 
         # Conv9
-        model9up = (Conv2DTranspose(256, 128, kernel_size=4, stride=2, padding=1), )
-        model2short9 = (Conv2D(
-            128,
-            128,
-            3,
-            1,
-            1,
-        ), )
+        model9up = (Conv2DTranspose(256, 128, kernel_size=4, stride=2, padding=1),)
+        model2short9 = (Conv2D(128, 128, 3, 1, 1,),)
         model9 = (nn.ReLU(), Conv2D(128, 128, 3, 1, 1), nn.ReLU(), nn.BatchNorm(128))
 
         # Conv10
-        model10up = (Conv2DTranspose(128, 128, kernel_size=4, stride=2, padding=1), )
-        model1short10 = (Conv2D(64, 128, 3, 1, 1), )
+        model10up = (Conv2DTranspose(128, 128, kernel_size=4, stride=2, padding=1),)
+        model1short10 = (Conv2D(64, 128, 3, 1, 1),)
         model10 = (nn.ReLU(), Conv2D(128, 128, 3, 1, 1), nn.LeakyReLU(negative_slope=0.2))
-        model_class = (Conv2D(256, 529, 1), )
+        model_class = (Conv2D(256, 529, 1),)
 
         if use_tanh:
             model_out = (Conv2D(128, 2, 1, 1, 0, 1), nn.Tanh())
         else:
-            model_out = (Conv2D(128, 2, 1, 1, 0, 1), )
+            model_out = (Conv2D(128, 2, 1, 1, 0, 1),)
 
         self.model1 = nn.Sequential(*model1)
         self.model2 = nn.Sequential(*model2)
@@ -183,24 +179,14 @@ class UserGuidedColorization(nn.Layer):
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
 
-    def transforms(self, images: str, is_train: bool = True) -> callable:
-        if is_train:
-            transform = T.Compose(
-                [T.Resize((256, 256), interpolation='NEAREST'),
-                 T.RandomPaddingCrop(crop_size=176),
-                 T.RGB2LAB()],
-                stay_rgb=True,
-                is_permute=False)
-        else:
-            transform = T.Compose([T.Resize(
-                (256, 256), interpolation='NEAREST'), T.RGB2LAB()],
-                                  stay_rgb=True,
-                                  is_permute=False)
+    def transforms(self, images: str) -> callable:
+ 
+        transform = T.Compose([T.Resize((256, 256), interpolation='NEAREST'), T.RGB2LAB()], to_rgb=True)
         return transform(images)
 
-    def preprocess(self, inputs: paddle.Tensor, ab_thresh: float = 0., prob: float = 0.):
-        self.preprocess = ColorizePreprocess(ab_thresh=ab_thresh, p=prob)
-        return self.preprocess(inputs)
+    def preprocess(self, inputs: paddle.Tensor):
+        output = self.pre_func(inputs)
+        return output
 
     def forward(self,
                 input_A: paddle.Tensor,
@@ -234,10 +220,3 @@ class UserGuidedColorization(nn.Layer):
             out_reg = self.model_out(conv10_2)
 
         return out_class, out_reg
-
-
-if __name__ == "__main__":
-    place = paddle.CUDAPlace(0)
-    paddle.disable_static()
-    model = UserGuidedColorization()
-    model.eval()

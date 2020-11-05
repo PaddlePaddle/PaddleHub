@@ -23,7 +23,7 @@ import paddlehub.vision.functional as F
 
 
 class Compose:
-    def __init__(self, transforms, to_rgb=True, stay_rgb=False, is_permute=True):
+    def __init__(self, transforms, to_rgb=False):
         if not isinstance(transforms, list):
             raise TypeError('The transforms must be a list!')
         if len(transforms) < 1:
@@ -31,8 +31,6 @@ class Compose:
                              'must be equal or larger than 1!')
         self.transforms = transforms
         self.to_rgb = to_rgb
-        self.stay_rgb = stay_rgb
-        self.is_permute = is_permute
 
     def __call__(self, im):
         if isinstance(im, str):
@@ -46,11 +44,7 @@ class Compose:
         for op in self.transforms:
             im = op(im)
 
-        if not self.stay_rgb:
-            im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
-
-        if self.is_permute:
-            im = F.permute(im)
+        im = F.permute(im)
 
         return im
 
@@ -66,7 +60,7 @@ class RandomHorizontalFlip:
 
 
 class RandomVerticalFlip:
-    def __init__(self, prob=0.1):
+    def __init__(self, prob=0.5):
         self.prob = prob
 
     def __call__(self, im):
@@ -85,7 +79,7 @@ class Resize:
         'LANCZOS4': cv2.INTER_LANCZOS4
     }
 
-    def __init__(self, target_size=512, interpolation='LINEAR'):
+    def __init__(self, target_size, interpolation='LINEAR'):
         self.interpolation = interpolation
         if not (interpolation == "RANDOM" or interpolation in self.interpolation_dict):
             raise ValueError("interpolation should be one of {}".format(self.interpolation_dict.keys()))
@@ -212,7 +206,7 @@ class Padding:
 
 
 class RandomPaddingCrop:
-    def __init__(self, crop_size=512, im_padding_value=[127.5, 127.5, 127.5]):
+    def __init__(self, crop_size, im_padding_value=[127.5, 127.5, 127.5]):
         if isinstance(crop_size, list) or isinstance(crop_size, tuple):
             if len(crop_size) != 2:
                 raise ValueError(
@@ -469,7 +463,8 @@ class RGB2LAB:
     def __call__(self, img: np.ndarray) -> np.ndarray:
         img = img / 255
         img = np.array(img).transpose(2, 0, 1)
-        return self.rgb2lab(img)
+        img = self.rgb2lab(img)
+        return np.array(img).transpose(1, 2, 0)
 
 
 class LAB2RGB:
@@ -585,39 +580,3 @@ class CenterCrop:
         crop_left = int((img_width - self.crop_size) / 2.)
         return img[crop_left:crop_left + self.crop_size, crop_top:crop_top + self.crop_size, :]
 
-
-class SetType:
-    """
-    Set image type.
-
-    Args:
-       type(type): Type of Image value.
-
-    Return:
-        img(np.ndarray): Transformed image.
-    """
-
-    def __init__(self, datatype: type = 'float32'):
-        self.type = datatype
-
-    def __call__(self, img: np.ndarray):
-        img = img.astype(self.type)
-        return img
-
-
-class ResizeScaling:
-    """Resize images by scaling method.
-
-    Args:
-        target(int): Target image size.
-        interpolation(Callable): Interpolation method.
-    """
-
-    def __init__(self, target: int = 368, interpolation: Callable = cv2.INTER_CUBIC):
-        self.target = target
-        self.interpolation = interpolation
-
-    def __call__(self, img, scale_search):
-        scale = scale_search * self.target / img.shape[0]
-        resize_img = cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=self.interpolation)
-        return resize_img
