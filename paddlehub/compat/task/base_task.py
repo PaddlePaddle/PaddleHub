@@ -27,6 +27,7 @@ from paddlehub.compat import paddle_utils
 from paddlehub.compat.task.config import RunConfig
 from paddlehub.compat.task.hook import TaskHooks
 from paddlehub.compat.task.task_utils import RunEnv, RunState
+from paddlehub.compat.task.checkpoint import load_checkpoint
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import generate_tempdir
 
@@ -133,6 +134,26 @@ class BaseTask(object):
 
     def exit_phase(self):
         self._phases = self._phases[:-1]
+
+    def init_if_necessary(self):
+        if not self.is_checkpoint_loaded:
+            if not self.load_checkpoint():
+                self.exe.run(self._base_startup_program)
+            self.is_checkpoint_loaded = True
+            self.is_best_model_loaded = False
+
+    def init_if_load_best_model(self):
+        if not self.is_best_model_loaded:
+            best_model_path = os.path.join(self.config.checkpoint_dir, "best_model")
+            logger.info("Load the best model from %s" % best_model_path)
+            if os.path.exists(best_model_path):
+                self.load_parameters(best_model_path)
+                self.is_checkpoint_loaded = False
+                self.is_best_model_loaded = True
+            else:
+                self.init_if_necessary()
+        else:
+            logger.info("The best model has been loaded")
 
     def _build_env(self):
         '''Building the program and strategy for specific running phase.'''
@@ -277,12 +298,25 @@ class BaseTask(object):
 
     @property
     def generator(self) -> Generator:
+        def data_generator(records):
+            def wrapper():
+                for record in records:
+                    values = []
+                    for feed_name in self.feed_list:
+                        values.append(record[feed_name])
+                    yield values
+
+            return wrapper
+
         if self.is_predict_phase:
-            data = self._predict_data
+            records = self._predict_data
         else:
-            data = None
-        self.env.generator = self._base_data_reader.data_generator(
-            batch_size=self.config.batch_size, phase=self.phase, data=data, return_list=True)
+            if self.is_train_phase:
+                shuffle = True
+            else:
+                shuffle = False
+            records = self.dataset.get_records(phase=self.phase, shuffle=shuffle)
+        self.env.generator = data_generator(records)
 
         return self.env.generator
 
@@ -325,20 +359,15 @@ class BaseTask(object):
 
     @property
     def feed_list(self) -> List[str]:
-        if self._compatible_mode:
-            feed_list = [varname for varname in self._base_feed_list]
-            if self.is_train_phase or self.is_test_phase:
-                feed_list += [label.name for label in self.labels]
+        if not self.env.is_inititalized:
+            self._build_env()
+
+        if self._predict_data:
+            feed_list = list(self._predict_data[0].keys())
         else:
-            if not self.env.is_inititalized:
-                self._build_env()
+            feed_list = self.dataset.get_feed_list(self.phase)
 
-            if self._predict_data:
-                feed_list = list(self._predict_data[0].keys())
-            else:
-                feed_list = self.dataset.get_feed_list(self.phase)
-
-            feed_list = [feed_name for feed_name in feed_list if feed_name in self.main_program.global_block().vars]
+        feed_list = [feed_name for feed_name in feed_list if feed_name in self.main_program.global_block().vars]
         return feed_list
 
     @property
@@ -544,9 +573,26 @@ class BaseTask(object):
         # The first key will be used as main metrics to update the best model
         raise NotImplementedError
 
+    def load_checkpoint(self):
+        is_load_successful, self.env.current_epoch, self.env.current_step, self.best_score = load_checkpoint(
+            self.config.checkpoint_dir, self.exe, main_program=self.main_program)
+
+        # Revise max_train_steps when incremental training
+        if is_load_successful:
+            self.max_train_steps = self.env.current_step + self.max_train_steps / self.config.num_epoch * (
+                self.config.num_epoch - self.env.current_epoch + 1)
+        return is_load_successful
+
+    def load_parameters(self, dirname):
+        def if_exist(var):
+            path = os.path.join(dirname, var.name)
+            return os.path.exists(path)
+
+        paddle.static.load(executor=self.exe, model_path=dirname, program=self.main_program)
+
     def save_inference_model(self, dirname: str, model_filename: str = None, params_filename: str = None):
         with self.phase_guard('predict'):
-            paddle.io.save_inference_model(
+            paddle.static.save_inference_model(
                 dirname=dirname,
                 executor=self.exe,
                 main_program=self.main_program,
@@ -688,7 +734,8 @@ class BaseTask(object):
             self,
             data: List[Any] = None,
             label_list: List[Any] = None,
-            return_result: bool = False,
+            load_best_model: bool = True,
+            return_result: bool = True,
             accelerate_mode: bool = True,
     ) -> List[RunState]:
         '''
@@ -710,6 +757,9 @@ class BaseTask(object):
                 self._label_list = label_list
             self._predict_start_event()
 
+            if load_best_model:
+                self.init_if_load_best_model()
+
             if not self.accelerate_mode:
                 run_states = self._run()
             else:
@@ -719,7 +769,7 @@ class BaseTask(object):
 
             self._predict_end_event(run_states)
             self._predict_data = None
-            if return_result or not self._compatible_mode:
+            if return_result:
                 return self._postprocessing(run_states)
         return run_states
 
@@ -746,18 +796,14 @@ class BaseTask(object):
             RunState: the running result of specific phase
         '''
         with paddle.static.program_guard(self.main_program, self.startup_program):
-            if self.config.use_pyreader:
-                data_loader = paddle.io.DataLoader.from_generator(
-                    feed_list=self.feed_var_list, capacity=64, use_double_buffer=True, iterable=True)
-                if self._compatible_mode:
-                    data_reader = data_loader.set_batch_generator(self.generator, places=self.places)
-                else:
-                    if self.is_predict_phase:
-                        data_reader = data_loader.set_sample_generator(
-                            self.generator, places=self.places, batch_size=self.config.batch_size, drop_last=False)
-                    else:
-                        data_reader = data_loader.set_sample_generator(
-                            self.generator, places=self.places, batch_size=self.config.batch_size, drop_last=True)
+            data_loader = paddle.io.DataLoader.from_generator(
+                feed_list=self.feed_var_list, capacity=64, use_double_buffer=True, iterable=True)
+            if self.is_predict_phase:
+                data_reader = data_loader.set_sample_generator(
+                    self.generator, places=self.places, batch_size=self.config.batch_size, drop_last=False)
+            else:
+                data_reader = data_loader.set_sample_generator(
+                    self.generator, places=self.places, batch_size=self.config.batch_size, drop_last=True)
 
             global_run_states = []
             period_run_states = []

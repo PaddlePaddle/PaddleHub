@@ -16,10 +16,9 @@
 from collections import OrderedDict
 from typing import List
 
+import paddlehub.config as hubconf
 from paddlehub.server import ServerSource, GitSource
 from paddlehub.utils import utils
-
-PADDLEHUB_PUBLIC_SERVER = 'http://paddlepaddle.org.cn/paddlehub'
 
 
 class HubServer(object):
@@ -27,6 +26,7 @@ class HubServer(object):
 
     def __init__(self):
         self.sources = OrderedDict()
+        self.keysmap = OrderedDict()
 
     def _generate_source(self, url: str, source_type: str = 'git'):
         if source_type == 'server':
@@ -34,15 +34,16 @@ class HubServer(object):
         elif source_type == 'git':
             source = GitSource(url)
         else:
-            raise RuntimeError('Unknown source type {}.'.format(source_type))
+            raise ValueError('Unknown source type {}.'.format(source_type))
         return source
 
     def _get_source_key(self, url: str):
         return 'source_{}'.format(utils.md5(url))
 
-    def add_source(self, url: str, source_type: str = 'git'):
+    def add_source(self, url: str, source_type: str = 'git', key: str = ''):
         '''Add a module source(GitSource or ServerSource)'''
-        key = self._get_source_key(url)
+        key = self._get_source_key(url) if not key else key
+        self.keysmap[url] = key
         self.sources[key] = self._generate_source(url, source_type)
 
     def remove_source(self, url: str = None, key: str = None):
@@ -50,9 +51,15 @@ class HubServer(object):
         self.sources.pop(key)
 
     def get_source(self, url: str):
-        ''''''
-        key = self._get_source_key(url)
-        return self.sources.get(key, None)
+        '''Get a module source by url'''
+        key = self.keysmap.get(url)
+        if not key:
+            return None
+        return self.sources.get(key)
+
+    def get_source_by_key(self, key: str):
+        '''Get a module source by key'''
+        return self.sources.get(key)
 
     def search_module(self,
                       name: str,
@@ -98,16 +105,15 @@ class HubServer(object):
                 return result
         return []
 
-    def get_module_info(self, name: str, source: str = None) -> dict:
-        '''
-        '''
+    def get_module_compat_info(self, name: str, source: str = None) -> dict:
+        '''Get the version compatibility information of the model.'''
         sources = self.sources.values() if not source else [self._generate_source(source)]
         for source in sources:
-            result = source.get_module_info(name=name)
+            result = source.get_module_compat_info(name=name)
             if result:
                 return result
         return {}
 
 
 module_server = HubServer()
-module_server.add_source(PADDLEHUB_PUBLIC_SERVER, source_type='server')
+module_server.add_source(hubconf.server, source_type='server', key='default_hub_server')

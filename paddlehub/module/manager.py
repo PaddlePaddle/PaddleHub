@@ -15,8 +15,8 @@
 
 import os
 import shutil
+
 import sys
-import traceback
 from collections import OrderedDict
 from typing import List
 
@@ -39,6 +39,7 @@ class HubModuleNotFoundError(Exception):
         msg = '{}'.format(self.name)
         if self.version:
             msg += '-{}'.format(self.version)
+
         if self.source:
             msg += ' from {}'.format(self.source)
 
@@ -146,6 +147,7 @@ class LocalModuleManager(object):
         return name.replace('-', '_')
 
     def install(self,
+                *,
                 name: str = None,
                 directory: str = None,
                 archive: str = None,
@@ -156,8 +158,8 @@ class LocalModuleManager(object):
                 branch: str = None) -> HubModule:
         '''
         Install a HubModule from name or directory or archive file or url. When installing with the name parameter, if a
-        module that meets the conditions (both name and version) already installed, the installation step will be
-        skipped. When installing with other parameter, The locally installed modules will be uninstalled.
+        module that meets the conditions (both name and version) already installed, the installation step will be skipped.
+        When installing with other parameter, The locally installed modules will be uninstalled.
 
         Args:
             name      (str|optional): module name to install
@@ -168,6 +170,7 @@ class LocalModuleManager(object):
             source    (str|optional): source containing module code, use with name paramete
         '''
         if name:
+
             lock = filelock.FileLock(os.path.join(TMP_HOME, name))
             with lock:
                 hub_module_cls = self.search(name, source, branch)
@@ -217,12 +220,8 @@ class LocalModuleManager(object):
             if os.path.exists(module_dir):
                 try:
                     module = self._local_modules[name] = HubModule.load(module_dir)
-                except Exception as e:
-                    msg = traceback.format_exc()
-                    file = utils.record(msg)
-                    log.logger.warning(
-                        'An error was encountered while loading {}. Detailed error information can be found in the {}.'.
-                        format(name, file))
+                except:
+                    utils.record_exception('An error was encountered while loading {}'.format(name))
 
         if not module:
             return None
@@ -239,14 +238,11 @@ class LocalModuleManager(object):
         '''List all installed HubModule.'''
         for subdir in os.listdir(self.home):
             fulldir = os.path.join(self.home, subdir)
+
             try:
                 self._local_modules[subdir] = HubModule.load(fulldir)
-            except Exception as e:
-                msg = traceback.format_exc()
-                file = utils.record(msg)
-                log.logger.warning(
-                    'An error was encountered while loading {}. Detailed error information can be found in the {}.'.
-                    format(subdir, file))
+            except:
+                utils.record_exception('An error was encountered while loading {}'.format(subdir))
 
         return [module for module in self._local_modules.values()]
 
@@ -266,7 +262,7 @@ class LocalModuleManager(object):
             if name.lower() == item['name'].lower() and utils.Version(item['version']).match(version):
                 return self._install_from_url(item['url'])
 
-        module_infos = module_server.get_module_info(name=name)
+        module_infos = module_server.get_module_compat_info(name=name)
         # The HubModule with the specified name cannot be found
         if not module_infos:
             raise HubModuleNotFoundError(name=name, version=version)
@@ -286,26 +282,22 @@ class LocalModuleManager(object):
 
     def _install_from_source(self, name: str, version: str, source: str, update: bool = False,
                              branch: str = None) -> HubModule:
-        '''Install a HubModule from Git Repo'''
+        '''Install a HubModule from git repository'''
         result = module_server.search_module(name=name, source=source, version=version, update=update, branch=branch)
         for item in result:
             if item['name'] == name and item['version'].match(version):
 
                 # uninstall local module
-                if self.search(name):
+                local_module = self.search(name)
+                if local_module and local_module.source == source and local_module.branch == branch:
+                    self._local_modules[name] = local_module
+                    return self._local_modules[name]
+
+                if os.path.exists(self._get_normalized_path(name)):
                     self.uninstall(name)
 
                 installed_path = self._get_normalized_path(name)
-                if not os.path.exists(installed_path):
-                    os.makedirs(installed_path)
-                module_file = os.path.join(installed_path, 'module.py')
-
-                # Generate a module.py file to reference objects from Git Repo
-                with open(module_file, 'w') as file:
-                    file.write('import sys\n\n')
-                    file.write('sys.path.insert(0, \'{}\')\n'.format(item['path']))
-                    file.write('from hubconf import {}\n'.format(item['class']))
-                    file.write('sys.path.pop(0)\n')
+                shutil.copytree(item['path'], installed_path)
 
                 source_info_file = os.path.join(installed_path, '_source_info.yaml')
                 with open(source_info_file, 'w') as file:
@@ -313,11 +305,16 @@ class LocalModuleManager(object):
                     file.write('branch: {}'.format(branch))
 
                 self._local_modules[name] = HubModule.load(installed_path)
+
+                # Install python package requirements
+                self._install_module_requirements(self._local_modules[name])
+
                 if version:
                     log.logger.info('Successfully installed {}-{}'.format(name, version))
                 else:
                     log.logger.info('Successfully installed {}'.format(name))
                 return self._local_modules[name]
+
         raise HubModuleNotFoundError(name=name, version=version, source=source)
 
     def _install_from_directory(self, directory: str) -> HubModule:
@@ -334,27 +331,17 @@ class LocalModuleManager(object):
             tempdir = self._get_normalized_name(tempdir)
             shutil.copytree(directory, tempdir)
 
-            directory = tempdir
-            hub_module_cls = HubModule.load(directory)
-
             # Uninstall local module
-            if self.search(hub_module_cls.name):
-                self.uninstall(hub_module_cls.name)
+            if os.path.exists(self._get_normalized_path(module_info.name)):
+                self.uninstall(module_info.name)
 
-            shutil.copytree(directory, self._get_normalized_path(hub_module_cls.name))
+            shutil.copytree(directory, self._get_normalized_path(module_info.name))
 
-            # Reload the Module object to avoid path errors
-            hub_module_cls = HubModule.load(self._get_normalized_path(hub_module_cls.name))
-            self._local_modules[hub_module_cls.name] = hub_module_cls
+            hub_module_cls = HubModule.load(self._get_normalized_path(module_info.name))
+            self._local_modules[module_info.name] = hub_module_cls
 
-            for py_req in hub_module_cls.get_py_requirements():
-                log.logger.info('Installing dependent packages: {}'.format(py_req))
-                result = pypi.install(py_req)
-                if result:
-                    log.logger.info('Successfully installed {}'.format(py_req))
-                else:
-                    log.logger.info('Some errors occurred while installing {}'.format(py_req))
-
+            # Install python package requirements
+            self._install_module_requirements(hub_module_cls)
             log.logger.info('Successfully installed {}-{}'.format(hub_module_cls.name, hub_module_cls.version))
             return hub_module_cls
 
@@ -365,5 +352,24 @@ class LocalModuleManager(object):
                 for path, ds, ts in xarfile.unarchive_with_progress(archive, _tdir):
                     bar.update(float(ds) / ts)
 
-            path = path.split(os.sep)[0]
-            return self._install_from_directory(os.path.join(_tdir, path))
+            # Sometimes the path contains '.'
+            path = os.path.normpath(path)
+            directory = os.path.join(_tdir, path.split(os.sep)[0])
+            return self._install_from_directory(directory)
+
+    def _install_module_requirements(self, module: HubModule):
+        file = utils.get_record_file()
+        with open(file, 'a') as _stream:
+
+            for py_req in module.get_py_requirements():
+                if py_req.lstrip().rstrip() == '':
+                    continue
+
+                with log.logger.processing('Installing dependent packages {}'.format(py_req)):
+                    result = pypi.install(py_req, ostream=_stream, estream=_stream)
+                    if result:
+                        log.logger.info('Successfully installed dependent packages {}'.format(py_req))
+                    else:
+                        log.logger.warning(
+                            'Some errors occurred while installing dependent packages {}. Detailed error information can be found in the {}.'
+                            .format(py_req, file))

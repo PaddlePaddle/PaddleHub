@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import time
+from typing import Callable
 
 
 class RunConfig(object):
@@ -27,7 +28,8 @@ class RunConfig(object):
                  use_cuda: bool = True,
                  checkpoint_dir: str = None,
                  num_epoch: int = 1,
-                 batch_size: int = 32):
+                 batch_size: int = 32,
+                 strategy: Callable = None):
         ''' Construct finetune Config '''
         self.log_interval = log_interval
         self.eval_interval = eval_interval

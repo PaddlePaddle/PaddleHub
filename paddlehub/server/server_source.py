@@ -18,7 +18,7 @@ import requests
 from typing import List
 
 import paddlehub
-from paddlehub.utils import utils, platform
+from paddlehub.utils import platform
 
 
 class ServerConnectionError(Exception):
@@ -71,17 +71,16 @@ class ServerSource(object):
 
         # Delay module loading to improve command line speed
         import paddle
-        params['hub_version'] = paddlehub.__version__
-        params['paddle_version'] = paddle.__version__
+        params['hub_version'] = paddlehub.__version__.split('-')[0]
+        params['paddle_version'] = paddle.__version__.split('-')[0]
 
         result = self.request(path='search', params=params)
         if result['status'] == 0 and len(result['data']) > 0:
             return result['data']
         return None
 
-    def get_module_info(self, name: str) -> dict:
-        '''
-        '''
+    def get_module_compat_info(self, name: str) -> dict:
+        '''Get the version compatibility information of the model.'''
 
         def _convert_version(version: str) -> List:
             result = []
@@ -112,14 +111,16 @@ class ServerSource(object):
         return {}
 
     def request(self, path: str, params: dict) -> dict:
-        '''
-        '''
+        '''Request server.'''
         api = '{}/{}'.format(self._url, path)
         try:
             result = requests.get(api, params, timeout=self._timeout)
             return result.json()
         except requests.exceptions.ConnectionError as e:
             raise ServerConnectionError(self._url)
+
+    def is_connected(self):
+        return self.check(self._url)
 
     @classmethod
     def check(cls, url: str) -> bool:

@@ -6,7 +6,7 @@ PaddleHub支持修改预训练模型存放路径：
 * 如已设置`${HUB_HOME}`环境变量，则预训练模型、配置等文件都存放在`${HUB_HOME}`指示的路径下
 * 如未设置`${HUB_HOME}`环境变量，则存放在`$HOME`指示的路径下
 
-目前命令行支持以下12个命令：
+目前命令行支持以下11个命令：
 
 ## `hub install`
 
@@ -22,14 +22,7 @@ PaddleHub支持修改预训练模型存放路径：
 
 ## `hub download`
 
-用于下载百度提供的Module
-
-`选项`
-* `--output_path`：用于指定存放下载文件的目录，默认为当前目录
-
-* `--uncompress`：是否对下载的压缩包进行解压，填写true或者false，默认false（不解压）
-
-* `--type`：指定下载的资源类型，当指定Model时，download只会下载Model的资源。默认为All，此时会优先搜索Module资源，如果没有相关的Module资源，则搜索Model
+用于下载PaddleHub提供的Module
 
 ## `hub search`
 
@@ -58,26 +51,6 @@ PaddleHub支持修改预训练模型存放路径：
 
 PaddleHub在使用过程中会产生一些缓存数据，这部分数据默认存放在${HUB_HOME}/.paddlehub/cache目录下，用户可以通过clear命令来清空缓存
 
-## `hub autofinetune`
-
-用于自动调整Fine-tune任务的超参数，具体使用详情参考[PaddleHub AutoDL Finetuner使用教程](./autofinetune.md)
-
-`选项`
-* `--param_file`: 需要搜索的超参数信息yaml文件
-
-* `--gpu`: 设置运行程序的可用GPU卡号，中间以逗号隔开，不能有空格
-
-* `--popsize`: 设置程序运行每轮产生的超参组合数，默认为5
-
-* `--round`: 设置程序运行的轮数，默认是10
-
-* `--output_dir`: 设置程序运行输出结果存放目录，可选，不指定该选项参数时，在当前运行路径下生成存放程序运行输出信息的文件夹
-
-* `--evaluator`: 设置自动搜索超参的评价效果方式，可选fulltrail和populationbased, 默认为populationbased
-
-* `--strategy`: 设置自动搜索超参算法，可选hazero和pshe2，默认为hazero
-
-
 ## `hub config`
 用于查看和设置paddlehub相关设置，包括对server地址、日志级别的设置：
 
@@ -88,7 +61,9 @@ PaddleHub在使用过程中会产生一些缓存数据，这部分数据默认�
 
 * `hub config server==[address]`: 设置当前paddlehub-server地址为[address]，paddlehub客户端从此地址获取模型信息
 
-* `hub config log==[level]`: 设置当前日志级别为[level]， 可选值为critical, error, warning, info, debug, nolog, 从左到右优先级从高到低，nolog表示不显示日志信息
+* `hub config log.level==[level]`: 设置当前日志级别为[level]， 可选值为CRITICAL, ERROR, WARNING, EVAL, TRAIN, INFO, DEBUG, 从左到右优先级从高到低
+
+* `hub config log.enable==True|False`: 设置当日志是否可用
 
 ## `hub serving`
 
@@ -96,7 +71,7 @@ PaddleHub在使用过程中会产生一些缓存数据，这部分数据默认�
 
 **NOTE:**
 
-在PaddleHub中，Module表示一个`可执行的神经网络模型`，一个Module可以支持直接命令行预测，也可以配合PaddleHub Finetune API，通过少量代码实现迁移学习。不是所有的Module都支持命令行预测 (例如BERT/ERNIE Transformer类模型，一般需要搭配任务进行finetune)，也不是所有的Module都可用于finetune（例如LAC词法分析模型，我们不建议用户用于finetune）。
+在PaddleHub中，Module表示一个`可执行的预训练模型`，一个Module可以支持直接命令行预测，也可以配合PaddleHub Finetune API，通过少量代码实现迁移学习。不是所有的Module都支持命令行预测 (例如BERT/ERNIE Transformer类模型，一般需要搭配任务进行finetune)，也不是所有的Module都可用于finetune（例如LAC词法分析模型，我们不建议用户用于finetune）。
 
 PaddleHub尽量简化了用户在使用命令行预测时的理解成本，一般来讲，我们将预测分为NLP和CV两大类
 

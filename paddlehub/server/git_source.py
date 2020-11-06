@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import ast
 import inspect
 import importlib
 import os
 import sys
-import traceback
 from collections import OrderedDict
 from typing import List
 
@@ -56,29 +56,23 @@ class GitSource(object):
         self.load_hub_modules()
 
     def checkout(self, branch: str):
+        '''Checkout the current repo to the specified branch.'''
         try:
             self.repo.git.checkout(branch)
             # reload modules
             self.load_hub_modules()
         except:
-            msg = traceback.format_exc()
-            file = utils.record(msg)
-            log.logger.warning(
-                'An error occurred while checkout {}. Detailed error information can be found in the {}.'.format(
-                    self.path, file))
+            utils.record_exception('An error occurred while checkout {}'.format(self.path))
 
     def update(self):
+        '''Update the current repo.'''
         try:
             self.repo.remote().pull(self.repo.branches[0])
             # reload modules
             self.load_hub_modules()
-        except Exception as e:
+        except:
             self.hub_modules = OrderedDict()
-            msg = traceback.format_exc()
-            file = utils.record(msg)
-            log.logger.warning(
-                'An error occurred while update {}. Detailed error information can be found in the {}.'.format(
-                    self.path, file))
+            utils.record_exception('An error occurred while update {}'.format(self.path))
 
     def load_hub_modules(self):
         if 'hubconf' in sys.modules:
@@ -86,18 +80,28 @@ class GitSource(object):
 
         sys.path.insert(0, self.path)
         try:
+            with open(os.path.join(self.path, 'hubconf.py'), 'r') as file:
+                pycode = file.read()
+                ast_module = ast.parse(pycode)
+                for _body in ast_module.body:
+                    if not isinstance(_body, (ast.Import, ast.ImportFrom)):
+                        continue
+
+                    if not _body.module.endswith('module'):
+                        continue
+
+                    subpath = '.'.join(_body.module.split('.')[:-2])
+                    subpath = os.path.join(self.path, subpath)
+                    sys.path.insert(0, subpath)
+
             py_module = importlib.import_module('hubconf')
             for _item, _cls in inspect.getmembers(py_module, inspect.isclass):
                 _item = py_module.__dict__[_item]
                 if issubclass(_item, RunModule):
                     self.hub_modules[_item.name] = _item
-        except Exception as e:
+        except:
             self.hub_modules = OrderedDict()
-            msg = traceback.format_exc()
-            file = utils.record(msg)
-            log.logger.warning(
-                'An error occurred while loading {}. Detailed error information can be found in the {}.'.format(
-                    self.path, file))
+            utils.record_exception('An error occurred while loading {}'.format(self.path))
 
         sys.path.remove(self.path)
 
@@ -122,14 +126,20 @@ class GitSource(object):
         '''
         module = self.hub_modules.get(name, None)
         if module and module.version.match(version):
+            path = sys.modules[module.__module__].__file__
+            path = os.path.dirname(path)
             return [{
                 'version': module.version,
                 'name': module.name,
-                'path': self.path,
+                'path': path,
                 'class': module.__name__,
                 'source': self.url
             }]
         return None
+
+    def get_module_compat_info(self, name: str) -> dict:
+        '''Get the version compatibility information of the model.'''
+        return {}
 
     @classmethod
     def check(cls, url: str) -> bool:

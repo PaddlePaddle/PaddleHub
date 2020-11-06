@@ -34,8 +34,7 @@ class ResourceNotFoundError(Exception):
 
 
 def download(name: str, save_path: str, version: str = None):
-    '''
-    '''
+    '''The download interface provided to PaddleX for downloading the specified model and resource files.'''
     file = os.path.join(save_path, name)
     file = os.path.realpath(file)
     if os.path.exists(file):

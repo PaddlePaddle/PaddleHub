@@ -3,7 +3,7 @@
 ## 环境依赖
 
 * Python>=3.6
-* PaddlePaddle>=1.7.0
+* PaddlePaddle>=2.0.0rc
 * 操作系统：Windows/Mac/Linux
 
 ## 安装命令

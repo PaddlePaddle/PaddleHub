@@ -24,6 +24,7 @@ import requests
 import sys
 import time
 import tempfile
+import traceback
 import types
 from typing import Generator
 from urllib.parse import urlparse
@@ -226,6 +227,7 @@ def download_with_progress(url: str, path: str = None) -> Generator[str, int, in
 def load_py_module(python_path: str, py_module_name: str) -> types.ModuleType:
     '''
     Load the specified python module.
+
     Args:
         python_path(str) : The directory where the python module is located
         py_module_name(str) : Module name to be loaded
@@ -245,16 +247,14 @@ def load_py_module(python_path: str, py_module_name: str) -> types.ModuleType:
 
 
 def get_platform_default_encoding() -> str:
-    '''
-    '''
+    '''Get the default encoding of the current platform.'''
     if utils.platform.is_windows():
         return 'gbk'
     return 'utf8'
 
 
 def sys_stdin_encoding() -> str:
-    '''
-    '''
+    '''Get the standary input stream default encoding.'''
     encoding = sys.stdin.encoding
     if encoding is None:
         encoding = sys.getdefaultencoding()
@@ -265,8 +265,7 @@ def sys_stdin_encoding() -> str:
 
 
 def sys_stdout_encoding() -> str:
-    '''
-    '''
+    '''Get the standary output stream default encoding.'''
     encoding = sys.stdout.encoding
     if encoding is None:
         encoding = sys.getdefaultencoding()
@@ -277,16 +276,14 @@ def sys_stdout_encoding() -> str:
 
 
 def md5(text: str):
-    '''
-    '''
+    '''Calculate the md5 value of the input text.'''
     md5code = hashlib.md5(text.encode())
     return md5code.hexdigest()
 
 
 def record(msg: str) -> str:
-    '''
-    '''
-    logfile = os.path.join(hubenv.LOG_HOME, time.strftime('%Y%m%d.log'))
+    '''Record the specified text into the PaddleHub log file witch will be automatically stored according to date.'''
+    logfile = get_record_file()
     with open(logfile, 'a') as file:
         file.write('=' * 50 + '\n')
         file.write('Record at ' + time.strftime('%Y-%m-%d %H:%M:%S') + '\n')
@@ -294,3 +291,14 @@ def record(msg: str) -> str:
         file.write(str(msg) + '\n' * 3)
 
     return logfile
+
+
+def record_exception(msg: str) -> str:
+    '''Record the current exception infomation into the PaddleHub log file witch will be automatically stored according to date.'''
+    tb = traceback.format_exc()
+    file = record(tb)
+    utils.log.logger.warning('{}. Detailed error information can be found in the {}.'.format(msg, file))
+
+
+def get_record_file():
+    return os.path.join(hubenv.LOG_HOME, time.strftime('%Y%m%d.log'))

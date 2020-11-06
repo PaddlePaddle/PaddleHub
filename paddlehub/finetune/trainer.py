@@ -20,7 +20,6 @@ from collections import defaultdict
 from typing import Any, Callable, Generic, List
 
 import paddle
-from paddle.distributed import ParallelEnv
 from visualdl import LogWriter
 
 from paddlehub.utils.log import logger
@@ -33,7 +32,7 @@ class Trainer(object):
 
     Args:
         model(paddle.nn.Layer) : Model to train or evaluate.
-        strategy(paddle.optimizer.Optimizer) : Optimizer strategy.
+        optimizer(paddle.optimizer.Optimizer) : Optimizer for loss.
         use_vdl(bool) : Whether to use visualdl to record training data.
         checkpoint_dir(str) : Directory where the checkpoint is saved, and the trainer will restore the
             state and model parameters from the checkpoint.
@@ -52,15 +51,18 @@ class Trainer(object):
 
     def __init__(self,
                  model: paddle.nn.Layer,
-                 strategy: paddle.optimizer.Optimizer,
+                 optimizer: paddle.optimizer.Optimizer,
                  use_vdl: bool = True,
                  checkpoint_dir: str = None,
                  compare_metrics: Callable = None):
-        self.nranks = ParallelEnv().nranks
-        self.local_rank = ParallelEnv().local_rank
+        self.nranks = paddle.distributed.get_world_size()
+        self.local_rank = paddle.distributed.get_rank()
         self.model = model
-        self.optimizer = strategy
+        self.optimizer = optimizer
         self.checkpoint_dir = checkpoint_dir if checkpoint_dir else 'ckpt_{}'.format(time.time())
+
+        if not isinstance(self.model, paddle.nn.Layer):
+            raise TypeError('The model {} is not a `paddle.nn.Layer` object.'.format(self.model.__name__))
 
         if self.local_rank == 0 and not os.path.exists(self.checkpoint_dir):
             os.makedirs(self.checkpoint_dir)
@@ -78,7 +80,6 @@ class Trainer(object):
             strategy = paddle.distributed.prepare_context()
             self.model = paddle.DataParallel(self.model, strategy)
         self.compare_metrics = self._compare_metrics if not compare_metrics else compare_metrics
-
         self._load_checkpoint()
 
     def _load_checkpoint(self):
@@ -111,20 +112,18 @@ class Trainer(object):
                 self.current_epoch, metric_msg))
 
         # load model checkpoint
-        model_params_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch),
-                                         'model.pdparmas')
+        model_params_path = os.path.join(self.checkpoint_dir, 'epoch_{}'.format(self.current_epoch), 'model.pdparams')
         state_dict = paddle.load(model_params_path)
-        self.model.set_dict(state_dict)
+        self.model.set_state_dict(state_dict)
 
         # load optimizer checkpoint
-        optim_params_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch),
-                                         'model.pdopt')
+        optim_params_path = os.path.join(self.checkpoint_dir, 'epoch_{}'.format(self.current_epoch), 'model.pdopt')
         state_dict = paddle.load(optim_params_path)
-        self.optimizer.set_dict(state_dict)
+        self.optimizer.set_state_dict(state_dict)
 
     def _save_checkpoint(self):
         '''Save model checkpoint and state dict'''
-        model_path = os.path.join(self.checkpoint_dir, '{}_{}'.format('epoch', self.current_epoch), 'model')
+        model_path = os.path.join(self.checkpoint_dir, 'epoch_{}'.format(self.current_epoch))
         logger.info('Saving model checkpoint to {}'.format(model_path))
         self.save_model(model_path)
 
@@ -133,7 +132,7 @@ class Trainer(object):
         model_params_path = os.path.join(save_dir, 'model.pdparams')
         optim_params_path = os.path.join(save_dir, 'model.pdopt')
         paddle.save(self.model.state_dict(), model_params_path)
-        paddle.save(self.model.state_dict(), optim_params_path)
+        paddle.save(self.optimizer.state_dict(), optim_params_path)
 
     def _save_metrics(self):
         with open(os.path.join(self.checkpoint_dir, 'metrics.pkl'), 'wb') as file:
@@ -164,14 +163,14 @@ class Trainer(object):
             log_interval(int) : Log the train infomation every `log_interval` steps.
             save_interval(int) : Save the checkpoint every `save_interval` epochs.
         '''
-        use_gpu = True
-        place = 'gpu' if use_gpu else 'cpu'
-        paddle.set_device(place)
-
         batch_sampler = paddle.io.DistributedBatchSampler(
             train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
         loader = paddle.io.DataLoader(
-            train_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
+            train_dataset,
+            batch_sampler=batch_sampler,
+            num_workers=num_workers,
+            return_list=True,
+            use_buffer_reader=True)
 
         steps_per_epoch = len(batch_sampler)
         timer = Timer(steps_per_epoch * epochs)
@@ -255,33 +254,30 @@ class Trainer(object):
             batch_size(int) : Batch size of per step, default is 1.
             num_workers(int) : Number of subprocess to load data, default is 0.
         '''
-        use_gpu = True
-        place = 'gpu' if use_gpu else 'cpu'
-        paddle.set_device(place)
-
         batch_sampler = paddle.io.DistributedBatchSampler(
             eval_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
 
         loader = paddle.io.DataLoader(
-            eval_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
+            eval_dataset, batch_sampler=batch_sampler, num_workers=num_workers, return_list=True)
 
         self.model.eval()
         avg_loss = num_samples = 0
         sum_metrics = defaultdict(int)
         avg_metrics = defaultdict(int)
 
-        for batch_idx, batch in enumerate(loader):
-            result = self.validation_step(batch, batch_idx)
-            loss = result.get('loss', None)
-            metrics = result.get('metrics', {})
-            bs = batch[0].shape[0]
-            num_samples += bs
+        with logger.processing('Evaluation on validation dataset'):
+            for batch_idx, batch in enumerate(loader):
+                result = self.validation_step(batch, batch_idx)
+                loss = result.get('loss', None)
+                metrics = result.get('metrics', {})
+                bs = batch[0].shape[0]
+                num_samples += bs
 
-            if loss:
-                avg_loss += loss.numpy()[0] * bs
+                if loss:
+                    avg_loss += loss.numpy()[0] * bs
 
-            for metric, value in metrics.items():
-                sum_metrics[metric] += value.numpy()[0] * bs
+                for metric, value in metrics.items():
+                    sum_metrics[metric] += value.numpy()[0] * bs
 
         # print avg metrics and loss
         print_msg = '[Evaluation result]'
@@ -354,7 +350,7 @@ class Trainer(object):
             loss(paddle.Tensor) : Loss tensor.
         '''
         self.optimizer.step()
-        self.learning_rate_step(epoch_idx, batch_idx, self.optimizer.get_lr(), loss)
+        self.learning_rate_step(epoch_idx, batch_idx, self.optimizer._learning_rate, loss)
 
     def learning_rate_step(self, epoch_idx: int, batch_idx: int, learning_rate: Generic, loss: paddle.Tensor):
         if isinstance(learning_rate, paddle.optimizer.lr.LRScheduler):

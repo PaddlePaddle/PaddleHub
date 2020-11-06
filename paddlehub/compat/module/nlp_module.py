@@ -186,7 +186,7 @@ class TransformerModule(NLPBaseModule):
                 return False
             return os.path.exists(os.path.join(pretraining_params_path, var.name))
 
-        paddle.io.load(
+        paddle.static.load(
             executor=exe,
             model_path=pretraining_params_path,
             program=main_program,
@@ -195,6 +195,7 @@ class TransformerModule(NLPBaseModule):
     def param_prefix(self) -> str:
         return '@HUB_%s@' % self.name
 
+    @paddle_utils.run_in_static_mode
     def context(
             self,
             max_seq_len: int = None,
@@ -225,23 +226,26 @@ class TransformerModule(NLPBaseModule):
         startup_program = paddle.static.Program()
         with paddle.static.program_guard(module_program, startup_program):
             with paddle.fluid.unique_name.guard():
-                input_ids = paddle.data(name='input_ids', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                position_ids = paddle.data(name='position_ids', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                segment_ids = paddle.data(name='segment_ids', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                input_mask = paddle.data(name='input_mask', shape=[-1, max_seq_len, 1], dtype='float32', lod_level=0)
+                input_ids = paddle.static.data(name='input_ids', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
+                position_ids = paddle.static.data(
+                    name='position_ids', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
+                segment_ids = paddle.static.data(
+                    name='segment_ids', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
+                input_mask = paddle.static.data(
+                    name='input_mask', shape=[-1, max_seq_len, 1], dtype='float32', lod_level=0)
                 pooled_output, sequence_output = self.net(input_ids, position_ids, segment_ids, input_mask)
 
                 data_list = [(input_ids, position_ids, segment_ids, input_mask)]
                 output_name_list = [(pooled_output.name, sequence_output.name)]
 
                 if num_slots > 1:
-                    input_ids_2 = paddle.data(
+                    input_ids_2 = paddle.static.data(
                         name='input_ids_2', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    position_ids_2 = paddle.data(
+                    position_ids_2 = paddle.static.data(
                         name='position_ids_2', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    segment_ids_2 = paddle.data(
+                    segment_ids_2 = paddle.static.data(
                         name='segment_ids_2', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    input_mask_2 = paddle.data(
+                    input_mask_2 = paddle.static.data(
                         name='input_mask_2', shape=[-1, max_seq_len, 1], dtype='float32', lod_level=0)
                     pooled_output_2, sequence_output_2 = self.net(input_ids_2, position_ids_2, segment_ids_2,
                                                                   input_mask_2)
@@ -249,13 +253,13 @@ class TransformerModule(NLPBaseModule):
                     output_name_list.append((pooled_output_2.name, sequence_output_2.name))
 
                 if num_slots > 2:
-                    input_ids_3 = paddle.data(
+                    input_ids_3 = paddle.static.data(
                         name='input_ids_3', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    position_ids_3 = paddle.data(
+                    position_ids_3 = paddle.static.data(
                         name='position_ids_3', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    segment_ids_3 = paddle.data(
+                    segment_ids_3 = paddle.static.data(
                         name='segment_ids_3', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    input_mask_3 = paddle.data(
+                    input_mask_3 = paddle.static.data(
                         name='input_mask_3', shape=[-1, max_seq_len, 1], dtype='float32', lod_level=0)
                     pooled_output_3, sequence_output_3 = self.net(input_ids_3, position_ids_3, segment_ids_3,
                                                                   input_mask_3)
@@ -308,6 +312,7 @@ class TransformerModule(NLPBaseModule):
 
         return inputs, outputs, module_program
 
+    @paddle_utils.run_in_static_mode
     def get_embedding(self, texts: List[str], max_seq_len: int = 512, use_gpu: bool = False, batch_size: int = 1):
         '''
         get pooled_output and sequence_output for input texts.

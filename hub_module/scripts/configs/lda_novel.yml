@@ -1,9 +1,0 @@
-name: lda_novel
-dir: "modules/text/semantic_model/lda_novel"
-exclude:
-  - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/lda_novel.tar.gz
-    dest: .
-    uncompress: True

@@ -1,9 +1,0 @@
-name: res2net101_vd_26w_4s_imagenet
-dir: "modules/image/classification/res2net101_vd_26w_4s_imagenet"
-exclude:
-  - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/hub_dev/res2net101_vd_26w_4s_imagenet_model.tar.gz
-    dest: .
-    uncompress: True

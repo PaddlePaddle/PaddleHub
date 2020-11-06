@@ -13,6 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .server_source import ServerSource
-from .git_source import GitSource
-from .server import module_server
+from paddlehub.server.server_source import ServerSource
+from paddlehub.server.git_source import GitSource
+from paddlehub.server.server import module_server
+from paddlehub.utils import log
+
+
+def server_check() -> bool:
+    '''Check whether localhost can access the PaddleHub default server normally.'''
+    if module_server.get_source_by_key('default_hub_server').is_connected():
+        log.logger.info('Request Hub-Server successfully.')
+        return True
+
+    log.logger.info('Request Hub-Server unsuccessfully.')
+    return False

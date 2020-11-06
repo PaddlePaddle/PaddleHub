@@ -19,16 +19,17 @@ from typing import List
 from collections import OrderedDict
 
 import cv2
-import numpy as np
 import paddle
+import numpy as np
 import paddle.nn as nn
 import paddle.nn.functional as F
 from PIL import Image
 
+import paddlehub.vision.transforms as T
+import paddlehub.vision.functional as Func
+from paddlehub.vision import utils
 from paddlehub.module.module import serving, RunModule
 from paddlehub.utils.utils import base64_to_cv2
-import paddlehub.process.transforms as T
-import paddlehub.process.functional as Func
 
 
 class ImageServing(object):
@@ -136,40 +137,27 @@ class ImageColorizeModule(RunModule, ImageServing):
         loss_G_L1_reg = paddle.mean(loss_G_L1_reg)
         loss = loss_ce + loss_G_L1_reg
 
-        #calculate psnr
-        visual_ret = OrderedDict()
-        psnrs = []
-        lab2rgb = T.LAB2RGB()
-        process = T.ColorPostprocess()
-        for i in range(img['A'].numpy().shape[0]):
-            real = lab2rgb(np.concatenate((img['A'].numpy(), img['B'].numpy()), axis=1))[i]
-            visual_ret['real'] = process(real)
-            fake = lab2rgb(np.concatenate((img['A'].numpy(), out_reg.numpy()), axis=1))[i]
-            visual_ret['fake_reg'] = process(fake)
-            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
-            psnr_value = 20 * np.log10(255. / np.sqrt(mse))
-            psnrs.append(psnr_value)
-        psnr = paddle.to_variable(np.array(psnrs))
-        return {'loss': loss, 'metrics': {'psnr': psnr}}
+        return {'loss': loss}
 
     def predict(self, images: str, visualization: bool = True, save_path: str = 'result'):
         '''
         Colorize images
 
         Args:
-            images(str) : Images path to be colorized.
+            images(str|np.ndarray) : Images path or BGR image to be colorized.
             visualization(bool): Whether to save colorized images.
             save_path(str) : Path to save colorized images.
 
         Returns:
             results(list[dict]) : The prediction result of each input image
         '''
-
+        self.eval()
         lab2rgb = T.LAB2RGB()
-        process = T.ColorPostprocess()
-        resize = T.Resize((256, 256))
 
-        im = self.transforms(images, is_train=False)
+        if isinstance(images, str):
+            images = cv2.imread(images).astype('float32')
+
+        im = self.transforms(images)
         im = im[np.newaxis, :, :, :]
         im = self.preprocess(im)
         out_class, out_reg = self(im['A'], im['hint_B'], im['mask_B'])
@@ -178,17 +166,20 @@ class ImageColorizeModule(RunModule, ImageServing):
         visual_ret = OrderedDict()
         for i in range(im['A'].shape[0]):
             gray = lab2rgb(np.concatenate((im['A'].numpy(), np.zeros(im['B'].shape)), axis=1))[i]
-            visual_ret['gray'] = resize(process(gray))
+            gray = np.clip(np.transpose(gray, (1, 2, 0)), 0, 1) * 255
+            visual_ret['gray'] = gray.astype(np.uint8)
             hint = lab2rgb(np.concatenate((im['A'].numpy(), im['hint_B'].numpy()), axis=1))[i]
-            visual_ret['hint'] = resize(process(hint))
+            hint = np.clip(np.transpose(hint, (1, 2, 0)), 0, 1) * 255
+            visual_ret['hint'] = hint.astype(np.uint8)
             real = lab2rgb(np.concatenate((im['A'].numpy(), im['B'].numpy()), axis=1))[i]
-            visual_ret['real'] = resize(process(real))
+            real = np.clip(np.transpose(real, (1, 2, 0)), 0, 1) * 255
+            visual_ret['real'] = real.astype(np.uint8)
             fake = lab2rgb(np.concatenate((im['A'].numpy(), out_reg.numpy()), axis=1))[i]
-            visual_ret['fake_reg'] = resize(process(fake))
+            fake = np.clip(np.transpose(fake, (1, 2, 0)), 0, 1) * 255
+            visual_ret['fake_reg'] = fake.astype(np.uint8)
 
             if visualization:
-                img = Image.open(images)
-                w, h = img.size[0], img.size[1]
+                h, w, c = images.shape
                 fake_name = "fake_" + str(time.time()) + ".png"
                 if not os.path.exists(save_path):
                     os.mkdir(save_path)
@@ -197,8 +188,6 @@ class ImageColorizeModule(RunModule, ImageServing):
                 visual_gray = visual_gray.resize((w, h), Image.BILINEAR)
                 visual_gray.save(fake_path)
 
-            mse = np.mean((visual_ret['real'] * 1.0 - visual_ret['fake_reg'] * 1.0)**2)
-            psnr_value = 20 * np.log10(255. / np.sqrt(mse))
             result.append(visual_ret)
         return result
 
@@ -270,13 +259,14 @@ class Yolov3Module(RunModule, ImageServing):
             scores(np.ndarray): Predict score.
             labels(np.ndarray): Predict labels.
         '''
+        self.eval()
         boxes = []
         scores = []
         self.downsample = 32
         im = self.transform(imgpath)
-        h, w, c = Func.img_shape(imgpath)
+        h, w, c = utils.img_shape(imgpath)
         im_shape = paddle.to_tensor(np.array([[h, w]]).astype('int32'))
-        label_names = Func.get_label_infos(filelist)
+        label_names = utils.get_label_infos(filelist)
         img_data = paddle.to_tensor(np.array([im]).astype('float32'))
 
         outputs = self(img_data)
@@ -321,7 +311,7 @@ class Yolov3Module(RunModule, ImageServing):
         if visualization:
             if not os.path.exists(save_path):
                 os.mkdir(save_path)
-            Func.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5, save_path)
+            utils.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5, save_path)
 
         return boxes, scores, labels
 
@@ -358,19 +348,19 @@ class StyleTransferModule(RunModule, ImageServing):
 
         y = self(batch[0])
         xc = paddle.to_tensor(batch[0].numpy().copy())
-        y = Func.subtract_imagenet_mean_batch(y)
-        xc = Func.subtract_imagenet_mean_batch(xc)
+        y = utils.subtract_imagenet_mean_batch(y)
+        xc = utils.subtract_imagenet_mean_batch(xc)
         features_y = self.getFeature(y)
         features_xc = self.getFeature(xc)
         f_xc_c = paddle.to_tensor(features_xc[1].numpy(), stop_gradient=True)
         content_loss = mse_loss(features_y[1], f_xc_c)
 
-        batch[1] = Func.subtract_imagenet_mean_batch(batch[1])
+        batch[1] = utils.subtract_imagenet_mean_batch(batch[1])
         features_style = self.getFeature(batch[1])
-        gram_style = [Func.gram_matrix(y) for y in features_style]
+        gram_style = [utils.gram_matrix(y) for y in features_style]
         style_loss = 0.
         for m in range(len(features_y)):
-            gram_y = Func.gram_matrix(features_y[m])
+            gram_y = utils.gram_matrix(features_y[m])
             gram_s = paddle.to_tensor(np.tile(gram_style[m].numpy(), (N, 1, 1, 1)))
             style_loss += mse_loss(gram_y, gram_s[:N, :, :])
 
@@ -378,21 +368,23 @@ class StyleTransferModule(RunModule, ImageServing):
 
         return {'loss': loss, 'metrics': {'content gap': content_loss, 'style gap': style_loss}}
 
-    def predict(self, origin_path: str, style_path: str, visualization: bool = True, save_path: str = 'result'):
+    def predict(self, origin: str, style: str, visualization: bool = True, save_path: str = 'result'):
         '''
         Colorize images
 
         Args:
-            origin_path(str): Content image path .
-            style_path(str): Style image path.
+            origin(str|np.array): Content image path or BGR image.
+            style(str|np.array): Style image path or BGR image.
             visualization(bool): Whether to save colorized images.
             save_path(str) : Path to save colorized images.
 
         Returns:
             output(np.ndarray) : The style transformed images with bgr mode.
         '''
-        content = paddle.to_tensor(self.transform(origin_path))
-        style = paddle.to_tensor(self.transform(style_path))
+        self.eval()
+
+        content = paddle.to_tensor(self.transform(origin).astype('float32'))
+        style = paddle.to_tensor(self.transform(style).astype('float32'))
         content = content.unsqueeze(0)
         style = style.unsqueeze(0)
 

@@ -1,9 +1,0 @@
-name: resnet50_vd_animals
-dir: "modules/image/classification/resnet50_vd_animals"
-exclude:
-  - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/model/cv/resnet50_vd_animals.tar.gz
-    dest: model
-    uncompress: True

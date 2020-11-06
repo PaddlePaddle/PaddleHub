@@ -27,8 +27,13 @@ from paddlehub.utils import utils, log
 
 class ModuleV1(object):
     '''
+    ModuleV1 is an old version of the PaddleHub Module format, which is no longer in use. In order to maintain
+    compatibility, users can still load the corresponding Module for prediction. User should call `hub.Module`
+    to initialize the corresponding object, rather than `ModuleV1`.
     '''
 
+    # All ModuleV1 in PaddleHub is static graph model
+    @paddle_utils.run_in_static_mode
     def __init__(self, name: str = None, directory: str = None, version: str = None):
         if not directory:
             return
@@ -77,6 +82,8 @@ class ModuleV1(object):
             num_param_loaded += 1
             var = global_block.vars[name]
 
+            # Since the pre-trained model saved by the old version of Paddle cannot restore the corresponding
+            # parameters, we need to restore them manually.
             global_block.create_parameter(
                 name=name,
                 shape=var.shape,
@@ -101,7 +108,7 @@ class ModuleV1(object):
     def _load_model(self):
         model_path = os.path.join(self.directory, 'model')
         exe = paddle.static.Executor(paddle.CPUPlace())
-        self.program, _, _ = paddle.io.load_inference_model(model_path, executor=exe)
+        self.program, _, _ = paddle.static.load_inference_model(model_path, executor=exe)
 
         # Clear the callstack since it may leak the privacy of the creator.
         for block in self.program.blocks:
@@ -110,10 +117,10 @@ class ModuleV1(object):
                     continue
                 op._set_attr('op_callstack', [''])
 
+    @paddle_utils.run_in_static_mode
     def context(self, signature: str = None, for_test: bool = False,
                 trainable: bool = True) -> Tuple[dict, dict, paddle.static.Program]:
-        '''
-        '''
+        '''Get module context information, including graph structure and graph input and output variables.'''
         program = self.program.clone(for_test=for_test)
         paddle_utils.remove_feed_fetch_op(program)
 
@@ -136,9 +143,9 @@ class ModuleV1(object):
 
         return feed_dict, fetch_dict, program
 
+    @paddle_utils.run_in_static_mode
     def __call__(self, sign_name: str, data: dict, use_gpu: bool = False, batch_size: int = 1, **kwargs):
-        '''
-        '''
+        '''Call the specified signature function for prediction.'''
 
         def _get_reader_and_feeder(data_format, data, place):
             def _reader(process_data):
@@ -175,10 +182,12 @@ class ModuleV1(object):
 
     @classmethod
     def get_py_requirements(cls) -> List[str]:
+        '''Get Module's python package dependency list.'''
         return []
 
     @classmethod
     def load(cls, directory: str) -> EasyDict:
+        '''Load the Module object defined in the specified directory.'''
         module_info = cls.load_module_info(directory)
 
         # Generate a uuid based on the class information, and dynamically create a new type.
@@ -186,7 +195,7 @@ class ModuleV1(object):
         # previously generated.
         cls_uuid = utils.md5(module_info.name + module_info.author + module_info.author_email + module_info.type +
                              module_info.summary + module_info.version + directory)
-        cls = type(cls_uuid, (cls, ), {})
+        cls = type('ModuleV1_{}'.format(cls_uuid), (cls, ), {})
 
         cls.name = module_info.name
         cls.author = module_info.author
@@ -199,6 +208,7 @@ class ModuleV1(object):
 
     @classmethod
     def load_module_info(cls, directory: str) -> EasyDict:
+        '''Load the infomation of Module object defined in the specified directory.'''
         desc_file = os.path.join(directory, 'module_desc.pb')
         desc = module_v1_utils.convert_module_desc(desc_file)
         return desc.module_info
@@ -208,4 +218,8 @@ class ModuleV1(object):
 
     @property
     def is_runnable(self):
+        '''
+        Whether the Module is runnable, in other words, whether can we execute the Module through the
+        `hub run` command.
+        '''
         return self.default_signature != None

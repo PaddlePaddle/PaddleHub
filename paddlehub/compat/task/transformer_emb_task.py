@@ -38,7 +38,7 @@ class TransformerEmbeddingTask(BaseTask):
 
     def _build_net(self) -> List[paddle.static.Variable]:
         # ClassifyReader will return the seqence length of an input text
-        self.seq_len = paddle.data(name='seq_len', shape=[1], dtype='int64', lod_level=0)
+        self.seq_len = paddle.static.data(name='seq_len', shape=[1], dtype='int64', lod_level=0)
         return [self.pooled_feature, self.seq_feature]
 
     def _postprocessing(self, run_states: List[RunState]) -> List[List[np.ndarray]]:
