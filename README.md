@@ -112,7 +112,7 @@ PaddleHub还提供图像分类、语义模型、视频分类、图像生成、�
 </p>
 
 <p align='center'>
- 十行代码完成ERNIE工业级文本分类
+ 十行代码完成图像风格迁移
 </p>
 
 * 如需在线快速体验，请点击[PaddleHub教程合集](https://aistudio.baidu.com/aistudio/projectdetail/231146)，可使用AI Studio平台提供的GPU算力进行快速尝试。
