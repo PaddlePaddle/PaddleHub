@@ -1,4 +1,5 @@
 import math
+from typing import Callable
 
 import cv2
 import numpy as np
@@ -309,3 +310,21 @@ class Candidate:
         subset = np.delete(subset, deleteIdx, axis=0)
 
         return candidate, subset
+    
+
+class ResizeScaling:
+    """Resize images by scaling method.
+
+    Args:
+        target(int): Target image size.
+        interpolation(Callable): Interpolation method.
+    """
+
+    def __init__(self, target: int = 368, interpolation: Callable = cv2.INTER_CUBIC):
+        self.target = target
+        self.interpolation = interpolation
+
+    def __call__(self, img, scale_search):
+        scale = scale_search * self.target / img.shape[0]
+        resize_img = cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=self.interpolation)
+        return resize_img

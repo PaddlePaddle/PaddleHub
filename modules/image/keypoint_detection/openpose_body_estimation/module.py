@@ -23,7 +23,7 @@ import numpy as np
 from paddlehub.transforms.module import moduleinfo
 import paddlehub.transforms.transforms as T
 import openpose_body_estimation.processor as P
-
+    
 
 @moduleinfo(
     name="openpose_body_estimation",
@@ -45,7 +45,7 @@ class BodyPoseModel(nn.Layer):
     def __init__(self, load_checkpoint: str = None, visualization: bool = True):
         super(BodyPoseModel, self).__init__()
 
-        self.resize_func = T.ResizeScaling()
+        self.resize_func = P.ResizeScaling()
         self.norm_func = T.Normalize(std=[1, 1, 1])
         self.pad_func = P.PadDownRight()
         self.remove_pad = P.RemovePadding()

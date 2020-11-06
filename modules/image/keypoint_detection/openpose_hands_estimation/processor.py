@@ -1,4 +1,5 @@
 import math
+from typing import Callable
 
 import cv2
 import numpy as np
@@ -210,3 +211,30 @@ class DrawHandPose:
         bg.draw()
         canvas = np.frombuffer(bg.tostring_rgb(), dtype='uint8').reshape(int(height), int(width), 3)
         return canvas
+    
+    
+class ResizeScaling:
+    """Resize images by scaling method.
+
+    Args:
+        target(int): Target image size.
+        interpolation(Callable): Interpolation method.
+    """
+
+    def __init__(self, target: int = 368, interpolation: Callable = cv2.INTER_CUBIC):
+        self.target = target
+        self.interpolation = interpolation
+
+    def __call__(self, img, scale_search):
+        scale = scale_search * self.target / img.shape[0]
+        resize_img = cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=self.interpolation)
+        return resize_img
+    
+    
+def npmax(array: np.ndarray):
+    """Get max value and index."""
+    arrayindex = array.argmax(1)
+    arrayvalue = array.max(1)
+    i = arrayvalue.argmax()
+    j = arrayindex[i]
+    return i, j
