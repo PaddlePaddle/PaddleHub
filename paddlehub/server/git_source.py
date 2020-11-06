@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import ast
 import inspect
 import importlib
 import os
@@ -79,6 +80,20 @@ class GitSource(object):
 
         sys.path.insert(0, self.path)
         try:
+            with open(os.path.join(self.path, 'hubconf.py'), 'r') as file:
+                pycode = file.read()
+                ast_module = ast.parse(pycode)
+                for _body in ast_module.body:
+                    if not isinstance(_body, (ast.Import, ast.ImportFrom)):
+                        continue
+
+                    if not _body.module.endswith('module'):
+                        continue
+
+                    subpath = '.'.join(_body.module.split('.')[:-2])
+                    subpath = os.path.join(self.path, subpath)
+                    sys.path.insert(0, subpath)
+
             py_module = importlib.import_module('hubconf')
             for _item, _cls in inspect.getmembers(py_module, inspect.isclass):
                 _item = py_module.__dict__[_item]
@@ -111,10 +126,12 @@ class GitSource(object):
         '''
         module = self.hub_modules.get(name, None)
         if module and module.version.match(version):
+            path = sys.modules[module.__module__].__file__
+            path = os.path.dirname(path)
             return [{
                 'version': module.version,
                 'name': module.name,
-                'path': self.path,
+                'path': path,
                 'class': module.__name__,
                 'source': self.url
             }]

@@ -31,7 +31,6 @@ class HelpCommand:
 
             if not '_description' in detail:
                 continue
-
             msg += '    {:<15}        {}\n'.format(command, detail['_description'])
 
         print(msg)

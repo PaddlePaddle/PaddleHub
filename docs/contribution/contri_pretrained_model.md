@@ -1,6 +1,8 @@
-# 如何编写一个PaddleHub Module
+# 如何编写一个PaddleHub Module并发布上线
 
-## 模型基本信息
+## 一、准备工作
+
+### 模型基本信息
 
 我们准备编写一个PaddleHub Module，Module的基本信息如下：
 ```yaml
@@ -27,13 +29,13 @@ hub run senta_test --input_text 这部电影太差劲了
 
 <br/>
 
-## 策略
+### 策略
 
 为了示例代码简单起见，我们使用一个非常简单的情感判断策略，当输入文本中带有词表中指定单词时，则判断文本倾向为负向，否则为正向
 
 <br/>
 
-## Module创建
+## 二、创建Module
 
 ### step 1. 创建必要的目录与文件
 
@@ -162,7 +164,7 @@ def sentiment_classify(self, texts):
 
 <br/>
 
-## 测试步骤
+## 三、安装并测试Module
 
 完成Module编写后，我们可以通过以下方式测试该Module
 
@@ -208,4 +210,53 @@ SentaTest.sentiment_classify(texts=["这部电影太差劲了"])
 ```shell
 ➜  hub install senta_test
 ➜  hub run senta_test --input_text "这部电影太差劲了"
+```
+
+## 四、发布Module
+
+在完成Module的开发和测试后，如果想要将模型分享给其他人使用，可以通过以下方式发布模型：
+
+### 方式一、上传Module到PaddleHub官网
+
+https://www.paddlepaddle.org.cn/hub
+
+我们会在尽可能短的时间内完成Module的审核并给出反馈，通过审核并上线后，Module将展示在PaddleHub官网的`开发者贡献模型`中，用户可以像加载其他官方Module一样加载该Module。
+
+### 方式二、上传Module到远程代码托管平台
+
+PaddleHub也支持直接加载远程代码托管平台上的Module，具体步骤如下：
+
+#### step 1. 创建新的仓库
+
+在代码托管平台上创建一个新的Git仓库，添加前面所写Module的代码，为了方便区分管理不同的Module，我们创建一个modules目录，并将senta_test放在modules目录下
+
+
+#### step 2. 新增配置文件`hubconf.py`
+
+在根目录下，新增配置文件`hubconf.py`，文件中引用一个通过`moduleinfo`修饰的类，如下
+```python
+from modules.senta_test.module import SentaTest
+```
+
+*此时文件结构如下：*
+```
+hubconf.py
+modules
+├── senta_test/
+    ├── vocab.list
+    ├── module.py
+    └── processor.py
+```
+
+#### step 3. 完成提交并推送到远程仓库
+
+#### step 4. 在本地加载远程仓库中的Module
+
+为了方便体验，我们在GitHub和Gitee上都存放了SentaTest的代码，可以直接通过以下方式体验效果
+```python
+import paddlehub as hub
+
+senta_test = hub.Module(name='senta_test', source='https://github.com/nepeplwu/myhub.git')
+# senta_test = hub.Module(name='senta_test', source='https://gitee.com/nepeplwu/myhub.git')
+print(senta_test.sentiment_classify(texts=["这部电影太差劲了"]))
 ```

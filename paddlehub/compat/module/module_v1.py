@@ -15,7 +15,7 @@
 
 import functools
 import os
-from typing import Tuple, List, Optional
+from typing import Tuple, List
 
 import paddle
 from easydict import EasyDict
@@ -223,21 +223,3 @@ class ModuleV1(object):
         `hub run` command.
         '''
         return self.default_signature != None
-
-    def get_vocab_path(self) -> Optional[str]:
-        for assets_file in self.assets:
-            if 'vocab.txt' in assets_file:
-                return assets_file
-        return None
-
-    def get_word_dict_path(self) -> Optional[str]:
-        for assets_file in self.assets:
-            if 'dict.wordseg.pickle' in assets_file:
-                return assets_file
-        return None
-
-    def get_spm_path(self) -> Optional[str]:
-        for assets_file in self.assets:
-            if 'spm_cased_simp_sampled.model' in assets_file:
-                return assets_file
-        return None

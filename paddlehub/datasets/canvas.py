@@ -31,16 +31,16 @@ class Canvas(paddle.io.Dataset):
     We collected data from https://people.eecs.berkeley.edu/~taesung_park/CycleGAN/datasets/.
 
     Args:
-       transforms(callmethod) : The method of preprocess images.
+       transform(callmethod) : The method of preprocess images.
        mode(str): The mode for preparing dataset.
 
     Returns:
         DataSet: An iterable object for data iterating
     """
 
-    def __init__(self, transforms: Callable, mode: str = 'train'):
+    def __init__(self, transform: Callable, mode: str = 'train'):
         self.mode = mode
-        self.transforms = transforms
+        self.transform = transform
 
         if self.mode == 'train':
             self.file = 'train'
@@ -52,7 +52,7 @@ class Canvas(paddle.io.Dataset):
 
     def __getitem__(self, idx: int) -> np.ndarray:
         img_path = self.data[idx]
-        im = self.transforms(img_path)
+        im = self.transform(img_path)
         return im
 
     def __len__(self):

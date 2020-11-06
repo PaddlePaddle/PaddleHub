@@ -28,7 +28,6 @@ from paddlehub.utils.utils import Timer
 
 class Trainer(object):
     '''
-
     Model trainer
 
     Args:
@@ -77,7 +76,6 @@ class Trainer(object):
         self.best_metrics = defaultdict(int)
 
         if self.nranks > 1:
-
             paddle.distributed.init_parallel_env()
             strategy = paddle.distributed.prepare_context()
             self.model = paddle.DataParallel(self.model, strategy)
@@ -131,7 +129,6 @@ class Trainer(object):
 
     def save_model(self, save_dir: str):
         '''Save model'''
-
         model_params_path = os.path.join(save_dir, 'model.pdparams')
         optim_params_path = os.path.join(save_dir, 'model.pdopt')
         paddle.save(self.model.state_dict(), model_params_path)
@@ -157,7 +154,6 @@ class Trainer(object):
         Train a model with specific config.
 
         Args:
-
             train_dataset(paddle.io.Dataset) : Dataset to train the model
             epochs(int) : Number of training loops, default is 1.
             batch_size(int) : Batch size of per step, default is 1.
@@ -254,7 +250,6 @@ class Trainer(object):
         Run evaluation and returns metrics.
 
         Args:
-
             eval_dataset(paddle.io.Dataset) : The validation dataset
             batch_size(int) : Batch size of per step, default is 1.
             num_workers(int) : Number of subprocess to load data, default is 0.
@@ -315,7 +310,6 @@ class Trainer(object):
 
         # process result
         if not isinstance(result, dict):
-
             raise RuntimeError('The return value of `trainning_step` in {} is not a dict'.format(self.model.__class__))
 
         loss = result.get('loss', None)
