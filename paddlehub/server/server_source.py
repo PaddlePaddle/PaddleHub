@@ -119,6 +119,9 @@ class ServerSource(object):
         except requests.exceptions.ConnectionError as e:
             raise ServerConnectionError(self._url)
 
+    def is_connected(self):
+        return self.check(self._url)
+
     @classmethod
     def check(cls, url: str) -> bool:
         '''
