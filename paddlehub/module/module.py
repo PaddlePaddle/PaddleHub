@@ -123,6 +123,10 @@ class RunModule(object):
         `hub run` command.
         '''
         return self._run_func != None
+      
+    @property
+    def serving_func_name(self):
+        return self._serving_func_name
 
 
 class Module(object):

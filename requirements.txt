@@ -10,6 +10,9 @@ sentencepiece
 colorlog
 tqdm
 nltk
+pyzmq
+gitpython
+easydict
 
 # pandas no longer support python2 in version 0.25 and above
 pandas ; python_version >= "3"
