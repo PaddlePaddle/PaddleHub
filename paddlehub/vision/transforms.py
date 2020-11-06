@@ -579,4 +579,3 @@ class CenterCrop:
         crop_top = int((img_height - self.crop_size) / 2.)
         crop_left = int((img_width - self.crop_size) / 2.)
         return img[crop_left:crop_left + self.crop_size, crop_top:crop_top + self.crop_size, :]
-

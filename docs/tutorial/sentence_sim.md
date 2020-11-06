@@ -35,9 +35,9 @@ import numpy as np
 import scipy
 from scipy.spatial import distance
 
-from paddlehub.reader.tokenization import load_vocab
-import paddle.fluid as fluid
+import paddle
 import paddlehub as hub
+from paddlehub.text.utils import load_vocab
 
 raw_data = [
     ["驾驶违章一次扣12分用两个驾驶证处理可以吗", "一次性扣12分的违章,能用不满十二分的驾驶证扣分吗"],
@@ -79,9 +79,10 @@ vocab = load_vocab(module.get_vocab_path())
 word_ids = inputs["word_ids"]
 embedding = outputs["word_embs"]
 
-place = fluid.CPUPlace()
-exe = fluid.Executor(place)
-feeder = fluid.DataFeeder(feed_list=[word_ids], place=place)
+paddle.enable_static()
+place = paddle.CPUPlace()
+exe = paddle.static.Executor(place)
+feeder = paddle.fluid.DataFeeder(feed_list=[word_ids], place=place)
 
 for item in processed_data:
     text_a = convert_tokens_to_ids(vocab, item[0])

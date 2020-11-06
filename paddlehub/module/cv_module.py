@@ -153,7 +153,7 @@ class ImageColorizeModule(RunModule, ImageServing):
         '''
         self.eval()
         lab2rgb = T.LAB2RGB()
-        
+
         if isinstance(images, str):
             images = cv2.imread(images).astype('float32')
 

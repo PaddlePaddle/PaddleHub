@@ -1,5 +1,26 @@
 # 更新历史
 
+## `v2.0.0a`
+
+* TODO
+
+## `v1.8.1`
+
+* 『[图像分割](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=ImageSegmentation)』新增轻量级人像分割模型Humanseg，支持移动端实时分割
+* 增强文本匹配任务性能，使用[EMNLP2019-Sentence-BERT](https://arxiv.org/abs/1908.10084)作为文本匹配任务网络，可同时大幅提升准确率和预测速度。配套教程：[pointwise文本语义匹配](https://aistudio.baidu.com/aistudio/projectdetail/705526)、[pairwise文本语义匹配](https://aistudio.baidu.com/aistudio/projectdetail/709472)
+* 修复文本分类选择F1作为评价指标，运行错误
+
+## `v1.8.0`
+
+* 预训练模型丰富，一键完成更多
+  * 『[文本生成](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=TextGeneration)』新增基于ERNIE-tiny和ERNIE-gen的对联和写诗生成模型，支持一键自动写诗和对对联。
+  *  『[词法分析](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=LexicalAnalysis)』新增jieba的paddle模式切词模型，可一键完成中文分词、关键词抽取等功能。
+  * 『[语义表示](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=SemanticModel)』新增基于网页、小说、新闻三类大规模文本数据的LDA主题模型及其语义相似度计算接口。
+* Fine-tune API升级，提升灵活性并支持更多任务
+   * 新增Tokenizer API，支持更加灵活的切词、切字模式和自定义切词工具拓展。
+   * 新增[文本生成](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo/text_generation)任务，支持Seq2Seq任务的Fine-tuning。
+  * 新增文本匹配任务，支持[Pointwise](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo/pointwise_text_matching)、[Pairwise](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo/pairwise_text_matching)两种文本匹配训练模式，更便捷完成语义匹配任务。
+
 ## `v1.7.0`
 
 * 丰富预训练模型，提升应用性
