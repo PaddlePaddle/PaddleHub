@@ -438,4 +438,31 @@ class Table(object):
         return seprow + content
 
 
+def log_to_file(logger, filename):
+    '''
+    Set logger.handler to FileHandler.
+
+    Args:
+        logger(Logger): modules info, include module name, version
+        filename(str): filename to logging
+
+    Examples:
+    .. code-block:: python
+
+        logger = log_to_file(logger, 'test.log')
+        logger.logger.info('test_1')
+    '''
+    old_handlers = logger.logger.handlers
+    for handler in old_handlers:
+        logger.logger.removeHandler(handler)
+
+    format = logging.Formatter('[%(asctime)-15s] [%(levelname)8s] - %(message)s')
+    sh = logging.FileHandler(filename=filename, mode='a')
+    sh.setFormatter(format)
+    logger.logger.addHandler(sh)
+    logger.logger.setLevel(logging.INFO)
+
+    return logger
+
+
 logger = Logger()

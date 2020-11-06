@@ -14,12 +14,16 @@
 # limitations under the License.
 
 import zmq
+import time
 import os
 import json
 import traceback
 import subprocess
 
 from paddlehub.utils import log
+
+filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
+log.logger = log.log_to_file(log.logger, filename)
 
 
 class InferenceDevice(object):

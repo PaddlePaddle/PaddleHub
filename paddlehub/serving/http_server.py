@@ -25,6 +25,9 @@ from paddlehub.serving.device import InferenceServer
 from paddlehub.serving.client import InferenceClientProxy
 from paddlehub.utils import utils, log
 
+filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
+log.logger = log.log_to_file(log.logger, filename)
+
 if platform.system() == "Windows":
 
     class StandaloneApplication(object):
@@ -109,10 +112,6 @@ def create_app(client_port: int = 5559, modules_name: list = []):
     '''
     app_instance = Flask(__name__)
     app_instance.config["JSON_AS_ASCII"] = False
-    logging.basicConfig()
-    gunicorn_logger = logging.getLogger('gunicorn.info')
-    app_instance.logger.handlers = gunicorn_logger.handlers
-    app_instance.logger.setLevel(gunicorn_logger.level)
     pid = os.getpid()
 
     @app_instance.route("/", methods=["GET", "POST"])
