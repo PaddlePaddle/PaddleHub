@@ -353,7 +353,7 @@ class RandomRotation:
         max_rotation(float): Upper bound of rotation angle.
         im_padding_value(list): Border value for 3 channels, default is [127.5, 127.5, 127.5].
     """
-    def __init__(self, max_rotation=15, im_padding_value=[127.5, 127.5, 127.5]):
+    def __init__(self, max_rotation: float = 15, im_padding_value: list = [127.5, 127.5, 127.5]):
         self.max_rotation = max_rotation
         self.im_padding_value = im_padding_value
 
