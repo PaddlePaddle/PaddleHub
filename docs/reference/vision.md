@@ -12,6 +12,7 @@ Compose preprocessing operators for obtaining prepocessed data. The shape of inp
 * transforms(callmethod) : The method of preprocess images.
 * to_rgb(bool): Whether to transform the input from BGR mode to RGB mode, default is False.
 
+
 # Class `hub.vision.RandomHorizontalFlip`
 
 ```python
@@ -53,6 +54,7 @@ Resize input image to target size.
 
 * target_size(List[int]|int]): Target image size.
 * interpolation(str): Interpolation mode, default is 'LINEAR'. It support 6 modes: 'NEAREST', 'LINEAR', 'CUBIC', 'AREA', 'LANCZOS4' and 'RANDOM'.
+
 
 # Class `hub.vision.ResizeByLong`
 
@@ -215,8 +217,6 @@ Normalize the input image.
  Convert color space from RGB to LAB.
 
 
-
-
 # Class `hub.vision.LAB2RGB`
  
  ```python
@@ -224,9 +224,6 @@ Normalize the input image.
  ```
  
  Convert color space from LAB to RGB.
-
-
-
 
 
 # Class `hub.vision.CenterCrop`
@@ -240,4 +237,3 @@ Normalize the input image.
  **Args**
 
 * crop_size(int): Target size for croped image.
-
