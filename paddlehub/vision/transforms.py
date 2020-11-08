@@ -301,35 +301,6 @@ class RandomRotation:
         return im
 
 
-class RandomScaleAspect:
-    def __init__(self, min_scale=0.5, aspect_ratio=0.33):
-        self.min_scale = min_scale
-        self.aspect_ratio = aspect_ratio
-
-    def __call__(self, im):
-        if self.min_scale != 0 and self.aspect_ratio != 0:
-            img_height = im.shape[0]
-            img_width = im.shape[1]
-            for i in range(0, 10):
-                area = img_height * img_width
-                target_area = area * np.random.uniform(self.min_scale, 1.0)
-                aspectRatio = np.random.uniform(self.aspect_ratio, 1.0 / self.aspect_ratio)
-
-                dw = int(np.sqrt(target_area * 1.0 * aspectRatio))
-                dh = int(np.sqrt(target_area * 1.0 / aspectRatio))
-                if (np.random.randint(10) < 5):
-                    tmp = dw
-                    dw = dh
-                    dh = tmp
-
-                if (dh < img_height and dw < img_width):
-                    h1 = np.random.randint(0, img_height - dh)
-                    w1 = np.random.randint(0, img_width - dw)
-
-                    im = im[h1:(h1 + dh), w1:(w1 + dw), :]
-                    im = cv2.resize(im, (img_width, img_height), interpolation=cv2.INTER_LINEAR)
-
-        return im
 
 
 class RandomDistort:
@@ -360,7 +331,7 @@ class RandomDistort:
         saturation_upper = 1 + self.saturation_range
         hue_lower = -self.hue_range
         hue_upper = self.hue_range
-        ops = ['brightness', 'contrast', 'saturation', 'hue']
+        ops = [F.brightness, F.contrast, F.saturation, F.hue]
         random.shuffle(ops)
         params_dict = {
             'brightness': {
@@ -389,7 +360,7 @@ class RandomDistort:
         im = im.astype('uint8')
         im = PIL.Image.fromarray(im)
         for id in range(4):
-            params = params_dict[ops[id].__name__]
+            params = params_dict[ops[0].__name__]
             prob = prob_dict[ops[id].__name__]
             params['im'] = im
             if np.random.uniform(0, 1) < prob:
@@ -537,27 +508,6 @@ class LAB2RGB:
 
     def __call__(self, img: np.ndarray) -> np.ndarray:
         return self.lab2rgb(img)
-
-
-class ColorPostprocess:
-    """
-    Transform images from [0, 1] to [0, 255]
-
-    Args:
-       type(type): Type of Image value.
-
-    Return:
-        img(np.ndarray): Image in range of 0-255.
-    """
-
-    def __init__(self, type: type = np.uint8):
-        self.type = type
-
-    def __call__(self, img: np.ndarray):
-        img = np.transpose(img, (1, 2, 0))
-        img = np.clip(img, 0, 1) * 255
-        img = img.astype(self.type)
-        return img
 
 
 class CenterCrop:
