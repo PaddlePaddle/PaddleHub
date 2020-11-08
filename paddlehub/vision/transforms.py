@@ -360,7 +360,7 @@ class RandomDistort:
         im = im.astype('uint8')
         im = PIL.Image.fromarray(im)
         for id in range(4):
-            params = params_dict[ops[0].__name__]
+            params = params_dict[ops[id].__name__]
             prob = prob_dict[ops[id].__name__]
             params['im'] = im
             if np.random.uniform(0, 1) < prob:
