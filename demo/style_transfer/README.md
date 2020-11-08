@@ -34,7 +34,7 @@ color_set = MiniCOCO(transform=transform, mode='train')
 ### Step3: 加载预训练模型
 
 ```python
-model = hub.Module(name='msgnet'， load_checkpoint=None)
+model = hub.Module(name='msgnet', load_checkpoint=None)
 ```
 * `name`: 选择预训练模型的名字。
 * `load_checkpoint`: 是否加载自己训练的模型，若为None，则加载提供的模型默认参数。
@@ -63,7 +63,6 @@ Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详
 * `learning_rate`: 全局学习率。默认为1e-4；
 *  `parameters`: 待优化模型参数。
  
-
 #### 运行配置
 `Trainer` 主要控制Fine-tune的训练，包含以下可控制的参数:
 
@@ -83,8 +82,6 @@ Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详
 * `log_interval`: 打印日志的间隔， 单位为执行批训练的次数。
 * `save_interval`: 保存模型的间隔频次，单位为执行训练的轮数。
 
-
-
 ## 模型预测
 
 当完成Fine-tune后，Fine-tune过程在验证集上表现最优的模型会被保存在`${CHECKPOINT_DIR}/best_model`目录下，其中`${CHECKPOINT_DIR}`目录为Fine-tune时所选择的保存checkpoint的目录。
@@ -103,15 +100,12 @@ if __name__ == '__main__':
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
 
 **Args**
-
 * `origin`:原始图像路径；
 * `style`: 风格图像路径；
 * `visualization`: 是否可视化，默认为True；
 * `save_path`: 保存结果的路径，默认为'result'。
 
 **NOTE:** 进行预测时，所选择的module，checkpoint_dir，dataset必须和Fine-tune所用的一样。若想获取油画风着色效果，请下载参数文件[油画着色](http://)
-
-
 
 ## 超参优化AutoDL Finetuner
 
