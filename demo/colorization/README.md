@@ -60,7 +60,7 @@ Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详
 其中`Adam`:
 
 * `learning_rate`: 全局学习率。默认为1e-4；
-*  `parameters`: 待优化模型参数。
+* `parameters`: 待优化模型参数。
 
 #### 运行配置
 `Trainer` 主要控制Fine-tune的训练，包含以下可控制的参数:
