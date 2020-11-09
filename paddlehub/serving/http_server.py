@@ -15,7 +15,6 @@
 
 import time
 import os
-import logging
 import multiprocessing
 import platform
 
@@ -25,8 +24,8 @@ from paddlehub.serving.device import InferenceServer
 from paddlehub.serving.client import InferenceClientProxy
 from paddlehub.utils import utils, log
 
-filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
-log.logger = log.log_to_file(log.logger, filename)
+filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d_%H%M%S", time.localtime())
+logger = log.get_file_logger(filename)
 
 if platform.system() == "Windows":
 
@@ -184,7 +183,7 @@ def run(port: int = 8866, client_port: int = 5559, names: list = [], workers: in
         options = {"bind": "0.0.0.0:%s" % port, "workers": workers, "worker_class": "sync"}
         StandaloneApplication(create_app(client_port, modules_name=names), options).run()
 
-    log.logger.info("PaddleHub-Serving has been stopped.")
+    logger.info("PaddleHub-Serving has been stopped.")
 
 
 def run_http_server(port: int = 8866, client_port: int = 5559, names: list = [], workers: int = 1):
