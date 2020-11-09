@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import random
-from typing import Callable, Union
+from typing import Callable, Union, List, Tuple
 
 import cv2
 import PIL
@@ -105,7 +105,7 @@ class Resize:
         'LANCZOS4': cv2.INTER_LANCZOS4
     }
 
-    def __init__(self, target_size: Union(List[int]|int]), interpolation: str = 'LINEAR'):
+    def __init__(self, target_size: Union[List[int], int], interpolation: str = 'LINEAR'):
         self.interpolation = interpolation
         if not (interpolation == "RANDOM" or interpolation in self.interpolation_dict):
             raise ValueError("interpolation should be one of {}".format(self.interpolation_dict.keys()))
@@ -135,7 +135,7 @@ class ResizeByLong:
     Args:
         long_size(int|list[int]): The target size of long side.
     """
-    def __init__(self, long_size: Union(int|list[int])):
+    def __init__(self, long_size: Union[List[int], int]):
         self.long_size = long_size
 
     def __call__(self, im):
