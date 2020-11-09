@@ -29,7 +29,7 @@ color_set = MiniCOCO(transform=transform, mode='train')
 * `transforms`: 数据预处理方式。
 * `mode`: 选择数据模式，可选项有 `train`, `test`， 默认为`train`。
 
-数据集的准备代码可以参考 [minicoco.py](../../paddlehub/datasets/flowers.py)。`hub.datasets. MiniCOCO()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录。
+数据集的准备代码可以参考 [minicoco.py](../../paddlehub/datasets/flowers.py)。`hub.datasets. MiniCOCO()`会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录。
 
 ### Step3: 加载预训练模型
 
@@ -42,10 +42,9 @@ model = hub.Module(name='msgnet', load_checkpoint=None)
 ### Step4: 选择优化策略和运行配置
 
 ```python
-scheduler =  paddle.optimizer.lr.PolynomialDecay(learning_rate=0.001, power=0.9, decay_steps=100)
-    optimizer = paddle.optimizer.Adam(learning_rate=scheduler, parameters=model.parameters())
-    trainer = Trainer(model, optimizer, checkpoint_dir='test_style_ckpt')
-    trainer.train(styledata, epochs=101, batch_size=4, eval_dataset=styledata, log_interval=10, save_interval=10)
+optimizer = paddle.optimizer.Adam(learning_rate=0.0001, parameters=model.parameters())
+trainer = Trainer(model, optimizer, checkpoint_dir='test_style_ckpt')
+trainer.train(styledata, epochs=101, batch_size=4, eval_dataset=styledata, log_interval=10, save_interval=10)
 ```
 
 #### 优化策略
@@ -93,7 +92,7 @@ import paddle
 import paddlehub as hub
 
 if __name__ == '__main__':
-    model = hub.Module(name='msgnet')
+    model = hub.Module(name='msgnet', load_checkpoint=/PATH/TO/CHECKPOINT)
     result = model.predict(origin="venice-boat.jpg", style="candy.jpg", visualization=True, save_path ='result')
 ```
 
@@ -105,8 +104,4 @@ if __name__ == '__main__':
 * `visualization`: 是否可视化，默认为True；
 * `save_path`: 保存结果的路径，默认为'result'。
 
-**NOTE:** 进行预测时，所选择的module，checkpoint_dir，dataset必须和Fine-tune所用的一样。若想获取油画风着色效果，请下载参数文件[油画着色](http://)
-
-## 超参优化AutoDL Finetuner
-
-PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../../docs/tutorial/autofinetune.md)。
+**NOTE:** 进行预测时，所选择的module，checkpoint_dir，dataset必须和Fine-tune所用的一样。

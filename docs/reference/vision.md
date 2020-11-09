@@ -1,7 +1,7 @@
-# Class `hub.vision.Compose`
+# Class `hub.vision.transforms.Compose`
 
 ```python
-hub.vision.Compose(
+hub.vision.transforms.Compose(
     transforms: Callable,
     to_rgb: bool = False)
 ```
@@ -13,10 +13,10 @@ Compose preprocessing operators for obtaining prepocessed data. The shape of inp
 * to_rgb(bool): Whether to transform the input from BGR mode to RGB mode, default is False.
 
 
-# Class `hub.vision.RandomHorizontalFlip`
+# Class `hub.vision.transforms.RandomHorizontalFlip`
 
 ```python
-hub.vision.RandomHorizontalFlip(prob: float = 0.5)
+hub.vision.transforms.RandomHorizontalFlip(prob: float = 0.5)
 ```
 
 Randomly flip the image horizontally according to given probability.
@@ -26,10 +26,10 @@ Randomly flip the image horizontally according to given probability.
 * prob(float): The probability for flipping the image horizontally, default is 0.5.
 
 
-# Class `hub.vision.RandomVerticalFlip`
+# Class `hub.vision.transforms.RandomVerticalFlip`
 
 ```python
-hub.vision.RandomVerticalFlip(
+hub.vision.transforms.RandomVerticalFlip(
     prob: float = 0.5)
 ```
 
@@ -40,10 +40,10 @@ Randomly flip the image vertically according to given probability.
 * prob(float): The probability for flipping the image vertically, default is 0.5.
 
 
-# Class `hub.vision.Resize`
+# Class `hub.vision.transforms.Resize`
 
 ```python
-hub.vision.Resize(
+hub.vision.transforms.Resize(
     target_size: Union[List[int], int], 
     interpolation: str = 'LINEAR')
 ```
@@ -56,10 +56,10 @@ Resize input image to target size.
 * interpolation(str): Interpolation mode, default is 'LINEAR'. It support 6 modes: 'NEAREST', 'LINEAR', 'CUBIC', 'AREA', 'LANCZOS4' and 'RANDOM'.
 
 
-# Class `hub.vision.ResizeByLong`
+# Class `hub.vision.transforms.ResizeByLong`
 
 ```python
-hub.vision.ResizeByLong(long_size: int)
+hub.vision.transforms.ResizeByLong(long_size: int)
 ```
 
 Resize the long side of the input image to the target size.
@@ -69,10 +69,10 @@ Resize the long side of the input image to the target size.
 * long_size(int|list[int]): The target size of long side.
 
 
-# Class `hub.vision.ResizeRangeScaling`
+# Class `hub.vision.transforms.ResizeRangeScaling`
 
 ```python
-hub.vision.ResizeRangeScaling(
+hub.vision.transforms.ResizeRangeScaling(
     min_value: int = 400, 
     max_value: int = 600)
 ```
@@ -85,10 +85,10 @@ Randomly select a targeted size to resize the image according to given range.
 * max_value(int): The maximum value for targeted size.
 
 
-# Class `hub.vision.ResizeStepScaling`
+# Class `hub.vision.transforms.ResizeStepScaling`
 
 ```python
-hub.vision.ResizeStepScaling(
+hub.vision.transforms.ResizeStepScaling(
     min_scale_factor: float = 0.75, 
     max_scale_factor: float = 1.25,
     scale_step_size: float = 0.25)
@@ -103,10 +103,10 @@ Randomly select a scale factor to resize the image according to given range.
 * scale_step_size(float): Scale interval.
 
 
-# Class `hub.vision.Normalize`
+# Class `hub.vision.transforms.Normalize`
 
 ```python
-hub.vision.Normalize(
+hub.vision.transforms.Normalize(
     mean: list = [0.5, 0.5, 0.5], 
     std: list =[0.5, 0.5, 0.5])
 ```
@@ -119,10 +119,10 @@ Normalize the input image.
 * std(list): Standard deviation for normalization.
 
 
-# Class `hub.vision.Padding`
+# Class `hub.vision.transforms.Padding`
  
  ```python
- hub.vision.Padding(
+ hub.vision.transforms.Padding(
     target_size: Union[List[int], Tuple[int], int], 
     im_padding_value: list = [127.5, 127.5, 127.5])
  ```
@@ -135,10 +135,10 @@ Normalize the input image.
 * im_padding_value(list): Border value for 3 channels, default is [127.5, 127.5, 127.5].
 
 
-# Class `hub.vision.RandomPaddingCrop`
+# Class `hub.vision.transforms.RandomPaddingCrop`
  
  ```python
- hub.vision.RandomPaddingCrop(
+ hub.vision.transforms.RandomPaddingCrop(
     crop_size(Union[List[int], Tuple[int], int]), 
     im_padding_value: list = [127.5, 127.5, 127.5])
  ```
@@ -151,10 +151,10 @@ Normalize the input image.
 * im_padding_value(list): Border value for 3 channels, default is [127.5, 127.5, 127.5].
 
 
-# Class `hub.vision.RandomBlur`
+# Class `hub.vision.transforms.RandomBlur`
  
  ```python
- hub.vision.RandomBlur(prob: float = 0.1)
+ hub.vision.transforms.RandomBlur(prob: float = 0.1)
  ```
  
  Random blur input image by Gaussian filter according to given probability.
@@ -164,10 +164,10 @@ Normalize the input image.
 * prob(float): The probability to blur the image, default is 0.1.
 
 
-# Class `hub.vision.RandomRotation`
+# Class `hub.vision.transforms.RandomRotation`
  
  ```python
- hub.vision.RandomRotation(
+ hub.vision.transforms.RandomRotation(
      max_rotation: float = 15., 
      im_padding_value: list = [127.5, 127.5, 127.5])
  ```
@@ -180,10 +180,10 @@ Normalize the input image.
 * im_padding_value(list): Border value for 3 channels, default is [127.5, 127.5, 127.5].
 
 
-# Class `hub.vision.RandomDistort`
+# Class `hub.vision.transforms.RandomDistort`
  
  ```python
- hub.vision.RandomDistort(
+ hub.vision.transforms.RandomDistort(
      brightness_range: float = 0.5,
      brightness_prob: float = 0.5,
      contrast_range: float = 0.5,
@@ -208,28 +208,28 @@ Normalize the input image.
 * hue_prob(float): Probability for disturb the hue of image.
 
 
-# Class `hub.vision.RGB2LAB`
+# Class `hub.vision.transforms.RGB2LAB`
  
  ```python
- hub.vision.RGB2LAB()
+ hub.vision.transforms.RGB2LAB()
  ```
  
  Convert color space from RGB to LAB.
 
 
-# Class `hub.vision.LAB2RGB`
+# Class `hub.vision.transforms.LAB2RGB`
  
  ```python
- hub.vision.LAB2RGB()
+ hub.vision.transforms.LAB2RGB()
  ```
  
  Convert color space from LAB to RGB.
 
 
-# Class `hub.vision.CenterCrop`
+# Class `hub.vision.transforms.CenterCrop`
  
  ```python
- hub.vision.CenterCrop(crop_size: int)
+ hub.vision.transforms.CenterCrop(crop_size: int)
  ```
  
  Crop the middle part of the image to the specified size.

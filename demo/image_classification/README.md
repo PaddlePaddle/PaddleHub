@@ -36,7 +36,7 @@ flowers_validate = Flowers(transforms, mode='val')
 ### Step3: 加载预训练模型
 
 ```python
-module = hub.Module(name="mobilenet_v2_imagenet", class_dim=flowers.num_classes)
+module = hub.Module(name="resnet50_vd_imagenet_ssld", class_dim=flowers.num_classes)
 ```
 * `name`: 选择预训练模型的名字。
 * `class_dim`: 设置最终输出分类类别。
@@ -99,9 +99,7 @@ import paddlehub as hub
 
 if __name__ == '__main__':
 
-    model = hub.Module(name='mobilenet_v2_imagenet', class_dim=5)
-    state_dict = paddle.load('img_classification_ckpt')
-    model.set_dict(state_dict)
+    model = hub.Module(name='mobilenet_v2_imagenet', class_dim=5, load_checkpoint=/PATH/TO/CHECKPOINT)
     result = model.predict('flower.jpg')
 ```
 

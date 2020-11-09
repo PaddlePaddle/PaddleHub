@@ -39,7 +39,7 @@ class Compose:
         self.transforms = transforms
         self.to_rgb = to_rgb
 
-    def __call__(self, im:  Union[List[str], str]):
+    def __call__(self, im:  Union[np.ndarray, str]):
         if isinstance(im, str):
             im = cv2.imread(im).astype('float32')
 

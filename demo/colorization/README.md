@@ -98,12 +98,9 @@ if __name__ == '__main__':
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
 
-**NOTE:** 进行预测时，所选择的module，checkpoint_dir，dataset必须和Fine-tune所用的一样。若想获取油画风着色效果，请下载参数文件[油画着色](http://)
+**NOTE:** 进行预测时，所选择的module，checkpoint_dir，dataset必须和Fine-tune所用的一样。若想获取油画风着色效果，请下载参数文件[油画着色](https://paddlehub.bj.bcebos.com/dygraph/models/canvas_rc.pdparams)
 
 **Args**
 * `images`:原始图像路径；
 * `visualization`: 是否可视化，默认为True；
 * `save_path`: 保存结果的路径，默认为'result'。
-## 超参优化AutoDL Finetuner
-
-PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../../docs/tutorial/autofinetune.md)。
