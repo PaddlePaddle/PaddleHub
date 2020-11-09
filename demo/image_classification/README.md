@@ -4,7 +4,7 @@
 
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用mobilenet_v2_imagenet对[Flowers](../../docs/reference/dataset.md#class-hubdatasetsflowers)等数据集进行Fine-tune。
+在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用resnet50_vd_imagenet_ssld对[Flowers](../../docs/reference/dataset.md#class-hubdatasetsflowers)等数据集进行Fine-tune。
 
 ## 代码步骤
 
