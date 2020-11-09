@@ -81,8 +81,6 @@ Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详
 * `log_interval`: 打印日志的间隔， 单位为执行批训练的次数。
 * `save_interval`: 保存模型的间隔频次，单位为执行训练的轮数。
 
-
-
 ## 模型预测
 
 当完成Fine-tune后，Fine-tune过程在验证集上表现最优的模型会被保存在`${CHECKPOINT_DIR}/best_model`目录下，其中`${CHECKPOINT_DIR}`目录为Fine-tune时所选择的保存checkpoint的目录。
