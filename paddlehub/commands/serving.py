@@ -189,6 +189,9 @@ class ServingCommand:
                 return False
             back_port = int(front_port) + 1
             for index in range(100):
+                if index == 99:
+                    raise RuntimeError("Port from %s to %s is occupied, please use another port" % int(front_port) + 1,
+                                       back_port)
                 if is_port_occupied("127.0.0.1", back_port):
                     break
                 else:
