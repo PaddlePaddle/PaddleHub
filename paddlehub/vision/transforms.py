@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import random
-from typing import Callable
+from typing import Callable, Union, List, Tuple
 
 import cv2
 import PIL
@@ -23,7 +23,14 @@ import paddlehub.vision.functional as F
 
 
 class Compose:
-    def __init__(self, transforms, to_rgb=False):
+    """
+    Compose preprocessing operators for obtaining prepocessed data. The shape of input image for all operations is [H, W, C], where H is the image height, W is the image width, and C is the number of image channels.
+
+    Args:
+        transforms(callmethod) : The method of preprocess images.
+        to_rgb(bool): Whether to transform the input from BGR mode to RGB mode, default is False.
+    """
+    def __init__(self, transforms: Callable, to_rgb: bool = False):
         if not isinstance(transforms, list):
             raise TypeError('The transforms must be a list!')
         if len(transforms) < 1:
@@ -32,7 +39,7 @@ class Compose:
         self.transforms = transforms
         self.to_rgb = to_rgb
 
-    def __call__(self, im):
+    def __call__(self, im:  Union[np.ndarray, str]):
         if isinstance(im, str):
             im = cv2.imread(im).astype('float32')
 
@@ -50,26 +57,45 @@ class Compose:
 
 
 class RandomHorizontalFlip:
-    def __init__(self, prob=0.5):
+    """
+    Randomly flip the image horizontally according to given probability.
+
+    Args:
+        prob(float): The probability for flipping the image horizontally, default is 0.5.
+    """
+    def __init__(self, prob: float = 0.5):
         self.prob = prob
 
-    def __call__(self, im):
+    def __call__(self, im: np.ndarray):
         if random.random() < self.prob:
             im = F.horizontal_flip(im)
         return im
 
 
 class RandomVerticalFlip:
-    def __init__(self, prob=0.5):
+    """
+    Randomly flip the image vertically according to given probability.
+
+    Args:
+        prob(float): The probability for flipping the image vertically, default is 0.5.
+    """
+    def __init__(self, prob: float = 0.5):
         self.prob = prob
 
-    def __call__(self, im):
+    def __call__(self, im: np.ndarray):
         if random.random() < self.prob:
             im = F.vertical_flip(im)
         return im
 
 
 class Resize:
+    """
+    Resize input image to target size.
+
+    Args:
+        target_size(List[int]|int]): Target image size.
+        interpolation(str): Interpolation mode, default is 'LINEAR'. It support 6 modes: 'NEAREST', 'LINEAR', 'CUBIC', 'AREA', 'LANCZOS4' and 'RANDOM'.
+    """
     # The interpolation mode
     interpolation_dict = {
         'NEAREST': cv2.INTER_NEAREST,
@@ -79,7 +105,7 @@ class Resize:
         'LANCZOS4': cv2.INTER_LANCZOS4
     }
 
-    def __init__(self, target_size, interpolation='LINEAR'):
+    def __init__(self, target_size: Union[List[int], int], interpolation: str = 'LINEAR'):
         self.interpolation = interpolation
         if not (interpolation == "RANDOM" or interpolation in self.interpolation_dict):
             raise ValueError("interpolation should be one of {}".format(self.interpolation_dict.keys()))
@@ -93,7 +119,7 @@ class Resize:
 
         self.target_size = target_size
 
-    def __call__(self, im):
+    def __call__(self, im: np.ndarray):
         if self.interpolation == "RANDOM":
             interpolation = random.choice(list(self.interpolation_dict.keys()))
         else:
@@ -103,7 +129,13 @@ class Resize:
 
 
 class ResizeByLong:
-    def __init__(self, long_size):
+    """
+    Resize the long side of the input image to the target size.
+
+    Args:
+        long_size(int|list[int]): The target size of long side.
+    """
+    def __init__(self, long_size: Union[List[int], int]):
         self.long_size = long_size
 
     def __call__(self, im):
@@ -112,14 +144,21 @@ class ResizeByLong:
 
 
 class ResizeRangeScaling:
-    def __init__(self, min_value=400, max_value=600):
+    """
+    Randomly select a targeted size to resize the image according to given range.
+
+    Args:
+        min_value(int): The minimum value for targeted size.
+        max_value(int): The maximum value for targeted size.
+    """
+    def __init__(self, min_value: int = 400, max_value: int = 600):
         if min_value > max_value:
             raise ValueError('min_value must be less than max_value, '
                              'but they are {} and {}.'.format(min_value, max_value))
         self.min_value = min_value
         self.max_value = max_value
 
-    def __call__(self, im):
+    def __call__(self, im: np.ndarray):
         if self.min_value == self.max_value:
             random_size = self.max_value
         else:
@@ -129,7 +168,16 @@ class ResizeRangeScaling:
 
 
 class ResizeStepScaling:
-    def __init__(self, min_scale_factor=0.75, max_scale_factor=1.25, scale_step_size=0.25):
+    """
+    Randomly select a scale factor to resize the image according to given range.
+
+    Args:
+        min_scale_factor(float): The minimum scale factor for targeted scale.
+        max_scale_factor(float): The maximum scale factor for targeted scale.
+        scale_step_size(float): Scale interval.
+
+    """
+    def __init__(self, min_scale_factor: float = 0.75, max_scale_factor: float = 1.25, scale_step_size: float = 0.25):
         if min_scale_factor > max_scale_factor:
             raise ValueError('min_scale_factor must be less than max_scale_factor, '
                              'but they are {} and {}.'.format(min_scale_factor, max_scale_factor))
@@ -137,7 +185,7 @@ class ResizeStepScaling:
         self.max_scale_factor = max_scale_factor
         self.scale_step_size = scale_step_size
 
-    def __call__(self, im):
+    def __call__(self, im: np.ndarray):
         if self.min_scale_factor == self.max_scale_factor:
             scale_factor = self.min_scale_factor
 
@@ -157,7 +205,14 @@ class ResizeStepScaling:
 
 
 class Normalize:
-    def __init__(self, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]):
+    """
+    Normalize the input image.
+
+    Args:
+        mean(list): Mean value for normalization.
+        std(list): Standard deviation for normalization.
+    """
+    def __init__(self, mean: list = [0.5, 0.5, 0.5], std: list = [0.5, 0.5, 0.5]):
         self.mean = mean
         self.std = std
         if not (isinstance(self.mean, list) and isinstance(self.std, list)):
@@ -174,7 +229,14 @@ class Normalize:
 
 
 class Padding:
-    def __init__(self, target_size, im_padding_value=[127.5, 127.5, 127.5]):
+    """
+    Padding input into targeted size according to specific padding value.
+
+    Args:
+        target_size(Union[List[int], Tuple[int], int]): Targeted image size.
+        im_padding_value(list): Border value for 3 channels, default is [127.5, 127.5, 127.5].
+    """
+    def __init__(self, target_size: Union[List[int], Tuple[int], int], im_padding_value: list = [127.5, 127.5, 127.5]):
         if isinstance(target_size, list) or isinstance(target_size, tuple):
             if len(target_size) != 2:
                 raise ValueError(
@@ -185,7 +247,7 @@ class Padding:
         self.target_size = target_size
         self.im_padding_value = im_padding_value
 
-    def __call__(self, im):
+    def __call__(self, im: np.ndarray):
         im_height, im_width = im.shape[0], im.shape[1]
         if isinstance(self.target_size, int):
             target_height = self.target_size
@@ -206,6 +268,13 @@ class Padding:
 
 
 class RandomPaddingCrop:
+    """
+    Padding input image if crop size is greater than image size. Otherwise, crop the input image to given size.
+
+    Args:
+        crop_size(Union[List[int], Tuple[int], int]): Targeted image size.
+        im_padding_value(list): Border value for 3 channels, default is [127.5, 127.5, 127.5].
+    """
     def __init__(self, crop_size, im_padding_value=[127.5, 127.5, 127.5]):
         if isinstance(crop_size, list) or isinstance(crop_size, tuple):
             if len(crop_size) != 2:
@@ -247,10 +316,16 @@ class RandomPaddingCrop:
 
 
 class RandomBlur:
-    def __init__(self, prob=0.1):
+    """
+    Random blur input image by Gaussian filter according to given probability.
+
+    Args:
+        prob(float): The probability to blur the image, default is 0.1.
+    """
+    def __init__(self, prob: float = 0.1):
         self.prob = prob
 
-    def __call__(self, im):
+    def __call__(self, im: np.ndarray):
         if self.prob <= 0:
             n = 0
         elif self.prob >= 1:
@@ -270,7 +345,15 @@ class RandomBlur:
 
 
 class RandomRotation:
-    def __init__(self, max_rotation=15, im_padding_value=[127.5, 127.5, 127.5]):
+    """
+    Rotate the input image at random angle. The angle will not exceed to max_rotation.
+
+    Args:
+
+        max_rotation(float): Upper bound of rotation angle.
+        im_padding_value(list): Border value for 3 channels, default is [127.5, 127.5, 127.5].
+    """
+    def __init__(self, max_rotation: float = 15, im_padding_value: list = [127.5, 127.5, 127.5]):
         self.max_rotation = max_rotation
         self.im_padding_value = im_padding_value
 
@@ -301,47 +384,32 @@ class RandomRotation:
         return im
 
 
-class RandomScaleAspect:
-    def __init__(self, min_scale=0.5, aspect_ratio=0.33):
-        self.min_scale = min_scale
-        self.aspect_ratio = aspect_ratio
-
-    def __call__(self, im):
-        if self.min_scale != 0 and self.aspect_ratio != 0:
-            img_height = im.shape[0]
-            img_width = im.shape[1]
-            for i in range(0, 10):
-                area = img_height * img_width
-                target_area = area * np.random.uniform(self.min_scale, 1.0)
-                aspectRatio = np.random.uniform(self.aspect_ratio, 1.0 / self.aspect_ratio)
-
-                dw = int(np.sqrt(target_area * 1.0 * aspectRatio))
-                dh = int(np.sqrt(target_area * 1.0 / aspectRatio))
-                if (np.random.randint(10) < 5):
-                    tmp = dw
-                    dw = dh
-                    dh = tmp
-
-                if (dh < img_height and dw < img_width):
-                    h1 = np.random.randint(0, img_height - dh)
-                    w1 = np.random.randint(0, img_width - dw)
-
-                    im = im[h1:(h1 + dh), w1:(w1 + dw), :]
-                    im = cv2.resize(im, (img_width, img_height), interpolation=cv2.INTER_LINEAR)
-
-        return im
 
 
 class RandomDistort:
+    """
+    Random adjust brightness, contrast, saturation and hue according to the given random range and probability, respectively.
+
+    Args:
+
+        brightness_range(float): Boundary of brightness.
+        brightness_prob(float): Probability for disturb the brightness of image.
+        contrast_range(float): Boundary of contrast.
+        contrast_prob(float): Probability for disturb the contrast of image.
+        saturation_range(float): Boundary of saturation.
+        saturation_prob(float): Probability for disturb the saturation of image.
+        hue_range(float): Boundary of hue.
+        hue_prob(float): Probability for disturb the hue of image.
+    """
     def __init__(self,
-                 brightness_range=0.5,
-                 brightness_prob=0.5,
-                 contrast_range=0.5,
-                 contrast_prob=0.5,
-                 saturation_range=0.5,
-                 saturation_prob=0.5,
-                 hue_range=18,
-                 hue_prob=0.5):
+                 brightness_range: float = 0.5,
+                 brightness_prob: float = 0.5,
+                 contrast_range: float = 0.5,
+                 contrast_prob: float = 0.5,
+                 saturation_range: float = 0.5,
+                 saturation_prob: float = 0.5,
+                 hue_range: float = 18,
+                 hue_prob: float = 0.5):
         self.brightness_range = brightness_range
         self.brightness_prob = brightness_prob
         self.contrast_range = contrast_range
@@ -351,7 +419,7 @@ class RandomDistort:
         self.hue_range = hue_range
         self.hue_prob = hue_prob
 
-    def __call__(self, im):
+    def __call__(self, im: np.ndarray):
         brightness_lower = 1 - self.brightness_range
         brightness_upper = 1 + self.brightness_range
         contrast_lower = 1 - self.contrast_range
@@ -360,7 +428,7 @@ class RandomDistort:
         saturation_upper = 1 + self.saturation_range
         hue_lower = -self.hue_range
         hue_upper = self.hue_range
-        ops = ['brightness', 'contrast', 'saturation', 'hue']
+        ops = [F.brightness, F.contrast, F.saturation, F.hue]
         random.shuffle(ops)
         params_dict = {
             'brightness': {
@@ -537,27 +605,6 @@ class LAB2RGB:
 
     def __call__(self, img: np.ndarray) -> np.ndarray:
         return self.lab2rgb(img)
-
-
-class ColorPostprocess:
-    """
-    Transform images from [0, 1] to [0, 255]
-
-    Args:
-       type(type): Type of Image value.
-
-    Return:
-        img(np.ndarray): Image in range of 0-255.
-    """
-
-    def __init__(self, type: type = np.uint8):
-        self.type = type
-
-    def __call__(self, img: np.ndarray):
-        img = np.transpose(img, (1, 2, 0))
-        img = np.clip(img, 0, 1) * 255
-        img = img.astype(self.type)
-        return img
 
 
 class CenterCrop:

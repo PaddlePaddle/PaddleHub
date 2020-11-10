@@ -69,7 +69,8 @@ class ImageClassifierModule(RunModule, ImageServing):
         images = batch[0]
         labels = paddle.unsqueeze(batch[1], axis=-1)
 
-        preds = self(images)
+        preds, feature = self(images)
+        
         loss, _ = F.softmax_with_cross_entropy(preds, labels, return_softmax=True, axis=1)
         loss = paddle.mean(loss)
         acc = paddle.metric.accuracy(preds, labels)
@@ -89,10 +90,11 @@ class ImageClassifierModule(RunModule, ImageServing):
         images = self.transforms(images)
         if len(images.shape) == 3:
             images = images[np.newaxis, :]
-        preds = self(paddle.to_tensor(images))
+        preds, feature = self(paddle.to_tensor(images))
         preds = F.softmax(preds, axis=1).numpy()
         pred_idxs = np.argsort(preds)[::-1][:, :top_k]
         res = []
+
         for i, pred in enumerate(pred_idxs):
             res_dict = {}
             for k in pred:

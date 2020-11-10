@@ -73,7 +73,7 @@ def resize_long(im: np.ndarray, long_size: int, interpolation: int = cv2.INTER_L
 
     Args:
         im(np.ndarray): Input image.
-        target_size(int|list[int]): The target size of long side.
+        long_size(int|list[int]): The target size of long side.
         interpolation(int): Interpolation method. Default to cv2.INTER_LINEAR.
     '''
     value = max(im.shape[0], im.shape[1])
