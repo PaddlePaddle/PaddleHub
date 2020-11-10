@@ -22,6 +22,7 @@ __version__ = '2.0.0-alpha0'
 from paddlehub.config import config
 from paddlehub.utils import log, parser, utils
 from paddlehub.utils.paddlex import download, ResourceNotFoundError
+from paddlehub.server import server_check
 from paddlehub.server.server_source import ServerConnectionError
 from paddlehub.module import Module
 from paddlehub.text.bert_tokenizer import BertTokenizer

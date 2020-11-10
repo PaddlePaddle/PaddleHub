@@ -15,6 +15,7 @@
 
 import os
 import shutil
+
 import sys
 from collections import OrderedDict
 from typing import List
@@ -38,6 +39,7 @@ class HubModuleNotFoundError(Exception):
         msg = '{}'.format(self.name)
         if self.version:
             msg += '-{}'.format(self.version)
+
         if self.source:
             msg += ' from {}'.format(self.source)
 
@@ -168,6 +170,7 @@ class LocalModuleManager(object):
             source    (str|optional): source containing module code, use with name paramete
         '''
         if name:
+
             lock = filelock.FileLock(os.path.join(TMP_HOME, name))
             with lock:
                 hub_module_cls = self.search(name, source, branch)
@@ -235,6 +238,7 @@ class LocalModuleManager(object):
         '''List all installed HubModule.'''
         for subdir in os.listdir(self.home):
             fulldir = os.path.join(self.home, subdir)
+
             try:
                 self._local_modules[subdir] = HubModule.load(fulldir)
             except:
@@ -284,20 +288,16 @@ class LocalModuleManager(object):
             if item['name'] == name and item['version'].match(version):
 
                 # uninstall local module
-                if self.search(name):
+                local_module = self.search(name)
+                if local_module and local_module.source == source and local_module.branch == branch:
+                    self._local_modules[name] = local_module
+                    return self._local_modules[name]
+
+                if os.path.exists(self._get_normalized_path(name)):
                     self.uninstall(name)
 
                 installed_path = self._get_normalized_path(name)
-                if not os.path.exists(installed_path):
-                    os.makedirs(installed_path)
-                module_file = os.path.join(installed_path, 'module.py')
-
-                # Generate a module.py file to reference objects from git repository
-                with open(module_file, 'w') as file:
-                    file.write('import sys\n\n')
-                    file.write('sys.path.insert(0, \'{}\')\n'.format(item['path']))
-                    file.write('from hubconf import {}\n'.format(item['class']))
-                    file.write('sys.path.pop(0)\n')
+                shutil.copytree(item['path'], installed_path)
 
                 source_info_file = os.path.join(installed_path, '_source_info.yaml')
                 with open(source_info_file, 'w') as file:
@@ -305,10 +305,6 @@ class LocalModuleManager(object):
                     file.write('branch: {}'.format(branch))
 
                 self._local_modules[name] = HubModule.load(installed_path)
-                module_file = sys.modules[self._local_modules[name].__module__].__file__
-                requirements_file = os.path.join(os.path.dirname(module_file), 'requirements.txt')
-                if os.path.exists(requirements_file):
-                    shutil.copy(requirements_file, installed_path)
 
                 # Install python package requirements
                 self._install_module_requirements(self._local_modules[name])

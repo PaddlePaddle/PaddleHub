@@ -51,7 +51,7 @@ class ConfigCommand:
                 hubconf.reset()
                 print(hubconf)
             elif arg.startswith("server=="):
-                hubconf.server_url = arg.split("==")[1]
+                hubconf.server = arg.split("==")[1]
             elif arg.startswith("log.level=="):
                 hubconf.log_level = arg.split("==")[1]
             elif arg.startswith("log.enable=="):

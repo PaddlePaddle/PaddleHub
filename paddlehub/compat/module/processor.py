@@ -19,6 +19,7 @@ from typing import List
 class BaseProcessor(object):
     '''
     '''
+
     def __init__(self, module):
         ...
 
