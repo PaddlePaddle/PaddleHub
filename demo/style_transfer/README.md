@@ -29,7 +29,7 @@ color_set = MiniCOCO(transform=transform, mode='train')
 * `transforms`: 数据预处理方式。
 * `mode`: 选择数据模式，可选项有 `train`, `test`， 默认为`train`。
 
-数据集的准备代码可以参考 [minicoco.py](../../paddlehub/datasets/flowers.py)。`hub.datasets. MiniCOCO()`会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录。
+数据集的准备代码可以参考 [minicoco.py](../../paddlehub/datasets/flowers.py)。`hub.datasets.MiniCOCO()`会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录。
 
 ### Step3: 加载预训练模型
 
