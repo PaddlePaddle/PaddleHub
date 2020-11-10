@@ -101,7 +101,7 @@ class ImageClassifierModule(RunModule, ImageServing):
                 class_name = self.labels[int(k)]
                 res_dict[class_name] = preds[i][k]
             res.append(res_dict)
-        return res, feature
+        return res
 
 
 class ImageColorizeModule(RunModule, ImageServing):
