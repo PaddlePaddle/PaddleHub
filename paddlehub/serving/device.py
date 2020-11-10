@@ -22,9 +22,6 @@ import subprocess
 
 from paddlehub.utils import log
 
-filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d_%H%M%S", time.localtime())
-logger = log.get_file_logger(filename)
-
 
 class InferenceDevice(object):
     '''
@@ -35,6 +32,8 @@ class InferenceDevice(object):
     def __init__(self):
         self.frontend = None
         self.backend = None
+        filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
+        self.logger = log.get_file_logger(filename)
 
     def listen(self, frontend_addr: str, backend_addr: str):
         '''
@@ -51,7 +50,7 @@ class InferenceDevice(object):
 
             zmq.device(zmq.QUEUE, self.frontend, self.backend)
         except Exception as e:
-            logger.error(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
         finally:
             self.frontend.close()
             self.backend.close()
