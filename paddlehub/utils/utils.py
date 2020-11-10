@@ -21,6 +21,7 @@ import importlib
 import math
 import os
 import requests
+import socket
 import sys
 import time
 import tempfile
@@ -302,3 +303,16 @@ def record_exception(msg: str) -> str:
 
 def get_record_file():
     return os.path.join(hubenv.LOG_HOME, time.strftime('%Y%m%d.log'))
+
+
+def is_port_occupied(ip, port):
+    '''
+    Check if port os occupied.
+    '''
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.connect((ip, int(port)))
+        s.shutdown(2)
+        return True
+    except:
+        return False

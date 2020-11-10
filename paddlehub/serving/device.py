@@ -17,10 +17,12 @@ import zmq
 import time
 import os
 import json
+import platform
 import traceback
 import subprocess
 
 from paddlehub.utils import log
+from paddlehub.utils.utils import is_port_occupied
 
 
 class InferenceDevice(object):
@@ -94,7 +96,19 @@ class InferenceServer(object):
         self.gpus = gpus
 
     def listen(self, port: int):
-        backend = "ipc://backend.ipc"
-        start_workers(modules_info=self.modules_info, gpus=self.gpus, backend_addr=backend)
+        if platform.system() == "Windows":
+            back_port = int(port) + 1
+            for index in range(100):
+                if is_port_occupied("127.0.0.1", back_port):
+                    break
+                else:
+                    back_port = int(back_port) + 1
+            worker_backend = "tcp://localhost:%s" % back_port
+            backend = "tcp://*:%s" % back_port
+        else:
+            worker_backend = "ipc://backend.ipc"
+            backend = "ipc://backend.ipc"
+
+        start_workers(modules_info=self.modules_info, gpus=self.gpus, backend_addr=worker_backend)
         d = InferenceDevice()
         d.listen('tcp://*:%s' % port, backend)

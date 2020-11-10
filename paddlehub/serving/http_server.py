@@ -204,6 +204,7 @@ def run_http_server(port: int = 8866, client_port: int = 5559, names: list = [],
 
             run_http_server(port=8866, client_port='5559', names=['lac'])
     '''
+    names = list(names)
     p = multiprocessing.Process(target=run, args=(port, client_port, names, workers))
     p.start()
     return p.pid

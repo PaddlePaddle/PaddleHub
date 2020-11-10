@@ -28,6 +28,7 @@ from paddlehub.serving import app_compat as app
 from paddlehub.env import CONF_HOME
 from paddlehub.serving.http_server import run_all, StandaloneApplication
 from paddlehub.utils import log
+from paddlehub.utils.utils import is_port_occupied
 
 
 def number_of_workers():
@@ -124,7 +125,7 @@ class ServingCommand:
             log.logger.error("Error. Bert Service only support linux.")
             return False
 
-        if ServingCommand.is_port_occupied("127.0.0.1", args.port) is True:
+        if is_port_occupied("127.0.0.1", args.port) is True:
             log.logger.error("Port %s is occupied, please change it." % args.port)
             return False
 
@@ -133,19 +134,6 @@ class ServingCommand:
         bs.with_model(model_name=args.modules[0])
         # CacheUpdater("hub_bert_service", module=args.modules[0], version="0.0.0").start()
         bs.run(gpu_index=args.gpu, port=int(args.port))
-
-    @staticmethod
-    def is_port_occupied(ip, port):
-        '''
-        Check if port os occupied.
-        '''
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.connect((ip, int(port)))
-            s.shutdown(2)
-            return True
-        except:
-            return False
 
     def preinstall_modules(self):
         '''
@@ -180,7 +168,7 @@ class ServingCommand:
         module = self.args.modules
         if module is not None:
             port = self.args.port
-            if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
+            if is_port_occupied("127.0.0.1", port) is True:
                 log.logger.error("Port %s is occupied, please change it." % port)
                 return False
             self.preinstall_modules()
@@ -196,12 +184,12 @@ class ServingCommand:
         '''
         if self.modules_info is not None:
             front_port = self.args.port
-            if ServingCommand.is_port_occupied("127.0.0.1", front_port) is True:
+            if is_port_occupied("127.0.0.1", front_port) is True:
                 log.logger.error("Port %s is occupied, please change it." % front_port)
                 return False
             back_port = int(front_port) + 1
             for index in range(100):
-                if ServingCommand.is_port_occupied("127.0.0.1", back_port):
+                if is_port_occupied("127.0.0.1", back_port):
                     break
                 else:
                     back_port = int(back_port) + 1
@@ -217,7 +205,7 @@ class ServingCommand:
         module = self.args.modules
         if module is not None:
             port = self.args.port
-            if ServingCommand.is_port_occupied("127.0.0.1", port) is True:
+            if is_port_occupied("127.0.0.1", port) is True:
                 log.logger.error("Port %s is occupied, please change it." % port)
                 return False
             self.preinstall_modules()
