@@ -17,6 +17,7 @@ import contextlib
 import copy
 import functools
 import logging
+import os
 import sys
 import time
 import threading
@@ -26,6 +27,9 @@ import colorlog
 from colorama import Fore
 
 import paddlehub.config as hubconf
+from paddlehub.env import LOG_HOME
+
+loggers = {}
 
 log_config = {
     'DEBUG': {
@@ -488,16 +492,19 @@ def get_file_logger(filename):
         logger = get_file_logger('test.log')
         logger.logger.info('test_1')
     '''
-    logger = Logger()
-    old_handlers = logger.logger.handlers
-    for handler in old_handlers:
-        logger.logger.removeHandler(handler)
+    log_name = os.path.join(LOG_HOME, filename)
+    if log_name in loggers:
+        return loggers[log_name]
 
+    logger = Logger()
+    logger.logger.handlers = []
     format = logging.Formatter('[%(asctime)-15s] [%(levelname)8s] - %(message)s')
-    sh = logging.FileHandler(filename=filename, mode='a')
+    sh = logging.FileHandler(filename=log_name, mode='a')
     sh.setFormatter(format)
     logger.logger.addHandler(sh)
     logger.logger.setLevel(logging.INFO)
+
+    loggers.update({log_name: logger})
 
     return logger
 

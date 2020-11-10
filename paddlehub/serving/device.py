@@ -17,13 +17,12 @@ import zmq
 import time
 import os
 import json
+import platform
 import traceback
 import subprocess
 
 from paddlehub.utils import log
-
-filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d_%H%M%S", time.localtime())
-logger = log.get_file_logger(filename)
+from paddlehub.utils.utils import is_port_occupied
 
 
 class InferenceDevice(object):
@@ -35,6 +34,8 @@ class InferenceDevice(object):
     def __init__(self):
         self.frontend = None
         self.backend = None
+        filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
+        self.logger = log.get_file_logger(filename)
 
     def listen(self, frontend_addr: str, backend_addr: str):
         '''
@@ -51,7 +52,7 @@ class InferenceDevice(object):
 
             zmq.device(zmq.QUEUE, self.frontend, self.backend)
         except Exception as e:
-            logger.error(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
         finally:
             self.frontend.close()
             self.backend.close()
@@ -95,7 +96,21 @@ class InferenceServer(object):
         self.gpus = gpus
 
     def listen(self, port: int):
-        backend = "ipc://backend.ipc"
-        start_workers(modules_info=self.modules_info, gpus=self.gpus, backend_addr=backend)
+        if platform.system() == "Windows":
+            back_port = int(port) + 1
+            for index in range(100):
+                if is_port_occupied("127.0.0.1", back_port):
+                    break
+                else:
+                    back_port = int(back_port) + 1
+            else:
+                raise RuntimeError("Port from %s to %s is occupied, please use another port" % int(port) + 1, back_port)
+            worker_backend = "tcp://localhost:%s" % back_port
+            backend = "tcp://*:%s" % back_port
+        else:
+            worker_backend = "ipc://backend.ipc"
+            backend = "ipc://backend.ipc"
+
+        start_workers(modules_info=self.modules_info, gpus=self.gpus, backend_addr=worker_backend)
         d = InferenceDevice()
         d.listen('tcp://*:%s' % port, backend)

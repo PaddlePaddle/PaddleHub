@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import zmq
+import time
 import os
 import json
 import traceback
@@ -70,6 +71,10 @@ if __name__ == '__main__':
     import paddlehub as hub
     from paddlehub.serving.http_server import package_result
     from paddlehub.utils import log
+
+    filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
+    logger = log.get_file_logger(filename)
+    logger.logger.handlers = logger.logger.handlers[0:1]
 
     modules_pred_info = {}
     for module_name, module_info in modules_info.items():
