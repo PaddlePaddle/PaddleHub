@@ -15,7 +15,6 @@
 
 import traceback
 import time
-import logging
 
 from flask import Flask, request
 
@@ -23,6 +22,8 @@ from paddlehub.serving.model_service.base_model_service import cv_module_info
 from paddlehub.serving.model_service.base_model_service import nlp_module_info
 from paddlehub.serving.model_service.base_model_service import v2_module_info
 from paddlehub.utils import utils, log
+
+filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
 
 
 def package_result(status: str, msg: str, data: dict):
@@ -115,10 +116,7 @@ def create_app(init_flag: bool = False, configs: dict = None):
 
     app_instance = Flask(__name__)
     app_instance.config["JSON_AS_ASCII"] = False
-    logging.basicConfig()
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    app_instance.logger.handlers = gunicorn_logger.handlers
-    app_instance.logger.setLevel(gunicorn_logger.level)
+    app_instance.logger = log.get_file_logger(filename)
 
     @app_instance.route("/", methods=["GET", "POST"])
     def index():
@@ -183,7 +181,8 @@ def config_with_file(configs: dict):
         elif "NLP" == value["category"]:
             nlp_module_info.add_module(key, {key: value})
         v2_module_info.add_module(key, {key: value})
-        log.logger.info("%s==%s" % (key, value["version"]))
+        logger = log.get_file_logger(filename)
+        logger.info("%s==%s" % (key, value["version"]))
 
 
 def run(configs: dict = None, port: int = 8866):
@@ -200,10 +199,11 @@ def run(configs: dict = None, port: int = 8866):
             configs = {'lac': {'version': 1.0.0, 'category': nlp}}
             run(configs=configs, port=8866)
     '''
+    logger = log.get_file_logger(filename)
     if configs is not None:
         config_with_file(configs)
     else:
-        log.logger.error("Start failed cause of missing configuration.")
+        logger.error("Start failed cause of missing configuration.")
         return
     my_app = create_app(init_flag=True)
     my_app.run(host="0.0.0.0", port=port, debug=False, threaded=False)

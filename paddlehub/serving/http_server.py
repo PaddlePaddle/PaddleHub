@@ -24,6 +24,8 @@ from paddlehub.serving.device import InferenceServer
 from paddlehub.serving.client import InferenceClientProxy
 from paddlehub.utils import utils, log
 
+filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
+
 if platform.system() == "Windows":
 
     class StandaloneApplication(object):
@@ -108,6 +110,7 @@ def create_app(client_port: int = 5559, modules_name: list = []):
     '''
     app_instance = Flask(__name__)
     app_instance.config["JSON_AS_ASCII"] = False
+    app_instance.logger = log.get_file_logger(filename)
     pid = os.getpid()
 
     @app_instance.route("/", methods=["GET", "POST"])
@@ -180,10 +183,7 @@ def run(port: int = 8866, client_port: int = 5559, names: list = [], workers: in
         options = {"bind": "0.0.0.0:%s" % port, "workers": workers, "worker_class": "sync"}
         StandaloneApplication(create_app(client_port, modules_name=names), options).run()
 
-    filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
-    logger = log.get_file_logger(filename)
-
-    logger.info("PaddleHub-Serving has been stopped.")
+    log.logger.info("PaddleHub-Serving has been stopped.")
 
 
 def run_http_server(port: int = 8866, client_port: int = 5559, names: list = [], workers: int = 1):
