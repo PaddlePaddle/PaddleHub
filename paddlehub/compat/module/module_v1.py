@@ -211,7 +211,12 @@ class ModuleV1(object):
         '''Load the infomation of Module object defined in the specified directory.'''
         desc_file = os.path.join(directory, 'module_desc.pb')
         desc = module_v1_utils.convert_module_desc(desc_file)
-        return desc.module_info
+
+        # The naming of some old versions of Module is not standardized, which format of uppercase
+        # letters. This will cause the path of these modules to be incorrect after installation.
+        module_info = desc.module_info
+        module_info.name = module_info.name.lower()
+        return module_info
 
     def assets_path(self):
         return os.path.join(self.directory, 'assets')

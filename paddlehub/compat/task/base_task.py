@@ -117,6 +117,8 @@ class BaseTask(object):
         self._base_data_reader = data_reader
         self._base_feed_list = feed_list
 
+        self._compatible_mode = True if data_reader else False
+
     @contextlib.contextmanager
     def phase_guard(self, phase: str):
         self.enter_phase(phase)
@@ -308,15 +310,19 @@ class BaseTask(object):
 
             return wrapper
 
-        if self.is_predict_phase:
-            records = self._predict_data
+        if self._compatible_mode:
+            self.env.generator = self._base_data_reader.data_generator(
+                batch_size=self.config.batch_size, phase=self.phase, data=self._predict_data, return_list=True)
         else:
-            if self.is_train_phase:
-                shuffle = True
+            if self.is_predict_phase:
+                records = self._predict_data
             else:
-                shuffle = False
-            records = self.dataset.get_records(phase=self.phase, shuffle=shuffle)
-        self.env.generator = data_generator(records)
+                if self.is_train_phase:
+                    shuffle = True
+                else:
+                    shuffle = False
+                records = self.dataset.get_records(phase=self.phase, shuffle=shuffle)
+            self.env.generator = data_generator(records)
 
         return self.env.generator
 
