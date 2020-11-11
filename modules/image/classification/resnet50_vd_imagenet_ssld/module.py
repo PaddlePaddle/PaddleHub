@@ -13,13 +13,16 @@
 # limitations under the License.
 import os
 import math
+from typing import Union
 
 import numpy as np
 import paddle
 from paddle import ParamAttr
 import paddle.nn as nn
-from paddle.nn import Conv2d, BatchNorm, Linear, Dropout
-from paddle.nn import AdaptiveAvgPool2d, MaxPool2d, AvgPool2d
+import paddle.nn.functional as F
+import paddlehub.vision.transforms as T
+from paddle.nn import Conv2D, BatchNorm, Linear, Dropout
+from paddle.nn import AdaptiveAvgPool2D, MaxPool2D, AvgPool2D
 from paddle.nn.initializer import Uniform
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.cv_module import ImageClassifierModule
@@ -42,8 +45,8 @@ class ConvBNLayer(nn.Layer):
         super(ConvBNLayer, self).__init__()
 
         self.is_vd_mode = is_vd_mode
-        self._pool2d_avg = AvgPool2d(kernel_size=2, stride=2, padding=0, ceil_mode=True)
-        self._conv = Conv2d(
+        self._pool2d_avg = AvgPool2D(kernel_size=2, stride=2, padding=0, ceil_mode=True)
+        self._conv = Conv2D(
             in_channels=num_channels,
             out_channels=num_filters,
             kernel_size=filter_size,
@@ -116,7 +119,8 @@ class BottleneckBlock(nn.Layer):
             short = inputs
         else:
             short = self.short(inputs)
-        y = paddle.elementwise_add(x=short, y=conv2, act='relu')
+        y = paddle.add(x=short, y=conv2)
+        y = F.relu(y)
         return y
 
 
@@ -161,7 +165,8 @@ class BasicBlock(nn.Layer):
             short = inputs
         else:
             short = self.short(inputs)
-        y = paddle.elementwise_add(x=short, y=conv1, act='relu')
+        y = paddle.add(x=short, y=conv1)
+        y = F.relu(y)
         return y
 
 
@@ -177,11 +182,12 @@ class BasicBlock(nn.Layer):
 class ResNet50_vd(nn.Layer):
     """ResNet50_vd model."""
 
-    def __init__(self, class_dim: int = 1000, load_checkpoint: str = None):
+    def __init__(self, label_list: list, load_checkpoint: str = None):
         super(ResNet50_vd, self).__init__()
 
         self.layers = 50
-
+        self.labels = label_list
+        class_dim = len(self.labels)
         depth = [3, 4, 6, 3]
         num_channels = [64, 256, 512, 1024]
         num_filters = [64, 128, 256, 512]
@@ -189,7 +195,7 @@ class ResNet50_vd(nn.Layer):
         self.conv1_1 = ConvBNLayer(num_channels=3, num_filters=32, filter_size=3, stride=2, act='relu', name="conv1_1")
         self.conv1_2 = ConvBNLayer(num_channels=32, num_filters=32, filter_size=3, stride=1, act='relu', name="conv1_2")
         self.conv1_3 = ConvBNLayer(num_channels=32, num_filters=64, filter_size=3, stride=1, act='relu', name="conv1_3")
-        self.pool2d_max = MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.pool2d_max = MaxPool2D(kernel_size=3, stride=2, padding=1)
 
         self.block_list = []
 
@@ -210,7 +216,7 @@ class ResNet50_vd(nn.Layer):
                 self.block_list.append(bottleneck_block)
                 shortcut = True
 
-        self.pool2d_avg = AdaptiveAvgPool2d(1)
+        self.pool2d_avg = AdaptiveAvgPool2D(1)
         self.pool2d_avg_channels = num_channels[-1] * 2
         stdv = 1.0 / math.sqrt(self.pool2d_avg_channels * 1.0)
 
@@ -227,13 +233,13 @@ class ResNet50_vd(nn.Layer):
 
         else:
             checkpoint = os.path.join(self.directory, 'resnet50_vd_ssld.pdparams')
-            if not os.path.exists(checkpoint):
-                os.system(
-                    'wget https://paddlehub.bj.bcebos.com/dygraph/image_classification/resnet50_vd_ssld.pdparams -O ' +
-                    checkpoint)
-            model_dict = paddle.load(checkpoint)[0]
+            model_dict = paddle.load(checkpoint)
             self.set_dict(model_dict)
             print("load pretrained checkpoint success")
+            
+    def transforms(self, images: Union[str, np.ndarray]):
+        transforms = T.Compose([T.Resize((224, 224)), T.Normalize()])
+        return transforms(images)
 
     def forward(self, inputs: paddle.Tensor):
         y = self.conv1_1(inputs)
@@ -242,7 +248,7 @@ class ResNet50_vd(nn.Layer):
         y = self.pool2d_max(y)
         for block in self.block_list:
             y = block(y)
-        y = self.pool2d_avg(y)
-        y = paddle.reshape(y, shape=[-1, self.pool2d_avg_channels])
+        feature = self.pool2d_avg(y)
+        y = paddle.reshape(feature, shape=[-1, self.pool2d_avg_channels])
         y = self.out(y)
-        return y
+        return y, feature
