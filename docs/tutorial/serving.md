@@ -20,6 +20,7 @@ $ hub serving start --modules [Module1==Version1, Module2==Version2, ...] \
                     --use_gpu \
                     --use_multiprocess \
                     --workers \
+                    --gpu \
 ```
 
 **参数**：
@@ -30,7 +31,8 @@ $ hub serving start --modules [Module1==Version1, Module2==Version2, ...] \
 |--port/-p|服务端口，默认为8866|  
 |--use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
 |--use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式<br>*`Windows操作系统只支持单进程方式`*|
-|--workers|在并发方式下指定的并发任务数，默认为`2*cpu_count-1`，其中`cpu_count`为CPU核数|  
+|--workers|在并发方式下指定的并发任务数，默认为`2*cpu_count-1`，其中`cpu_count`为CPU核数|
+|--gpu|指定使用gpu的卡号，如`1,2`代表使用1号显卡和2号显卡，默认仅使用0号显卡|
 
 **NOTE:** --use_gpu不可与--use_multiprocess共用。
 
@@ -65,7 +67,8 @@ $ hub serving start --config config.json
   },
   "port": 8866,
   "use_multiprocess": false,
-  "workers": 2
+  "workers": 2,
+  "gpu": "0,1,2"
 }
 
 ```
@@ -79,6 +82,8 @@ $ hub serving start --config config.json
 |use_gpu|使用GPU进行预测，必须安装paddlepaddle-gpu|  
 |use_multiprocess|是否启用并发方式，默认为单进程方式，推荐多核CPU机器使用此方式<br>*`Windows操作系统只支持单进程方式`*|
 |workers|启动的并发任务数，在并发模式下才生效，默认为`2*cpu_count-1`，其中`cpu_count`代表CPU的核数|
+|gpu|指定使用gpu的卡号，如`1,2`代表使用1号显卡和2号显卡，默认仅使用0号显卡|
+**NOTE:** --use_gpu不可与--use_multiprocess共用。
 
 ### Step2：访问服务端
 
