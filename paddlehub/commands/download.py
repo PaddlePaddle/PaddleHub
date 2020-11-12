@@ -19,6 +19,7 @@ import paddlehub as hub
 from paddlehub.commands import register
 from paddlehub.server import module_server
 from paddlehub.utils import utils, log
+from paddlehub.server.server import CacheUpdater
 
 
 @register(name='hub.download', description='Download PaddlePaddle pretrained module files.')
@@ -30,6 +31,7 @@ class DownloadCommand:
 
         for _arg in argv:
             result = module_server.search_module(_arg)
+            CacheUpdater("hub_download", _arg).start()
             if result:
                 url = result[0]['url']
                 with log.ProgressBar('Download {}'.format(url)) as bar:

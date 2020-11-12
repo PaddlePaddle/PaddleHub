@@ -21,6 +21,7 @@ from paddlehub.commands import register
 from paddlehub.module.manager import LocalModuleManager
 from paddlehub.server.server import module_server
 from paddlehub.utils import log, platform
+from paddlehub.server.server import CacheUpdater
 
 
 @register(name='hub.search', description='Search PaddleHub pretrained model through model keywords.')
@@ -31,8 +32,9 @@ class SearchCommand:
         widths = [20, 8, 30] if platform.is_windows() else [30, 8, 40]
         table = log.Table(widths=widths)
         table.append(*['ModuleName', 'Version', 'Summary'], aligns=['^', '^', '^'], colors=["blue", "blue", "blue"])
-
+        CacheUpdater("hub_search", argv).start()
         results = module_server.search_module(name=argv)
+
         for result in results:
             table.append(result['name'], result['version'], result['summary'])
 

@@ -16,7 +16,6 @@
 import argparse
 import os
 import platform
-import socket
 import json
 import multiprocessing
 import time
@@ -29,6 +28,7 @@ from paddlehub.env import CONF_HOME
 from paddlehub.serving.http_server import run_all, StandaloneApplication
 from paddlehub.utils import log
 from paddlehub.utils.utils import is_port_occupied
+from paddlehub.server.server import CacheUpdater
 
 
 def number_of_workers():
@@ -103,6 +103,9 @@ class ServingCommand:
         if info is False:
             return
         pid = info["pid"]
+        module = info["module"]
+        start_time = info["start_time"]
+        CacheUpdater("hub_serving_stop", module=module, addition={"period_time": time.time() - start_time}).start()
         if os.path.exists(filepath):
             os.remove(filepath)
 
@@ -110,7 +113,6 @@ class ServingCommand:
             log.logger.info("PaddleHub Serving has been stopped.")
             return
         log.logger.info("PaddleHub Serving will stop.")
-        # CacheUpdater("hub_serving_stop", module=module, addition={"period_time": time.time() - start_time}).start()
         if platform.system() == "Windows":
             os.kill(pid, signal.SIGTERM)
         else:
@@ -132,7 +134,7 @@ class ServingCommand:
         from paddle_gpu_serving.run import BertServer
         bs = BertServer(with_gpu=args.use_gpu)
         bs.with_model(model_name=args.modules[0])
-        # CacheUpdater("hub_bert_service", module=args.modules[0], version="0.0.0").start()
+        CacheUpdater("hub_bert_service", module=args.modules[0], version="0.0.0").start()
         bs.run(gpu_index=args.gpu, port=int(args.port))
 
     def preinstall_modules(self):
@@ -141,8 +143,7 @@ class ServingCommand:
         '''
         for key, value in self.modules_info.items():
             init_args = value["init_args"]
-            # CacheUpdater("hub_serving_start", module=key, version=init_args.get("version", "0.0.0")).start()
-
+            CacheUpdater("hub_serving_start", module=key, version=init_args.get("version", "0.0.0")).start()
             if "directory" not in init_args:
                 init_args.update({"name": key})
             m = hub.Module(**init_args)
@@ -183,19 +184,22 @@ class ServingCommand:
         Start one PaddleHub-Serving instance by arguments with zmq.
         '''
         if self.modules_info is not None:
+            for module, info in self.modules_info.items():
+                CacheUpdater("hub_serving_start", module=module, version=info['init_args']['version']).start()
             front_port = self.args.port
             if is_port_occupied("127.0.0.1", front_port) is True:
                 log.logger.error("Port %s is occupied, please change it." % front_port)
                 return False
             back_port = int(front_port) + 1
             for index in range(100):
-                if is_port_occupied("127.0.0.1", back_port):
+                if not is_port_occupied("127.0.0.1", back_port):
                     break
                 else:
                     back_port = int(back_port) + 1
             else:
-                raise RuntimeError("Port from %s to %s is occupied, please use another port" % int(front_port) + 1,
-                                   back_port)
+                raise RuntimeError(
+                    "Port from %s to %s is occupied, please use another port" % (int(front_port) + 1, back_port))
+            self.dump_pid_file()
             run_all(self.modules_info, self.args.gpu, front_port, back_port)
 
         else:

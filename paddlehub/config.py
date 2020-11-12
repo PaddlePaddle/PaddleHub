@@ -13,13 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import hashlib
 import os
+import time
 import json
-
+import uuid
 import yaml
 from easydict import EasyDict
 
 import paddlehub.env as hubenv
+
+
+def md5(text: str):
+    '''Calculate the md5 value of the input text.'''
+    md5code = hashlib.md5(text.encode())
+    return md5code.hexdigest()
 
 
 class HubConfig:
@@ -106,6 +114,48 @@ class HubConfig:
         return yaml.dump(cfg)
 
 
+class CacheConfig(object):
+    def __init__(self):
+        self._initialize()
+        self.file = os.path.join(hubenv.CONF_HOME, 'cache.yaml')
+        if not os.path.exists(self.file):
+            self.flush()
+            return
+
+        with open(self.file, 'r') as file:
+            try:
+                cfg = yaml.load(file, Loader=yaml.FullLoader)
+                self.data.update(cfg)
+            except:
+                ...
+
+    def _initialize(self):
+        # Set default configuration values.
+        self.data = EasyDict()
+        hub_name = md5(str(uuid.uuid1())[-12:]) + "-" + str(int(time.time()))
+        self.data.hub_name = hub_name
+
+    @property
+    def hub_name(self):
+        return self.data.hub_name
+
+    @hub_name.setter
+    def hub_name(self, url: str):
+        self.data.server = url
+        self.flush()
+
+    def flush(self):
+        '''Flush the current configuration into the configuration file.'''
+        with open(self.file, 'w') as file:
+            # convert EasyDict to dict
+            cfg = json.loads(json.dumps(self.data))
+            yaml.dump(cfg, file)
+
+    def __str__(self):
+        cfg = json.loads(json.dumps(self.data))
+        return yaml.dump(cfg)
+
+
 def _load_old_config(config: HubConfig):
     # The old version of the configuration file is obsolete, read the configuration value and delete it.
     old_cfg_file = os.path.join(hubenv.CONF_HOME, 'config.json')
@@ -122,3 +172,4 @@ def _load_old_config(config: HubConfig):
 
 config = HubConfig()
 _load_old_config(config)
+cache_config = CacheConfig()

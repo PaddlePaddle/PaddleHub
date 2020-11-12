@@ -13,10 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import os
+import requests
+import threading
+import time
+import yaml
+
 from collections import OrderedDict
 from typing import List
 
+import paddle
+import paddlehub
 import paddlehub.config as hubconf
+from paddlehub.config import cache_config
 from paddlehub.server import ServerSource, GitSource
 from paddlehub.utils import utils
 
@@ -113,6 +123,64 @@ class HubServer(object):
             if result:
                 return result
         return {}
+
+
+def uri_path(server_url, api):
+    srv = server_url
+    if server_url.endswith('/'):
+        srv = server_url[:-1]
+    if api.startswith('/'):
+        srv += api
+    else:
+        api = '/' + api
+        srv += api
+    return srv
+
+
+def hub_request(api, params, extra=None, timeout=8):
+    params['hub_version'] = paddlehub.__version__.split('-')[0]
+    params['paddle_version'] = paddle.__version__.split('-')[0]
+
+    params["extra"] = json.dumps(extra)
+    r = requests.get(api, params, timeout=timeout)
+    return r.json()
+
+
+class CacheUpdater(threading.Thread):
+    def __init__(self, command="update_cache", module=None, version=None, addition=None):
+        threading.Thread.__init__(self)
+        self.command = command
+        self.module = module
+        self.version = version
+        self.addition = addition
+
+    def update_resource_list_file(self, command="update_cache", module=None, version=None, addition=None):
+        payload = {'word': module}
+        if version:
+            payload['version'] = version
+        api_url = uri_path(hubconf.server, 'search')
+        cache_path = os.path.join("～")
+        hub_name = cache_config.hub_name
+        if os.path.exists(cache_path):
+            extra = {"command": command, "mtime": os.stat(cache_path).st_mtime, "hub_name": hub_name}
+        else:
+            extra = {
+                "command": command,
+                "mtime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+                "hub_name": hub_name
+            }
+        if addition is not None:
+            extra.update({"addition": addition})
+        try:
+            r = hub_request(api_url, payload, extra, timeout=1)
+            if r.get("update_cache", 0) == 1:
+                with open(cache_path, 'w+') as fp:
+                    yaml.safe_dump({'resource_list': r['data']}, fp)
+        except Exception as err:
+            pass
+
+    def run(self):
+        self.update_resource_list_file(self.command, self.module, self.version, self.addition)
 
 
 module_server = HubServer()
