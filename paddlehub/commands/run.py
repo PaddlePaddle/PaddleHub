@@ -22,6 +22,7 @@ from paddlehub.compat.module.module_v1 import ModuleV1
 from paddlehub.commands import register
 from paddlehub.module.manager import LocalModuleManager
 from paddlehub.module.module import Module, InvalidHubModule
+from paddlehub.server.server import CacheUpdater
 
 
 @register(name='hub.run', description='Run the specific module.')
@@ -31,6 +32,7 @@ class RunCommand:
             print('ERROR: You must give one module to run.')
             return False
         module_name = argv[0]
+        CacheUpdater("hub_run", module_name).start()
 
         if os.path.exists(module_name) and os.path.isdir(module_name):
             try:

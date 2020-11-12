@@ -99,12 +99,13 @@ class InferenceServer(object):
         if platform.system() == "Windows":
             back_port = int(port) + 1
             for index in range(100):
-                if is_port_occupied("127.0.0.1", back_port):
+                if not is_port_occupied("127.0.0.1", back_port):
                     break
                 else:
                     back_port = int(back_port) + 1
             else:
-                raise RuntimeError("Port from %s to %s is occupied, please use another port" % int(port) + 1, back_port)
+                raise RuntimeError(
+                    "Port from %s to %s is occupied, please use another port" % (int(port) + 1, back_port))
             worker_backend = "tcp://localhost:%s" % back_port
             backend = "tcp://*:%s" % back_port
         else:
