@@ -5,7 +5,11 @@ from paddlehub.finetune.trainer import Trainer
 from paddlehub.datasets import Flowers
 
 if __name__ == '__main__':
-    transforms = T.Compose([T.Resize((224, 224)), T.Normalize()])
+    transforms = T.Compose([T.Resize((256, 256)), 
+                            T.CenterCrop(224), 
+                            T.Normalize(mean=[0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])], 
+                            to_rgb=True)
+                            
     flowers = Flowers(transforms)
     flowers_validate = Flowers(transforms, mode='val')
     model = hub.Module(name='resnet50_vd_imagenet_ssld', label_list=["roses", "tulips", "daisy", "sunflowers", "dandelion"], load_checkpoint=None)

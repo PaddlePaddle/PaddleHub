@@ -4,7 +4,7 @@
 
 ## 命令行预测
 
-```
+```shell
 $ hub run resnet50_vd_imagenet_ssld --input_path "/PATH/TO/IMAGE" --top_k 5
 ```
 
@@ -20,7 +20,10 @@ $ hub run resnet50_vd_imagenet_ssld --input_path "/PATH/TO/IMAGE" --top_k 5
 ```python
 import paddlehub.vision.transforms as T
 
-transforms = T.Compose([T.Resize((224, 224)), T.Normalize()])
+transforms = T.Compose([T.Resize((256, 256)), 
+                        T.CenterCrop(224), 
+                        T.Normalize(mean=[0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])], 
+                        to_rgb=True)
 ```
 
 `transforms` 数据增强模块定义了丰富的数据预处理方式，用户可按照需求替换自己需要的数据预处理方式。
