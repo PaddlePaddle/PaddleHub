@@ -20,7 +20,8 @@ $ hub run user_guided_colorization --input_path "/PATH/TO/IMAGE"
 ```python
 import paddlehub.vision.transforms as T
 
-transform = T.Compose([T.Resize((176, 176), interpolation='NEAREST'),
+transform = T.Compose([T.Resize((256, 256), interpolation='NEAREST'),
+                       T.RandomPaddingCrop(crop_size=176),
                        T.RGB2LAB()], to_rgb=True)
 ```
 
@@ -34,7 +35,7 @@ from paddlehub.datasets import Canvas
 
 color_set = Canvas(transform=transform, mode='train')
 ```
-* `transforms`: 数据预处理方式。
+* `transform`: 数据预处理方式。
 * `mode`: 选择数据模式，可选项有 `train`, `test` 默认为`train`。
 
 数据集的准备代码可以参考 [canvas.py](../../paddlehub/datasets/canvas.py)。`hub.datasets.Canvas()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录。

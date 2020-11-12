@@ -57,12 +57,6 @@ trainer.train(styledata, epochs=101, batch_size=4, eval_dataset=styledata, log_i
 
 Paddle2.0rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详细参见[策略](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/optimizer/optimizer/Optimizer_cn.html)。
 
-其中`PolynomialDecay`:
-
-* `learning_rate`: 初始学习率，数据类型为Python float；
-* `power`: 多项式的幂，默认值为1.0；
-* `decay_steps`: 衰减步数。必须是正整数，该参数确定衰减周期。
-
 其中`Adam`:
 
 * `learning_rate`: 全局学习率。默认为1e-4；
@@ -99,7 +93,7 @@ import paddlehub as hub
 
 if __name__ == '__main__':
     model = hub.Module(name='msgnet', load_checkpoint="/PATH/TO/CHECKPOINT")
-    result = model.predict(origin="venice-boat.jpg", style="candy.jpg", visualization=True, save_path ='result')
+    result = model.predict(origin="venice-boat.jpg", style="candy.jpg", visualization=True, save_path ='style_tranfer')
 ```
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
@@ -108,7 +102,7 @@ if __name__ == '__main__':
 * `origin`:原始图像路径；
 * `style`: 风格图像路径；
 * `visualization`: 是否可视化，默认为True；
-* `save_path`: 保存结果的路径，默认为'result'。
+* `save_path`: 保存结果的路径，默认保存路径为'style_tranfer'。
 
 **NOTE:** 进行预测时，所选择的module，checkpoint_dir，dataset必须和Fine-tune所用的一样。
 
