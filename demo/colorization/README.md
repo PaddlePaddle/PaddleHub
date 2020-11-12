@@ -112,7 +112,7 @@ if __name__ == '__main__':
 
 PaddleHub Serving可以部署一个在线关键点检测服务。
 
-## Step1: 启动PaddleHub Serving
+### Step1: 启动PaddleHub Serving
 
 运行启动命令：
 
@@ -124,7 +124,7 @@ $ hub serving start -m user_guided_colorization
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
 
-## Step2: 发送预测请求
+### Step2: 发送预测请求
 
 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
