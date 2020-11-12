@@ -2,9 +2,15 @@
 
 本示例将展示如何使用PaddleHub对预训练模型进行finetune并完成预测任务。
 
+## 命令行预测
+
+```
+$ hub run user_guided_colorization --input_path "/PATH/TO/IMAGE"
+```
+
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用user_guided_colorization模型对[Canvas](../../docs/reference/dataset.md#class-hubdatasetsCanvas)等数据集进行Fine-tune。
+在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用user_guided_colorization模型对[Canvas](../../docs/reference/datasets.md#class-hubdatasetsCanvas)等数据集进行Fine-tune。
 
 ## 代码步骤
 
@@ -18,7 +24,7 @@ transform = T.Compose([T.Resize((176, 176), interpolation='NEAREST'),
                        T.RGB2LAB()], to_rgb=True)
 ```
 
-`transforms` 数据增强模块定义了丰富的数据预处理方式，用户可按照需求替换自己需要的数据预处理方式。
+`transforms`数据增强模块定义了丰富的数据预处理方式，用户可按照需求替换自己需要的数据预处理方式。
 
 **NOTE:** 要将`T.Compose`中`to_rgb`设定为True.
 
@@ -27,7 +33,6 @@ transform = T.Compose([T.Resize((176, 176), interpolation='NEAREST'),
 from paddlehub.datasets import Canvas
 
 color_set = Canvas(transform=transform, mode='train')
-
 ```
 * `transforms`: 数据预处理方式。
 * `mode`: 选择数据模式，可选项有 `train`, `test` 默认为`train`。
@@ -37,12 +42,9 @@ color_set = Canvas(transform=transform, mode='train')
 ### Step3: 加载预训练模型
 
 ```python
-model = hub.Module(name='user_guided_colorization', classification=True, prob=1, num_point=None, load_checkpoint=None)
+model = hub.Module(name='user_guided_colorization', use_tanh=True, load_checkpoint=None)
 ```
-* `name`: 选择预训练模型的名字。
-* `classification`: 着色任务分为两阶段训练,第一阶段`classification`设定为True, 用于不加着色块网络的训练，第二阶段`classification`设定为False,用于输入图像加入着色块的训练。
-* `prob`: 不加着色块的概率，默认值为1，即不加着色块
-* `num_point`: 着色块的数量，默认为None.
+* `use_tanh`: 最后输出是否经过tanh激活。
 * `load_checkpoint`: 是否加载自己训练的模型，若为None，则加载提供的模型默认参数。
 
 ### Step4: 选择优化策略和运行配置
@@ -104,3 +106,64 @@ if __name__ == '__main__':
 * `images`:原始图像路径；
 * `visualization`: 是否可视化，默认为True；
 * `save_path`: 保存结果的路径，默认为'result'。
+
+## 服务部署
+
+PaddleHub Serving可以部署一个在线关键点检测服务。
+
+## Step1: 启动PaddleHub Serving
+
+运行启动命令：
+
+```shell
+$ hub serving start -m user_guided_colorization
+```
+
+这样就完成了一个肢体关键点服务化API的部署，默认端口号为8866。
+
+**NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
+
+## Step2: 发送预测请求
+
+配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+
+```python
+import requests
+import json
+import cv2
+import base64
+
+import numpy as np
+
+
+def cv2_to_base64(image):
+    data = cv2.imencode('.jpg', image)[1]
+    return base64.b64encode(data.tostring()).decode('utf8')
+
+def base64_to_cv2(b64str):
+    data = base64.b64decode(b64str.encode('utf8'))
+    data = np.fromstring(data, np.uint8)
+    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    return data
+
+# 发送HTTP请求
+org_im = cv2.imread('/PATH/TO/IMAGE')
+data = {'images':[cv2_to_base64(org_im)]}
+headers = {"Content-type": "application/json"}
+url = "http://127.0.0.1:8866/predict/user_guided_colorization"
+r = requests.post(url=url, headers=headers, data=json.dumps(data))
+data =r.json()["results"]['data']
+data = base64_to_cv2(r.json()["results"]['data']['fake_reg'])
+cv2.imwrite('color.png', data)
+
+```
+
+### 查看代码
+
+https://github.com/richzhang/colorization-pytorch
+
+### 依赖
+
+paddlepaddle >= 2.0.0rc
+
+paddlehub >= 2.0.0

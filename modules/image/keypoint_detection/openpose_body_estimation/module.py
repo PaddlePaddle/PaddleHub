@@ -13,17 +13,27 @@
 # limitations under the License.
 
 import os
+import time
 import copy
+import base64
+import argparse
+from typing import Union
 from collections import OrderedDict
 
 import cv2
 import paddle
 import paddle.nn as nn
 import numpy as np
-from paddlehub.transforms.module import moduleinfo
-import paddlehub.transforms.transforms as T
+from paddlehub.module.module import moduleinfo, runnable, serving
+import paddlehub.vision.transforms as T
 import openpose_body_estimation.processor as P
-    
+
+
+def base64_to_cv2(b64str):
+    data = base64.b64decode(b64str.encode('utf8'))
+    data = np.fromstring(data, np.uint8)
+    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    return data
 
 @moduleinfo(
     name="openpose_body_estimation",
@@ -39,10 +49,9 @@ class BodyPoseModel(nn.Layer):
 
     Args:
         load_checkpoint(str): Checkpoint save path, default is None.
-        visualization (bool): Whether to save the estimation result. Default is True.
     """
 
-    def __init__(self, load_checkpoint: str = None, visualization: bool = True):
+    def __init__(self, load_checkpoint: str = None):
         super(BodyPoseModel, self).__init__()
 
         self.resize_func = P.ResizeScaling()
@@ -53,7 +62,6 @@ class BodyPoseModel(nn.Layer):
         self.get_connection = P.Connection()
         self.get_candidate = P.Candidate()
         self.draw_pose = P.DrawPose()
-        self.visualization = visualization
 
         no_relu_layers = ['conv5_5_CPM_L1', 'conv5_5_CPM_L2', 'Mconv7_stage2_L1', \
                           'Mconv7_stage2_L2', 'Mconv7_stage3_L1', 'Mconv7_stage3_L2', \
@@ -116,14 +124,14 @@ class BodyPoseModel(nn.Layer):
         self.model6_2 = blocks['block6_2']
 
         if load_checkpoint is not None:
-            model_dict = paddle.load(load_checkpoint)
-            self.set_dict(model_dict)
+            self.model_dict = paddle.load(load_checkpoint)
+            self.set_dict(self.model_dict)
             print("load custom checkpoint success")
 
         else:
             checkpoint = os.path.join(self.directory, 'openpose_body.pdparams')
-            model_dict = paddle.load(checkpoint)
-            self.set_dict(model_dict)
+            self.model_dict = paddle.load(checkpoint)
+            self.set_dict(self.model_dict)
             print("load pretrained checkpoint success")
 
     def make_layers(self, block: dict, no_relu_layers: list):
@@ -177,9 +185,13 @@ class BodyPoseModel(nn.Layer):
 
         return out6_1, out6_2
 
-    def predict(self, img_path: str, save_path: str = "result"):
+    def predict(self, img: Union[str, np.ndarray], save_path: str = "openpose_body", visualization: bool = True):
         self.eval()
-        orgImg = cv2.imread(img_path)
+        self.visualization = visualization
+        if isinstance(img, str):
+            orgImg = cv2.imread(img)
+        else:
+            orgImg = img
         data, imageToTest_padded, pad = self.transform(orgImg)
         Mconv7_stage6_L1, Mconv7_stage6_L2 = self.forward(paddle.to_tensor(data))
         Mconv7_stage6_L1 = Mconv7_stage6_L1.numpy()
@@ -192,11 +204,94 @@ class BodyPoseModel(nn.Layer):
         connection_all, special_k = self.get_connection(all_peaks, paf_avg, orgImg)
         candidate, subset = self.get_candidate(all_peaks, connection_all, special_k)
 
+        canvas = copy.deepcopy(orgImg)
+        canvas = self.draw_pose(canvas, candidate, subset)
         if self.visualization:
-            canvas = copy.deepcopy(orgImg)
-            canvas = self.draw_pose(canvas, candidate, subset)
             if not os.path.exists(save_path):
                 os.mkdir(save_path)
-            save_path = os.path.join(save_path, img_path.rsplit("/", 1)[-1])
+            img_name = str(time.time()) + '.png'
+            save_path = os.path.join(save_path, img_name)
             cv2.imwrite(save_path, canvas)
-        return candidate, subset
+            
+        results = {
+            'candidate': candidate,
+            'subset': subset,
+            'data': canvas}
+
+        return results
+
+    def save_inference_model(self, save_dir):
+        save_name = os.path.join(save_dir, 'model.pdparams')
+        paddle.save(self.model_dict, save_name)
+
+    @serving
+    def serving_method(self, images, **kwargs):
+        """
+        Run as a service.
+        """
+        images_decode = [base64_to_cv2(image) for image in images]
+        results = self.predict(img=images_decode[0], **kwargs)
+        final={}
+        final['candidate'] = P.cv2_to_base64(results['candidate'])
+        final['subset'] = P.cv2_to_base64(results['subset'])
+        final['data'] = P.cv2_to_base64(results['data'])
+        
+        return final
+
+    @runnable
+    def run_cmd(self, argvs):
+        """
+        Run as a command.
+        """
+        self.parser = argparse.ArgumentParser(
+            description="Run the {} module.".format(self.name),
+            prog='hub run {}'.format(self.name),
+            usage='%(prog)s',
+            add_help=True)
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
+        self.arg_config_group = self.parser.add_argument_group(
+            title="Config options",
+            description=
+            "Run configuration for controlling module behavior, not required.")
+        self.add_module_config_arg()
+        self.add_module_input_arg()
+        args = self.parser.parse_args(argvs)
+        results = self.predict(
+            img=args.input_path,
+            save_path=args.output_dir,
+            visualization=args.visualization)
+
+        if args.save_dir is not None:
+            P.check_dir(args.save_dir)
+            self.save_inference_model(args.save_dir)
+
+        return results
+
+    def add_module_config_arg(self):
+        """
+        Add the command config options.
+        """
+
+        self.arg_config_group.add_argument(
+            '--output_dir',
+            type=str,
+            default='openpose_body',
+            help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--save_dir',
+            type=str,
+            default='openpose_model',
+            help="The directory to save model.")
+        self.arg_config_group.add_argument(
+            '--visualization',
+            type=bool,
+            default=True,
+            help="whether to save output as images.")
+
+    def add_module_input_arg(self):
+        """
+        Add the command input options.
+        """
+        self.arg_input_group.add_argument(
+            '--input_path', type=str, help="path to image.")
