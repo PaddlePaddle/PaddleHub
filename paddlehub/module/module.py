@@ -159,12 +159,15 @@ class Module(object):
                 branch: str = None,
                 **kwargs):
         if cls.__name__ == 'Module':
+            from paddlehub.server.server import CacheUpdater
             # This branch come from hub.Module(name='xxx') or hub.Module(directory='xxx')
             if name:
                 module = cls.init_with_name(
                     name=name, version=version, source=source, update=update, branch=branch, **kwargs)
+                CacheUpdater("update_cache", module=name, version=version).start()
             elif directory:
                 module = cls.init_with_directory(directory=directory, **kwargs)
+                CacheUpdater("update_cache", module=directory, version="0.0.0").start()
         else:
             module = object.__new__(cls)
 
