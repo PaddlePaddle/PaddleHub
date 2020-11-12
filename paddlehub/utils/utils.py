@@ -21,6 +21,7 @@ import importlib
 import math
 import os
 import requests
+import socket
 import sys
 import time
 import tempfile
@@ -153,6 +154,9 @@ def seconds_to_hms(seconds: int) -> str:
     hms_str = '{:0>2}:{:0>2}:{:0>2}'.format(h, m, s)
     return hms_str
 
+def cv2_to_base64(image):
+    data = cv2.imencode('.jpg', image)[1]
+    return base64.b64encode(data.tostring()).decode('utf8')
 
 def base64_to_cv2(b64str: str) -> np.ndarray:
     '''Convert a string in base64 format to cv2 data'''
@@ -160,11 +164,6 @@ def base64_to_cv2(b64str: str) -> np.ndarray:
     data = np.fromstring(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
     return data
-
-
-def cv2_to_base64(image):
-    data = cv2.imencode('.jpg', image)[1]
-    return base64.b64encode(data.tostring()).decode('utf8')
 
 
 @contextlib.contextmanager
@@ -307,3 +306,16 @@ def record_exception(msg: str) -> str:
 
 def get_record_file():
     return os.path.join(hubenv.LOG_HOME, time.strftime('%Y%m%d.log'))
+
+
+def is_port_occupied(ip, port):
+    '''
+    Check if port os occupied.
+    '''
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.connect((ip, int(port)))
+        s.shutdown(2)
+        return True
+    except:
+        return False
