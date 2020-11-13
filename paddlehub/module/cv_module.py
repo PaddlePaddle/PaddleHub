@@ -96,7 +96,7 @@ class ImageClassifierModule(RunModule, ImageServing):
             images = images[np.newaxis, :]
         preds, feature = self(paddle.to_tensor(images))
         preds = F.softmax(preds, axis=1).numpy()
-        pred_idxs = np.argsort(preds)[::-1][:, :top_k]
+        pred_idxs = np.argsort(preds)[:, ::-1][:, :top_k]
         
         for i, pred in enumerate(pred_idxs):
             res_dict = {}
