@@ -66,7 +66,7 @@ $ hub serving start -m stgan_bald
     one_year =cv2.cvtColor(base64_to_cv2(r.json()["results"]['data_0']), cv2.COLOR_RGB2BGR)
     three_year =cv2.cvtColor(base64_to_cv2(r.json()["results"]['data_1']), cv2.COLOR_RGB2BGR)
     five_year =cv2.cvtColor(base64_to_cv2(r.json()["results"]['data_2']), cv2.COLOR_RGB2BGR)
-    cv2.imwrite("segment_human_server.png", one_year)
+    cv2.imwrite("stgan_bald_server.png", one_year)
 
 # 贡献者
 刘炫、彭兆帅、郑博培
@@ -77,4 +77,4 @@ paddlehub >= 1.8.0
 
 # 查看代码
 
-[基于PaddleHub的秃头生成器](https://github.com/1084667371/PaddleHub/tree/release/v1.8/hub_module/modules/image/gan/stgan_bald)
+[基于PaddleHub的秃头生成器](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/hub_module/modules/image/gan/stgan_bald)
