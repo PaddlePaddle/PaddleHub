@@ -27,7 +27,6 @@ def reader(images=None, paths=None, org_labels=None, target_labels=None):
             each = OrderedDict()
             assert os.path.isfile(
                 im_path), "The {} isn't a valid file path.".format(im_path)
-            # print(im_path)
             im = cv2.imread(im_path)
             each['org_im'] = im
             each['org_im_path'] = im_path
