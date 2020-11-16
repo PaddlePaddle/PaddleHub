@@ -154,9 +154,11 @@ def seconds_to_hms(seconds: int) -> str:
     hms_str = '{:0>2}:{:0>2}:{:0>2}'.format(h, m, s)
     return hms_str
 
+
 def cv2_to_base64(image: np.ndarray) -> str:
     data = cv2.imencode('.jpg', image)[1]
     return base64.b64encode(data.tostring()).decode('utf8')
+
 
 def base64_to_cv2(b64str: str) -> np.ndarray:
     '''Convert a string in base64 format to cv2 data'''
@@ -304,11 +306,11 @@ def record_exception(msg: str) -> str:
     utils.log.logger.warning('{}. Detailed error information can be found in the {}.'.format(msg, file))
 
 
-def get_record_file():
+def get_record_file() -> str:
     return os.path.join(hubenv.LOG_HOME, time.strftime('%Y%m%d.log'))
 
 
-def is_port_occupied(ip, port):
+def is_port_occupied(ip: str, port: int) -> bool:
     '''
     Check if port os occupied.
     '''
@@ -319,3 +321,9 @@ def is_port_occupied(ip, port):
         return True
     except:
         return False
+
+
+def mkdir(path: str):
+    """The same as the shell command `mkdir -p`."""
+    if not os.path.exists(path):
+        os.makedirs(path)

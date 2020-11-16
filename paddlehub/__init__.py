@@ -19,8 +19,10 @@ from easydict import EasyDict
 
 __version__ = '2.0.0-alpha0'
 
+from paddlehub import env
 from paddlehub.config import config
 from paddlehub.utils import log, parser, utils
+from paddlehub.utils import download as _download
 from paddlehub.utils.paddlex import download, ResourceNotFoundError
 from paddlehub.server import server_check
 from paddlehub.server.server_source import ServerConnectionError
@@ -40,6 +42,8 @@ from paddlehub.compat.task.config import RunConfig
 from paddlehub.compat.task.text_generation_task import TextGenerationTask
 
 sys.modules['paddlehub.io.parser'] = parser
+sys.modules['paddlehub.common.dir'] = env
+sys.modules['paddlehub.common.downloader'] = _download
 sys.modules['paddlehub.common.logger'] = log
 sys.modules['paddlehub.common.paddle_helper'] = paddle_utils
 sys.modules['paddlehub.common.utils'] = utils

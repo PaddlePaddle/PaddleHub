@@ -67,15 +67,7 @@ class RunModule(object):
     '''The base class of PaddleHub Module, users can inherit this class to implement to realize custom class.'''
 
     def __init__(self, *args, **kwargs):
-        # Avoid module being initialized multiple times
-        if '_is_initialize' in self.__dict__ and self._is_initialize:
-            return
-
         super(RunModule, self).__init__()
-        _run_func_name = self._get_func_name(self.__class__, _module_runnable_func)
-        self._run_func = getattr(self, _run_func_name) if _run_func_name else None
-        self._serving_func_name = self._get_func_name(self.__class__, _module_serving_func)
-        self._is_initialize = True
 
     def _get_func_name(self, current_cls: Generic, module_func_dict: dict) -> Optional[str]:
         mod = current_cls.__module__ + '.' + current_cls.__name__
@@ -133,7 +125,7 @@ class RunModule(object):
         `hub run` command.
         '''
         return True if self._run_func else False
-      
+
     @property
     def serving_func_name(self):
         return self._get_func_name(self.__class__, _module_serving_func)

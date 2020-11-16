@@ -15,18 +15,40 @@
 
 import os
 
-from paddlehub.env import DATA_HOME
+import paddlehub.env as hubenv
 from paddle.utils.download import get_path_from_url
+from paddlehub.utils import log, utils, xarfile
 
 
 def download_data(url):
     save_name = os.path.basename(url).split('.')[0]
-    output_path = os.path.join(DATA_HOME, save_name)
+    output_path = os.path.join(hubenv.DATA_HOME, save_name)
 
     if not os.path.exists(output_path):
-        get_path_from_url(url, DATA_HOME)
+        get_path_from_url(url, hubenv.DATA_HOME)
 
     def _wrapper(Dataset):
         return Dataset
 
     return _wrapper
+
+
+class Downloader:
+    def download_file_and_uncompress(self, url: str, save_path: str, print_progress: bool):
+        with utils.generate_tempdir() as _dir:
+            if print_progress:
+                with log.ProgressBar('Download {}'.format(url)) as bar:
+                    for path, ds, ts in utils.download_with_progress(url=url, path=_dir):
+                        bar.update(float(ds) / ts)
+            else:
+                path = utils.download(url=url, path=_dir)
+
+            if print_progress:
+                with log.ProgressBar('Decompress {}'.format(path)) as bar:
+                    for path, ds, ts in xarfile.unarchive_with_progress(name=path, path=save_path):
+                        bar.update(float(ds) / ts)
+            else:
+                path = xarfile.unarchive(name=path, path=save_path)
+
+
+default_downloader = Downloader()
