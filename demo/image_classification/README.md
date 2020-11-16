@@ -110,8 +110,8 @@ import paddlehub as hub
 
 if __name__ == '__main__':
 
-    model = hub.Module(name='resnet50_vd_imagenet_ssld', label_list=["roses", "tulips", "daisy", "sunflowers", "dandelion"], load_checkpoint=/PATH/TO/CHECKPOINT)
-    result = model.predict('flower.jpg')
+    model = hub.Module(name='resnet50_vd_imagenet_ssld', label_list=["roses", "tulips", "daisy", "sunflowers", "dandelion"], load_checkpoint='/PATH/TO/CHECKPOINT')
+    result = model.predict(['flower.jpg'])
 ```
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
 ## 服务部署
 
-PaddleHub Serving可以部署一个在线关键点检测服务。
+PaddleHub Serving可以部署一个在线分类任务服务。
 
 ### Step1: 启动PaddleHub Serving
 
@@ -130,7 +130,7 @@ PaddleHub Serving可以部署一个在线关键点检测服务。
 $ hub serving start -m resnet50_vd_imagenet_ssld
 ```
 
-这样就完成了一个肢体关键点服务化API的部署，默认端口号为8866。
+这样就完成了一个分类任务服务化API的部署，默认端口号为8866。
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
 

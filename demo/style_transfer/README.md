@@ -29,7 +29,7 @@ transform = T.Compose([T.Resize((256, 256), interpolation='LINEAR')])
 ```python
 from paddlehub.datasets.minicoco import MiniCOCO
 
-color_set = MiniCOCO(transform=transform, mode='train')
+styledata = MiniCOCO(transform=transform, mode='train')
 
 ```
 * `transforms`: 数据预处理方式。
@@ -93,13 +93,13 @@ import paddlehub as hub
 
 if __name__ == '__main__':
     model = hub.Module(name='msgnet', load_checkpoint="/PATH/TO/CHECKPOINT")
-    result = model.predict(origin="venice-boat.jpg", style="candy.jpg", visualization=True, save_path ='style_tranfer')
+    result = model.predict(origin=["venice-boat.jpg"], style="candy.jpg", visualization=True, save_path ='style_tranfer')
 ```
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
 
 **Args**
-* `origin`:原始图像路径；
+* `origin`:原始图像路径或BGR格式图片；
 * `style`: 风格图像路径；
 * `visualization`: 是否可视化，默认为True；
 * `save_path`: 保存结果的路径，默认保存路径为'style_tranfer'。
@@ -108,7 +108,7 @@ if __name__ == '__main__':
 
 ## 服务部署
 
-PaddleHub Serving可以部署一个在线关键点检测服务。
+PaddleHub Serving可以部署一个在线风格迁移服务。
 
 ### Step1: 启动PaddleHub Serving
 
@@ -118,7 +118,7 @@ PaddleHub Serving可以部署一个在线关键点检测服务。
 $ hub serving start -m msgnet
 ```
 
-这样就完成了一个肢体关键点服务化API的部署，默认端口号为8866。
+这样就完成了一个风格迁移服务化API的部署，默认端口号为8866。
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
 
@@ -148,11 +148,11 @@ def base64_to_cv2(b64str):
 # 发送HTTP请求
 org_im = cv2.imread('/PATH/TO/ORIGIN/IMAGE')
 style_im = cv2.imread('/PATH/TO/STYLE/IMAGE')
-data = {'images':[cv2_to_base64(org_im), cv2_to_base64(style_im)]}
+data = {'images':[[cv2_to_base64(org_im)], cv2_to_base64(style_im)]}
 headers = {"Content-type": "application/json"}
 url = "http://127.0.0.1:8866/predict/msgnet"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
-data = base64_to_cv2(r.json()["results"]['data'])
+data = base64_to_cv2(r.json()["results"]['data'][0])
 cv2.imwrite('style.png', data)
 ```
 

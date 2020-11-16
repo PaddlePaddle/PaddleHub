@@ -207,13 +207,9 @@ class HandPoseModel(nn.Layer):
             'data': canvas}
 
         return results
-    
-    def save_inference_model(self, save_dir):
-        save_name = os.path.join(save_dir, 'model.pdparams')
-        paddle.save(self.model_dict, save_name)
 
     @serving
-    def serving_method(self, images, **kwargs):
+    def serving_method(self, images: list, **kwargs):
         """
         Run as a service.
         """
@@ -225,7 +221,7 @@ class HandPoseModel(nn.Layer):
         return final
     
     @runnable
-    def run_cmd(self, argvs):
+    def run_cmd(self, argvs: list):
         """
         Run as a command.
         """
@@ -249,10 +245,6 @@ class HandPoseModel(nn.Layer):
             scale=args.scale,
             visualization=args.visualization)
 
-        if args.save_dir is not None:
-            P.check_dir(args.save_dir)
-            self.save_inference_model(args.save_dir)
-
         return results
 
     def add_module_config_arg(self):
@@ -265,11 +257,6 @@ class HandPoseModel(nn.Layer):
             type=str,
             default='openpose_hand',
             help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--save_dir',
-            type=str,
-            default='openpose_hand_model',
-            help="The directory to save model.")
         self.arg_config_group.add_argument(
             '--scale',
             type=list,

@@ -241,20 +241,13 @@ def npmax(array: np.ndarray):
     return i, j
 
 
-def cv2_to_base64(image):
+def cv2_to_base64(image: np.ndarray):
     data = cv2.imencode('.jpg', image)[1]
     return base64.b64encode(data.tostring()).decode('utf8')
 
 
-def base64_to_cv2(b64str):
+def base64_to_cv2(b64str: str):
     data = base64.b64decode(b64str.encode('utf8'))
     data = np.fromstring(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
     return data
-
-def check_dir(dir_path):
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-    elif os.path.isfile(dir_path):
-        os.remove(dir_path)
-        os.makedirs(dir_path)

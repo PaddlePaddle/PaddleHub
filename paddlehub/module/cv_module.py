@@ -78,55 +78,64 @@ class ImageClassifierModule(RunModule, ImageServing):
         acc = paddle.metric.accuracy(preds, labels)
         return {'loss': loss, 'metrics': {'acc': acc}}
 
-    def predict(self, images: List[np.ndarray], top_k: int = 1) -> List[dict]:
+    def predict(self, images: List[np.ndarray], batch_size: int = 1, top_k: int = 1) -> List[dict]:
         '''
         Predict images
 
         Args:
             images(list[numpy.ndarray]) : Images to be predicted, consist of np.ndarray in bgr format.
+            batch_size(int) : Batch size for prediciton.
             top_k(int) : Output top k result of each image.
 
         Returns:
             results(list[dict]) : The prediction result of each input image
         '''
         self.eval()
+        res = []
+        total_num = len(images)
+        loop_num = int(np.ceil(total_num / batch_size))
+ 
+        for iter_id in range(loop_num):
+            batch_data = []
+            handle_id = iter_id * batch_size
+            for image_id in range(batch_size):
+                try:
+                    image = self.transforms(images[handle_id + image_id])
+                    batch_data.append(image)
+                except:
+                    pass
+            batch_image = np.array(batch_data)
+            preds, feature = self(paddle.to_tensor(batch_image))
+            preds = F.softmax(preds, axis=1).numpy()
+            pred_idxs = np.argsort(preds)[:, ::-1][:, :top_k]
+            
+            for i, pred in enumerate(pred_idxs):
+                res_dict = {}
+                for k in pred:
+                    class_name = self.labels[int(k)]
+                    res_dict[class_name] = preds[i][k]
+                     
+                res.append(res_dict)   
 
-        images = self.transforms(images)
-        if len(images.shape) == 3:
-            images = images[np.newaxis, :]
-        preds, feature = self(paddle.to_tensor(images))
-        preds = F.softmax(preds, axis=1).numpy()
-        pred_idxs = np.argsort(preds)[:, ::-1][:, :top_k]
-        
-        for i, pred in enumerate(pred_idxs):
-            res_dict = {}
-            for k in pred:
-                class_name = self.labels[int(k)]
-                res_dict[class_name] = preds[i][k]
-
-        return res_dict
-
-    def save_inference_model(self, save_dir):
-            save_name = os.path.join(save_dir, 'model.pdparams')
-            paddle.save(self.model_dict, save_name)
+        return res
 
     @serving
-    def serving_method(self, images, top_k, **kwargs):
+    def serving_method(self, images: list, top_k: int, **kwargs):
         """
         Run as a service.
         """
         top_k = int(top_k)
-        images_decode = base64_to_cv2(images[0])
-        resdict = self.predict(images=images_decode, top_k=top_k,**kwargs)
+        images_decode = [base64_to_cv2(image) for image in images]
+        resdicts = self.predict(images=images_decode, top_k=top_k,**kwargs)
         final={}
-
-        for key, value in resdict.items():
-            resdict[key] = float(value)
-        final['data'] = resdict
+        for resdict in resdicts:
+            for key, value in resdict.items():
+                resdict[key] = float(value)
+        final['data'] = resdicts
         return final
 
     @runnable
-    def run_cmd(self, argvs):
+    def run_cmd(self, argvs: list):
         """
         Run as a command.
         """
@@ -145,12 +154,8 @@ class ImageClassifierModule(RunModule, ImageServing):
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
         results = self.predict(
-            images=args.input_path,
+            images=[args.input_path],
             top_k=args.top_k)
-
-        if args.save_dir is not None:
-            Func.check_dir(args.save_dir)
-            self.save_inference_model(args.save_dir)
 
         return results
 
@@ -164,11 +169,6 @@ class ImageClassifierModule(RunModule, ImageServing):
             type=int,
             default=1,
             help="top_k classification result.")
-        self.arg_config_group.add_argument(
-            '--save_dir',
-            type=str,
-            default='image_classification_model',
-            help="The directory to save model.")
 
     def add_module_input_arg(self):
         """
@@ -214,76 +214,87 @@ class ImageColorizeModule(RunModule, ImageServing):
         loss = loss_ce + loss_G_L1_reg
         return {'loss': loss}
 
-    def predict(self, images: str, visualization: bool = True, save_path: str = 'colorization'):
+    def predict(self, images: list, visualization: bool = True, batch_size: int = 1, save_path: str = 'colorization'):
         '''
         Colorize images
 
         Args:
-            images(str|np.ndarray) : Images path or BGR image to be colorized.
+            images(list[str|np.ndarray]) : Images path or BGR image to be colorized.
             visualization(bool): Whether to save colorized images.
+            batch_size(int): Batch size for prediciton.
             save_path(str) : Path to save colorized images.
 
         Returns:
-            results(list[dict]) : The prediction result of each input image
+            res(list[dict]) : The prediction result of each input image
         '''
         self.eval()
         lab2rgb = T.LAB2RGB()
-        if isinstance(images, str):
-            images = cv2.imread(images).astype('float32')
+        res = []
+        total_num = len(images)
+        loop_num = int(np.ceil(total_num / batch_size))
+        for iter_id in range(loop_num):
+            batch_data = []
+            handle_id = iter_id * batch_size
+            for image_id in range(batch_size):
+                try:
+                    image = self.transforms(images[handle_id + image_id])
+                    batch_data.append(image)
+                except:
+                    pass
+            batch_data = np.array(batch_data)
+            im = self.preprocess(batch_data)
+            out_class, out_reg = self(im['A'], im['hint_B'], im['mask_B'])
 
-        im = self.transforms(images)
-        im = im[np.newaxis, :, :, :]
-        im = self.preprocess(im)
-        out_class, out_reg = self(im['A'], im['hint_B'], im['mask_B'])
+            visual_ret = OrderedDict()
+            for i in range(im['A'].shape[0]):
+                gray = lab2rgb(np.concatenate((im['A'].numpy(), np.zeros(im['B'].shape)), axis=1))[i]
+                gray = np.clip(np.transpose(gray, (1, 2, 0)), 0, 1) * 255
+                visual_ret['gray'] = gray.astype(np.uint8)
+                hint = lab2rgb(np.concatenate((im['A'].numpy(), im['hint_B'].numpy()), axis=1))[i]
+                hint = np.clip(np.transpose(hint, (1, 2, 0)), 0, 1) * 255
+                visual_ret['hint'] = hint.astype(np.uint8)
+                real = lab2rgb(np.concatenate((im['A'].numpy(), im['B'].numpy()), axis=1))[i]
+                real = np.clip(np.transpose(real, (1, 2, 0)), 0, 1) * 255
+                visual_ret['real'] = real.astype(np.uint8)
+                fake = lab2rgb(np.concatenate((im['A'].numpy(), out_reg.numpy()), axis=1))[i]
+                fake = np.clip(np.transpose(fake, (1, 2, 0)), 0, 1) * 255
+                visual_ret['fake_reg'] = fake.astype(np.uint8)
 
-        visual_ret = OrderedDict()
-        for i in range(im['A'].shape[0]):
-            gray = lab2rgb(np.concatenate((im['A'].numpy(), np.zeros(im['B'].shape)), axis=1))[i]
-            gray = np.clip(np.transpose(gray, (1, 2, 0)), 0, 1) * 255
-            visual_ret['gray'] = gray.astype(np.uint8)
-            hint = lab2rgb(np.concatenate((im['A'].numpy(), im['hint_B'].numpy()), axis=1))[i]
-            hint = np.clip(np.transpose(hint, (1, 2, 0)), 0, 1) * 255
-            visual_ret['hint'] = hint.astype(np.uint8)
-            real = lab2rgb(np.concatenate((im['A'].numpy(), im['B'].numpy()), axis=1))[i]
-            real = np.clip(np.transpose(real, (1, 2, 0)), 0, 1) * 255
-            visual_ret['real'] = real.astype(np.uint8)
-            fake = lab2rgb(np.concatenate((im['A'].numpy(), out_reg.numpy()), axis=1))[i]
-            fake = np.clip(np.transpose(fake, (1, 2, 0)), 0, 1) * 255
-            visual_ret['fake_reg'] = fake.astype(np.uint8)
+                if visualization:
+                    if isinstance(images[handle_id + i], str):
+                        org_img = cv2.imread(images[handle_id + i]).astype('float32')
+                    else:
+                        org_img = images[handle_id + i]
+                    h, w, c = org_img.shape
+                    fake_name = "fake_" + str(time.time()) + ".png"
+                    if not os.path.exists(save_path):
+                        os.mkdir(save_path)
+                    fake_path = os.path.join(save_path, fake_name)
+                    visual_gray = Image.fromarray(visual_ret['fake_reg'])
+                    visual_gray = visual_gray.resize((w, h), Image.BILINEAR)
+                    visual_gray.save(fake_path)
 
-            if visualization:
-                h, w, c = images.shape
-                fake_name = "fake_" + str(time.time()) + ".png"
-                if not os.path.exists(save_path):
-                    os.mkdir(save_path)
-                fake_path = os.path.join(save_path, fake_name)
-                visual_gray = Image.fromarray(visual_ret['fake_reg'])
-                visual_gray = visual_gray.resize((w, h), Image.BILINEAR)
-                visual_gray.save(fake_path)
-
-        return visual_ret
-
-    def save_inference_model(self, save_dir):
-            save_name = os.path.join(save_dir, 'model.pdparams')
-            paddle.save(self.model_dict, save_name)
+                res.append(visual_ret)
+        return res
 
     @serving
-    def serving_method(self, images, **kwargs):
+    def serving_method(self, images: list, **kwargs):
         """
         Run as a service.
         """
-        images_decode = base64_to_cv2(images[0])
-        visual_ret = self.predict(images=images_decode, **kwargs)
+        images_decode = [base64_to_cv2(image) for image in images]
+        visual = self.predict(images=images_decode, **kwargs)
         final={}
-
-        for key, value in visual_ret.items():
-            value = cv2.cvtColor(value,cv2.COLOR_RGB2BGR)
-            visual_ret[key] = cv2_to_base64(value)
-        final['data'] = visual_ret
+        for i, visual_ret in enumerate(visual):
+            h, w, c = images_decode[i].shape
+            for key, value in visual_ret.items():
+                value = cv2.resize(cv2.cvtColor(value,cv2.COLOR_RGB2BGR), (w, h), cv2.INTER_NEAREST)
+                visual_ret[key] = cv2_to_base64(value)
+        final['data'] = visual
         return final
 
     @runnable
-    def run_cmd(self, argvs):
+    def run_cmd(self, argvs: list):
         """
         Run as a command.
         """
@@ -302,13 +313,9 @@ class ImageColorizeModule(RunModule, ImageServing):
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
         results = self.predict(
-            images=args.input_path,
+            images=[args.input_path],
             visualization=args.visualization,
             save_path=args.output_dir)
-
-        if args.save_dir is not None:
-            Func.check_dir(args.save_dir)
-            self.save_inference_model(args.save_dir)
 
         return results
 
@@ -322,11 +329,6 @@ class ImageColorizeModule(RunModule, ImageServing):
             type=str,
             default='colorization',
             help="save visualization result.")
-        self.arg_config_group.add_argument(
-            '--save_dir',
-            type=str,
-            default='colorization_model',
-            help="The directory to save model.")
         self.arg_config_group.add_argument(
             '--visualization',
             type=bool,
@@ -517,57 +519,67 @@ class StyleTransferModule(RunModule, ImageServing):
 
         return {'loss': loss, 'metrics': {'content gap': content_loss, 'style gap': style_loss}}
 
-    def predict(self, origin: Union[str, np.ndarray], style: Union[str, np.ndarray], visualization: bool = True, save_path: str = 'style_tranfer'):
+    def predict(self, origin: list, style: Union[str, np.ndarray], batch_size: int = 1, visualization: bool = True, save_path: str = 'style_tranfer'):
         '''
         Colorize images
 
         Args:
-            origin(str|np.array): Content image path or BGR image.
+            origin(list[str|np.array]): Content image path or BGR image.
             style(str|np.array): Style image path or BGR image.
+            batch_size(int): Batch size for prediciton.
             visualization(bool): Whether to save colorized images.
             save_path(str) : Path to save colorized images.
 
         Returns:
-            output(np.ndarray) : The style transformed images with bgr mode.
+            output(list[np.ndarray]) : The style transformed images with bgr mode.
         '''
         self.eval()
-
-        content = paddle.to_tensor(self.transform(origin).astype('float32'))
         style = paddle.to_tensor(self.transform(style).astype('float32'))
-        content = content.unsqueeze(0)
         style = style.unsqueeze(0)
 
-        self.setTarget(style)
-        output = self(content)
-        output = paddle.clip(output[0].transpose((1, 2, 0)), 0, 255).numpy()
-        output = output.astype(np.uint8)
+        res = []
+        total_num = len(origin)
+        loop_num = int(np.ceil(total_num / batch_size))
+        for iter_id in range(loop_num):
+            batch_data = []
+            handle_id = iter_id * batch_size
+            for image_id in range(batch_size):
+                try:
+                    image = self.transform(origin[handle_id + image_id])
+                    batch_data.append(image.astype('float32'))
+                except:
+                    pass
 
-        if visualization:
-            style_name = "style_" + str(time.time()) + ".png"
-            if not os.path.exists(save_path):
-                os.mkdir(save_path)
-            path = os.path.join(save_path, style_name)
-            cv2.imwrite(path, output)
-        return output
+            batch_image = np.array(batch_data)    
+            content = paddle.to_tensor(batch_image)
 
-    def save_inference_model(self, save_dir):
-        save_name = os.path.join(save_dir, 'model.pdparams')
-        paddle.save(self.model_dict, save_name)
+            self.setTarget(style)
+            output = self(content)
+            for num in range(batch_size):
+                out = paddle.clip(output[num].transpose((1, 2, 0)), 0, 255).numpy().astype(np.uint8)
+                res.append(out)
+                if visualization:
+                    style_name = "style_" + str(time.time()) + ".png"
+                    if not os.path.exists(save_path):
+                        os.mkdir(save_path)
+                    path = os.path.join(save_path, style_name)
+                    cv2.imwrite(path, out)
+        return res
 
     @serving
-    def serving_method(self, images, **kwargs):
+    def serving_method(self, images: list, **kwargs):
         """
         Run as a service.
         """
-        images_decode = base64_to_cv2(images[0])
+        images_decode = [base64_to_cv2(image) for image in images[0]]
         style_decode = base64_to_cv2(images[1])
         results = self.predict(origin=images_decode, style=style_decode, **kwargs)
         final={}
-        final['data'] = cv2_to_base64(results)
+        final['data'] = [cv2_to_base64(result) for result in results]
         return final
 
     @runnable
-    def run_cmd(self, argvs):
+    def run_cmd(self, argvs: list):
         """
         Run as a command.
         """
@@ -586,14 +598,10 @@ class StyleTransferModule(RunModule, ImageServing):
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
         results = self.predict(
-            origin=args.input_path,
+            origin=[args.input_path],
             style=args.style_path,
             save_path=args.output_dir,
             visualization=args.visualization)
-
-        if args.save_dir is not None:
-            Func.check_dir(args.save_dir)
-            self.save_inference_model(args.save_dir)
 
         return results
         
@@ -607,11 +615,7 @@ class StyleTransferModule(RunModule, ImageServing):
             type=str,
             default='style_tranfer',
             help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--save_dir',
-            type=str,
-            default='style_tranfer_model',
-            help="The directory to save model.")
+
         self.arg_config_group.add_argument(
             '--visualization',
             type=bool,

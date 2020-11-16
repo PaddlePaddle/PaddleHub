@@ -43,16 +43,19 @@ color_set = Canvas(transform=transform, mode='train')
 ### Step3: 加载预训练模型
 
 ```python
-model = hub.Module(name='user_guided_colorization', use_tanh=True, load_checkpoint=None)
+model = hub.Module(name='user_guided_colorization', load_checkpoint=None)
+model.set_config(classification=True, prob=1)
 ```
-* `use_tanh`: 最后输出是否经过tanh激活。
+* `name`:加载模型的名字。
 * `load_checkpoint`: 是否加载自己训练的模型，若为None，则加载提供的模型默认参数。
+* `classification`: 着色模型分两部分训练，开始阶段`classification`设置为True, 用于浅层网络训练。训练后期将`classification`设置为False, 用于训练网络的输出层。
+* `prob`: 每张输入图不加一个先验彩色块的概率，默认为1，即不加入先验彩色块。例如，当`prob`设定为0.9时，一张图上有两个先验彩色块的概率为(1-0.9)*(1-0.9)*0.9=0.009.
 
 ### Step4: 选择优化策略和运行配置
 
 ```python
 optimizer = paddle.optimizer.Adam(learning_rate=0.0001, parameters=model.parameters())
-trainer = Trainer(model, optimizer, checkpoint_dir='img_colorization_ckpt')
+trainer = Trainer(model, optimizer, checkpoint_dir='img_colorization_ckpt_cls_1')
 trainer.train(color_set, epochs=201, batch_size=25, eval_dataset=color_set, log_interval=10, save_interval=10)
 ```
 
@@ -96,7 +99,8 @@ import paddlehub as hub
 
 if __name__ == '__main__':
     model = hub.Module(name='user_guided_colorization', load_checkpoint='/PATH/TO/CHECKPOINT')
-    result = model.predict(images='house.png', visualization=True, save_path='result')
+    model.set_config(prob=0.1)
+    result = model.predict(images=['house.png'])
 ```
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
@@ -104,13 +108,13 @@ if __name__ == '__main__':
 **NOTE:** 进行预测时，所选择的module，checkpoint_dir，dataset必须和Fine-tune所用的一样。若想获取油画风着色效果，请下载参数文件[油画着色](https://paddlehub.bj.bcebos.com/dygraph/models/canvas_rc.pdparams)
 
 **Args**
-* `images`:原始图像路径；
+* `images`:原始图像路径或者BGR格式图片；
 * `visualization`: 是否可视化，默认为True；
 * `save_path`: 保存结果的路径，默认为'result'。
 
 ## 服务部署
 
-PaddleHub Serving可以部署一个在线关键点检测服务。
+PaddleHub Serving可以部署一个在线着色任务服务。
 
 ### Step1: 启动PaddleHub Serving
 
@@ -120,7 +124,7 @@ PaddleHub Serving可以部署一个在线关键点检测服务。
 $ hub serving start -m user_guided_colorization
 ```
 
-这样就完成了一个肢体关键点服务化API的部署，默认端口号为8866。
+这样就完成了一个着色任务服务化API的部署，默认端口号为8866。
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
 
@@ -153,8 +157,7 @@ data = {'images':[cv2_to_base64(org_im)]}
 headers = {"Content-type": "application/json"}
 url = "http://127.0.0.1:8866/predict/user_guided_colorization"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
-data =r.json()["results"]['data']
-data = base64_to_cv2(r.json()["results"]['data']['fake_reg'])
+data = base64_to_cv2(r.json()["results"]['data'][0]['fake_reg'])
 cv2.imwrite('color.png', data)
 
 ```

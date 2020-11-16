@@ -154,7 +154,7 @@ def seconds_to_hms(seconds: int) -> str:
     hms_str = '{:0>2}:{:0>2}:{:0>2}'.format(h, m, s)
     return hms_str
 
-def cv2_to_base64(image):
+def cv2_to_base64(image: np.ndarray) -> str:
     data = cv2.imencode('.jpg', image)[1]
     return base64.b64encode(data.tostring()).decode('utf8')
 

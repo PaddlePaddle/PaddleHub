@@ -29,12 +29,6 @@ import paddlehub.vision.transforms as T
 import openpose_body_estimation.processor as P
 
 
-def base64_to_cv2(b64str):
-    data = base64.b64decode(b64str.encode('utf8'))
-    data = np.fromstring(data, np.uint8)
-    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-    return data
-
 @moduleinfo(
     name="openpose_body_estimation",
     type="CV/image_editing",
@@ -220,16 +214,12 @@ class BodyPoseModel(nn.Layer):
 
         return results
 
-    def save_inference_model(self, save_dir):
-        save_name = os.path.join(save_dir, 'model.pdparams')
-        paddle.save(self.model_dict, save_name)
-
     @serving
-    def serving_method(self, images, **kwargs):
+    def serving_method(self, images: list, **kwargs):
         """
         Run as a service.
         """
-        images_decode = [base64_to_cv2(image) for image in images]
+        images_decode = [P.base64_to_cv2(image) for image in images]
         results = self.predict(img=images_decode[0], **kwargs)
         final={}
         final['candidate'] = P.cv2_to_base64(results['candidate'])
@@ -239,7 +229,7 @@ class BodyPoseModel(nn.Layer):
         return final
 
     @runnable
-    def run_cmd(self, argvs):
+    def run_cmd(self, argvs: list):
         """
         Run as a command.
         """
@@ -262,10 +252,6 @@ class BodyPoseModel(nn.Layer):
             save_path=args.output_dir,
             visualization=args.visualization)
 
-        if args.save_dir is not None:
-            P.check_dir(args.save_dir)
-            self.save_inference_model(args.save_dir)
-
         return results
 
     def add_module_config_arg(self):
@@ -278,11 +264,6 @@ class BodyPoseModel(nn.Layer):
             type=str,
             default='openpose_body',
             help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--save_dir',
-            type=str,
-            default='openpose_model',
-            help="The directory to save model.")
         self.arg_config_group.add_argument(
             '--visualization',
             type=bool,
