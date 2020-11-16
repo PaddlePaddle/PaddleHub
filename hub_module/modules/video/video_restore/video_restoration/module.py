@@ -38,6 +38,11 @@ class PhotoRestoreModel(Module):
     """
     def _initialize(self, output_path='output'):
         self.output_path = output_path
+        paddle.enable_static()
+        self.dain = hub.Module(name='dain', output_path=self.output_path)
+        self.edvr = hub.Module(name='edvr', output_path=self.output_path)
+        paddle.disable_static()
+        self.deoldify = hub.Module(name='deoldify', output_path=self.output_path)
 
     def predict(self,
                 input_video_path,
@@ -47,14 +52,12 @@ class PhotoRestoreModel(Module):
             print('\n {} model proccess start..'.format(model))
             if model == 'Interpolation':
                 paddle.enable_static()
-                self.dain = hub.Module(name='dain', output_path=self.output_path)
                 print('dain input:',input_video_path)
                 frames_path, temp_video_path = self.dain.predict(input_video_path)
                 input_video_path = temp_video_path
                 paddle.disable_static()
             
             if model == 'Colorization':
-                self.deoldify = hub.Module(name='deoldify', output_path=self.output_path)
                 self.deoldify.eval()
                 print('deoldify input:',input_video_path)
                 frames_path, temp_video_path = self.deoldify.predict(input_video_path)
@@ -62,7 +65,6 @@ class PhotoRestoreModel(Module):
                 
             if model == 'SuperResolution':
                 paddle.enable_static()
-                self.edvr = hub.Module(name='edvr', output_path=self.output_path)
                 print('edvr input:',input_video_path)
                 frames_path, temp_video_path = self.edvr.predict(input_video_path)
                 input_video_path = temp_video_path

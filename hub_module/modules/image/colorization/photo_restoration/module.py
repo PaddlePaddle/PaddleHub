@@ -39,7 +39,8 @@ class PhotoRestoreModel(Module):
     """
     def _initialize(self, visualization: bool = False):
         #super(PhotoRestoreModel, self).__init__()
-
+        self.deoldify = hub.Module(name='deoldify')
+        self.realsr = hub.Module(name='realsr')
         self.visualization = visualization
         
 
@@ -48,11 +49,9 @@ class PhotoRestoreModel(Module):
         for model in model_select:
             print('\n {} model proccess start..'.format(model))
             if model == 'Colorization':
-                self.deoldify = hub.Module(name='deoldify')
                 self.deoldify.eval()
                 self.models.append(self.deoldify)
             if model == 'SuperResolution':
-                self.realsr = hub.Module(name='realsr')
                 self.realsr.eval()
                 self.models.append(self.realsr)
                 
@@ -77,6 +76,6 @@ class PhotoRestoreModel(Module):
         print(model_select)
         images_decode = U.base64_to_cv2(images)
         results = self.run_image(input=images_decode, model_select=model_select)
-        results = {'data': U.cv2_to_base64(results)}
+        results = U.cv2_to_base64(results)
         return results
 

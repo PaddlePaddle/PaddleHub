@@ -31,7 +31,7 @@ import realsr.utils as U
             type="CV/image_editing",
             author="paddlepaddle",
             author_email="",
-            summary="Deoldify is a super resolution model",
+            summary="realsr is a super resolution model",
             version="1.0.0")
 class RealSRPredictor(Module):
     def _initialize(self, output='output', weight_path=None, load_checkpoint: str = None):
