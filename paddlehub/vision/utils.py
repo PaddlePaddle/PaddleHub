@@ -182,11 +182,3 @@ def npmax(array: np.ndarray):
     i = arrayvalue.argmax()
     j = arrayindex[i]
     return i, j
-
-
-def check_dir(dir_path: str):
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-    elif os.path.isfile(dir_path):
-        os.remove(dir_path)
-        os.makedirs(dir_path)
