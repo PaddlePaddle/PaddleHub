@@ -20,6 +20,7 @@ from typing import List
 from paddlehub.commands import register
 from paddlehub.module.manager import LocalModuleManager
 from paddlehub.utils import xarfile
+from paddlehub.server.server import CacheUpdater
 
 
 @register(name='hub.install', description='Install PaddleHub module.')
@@ -39,5 +40,6 @@ class InstallCommand:
                 _arg = _arg.split('==')
                 name = _arg[0]
                 version = None if len(_arg) == 1 else _arg[1]
+                CacheUpdater("hub_install", name, version).start()
                 manager.install(name=name, version=version)
         return True

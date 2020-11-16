@@ -22,6 +22,7 @@ from string import Template
 from paddlehub.env import TMP_HOME as tmp_dir
 from paddlehub.commands import register
 from paddlehub.utils.xarfile import XarFile
+from paddlehub.server.server import CacheUpdater
 
 INIT_FILE = '__init__.py'
 MODULE_FILE = 'module.py'
@@ -113,6 +114,7 @@ class ConvertCommand:
             return False
         self.module = args.module_name
         self.version = args.module_version if args.module_version is not None else '1.0.0'
+        CacheUpdater("hub_convert", module=self.module, version=self.version).start()
         self.src = args.model_dir
         if not os.path.isdir(self.src):
             print('`{}` is not exists or not a directory path'.format(self.src))
