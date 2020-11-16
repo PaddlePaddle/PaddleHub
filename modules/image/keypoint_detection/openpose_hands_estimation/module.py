@@ -13,7 +13,11 @@
 # limitations under the License.
 
 import os
+import base64
 import copy
+import time
+import argparse
+from typing import Union
 from collections import OrderedDict
 
 import cv2
@@ -23,7 +27,7 @@ import paddle.nn as nn
 import paddlehub as hub
 from skimage.measure import label
 from scipy.ndimage.filters import gaussian_filter
-from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import moduleinfo, runnable, serving
 import paddlehub.vision.transforms as T
 
 import openpose_hands_estimation.processor as P
@@ -43,12 +47,10 @@ class HandPoseModel(nn.Layer):
 
     Args:
         load_checkpoint(str): Checkpoint save path, default is None.
-        visualization (bool): Whether to save the estimation result. Default is True.
     """
 
-    def __init__(self, load_checkpoint: str = None, visualization: bool = True):
+    def __init__(self, load_checkpoint: str = None):
         super(HandPoseModel, self).__init__()
-        self.visualization = visualization
         
         self.norm_func = T.Normalize(std=[1, 1, 1])
         self.resize_func = P.ResizeScaling()
@@ -98,15 +100,16 @@ class HandPoseModel(nn.Layer):
         self.model6 = blocks['block6']
 
         if load_checkpoint is not None:
-            model_dict = paddle.load(load_checkpoint)[0]
-            self.set_dict(model_dict)
+            self.model_dict = paddle.load(load_checkpoint)[0]
+            self.set_dict(self.model_dict)
             print("load custom checkpoint success")
 
         else:
             checkpoint = os.path.join(self.directory, 'openpose_hand.pdparams')
-            model_dict = paddle.load(checkpoint)
-            self.set_dict(model_dict)
+            self.model_dict = paddle.load(checkpoint)
+            self.set_dict(self.model_dict)
             print("load pretrained checkpoint success")
+        self.body_model = None
 
     def make_layers(self, block: dict, no_relu_layers: list):
         layers = []
@@ -139,7 +142,6 @@ class HandPoseModel(nn.Layer):
 
     def hand_estimation(self, handimg: np.ndarray, scale_search: list):
         heatmap_avg = np.zeros((handimg.shape[0], handimg.shape[1], 22))
-
         for scale in scale_search:
             process = self.resize_func(handimg, scale)
             imageToTest_padded, pad = self.pad_func(process)
@@ -168,14 +170,20 @@ class HandPoseModel(nn.Layer):
 
         return np.array(all_peaks)
 
-    def predict(self, img_path: str, save_path: str = 'result', scale: list = [0.5, 1.0, 1.5, 2.0]):
+    def predict(self, img: Union[str, np.ndarray], save_path: str = 'openpose_hand', scale: list = [0.5, 1.0, 1.5, 2.0], visualization: bool = True):
         self.eval()
-        self.body_model = hub.Module(name='openpose_body_estimation')
-        self.body_model.eval()
-        org_img = cv2.imread(img_path)
+        self.visualization = visualization
+        if isinstance(img, str):
+            org_img = cv2.imread(img)
+        else:
+            org_img = img
+            
+        if not self.body_model:
+            self.body_model = hub.Module(name='openpose_body_estimation')
+            self.body_model.eval()
 
-        candidate, subset = self.body_model.predict(img_path)
-        hands_list = self.hand_detect(candidate, subset, org_img)
+        body_result = self.body_model.predict(org_img)
+        hands_list = self.hand_detect(body_result['candidate'], body_result['subset'], org_img)
 
         all_hand_peaks = []
 
@@ -184,13 +192,85 @@ class HandPoseModel(nn.Layer):
             peaks[:, 0] = np.where(peaks[:, 0] == 0, peaks[:, 0], peaks[:, 0] + x)
             peaks[:, 1] = np.where(peaks[:, 1] == 0, peaks[:, 1], peaks[:, 1] + y)
             all_hand_peaks.append(peaks)
-
+        canvas = copy.deepcopy(org_img)
+        canvas = self.draw_pose(canvas, body_result['candidate'], body_result['subset'],)
+        canvas = self.draw_hand(canvas, all_hand_peaks)
         if self.visualization:
-            canvas = copy.deepcopy(org_img)
-            canvas = self.draw_pose(canvas, candidate, subset)
-            canvas = self.draw_hand(canvas, all_hand_peaks)
             if not os.path.exists(save_path):
                 os.mkdir(save_path)
-            save_path = os.path.join(save_path, img_path.rsplit("/", 1)[-1])
+            img_name = str(time.time()) + '.png'
+            save_path = os.path.join(save_path, img_name)
             cv2.imwrite(save_path, canvas)
-        return all_hand_peaks
+            
+        results = {
+            'all_hand_peaks': all_hand_peaks,
+            'data': canvas}
+
+        return results
+
+    @serving
+    def serving_method(self, images: list, **kwargs):
+        """
+        Run as a service.
+        """
+        images_decode = [P.base64_to_cv2(image) for image in images]
+        results = self.predict(img=images_decode[0], **kwargs)
+        final={}
+        final['all_hand_peaks']=[peak.tolist() for peak in results['all_hand_peaks']]
+        final['data'] = P.cv2_to_base64(results['data'])
+        return final
+    
+    @runnable
+    def run_cmd(self, argvs: list):
+        """
+        Run as a command.
+        """
+        self.parser = argparse.ArgumentParser(
+            description="Run the {} module.".format(self.name),
+            prog='hub run {}'.format(self.name),
+            usage='%(prog)s',
+            add_help=True)
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
+        self.arg_config_group = self.parser.add_argument_group(
+            title="Config options",
+            description=
+            "Run configuration for controlling module behavior, not required.")
+        self.add_module_config_arg()
+        self.add_module_input_arg()
+        args = self.parser.parse_args(argvs)
+        results = self.predict(
+            img=args.input_path,
+            save_path=args.output_dir,
+            scale=args.scale,
+            visualization=args.visualization)
+
+        return results
+
+    def add_module_config_arg(self):
+        """
+        Add the command config options.
+        """
+
+        self.arg_config_group.add_argument(
+            '--output_dir',
+            type=str,
+            default='openpose_hand',
+            help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--scale',
+            type=list,
+            default=[0.5, 1.0, 1.5, 2.0],
+            help="The search scale for openpose hands model.")
+        self.arg_config_group.add_argument(
+            '--visualization',
+            type=bool,
+            default=True,
+            help="whether to save output as images.")
+
+    def add_module_input_arg(self):
+        """
+        Add the command input options.
+        """
+        self.arg_input_group.add_argument(
+            '--input_path', type=str, help="path to image.")

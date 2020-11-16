@@ -6,7 +6,7 @@ hub.vision.transforms.Compose(
     to_rgb: bool = False)
 ```
 
-Compose preprocessing operators for obtaining prepocessed data. The shape of input image for all operations is [H, W, C], where H is the image height, W is the image width, and C is the number of image channels.
+Compose preprocessing operators for obtaining prepocessed data. The shape of input image for all operations is [H, W, C], where `H` is the image height, `W` is the image width, and `C` is the number of image channels.
 
 **Args**
 * transforms(callmethod) : The method of preprocess images.

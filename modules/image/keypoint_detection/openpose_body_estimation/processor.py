@@ -1,3 +1,5 @@
+import os
+import base64
 import math
 from typing import Callable
 
@@ -328,3 +330,15 @@ class ResizeScaling:
         scale = scale_search * self.target / img.shape[0]
         resize_img = cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=self.interpolation)
         return resize_img
+
+
+def cv2_to_base64(image: np.ndarray):
+    data = cv2.imencode('.jpg', image)[1]
+    return base64.b64encode(data.tostring()).decode('utf8')
+
+
+def base64_to_cv2(b64str: str):
+    data = base64.b64decode(b64str.encode('utf8'))
+    data = np.fromstring(data, np.uint8)
+    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    return data

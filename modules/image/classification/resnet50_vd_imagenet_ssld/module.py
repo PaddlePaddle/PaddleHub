@@ -182,12 +182,22 @@ class BasicBlock(nn.Layer):
 class ResNet50_vd(nn.Layer):
     """ResNet50_vd model."""
 
-    def __init__(self, label_list: list, load_checkpoint: str = None):
+    def __init__(self, label_list: list = None, load_checkpoint: str = None):
         super(ResNet50_vd, self).__init__()
 
         self.layers = 50
-        self.labels = label_list
-        class_dim = len(self.labels)
+        if label_list is not None:
+            self.labels = label_list
+            class_dim = len(self.labels)
+        else:
+            label_list = []
+            label_file = os.path.join(self.directory, 'label_list.txt')
+            files = open(label_file)
+            for line in files.readlines():  
+                line=line.strip('\n') 
+                label_list.append(line)
+            self.labels = label_list
+            class_dim = len(self.labels)
         depth = [3, 4, 6, 3]
         num_channels = [64, 256, 512, 1024]
         num_filters = [64, 128, 256, 512]
@@ -227,18 +237,18 @@ class ResNet50_vd(nn.Layer):
             bias_attr=ParamAttr(name="fc_0.b_0"))
 
         if load_checkpoint is not None:
-            model_dict = paddle.load(load_checkpoint)[0]
-            self.set_dict(model_dict)
+            self.model_dict = paddle.load(load_checkpoint)[0]
+            self.set_dict(self.model_dict)
             print("load custom checkpoint success")
 
         else:
             checkpoint = os.path.join(self.directory, 'resnet50_vd_ssld.pdparams')
-            model_dict = paddle.load(checkpoint)
-            self.set_dict(model_dict)
+            self.model_dict = paddle.load(checkpoint)
+            self.set_dict(self.model_dict)
             print("load pretrained checkpoint success")
             
     def transforms(self, images: Union[str, np.ndarray]):
-        transforms = T.Compose([T.Resize((224, 224)), T.Normalize()])
+        transforms = T.Compose([T.Resize((256, 256)), T.CenterCrop(224), T.Normalize(mean=[0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])], to_rgb=True)
         return transforms(images)
 
     def forward(self, inputs: paddle.Tensor):

@@ -1,4 +1,5 @@
 import os
+import argparse
 
 import paddle
 import paddle.nn as nn
@@ -305,8 +306,8 @@ class MSGNet(nn.Layer):
         self.model = nn.Sequential(*model)
 
         if load_checkpoint is not None:
-            model_dict = paddle.load(load_checkpoint)
-            self.set_dict(model_dict)
+            self.model_dict = paddle.load(load_checkpoint)
+            self.set_dict(self.model_dict)
             print("load custom checkpoint success")
 
         else:
@@ -319,6 +320,7 @@ class MSGNet(nn.Layer):
                     model_dict[name] = paddle.zeros(shape=model_dict[name].shape, dtype='float32')
                     model_dict[key] = paddle.ones(shape=model_dict[key].shape, dtype='float32')
             self.set_dict(model_dict)
+            self.model_dict = model_dict
             print("load pretrained checkpoint success")
 
         self._vgg = None

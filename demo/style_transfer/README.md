@@ -2,9 +2,15 @@
 
 本示例将展示如何使用PaddleHub对预训练模型进行finetune并完成预测任务。
 
+## 命令行预测
+
+```
+$ hub run msgnet --input_path "/PATH/TO/ORIGIN/IMAGE" --style_path "/PATH/TO/STYLE/IMAGE"
+```
+
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用msgnet模型对[MiniCOCO](../../docs/reference/dataset.md#class-hubdatasetsMiniCOCO)等数据集进行Fine-tune。
+在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用msgnet模型对[MiniCOCO](../../docs/reference/datasets.md#class-hubdatasetsMiniCOCO)等数据集进行Fine-tune。
 
 ## 代码步骤
 
@@ -23,7 +29,7 @@ transform = T.Compose([T.Resize((256, 256), interpolation='LINEAR')])
 ```python
 from paddlehub.datasets.minicoco import MiniCOCO
 
-color_set = MiniCOCO(transform=transform, mode='train')
+styledata = MiniCOCO(transform=transform, mode='train')
 
 ```
 * `transforms`: 数据预处理方式。
@@ -49,13 +55,7 @@ trainer.train(styledata, epochs=101, batch_size=4, eval_dataset=styledata, log_i
 
 #### 优化策略
 
-Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详细参见[策略](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/optimizer/optimizer/Optimizer_cn.html)。
-
-其中`PolynomialDecay`:
-
-* `learning_rate`: 初始学习率，数据类型为Python float；
-* `power`: 多项式的幂，默认值为1.0；
-* `decay_steps`: 衰减步数。必须是正整数，该参数确定衰减周期。
+Paddle2.0rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详细参见[策略](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/optimizer/optimizer/Optimizer_cn.html)。
 
 其中`Adam`:
 
@@ -92,16 +92,76 @@ import paddle
 import paddlehub as hub
 
 if __name__ == '__main__':
-    model = hub.Module(name='msgnet', load_checkpoint=/PATH/TO/CHECKPOINT)
-    result = model.predict(origin="venice-boat.jpg", style="candy.jpg", visualization=True, save_path ='result')
+    model = hub.Module(name='msgnet', load_checkpoint="/PATH/TO/CHECKPOINT")
+    result = model.predict(origin=["venice-boat.jpg"], style="candy.jpg", visualization=True, save_path ='style_tranfer')
 ```
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
 
 **Args**
-* `origin`:原始图像路径；
+* `origin`:原始图像路径或BGR格式图片；
 * `style`: 风格图像路径；
 * `visualization`: 是否可视化，默认为True；
-* `save_path`: 保存结果的路径，默认为'result'。
+* `save_path`: 保存结果的路径，默认保存路径为'style_tranfer'。
 
 **NOTE:** 进行预测时，所选择的module，checkpoint_dir，dataset必须和Fine-tune所用的一样。
+
+## 服务部署
+
+PaddleHub Serving可以部署一个在线风格迁移服务。
+
+### Step1: 启动PaddleHub Serving
+
+运行启动命令：
+
+```shell
+$ hub serving start -m msgnet
+```
+
+这样就完成了一个风格迁移服务化API的部署，默认端口号为8866。
+
+**NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
+
+### Step2: 发送预测请求
+
+配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+
+```python
+import requests
+import json
+import cv2
+import base64
+
+import numpy as np
+
+
+def cv2_to_base64(image):
+    data = cv2.imencode('.jpg', image)[1]
+    return base64.b64encode(data.tostring()).decode('utf8')
+
+def base64_to_cv2(b64str):
+    data = base64.b64decode(b64str.encode('utf8'))
+    data = np.fromstring(data, np.uint8)
+    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    return data
+
+# 发送HTTP请求
+org_im = cv2.imread('/PATH/TO/ORIGIN/IMAGE')
+style_im = cv2.imread('/PATH/TO/STYLE/IMAGE')
+data = {'images':[[cv2_to_base64(org_im)], cv2_to_base64(style_im)]}
+headers = {"Content-type": "application/json"}
+url = "http://127.0.0.1:8866/predict/msgnet"
+r = requests.post(url=url, headers=headers, data=json.dumps(data))
+data = base64_to_cv2(r.json()["results"]['data'][0])
+cv2.imwrite('style.png', data)
+```
+
+### 查看代码
+
+https://github.com/zhanghang1989/PyTorch-Multi-Style-Transfer
+
+### 依赖
+
+paddlepaddle >= 2.0.0rc
+
+paddlehub >= 2.0.0

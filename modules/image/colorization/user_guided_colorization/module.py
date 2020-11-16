@@ -37,18 +37,14 @@ class UserGuidedColorization(nn.Layer):
 
     Args:
         use_tanh (bool): Whether to use tanh as final activation function.
-        classification (bool): Whether to switch classification branch for optimization.
         load_checkpoint (str): Pretrained checkpoint path.
 
     """
 
-    def __init__(self, use_tanh: bool = True, classification: bool = True, load_checkpoint: str = None,
-                 ab_thresh: float = 0., prob: float = 1., num_point: int = None):
+    def __init__(self, use_tanh: bool = True, load_checkpoint: str = None):
         super(UserGuidedColorization, self).__init__()
         self.input_nc = 4
         self.output_nc = 2
-        self.classification = classification
-        self.pre_func = ColorizePreprocess(ab_thresh=ab_thresh, p=prob, points=num_point)
         # Conv1
         model1 = (
             Conv2D(self.input_nc, 64, 3, 1, 1),
@@ -169,20 +165,26 @@ class UserGuidedColorization(nn.Layer):
         self.model_class = nn.Sequential(*model_class)
         self.model_out = nn.Sequential(*model_out)
 
+        self.set_config()
+
         if load_checkpoint is not None:
-            model_dict = paddle.load(load_checkpoint)
-            self.set_dict(model_dict)
+            self.model_dict = paddle.load(load_checkpoint)
+            self.set_dict(self.model_dict)
             print("load custom checkpoint success")
         else:
             checkpoint = os.path.join(self.directory, 'user_guided.pdparams')
-            model_dict = paddle.load(checkpoint)
-            self.set_dict(model_dict)
+            self.model_dict = paddle.load(checkpoint)
+            self.set_dict(self.model_dict)
             print("load pretrained checkpoint success")
 
     def transforms(self, images: str) -> callable:
  
         transform = T.Compose([T.Resize((256, 256), interpolation='NEAREST'), T.RGB2LAB()], to_rgb=True)
         return transform(images)
+    
+    def set_config(self, classification: bool = True, prob: float = 1., num_point: int = None):
+        self.classification = classification
+        self.pre_func = ColorizePreprocess(ab_thresh=0., p=prob, points=num_point)
 
     def preprocess(self, inputs: paddle.Tensor):
         output = self.pre_func(inputs)
