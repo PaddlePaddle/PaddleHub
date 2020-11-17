@@ -1,9 +1,7 @@
 ## 模型概述
 
-photo_restoration 是针对老照片修复的模型。它主要由两个部分组成：着色和超分。着色模型基于
-https://github.com/jantic/DeOldify
-，超分模型基于Toward Real-World Single Image Super-Resolution: A New Benchmark and A New Mode. 用户可以根据自己的需求选择对图像进行着色或超分操作。
-因此在使用该模型时，请预先安装deoldify和realsr两个模型。
+photo_restoration 是针对老照片修复的模型。它主要由两个部分组成：着色和超分。着色模型基于deoldify
+，超分模型基于realsr. 用户可以根据自己的需求选择对图像进行着色或超分操作。因此在使用该模型时，请预先安装deoldify和realsr两个模型。
 
 
 ## API
@@ -48,7 +46,7 @@ res = model.run_image(im)
 
 ## 服务部署
 
-PaddleHub Serving可以部署一个人像分割的在线服务。
+PaddleHub Serving可以部署一个照片修复的在线服务。
 
 ## 第一步：启动PaddleHub Serving
 
@@ -58,7 +56,7 @@ PaddleHub Serving可以部署一个人像分割的在线服务。
 $ hub serving start -m photo_restoration
 ```
 
-这样就完成了一个人像分割的服务化API的部署，默认端口号为8866。
+这样就完成了一个照片修复的服务化API的部署，默认端口号为8866。
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 

@@ -1,6 +1,6 @@
 
 ## 模型概述
-realsr是用于图像和视频超分模型，该模型基于Toward Real-World Single Image Super-Resolution: A New Benchmark and A New Mode，它能够给输入的图片和视频超分四倍。
+realsr是用于图像和视频超分模型，该模型基于Toward Real-World Single Image Super-Resolution: A New Benchmark and A New Mode，它能够将输入的图片和视频超分四倍。
 
 ## API 说明
 

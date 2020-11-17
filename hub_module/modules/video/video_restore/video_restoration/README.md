@@ -1,20 +1,7 @@
 ## 模型概述
 
-video_restoration 是针对老旧视频修复的模型。它主要由三个个部分组成：插帧，着色和超分。插帧模型基于dain模型，着色模型基于deoldify模型，超分模型基于edvr模型. 用户可以根据自己的需求选择对图像进行插帧，着色或超分操作。
-在使用该模型前请预先安装dain, deoldify以及edvr.
+video_restoration 是针对老旧视频修复的模型。它主要由三个个部分组成：插帧，着色和超分。插帧模型基于dain模型，着色模型基于deoldify模型，超分模型基于edvr模型. 用户可以根据自己的需求选择对图像进行插帧，着色或超分操作。在使用该模型前请预先安装dain, deoldify以及edvr.
 
-##安装
-
-
-```shell
-$ hub install dain
-
-$ hub install deoldify
-
-$ hub install edvr
-
-$ hub install video_restoration
-```
 
 ## API
 
