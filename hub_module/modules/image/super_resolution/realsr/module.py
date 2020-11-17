@@ -134,7 +134,7 @@ class RealSRPredictor(Module):
                 final.save(out_path)
                 print('save result at {}'.format(out_path))
 
-            return pred_img
+            return pred_img, out_path
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -143,5 +143,5 @@ class RealSRPredictor(Module):
         """
         images_decode = U.base64_to_cv2(images)
         results = self.run_image(img=images_decode)
-        results = {'data': U.cv2_to_base64(results)}
+        results = U.cv2_to_base64(results)
         return results

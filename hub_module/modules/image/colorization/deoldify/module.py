@@ -25,10 +25,7 @@ from tqdm import tqdm
 
 import deoldify.utils as U
 from paddlehub.module.module import moduleinfo, serving, Module
-from paddle.utils.download import get_path_from_url
 from deoldify.base_module import build_model
-
-DEOLDIFY_WEIGHT_URL = 'https://paddlegan.bj.bcebos.com/applications/DeOldify_stable.pdparams'
 
 
 @moduleinfo(name="deoldify",
@@ -38,22 +35,23 @@ DEOLDIFY_WEIGHT_URL = 'https://paddlegan.bj.bcebos.com/applications/DeOldify_sta
             summary="Deoldify is a colorizaton model",
             version="1.0.0")
 class DeOldifyPredictor(Module):
-    def _initialize(self, render_factor: int = 32, output_path: int = 'output', weight_path: str = None):
-        
+    def _initialize(self, render_factor: int = 32, output_path: int = 'result', load_checkpoint: str = None):
+        #super(DeOldifyPredictor, self).__init__()
         self.model = build_model()
         self.render_factor = render_factor
         self.output = os.path.join(output_path, 'DeOldify')
-
-        if weight_path is not None:
-            state_dict = paddle.load(weight_path)
+        if not os.path.exists(self.output):
+            os.makedirs(self.output)
+        if load_checkpoint is not None:
+            state_dict = paddle.load(load_checkpoint)
             self.model.load_dict(state_dict)
+            print("load custom checkpoint success")
 
         else:
-            cur_path = os.path.abspath(os.path.dirname(__file__))
-            weight_path = get_path_from_url(DEOLDIFY_WEIGHT_URL, cur_path)
-            state_dict = paddle.load(weight_path)
+            checkpoint = os.path.join(self.directory, 'DeOldify_stable.pdparams')
+            state_dict = paddle.load(checkpoint)
             self.model.load_dict(state_dict)
-  
+            print("load pretrained checkpoint success")
 
     def norm(self, img, render_factor=32, render_base=16):
         target_size = render_factor * render_base
@@ -78,6 +76,7 @@ class DeOldifyPredictor(Module):
 
         return (img * 255).clip(0, 255).astype('uint8')
 
+    
     def post_process(self, raw_color, orig):
         color_np = np.asarray(raw_color)
         orig_np = np.asarray(orig)
@@ -85,16 +84,14 @@ class DeOldifyPredictor(Module):
         orig_yuv = cv2.cvtColor(orig_np, cv2.COLOR_BGR2YUV)
         hires = np.copy(orig_yuv)
         hires[:, :, 1:3] = color_yuv[:, :, 1:3]
-        final = cv2.cvtColor(hires, cv2.COLOR_YUV2RGB)
-
+        final = cv2.cvtColor(hires, cv2.COLOR_YUV2BGR)
         return final
 
     def run_image(self, img):
         if isinstance(img, str):
             ori_img = Image.open(img).convert('LA').convert('RGB')
         elif isinstance(img, np.ndarray):
-            ori_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-            # ori_img = Image.fromarray(img).convert('LA').convert('RGB')
+            ori_img = Image.fromarray(img).convert('LA').convert('RGB')
         elif isinstance(img, Image.Image):
             ori_img = img
 
@@ -106,6 +103,7 @@ class DeOldifyPredictor(Module):
         pred_img = Image.fromarray(pred_img)
         pred_img = pred_img.resize(ori_img.size, resample=Image.BILINEAR)
         pred_img = self.post_process(pred_img, ori_img)
+        pred_img =cv2.cvtColor(pred_img, cv2.COLOR_RGB2BGR)
         return pred_img
 
     def run_video(self, video):
@@ -143,19 +141,18 @@ class DeOldifyPredictor(Module):
         return frame_pattern_combined, vid_out_path
 
     def predict(self, input):
+        if not os.path.exists(self.output):
+            os.makedirs(self.output)
+            
         if not U.is_image(input):
             return self.run_video(input)
         else:
             pred_img = self.run_image(input)
-
+            
             if self.output:
-                final = cv2.cvtColor(pred_img, cv2.COLOR_BGR2RGB)
-                final = Image.fromarray(final)
                 base_name = os.path.splitext(os.path.basename(input))[0]
                 out_path = os.path.join(self.output, base_name + '.png')
-                final.save(out_path)
-                print('Save image at {}.'.format(out_path))
-
+                cv2.imwrite(out_path, pred_img)
             return pred_img, out_path
 
     @serving
@@ -165,5 +162,5 @@ class DeOldifyPredictor(Module):
         """
         images_decode = U.base64_to_cv2(images)
         results = self.run_image(img=images_decode)
-        results = {'data': U.cv2_to_base64(results)}
+        results = U.cv2_to_base64(results)
         return results
