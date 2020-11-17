@@ -47,8 +47,6 @@ class RealSRPredictor(Module):
 
         else:
             checkpoint = os.path.join(self.directory, 'DF2K_JPEG.pdparams')
-            if not os.path.exists(checkpoint):
-                os.system('wget https://paddlegan.bj.bcebos.com/applications/DF2K_JPEG.pdparams -O ' + checkpoint)
             state_dict = paddle.load(checkpoint)
             self.model.load_dict(state_dict)
             print("load pretrained checkpoint success")

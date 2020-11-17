@@ -22,12 +22,9 @@ from imageio import imread, imsave
 
 import paddle
 import paddle.fluid as fluid
-from paddle.utils.download import get_path_from_url
 from paddlehub.module.module import moduleinfo, serving, Module
 
 import dain.utils as U
-
-DAIN_WEIGHT_URL = 'https://paddlegan.bj.bcebos.com/applications/DAIN_weight.tar'
 
 
 @moduleinfo(name="dain",
@@ -49,7 +46,7 @@ class DAINPredictor(Module):
 
         if weight_path is None:
             cur_path = os.path.abspath(os.path.dirname(__file__))
-            self.weight_path = get_path_from_url(DAIN_WEIGHT_URL, cur_path)
+            self.weight_path = os.path.join(cur_path, 'DAIN_weight')
 
         self.time_step = time_step
         self.key_frame_thread = key_frame_thread

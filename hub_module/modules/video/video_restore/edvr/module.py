@@ -21,12 +21,9 @@ import cv2
 import numpy as np
 import paddle
 from PIL import Image
-from paddle.utils.download import get_path_from_url
 from paddlehub.module.module import moduleinfo, serving, Module
 
 import edvr.utils as U
-
-EDVR_WEIGHT_URL = 'https://paddlegan.bj.bcebos.com/applications/edvr_infer_model.tar'
 
 
 class EDVRDataset:
@@ -65,7 +62,7 @@ class EDVRPredictor(Module):
 
         if weight_path is None:
             cur_path = os.path.abspath(os.path.dirname(__file__))
-            weight_path = get_path_from_url(EDVR_WEIGHT_URL, cur_path)
+            weight_path = os.path.join(cur_path, 'edvr_infer_model')
 
         self.weight_path = weight_path
 
