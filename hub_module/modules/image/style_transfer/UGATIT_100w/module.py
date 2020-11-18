@@ -21,7 +21,7 @@ class UGATIT_100w(Module):
         self.model_path = os.path.join(self.directory, "UGATIT_100w")
 
         # 加载模型
-        self.model = Model(self.model_path, use_gpu)     
+        self.model = Model(self.model_path, use_gpu=use_gpu, use_mkldnn=False, combined=False) 
     
     # 关键点检测函数
     def style_transfer(
