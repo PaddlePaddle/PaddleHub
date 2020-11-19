@@ -48,7 +48,11 @@ sys.modules['paddlehub.common.logger'] = log
 sys.modules['paddlehub.common.paddle_helper'] = paddle_utils
 sys.modules['paddlehub.common.utils'] = utils
 sys.modules['paddlehub.reader'] = task
+sys.modules['paddlehub.reader.batching'] = task.batch
 
+AdamWeightDecayStrategy = lambda: 0
+ULMFiTStrategy = lambda params_layer=0: 0
 common = EasyDict(paddle_helper=paddle_utils)
 dataset = EasyDict(Couplet=couplet.Couplet)
-AdamWeightDecayStrategy = lambda: 0
+finetune = EasyDict(strategy=EasyDict(ULMFiTStrategy=ULMFiTStrategy))
+logger = EasyDict(logger=log.logger)
