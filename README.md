@@ -82,7 +82,7 @@
 ### 图像分割
 - 包含效果卓越的人像抠图模型、ACE2P人体解析世界冠军模型
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "643" height = "400" />
+<img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
 </div>
 
 ### 图像动漫化
@@ -169,7 +169,8 @@
 ##  ===划重点===
 - 以上所有预训练模型全部开源，模型数量持续更新，欢迎Star关注。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/star.png"  width = "411" height = "100" />
+<a href="https://github.com/PaddlePaddle/PaddleHub/stargazers">
+            <img src="./docs/imgs/Readme_Related/star.png"  width = "411" height = "100" /></a>  
 </div>
 
 <a name="欢迎加入PaddleOCR技术交流群"></a>
