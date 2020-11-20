@@ -29,67 +29,78 @@
 
 ## 精品模型效果展示
 - 文本识别
+    - 包含超轻量中英文OCR模型，高精度中英文、多语种德语、法语、日语、韩语OCR识别。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_Ocr.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/Image_Ocr.gif"  width = "400" height = "200" />
 </div>
 - 人脸检测
+    - 包含人脸检测，口罩人脸检测，多种算法可选
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Face_Mask.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Face_Mask.gif"  width = "294" height = "200" />
 </div>
 - 图像超分
+    - 4倍超分效果，多种超分算法可选。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageEdit_SuperResolution.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/ImageEdit_SuperResolution.gif"  width = "266" height = "400" />
 </div>
 - 图像上色
+    - 黑白图片上色，适用于老旧照片修复，适用于图像和视频。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageEdit_Restoration.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/ImageEdit_Restoration.gif"  width = "300" height = "400" />
 </div>
 - 目标检测
+    - 包含行人检测、车辆检测，更有工业级超大规模预训练模型可选。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Pedestrian_Vehicle.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Pedestrian_Vehicle.gif"  width = "321" height = "200" />
 </div>
 - 关键点检测
+    - 包含单人、多人身体关键点检测、面部关键点检测、手部关键点检测。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "229" height = "200" />
 </div>
 - 图像分割
+    - 包含效果卓越的人像抠图模型、ACE2P人体解析世界冠军模型
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "321" height = "200" />
 </div>
 - 图像动漫化
+    - 包含宫崎骏、新海诚在内的多位漫画家风格迁移，多种算法可选
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "266" height = "200" />
 </div>
 - 图像分类
+    - 包含动物分类、菜品分类、野生动物制品分类，多种算法可选
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "265" height = "200" />
 </div>
-
-
-
-
 - 词法分析
+    - 效果优秀的中文分词算法。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "547" height = "200" />
 </div>
 - 文本生成
+    - 包含AI写诗、AI对联、AI情话、AI藏头诗，多种算法可选。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "425" height = "200" />
 </div>
 - 句法分析
+    - 效果优秀的中文分词算法。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "425" height = "200" />
 </div>
 - 情感分析
+    - 支持中文的评论情感分析
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "560" height = "200" />
 </div>
 - 文本审核
+    - 包含色情文本的审核，多种算法可选。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "718" height = "200" />
 </div>
 
 - 语音合成
+    - TTS语音合成算法，多种算法可选
     - 输入：`Life was like a box of chocolates, you never know what you're gonna get.`
     - 合成效果如下:
 <div align="center">
@@ -121,14 +132,19 @@
 </div>
 
 - 视频分类
+    - 包含短视频分类，支持3000+标签种类，多种算法可选。
+    - `举例：输入一段游泳的短视频，算法可以准确判断为"游泳"结果`
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "200" height = "200" />
 </div>
 
+-  以上所有预训练模型全部开源
+
 
 <a name="欢迎加入PaddleOCR技术交流群"></a>
 ## 欢迎加入PaddleHub技术交流群
-- 微信扫描二维码加入官方交流群，获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
+- 在使用模型过程中有任何问题，可以加入官方微信群
+- 获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
 </div>  
