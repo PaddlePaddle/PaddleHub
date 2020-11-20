@@ -31,85 +31,100 @@
 ### 文本识别
 - 包含超轻量中英文OCR模型，高精度中英文、多语种德语、法语、日语、韩语OCR识别。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_Ocr.gif"  width = "400" height = "200" />
+<img src="./docs/imgs/Readme_Related/Image_Ocr.gif"  width = "800" height = "400" />
 </div>
 
 ### 人脸检测
 - 包含人脸检测，口罩人脸检测，多种算法可选。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Face_Mask.gif"  width = "294" height = "200" />
+<img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Face_Mask.gif"  width = "588" height = "400" />
 </div>
 
-### 图像超分
+### 图像编辑
 - 4倍超分效果，多种超分算法可选。
+- 黑白图片上色，可用于老旧照片修复，
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageEdit_SuperResolution.gif"  width = "266" height = "400" />
+<table>
+    <thead>
+    </thead>
+    <tbody>
+        <tr>
+            <th>图像超分辨率 </th>
+            <th>黑白图片上色 </th>
+        </tr>
+        <tr>
+            <th>
+            <a>
+            <img src="./docs/imgs/Readme_Related/ImageEdit_SuperResolution.gif"  width = "266" height = "400" /></a><br>
+            </th>
+            <th>
+            <a>
+            <img src="./docs/imgs/Readme_Related/ImageEdit_Restoration.gif"  width = "300" height = "400" /></a><br>
+            </th>
+        </tr>
+    </tbody>
+</table>
 </div>
 
-### 图像上色
-- 黑白图片上色，适用于老旧照片修复，适用于图像和视频。
-<div align="center">
-<img src="./docs/imgs/Readme_Related/ImageEdit_Restoration.gif"  width = "300" height = "400" />
-</div>
 
 ### 目标检测
 - 包含行人检测、车辆检测，更有工业级超大规模预训练模型可选。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Pedestrian_Vehicle.gif"  width = "321" height = "200" />
+<img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Pedestrian_Vehicle.gif"  width = "642" height = "400" />
 </div>
 
 ### 关键点检测
 - 包含单人、多人身体关键点检测、面部关键点检测、手部关键点检测。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "229" height = "200" />
+<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "458" height = "400" />
 </div>
 
 ### 图像分割
 - 包含效果卓越的人像抠图模型、ACE2P人体解析世界冠军模型
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "321" height = "200" />
+<img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
 </div>
 
 ### 图像动漫化
 - 包含宫崎骏、新海诚在内的多位漫画家风格迁移，多种算法可选
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "266" height = "200" />
+<img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "532" height = "400" />
 </div>
 
 ### 图像分类
 - 包含动物分类、菜品分类、野生动物制品分类，多种算法可选
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "265" height = "200" />
+<img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "530" height = "400" />
 </div>
 
 ### 词法分析
 - 效果优秀的中文分词算法。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "547" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "1096" height = "400" />
 </div>
 
 ### 文本生成
 - 包含AI写诗、AI对联、AI情话、AI藏头诗，多种算法可选。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "425" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "850" height = "400" />
 </div>
 
 ### 句法分析
-- 效果优秀的中文分词算法。
+- 效果优秀的句法分析算法。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "425" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "850" height = "400" />
 </div>
 
 ### 情感分析
 - 支持中文的评论情感分析
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "560" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "1120" height = "400" />
 </div>
 
 ### 文本审核
 - 包含色情文本的审核，多种算法可选。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "718" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "1546" height = "339" />
 </div>
 
 ### 语音合成
@@ -124,19 +139,19 @@
         <tr>
             <th>deepvoice3 </th>
             <th>fastspeech </th>
-            <th>transformer </th>
+            <th>transformer</th>
         </tr>
         <tr>
             <th>
-            <a href="./docs/imgs/Readme_Related/Audio_TTS_deepvoice3.wav">
+            <a href="https://paddlehub.bj.bcebos.com/resources/deepvoice3_ljspeech-0.wav">
             <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
             </th>
             <th>
-            <a href="./docs/imgs/Readme_Related/Audio_TTS_fastspeech.wav">
+            <a href="https://paddlehub.bj.bcebos.com/resources/fastspeech_ljspeech-0.wav">
             <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
             </th>
             <th>
-            <a href="./docs/imgs/Readme_Related/Audio_TTS_transformer.wav">
+            <a href="https://paddlehub.bj.bcebos.com/resources/transformer_tts_ljspeech-0.wav">
             <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
             </th>
         </tr>
@@ -148,7 +163,7 @@
 - 包含短视频分类，支持3000+标签种类，多种算法可选。
 - `举例：输入一段游泳的短视频，算法可以准确判断为"游泳"结果`
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "200" height = "200" />
+<img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "400" height = "400" />
 </div>
 
 ##  ===划重点===

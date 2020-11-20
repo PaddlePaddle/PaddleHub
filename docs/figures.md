@@ -3,7 +3,7 @@
 
 ### 1、丰富的预训练模型
 
-- 1.1、图像
+#### 1.1、图像
 
 |            | **精品模型举例**                                             |
 | ---------- | :----------------------------------------------------------- |
@@ -15,8 +15,7 @@
 | 文本识别 | [超轻量中英文OCR文字识别](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_ocr_db_crnn_mobile&en_category=TextRecognition)、[-->More](../modules/image/text_recognition/README.md) |
 | 图像生成    | [风格迁移](https://www.paddlepaddle.org.cn/hubdetail?name=stylepro_artistic&en_category=GANs)、[街景动漫画]()、[-->More](../modules/image/Image_gan/README.md) |
 | 图像编辑 | [超分辨率](https://www.paddlepaddle.org.cn/hubdetail?name=realsr&en_category=ImageEditing)、[黑白上色](https://www.paddlepaddle.org.cn/hubdetail?name=deoldify&en_category=ImageEditing)、[-->More](../modules/image/Image_editing/README.md) |
-
-- 1.2、文本
+#### 1.2、文本
 |            | **精品模型举例**                                           |
 | ---------- | :----------------------------------------------------------- |
 | 词句分析 | [词法分析 ](https://www.paddlepaddle.org.cn/hubdetail?name=lac&en_category=LexicalAnalysis)、[句法分析](https://www.paddlepaddle.org.cn/hubdetail?name=ddparser&en_category=SyntacticAnalysis)、[-->More](../modules/text/lexical_analysis/README.md) |
@@ -25,12 +24,11 @@
 | 文本生成 | [对联生成]()、[情话生成]()、[藏图诗生成]()、[土味情话]() 、[-->More](../modules/text/text_generation/README.md)|
 | 语义模型   | [ERNIE](https://www.paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel)、[文本相似度](https://www.paddlepaddle.org.cn/hubdetail?name=simnet_bow&en_category=SemanticModel)、[-->More](../modules/text/language_model/README.md) |
 
-- 1.3、语音
+#### 1.3、语音
 |            | **精品模型举例**                                           |
 | ---------- | :----------------------------------------------------------- |
 | 语音合成   | [语音合成]() 、[-->More](../modules/audio/README.md)                         |
-
-- 1.4、视频
+#### 1.4、视频
 |            | **精品模型举例**                                       |
 | ---------- | :----------------------------------------------------------- |
 | 视频分类 | [视频分类]()、[-->More](../modules/video/README.md) |
