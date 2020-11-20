@@ -100,7 +100,7 @@
 ### 词法分析
 - 效果优秀的中文分词算法。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "1096" height = "400" />
+<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "640" height = "233" />
 </div>
 
 ### 文本生成
@@ -112,19 +112,19 @@
 ### 句法分析
 - 效果优秀的句法分析算法。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "850" height = "400" />
+<img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "640" height = "301" />
 </div>
 
 ### 情感分析
 - 支持中文的评论情感分析
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "1120" height = "400" />
+<img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "640" height = "228" />
 </div>
 
 ### 文本审核
 - 包含色情文本的审核，多种算法可选。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "1546" height = "339" />
+<img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "640" height = "140" />
 </div>
 
 ### 语音合成
