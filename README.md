@@ -138,20 +138,25 @@
 <img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "200" height = "200" />
 </div>
 
--  以上所有预训练模型全部开源
+##  ===划重点===
+- 以上所有预训练模型全部开源，模型数量持续更新，欢迎Star关注。
+<div align="center">
+<img src="./docs/imgs/Readme_Related/star.png"  width = "411" height = "100" />
+</div>
+
+
 
 
 <a name="欢迎加入PaddleOCR技术交流群"></a>
 ## 欢迎加入PaddleHub技术交流群
-- 在使用模型过程中有任何问题，可以加入官方微信群
-- 获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
+- 在使用模型过程中有任何问题，可以加入官方微信群，获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
 </div>  
 如扫码失败，请添加微信15711058002，并备注“Hub”，运营同学会邀请您入群。  
 
 
-## 文档教程 [[readthedocs]](https://paddlehub.readthedocs.io/zh_CN/develop/index.html)
+## 文档教程
 
 - [PIP安装](./docs/installation.md)
 - 快速开始
