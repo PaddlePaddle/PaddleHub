@@ -4,7 +4,7 @@
 ![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
 
 ## 简介
-- PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型，**【无需深度学习背景、无需数据与训练过程】，**也可快速使用AI模型。
+- PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型，**【无需深度学习背景、无需数据与训练过程】**，也可快速使用AI模型。
 - 涵盖CV、NLP、Audio、Video主流四大品类，支持**一键预测**、**一键服务化部署**和**快速迁移学习**
 - 全部模型开源下载，**离线可运行**。
 
@@ -15,10 +15,10 @@
 - **2020.09.27**，新增文本生成模型6个，图像分割模型1个，预训练模型总量到达 **【154】** 个。
 - **2020.08.13**，发布v1.8.1，新增人像分割模型Humanseg，支持EMNLP2019-Sentence-BERT作为文本匹配任务网络，预训练模型总量到达 **【147】** 个。
 - **2020.07.29**，发布v1.8.0，新增AI对联和AI写诗、jieba切词，文本数据LDA、语义相似度计算，新增目标检测，短视频分类模型，超轻量中英文OCR，新增行人检测、车辆检测、动物识别等工业级模型，支持VisualDL可视化训练，预训练模型总量到达 **【135】** 个。
-- [More]()
+- [More](./docs/release.md)
 
 
-## 特性
+## [特性](./docs/figures.md)
 - **【丰富的预训练模型】**：涵盖CV、NLP、Audio、Video主流四大品类的 180+ 预训练模型，全部开源下载，离线可运行。
 - **【一键模型快速预测】**：通过一行命令行或者极简的Python API实现模型调用，可快速体验模型效果。
 - **【一键模型转服务化】**：一行命令，搭建深度学习模型API服务化部署能力。
@@ -60,27 +60,27 @@
     - [在线运行体验demo【Official】](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo)
     - [生态趣味项目demo【ThirdPary】](./docs/quick_experience/more_demos.md)
 - 丰富的预训练模型 182 个
-    - [精品特色模型](./docs/pretrained_models.md)
+    - [精品特色模型](./docs/figure.md)
     - 计算机视觉 126 个
-      - [图像分类 64 个](./modules/image/classification)
-      - [目标检测 13 个](./modules/image/object_detection)
-      - [人脸检测 7 个](./modules/image/face_detection)  
-      - [关键点检测 3 个](./modules/image/keypoint_detection)
-      - [图像分割 7 个](./modules/image/semantic_segmentation)
-      - [文本识别 8 个](./modules/image/text_recognition)
-      - [图像生成 17 个](./modules/image/gan)
-      - [图像编辑 7 个](./modules/image/style_transfer)
+      - [图像分类 64 个](./modules/image/classification/README.md)
+      - [目标检测 13 个](./modules/image/object_detection/README.md)
+      - [人脸检测 7 个](./modules/image/face_detection/README.md)  
+      - [关键点检测 3 个](./modules/image/keypoint_detection/README.md)
+      - [图像分割 7 个](./modules/image/semantic_segmentation/README.md)
+      - [文本识别 8 个](./modules/image/text_recognition/README.md)
+      - [图像生成 17 个](./modules/image/Image_gan/README.md)
+      - [图像编辑 7 个](./modules/image/Image_editing/README.md)
     - 自然语言处理 48 个
-      - [词法分析 2 个](./modules/text/lexical_analysis)
-      - [句法分析 1 个](./modules/text/syntactic_analysis)
-      - [情感分析 7 个](./modules/text/semantic_model)
-      - [文本审核 3 个](./modules/text/text_review)
-      - [文本生成 9 个](./modules/text/text_generation)
-      - [语义模型 26 个](./modules/text/semantic_model)
+      - [词法分析 2 个](./modules/text/lexical_analysis/README.md)
+      - [句法分析 1 个](./modules/text/syntactic_analysis/README.md)
+      - [情感分析 7 个](./modules/text/sentiment_analysis/README.md)
+      - [文本审核 3 个](./modules/text/text_review/README.md)
+      - [文本生成 9 个](./modules/text/text_generation/README.md)
+      - [语义模型 26 个](./modules/text/language_model/README.md)
     - 语音 3 个
-      - [语音合成 3 个](./modules/audio)
+      - [语音合成 3 个](./modules/audio/README.md)
     - 视频5个
-      - [视频分类 5 个](./modules/video)
+      - [视频分类 5 个](./modules/video/README.md)
 - 部署
     - [一行代码服务化部署](./docs/tutorial/serving.md)
     - C++ Inference 部署（建议加群沟通）
