@@ -34,7 +34,7 @@
 <img src="./docs/imgs/Readme_Related/Image_Ocr.gif"  width = "400" height = "200" />
 </div>
 - 人脸检测
-    - 包含人脸检测，口罩人脸检测，多种算法可选
+    - 包含人脸检测，口罩人脸检测，多种算法可选  
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Face_Mask.gif"  width = "294" height = "200" />
 </div>
@@ -98,7 +98,6 @@
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "718" height = "200" />
 </div>
-
 - 语音合成
     - TTS语音合成算法，多种算法可选
     - 输入：`Life was like a box of chocolates, you never know what you're gonna get.`
@@ -130,7 +129,6 @@
     </tbody>
 </table>
 </div>
-
 - 视频分类
     - 包含短视频分类，支持3000+标签种类，多种算法可选。
     - `举例：输入一段游泳的短视频，算法可以准确判断为"游泳"结果`
@@ -143,9 +141,6 @@
 <div align="center">
 <img src="./docs/imgs/Readme_Related/star.png"  width = "411" height = "100" />
 </div>
-
-
-
 
 <a name="欢迎加入PaddleOCR技术交流群"></a>
 ## 欢迎加入PaddleHub技术交流群
