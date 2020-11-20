@@ -28,18 +28,102 @@
 
 
 ## 精品模型效果展示
-- 图像分类
-- 目标检测
-- 关键点检测
-- 图像分割
-- 图像生成
 - 文本识别
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Image_Ocr.gif"  width = "200" height = "200" />
+</div>
+- 人脸检测
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Face_Mask.gif"  width = "200" height = "200" />
+</div>
+- 图像超分
+<div align="center">
+<img src="./docs/imgs/Readme_Related/ImageEdit_SuperResolution.gif"  width = "200" height = "200" />
+</div>
+- 图像上色
+<div align="center">
+<img src="./docs/imgs/Readme_Related/ImageEdit_Restoration.gif"  width = "200" height = "200" />
+</div>
+- 目标检测
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Pedestrian_Vehicle.gif"  width = "200" height = "200" />
+</div>
+- 关键点检测
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "200" height = "200" />
+</div>
+- 图像分割
+<div align="center">
+<img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "200" height = "200" />
+</div>
+- 图像动漫化
+<div align="center">
+<img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "200" height = "200" />
+</div>
+- 图像分类
+<div align="center">
+<img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "200" height = "200" />
+</div>
+
+
+
+
 - 词法分析
-- 句法分析
-- 文本审核
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "200" height = "200" />
+</div>
 - 文本生成
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "200" height = "200" />
+</div>
+- 句法分析
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "200" height = "200" />
+</div>
+- 情感分析
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "200" height = "200" />
+</div>
+- 文本审核
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "200" height = "200" />
+</div>
+
 - 语音合成
+    - 输入：`Life was like a box of chocolates, you never know what you're gonna get.`
+    - 合成效果如下:
+<div align="center">
+<table>
+    <thead>
+    </thead>
+    <tbody>
+        <tr>
+            <th>deepvoice3 </th>
+            <th>fastspeech </th>
+            <th>transformer </th>
+        </tr>
+        <tr>
+            <th>
+            <a href="./docs/imgs/Readme_Related/Audio_TTS_deepvoice3.wav">
+            <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
+            </th>
+            <th>
+            <a href="./docs/imgs/Readme_Related/Audio_TTS_fastspeech.wav">
+            <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
+            </th>
+            <th>
+            <a href="./docs/imgs/Readme_Related/Audio_TTS_transformer.wav">
+            <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
+            </th>
+        </tr>
+    </tbody>
+</table>
+</div>
+
 - 视频分类
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "200" height = "200" />
+</div>
 
 
 <a name="欢迎加入PaddleOCR技术交流群"></a>
