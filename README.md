@@ -82,7 +82,7 @@
 ### 图像分割
 - 包含效果卓越的人像抠图模型、ACE2P人体解析世界冠军模型
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
+<img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "643" height = "400" />
 </div>
 
 ### 图像动漫化
