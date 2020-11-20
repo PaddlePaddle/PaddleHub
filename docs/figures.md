@@ -96,18 +96,3 @@ $ hub serving start -m chinese_ocr_db_crnn_mobile
 
 
 
-<a name="许可证书"></a>
-## 许可证书
-本项目的发布受<a href="./LICENSE">Apache 2.0 license</a>许可认证。
-
-<a name="致谢"></a>
-## 致谢
-我们非常欢迎您为PaddleHub贡献代码，也十分感谢您的反馈。
-
-* 非常感谢[Austendeng](https://github.com/Austendeng)贡献了修复SequenceLabelReader的pr
-* 非常感谢[cclauss](https://github.com/cclauss)贡献了优化travis-ci检查的pr
-* 非常感谢[奇想天外](http://www.cheerthink.com/)贡献了口罩检测的demo
-* 非常感谢[mhlwsk](https://github.com/mhlwsk)贡献了修复序列标注预测demo的pr
-* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)贡献了看图作诗的module
-* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)和[七年期限](https://github.com/1084667371)联合贡献了看图写诗中秋特别版module
-* 非常感谢[livingbody](https://github.com/livingbody)贡献了基于PaddleHub能力的风格迁移和中秋看图写诗微信小程序
