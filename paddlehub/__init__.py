@@ -17,7 +17,7 @@ import sys
 
 from easydict import EasyDict
 
-__version__ = '2.0.0-alpha0'
+__version__ = '2.0.0-beta0'
 
 from paddlehub import env
 from paddlehub.config import config
