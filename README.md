@@ -2,12 +2,14 @@
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"  	
 </p>
 
+
+------------------------------------------------------------------------------------------
+
 [![License](https://img.shields.io/badge/license-Apache%202-red.svg)](LICENSE)
 [![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
 ![python version](https://img.shields.io/badge/python-3.6+-orange.svg)
 ![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
 
-------------------------------------------------------------------------------------------
 
 ## 简介
 - PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型，**【无需深度学习背景、无需数据与训练过程】**，也可快速使用AI模型。
