@@ -1,4 +1,4 @@
-## **更好用户体验，建议参考WEB端官方文档 -> [【文字识别】](https://www.paddlepaddle.org.cn/hubdetail)**
+## **更好用户体验，建议参考WEB端官方文档 -> [【文字识别】](https://www.paddlepaddle.org.cn/hublist)**
 
 ### 文字识别
 文字识别（OCR）是计算机视觉重要任务之一，主要用于图像中文本信息的提取，具有重要的产业实践意义。

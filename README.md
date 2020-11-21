@@ -10,7 +10,7 @@
 
 
 ## 近期更新
-- **2020.11.20**，发布2.0版本，全面迁移动态图编程模式，服务化部署Serving能力升级；新增手部关键点检测1个、图像动漫化类12个、图片编辑类3个，语音合成类3个，句法分析1个，预训练模型总量到达 **【182】** 个。
+- **2020.11.20**，发布2.0-beta版本，全面迁移动态图编程模式，服务化部署Serving能力升级；新增手部关键点检测1个、图像动漫化类12个、图片编辑类3个，语音合成类3个，句法分析1个，预训练模型总量到达 **【182】** 个。
 - **2020.10.09**，新增OCR多语言系列模型4个，图像编辑模型4个，预训练模型总量到达 **【162】** 个。
 - **2020.09.27**，新增文本生成模型6个，图像分割模型1个，预训练模型总量到达 **【154】** 个。
 - **2020.08.13**，发布v1.8.1，新增人像分割模型Humanseg，支持EMNLP2019-Sentence-BERT作为文本匹配任务网络，预训练模型总量到达 **【147】** 个。
@@ -98,7 +98,7 @@
 </div>
 
 ### 词法分析
-- 效果优秀的中文分词算法。
+- 效果优秀的中文分词、词性标注与命名实体识别的模型。
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "640" height = "233" />
 </div>
@@ -110,7 +110,7 @@
 </div>
 
 ### 句法分析
-- 效果优秀的句法分析算法。
+- 效果领先的中文句法分析模型。
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "640" height = "301" />
 </div>
@@ -122,7 +122,7 @@
 </div>
 
 ### 文本审核
-- 包含色情文本的审核，多种算法可选。
+- 包含中文色情文本的审核，多种算法可选。
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "640" height = "140" />
 </div>
@@ -160,8 +160,8 @@
 </div>
 
 ### 视频分类
-- 包含短视频分类，支持3000+标签种类，多种算法可选。
-- `举例：输入一段游泳的短视频，算法可以准确判断为"游泳"结果`
+- 包含短视频分类，支持3000+标签种类，可输出TOP-K标签，多种算法可选。
+- `举例：输入一段游泳的短视频，算法可以输出"游泳"结果`
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "400" height = "400" />
 </div>
@@ -173,7 +173,7 @@
             <img src="./docs/imgs/Readme_Related/star.png"  width = "411" height = "100" /></a>  
 </div>
 
-<a name="欢迎加入PaddleOCR技术交流群"></a>
+<a name="欢迎加入PaddleHub技术交流群"></a>
 ## 欢迎加入PaddleHub技术交流群
 - 在使用模型过程中有任何问题，可以加入官方微信群，获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
 <div align="center">
@@ -189,7 +189,7 @@
     - [命令行调用](./docs/quick_experience/cmd_quick_run.md)
     - [Python API调用](./docs/quick_experience/python_use_hub.md)
     - [在线运行体验demo【Official】](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo)
-    - [生态趣味项目demo【ThirdPary】](./docs/quick_experience/more_demos.md)
+    - [生态趣味项目demo【ThirdParty】](./docs/quick_experience/more_demos.md)
 - 丰富的预训练模型 182 个
     - [精品特色模型](./docs/figure.md)
     - 计算机视觉 126 个
@@ -213,9 +213,9 @@
     - 视频5个
       - [视频分类 5 个](./modules/video/README.md)
 - 部署
+    - [本地Inference部署](./docs/quick_experience/python_use_hub.md)
     - [一行代码服务化部署](./docs/tutorial/serving.md)
-    - C++ Inference 部署（建议加群沟通）
-    - 移动端 Lite 部署（建议加群沟通）
+    - [移动端 Lite 部署（跳转Lite教程）](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
 - 进阶文档
     - [命令行工具详解](./docs/tutorial/cmdintro.md)
     - [自定义数据迁移学习](./docs/tutorial/how_to_load_data.md)

@@ -1,5 +1,5 @@
 
-## **更好用户体验，建议参考WEB端官方文档 -> [【图像分类】](https://www.paddlepaddle.org.cn/hubdetail)**
+## **更好用户体验，建议参考WEB端官方文档 -> [【图像分类】](https://www.paddlepaddle.org.cn/hublist)**
 
 
 ### 图像分类

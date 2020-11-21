@@ -1,4 +1,4 @@
-## **更好用户体验，建议参考WEB端官方文档 -> [【文本生成】](https://www.paddlepaddle.org.cn/hubdetail)**
+## **更好用户体验，建议参考WEB端官方文档 -> [【文本生成】](https://www.paddlepaddle.org.cn/hublist)**
 
 ### 文本生成
 

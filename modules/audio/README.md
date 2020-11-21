@@ -1,4 +1,4 @@
-## **更好用户体验，建议参考WEB端官方文档 -> [【语音合成】](https://www.paddlepaddle.org.cn/hubdetail)**
+## **更好用户体验，建议参考WEB端官方文档 -> [【语音合成】](https://www.paddlepaddle.org.cn/hublist)**
 
 ### 文字识别
 语音合成（TTS）任务可以实现讲文字转化为语音，已经广泛应用于各种语音交互设备中。

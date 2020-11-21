@@ -1,4 +1,4 @@
-## **更好用户体验，建议参考WEB端官方文档 -> [【人脸检测】](https://www.paddlepaddle.org.cn/hubdetail)**
+## **更好用户体验，建议参考WEB端官方文档 -> [【人脸检测】](https://www.paddlepaddle.org.cn/hublist)**
 
 ### 人脸检测
 人脸检测属于目标检测的一个重要分支，由于近年来安防市场、人脸识别、人脸安全方面的原因，成为目标检测中最重要的任务之一。
