@@ -197,8 +197,7 @@
 - 快速开始
     - [命令行调用](./docs/quick_experience/cmd_quick_run.md)
     - [Python API调用](./docs/quick_experience/python_use_hub.md)
-    - [在线运行体验demo【Official】](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo)
-    - [生态趣味项目demo【ThirdParty】](./docs/quick_experience/more_demos.md)
+    - [示例体验项目demo](./docs/quick_experience/more_demos.md)
 - 丰富的预训练模型 182 个
     - [精品特色模型](./docs/figure.md)
     - 计算机视觉 126 个
