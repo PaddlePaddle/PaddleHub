@@ -17,7 +17,7 @@
 # -*- coding: utf-8 -*-
 # *******************************************************************************
 #
-# Copyright (c) 2019 Baidu.com, Inc. All Rights Reserved
+# Copyright (c) 2020 Baidu.com, Inc. All Rights Reserved
 #
 # *******************************************************************************
 """
@@ -25,19 +25,14 @@
 Authors: lvhaijun01@baidu.com
 Date:     2019-06-30 00:10
 """
-import logging
 import re
 from auto_augment.autoaug.transform.autoaug_transform import AutoAugTransform
 import numpy as np
 import six
 import cv2
 import os
-import os
 import paddle
-
 import paddlehub.vision.transforms as transforms
-#import paddlehub_utils.transforms as transforms_v1
-from PIL import Image
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 __imagenet_stats = {'mean': [0.485, 0.456, 0.406],

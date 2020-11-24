@@ -1,15 +1,20 @@
-from paddlehub.finetune.trainer import Trainer
-import paddle
-import os
-import pickle
-import time
-from collections import defaultdict
-from typing import Any, Callable, Generic, List
+# -*- coding: utf-8 -*-
+#*******************************************************************************
+#
+# Copyright (c) 2019 Baidu.com, Inc. All Rights Reserved
+#
+#*******************************************************************************
+"""
 
+Authors: lvhaijun01@baidu.com
+Date:     2020-11-24 20:46
+"""
+
+from paddlehub.finetune.trainer import Trainer
+import os
+from collections import defaultdict
 import paddle
 from paddle.distributed import ParallelEnv
-from visualdl import LogWriter
-
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import Timer
 
