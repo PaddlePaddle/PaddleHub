@@ -33,6 +33,7 @@ class Trainer(object):
     Args:
         model(paddle.nn.Layer) : Model to train or evaluate.
         optimizer(paddle.optimizer.Optimizer) : Optimizer for loss.
+        use_gpu(bool) : Whether to use gpu to run.
         use_vdl(bool) : Whether to use visualdl to record training data.
         checkpoint_dir(str) : Directory where the checkpoint is saved, and the trainer will restore the
             state and model parameters from the checkpoint.
@@ -52,9 +53,12 @@ class Trainer(object):
     def __init__(self,
                  model: paddle.nn.Layer,
                  optimizer: paddle.optimizer.Optimizer,
+                 use_gpu: bool = True,
                  use_vdl: bool = True,
                  checkpoint_dir: str = None,
-                 compare_metrics: Callable = None):
+                 compare_metrics: Callable = None,
+                 **kwargs):
+        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
         self.nranks = paddle.distributed.get_world_size()
         self.local_rank = paddle.distributed.get_rank()
         self.model = model
@@ -149,7 +153,8 @@ class Trainer(object):
               num_workers: int = 0,
               eval_dataset: paddle.io.Dataset = None,
               log_interval: int = 10,
-              save_interval: int = 10):
+              save_interval: int = 10,
+              collate_fn: Callable = None):
         '''
         Train a model with specific config.
 
@@ -162,6 +167,8 @@ class Trainer(object):
                 execute evaluate function every `save_interval` epochs.
             log_interval(int) : Log the train infomation every `log_interval` steps.
             save_interval(int) : Save the checkpoint every `save_interval` epochs.
+            collate_fn(callable): function to generate mini-batch data by merging the sample list.
+                None for only stack each fields of sample in axis 0(same as :attr::`np.stack(..., axis=0)`). Default None
         '''
         batch_sampler = paddle.io.DistributedBatchSampler(
             train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
@@ -170,7 +177,8 @@ class Trainer(object):
             batch_sampler=batch_sampler,
             num_workers=num_workers,
             return_list=True,
-            use_buffer_reader=True)
+            use_buffer_reader=True,
+            collate_fn=collate_fn)
 
         steps_per_epoch = len(batch_sampler)
         timer = Timer(steps_per_epoch * epochs)
@@ -190,7 +198,9 @@ class Trainer(object):
                 # calculate metrics and loss
                 avg_loss += loss.numpy()[0]
                 for metric, value in metrics.items():
-                    avg_metrics[metric] += value.numpy()[0]
+                    if isinstance(value, paddle.Tensor):
+                        value = value.numpy()
+                    avg_metrics[metric] += value
 
                 timer.count()
 
@@ -220,7 +230,7 @@ class Trainer(object):
 
                 if self.current_epoch % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
                     if eval_dataset:
-                        result = self.evaluate(eval_dataset, batch_size, num_workers)
+                        result = self.evaluate(eval_dataset, batch_size, num_workers, collate_fn=collate_fn)
                         eval_loss = result.get('loss', None)
                         eval_metrics = result.get('metrics', {})
                         if self.use_vdl:
@@ -245,7 +255,11 @@ class Trainer(object):
 
                     self._save_checkpoint()
 
-    def evaluate(self, eval_dataset: paddle.io.Dataset, batch_size: int = 1, num_workers: int = 0):
+    def evaluate(self,
+                 eval_dataset: paddle.io.Dataset,
+                 batch_size: int = 1,
+                 num_workers: int = 0,
+                 collate_fn: Callable = None):
         '''
         Run evaluation and returns metrics.
 
@@ -253,47 +267,53 @@ class Trainer(object):
             eval_dataset(paddle.io.Dataset) : The validation dataset
             batch_size(int) : Batch size of per step, default is 1.
             num_workers(int) : Number of subprocess to load data, default is 0.
+            collate_fn(callable): function to generate mini-batch data by merging the sample list.
+                None for only stack each fields of sample in axis 0(same as :attr::`np.stack(..., axis=0)`). Default None
         '''
-        batch_sampler = paddle.io.DistributedBatchSampler(
-            eval_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
+        if self.local_rank == 0:
+            batch_sampler = paddle.io.BatchSampler(eval_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
 
-        loader = paddle.io.DataLoader(
-            eval_dataset, batch_sampler=batch_sampler, num_workers=num_workers, return_list=True)
+            loader = paddle.io.DataLoader(
+                eval_dataset,
+                batch_sampler=batch_sampler,
+                num_workers=num_workers,
+                return_list=True,
+                collate_fn=collate_fn)
 
-        self.model.eval()
-        avg_loss = num_samples = 0
-        sum_metrics = defaultdict(int)
-        avg_metrics = defaultdict(int)
+            self.model.eval()
+            avg_loss = num_samples = 0
+            sum_metrics = defaultdict(int)
+            avg_metrics = defaultdict(int)
 
-        with logger.processing('Evaluation on validation dataset'):
-            for batch_idx, batch in enumerate(loader):
-                result = self.validation_step(batch, batch_idx)
-                loss = result.get('loss', None)
-                metrics = result.get('metrics', {})
-                bs = batch[0].shape[0]
-                num_samples += bs
+            with logger.processing('Evaluation on validation dataset'):
+                for batch_idx, batch in enumerate(loader):
+                    result = self.validation_step(batch, batch_idx)
+                    loss = result.get('loss', None)
+                    metrics = result.get('metrics', {})
+                    bs = batch[0].shape[0]
+                    num_samples += bs
 
-                if loss:
-                    avg_loss += loss.numpy()[0] * bs
+                    if loss:
+                        avg_loss += loss.numpy()[0] * bs
 
-                for metric, value in metrics.items():
-                    sum_metrics[metric] += value.numpy()[0] * bs
+                    for metric, value in metrics.items():
+                        sum_metrics[metric] += value * bs
 
-        # print avg metrics and loss
-        print_msg = '[Evaluation result]'
-        if loss:
-            avg_loss /= num_samples
-            print_msg += ' avg_loss={:.4f}'.format(avg_loss)
+            # print avg metrics and loss
+            print_msg = '[Evaluation result]'
+            if loss:
+                avg_loss /= num_samples
+                print_msg += ' avg_loss={:.4f}'.format(avg_loss)
 
-        for metric, value in sum_metrics.items():
-            avg_metrics[metric] = value / num_samples
-            print_msg += ' avg_{}={:.4f}'.format(metric, avg_metrics[metric])
+            for metric, value in sum_metrics.items():
+                avg_metrics[metric] = value / num_samples
+                print_msg += ' avg_{}={:.4f}'.format(metric, avg_metrics[metric])
 
-        logger.eval(print_msg)
+            logger.eval(print_msg)
 
-        if loss:
-            return {'loss': avg_loss, 'metrics': avg_metrics}
-        return {'metrics': avg_metrics}
+            if loss:
+                return {'loss': avg_loss, 'metrics': avg_metrics}
+            return {'metrics': avg_metrics}
 
     def training_step(self, batch: List[paddle.Tensor], batch_idx: int):
         '''
@@ -313,7 +333,7 @@ class Trainer(object):
             raise RuntimeError('The return value of `trainning_step` in {} is not a dict'.format(self.model.__class__))
 
         loss = result.get('loss', None)
-        if not loss:
+        if loss is None:
             raise RuntimeError('Cannot find loss attribute in the return value of `trainning_step` of {}'.format(
                 self.model.__class__))
 

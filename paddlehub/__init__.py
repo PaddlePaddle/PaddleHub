@@ -28,6 +28,7 @@ from paddlehub.server import server_check
 from paddlehub.server.server_source import ServerConnectionError
 from paddlehub.module import Module
 from paddlehub.text.bert_tokenizer import BertTokenizer
+from paddlehub.text.tokenizer import CustomTokenizer
 
 # In order to maintain the compatibility of the old version, we put the relevant
 # compatible code in the paddlehub.compat package, and mapped some modules referenced

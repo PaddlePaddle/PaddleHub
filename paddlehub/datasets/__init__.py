@@ -16,3 +16,4 @@
 from paddlehub.datasets.canvas import Canvas
 from paddlehub.datasets.flowers import Flowers
 from paddlehub.datasets.minicoco import MiniCOCO
+from paddlehub.datasets.chnsenticorp import ChnSentiCorp
