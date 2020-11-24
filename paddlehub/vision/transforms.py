@@ -29,8 +29,9 @@ class Compose:
     Args:
         transforms(callmethod) : The method of preprocess images.
         to_rgb(bool): Whether to transform the input from BGR mode to RGB mode, default is False.
+        channel_first(bool): whether to permute image from channel laste to channel first
     """
-    def __init__(self, transforms: Callable, to_rgb: bool = False):
+    def __init__(self, transforms: Callable, to_rgb: bool = False, channel_first: bool = True):
         if not isinstance(transforms, list):
             raise TypeError('The transforms must be a list!')
         if len(transforms) < 1:
@@ -38,6 +39,7 @@ class Compose:
                              'must be equal or larger than 1!')
         self.transforms = transforms
         self.to_rgb = to_rgb
+        self.channel_first = channel_first
 
     def __call__(self, im:  Union[np.ndarray, str]):
         if isinstance(im, str):
@@ -51,10 +53,19 @@ class Compose:
         for op in self.transforms:
             im = op(im)
 
-        im = F.permute(im)
-
+        if self.channel_first:
+            im = F.permute(im)
         return im
 
+class Permute:
+    """
+    Repermute the input image from [H, W, C] to [C, H, W].
+    """
+    def __init__(self):
+        pass
+    def __call__(self, im):
+        im = F.permute(im)
+        return im
 
 class RandomHorizontalFlip:
     """
@@ -211,10 +222,12 @@ class Normalize:
     Args:
         mean(list): Mean value for normalization.
         std(list): Standard deviation for normalization.
+        channel_first(bool): im channel firest or last
     """
-    def __init__(self, mean: list = [0.5, 0.5, 0.5], std: list = [0.5, 0.5, 0.5]):
+    def __init__(self, mean: list = [0.5, 0.5, 0.5], std: list = [0.5, 0.5, 0.5], channel_first: bool = False):
         self.mean = mean
         self.std = std
+        self.channel_first = channel_first
         if not (isinstance(self.mean, list) and isinstance(self.std, list)):
             raise ValueError("{}: input type is invalid.".format(self))
         from functools import reduce
@@ -222,8 +235,12 @@ class Normalize:
             raise ValueError('{}: std is invalid!'.format(self))
 
     def __call__(self, im):
-        mean = np.array(self.mean)[np.newaxis, np.newaxis, :]
-        std = np.array(self.std)[np.newaxis, np.newaxis, :]
+        if not self.channel_first:
+            mean = np.array(self.mean)[np.newaxis, np.newaxis, :]
+            std = np.array(self.std)[np.newaxis, np.newaxis, :]
+        else:
+            mean = np.array(self.mean)[:, np.newaxis, np.newaxis]
+            std = np.array(self.std)[:, np.newaxis, np.newaxis]
         im = F.normalize(im, mean, std)
         return im
 
