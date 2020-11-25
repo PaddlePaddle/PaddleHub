@@ -1,18 +1,3 @@
-# coding:utf-8
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License"
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 # Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +23,7 @@ import os
 import six
 
 import paddle
-from paddle.nn import Layer
+import paddle.nn as nn
 from paddle.dataset.common import DATA_HOME
 from paddle.utils.download import get_path_from_url
 
@@ -68,14 +53,14 @@ def fn_args_to_dict(func, *args, **kwargs):
     return init_dict
 
 
-class InitTrackerMeta(type(Layer)):
+class InitTrackerMeta(type(nn.Layer)):
     """
     This metaclass wraps the `__init__` method of a class to add `init_config`
     attribute for instances of that class, and `init_config` use a dict to track
     the initial configuration. If the class has `_wrap_init` method, it would be
     hooked after `__init__` and called as `_wrap_init(self, init_fn, init_args)`.
     Since InitTrackerMeta would be used as metaclass for pretrained model classes,
-    which always are Layer and `type(Layer)` is not `type`, thus use `type(Layer)`
+    which always are Layer and `type(nn.Layer)` is not `type`, thus use `type(nn.Layer)`
     rather than `type` as base class for it to avoid inheritance metaclass
     conflicts.
     """
@@ -134,7 +119,7 @@ def register_base_model(cls):
 
 
 @six.add_metaclass(InitTrackerMeta)
-class PretrainedModel(Layer):
+class PretrainedModel(nn.Layer):
     """
     The base class for all pretrained models. It provides some attributes and
     common methods for all pretrained models, including attributes `init_config`,

@@ -28,6 +28,8 @@ class ChnSentiCorp(TextClassificationDataset):
     which was published by Tan Songbo at ICT of Chinese Academy of Sciences.
     """
 
+    # TODO(zhangxuefei): simplify datatset load, such as
+    # train_ds, dev_ds, test_ds = hub.datasets.ChnSentiCorp(tokenizer=xxx, max_seq_len=128, select='train', 'test', 'valid')
     def __init__(self, tokenizer: Union[BertTokenizer, CustomTokenizer], max_seq_len: int = 128, mode: str = 'train'):
         """
         Args:
