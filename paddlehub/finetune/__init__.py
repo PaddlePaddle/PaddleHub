@@ -13,4 +13,3 @@
 # limitations under the License.
 
 from paddlehub.finetune.trainer import Trainer
-from paddlehub.finetune.strategy import AdamWeightDecayStrategy

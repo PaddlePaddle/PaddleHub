@@ -166,7 +166,8 @@ class ServingCommand:
         '''
         Start one PaddleHub-Serving instance by arguments with gunicorn.
         '''
-        module = self.args.modules
+        # module = self.args.modules
+        module = self.modules_info
         if module is not None:
             port = self.args.port
             if is_port_occupied("127.0.0.1", port) is True:
@@ -209,7 +210,8 @@ class ServingCommand:
         '''
         Start one PaddleHub-Serving instance by arguments with flask.
         '''
-        module = self.args.modules
+        # module = self.args.modules
+        module = self.modules_info
         if module is not None:
             port = self.args.port
             if is_port_occupied("127.0.0.1", port) is True:

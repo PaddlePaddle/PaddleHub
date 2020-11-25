@@ -27,20 +27,5 @@ if __name__ == '__main__':
     optimizer = paddle.optimizer.AdamW(learning_rate=5e-5, parameters=model.parameters())
     trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls')
 
-    batch_size, epoch = 32, 3
-    num_training_steps = len(train_dataset) / batch_size * epoch
-    num_warmup_steps = 0.1 * num_training_steps
-    apply_decay_param_fun = lambda x: x in [
-        p.name for n, p in model.named_parameters() if not any(nd in n for nd in ["bias", "norm"])
-    ]
-    strategy = hub.finetune.AdamWeightDecayStrategy(
-        model,
-        num_training_steps,
-        num_warmup_steps,
-        lr=5e-5,
-        weight_decay=0.01,
-        apply_decay_param_fun=apply_decay_param_fun,
-    )
-
     trainer.train(train_dataset, epochs=3, batch_size=32, eval_dataset=dev_dataset, log_interval=10, save_interval=1)
     trainer.evaluate(test_dataset, batch_size=32)
