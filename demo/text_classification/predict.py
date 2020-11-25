@@ -24,10 +24,13 @@ if __name__ == '__main__':
 
     model = hub.Module(
         name='ernie',
+        # directory='/mnt/zhangxuefei/program-paddle/PaddleHub/modules/text/language_model/ernie',
         version='2.0.0',
         task='sequence_classification',
-        params_path='./test_ernie_text_cls/epoch_9/model.pdparams',
+        load_checkpoint='./test_ernie_text_cls/epoch_3/model.pdparams',
         label_map=label_map)
     results = model.predict(data, max_seq_len=50, batch_size=2)
+
+    print(len(results), results)
     for idx, text in enumerate(data):
         print('Data: {} \t Lable: {}'.format(text, results[idx]))

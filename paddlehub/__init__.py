@@ -20,7 +20,10 @@ from easydict import EasyDict
 __version__ = '2.0.0-alpha0'
 
 from paddlehub import env
+from paddlehub import datasets
+from paddlehub import finetune
 from paddlehub.config import config
+from paddlehub.finetune import Trainer
 from paddlehub.utils import log, parser, utils
 from paddlehub.utils import download as _download
 from paddlehub.utils.paddlex import download, ResourceNotFoundError

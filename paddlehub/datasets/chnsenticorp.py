@@ -14,10 +14,11 @@
 from typing import Dict, List, Optional, Union, Tuple
 import os
 
-from paddlehub import BertTokenizer, CustomTokenizer
 from paddlehub.env import DATA_HOME
 from paddlehub.utils.download import download_data
 from paddlehub.datasets.base_nlp_dataset import TextClassificationDataset
+from paddlehub.text.bert_tokenizer import BertTokenizer
+from paddlehub.text.tokenizer import CustomTokenizer
 
 
 @download_data(url="https://bj.bcebos.com/paddlehub-dataset/chnsenticorp.tar.gz")

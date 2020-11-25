@@ -20,8 +20,9 @@ import os
 import numpy as np
 import paddle.fluid as fluid
 
-from paddlehub import BertTokenizer, CustomTokenizer
 from paddlehub.env import DATA_HOME
+from paddlehub.text.bert_tokenizer import BertTokenizer
+from paddlehub.text.tokenizer import CustomTokenizer
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import download
 from paddlehub.utils.xarfile import is_xarfile, unarchive

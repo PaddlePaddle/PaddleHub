@@ -20,7 +20,7 @@ import paddle.nn as nn
 import paddle.nn.functional as F
 
 from paddlehub import BertTokenizer
-from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import moduleinfo, serving
 from paddlehub.module.nlp_module import PretrainedModel, register_base_model
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import download
@@ -265,11 +265,11 @@ class Ernie(nn.Layer):
     def __init__(
             self,
             task=None,
-            params_path=None,
+            load_checkpoint=None,
             label_map=None,
     ):
         super(Ernie, self).__init__()
-
+        # TODO(zhangxuefei): add token_classification task
         if task == 'sequence_classification':
             self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie')
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
@@ -277,15 +277,15 @@ class Ernie(nn.Layer):
         elif task is None:
             self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie')
         else:
-            raise RuntimeError("Unknown task %s, task should be sequence_classification or token_classification" % task)
+            raise RuntimeError("Unknown task %s, task should be sequence_classification" % task)
 
         self.task = task
         self.label_map = label_map
 
-        if params_path is not None:
-            state_dict = paddle.load(params_path)
+        if load_checkpoint is not None and os.path.isfile(load_checkpoint):
+            state_dict = paddle.load(load_checkpoint)
             self.set_state_dict(state_dict)
-            logger.info('Loaded parameters from %s' % os.path.abspath(params_path))
+            logger.info('Loaded parameters from %s' % os.path.abspath(load_checkpoint))
 
     def forward(self, input_ids, token_type_ids=None, position_ids=None, attention_mask=None, labels=None):
         result = self.model(input_ids, token_type_ids, position_ids, attention_mask)
@@ -349,23 +349,26 @@ class Ernie(nn.Layer):
         predictions, avg_loss, acc = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
         return {'metrics': {'acc': acc}}
 
-    def predict(self, data, tokenizer=None, max_seq_len=128, batch_size=1):
+    def predict(self, data, max_seq_len=128, batch_size=1, use_gpu=False):
         """
         Predicts the data labels.
 
         Args:
             data (obj:`List(str)`): The processed data whose each element is the raw text.
-            tokenizer(obj:`BertTokenizer`): This tokenizer object from :class:`~paddlehub.text.BertTokenizer`
-                which contains most of the methods. Users should refer to the superclass for more information regarding methods.
             max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
                 If set to a number, will limit the total sequence returned so that it has a maximum length.
             batch_size(obj:`int`, defaults to 1): The number of batch.
+            use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
 
         Returns:
             results(obj:`list`): All the predictions labels.
         """
-        if tokenizer is None:
-            tokenizer = self.get_tokenizer()
+        # TODO(zhangxuefei): add task token_classification task predict.
+        if self.task not in ['sequence_classification']:
+            raise RuntimeError("The predict method is for sequence_classification task, but got task %s." % self.task)
+
+        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
+        tokenizer = self.get_tokenizer()
 
         examples = []
         for text in data:
@@ -384,6 +387,7 @@ class Ernie(nn.Layer):
             one_batch.append(example)
             if len(one_batch) == batch_size:
                 batches.append(one_batch)
+                one_batch = []
         if one_batch:
             # The last batch whose size is less than the config batch_size setting.
             batches.append(one_batch)
@@ -394,11 +398,35 @@ class Ernie(nn.Layer):
             input_ids, segment_ids = _batchify_fn(batch)
             input_ids = paddle.to_tensor(input_ids)
             segment_ids = paddle.to_tensor(segment_ids)
-            probs = self(input_ids, segment_ids)
-            idx = paddle.argmax(probs, axis=1).numpy()
-            idx = idx.tolist()
-            labels = [self.label_map[i] for i in idx]
-            results.extend(labels)
+
+            # TODO(zhangxuefei): add task token_classification postprocess after prediction.
+            if self.task == 'sequence_classification':
+                probs = self(input_ids, segment_ids)
+                idx = paddle.argmax(probs, axis=1).numpy()
+                idx = idx.tolist()
+                labels = [self.label_map[i] for i in idx]
+                results.extend(labels)
+
+        return results
+
+    @serving
+    def get_embedding(self, texts, use_gpu=False):
+        if self.task is not None:
+            raise RuntimeError("The get_embedding method is only valid when task is None, but got task %s" % self.task)
+
+        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
+
+        tokenizer = self.get_tokenizer()
+        results = []
+        for text in texts:
+            encoded_inputs = tokenizer.encode(text, pad_to_max_seq_len=False)
+            input_ids = paddle.to_tensor(encoded_inputs['input_ids']).unsqueeze(0)
+            segment_ids = paddle.to_tensor(encoded_inputs['segment_ids']).unsqueeze(0)
+            sequence_output, pooled_output = self(input_ids, segment_ids)
+
+            sequence_output = sequence_output.squeeze(0)
+            pooled_output = pooled_output.squeeze(0)
+            results.append((sequence_output.numpy().tolist(), pooled_output.numpy().tolist()))
         return results
 
 
