@@ -1,12 +1,12 @@
 # PaddleHub更多体验Demos
 
-## PaddleHub官方Demo全集
+## PaddleHub官方Demo全集【Offical】
 
 官方Demo在AI Studio中均可在线运行，类似notebook的环境，只需通过浏览器即可访问，无需准备环境，非常方便开发者快速体验。
 并将持续更新，建议收藏。
 [https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927](https://aistudio.baidu.com/aistudio/personalcenter/thirdview/79927)
 
-## PaddleHub开发者趣味实践作品
+## PaddleHub开发者趣味实践作品【ThirdParty】
 
 以下为前期PaddleHub课程或活动中，开发者们基于PaddleHub创作的趣味实践作品，均收录在AI Studio中，可在线运行，欢迎访问，希望对您有所启发。
 1. [布剪刀石头【人脸识别切换本地窗口】](https://aistudio.baidu.com/aistudio/projectdetail/507630)

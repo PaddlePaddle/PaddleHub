@@ -12,7 +12,8 @@
 
 
 ## 简介
-- PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型，**【无需深度学习背景、无需数据与训练过程】**，也可快速使用AI模型。
+- PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型。
+- **【无需深度学习背景、无需数据与训练过程】**，可快速使用AI模型，享受人工智能时代红利。
 - 涵盖CV、NLP、Audio、Video主流四大品类，支持**一键预测**、**一键服务化部署**和**快速迁移学习**
 - 全部模型开源下载，**离线可运行**。
 
@@ -196,8 +197,7 @@
 - 快速开始
     - [命令行调用](./docs/quick_experience/cmd_quick_run.md)
     - [Python API调用](./docs/quick_experience/python_use_hub.md)
-    - [在线运行体验demo【Official】](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.8/demo)
-    - [生态趣味项目demo【ThirdParty】](./docs/quick_experience/more_demos.md)
+    - [示例体验项目demo](./docs/quick_experience/more_demos.md)
 - 丰富的预训练模型 182 个
     - [精品特色模型](./docs/figure.md)
     - 计算机视觉 126 个
