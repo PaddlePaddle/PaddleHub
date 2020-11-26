@@ -25,8 +25,6 @@ from paddlehub.module.nlp_module import PretrainedModel, register_base_model
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import download
 
-__all__ = ['Ernie']
-
 
 class ErnieEmbeddings(nn.Layer):
     """
@@ -129,7 +127,7 @@ class ErniePretrainedModel(PretrainedModel):
             "max_position_embeddings": 512,
             "num_attention_heads": 12,
             "num_hidden_layers": 12,
-            "type_vocab_size": 2,
+            "type_vocab_size": 4,
             "vocab_size": 30522,
             "pad_token_id": 0,
         },
@@ -142,8 +140,9 @@ class ErniePretrainedModel(PretrainedModel):
             "max_position_embeddings": 512,
             "num_attention_heads": 16,
             "num_hidden_layers": 24,
-            "type_vocab_size": 2,
-            "vocab_size": 30522
+            "type_vocab_size": 4,
+            "vocab_size": 30522,
+            "pad_token_id": 0,
         },
     }
     resource_files_names = {"model_state": "model_state.pdparams"}
