@@ -87,7 +87,7 @@ def predict_v2(module_info: dict, input: dict):
         output = serving_method(**predict_args)
     except Exception as err:
         log.logger.error(traceback.format_exc())
-        return package_result("101", err, "")
+        return package_result("101", str(err), "")
 
     return package_result("000", "", output)
 
