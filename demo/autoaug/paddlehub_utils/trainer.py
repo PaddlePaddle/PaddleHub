@@ -19,23 +19,24 @@ from paddlehub.utils.log import logger
 from paddlehub.utils.utils import Timer
 
 class CustomTrainer(Trainer):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super(CustomTrainer, self).__init__(**kwargs)
 
-    def init_train_and_eval(self,                                         train_dataset: paddle.io.Dataset,
-              epochs: int = 1,
-              batch_size: int = 1,
-              num_workers: int = 0,
-              eval_dataset: paddle.io.Dataset = None,
-              log_interval: int = 10,
-              save_interval: int = 10):
+    def init_train_and_eval(self,
+            train_dataset: paddle.io.Dataset,
+            epochs: int = 1,
+            batch_size: int = 1,
+            num_workers: int = 0,
+            eval_dataset: paddle.io.Dataset = None,
+            log_interval: int = 10,
+            save_interval: int = 10) -> None:
         self.batch_sampler, self.train_loader = self.init_train(train_dataset, batch_size, num_workers)
         self.eval_loader = self.init_evaluate(eval_dataset, batch_size, num_workers)
 
     def init_train(self,
               train_dataset: paddle.io.Dataset,
               batch_size: int = 1,
-              num_workers: int = 0,):
+              num_workers: int = 0) -> tuple:
         use_gpu = True
         place = paddle.CUDAPlace(ParallelEnv().dev_id) if use_gpu else paddle.CPUPlace()
         paddle.disable_static(place)
@@ -46,7 +47,7 @@ class CustomTrainer(Trainer):
             train_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
         return batch_sampler, loader
 
-    def train_one_epoch(self, loader, timer, current_epoch, epochs, log_interval, steps_per_epoch):
+    def train_one_epoch(self, loader: paddle.io.DataLoader, timer: Timer, current_epoch: int, epochs: int, log_interval: int, steps_per_epoch: int) -> None:
         avg_loss = 0
         avg_metrics = defaultdict(int)
         self.model.train()
@@ -145,7 +146,7 @@ class CustomTrainer(Trainer):
 
                 self._save_checkpoint()
 
-    def init_evaluate(self, eval_dataset, batch_size, num_workers):
+    def init_evaluate(self, eval_dataset: paddle.io.Dataset, batch_size: int, num_workers: int) -> paddle.io.DataLoader:
         use_gpu = True
         place = paddle.CUDAPlace(ParallelEnv().dev_id) if use_gpu else paddle.CPUPlace()
         paddle.disable_static(place)
@@ -157,7 +158,7 @@ class CustomTrainer(Trainer):
             eval_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
         return loader
 
-    def evaluate_process(self, loader):
+    def evaluate_process(self, loader: paddle.io.DataLoader) -> dict:
         self.model.eval()
         avg_loss = num_samples = 0
         sum_metrics = defaultdict(int)
@@ -192,7 +193,7 @@ class CustomTrainer(Trainer):
             return {'loss': avg_loss, 'metrics': avg_metrics}
         return {'metrics': avg_metrics}
 
-    def evaluate(self, eval_dataset: paddle.io.Dataset, batch_size: int = 1, num_workers: int = 0):
+    def evaluate(self, eval_dataset: paddle.io.Dataset, batch_size: int = 1, num_workers: int = 0) -> dict:
         '''
         Run evaluation and returns metrics.
 

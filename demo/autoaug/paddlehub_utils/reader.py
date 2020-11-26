@@ -26,14 +26,15 @@ Authors: lvhaijun01@baidu.com
 Date:     2019-06-30 00:10
 """
 import re
-from auto_augment.autoaug.transform.autoaug_transform import AutoAugTransform
 import numpy as np
+from typing import Dict, List, Optional, Union, Tuple
 import six
 import cv2
 import os
 import paddle
 import paddlehub.vision.transforms as transforms
 from PIL import ImageFile
+from auto_augment.autoaug.transform.autoaug_transform import AutoAugTransform
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 __imagenet_stats = {'mean': [0.485, 0.456, 0.406],
                     'std': [0.229, 0.224, 0.225]}
@@ -46,11 +47,11 @@ class PbaAugment(object):
 
     def __init__(
             self,
-            input_size=224,
-            scale_size=256,
-            normalize=None,
-            pre_transform=True,
-            **kwargs):
+            input_size: int = 224,
+            scale_size: int = 256,
+            normalize: Optional[list] = None,
+            pre_transform: bool = True,
+            **kwargs) -> None:
         """
 
         Args:
@@ -85,7 +86,7 @@ class PbaAugment(object):
         )
         self.cur_epoch = 0
 
-    def set_epoch(self, indx):
+    def set_epoch(self, indx: int) -> None:
         """
 
         Args:
@@ -96,7 +97,7 @@ class PbaAugment(object):
         """
         self.auto_aug_transform.set_epoch(indx)
 
-    def reset_policy(self, new_hparams):
+    def reset_policy(self, new_hparams: dict) -> None:
         """
 
         Args:
@@ -107,7 +108,7 @@ class PbaAugment(object):
         """
         self.auto_aug_transform.reset_policy(new_hparams)
 
-    def __call__(self, img):
+    def __call__(self, img: np.ndarray):
         """
 
         Args:
@@ -130,7 +131,7 @@ class PicRecord(object):
     PicRecord
     """
 
-    def __init__(self, row):
+    def __init__(self, row: list) -> None:
         """
 
         Args:
@@ -139,7 +140,7 @@ class PicRecord(object):
         self._data = row
 
     @property
-    def sub_path(self):
+    def sub_path(self) -> str:
         """
 
         Returns:
@@ -148,7 +149,7 @@ class PicRecord(object):
         return self._data[0]
 
     @property
-    def label(self):
+    def label(self) -> str:
         """
 
         Returns:
@@ -164,13 +165,13 @@ class PicReader(paddle.io.Dataset):
 
     def __init__(
             self,
-            root_path,
-            list_file,
-            meta=False,
-            transform=None,
-            class_to_id_dict=None,
-            cache_img=False,
-            **kwargs):
+            root_path: str,
+            list_file: str,
+            meta: bool = False,
+            transform: Optional[callable] = None,
+            class_to_id_dict: Optional[dict] = None,
+            cache_img: bool = False,
+            **kwargs) -> None:
         """
 
         Args:
@@ -197,7 +198,7 @@ class PicReader(paddle.io.Dataset):
         if self.cache_img:
             self._get_all_img(**kwargs)
 
-    def _get_all_img(self, **kwargs):
+    def _get_all_img(self, **kwargs) -> None:
         """
         缓存图片进行预resize, 减少内存占用
 
@@ -225,7 +226,7 @@ class PicReader(paddle.io.Dataset):
 
                 pass
 
-    def _load_image(self, directory):
+    def _load_image(self, directory: str) -> np.ndarray:
         """
 
         Args:
@@ -249,7 +250,7 @@ class PicReader(paddle.io.Dataset):
                 # img = Image.open(directory).convert('RGB')
         return img
 
-    def _parse_list(self, **kwargs):
+    def _parse_list(self, **kwargs) -> None:
         """
 
         Args:
@@ -280,7 +281,7 @@ class PicReader(paddle.io.Dataset):
 
                 self.pic_list.append(PicRecord(record))
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int):
         """
 
         Args:
@@ -293,7 +294,7 @@ class PicReader(paddle.io.Dataset):
 
         return self.get(record)
 
-    def get(self, record):
+    def get(self, record: PicRecord) -> tuple:
         """
 
         Args:
@@ -330,7 +331,7 @@ class PicReader(paddle.io.Dataset):
         else:
             return process_data, label
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
 
         Returns:
@@ -338,7 +339,7 @@ class PicReader(paddle.io.Dataset):
         """
         return len(self.pic_list)
 
-    def set_meta(self, meta):
+    def set_meta(self, meta: bool) -> None:
         """
 
         Args:
@@ -349,7 +350,7 @@ class PicReader(paddle.io.Dataset):
         """
         self.meta = meta
 
-    def set_epoch(self, epoch):
+    def set_epoch(self, epoch: int) -> None:
         """
 
         Args:
@@ -361,7 +362,7 @@ class PicReader(paddle.io.Dataset):
         self.transform.set_epoch(epoch)
 
     # only use in search
-    def reset_policy(self, new_hparams):
+    def reset_policy(self, new_hparams: dict) -> None:
         """
 
         Args:
@@ -374,7 +375,7 @@ class PicReader(paddle.io.Dataset):
             self.transform.reset_policy(new_hparams)
 
 
-def _parse(value, function, fmt):
+def _parse(value: str, function: callable, fmt: str) -> None:
     """
     Parse a string into a value, and format a nice ValueError if it fails.
 
@@ -387,23 +388,24 @@ def _parse(value, function, fmt):
     except ValueError as e:
         six.raise_from(ValueError(fmt.format(e)), None)
 
-def _read_classes(csv_file):
+
+def _read_classes(csv_file: str) -> dict:
     """ Parse the classes file.
     """
     result = {}
     with open(csv_file) as csv_reader:
         for line, row in enumerate(csv_reader):
             try:
-                class_id, class_name = row.strip().split(':')[:2]
+                class_name = row.strip()
                 # print(class_id, class_name)
             except ValueError:
                 six.raise_from(
                     ValueError(
-                        'line {}: format should be \'class_id:class_name\''.format(line)),
+                        'line {}: format should be \'class_name\''.format(line)),
                     None)
 
             class_id = _parse(
-                class_id,
+                line,
                 int,
                 'line {}: malformed class ID: {{}}'.format(line))
 

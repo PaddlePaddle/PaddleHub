@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-export PYTHONPATH=${PYTHONPATH}:../
-export PYTHONPATH=${PYTHONPATH}:/home/lvhaijun/video_recognition/utils_project/experiment_project/PaddleHub
-export PYTHONPATH=${PYTHONPATH}:/home/lvhaijun/video_recognition/utils_project/experiment_project/baidu/aicc/auto-augment
-echo ${PYTHONPATH}
 
 export FLAGS_fast_eager_deletion_mode=1
 export FLAGS_eager_delete_tensor_gb=0.0

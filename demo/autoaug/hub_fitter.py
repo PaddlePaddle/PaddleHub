@@ -16,7 +16,7 @@ from __future__ import print_function
 import time
 import six
 import os
-
+from typing import Dict, List, Optional, Union, Tuple
 from auto_augment.autoaug.utils import log
 import logging
 logger = log.get_logger(level=logging.INFO)
@@ -26,7 +26,7 @@ auto_augment_path = auto_augment.__file__
 class HubFitterClassifer(object):
     """Trains an instance of the Model class."""
 
-    def __init__(self, hparams):
+    def __init__(self, hparams: dict) -> None:
         """
         定义分类任务的数据、模型
 
@@ -50,7 +50,7 @@ class HubFitterClassifer(object):
         from paddle.distributed import ParallelEnv
         from paddlehub_utils.trainer import CustomTrainer
 
-        # todo 不支持fleet分布式模式
+        # todo now does not support fleet distribute training
         # from paddle.fluid.incubate.fleet.base import role_maker
         # from paddle.fluid.incubate.fleet.collective import fleet
         # role = role_maker.PaddleCloudRoleMaker(is_collective=True)
@@ -58,8 +58,8 @@ class HubFitterClassifer(object):
 
         logger.info("classficiation data augment search begin")
         self.hparams = hparams
+        # param compatible
         self._fit_param(show=True)
-
         paddle.disable_static(paddle.CUDAPlace(ParallelEnv().dev_id))
 
         train_dataset, eval_dataset = self._init_loader()
@@ -82,7 +82,7 @@ class HubFitterClassifer(object):
             save_interval=1)
         self.trainer = trainer
 
-    def _fit_param(self, show=False):
+    def _fit_param(self, show: bool = False) -> None:
         """
         param fit
         Args:
@@ -94,47 +94,7 @@ class HubFitterClassifer(object):
         hparams = self.hparams
         self._get_label_info(hparams)
 
-    def _parse(self, value, function, fmt):
-        """
-        Parse a string into a value, and format a nice ValueError if it fails.
-
-        Returns `function(value)`.
-        Any `ValueError` raised is catched and a new `ValueError` is raised
-        with message `fmt.format(e)`, where `e` is the caught `ValueError`.
-        """
-        try:
-            return function(value)
-        except ValueError as e:
-            six.raise_from(ValueError(fmt.format(e)), None)
-
-    def _read_classes(self, csv_file):
-        """ Parse the classes file.
-        """
-        result = {}
-        with open(csv_file) as csv_reader:
-            for line, row in enumerate(csv_reader):
-                try:
-                    class_name = row.strip()
-                    # print(class_id, class_name)
-                except ValueError:
-                    six.raise_from(
-                        ValueError(
-                            'line {}: format should be \'class_name\''.format(line)),
-                        None)
-
-                class_id = self._parse(
-                    line,
-                    int,
-                    'line {}: malformed class ID: {{}}'.format(line))
-
-                if class_name in result:
-                    raise ValueError(
-                        'line {}: duplicate class name: \'{}\''.format(
-                            line, class_name))
-                result[class_name] = class_id
-        return result
-
-    def _get_label_info(self, hparams):
+    def _get_label_info(self, hparams: dict) -> None:
         """
 
         Args:
@@ -143,17 +103,17 @@ class HubFitterClassifer(object):
         Returns:
 
         """
+        from paddlehub_utils.reader import _read_classes
         data_config = hparams.data_config
         label_list = data_config.label_list
-        class_to_id_dict = {}
         if os.path.isfile(label_list):
-            class_to_id_dict = self._read_classes(label_list)
+            class_to_id_dict = _read_classes(label_list)
         else:
             assert 0, "label_list:{} not exist".format(label_list)
         self.num_classes = len(class_to_id_dict)
         self.class_to_id_dict = class_to_id_dict
 
-    def _init_loader(self):
+    def _init_loader(self) -> tuple:
         """
 
         Args:
@@ -224,13 +184,21 @@ class HubFitterClassifer(object):
 
         return train_data, val_data
 
-    def reset_config(self, new_hparams):
+    def reset_config(self, new_hparams: dict) -> None:
+        """
+        reset config, used by search stage
+        Args:
+            new_hparams:
+
+        Returns:
+
+        """
         self.hparams = new_hparams
         self.trainer.train_loader.dataset.reset_policy(
             new_hparams.search_space)
-        return
+        return None
 
-    def save_model(self, checkpoint_dir, step=None):
+    def save_model(self, checkpoint_dir: str, step: Optional[str] = None) -> str:
         """Dumps model into the backup_dir.
 
         Args:
@@ -244,7 +212,7 @@ class HubFitterClassifer(object):
 
         return checkpoint_path
 
-    def extract_model_spec(self, checkpoint_path):
+    def extract_model_spec(self, checkpoint_path: str) -> None:
         """Loads a checkpoint with the architecture structure stored in the name."""
         import paddle
         ckpt_path = os.path.join(checkpoint_path, "checkpoint")
@@ -254,7 +222,7 @@ class HubFitterClassifer(object):
         logger.info(
             'Loaded child model checkpoint from {}'.format(checkpoint_path))
 
-    def eval_child_model(self, mode, pass_id=0):
+    def eval_child_model(self, mode: str, pass_id: int = 0) -> dict:
         """Evaluate the child model.
 
         Args:
@@ -276,7 +244,7 @@ class HubFitterClassifer(object):
         else:
             raise NotImplementedError
 
-    def train_one_epoch(self, pass_id):
+    def train_one_epoch(self, pass_id: int) -> dict:
         """
 
         Args:
@@ -306,7 +274,7 @@ class HubFitterClassifer(object):
             steps_per_epoch=steps_per_epoch)
         return {"train_acc": 0}
 
-    def _run_training_loop(self, curr_epoch):
+    def _run_training_loop(self, curr_epoch: int) -> dict:
         """Trains the model `m` for one epoch."""
         start_time = time.time()
         train_acc = self.train_one_epoch(curr_epoch)
@@ -316,7 +284,7 @@ class HubFitterClassifer(object):
                 (time.time() - start_time) / 60.0))
         return train_acc
 
-    def _compute_final_accuracies(self, iteration):
+    def _compute_final_accuracies(self, iteration: int) -> dict:
         """Run once training is finished to compute final test accuracy."""
         task_config = self.hparams.task_config
         task_type = task_config.task_type
@@ -329,7 +297,7 @@ class HubFitterClassifer(object):
         logger.info('Test acc: {}'.format(test_acc))
         return test_acc
 
-    def run_model(self, epoch):
+    def run_model(self, epoch: int) -> dict:
         """Trains and evalutes the image model."""
         self._fit_param()
         train_acc = self._run_training_loop(epoch)
