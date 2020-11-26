@@ -15,7 +15,7 @@ PaddleHub Serving有两种启动方式，分别是使用命令行启动，以及
 #### 命令行命令启动
 启动命令
 ```shell
-$ hub serving start --modules [Module1==Version1, Module2==Version2, ...] \
+$ hub serving start --modules Module1==Version1 Module2==Version2 ... \
                     --port XXXX \
                     --use_gpu \
                     --use_multiprocess \
