@@ -166,7 +166,6 @@ class ServingCommand:
         '''
         Start one PaddleHub-Serving instance by arguments with gunicorn.
         '''
-        # module = self.args.modules
         module = self.modules_info
         if module is not None:
             port = self.args.port
@@ -210,7 +209,6 @@ class ServingCommand:
         '''
         Start one PaddleHub-Serving instance by arguments with flask.
         '''
-        # module = self.args.modules
         module = self.modules_info
         if module is not None:
             port = self.args.port
