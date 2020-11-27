@@ -59,7 +59,7 @@ def save_inference_model(self,
 import cv2
 import paddlehub as hub
 
-sr_model = hub.Module('dcscn')
+sr_model = hub.Module(name='dcscn')
 im = cv2.imread('/PATH/TO/IMAGE').astype('float32')
 #visualization=True可以用于查看超分图片效果，可设置为False提升运行速度。
 res = sr_model.reconstruct(images=[im], visualization=True)

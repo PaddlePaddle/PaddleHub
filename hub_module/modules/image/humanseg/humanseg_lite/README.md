@@ -105,7 +105,7 @@ def save_inference_model(dirname='humanseg_lite_model',
 import cv2
 import paddlehub as hub
 
-human_seg = hub.Module('humanseg_lite')
+human_seg = hub.Module(name='humanseg_lite')
 im = cv2.imread('/PATH/TO/IMAGE')
 #visualization=True可以用于查看超分图片效果，可设置为False提升运行速度。
 res = human_seg.segment(images=[im],visualization=True)

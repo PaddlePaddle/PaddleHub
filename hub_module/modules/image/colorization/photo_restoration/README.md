@@ -38,7 +38,7 @@ def run_image(self,
 import cv2
 import paddlehub as hub
 
-model = hub.Module('photo_restoration', visualization=True)
+model = hub.Module(name='photo_restoration', visualization=True)
 im = cv2.imread('/PATH/TO/IMAGE')
 res = model.run_image(im)
 
