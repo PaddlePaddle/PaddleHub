@@ -142,21 +142,43 @@ classifier任务采用开源paddleclas框架
 
 ### 搜索阶段
 
-```
-cd PaddleHub/demo/autaug/
-bash search.sh
-```
-
-结果会以json形式dump到workspace中，用户可利用这个json文件进行训练
+用于数据增强策略的搜索
 
 ### 训练阶段
 
+在训练中应用搜索出来的数据增强策略
 
+
+
+### 示例demo
+
+#### Flower数据组织
+
+
+```
+cd PaddleHub/demo/autaug/
+mkdir -p ./dataset
+cd dataset
+wget https://bj.bcebos.com/paddlehub-dataset/flower_photos.tar.gz
+tar -xvf flower_photos.tar.gz
+```
+
+#### 搜索流程
+
+```
+cd PaddleHub/demo/autaug/
+bash search.sh
+# 结果会以json形式dump到workspace中，用户可利用这个json文件进行训练
+```
+
+#### 训练阶段
 
 ```
 cd PaddleHub/demo/autaug/
 bash train.sh
 ```
+
+
 
 
 
