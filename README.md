@@ -1,5 +1,5 @@
-<p align="center">	
- <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"  	
+<p align="center">
+ <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"
 </p>
 
 
@@ -247,6 +247,7 @@
 ## 致谢
 我们非常欢迎您为PaddleHub贡献代码，也十分感谢您的反馈。
 
+* 非常感谢[肖培楷](https://github.com/jm12138)贡献了街景动漫化，人像动漫化和手势关键点识别三个module
 * 非常感谢[Austendeng](https://github.com/Austendeng)贡献了修复SequenceLabelReader的pr
 * 非常感谢[cclauss](https://github.com/cclauss)贡献了优化travis-ci检查的pr
 * 非常感谢[奇想天外](http://www.cheerthink.com/)贡献了口罩检测的demo
