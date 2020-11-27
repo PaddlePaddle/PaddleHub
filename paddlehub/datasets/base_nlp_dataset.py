@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from tqdm import tqdm
 from typing import Dict, List, Optional, Union, Tuple
 import csv
 import io
@@ -231,20 +230,17 @@ class TextClassificationDataset(BaseNLPDataset, fluid.io.Dataset):
             records(:obj:`List[dict]`): All records which the model needs.
         """
         records = []
-        with tqdm(total=len(examples)) as process_bar:
-            for example in examples:
-                record = self.tokenizer.encode(
-                    text=example.text_a, text_pair=example.text_b, max_seq_len=self.max_seq_len)
-                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
-                # When all words are not found in the vocab, the text will be dropped.
-                if not record:
-                    logger.info("The text %s has been dropped as it has no words in the vocab after tokenization." %
-                                example.text_a)
-                    continue
-                if example.label:
-                    record['label'] = self.label_map[example.label]
-                records.append(record)
-                process_bar.update(1)
+        for example in examples:
+            record = self.tokenizer.encode(text=example.text_a, text_pair=example.text_b, max_seq_len=self.max_seq_len)
+            # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+            # When all words are not found in the vocab, the text will be dropped.
+            if not record:
+                logger.info(
+                    "The text %s has been dropped as it has no words in the vocab after tokenization." % example.text_a)
+                continue
+            if example.label:
+                record['label'] = self.label_map[example.label]
+            records.append(record)
         return records
 
     def __getitem__(self, idx):
