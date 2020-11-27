@@ -115,6 +115,7 @@ class CustomTrainer(Trainer):
         timer.start()
 
         for i in range(epochs):
+            loader.dataset.set_epoch(epochs)
             self.current_epoch += 1
             self.train_one_epoch(loader, timer, self.current_epoch, epochs, log_interval, steps_per_epoch)
 

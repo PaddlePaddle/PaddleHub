@@ -111,13 +111,18 @@ class Trainer(object):
             logger.info('PaddleHub model checkpoint loaded. current_epoch={} [{}]'.format(
                 self.current_epoch, metric_msg))
 
+        model_path = os.path.join(self.checkpoint_dir, 'epoch_{}'.format(self.current_epoch))
+        self.load_model(model_path)
+
+    def load_model(self, load_dir: str):
+        """load model"""
         # load model checkpoint
-        model_params_path = os.path.join(self.checkpoint_dir, 'epoch_{}'.format(self.current_epoch), 'model.pdparams')
+        model_params_path = os.path.join(load_dir, 'model.pdparams')
         state_dict = paddle.load(model_params_path)
         self.model.set_state_dict(state_dict)
 
         # load optimizer checkpoint
-        optim_params_path = os.path.join(self.checkpoint_dir, 'epoch_{}'.format(self.current_epoch), 'model.pdopt')
+        optim_params_path = os.path.join(load_dir, 'model.pdopt')
         state_dict = paddle.load(optim_params_path)
         self.optimizer.set_state_dict(state_dict)
 

@@ -51,6 +51,7 @@ class PbaAugment(object):
             scale_size: int = 256,
             normalize: Optional[list] = None,
             pre_transform: bool = True,
+            stage: str = "search",
             **kwargs) -> None:
         """
 
@@ -69,7 +70,7 @@ class PbaAugment(object):
                     0.229, 0.224, 0.225]}
 
         policy = kwargs["policy"]
-        stage = "search"
+        assert stage in ["search", "train"]
         train_epochs = kwargs["hp_policy_epochs"]
         self.auto_aug_transform = AutoAugTransform.create(
             policy, stage=stage, train_epochs=train_epochs)
@@ -359,7 +360,8 @@ class PicReader(paddle.io.Dataset):
         Returns:
 
         """
-        self.transform.set_epoch(epoch)
+        if self.transform is not None:
+            self.transform.set_epoch(epoch)
 
     # only use in search
     def reset_policy(self, new_hparams: dict) -> None:
@@ -415,3 +417,73 @@ def _read_classes(csv_file: str) -> dict:
                         line, class_name))
             result[class_name] = class_id
     return result
+
+
+def _init_loader(hparams: dict, TrainTransform=None) -> tuple:
+    """
+
+    Args:
+        hparams:
+
+    Returns:
+
+    """
+    train_data_root = hparams.data_config.train_img_prefix
+    val_data_root = hparams.data_config.val_img_prefix
+    train_list = hparams.data_config.train_ann_file
+    val_list = hparams.data_config.val_ann_file
+    input_size = hparams.task_config.classifier.input_size
+    scale_size = hparams.task_config.classifier.scale_size
+    search_space = hparams.search_space
+    search_space["task_type"] = hparams.task_config.task_type
+    epochs = hparams.task_config.classifier.epochs
+    no_cache_img = hparams.task_config.classifier.get("no_cache_img", False)
+
+    normalize = {
+        'mean': [
+            0.485, 0.456, 0.406], 'std': [
+            0.229, 0.224, 0.225]}
+
+    if TrainTransform is None:
+        TrainTransform = PbaAugment(
+            input_size=input_size,
+            scale_size=scale_size,
+            normalize=normalize,
+            policy=search_space,
+            hp_policy_epochs=epochs,
+        )
+    delimiter = hparams.data_config.delimiter
+    kwargs = dict(
+        conf=hparams,
+        delimiter=delimiter
+    )
+
+    if hparams.task_config.classifier.use_class_map:
+        class_to_id_dict = _read_classes(label_list=hparams.data_config.label_list)
+    else:
+        class_to_id_dict = None
+    train_data = PicReader(
+        root_path=train_data_root,
+        list_file=train_list,
+        transform=TrainTransform,
+        class_to_id_dict=class_to_id_dict,
+        cache_img=not no_cache_img,
+        **kwargs)
+
+    val_data = PicReader(
+        root_path=val_data_root,
+        list_file=val_list,
+        transform=transforms.Compose(
+            transforms=[
+                transforms.Resize(
+                    (224,
+                     224)),
+                transforms.Permute(),
+                transforms.Normalize(
+                    **normalize, channel_first=True)],
+            channel_first = False),
+        class_to_id_dict=class_to_id_dict,
+        cache_img=not no_cache_img,
+        **kwargs)
+
+    return train_data, val_data
