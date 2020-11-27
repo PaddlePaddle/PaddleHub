@@ -86,6 +86,44 @@ for idx, text in enumerate(data):
 
 参考PaddleHub 文本分类示例。https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/text_classifcation
 
+## 服务部署
+
+PaddleHub Serving可以部署一个在线获取预训练词向量。
+
+### Step1: 启动PaddleHub Serving
+
+运行启动命令：
+
+```shell
+$ hub serving start -m bert_multi_uncased_L-12_H-768_A-12
+```
+
+这样就完成了一个获取预训练词向量服务化API的部署，默认端口号为8866。
+
+**NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
+
+### Step2: 发送预测请求
+
+配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+
+```python
+import requests
+import json
+
+# 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
+text = [["今天是个好日子", "天气预报说今天要下雨"], ["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"]]
+# 以key的方式指定text传入预测方法的时的参数，此例中为"texts"
+# 对应本地部署，则为module.get_embedding(texts=text)
+data = {"texts": text}
+# 发送post请求，content-type类型应指定json方式
+url = "http://10.12.121.132:8866/predict/bert_multi_uncased_L-12_H-768_A-12"
+# 指定post请求的headers为application/json方式
+headers = {"Content-Type": "application/json"}
+
+r = requests.post(url=url, headers=headers, data=json.dumps(data))
+print(r.json())
+```
+
 ##   查看代码
 
 https://github.com/PaddlePaddle/models/tree/develop/PaddleNLP/pretrain_langauge_models/BERT
