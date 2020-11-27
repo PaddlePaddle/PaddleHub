@@ -23,15 +23,11 @@ if __name__ == '__main__':
     label_map = {0: 'negative', 1: 'positive'}
 
     model = hub.Module(
-        name='ernie',
-        # directory='/mnt/zhangxuefei/program-paddle/PaddleHub/modules/text/language_model/ernie',
-        version='2.0.0')
-    # task='sequence_classification',
-    # load_checkpoint='./test_ernie_text_cls/epoch_3/model.pdparams',
-    # label_map=label_map)
-    import json
-    results = json.dumps(model.get_embedding(data))
-
-    print(len(results), results)
+        name='ernie_tiny',
+        version='2.0.0',
+        task='sequence_classification',
+        load_checkpoint='./test_ernie_text_cls/best_model/model.pdparams',
+        label_map=label_map)
+    results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)
     for idx, text in enumerate(data):
         print('Data: {} \t Lable: {}'.format(text, results[idx]))

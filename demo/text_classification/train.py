@@ -31,5 +31,5 @@ if __name__ == '__main__':
     optimizer = paddle.optimizer.AdamW(learning_rate=5e-5, parameters=model.parameters())
     trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls')
 
-    trainer.train(train_dataset, epochs=3, batch_size=32, eval_dataset=dev_dataset, log_interval=10, save_interval=1)
+    trainer.train(train_dataset, epochs=3, batch_size=32, eval_dataset=dev_dataset)
     trainer.evaluate(test_dataset, batch_size=32)

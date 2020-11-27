@@ -52,7 +52,7 @@ class Trainer(object):
     def __init__(self,
                  model: paddle.nn.Layer,
                  optimizer: paddle.optimizer.Optimizer,
-                 use_gpu: bool = True,
+                 use_gpu: bool = False,
                  use_vdl: bool = True,
                  checkpoint_dir: str = None,
                  compare_metrics: Callable = None,
