@@ -127,6 +127,7 @@ class ErniePretrainedModel(PretrainedModel):
         },
         "ernie_v2_eng_large": {
             "attention_probs_dropout_prob": 0.1,
+            "intermediate_size": 4096,
             "hidden_act": "gelu",
             "hidden_dropout_prob": 0.1,
             "hidden_size": 1024,
