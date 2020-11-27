@@ -15,11 +15,7 @@ import paddle
 import paddlehub as hub
 
 if __name__ == '__main__':
-    model = hub.Module(
-        # name='ernie_tiny',
-        directory='/mnt/zhangxuefei/program-paddle/PaddleHub/modules/text/language_model/ernie_tiny',
-        version='2.0.0',
-        task='sequence_classification')
+    model = hub.Module(name='ernie_tiny', version='2.0.0', task='sequence_classification')
 
     train_dataset = hub.datasets.ChnSentiCorp(
         tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='train')
@@ -29,7 +25,7 @@ if __name__ == '__main__':
         tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='test')
 
     optimizer = paddle.optimizer.AdamW(learning_rate=5e-5, parameters=model.parameters())
-    trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls')
+    trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls', use_gpu=True)
 
-    trainer.train(train_dataset, epochs=3, batch_size=32, eval_dataset=dev_dataset)
+    trainer.train(train_dataset, epochs=3, batch_size=32, eval_dataset=dev_dataset, save_interval=1)
     trainer.evaluate(test_dataset, batch_size=32)
