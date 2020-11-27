@@ -150,7 +150,13 @@ class Bert(nn.Layer):
 
         examples = []
         for text in data:
-            encoded_inputs = tokenizer.encode(text, max_seq_len=max_seq_len)
+            if len(text) == 1:
+                encoded_inputs = tokenizer.encode(text[0], text_pair=None, max_seq_len=max_seq_len)
+            elif len(text) == 2:
+                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], max_seq_len=max_seq_len)
+            else:
+                raise RuntimeError(
+                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
             examples.append((encoded_inputs['input_ids'], encoded_inputs['segment_ids']))
 
         def _batchify_fn(batch):
@@ -197,7 +203,14 @@ class Bert(nn.Layer):
         tokenizer = self.get_tokenizer()
         results = []
         for text in texts:
-            encoded_inputs = tokenizer.encode(text, pad_to_max_seq_len=False)
+            if len(text) == 1:
+                encoded_inputs = tokenizer.encode(text[0], text_pair=None, pad_to_max_seq_len=False)
+            elif len(text) == 2:
+                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], pad_to_max_seq_len=False)
+            else:
+                raise RuntimeError(
+                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
+
             input_ids = paddle.to_tensor(encoded_inputs['input_ids']).unsqueeze(0)
             segment_ids = paddle.to_tensor(encoded_inputs['segment_ids']).unsqueeze(0)
             sequence_output, pooled_output = self(input_ids, segment_ids)
