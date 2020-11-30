@@ -65,15 +65,3 @@ class ChnSentiCorp(TextClassificationDataset):
             data_file=data_file,
             label_list=["0", "1"],
             is_file_with_header=True)
-
-
-if __name__ == "__main__":
-    tokenizer = BertTokenizer(vocab_file='/mnt/zhangxuefei/.cache/paddle/dataset/ernie/vocab.txt')
-    train_dataset = ChnSentiCorp(tokenizer=tokenizer, max_seq_len=128, mode='train')
-    # dev_dataset = ChnSentiCorp(tokenizer=tokenizer, max_seq_len=60, mode='dev')
-    # test_dataset = ChnSentiCorp(tokenizer=tokenizer, max_seq_len=60, mode='test')
-
-    for index, record in enumerate(train_dataset):
-        if index > 3:
-            break
-        print(len(record), record)

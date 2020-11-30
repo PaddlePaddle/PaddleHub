@@ -32,7 +32,7 @@ from paddlehub.utils.utils import download
     summary=
     "Baidu's ERNIE, Enhanced Representation through kNowledge IntEgration, max_seq_len=512 when predtrained. The module is executed as paddle.dygraph.",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com",
+    author_email="",
     type="nlp/semantic_model")
 class Ernie(nn.Layer):
     """
@@ -218,17 +218,3 @@ class Ernie(nn.Layer):
             pooled_output = pooled_output.squeeze(0)
             results.append((sequence_output.numpy().tolist(), pooled_output.numpy().tolist()))
         return results
-
-
-if __name__ == "__main__":
-    import numpy as np
-    import paddlehub as hub
-    src_ids = paddle.to_tensor(np.array([[1, 2, 3, 4, 5]], dtype=np.int64))
-    sent_ids = paddle.to_tensor(np.array([[0, 0, 0, 0, 0]], dtype=np.int64))
-    paddle.set_device('cpu')
-
-    ernie = hub.Module(
-        directory='/mnt/zhangxuefei/program-paddle/PaddleHub/modules/text/language_model/ernie', version='2.0.0')
-    sequence_output, pooled_output = ernie(src_ids, sent_ids)
-    results = ernie.get_embedding(texts=[('今天天气真好', '今天是个好日子'), ('今天天气真好', '今天是个好日子')])
-    vocab_path = ernie.get_vocab_path()

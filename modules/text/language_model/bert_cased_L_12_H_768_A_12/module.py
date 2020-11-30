@@ -32,7 +32,7 @@ from paddlehub.utils.utils import download
     summary=
     "bert_cased_L-12_H-768_A-12, 12-layer, 768-hidden, 12-heads, 110M parameters. The module is executed as paddle.dygraph.",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com",
+    author_email="",
     type="nlp/semantic_model")
 class Bert(nn.Layer):
     """
@@ -219,19 +219,3 @@ class Bert(nn.Layer):
             pooled_output = pooled_output.squeeze(0)
             results.append((sequence_output.numpy().tolist(), pooled_output.numpy().tolist()))
         return results
-
-
-if __name__ == "__main__":
-    import numpy as np
-    import paddlehub as hub
-    src_ids = paddle.to_tensor(np.array([[1, 2, 3, 4, 5]], dtype=np.int64))
-    sent_ids = paddle.to_tensor(np.array([[0, 0, 0, 0, 0]], dtype=np.int64))
-    paddle.set_device('cpu')
-
-    bert = hub.Module(
-        directory='/mnt/zhangxuefei/program-paddle/PaddleHub/modules/text/language_model/bert_cased_L_12_H_768_A_12',
-        version='2.0.0')
-    sequence_output, pooled_output = bert(src_ids, sent_ids)  #, pos_ids, input_mask)
-    print(sequence_output.shape)
-    print(pooled_output.shape)
-    vocab_path = bert.get_vocab_path()

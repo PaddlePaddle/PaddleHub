@@ -31,7 +31,7 @@ from paddlehub.utils.utils import download
     version="2.0.0",
     summary="Baidu's ERNIE-tiny, Enhanced Representation through kNowledge IntEgration, tiny version, max_seq_len=512",
     author="paddlepaddle",
-    author_email="paddle-dev@baidu.com",
+    author_email="",
     type="nlp/semantic_model")
 class ErnieTiny(nn.Layer):
     """
@@ -227,18 +227,3 @@ class ErnieTiny(nn.Layer):
             pooled_output = pooled_output.squeeze(0)
             results.append((sequence_output.numpy().tolist(), pooled_output.numpy().tolist()))
         return results
-
-
-if __name__ == "__main__":
-    import numpy as np
-    import paddlehub as hub
-    src_ids = paddle.to_tensor(np.array([[1, 2, 3, 4, 5]], dtype=np.int64))
-    sent_ids = paddle.to_tensor(np.array([[0, 0, 0, 0, 0]], dtype=np.int64))
-    paddle.set_device('cpu')
-
-    ernie = hub.Module(
-        directory='/mnt/zhangxuefei/program-paddle/PaddleHub/modules/text/language_model/ernie_tiny', version='2.0.0')
-    sequence_output, pooled_output = ernie(src_ids, sent_ids)  #, pos_ids, input_mask)
-    print(sequence_output.shape)
-    print(pooled_output.shape)
-    vocab_path = ernie.get_vocab_path()

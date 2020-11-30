@@ -761,10 +761,3 @@ class ErnieTinyTokenizer(BertTokenizer):
             else:
                 in_vocab_tokens.append(self.unk_token)
         return in_vocab_tokens
-
-
-if __name__ == "__main__":
-    tokenizer = BertTokenizer(vocab_file='/mnt/zhangxuefei/.cache/paddle/dataset/ernie/vocab.txt')
-
-    inputs = tokenizer.encode(text="计算准确率", text_pair="实例的名字")
-    print(inputs)
