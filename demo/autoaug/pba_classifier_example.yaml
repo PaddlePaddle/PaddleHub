@@ -11,11 +11,11 @@ task_config:
         use_class_map: false
 
 data_config:
-    train_img_prefix: ./dataset/flower_photos"
-    train_ann_file: ./dataset/flower_photos/train_list.txt"
-    val_img_prefix: ./dataset/flower_photos"
-    val_ann_file: ./dataset/flower_photos/validate_list.txt"
-    label_list: ./dataset/flower_photos/label_list.txt"
+    train_img_prefix: "./dataset/flower_photos"
+    train_ann_file: "./dataset/flower_photos/train_list.txt"
+    val_img_prefix: "./dataset/flower_photos"
+    val_ann_file: "./dataset/flower_photos/validate_list.txt"
+    label_list: "./dataset/flower_photos/label_list.txt"
     delimiter: " "
 
 resource_config:

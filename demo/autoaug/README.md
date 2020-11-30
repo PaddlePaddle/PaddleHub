@@ -7,8 +7,7 @@
 请预先从pip下载auto-augment软件包
 
 ```
-# 测试pypi源，正式源待更新
-pip install -i https://test.pypi.org/simple/ auto-augment
+pip install auto-augment
 ```
 
 
@@ -29,7 +28,7 @@ auto-augment软件包目前支持Paddle的图像分类任务和物体检测任�
 
 ## 支持任务
 
-目前auto-augment仅支持paddlhub的图像分类任务。
+目前auto-augment支持paddlhub的图像分类任务。
 
 后续会扩充到其他任务
 
@@ -59,13 +58,11 @@ auto-augment软件包目前支持Paddle的图像分类任务和物体检测任�
 
 ##### classifier任务配置细节
 
-classifier任务采用开源paddleclas框架
-
 - model_name: paddlehub模型名称
 - epochs: int, 任务搜索轮数， **必填** , 该参数需要特殊指定
 - Input_size: 模型输入尺寸
 - scale_size： 数据预处理尺寸
-- no_cache_image: 不缓存数据， 默认False
+- no_cache_image: 不缓存数据， 默认False
 - use_class_map: 使用label_list 映射
 
 
@@ -106,7 +103,6 @@ classifier任务采用开源paddleclas框架
 - algo_param:
   - perturbation_interval: 搜索扰动周期
   - num_samples：搜索进程数
-  - 
 
 #### search_space(搜索空间配置)
 
@@ -122,13 +118,13 @@ classifier任务采用开源paddleclas框架
 
      value: list, [0,0.5,1] 枚举数据
 
-     ![image-20200707162627074](/Users/lvhaijun01/Library/Application%20Support/typora-user-images/image-20200707162627074.png)
+     ![image-20200707162627074](./doc/operators.png)
 
   2. 缩略版算子模式:
 
      用户只需要指定需要搜索的算子，prob, magtitue搜索空间为系统默认配置，为0-1之间。
 
-     ![image-20200707162709253](/Users/lvhaijun01/Library/Application%20Support/typora-user-images/image-20200707162709253.png)
+     ![image-20200707162709253](./doc/short_operators.png)
 
   支持1，2模式混合定议
 

@@ -47,7 +47,6 @@ class HubFitterClassifer(object):
         )
         import paddle
         import paddlehub as hub
-        from paddle.distributed import ParallelEnv
         from paddlehub_utils.trainer import CustomTrainer
         from paddlehub_utils.reader import _init_loader
 
@@ -61,7 +60,7 @@ class HubFitterClassifer(object):
         self.hparams = hparams
         # param compatible
         self._fit_param(show=True)
-        paddle.disable_static(paddle.CUDAPlace(ParallelEnv().dev_id))
+        paddle.disable_static(paddle.CUDAPlace(paddle.distributed.get_rank()))
 
         train_dataset, eval_dataset = _init_loader(self.hparams)
         model = hub.Module(name=hparams["task_config"]["classifier"]["model_name"], label_list=self.class_to_id_dict.keys(), load_checkpoint=None)

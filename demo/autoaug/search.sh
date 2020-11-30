@@ -7,6 +7,6 @@ workspace="./work_dirs//autoaug_flower_mobilenetv2"
 # workspace工作空间需要初始化
 rm -rf ${workspace}
 mkdir -p ${workspace}
-CUDA_VISIBLE_DEVICES=0,1 python search.py \
+CUDA_VISIBLE_DEVICES=0,1 python -u search.py \
     --config=${config} \
-    --workspace=${workspace} #2>&1 | tee -a ${workspace}/log.txt
+    --workspace=${workspace} 2>&1 | tee -a ${workspace}/log.txt
