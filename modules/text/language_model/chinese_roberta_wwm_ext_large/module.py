@@ -27,7 +27,7 @@ from paddlehub.utils.utils import download
 
 
 @moduleinfo(
-    name="chinese-roberta-wwm-ext-large",
+    name="roberta-wwm-ext-large",
     version="2.0.0",
     summary=
     "chinese-roberta-wwm-ext-large, 24-layer, 1024-hidden, 16-heads, 340M parameters. The module is executed as paddle.dygraph.",

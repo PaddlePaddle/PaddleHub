@@ -27,7 +27,7 @@ from paddlehub.utils.utils import download
 
 
 @moduleinfo(
-    name="bert_multi_uncased_L-12_H-768_A-12",
+    name="bert-base-multilingual-uncased",
     version="2.0.0",
     summary=
     "bert_multi_uncased_L-12_H-768_A-12, 12-layer, 768-hidden, 12-heads, 110M parameters. The module is executed as paddle.dygraph.",

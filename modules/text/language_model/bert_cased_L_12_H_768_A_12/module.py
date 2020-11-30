@@ -27,7 +27,7 @@ from paddlehub.utils.utils import download
 
 
 @moduleinfo(
-    name="bert_cased_L-12_H-768_A-12",
+    name="bert-base-cased",
     version="2.0.0",
     summary=
     "bert_cased_L-12_H-768_A-12, 12-layer, 768-hidden, 12-heads, 110M parameters. The module is executed as paddle.dygraph.",

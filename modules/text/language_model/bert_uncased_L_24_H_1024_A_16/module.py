@@ -27,7 +27,7 @@ from paddlehub.utils.utils import download
 
 
 @moduleinfo(
-    name="bert_uncased_L-24_H-1024_A-16",
+    name="bert-large-uncased",
     version="2.0.0",
     summary=
     "bert_uncased_L-24_H-1024_A-16, 24-layer, 1024-hidden, 16-heads, 340M parameters. The module is executed as paddle.dygraph.",
