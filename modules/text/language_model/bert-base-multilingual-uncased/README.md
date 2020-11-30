@@ -1,5 +1,5 @@
 ```shell
-$ hub install bert_multi_uncased_L-12_H-768_A-12==2.0.0
+$ hub install bert-base-multilingual-uncased==2.0.0
 ```
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/bert_network.png"  hspace='10'/> <br />
@@ -74,7 +74,7 @@ data = [
 label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
-    name='bert_multi_uncased_L-12_H-768_A-12',
+    name='bert-base-multilingual-uncased',
     version='2.0.0',
     task='sequence_classification',
     load_checkpoint='/path/to/parameters',
@@ -95,7 +95,7 @@ PaddleHub Serving可以部署一个在线获取预训练词向量。
 运行启动命令：
 
 ```shell
-$ hub serving start -m bert_multi_uncased_L-12_H-768_A-12
+$ hub serving start -m bert-base-multilingual-uncased
 ```
 
 这样就完成了一个获取预训练词向量服务化API的部署，默认端口号为8866。
@@ -116,7 +116,7 @@ text = [["今天是个好日子", "天气预报说今天要下雨"], ["这个宾
 # 对应本地部署，则为module.get_embedding(texts=text)
 data = {"texts": text}
 # 发送post请求，content-type类型应指定json方式
-url = "http://10.12.121.132:8866/predict/bert_multi_uncased_L-12_H-768_A-12"
+url = "http://10.12.121.132:8866/predict/bert-base-multilingual-uncased"
 # 指定post请求的headers为application/json方式
 headers = {"Content-Type": "application/json"}
 
