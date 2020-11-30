@@ -16,7 +16,7 @@ $ hub install ernie_v2_eng_base==2.0.0
 ## API
 
 ```python
-def \_\init\_\_(
+def __init__(
     task=None,
     load_checkpoint=None,
     label_map=None)

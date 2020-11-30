@@ -10,7 +10,7 @@ $ hub install bert-large-cased==2.0.0
 ## API
 
 ```python
-def \_\init\_\_(
+def __init__(
     task=None,
     load_checkpoint=None,
     label_map=None)
