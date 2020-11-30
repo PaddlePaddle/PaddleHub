@@ -20,23 +20,23 @@ import paddle.nn as nn
 import paddle.nn.functional as F
 
 from paddlehub import BertTokenizer
-from paddlehub.module.modeling_ernie import ErnieModel, ErnieForSequenceClassification
+from paddlehub.module.modeling_bert import BertForSequenceClassification, BertModel
 from paddlehub.module.module import moduleinfo, serving
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import download
 
 
 @moduleinfo(
-    name="ernie",
+    name="bert-large-cased",
     version="2.0.0",
     summary=
-    "Baidu's ERNIE, Enhanced Representation through kNowledge IntEgration, max_seq_len=512 when predtrained. The module is executed as paddle.dygraph.",
+    "bert_cased_L-24_H-1024_A-16, 24-layer, 1024-hidden, 16-heads, 340M parameters. The module is executed as paddle.dygraph.",
     author="paddlepaddle",
     author_email="",
     type="nlp/semantic_model")
-class Ernie(nn.Layer):
+class Bert(nn.Layer):
     """
-    Ernie model
+    BERT model
     """
 
     def __init__(
@@ -45,14 +45,14 @@ class Ernie(nn.Layer):
             load_checkpoint=None,
             label_map=None,
     ):
-        super(Ernie, self).__init__()
+        super(Bert, self).__init__()
         # TODO(zhangxuefei): add token_classification task
         if task == 'sequence_classification':
-            self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie')
+            self.model = BertForSequenceClassification.from_pretrained(pretrained_model_name_or_path='bert-large-cased')
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy(name='acc_accumulation')
         elif task is None:
-            self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie')
+            self.model = BertModel.from_pretrained(pretrained_model_name_or_path='bert-large-cased')
         else:
             raise RuntimeError("Unknown task %s, task should be sequence_classification" % task)
 
@@ -83,10 +83,10 @@ class Ernie(nn.Layer):
         """
         Gets the path of the module vocabulary path.
         """
-        save_path = os.path.join(DATA_HOME, 'ernie', 'vocab.txt')
+        save_path = os.path.join(DATA_HOME, 'bert-large-cased', 'bert-large-cased-vocab.txt')
         if not os.path.exists(save_path) or not os.path.isfile(save_path):
-            url = "https://paddlenlp.bj.bcebos.com/models/transformers/ernie/vocab.txt"
-            download(url, os.path.join(DATA_HOME, 'ernie'))
+            url = "https://paddle-hapi.bj.bcebos.com/models/bert/bert-large-cased-vocab.txt"
+            download(url, os.path.join(DATA_HOME, 'bert-large-cased'))
         return save_path
 
     def get_tokenizer(self, tokenize_chinese_chars=True):

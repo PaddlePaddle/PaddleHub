@@ -20,7 +20,7 @@ import pickle
 import unicodedata
 from typing import Dict, List, Optional, Union, Tuple
 
-import sentencepiece as spm
+from paddle.utils import try_import
 
 from paddlehub.text.utils import load_vocab, is_whitespace, is_control, is_punctuation, whitespace_tokenize, is_chinese_char
 
@@ -509,9 +509,9 @@ class BertTokenizer(object):
                max_seq_len: Optional[int] = None,
                pad_to_max_seq_len: bool = True,
                truncation_strategy: str = 'longest_first',
-               return_position_ids: bool = True,
+               return_position_ids: bool = False,
                return_segment_ids: bool = True,
-               return_input_mask: bool = True,
+               return_input_mask: bool = False,
                return_length: bool = True,
                return_overflowing_tokens: bool = False,
                return_special_tokens_mask: bool = False):
@@ -541,11 +541,11 @@ class BertTokenizer(object):
                 - 'only_first': Only truncate the first sequence
                 - 'only_second': Only truncate the second sequence
                 - 'do_not_truncate': Does not truncate (raise an error if the input sequence is longer than max_seq_len)
-            return_position_ids (:obj:`bool`, `optional`, defaults to :obj:`True`):
+            return_position_ids (:obj:`bool`, `optional`, defaults to :obj:`False`):
                 Set to True to return tokens position ids (default True).
             return_segment_ids (:obj:`bool`, `optional`, defaults to :obj:`True`):
                 Whether to return token type IDs.
-            return_input_mask (:obj:`bool`, `optional`, defaults to :obj:`True`):
+            return_input_mask (:obj:`bool`, `optional`, defaults to :obj:`False`):
                 Whether to return the attention mask.
             return_length (:obj:`int`, defaults to :obj:`True`):
                 If set the resulting dictionary will include the length of each encoded inputs
@@ -612,7 +612,6 @@ class BertTokenizer(object):
                 encoded_inputs['num_truncated_tokens'] = total_len - max_seq_len
 
         # Add special tokens
-
         sequence = self.build_inputs_with_special_tokens(ids, pair_ids)
         segment_ids = self.create_segment_ids_from_sequences(ids, pair_ids)
 
@@ -704,6 +703,7 @@ class ErnieTinyTokenizer(BertTokenizer):
             cls_token: str = '[CLS]',
             mask_token: str = '[MASK]',
     ):
+        mod = try_import('sentencepiece')
         self.unk_token = unk_token
         self.sep_token = sep_token
         self.pad_token = pad_token
@@ -719,7 +719,7 @@ class ErnieTinyTokenizer(BertTokenizer):
 
         # Here is the difference with BertTokenizer.
         self.dict = pickle.load(open(word_dict_path, 'rb'))
-        self.sp_model = spm.SentencePieceProcessor()
+        self.sp_model = mod.SentencePieceProcessor()
         self.window_size = 5
         self.sp_model.Load(spm_path)
 

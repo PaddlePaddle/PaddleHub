@@ -1,4 +1,3 @@
-# coding:utf-8
 # Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -16,3 +15,4 @@
 from paddlehub.datasets.canvas import Canvas
 from paddlehub.datasets.flowers import Flowers
 from paddlehub.datasets.minicoco import MiniCOCO
+from paddlehub.datasets.chnsenticorp import ChnSentiCorp

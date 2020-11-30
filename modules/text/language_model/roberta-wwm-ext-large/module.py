@@ -20,23 +20,24 @@ import paddle.nn as nn
 import paddle.nn.functional as F
 
 from paddlehub import BertTokenizer
-from paddlehub.module.modeling_ernie import ErnieModel, ErnieForSequenceClassification
+from paddlehub.module.modeling_roberta import RobertaModel, RobertaForSequenceClassification
 from paddlehub.module.module import moduleinfo, serving
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import download
 
 
 @moduleinfo(
-    name="ernie",
+    name="roberta-wwm-ext-large",
     version="2.0.0",
     summary=
-    "Baidu's ERNIE, Enhanced Representation through kNowledge IntEgration, max_seq_len=512 when predtrained. The module is executed as paddle.dygraph.",
-    author="paddlepaddle",
-    author_email="",
-    type="nlp/semantic_model")
-class Ernie(nn.Layer):
+    "chinese-roberta-wwm-ext-large, 24-layer, 1024-hidden, 16-heads, 340M parameters. The module is executed as paddle.dygraph.",
+    author="ymcui",
+    author_email="ymcui@ir.hit.edu.cn",
+    type="nlp/semantic_model",
+)
+class Roberta(nn.Layer):
     """
-    Ernie model
+    RoBERTa model
     """
 
     def __init__(
@@ -45,14 +46,15 @@ class Ernie(nn.Layer):
             load_checkpoint=None,
             label_map=None,
     ):
-        super(Ernie, self).__init__()
+        super(Roberta, self).__init__()
         # TODO(zhangxuefei): add token_classification task
         if task == 'sequence_classification':
-            self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie')
+            self.model = RobertaForSequenceClassification.from_pretrained(
+                pretrained_model_name_or_path='roberta-wwm-ext-large')
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy(name='acc_accumulation')
         elif task is None:
-            self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie')
+            self.model = RobertaModel.from_pretrained(pretrained_model_name_or_path='roberta-wwm-ext-large')
         else:
             raise RuntimeError("Unknown task %s, task should be sequence_classification" % task)
 
@@ -83,10 +85,10 @@ class Ernie(nn.Layer):
         """
         Gets the path of the module vocabulary path.
         """
-        save_path = os.path.join(DATA_HOME, 'ernie', 'vocab.txt')
+        save_path = os.path.join(DATA_HOME, 'roberta-wwm-ext-large', 'vocab.txt')
         if not os.path.exists(save_path) or not os.path.isfile(save_path):
-            url = "https://paddlenlp.bj.bcebos.com/models/transformers/ernie/vocab.txt"
-            download(url, os.path.join(DATA_HOME, 'ernie'))
+            url = "https://paddlenlp.bj.bcebos.com/models/transformers/roberta_large/vocab.txt"
+            download(url, os.path.join(DATA_HOME, 'roberta-wwm-ext-large'))
         return save_path
 
     def get_tokenizer(self, tokenize_chinese_chars=True):

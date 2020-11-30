@@ -1,17 +1,12 @@
-
 ```shell
-$ hub install ernie_v2_eng_large==2.0.0
+$ hub install bert-base-cased==2.0.0
 ```
 
 <p align="center">
-<img src="https://bj.bcebos.com/paddlehub/paddlehub-img/ernie2.0_arch.png" hspace='10'/> <br />
+<img src="https://bj.bcebos.com/paddlehub/paddlehub-img/bert_network.png"  hspace='10'/> <br />
 </p>
 
-<p align="center">
-<img src="https://bj.bcebos.com/paddlehub/paddlehub-img/ernie2.0_model.png" hspace='10'/> <br />
-</p>
-
-更多详情请参考[ERNIE论文](https://arxiv.org/abs/1907.12412)
+更多详情请参考[BERT论文](https://arxiv.org/abs/1810.04805)
 
 ## API
 
@@ -80,7 +75,7 @@ data = [
 label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
-    name='ernie_v2_eng_large',
+    name='bert-base-cased',
     version='2.0.0',
     task='sequence_classification',
     load_checkpoint='/path/to/parameters',
@@ -101,7 +96,7 @@ PaddleHub Serving可以部署一个在线获取预训练词向量。
 运行启动命令：
 
 ```shell
-$ hub serving start -m ernie_v2_eng_large
+$ hub serving start -m bert-base-cased
 ```
 
 这样就完成了一个获取预训练词向量服务化API的部署，默认端口号为8866。
@@ -122,7 +117,7 @@ text = [["今天是个好日子", "天气预报说今天要下雨"], ["这个宾
 # 对应本地部署，则为module.get_embedding(texts=text)
 data = {"texts": text}
 # 发送post请求，content-type类型应指定json方式
-url = "http://10.12.121.132:8866/predict/ernie_v2_eng_large"
+url = "http://10.12.121.132:8866/predict/bert-base-cased"
 # 指定post请求的headers为application/json方式
 headers = {"Content-Type": "application/json"}
 
@@ -132,7 +127,8 @@ print(r.json())
 
 ##   查看代码
 
-https://github.com/PaddlePaddle/ERNIE
+https://github.com/PaddlePaddle/models/tree/develop/PaddleNLP/pretrain_langauge_models/BERT
+
 
 ## 依赖
 
@@ -146,14 +142,10 @@ paddlehub >= 2.0.0
 
   初始发布
 
-* 1.0.1
-
-  修复python 2的兼容问题
-
 * 1.1.0
 
   支持get_embedding与get_params_layer
 
 * 2.0.0
 
-  全面升级动态图版本，接口有所变化
+  全面升级动态图，接口有所变化。
