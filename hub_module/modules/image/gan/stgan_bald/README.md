@@ -32,7 +32,7 @@
     import paddlehub as hub
     import cv2
     
-    stgan_bald = hub.Module('stgan_bald')
+    stgan_bald = hub.Module(name='stgan_bald')
     im = cv2.imread('/PATH/TO/IMAGE')
     res = stgan_bald.bald(images=[im],visualization=True)
 # 服务部署

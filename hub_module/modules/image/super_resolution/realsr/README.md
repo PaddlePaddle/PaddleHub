@@ -57,7 +57,7 @@ def run_video(self, video):
 ```python
 import paddlehub as hub
 
-model = hub.Module('realsr')
+model = hub.Module(name='realsr')
 model.predict('/PATH/TO/IMAGE/OR/VIDEO')
 ```
 

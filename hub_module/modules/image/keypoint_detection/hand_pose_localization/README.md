@@ -46,7 +46,7 @@ import cv2
 import paddlehub as hub
 
 # use_gpu：是否使用GPU进行预测
-model = hub.Module('hand_pose_localization', use_gpu=False)
+model = hub.Module(name='hand_pose_localization', use_gpu=False)
 
 # 调用关键点检测API
 result = model.keypoint_detection(images=[cv2.imread('/PATH/TO/IMAGE')])

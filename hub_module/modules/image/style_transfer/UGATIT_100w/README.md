@@ -58,7 +58,7 @@ import paddlehub as hub
 
 # 模型加载
 # use_gpu：是否使用GPU进行预测
-model = hub.Module('UGATIT_100w', use_gpu=False)
+model = hub.Module(name='UGATIT_100w', use_gpu=False)
 
 # 模型预测
 result = model.style_transfer(images=[cv2.imread('/PATH/TO/IMAGE')])
