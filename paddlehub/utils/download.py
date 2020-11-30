@@ -15,20 +15,27 @@
 
 import os
 
+import filelock
+
 import paddlehub.env as hubenv
 from paddle.utils.download import get_path_from_url
 from paddlehub.utils import log, utils, xarfile
 
 
 def download_data(url):
-    save_name = os.path.basename(url).split('.')[0]
-    output_path = os.path.join(hubenv.DATA_HOME, save_name)
-
-    if not os.path.exists(output_path):
-        get_path_from_url(url, hubenv.DATA_HOME)
 
     def _wrapper(Dataset):
-        return Dataset
+        
+        def _download_dataset_from_url(*args, **kwargs):
+            save_name = os.path.basename(url).split('.')[0]
+            output_path = os.path.join(hubenv.DATA_HOME, save_name)
+            lock = filelock.FileLock(os.path.join(hubenv.TMP_HOME, save_name))
+            with lock:
+                if not os.path.exists(output_path):
+                    default_downloader.download_file_and_uncompress(url, hubenv.DATA_HOME, True)
+                    
+            return Dataset(*args, **kwargs)
+        return _download_dataset_from_url
 
     return _wrapper
 
