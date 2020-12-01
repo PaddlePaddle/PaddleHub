@@ -2,7 +2,6 @@
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"
 </p>
 
-
 ------------------------------------------------------------------------------------------
 
 [![License](https://img.shields.io/badge/license-Apache%202-red.svg)](LICENSE)
@@ -198,7 +197,7 @@
     - [命令行调用](./docs/docs_ch/quick_experience/cmd_quick_run.md)
     - [Python API调用](./docs/docs_ch/quick_experience/python_use_hub.md)
     - [示例体验项目demo](./docs/docs_ch/quick_experience/more_demos.md)
-- 丰富的预训练模型 182 �
+- 丰富的预训练模型 182
     - [精品特色模型](./docs/docs_ch/figures.md)
     - 计算机视觉 126 个
       - [图像分类 64 个](./modules/image/classification/README.md)
