@@ -4,7 +4,7 @@
 
 * 全面迁移动态图编程模式，模型开发调试更加方便，finetune接口更加灵活易用。
 * 优化服务化部署Serving能力，支持多卡预测、自动负载均衡，性能大幅度提升。
-* 视觉类迁移学习能力全面升级，支持[图像分类](../demo/image_classification)、[图像着色](../demo/colorization)、[风格迁移](../demo/style_transfer)等多种视觉任务。
+* 视觉类迁移学习能力全面升级，支持[图像分类](../../demo/image_classification)、[图像着色](../../demo/colorization)、[风格迁移](../../demo/style_transfer)等多种视觉任务。
 
 ## `v1.8.1`
 
