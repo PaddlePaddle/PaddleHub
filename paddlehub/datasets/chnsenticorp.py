@@ -57,7 +57,7 @@ class ChnSentiCorp(TextClassificationDataset):
             data_file = 'test.tsv'
         else:
             data_file = 'dev.tsv'
-        super(ChnSentiCorp, self).__init__(
+        super().__init__(
             base_path=base_path,
             tokenizer=tokenizer,
             max_seq_len=max_seq_len,
