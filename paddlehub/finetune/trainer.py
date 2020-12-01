@@ -18,6 +18,7 @@ import time
 from collections import defaultdict
 from typing import Any, Callable, Generic, List
 
+import numpy as np
 import paddle
 from visualdl import LogWriter
 
@@ -223,6 +224,8 @@ class Trainer(object):
                         if self.use_vdl:
                             self.log_writer.add_scalar(
                                 tag='TRAIN/{}'.format(metric), step=timer.current_step, value=value)
+                        if isinstance(value, np.ndarray):
+                            value = value.item()
                         print_msg += ' {}={:.4f}'.format(metric, value)
 
                     print_msg += ' lr={:.6f} step/sec={:.2f} | ETA {}'.format(lr, timer.timing, timer.eta)
