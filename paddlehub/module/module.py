@@ -15,6 +15,7 @@
 
 import ast
 import builtins
+import codecs
 import inspect
 import os
 import re
@@ -107,7 +108,7 @@ class RunModule(object):
         req_file = os.path.join(directory, 'requirements.txt')
         if not os.path.exists(req_file):
             return []
-        with open(req_file, 'r') as file:
+        with codecs.open(req_file, 'r', encoding='utf8') as file:
             return file.read().split('\n')
 
     @property
@@ -229,7 +230,7 @@ class Module(object):
 
         # If is ModuleV2
         module_file = os.path.join(directory, 'module.py')
-        with open(module_file, 'r') as file:
+        with codecs.open(module_file, 'r', encoding='utf8') as file:
             pycode = file.read()
             ast_module = ast.parse(pycode)
 
