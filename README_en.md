@@ -25,14 +25,14 @@
 
 
 ## Features
-- **【Abundant pre-trained models】**: 180+ pre-trained models covering the four major categories of CV, NLP, Audio, and Video, all open source downloads, and can be run offline.
-- **【Quick model prediction】**: Model calls can be realized through a one-line command line or a minimalist Python API to quickly experience the model effect.
-- **【Model to Servicing】**: A one-line command to build deep learning model API service deployment capabilities.
-- **【Ten lines of code for transfer-learning】**: Ten lines of code complete the transfer-learning task of image classification and text classification
-- **【PIP installation is convenient】**: Support PIP quick installation and use
-- **【Cross-platform compatibility】**: Can run on Linux, Windows, MacOS and other operating systems
+- **【Abundant Pre-trained Models】**: 180+ pre-trained models covering the four major categories of CV, NLP, Audio, and Video, all open source downloads, and can be run offline.
+- **【Quick Model Prediction】**: Model calls can be realized through a one-line command line or a minimalist Python API to quickly experience the model effect.
+- **【Model As Service】**: A one-line command to build deep learning model API service deployment capabilities.
+- **【Ten Lines of Code for Transfer Learning】**: Ten lines of code complete the transfer-learning task of image classification and text classification
+- **【PIP installation 】**: Support PIP quick installation and use
+- **【Cross-platform Compatibility】**: Can run on Linux, Windows, MacOS and other operating systems
 
-## Show results
+## Visualization
 ### Text recognition
 - Contains ultra-lightweight Chinese and English OCR models, high-precision Chinese and English, multilingual German, French, Japanese, Korean OCR recognition.
 <div align="center">
@@ -77,19 +77,19 @@
 <img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Pedestrian_Vehicle.gif"  width = "642" height = "400" />
 </div>
 
-### Key point detection
+### Key Point Detection
 - Including single person, multi-person body key point detection, face key point detection, hand key point detection.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "458" height = "400" />
 </div>
 
-### Image segmentation
+### Image Segmentation
 - Contains excellent portrait cutout model, ACE2P human body analysis world champion model
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
 </div>
 
-### Image animation
+### Image Animation
 - Many cartoonists including Hayao Miyazaki and Makoto Shinkai are migrating their styles, and a variety of algorithms are available
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "642" height = "400" />
@@ -101,31 +101,31 @@
 <img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "530" height = "400" />
 </div>
 
-### lexical analysis
+### Lexical Analysis
 - Including AI poem writing, AI couplets, AI love words, AI hidden poems, multiple algorithms are available.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "850" height = "400" />
 </div>
 
-### Syntax analysis
+### Syntax Analysis
 - Leading Chinese syntactic analysis model.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "640" height = "301" />
 </div>
 
-### Sementic analysis
+### Sementic Analysis
 - Support Chinese comment sentiment analysis
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "640" height = "228" />
 </div>
 
-### Text review
+### Text Review
 - Contains the review of Chinese pornographic text, and multiple algorithms are available.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "640" height = "140" />
 </div>
 
-### Speech synthesis
+### Speech Synthesis
 - TTS speech synthesis algorithm, multiple algorithms are available
 - Input: `Life was like a box of chocolates, you never know what you're gonna get.`
 - The synthesis effect is as follows:
@@ -157,7 +157,7 @@
 </table>
 </div>
 
-### Video classification
+### Video Classification
 - Contains short video classification, supports 3000+ tag types, can output TOP-K tags, and multiple algorithms are optional.
 - `Example: Input a short video of swimming, the algorithm can output the result of "swimming"`
 <div align="center">
@@ -168,7 +168,7 @@
 -All the above pre-trained models are all open source, and the number of models is continuously updated. Welcome Star to pay attention.
 <div align="center">
 <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers">
-            <img src="./docs/imgs/Readme_Related/star.png"  width = "411" height = "100" /></a>  
+            <img src="./docs/imgs/Readme_Related/star_en.png"  width = "411" height = "100" /></a>  
 </div>
 
 <a name="Welcome_joinus"></a>
@@ -184,36 +184,36 @@ If you fail to scan the code, please add WeChat 15711058002 and note "Hub", the 
 - Quick Start
     - [Command Line](./docs/docs_en/quick_experience/cmd_quick_run_en.md)
     - [Python API](./docs/docs_en/quick_experience/python_use_hub_en.md)
-    - [More_demos](./docs/docs_en/quick_experience/more_demos_en.md)
-- Rich pre-trained models 182
+    - [More_Demos](./docs/docs_en/quick_experience/more_demos_en.md)
+- Rich Pre-trained Models 182
     - [Boutique Featured Models](./docs/docs_en/figures_en.md)
     - Computer vision 126
-      - [Image classification 64 ](./modules/image/classification/README_en.md)
+      - [Image Classification 64 ](./modules/image/classification/README_en.md)
       - [Object Detection 13 ](./modules/image/object_detection/README_en.md)
       - [Face Detection 7 ](./modules/image/face_detection/README_en.md)  
-      - [Key point detection 3 ](./modules/image/keypoint_detection/README_en.md)
-      - [Image segmentation 7 ](./modules/image/semantic_segmentation/README_en.md)
-      - [Text recognition 8 ](./modules/image/text_recognition/README_en.md)
-      - [Image generation 17 ](./modules/image/Image_gan/README_en.md)
-      - [Image editing 7 ](./modules/image/Image_editing/README_en.md)
+      - [Key Point Detection 3 ](./modules/image/keypoint_detection/README_en.md)
+      - [Image Segmentation 7 ](./modules/image/semantic_segmentation/README_en.md)
+      - [Text Recognition 8 ](./modules/image/text_recognition/README_en.md)
+      - [Image Generation 17 ](./modules/image/Image_gan/README_en.md)
+      - [Image Editing 7 ](./modules/image/Image_editing/README_en.md)
     - Natural language processing 48
-      - [lexical analysis 2 ](./modules/text/lexical_analysis/README_en.md)
-      - [Syntax analysis 1 ](./modules/text/syntactic_analysis/README_en.md)
-      - [emotion analysis 7 ](./modules/text/sentiment_analysis/README_en.md)
-      - [Text review 3 ](./modules/text/text_review/README_en.md)
-      - [Text generation 9 ](./modules/text/text_generation/README_en.md)
-      - [Semantic models 26 ](./modules/text/language_model/README_en.md)
+      - [Lexical Analysis 2 ](./modules/text/lexical_analysis/README_en.md)
+      - [Syntax Analysis 1 ](./modules/text/syntactic_analysis/README_en.md)
+      - [Emotion Analysis 7 ](./modules/text/sentiment_analysis/README_en.md)
+      - [Text Review 3 ](./modules/text/text_review/README_en.md)
+      - [Text Generation 9 ](./modules/text/text_generation/README_en.md)
+      - [Semantic Models 26 ](./modules/text/language_model/README_en.md)
     - Audio 3
-      - [Speech synthesis 3 ](./modules/audio/README_en.md)
+      - [Speech Synthesis 3 ](./modules/audio/README_en.md)
     - Video 5
-      - [Video classification 5 ](./modules/video/README_en.md)
+      - [Video Classification 5 ](./modules/video/README_en.md)
 - Deploy
-    - [Local Inference deployment](./docs/docs_en/quick_experience/python_use_hub_en.md)
-    - [One line of code service deployment](./docs/docs_en/tutorial/serving_en.md)
-    - [Mobile Lite deployment (Jump Lite tutorial)](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
+    - [Local Inference Deployment](./docs/docs_en/quick_experience/python_use_hub_en.md)
+    - [One Line of Code Service deployment](./docs/docs_en/tutorial/serving_en.md)
+    - [Mobile Lite Deployment (link to Lite tutorial)](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
 - Advanced documentation
-    - [cmdintro](./docs/docs_en/tutorial/cmdintro_en.md)
-    - [how to load data](./docs/docs_en/tutorial/how_to_load_data_en.md)
+    - [Command_Line](./docs/docs_en/tutorial/cmdintro_en.md)
+    - [How to Load Data](./docs/docs_en/tutorial/how_to_load_data_en.md)
 - Community
     - [Join the technical group](#Welcome_joinus)
     - [Contribute pre-trained models](./docs/docs_en/contribution/contri_pretrained_model_en.md)

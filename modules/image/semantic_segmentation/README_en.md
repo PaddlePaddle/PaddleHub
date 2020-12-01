@@ -1,4 +1,4 @@
-## **For better user experience, refer to the Web official document ->  [Image Segmentation](https://www.paddlepaddle.org.cn/hublist) **
+## **For better user experience, refer to the Web official document ->  [Image Segmentation](https://www.paddlepaddle.org.cn/hublist)**
 
 ### Image Segmentation
 

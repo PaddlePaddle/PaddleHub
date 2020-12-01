@@ -1,4 +1,4 @@
-## **For better user experience, refer to the Web official document ->  \[Video Classification](https://www.paddlepaddle.org.cn/hublist)**
+## **For better user experience, refer to the Web official document ->  [Video Classification](https://www.paddlepaddle.org.cn/hublist)**
 
 ### Video Classification
 

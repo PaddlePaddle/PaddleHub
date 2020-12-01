@@ -1,4 +1,4 @@
-## **For better user experience, refer to the Web official document -> [Text Generation](https://www.paddlepaddle.org.cn/hublist) **
+## **For better user experience, refer to the Web official document -> [Text Generation]https://www.paddlepaddle.org.cn/hublist)**
 
 ### Text Generation
 

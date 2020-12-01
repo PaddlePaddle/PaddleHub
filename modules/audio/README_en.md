@@ -1,4 +1,4 @@
-## **For better user experience, refer to the official documentation on WEB -> \[Text-to-speech](https://www.paddlepaddle.org.cn/hublist)**
+## **For better user experience, refer to the official documentation on WEB -> [Text-to-speech](https://www.paddlepaddle.org.cn/hublist)**
 
 ### OCR
 
