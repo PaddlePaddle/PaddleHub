@@ -19,6 +19,14 @@ $ hub run chinese_text_detection_db_server --input_path "/PATH/TO/IMAGE"
 
 ## API
 
+### \_\_init\_\_(enable_mkldnn=False)
+
+构造ChineseTextDetectionDBServer对象
+
+**参数**
+
+* enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
+
 ```python
 def detect_text(paths=[],
                 images=[],
@@ -117,3 +125,11 @@ pyclipper
 * 1.0.0
 
   初始发布
+
+* 1.0.2
+
+  支持mkldnn加速CPU计算
+
+* 1.0.3
+
+  增加更多预训练数据，更新预训练参数

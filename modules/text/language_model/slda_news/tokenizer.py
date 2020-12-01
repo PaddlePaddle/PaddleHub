@@ -7,6 +7,7 @@ from paddlehub.common.logger import logger
 class Tokenizer(object):
     """Base tokenizer class.
     """
+
     def __init__(self):
         pass
 
@@ -20,6 +21,7 @@ class SimpleTokenizer(Tokenizer):
 
        Notes: This tokenizer can only recognize the words in the corresponding vocab file.
     """
+
     def __init__(self, vocab_path):
         super().__init__()
         self.__max_word_len = 0

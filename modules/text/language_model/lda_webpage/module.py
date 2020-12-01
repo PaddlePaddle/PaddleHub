@@ -105,9 +105,8 @@ class TopicModel(hub.Module):
             wd = WordAndDis()
             wd.word = word
             sm = SemanticMatching()
-            wd.distance = sm.likelihood_based_similarity(terms=[word],
-                                                         doc_topic_dist=doc_topic_dist,
-                                                         model=self.__engine.get_model())
+            wd.distance = sm.likelihood_based_similarity(
+                terms=[word], doc_topic_dist=doc_topic_dist, model=self.__engine.get_model())
             items.append(wd)
 
         def take_elem(word_dis):

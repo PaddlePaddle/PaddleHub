@@ -5,6 +5,7 @@ class Topic(object):
     """Basic data structure of topic, contains topic id and
        corresponding probability.
     """
+
     def __init__(self, tid, prob):
         self.tid = tid  # topic id
         self.prob = prob  # topic probability
@@ -14,6 +15,7 @@ class Token(object):
     """Basic storage unit of LDA documents, contains word id
        and corresponding topic.
     """
+
     def __init__(self, topic, id):
         self.topic = topic
         self.id = id
@@ -23,6 +25,7 @@ class Sentence(object):
     """Basic storage unit of SentenceLDA documents, contains word ids
        of the sentence and its corresponding topic id.
     """
+
     def __init__(self, topic, tokens):
         self.topic = topic
         self.tokens = tokens
@@ -31,6 +34,7 @@ class Sentence(object):
 class LDADoc(object):
     """The storage structure of LDA model's inference result.
     """
+
     def __init__(self):
         self._num_topics = None  # Number of topics.
         self._num_accum = None  # Number of accumulated sample rounds.
@@ -116,8 +120,8 @@ class LDADoc(object):
         dense_dist = np.zeros(self._num_topics)
         if self.size() == 0:
             return dense_dist
-        dense_dist = (self._accum_topic_sum * 1.0 / self._num_accum + self._alpha) / (self.size() +
-                                                                                      self._alpha * self._num_topics)
+        dense_dist = (self._accum_topic_sum * 1.0 / self._num_accum + self._alpha) / (
+            self.size() + self._alpha * self._num_topics)
         return dense_dist
 
     def accumulate_topic_num(self):
@@ -129,6 +133,7 @@ class SLDADoc(LDADoc):
     """Sentence LDA Document, inherited from LDADoc.
        Add add_sentence interface.
     """
+
     def __init__(self):
         super().__init__()
         self.__sentences = None

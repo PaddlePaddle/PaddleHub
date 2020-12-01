@@ -12,25 +12,43 @@ import numpy as np
 import pyclipper
 
 
-class DBPreProcess(object):
-    def __init__(self, max_side_len=960):
-        self.max_side_len = max_side_len
+class DBProcessTest(object):
+    """
+    DB pre-process for Test mode
+    """
 
-    def resize_image_type(self, im):
+    def __init__(self, params):
+        super(DBProcessTest, self).__init__()
+        self.resize_type = 0
+        if 'test_image_shape' in params:
+            self.image_shape = params['test_image_shape']
+            # print(self.image_shape)
+            self.resize_type = 1
+        if 'max_side_len' in params:
+            self.max_side_len = params['max_side_len']
+        else:
+            self.max_side_len = 2400
+
+    def resize_image_type0(self, im):
         """
         resize image to a size multiple of 32 which is required by the network
+        args:
+            img(array): array with shape [h, w, c]
+        return(tuple):
+            img, (ratio_h, ratio_w)
         """
+        max_side_len = self.max_side_len
         h, w, _ = im.shape
 
         resize_w = w
         resize_h = h
 
         # limit the max side
-        if max(resize_h, resize_w) > self.max_side_len:
+        if max(resize_h, resize_w) > max_side_len:
             if resize_h > resize_w:
-                ratio = float(self.max_side_len) / resize_h
+                ratio = float(max_side_len) / resize_h
             else:
-                ratio = float(self.max_side_len) / resize_w
+                ratio = float(max_side_len) / resize_w
         else:
             ratio = 1.
         resize_h = int(resize_h * ratio)
@@ -58,19 +76,34 @@ class DBPreProcess(object):
         ratio_w = resize_w / float(w)
         return im, (ratio_h, ratio_w)
 
+    def resize_image_type1(self, im):
+        resize_h, resize_w = self.image_shape
+        ori_h, ori_w = im.shape[:2]  # (h, w, c)
+        im = cv2.resize(im, (int(resize_w), int(resize_h)))
+        ratio_h = float(resize_h) / ori_h
+        ratio_w = float(resize_w) / ori_w
+        return im, (ratio_h, ratio_w)
+
     def normalize(self, im):
         img_mean = [0.485, 0.456, 0.406]
         img_std = [0.229, 0.224, 0.225]
         im = im.astype(np.float32, copy=False)
         im = im / 255
-        im -= img_mean
-        im /= img_std
+        im[:, :, 0] -= img_mean[0]
+        im[:, :, 1] -= img_mean[1]
+        im[:, :, 2] -= img_mean[2]
+        im[:, :, 0] /= img_std[0]
+        im[:, :, 1] /= img_std[1]
+        im[:, :, 2] /= img_std[2]
         channel_swap = (2, 0, 1)
         im = im.transpose(channel_swap)
         return im
 
     def __call__(self, im):
-        im, (ratio_h, ratio_w) = self.resize_image_type(im)
+        if self.resize_type == 0:
+            im, (ratio_h, ratio_w) = self.resize_image_type0(im)
+        else:
+            im, (ratio_h, ratio_w) = self.resize_image_type1(im)
         im = self.normalize(im)
         im = im[np.newaxis, :]
         return [im, (ratio_h, ratio_w)]
@@ -81,10 +114,11 @@ class DBPostProcess(object):
     The post process for Differentiable Binarization (DB).
     """
 
-    def __init__(self, thresh=0.3, box_thresh=0.5, max_candidates=1000):
-        self.thresh = thresh
-        self.box_thresh = box_thresh
-        self.max_candidates = max_candidates
+    def __init__(self, params):
+        self.thresh = params['thresh']
+        self.box_thresh = params['box_thresh']
+        self.max_candidates = params['max_candidates']
+        self.unclip_ratio = params['unclip_ratio']
         self.min_size = 3
 
     def boxes_from_bitmap(self, pred, _bitmap, dest_width, dest_height):
@@ -131,7 +165,8 @@ class DBPostProcess(object):
             scores[index] = score
         return boxes, scores
 
-    def unclip(self, box, unclip_ratio=2.0):
+    def unclip(self, box):
+        unclip_ratio = self.unclip_ratio
         poly = Polygon(box)
         distance = poly.area * unclip_ratio / poly.length
         offset = pyclipper.PyclipperOffset()
@@ -174,8 +209,10 @@ class DBPostProcess(object):
         cv2.fillPoly(mask, box.reshape(1, -1, 2).astype(np.int32), 1)
         return cv2.mean(bitmap[ymin:ymax + 1, xmin:xmax + 1], mask)[0]
 
-    def __call__(self, predictions, ratio_list):
-        pred = predictions[:, 0, :, :]
+    def __call__(self, outs_dict, ratio_list):
+        pred = outs_dict['maps']
+
+        pred = pred[:, 0, :, :]
         segmentation = pred > self.thresh
 
         boxes_batch = []

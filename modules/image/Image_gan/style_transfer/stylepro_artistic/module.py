@@ -140,13 +140,14 @@ class StyleProjection(hub.Module):
         encode_program, encode_feeded_var_names, encode_target_vars = fluid.io.load_inference_model(
             dirname=self.pretrained_encoder_net, executor=exe)
 
-        fluid.io.save_inference_model(dirname=dirname,
-                                      main_program=encode_program,
-                                      executor=exe,
-                                      feeded_var_names=encode_feeded_var_names,
-                                      target_vars=encode_target_vars,
-                                      model_filename=model_filename,
-                                      params_filename=params_filename)
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=encode_program,
+            executor=exe,
+            feeded_var_names=encode_feeded_var_names,
+            target_vars=encode_target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     def _save_decode_model(self, dirname, model_filename=None, params_filename=None, combined=True):
         if combined:
@@ -158,13 +159,14 @@ class StyleProjection(hub.Module):
         decode_program, decode_feeded_var_names, decode_target_vars = fluid.io.load_inference_model(
             dirname=self.pretrained_decoder_net, executor=exe)
 
-        fluid.io.save_inference_model(dirname=dirname,
-                                      main_program=decode_program,
-                                      executor=exe,
-                                      feeded_var_names=decode_feeded_var_names,
-                                      target_vars=decode_target_vars,
-                                      model_filename=model_filename,
-                                      params_filename=params_filename)
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=decode_program,
+            executor=exe,
+            feeded_var_names=decode_feeded_var_names,
+            target_vars=decode_target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -184,10 +186,11 @@ class StyleProjection(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
-                                              prog='hub run {}'.format(self.name),
-                                              usage='%(prog)s',
-                                              add_help=True)
+        self.parser = argparse.ArgumentParser(
+            description="Run the {} module.".format(self.name),
+            prog='hub run {}'.format(self.name),
+            usage='%(prog)s',
+            add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -199,29 +202,20 @@ class StyleProjection(hub.Module):
             paths = [{'content': args.content, 'styles': args.styles.split(',')}]
         else:
             paths = [{'content': args.content, 'styles': args.styles.split(','), 'weights': list(args.weights)}]
-        results = self.style_transfer(paths=paths,
-                                      alpha=args.alpha,
-                                      use_gpu=args.use_gpu,
-                                      output_dir=args.output_dir,
-                                      visualization=True)
+        results = self.style_transfer(
+            paths=paths, alpha=args.alpha, use_gpu=args.use_gpu, output_dir=args.output_dir, visualization=True)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument('--use_gpu',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether use GPU or not")
-        self.arg_config_group.add_argument('--output_dir',
-                                           type=str,
-                                           default='transfer_result',
-                                           help="The directory to save output images.")
-        self.arg_config_group.add_argument('--visualization',
-                                           type=ast.literal_eval,
-                                           default=True,
-                                           help="whether to save output as images.")
+        self.arg_config_group.add_argument(
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+        self.arg_config_group.add_argument(
+            '--output_dir', type=str, default='transfer_result', help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--visualization', type=ast.literal_eval, default=True, help="whether to save output as images.")
 
     def add_module_input_arg(self):
         """
@@ -229,11 +223,7 @@ class StyleProjection(hub.Module):
         """
         self.arg_input_group.add_argument('--content', type=str, help="path to content.")
         self.arg_input_group.add_argument('--styles', type=str, help="path to styles.")
-        self.arg_input_group.add_argument('--weights',
-                                          type=ast.literal_eval,
-                                          default=None,
-                                          help="interpolation weights of styles.")
-        self.arg_config_group.add_argument('--alpha',
-                                           type=ast.literal_eval,
-                                           default=1,
-                                           help="The parameter to control the tranform degree.")
+        self.arg_input_group.add_argument(
+            '--weights', type=ast.literal_eval, default=None, help="interpolation weights of styles.")
+        self.arg_config_group.add_argument(
+            '--alpha', type=ast.literal_eval, default=1, help="The parameter to control the tranform degree.")

@@ -11,6 +11,7 @@ from slda_weibo.vocab import Vocab, WordCount
 class TopicModel(object):
     """Storage Structure of Topic model, including vocabulary and word topic count.
     """
+
     def __init__(self, model_dir, config):
         """
         Args:

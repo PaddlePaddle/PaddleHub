@@ -1,6 +1,6 @@
 ## 概述
 
-chinese_ocr_db_crnn_mobile Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_mobile Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_mobile&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个超轻量级中文OCR模型，支持直接预测。
+chinese_ocr_db_crnn_mobile Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_mobile Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_mobile&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。之后对检测文本框进行角度分类。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个超轻量级中文OCR模型，支持直接预测。
 
 
 <p align="center">
@@ -19,6 +19,16 @@ $ hub run chinese_ocr_db_crnn_mobile --input_path "/PATH/TO/IMAGE"
 
 ## API
 
+### \_\_init\_\_(text_detector_module=None, enable_mkldnn=False)
+
+构造ChineseOCRDBCRNN对象
+
+**参数**
+
+* text_detector_module(str): 文字检测PaddleHub Module名字，如设置为None，则默认使用[chinese_text_detection_db_mobile Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_mobile&en_category=TextRecognition)。其作用为检测图片当中的文本。
+* enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
+
+
 ```python
 def recognize_text(images=[],
                     paths=[],
@@ -26,7 +36,8 @@ def recognize_text(images=[],
                     output_dir='ocr_result',
                     visualization=False,
                     box_thresh=0.5,
-                    text_thresh=0.5)
+                    text_thresh=0.5,
+                    angle_classification_thresh=0.9)
 ```
 
 预测API，检测输入图片中的所有中文文本的位置。
@@ -38,6 +49,7 @@ def recognize_text(images=[],
 * use\_gpu (bool): 是否使用 GPU；**若使用GPU，请先设置CUDA_VISIBLE_DEVICES环境变量**
 * box\_thresh (float): 检测文本框置信度的阈值；
 * text\_thresh (float): 识别中文文本置信度的阈值；
+* angle_classification_thresh(float): 文本角度分类置信度的阈值
 * visualization (bool): 是否将识别结果保存为图片文件；
 * output\_dir (str): 图片的保存路径，默认设为 ocr\_result；
 
@@ -132,3 +144,11 @@ pyclipper
 * 1.0.1
 
   修复使用在线服务调用模型失败问题
+
+* 1.0.2
+
+  支持mkldnn加速CPU计算
+
+* 1.1.0
+
+  使用超轻量级的三阶段模型（文本框检测-角度分类-文字识别）识别图片文字。

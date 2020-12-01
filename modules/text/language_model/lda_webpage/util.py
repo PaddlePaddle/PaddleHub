@@ -46,6 +46,7 @@ def rand_k(k):
 def timeit(f):
     """Return time cost of function f.
     """
+
     def timed(*args, **kwargs):
         start_time = time.time()
         result = f(*args, **kwargs)

@@ -9,6 +9,7 @@ from slda_weibo.util import rand, rand_k
 class VoseAlias(object):
     """Vose's Alias Method.
     """
+
     def __init__(self):
         self.__alias = None
         self.__prob = None  # np.array

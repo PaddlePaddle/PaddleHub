@@ -19,6 +19,17 @@ $ hub run chinese_text_detection_db_mobile --input_path "/PATH/TO/IMAGE"
 
 ## API
 
+## API
+
+### \_\_init\_\_(enable_mkldnn=False)
+
+构造ChineseTextDetectionDB对象
+
+**参数**
+
+* enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
+
+
 ```python
 def detect_text(paths=[],
                 images=[],
@@ -51,7 +62,7 @@ def detect_text(paths=[],
 import paddlehub as hub
 import cv2
 
-text_detector = hub.Module(name="chinese_text_detection_db_mobile")
+text_detector = hub.Module(name="chinese_text_detection_db_mobile", enable_mkldnn=True)
 result = text_detector.detect_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
 # or
@@ -121,3 +132,15 @@ pyclipper
 * 1.0.1
 
   修复使用在线服务调用模型失败问题
+
+* 1.0.2
+
+  支持mkldnn加速CPU计算
+
+* 1.0.3
+
+  增加更多预训练数据，更新预训练参数
+
+1.1.0
+
+使用超轻量级的三阶段模型（文本框检测-角度分类-文字识别）识别图片文字。
