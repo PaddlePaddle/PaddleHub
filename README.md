@@ -199,7 +199,7 @@
     - [Python API调用](./docs/quick_experience/python_use_hub.md)
     - [示例体验项目demo](./docs/quick_experience/more_demos.md)
 - 丰富的预训练模型 182 个
-    - [精品特色模型](./docs/figure.md)
+    - [精品特色模型](./docs/figures.md)
     - 计算机视觉 126 个
       - [图像分类 64 个](./modules/image/classification/README.md)
       - [目标检测 13 个](./modules/image/object_detection/README.md)
@@ -227,7 +227,6 @@
 - 进阶文档
     - [命令行工具详解](./docs/tutorial/cmdintro.md)
     - [自定义数据迁移学习](./docs/tutorial/how_to_load_data.md)
-    - [模型转module](./docs/tutorial/contri_pretrained_model.md)
     - [文本Embedding任务](./docs/tutorial/bert_service.md)
 - 社区交流
     - [加入技术交流群](#欢迎加入PaddleHub技术交流群)
