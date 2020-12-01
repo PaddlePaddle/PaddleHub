@@ -97,7 +97,7 @@
 ### 图像动漫化
 - 包含宫崎骏、新海诚在内的多位漫画家风格迁移，多种算法可选
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "532" height = "400" />
+<img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "642" height = "400" />
 </div>
 
 ### 图像分类
