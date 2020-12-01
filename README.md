@@ -24,10 +24,10 @@
 - **2020.09.27**，新增文本生成模型6个，图像分割模型1个，预训练模型总量到达 **【154】** 个。
 - **2020.08.13**，发布v1.8.1，新增人像分割模型Humanseg，支持EMNLP2019-Sentence-BERT作为文本匹配任务网络，预训练模型总量到达 **【147】** 个。
 - **2020.07.29**，发布v1.8.0，新增AI对联和AI写诗、jieba切词，文本数据LDA、语义相似度计算，新增目标检测，短视频分类模型，超轻量中英文OCR，新增行人检测、车辆检测、动物识别等工业级模型，支持VisualDL可视化训练，预训练模型总量到达 **【135】** 个。
-- [More](./docs/release.md)
+- [More](./docs/docs_ch/release.md)
 
 
-## [特性](./docs/figures.md)
+## [特性](./docs/docs_ch/figures.md)
 - **【丰富的预训练模型】**：涵盖CV、NLP、Audio、Video主流四大品类的 180+ 预训练模型，全部开源下载，离线可运行。
 - **【一键模型快速预测】**：通过一行命令行或者极简的Python API实现模型调用，可快速体验模型效果。
 - **【一键模型转服务化】**：一行命令，搭建深度学习模型API服务化部署能力。
@@ -193,13 +193,13 @@
 
 ## 文档教程
 
-- [PIP安装](./docs/installation.md)
+- [PIP安装](./docs/docs_ch/installation.md)
 - 快速开始
-    - [命令行调用](./docs/quick_experience/cmd_quick_run.md)
-    - [Python API调用](./docs/quick_experience/python_use_hub.md)
-    - [示例体验项目demo](./docs/quick_experience/more_demos.md)
+    - [命令行调用](./docs/docs_ch/quick_experience/cmd_quick_run.md)
+    - [Python API调用](./docs/docs_ch/quick_experience/python_use_hub.md)
+    - [示例体验项目demo](./docs/docs_ch/quick_experience/more_demos.md)
 - 丰富的预训练模型 182 个
-    - [精品特色模型](./docs/figure.md)
+    - [精品特色模型](./docs/docs_ch/figures.md)
     - 计算机视觉 126 个
       - [图像分类 64 个](./modules/image/classification/README.md)
       - [目标检测 13 个](./modules/image/object_detection/README.md)
@@ -221,20 +221,18 @@
     - 视频5个
       - [视频分类 5 个](./modules/video/README.md)
 - 部署
-    - [本地Inference部署](./docs/quick_experience/python_use_hub.md)
-    - [一行代码服务化部署](./docs/tutorial/serving.md)
+    - [本地Inference部署](./docs/docs_ch/quick_experience/python_use_hub.md)
+    - [一行代码服务化部署](./docs/docs_ch/tutorial/serving.md)
     - [移动端 Lite 部署（跳转Lite教程）](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
 - 进阶文档
-    - [命令行工具详解](./docs/tutorial/cmdintro.md)
-    - [自定义数据迁移学习](./docs/tutorial/how_to_load_data.md)
-    - [模型转module](./docs/tutorial/contri_pretrained_model.md)
-    - [文本Embedding任务](./docs/tutorial/bert_service.md)
+    - [命令行工具详解](./docs/docs_ch/tutorial/cmdintro.md)
+    - [自定义数据迁移学习](./docs/docs_ch/tutorial/how_to_load_data.md)
 - 社区交流
     - [加入技术交流群](#欢迎加入PaddleHub技术交流群)
-    - [贡献预训练模型](./docs/contribution/contri_pretrained_model.md)
-    - [贡献代码](./docs/contribution/contri_pr.md)
-- [FAQ](./docs/faq.md)  
-- [更新历史](./docs/release.md)
+    - [贡献预训练模型](./docs/docs_ch/contribution/contri_pretrained_model.md)
+    - [贡献代码](./docs/docs_ch/contribution/contri_pr.md)
+- [FAQ](./docs/docs_ch/faq.md)  
+- [更新历史](./docs/docs_ch/release.md)
 - [许可证书](#许可证书)
 - [致谢](#致谢)
 

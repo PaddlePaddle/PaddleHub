@@ -62,7 +62,7 @@ flowers_validate = Flowers(transforms, mode='val')
 
 ## 二、图像着色数据集
 
-利用PaddleHub迁移着色任务使用自定义数据时，需要切分数据集，将数据集切分为训练集和测试集。 
+利用PaddleHub迁移着色任务使用自定义数据时，需要切分数据集，将数据集切分为训练集和测试集。
 
 ### 数据准备
 
@@ -116,7 +116,7 @@ color_set = Canvas(transforms, mode='train')
 
 ## 三、风格迁移数据集
 
-利用PaddleHub进行风格迁移任务使用自定义数据时，需要切分数据集，将数据集切分为训练集和测试集。 
+利用PaddleHub进行风格迁移任务使用自定义数据时，需要切分数据集，将数据集切分为训练集和测试集。
 
 ### 数据准备
 
