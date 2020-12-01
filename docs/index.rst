@@ -10,7 +10,6 @@ PaddleHub 文档
     概述<overview>
     安装<install>
     快速体验<quick_experience/quick_index>
-    迁移学习<tutorial/tutorial_index>
     部署预训练模型<tutorial/Serving_index>
     API<reference/ref_index>
     命令行参考<tutorial/cmdintro>
