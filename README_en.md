@@ -180,13 +180,13 @@
 If you fail to scan the code, please add WeChat 15711058002 and note "Hub", the operating class will invite you to join the group.
 
 ## Documentation Tutorial
-- [PIP Installation](./docs/docs_en/installation.md)
+- [PIP Installation](./docs/docs_en/installation_en.md)
 - Quick Start
-    - [Command Line](./docs/docs_en/quick_experience/cmd_quick_run.md)
-    - [Python API](./docs/docs_en/quick_experience/python_use_hub.md)
-    - [More_demos](./docs/docs_en/quick_experience/more_demos.md)
+    - [Command Line](./docs/docs_en/quick_experience/cmd_quick_run_en.md)
+    - [Python API](./docs/docs_en/quick_experience/python_use_hub_en.md)
+    - [More_demos](./docs/docs_en/quick_experience/more_demos_en.md)
 - Rich pre-trained models 182
-    - [Boutique Featured Models](./docs/docs_en/figure.md)
+    - [Boutique Featured Models](./docs/docs_en/figures_en.md)
     - Computer vision 126
       - [Image classification 64 ](./modules/image/classification/README_en.md)
       - [Object Detection 13 ](./modules/image/object_detection/README_en.md)
@@ -208,16 +208,16 @@ If you fail to scan the code, please add WeChat 15711058002 and note "Hub", the 
     - Video 5
       - [Video classification 5 ](./modules/video/README_en.md)
 - Deploy
-    - [Local Inference deployment](./docs/docs_en/quick_experience/python_use_hub.md)
-    - [One line of code service deployment](./docs/docs_en/tutorial/serving.md)
+    - [Local Inference deployment](./docs/docs_en/quick_experience/python_use_hub_en.md)
+    - [One line of code service deployment](./docs/docs_en/tutorial/serving_en.md)
     - [Mobile Lite deployment (Jump Lite tutorial)](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
 - Advanced documentation
-    - [cmdintro](./docs/docs_en/tutorial/cmdintro.md)
-    - [how to load data](./docs/docs_en/tutorial/how_to_load_data.md)
+    - [cmdintro](./docs/docs_en/tutorial/cmdintro_en.md)
+    - [how to load data](./docs/docs_en/tutorial/how_to_load_data_en.md)
 - Community
     - [Join the technical group](#Welcome_joinus)
-    - [Contribute pre-trained models](./docs/docs_en/contribution/contri_pretrained_model.md)
-    - [Contribute code](./docs/docs_en/contribution/contri_pr.md)
+    - [Contribute pre-trained models](./docs/docs_en/contribution/contri_pretrained_model_en.md)
+    - [Contribute code](./docs/docs_en/contribution/contri_pr_en.md)
 - [License](#License)
 - [Contribution](#Contribution)
 
