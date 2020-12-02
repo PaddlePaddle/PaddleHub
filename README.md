@@ -111,8 +111,15 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "850" height = "400" />
 </div>
 
+### Lexical Analysis
+- Excelent Chinese text segmentation, part-of-speech, named entity recognition model are provided by [LAC](https://github.com/baidu/LAC)
+@Baidu NLP
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "640" height = "233" />
+</div>
+
 ### Syntax Analysis
-- Leading Chinese syntactic analysis model release by Baidu NLP.
+- Leading Chinese syntactic analysis model are provided by Baidu NLP.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "640" height = "301" />
 </div>
@@ -124,7 +131,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Text Review
-- Contains the review of Chinese pornographic text, and multiple algorithms are available.
+- Text review model of Chinese pornographic text are available.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "640" height = "140" />
 </div>
