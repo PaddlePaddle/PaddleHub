@@ -15,7 +15,7 @@ pip install paddlepaddle-gpu==2.0.0rc
 
 ## Installation Command
 
-Before installing the PaddleHub, install the PaddlePaddle deep learning framework first. For more installation instructions, refer to [PaddleQuickInstall](https://github.com/PaddlePaddle/PaddleHub)
+Before installing the PaddleHub, install the PaddlePaddle deep learning framework first. For more installation instructions, refer to [PaddleQuickInstall](https://www.paddlepaddle.org.cn/install/quick/zh/2.0rc-windows-pip)
 
 ```shell
 pip install paddlehub==2.0.0b
