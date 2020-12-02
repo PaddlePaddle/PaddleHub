@@ -1,8 +1,9 @@
-简体中文 | [English](README_en.md)
+English | [简体中文](README_ch.md)
 
 <p align="center">
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"
 </p>
+
 
 ------------------------------------------------------------------------------------------
 
@@ -11,60 +12,52 @@
 ![python version](https://img.shields.io/badge/python-3.6+-orange.svg)
 ![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
 
+## Introduction
+- PaddleHub aims to provide developers with rich, high-quality, and directly usable pre-trained models.
+- **【No need for deep learning background, no data and training process】**，you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
+- Covers the four major categories of CV, NLP, Audio, and Video, and supports **one-click prediction**, **one-click service deployment** and **migration learning**
+- All models are open source download, **offline can run**.
 
-## 简介
-- PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型。
-- **【无需深度学习背景、无需数据与训练过程】**，可快速使用AI模型，享受人工智能时代红利。
-- 涵盖CV、NLP、Audio、Video主流四大品类，支持**一键预测**、**一键服务化部署**和**快速迁移学习**
-- 全部模型开源下载，**离线可运行**。
-
-
-## 近期更新
-- **2020.11.20**，发布2.0-beta版本，全面迁移动态图编程模式，服务化部署Serving能力升级；新增手部关键点检测1个、图像动漫化类12个、图片编辑类3个，语音合成类3个，句法分析1个，预训练模型总量到达 **【182】** 个。
-- **2020.10.09**，新增OCR多语言系列模型4个，图像编辑模型4个，预训练模型总量到达 **【162】** 个。
-- **2020.09.27**，新增文本生成模型6个，图像分割模型1个，预训练模型总量到达 **【154】** 个。
-- **2020.08.13**，发布v1.8.1，新增人像分割模型Humanseg，支持EMNLP2019-Sentence-BERT作为文本匹配任务网络，预训练模型总量到达 **【147】** 个。
-- **2020.07.29**，发布v1.8.0，新增AI对联和AI写诗、jieba切词，文本数据LDA、语义相似度计算，新增目标检测，短视频分类模型，超轻量中英文OCR，新增行人检测、车辆检测、动物识别等工业级模型，支持VisualDL可视化训练，预训练模型总量到达 **【135】** 个。
-- [More](./docs/docs_ch/release.md)
+**Recent updates**
+- 2020.11.20: Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key detection model, 12 image animation models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
+- 2020.10.09: Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
+- 2020.09.27: 6 new text generation models and 1 image segmentation model were added, and the total number of pre-trained models reached **【154】**.
+- 2020.08.13: Released v1.8.1, added a segmentation model, and supports EMNLP2019-Sentence-BERT as a text matching task network. The total number of pre-training models reaches **【147】**.
+- 2020.07.29: Release v1.8.0, new AI couplets and AI writing poems, jieba word cutting, text data LDA, semantic similarity calculation, new target detection, short video classification model, ultra-lightweight Chinese and English OCR, new pedestrian detection, vehicle Industrial-grade models such as detection and animal recognition support VisualDL visualization training, and the total number of pre-training models reaches **【135】**.
 
 
-## [特性](./docs/docs_ch/figures.md)
-- **【丰富的预训练模型】**：涵盖CV、NLP、Audio、Video主流四大品类的 180+ 预训练模型，全部开源下载，离线可运行。
-- **【一键模型快速预测】**：通过一行命令行或者极简的Python API实现模型调用，可快速体验模型效果。
-- **【一键模型转服务化】**：一行命令，搭建深度学习模型API服务化部署能力。
-- **【十行代码迁移学习】**：十行代码完成图片分类、文本分类的迁移学习任务
-- **【PIP安装便捷】**：支持PIP快速安装使用
-- **【跨平台兼容性】**：可运行于Linux、Windows、MacOS等多种操作系统
+## Features
+- **【Abundant Pre-trained Models】**: 180+ pre-trained models covering the four major categories of CV, NLP, Audio, and Video, all open source downloads, and can be run offline.
+- **【Quick Model Prediction】**: Model calls can be realized through a one-line command line or a minimalist Python API to quickly experience the model effect.
+- **【Model As Service】**: A one-line command to build deep learning model API service deployment capabilities.
+- **【Ten Lines of Code for Transfer Learning】**: Ten lines of code complete the transfer-learning task of image classification and text classification
+- **【PIP installation 】**: Support PIP quick installation and use
+- **【Cross-platform Compatibility】**: Can run on Linux, Windows, MacOS and other operating systems
 
-
-## 精品模型效果展示
-
-### 文本识别
-- 包含超轻量中英文OCR模型，高精度中英文、多语种德语、法语、日语、韩语OCR识别。
-- 感谢CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)提供预训练模型，训练能力开放，欢迎体验。
+## Visualization
+### Text recognition
+- Contains ultra-lightweight Chinese and English OCR models, high-precision Chinese and English, multilingual German, French, Japanese, Korean OCR recognition.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_Ocr.gif"  width = "800" height = "400" />
 </div>
 
-### 人脸检测
-- 包含人脸检测，口罩人脸检测，多种算法可选。
-- 感谢CopyRight@[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)提供预训练模型，训练能力开放，欢迎体验。
+### Face Detection
+- Including face detection, mask face detection, multiple algorithms are optional.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Face_Mask.gif"  width = "588" height = "400" />
 </div>
 
-### 图像编辑
-- 4倍超分效果，多种超分算法可选。
-- 黑白图片上色，可用于老旧照片修复，
-- 感谢CopyRight@[PaddleGan](https://github.com/PaddlePaddle/PaddleGan)提供预训练模型，训练能力开放，欢迎体验。
+### Image editing
+- 4 times the super-score effect, multiple super-score algorithms are optional.
+- Coloring black and white pictures can be used to repair old photos.
 <div align="center">
 <table>
     <thead>
     </thead>
     <tbody>
         <tr>
-            <th>图像超分辨率 </th>
-            <th>黑白图片上色 </th>
+            <th>SuperResolution </th>
+            <th>Restoration </th>
         </tr>
         <tr>
             <th>
@@ -80,80 +73,64 @@
 </table>
 </div>
 
-
-### 目标检测
-- 包含行人检测、车辆检测，更有工业级超大规模预训练模型可选。--
-- 感谢CopyRight@[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)提供预训练模型，训练能力开放，欢迎体验。
+### Object Detection
+- Including pedestrian detection, vehicle detection, and more industrial-grade ultra-large-scale pre-training models are optional.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Pedestrian_Vehicle.gif"  width = "642" height = "400" />
 </div>
 
-### 关键点检测
-- 包含单人、多人身体关键点检测、面部关键点检测、手部关键点检测。
-- 感谢CopyRight@[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)开源预训练模型。
+### Key Point Detection
+- Including single person, multi-person body key point detection, face key point detection, hand key point detection.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "458" height = "400" />
 </div>
 
-### 图像分割
-- 包含效果卓越的人像抠图模型、ACE2P人体解析世界冠军模型
-- 感谢CopyRight@[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)提供预训练模型，训练能力开放，欢迎体验。
+### Image Segmentation
+- Contains excellent portrait cutout model, ACE2P human body analysis world champion model
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
 </div>
 
-### 图像动漫化
-- 包含宫崎骏、新海诚在内的多位漫画家风格迁移，多种算法可选
-- 感谢CopyRight@[AnimeGANv2](https://github.com/TachibanaYoshino/AnimeGANv2)开源预训练模型
+### Image Animation
+- Many cartoonists including Hayao Miyazaki and Makoto Shinkai are migrating their styles, and a variety of algorithms are available
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "642" height = "400" />
 </div>
 
-### 图像分类
-- 包含动物分类、菜品分类、野生动物制品分类，多种算法可选
-- 感谢CopyRight@[PaddleClas](https://github.com/PaddlePaddle/PaddleClas)提供预训练模型，训练能力开放，欢迎体验。
+### Image Classification
+- Including animal classification, dish classification, wild animal product classification, multiple algorithms are available
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "530" height = "400" />
 </div>
 
-### 词法分析
-- 效果优秀的中文分词、词性标注与命名实体识别的模型。
-- 感谢CopyRight@[LAC](https://github.com/baidu/LAC)提供预训练模型，训练能力开放，欢迎体验。
-<div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "640" height = "233" />
-</div>
-
-### 文本生成
-- 包含AI写诗、AI对联、AI情话、AI藏头诗，多种算法可选。
-- 感谢CopyRight@[ERNIE](https://github.com/PaddlePaddle/ERNIE)提供预训练模型，训练能力开放，欢迎体验。
+### Lexical Analysis
+- Including AI poem writing, AI couplets, AI love words, AI hidden poems, multiple algorithms are available.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "850" height = "400" />
 </div>
 
-### 句法分析
-- 效果领先的中文句法分析模型。
-- 感谢CopyRight@[DDParser](https://github.com/baidu/DDParser)提供预训练模型，训练能力开放，欢迎体验。
+### Syntax Analysis
+- Leading Chinese syntactic analysis model.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "640" height = "301" />
 </div>
 
-### 情感分析
-- 支持中文的评论情感分析
+### Sementic Analysis
+- Support Chinese comment sentiment analysis
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "640" height = "228" />
 </div>
 
-### 文本审核
-- 包含中文色情文本的审核，多种算法可选。
+### Text Review
+- Contains the review of Chinese pornographic text, and multiple algorithms are available.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textreview.png"  width = "640" height = "140" />
 </div>
 
-### 语音合成
-- TTS语音合成算法，多种算法可选
-- 感谢CopyRight@[Parakeet](https://github.com/PaddlePaddle/Parakeet)提供预训练模型，训练能力开放，欢迎体验。
-- 输入：`Life was like a box of chocolates, you never know what you're gonna get.`
-- 合成效果如下:
+### Speech Synthesis
+- TTS speech synthesis algorithm, multiple algorithms are available
+- Input: `Life was like a box of chocolates, you never know what you're gonna get.`
+- The synthesis effect is as follows:
 <div align="center">
 <table>
     <thead>
@@ -182,90 +159,82 @@
 </table>
 </div>
 
-### 视频分类
-- 包含短视频分类，支持3000+标签种类，可输出TOP-K标签，多种算法可选。
-- 感谢CopyRight@[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo)提供预训练模型，训练能力开放，欢迎体验。
-- `举例：输入一段游泳的短视频，算法可以输出"游泳"结果`
+### Video Classification
+- Contains short video classification, supports 3000+ tag types, can output TOP-K tags, and multiple algorithms are optional.
+- `Example: Input a short video of swimming, the algorithm can output the result of "swimming"`
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "400" height = "400" />
 </div>
 
-##  ===划重点===
-- 以上所有预训练模型全部开源，模型数量持续更新，欢迎Star关注。
+## ===Key Points===
+-All the above pre-trained models are all open source, and the number of models is continuously updated. Welcome Star to pay attention.
 <div align="center">
 <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers">
-            <img src="./docs/imgs/Readme_Related/star.png"  width = "411" height = "100" /></a>  
+            <img src="./docs/imgs/Readme_Related/star_en.png"  width = "411" height = "100" /></a>  
 </div>
 
-<a name="欢迎加入PaddleHub技术交流群"></a>
-## 欢迎加入PaddleHub技术交流群
-- 在使用模型过程中有任何问题，可以加入官方微信群，获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
+<a name="Welcome_joinus"></a>
+## Welcome to join PaddleHub technical group
+- If you have any questions during the use of the model, you can join the official WeChat group to get more efficient questions and answers, and fully communicate with developers from all walks of life. We look forward to your joining.
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
 </div>  
-如扫码失败，请添加微信15704308458，并备注“Hub”，运营同学会邀请您入群。  
+If you fail to scan the code, please add WeChat 15711058002 and note "Hub", the operating class will invite you to join the group.
 
+## Documentation Tutorial
+- [PIP Installation](./docs/docs_en/installation_en.md)
+- Quick Start
+    - [Command Line](./docs/docs_en/quick_experience/cmd_quick_run_en.md)
+    - [Python API](./docs/docs_en/quick_experience/python_use_hub_en.md)
+    - [More_Demos](./docs/docs_en/quick_experience/more_demos_en.md)
+- Rich Pre-trained Models 182
+    - [Boutique Featured Models](./docs/docs_en/figures_en.md)
+    - Computer vision 126
+      - [Image Classification 64 ](./modules/image/classification/README_en.md)
+      - [Object Detection 13 ](./modules/image/object_detection/README_en.md)
+      - [Face Detection 7 ](./modules/image/face_detection/README_en.md)  
+      - [Key Point Detection 3 ](./modules/image/keypoint_detection/README_en.md)
+      - [Image Segmentation 7 ](./modules/image/semantic_segmentation/README_en.md)
+      - [Text Recognition 8 ](./modules/image/text_recognition/README_en.md)
+      - [Image Generation 17 ](./modules/image/Image_gan/README_en.md)
+      - [Image Editing 7 ](./modules/image/Image_editing/README_en.md)
+    - Natural language processing 48
+      - [Lexical Analysis 2 ](./modules/text/lexical_analysis/README_en.md)
+      - [Syntax Analysis 1 ](./modules/text/syntactic_analysis/README_en.md)
+      - [Emotion Analysis 7 ](./modules/text/sentiment_analysis/README_en.md)
+      - [Text Review 3 ](./modules/text/text_review/README_en.md)
+      - [Text Generation 9 ](./modules/text/text_generation/README_en.md)
+      - [Semantic Models 26 ](./modules/text/language_model/README_en.md)
+    - Audio 3
+      - [Speech Synthesis 3 ](./modules/audio/README_en.md)
+    - Video 5
+      - [Video Classification 5 ](./modules/video/README_en.md)
+- Deploy
+    - [Local Inference Deployment](./docs/docs_en/quick_experience/python_use_hub_en.md)
+    - [One Line of Code Service deployment](./docs/docs_en/tutorial/serving_en.md)
+    - [Mobile Lite Deployment (link to Lite tutorial)](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
+- Advanced documentation
+    - [Command_Line](./docs/docs_en/tutorial/cmdintro_en.md)
+    - [How to Load Data](./docs/docs_en/tutorial/how_to_load_data_en.md)
+- Community
+    - [Join the technical group](#Welcome_joinus)
+    - [Contribute pre-trained models](./docs/docs_en/contribution/contri_pretrained_model_en.md)
+    - [Contribute code](./docs/docs_en/contribution/contri_pr_en.md)
+- [License](#License)
+- [Contribution](#Contribution)
 
-## 文档教程
+<a name="License"></a>
+## License
+The release of this project is certified by the <a href="./LICENSE">Apache 2.0 license</a>.
 
-- [PIP安装](./docs/docs_ch/installation.md)
-- 快速开始
-    - [命令行调用](./docs/docs_ch/quick_experience/cmd_quick_run.md)
-    - [Python API调用](./docs/docs_ch/quick_experience/python_use_hub.md)
-    - [示例体验项目demo](./docs/docs_ch/quick_experience/more_demos.md)
-- 丰富的预训练模型 182
-    - [精品特色模型](./docs/docs_ch/figures.md)
-    - 计算机视觉 126 个
-      - [图像分类 64 个](./modules/image/classification/README.md)
-      - [目标检测 13 个](./modules/image/object_detection/README.md)
-      - [人脸检测 7 个](./modules/image/face_detection/README.md)  
-      - [关键点检测 3 个](./modules/image/keypoint_detection/README.md)
-      - [图像分割 7 个](./modules/image/semantic_segmentation/README.md)
-      - [文本识别 8 个](./modules/image/text_recognition/README.md)
-      - [图像生成 17 个](./modules/image/Image_gan/README.md)
-      - [图像编辑 7 个](./modules/image/Image_editing/README.md)
-    - 自然语言处理 48 个
-      - [词法分析 2 个](./modules/text/lexical_analysis/README.md)
-      - [句法分析 1 个](./modules/text/syntactic_analysis/README.md)
-      - [情感分析 7 个](./modules/text/sentiment_analysis/README.md)
-      - [文本审核 3 个](./modules/text/text_review/README.md)
-      - [文本生成 9 个](./modules/text/text_generation/README.md)
-      - [语义模型 26 个](./modules/text/language_model/README.md)
-    - 语音 3 个
-      - [语音合成 3 个](./modules/audio/README.md)
-    - 视频5个
-      - [视频分类 5 个](./modules/video/README.md)
-- 部署
-    - [本地Inference部署](./docs/docs_ch/quick_experience/python_use_hub.md)
-    - [一行代码服务化部署](./docs/docs_ch/tutorial/serving.md)
-    - [移动端 Lite 部署（跳转Lite教程）](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
-- 进阶文档
-    - [命令行工具详解](./docs/docs_ch/tutorial/cmdintro.md)
-    - [自定义数据迁移学习](./docs/docs_ch/tutorial/how_to_load_data.md)
-- 社区交流
-    - [加入技术交流群](#欢迎加入PaddleHub技术交流群)
-    - [贡献预训练模型](./docs/docs_ch/contribution/contri_pretrained_model.md)
-    - [贡献代码](./docs/docs_ch/contribution/contri_pr.md)
-- [FAQ](./docs/docs_ch/faq.md)  
-- [更新历史](./docs/docs_ch/release.md)
-- [许可证书](#许可证书)
-- [致谢](#致谢)
+<a name="Contribution"></a>
+## Contribution
+We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 
-
-<a name="许可证书"></a>
-## 许可证书
-本项目的发布受<a href="./LICENSE">Apache 2.0 license</a>许可认证。
-
-<a name="致谢"></a>
-## 致谢开发者
-我们非常欢迎您为PaddleHub贡献代码，也十分感谢您的反馈。
-
-* 非常感谢[肖培楷](https://github.com/jm12138)贡献了街景动漫化，人像动漫化和手势关键点识别三个module
-* 非常感谢[Austendeng](https://github.com/Austendeng)贡献了修复SequenceLabelReader的pr
-* 非常感谢[cclauss](https://github.com/cclauss)贡献了优化travis-ci检查的pr
-* 非常感谢[奇想天外](http://www.cheerthink.com/)贡献了口罩检测的demo
-* 非常感谢[mhlwsk](https://github.com/mhlwsk)贡献了修复序列标注预测demo的pr
-* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)贡献了看图作诗的module
-* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)和[七年期限](https://github.com/1084667371)联合贡献了看图写诗中秋特别版module
-* 非常感谢[livingbody](https://github.com/livingbody)贡献了基于PaddleHub能力的风格迁移和中秋看图写诗微信小程序
-
+* Many thanks to [Austendeng](https://github.com/Austendeng) for fixing the SequenceLabelReader
+* Many thanks to [cclauss](https://github.com/cclauss) optimizing travis-ci check
+* Many thanks to [奇想天外](http://www.cheerthink.com/)，Contributed a demo of mask detection
+* Many thanks to [mhlwsk](https://github.com/mhlwsk)，Contributed the repair sequence annotation prediction demo
+* Many thanks to [zbp-xxxp](https://github.com/zbp-xxxp)，Contributed modules for viewing pictures and writing poems
+* Many thanks to [zbp-xxxp](https://github.com/zbp-xxxp) and [七年期限](https://github.com/1084667371),Jointly contributed to the Mid-Autumn Festival Special Edition Module
+* Many thanks to [livingbody](https://github.com/livingbody)，Contributed models for style transfer based on PaddleHub's capabilities and Mid-Autumn Festival WeChat Mini Program
