@@ -1,5 +1,10 @@
 # 更新历史
 
+## `v2.0.0-beta1`
+
+* BERT、ERNIE、RoBERTa等Transformer类模型升级至动态图，增加[文本分类](../../demo/text_classification)的Fine-Tune能力
+* 修复部分已知问题
+
 ## `v2.0.0-beta0`
 
 * 全面迁移动态图编程模式，模型开发调试更加方便，finetune接口更加灵活易用。

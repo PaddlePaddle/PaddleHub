@@ -1,3 +1,5 @@
+English | [简体中文](README.md)
+
 <p align="center">
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"
 </p>
