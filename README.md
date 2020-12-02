@@ -118,7 +118,7 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "640" height = "233" />
 </div>
 
-### Syntax Analysis
+### Syntactic Analysis
 - Leading Chinese syntactic analysis model are provided by Baidu NLP.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "640" height = "301" />
@@ -211,7 +211,7 @@ If you fail to scan the code, please add WeChat 15711058002 and note "Hub", the 
       - [Image Editing 7 ](./modules/image/Image_editing/README_en.md)
     - Natural Language Processing 48
       - [Lexical Analysis 2 ](./modules/text/lexical_analysis/README_en.md)
-      - [Syntax Analysis 1 ](./modules/text/syntactic_analysis/README_en.md)
+      - [Syntactic Analysis 1 ](./modules/text/syntactic_analysis/README_en.md)
       - [Sentiment Analysis 7 ](./modules/text/sentiment_analysis/README_en.md)
       - [Text Review 3 ](./modules/text/text_review/README_en.md)
       - [Text Generation 9 ](./modules/text/text_generation/README_en.md)
