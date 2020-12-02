@@ -19,7 +19,7 @@ English | [简体中文](README_ch.md)
 - All models are open source download, **offline can run**.
 
 **Recent updates**
-- 2020.11.20: Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key detection model, 12 image animation models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
+- 2020.11.20: Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key point detection model, 12 image animation models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
 - 2020.10.09: Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
 - 2020.09.27: 6 new text generation models and 1 image segmentation model were added, and the total number of pre-trained models reached **【154】**.
 - 2020.08.13: Released v1.8.1, added a segmentation model, and supports EMNLP2019-Sentence-BERT as a text matching task network. The total number of pre-training models reaches **【147】**.
@@ -30,9 +30,9 @@ English | [简体中文](README_ch.md)
 - **【Abundant Pre-trained Models】**: 180+ pre-trained models covering the four major categories of CV, NLP, Audio, and Video, all open source downloads, and can be run offline.
 - **【Quick Model Prediction】**: Model calls can be realized through a one-line command line or a minimalist Python API to quickly experience the model effect.
 - **【Model As Service】**: A one-line command to build deep learning model API service deployment capabilities.
-- **【Ten Lines of Code for Transfer Learning】**: Ten lines of code complete the transfer-learning task of image classification and text classification
-- **【PIP installation 】**: Support PIP quick installation and use
-- **【Cross-platform Compatibility】**: Can run on Linux, Windows, MacOS and other operating systems
+- **【Ten Lines of Code for Transfer Learning】**: Ten lines of code complete the transfer-learning task of image classification and text classification.
+- **【PIP installation 】**: Support PIP quick installation and use.
+- **【Cross-platform Compatibility】**: Can run on Linux, Windows, MacOS and other operating systems.
 
 ## Visualization
 ### Text recognition
@@ -47,9 +47,10 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Face_Mask.gif"  width = "588" height = "400" />
 </div>
 
-### Image Editing
-- 4 times the super-resolution effect, multiple super-resolution algorithms are optional.
-- Coloring black-and-white pictures can be used to repair old photos.
+### Image editing
+- 4 times super resolution effect, multiple super resolution models are optional.
+- Colorization models can be used to repair old grayscale photos.
+
 <div align="center">
 <table>
     <thead>
@@ -74,13 +75,13 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Object Detection
-- Including pedestrian detection, vehicle detection, and more industrial-grade ultra-large-scale pre-training models are optional.
+- Including pedestrian detection, vehicle detection, and more industrial-grade ultra-large-scale pretrained models are optional.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Pedestrian_Vehicle.gif"  width = "642" height = "400" />
 </div>
 
 ### Key Point Detection
-- Including single person, multi-person body key point detection, face key point detection, hand key point detection.
+- Supports body, face and hands key point detection in single or multiple person.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "458" height = "400" />
 </div>
@@ -92,13 +93,13 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Image Animation
-- Many cartoonists including Hayao Miyazaki and Makoto Shinkai are migrating their styles, and a variety of algorithms are available
+- Contains image style transfer models with Hayao Miyazaki and Makoto Shinkai styles, etc.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "642" height = "400" />
 </div>
 
 ### Image Classification
-- Including animal classification, dish classification, wild animal product classification, multiple algorithms are available
+- Including animal classification, dish classification, wild animal product classification, multiple algorithms are available.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "530" height = "400" />
 </div>
@@ -114,6 +115,7 @@ English | [简体中文](README_ch.md)
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "640" height = "301" />
 </div>
+
 
 ### Sentiment Analysis
 - Support Chinese comment sentiment analysis.
