@@ -13,7 +13,7 @@
 | 图像分割   | [人像分割](https://www.paddlepaddle.org.cn/hubdetail?name=deeplabv3p_xception65_humanseg&en_category=ImageSegmentation)、[人体解析](https://www.paddlepaddle.org.cn/hubdetail?name=ace2p&en_category=ImageSegmentation)、[肺炎CT影像分析](https://www.paddlepaddle.org.cn/hubdetail?name=Pneumonia_CT_LKM_PP&en_category=ImageSegmentation)、[-->More](../modules/image/semantic_segmentation/README.md) |
 | 关键点检测 | [人体关键点](https://www.paddlepaddle.org.cn/hubdetail?name=human_pose_estimation_resnet50_mpii&en_category=KeyPointDetection)、[人脸关键点](https://www.paddlepaddle.org.cn/hubdetail?name=face_landmark_localization&en_category=KeyPointDetection)、[手部关键点](https://www.paddlepaddle.org.cn/hubdetail?name=hand_pose_localization&en_category=KeyPointDetection)、[-->More](./modules/image/keypoint_detection/README.md) |
 | 文本识别 | [超轻量中英文OCR文字识别](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_ocr_db_crnn_mobile&en_category=TextRecognition)、[-->More](../modules/image/text_recognition/README.md) |
-| 图像生成    | [风格迁移](https://www.paddlepaddle.org.cn/hubdetail?name=stylepro_artistic&en_category=GANs)、[街景动漫画]()、[-->More](../modules/image/Image_gan/README.md) |
+| 图像生成    | [风格迁移](https://www.paddlepaddle.org.cn/hubdetail?name=stylepro_artistic&en_category=GANs)、[街景动漫画](https://www.paddlepaddle.org.cn/hubdetail?name=animegan_v2_hayao_99&en_category=GANs)、[-->More](../modules/image/Image_gan/README.md) |
 | 图像编辑 | [超分辨率](https://www.paddlepaddle.org.cn/hubdetail?name=realsr&en_category=ImageEditing)、[黑白上色](https://www.paddlepaddle.org.cn/hubdetail?name=deoldify&en_category=ImageEditing)、[-->More](../modules/image/Image_editing/README.md) |
 #### 1.2、文本
 |            | **精品模型举例**                                           |
@@ -21,17 +21,17 @@
 | 词句分析 | [词法分析 ](https://www.paddlepaddle.org.cn/hubdetail?name=lac&en_category=LexicalAnalysis)、[句法分析](https://www.paddlepaddle.org.cn/hubdetail?name=ddparser&en_category=SyntacticAnalysis)、[-->More](../modules/text/lexical_analysis/README.md) |
 | 情感分析   | [情感判断](https://www.paddlepaddle.org.cn/hubdetail?name=lac&en_category=LexicalAnalysis)、[情绪分析](https://www.paddlepaddle.org.cn/hubdetail?name=emotion_detection_textcnn&en_category=SentimentAnalysis) 、[-->More](../modules/text/sentiment_analysis/README.md)|
 | 文本审核 | [色情审核](https://www.paddlepaddle.org.cn/hubdetail?name=porn_detection_gru&en_category=TextCensorship)、[-->More](../modules/text/text_review/README.md) |
-| 文本生成 | [对联生成]()、[情话生成]()、[藏图诗生成]()、[土味情话]() 、[-->More](../modules/text/text_generation/README.md)|
+| 文本生成 | [对联生成](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_tiny_couplet&en_category=TextGeneration)、[情话生成](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_gen_poetry&en_category=TextGeneration)、[藏头诗生成](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_gen_acrostic_poetry&en_category=TextGeneration)、[土味情话](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_gen_lover_words&en_category=TextGeneration) 、[-->More](../modules/text/text_generation/README.md)|
 | 语义模型   | [ERNIE](https://www.paddlepaddle.org.cn/hubdetail?name=ERNIE&en_category=SemanticModel)、[文本相似度](https://www.paddlepaddle.org.cn/hubdetail?name=simnet_bow&en_category=SemanticModel)、[-->More](../modules/text/language_model/README.md) |
 
 #### 1.3、语音
 |            | **精品模型举例**                                           |
 | ---------- | :----------------------------------------------------------- |
-| 语音合成   | [语音合成]() 、[-->More](../modules/audio/README.md)                         |
+| 语音合成   | [语音合成](https://www.paddlepaddle.org.cn/hubdetail?name=deepvoice3_ljspeech&en_category=TextToSpeech) 、[-->More](../modules/audio/README.md)                         |
 #### 1.4、视频
 |            | **精品模型举例**                                       |
 | ---------- | :----------------------------------------------------------- |
-| 视频分类 | [视频分类]()、[-->More](../modules/video/README.md) |
+| 视频分类 | [视频分类](https://www.paddlepaddle.org.cn/hublist?filter=en_category&value=VideoClassificationhttps://www.paddlepaddle.org.cn/hublist?filter=en_category&value=VideoClassification)、[-->More](../modules/video/README.md) |
 
 <a name="一键模型预测"></a>
 
@@ -48,7 +48,7 @@ $ hub run chinese_ocr_db_crnn_mobile --input_path test_ocr.jpg --visualization=T
 * 预测结果图片保存在当前运行路径下ocr_result文件夹中，如下图所示。
 
 <p align="center">
- <img src="./imgs/ocr_res.jpg" width='70%' align="middle"  
+ <img src="../imgs/ocr_res.jpg" width='70%' align="middle"  
 </p>
 
 * 使用词法分析模型LAC进行分词
@@ -85,7 +85,7 @@ $ hub serving start -m chinese_ocr_db_crnn_mobile
 * [Demo示例](../demo)提供丰富的Fine-tune API的使用代码，包括[图像分类](../demo/image_classification)、[图像着色](../demo/colorization)、[风格迁移](../demo/style_transfer)、等场景的模型迁移示例。
 
 <p align="center">
- <img src="./imgs/paddlehub_finetune.gif" align="middle"  
+ <img src="../imgs/paddlehub_finetune.gif" align="middle"  
 </p>
 
 <p align='center'>

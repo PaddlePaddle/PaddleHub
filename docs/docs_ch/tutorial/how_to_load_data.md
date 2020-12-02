@@ -31,7 +31,7 @@ label_list.txt的格式如下
 ```
 
 示例：
-以[Flower数据集](../reference/dataset.md)为示例，train_list.txt/test_list.txt/validate_list.txt内容如下示例
+以[Flower数据集](../reference/datasets.md)为示例，train_list.txt/test_list.txt/validate_list.txt内容如下示例
 ```
 roses/8050213579_48e1e7109f.jpg 0
 sunflowers/45045003_30bbd0a142_m.jpg 3
@@ -62,7 +62,7 @@ flowers_validate = Flowers(transforms, mode='val')
 
 ## 二、图像着色数据集
 
-利用PaddleHub迁移着色任务使用自定义数据时，需要切分数据集，将数据集切分为训练集和测试集。 
+利用PaddleHub迁移着色任务使用自定义数据时，需要切分数据集，将数据集切分为训练集和测试集。
 
 ### 数据准备
 
@@ -116,7 +116,7 @@ color_set = Canvas(transforms, mode='train')
 
 ## 三、风格迁移数据集
 
-利用PaddleHub进行风格迁移任务使用自定义数据时，需要切分数据集，将数据集切分为训练集和测试集。 
+利用PaddleHub进行风格迁移任务使用自定义数据时，需要切分数据集，将数据集切分为训练集和测试集。
 
 ### 数据准备
 

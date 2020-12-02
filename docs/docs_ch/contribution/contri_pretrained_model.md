@@ -14,7 +14,7 @@ author_email:
 type: nlp/sentiment_analysis
 ```
 
-**本示例代码可以参考[senta_module_sample](../../demo/senta_module_sample/senta_test)**
+
 
 Module存在一个接口sentiment_classify，用于接收传入文本，并给出文本的情感倾向（正面/负面），支持python接口调用和命令行调用。
 ```python

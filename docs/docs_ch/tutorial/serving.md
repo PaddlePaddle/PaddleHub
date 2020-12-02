@@ -99,7 +99,7 @@ $ hub serving start --config config.json
 ### Step3：利用PaddleHub Serving进行个性化开发
 使用PaddleHub Serving进行模型服务部署后，可以利用得到的接口进行开发，如对外提供web服务，或接入到应用程序中，以降低客户端预测压力，提高性能，下面展示了一个web页面demo:
 
-![](../imgs/web_demo.png)
+![](../../imgs/web_demo.png)
 
 
 ### Step4：关闭serving
@@ -147,7 +147,7 @@ $ hub serving start -c serving_config.json
 ```
 启动成功界面如图：
 
-![](../imgs/start_serving_lac.png)
+![](../../imgs/start_serving_lac.png)
 
 这样我们就在8866端口成功部署了lac的在线分词服务。
 *此处warning为Flask提示，不影响使用*
@@ -227,13 +227,11 @@ $ PaddleHub Serving will stop.
 
 ## Demo——其他模型的一键部署服务
 
-* [中文词法分析-基于lac](../../demo/serving/module_serving/lexical_analysis_lac)
+* [中文词法分析-基于lac](../../../demo/serving/module_serving/lexical_analysis_lac)
 
 &emsp;&emsp;该示例展示了利用lac完成中文文本分词服务化部署和在线预测，获取文本的分词结果，并可通过用户自定义词典干预分词结果。
 
-* [人脸检测-基于pyramidbox_lite_server_mask](../../demo/serving/module_serving/object_detection_pyramidbox_lite_server_mask)
+* [人脸检测-基于pyramidbox_lite_server_mask](../../../demo/serving/module_serving/object_detection_pyramidbox_lite_server_mask)
 
 &emsp;&emsp;该示例展示了利用pyramidbox_lite_server_mask完成人脸口罩检测，检测人脸位置以及戴口罩的置信度。
 
-## Bert Service
-除了预训练模型一键服务部署功能之外，PaddleHub Serving还具有`Bert Service`功能，支持ernie_tiny、bert等模型快速部署，对外提供可靠的在线embedding服务，具体信息请参见[Bert Service](./bert_service.md)。

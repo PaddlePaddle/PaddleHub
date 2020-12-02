@@ -103,6 +103,7 @@ $ hub run lac --input_file test.txt
 # 单张照片预测
 $ hub run resnet_v2_50_imagenet --input_path test.jpg
 ```
+
 ```shell
 # 多张照片预测
 $ hub run resnet_v2_50_imagenet --input_file test.txt
