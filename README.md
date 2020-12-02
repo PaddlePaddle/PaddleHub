@@ -19,6 +19,7 @@ English | [简体中文](README_ch.md)
 - All models are open source download, **offline can run**.
 
 **Recent updates**
+- 2020.12.1: Release 2.0-beta-1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tuen task based on large-scale pre-trained models.
 - 2020.11.20: Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key point detection model, 12 image animation models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
 - 2020.10.09: Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
 - 2020.09.27: 6 new text generation models and 1 image segmentation model were added, and the total number of pre-trained models reached **【154】**.
@@ -35,7 +36,7 @@ English | [简体中文](README_ch.md)
 - **【Cross-platform Compatibility】**: Can run on Linux, Windows, MacOS and other operating systems.
 
 ## Visualization
-### Text recognition
+### Text Recognition
 - Contains ultra-lightweight Chinese and English OCR models, high-precision Chinese and English, multilingual German, French, Japanese, Korean OCR recognition.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_Ocr.gif"  width = "800" height = "400" />
@@ -47,7 +48,7 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Face_Mask.gif"  width = "588" height = "400" />
 </div>
 
-### Image editing
+### Image Editing
 - 4 times super resolution effect, multiple super resolution models are optional.
 - Colorization models can be used to repair old grayscale photos.
 
@@ -87,7 +88,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Image Segmentation
-- Contains excellent portrait cutout model, ACE2P human body analysis world champion model
+- Contains excellent portrait cutout model, ACE2P human body analysis world champion model.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
 </div>
@@ -104,21 +105,20 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "530" height = "400" />
 </div>
 
-### Lexical Analysis
+### Text Generation
 - Including AI poem writing, AI couplets, AI love words, AI hidden poems, multiple algorithms are available.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "850" height = "400" />
 </div>
 
 ### Syntax Analysis
-- Leading Chinese syntactic analysis model.
+- Leading Chinese syntactic analysis model release by Baidu NLP.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "640" height = "301" />
 </div>
 
-
 ### Sentiment Analysis
-- Support Chinese comment sentiment analysis.
+- SOTA Chinese sentiment analysis model released by Baidu NLP.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "640" height = "228" />
 </div>
@@ -172,7 +172,7 @@ English | [简体中文](README_ch.md)
 -All the above pre-trained models are all open source, and the number of models is continuously updated. Welcome Star to pay attention.
 <div align="center">
 <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers">
-            <img src="./docs/imgs/Readme_Related/star_en.png"  width = "411" height = "100" /></a>  
+    <img src="./docs/imgs/Readme_Related/star_en.png"  width = "411" height = "100" /></a>  
 </div>
 
 <a name="Welcome_joinus"></a>
