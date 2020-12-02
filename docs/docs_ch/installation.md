@@ -4,11 +4,18 @@
 
 * Python>=3.6
 * PaddlePaddle>=2.0.0rc
+```shell
+# 安装gpu版本的PaddlePaddle
+pip install paddlepaddle-gpu==2.0.0rc
+
+# 或者安装cpu版本的paddlepaddle
+# pip install paddlepaddle==2.0.0rc
+```
 * 操作系统：Windows/Mac/Linux
 
 ## 安装命令
 
-在安装PaddleHub之前，请先安装PaddlePaddle深度学习框架，更多安装说明请查阅[飞桨快速安装](https://github.com/PaddlePaddle/PaddleHub)
+在安装PaddleHub之前，请先安装PaddlePaddle深度学习框架，更多安装说明请查阅[飞桨快速安装](https://www.paddlepaddle.org.cn/install/quick/zh/2.0rc-windows-pip)
 
 ```shell
 pip install paddlehub==2.0.0b
