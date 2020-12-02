@@ -18,13 +18,13 @@ English | [简体中文](README_ch.md)
 - Covers 4 major categories of CV, NLP, Audio, and Video, and supports **one-click prediction**, **one-click service deployment** and **transfer learning**
 - All models are **OPEN SOURCE**, **FREE** for download and use in offline scenario.
 
-**Recent updates**
-- 2020.12.1: Release 2.0-beta1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tune task based on large-scale pre-trained models.
-- 2020.11.20: Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key point detection model, 12 image animation models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
-- 2020.10.09: Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
-- 2020.09.27: 6 new text generation models and 1 image segmentation model were added, and the total number of pre-trained models reached **【154】**.
-- 2020.08.13: Released v1.8.1, added a segmentation model, and supports EMNLP2019-Sentence-BERT as a text matching task network. The total number of pre-training models reaches **【147】**.
-- 2020.07.29: Release v1.8.0, new AI couplets and AI writing poems, jieba word segmentation, LDA topic model, semantic similarity calculation, new target detection, short video classification model, ultra-lightweight Chinese and English OCR, new pedestrian detection, vehicle industrial-grade models such as detection and animal recognition support [VisualDL](https://github.com/PaddlePaddle/VisualDL) visualization training, and the total number of pre-training models reaches **【135】**.
+### Recent updates
+- **2020.12.1:** Release 2.0-beta1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tune task based on large-scale pre-trained models.
+- **2020.11.20:** Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key point detection model, 12 image animation models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
+- **2020.10.09:** Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
+- **2020.09.27:** 6 new text generation models and 1 image segmentation model were added, and the total number of pre-trained models reached **【154】**.
+- **2020.08.13:** Released v1.8.1, added a segmentation model, and supports EMNLP2019-Sentence-BERT as a text matching task network. The total number of pre-training models reaches **【147】**.
+- **2020.07.29:** Release v1.8.0, new AI couplets and AI writing poems, jieba word segmentation, LDA topic model, semantic similarity calculation, new target detection, short video classification model, ultra-lightweight Chinese and English OCR, new pedestrian detection, vehicle industrial-grade models such as detection and animal recognition support [VisualDL](https://github.com/PaddlePaddle/VisualDL) visualization training, and the total number of pre-training models reaches **【135】**.
 
 
 ## Features
@@ -175,8 +175,8 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "400" height = "400" />
 </div>
 
-## ===Key Points===
-- All the above pre-trained models are all open source, and the number of models is continuously updated. Welcome Star to pay attention.
+## ===**Key Points**===
+- All the above pre-trained models are all open source and free, and the number of models is continuously updated. Welcome **⭐Star⭐** to pay attention.
 <div align="center">
 <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers">
     <img src="./docs/imgs/Readme_Related/star_en.png"  width = "411" height = "100" /></a>  
