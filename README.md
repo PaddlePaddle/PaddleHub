@@ -169,15 +169,17 @@ English | [简体中文](README_ch.md)
 </div>
 
 ## ===Key Points===
--All the above pre-trained models are all open source, and the number of models is continuously updated. Welcome Star to pay attention.
+- All the above pre-trained models are all open source, and the number of models is continuously updated. Welcome Star to pay attention.
 <div align="center">
 <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers">
     <img src="./docs/imgs/Readme_Related/star_en.png"  width = "411" height = "100" /></a>  
 </div>
 
 <a name="Welcome_joinus"></a>
+
 ## Welcome to join PaddleHub technical group
-- If you have any questions during the use of the model, you can join the official WeChat group to get more efficient questions and answers, and fully communicate with developers from all walks of life. We look forward to your joining.
+
+If you have any questions during the use of the model, you can join the official WeChat group to get more efficient questions and answers, and fully communicate with developers from all walks of life. We look forward to your joining.
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
 </div>  
