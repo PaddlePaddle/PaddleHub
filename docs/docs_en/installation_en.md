@@ -1,9 +1,16 @@
 # Installation
 
-## Environment Dependence
+## Environment Dependency
 
 * Python>=3.6
 * PaddlePaddle>=2.0.0rc
+```shell
+# Install gpu version of paddlepaddle
+pip install paddlepaddle-gpu==2.0.0rc
+
+# Or install cpu version of paddlepaddle
+# pip install paddlepaddle==2.0.0rc
+```
 * Operating System: Windows/Mac/Linux
 
 ## Installation Command
