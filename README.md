@@ -47,9 +47,9 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Face_Mask.gif"  width = "588" height = "400" />
 </div>
 
-### Image editing
-- 4 times the super-score effect, multiple super-score algorithms are optional.
-- Coloring black and white pictures can be used to repair old photos.
+### Image Editing
+- 4 times the super-resolution effect, multiple super-resolution algorithms are optional.
+- Coloring black-and-white pictures can be used to repair old photos.
 <div align="center">
 <table>
     <thead>
@@ -115,8 +115,8 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/Text_SyntacticAnalysis.png"  width = "640" height = "301" />
 </div>
 
-### Sementic Analysis
-- Support Chinese comment sentiment analysis
+### Sentiment Analysis
+- Support Chinese comment sentiment analysis.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "640" height = "228" />
 </div>
@@ -189,7 +189,7 @@ If you fail to scan the code, please add WeChat 15711058002 and note "Hub", the 
     - [More_Demos](./docs/docs_en/quick_experience/more_demos_en.md)
 - Rich Pre-trained Models 182
     - [Boutique Featured Models](./docs/docs_en/figures_en.md)
-    - Computer vision 126
+    - Computer Vision 126
       - [Image Classification 64 ](./modules/image/classification/README_en.md)
       - [Object Detection 13 ](./modules/image/object_detection/README_en.md)
       - [Face Detection 7 ](./modules/image/face_detection/README_en.md)  
@@ -198,10 +198,10 @@ If you fail to scan the code, please add WeChat 15711058002 and note "Hub", the 
       - [Text Recognition 8 ](./modules/image/text_recognition/README_en.md)
       - [Image Generation 17 ](./modules/image/Image_gan/README_en.md)
       - [Image Editing 7 ](./modules/image/Image_editing/README_en.md)
-    - Natural language processing 48
+    - Natural Language Processing 48
       - [Lexical Analysis 2 ](./modules/text/lexical_analysis/README_en.md)
       - [Syntax Analysis 1 ](./modules/text/syntactic_analysis/README_en.md)
-      - [Emotion Analysis 7 ](./modules/text/sentiment_analysis/README_en.md)
+      - [Sentiment Analysis 7 ](./modules/text/sentiment_analysis/README_en.md)
       - [Text Review 3 ](./modules/text/text_review/README_en.md)
       - [Text Generation 9 ](./modules/text/text_generation/README_en.md)
       - [Semantic Models 26 ](./modules/text/language_model/README_en.md)
