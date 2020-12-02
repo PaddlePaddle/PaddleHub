@@ -24,14 +24,14 @@ English | [简体中文](README_ch.md)
 - 2020.10.09: Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
 - 2020.09.27: 6 new text generation models and 1 image segmentation model were added, and the total number of pre-trained models reached **【154】**.
 - 2020.08.13: Released v1.8.1, added a segmentation model, and supports EMNLP2019-Sentence-BERT as a text matching task network. The total number of pre-training models reaches **【147】**.
-- 2020.07.29: Release v1.8.0, new AI couplets and AI writing poems, jieba word cutting, text data LDA, semantic similarity calculation, new target detection, short video classification model, ultra-lightweight Chinese and English OCR, new pedestrian detection, vehicle Industrial-grade models such as detection and animal recognition support [VisualDL](https://github.com/PaddlePaddle/VisualDL) visualization training, and the total number of pre-training models reaches **【135】**.
+- 2020.07.29: Release v1.8.0, new AI couplets and AI writing poems, jieba word segmentation, LDA topic model, semantic similarity calculation, new target detection, short video classification model, ultra-lightweight Chinese and English OCR, new pedestrian detection, vehicle industrial-grade models such as detection and animal recognition support [VisualDL](https://github.com/PaddlePaddle/VisualDL) visualization training, and the total number of pre-training models reaches **【135】**.
 
 
 ## Features
-- **Abundant Pre-trained Models**: 180+ pre-trained models covering the four major categories of CV, NLP, Audio, and Video, all open source and free for downloads and offline usage.
-- **Quick Model Prediction**: Model calls can be realized through a one-line command line or a minimalist Python API to quickly experience the model effect.
+- **Abundant Pre-trained Models**: 180+ pre-trained models covering the four major categories of CV, NLP, Audio, and Video, all open source and free for download and offline usage.
+- **Quick Model Prediction**: Model prediction can be realized through a few lines of scripts to quickly experience the model effect.
 - **Model As Service**: A one-line command to build deep learning model API service deployment capabilities.
-- **Super Easy Transfer Learning**: Just few lines of code you complete the transfer-learning task like image classification and text classification, etc.
+- **Easy-to-use Transfer Learning**: Just few lines of code you can complete the transfer-learning task like image classification and text classification based on high quality pre-trained models.
 - **Cross-platform**: Can run on Linux, Windows, MacOS and other operating systems.
 
 ## Visualization Demo
