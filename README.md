@@ -14,12 +14,12 @@ English | [简体中文](README_ch.md)
 
 ## Introduction
 - PaddleHub aims to provide developers with rich, high-quality, and directly usable pre-trained models.
-- **【No need for deep learning background, no data and training process】**，you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
+- **No need for deep learning background**，you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
 - Covers 4 major categories of CV, NLP, Audio, and Video, and supports **one-click prediction**, **one-click service deployment** and **transfer learning**
-- All models are **OPEN SOURCE**, **FREE** for download and use in **offline scenario**.
+- All models are **OPEN SOURCE**, **FREE** for download and use in offline scenario.
 
 **Recent updates**
-- 2020.12.1: Release 2.0-beta-1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tuen task based on large-scale pre-trained models.
+- 2020.12.1: Release 2.0-beta1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tune task based on large-scale pre-trained models.
 - 2020.11.20: Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key point detection model, 12 image animation models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
 - 2020.10.09: Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
 - 2020.09.27: 6 new text generation models and 1 image segmentation model were added, and the total number of pre-trained models reached **【154】**.
@@ -28,12 +28,11 @@ English | [简体中文](README_ch.md)
 
 
 ## Features
-- **【Abundant Pre-trained Models】**: 180+ pre-trained models covering the four major categories of CV, NLP, Audio, and Video, all open source downloads, and can be run offline.
-- **【Quick Model Prediction】**: Model calls can be realized through a one-line command line or a minimalist Python API to quickly experience the model effect.
-- **【Model As Service】**: A one-line command to build deep learning model API service deployment capabilities.
-- **【Ten Lines of Code for Transfer Learning】**: Ten lines of code complete the transfer-learning task of image classification and text classification.
-- **【PIP installation 】**: Support PIP quick installation and use.
-- **【Cross-platform Compatibility】**: Can run on Linux, Windows, MacOS and other operating systems.
+- **Abundant Pre-trained Models**: 180+ pre-trained models covering the four major categories of CV, NLP, Audio, and Video, all open source and free for downloads and offline usage.
+- **Quick Model Prediction**: Model calls can be realized through a one-line command line or a minimalist Python API to quickly experience the model effect.
+- **Model As Service**: A one-line command to build deep learning model API service deployment capabilities.
+- **Super Easy Transfer Learning**: Just few lines of code you complete the transfer-learning task like image classification and text classification, etc.
+- **Cross-platform**: Can run on Linux, Windows, MacOS and other operating systems.
 
 ## Visualization Demo
 
@@ -89,25 +88,25 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Image Segmentation
-- Contains excellent portrait cutout model, ACE2P human body analysis world champion model.
+- High quality pixel-level portrait cutout model, ACE2P human body analysis world champion models are provided.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
 </div>
 
 ### Image Animation
-- Contains image style transfer models with Hayao Miyazaki and Makoto Shinkai styles, etc.
+- Image style transfer models with Hayao Miyazaki and Makoto Shinkai styles, etc are provided
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "642" height = "400" />
 </div>
 
 ### Image Classification
-- Including animal classification, dish classification, wild animal product classification, multiple algorithms are available.
+- Various models like animal classification, dish classification, wild animal product classification are available.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "530" height = "400" />
 </div>
 
 ### Text Generation
-- Including AI poem writing, AI couplets, AI love words, AI hidden poems, multiple algorithms are available.
+- AI poem writing, AI couplets, AI love words generation models are available.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "850" height = "400" />
 </div>
@@ -119,7 +118,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Sentiment Analysis
-- SOTA Chinese sentiment analysis model released by Baidu NLP.
+- All SOTA Chinese sentiment analysis model released by Baidu NLP can be used just one-line of code.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_SentimentAnalysis.png"  width = "640" height = "228" />
 </div>
