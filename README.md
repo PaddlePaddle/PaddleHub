@@ -15,8 +15,8 @@ English | [简体中文](README_ch.md)
 ## Introduction
 - PaddleHub aims to provide developers with rich, high-quality, and directly usable pre-trained models.
 - **【No need for deep learning background, no data and training process】**，you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
-- Covers the four major categories of CV, NLP, Audio, and Video, and supports **one-click prediction**, **one-click service deployment** and **migration learning**
-- All models are open source download, **offline can run**.
+- Covers 4 major categories of CV, NLP, Audio, and Video, and supports **one-click prediction**, **one-click service deployment** and **transfer learning**
+- All models are **OPEN SOURCE**, **FREE** for download and use in **offline scenario**.
 
 **Recent updates**
 - 2020.12.1: Release 2.0-beta-1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tuen task based on large-scale pre-trained models.
@@ -24,7 +24,7 @@ English | [简体中文](README_ch.md)
 - 2020.10.09: Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
 - 2020.09.27: 6 new text generation models and 1 image segmentation model were added, and the total number of pre-trained models reached **【154】**.
 - 2020.08.13: Released v1.8.1, added a segmentation model, and supports EMNLP2019-Sentence-BERT as a text matching task network. The total number of pre-training models reaches **【147】**.
-- 2020.07.29: Release v1.8.0, new AI couplets and AI writing poems, jieba word cutting, text data LDA, semantic similarity calculation, new target detection, short video classification model, ultra-lightweight Chinese and English OCR, new pedestrian detection, vehicle Industrial-grade models such as detection and animal recognition support VisualDL visualization training, and the total number of pre-training models reaches **【135】**.
+- 2020.07.29: Release v1.8.0, new AI couplets and AI writing poems, jieba word cutting, text data LDA, semantic similarity calculation, new target detection, short video classification model, ultra-lightweight Chinese and English OCR, new pedestrian detection, vehicle Industrial-grade models such as detection and animal recognition support [VisualDL](https://github.com/PaddlePaddle/VisualDL) visualization training, and the total number of pre-training models reaches **【135】**.
 
 
 ## Features
@@ -35,7 +35,8 @@ English | [简体中文](README_ch.md)
 - **【PIP installation 】**: Support PIP quick installation and use.
 - **【Cross-platform Compatibility】**: Can run on Linux, Windows, MacOS and other operating systems.
 
-## Visualization
+## Visualization Demo
+
 ### Text Recognition
 - Contains ultra-lightweight Chinese and English OCR models, high-precision Chinese and English, multilingual German, French, Japanese, Korean OCR recognition.
 <div align="center">
@@ -49,7 +50,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Image Editing
-- 4 times super resolution effect, multiple super resolution models are optional.
+- 4x super resolution effect, multiple super resolution models are optional.
 - Colorization models can be used to repair old grayscale photos.
 
 <div align="center">
@@ -76,13 +77,13 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Object Detection
-- Including pedestrian detection, vehicle detection, and more industrial-grade ultra-large-scale pretrained models are optional.
+- Pedestrian detection, vehicle detection, and more industrial-grade ultra-large-scale pretrained models are provided.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_ObjectDetection_Pedestrian_Vehicle.gif"  width = "642" height = "400" />
 </div>
 
 ### Key Point Detection
-- Supports body, face and hands key point detection in single or multiple person.
+- Supports body, face and hands key point detection for single or multiple person.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "458" height = "400" />
 </div>
@@ -162,7 +163,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Video Classification
-- Contains short video classification, supports 3000+ tag types, can output TOP-K tags, and multiple algorithms are optional.
+- Short video classification trained via large-scale video dataset, supports 3000+ tag types prediction.
 - `Example: Input a short video of swimming, the algorithm can output the result of "swimming"`
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "400" height = "400" />
@@ -190,7 +191,7 @@ If you fail to scan the code, please add WeChat 15711058002 and note "Hub", the 
 - Quick Start
     - [Command Line](./docs/docs_en/quick_experience/cmd_quick_run_en.md)
     - [Python API](./docs/docs_en/quick_experience/python_use_hub_en.md)
-    - [More_Demos](./docs/docs_en/quick_experience/more_demos_en.md)
+    - [More Demos](./docs/docs_en/quick_experience/more_demos_en.md)
 - Rich Pre-trained Models 182
     - [Boutique Featured Models](./docs/docs_en/figures_en.md)
     - Computer Vision 126
@@ -216,14 +217,14 @@ If you fail to scan the code, please add WeChat 15711058002 and note "Hub", the 
 - Deploy
     - [Local Inference Deployment](./docs/docs_en/quick_experience/python_use_hub_en.md)
     - [One Line of Code Service deployment](./docs/docs_en/tutorial/serving_en.md)
-    - [Mobile Lite Deployment (link to Lite tutorial)](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
+    - [Mobile Device Deployment](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
 - Advanced documentation
-    - [Command_Line](./docs/docs_en/tutorial/cmdintro_en.md)
-    - [How to Load Data](./docs/docs_en/tutorial/how_to_load_data_en.md)
+    - [Command Line Interface Usage](./docs/docs_en/tutorial/cmdintro_en.md)
+    - [How to Load Customized Dataset](./docs/docs_en/tutorial/how_to_load_data_en.md)
 - Community
-    - [Join the technical group](#Welcome_joinus)
-    - [Contribute pre-trained models](./docs/docs_en/contribution/contri_pretrained_model_en.md)
-    - [Contribute code](./docs/docs_en/contribution/contri_pr_en.md)
+    - [Join Technical Group](#Welcome_joinus)
+    - [Contribute Pre-trained Models](./docs/docs_en/contribution/contri_pretrained_model_en.md)
+    - [Contribute Code](./docs/docs_en/contribution/contri_pr_en.md)
 - [License](#License)
 - [Contribution](#Contribution)
 
