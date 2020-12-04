@@ -37,7 +37,7 @@ English | [简体中文](README_ch.md)
 ## Visualization Demo
 
 ### Text Recognition
-- Contains ultra-lightweight Chinese and English OCR models, high-precision Chinese and English, multilingual German, French, Japanese, Korean OCR recognition.
+- Contain ultra-lightweight Chinese and English OCR models, high-precision Chinese and English, multilingual German, French, Japanese, Korean OCR recognition.
 - Many thanks to CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) for the pre-trained models, you can try to train your models with PadddleOCR.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_Ocr.gif"  width = "800" height = "400" />
@@ -85,7 +85,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Key Point Detection
-- Supports body, face and hands key point detection for single or multiple person.
+- Support body, face and hands key point detection for single or multiple person.
 - Many thanks to CopyRight@[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) for the pre-trained models.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "458" height = "400" />
@@ -177,7 +177,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Video Classification
-- Short video classification trained via large-scale video dataset, supports 3000+ tag types prediction.
+- Short video classification trained via large-scale video datasets, supports 3000+ tag types prediction for short Form Videos.
 - Many thanks to CopyRight@[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo) for the pre-trained model, you can try to train your models with PaddleVideo.
 - `Example: Input a short video of swimming, the algorithm can output the result of "swimming"`
 <div align="center">
