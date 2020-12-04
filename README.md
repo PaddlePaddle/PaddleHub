@@ -120,8 +120,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Lexical Analysis
-- Excelent Chinese text segmentation, part-of-speech, named entity recognition model are provided by [LAC](https://github.com/baidu/LAC)
-@Baidu NLP.
+- Excelent Chinese text segmentation, part-of-speech, named entity recognition model are provided by [LAC](https://github.com/baidu/LAC)@Baidu NLP.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "640" height = "233" />
 </div>
