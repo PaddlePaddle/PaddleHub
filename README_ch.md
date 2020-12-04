@@ -190,7 +190,7 @@
 </div>
 
 ##  ===划重点===
-- 以上所有预训练模型全部开源，模型数量持续更新，欢迎Star关注。
+- 以上所有预训练模型全部开源，模型数量持续更新，欢迎**⭐Star⭐**关注。
 <div align="center">
 <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers">
             <img src="./docs/imgs/Readme_Related/star.png"  width = "411" height = "100" /></a>  
