@@ -14,9 +14,9 @@ English | [简体中文](README_ch.md)
 
 ## Introduction
 - PaddleHub aims to provide developers with rich, high-quality, and directly usable pre-trained models.
-- **No need for deep learning background**，you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
-- Covers 4 major categories of CV, NLP, Audio, and Video, and supports **one-click prediction**, **one-click service deployment** and **transfer learning**
-- All models are **OPEN SOURCE**, **FREE** for download and use in offline scenario.
+- **No need for deep learning background**, you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
+- Covers 4 major categories of Image, Text, Audio, and Video, and supports **one-click prediction**, **easy service deployment** and **transfer learning**
+- All models are **OPEN SOURCE**, **FREE** to download and use them in offline scenario.
 
 ### Recent updates
 - **2020.12.1:** Release 2.0-beta1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tune task based on large-scale pre-trained models.
@@ -28,7 +28,7 @@ English | [简体中文](README_ch.md)
 
 
 ## Features
-- **Abundant Pre-trained Models**: 180+ pre-trained models covering the four major categories of CV, NLP, Audio, and Video, all open source and free for download and offline usage.
+- **Abundant Pre-trained Models**: 180+ pre-trained models covering the 4 major categories including Image, Text, Audio, and Video, all open source and free for download and offline usage.
 - **Quick Model Prediction**: Model prediction can be realized through a few lines of scripts to quickly experience the model effect.
 - **Model As Service**: A one-line command to build deep learning model API service deployment capabilities.
 - **Easy-to-use Transfer Learning**: Just few lines of code you can complete the transfer-learning task like image classification and text classification based on high quality pre-trained models.
