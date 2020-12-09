@@ -37,8 +37,7 @@ Lists the locally installed Modules
 
 ## `hub run`
 
-Executes the prediction of Module. It should be noted that not all models support prediction (and likewise, not all models support migration learning). For more details on the run command, see `About Prediction` below.
-
+Executes the prediction of Module. It should be noted that not all models support prediction (and likewise, not all models support migration learning). For more details please refer to the [Quick experience of *hub run*](../quick_experience/cmd_quick_run_en.md)
 ## `hub help`
 
 Displays help information.
