@@ -1,5 +1,5 @@
 ## 概述
-* $U^2Net$的网络结构如下图，其类似于编码-解码(Encoder-Decoder)结构的 U-Net
+* ![](http://latex.codecogs.com/svg.latex?U^2Net)的网络结构如下图，其类似于编码-解码(Encoder-Decoder)结构的 U-Net
 * 每个 stage 由新提出的 RSU模块(residual U-block) 组成. 例如，En_1 即为基于 RSU 构建的
 
 ![](https://ai-studio-static-online.cdn.bcebos.com/999d37b4ffdd49dc9e3315b7cec7b2c6918fdd57c8594ced9dded758a497913d)
