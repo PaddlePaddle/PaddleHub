@@ -1,4 +1,3 @@
-# coding=utf-8
 import os
 
 from paddlehub import Module
@@ -22,7 +21,7 @@ class Hand_Pose_Localization(Module):
         self.model_path = os.path.join(self.directory, "hand_pose_localization")
 
         # 加载模型
-        self.model = Model(self.model_path, use_gpu)     
+        self.model = Model(self.model_path, use_gpu=use_gpu, use_mkldnn=False, combined=True)       
     
     # 关键点检测函数
     def keypoint_detection(
