@@ -17,7 +17,10 @@ import string
 
 
 class CharacterOps(object):
-    """ Convert between text-label and text-index """
+    """ Convert between text-label and text-index
+    Args:
+        config: config from yaml file
+    """
 
     def __init__(self, config):
         self.character_type = config['character_type']
@@ -26,6 +29,7 @@ class CharacterOps(object):
         if self.character_type == "en":
             self.character_str = "0123456789abcdefghijklmnopqrstuvwxyz"
             dict_character = list(self.character_str)
+        # use the custom dictionary
         elif self.character_type == "ch":
             character_dict_path = config['character_dict_path']
             add_space = False
@@ -50,10 +54,12 @@ class CharacterOps(object):
             "Nonsupport type of the character: {}".format(self.character_str)
         self.beg_str = "sos"
         self.end_str = "eos"
+        # add start and end str for attention
         if self.loss_type == "attention":
             dict_character = [self.beg_str, self.end_str] + dict_character
         elif self.loss_type == "srn":
             dict_character = dict_character + [self.beg_str, self.end_str]
+        # create char dict
         self.dict = {}
         for i, char in enumerate(dict_character):
             self.dict[char] = i
@@ -122,6 +128,21 @@ class CharacterOps(object):
 
 
 def cal_predicts_accuracy(char_ops, preds, preds_lod, labels, labels_lod, is_remove_duplicate=False):
+    """
+    Calculate prediction accuracy
+    Args:
+        char_ops: CharacterOps
+        preds: preds result,text index
+        preds_lod: lod tensor of preds
+        labels: label of input image, text index
+        labels_lod:  lod tensor of label
+        is_remove_duplicate: Whether to remove duplicate characters,
+                                 The default is False
+    Return:
+        acc: The accuracy of test set
+        acc_num: The correct number of samples predicted
+        img_num: The total sample number of the test set
+    """
     acc_num = 0
     img_num = 0
     for ino in range(len(labels_lod) - 1):
