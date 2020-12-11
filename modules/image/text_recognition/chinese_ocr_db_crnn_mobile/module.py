@@ -21,7 +21,7 @@ from chinese_ocr_db_crnn_mobile.utils import base64_to_cv2, draw_ocr, get_image_
 
 @moduleinfo(
     name="chinese_ocr_db_crnn_mobile",
-    version="1.1.0",
+    version="1.1.1",
     summary="The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions \
         based on the differentiable_binarization_chn module. Then it classifies the text angle and recognizes the chinese texts. ",
     author="paddle-dev",
@@ -100,7 +100,7 @@ class ChineseOCRDBCRNN(hub.Module):
         """
         if not self._text_detector_module:
             self._text_detector_module = hub.Module(
-                name='chinese_text_detection_db_mobile', enable_mkldnn=self.enable_mkldnn, version='1.0.3')
+                name='chinese_text_detection_db_mobile', enable_mkldnn=self.enable_mkldnn, version='1.0.4')
         return self._text_detector_module
 
     def read_images(self, paths=[]):
