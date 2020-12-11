@@ -11,4 +11,4 @@ if __name__ == "__main__":
     styledata = MiniCOCO(transform)
     optimizer = paddle.optimizer.Adam(learning_rate=0.0001, parameters=model.parameters())
     trainer = Trainer(model, optimizer, checkpoint_dir='test_style_ckpt')
-    trainer.train(styledata, epochs=101, batch_size=4, eval_dataset=styledata, log_interval=10, save_interval=10)
+    trainer.train(styledata, epochs=101, batch_size=4, log_interval=10, save_interval=10)
