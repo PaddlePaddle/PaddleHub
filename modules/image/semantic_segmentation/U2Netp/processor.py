@@ -89,8 +89,9 @@ class Processor():
             pred = cv2.resize(pred, (w, h))
             
             results.append(pred)
-
+            mask = (1-pred/255)[..., np.newaxis]
+            output_img = image*mask + (1-mask)*255
             if visualization:
-                cv2.imwrite(os.path.join(output_dir, 'result_%d.png' % i), pred)
-
+                cv2.imwrite(os.path.join(output_dir, 'result_mask_%d.png' % i), pred)
+                cv2.imwrite(os.path.join(output_dir, 'result_%d.png' % i), output_img)
         return results

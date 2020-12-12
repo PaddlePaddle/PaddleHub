@@ -8,6 +8,9 @@
 ## 效果展示
 ![](https://ai-studio-static-online.cdn.bcebos.com/4d77bc3a05cf48bba6f67b797978f4cdf10f38288b9645d59393dd85cef58eff)
 ![](https://ai-studio-static-online.cdn.bcebos.com/d7839c7207024747b32e42e49f7881bd2554d8408ab44e669fb340b50d4e38de)
+![](https://ai-studio-static-online.cdn.bcebos.com/eae4edee629d4a1484bc7444151a71798bd5e6e0ffb8408c9ed0a0cc9429b3db)
+
+
 
 ## API
 ```python
