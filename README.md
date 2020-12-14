@@ -93,7 +93,7 @@ English | [简体中文](README_ch.md)
 
 ### Image Segmentation
 - High quality pixel-level portrait cutout model, ACE2P human body analysis world champion models are provided.
-- Many thanks to CopyRight@[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg) for the pre-trained models, you can try to train your models with PadddleSeg.
+- Many thanks to CopyRight@[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg) for the pre-trained models, you can try to train your models with PaddleSeg.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
 </div>
