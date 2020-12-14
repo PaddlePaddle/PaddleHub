@@ -7,7 +7,8 @@
 
 ## 效果展示
 ![](https://ai-studio-static-online.cdn.bcebos.com/4d77bc3a05cf48bba6f67b797978f4cdf10f38288b9645d59393dd85cef58eff)
-![](https://ai-studio-static-online.cdn.bcebos.com/d7839c7207024747b32e42e49f7881bd2554d8408ab44e669fb340b50d4e38de)
+![](https://ai-studio-static-online.cdn.bcebos.com/865b7b6a262b4ce3bbba4a5c0d973d9eea428bc3e8af4f76a1cdab0c04e3dd33)
+![](https://ai-studio-static-online.cdn.bcebos.com/11c9eba8de6d4316b672f10b285245061821f0a744e441f3b80c223881256ca0)
 
 ## API
 ```python

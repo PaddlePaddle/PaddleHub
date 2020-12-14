@@ -33,13 +33,6 @@ class Processor():
     def preprocess(self, imgs, batch_size=1, input_size=320):
         input_datas = []
         for image in imgs:
-            # h, w = image.shape[:2]
-            # if h > w:
-            #     new_h, new_w = input_size*h/w,input_size
-            # else:
-            #     new_h, new_w = input_size,input_size*w/h
-            # image = cv2.resize(image, (int(new_w), int(new_h)))
-            
             image = cv2.resize(image, (input_size, input_size))
             tmpImg = np.zeros((image.shape[0],image.shape[1],3))
             image = image/np.max(image)
@@ -78,19 +71,25 @@ class Processor():
             
         for i, image in enumerate(self.imgs):
             # normalization
-            pred = 1.0 - outputs[i,0,:,:]
+            pred = outputs[i,0,:,:]
 
             pred = self.normPRED(pred)
 
             # convert torch tensor to numpy array
-            pred = pred.squeeze()
-            pred = (pred*255).astype(np.uint8)
             h, w = image.shape[:2]
-            pred = cv2.resize(pred, (w, h))
+            mask = cv2.resize(pred, (w, h))
+
+            output_img = (image*mask[..., np.newaxis] + (1-mask[..., np.newaxis])*255).astype(np.uint8)
+
+            mask = (mask*255).astype(np.uint8)
             
-            results.append(pred)
-
             if visualization:
-                cv2.imwrite(os.path.join(output_dir, 'result_%d.png' % i), pred)
+                cv2.imwrite(os.path.join(output_dir, 'result_mask_%d.png' % i), mask)
+                cv2.imwrite(os.path.join(output_dir, 'result_%d.png' % i), output_img)
 
+            results.append({
+                'mask': mask,
+                'front': output_img
+            })
+            
         return results
