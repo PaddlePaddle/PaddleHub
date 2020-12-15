@@ -30,10 +30,16 @@ if __name__ == '__main__':
     train_dataset = hub.datasets.MSRA_NER(
         tokenizer=model.get_tokenizer(),
         max_seq_len=50,
+        mode='train'
+    )
+
+    dev_dataset = hub.datasets.MSRA_NER(
+        tokenizer=model.get_tokenizer(),
+        max_seq_len=50,
         mode='dev'
     )
 
     optimizer = paddle.optimizer.AdamW(learning_rate=5e-5, parameters=model.parameters())
     trainer = hub.Trainer(model, optimizer, checkpoint_dir='token_cls_save_dir', use_gpu=False)
 
-    trainer.train(train_dataset, epochs=1, batch_size=16, save_interval=1)
+    trainer.train(train_dataset, epochs=1, batch_size=16, eval_dataset=dev_dataset, save_interval=1)
