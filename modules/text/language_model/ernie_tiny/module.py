@@ -20,7 +20,7 @@ import paddle.nn as nn
 import paddle.nn.functional as F
 
 from paddlehub import ErnieTinyTokenizer
-from paddlehub.module.modeling_ernie import ErnieModel, ErnieForSequenceClassification
+from paddlenlp.transformers.ernie.modeling import ErnieModel, ErnieForSequenceClassification, ErnieForTokenClassification
 from paddlehub.module.module import moduleinfo, serving
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import download
@@ -43,11 +43,21 @@ class ErnieTiny(nn.Layer):
             task=None,
             load_checkpoint=None,
             label_map=None,
+            num_classes=2,
     ):
         super(ErnieTiny, self).__init__()
         # TODO(zhangxuefei): add token_classification task
+        if label_map:
+            self.num_classes = len(label_map)
+        else:
+            self.num_classes = num_classes
+
         if task == 'sequence_classification':
-            self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie_tiny')
+            self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie_tiny', num_classes=self.num_classes)
+            self.criterion = paddle.nn.loss.CrossEntropyLoss()
+            self.metric = paddle.metric.Accuracy(name='acc_accumulation')
+        elif task == 'token_cls':
+            self.model = ErnieForTokenClassification.from_pretrained(pretrained_model_name_or_path='ernie_tiny', num_classes=self.num_classes)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy(name='acc_accumulation')
         elif task is None:
@@ -65,7 +75,7 @@ class ErnieTiny(nn.Layer):
 
     def forward(self, input_ids, token_type_ids=None, position_ids=None, attention_mask=None, labels=None):
         result = self.model(input_ids, token_type_ids, position_ids, attention_mask)
-        if self.task is not None:
+        if self.task == 'sequence_classification':
             logits = result
             probs = F.softmax(logits, axis=1)
             if labels is not None:
@@ -74,6 +84,16 @@ class ErnieTiny(nn.Layer):
                 acc = self.metric.update(correct)
                 return probs, loss, acc
             return probs
+        elif self.task == 'token_cls':
+            logits = result
+            token_level_probs = F.softmax(logits, axis=2)
+            if labels is not None:
+                labels = paddle.to_tensor(labels).unsqueeze(-1)
+                loss = self.criterion(logits, labels)
+                correct = self.metric.compute(token_level_probs, labels)
+                acc = self.metric.update(correct)
+                return token_level_probs, loss, acc
+            return token_level_probs
         else:
             sequence_output, pooled_output = result
             return sequence_output, pooled_output
@@ -150,7 +170,7 @@ class ErnieTiny(nn.Layer):
             results(obj:`list`): All the predictions labels.
         """
         # TODO(zhangxuefei): add task token_classification task predict.
-        if self.task not in ['sequence_classification']:
+        if self.task not in ['sequence_classification', 'token_cls']:
             raise RuntimeError("The predict method is for sequence_classification task, but got task %s." % self.task)
 
         paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
@@ -198,6 +218,12 @@ class ErnieTiny(nn.Layer):
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
                 results.extend(labels)
+            elif self.task == 'token_cls':
+                probs = self(input_ids, segment_ids)
+                batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
+                batch_ids = batch_ids.tolist()
+                token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
+                results.extend(token_labels)
 
         return results
 
