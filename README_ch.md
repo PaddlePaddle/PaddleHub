@@ -101,13 +101,6 @@
 <img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
 </div>
 
-### 图像动漫化
-- 包含宫崎骏、新海诚在内的多位漫画家风格迁移，多种算法可选
-- 感谢CopyRight@[AnimeGANv2](https://github.com/TachibanaYoshino/AnimeGANv2)开源预训练模型
-<div align="center">
-<img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "642" height = "400" />
-</div>
-
 ### 图像分类
 - 包含动物分类、菜品分类、野生动物制品分类，多种算法可选
 - 感谢CopyRight@[PaddleClas](https://github.com/PaddlePaddle/PaddleClas)提供预训练模型，训练能力开放，欢迎体验。
