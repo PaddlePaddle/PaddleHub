@@ -98,13 +98,6 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
 </div>
 
-### Image Animation
-- Image style transfer models with Hayao Miyazaki and Makoto Shinkai styles, etc are provided.
-- Many thanks to CopyRight@[AnimeGANv2](https://github.com/TachibanaYoshino/AnimeGANv2) for the pre-trained models.
-<div align="center">
-<img src="./docs/imgs/Readme_Related/ImageGan_Anime.gif"  width = "642" height = "400" />
-</div>
-
 ### Image Classification
 - Various models like animal classification, dish classification, wild animal product classification are available.
 - Many thanks to CopyRight@[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) for the pre-trained models, you can try to train your models with PadddleClas.
