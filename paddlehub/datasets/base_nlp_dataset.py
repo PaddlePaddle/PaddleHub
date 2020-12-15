@@ -15,6 +15,7 @@ from typing import Dict, List, Optional, Union, Tuple
 import csv
 import io
 import os
+from tqdm import tqdm
 
 import numpy as np
 import paddle.fluid as fluid
@@ -255,6 +256,142 @@ class TextClassificationDataset(BaseNLPDataset, fluid.io.Dataset):
                 return np.array(record['input_ids']), np.array(record['segment_ids'])
             elif isinstance(self.tokenizer, CustomTokenizer):
                 return np.array(record['text']), np.array(record['seq_len'])
+
+    def __len__(self):
+        return len(self.records)
+
+
+class SeqLabelingDataset(BaseNLPDataset, fluid.io.Dataset):
+    def __init__(self,
+                 base_path: str,
+                 tokenizer: Union[BertTokenizer, CustomTokenizer],
+                 max_seq_len: int = 128,
+                 mode: str = "train",
+                 data_file: str = None,
+                 label_file: str = None,
+                 label_list: list = None,
+                 split_char="\002",
+                 no_entity_label="O",
+                 is_file_with_header: bool = False):
+        super(SeqLabelingDataset, self).__init__(
+            base_path=base_path,
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len,
+            mode=mode,
+            data_file=data_file,
+            label_file=label_file,
+            label_list=label_list)
+
+        self.no_entity_label = no_entity_label
+        self.split_char = split_char
+
+        self.examples = self._read_file(self.data_file, is_file_with_header)
+        self.records = self._convert_examples_to_records(self.examples)
+
+    def _read_file(self, input_file, is_file_with_header: bool = False) -> List[InputExample]:
+        """Reads a tab separated value file."""
+        if not os.path.exists(input_file):
+            raise RuntimeError("The file {} is not found.".format(input_file))
+        else:
+            with io.open(input_file, "r", encoding="UTF-8") as f:
+                reader = csv.reader(f, delimiter="\t", quotechar=None)
+                examples = []
+                seq_id = 0
+                header = next(reader) if is_file_with_header else None
+                for line in reader:
+                    example = InputExample(guid=seq_id, label=line[1], text_a=line[0])
+                    seq_id += 1
+                    examples.append(example)
+                return examples
+
+    def _convert_examples_to_records(self, examples: List[InputExample]) -> List[dict]:
+        """
+        Returns a list[dict] including all the input information what the model need.
+        Args:
+            examples (list): the data examples, returned by _read_file.
+        Returns:
+            a list with all the examples record.
+        """
+        records = []
+        with tqdm(total=len(examples)) as process_bar:
+            for example in examples:
+                tokens, labels = self._reseg_token_label(
+                    tokens=example.text_a.split(self.split_char),
+                    labels=example.label.split(self.split_char))
+                record = self.tokenizer.encode(
+                    text=tokens, max_seq_len=self.max_seq_len)
+                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+                # When all words are not found in the vocab, the text will be dropped.
+                if not record:
+                    logger.info(
+                        "The text %s has been dropped as it has no words in the vocab after tokenization."
+                        % example.text_a)
+                    continue
+                if labels:
+                    record["label"] = []
+                    tokens_with_specical_token = self.tokenizer.decode(
+                        record, only_convert_to_tokens=True)
+                    tokens_index = 0
+                    for token in tokens_with_specical_token:
+                        if tokens_index < len(
+                                tokens) and token == tokens[tokens_index]:
+                            record["label"].append(
+                                self.label_list.index(labels[tokens_index]))
+                            tokens_index += 1
+                        else:
+                            record["label"].append(
+                                self.label_list.index(self.no_entity_label))
+                records.append(record)
+                process_bar.update(1)
+        return records
+
+    def _reseg_token_label(self, tokens, labels=None):
+        if labels:
+            if len(tokens) != len(labels):
+                raise ValueError(
+                    "The length of tokens must be same with labels")
+            ret_tokens = []
+            ret_labels = []
+            for token, label in zip(tokens, labels):
+                sub_token = self.tokenizer.tokenize(token)
+                if len(sub_token) == 0:
+                    continue
+                ret_tokens.extend(sub_token)
+                ret_labels.append(label)
+                if len(sub_token) < 2:
+                    continue
+                sub_label = label
+                if label.startswith("B-"):
+                    sub_label = "I-" + label[2:]
+                ret_labels.extend([sub_label] * (len(sub_token) - 1))
+
+            if len(ret_tokens) != len(ret_labels):
+                raise ValueError(
+                    "The length of ret_tokens can't match with labels")
+            return ret_tokens, ret_labels
+        else:
+            ret_tokens = []
+            for token in tokens:
+                sub_token = self.tokenizer.tokenize(token)
+                if len(sub_token) == 0:
+                    continue
+                ret_tokens.extend(sub_token)
+                if len(sub_token) < 2:
+                    continue
+            return ret_tokens, None
+
+    def __getitem__(self, idx):
+        record = self.records[idx]
+        if 'label' in record.keys():
+            if isinstance(self.tokenizer, BertTokenizer):
+                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'])
+            else:  # TODO(chenxiaojie): add CustomTokenizer supported
+                raise NotImplementedError
+        else:
+            if isinstance(self.tokenizer, BertTokenizer):
+                return np.array(record['input_ids']), np.array(record['segment_ids'])
+            else:  # TODO(chenxiaojie): add CustomTokenizer supported
+                raise NotImplementedError
 
     def __len__(self):
         return len(self.records)
