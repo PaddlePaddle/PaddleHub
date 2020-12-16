@@ -1,6 +1,6 @@
 # PaddleHub Transformer模型fine-tune序列标注（动态图）
 
-本示例将展示如何使用PaddleHub Transformer模型（如 ERNIE、BERT、RoBERTa等模型）module 以动态图方式fine-tune并完成预测任务。
+本示例将展示如何使用PaddleHub Transformer模型（如 ERNIE、BERT、RoBERTa等模型）Module 以动态图方式fine-tune并完成预测任务。
 
 ## 如何开始Fine-tune
 
@@ -134,4 +134,6 @@ for idx, text in enumerate(text_a):
 
 paddlepaddle >= 2.0.0rc
 
-paddlehub >= 2.0.1
+paddlenlp >= 2.0.0a4
+
+paddlehub >= 2.0.0

@@ -15,10 +15,9 @@ from typing import Dict, List, Optional, Union, Tuple
 import csv
 import io
 import os
-from tqdm import tqdm
 
 import numpy as np
-import paddle.fluid as fluid
+import paddle
 
 from paddlehub.env import DATA_HOME
 from paddlehub.text.bert_tokenizer import BertTokenizer
@@ -153,7 +152,7 @@ class BaseNLPDataset(object):
         return self.label_list
 
 
-class TextClassificationDataset(BaseNLPDataset, fluid.io.Dataset):
+class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
     """
     The dataset class which is fit for all datatset of text classification.
     """
@@ -261,7 +260,7 @@ class TextClassificationDataset(BaseNLPDataset, fluid.io.Dataset):
         return len(self.records)
 
 
-class SeqLabelingDataset(BaseNLPDataset, fluid.io.Dataset):
+class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
     def __init__(self,
                  base_path: str,
                  tokenizer: Union[BertTokenizer, CustomTokenizer],
@@ -313,39 +312,38 @@ class SeqLabelingDataset(BaseNLPDataset, fluid.io.Dataset):
             a list with all the examples record.
         """
         records = []
-        with tqdm(total=len(examples)) as process_bar:
-            for example in examples:
-                tokens, labels = self._reseg_token_label(
-                    tokens=example.text_a.split(self.split_char),
-                    labels=example.label.split(self.split_char))
-                record = self.tokenizer.encode(
-                    text=tokens, max_seq_len=self.max_seq_len)
-                # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
-                # When all words are not found in the vocab, the text will be dropped.
-                if not record:
-                    logger.info(
-                        "The text %s has been dropped as it has no words in the vocab after tokenization."
-                        % example.text_a)
-                    continue
-                if labels:
-                    record["label"] = []
-                    tokens_with_specical_token = self.tokenizer.decode(
-                        record, only_convert_to_tokens=True)
-                    tokens_index = 0
-                    for token in tokens_with_specical_token:
-                        if tokens_index < len(
-                                tokens) and token == tokens[tokens_index]:
-                            record["label"].append(
-                                self.label_list.index(labels[tokens_index]))
-                            tokens_index += 1
-                        else:
-                            record["label"].append(
-                                self.label_list.index(self.no_entity_label))
-                records.append(record)
-                process_bar.update(1)
+        for example in examples:
+            tokens, labels = self._reseg_token_label(
+                tokens=example.text_a.split(self.split_char),
+                labels=example.label.split(self.split_char))
+            record = self.tokenizer.encode(
+                text=tokens, max_seq_len=self.max_seq_len)
+            # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
+            # When all words are not found in the vocab, the text will be dropped.
+            if not record:
+                logger.info(
+                    "The text %s has been dropped as it has no words in the vocab after tokenization."
+                    % example.text_a)
+                continue
+            if labels:
+                record["label"] = []
+                tokens_with_specical_token = self.tokenizer.decode(
+                    record, only_convert_to_tokens=True)
+                tokens_index = 0
+                for token in tokens_with_specical_token:
+                    if tokens_index < len(
+                            tokens) and token == tokens[tokens_index]:
+                        record["label"].append(
+                            self.label_list.index(labels[tokens_index]))
+                        tokens_index += 1
+                    else:
+                        record["label"].append(
+                            self.label_list.index(self.no_entity_label))
+            records.append(record)
         return records
 
-    def _reseg_token_label(self, tokens, labels=None):
+    def _reseg_token_label(
+            self, tokens: List[str], labels: List[str] = None) -> Tuple[List[str], List[str]] or List[str]:
         if labels:
             if len(tokens) != len(labels):
                 raise ValueError(

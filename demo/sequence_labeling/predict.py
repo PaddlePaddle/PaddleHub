@@ -32,11 +32,11 @@ if __name__ == '__main__':
         name='ernie_tiny',
         version='2.0.1',
         task='token-cls',
-        load_checkpoint='./token_cls_save_dir/epoch_1/model.pdparams',
+        load_checkpoint='./token_cls_save_dir/best/model.pdparams',
         label_map=label_map,
     )
 
-    results = model.predict(data=data, max_seq_len=50, batch_size=1, use_gpu=False)
+    results = model.predict(data=data, max_seq_len=128, batch_size=1, use_gpu=True)
     for idx, text in enumerate(text_a):
         print(f'Text:\n{text} \nLable: \n{", ".join(results[idx][1:len(text)+1])} \n')
 

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
-from warnings import warn
 import os
 
 from paddle.dataset.common import DATA_HOME
@@ -49,6 +48,7 @@ class ErnieTiny(nn.Layer):
             load_checkpoint=None,
             label_map=None,
             num_classes=2,
+            **kwargs,
     ):
         super(ErnieTiny, self).__init__()
         if label_map:
@@ -58,21 +58,20 @@ class ErnieTiny(nn.Layer):
 
         if task == 'sequence_classification':
             task = 'seq-cls'
-            warn(
+            logger.warning(
                 "current task name 'sequence_classification' was renamed to 'seq-cls', "
-                "'sequence_classification' will be removed in the future",
-                DeprecationWarning,
+                "'sequence_classification' will be removed in the future.",
             )
         if task == 'seq-cls':
-            self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie_tiny', num_classes=self.num_classes)
+            self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie-tiny', num_classes=self.num_classes, **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
-            self.metric = paddle.metric.Accuracy(name='acc_accumulation')
+            self.metric = paddle.metric.Accuracy()
         elif task == 'token-cls':
-            self.model = ErnieForTokenClassification.from_pretrained(pretrained_model_name_or_path='ernie_tiny', num_classes=self.num_classes)
+            self.model = ErnieForTokenClassification.from_pretrained(pretrained_model_name_or_path='ernie-tiny', num_classes=self.num_classes, **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
-            self.metric = paddle.metric.Accuracy(name='acc_accumulation')
+            self.metric = paddle.metric.Accuracy()
         elif task is None:
-            self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie_tiny')
+            self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-tiny', **kwargs)
         else:
             raise RuntimeError("Unknown task {}, task should be one in {}".format(
                 task, self._tasks_supported))

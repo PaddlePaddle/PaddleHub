@@ -49,10 +49,3 @@ class MSRA_NER(SeqLabelingDataset):
             label_list=["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"],
             is_file_with_header=True,
         )
-
-
-if __name__ == "__main__":
-    from paddlehub.env import MODULE_HOME
-    tokenizer = BertTokenizer(
-        vocab_file= os.path.join(MODULE_HOME, 'ernie', 'assets', 'vocab.txt'))
-    ds = MSRA_NER(tokenizer=tokenizer, max_seq_len=50, mode='dev')
