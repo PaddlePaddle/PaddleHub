@@ -23,7 +23,7 @@ if __name__ == '__main__':
     model = hub.Module(
         name='ernie_tiny',
         version='2.0.0',
-        task='token_cls',
+        task='token-cls',
         label_map=label_map,
     )
 
