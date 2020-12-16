@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     model = hub.Module(
         name='ernie_tiny',
-        version='2.0.0',
+        version='2.0.1',
         task='token-cls',
         load_checkpoint='./token_cls_save_dir/epoch_1/model.pdparams',
         label_map=label_map,

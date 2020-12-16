@@ -29,7 +29,7 @@ from paddlehub.utils.utils import download
 
 @moduleinfo(
     name="ernie_tiny",
-    version="2.0.0",
+    version="2.0.1",
     summary="Baidu's ERNIE-tiny, Enhanced Representation through kNowledge IntEgration, tiny version, max_seq_len=512",
     author="paddlepaddle",
     author_email="",
