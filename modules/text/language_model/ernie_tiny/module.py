@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, List, Optional, Union, Tuple
+from typing import List
+from warnings import warn
 import os
 
 from paddle.dataset.common import DATA_HOME
@@ -37,6 +38,10 @@ class ErnieTiny(nn.Layer):
     """
     Ernie model
     """
+    _tasks_supported = [
+        'seq-cls',
+        'token-cls',
+    ]
 
     def __init__(
             self,
@@ -46,24 +51,31 @@ class ErnieTiny(nn.Layer):
             num_classes=2,
     ):
         super(ErnieTiny, self).__init__()
-        # TODO(zhangxuefei): add token_classification task
         if label_map:
             self.num_classes = len(label_map)
         else:
             self.num_classes = num_classes
 
         if task == 'sequence_classification':
+            task = 'seq-cls'
+            warn(
+                "current task name 'sequence_classification' was renamed to 'seq-cls', "
+                "'sequence_classification' will be removed in the future",
+                DeprecationWarning,
+            )
+        if task == 'seq-cls':
             self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie_tiny', num_classes=self.num_classes)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy(name='acc_accumulation')
-        elif task == 'token_cls':
+        elif task == 'token-cls':
             self.model = ErnieForTokenClassification.from_pretrained(pretrained_model_name_or_path='ernie_tiny', num_classes=self.num_classes)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy(name='acc_accumulation')
         elif task is None:
             self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie_tiny')
         else:
-            raise RuntimeError("Unknown task %s, task should be sequence_classification" % task)
+            raise RuntimeError("Unknown task {}, task should be one in {}".format(
+                task, self._tasks_supported))
 
         self.task = task
         self.label_map = label_map
@@ -75,7 +87,7 @@ class ErnieTiny(nn.Layer):
 
     def forward(self, input_ids, token_type_ids=None, position_ids=None, attention_mask=None, labels=None):
         result = self.model(input_ids, token_type_ids, position_ids, attention_mask)
-        if self.task == 'sequence_classification':
+        if self.task == 'seq-cls':
             logits = result
             probs = F.softmax(logits, axis=1)
             if labels is not None:
@@ -84,7 +96,7 @@ class ErnieTiny(nn.Layer):
                 acc = self.metric.update(correct)
                 return probs, loss, acc
             return probs
-        elif self.task == 'token_cls':
+        elif self.task == 'token-cls':
             logits = result
             token_level_probs = F.softmax(logits, axis=2)
             if labels is not None:
@@ -169,9 +181,9 @@ class ErnieTiny(nn.Layer):
         Returns:
             results(obj:`list`): All the predictions labels.
         """
-        # TODO(zhangxuefei): add task token_classification task predict.
-        if self.task not in ['sequence_classification', 'token_cls']:
-            raise RuntimeError("The predict method is for sequence_classification task, but got task %s." % self.task)
+        if self.task not in self._tasks_supported:
+            raise RuntimeError("The predict method supports task in {}, but got task {}.".format(
+                self._tasks_supported, self.task))
 
         paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
         tokenizer = self.get_tokenizer()
@@ -211,14 +223,13 @@ class ErnieTiny(nn.Layer):
             input_ids = paddle.to_tensor(input_ids)
             segment_ids = paddle.to_tensor(segment_ids)
 
-            # TODO(zhangxuefei): add task token_classification postprocess after prediction.
-            if self.task == 'sequence_classification':
+            if self.task == 'seq-cls':
                 probs = self(input_ids, segment_ids)
                 idx = paddle.argmax(probs, axis=1).numpy()
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
                 results.extend(labels)
-            elif self.task == 'token_cls':
+            elif self.task == 'token-cls':
                 probs = self(input_ids, segment_ids)
                 batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
                 batch_ids = batch_ids.tolist()
