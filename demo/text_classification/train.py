@@ -15,7 +15,7 @@ import paddle
 import paddlehub as hub
 
 if __name__ == '__main__':
-    model = hub.Module(name='ernie_tiny', version='2.0.0', task='sequence_classification')
+    model = hub.Module(name='ernie_tiny', version='2.0.1', task='sequence_classification')
 
     train_dataset = hub.datasets.ChnSentiCorp(
         tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='train')

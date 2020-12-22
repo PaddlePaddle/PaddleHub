@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     model = hub.Module(
         name='ernie_tiny',
-        version='2.0.0',
+        version='2.0.1',
         task='sequence_classification',
         load_checkpoint='./test_ernie_text_cls/best_model/model.pdparams',
         label_map=label_map)

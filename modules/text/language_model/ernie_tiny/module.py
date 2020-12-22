@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
 import os
 
 from paddle.dataset.common import DATA_HOME
@@ -21,7 +20,8 @@ import paddle.nn.functional as F
 
 from paddlehub import ErnieTinyTokenizer
 from paddlenlp.transformers.ernie.modeling import ErnieModel, ErnieForSequenceClassification, ErnieForTokenClassification
-from paddlehub.module.module import moduleinfo, serving
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.nlp_module import TransformerModule
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import download
 
@@ -32,15 +32,12 @@ from paddlehub.utils.utils import download
     summary="Baidu's ERNIE-tiny, Enhanced Representation through kNowledge IntEgration, tiny version, max_seq_len=512",
     author="paddlepaddle",
     author_email="",
-    type="nlp/semantic_model")
+    type="nlp/semantic_model",
+    meta=TransformerModule)
 class ErnieTiny(nn.Layer):
     """
     Ernie model
     """
-    _tasks_supported = [
-        'seq-cls',
-        'token-cls',
-    ]
 
     def __init__(
             self,
@@ -60,7 +57,7 @@ class ErnieTiny(nn.Layer):
             task = 'seq-cls'
             logger.warning(
                 "current task name 'sequence_classification' was renamed to 'seq-cls', "
-                "'sequence_classification' will be removed in the future.",
+                "'sequence_classification' has been deprecated and will be removed the future.",
             )
         if task == 'seq-cls':
             self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie-tiny', num_classes=self.num_classes, **kwargs)
@@ -139,127 +136,3 @@ class ErnieTiny(nn.Layer):
             download(url, os.path.join(DATA_HOME, 'ernie_tiny'))
 
         return ErnieTinyTokenizer(self.get_vocab_path(), spm_path, word_dict_path)
-
-    def training_step(self, batch: List[paddle.Tensor], batch_idx: int):
-        """
-        One step for training, which should be called as forward computation.
-        Args:
-            batch(:obj:List[paddle.Tensor]): The one batch data, which contains the model needed,
-                such as input_ids, sent_ids, pos_ids, input_mask and labels.
-            batch_idx(int): The index of batch.
-        Returns:
-            results(:obj: Dict) : The model outputs, such as loss and metrics.
-        """
-        predictions, avg_loss, acc = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
-        return {'loss': avg_loss, 'metrics': {'acc': acc}}
-
-    def validation_step(self, batch: List[paddle.Tensor], batch_idx: int):
-        """
-        One step for validation, which should be called as forward computation.
-        Args:
-            batch(:obj:List[paddle.Tensor]): The one batch data, which contains the model needed,
-                such as input_ids, sent_ids, pos_ids, input_mask and labels.
-            batch_idx(int): The index of batch.
-        Returns:
-            results(:obj: Dict) : The model outputs, such as metrics.
-        """
-        predictions, avg_loss, acc = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
-        return {'metrics': {'acc': acc}}
-
-    def predict(self, data, max_seq_len=128, batch_size=1, use_gpu=False):
-        """
-        Predicts the data labels.
-
-        Args:
-            data (obj:`List(str)`): The processed data whose each element is the raw text.
-            max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
-                If set to a number, will limit the total sequence returned so that it has a maximum length.
-            batch_size(obj:`int`, defaults to 1): The number of batch.
-            use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
-
-        Returns:
-            results(obj:`list`): All the predictions labels.
-        """
-        if self.task not in self._tasks_supported:
-            raise RuntimeError("The predict method supports task in {}, but got task {}.".format(
-                self._tasks_supported, self.task))
-
-        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
-        tokenizer = self.get_tokenizer()
-
-        examples = []
-        for text in data:
-            if len(text) == 1:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=None, max_seq_len=max_seq_len)
-            elif len(text) == 2:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], max_seq_len=max_seq_len)
-            else:
-                raise RuntimeError(
-                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
-            examples.append((encoded_inputs['input_ids'], encoded_inputs['segment_ids']))
-
-        def _batchify_fn(batch):
-            input_ids = [entry[0] for entry in batch]
-            segment_ids = [entry[1] for entry in batch]
-            return input_ids, segment_ids
-
-        # Seperates data into some batches.
-        batches = []
-        one_batch = []
-        for example in examples:
-            one_batch.append(example)
-            if len(one_batch) == batch_size:
-                batches.append(one_batch)
-                one_batch = []
-        if one_batch:
-            # The last batch whose size is less than the config batch_size setting.
-            batches.append(one_batch)
-
-        results = []
-        self.eval()
-        for batch in batches:
-            input_ids, segment_ids = _batchify_fn(batch)
-            input_ids = paddle.to_tensor(input_ids)
-            segment_ids = paddle.to_tensor(segment_ids)
-
-            if self.task == 'seq-cls':
-                probs = self(input_ids, segment_ids)
-                idx = paddle.argmax(probs, axis=1).numpy()
-                idx = idx.tolist()
-                labels = [self.label_map[i] for i in idx]
-                results.extend(labels)
-            elif self.task == 'token-cls':
-                probs = self(input_ids, segment_ids)
-                batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
-                batch_ids = batch_ids.tolist()
-                token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
-                results.extend(token_labels)
-
-        return results
-
-    @serving
-    def get_embedding(self, texts, use_gpu=False):
-        if self.task is not None:
-            raise RuntimeError("The get_embedding method is only valid when task is None, but got task %s" % self.task)
-
-        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
-
-        tokenizer = self.get_tokenizer()
-        results = []
-        for text in texts:
-            if len(text) == 1:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=None, pad_to_max_seq_len=False)
-            elif len(text) == 2:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], pad_to_max_seq_len=False)
-            else:
-                raise RuntimeError(
-                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
-
-            input_ids = paddle.to_tensor(encoded_inputs['input_ids']).unsqueeze(0)
-            segment_ids = paddle.to_tensor(encoded_inputs['segment_ids']).unsqueeze(0)
-            sequence_output, pooled_output = self(input_ids, segment_ids)
-
-            sequence_output = sequence_output.squeeze(0)
-            pooled_output = pooled_output.squeeze(0)
-            results.append((sequence_output.numpy().tolist(), pooled_output.numpy().tolist()))
-        return results

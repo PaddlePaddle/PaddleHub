@@ -1,6 +1,15 @@
 # PaddleHub Transformer模型fine-tune文本分类（动态图）
 
-本示例将展示如何使用PaddleHub Transformer模型（如 ERNIE、BERT、RoBERTa等模型）module 以动态图方式fine-tune并完成预测任务。
+在2017年之前，工业界和学术界对NLP文本处理依赖于序列模型[Recurrent Neural Network (RNN)](https://baike.baidu.com/item/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/23199490?fromtitle=RNN&fromid=5707183&fr=aladdin).
+
+![](http://colah.github.io/posts/2015-09-NN-Types-FP/img/RNN-general.png)
+
+近年来随着深度学习的发展，模型参数数量飞速增长，为了训练这些参数，需要更大的数据集来避免过拟合。然而，对于大部分NLP任务来说，构建大规模的标注数据集成本过高，非常困难，特别是对于句法和语义相关的任务。相比之下，大规模的未标注语料库的构建则相对容易。最近的研究表明，基于大规模未标注语料库的预训练模型（Pretrained Models, PTM) 能够习得通用的语言表示，将预训练模型Fine-tune到下游任务，能够获得出色的表现。另外，预训练模型能够避免从零开始训练模型。
+
+![](https://ai-studio-static-online.cdn.bcebos.com/327f44ff3ed24493adca5ddc4dc24bf61eebe67c84a6492f872406f464fde91e)
+
+
+本示例将展示如何使用PaddleHub Transformer模型（如 ERNIE、BERT、RoBERTa等模型）Module 以动态图方式fine-tune并完成预测任务。
 
 ## 如何开始Fine-tune
 
@@ -22,14 +31,19 @@ python train.py
 ```python
 import paddlehub as hub
 
-model = hub.Module(name='ernie_tiny', version='2.0.0', task='sequence_classification')
+model = hub.Module(name='ernie_tiny', version='2.0.1', task='sequence_classification')
 ```
 
 其中，参数：
 
-* `name`：模型名称，可以选择`ernie`，`ernie-tiny`，`bert_chinese_L-12_H-768_A-12`，`chinese-roberta-wwm-ext`，`chinese-roberta-wwm-ext-large`等。
+* `name`：模型名称，可以选择`ernie`，`ernie_tiny`，`bert-base-cased`， `bert-base-chinese`, `roberta-wwm-ext`，`roberta-wwm-ext-large`等。
 * `version`：module版本号
 * `task`：fine-tune任务。此处为`sequence_classification`，表示文本分类任务。
+
+通过以上的一行代码，`model`初始化为一个适用于文本分类任务的模型，为ERNIE Tiny的预训练模型后拼接上一个全连接网络（Full Connected）。
+![](https://ai-studio-static-online.cdn.bcebos.com/f9e1bf9d56c6412d939960f2e3767c2f13b93eab30554d738b137ab2b98e328c)
+
+以上图片来自于：https://arxiv.org/pdf/1810.04805.pdf
 
 ### Step2: 下载并加载数据集
 
@@ -43,6 +57,11 @@ dev_dataset = hub.datasets.ChnSentiCorp(
 * `tokenizer`：表示该module所需用到的tokenizer，其将对输入文本完成切词，并转化成module运行所需模型输入格式。
 * `mode`：选择数据模式，可选项有 `train`, `test`, `val`， 默认为`train`。
 * `max_seq_len`：ERNIE/BERT模型使用的最大序列长度，若出现显存不足，请适当调低这一参数。
+
+预训练模型ERNIE对中文数据的处理是以字为单位，tokenizer作用为将原始输入文本转化成模型model可以接受的输入数据形式。 PaddleHub 2.0中的各种预训练模型已经内置了相应的tokenizer，可以通过`model.get_tokenizer`方法获取。
+
+![](https://bj.bcebos.com/paddlehub/paddlehub-img/ernie_network_1.png)
+![](https://bj.bcebos.com/paddlehub/paddlehub-img/ernie_network_2.png)
 
 ### Step3:  选择优化策略和运行配置
 
