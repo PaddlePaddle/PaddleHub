@@ -36,7 +36,8 @@ class SearchCommand:
         results = module_server.search_module(name=argv)
 
         for result in results:
-            table.append(result['name'], result['version'], result['summary'])
+            if 'Module' == result['type']:
+                table.append(result['name'], result['version'], result['summary'])
 
         print(table)
         return True
