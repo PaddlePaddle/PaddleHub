@@ -1,0 +1,2 @@
+from .networks import ResnetGenerator
+
