@@ -25,7 +25,7 @@ if __name__ == '__main__':
     model = hub.Module(
         name='ernie_tiny',
         version='2.0.1',
-        task='sequence_classification',
+        task='seq-cls',
         load_checkpoint='./test_ernie_text_cls/best_model/model.pdparams',
         label_map=label_map)
     results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)

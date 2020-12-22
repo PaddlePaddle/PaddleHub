@@ -34,6 +34,7 @@ from paddlehub.utils.log import logger
 __all__ = [
     'PretrainedModel',
     'register_base_model',
+    'TransformerModule',
 ]
 
 

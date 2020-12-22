@@ -31,14 +31,14 @@ python train.py
 ```python
 import paddlehub as hub
 
-model = hub.Module(name='ernie_tiny', version='2.0.1', task='sequence_classification')
+model = hub.Module(name='ernie_tiny', version='2.0.1', task='seq-cls')
 ```
 
 其中，参数：
 
 * `name`：模型名称，可以选择`ernie`，`ernie_tiny`，`bert-base-cased`， `bert-base-chinese`, `roberta-wwm-ext`，`roberta-wwm-ext-large`等。
 * `version`：module版本号
-* `task`：fine-tune任务。此处为`sequence_classification`，表示文本分类任务。
+* `task`：fine-tune任务。此处为`seq-cls`，表示文本分类任务。
 
 通过以上的一行代码，`model`初始化为一个适用于文本分类任务的模型，为ERNIE Tiny的预训练模型后拼接上一个全连接网络（Full Connected）。
 ![](https://ai-studio-static-online.cdn.bcebos.com/f9e1bf9d56c6412d939960f2e3767c2f13b93eab30554d738b137ab2b98e328c)
@@ -129,7 +129,7 @@ label_map = {0: 'negative', 1: 'positive'}
 model = hub.Module(
     directory='/mnt/zhangxuefei/program-paddle/PaddleHub/modules/text/language_model/ernie_tiny',
     version='2.0.0',
-    task='sequence_classification',
+    task='seq-cls',
     load_checkpoint='./test_ernie_text_cls/best_model/model.pdparams',
     label_map=label_map)
 results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)
