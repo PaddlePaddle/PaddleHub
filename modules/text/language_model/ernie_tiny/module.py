@@ -57,7 +57,7 @@ class ErnieTiny(nn.Layer):
             task = 'seq-cls'
             logger.warning(
                 "current task name 'sequence_classification' was renamed to 'seq-cls', "
-                "'sequence_classification' has been deprecated and will be removed the future.",
+                "'sequence_classification' has been deprecated and will be removed in the future.",
             )
         if task == 'seq-cls':
             self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie-tiny', num_classes=self.num_classes, **kwargs)

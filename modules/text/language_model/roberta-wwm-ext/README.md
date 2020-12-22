@@ -1,5 +1,5 @@
 ```shell
-$ hub install roberta-wwm-ext==2.0.0
+$ hub install roberta-wwm-ext==2.0.1
 ```
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/bert_network.png"  hspace='10'/> <br />
@@ -20,7 +20,7 @@ def __init__(
 
 **参数**
 
-* `task`： 任务名称，可为`sequence_classification`。
+* `task`： 任务名称，可为`seq-cls`(文本分类任务，原来的`sequence_classification`在未来会被弃用)或`token-cls`(序列标注任务)。
 * `load_checkpoint`：使用PaddleHub Fine-tune api训练保存的模型参数文件路径。
 * `label_map`：预测时的类别映射表。
 
@@ -67,15 +67,15 @@ def get_embedding(
 import paddlehub as hub
 
 data = [
-    '这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般',
-    '怀着十分激动的心情放映，可是看着看着发现，在放映完毕后，出现一集米老鼠的动画片',
-    '作为老的四星酒店，房间依然很整洁，相当不错。机场接机服务很好，可以在车上办理入住手续，节省时间。',
+    ['这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般'],
+    ['怀着十分激动的心情放映，可是看着看着发现，在放映完毕后，出现一集米老鼠的动画片'],
+    ['作为老的四星酒店，房间依然很整洁，相当不错。机场接机服务很好，可以在车上办理入住手续，节省时间。'],
 ]
 label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
     name='roberta-wwm-ext',
-    version='2.0.0',
+    version='2.0.1',
     task='sequence_classification',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
@@ -144,3 +144,7 @@ paddlehub >= 2.0.0
 * 2.0.0
 
   全面升级动态图，接口有所变化。
+
+* 2.0.1
+
+  任务名称调整，增加序列标注任务`token-cls`
