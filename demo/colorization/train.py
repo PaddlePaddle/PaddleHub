@@ -21,4 +21,4 @@ if __name__ == '__main__':
     model.set_config(classification=False, prob=0.125)
     optimizer = paddle.optimizer.Adam(learning_rate=0.00001, parameters=model.parameters())
     trainer = Trainer(model, optimizer, checkpoint_dir='img_colorization_ckpt_reg_1')
-    trainer.train(color_set, epochs=101, batch_size=25, eval_dataset=color_set, log_interval=10, save_interval=10)
+    trainer.train(color_set, epochs=101, batch_size=25, log_interval=10, save_interval=10)
