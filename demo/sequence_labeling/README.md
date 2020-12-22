@@ -1,4 +1,4 @@
-# PaddleHub Transformer模型fine-tune文本分类（动态图）
+# PaddleHub Transformer模型fine-tune序列标注（动态图）
 
 在2017年之前，工业界和学术界对NLP文本处理依赖于序列模型[Recurrent Neural Network (RNN)](https://baike.baidu.com/item/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/23199490?fromtitle=RNN&fromid=5707183&fr=aladdin).
 
@@ -14,7 +14,7 @@
 ## 如何开始Fine-tune
 
 
-我们以中文情感分类公开数据集ChnSentiCorp为示例数据集，可以运行下面的命令，在训练集（train.tsv）上进行模型训练，并在开发集（dev.tsv）验证。通过如下命令，即可启动训练。
+我们以微软亚洲研究院发布的中文实体识别数据集MSRA-NER为示例数据集，可以运行下面的命令，在训练集（train.tsv）上进行模型训练，并在开发集（dev.tsv）验证。通过如下命令，即可启动训练。
 
 ```shell
 # 设置使用的GPU卡号
@@ -31,27 +31,27 @@ python train.py
 ```python
 import paddlehub as hub
 
-model = hub.Module(name='ernie_tiny', version='2.0.1', task='seq-cls')
+model = hub.Module(name='ernie_tiny', version='2.0.1', task='token-cls')
 ```
 
 其中，参数：
 
 * `name`：模型名称，可以选择`ernie`，`ernie_tiny`，`bert-base-cased`， `bert-base-chinese`, `roberta-wwm-ext`，`roberta-wwm-ext-large`等。
 * `version`：module版本号
-* `task`：fine-tune任务。此处为`seq-cls`，表示文本分类任务。
+* `task`：fine-tune任务。此处为`token-cls`，表示序列标注任务。
 
-通过以上的一行代码，`model`初始化为一个适用于文本分类任务的模型，为ERNIE Tiny的预训练模型后拼接上一个全连接网络（Full Connected）。
-![](https://ai-studio-static-online.cdn.bcebos.com/f9e1bf9d56c6412d939960f2e3767c2f13b93eab30554d738b137ab2b98e328c)
+通过以上的一行代码，`model`初始化为一个适用于序列标注任务的模型，为ERNIE Tiny的预训练模型后拼接上一个输出token共享的全连接网络（Full Connected）。
+![](https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=224484727,3049769188&fm=15&gp=0.jpg)
 
 以上图片来自于：https://arxiv.org/pdf/1810.04805.pdf
 
 ### Step2: 下载并加载数据集
 
 ```python
-train_dataset = hub.datasets.ChnSentiCorp(
-    tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='train')
-dev_dataset = hub.datasets.ChnSentiCorp(
-    tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='dev')
+train_dataset = hub.datasets.MSRA_NER(
+    tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=50, mode='train')
+dev_dataset = hub.datasets.MSRA_NER(
+    tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=50, mode='dev')
 ```
 
 * `tokenizer`：表示该module所需用到的tokenizer，其将对输入文本完成切词，并转化成module运行所需模型输入格式。
@@ -66,8 +66,8 @@ dev_dataset = hub.datasets.ChnSentiCorp(
 ### Step3:  选择优化策略和运行配置
 
 ```python
-optimizer = paddle.optimizer.Adam(learning_rate=5e-5, parameters=model.parameters())
-trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls')
+optimizer = paddle.optimizer.AdamW(learning_rate=5e-5, parameters=model.parameters())
+trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_token_cls', use_gpu=False)
 
 trainer.train(train_dataset, epochs=3, batch_size=32, eval_dataset=dev_dataset)
 
@@ -77,9 +77,9 @@ trainer.evaluate(test_dataset, batch_size=32)
 
 #### 优化策略
 
-Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详细参见[策略](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/optimizer/optimizer/Optimizer_cn.html)。
+Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`, `AdamW`等，详细参见[策略](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/optimizer/optimizer/Optimizer_cn.html)。
 
-其中`Adam`:
+其中`AdamW`:
 
 * `learning_rate`: 全局学习率。默认为1e-3；
 * `parameters`: 待优化模型参数。
@@ -90,6 +90,7 @@ Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详
 
 * `model`: 被优化模型；
 * `optimizer`: 优化器选择；
+* `use_gpu`: 是否使用GPU训练，默认为False;
 * `use_vdl`: 是否使用vdl可视化训练过程；
 * `checkpoint_dir`: 保存模型参数的地址；
 * `compare_metrics`: 保存最优模型的衡量指标；
@@ -99,7 +100,7 @@ Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详
 * `train_dataset`: 训练时所用的数据集；
 * `epochs`: 训练轮数；
 * `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size；
-* `num_workers`: works的数量，默认为0；
+* `num_workers`: workers的数量，默认为0；
 * `eval_dataset`: 验证集；
 * `log_interval`: 打印日志的间隔， 单位为执行批训练的次数。
 * `save_interval`: 保存模型的间隔频次，单位为执行训练的轮数。
@@ -111,30 +112,39 @@ Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详
 我们以以下数据为待预测数据，使用该模型来进行预测
 
 ```text
-这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般
-怀着十分激动的心情放映，可是看着看着发现，在放映完毕后，出现一集米老鼠的动画片
-作为老的四星酒店，房间依然很整洁，相当不错。机场接机服务很好，可以在车上办理入住手续，节省时间。
+去年十二月二十四日，市委书记张敬涛召集县市主要负责同志研究信访工作时，提出三问：『假如上访群众是我们的父母姐妹，你会用什么样的感情对待他们？
+新华社北京5月7日电国务院副总理李岚清今天在中南海会见了美国前商务部长芭芭拉·弗兰克林。
+根据测算，海卫1表面温度已经从“旅行者”号探测器1989年造访时的零下236摄氏度上升到零下234摄氏度。
+华裔作家韩素音女士曾三次到大足，称“大足石窟是一座未被开发的金矿”。
 ```
 
 ```python
 import paddlehub as hub
 
-data = [
-    ['这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般'],
-    ['怀着十分激动的心情放映，可是看着看着发现，在放映完毕后，出现一集米老鼠的动画片'],
-    ['作为老的四星酒店，房间依然很整洁，相当不错。机场接机服务很好，可以在车上办理入住手续，节省时间。'],
+split_char = "\002"
+label_list = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
+text_a = [
+    '去年十二月二十四日，市委书记张敬涛召集县市主要负责同志研究信访工作时，提出三问：『假如上访群众是我们的父母姐妹，你会用什么样的感情对待他们？',
+    '新华社北京5月7日电国务院副总理李岚清今天在中南海会见了美国前商务部长芭芭拉·弗兰克林。',
+    '根据测算，海卫1表面温度已经从“旅行者”号探测器1989年造访时的零下236摄氏度上升到零下234摄氏度。',
+    '华裔作家韩素音女士曾三次到大足，称“大足石窟是一座未被开发的金矿”。',
 ]
-label_map = {0: 'negative', 1: 'positive'}
+data = [[split_char.join(text)] for text in text_a]
+label_map = {
+    idx: label for idx, label in enumerate(label_list)
+}
 
 model = hub.Module(
-    directory='/mnt/zhangxuefei/program-paddle/PaddleHub/modules/text/language_model/ernie_tiny',
-    version='2.0.0',
-    task='seq-cls',
-    load_checkpoint='./test_ernie_text_cls/best_model/model.pdparams',
-    label_map=label_map)
+    name='ernie_tiny',
+    version='2.0.1',
+    task='token_cls',
+    load_checkpoint='./token_cls_save_dir/best_model/model.pdparams',
+    label_map=label_map,
+)
+
 results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)
-for idx, text in enumerate(data):
-    print('Data: {} \t Lable: {}'.format(text[0], results[idx]))
+for idx, text in enumerate(text_a):
+    print(f'Data: {text} \t Lable: {", ".join(results[idx][1:len(text)+1])}')
 ```
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。

@@ -11,21 +11,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import paddle
 import paddlehub as hub
 
 if __name__ == '__main__':
-    model = hub.Module(name='ernie_tiny', version='2.0.1', task='seq-cls')
+    label_list = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
+    label_map = {
+        idx: label for idx, label in enumerate(label_list)
+    }
+    model = hub.Module(
+        name='ernie_tiny',
+        version='2.0.1',
+        task='token-cls',
+        label_map=label_map,
+    )
 
-    train_dataset = hub.datasets.ChnSentiCorp(
-        tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='train')
-    dev_dataset = hub.datasets.ChnSentiCorp(
-        tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='dev')
-    test_dataset = hub.datasets.ChnSentiCorp(
-        tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='test')
+    train_dataset = hub.datasets.MSRA_NER(
+        tokenizer=model.get_tokenizer(),
+        max_seq_len=128,
+        mode='train'
+    )
+
+    dev_dataset = hub.datasets.MSRA_NER(
+        tokenizer=model.get_tokenizer(),
+        max_seq_len=50,
+        mode='dev'
+    )
 
     optimizer = paddle.optimizer.AdamW(learning_rate=5e-5, parameters=model.parameters())
-    trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls', use_gpu=True)
+    trainer = hub.Trainer(model, optimizer, checkpoint_dir='token_cls_save_dir', use_gpu=True)
 
     trainer.train(train_dataset, epochs=3, batch_size=32, eval_dataset=dev_dataset, save_interval=1)
-    trainer.evaluate(test_dataset, batch_size=32)
