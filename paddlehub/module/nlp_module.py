@@ -348,10 +348,38 @@ class PretrainedModel(nn.Layer):
 
 
 class TextServing(object):
+    """
+    A base class for text model which supports serving.
+    """
     @serving
-    def predict_method(self, texts: List[List[str]], max_seq_len=128, batch_size=1, use_gpu=False):
-        if self.task in self._tasks_supported:
-            if self.label_map:            # compatible with json decoding label_map
+    def predict_method(
+            self,
+            texts: List[List[str]],
+            max_seq_len: int = 128,
+            batch_size: int = 1,
+            use_gpu: bool = False
+    ):
+        """
+        Run predict method as a service.
+        Serving as a task which is specified from serving config.
+        Tasks supported:
+        1. seq-cls: sequence classification;
+        2. token-cls: sequence labeling;
+        3. None: embedding.
+
+        Args:
+            texts (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
+            max_seq_len (:obj:`int`, `optional`, defaults to 128):
+                If set to a number, will limit the total sequence returned so that it has a maximum length.
+            batch_size(obj:`int`, defaults to 1): The number of batch.
+            use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
+
+        Returns:
+            results(obj:`list`): All the predictions labels.
+        """
+        if self.task in self._tasks_supported:  # cls service
+            if self.label_map:
+                # compatible with json decoding label_map
                 self.label_map = {int(k): v for k, v in self.label_map.items()}
             results = self.predict(texts, max_seq_len, batch_size, use_gpu)
 
@@ -361,17 +389,28 @@ class TextServing(object):
                     token_labels[1:len(texts[i][0])+1] for i, token_labels in enumerate(results)
                 ]
             return results
-        else:
+        elif self.task is None:                 # embedding service
             return self.get_embedding(texts, max_seq_len, batch_size, use_gpu)
+        else:                                   # unknown service
+            logger.error(
+                f'Unknown task {self.task}, '
+                f'current tasks supported:\n'
+                '1. seq-cls: sequence classification service;\n'
+                '2. token-cls: sequence labeling service;\n'
+                '3. None: embedding service'
+            )
 
 
 class TransformerModule(RunModule, TextServing):
+    """
+    The base class for Transformer models.
+    """
     _tasks_supported = [
         'seq-cls',
         'token-cls',
     ]
 
-    def _batchify(self, texts: List[List[str]], max_seq_len, batch_size: int):
+    def _batchify(self, texts: List[List[str]], max_seq_len: int, batch_size: int):
         def _parse_batch(batch):
             input_ids = [entry[0] for entry in batch]
             segment_ids = [entry[1] for entry in batch]
@@ -446,7 +485,13 @@ class TransformerModule(RunModule, TextServing):
             seq_res.extend(pooled_output.numpy().tolist())
         return token_res, seq_res
 
-    def predict(self, data: List[List[str]], max_seq_len=128, batch_size=1, use_gpu=False):
+    def predict(
+            self,
+            data: List[List[str]],
+            max_seq_len: int = 128,
+            batch_size: int = 1,
+            use_gpu: bool = False
+    ):
         """
         Predicts the data labels.
 
