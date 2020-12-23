@@ -21,7 +21,7 @@ import io
 import json
 import os
 import six
-from typing import List
+from typing import List, Tuple
 
 import paddle
 import paddle.nn as nn
@@ -347,40 +347,58 @@ class PretrainedModel(nn.Layer):
         paddle.save(self.state_dict(), file_name)
 
 
-class EmbeddingServing(object):
+class TextServing(object):
     @serving
-    def get_embedding(self, texts, use_gpu=False):
-        if self.task is not None:
-            raise RuntimeError("The get_embedding method is only valid when task is None, but got task %s" % self.task)
+    def predict_method(self, texts: List[List[str]], max_seq_len=128, batch_size=1, use_gpu=False):
+        if self.task in self._tasks_supported:
+            if self.label_map:            # compatible with json decoding label_map
+                self.label_map = {int(k): v for k, v in self.label_map.items()}
+            results = self.predict(texts, max_seq_len, batch_size, use_gpu)
 
-        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
-
-        tokenizer = self.get_tokenizer()
-        results = []
-        for text in texts:
-            if len(text) == 1:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=None, pad_to_max_seq_len=False)
-            elif len(text) == 2:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], pad_to_max_seq_len=False)
-            else:
-                raise RuntimeError(
-                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
-
-            input_ids = paddle.to_tensor(encoded_inputs['input_ids']).unsqueeze(0)
-            segment_ids = paddle.to_tensor(encoded_inputs['segment_ids']).unsqueeze(0)
-            sequence_output, pooled_output = self(input_ids, segment_ids)
-
-            sequence_output = sequence_output.squeeze(0)
-            pooled_output = pooled_output.squeeze(0)
-            results.append((sequence_output.numpy().tolist(), pooled_output.numpy().tolist()))
-        return results
+            if self.task == 'token-cls':
+                # remove labels of [CLS] token and pad tokens
+                results = [
+                    token_labels[1:len(texts[i][0])+1] for i, token_labels in enumerate(results)
+                ]
+            return results
+        else:
+            return self.get_embedding(texts, max_seq_len, batch_size, use_gpu)
 
 
-class TransformerModule(RunModule, EmbeddingServing):
+class TransformerModule(RunModule, TextServing):
     _tasks_supported = [
         'seq-cls',
         'token-cls',
     ]
+
+    def _batchify(self, texts: List[List[str]], max_seq_len, batch_size: int):
+        def _parse_batch(batch):
+            input_ids = [entry[0] for entry in batch]
+            segment_ids = [entry[1] for entry in batch]
+            return input_ids, segment_ids
+
+        tokenizer = self.get_tokenizer()
+        examples = []
+        for text in texts:
+            if len(text) == 1:
+                encoded_inputs = tokenizer.encode(text[0], text_pair=None, max_seq_len=max_seq_len)
+            elif len(text) == 2:
+                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], max_seq_len=max_seq_len)
+            else:
+                raise RuntimeError(
+                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
+            examples.append((encoded_inputs['input_ids'], encoded_inputs['segment_ids']))
+
+        # Seperates data into some batches.
+        one_batch = []
+        for example in examples:
+            one_batch.append(example)
+            if len(one_batch) == batch_size:
+                yield _parse_batch(one_batch)
+                one_batch = []
+        if one_batch:
+            # The last batch whose size is less than the config batch_size setting.
+            yield _parse_batch(one_batch)
 
     def training_step(self, batch: List[paddle.Tensor], batch_idx: int):
         """
@@ -408,12 +426,32 @@ class TransformerModule(RunModule, EmbeddingServing):
         predictions, avg_loss, acc = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
         return {'metrics': {'acc': acc}}
 
-    def predict(self, data, max_seq_len=128, batch_size=1, use_gpu=False):
+    def get_embedding(self, texts: List[List[str]], max_seq_len=128, batch_size=1, use_gpu=False):
+        if self.task is not None:
+            raise RuntimeError("The get_embedding method is only valid when task is None, but got task %s" % self.task)
+
+        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
+
+        batches = self._batchify(texts, max_seq_len, batch_size)
+        token_res = []
+        seq_res = []
+        self.eval()
+        for batch in batches:
+            input_ids, segment_ids = batch
+            input_ids = paddle.to_tensor(input_ids)
+            segment_ids = paddle.to_tensor(segment_ids)
+
+            sequence_output, pooled_output = self(input_ids, segment_ids)
+            token_res.extend(sequence_output.numpy().tolist())
+            seq_res.extend(pooled_output.numpy().tolist())
+        return token_res, seq_res
+
+    def predict(self, data: List[List[str]], max_seq_len=128, batch_size=1, use_gpu=False):
         """
         Predicts the data labels.
 
         Args:
-            data (obj:`List(str)`): The processed data whose each element is the raw text.
+            data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
             max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
                 If set to a number, will limit the total sequence returned so that it has a maximum length.
             batch_size(obj:`int`, defaults to 1): The number of batch.
@@ -427,40 +465,12 @@ class TransformerModule(RunModule, EmbeddingServing):
                 self._tasks_supported, self.task))
 
         paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
-        tokenizer = self.get_tokenizer()
 
-        examples = []
-        for text in data:
-            if len(text) == 1:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=None, max_seq_len=max_seq_len)
-            elif len(text) == 2:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], max_seq_len=max_seq_len)
-            else:
-                raise RuntimeError(
-                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
-            examples.append((encoded_inputs['input_ids'], encoded_inputs['segment_ids']))
-
-        def _batchify_fn(batch):
-            input_ids = [entry[0] for entry in batch]
-            segment_ids = [entry[1] for entry in batch]
-            return input_ids, segment_ids
-
-        # Seperates data into some batches.
-        batches = []
-        one_batch = []
-        for example in examples:
-            one_batch.append(example)
-            if len(one_batch) == batch_size:
-                batches.append(one_batch)
-                one_batch = []
-        if one_batch:
-            # The last batch whose size is less than the config batch_size setting.
-            batches.append(one_batch)
-
+        batches = self._batchify(data, max_seq_len, batch_size)
         results = []
         self.eval()
         for batch in batches:
-            input_ids, segment_ids = _batchify_fn(batch)
+            input_ids, segment_ids = batch
             input_ids = paddle.to_tensor(input_ids)
             segment_ids = paddle.to_tensor(segment_ids)
 
