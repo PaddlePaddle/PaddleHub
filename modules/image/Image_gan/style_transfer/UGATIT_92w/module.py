@@ -17,7 +17,7 @@ from UGATIT_92w.processor import base64_to_cv2, cv2_to_base64, Processor
 )
 class UGATIT_92w(Module):
     # 初始化函数
-    def _initialize(self, use_gpu=False):
+    def __init__(self, name=None, use_gpu=False):
         # 设置模型路径
         self.model_path = os.path.join(self.directory, "UGATIT_92w")
 

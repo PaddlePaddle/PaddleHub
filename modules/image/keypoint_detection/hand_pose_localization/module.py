@@ -18,7 +18,7 @@ from hand_pose_localization.processor import base64_to_cv2, Processor
 )
 class Hand_Pose_Localization(Module):
     # 初始化函数
-    def _initialize(self, use_gpu=False):
+    def __init__(self, name=None, use_gpu=False):
         # 设置模型路径
         self.model_path = os.path.join(self.directory, "hand_pose_localization")
 
