@@ -13,7 +13,7 @@ from animegan_v2_paprika_98.processor import base64_to_cv2, cv2_to_base64, Proce
     author="jm12138",  # 作者名称
     author_email="jm12138@qq.com",  # 作者邮箱
     summary="animegan_v2_paprika_98",  # 模型介绍
-    version="1.0.0"  # 版本号
+    version="1.0.2"  # 版本号
 )
 class Animegan_V2_Paprika_98(Module):
     # 初始化函数
@@ -22,7 +22,7 @@ class Animegan_V2_Paprika_98(Module):
         self.model_path = os.path.join(self.directory, "animegan_v2_paprika_98")
 
         # 加载模型
-        self.model = Model(self.model_path, use_gpu)
+        self.model = Model(modelpath=self.model_path, use_gpu=use_gpu, use_mkldnn=False, combined=False)
 
     # 关键点检测函数
     def style_transfer(self,
