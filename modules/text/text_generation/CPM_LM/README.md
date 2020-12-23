@@ -59,7 +59,7 @@ inputs = '''默写古诗:
 日照香炉生紫烟，遥看瀑布挂前川。
 飞流直下三千尺，'''
 outputs = model.greedy_search(inputs, max_len=10, end_word='\n')
-print(inputs+outputs)
+print(outputs)
 ```
 > 默写古诗:  
 日照香炉生紫烟，遥看瀑布挂前川。  
@@ -68,7 +68,7 @@ print(inputs+outputs)
 inputs = '''问题：西游记是谁写的？
 答案：'''
 outputs = model.greedy_search(inputs, max_len=10, end_word='\n')
-print(inputs+outputs)
+print(outputs)
 ```
 > 问题：西游记是谁写的？  
 答案：吴承恩。
@@ -77,7 +77,7 @@ inputs = '''小明决定去吃饭，小红继续写作业
 问题：去吃饭的人是谁？
 答案：'''
 outputs = model.greedy_search(inputs, max_len=10, end_word='\n')
-print(inputs+outputs)
+print(outputs)
 ```
 > 小明决定去吃饭，小红继续写作业  
 问题：去吃饭的人是谁？  
@@ -87,7 +87,7 @@ inputs = '''默写英文：
 狗：dog
 猫：'''
 outputs = model.greedy_search(inputs, max_len=10, end_word='\n')
-print(inputs+outputs)
+print(outputs)
 ```
 > 默写英文：  
 狗：dog  
