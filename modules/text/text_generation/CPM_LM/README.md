@@ -7,9 +7,12 @@ CPM-LM 是一个基于 GPT-2 的预训练生成模型，参数规模达 26 亿�
 
 ## API
 ```python
-def predict(text, max_len=32, end_word=None):
+def greedy_search(
+    text, 
+    max_len=32, 
+    end_word=None):
 ```
-预测 API ，根据输入的文字进行文本生成，使用 Greedy Search 进行解码。
+文本生成 API ，根据输入的文字进行文本生成，使用 Greedy Search 进行解码，生成的文本单一且确定，适合于问答类的文本生成。
 
 **参数**
 * text (str) : 输入文本
@@ -20,51 +23,42 @@ def predict(text, max_len=32, end_word=None):
 * results (str): 生成的文本
 
 ```python
-def tokenizer.encode(text):
+def sample(
+    text, 
+    max_len=32, 
+    end_word=None, 
+    repitition_penalty=1.0, 
+    temperature=1.0, 
+    top_k=0, 
+    top_p=1.0):
 ```
-编码 API
+文本生成 API ，根据输入的文字进行文本生成，使用采样的方式进行解码，生成的文本比较多样，适合于文章类的文本生成。
 
 **参数**
 * text (str) : 输入文本
+* max_len (int) : 生成文本的最大长度
+* end_word (str or None) : 终止生成的标志词
+* repitition_penalty (float) : 重复词抑制率，大于1抑制，小于1提高
+* temperature (float) ：较低的temperature可以让模型对最佳选择越来越有信息，大于1，则会降低，0则相当于 argmax/max ，inf则相当于均匀采样
+* top_k (int) : 抑制小于 Top K 的输出，大于0时有效
+* top_p (float) : 抑制小于 Top P 的输出，小于1.0时有效
 
 **返回**
-* results (list[int]) : 输出编码
-
-```python
-def tokenizer.decode(ids):
-```
-解码 API
-
-**参数**
-* ids (list[int]) : 输入编码
-
-**返回**
-* results (str) : 输出文本
-
-```python
-def model(x, kv_cache=None, use_cache=False):
-```
-模型前向计算 API
-
-**参数**
-* x (tensor) : 输入编码
-* kv_cache (tensor) : 输入的缓存
-* use_cache (bool) : 是否使用缓存
-
-**返回**
-* results (tensor) : 模型输出
+* results (str): 生成的文本
 
 **代码示例**
+* 加载模型：
 ```python
 import paddlehub as hub
 
 model = hub.Module(name='CPM_LM')
 ```
+* 使用 Greedy Search 生成文本：
 ```python
 inputs = '''默写古诗:
 日照香炉生紫烟，遥看瀑布挂前川。
 飞流直下三千尺，'''
-outputs = model.predict(inputs, max_len=10, end_word='\n')
+outputs = model.greedy_search(inputs, max_len=10, end_word='\n')
 print(inputs+outputs)
 ```
 > 默写古诗:  
@@ -73,7 +67,7 @@ print(inputs+outputs)
 ```python
 inputs = '''问题：西游记是谁写的？
 答案：'''
-outputs = model.predict(inputs, max_len=10, end_word='\n')
+outputs = model.greedy_search(inputs, max_len=10, end_word='\n')
 print(inputs+outputs)
 ```
 > 问题：西游记是谁写的？  
@@ -82,7 +76,7 @@ print(inputs+outputs)
 inputs = '''小明决定去吃饭，小红继续写作业
 问题：去吃饭的人是谁？
 答案：'''
-outputs = model.predict(inputs, max_len=10, end_word='\n')
+outputs = model.greedy_search(inputs, max_len=10, end_word='\n')
 print(inputs+outputs)
 ```
 > 小明决定去吃饭，小红继续写作业  
@@ -92,12 +86,51 @@ print(inputs+outputs)
 inputs = '''默写英文：
 狗：dog
 猫：'''
-outputs = model.predict(inputs, max_len=10, end_word='\n')
+outputs = model.greedy_search(inputs, max_len=10, end_word='\n')
 print(inputs+outputs)
 ```
 > 默写英文：  
 狗：dog  
 猫：cat
+
+* 使用采样方式生成文本：
+
+```python
+inputs = '''在此处输入文本的开头'''
+
+outputs = model.sample(
+    inputs,
+    max_len=32,
+    end_word='。',
+    repitition_penalty=1.0,
+    temperature=1.0,
+    top_k=5,
+    top_p=1.0
+)
+
+print(outputs)
+```
+> 此处输入文本的开头,然后再输入下一个字符 ,就可以得到一个"HelloWorld!"的文本。
+
+
+```python
+inputs = '''方平带众人骑马出了城，残雪点缀原本泛黄的大地。他一身黑衣在一群铁甲士兵中尤其显眼。'''
+
+outputs = model.sample(
+    inputs,
+    max_len=128,
+    end_word=None,
+    repitition_penalty=1.0,
+    temperature=1.0,
+    top_k=3000,
+    top_p=1.0
+)
+
+print(outputs)
+```
+> 方平带众人骑马出了城,残雪点缀原本泛黄的大地。他一身黑衣在一群铁甲士兵中尤其显眼。他负手彷徨,曾经在铜宫带领大军,横扫天下的军师如今只是位数趾高气扬的小卒,如今自己,连他身边的一个随从的支使就算不会武功也是位高权重。横刀立马,换来的是什么?他不知道,今天他走路都有些飘摇。
+蓦然回眼看向熟悉而熟悉的军队,心中一阵轻松,走向来时军队时。忽然看见那位太史
+
 
 ## 查看代码
 https://github.com/jm12138/CPM-Generate-Paddle

@@ -49,34 +49,109 @@ class CPM_LM(Layer):
         # 初始化编码器
         _ = self.tokenizer.encode('_')
 
-    # 基础预测函数
-    def predict(self, text, max_len=32, end_word=None):
+    # greedy_search
+    def greedy_search(self, text, max_len=32, end_word=None):
         # 终止标志
+        end_id = self.tokenizer.eod_id
         if end_word is not None:
-            end_id = self.tokenizer.encode(end_word)
-            length = len(end_id)
-        else:
-            end_id = self.tokenizer.eod_id
+            stop_id = self.tokenizer.encode(end_word)
+            length = len(stop_id)
+        
+        # 初始预测
+        ids = self.tokenizer.encode(text)
+        input_id = paddle.to_tensor(np.array(ids).reshape(1, -1).astype('int64'))
+        output, cached_kvs = self.model(input_id, use_cache=True)
+        next_token = int(np.argmax(output[0, -1].numpy()))
+        ids.append(next_token)
+
+        # 使用缓存进行继续预测
+        for i in range(max_len-1):
+            input_id = paddle.to_tensor(np.array([next_token]).reshape(1, -1).astype('int64'))
+            output, cached_kvs = self.model(input_id, cached_kvs, use_cache=True)
+            next_token = int(np.argmax(output[0, -1].numpy()))
+            ids.append(next_token)
+
+            if next_token==end_id:
+                break
+
+            # 根据终止标志停止预测
+            if (end_word is not None) and (ids[-length:]==stop_id):
+                break
+
+        return self.tokenizer.decode(ids)
+
+    @staticmethod
+    def top_k_top_p_filtering(logits, top_k=0, top_p=1.0, filter_value=-float('Inf')):
+        """ Filter a distribution of logits using top-k and/or nucleus (top-p) filtering
+            Args:
+                logits: logits distribution shape (vocabulary size)
+                top_k > 0: keep only top k tokens with highest probability (top-k filtering).
+                top_p > 0.0: keep the top tokens with cumulative probability >= top_p (nucleus filtering).
+                    Nucleus filtering is described in Holtzman et al. (http://arxiv.org/abs/1904.09751)
+            From: https://gist.github.com/thomwolf/1a5a29f6962089e871b94cbd09daf317
+        """
+        top_k = min(top_k, logits.shape[-1])  # Safety check
+        logits_np = logits.numpy()
+        if top_k > 0:
+            # Remove all tokens with a probability less than the last token of the top-k
+            indices_to_remove = logits_np < np.sort(logits_np)[-top_k]
+            logits_np[indices_to_remove] = filter_value
+
+        if top_p < 1.0:
+            sorted_logits = paddle.sort(logits, descending=True)
+            sorted_indices = paddle.argsort(logits, descending=True).numpy()
+            cumulative_probs = paddle.cumsum(paddle.nn.functional.softmax(sorted_logits, axis=-1), axis=-1).numpy()
+
+            # Remove tokens with cumulative probability above the threshold
+            sorted_indices_to_remove = cumulative_probs > top_p
+            # Shift the indices to the right to keep also the first token above the threshold
+            sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1]
+            sorted_indices_to_remove[..., 0] = 0
+
+            indices_to_remove = sorted_indices[sorted_indices_to_remove]
+            logits_np[indices_to_remove] = filter_value
+
+        return paddle.to_tensor(logits_np)
+
+    # sample
+    def sample(self, text, max_len=32, end_word=None, repitition_penalty=1.0, temperature=1.0, top_k=0, top_p=1.0):
+        # 终止标志
+        end_id = self.tokenizer.eod_id
+        if end_word is not None:
+            stop_id = self.tokenizer.encode(end_word)
+            length = len(stop_id)
 
         # 初始预测
         ids = self.tokenizer.encode(text)
         input_id = paddle.to_tensor(np.array(ids).reshape(1, -1).astype('int64'))
         output, cached_kvs = self.model(input_id, use_cache=True)
-        nid = int(np.argmax(output[0, -1].numpy()))
-        out = [nid]
+        next_token_logits = output[0, -1, :]
+        for id in set(ids):
+            next_token_logits[id] /= repitition_penalty
+        next_token_logits = next_token_logits / temperature
+        next_token_logits[self.tokenizer.encoder['<unk>']] = -float('Inf')
+        filtered_logits = self.top_k_top_p_filtering(next_token_logits, top_k=top_k, top_p=top_p)
+        next_token = paddle.multinomial(paddle.nn.functional.softmax(filtered_logits, axis=-1), num_samples=1).numpy()
+        ids += [int(next_token)]
 
         # 使用缓存进行继续预测
         for i in range(max_len-1):
-            input_id = paddle.to_tensor(np.array([nid]).reshape(1, -1).astype('int64'))
+            input_id = paddle.to_tensor(np.array([next_token]).reshape(1, -1).astype('int64'))
             output, cached_kvs = self.model(input_id, cached_kvs, use_cache=True)
-            nid = int(np.argmax(output[0, -1].numpy()))
+            next_token_logits = output[0, -1, :]
+            for id in set(ids):
+                next_token_logits[id] /= repitition_penalty
+            next_token_logits = next_token_logits / temperature
+            next_token_logits[self.tokenizer.encoder['<unk>']] = -float('Inf')
+            filtered_logits = self.top_k_top_p_filtering(next_token_logits, top_k=top_k, top_p=top_p)
+            next_token = paddle.multinomial(paddle.nn.functional.softmax(filtered_logits, axis=-1), num_samples=1).numpy()
+            ids += [int(next_token)]
+            
+            if next_token==end_id:
+                break
 
             # 根据终止标志停止预测
-            if (end_word is not None) and (out[-length+1:]+[nid]==end_id):
+            if (end_word is not None) and (ids[-length:]==stop_id):
                 break
-            elif (end_word is None) and (nid==end_id):
-                break
-            
-            out.append(nid)
-        
-        return self.tokenizer.decode(out)
+
+        return self.tokenizer.decode(ids)
