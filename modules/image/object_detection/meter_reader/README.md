@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
 ### 查看代码
 
-https://github.com/PaddlePaddle/PaddleX/blob/develop/README.md
+https://github.com/PaddlePaddle/PaddleX
 
 
 ### 依赖
