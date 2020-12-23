@@ -11,7 +11,7 @@ from CPM_LM.GPT2 import GPT2Model, GPT2Tokenizer
     author="jm12138", # 作者名称
     author_email="jm12138@qq.com", # 作者邮箱
     summary="CPM_LM", # 模型介绍
-    version="1.0.0" # 版本号
+    version="1.0.1" # 版本号
 )
 class CPM_LM(Layer):
     def __init__(self, max_len=512):
