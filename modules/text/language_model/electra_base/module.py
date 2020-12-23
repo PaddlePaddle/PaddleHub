@@ -27,12 +27,12 @@ from paddlehub.utils.log import logger
 
 
 @moduleinfo(
-    name="chinese-electra-base",
-    version="2.0.0",
+    name="electra-base",
+    version="1.0.0",
     summary=
-    "chinese-electra-base, 12-layer, 768-hidden, 12-heads, 102M parameters. The module is executed as paddle.dygraph.",
-    author="ymcui",
-    author_email="ymcui@ir.hit.edu.cn",
+    "electra-base, 12-layer, 768-hidden, 12-heads, 110M parameters. The module is executed as paddle.dygraph.",
+    author="paddlepaddle",
+    author_email="",
     type="nlp/semantic_model",
     meta=TransformerModule,
 )
@@ -64,7 +64,7 @@ class Electra(nn.Layer):
             )
         if task == 'seq-cls':
             self.model = ElectraForSequenceClassification.from_pretrained(
-                pretrained_model_name_or_path='chinese-electra-base',
+                pretrained_model_name_or_path='electra-base',
                 num_classes=self.num_classes,
                 **kwargs
             )
@@ -72,7 +72,7 @@ class Electra(nn.Layer):
             self.metric = paddle.metric.Accuracy()
         elif task == 'token-cls':
             self.model = ElectraForTokenClassification.from_pretrained(
-                pretrained_model_name_or_path='chinese-electra-base',
+                pretrained_model_name_or_path='electra-base',
                 num_classes=self.num_classes,
                 **kwargs
             )
@@ -81,7 +81,7 @@ class Electra(nn.Layer):
                 label_list=[self.label_map[i] for i in sorted(self.label_map.keys())]
             )
         elif task is None:
-            self.model = ElectraModel.from_pretrained(pretrained_model_name_or_path='chinese-electra-base', **kwargs)
+            self.model = ElectraModel.from_pretrained(pretrained_model_name_or_path='electra-base', **kwargs)
         else:
             raise RuntimeError("Unknown task {}, task should be one in {}".format(
                 task, self._tasks_supported))
@@ -127,4 +127,4 @@ class Electra(nn.Layer):
         Gets the tokenizer that is customized for this module.
         """
         return ElectraTokenizer.from_pretrained(
-            pretrained_model_name_or_path='chinese-electra-base', *args, **kwargs)
+            pretrained_model_name_or_path='electra-base', *args, **kwargs)
