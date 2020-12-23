@@ -66,7 +66,7 @@ PaddleHub Serving可以部署一个图像超分的在线服务。
 $ hub serving start -m meter_reader
 ```
 
-这样就完成了一个表计识别任务的服务化API的部署，默认端口号为8866。
+默认端口号为8866。
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
 
