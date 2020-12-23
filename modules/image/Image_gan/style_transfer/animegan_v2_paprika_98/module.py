@@ -17,7 +17,7 @@ from animegan_v2_paprika_98.processor import base64_to_cv2, cv2_to_base64, Proce
 )
 class Animegan_V2_Paprika_98(Module):
     # 初始化函数
-    def _initialize(self, use_gpu=False):
+    def __init__(self, name=None, use_gpu=False):
         # 设置模型路径
         self.model_path = os.path.join(self.directory, "animegan_v2_paprika_98")
 
