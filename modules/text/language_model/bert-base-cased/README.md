@@ -14,7 +14,10 @@ $ hub install bert-base-cased==2.0.1
 def __init__(
     task=None,
     load_checkpoint=None,
-    label_map=None)
+    label_map=None,
+    num_classes=2,
+    **kwargs,
+)
 ```
 
 创建Module对象（动态图组网版本）。
@@ -24,13 +27,16 @@ def __init__(
 * `task`： 任务名称，可为`seq-cls`(文本分类任务，原来的`sequence_classification`在未来会被弃用)或`token-cls`(序列标注任务)。
 * `load_checkpoint`：使用PaddleHub Fine-tune api训练保存的模型参数文件路径。
 * `label_map`：预测时的类别映射表。
+* `num_classes`：分类任务的类别数，如果指定了`label_map`，此参数可不传，默认2分类。
+* `**kwargs`：用户额外指定的关键字字典类型的参数。
 
 ```python
 def predict(
     data,
     max_seq_len=128,
     batch_size=1,
-    use_gpu=False)
+    use_gpu=False
+)
 ```
 
 **参数**
@@ -46,6 +52,8 @@ def predict(
 ```python
 def get_embedding(
     texts,
+    max_seq_len=128,
+    batch_size=1,
     use_gpu=False
 )
 ```
@@ -55,6 +63,8 @@ def get_embedding(
 **参数**
 
 * `texts`：输入文本列表，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。
+* `max_seq_len`：模型处理文本的最大长度。
+* `batch_size`：模型批处理大小。
 * `use_gpu`：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
 
 **返回**
@@ -77,7 +87,7 @@ label_map = {0: 'negative', 1: 'positive'}
 model = hub.Module(
     name='bert-base-cased',
     version='2.0.1',
-    task='sequence_classification',
+    task='seq-cls',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
 results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)
@@ -85,7 +95,9 @@ for idx, text in enumerate(data):
     print('Data: {} \t Lable: {}'.format(text, results[idx]))
 ```
 
-参考PaddleHub 文本分类示例。https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/text_classifcation
+详情可参考PaddleHub示例：
+- [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/text_classification)
+- [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/sequence_labeling)
 
 ## 服务部署
 

@@ -1,5 +1,5 @@
 ```shell
-$ hub install chinese-bert-wwm==1.0.0
+$ hub install chinese-bert-wwm==2.0.1
 ```
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/bert_network.png"  hspace='10'/> <br />
@@ -9,112 +9,130 @@ $ hub install chinese-bert-wwm==1.0.0
 
 ## API
 ```python
-def context(
-    trainable=True,
-    max_seq_len=128
+def __init__(
+    task=None,
+    load_checkpoint=None,
+    label_map=None,
+    num_classes=2,
+    **kwargs,
 )
 ```
-用于获取Module的上下文信息，得到输入、输出以及预训练的Paddle Program副本  
 
-**参数**  
+创建Module对象（动态图组网版本）。
+
+**参数**
+
+* `task`： 任务名称，可为`seq-cls`(文本分类任务，原来的`sequence_classification`在未来会被弃用)或`token-cls`(序列标注任务)。
+* `load_checkpoint`：使用PaddleHub Fine-tune api训练保存的模型参数文件路径。
+* `label_map`：预测时的类别映射表。
+* `num_classes`：分类任务的类别数，如果指定了`label_map`，此参数可不传，默认2分类。
+* `**kwargs`：用户额外指定的关键字字典类型的参数。
+
+```python
+def predict(
+    data,
+    max_seq_len=128,
+    batch_size=1,
+    use_gpu=False
+)
+```
+
+**参数**
+
+* `data`： 待预测数据，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，
+  每个样例可以包含text\_a与text\_b。每个样例文本数量（1个或者2个）需和训练时保持一致。
+* `max_seq_len`：模型处理文本的最大长度
+* `batch_size`：模型批处理大小
+* `use_gpu`：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
+
+**返回**
+
+```python
+def get_embedding(
+    texts,
+    max_seq_len=128,
+    batch_size=1,
+    use_gpu=False
+)
+```
+
+用于获取输入文本的句子粒度特征与字粒度特征
+
+**参数**
+
+* `texts`：输入文本列表，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。
+* `max_seq_len`：模型处理文本的最大长度。
+* `batch_size`：模型批处理大小。
+* `use_gpu`：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
+
+**返回**
+
+* `results`：list类型，格式为\[\[sample\_a\_pooled\_feature, sample\_a\_seq\_feature\], \[sample\_b\_pooled\_feature, sample\_b\_seq\_feature\],…,\]，其中每个元素都是对应样例的特征输出，每个样例都有句子粒度特征pooled\_feature与字粒度特征seq\_feature。
+
+
+**代码示例**
+
+```python
+import paddlehub as hub
+
+data = [
+    ['这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般'],
+    ['怀着十分激动的心情放映，可是看着看着发现，在放映完毕后，出现一集米老鼠的动画片'],
+    ['作为老的四星酒店，房间依然很整洁，相当不错。机场接机服务很好，可以在车上办理入住手续，节省时间。'],
+]
+label_map = {0: 'negative', 1: 'positive'}
+
+model = hub.Module(
+    name='chinese-bert-wwm',
+    version='2.0.1',
+    task='seq-cls',
+    load_checkpoint='/path/to/parameters',
+    label_map=label_map)
+results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)
+for idx, text in enumerate(data):
+    print('Data: {} \t Lable: {}'.format(text, results[idx]))
+```
+
+详情可参考PaddleHub示例：
+- [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/text_classification)
+- [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/sequence_labeling)
+
+## 服务部署
+
+PaddleHub Serving可以部署一个在线获取预训练词向量。
+
+### Step1: 启动PaddleHub Serving
+
+运行启动命令：
+
 ```shell
-$ hub install chinese-bert-wwm==1.0.0
-```
-<p align="center">
-<img src="https://bj.bcebos.com/paddlehub/paddlehub-img/bert_network.png"  hspace='10'/> <br />
-</p>
-
-更多详情请参考[BERT论文](https://arxiv.org/abs/1810.04805), [Chinese-BERT-wwm技术报告](https://arxiv.org/abs/1906.08101)
-
-## API
-```python
-def context(
-    trainable=True,
-    max_seq_len=128
-)
-```
-用于获取Module的上下文信息，得到输入、输出以及预训练的Paddle Program副本
-
-**参数**
-
-> trainable：设置为True时，Module中的参数在Fine-tune时也会随之训练，否则保持不变。
-> max_seq_len：BERT模型的最大序列长度，若序列长度不足，会通过padding方式补到**max_seq_len**, 若序列长度大于该值，则会以截断方式让序列长度为**max_seq_len**，max_seq_len可取值范围为0～512；
-
-**返回**
-> inputs：dict类型，有以下字段：
-> >**position_ids**存放输入文本tokenize后各token所在该文本的位置，shape为\[batch_size, max_seq_len\]，int64类型；
-> >**segment_ids**存放各token所在文本的标识（token属于文本1或者文本2），shape为\[batch_size, max_seq_len\]，int64类型；
-> >**input_mask**存放token是否为padding的标识，shape为\[batch_size, max_seq_len\]，int64类型；
->
-> outputs：dict类型，Module的输出特征，有以下字段：
-> >**pooled_output**字段存放句子粒度的特征，可用于文本分类等任务，shape为 \[batch_size, 768\]，int64类型；
-> >**sequence_output**字段存放字粒度的特征，可用于序列标注等任务，shape为 \[batch_size, seq_len, 768\]，int64类型；
->
-> program：包含该Module计算图的Program。
-
-
-
-```python
-def get_embedding(
-    texts,
-    use_gpu=False,
-    batch_size=1
-)
+$ hub serving start -m chinese-bert-wwm
 ```
 
-用于获取输入文本的句子粒度特征与字粒度特征
+这样就完成了一个获取预训练词向量服务化API的部署，默认端口号为8866。
 
-**参数**
+**NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
 
-> texts：输入文本列表，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。
-> use_gpu：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
+### Step2: 发送预测请求
 
-**返回**
-
-> results：list类型，格式为\[\[sample\_a\_pooled\_feature, sample\_a\_seq\_feature\], \[sample\_b\_pooled\_feature, sample\_b\_seq\_feature\],…,\]，其中每个元素都是对应样例的特征输出，每个样例都有句子粒度特征pooled\_feature与字粒度特征seq\_feature。
->
+配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
 ```python
-def get_params_layer()
-```
+import requests
+import json
 
-用于获取参数层信息，该方法与ULMFiTStrategy联用可以严格按照层数设置分层学习率与逐层解冻。
+# 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
+text = [["今天是个好日子", "天气预报说今天要下雨"], ["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"]]
+# 以key的方式指定text传入预测方法的时的参数，此例中为"texts"
+# 对应本地部署，则为module.get_embedding(texts=text)
+data = {"texts": text}
+# 发送post请求，content-type类型应指定json方式
+url = "http://10.12.121.132:8866/predict/chinese-bert-wwm"
+# 指定post请求的headers为application/json方式
+headers = {"Content-Type": "application/json"}
 
-**参数**
-
-> 无
-
-**返回**
-
-> params_layer：dict类型，key为参数名，值为参数所在层数
-
-**代码示例**
-
-```python
-import paddlehub as hub
-
-# Load $ hub install chinese-bert-wwm pretrained model
-module = hub.Module(name="chinese-bert-wwm")
-inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
-
-# Must feed all the tensor of chinese-bert-wwm's module need
-input_ids = inputs["input_ids"]
-position_ids = inputs["position_ids"]
-segment_ids = inputs["segment_ids"]
-input_mask = inputs["input_mask"]
-
-# Use "pooled_output" for sentence-level output.
-pooled_output = outputs["pooled_output"]
-
-# Use "sequence_output" for token-level output.
-sequence_output = outputs["sequence_output"]
-
-# Use "get_embedding" to get embedding result.
-embedding_result = module.get_embedding(texts=[["Sample1_text_a"],["Sample2_text_a","Sample2_text_b"]], use_gpu=True)
-
-# Use "get_params_layer" to get params layer and used to ULMFiTStrategy.
-params_layer = module.get_params_layer()
-strategy = hub.finetune.strategy.ULMFiTStrategy(frz_params_layer=params_layer, dis_params_layer=params_layer)
+r = requests.post(url=url, headers=headers, data=json.dumps(data))
+print(r.json())
 ```
 
 ## 查看代码
@@ -127,116 +145,16 @@ https://github.com/ymcui/Chinese-BERT-wwm
 
 ## 依赖
 
-paddlepaddle >= 1.6.2
+paddlepaddle >= 2.0.0
 
-paddlehub >= 1.6.0
-
-## 更新历史
-
-* 1.0.0
-
-  初始发布
-
-* 1.0.0
-
-  支持get_embedding与get_params_layer
-
-> trainable：设置为True时，Module中的参数在Fine-tune时也会随之训练，否则保持不变。  
-> max_seq_len：BERT模型的最大序列长度，若序列长度不足，会通过padding方式补到**max_seq_len**, 若序列长度大于该值，则会以截断方式让序列长度为**max_seq_len**，max_seq_len可取值范围为0～512；  
-
-**返回**  
-> inputs：dict类型，有以下字段：  
-> >**position_ids**存放输入文本tokenize后各token所在该文本的位置，shape为\[batch_size, max_seq_len\]，int64类型；
-> >**segment_ids**存放各token所在文本的标识（token属于文本1或者文本2），shape为\[batch_size, max_seq_len\]，int64类型；  
-> >**input_mask**存放token是否为padding的标识，shape为\[batch_size, max_seq_len\]，int64类型；  
->
-> outputs：dict类型，Module的输出特征，有以下字段：  
-> >**pooled_output**字段存放句子粒度的特征，可用于文本分类等任务，shape为 \[batch_size, 768\]，int64类型；  
-> >**sequence_output**字段存放字粒度的特征，可用于序列标注等任务，shape为 \[batch_size, seq_len, 768\]，int64类型；  
->
-> program：包含该Module计算图的Program。  
-
-
-
-```python
-def get_embedding(
-    texts,
-    use_gpu=False,
-    batch_size=1
-)
-```
-
-用于获取输入文本的句子粒度特征与字粒度特征
-
-**参数**
-
-> texts：输入文本列表，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。
-> use_gpu：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
-
-**返回**
-
-> results：list类型，格式为\[\[sample\_a\_pooled\_feature, sample\_a\_seq\_feature\], \[sample\_b\_pooled\_feature, sample\_b\_seq\_feature\],…,\]，其中每个元素都是对应样例的特征输出，每个样例都有句子粒度特征pooled\_feature与字粒度特征seq\_feature。
->
-
-```python
-def get_params_layer()
-```
-
-用于获取参数层信息，该方法与ULMFiTStrategy联用可以严格按照层数设置分层学习率与逐层解冻。
-
-**参数**
-
-> 无
-
-**返回**
-
-> params_layer：dict类型，key为参数名，值为参数所在层数
-
-**代码示例**
-
-```python
-import paddlehub as hub
-
-# Load $ hub install chinese-bert-wwm pretrained model
-module = hub.Module(name="chinese-bert-wwm")
-inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
-
-# Must feed all the tensor of chinese-bert-wwm's module need
-input_ids = inputs["input_ids"]
-position_ids = inputs["position_ids"]
-segment_ids = inputs["segment_ids"]
-input_mask = inputs["input_mask"]
-
-# Use "pooled_output" for sentence-level output.
-pooled_output = outputs["pooled_output"]
-
-# Use "sequence_output" for token-level output.
-sequence_output = outputs["sequence_output"]
-
-# Use "get_embedding" to get embedding result.
-embedding_result = module.get_embedding(texts=[["Sample1_text_a"],["Sample2_text_a","Sample2_text_b"]], use_gpu=True)
-
-# Use "get_params_layer" to get params layer and used to ULMFiTStrategy.
-params_layer = module.get_params_layer()
-strategy = hub.finetune.strategy.ULMFiTStrategy(frz_params_layer=params_layer, dis_params_layer=params_layer)
-```
-
-## 查看代码
-https://github.com/ymcui/Chinese-BERT-wwm
-
-
-## 贡献者
-
-[ymcui](https://github.com/ymcui)
-
-## 依赖
-
-paddlepaddle >= 1.6.2
-
-paddlehub >= 1.6.0
+paddlehub >= 2.0.0
 
 ## 更新历史
 
 * 1.0.0
 
   初始发布
+  
+* 2.0.1
+
+  全面升级动态图，接口有所变化。任务名称调整，增加序列标注任务`token-cls`
