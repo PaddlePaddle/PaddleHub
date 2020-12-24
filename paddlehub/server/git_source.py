@@ -21,6 +21,9 @@ import sys
 from collections import OrderedDict
 from typing import List
 
+# For some environments where git is not installed, we need to set this environment
+# variable to avoid errors.
+os.environ['GIT_PYTHON_REFRESH'] = 'quiet'
 import git
 from git import Repo
 
