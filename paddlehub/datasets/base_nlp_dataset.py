@@ -247,9 +247,9 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
         record = self.records[idx]
         if 'label' in record.keys():
             if isinstance(self.tokenizer, BertTokenizer):
-                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'])
+                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'], dtype=np.int64)
             elif isinstance(self.tokenizer, CustomTokenizer):
-                return np.array(record['text']), np.array(record['seq_len']), np.array(record['label'])
+                return np.array(record['text']), np.array(record['seq_len']), np.array(record['label'], dtype=np.int64)
         else:
             if isinstance(self.tokenizer, BertTokenizer):
                 return np.array(record['input_ids']), np.array(record['segment_ids'])
@@ -382,7 +382,7 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
         record = self.records[idx]
         if 'label' in record.keys():
             if isinstance(self.tokenizer, BertTokenizer):
-                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'])
+                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'], dtype=np.int64)
             else:  # TODO(chenxiaojie): add CustomTokenizer supported
                 raise NotImplementedError
         else:
