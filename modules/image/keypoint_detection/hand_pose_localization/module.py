@@ -14,16 +14,16 @@ from hand_pose_localization.processor import base64_to_cv2, Processor
     author="jm12138",  # 作者名称
     author_email="jm12138@qq.com",  # 作者邮箱
     summary="hand_pose_localization",  # 模型介绍
-    version="1.0.0"  # 版本号
+    version="1.0.2"  # 版本号
 )
 class Hand_Pose_Localization(Module):
     # 初始化函数
-    def _initialize(self, use_gpu=False):
+    def __init__(self, name=None, use_gpu=False):
         # 设置模型路径
         self.model_path = os.path.join(self.directory, "hand_pose_localization")
 
         # 加载模型
-        self.model = Model(self.model_path, use_gpu)
+        self.model = Model(modelpath=self.model_path, use_gpu=use_gpu, use_mkldnn=False, combined=True)
 
     # 关键点检测函数
     def keypoint_detection(self, images=None, paths=None, batch_size=1, output_dir='output', visualization=False):
