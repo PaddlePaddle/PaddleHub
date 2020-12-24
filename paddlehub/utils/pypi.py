@@ -59,6 +59,18 @@ def install(package: str, version: str = '', upgrade: bool = False, ostream: IO 
     return result == 0
 
 
+def install_from_file(file: str, ostream: IO = None, estream: IO = None) -> bool:
+    '''Install the python package.'''
+    cmd = 'pip install -r {}'.format(file)
+
+    result, content = subprocess.getstatusoutput(cmd)
+    if result:
+        estream.write(content)
+    else:
+        ostream.write(content)
+    return result == 0
+
+
 def uninstall(package: str, ostream: IO = None, estream: IO = None) -> bool:
     '''Uninstall the python package.'''
     with typein('y'):

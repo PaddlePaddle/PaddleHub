@@ -304,10 +304,11 @@ class LocalModuleManager(object):
                     file.write('source: {}\n'.format(source))
                     file.write('branch: {}'.format(branch))
 
-                self._local_modules[name] = HubModule.load(installed_path)
+                # Install python package requirements, This behavior needs to occur before Module.load,
+                # otherwise the model will fail to load due to missing dependencies.
+                self._install_module_requirements(installed_path)
 
-                # Install python package requirements
-                self._install_module_requirements(self._local_modules[name])
+                self._local_modules[name] = HubModule.load(installed_path)
 
                 if version:
                     log.logger.info('Successfully installed {}-{}'.format(name, version))
@@ -337,11 +338,13 @@ class LocalModuleManager(object):
 
             shutil.copytree(directory, self._get_normalized_path(module_info.name))
 
+            # Install python package requirements, This behavior needs to occur before Module.load,
+            # otherwise the model will fail to load due to missing dependencies.
+            self._install_module_requirements(directory)
+
             hub_module_cls = HubModule.load(self._get_normalized_path(module_info.name))
             self._local_modules[module_info.name] = hub_module_cls
 
-            # Install python package requirements
-            self._install_module_requirements(hub_module_cls)
             log.logger.info('Successfully installed {}-{}'.format(hub_module_cls.name, hub_module_cls.version))
             return hub_module_cls
 
@@ -357,19 +360,20 @@ class LocalModuleManager(object):
             directory = os.path.join(_tdir, path.split(os.sep)[0])
             return self._install_from_directory(directory)
 
-    def _install_module_requirements(self, module: HubModule):
+    def _install_module_requirements(self, directory: str):
+
+        rfile = os.path.join(directory, 'requirements.txt')
+        if not os.path.exists(rfile):
+            return
+
         file = utils.get_record_file()
         with open(file, 'a') as _stream:
 
-            for py_req in module.get_py_requirements():
-                if py_req.lstrip().rstrip() == '':
-                    continue
-
-                with log.logger.processing('Installing dependent packages {}'.format(py_req)):
-                    result = pypi.install(py_req, ostream=_stream, estream=_stream)
-                    if result:
-                        log.logger.info('Successfully installed dependent packages {}'.format(py_req))
-                    else:
-                        log.logger.warning(
-                            'Some errors occurred while installing dependent packages {}. Detailed error information can be found in the {}.'
-                            .format(py_req, file))
+            with log.logger.processing('Installing dependent packages from {}'.format(rfile)):
+                result = pypi.install_from_file(rfile, ostream=_stream, estream=_stream)
+                if result:
+                    log.logger.info('Successfully installed dependent packages.')
+                else:
+                    log.logger.warning(
+                        'Some errors occurred while installing dependent packages. Detailed error information can be found in the {}.'
+                        .format(file))
