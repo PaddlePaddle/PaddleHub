@@ -2,7 +2,7 @@
 * 基于 face_landmark_localization 和 FCN_HRNet_W18_Face_Seg 模型实现的证件照生成模型，一键生成白底、红底和蓝底的人像照片
 
 ## 效果展示
-![](https://ai-studio-static-online.cdn.bcebos.com/cb82156ad0d44938896c3679534cc50e8e9c170cdd1b4ab8bf34304f69229fda)
+![](https://img-blog.csdnimg.cn/20201224163307901.jpg)
 
 ## API
 ```python
