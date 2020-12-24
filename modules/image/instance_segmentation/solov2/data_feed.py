@@ -19,8 +19,7 @@ def create_inputs(im, im_info):
     inputs['image'] = im
     origin_shape = list(im_info['origin_shape'])
     resize_shape = list(im_info['resize_shape'])
-    pad_shape = list(im_info['pad_shape']) if im_info[
-                                                  'pad_shape'] is not None else list(im_info['resize_shape'])
+    pad_shape = list(im_info['pad_shape']) if im_info['pad_shape'] is not None else list(im_info['resize_shape'])
     scale_x, scale_y = im_info['scale']
     scale = scale_x
     im_info = np.array([resize_shape + [scale]]).astype('float32')
@@ -163,8 +162,7 @@ def draw_mask(im, np_boxes, np_masks, labels, resolution=14, threshold=0.5):
         y0 = min(max(ymin, 0), im_h)
         y1 = min(max(ymax + 1, 0), im_h)
         im_mask = np.zeros((im_h, im_w), dtype=np.uint8)
-        im_mask[y0:y1, x0:x1] = resized_mask[(y0 - ymin):(y1 - ymin), (
-                                                                              x0 - xmin):(x1 - xmin)]
+        im_mask[y0:y1, x0:x1] = resized_mask[(y0 - ymin):(y1 - ymin), (x0 - xmin):(x1 - xmin)]
         if clsid not in clsid2color:
             clsid2color[clsid] = color_list[clsid]
         color_mask = clsid2color[clsid]
