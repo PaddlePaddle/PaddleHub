@@ -56,7 +56,7 @@ print(res)
 
 ## 服务部署
 
-PaddleHub Serving可以部署一个图像超分的在线服务。
+PaddleHub Serving可以部署一个表计识别的在线服务。
 
 ## 第一步：启动PaddleHub Serving
 
