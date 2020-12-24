@@ -99,13 +99,9 @@ label = np.fromstring(label, dtype=np.int64)
 score = base64.b64decode(r.json()["results"]['score'].encode('utf8'))
 score = np.fromstring(score, dtype=np.float32)
 
-boxes = base64.b64decode(r.json()["results"]['boxes'].encode('utf8'))
-boxes = np.fromstring(boxes, dtype=np.float32)
-
 print('seg', seg)
 print('label', label)
 print('score', score)
-print('boxes', boxes)
 ```
 
 ### 查看代码
