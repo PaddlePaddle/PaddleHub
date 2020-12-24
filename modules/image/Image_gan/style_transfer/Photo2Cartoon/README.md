@@ -5,7 +5,7 @@
 ![](https://ai-studio-static-online.cdn.bcebos.com/8eff9a95bd6741beb3895f38eca39265f22c358c7d114c11b400bbbcd9c4cfc0)
 
 ## 效果展示
-![](https://ai-studio-static-online.cdn.bcebos.com/a4aaedc5ede449e282f0a1c1df05566b62737ddec98246a9b2d5cfeb0f005563)
+![](https://img-blog.csdnimg.cn/20201224164040624.jpg)
 
 ## API
 ```python
