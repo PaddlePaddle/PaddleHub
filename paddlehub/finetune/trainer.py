@@ -313,7 +313,7 @@ class Trainer(object):
                 print_msg += ' avg_loss={:.4f}'.format(avg_loss)
 
             for metric, value in sum_metrics.items():
-                avg_metrics[metric] = value / num_samples
+                avg_metrics[metric] = float(value) / num_samples
                 print_msg += ' avg_{}={:.4f}'.format(metric, avg_metrics[metric])
 
             logger.eval(print_msg)
