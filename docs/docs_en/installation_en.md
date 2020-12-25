@@ -18,7 +18,7 @@ pip install paddlepaddle-gpu==2.0.0rc
 Before installing the PaddleHub, install the PaddlePaddle deep learning framework first. For more installation instructions, refer to [PaddleQuickInstall](https://www.paddlepaddle.org.cn/install/quick/zh/2.0rc-windows-pip)
 
 ```shell
-pip install paddlehub==2.0.0b
+pip install paddlehub==2.0.0b1
 ```
 
 In addition to the above dependences, PaddleHub's pre-training models and pre-set datasets need to be downloaded through connecting to the server. Make sure that the computer can access the network. You can run PaddleHub offline if the relevant datasets and pre-set models are already available locally.
