@@ -1,6 +1,10 @@
 ## 模型概述
 
-solov2是基于'SOLOv2: Dynamic, Faster and Stronger'实现的快速实例分割的模型。
+solov2是基于'SOLOv2: Dynamic, Faster and Stronger'实现的快速实例分割的模型。该模型基于SOLOV1, 并且针对mask的检测效果和运行效率进行改进，在实例分割任务中表现优秀。相对语义分割，实例分割需要标注出图上同一物体的不同个体。solov2实例分割效果如下：
+
+<div align="center">
+<img src="./docs/imgs/instance_segmentation.png"  width = "642" height = "400" />
+</div>
 
 
 ## API
@@ -25,10 +29,10 @@ def predict(self,
 **返回**
 
 * res (dict): 识别结果，关键字有 'segm', 'label', 'score','image', 对应的取值为：
-  * segm (np.ndarray): 示例分割结果；
+  * segm (np.ndarray): 实例分割结果,取值为0或1。0表示背景，1为实例；
   * label (list): 实例分割结果类别id；
   * score (list):实例分割结果类别得分；
-  * image (np.ndarray): 实例分割结果图片。
+  * image (np.ndarray): 实例分割效果展示图片。
 
 
 ## 代码示例
@@ -39,8 +43,7 @@ import paddlehub as hub
 
 img = cv2.imread('/PATH/TO/IMAGE')
 model = hub.Module(name='solov2', use_gpu=False)
-output = model.predict(image=img,visualization=True)
-print(output['segm'].shape)
+output = model.predict(image=img,visualization=False)
 ```
 
 ## 服务部署
@@ -106,7 +109,7 @@ print('score', score)
 
 ### 查看代码
 
-https://github.com/Epiphqny/SOLOv2
+https://github.com/PaddlePaddle/PaddleDetection
 
 
 ### 依赖

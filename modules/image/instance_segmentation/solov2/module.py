@@ -106,7 +106,7 @@ class Detector(object):
 
 @moduleinfo(
     name="solov2",
-    type="CV/object_detection",
+    type="CV/instance_segmentation",
     author="paddlepaddle",
     author_email="",
     summary="solov2 is a detection model, this module is trained with COCO dataset.",
@@ -163,8 +163,6 @@ class DetectorSOLOv2(Detector):
             name = str(time.time()) + '.png'
             save_path = os.path.join(save_dir, name)
             image.save(save_path)
-        img = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-        output['image'] = img
         return output
 
     @serving
@@ -178,5 +176,4 @@ class DetectorSOLOv2(Detector):
         final['segm'] = base64.b64encode(results['segm']).decode('utf8')
         final['label'] = base64.b64encode(results['label']).decode('utf8')
         final['score'] = base64.b64encode(results['score']).decode('utf8')
-        final['image'] = D.cv2_to_base64(results['image'])
         return final
