@@ -3,7 +3,7 @@
 solov2是基于'SOLOv2: Dynamic, Faster and Stronger'实现的快速实例分割的模型。该模型基于SOLOV1, 并且针对mask的检测效果和运行效率进行改进，在实例分割任务中表现优秀。相对语义分割，实例分割需要标注出图上同一物体的不同个体。solov2实例分割效果如下：
 
 <div align="center">
-<img src="./docs/imgs/instance_segmentation.png"  width = "642" height = "400" />
+<img src="example.png"  width = "642" height = "400" />
 </div>
 
 
@@ -28,11 +28,10 @@ def predict(self,
 
 **返回**
 
-* res (dict): 识别结果，关键字有 'segm', 'label', 'score','image', 对应的取值为：
+* res (dict): 识别结果，关键字有 'segm', 'label', 'score'对应的取值为：
   * segm (np.ndarray): 实例分割结果,取值为0或1。0表示背景，1为实例；
   * label (list): 实例分割结果类别id；
   * score (list):实例分割结果类别得分；
-  * image (np.ndarray): 实例分割效果展示图片。
 
 
 ## 代码示例
