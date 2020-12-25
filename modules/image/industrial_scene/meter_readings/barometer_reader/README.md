@@ -1,11 +1,11 @@
 ## 模型概述
 
-meter_reader是基于PaddleX实现对传统机械式指针表计的检测与自动读数功能的模型。该模型首先使用目标检测模型检测出图像中的表计，随后使用语义分割模型将各表计的指针和刻度分割，最后根据指针的相对位置和预知的量程计算出各表计的读数。
+barometer_reader是基于PaddleX实现对传统机械式指针表计的检测与自动读数功能的模型。该模型首先使用目标检测模型检测出图像中的表计，随后使用语义分割模型将各表计的指针和刻度分割，最后根据指针的相对位置和预知的量程计算出各表计的读数。
 
 ## 命令行预测
 
 ```
-$ hub run meter_reader --meter_reader "/PATH/TO/IMAGE"
+$ hub run barometer_reader --input_path "/PATH/TO/IMAGE"
 
 ```
 
@@ -49,7 +49,7 @@ def predict(self,
 import cv2
 import paddlehub as hub
 
-model = hub.Module(name='meter_reader')
+model = hub.Module(name='barometer_reader')
 res = model.predict('/PATH/TO/IMAGE')
 print(res)
 ```
@@ -63,7 +63,7 @@ PaddleHub Serving可以部署一个表计识别的在线服务。
 运行启动命令：
 
 ```shell
-$ hub serving start -m meter_reader
+$ hub serving start -m barometer_reader
 ```
 
 默认端口号为8866。
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # 指定content-type
     headers = {"Content-type": "application/json"}
     # 发送HTTP请求
-    url = "http://127.0.0.1:8866/predict/meter_reader"
+    url = "http://127.0.0.1:8866/predict/barometer_reader"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
     # 打印预测结果
     print(r.json())

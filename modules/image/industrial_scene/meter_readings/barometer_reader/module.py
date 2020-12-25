@@ -44,13 +44,13 @@ def cv2_to_base64(image: np.ndarray):
     return base64.b64encode(data.tostring()).decode('utf8')
 
 
-@moduleinfo(name="meter_reader",
+@moduleinfo(name="barometer_reader",
             type="CV/image_editing",
             author="paddlepaddle",
             author_email="",
             summary="meter_reader implements the detection and automatic reading of traditional mechanical pointer meters based on Meter detection and  pointer segmentation.",
             version="1.0.0")
-class MeterReader(nn.Layer):
+class BarometerReader(nn.Layer):
     def __init__(self):
         super(MeterReader, self).__init__()
         self.detector = pdx.load_model(os.path.join(self.directory, 'meter_det_inference_model'))
