@@ -52,7 +52,7 @@ def cv2_to_base64(image: np.ndarray):
             version="1.0.0")
 class BarometerReader(nn.Layer):
     def __init__(self):
-        super(MeterReader, self).__init__()
+        super(BarometerReader, self).__init__()
         self.detector = pdx.load_model(os.path.join(self.directory, 'meter_det_inference_model'))
         self.segmenter = pdx.load_model(os.path.join(self.directory, 'meter_seg_inference_model'))
         self.seg_transform = T.Compose([T.Normalize()])
