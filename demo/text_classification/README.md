@@ -127,8 +127,8 @@ data = [
 label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
-    directory='/mnt/zhangxuefei/program-paddle/PaddleHub/modules/text/language_model/ernie_tiny',
-    version='2.0.0',
+    name='ernie_tiny',
+    version='2.0.1',
     task='seq-cls',
     load_checkpoint='./test_ernie_text_cls/best_model/model.pdparams',
     label_map=label_map)
@@ -139,8 +139,3 @@ for idx, text in enumerate(data):
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
 
-### 依赖
-
-paddlepaddle >= 2.0.0rc
-
-paddlehub >= 2.0.0
