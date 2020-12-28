@@ -21,7 +21,7 @@ import io
 import json
 import os
 import six
-from typing import List
+from typing import List, Tuple
 
 import paddle
 import paddle.nn as nn
@@ -347,40 +347,101 @@ class PretrainedModel(nn.Layer):
         paddle.save(self.state_dict(), file_name)
 
 
-class EmbeddingServing(object):
+class TextServing(object):
+    """
+    A base class for text model which supports serving.
+    """
     @serving
-    def get_embedding(self, texts, use_gpu=False):
-        if self.task is not None:
-            raise RuntimeError("The get_embedding method is only valid when task is None, but got task %s" % self.task)
+    def predict_method(
+            self,
+            data: List[List[str]],
+            max_seq_len: int = 128,
+            batch_size: int = 1,
+            use_gpu: bool = False
+    ):
+        """
+        Run predict method as a service.
+        Serving as a task which is specified from serving config.
+        Tasks supported:
+        1. seq-cls: sequence classification;
+        2. token-cls: sequence labeling;
+        3. None: embedding.
 
-        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
+        Args:
+            data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
+            max_seq_len (:obj:`int`, `optional`, defaults to 128):
+                If set to a number, will limit the total sequence returned so that it has a maximum length.
+            batch_size(obj:`int`, defaults to 1): The number of batch.
+            use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
 
-        tokenizer = self.get_tokenizer()
-        results = []
-        for text in texts:
-            if len(text) == 1:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=None, pad_to_max_seq_len=False)
-            elif len(text) == 2:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], pad_to_max_seq_len=False)
-            else:
-                raise RuntimeError(
-                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
+        Returns:
+            results(obj:`list`): All the predictions labels.
+        """
+        if self.task in self._tasks_supported:  # cls service
+            if self.label_map:
+                # compatible with json decoding label_map
+                self.label_map = {int(k): v for k, v in self.label_map.items()}
+            results = self.predict(data, max_seq_len, batch_size, use_gpu)
 
-            input_ids = paddle.to_tensor(encoded_inputs['input_ids']).unsqueeze(0)
-            segment_ids = paddle.to_tensor(encoded_inputs['segment_ids']).unsqueeze(0)
-            sequence_output, pooled_output = self(input_ids, segment_ids)
+            if self.task == 'token-cls':
+                # remove labels of [CLS] token and pad tokens
+                results = [
+                    token_labels[1:len(data[i][0])+1] for i, token_labels in enumerate(results)
+                ]
+            return results
+        elif self.task is None:                 # embedding service
+            token_results, sentence_results = self.get_embedding(data, max_seq_len, batch_size, use_gpu)
+            token_results = [
+                token_embeddings[1:len(data[i][0])+1] for i, token_embeddings in enumerate(token_results)
+            ]
+            return token_results, sentence_results
+        else:                                   # unknown service
+            logger.error(
+                f'Unknown task {self.task}, current tasks supported:\n'
+                '1. seq-cls: sequence classification service;\n'
+                '2. token-cls: sequence labeling service;\n'
+                '3. None: embedding service'
+            )
+        return
 
-            sequence_output = sequence_output.squeeze(0)
-            pooled_output = pooled_output.squeeze(0)
-            results.append((sequence_output.numpy().tolist(), pooled_output.numpy().tolist()))
-        return results
 
-
-class TransformerModule(RunModule, EmbeddingServing):
+class TransformerModule(RunModule, TextServing):
+    """
+    The base class for Transformer models.
+    """
     _tasks_supported = [
         'seq-cls',
         'token-cls',
     ]
+
+    def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int):
+        def _parse_batch(batch):
+            input_ids = [entry[0] for entry in batch]
+            segment_ids = [entry[1] for entry in batch]
+            return input_ids, segment_ids
+
+        tokenizer = self.get_tokenizer()
+        examples = []
+        for text in data:
+            if len(text) == 1:
+                encoded_inputs = tokenizer.encode(text[0], text_pair=None, max_seq_len=max_seq_len)
+            elif len(text) == 2:
+                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], max_seq_len=max_seq_len)
+            else:
+                raise RuntimeError(
+                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
+            examples.append((encoded_inputs['input_ids'], encoded_inputs['segment_ids']))
+
+        # Seperates data into some batches.
+        one_batch = []
+        for example in examples:
+            one_batch.append(example)
+            if len(one_batch) == batch_size:
+                yield _parse_batch(one_batch)
+                one_batch = []
+        if one_batch:
+            # The last batch whose size is less than the config batch_size setting.
+            yield _parse_batch(one_batch)
 
     def training_step(self, batch: List[paddle.Tensor], batch_idx: int):
         """
@@ -408,12 +469,41 @@ class TransformerModule(RunModule, EmbeddingServing):
         predictions, avg_loss, acc = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
         return {'metrics': {'acc': acc}}
 
-    def predict(self, data, max_seq_len=128, batch_size=1, use_gpu=False):
+    def get_embedding(self, data: List[List[str]], max_seq_len=128, batch_size=1, use_gpu=False):
+        """
+        Get token level embeddings and sentence level embeddings from model.
+        Args:
+            data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
+            max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
+                If set to a number, will limit the total sequence returned so that it has a maximum length.
+            batch_size(obj:`int`, defaults to 1): The number of batch.
+            use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
+
+        Returns:
+            results(obj:`list`): All the tokens and sentences embeddings.
+        """
+        if self.task is not None:
+            raise RuntimeError("The get_embedding method is only valid when task is None, but got task %s" % self.task)
+
+        return self.predict(
+            data=data,
+            max_seq_len=max_seq_len,
+            batch_size=batch_size,
+            use_gpu=use_gpu
+        )
+
+    def predict(
+            self,
+            data: List[List[str]],
+            max_seq_len: int = 128,
+            batch_size: int = 1,
+            use_gpu: bool = False
+    ):
         """
         Predicts the data labels.
 
         Args:
-            data (obj:`List(str)`): The processed data whose each element is the raw text.
+            data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
             max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
                 If set to a number, will limit the total sequence returned so that it has a maximum length.
             batch_size(obj:`int`, defaults to 1): The number of batch.
@@ -422,45 +512,22 @@ class TransformerModule(RunModule, EmbeddingServing):
         Returns:
             results(obj:`list`): All the predictions labels.
         """
-        if self.task not in self._tasks_supported:
-            raise RuntimeError("The predict method supports task in {}, but got task {}.".format(
-                self._tasks_supported, self.task))
+        if self.task not in self._tasks_supported \
+                and self.task is not None:      # None for getting embedding
+            raise RuntimeError(
+                f'Unknown task {self.task}, current tasks supported:\n'
+                '1. seq-cls: sequence classification;\n'
+                '2. token-cls: sequence labeling;\n'
+                '3. None: embedding'
+            )
 
         paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
-        tokenizer = self.get_tokenizer()
 
-        examples = []
-        for text in data:
-            if len(text) == 1:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=None, max_seq_len=max_seq_len)
-            elif len(text) == 2:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], max_seq_len=max_seq_len)
-            else:
-                raise RuntimeError(
-                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
-            examples.append((encoded_inputs['input_ids'], encoded_inputs['segment_ids']))
-
-        def _batchify_fn(batch):
-            input_ids = [entry[0] for entry in batch]
-            segment_ids = [entry[1] for entry in batch]
-            return input_ids, segment_ids
-
-        # Seperates data into some batches.
-        batches = []
-        one_batch = []
-        for example in examples:
-            one_batch.append(example)
-            if len(one_batch) == batch_size:
-                batches.append(one_batch)
-                one_batch = []
-        if one_batch:
-            # The last batch whose size is less than the config batch_size setting.
-            batches.append(one_batch)
-
+        batches = self._batchify(data, max_seq_len, batch_size)
         results = []
         self.eval()
         for batch in batches:
-            input_ids, segment_ids = _batchify_fn(batch)
+            input_ids, segment_ids = batch
             input_ids = paddle.to_tensor(input_ids)
             segment_ids = paddle.to_tensor(segment_ids)
 
@@ -476,5 +543,11 @@ class TransformerModule(RunModule, EmbeddingServing):
                 batch_ids = batch_ids.tolist()
                 token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
                 results.extend(token_labels)
+            elif self.task == None:
+                if not results:
+                    results = [[], []]
+                sequence_output, pooled_output = self(input_ids, segment_ids)
+                results[0].extend(sequence_output.numpy().tolist())  # token-level embedding
+                results[1].extend(pooled_output.numpy().tolist())    # sentence-level embedding
 
         return results
