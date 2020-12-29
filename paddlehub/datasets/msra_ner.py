@@ -18,12 +18,9 @@ import os
 
 from paddlehub.env import DATA_HOME
 from paddlehub.utils.download import download_data
-from paddlehub.datasets.base_nlp_dataset import SeqLabelingDataset
+from paddlehub.datasets.base_nlp_dataset import SeqLabelingDataset, ChunkScheme
 from paddlehub.text.bert_tokenizer import BertTokenizer
 from paddlehub.text.tokenizer import CustomTokenizer
-
-MSRA_NER_CHUNK_SCHEME = "IOB"
-MSRA_NER_LABEL_LIST = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
 
 
 @download_data(url="https://bj.bcebos.com/paddlehub-dataset/msra_ner.tar.gz")
@@ -39,11 +36,13 @@ class MSRA_NER(SeqLabelingDataset):
             self,
             tokenizer: Union[BertTokenizer, CustomTokenizer],
             max_seq_len: int = 128,
-            ignore_label: int = -100,
             mode: str = 'train',
-
     ):
         base_path = os.path.join(DATA_HOME, "msra_ner")
+
+        label_list = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
+        chunk_scheme = ChunkScheme.IOB
+
         if mode == 'train':
             data_file = 'train.tsv'
         elif mode == 'test':
@@ -53,11 +52,11 @@ class MSRA_NER(SeqLabelingDataset):
         super().__init__(
             base_path=base_path,
             tokenizer=tokenizer,
+            chunk_scheme=chunk_scheme,
             max_seq_len=max_seq_len,
             mode=mode,
             data_file=data_file,
             label_file=None,
-            label_list=MSRA_NER_LABEL_LIST,
-            ignore_label=ignore_label,
+            label_list=label_list,
             is_file_with_header=True,
         )

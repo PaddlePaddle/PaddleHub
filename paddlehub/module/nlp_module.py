@@ -484,9 +484,3 @@ class TransformerModule(RunModule, EmbeddingServing):
                 results.extend(token_labels)
 
         return results
-
-    def get_tokenizer(self):
-        """
-        Gets the tokenizer that is customized for this module.
-        """
-        return self.tokenizer

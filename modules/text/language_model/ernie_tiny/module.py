@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Dict
 import os
 import math
 
@@ -23,6 +24,7 @@ from paddlenlp.transformers.ernie.tokenizer import ErnieTinyTokenizer
 from paddlenlp.metrics import ChunkEvaluator
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.nlp_module import TransformerModule
+from paddlehub.datasets.base_nlp_dataset import ChunkScheme
 from paddlehub.utils.log import logger
 
 
@@ -41,12 +43,11 @@ class ErnieTiny(nn.Layer):
 
     def __init__(
             self,
-            task=None,
-            load_checkpoint=None,
-            label_map=None,
-            num_classes=2,
-            ignore_label=-100,
-            chunk_scheme="IOB",
+            task: str = None,
+            load_checkpoint: str = None,
+            label_map: Dict = None,
+            num_classes: int = 2,
+            chunk_scheme: ChunkScheme = ChunkScheme.IOB,
             **kwargs,
     ):
         super(ErnieTiny, self).__init__()
@@ -68,10 +69,10 @@ class ErnieTiny(nn.Layer):
             self.metric = paddle.metric.Accuracy()
         elif task == 'token-cls':
             self.model = ErnieForTokenClassification.from_pretrained(pretrained_model_name_or_path='ernie-tiny', num_classes=self.num_classes, **kwargs)
-            self.criterion = paddle.nn.loss.CrossEntropyLoss(ignore_index=ignore_label)
+            self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = ChunkEvaluator(
                 num_chunk_types=int(math.ceil((self.num_classes+1)/2.0)),
-                chunk_scheme=chunk_scheme,
+                chunk_scheme=chunk_scheme.value,
             )
         elif task is None:
             self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-tiny', **kwargs)
@@ -80,7 +81,6 @@ class ErnieTiny(nn.Layer):
                 task, self._tasks_supported))
 
         self.task = task
-        self.tokenizer = ErnieTinyTokenizer.from_pretrained('ernie-tiny')
 
         if load_checkpoint is not None and os.path.isfile(load_checkpoint):
             state_dict = paddle.load(load_checkpoint)
@@ -115,3 +115,10 @@ class ErnieTiny(nn.Layer):
             sequence_output, pooled_output = result
             return sequence_output, pooled_output
 
+    @staticmethod
+    def get_tokenizer(*args, **kwargs):
+        """
+        Gets the tokenizer that is customized for this module.
+        """
+        return ErnieTinyTokenizer.from_pretrained(
+            pretrained_model_name_or_path='ernie-tiny', *args, **kwargs)
