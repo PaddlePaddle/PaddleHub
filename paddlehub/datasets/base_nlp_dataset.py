@@ -246,15 +246,9 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
     def __getitem__(self, idx):
         record = self.records[idx]
         if 'label' in record.keys():
-            if isinstance(self.tokenizer, BertTokenizer):
-                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'], dtype=np.int64)
-            elif isinstance(self.tokenizer, CustomTokenizer):
-                return np.array(record['text']), np.array(record['seq_len']), np.array(record['label'], dtype=np.int64)
+            return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'], dtype=np.int64)
         else:
-            if isinstance(self.tokenizer, BertTokenizer):
-                return np.array(record['input_ids']), np.array(record['segment_ids'])
-            elif isinstance(self.tokenizer, CustomTokenizer):
-                return np.array(record['text']), np.array(record['seq_len'])
+            return np.array(record['input_ids']), np.array(record['segment_ids'])
 
     def __len__(self):
         return len(self.records)
@@ -271,6 +265,7 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
                  label_list: list = None,
                  split_char="\002",
                  no_entity_label="O",
+                 ignore_label=-100,
                  is_file_with_header: bool = False):
         super(SeqLabelingDataset, self).__init__(
             base_path=base_path,
@@ -283,6 +278,7 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
 
         self.no_entity_label = no_entity_label
         self.split_char = split_char
+        self.ignore_label = ignore_label
 
         self.examples = self._read_file(self.data_file, is_file_with_header)
         self.records = self._convert_examples_to_records(self.examples)
@@ -327,8 +323,7 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
                 continue
             if labels:
                 record["label"] = []
-                tokens_with_specical_token = self.tokenizer.decode(
-                    record, only_convert_to_tokens=True)
+                tokens_with_specical_token = self.tokenizer.convert_ids_to_tokens(record['input_ids'])
                 tokens_index = 0
                 for token in tokens_with_specical_token:
                     if tokens_index < len(
@@ -336,6 +331,8 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
                         record["label"].append(
                             self.label_list.index(labels[tokens_index]))
                         tokens_index += 1
+                    elif token in [self.tokenizer.pad_token]:
+                        record["label"].append(self.ignore_label)  # label of special token
                     else:
                         record["label"].append(
                             self.label_list.index(self.no_entity_label))
@@ -351,7 +348,7 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
             ret_tokens = []
             ret_labels = []
             for token, label in zip(tokens, labels):
-                sub_token = self.tokenizer.tokenize(token)
+                sub_token = self.tokenizer(token)
                 if len(sub_token) == 0:
                     continue
                 ret_tokens.extend(sub_token)
@@ -370,7 +367,7 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
         else:
             ret_tokens = []
             for token in tokens:
-                sub_token = self.tokenizer.tokenize(token)
+                sub_token = self.tokenizer(token)
                 if len(sub_token) == 0:
                     continue
                 ret_tokens.extend(sub_token)
@@ -381,15 +378,9 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
     def __getitem__(self, idx):
         record = self.records[idx]
         if 'label' in record.keys():
-            if isinstance(self.tokenizer, BertTokenizer):
-                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'], dtype=np.int64)
-            else:  # TODO(chenxiaojie): add CustomTokenizer supported
-                raise NotImplementedError
+            return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['seq_len']), np.array(record['label'], dtype=np.int64)
         else:
-            if isinstance(self.tokenizer, BertTokenizer):
-                return np.array(record['input_ids']), np.array(record['segment_ids'])
-            else:  # TODO(chenxiaojie): add CustomTokenizer supported
-                raise NotImplementedError
+            return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['seq_len'])
 
     def __len__(self):
         return len(self.records)

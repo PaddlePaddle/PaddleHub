@@ -16,4 +16,4 @@ from paddlehub.datasets.canvas import Canvas
 from paddlehub.datasets.flowers import Flowers
 from paddlehub.datasets.minicoco import MiniCOCO
 from paddlehub.datasets.chnsenticorp import ChnSentiCorp
-from paddlehub.datasets.msra_ner import MSRA_NER
+from paddlehub.datasets.msra_ner import MSRA_NER, MSRA_NER_CHUNK_SCHEME, MSRA_NER_LABEL_LIST

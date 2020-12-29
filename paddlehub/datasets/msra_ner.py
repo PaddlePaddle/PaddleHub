@@ -22,6 +22,9 @@ from paddlehub.datasets.base_nlp_dataset import SeqLabelingDataset
 from paddlehub.text.bert_tokenizer import BertTokenizer
 from paddlehub.text.tokenizer import CustomTokenizer
 
+MSRA_NER_CHUNK_SCHEME = "IOB"
+MSRA_NER_LABEL_LIST = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
+
 
 @download_data(url="https://bj.bcebos.com/paddlehub-dataset/msra_ner.tar.gz")
 class MSRA_NER(SeqLabelingDataset):
@@ -31,7 +34,15 @@ class MSRA_NER(SeqLabelingDataset):
     for research purposes.  For more information please refer to
     https://www.microsoft.com/en-us/download/details.aspx?id=52531
     """
-    def __init__(self, tokenizer: Union[BertTokenizer, CustomTokenizer], max_seq_len: int = 128, mode: str = 'train'):
+
+    def __init__(
+            self,
+            tokenizer: Union[BertTokenizer, CustomTokenizer],
+            max_seq_len: int = 128,
+            ignore_label: int = -100,
+            mode: str = 'train',
+
+    ):
         base_path = os.path.join(DATA_HOME, "msra_ner")
         if mode == 'train':
             data_file = 'train.tsv'
@@ -46,6 +57,7 @@ class MSRA_NER(SeqLabelingDataset):
             mode=mode,
             data_file=data_file,
             label_file=None,
-            label_list=["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"],
+            label_list=MSRA_NER_LABEL_LIST,
+            ignore_label=ignore_label,
             is_file_with_header=True,
         )
