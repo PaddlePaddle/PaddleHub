@@ -11,19 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Dict
 import os
+import math
 
-from paddle.dataset.common import DATA_HOME
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
 
-from paddlehub import BertTokenizer
 from paddlenlp.transformers.ernie.modeling import ErnieModel, ErnieForSequenceClassification, ErnieForTokenClassification
+from paddlenlp.transformers.ernie.tokenizer import ErnieTokenizer
+from paddlenlp.metrics import ChunkEvaluator
+from paddlehub.datasets.base_nlp_dataset import ChunkScheme
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.nlp_module import TransformerModule
 from paddlehub.utils.log import logger
-from paddlehub.utils.utils import download
 
 
 @moduleinfo(
@@ -42,14 +44,16 @@ class ErnieV2(nn.Layer):
 
     def __init__(
             self,
-            task=None,
-            load_checkpoint=None,
-            label_map=None,
-            num_classes=2,
+            task: str = None,
+            load_checkpoint: str = None,
+            label_map: Dict = None,
+            num_classes: int = 2,
+            chunk_scheme: ChunkScheme = ChunkScheme.IOB,
             **kwargs,
     ):
         super(ErnieV2, self).__init__()
         if label_map:
+            self.label_map = label_map
             self.num_classes = len(label_map)
         else:
             self.num_classes = num_classes
@@ -75,7 +79,10 @@ class ErnieV2(nn.Layer):
                 **kwargs
             )
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
-            self.metric = paddle.metric.Accuracy()
+            self.metric = ChunkEvaluator(
+                num_chunk_types=int(math.ceil((self.num_classes-1)/2.0)),
+                chunk_scheme=chunk_scheme.value,
+            )
         elif task is None:
             self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-2.0-en', **kwargs)
         else:
@@ -83,14 +90,13 @@ class ErnieV2(nn.Layer):
                 task, self._tasks_supported))
 
         self.task = task
-        self.label_map = label_map
 
         if load_checkpoint is not None and os.path.isfile(load_checkpoint):
             state_dict = paddle.load(load_checkpoint)
             self.set_state_dict(state_dict)
             logger.info('Loaded parameters from %s' % os.path.abspath(load_checkpoint))
 
-    def forward(self, input_ids, token_type_ids=None, position_ids=None, attention_mask=None, labels=None):
+    def forward(self, input_ids, token_type_ids=None, position_ids=None, attention_mask=None, seq_lengths=None, labels=None):
         result = self.model(input_ids, token_type_ids, position_ids, attention_mask)
         if self.task == 'seq-cls':
             logits = result
@@ -99,39 +105,29 @@ class ErnieV2(nn.Layer):
                 loss = self.criterion(logits, labels)
                 correct = self.metric.compute(probs, labels)
                 acc = self.metric.update(correct)
-                return probs, loss, acc
+                return probs, loss, {'acc': acc}
             return probs
         elif self.task == 'token-cls':
             logits = result
-            token_level_probs = F.softmax(logits, axis=2)
+            token_level_probs = F.softmax(logits, axis=-1)
+            preds = token_level_probs.argmax(axis=-1)
             if labels is not None:
-                labels = paddle.to_tensor(labels).unsqueeze(-1)
-                loss = self.criterion(logits, labels)
-                correct = self.metric.compute(token_level_probs, labels)
-                acc = self.metric.update(correct)
-                return token_level_probs, loss, acc
+                loss = self.criterion(logits, labels.unsqueeze(-1))
+                num_infer_chunks, num_label_chunks, num_correct_chunks = \
+                    self.metric.compute(None, seq_lengths, preds, labels)
+                self.metric.update(
+                    num_infer_chunks.numpy(), num_label_chunks.numpy(), num_correct_chunks.numpy())
+                _, _, f1_score = map(float, self.metric.accumulate())
+                return token_level_probs, loss, {'f1_score': f1_score}
             return token_level_probs
         else:
             sequence_output, pooled_output = result
             return sequence_output, pooled_output
 
-    def get_vocab_path(self):
-        """
-        Gets the path of the module vocabulary path.
-        """
-        save_path = os.path.join(DATA_HOME, 'ernie_v2_eng_base', 'vocab.txt')
-        if not os.path.exists(save_path) or not os.path.isfile(save_path):
-            url = "https://paddlenlp.bj.bcebos.com/models/transformers/ernie_v2_base/vocab.txt"
-            download(url, os.path.join(DATA_HOME, 'ernie_v2_eng_base'))
-        return save_path
-
-    def get_tokenizer(self, tokenize_chinese_chars=True):
+    @staticmethod
+    def get_tokenizer(*args, **kwargs):
         """
         Gets the tokenizer that is customized for this module.
-        Args:
-            tokenize_chinese_chars (:obj: bool , defaults to :obj: True):
-                Whether to tokenize chinese characters or not.
-        Returns:
-            tokenizer (:obj:BertTokenizer) : The tokenizer which was customized for this module.
         """
-        return BertTokenizer(tokenize_chinese_chars=tokenize_chinese_chars, vocab_file=self.get_vocab_path())
+        return ErnieTokenizer.from_pretrained(
+            pretrained_model_name_or_path='ernie-2.0-en', *args, **kwargs)
