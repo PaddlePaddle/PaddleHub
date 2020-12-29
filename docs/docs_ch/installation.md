@@ -18,7 +18,7 @@ pip install paddlepaddle-gpu==2.0.0rc
 在安装PaddleHub之前，请先安装PaddlePaddle深度学习框架，更多安装说明请查阅[飞桨快速安装](https://www.paddlepaddle.org.cn/install/quick/zh/2.0rc-windows-pip)
 
 ```shell
-pip install paddlehub==2.0.0b
+pip install paddlehub==2.0.0b2
 ```
 
 除上述依赖外，PaddleHub的预训练模型和预置数据集需要连接服务端进行下载，请确保机器可以正常访问网络。若本地已存在相关的数据集和预训练模型，则可以离线运行PaddleHub。
