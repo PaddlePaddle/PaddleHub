@@ -32,11 +32,16 @@ args = parser.parse_args()
 
 
 if __name__ == '__main__':
+    label_list = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
+    label_map = {
+        idx: label for idx, label in enumerate(label_list)
+    }
+
     model = hub.Module(
         name='ernie_tiny',
         version='2.0.1',
         task='token-cls',
-        num_classes=7,      # Determined by number of classes in MSRA_NER dataset. Specify 'num_classes' and 'chunk_sheme' when using other dataset.
+        label_map=label_map,   # Required for token classification task
     )
 
     tokenizer = model.get_tokenizer()
