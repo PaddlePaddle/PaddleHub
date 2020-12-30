@@ -49,7 +49,7 @@ result = model.Segmentation(
 ```
 
 ## 查看代码
-https://github.com/clovaai/ext_portrait_segmentatio
+https://github.com/clovaai/ext_portrait_segmentation
 
 ## 依赖
 paddlepaddle >= 2.0.0rc0  
