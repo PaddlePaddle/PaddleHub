@@ -31,8 +31,16 @@ class MSRA_NER(SeqLabelingDataset):
     for research purposes.  For more information please refer to
     https://www.microsoft.com/en-us/download/details.aspx?id=52531
     """
-    def __init__(self, tokenizer: Union[BertTokenizer, CustomTokenizer], max_seq_len: int = 128, mode: str = 'train'):
+
+    def __init__(
+            self,
+            tokenizer: Union[BertTokenizer, CustomTokenizer],
+            max_seq_len: int = 128,
+            mode: str = 'train',
+    ):
         base_path = os.path.join(DATA_HOME, "msra_ner")
+        label_list = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
+
         if mode == 'train':
             data_file = 'train.tsv'
         elif mode == 'test':
@@ -46,6 +54,6 @@ class MSRA_NER(SeqLabelingDataset):
             mode=mode,
             data_file=data_file,
             label_file=None,
-            label_list=["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"],
+            label_list=label_list,
             is_file_with_header=True,
         )
