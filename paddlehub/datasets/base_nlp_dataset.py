@@ -289,6 +289,11 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
             label_file=label_file,
             label_list=label_list)
 
+        if not isinstance(chunk_scheme, ChunkScheme):
+            raise ValueError(
+                f"The 'chunk_scheme' must be one of ChunkScheme items. \n"
+                f"Available schemes: {[scheme for scheme in ChunkScheme]}")
+
         self.chunk_scheme = chunk_scheme.value
         self.no_entity_label = no_entity_label
         self.split_char = split_char
