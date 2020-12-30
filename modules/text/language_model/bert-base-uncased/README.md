@@ -123,12 +123,12 @@ $ hub serving start -m bert-base-uncased
 import requests
 import json
 
-# 指定用于预测的文本并生成字典{"text": [text_1, text_2, ... ]}
-text = [["今天是个好日子", "天气预报说今天要下雨"], ["这个宾馆比较陈旧了，特价的房间也很一般。总体来说一般"]]
-# 以key的方式指定text传入预测方法的时的参数，此例中为"texts"
-# 对应本地部署，则为module.get_embedding(texts=text)
-data = {"texts": text}
-# 发送post请求，content-type类型应指定json方式
+# 指定用于获取embedding的文本[[text_1], [text_2], ... ]}
+text = [["今天是个好日子"], ["天气预报说今天要下雨"]]
+# 以key的方式指定text传入预测方法的时的参数，此例中为"data"
+# 对应本地部署，则为module.get_embedding(data=text)
+data = {"data": text}
+# 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
 url = "http://10.12.121.132:8866/predict/bert-base-uncased"
 # 指定post请求的headers为application/json方式
 headers = {"Content-Type": "application/json"}
