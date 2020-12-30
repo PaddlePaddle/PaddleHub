@@ -22,7 +22,6 @@ import paddle.nn.functional as F
 from paddlenlp.transformers.ernie.modeling import ErnieModel, ErnieForSequenceClassification, ErnieForTokenClassification
 from paddlenlp.transformers.ernie.tokenizer import ErnieTokenizer
 from paddlenlp.metrics import ChunkEvaluator
-from paddlehub.datasets.base_nlp_dataset import ChunkScheme
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.nlp_module import TransformerModule
 from paddlehub.utils.log import logger
@@ -48,7 +47,6 @@ class Ernie(nn.Layer):
             load_checkpoint: str = None,
             label_map: Dict = None,
             num_classes: int = 2,
-            chunk_scheme: ChunkScheme = ChunkScheme.IOB,
             **kwargs,
     ):
         super(Ernie, self).__init__()
@@ -72,8 +70,7 @@ class Ernie(nn.Layer):
             self.model = ErnieForTokenClassification.from_pretrained(pretrained_model_name_or_path='ernie-1.0', num_classes=self.num_classes, **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = ChunkEvaluator(
-                num_chunk_types=int(math.ceil((self.num_classes-1)/2.0)),
-                chunk_scheme=chunk_scheme.value,
+                label_list=[self.label_map[i] for i in sorted(self.label_map.keys())]
             )
         elif task is None:
             self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-1.0', **kwargs)

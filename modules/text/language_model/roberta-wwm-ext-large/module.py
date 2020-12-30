@@ -22,7 +22,6 @@ import paddle.nn.functional as F
 from paddlenlp.transformers.roberta.modeling import RobertaForSequenceClassification, RobertaForTokenClassification, RobertaModel
 from paddlenlp.transformers.roberta.tokenizer import RobertaTokenizer
 from paddlenlp.metrics import ChunkEvaluator
-from paddlehub.datasets.base_nlp_dataset import ChunkScheme
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.nlp_module import TransformerModule
 from paddlehub.utils.log import logger
@@ -49,7 +48,6 @@ class Roberta(nn.Layer):
             load_checkpoint: str = None,
             label_map: Dict = None,
             num_classes: int = 2,
-            chunk_scheme: ChunkScheme = ChunkScheme.IOB,
             **kwargs,
     ):
         super(Roberta, self).__init__()
@@ -81,8 +79,7 @@ class Roberta(nn.Layer):
             )
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = ChunkEvaluator(
-                num_chunk_types=int(math.ceil((self.num_classes-1)/2.0)),
-                chunk_scheme=chunk_scheme.value,
+                label_list=[self.label_map[i] for i in sorted(self.label_map.keys())]
             )
         elif task is None:
             self.model = RobertaModel.from_pretrained(pretrained_model_name_or_path='roberta-wwm-ext-large', **kwargs)

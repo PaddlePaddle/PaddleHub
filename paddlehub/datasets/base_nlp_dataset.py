@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Dict, List, Optional, Union, Tuple
-from enum import Enum
 import csv
 import io
 import os
@@ -255,17 +254,6 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
         return len(self.records)
 
 
-class ChunkScheme(Enum):
-    """
-    Indicate the tagging schemes used in SeqLabelingDataset.
-    The value must be IOB, IOE, IOBES or plain.
-    """
-    IOB = 'IOB'
-    IOE = 'IOE'
-    IOBES = 'IOBES'
-    plain = 'plain'
-
-
 class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
     def __init__(self,
                  base_path: str,
@@ -278,7 +266,6 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
                  split_char: str ="\002",
                  no_entity_label: str = "O",
                  ignore_label: int = -100,
-                 chunk_scheme: ChunkScheme = ChunkScheme.IOB,
                  is_file_with_header: bool = False):
         super(SeqLabelingDataset, self).__init__(
             base_path=base_path,
@@ -289,12 +276,6 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
             label_file=label_file,
             label_list=label_list)
 
-        if not isinstance(chunk_scheme, ChunkScheme):
-            raise ValueError(
-                f"The 'chunk_scheme' must be one of ChunkScheme items. \n"
-                f"Available schemes: {[scheme for scheme in ChunkScheme]}")
-
-        self.chunk_scheme = chunk_scheme.value
         self.no_entity_label = no_entity_label
         self.split_char = split_char
         self.ignore_label = ignore_label
