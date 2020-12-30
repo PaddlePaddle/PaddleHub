@@ -56,7 +56,7 @@ def predict(
 
 ```python
 def get_embedding(
-    texts,
+    data,
     max_seq_len=128,
     batch_size=1,
     use_gpu=False
@@ -67,7 +67,7 @@ def get_embedding(
 
 **参数**
 
-* `texts`：输入文本列表，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。
+* `data`：输入文本列表，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。
 * `max_seq_len`：模型处理文本的最大长度。
 * `batch_size`：模型批处理大小。
 * `use_gpu`：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
