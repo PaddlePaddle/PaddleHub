@@ -6,8 +6,6 @@ import numpy as np
 from paddle.nn import Layer
 from paddlehub.module.module import moduleinfo
 
-from SINet_Portrait_Segmentation.model import SINet
-
 @moduleinfo(
     name="SINet_Portrait_Segmentation",  # 模型名称
     type="CV/semantic_segmentation",  # 模型类型
@@ -20,17 +18,11 @@ class SINet_Portrait_Segmentation(Layer):
     # 初始化函数
     def __init__(self, name=None, directory=None):
         super(SINet_Portrait_Segmentation, self).__init__()
-        # 模型配置
-        config = [[[3, 1], [5, 1]], [[3, 1], [3, 1]],
-              [[3, 1], [5, 1]], [[3, 1], [3, 1]], [[5, 1], [3, 2]], [[5, 2], [3, 4]],
-              [[3, 1], [3, 1]], [[5, 1], [5, 1]], [[3, 2], [3, 4]], [[3, 1], [5, 2]]]
-        
         # 设置模型路径
-        self.model_path = os.path.join(self.directory, "SINet.pdparams")
+        self.model_path = os.path.join(self.directory, "SINet")
 
         # 加载模型
-        self.model = SINet(classes=2, p=2, q=8, config=config, chnn=1)
-        self.model.set_dict(paddle.load(self.model_path))
+        self.model = paddle.jit.load(self.model_path)
         self.model.eval()
 
         # 均值方差
@@ -102,7 +94,7 @@ class SINet_Portrait_Segmentation(Layer):
 
             # 缩放
             h, w = img.shape[:2]
-            mask = cv2.resize(1-mask, (w, h))
+            mask = cv2.resize(mask, (w, h))
 
             # 计算输出图像
             result = (img * mask[..., np.newaxis] + (1 - mask[..., np.newaxis]) * 255).astype(np.uint8)

@@ -6,8 +6,6 @@ import numpy as np
 from paddle.nn import Layer
 from paddlehub.module.module import moduleinfo
 
-from ExtremeC3_Portrait_Segmentation.model import ExtremeC3Net
-
 @moduleinfo(
     name="ExtremeC3_Portrait_Segmentation",  # 模型名称
     type="CV/semantic_segmentation",  # 模型类型
@@ -21,11 +19,10 @@ class ExtremeC3_Portrait_Segmentation(Layer):
     def __init__(self, name=None, directory=None):
         super(ExtremeC3_Portrait_Segmentation, self).__init__()
         # 设置模型路径
-        self.model_path = os.path.join(self.directory, "ExtremeC3.pdparams")
+        self.model_path = os.path.join(self.directory, "ExtremeC3")
 
         # 加载模型
-        self.model = ExtremeC3Net(classes=1, p=1, q=5)
-        self.model.set_dict(paddle.load(self.model_path))
+        self.model = paddle.jit.load(self.model_path)
         self.model.eval()
 
         # 均值方差
