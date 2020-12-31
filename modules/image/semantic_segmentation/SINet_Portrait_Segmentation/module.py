@@ -90,7 +90,7 @@ class SINet_Portrait_Segmentation(Layer):
         results = []
         for output, img, i in zip(outputs, datas, range(len(datas))):
             # 计算MASK
-            mask = (output[0] > 0).numpy().astype('float32')
+            mask = 1 - (output[0] > 0).numpy().astype('float32')
 
             # 缩放
             h, w = img.shape[:2]
