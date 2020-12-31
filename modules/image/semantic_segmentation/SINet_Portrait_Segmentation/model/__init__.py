@@ -1,1 +1,0 @@
-from .sinet import SINet
