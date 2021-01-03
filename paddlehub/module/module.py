@@ -23,8 +23,6 @@ import sys
 import functools
 import inspect
 import importlib
-import tarfile
-import six
 import shutil
 
 import paddle
@@ -36,15 +34,10 @@ from paddlehub.common.dir import CACHE_HOME
 from paddlehub.common.lock import lock
 from paddlehub.common.logger import logger
 from paddlehub.common.hub_server import CacheUpdater
-from paddlehub.common import tmp_dir
-from paddlehub.common.downloader import progress
 from paddlehub.module import module_desc_pb2
 from paddlehub.module.manager import default_module_manager
 from paddlehub.module.checker import ModuleChecker
 from paddlehub.module.signature import Signature, create_signature
-from paddlehub.module.base_processor import BaseProcessor
-from paddlehub.io.parser import yaml_parser
-from paddlehub import version
 
 # PaddleHub module dir name
 ASSETS_DIRNAME = "assets"
@@ -54,72 +47,6 @@ PYTHON_DIR = "python"
 PROCESSOR_NAME = "processor"
 # PaddleHub var prefix
 HUB_VAR_PREFIX = "@HUB_%s@"
-# PaddleHub Module package suffix
-HUB_PACKAGE_SUFFIX = "phm"
-
-
-def create_module(directory, name, author, email, module_type, summary,
-                  version):
-    save_file = "{}-{}.{}".format(name, version, HUB_PACKAGE_SUFFIX)
-
-    with tmp_dir() as base_dir:
-        # package the module
-        with tarfile.open(save_file, "w:gz") as tar:
-            module_dir = os.path.join(base_dir, name)
-            shutil.copytree(directory, module_dir)
-
-            # record module info and serialize
-            desc = module_desc_pb2.ModuleDesc()
-            attr = desc.attr
-            attr.type = module_desc_pb2.MAP
-            module_info = attr.map.data['module_info']
-            module_info.type = module_desc_pb2.MAP
-            utils.from_pyobj_to_module_attr(name, module_info.map.data['name'])
-            utils.from_pyobj_to_module_attr(author,
-                                            module_info.map.data['author'])
-            utils.from_pyobj_to_module_attr(
-                email, module_info.map.data['author_email'])
-            utils.from_pyobj_to_module_attr(module_type,
-                                            module_info.map.data['type'])
-            utils.from_pyobj_to_module_attr(summary,
-                                            module_info.map.data['summary'])
-            utils.from_pyobj_to_module_attr(version,
-                                            module_info.map.data['version'])
-            module_desc_path = os.path.join(module_dir, "module_desc.pb")
-            with open(module_desc_path, "wb") as f:
-                f.write(desc.SerializeToString())
-
-            # generate check info
-            checker = ModuleChecker(module_dir)
-            checker.generate_check_info()
-
-            # add __init__
-            module_init = os.path.join(module_dir, "__init__.py")
-            with open(module_init, "a") as file:
-                file.write("")
-
-            _cwd = os.getcwd()
-            os.chdir(base_dir)
-            module_dir = module_dir.replace(base_dir, ".")
-            tar.add(module_dir, recursive=False)
-            files = []
-            for dirname, _, subfiles in os.walk(module_dir):
-                for file in subfiles:
-                    #                     if file.startswith("."):
-                    #                         continue
-                    files.append(os.path.join(dirname, file))
-
-            total_length = len(files)
-            print("Create Module {}-{}".format(name, version))
-            for index, file in enumerate(files):
-                done = int(float(index) / total_length * 50)
-                progress("[%-50s] %.2f%%" % ('=' * done,
-                                             float(index / total_length * 100)))
-                tar.add(file)
-            progress("[%-50s] %.2f%%" % ('=' * 50, 100), end=True)
-            print("Module package saved as {}".format(save_file))
-            os.chdir(_cwd)
-
 
 _module_runnable_func = {}
 
@@ -134,16 +61,47 @@ def runnable(func):
     return _wrapper
 
 
+_module_serving_func = {}
+
+
+def serving(func):
+    mod = func.__module__ + "." + inspect.stack()[1][3]
+    _module_serving_func[mod] = func.__name__
+
+    def _wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return _wrapper
+
+
+def moduleinfo(name, version, author, author_email, summary, type):
+    def _wrapper(cls):
+        if not issubclass(cls, Module):
+            raise RuntimeError
+        cls._name = name
+        cls._version = version
+        cls._author = author
+        cls._author_email = author_email
+        cls._summary = summary
+        cls._type = type
+        return cls
+
+    return _wrapper
+
+
 class Module(object):
-
-    _record = {}
-
-    def __new__(cls, name=None, directory=None, module_dir=None, version=None):
+    def __new__(cls,
+                name=None,
+                directory=None,
+                module_dir=None,
+                version=None,
+                **kwargs):
         if cls.__name__ == "Module":
             if name:
-                module = cls.init_with_name(name=name, version=version)
+                module = cls.init_with_name(
+                    name=name, version=version, **kwargs)
             elif directory:
-                module = cls.init_with_directory(directory=directory)
+                module = cls.init_with_directory(directory=directory, **kwargs)
             elif module_dir:
                 logger.warning(
                     "Parameter module_dir is deprecated, please use directory to specify the path"
@@ -154,19 +112,28 @@ class Module(object):
                     version = module_dir[1]
                 else:
                     directory = module_dir
-                module = cls.init_with_directory(directory=directory)
+                module = cls.init_with_directory(directory=directory, **kwargs)
             CacheUpdater("update_cache", module.name, module.version).start()
         else:
-            module = object.__new__(cls)
+            if not name and not directory:
+                directory = os.path.dirname(
+                    os.path.abspath(sys.modules[cls.__module__].__file__))
+                module = Module.init_with_directory(
+                    directory=directory, **kwargs)
+            else:
+                module = object.__new__(cls)
 
         return module
 
-    def __init__(self, name=None, directory=None, module_dir=None,
-                 version=None):
+    def __init__(self,
+                 name=None,
+                 directory=None,
+                 module_dir=None,
+                 version=None,
+                 **kwargs):
         # Avoid module being initialized multiple times
-        if not directory or id(self) in Module._record:
+        if "_is_initialize" in self.__dict__ and self._is_initialize:
             return
-        Module._record[id(self)] = True
 
         mod = self.__class__.__module__ + "." + self.__class__.__name__
         if mod in _module_runnable_func:
@@ -174,31 +141,15 @@ class Module(object):
             self._run_func = getattr(self, _run_func_name)
         else:
             self._run_func = None
+        self._serving_func_name = _module_serving_func.get(mod, None)
         self._code_version = "v2"
         self._directory = directory
-        self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
-        self._desc = module_desc_pb2.ModuleDesc()
-        with open(self.module_desc_path, "rb") as file:
-            self._desc.ParseFromString(file.read())
-
-        module_info = self.desc.attr.map.data['module_info']
-        self._name = utils.from_module_attr_to_pyobj(
-            module_info.map.data['name'])
-        self._author = utils.from_module_attr_to_pyobj(
-            module_info.map.data['author'])
-        self._author_email = utils.from_module_attr_to_pyobj(
-            module_info.map.data['author_email'])
-        self._version = utils.from_module_attr_to_pyobj(
-            module_info.map.data['version'])
-        self._type = utils.from_module_attr_to_pyobj(
-            module_info.map.data['type'])
-        self._summary = utils.from_module_attr_to_pyobj(
-            module_info.map.data['summary'])
-
-        self._initialize()
+        self._initialize(**kwargs)
+        self._is_initialize = True
+        self._code_version = "v2"
 
     @classmethod
-    def init_with_name(cls, name, version=None):
+    def init_with_name(cls, name, version=None, **kwargs):
         fp_lock = open(os.path.join(CACHE_HOME, name), "a")
         lock.flock(fp_lock, lock.LOCK_EX)
         log_msg = "Installing %s module" % name
@@ -214,30 +165,36 @@ class Module(object):
 
         logger.info(tips)
         lock.flock(fp_lock, lock.LOCK_UN)
-        return cls.init_with_directory(directory=module_dir[0])
+        return cls.init_with_directory(directory=module_dir[0], **kwargs)
 
     @classmethod
-    def init_with_directory(cls, directory):
+    def init_with_directory(cls, directory, **kwargs):
         desc_file = os.path.join(directory, MODULE_DESC_PBNAME)
-        checker = ModuleChecker(directory)
-        checker.check()
+        if os.path.exists(desc_file):
+            checker = ModuleChecker(directory)
+            checker.check()
+            return ModuleV1(directory=directory, **kwargs)
 
-        module_code_version = checker.module_code_version
-        if module_code_version == "v2":
-            basename = os.path.split(directory)[-1]
-            dirname = os.path.join(*list(os.path.split(directory)[:-1]))
-            sys.path.append(dirname)
-            user_module = importlib.import_module("{}.module".format(basename))
-            return user_module.HubModule(directory=directory)
-        return ModuleV1(directory=directory)
+        if directory.endswith(os.sep):
+            directory = directory[:-1]
+        basename = os.path.split(directory)[-1]
+        dirname = os.path.join(*list(os.path.split(directory)[:-1]))
+        sys.path.insert(0, dirname)
+        _module = importlib.import_module("{}.module".format(basename))
+        for _item, _cls in inspect.getmembers(_module, inspect.isclass):
+            _item = _module.__dict__[_item]
+            _file = os.path.realpath(sys.modules[_item.__module__].__file__)
+            _module_path = os.path.realpath(
+                os.path.join(directory, "module.py"))
+            if issubclass(_item, Module) and _file == _module_path:
+                user_module = _item(directory=directory, **kwargs)
+                break
+        sys.path.pop(0)
+        return user_module
 
     @property
     def run_func(self):
         return self._run_func
-
-    @property
-    def desc(self):
-        return self._desc
 
     @property
     def directory(self):
@@ -245,27 +202,27 @@ class Module(object):
 
     @property
     def author(self):
-        return self._author
+        return self.__class__._author
 
     @property
     def author_email(self):
-        return self._author_email
+        return self.__class__._author_email
 
     @property
     def summary(self):
-        return self._summary
+        return self.__class__._summary
 
     @property
     def type(self):
-        return self._type
+        return self.__class__._type
 
     @property
     def version(self):
-        return self._version
+        return self.__class__._version
 
     @property
     def name(self):
-        return self._name
+        return self.__class__._name
 
     @property
     def code_version(self):
@@ -274,6 +231,10 @@ class Module(object):
     @property
     def is_runnable(self):
         return self._run_func != None
+
+    @property
+    def serving_func_name(self):
+        return self._serving_func_name
 
     def _initialize(self):
         pass
@@ -305,7 +266,6 @@ class ModuleV1(Module):
         if not directory:
             return
         super(ModuleV1, self).__init__(name, directory, module_dir, version)
-        self._code_version = "v1"
         self.program = None
         self.assets = []
         self.helper = None
@@ -313,6 +273,27 @@ class ModuleV1(Module):
         self.default_signature = None
         self.processor = None
         self.extra_info = {}
+        self._code_version = "v1"
+
+        # parse desc
+        self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
+        self._desc = module_desc_pb2.ModuleDesc()
+        with open(self.module_desc_path, "rb") as file:
+            self._desc.ParseFromString(file.read())
+
+        module_info = self.desc.attr.map.data['module_info']
+        self._name = utils.from_module_attr_to_pyobj(
+            module_info.map.data['name'])
+        self._author = utils.from_module_attr_to_pyobj(
+            module_info.map.data['author'])
+        self._author_email = utils.from_module_attr_to_pyobj(
+            module_info.map.data['author_email'])
+        self._version = utils.from_module_attr_to_pyobj(
+            module_info.map.data['version'])
+        self._type = utils.from_module_attr_to_pyobj(
+            module_info.map.data['type'])
+        self._summary = utils.from_module_attr_to_pyobj(
+            module_info.map.data['summary'])
 
         # cache data
         self.last_call_name = None
@@ -335,6 +316,39 @@ class ModuleV1(Module):
         self._generate_extra_info()
         self._restore_parameter(self.program)
         self._recover_variable_info(self.program)
+
+    @property
+    def serving_func_name(self):
+        serving_func_name = self.desc.attr.map.data['default_signature'].s
+        return serving_func_name if serving_func_name != "" else None
+
+    @property
+    def desc(self):
+        return self._desc
+
+    @property
+    def author(self):
+        return self._author
+
+    @property
+    def author_email(self):
+        return self._author_email
+
+    @property
+    def summary(self):
+        return self._summary
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def version(self):
+        return self._version
+
+    @property
+    def name(self):
+        return self._name
 
     def _dump_processor(self):
         import inspect
@@ -558,6 +572,10 @@ class ModuleV1(Module):
     @property
     def is_runnable(self):
         return self.default_signature != None
+
+    @property
+    def code_version(self):
+        return self._code_version
 
     def context(self,
                 sign_name=None,

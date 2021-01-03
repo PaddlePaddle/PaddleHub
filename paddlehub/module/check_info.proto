@@ -52,5 +52,4 @@ message CheckInfo {
   string module_proto_version = 3;
   repeated FileInfo file_infos = 4;
   repeated Requires requires = 5;
-  string module_code_version = 6;
 };

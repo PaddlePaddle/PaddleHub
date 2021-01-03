@@ -56,13 +56,24 @@ def version_compare(version1, version2):
 
 def base64s_to_cvmats(base64s):
     for index, value in enumerate(base64s):
-        value = bytes(value, encoding="utf8")
+        if isinstance(value, str):
+            value = bytes(value, encoding="utf8")
         value = base64.b64decode(value)
         value = np.fromstring(value, np.uint8)
         value = cv2.imdecode(value, 1)
 
         base64s[index] = value
     return base64s
+
+
+def cvmats_to_base64s(cvmats):
+    for index, value in enumerate(cvmats):
+        retval, buffer = cv2.imencode('.jpg', value)
+        pic_str = base64.b64encode(buffer)
+        value = pic_str.decode()
+
+        cvmats[index] = value
+    return cvmats
 
 
 def handle_mask_results(results, data_len):

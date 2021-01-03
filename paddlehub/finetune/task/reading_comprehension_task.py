@@ -409,7 +409,8 @@ class ReadingComprehensionTask(BaseTask):
     def _build_net(self):
         self.unique_ids = fluid.layers.data(
             name="unique_ids", shape=[-1, 1], lod_level=0, dtype="int64")
-
+        # to avoid memory optimization
+        _ = fluid.layers.assign(self.unique_ids)
         logits = fluid.layers.fc(
             input=self.feature,
             size=2,

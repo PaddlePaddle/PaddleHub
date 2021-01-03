@@ -46,6 +46,7 @@ from .module.manager import default_module_manager
 
 from .io.type import DataType
 
+from .finetune.task import BaseTask
 from .finetune.task import ClassifierTask
 from .finetune.task import TextClassifierTask
 from .finetune.task import ImageClassifierTask
@@ -62,3 +63,5 @@ from .finetune.strategy import ULMFiTStrategy
 from .finetune.strategy import CombinedStrategy
 
 from .autofinetune.evaluator import report_final_result
+
+from .module.nlp_module import BERTModule

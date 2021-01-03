@@ -8,6 +8,7 @@ import os
 
 module = hub.Module(name="pyramidbox_lite_server_mask", version='1.1.0')
 
+
 # opencv输出中文
 def paint_chinese(im, chinese, position, fontsize, color_bgr):
     # 图像从OpenCV格式转换成PIL格式
@@ -88,7 +89,8 @@ while True:
             label_cn = "无口罩"
 
         cv2.rectangle(frame_copy, (left, top), (right, bottom), color, 3)
-        cv2.putText(frame_copy, label, (left, top-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+        cv2.putText(frame_copy, label, (left, top - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
         #origin_point = (left, top - 36)
         #frame_copy = paint_chinese(frame_copy, label_cn, origin_point, 24,
         #                           color)

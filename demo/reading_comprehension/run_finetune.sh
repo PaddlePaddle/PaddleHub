@@ -16,4 +16,4 @@ python -u reading_comprehension.py \
                    --warmup_proportion=0.1 \
                    --num_epoch=2 \
                    --max_seq_len=512 \
-                   --use_data_parallel=True
+                   --use_data_parallel=False
