@@ -31,7 +31,7 @@ python train.py
 ```python
 import paddlehub as hub
 
-model = hub.Module(name='ernie_tiny', version='2.0.1', task='seq-cls')
+model = hub.Module(name='ernie_tiny', version='2.0.1', task='seq-cls', num_classes=2)
 ```
 
 其中，参数：
@@ -39,6 +39,29 @@ model = hub.Module(name='ernie_tiny', version='2.0.1', task='seq-cls')
 * `name`：模型名称，可以选择`ernie`，`ernie_tiny`，`bert-base-cased`， `bert-base-chinese`, `roberta-wwm-ext`，`roberta-wwm-ext-large`等。
 * `version`：module版本号
 * `task`：fine-tune任务。此处为`seq-cls`，表示文本分类任务。
+* `num_classes`：表示当前文本分类任务的类别数，根据具体使用的数据集确定，默认为2。
+
+PaddleHub还提供BERT等模型可供选择, 当前支持文本分类任务的模型对应的加载示例如下：
+
+模型名                           | PaddleHub Module
+---------------------------------- | :------:
+ERNIE, Chinese                     | `hub.Module(name='ernie')`
+ERNIE tiny, Chinese                | `hub.Module(name='ernie_tiny')`
+ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
+ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
+BERT-Base, Cased                   | `hub.Module(name='bert-base-cased')`
+BERT-Base, Uncased                 | `hub.Module(name='bert-base-uncased')`
+BERT-Large, Cased                  | `hub.Module(name='bert-large-cased')`
+BERT-Large, Uncased                | `hub.Module(name='bert-large-uncased')`
+BERT-Base, Multilingual Cased      | `hub.Module(nane='bert-base-multilingual-cased')`
+BERT-Base, Multilingual Uncased    | `hub.Module(nane='bert-base-multilingual-uncased')`
+BERT-Base, Chinese                 | `hub.Module(name='bert-base-chinese')`
+BERT-wwm, Chinese                  | `hub.Module(name='chinese-bert-wwm')`
+BERT-wwm-ext, Chinese              | `hub.Module(name='chinese-bert-wwm-ext')`
+RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta-wwm-ext')`
+RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta-wwm-ext-large')`
+RBT3, Chinese                      | `hub.Module(name='rbt3')`
+RBTL3, Chinese                     | `hub.Module(name='rbtl3')`
 
 通过以上的一行代码，`model`初始化为一个适用于文本分类任务的模型，为ERNIE Tiny的预训练模型后拼接上一个全连接网络（Full Connected）。
 ![](https://ai-studio-static-online.cdn.bcebos.com/f9e1bf9d56c6412d939960f2e3767c2f13b93eab30554d738b137ab2b98e328c)
@@ -49,9 +72,9 @@ model = hub.Module(name='ernie_tiny', version='2.0.1', task='seq-cls')
 
 ```python
 train_dataset = hub.datasets.ChnSentiCorp(
-    tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='train')
+    tokenizer=model.get_tokenizer(), max_seq_len=128, mode='train')
 dev_dataset = hub.datasets.ChnSentiCorp(
-    tokenizer=model.get_tokenizer(tokenize_chinese_chars=True), max_seq_len=128, mode='dev')
+    tokenizer=model.get_tokenizer(), max_seq_len=128, mode='dev')
 ```
 
 * `tokenizer`：表示该module所需用到的tokenizer，其将对输入文本完成切词，并转化成module运行所需模型输入格式。
