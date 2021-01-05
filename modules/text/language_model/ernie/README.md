@@ -50,19 +50,21 @@ def predict(
 
 **参数**
 
-* `data`： 待预测数据，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，
-    每个样例可以包含text\_a与text\_b。每个样例文本数量（1个或者2个）需和训练时保持一致。
+* `data`： 待预测数据，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。每个样例文本数量（1个或者2个）需和训练时保持一致。
 * `max_seq_len`：模型处理文本的最大长度
 * `batch_size`：模型批处理大小
 * `use_gpu`：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
 
 **返回**
 
+* `results`：list类型，不同任务类型的返回结果如下
+  * 文本分类：列表里包含每个句子的预测标签，格式为\[label\_1, label\_2, …,\]
+  * 序列标注：列表里包含每个句子每个token的预测标签，格式为\[\[token\_1, token\_2, …,\], \[token\_1, token\_2, …,\], …,\]
+
 ```python
 def get_embedding(
     data,
     max_seq_len=128,
-    batch_size=1,
     use_gpu=False
 )
 ```
@@ -73,7 +75,6 @@ def get_embedding(
 
 * `data`：输入文本列表，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。
 * `max_seq_len`：模型处理文本的最大长度。
-* `batch_size`：模型批处理大小。
 * `use_gpu`：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
 
 **返回**
