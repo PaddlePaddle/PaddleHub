@@ -390,11 +390,8 @@ class TextServing(object):
                 ]
             return results
         elif self.task is None:                 # embedding service
-            token_results, sentence_results = self.get_embedding(data, max_seq_len, batch_size, use_gpu)
-            token_results = [
-                token_embeddings[1:len(data[i][0])+1] for i, token_embeddings in enumerate(token_results)
-            ]
-            return token_results, sentence_results
+            results = self.get_embedding(data, max_seq_len, use_gpu)
+            return results
         else:                                   # unknown service
             logger.error(
                 f'Unknown task {self.task}, current tasks supported:\n'
@@ -414,6 +411,17 @@ class TransformerModule(RunModule, TextServing):
         'token-cls',
     ]
 
+    def _convert_text_to_input(self, tokenizer, text: List[str], max_seq_len: int):
+        pad_to_max_seq_len = False if self.task is None else True
+        if len(text) == 1:
+            encoded_inputs = tokenizer.encode(text[0], text_pair=None, max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len)
+        elif len(text) == 2:
+            encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len)
+        else:
+            raise RuntimeError(
+                'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
+        return encoded_inputs
+
     def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int):
         def _parse_batch(batch):
             input_ids = [entry[0] for entry in batch]
@@ -423,13 +431,7 @@ class TransformerModule(RunModule, TextServing):
         tokenizer = self.get_tokenizer()
         examples = []
         for text in data:
-            if len(text) == 1:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=None, max_seq_len=max_seq_len)
-            elif len(text) == 2:
-                encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], max_seq_len=max_seq_len)
-            else:
-                raise RuntimeError(
-                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
+            encoded_inputs = self._convert_text_to_input(tokenizer, text, max_seq_len)
             examples.append((encoded_inputs['input_ids'], encoded_inputs['segment_ids']))
 
         # Seperates data into some batches.
@@ -475,7 +477,7 @@ class TransformerModule(RunModule, TextServing):
             predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
         return {'metrics': metric}
 
-    def get_embedding(self, data: List[List[str]], max_seq_len=128, batch_size=1, use_gpu=False):
+    def get_embedding(self, data: List[List[str]], max_seq_len=128, use_gpu=False):
         """
         Get token level embeddings and sentence level embeddings from model.
         Args:
@@ -494,7 +496,7 @@ class TransformerModule(RunModule, TextServing):
         return self.predict(
             data=data,
             max_seq_len=max_seq_len,
-            batch_size=batch_size,
+            batch_size=1,
             use_gpu=use_gpu
         )
 
@@ -550,10 +552,10 @@ class TransformerModule(RunModule, TextServing):
                 token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
                 results.extend(token_labels)
             elif self.task == None:
-                if not results:
-                    results = [[], []]
                 sequence_output, pooled_output = self(input_ids, segment_ids)
-                results[0].extend(sequence_output.numpy().tolist())  # token-level embedding
-                results[1].extend(pooled_output.numpy().tolist())    # sentence-level embedding
+                results.append([
+                    pooled_output.squeeze(0).numpy().tolist(),
+                    sequence_output.squeeze(0).numpy().tolist()
+                ])
 
         return results
