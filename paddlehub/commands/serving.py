@@ -116,7 +116,10 @@ class ServingCommand:
         if platform.system() == "Windows":
             os.kill(pid, signal.SIGTERM)
         else:
-            os.killpg(pid, signal.SIGTERM)
+            try:
+                os.killpg(pid, signal.SIGTERM)
+            except ProcessLookupError:
+                os.kill(pid, signal.SIGTERM)
 
     @staticmethod
     def start_bert_serving(args):
