@@ -210,7 +210,7 @@ label    text_a
 ```python
 from paddlehub.datasets.base_nlp_dataset import TextClassificationDataset
 
-class SeqClsDataset(TextClassificationDataset):
+class MyDataset(TextClassificationDataset):
     # 数据集存放目录
     base_path = '/path/to/dataset'
     # 数据集的标签列表
@@ -235,14 +235,14 @@ class SeqClsDataset(TextClassificationDataset):
         
 # 选择所需要的模型，获取对应的tokenizer
 import paddlehub as hub
-model = model = hub.Module(name='ernie_tiny', task='seq-cls', num_classes=len(SeqClsDataset.label_list))
+model = hub.Module(name='ernie_tiny', task='seq-cls', num_classes=len(MyDataset.label_list))
 tokenizer = model.get_tokenizer()
 
 # 实例化训练集
-train_dataset = SeqClsDataset(tokenizer)
+train_dataset = MyDataset(tokenizer)
 ```
 
-至此用户可以通过SeqClsDataset实例化获取对应的数据集，可以通过hub.Trainer对预训练模型`model`完成文本分类任务，详情可参考[PaddleHub文本分类demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/text_classification)。
+至此用户可以通过MyDataset实例化获取对应的数据集，可以通过hub.Trainer对预训练模型`model`完成文本分类任务，详情可参考[PaddleHub文本分类demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/text_classification)。
 
 ## 五、序列标注数据集
 
@@ -278,7 +278,7 @@ text_a    label
 ```python
 from paddlehub.datasets.base_nlp_dataset import SeqLabelingDataset
 
-class TokenClsDataset(SeqLabelingDataset):
+class MyDataset(SeqLabelingDataset):
     # 数据集存放目录
     base_path = '/path/to/dataset'
     # 数据集的标签列表
@@ -307,11 +307,11 @@ class TokenClsDataset(SeqLabelingDataset):
         
 # 选择所需要的模型，获取对应的tokenizer
 import paddlehub as hub
-model = model = hub.Module(name='ernie_tiny', task='token-cls', label_map=TokenClsDataset.label_map)
+model = hub.Module(name='ernie_tiny', task='token-cls', label_map=MyDataset.label_map)
 tokenizer = model.get_tokenizer()
 
 # 实例化训练集
-train_dataset = TokenClsDataset(tokenizer)
+train_dataset = MyDataset(tokenizer)
 ```
 
-至此用户可以通过TokenClsDataset实例化获取对应的数据集，可以通过hub.Trainer对预训练模型`model`完成系列标注任务，详情可参考[PaddleHub序列标注demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/sequence_labeling)。
+至此用户可以通过MyDataset实例化获取对应的数据集，可以通过hub.Trainer对预训练模型`model`完成系列标注任务，详情可参考[PaddleHub序列标注demo](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/sequence_labeling)。
