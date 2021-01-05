@@ -390,7 +390,7 @@ class TextServing(object):
                 ]
             return results
         elif self.task is None:                 # embedding service
-            results = self.get_embedding(data, max_seq_len, use_gpu)
+            results = self.get_embedding(data, use_gpu)
             return results
         else:                                   # unknown service
             logger.error(
@@ -477,14 +477,11 @@ class TransformerModule(RunModule, TextServing):
             predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
         return {'metrics': metric}
 
-    def get_embedding(self, data: List[List[str]], max_seq_len=128, use_gpu=False):
+    def get_embedding(self, data: List[List[str]], use_gpu=False):
         """
         Get token level embeddings and sentence level embeddings from model.
         Args:
             data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
-            max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
-                If set to a number, will limit the total sequence returned so that it has a maximum length.
-            batch_size(obj:`int`, defaults to 1): The number of batch.
             use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
 
         Returns:
@@ -495,8 +492,6 @@ class TransformerModule(RunModule, TextServing):
 
         return self.predict(
             data=data,
-            max_seq_len=max_seq_len,
-            batch_size=1,
             use_gpu=use_gpu
         )
 
