@@ -50,6 +50,7 @@ model = hub.Module(name='ernie_tiny', version='2.0.1', task='token-cls', label_m
 * `name`：模型名称，可以选择`ernie`，`ernie_tiny`，`bert-base-cased`， `bert-base-chinese`, `roberta-wwm-ext`，`roberta-wwm-ext-large`等。
 * `version`：module版本号
 * `task`：fine-tune任务。此处为`token-cls`，表示序列标注任务。
+* `label_map`：数据集中的标签信息，实体识别任务中需要根据不同标签种类对模型性能进行评价。
 
 PaddleHub还提供BERT等模型可供选择, 当前支持序列标注任务的模型对应的加载示例如下：
 
