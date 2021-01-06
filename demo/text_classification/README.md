@@ -49,10 +49,10 @@ ERNIE, Chinese                     | `hub.Module(name='ernie')`
 ERNIE tiny, Chinese                | `hub.Module(name='ernie_tiny')`
 ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
 ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
-BERT-Base, Cased                   | `hub.Module(name='bert-base-cased')`
-BERT-Base, Uncased                 | `hub.Module(name='bert-base-uncased')`
-BERT-Large, Cased                  | `hub.Module(name='bert-large-cased')`
-BERT-Large, Uncased                | `hub.Module(name='bert-large-uncased')`
+BERT-Base, English Cased           | `hub.Module(name='bert-base-cased')`
+BERT-Base, English Uncased         | `hub.Module(name='bert-base-uncased')`
+BERT-Large, English Cased          | `hub.Module(name='bert-large-cased')`
+BERT-Large, English Uncased        | `hub.Module(name='bert-large-uncased')`
 BERT-Base, Multilingual Cased      | `hub.Module(nane='bert-base-multilingual-cased')`
 BERT-Base, Multilingual Uncased    | `hub.Module(nane='bert-base-multilingual-uncased')`
 BERT-Base, Chinese                 | `hub.Module(name='bert-base-chinese')`
@@ -62,6 +62,11 @@ RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta-wwm-ext')`
 RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta-wwm-ext-large')`
 RBT3, Chinese                      | `hub.Module(name='rbt3')`
 RBTL3, Chinese                     | `hub.Module(name='rbtl3')`
+ELECTRA-Small, English             | `hub.Module(name='electra-small')`
+ELECTRA-Base, English              | `hub.Module(name='electra-base')`
+ELECTRA-Large, English             | `hub.Module(name='electra-large')`
+ELECTRA-Base, Chinese              | `hub.Module(name='chinese-electra-base')`
+ELECTRA-Small, Chinese             | `hub.Module(name='chinese-electra-small')`
 
 通过以上的一行代码，`model`初始化为一个适用于文本分类任务的模型，为ERNIE Tiny的预训练模型后拼接上一个全连接网络（Full Connected）。
 ![](https://ai-studio-static-online.cdn.bcebos.com/f9e1bf9d56c6412d939960f2e3767c2f13b93eab30554d738b137ab2b98e328c)
