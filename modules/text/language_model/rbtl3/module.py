@@ -29,7 +29,7 @@ from paddlehub.utils.log import logger
 
 @moduleinfo(
     name="rbtl3",
-    version="2.0.1",
+    version="2.0.0",
     summary="rbtl3, 3-layer, 1024-hidden, 16-heads, 61M parameters ",
     author="ymcui",
     author_email="ymcui@ir.hit.edu.cn",

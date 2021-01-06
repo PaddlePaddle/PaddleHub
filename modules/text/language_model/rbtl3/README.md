@@ -1,5 +1,5 @@
 ```shell
-$ hub install rbtl3==2.0.1
+$ hub install rbtl3==2.0.0
 ```
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/bert_network.png"  hspace='10'/> <br />
@@ -82,7 +82,7 @@ label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
     name='rbtl3',
-    version='2.0.1',
+    version='2.0.0',
     task='seq-cls',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
@@ -153,6 +153,6 @@ paddlehub >= 2.0.0
 
   初始发布
 
-* 2.0.1
+* 2.0.0
 
   全面升级动态图，接口有所变化。任务名称调整，增加序列标注任务`token-cls`

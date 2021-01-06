@@ -13,14 +13,13 @@
 # limitations under the License.
 from typing import Dict
 import os
-import math
 
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
 
-from paddlenlp.transformers.bert.modeling import BertForSequenceClassification, BertModel, BertForTokenClassification
-from paddlenlp.transformers.bert.tokenizer import BertTokenizer
+from paddlenlp.transformers.electra.modeling import ElectraForSequenceClassification, ElectraForTokenClassification, ElectraModel
+from paddlenlp.transformers.electra.tokenizer import ElectraTokenizer
 from paddlenlp.metrics import ChunkEvaluator
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.nlp_module import TransformerModule
@@ -28,18 +27,18 @@ from paddlehub.utils.log import logger
 
 
 @moduleinfo(
-    name="chinese-bert-wwm-ext",
-    version="2.0.0",
+    name="electra-large",
+    version="1.0.0",
     summary=
-    "chinese-bert-wwm-ext, 12-layer, 768-hidden, 12-heads, 110M parameters. The module is executed as paddle.dygraph.",
-    author="ymcui",
-    author_email="ymcui@ir.hit.edu.cn",
+    "electra-large, 24-layer, 1024-hidden, 16-heads, 335M parameters. The module is executed as paddle.dygraph.",
+    author="paddlepaddle",
+    author_email="",
     type="nlp/semantic_model",
-    meta=TransformerModule
+    meta=TransformerModule,
 )
-class BertWwm(nn.Layer):
+class Electra(nn.Layer):
     """
-    BertWwm model
+    Electra model
     """
 
     def __init__(
@@ -50,7 +49,7 @@ class BertWwm(nn.Layer):
             num_classes: int = 2,
             **kwargs,
     ):
-        super(BertWwm, self).__init__()
+        super(Electra, self).__init__()
         if label_map:
             self.label_map = label_map
             self.num_classes = len(label_map)
@@ -64,16 +63,16 @@ class BertWwm(nn.Layer):
                 "'sequence_classification' has been deprecated and will be removed in the future.",
             )
         if task == 'seq-cls':
-            self.model = BertForSequenceClassification.from_pretrained(
-                pretrained_model_name_or_path='bert-wwm-ext-chinese',
+            self.model = ElectraForSequenceClassification.from_pretrained(
+                pretrained_model_name_or_path='electra-large',
                 num_classes=self.num_classes,
                 **kwargs
             )
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy()
         elif task == 'token-cls':
-            self.model = BertForTokenClassification.from_pretrained(
-                pretrained_model_name_or_path='bert-wwm-ext-chinese',
+            self.model = ElectraForTokenClassification.from_pretrained(
+                pretrained_model_name_or_path='electra-large',
                 num_classes=self.num_classes,
                 **kwargs
             )
@@ -82,7 +81,7 @@ class BertWwm(nn.Layer):
                 label_list=[self.label_map[i] for i in sorted(self.label_map.keys())]
             )
         elif task is None:
-            self.model = BertModel.from_pretrained(pretrained_model_name_or_path='bert-wwm-ext-chinese', **kwargs)
+            self.model = ElectraModel.from_pretrained(pretrained_model_name_or_path='electra-large', **kwargs)
         else:
             raise RuntimeError("Unknown task {}, task should be one in {}".format(
                 task, self._tasks_supported))
@@ -127,5 +126,5 @@ class BertWwm(nn.Layer):
         """
         Gets the tokenizer that is customized for this module.
         """
-        return BertTokenizer.from_pretrained(
-            pretrained_model_name_or_path='bert-wwm-ext-chinese', *args, **kwargs)
+        return ElectraTokenizer.from_pretrained(
+            pretrained_model_name_or_path='electra-large', *args, **kwargs)

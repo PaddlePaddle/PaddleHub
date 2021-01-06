@@ -1,5 +1,5 @@
 ```shell
-$ hub install chinese-electra-small==2.0.0
+$ hub install electra-large==1.0.0
 ```
 
 <p align="center">
@@ -83,8 +83,8 @@ data = [
 label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
-    name='chinese-electra-small',
-    version='2.0.0',
+    name='electra-large',
+    version='1.0.0',
     task='seq-cls',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
@@ -106,7 +106,7 @@ PaddleHub Serving可以部署一个在线获取预训练词向量。
 运行启动命令：
 
 ```shell
-$ hub serving start -m chinese-electra-small
+$ hub serving start -m electra-large
 ```
 
 这样就完成了一个获取预训练词向量服务化API的部署，默认端口号为8866。
@@ -127,7 +127,7 @@ text = [["今天是个好日子"], ["天气预报说今天要下雨"]]
 # 对应本地部署，则为module.get_embedding(data=text)
 data = {"data": text}
 # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
-url = "http://10.12.121.132:8866/predict/chinese-electra-small"
+url = "http://10.12.121.132:8866/predict/electra-large"
 # 指定post请求的headers为application/json方式
 headers = {"Content-Type": "application/json"}
 
@@ -137,7 +137,7 @@ print(r.json())
 
 ##   查看代码
 
-https://github.com/ymcui/Chinese-ELECTRA
+https://github.com/google-research/electra
 
 
 ## 依赖
@@ -150,8 +150,4 @@ paddlehub >= 2.0.0
 
 * 1.0.0
 
-  初始发布
-
-* 2.0.0
-
-  全面升级动态图，接口有所变化。任务名称调整，增加序列标注任务`token-cls`
+  初始发布，动态图版本模型，支持文本分类`seq-cls`和序列标注`token-cls`任务的fine-tune
