@@ -207,7 +207,7 @@ class ImageColorizeModule(RunModule, ImageServing):
         out_class, out_reg = self(img['A'], img['hint_B'], img['mask_B'])
 
         # loss
-        loss_ce = F.softmax_with_cross_entropy(out_class, img['real_B_enc'][:, :1, :, :], axis=1)
+        loss_ce = F.cross_entropy(out_class, img['real_B_enc'][:, :1, :, :], axis=1)
         loss_ce = paddle.mean(loss_ce)
         loss_G_L1_reg = paddle.sum(paddle.abs(img['B'] - out_reg), axis=1, keepdim=True)
         loss_G_L1_reg = paddle.mean(loss_G_L1_reg)
