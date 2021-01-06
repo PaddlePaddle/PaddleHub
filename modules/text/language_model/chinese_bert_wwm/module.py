@@ -29,7 +29,7 @@ from paddlehub.utils.log import logger
 
 @moduleinfo(
     name="chinese-bert-wwm",
-    version="2.0.1",
+    version="2.0.0",
     summary=
     "chinese-bert-wwm, 12-layer, 768-hidden, 12-heads, 110M parameters. The module is executed as paddle.dygraph.",
     author="ymcui",
