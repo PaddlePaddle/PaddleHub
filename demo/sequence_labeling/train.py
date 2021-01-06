@@ -32,7 +32,7 @@ args = parser.parse_args()
 
 
 if __name__ == '__main__':
-    label_list = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
+    label_list = MSRA_NER.label_list
     label_map = {
         idx: label for idx, label in enumerate(label_list)
     }

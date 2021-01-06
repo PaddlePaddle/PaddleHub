@@ -32,7 +32,7 @@ python train.py
 在命名实体识别的任务中，因不同的数据集标识实体的标签不同，评测的方式也有所差异。因此，在初始化模型的之前，需要先确定实际标签的形式，下方的`label_list`则是MSRA-NER数据集中使用的标签类别。  
 如果用户使用的实体识别的数据集的标签方式与MSRA-NER不同，则需要自行根据数据集确定。
 ```python
-label_list = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
+label_list = hub.datasets.MSRA_NER.label_list
 label_map = {
     idx: label for idx, label in enumerate(label_list)
 }
