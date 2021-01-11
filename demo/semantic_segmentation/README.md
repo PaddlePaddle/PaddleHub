@@ -5,7 +5,7 @@
 
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用ocrnet_hrnetw18模型对[OpticDiscSeg](../../docs/reference/datasets.md#class-hubdatasetsOpticDiscSeg)等数据集进行Fine-tune。
+在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用ocrnet_hrnetw18模型对[OpticDiscSeg](../../docs_ch/reference/datasets.md#class-hubdatasetsOpticDiscSeg)等数据集进行Fine-tune。
 
 ## 代码步骤
 
@@ -28,7 +28,7 @@ train_reader = OpticDiscSeg(transform， mode='train')
 
 ```
 * `transform`: 数据预处理方式。
-* `mode`: 选择数据模式，可选项有 `train`, `test`， 默认为`train`。
+* `mode`: 选择数据模式，可选项有 `train`, `test`, `val`, 默认为`train`。
 
 数据集的准备代码可以参考 [opticdiscseg.py](../../paddlehub/datasets/opticdiscseg.py)。`hub.datasets.OpticDiscSeg()`会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录。
 
@@ -44,7 +44,7 @@ model = hub.Module(name='ocrnet_hrnetw18', num_classes=2, pretrained=None)
 ### Step4: 选择优化策略和运行配置
 
 ```python
-scheduler = paddle.optimizer.lr.PolynomialDecay(learning_rate=0.01, decay_steps=1000, power=0.9,  end_lr=0)
+scheduler = paddle.optimizer.lr.PolynomialDecay(learning_rate=0.01, decay_steps=1000, power=0.9,  end_lr=0.0001)
 optimizer = paddle.optimizer.Adam(learning_rate=scheduler, parameters=model.parameters())
 trainer = Trainer(model, optimizer, checkpoint_dir='test_ckpt_img_ocr', use_gpu=True)
 ```
@@ -55,7 +55,7 @@ Paddle2.0rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详�
 
 其中`Adam`:
 
-* `learning_rate`: 全局学习率。默认为1e-4；
+* `learning_rate`: 全局学习率。
 *  `parameters`: 待优化模型参数。
  
 #### 运行配置
@@ -91,12 +91,11 @@ import paddlehub as hub
 
 if __name__ == '__main__':
     model = hub.Module(name='ocrnet_hrnetw18', pretrained='/PATH/TO/CHECKPOINT')
-    img = cv2.imread("voc.jpg")
+    img = cv2.imread("/PATH/TO/IMAGE")
     model.predict(images=[img], visualization=True)
 ```
 
-参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
-
+参数配置正确后，请执行脚本`python predict.py`。
 **Args**
 * `images`:原始图像路径或BGR格式图片；
 * `visualization`: 是否可视化，默认为True；

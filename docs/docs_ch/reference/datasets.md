@@ -40,7 +40,7 @@ Dataset for Style transfer. The dataset contains 2001 images for training set an
 * transforms(callmethod) : The method of preprocess images.
 * mode(str): The mode for preparing dataset.
 
-# Class `hub.datasets.MiniCOCO`
+# Class `hub.datasets.OpticDiscSeg`
 
 ```python
 hub.datasets.OpticDiscSeg(
