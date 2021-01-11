@@ -39,3 +39,18 @@ Dataset for Style transfer. The dataset contains 2001 images for training set an
 **Args**
 * transforms(callmethod) : The method of preprocess images.
 * mode(str): The mode for preparing dataset.
+
+# Class `hub.datasets.MiniCOCO`
+
+```python
+hub.datasets.OpticDiscSeg(
+    transforms: Callable,
+    mode: str = 'train')
+```
+
+Dataset for semantic segmentation. The dataset contains 267 images for training set, 76 images for validation set and 38 images for testing set.
+
+**Args**
+* transforms(callmethod) : The method of preprocess images.
+* mode(str): The mode for preparing dataset.
+
