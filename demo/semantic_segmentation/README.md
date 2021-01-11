@@ -5,7 +5,7 @@
 
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用ocrnet_hrnetw18模型对[OpticDiscSeg](../../docs_ch/reference/datasets.md#class-hubdatasetsOpticDiscSeg)等数据集进行Fine-tune。
+在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用ocrnet_hrnetw18模型对OpticDiscSeg等数据集进行Fine-tune。
 
 ## 代码步骤
 
