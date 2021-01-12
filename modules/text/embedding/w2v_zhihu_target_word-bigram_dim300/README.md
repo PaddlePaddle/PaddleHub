@@ -62,7 +62,7 @@ def dot(
 
 ```python
 import paddlehub as hub
-embedding = hub.Module(name='w2v_baidu_encyclopedia_target_word-word_dim300')
+embedding = hub.Module(name='w2v_zhihu_target_word-bigram_dim300')
 
 # 获取单词的embedding
 embedding.search("中国")
@@ -81,7 +81,7 @@ embedding.dot("中国", "美国")
 运行启动命令：
 
 ```shell
-$ hub serving start -m w2v_baidu_encyclopedia_target_word-word_dim300
+$ hub serving start -m w2v_zhihu_target_word-bigram_dim300
 ```
 
 这样就完成了一个获取词向量的余弦相似度服务化API的部署，默认端口号为8866。
@@ -101,7 +101,7 @@ word_pairs = [["中国", "美国"], ["今天", "明天"]]
 # 以key的方式指定word_pairs传入预测方法的时的参数，此例中为"data"，对于每一对单词，调用cosine_sim进行余弦相似度的计算
 data = {"data": word_pairs}
 # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
-url = "http://10.12.121.132:8866/predict/w2v_baidu_encyclopedia_target_word-word_dim300"
+url = "http://10.12.121.132:8866/predict/w2v_zhihu_target_word-bigram_dim300"
 # 指定post请求的headers为application/json方式
 headers = {"Content-Type": "application/json"}
 
