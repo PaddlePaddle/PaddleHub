@@ -81,8 +81,7 @@ class Trainer(object):
 
         if self.nranks > 1:
             paddle.distributed.init_parallel_env()
-            strategy = paddle.distributed.prepare_context()
-            self.model = paddle.DataParallel(self.model, strategy)
+            self.model = paddle.DataParallel(self.model)
         self.compare_metrics = self._compare_metrics if not compare_metrics else compare_metrics
         self._load_checkpoint()
 
