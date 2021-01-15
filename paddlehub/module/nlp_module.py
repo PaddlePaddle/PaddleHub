@@ -459,6 +459,7 @@ class TransformerModule(RunModule, TextServing):
             predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
         elif self.task == 'token-cls':
             predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
+        self.metric.reset()
         return {'loss': avg_loss, 'metrics': metric}
 
     def validation_step(self, batch: List[paddle.Tensor], batch_idx: int):
@@ -475,6 +476,7 @@ class TransformerModule(RunModule, TextServing):
             predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
         elif self.task == 'token-cls':
             predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
+        self.metric.reset()
         return {'metrics': metric}
 
     def get_embedding(self, data: List[List[str]], use_gpu=False):
