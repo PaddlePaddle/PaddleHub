@@ -27,7 +27,7 @@ import time
 import tempfile
 import traceback
 import types
-from typing import Generator
+from typing import Generator, List
 from urllib.parse import urlparse
 
 import numpy as np
@@ -327,3 +327,43 @@ def mkdir(path: str):
     """The same as the shell command `mkdir -p`."""
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def reseg_token_label(tokenizer, tokens: List[str], labels: List[str] = None):
+    '''
+    Convert segments and labels of sequence labeling samples into tokens
+    based on the vocab of tokenizer.
+    '''
+    if labels:
+        if len(tokens) != len(labels):
+            raise ValueError(
+                "The length of tokens must be same with labels")
+        ret_tokens = []
+        ret_labels = []
+        for token, label in zip(tokens, labels):
+            sub_token = tokenizer(token)
+            if len(sub_token) == 0:
+                continue
+            ret_tokens.extend(sub_token)
+            ret_labels.append(label)
+            if len(sub_token) < 2:
+                continue
+            sub_label = label
+            if label.startswith("B-"):
+                sub_label = "I-" + label[2:]
+            ret_labels.extend([sub_label] * (len(sub_token) - 1))
+
+        if len(ret_tokens) != len(ret_labels):
+            raise ValueError(
+                "The length of ret_tokens can't match with labels")
+        return ret_tokens, ret_labels
+    else:
+        ret_tokens = []
+        for token in tokens:
+            sub_token = tokenizer(token)
+            if len(sub_token) == 0:
+                continue
+            ret_tokens.extend(sub_token)
+            if len(sub_token) < 2:
+                continue
+        return ret_tokens, None

@@ -23,7 +23,7 @@ from paddlehub.env import DATA_HOME
 from paddlehub.text.bert_tokenizer import BertTokenizer
 from paddlehub.text.tokenizer import CustomTokenizer
 from paddlehub.utils.log import logger
-from paddlehub.utils.utils import download
+from paddlehub.utils.utils import download, reseg_token_label
 from paddlehub.utils.xarfile import is_xarfile, unarchive
 
 
@@ -309,7 +309,8 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
         """
         records = []
         for example in examples:
-            tokens, labels = self._reseg_token_label(
+            tokens, labels = reseg_token_label(
+                tokenizer=self.tokenizer,
                 tokens=example.text_a.split(self.split_char),
                 labels=example.label.split(self.split_char))
             record = self.tokenizer.encode(
@@ -338,42 +339,6 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
                             self.label_list.index(self.no_entity_label))
             records.append(record)
         return records
-
-    def _reseg_token_label(
-            self, tokens: List[str], labels: List[str] = None) -> Tuple[List[str], List[str]] or List[str]:
-        if labels:
-            if len(tokens) != len(labels):
-                raise ValueError(
-                    "The length of tokens must be same with labels")
-            ret_tokens = []
-            ret_labels = []
-            for token, label in zip(tokens, labels):
-                sub_token = self.tokenizer(token)
-                if len(sub_token) == 0:
-                    continue
-                ret_tokens.extend(sub_token)
-                ret_labels.append(label)
-                if len(sub_token) < 2:
-                    continue
-                sub_label = label
-                if label.startswith("B-"):
-                    sub_label = "I-" + label[2:]
-                ret_labels.extend([sub_label] * (len(sub_token) - 1))
-
-            if len(ret_tokens) != len(ret_labels):
-                raise ValueError(
-                    "The length of ret_tokens can't match with labels")
-            return ret_tokens, ret_labels
-        else:
-            ret_tokens = []
-            for token in tokens:
-                sub_token = self.tokenizer(token)
-                if len(sub_token) == 0:
-                    continue
-                ret_tokens.extend(sub_token)
-                if len(sub_token) < 2:
-                    continue
-            return ret_tokens, None
 
     def __getitem__(self, idx):
         record = self.records[idx]

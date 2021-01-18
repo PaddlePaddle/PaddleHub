@@ -30,6 +30,7 @@ from paddle.utils.download import get_path_from_url
 from paddlehub.module.module import serving, RunModule, runnable
 
 from paddlehub.utils.log import logger
+from paddlehub.utils.utils import reseg_token_label
 
 __all__ = [
     'PretrainedModel',
@@ -411,50 +412,11 @@ class TransformerModule(RunModule, TextServing):
         'token-cls',
     ]
 
-    def _reseg_token_label(self, tokenizer, tokens: List[str], labels: List[str] = None):
-        '''
-        Convert segments and labels of sequence labeling samples into tokens
-        based on the vocab of tokenizer.
-        '''
-        if labels:
-            if len(tokens) != len(labels):
-                raise ValueError(
-                    "The length of tokens must be same with labels")
-            ret_tokens = []
-            ret_labels = []
-            for token, label in zip(tokens, labels):
-                sub_token = tokenizer(token)
-                if len(sub_token) == 0:
-                    continue
-                ret_tokens.extend(sub_token)
-                ret_labels.append(label)
-                if len(sub_token) < 2:
-                    continue
-                sub_label = label
-                if label.startswith("B-"):
-                    sub_label = "I-" + label[2:]
-                ret_labels.extend([sub_label] * (len(sub_token) - 1))
-
-            if len(ret_tokens) != len(ret_labels):
-                raise ValueError(
-                    "The length of ret_tokens can't match with labels")
-            return ret_tokens, ret_labels
-        else:
-            ret_tokens = []
-            for token in tokens:
-                sub_token = tokenizer(token)
-                if len(sub_token) == 0:
-                    continue
-                ret_tokens.extend(sub_token)
-                if len(sub_token) < 2:
-                    continue
-            return ret_tokens, None
-
     def _convert_text_to_input(self, tokenizer, text: List[str], max_seq_len: int, split_char: str):
         pad_to_max_seq_len = False if self.task is None else True
         if self.task == 'token-cls':  # Extra processing of token-cls task
             tokens = text[0].split(split_char)
-            text[0], _ = self._reseg_token_label(tokenizer=tokenizer, tokens=tokens)
+            text[0], _ = reseg_token_label(tokenizer=tokenizer, tokens=tokens)
 
         if len(text) == 1:
             encoded_inputs = tokenizer.encode(text[0], text_pair=None, max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len)
