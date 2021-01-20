@@ -367,3 +367,23 @@ def reseg_token_label(tokenizer, tokens: List[str], labels: List[str] = None):
             if len(sub_token) < 2:
                 continue
         return ret_tokens, None
+
+
+def pad_sequence(ids: List[int], max_seq_len: int, pad_token_id: int):
+    '''
+    Pad s sequence to max_seq_len
+    '''
+    assert len(ids) <= max_seq_len, \
+        f'The input length {len(ids)} is greater than max_seq_len {max_seq_len}. '\
+        'Please check the input list and max_seq_len if you really want to pad a sequence.'
+    return ids[:] + [pad_token_id]*(max_seq_len-len(ids))
+
+
+def trunc_sequence(ids: List[int], max_seq_len: int):
+    '''
+    Truncate a sequence to max_seq_len
+    '''
+    assert len(ids) >= max_seq_len, \
+        f'The input length {len(ids)} is less than max_seq_len {max_seq_len}. ' \
+        'Please check the input list and max_seq_len if you really want to truncate a sequence.'
+    return ids[:max_seq_len]

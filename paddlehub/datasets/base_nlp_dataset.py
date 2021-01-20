@@ -20,11 +20,12 @@ import numpy as np
 import paddle
 
 from paddlehub.env import DATA_HOME
-from paddlehub.text.bert_tokenizer import BertTokenizer
-from paddlehub.text.tokenizer import CustomTokenizer
+from paddlenlp.transformers import PretrainedTokenizer
+from paddlenlp.data import JiebaTokenizer
 from paddlehub.utils.log import logger
-from paddlehub.utils.utils import download, reseg_token_label
+from paddlehub.utils.utils import download, reseg_token_label, pad_sequence, trunc_sequence
 from paddlehub.utils.xarfile import is_xarfile, unarchive
+
 
 
 class InputExample(object):
@@ -72,7 +73,7 @@ class BaseNLPDataset(object):
 
     def __init__(self,
                  base_path: str,
-                 tokenizer: Union[BertTokenizer, CustomTokenizer],
+                 tokenizer: Union[PretrainedTokenizer, JiebaTokenizer],
                  max_seq_len: Optional[int] = 128,
                  mode: Optional[str] = "train",
                  data_file: Optional[str] = None,
@@ -81,7 +82,7 @@ class BaseNLPDataset(object):
         """
         Ags:
             base_path (:obj:`str`): The directory to the whole dataset.
-            tokenizer (:obj:`BertTokenizer` or :obj:`CustomTokenizer`):
+            tokenizer (:obj:`PretrainedTokenizer` or :obj:`JiebaTokenizer`):
                 It tokenizes the text and encodes the data as model needed.
             max_seq_len (:obj:`int`, `optional`, defaults to :128):
                 If set to a number, will limit the total sequence returned so that it has a maximum length.
@@ -159,7 +160,7 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
 
     def __init__(self,
                  base_path: str,
-                 tokenizer: Union[BertTokenizer, CustomTokenizer],
+                 tokenizer: Union[PretrainedTokenizer, JiebaTokenizer],
                  max_seq_len: int = 128,
                  mode: str = "train",
                  data_file: str = None,
@@ -169,7 +170,7 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
         """
         Ags:
             base_path (:obj:`str`): The directory to the whole dataset.
-            tokenizer (:obj:`BertTokenizer` or :obj:`CustomTokenizer`):
+            tokenizer (:obj:`PretrainedTokenizer` or :obj:`JiebaTokenizer`):
                 It tokenizes the text and encodes the data as model needed.
             max_seq_len (:obj:`int`, `optional`, defaults to :128):
                 If set to a number, will limit the total sequence returned so that it has a maximum length.
@@ -231,9 +232,22 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
         """
         records = []
         for example in examples:
-            record = self.tokenizer.encode(text=example.text_a, text_pair=example.text_b, max_seq_len=self.max_seq_len)
-            # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
-            # When all words are not found in the vocab, the text will be dropped.
+            if isinstance(self.tokenizer, PretrainedTokenizer):
+                record = self.tokenizer.encode(text=example.text_a, text_pair=example.text_b, max_seq_len=self.max_seq_len)
+            elif isinstance(self.tokenizer, JiebaTokenizer):
+                pad_token = self.tokenizer.vocab.pad_token
+
+                ids = self.tokenizer.encode(sentence=example.text_a)
+                seq_len = min(len(ids), self.max_seq_len)
+                if len(ids) > self.max_seq_len:
+                    ids = trunc_sequence(ids, self.max_seq_len)
+                else:
+                    pad_token_id = self.tokenizer.vocab.to_indices(pad_token)
+                    ids = pad_sequence(ids, self.max_seq_len, pad_token_id)
+                record = {'text': ids, 'seq_len': seq_len}
+            else:
+                raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".format(type(self.tokenizer)))
+
             if not record:
                 logger.info(
                     "The text %s has been dropped as it has no words in the vocab after tokenization." % example.text_a)
@@ -245,19 +259,53 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
 
     def __getitem__(self, idx):
         record = self.records[idx]
-        if 'label' in record.keys():
-            return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'], dtype=np.int64)
+        if isinstance(self.tokenizer, PretrainedTokenizer):
+            if 'label' in record.keys():
+                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'], dtype=np.int64)
+            else:
+                return np.array(record['input_ids']), np.array(record['segment_ids'])
+        elif isinstance(self.tokenizer, JiebaTokenizer):
+            if 'label' in record.keys():
+                return np.array(record['text']), np.array(record['label'], dtype=np.int64)
+            else:
+                return np.array(record['text'])
         else:
-            return np.array(record['input_ids']), np.array(record['segment_ids'])
+            raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".format(type(self.tokenizer)))
 
     def __len__(self):
         return len(self.records)
 
 
 class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
+    """
+    Ags:
+        base_path (:obj:`str`): The directory to the whole dataset.
+        tokenizer (:obj:`PretrainedTokenizer` or :obj:`JiebaTokenizer`):
+            It tokenizes the text and encodes the data as model needed.
+        max_seq_len (:obj:`int`, `optional`, defaults to :128):
+            If set to a number, will limit the total sequence returned so that it has a maximum length.
+        mode (:obj:`str`, `optional`, defaults to `train`):
+            It identifies the dataset mode (train, test or dev).
+        data_file(:obj:`str`, `optional`, defaults to :obj:`None`):
+            The data file name, which is relative to the base_path.
+        label_file(:obj:`str`, `optional`, defaults to :obj:`None`):
+            The label file name, which is relative to the base_path.
+            It is all labels of the dataset, one line one label.
+        label_list(:obj:`List[str]`, `optional`, defaults to :obj:`None`):
+            The list of all labels of the dataset
+        split_char(:obj:`str`, `optional`, defaults to :obj:`\002`):
+            The symbol used to split chars in text and labels
+        no_entity_label(:obj:`str`, `optional`, defaults to :obj:`O`):
+            The label used to mark no entities
+        ignore_label(:obj:`int`, `optional`, defaults to :-100):
+            If one token's label == ignore_label, it will be ignored when
+            calculating loss
+        is_file_with_header(:obj:bool, `optional`, default to :obj: False) :
+            Whether or not the file is with the header introduction.
+    """
     def __init__(self,
                  base_path: str,
-                 tokenizer: Union[BertTokenizer, CustomTokenizer],
+                 tokenizer: Union[PretrainedTokenizer, JiebaTokenizer],
                  max_seq_len: int = 128,
                  mode: str = "train",
                  data_file: str = None,
@@ -309,22 +357,46 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
         """
         records = []
         for example in examples:
-            tokens, labels = reseg_token_label(
-                tokenizer=self.tokenizer,
-                tokens=example.text_a.split(self.split_char),
-                labels=example.label.split(self.split_char))
-            record = self.tokenizer.encode(
-                text=tokens, max_seq_len=self.max_seq_len)
-            # CustomTokenizer will tokenize the text firstly and then lookup words in the vocab
-            # When all words are not found in the vocab, the text will be dropped.
+            tokens = example.text_a.split(self.split_char)
+            labels = example.label.split(self.split_char)
+
+            # convert tokens into record
+            if isinstance(self.tokenizer, PretrainedTokenizer):
+                pad_token = self.tokenizer.pad_token
+
+                tokens, labels = reseg_token_label(tokenizer=self.tokenizer, tokens=tokens, labels=labels)
+                record = self.tokenizer.encode(text=tokens, max_seq_len=self.max_seq_len)
+            elif isinstance(self.tokenizer, JiebaTokenizer):
+                pad_token = self.tokenizer.vocab.pad_token
+
+                ids = [self.tokenizer.vocab.to_indices(token) for token in tokens]
+                seq_len = min(len(ids), self.max_seq_len)
+                if len(ids) > self.max_seq_len:
+                    ids = trunc_sequence(ids, self.max_seq_len)
+                else:
+                    pad_token_id = self.tokenizer.vocab.to_indices(pad_token)
+                    ids = pad_sequence(ids, self.max_seq_len, pad_token_id)
+
+                record = {'text': ids, 'seq_len': seq_len}
+            else:
+                raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".format(type(self.tokenizer)))
+
             if not record:
                 logger.info(
                     "The text %s has been dropped as it has no words in the vocab after tokenization."
                     % example.text_a)
                 continue
+
+            # convert labels into record
             if labels:
                 record["label"] = []
-                tokens_with_specical_token = self.tokenizer.convert_ids_to_tokens(record['input_ids'])
+                if isinstance(self.tokenizer, PretrainedTokenizer):
+                    tokens_with_specical_token = self.tokenizer.convert_ids_to_tokens(record['input_ids'])
+                elif isinstance(self.tokenizer, JiebaTokenizer):
+                    tokens_with_specical_token = [self.tokenizer.vocab.to_tokens(id_) for id_ in record['text']]
+                else:
+                    raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".format(type(self.tokenizer)))
+
                 tokens_index = 0
                 for token in tokens_with_specical_token:
                     if tokens_index < len(
@@ -332,7 +404,7 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
                         record["label"].append(
                             self.label_list.index(labels[tokens_index]))
                         tokens_index += 1
-                    elif token in [self.tokenizer.pad_token]:
+                    elif token in [pad_token]:
                         record["label"].append(self.ignore_label)  # label of special token
                     else:
                         record["label"].append(
@@ -342,10 +414,18 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
 
     def __getitem__(self, idx):
         record = self.records[idx]
-        if 'label' in record.keys():
-            return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['seq_len']), np.array(record['label'], dtype=np.int64)
+        if isinstance(self.tokenizer, PretrainedTokenizer):
+            if 'label' in record.keys():
+                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['seq_len']), np.array(record['label'], dtype=np.int64)
+            else:
+                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['seq_len'])
+        elif isinstance(self.tokenizer, JiebaTokenizer):
+            if 'label' in record.keys():
+                return np.array(record['text']), np.array(record['seq_len']), np.array(record['label'], dtype=np.int64)
+            else:
+                return np.array(record['text']), np.array(record['seq_len'])
         else:
-            return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['seq_len'])
+            raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".format(type(self.tokenizer)))
 
     def __len__(self):
         return len(self.records)
