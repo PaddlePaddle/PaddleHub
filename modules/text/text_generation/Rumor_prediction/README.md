@@ -15,7 +15,7 @@ $ hub run Rumor_prediction --input_text='兴仁县今天抢小孩没抢走，把
 def Rumor(texts, use_gpu=False):
 ```
 
-预测API，输入关键字给出请假理由。
+预测API，预测语句是否为谣言。
 
 **参数**
 
