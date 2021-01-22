@@ -9,7 +9,7 @@ from pathlib import Path
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from paddlehub.module.module import runnable, serving, moduleinfo
 from paddlehub.io.parser import txt_parser
-from paddlehub.module.nlp_module import DataFormatError
+from paddlehub.compat.module.nlp_module import DataFormatError
 import numpy as np
 import paddle
 import paddlehub as hub
