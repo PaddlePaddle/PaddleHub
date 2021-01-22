@@ -47,4 +47,4 @@ print(results)
 
 paddlepaddle >= 2.0.0rc
 
-paddlehub >= 1.6.0
+paddlehub >= 2.0.0rc0
