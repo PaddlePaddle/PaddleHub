@@ -100,9 +100,6 @@ class Rumorprediction(hub.Module):
             }
             alltext = [alltext]
             results = results + alltext
-            # results = results.append(alltext)
-            # print(alltext)
-            # results = results.append(alltext)
             
         return results
 
