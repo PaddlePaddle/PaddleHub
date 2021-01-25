@@ -57,6 +57,12 @@ def get_command(name: str) -> Any:
 
 
 def execute():
+    '''
+    Execute a PaddleHub command and return the status code
+
+    Returns:
+         status(int) : Result of the command execution. 0 for a success and 1 for a failure.
+    '''
     import sys
     com = _commands
     for idx, _argv in enumerate(['hub'] + sys.argv[1:]):
@@ -66,4 +72,8 @@ def execute():
     else:
         idx += 1
 
-    return com['_entry']().execute(sys.argv[idx:])
+    # The method 'execute' of a command instance returns 'True' for a success
+    # while 'False' for a failure. Here converts this result into a exit status
+    # in bash: 0 for a success and 1 for a failure.
+    status = 0 if com['_entry']().execute(sys.argv[idx:]) else 1
+    return status
