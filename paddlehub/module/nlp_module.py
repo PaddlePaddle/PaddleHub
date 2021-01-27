@@ -32,6 +32,9 @@ from paddlehub.module.module import serving, RunModule, runnable
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import reseg_token_label
 
+from paddlenlp.embeddings.token_embedding import EMBEDDING_HOME, EMBEDDING_URL_ROOT
+from paddlenlp.data import JiebaTokenizer
+
 __all__ = [
     'PretrainedModel',
     'register_base_model',
@@ -510,6 +513,7 @@ class TransformerModule(RunModule, TextServing):
             batch_size: int = 1,
             use_gpu: bool = False
     ):
+
         """
         Predicts the data labels.
 
@@ -563,3 +567,63 @@ class TransformerModule(RunModule, TextServing):
                 ])
 
         return results
+
+
+class EmbeddingServing(object):
+    """
+    A base class for embedding model which supports serving.
+    """
+    @serving
+    def calc_similarity(self, data: List[List[str]]):
+        """
+        Calculate similarities of giving word pairs.
+        """
+        results = []
+        for word_pair in data:
+            if len(word_pair) != 2:
+                raise RuntimeError(
+                    f'The input must have two words, but got {len(word_pair)}. Please check your inputs.')
+            if not isinstance(word_pair[0], str) or not isinstance(word_pair[1], str):
+                raise RuntimeError(
+                    f'The types of text pair must be (str, str), but got'
+                    f' ({type(word_pair[0]).__name__}, {type(word_pair[1]).__name__}). Please check your inputs.')
+
+            for word in word_pair:
+                if self.get_idx_from_word(word) == \
+                        self.get_idx_from_word(self.vocab.unk_token):
+                    raise RuntimeError(
+                        f'Word "{word}" is not in vocab. Please check your inputs.')
+            results.append(str(self.cosine_sim(*word_pair)))
+        return results
+
+
+class EmbeddingModule(RunModule, EmbeddingServing):
+    """
+    The base class for Embedding models.
+    """
+    base_url = 'https://paddlenlp.bj.bcebos.com/models/embeddings/'
+
+    def _download_vocab(self):
+        """
+        Download vocab from url
+        """
+        url = EMBEDDING_URL_ROOT + '/' + f'vocab.{self.embedding_name}'
+        get_path_from_url(url, EMBEDDING_HOME)
+
+    def get_vocab_path(self):
+        """
+        Get local vocab path
+        """
+        vocab_path = os.path.join(EMBEDDING_HOME, f'vocab.{self.embedding_name}')
+        if not os.path.exists(vocab_path):
+            self._download_vocab()
+        return vocab_path
+
+    def get_tokenizer(self, *args, **kwargs):
+        """
+        Get tokenizer of embedding module
+        """
+        if self.embedding_name.endswith('.en'):  # English
+            raise NotImplementedError  # TODO: (chenxiaojie) add tokenizer of English embedding
+        else:                                    # Chinese
+            return JiebaTokenizer(self.vocab)
