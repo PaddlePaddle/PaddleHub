@@ -45,6 +45,6 @@ print(results)
 
 ### 依赖
 
-paddlepaddle >= 2.0.0rc
+paddlepaddle >= 2.0.0rc1
 
 paddlehub >= 2.0.0rc0
