@@ -20,6 +20,7 @@
 
 
 ## 近期更新
+- **2021.02.18**，发布v2.0.0版本，模型开发调试更简单，finetune接口更加灵活易用。视觉类任务迁移学习能力全面升级，支持[图像分类](./demo/image_classification/README.md)、[图像着色](./demo/colorization/README.md)、[风格迁移](./demo/style_transfer/README.md)等多种任务；BERT、ERNIE、RoBERTa等Transformer类模型升级至动态图，支持[文本分类](./demo/text_classification/README.md)、[序列标注](./demo/sequence_labeling/README.md)的Fine-Tune能力；优化服务化部署Serving能力，支持多卡预测、自动负载均衡，性能大幅度提升；新增自动数据增强能力[Auto Augment](./demo/autoaug/README.md)，能高效地搜索适合数据集的数据增强策略组合。新增[词向量模型](./modules/text/embedding)61个，其中包含中文模型51个，英文模型10个；新增[图像分割](./modules/thirdparty/image/semantic_segmentation)模型4个、[深度模型](./modules/thirdparty/image/depth_estimation)2个、[图像生成](./modules/thirdparty/image/Image_gan/style_transfer)模型7个、[文本生成](./modules/thirdparty/text/text_generation)模型3个。预训练模型总量达到[**【278】**](https://www.paddlepaddle.org.cn/hublist) 个。
 - **2020.11.20**，发布2.0-beta版本，全面迁移动态图编程模式，服务化部署Serving能力升级；新增手部关键点检测1个、图像动漫化类12个、图片编辑类3个，语音合成类3个，句法分析1个，预训练模型总量到达 **【182】** 个。
 - **2020.10.09**，新增OCR多语言系列模型4个，图像编辑模型4个，预训练模型总量到达 **【162】** 个。
 - **2020.09.27**，新增文本生成模型6个，图像分割模型1个，预训练模型总量到达 **【154】** 个。
@@ -80,6 +81,13 @@
 </div>
 
 
+### 图像生成
+- 包含人像动漫化、街景动漫化、风格迁移。
+- 感谢CopyRight@[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、CopyRight@[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)提供预训练模型。
+<div align="center">
+<img src="./docs/imgs/Readme_Related/ImageGAN.gif"  width = "642" height = "400" />
+</div>
+
 ### 目标检测
 - 包含行人检测、车辆检测，更有工业级超大规模预训练模型可选。--
 - 感谢CopyRight@[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)提供预训练模型，训练能力开放，欢迎体验。
@@ -91,21 +99,25 @@
 - 包含单人、多人身体关键点检测、面部关键点检测、手部关键点检测。
 - 感谢CopyRight@[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)开源预训练模型。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "458" height = "400" />
+<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "642" height = "400" />
 </div>
 
 ### 图像分割
-- 包含效果卓越的人像抠图模型、ACE2P人体解析世界冠军模型
-- 感谢CopyRight@[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)提供预训练模型，训练能力开放，欢迎体验。
+- 包含效果卓越的人像抠图模型、ACE2P人体解析世界冠军模型、动态天空置换算法
+- 感谢CopyRight@[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)、感谢CopyRight@[Zhengxia Zou](https://github.com/jiupinjia/SkyAR)提供预训练模型，训练能力开放，欢迎体验。
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
+</div>
+
+<div align="center">
+<img src="./docs/imgs/Readme_Related/9dis.gif"  width = "642" height = "400" />
 </div>
 
 ### 图像分类
 - 包含动物分类、菜品分类、野生动物制品分类，多种算法可选
 - 感谢CopyRight@[PaddleClas](https://github.com/PaddlePaddle/PaddleClas)提供预训练模型，训练能力开放，欢迎体验。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "530" height = "400" />
+<img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "640" height = "400" />
 </div>
 
 ### 词法分析
@@ -252,12 +264,10 @@
 ## 致谢开发者
 我们非常欢迎您为PaddleHub贡献代码，也十分感谢您的反馈。
 
-* 非常感谢[肖培楷](https://github.com/jm12138)贡献了街景动漫化，人像动漫化和手势关键点识别三个module
+* 非常感谢[肖培楷](https://github.com/jm12138)贡献了街景动漫化，人像动漫化、手势关键点识别、天空置换、深度估计、人像分割等module
 * 非常感谢[Austendeng](https://github.com/Austendeng)贡献了修复SequenceLabelReader的pr
 * 非常感谢[cclauss](https://github.com/cclauss)贡献了优化travis-ci检查的pr
 * 非常感谢[奇想天外](http://www.cheerthink.com/)贡献了口罩检测的demo
 * 非常感谢[mhlwsk](https://github.com/mhlwsk)贡献了修复序列标注预测demo的pr
-* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)贡献了看图作诗的module
-* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)和[七年期限](https://github.com/1084667371)联合贡献了看图写诗中秋特别版module
+* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)和[七年期限](https://github.com/1084667371)联合贡献了看图写诗中秋特别版module、谣言预测、请教条生成等module
 * 非常感谢[livingbody](https://github.com/livingbody)贡献了基于PaddleHub能力的风格迁移和中秋看图写诗微信小程序
-

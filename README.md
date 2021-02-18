@@ -19,6 +19,7 @@ English | [简体中文](README_ch.md)
 - All models are **OPEN SOURCE**, **FREE** to download and use them in offline scenario.
 
 ### Recent updates
+- **2021.02.18:** The v2.0.0 version is released, making model development and debugging easier, and the finetune task is more flexible and easy to use.The ability to transfer learning for visual tasks is fully upgraded, supporting various tasks such as image classification, image coloring, and style transfer; Transformer models such as BERT, ERNIE, and RoBERTa are upgraded to dynamic graphs, supporting Fine-Tune capabilities for text classification and sequence labeling; Optimize the Serving capability, support multi-card prediction, automatic load balancing, and greatly improve performance; the new automatic data enhancement capability Auto Augment can efficiently search for data enhancement strategy combinations suitable for data sets. 61 new word vector models were added, including 51 Chinese models and 10 English models; add 4 image segmentation models, 2 depth models, 7 image generation models, and 3 text generation models, the total number of pre-trained models reaches **【278】**.
 - **2020.12.1:** Release 2.0-beta1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tune task based on large-scale pre-trained models.
 - **2020.11.20:** Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key point detection model, 12 image animation models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
 - **2020.10.09:** Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
@@ -77,6 +78,14 @@ English | [简体中文](README_ch.md)
 </table>
 </div>
 
+### Image Generation
+- Including portrait animation, street scene animation, and style migration.
+- Many thanks to CopyRight@[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、CopyRight@[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)for the pre-trained models.
+<div align="center">
+<img src="./docs/imgs/Readme_Related/ImageGAN.gif"  width = "642" height = "400" />
+</div>
+
+
 ### Object Detection
 - Pedestrian detection, vehicle detection, and more industrial-grade ultra-large-scale pretrained models are provided.
 - Many thanks to CopyRight@[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection) for the pre-trained models, you can try to train your models with PadddleDetection.
@@ -88,15 +97,20 @@ English | [简体中文](README_ch.md)
 - Support body, face and hands key point detection for single or multiple person.
 - Many thanks to CopyRight@[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) for the pre-trained models.
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "458" height = "400" />
+<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "640" height = "400" />
 </div>
 
 ### Image Segmentation
-- High quality pixel-level portrait cutout model, ACE2P human body analysis world champion models are provided.
-- Many thanks to CopyRight@[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg) for the pre-trained models, you can try to train your models with PaddleSeg.
+- High quality pixel-level portrait cutout model, ACE2P human body analysis world champion models are provided, Dynamic Sky Replacement and Harmonization.
+- Many thanks to CopyRight@[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg), CopyRight@[Zhengxia Zou](https://github.com/jiupinjia/SkyAR) for the pre-trained models, you can try to retrain your models by paddleseg or sky matting model.
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
 </div>
+
+<div align="center">
+<img src="./docs/imgs/Readme_Related/9dis.gif"  width = "642" height = "400" />
+</div>
+
 
 ### Image Classification
 - Various models like animal classification, dish classification, wild animal product classification are available.
@@ -192,7 +206,7 @@ If you have any questions during the use of the model, you can join the official
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
 </div>  
-If you fail to scan the code, please add WeChat 15711058002 and note "Hub", the operating class will invite you to join the group.
+If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the operating class will invite you to join the group.
 
 ## Documentation Tutorial
 - [PIP Installation](./docs/docs_en/installation_en.md)
@@ -244,6 +258,7 @@ The release of this project is certified by the <a href="./LICENSE">Apache 2.0 l
 ## Contribution
 We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 
+* Many thanks to [肖培楷](https://github.com/jm12138), Contributed to street scene animation, portrait animation, gesture key point recognition, sky replacement, depth estimation, portrait segmentation and other modules
 * Many thanks to [Austendeng](https://github.com/Austendeng) for fixing the SequenceLabelReader
 * Many thanks to [cclauss](https://github.com/cclauss) optimizing travis-ci check
 * Many thanks to [奇想天外](http://www.cheerthink.com/)，Contributed a demo of mask detection
