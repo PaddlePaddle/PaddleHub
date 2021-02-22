@@ -28,7 +28,7 @@ from paddlehub.common.dir import THIRD_PARTY_HOME
 from paddlehub.common.utils import mkdir
 from paddlehub.common.downloader import default_downloader
 from paddlehub.module.module import runnable
-from paddlehub.module.nlp_module import DataFormatError
+from paddlehub.compat.module.nlp_module import DataFormatError
 
 lack_dependency = []
 for dependency in ["ruamel", "parakeet", "soundfile", "librosa"]:
