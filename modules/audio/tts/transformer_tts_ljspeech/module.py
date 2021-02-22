@@ -23,7 +23,7 @@ import paddle.fluid.dygraph as dg
 import paddlehub as hub
 from paddlehub.module.module import runnable
 from paddlehub.common.utils import mkdir
-from paddlehub.module.nlp_module import DataFormatError
+from paddlehub.compat.module.nlp_module import DataFormatError
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo, serving
 from paddlehub.common.dir import THIRD_PARTY_HOME
