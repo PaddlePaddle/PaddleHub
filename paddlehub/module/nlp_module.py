@@ -41,6 +41,10 @@ __all__ = [
     'TransformerModule',
 ]
 
+class DataFormatError(Exception):
+    def __init__(self, *args):
+        self.args = args
+
 
 def fn_args_to_dict(func, *args, **kwargs):
     """
