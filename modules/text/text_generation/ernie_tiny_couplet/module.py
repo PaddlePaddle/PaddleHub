@@ -18,7 +18,7 @@ import argparse
 
 import paddlehub as hub
 from paddlehub.module.module import moduleinfo, serving, runnable
-from paddlehub.module.nlp_module import DataFormatError
+from paddlehub.compat.module.nlp_module import DataFormatError
 
 
 @moduleinfo(
