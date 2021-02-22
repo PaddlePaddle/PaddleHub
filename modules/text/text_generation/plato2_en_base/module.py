@@ -23,7 +23,7 @@ from collections import namedtuple
 import paddle.fluid as fluid
 import paddlehub as hub
 from paddlehub.module.module import runnable
-from paddlehub.module.nlp_module import DataFormatError
+from paddlehub.compat.module.nlp_module import DataFormatError
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo, serving
 
