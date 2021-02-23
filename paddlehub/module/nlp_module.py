@@ -34,6 +34,8 @@ from paddlehub.utils.utils import reseg_token_label
 
 from paddlenlp.embeddings.token_embedding import EMBEDDING_HOME, EMBEDDING_URL_ROOT
 from paddlenlp.data import JiebaTokenizer
+from paddlehub.compat.module.nlp_module import DataFormatError
+
 
 __all__ = [
     'PretrainedModel',
