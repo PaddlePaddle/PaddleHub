@@ -85,7 +85,7 @@
 - 包含人像动漫化、街景动漫化、风格迁移。
 - 感谢CopyRight@[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、CopyRight@[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)提供预训练模型。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageGAN.gif"  width = "642" height = "400" />
+<img src="./docs/imgs/Readme_Related/ImageGAN.gif"  width = "640" height = "600" />
 </div>
 
 ### 目标检测
@@ -99,7 +99,7 @@
 - 包含单人、多人身体关键点检测、面部关键点检测、手部关键点检测。
 - 感谢CopyRight@[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)开源预训练模型。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "642" height = "400" />
+<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "642" height = "550" />
 </div>
 
 ### 图像分割
@@ -110,21 +110,16 @@
 </div>
 
 <div align="center">
-<img src="./docs/imgs/Readme_Related/9dis.gif"  width = "642" height = "400" />
+<img src="./docs/imgs/Readme_Related/9dis.gif"  width = "642" height = "200" />
 </div>
+
+（第二张动图来自于CopyRight@[jiupinjia/SkyAR](https://github.com/jiupinjia/SkyAR#district-9-ship-video-source))
 
 ### 图像分类
 - 包含动物分类、菜品分类、野生动物制品分类，多种算法可选
 - 感谢CopyRight@[PaddleClas](https://github.com/PaddlePaddle/PaddleClas)提供预训练模型，训练能力开放，欢迎体验。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "640" height = "400" />
-</div>
-
-### 词法分析
-- 效果优秀的中文分词、词性标注与命名实体识别的模型。
-- 感谢CopyRight@[LAC](https://github.com/baidu/LAC)提供预训练模型，训练能力开放，欢迎体验。
-<div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "640" height = "233" />
+<img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "530" height = "400" />
 </div>
 
 ### 文本生成
@@ -132,6 +127,13 @@
 - 感谢CopyRight@[ERNIE](https://github.com/PaddlePaddle/ERNIE)提供预训练模型，训练能力开放，欢迎体验。
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "850" height = "400" />
+</div>
+
+### 词法分析
+- 效果优秀的中文分词、词性标注与命名实体识别的模型。
+- 感谢CopyRight@[LAC](https://github.com/baidu/LAC)提供预训练模型，训练能力开放，欢迎体验。
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "640" height = "233" />
 </div>
 
 ### 句法分析
