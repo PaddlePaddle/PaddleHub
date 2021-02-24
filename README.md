@@ -111,10 +111,11 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/9dis.gif"  width = "642" height = "200" />
 </div>
 
-<center>
-
+<div align="center">
+  
 (The second gif comes from  CopyRight@[jiupinjia/SkyAR](https://github.com/jiupinjia/SkyAR#district-9-ship-video-source))
-</center>
+</div>
+
 
 ### Image Classification
 - Various models like animal classification, dish classification, wild animal product classification are available.
