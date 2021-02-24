@@ -21,7 +21,7 @@ English | [简体中文](README_ch.md)
 ### Recent updates
 - **2021.02.18:** The v2.0.0 version is released, making model development and debugging easier, and the finetune task is more flexible and easy to use.The ability to transfer learning for visual tasks is fully upgraded, supporting various tasks such as image classification, image coloring, and style transfer; Transformer models such as BERT, ERNIE, and RoBERTa are upgraded to dynamic graphs, supporting Fine-Tune capabilities for text classification and sequence labeling; Optimize the Serving capability, support multi-card prediction, automatic load balancing, and greatly improve performance; the new automatic data enhancement capability Auto Augment can efficiently search for data enhancement strategy combinations suitable for data sets. 61 new word vector models were added, including 51 Chinese models and 10 English models; add 4 image segmentation models, 2 depth models, 7 image generation models, and 3 text generation models, the total number of pre-trained models reaches **【278】**.
 - **2020.12.1:** Release 2.0-beta1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tune task based on large-scale pre-trained models.
-- **2020.11.20:** Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key point detection model, 12 image animation models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
+- **2020.11.20:** Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key point detection model, 12 image cartoonization models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
 - **2020.10.09:** Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
 - **2020.09.27:** 6 new text generation models and 1 image segmentation model were added, and the total number of pre-trained models reached **【154】**.
 - **2020.08.13:** Released v1.8.1, added a segmentation model, and supports EMNLP2019-Sentence-BERT as a text matching task network. The total number of pre-training models reaches **【147】**.
@@ -79,10 +79,10 @@ English | [简体中文](README_ch.md)
 </div>
 
 ### Image Generation
-- Including portrait animation, street scene animation, and style migration.
+- Including portrait cartoonization, street scene cartoonization, and style transfer.
 - Many thanks to CopyRight@[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、CopyRight@[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)for the pre-trained models.
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageGAN.gif"  width = "642" height = "400" />
+<img src="./docs/imgs/Readme_Related/ImageGAN.gif"  width = "642" height = "600" />
 </div>
 
 
@@ -108,7 +108,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 <div align="center">
-<img src="./docs/imgs/Readme_Related/9dis.gif"  width = "642" height = "400" />
+<img src="./docs/imgs/Readme_Related/9dis.gif"  width = "642" height = "200" />
 </div>
 
 
@@ -258,7 +258,7 @@ The release of this project is certified by the <a href="./LICENSE">Apache 2.0 l
 ## Contribution
 We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 
-* Many thanks to [肖培楷](https://github.com/jm12138), Contributed to street scene animation, portrait animation, gesture key point recognition, sky replacement, depth estimation, portrait segmentation and other modules
+* Many thanks to [肖培楷](https://github.com/jm12138), Contributed to street scene cartoonization, portrait cartoonization, gesture key point recognition, sky replacement, depth estimation, portrait segmentation and other modules
 * Many thanks to [Austendeng](https://github.com/Austendeng) for fixing the SequenceLabelReader
 * Many thanks to [cclauss](https://github.com/cclauss) optimizing travis-ci check
 * Many thanks to [奇想天外](http://www.cheerthink.com/)，Contributed a demo of mask detection
