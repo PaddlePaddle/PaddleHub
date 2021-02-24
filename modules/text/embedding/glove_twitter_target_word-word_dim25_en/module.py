@@ -12,44 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
 from paddlenlp.embeddings import TokenEmbedding
-from paddlehub.module.module import moduleinfo, serving
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.nlp_module import EmbeddingModule
 
 
 @moduleinfo(
     name="glove_twitter_target_word-word_dim25_en",
-    version="1.0.0",
+    version="1.0.1",
     summary="",
     author="paddlepaddle",
     author_email="",
-    type="nlp/semantic_model")
+    type="nlp/semantic_model",
+    meta=EmbeddingModule)
 class Embedding(TokenEmbedding):
     """
     Embedding model
     """
+    embedding_name = "glove.twitter.target.word-word.dim25.en"
+
     def __init__(self, *args, **kwargs):
-        super(Embedding, self).__init__(embedding_name="glove.twitter.target.word-word.dim25.en", *args, **kwargs)
-
-    @serving
-    def calc_similarity(self, data: List[List[str]]):
-        """
-        Calculate similarities of giving word pairs.
-        """
-        results = []
-        for word_pair in data:
-            if len(word_pair) != 2:
-                raise RuntimeError(
-                    f'The input must have two words, but got {len(word_pair)}. Please check your inputs.')
-            if not isinstance(word_pair[0], str) or not isinstance(word_pair[1], str):
-                raise RuntimeError(
-                    f'The types of text pair must be (str, str), but got'
-                    f' ({type(word_pair[0]).__name__}, {type(word_pair[1]).__name__}). Please check your inputs.')
-
-            for word in word_pair:
-                if self.get_idx_from_word(word) == \
-                        self.get_idx_from_word(self.vocab.unk_token):
-                    raise RuntimeError(
-                        f'Word "{word}" is not in vocab. Please check your inputs.')
-            results.append(str(self.cosine_sim(*word_pair)))
-        return results
+        super(Embedding, self).__init__(embedding_name=self.embedding_name, *args, **kwargs)
