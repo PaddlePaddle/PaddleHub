@@ -113,7 +113,7 @@
 <img src="./docs/imgs/Readme_Related/9dis.gif"  width = "642" height = "200" />
 </div>
 
-（第二张动图来自于CopyRight@[jiupinjia/SkyAR](https://github.com/jiupinjia/SkyAR#district-9-ship-video-source))
+<center>（第二张动图来自于CopyRight@[jiupinjia/SkyAR](https://github.com/jiupinjia/SkyAR#district-9-ship-video-source))</center>
 
 ### 图像分类
 - 包含动物分类、菜品分类、野生动物制品分类，多种算法可选
