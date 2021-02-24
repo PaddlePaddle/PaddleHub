@@ -82,7 +82,7 @@ English | [简体中文](README_ch.md)
 - Including portrait cartoonization, street scene cartoonization, and style transfer.
 - Many thanks to CopyRight@[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、CopyRight@[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)for the pre-trained models.
 <div align="center">
-<img src="./docs/imgs/Readme_Related/ImageGAN.gif"  width = "642" height = "600" />
+<img src="./docs/imgs/Readme_Related/ImageGAN.gif"  width = "642" height = "550" />
 </div>
 
 
@@ -97,7 +97,7 @@ English | [简体中文](README_ch.md)
 - Support body, face and hands key point detection for single or multiple person.
 - Many thanks to CopyRight@[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) for the pre-trained models.
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "640" height = "400" />
+<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "640" height = "550" />
 </div>
 
 ### Image Segmentation
@@ -110,6 +110,7 @@ English | [简体中文](README_ch.md)
 <div align="center">
 <img src="./docs/imgs/Readme_Related/9dis.gif"  width = "642" height = "200" />
 </div>
+（The second gif comes from [jiupinjia/SkyAR](https://github.com/jiupinjia/SkyAR#district-9-ship-video-source)）
 
 
 ### Image Classification
