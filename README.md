@@ -97,7 +97,7 @@ English | [简体中文](README_ch.md)
 - Support body, face and hands key point detection for single or multiple person.
 - Many thanks to CopyRight@[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) for the pre-trained models.
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "640" height = "550" />
+<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "642" height = "550" />
 </div>
 
 ### Image Segmentation
