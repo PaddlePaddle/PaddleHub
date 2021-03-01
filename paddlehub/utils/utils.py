@@ -340,7 +340,7 @@ def reseg_token_label(tokenizer, tokens: List[str], labels: List[str] = None):
         ret_tokens = []
         ret_labels = []
         for token, label in zip(tokens, labels):
-            sub_token = tokenizer.tokenize(token)
+            sub_token = tokenizer._tokenize(token)
             if len(sub_token) == 0:
                 continue
             ret_tokens.extend(sub_token)
@@ -358,7 +358,7 @@ def reseg_token_label(tokenizer, tokens: List[str], labels: List[str] = None):
     else:
         ret_tokens = []
         for token in tokens:
-            sub_token = tokenizer.tokenize(token)
+            sub_token = tokenizer._tokenize(token)
             if len(sub_token) == 0:
                 continue
             ret_tokens.extend(sub_token)

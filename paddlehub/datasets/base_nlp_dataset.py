@@ -11,13 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, List, Optional, Union, Tuple
 import csv
 import io
 import os
+from typing import Dict, List, Optional, Union, Tuple
 
 import numpy as np
 import paddle
+import paddlenlp
+from packaging.version import Version
 
 from paddlehub.env import DATA_HOME
 from paddlenlp.transformers import PretrainedTokenizer
@@ -232,12 +234,16 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
         records = []
         for example in examples:
             if isinstance(self.tokenizer, PretrainedTokenizer):
-                record = self.tokenizer(
-                    text=example.text_a,
-                    text_pair=example.text_b,
-                    max_seq_len=self.max_seq_len,
-                    pad_to_max_seq_len=True,
-                    return_length=True)
+                if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
+                    record = self.tokenizer.encode(
+                        text=example.text_a, text_pair=example.text_b, max_seq_len=self.max_seq_len)
+                else:
+                    record = self.tokenizer(
+                        text=example.text_a,
+                        text_pair=example.text_b,
+                        max_seq_len=self.max_seq_len,
+                        pad_to_max_seq_len=True,
+                        return_length=True)
             elif isinstance(self.tokenizer, JiebaTokenizer):
                 pad_token = self.tokenizer.vocab.pad_token
 
@@ -375,12 +381,15 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
                 pad_token = self.tokenizer.pad_token
 
                 tokens, labels = reseg_token_label(tokenizer=self.tokenizer, tokens=tokens, labels=labels)
-                record = self.tokenizer(
-                    text=tokens,
-                    max_seq_len=self.max_seq_len,
-                    pad_to_max_seq_len=True,
-                    is_split_into_words=True,
-                    return_length=True)
+                if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
+                    record = self.tokenizer.encode(text=tokens, max_seq_len=self.max_seq_len)
+                else:
+                    record = self.tokenizer(
+                        text=tokens,
+                        max_seq_len=self.max_seq_len,
+                        pad_to_max_seq_len=True,
+                        is_split_into_words=True,
+                        return_length=True)
             elif isinstance(self.tokenizer, JiebaTokenizer):
                 pad_token = self.tokenizer.vocab.pad_token
 
