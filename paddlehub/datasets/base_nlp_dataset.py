@@ -27,7 +27,6 @@ from paddlehub.utils.utils import download, reseg_token_label, pad_sequence, tru
 from paddlehub.utils.xarfile import is_xarfile, unarchive
 
 
-
 class InputExample(object):
     """
     The input data structure of Transformer modules (BERT, ERNIE and so on).
@@ -233,7 +232,12 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
         records = []
         for example in examples:
             if isinstance(self.tokenizer, PretrainedTokenizer):
-                record = self.tokenizer.encode(text=example.text_a, text_pair=example.text_b, max_seq_len=self.max_seq_len)
+                record = self.tokenizer(
+                    text=example.text_a,
+                    text_pair=example.text_b,
+                    max_seq_len=self.max_seq_len,
+                    pad_to_max_seq_len=True,
+                    return_length=True)
             elif isinstance(self.tokenizer, JiebaTokenizer):
                 pad_token = self.tokenizer.vocab.pad_token
 
@@ -246,7 +250,9 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
                     ids = pad_sequence(ids, self.max_seq_len, pad_token_id)
                 record = {'text': ids, 'seq_len': seq_len}
             else:
-                raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".format(type(self.tokenizer)))
+                raise RuntimeError(
+                    "Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer"
+                    .format(type(self.tokenizer)))
 
             if not record:
                 logger.info(
@@ -261,7 +267,8 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
         record = self.records[idx]
         if isinstance(self.tokenizer, PretrainedTokenizer):
             if 'label' in record.keys():
-                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['label'], dtype=np.int64)
+                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(
+                    record['label'], dtype=np.int64)
             else:
                 return np.array(record['input_ids']), np.array(record['segment_ids'])
         elif isinstance(self.tokenizer, JiebaTokenizer):
@@ -270,7 +277,9 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
             else:
                 return np.array(record['text'])
         else:
-            raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".format(type(self.tokenizer)))
+            raise RuntimeError(
+                "Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".
+                format(type(self.tokenizer)))
 
     def __len__(self):
         return len(self.records)
@@ -303,6 +312,7 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
         is_file_with_header(:obj:bool, `optional`, default to :obj: False) :
             Whether or not the file is with the header introduction.
     """
+
     def __init__(self,
                  base_path: str,
                  tokenizer: Union[PretrainedTokenizer, JiebaTokenizer],
@@ -311,7 +321,7 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
                  data_file: str = None,
                  label_file: str = None,
                  label_list: list = None,
-                 split_char: str ="\002",
+                 split_char: str = "\002",
                  no_entity_label: str = "O",
                  ignore_label: int = -100,
                  is_file_with_header: bool = False):
@@ -365,7 +375,12 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
                 pad_token = self.tokenizer.pad_token
 
                 tokens, labels = reseg_token_label(tokenizer=self.tokenizer, tokens=tokens, labels=labels)
-                record = self.tokenizer.encode(text=tokens, max_seq_len=self.max_seq_len)
+                record = self.tokenizer(
+                    text=tokens,
+                    max_seq_len=self.max_seq_len,
+                    pad_to_max_seq_len=True,
+                    is_split_into_words=True,
+                    return_length=True)
             elif isinstance(self.tokenizer, JiebaTokenizer):
                 pad_token = self.tokenizer.vocab.pad_token
 
@@ -379,12 +394,13 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
 
                 record = {'text': ids, 'seq_len': seq_len}
             else:
-                raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".format(type(self.tokenizer)))
+                raise RuntimeError(
+                    "Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer"
+                    .format(type(self.tokenizer)))
 
             if not record:
                 logger.info(
-                    "The text %s has been dropped as it has no words in the vocab after tokenization."
-                    % example.text_a)
+                    "The text %s has been dropped as it has no words in the vocab after tokenization." % example.text_a)
                 continue
 
             # convert labels into record
@@ -395,20 +411,19 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
                 elif isinstance(self.tokenizer, JiebaTokenizer):
                     tokens_with_specical_token = [self.tokenizer.vocab.to_tokens(id_) for id_ in record['text']]
                 else:
-                    raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".format(type(self.tokenizer)))
+                    raise RuntimeError(
+                        "Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer"
+                        .format(type(self.tokenizer)))
 
                 tokens_index = 0
                 for token in tokens_with_specical_token:
-                    if tokens_index < len(
-                            tokens) and token == tokens[tokens_index]:
-                        record["label"].append(
-                            self.label_list.index(labels[tokens_index]))
+                    if tokens_index < len(tokens) and token == tokens[tokens_index]:
+                        record["label"].append(self.label_list.index(labels[tokens_index]))
                         tokens_index += 1
                     elif token in [pad_token]:
                         record["label"].append(self.ignore_label)  # label of special token
                     else:
-                        record["label"].append(
-                            self.label_list.index(self.no_entity_label))
+                        record["label"].append(self.label_list.index(self.no_entity_label))
             records.append(record)
         return records
 
@@ -416,7 +431,9 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
         record = self.records[idx]
         if isinstance(self.tokenizer, PretrainedTokenizer):
             if 'label' in record.keys():
-                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['seq_len']), np.array(record['label'], dtype=np.int64)
+                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(
+                    record['seq_len']), np.array(
+                        record['label'], dtype=np.int64)
             else:
                 return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['seq_len'])
         elif isinstance(self.tokenizer, JiebaTokenizer):
@@ -425,7 +442,9 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
             else:
                 return np.array(record['text']), np.array(record['seq_len'])
         else:
-            raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".format(type(self.tokenizer)))
+            raise RuntimeError(
+                "Unknown type of self.tokenizer: {}, it must be an instance of  PretrainedTokenizer or JiebaTokenizer".
+                format(type(self.tokenizer)))
 
     def __len__(self):
         return len(self.records)

@@ -336,12 +336,11 @@ def reseg_token_label(tokenizer, tokens: List[str], labels: List[str] = None):
     '''
     if labels:
         if len(tokens) != len(labels):
-            raise ValueError(
-                "The length of tokens must be same with labels")
+            raise ValueError("The length of tokens must be same with labels")
         ret_tokens = []
         ret_labels = []
         for token, label in zip(tokens, labels):
-            sub_token = tokenizer(token)
+            sub_token = tokenizer.tokenize(token)
             if len(sub_token) == 0:
                 continue
             ret_tokens.extend(sub_token)
@@ -354,13 +353,12 @@ def reseg_token_label(tokenizer, tokens: List[str], labels: List[str] = None):
             ret_labels.extend([sub_label] * (len(sub_token) - 1))
 
         if len(ret_tokens) != len(ret_labels):
-            raise ValueError(
-                "The length of ret_tokens can't match with labels")
+            raise ValueError("The length of ret_tokens can't match with labels")
         return ret_tokens, ret_labels
     else:
         ret_tokens = []
         for token in tokens:
-            sub_token = tokenizer(token)
+            sub_token = tokenizer.tokenize(token)
             if len(sub_token) == 0:
                 continue
             ret_tokens.extend(sub_token)
@@ -376,7 +374,7 @@ def pad_sequence(ids: List[int], max_seq_len: int, pad_token_id: int):
     assert len(ids) <= max_seq_len, \
         f'The input length {len(ids)} is greater than max_seq_len {max_seq_len}. '\
         'Please check the input list and max_seq_len if you really want to pad a sequence.'
-    return ids[:] + [pad_token_id]*(max_seq_len-len(ids))
+    return ids[:] + [pad_token_id] * (max_seq_len - len(ids))
 
 
 def trunc_sequence(ids: List[int], max_seq_len: int):
