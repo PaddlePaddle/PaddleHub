@@ -272,11 +272,17 @@ class TextClassificationDataset(BaseNLPDataset, paddle.io.Dataset):
     def __getitem__(self, idx):
         record = self.records[idx]
         if isinstance(self.tokenizer, PretrainedTokenizer):
-            if 'label' in record.keys():
-                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(
-                    record['label'], dtype=np.int64)
+            input_ids = np.array(record['input_ids'])
+            if Version(paddlenlp.__version__) >= Version('2.0.0rc5'):
+                token_type_ids = np.array(record['token_type_ids'])
             else:
-                return np.array(record['input_ids']), np.array(record['segment_ids'])
+                token_type_ids = record['segment_ids']
+
+            if 'label' in record.keys():
+                return input_ids, token_type_ids, np.array(record['label'], dtype=np.int64)
+            else:
+                return input_ids, token_type_ids
+
         elif isinstance(self.tokenizer, JiebaTokenizer):
             if 'label' in record.keys():
                 return np.array(record['text']), np.array(record['label'], dtype=np.int64)
@@ -439,12 +445,18 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
     def __getitem__(self, idx):
         record = self.records[idx]
         if isinstance(self.tokenizer, PretrainedTokenizer):
-            if 'label' in record.keys():
-                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(
-                    record['seq_len']), np.array(
-                        record['label'], dtype=np.int64)
+            input_ids = np.array(record['input_ids'])
+            seq_lens = np.array(record['seq_len'])
+            if Version(paddlenlp.__version__) >= Version('2.0.0rc5'):
+                token_type_ids = np.array(record['token_type_ids'])
             else:
-                return np.array(record['input_ids']), np.array(record['segment_ids']), np.array(record['seq_len'])
+                token_type_ids = np.array(record['segment_ids'])
+
+            if 'label' in record.keys():
+                return input_ids, token_type_ids, seq_lens, np.array(record['label'], dtype=np.int64)
+            else:
+                return input_ids, token_type_ids, seq_lens
+
         elif isinstance(self.tokenizer, JiebaTokenizer):
             if 'label' in record.keys():
                 return np.array(record['text']), np.array(record['seq_len']), np.array(record['label'], dtype=np.int64)

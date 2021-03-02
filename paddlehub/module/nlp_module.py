@@ -453,7 +453,14 @@ class TransformerModule(RunModule, TextServing):
         examples = []
         for text in data:
             encoded_inputs = self._convert_text_to_input(tokenizer, text, max_seq_len, split_char)
-            examples.append((encoded_inputs['input_ids'], encoded_inputs['segment_ids']))
+            input_ids = encoded_inputs['input_ids']
+
+            if Version(paddlenlp.__version__) >= Version('2.0.0rc5'):
+                token_type_ids = encoded_inputs['token_type_ids']
+            else:
+                token_type_ids = encoded_inputs['segment_ids']
+
+            examples.append((input_ids, token_type_ids))
 
         # Seperates data into some batches.
         one_batch = []
