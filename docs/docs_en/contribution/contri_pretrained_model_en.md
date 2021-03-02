@@ -234,51 +234,8 @@ Install the Module on the local machine and run it through hub run.
 
 ## IV. Release Module
 
-After completing the development and testing of the module, if you want to share the model with others, you can release the model in the following ways.
-
-### Method 1: Upload the Module to the PaddleHub website.
+After completing the development and testing of the module, if you want to share the model with others, you can release the model by **Upload the Module to the PaddleHub website**.
 
 https://www.paddlepaddle.org.cn/hub
 
 We will complete the review of the module and give feedback in the shortest possible time. After passing the review and going online, the module will be displayed on the PaddleHub website, and users can load it like any other official modules.
-
-### Method 2: Upload the Module to the remote code hosting platform.
-
-PaddleHub also supports loading Modules directly to the remote code hosting platforms. The steps are as follows:
-
-#### Step 1: Create a new repository.
-
-To create a new Git repository on the code hosting platform, add the codes of the module we wrote earlier. To make it easier to manage different modules, we create a modules directory and put senta\_test in the modules directory.
-
-#### Step 2: Add a new configuration file`hubconf.py`.
-
-In the root directory, add a new configuration `hubconf.py` file, which references a class modified by `moduleinfo` as follows:
-
-```python
-from modules.senta_test.module import SentaTest
-```
-
-*The structure of the file at this point is as follows:*
-
-```
-hubconf.py
-modules
-├── senta_test/
-    ├── vocab.list
-    ├── module.py
-    └── processor.py
-```
-
-#### Step 3: Complete the commit and push to the remote repository.
-
-#### Step 4: Load Module in the remote repository locally.
-
-To facilitate the experience, we have stored the SentaTest codes on GitHub and Gitee. So you can directly experience the effect in the following ways:
-
-```python
-import paddlehub as hub
-
-senta_test = hub.Module(name='senta_test', source='https://github.com/nepeplwu/myhub.git')
-# senta_test = hub.Module(name='senta_test', source='https://gitee.com/nepeplwu/myhub.git')
-print(senta_test.sentiment_classify(texts=["这部电影太差劲了"]))
-```
