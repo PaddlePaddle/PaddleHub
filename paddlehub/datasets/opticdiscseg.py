@@ -37,8 +37,8 @@ class OpticDiscSeg(SegDataset):
     """
 
     def __init__(self,
-                 transforms=None,
-                 mode='train'):
+                 transforms: Callable = None,
+                 mode: str = 'train'):
         self.transforms = transforms
         mode = mode.lower()
         self.mode = mode

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from Typing import Tuple, Callable
 
 import paddle
 import numpy as np
@@ -42,16 +43,16 @@ class SegDataset(paddle.io.Dataset):
     """
 
     def __init__(self,
-                 transforms,
-                 dataset_root,
-                 num_classes,
-                 mode='train',
-                 train_path=None,
-                 val_path=None,
-                 test_path=None,
-                 separator=' ',
-                 ignore_index=255,
-                 edge=False):
+                 transforms: Callable,
+                 dataset_root: str,
+                 num_classes: int,
+                 mode: str = 'train',
+                 train_path: str = None,
+                 val_path: str = None,
+                 test_path: str = None,
+                 separator: str = ' ',
+                 ignore_index: int = 255,
+                 edge: bool = False):
         self.dataset_root = dataset_root
         self.transforms = transforms
         self.file_list = list()
@@ -120,7 +121,7 @@ class SegDataset(paddle.io.Dataset):
                     label_path = os.path.join(self.dataset_root, items[1])
                 self.file_list.append([image_path, label_path])
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> Tuple[np.ndarray]:
         image_path, label_path = self.file_list[idx]
         if self.mode == 'test':
             im, _ = self.transforms(im=image_path)
@@ -135,6 +136,6 @@ class SegDataset(paddle.io.Dataset):
             im, label = self.transforms(im=image_path, label=label_path)
             return im, label
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.file_list)
 
