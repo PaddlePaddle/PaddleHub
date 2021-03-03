@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os
-from Typing import Tuple, Callable
+from typing import Tuple, Callable
 
 import paddle
 import numpy as np
