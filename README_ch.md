@@ -12,6 +12,15 @@
 ![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
 
 
+## AI创造营·PaddleHub创意赛（火热招募）🔥🔥
+
+诚邀各位开发者参加 **AI创造营·PaddleHub创意赛** 第一期。基于PaddleHub实现AI创意项目，只要你的脑洞够强，飞桨小哥哥亲手pick你出道！更有丰厚奖品带回家（1万元RMB、Switch游戏机&健身环、机械键盘、小度耳机、小度熊）。扫描下方图片中二维码参与报名，也可以点击[前往报名](https://aistudio.baidu.com/aistudio/competition/detail/72)立即报名。比赛时间2021年3月1号-2021年3月31号，快来参加吧~
+
+
+<p align="center">
+ <img src="./docs/imgs/creation.png" align="middle"
+</p>
+
 ## 简介
 - PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型。
 - **【无需深度学习背景、无需数据与训练过程】**，可快速使用AI模型，享受人工智能时代红利。
