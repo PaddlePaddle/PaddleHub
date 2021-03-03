@@ -276,3 +276,4 @@
 * 非常感谢[mhlwsk](https://github.com/mhlwsk)贡献了修复序列标注预测demo的pr
 * 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)和[七年期限](https://github.com/1084667371)联合贡献了看图写诗中秋特别版module、谣言预测、请教条生成等module
 * 非常感谢[livingbody](https://github.com/livingbody)贡献了基于PaddleHub能力的风格迁移和中秋看图写诗微信小程序
+* 非常感谢[BurrowsWang](https://github.com/BurrowsWang)贡献了基于PaddleHub能力的风格迁移和中秋看图写诗微信小程序
