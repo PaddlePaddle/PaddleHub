@@ -12,6 +12,15 @@ English | [简体中文](README_ch.md)
 ![python version](https://img.shields.io/badge/python-3.6+-orange.svg)
 ![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
 
+## AI Creation Camp·PaddleHub Creative Competition (Hot Recruitment)🔥🔥
+
+Developers are sincerely invited to participate in the first phase of **AI Creation Camp·PaddleHub Creative Competition**. Realize AI creative projects based on PaddleHub. As long as your ideas are novel, you will have generous prizes to take home (10,000 RMB, Switch game console & fitness ring, mechanical keyboard, Xiaodu headphones, Xiaodu toy bear). Scan the QR code in the picture below to register, or click [Register Now](https://aistudio.baidu.com/aistudio/competition/detail/72) to register immediately. The competition time is from March 1, 2021 to March 31, 2021. 
+
+<p align="center">
+ <img src="./docs/imgs/creation.png" align="middle"
+</p>
+
+
 ## Introduction
 - PaddleHub aims to provide developers with rich, high-quality, and directly usable pre-trained models.
 - **No need for deep learning background**, you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
@@ -19,7 +28,7 @@ English | [简体中文](README_ch.md)
 - All models are **OPEN SOURCE**, **FREE** to download and use them in offline scenario.
 
 ### Recent updates
-- **2021.02.18:** The v2.0.0 version is released, making model development and debugging easier, and the finetune task is more flexible and easy to use.The ability to transfer learning for visual tasks is fully upgraded, supporting various tasks such as image classification, image coloring, and style transfer; Transformer models such as BERT, ERNIE, and RoBERTa are upgraded to dynamic graphs, supporting Fine-Tune capabilities for text classification and sequence labeling; Optimize the Serving capability, support multi-card prediction, automatic load balancing, and greatly improve performance; the new automatic data enhancement capability Auto Augment can efficiently search for data enhancement strategy combinations suitable for data sets. 61 new word vector models were added, including 51 Chinese models and 10 English models; add 4 image segmentation models, 2 depth models, 7 image generation models, and 3 text generation models, the total number of pre-trained models reaches **【278】**.
+- **2021.02.18:** The v2.0.0 version is released, making model development and debugging easier, and the finetune task is more flexible and easy to use.The ability to transfer learning for visual tasks is fully upgraded, supporting various tasks such as image classification, image coloring, and style transfer; Transformer models such as BERT, ERNIE, and RoBERTa are upgraded to dynamic graphs, supporting Fine-Tune capabilities for text classification and sequence labeling; Optimize the Serving capability, support multi-card prediction, automatic load balancing, and greatly improve performance; the new automatic data enhancement capability Auto Augment can efficiently search for data enhancement strategy combinations suitable for data sets. 61 new word vector models were added, including 51 Chinese models and 10 English models; add 4 image segmentation models, 2 depth models, 7 image generation models, and 3 text generation models, the total number of pre-trained models reaches **【274】**.
 - **2020.12.1:** Release 2.0-beta1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tune task based on large-scale pre-trained models.
 - **2020.11.20:** Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key point detection model, 12 image cartoonization models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
 - **2020.10.09:** Added 4 new OCR multi-language series models, 4 image editing models, and the total number of pre-trained models reached **【162】**.
@@ -219,28 +228,30 @@ If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the 
     - [Command Line](./docs/docs_en/quick_experience/cmd_quick_run_en.md)
     - [Python API](./docs/docs_en/quick_experience/python_use_hub_en.md)
     - [More Demos](./docs/docs_en/quick_experience/more_demos_en.md)
-- Rich Pre-trained Models 182
+- Rich Pre-trained Models 274
     - [Boutique Featured Models](./docs/docs_en/figures_en.md)
-    - Computer Vision 126
+    - Computer Vision 141
       - [Image Classification 64 ](./modules/image/classification/README_en.md)
       - [Object Detection 13 ](./modules/image/object_detection/README_en.md)
       - [Face Detection 7 ](./modules/image/face_detection/README_en.md)  
-      - [Key Point Detection 3 ](./modules/image/keypoint_detection/README_en.md)
-      - [Image Segmentation 7 ](./modules/image/semantic_segmentation/README_en.md)
+      - [Key Point Detection 5 ](./modules/image/keypoint_detection/README_en.md)
+      - [Image Segmentation 13 ](./modules/image/semantic_segmentation/README_en.md)
       - [Text Recognition 8 ](./modules/image/text_recognition/README_en.md)
-      - [Image Generation 17 ](./modules/image/Image_gan/README_en.md)
-      - [Image Editing 7 ](./modules/image/Image_editing/README_en.md)
-    - Natural Language Processing 48
+      - [Image Generation 22 ](./modules/image/Image_gan/README_en.md)
+      - [Image Editing 9 ](./modules/image/Image_editing/README_en.md)
+    - Natural Language Processing 122
       - [Lexical Analysis 2 ](./modules/text/lexical_analysis/README_en.md)
       - [Syntactic Analysis 1 ](./modules/text/syntactic_analysis/README_en.md)
       - [Sentiment Analysis 7 ](./modules/text/sentiment_analysis/README_en.md)
       - [Text Review 3 ](./modules/text/text_review/README_en.md)
-      - [Text Generation 9 ](./modules/text/text_generation/README_en.md)
-      - [Semantic Models 26 ](./modules/text/language_model/README_en.md)
+      - [Text Generation 12 ](./modules/text/text_generation/README_en.md)
+      - [Semantic Models 36 ](./modules/text/language_model/README_en.md)
+      - [Word Vector 61](https://www.paddlepaddle.org.cn/hublist)
     - Audio 3
       - [Speech Synthesis 3 ](./modules/audio/README_en.md)
-    - Video 5
+    - Video 8
       - [Video Classification 5 ](./modules/video/README_en.md)
+      - [Video Repair 3 ](https://www.paddlepaddle.org.cn/hublist)
 - Deploy
     - [Local Inference Deployment](./docs/docs_en/quick_experience/python_use_hub_en.md)
     - [One Line of Code Service deployment](./docs/docs_en/tutorial/serving_en.md)
@@ -271,3 +282,5 @@ We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 * Many thanks to [zbp-xxxp](https://github.com/zbp-xxxp)，Contributed modules for viewing pictures and writing poems
 * Many thanks to [zbp-xxxp](https://github.com/zbp-xxxp) and [七年期限](https://github.com/1084667371),Jointly contributed to the Mid-Autumn Festival Special Edition Module
 * Many thanks to [livingbody](https://github.com/livingbody)，Contributed models for style transfer based on PaddleHub's capabilities and Mid-Autumn Festival WeChat Mini Program
+* Many thanks to [BurrowsWang](https://github.com/BurrowsWang) for fixing Markdown table display problem
+
