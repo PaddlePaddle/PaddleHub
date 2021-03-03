@@ -12,6 +12,14 @@
 ![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
 
 
+## AI创造营·PaddleHub创意赛（火热招募）🔥🔥
+
+诚邀各位开发者参加 **AI创造营·PaddleHub创意赛** 第一期。基于PaddleHub实现AI创意项目，只要你的脑洞够强，飞桨小哥哥亲手pick你出道！更有丰厚奖品带回家（1万元RMB、Switch游戏机&健身环、机械键盘、小度耳机、小度熊）。扫描下方图片中二维码参与报名，也可以点击[前往报名](https://aistudio.baidu.com/aistudio/competition/detail/72)立即报名。比赛时间2021年3月1号-2021年3月31号，快来参加吧~
+
+<p align="center">
+ <img src="./docs/imgs/Creation.png" align="middle"
+</p>
+
 ## 简介
 - PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型。
 - **【无需深度学习背景、无需数据与训练过程】**，可快速使用AI模型，享受人工智能时代红利。
@@ -20,7 +28,7 @@
 
 
 ## 近期更新
-- **2021.02.18**，发布v2.0.0版本，模型开发调试更简单，finetune接口更加灵活易用。视觉类任务迁移学习能力全面升级，支持[图像分类](./demo/image_classification/README.md)、[图像着色](./demo/colorization/README.md)、[风格迁移](./demo/style_transfer/README.md)等多种任务；BERT、ERNIE、RoBERTa等Transformer类模型升级至动态图，支持[文本分类](./demo/text_classification/README.md)、[序列标注](./demo/sequence_labeling/README.md)的Fine-Tune能力；优化服务化部署Serving能力，支持多卡预测、自动负载均衡，性能大幅度提升；新增自动数据增强能力[Auto Augment](./demo/autoaug/README.md)，能高效地搜索适合数据集的数据增强策略组合。新增[词向量模型](./modules/text/embedding)61个，其中包含中文模型51个，英文模型10个；新增[图像分割](./modules/thirdparty/image/semantic_segmentation)模型4个、[深度模型](./modules/thirdparty/image/depth_estimation)2个、[图像生成](./modules/thirdparty/image/Image_gan/style_transfer)模型7个、[文本生成](./modules/thirdparty/text/text_generation)模型3个。预训练模型总量达到[**【278】**](https://www.paddlepaddle.org.cn/hublist) 个。
+- **2021.02.18**，发布v2.0.0版本，模型开发调试更简单，finetune接口更加灵活易用。视觉类任务迁移学习能力全面升级，支持[图像分类](./demo/image_classification/README.md)、[图像着色](./demo/colorization/README.md)、[风格迁移](./demo/style_transfer/README.md)等多种任务；BERT、ERNIE、RoBERTa等Transformer类模型升级至动态图，支持[文本分类](./demo/text_classification/README.md)、[序列标注](./demo/sequence_labeling/README.md)的Fine-Tune能力；优化服务化部署Serving能力，支持多卡预测、自动负载均衡，性能大幅度提升；新增自动数据增强能力[Auto Augment](./demo/autoaug/README.md)，能高效地搜索适合数据集的数据增强策略组合。新增[词向量模型](./modules/text/embedding)61个，其中包含中文模型51个，英文模型10个；新增[图像分割](./modules/thirdparty/image/semantic_segmentation)模型4个、[深度模型](./modules/thirdparty/image/depth_estimation)2个、[图像生成](./modules/thirdparty/image/Image_gan/style_transfer)模型7个、[文本生成](./modules/thirdparty/text/text_generation)模型3个。预训练模型总量达到[**【274】**](https://www.paddlepaddle.org.cn/hublist) 个。
 - **2020.11.20**，发布2.0-beta版本，全面迁移动态图编程模式，服务化部署Serving能力升级；新增手部关键点检测1个、图像动漫化类12个、图片编辑类3个，语音合成类3个，句法分析1个，预训练模型总量到达 **【182】** 个。
 - **2020.10.09**，新增OCR多语言系列模型4个，图像编辑模型4个，预训练模型总量到达 **【162】** 个。
 - **2020.09.27**，新增文本生成模型6个，图像分割模型1个，预训练模型总量到达 **【154】** 个。
@@ -222,28 +230,30 @@
     - [命令行调用](./docs/docs_ch/quick_experience/cmd_quick_run.md)
     - [Python API调用](./docs/docs_ch/quick_experience/python_use_hub.md)
     - [示例体验项目demo](./docs/docs_ch/quick_experience/more_demos.md)
-- 丰富的预训练模型 182
+- 丰富的预训练模型 274
     - [精品特色模型](./docs/docs_ch/figures.md)
-    - 计算机视觉 126 个
+    - 计算机视觉 141 个
       - [图像分类 64 个](./modules/image/classification/README.md)
       - [目标检测 13 个](./modules/image/object_detection/README.md)
       - [人脸检测 7 个](./modules/image/face_detection/README.md)  
-      - [关键点检测 3 个](./modules/image/keypoint_detection/README.md)
-      - [图像分割 7 个](./modules/image/semantic_segmentation/README.md)
+      - [关键点检测 5 个](./modules/image/keypoint_detection/README.md)
+      - [图像分割 13 个](./modules/image/semantic_segmentation/README.md)
       - [文本识别 8 个](./modules/image/text_recognition/README.md)
-      - [图像生成 17 个](./modules/image/Image_gan/README.md)
-      - [图像编辑 7 个](./modules/image/Image_editing/README.md)
-    - 自然语言处理 48 个
+      - [图像生成 22 个](./modules/image/Image_gan/README.md)
+      - [图像编辑 9 个](./modules/image/Image_editing/README.md)
+    - 自然语言处理 122 个
       - [词法分析 2 个](./modules/text/lexical_analysis/README.md)
       - [句法分析 1 个](./modules/text/syntactic_analysis/README.md)
       - [情感分析 7 个](./modules/text/sentiment_analysis/README.md)
       - [文本审核 3 个](./modules/text/text_review/README.md)
-      - [文本生成 9 个](./modules/text/text_generation/README.md)
-      - [语义模型 26 个](./modules/text/language_model/README.md)
+      - [文本生成 12 个](./modules/text/text_generation/README.md)
+      - [语义模型 36 个](./modules/text/language_model/README.md)
+      - [词向量 61 个](https://www.paddlepaddle.org.cn/hublist)
     - 语音 3 个
       - [语音合成 3 个](./modules/audio/README.md)
-    - 视频5个
+    - 视频8个
       - [视频分类 5 个](./modules/video/README.md)
+      - [视频修复 3 个](https://www.paddlepaddle.org.cn/hublist)
 - 部署
     - [本地Inference部署](./docs/docs_ch/quick_experience/python_use_hub.md)
     - [一行代码服务化部署](./docs/docs_ch/tutorial/serving.md)
@@ -276,3 +286,4 @@
 * 非常感谢[mhlwsk](https://github.com/mhlwsk)贡献了修复序列标注预测demo的pr
 * 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)和[七年期限](https://github.com/1084667371)联合贡献了看图写诗中秋特别版module、谣言预测、请教条生成等module
 * 非常感谢[livingbody](https://github.com/livingbody)贡献了基于PaddleHub能力的风格迁移和中秋看图写诗微信小程序
+* 非常感谢[BurrowsWang](https://github.com/BurrowsWang)修复Markdown表格显示问题
