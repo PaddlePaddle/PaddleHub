@@ -5,9 +5,9 @@
 
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用ocrnet_hrnetw18模型对OpticDiscSeg等数据集进行Fine-tune。
+在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用ocrnet_hrnetw18_voc模型对OpticDiscSeg等数据集进行Fine-tune。
 
-## 代码步骤
+## 代码步骤o
 
 使用PaddleHub Fine-tune API进行Fine-tune可以分为4个步骤。
 
@@ -35,7 +35,7 @@ train_reader = OpticDiscSeg(transform， mode='train')
 ### Step3: 加载预训练模型
 
 ```python
-model = hub.Module(name='ocrnet_hrnetw18', num_classes=2, pretrained=None)
+model = hub.Module(name='ocrnet_hrnetw18_voc', num_classes=2, pretrained=None)
 ```
 * `name`: 选择预训练模型的名字。
 * `num_classes`: 分割模型的类别数目。
@@ -90,7 +90,7 @@ import cv2
 import paddlehub as hub
 
 if __name__ == '__main__':
-    model = hub.Module(name='ocrnet_hrnetw18', pretrained='/PATH/TO/CHECKPOINT')
+    model = hub.Module(name='ocrnet_hrnetw18_voc', pretrained='/PATH/TO/CHECKPOINT')
     img = cv2.imread("/PATH/TO/IMAGE")
     model.predict(images=[img], visualization=True)
 ```
@@ -112,7 +112,7 @@ PaddleHub Serving可以部署一个在线图像分割服务。
 运行启动命令：
 
 ```shell
-$ hub serving start -m ocrnet_hrnetw18
+$ hub serving start -m ocrnet_hrnetw18_voc
 ```
 
 这样就完成了一个图像分割服务化API的部署，默认端口号为8866。
@@ -146,7 +146,7 @@ def base64_to_cv2(b64str):
 org_im = cv2.imread('/PATH/TO/IMAGE')
 data = {'images':[cv2_to_base64(org_im)]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/ocrnet_hrnetw18"
+url = "http://127.0.0.1:8866/predict/ocrnet_hrnetw18_voc"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 mask = base64_to_cv2(r.json()["results"][0])
 ```
