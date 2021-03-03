@@ -17,7 +17,7 @@ English | [简体中文](README_ch.md)
 Developers are sincerely invited to participate in the first phase of **AI Creation Camp·PaddleHub Creative Competition**. Realize AI creative projects based on PaddleHub. As long as your ideas are novel, you will have generous prizes to take home (10,000 RMB, Switch game console & fitness ring, mechanical keyboard, Xiaodu headphones, Xiaodu toy bear). Scan the QR code in the picture below to register, or click [Register Now](https://aistudio.baidu.com/aistudio/competition/detail/72) to register immediately. The competition time is from March 1, 2021 to March 31, 2021. 
 
 <p align="center">
- <img src="./docs/imgs/creation.png" align="middle"
+ <img src="./docs/imgs/Creation.png" align="middle"
 </p>
 
 
