@@ -17,7 +17,7 @@
 诚邀各位开发者参加 **AI创造营·PaddleHub创意赛** 第一期。基于PaddleHub实现AI创意项目，只要你的脑洞够强，飞桨小哥哥亲手pick你出道！更有丰厚奖品带回家（1万元RMB、Switch游戏机&健身环、机械键盘、小度耳机、小度熊）。扫描下方图片中二维码参与报名，也可以点击[前往报名](https://aistudio.baidu.com/aistudio/competition/detail/72)立即报名。比赛时间2021年3月1号-2021年3月31号，快来参加吧~
 
 <p align="center">
- <img src="./docs/imgs/creation.png" align="middle"
+ <img src="./docs/imgs/Creation.png" align="middle"
 </p>
 
 ## 简介
