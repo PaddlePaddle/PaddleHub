@@ -121,7 +121,7 @@ class SegDataset(paddle.io.Dataset):
                     label_path = os.path.join(self.dataset_root, items[1])
                 self.file_list.append([image_path, label_path])
 
-    def __getitem__(self, idx) -> Tuple[np.ndarray]:
+    def __getitem__(self, idx: int) -> Tuple[np.ndarray]:
         image_path, label_path = self.file_list[idx]
         if self.mode == 'test':
             im, _ = self.transforms(im=image_path)
