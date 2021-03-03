@@ -17,7 +17,7 @@ import time
 import os
 import base64
 import argparse
-from typing import List, Union
+from typing import List, Union, Tuple
 from collections import OrderedDict
 
 import cv2
@@ -633,7 +633,7 @@ class StyleTransferModule(RunModule, ImageServing):
         
 
 class ImageSegmentationModule(ImageServing, RunModule):
-    def training_step(self, batch: int, batch_idx: int) -> dict:
+    def training_step(self, batch: List[paddle.Tensor], batch_idx: int) -> dict:
         '''
         One step for training, which should be called as forward computation.
 
@@ -647,7 +647,7 @@ class ImageSegmentationModule(ImageServing, RunModule):
 
         return self.validation_step(batch, batch_idx)
 
-    def validation_step(self, batch: int, batch_idx: int) -> list:
+    def validation_step(self, batch: List[paddle.Tensor], batch_idx: int) -> dict:
         """
          One step for validation, which should be called as forward computation.
 
@@ -672,7 +672,7 @@ class ImageSegmentationModule(ImageServing, RunModule):
             loss += loss_ce / len(logits)
         return {"loss": loss}
 
-    def predict(self, images, batch_size: int = 1, visualization: bool = True, save_path: str = 'seg_result'):
+    def predict(self, images: Union[str, np.ndarray], batch_size: int = 1, visualization: bool = True, save_path: str = 'seg_result') -> List[np.ndarray]:
         '''
         Obtain segmentation results.
 
@@ -729,7 +729,7 @@ class ImageSegmentationModule(ImageServing, RunModule):
         return result
     
     @serving
-    def serving_method(self, images: list, **kwargs):
+    def serving_method(self, images: List[str], **kwargs):
         """
         Run as a service.
         """

@@ -1,4 +1,4 @@
-# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
 # limitations under the License.
 
 import os
-from typing import Union
+from typing import Callable, Union, List, Tuple
 
 import cv2
 import paddle
 import PIL
-from PIL import Image as PILImage
 import numpy as np
 import matplotlib as plt
 import paddle.nn.functional as F
@@ -30,7 +29,7 @@ def is_image_file(filename: str) -> bool:
     return ext in ['.bmp', '.dib', '.png', '.jpg', '.jpeg', '.pbm', '.pgm', '.ppm', '.tif', '.tiff']
 
 
-def get_img_file(dir_name: str) -> list:
+def get_img_file(dir_name: str) -> List[str]:
     '''Get all image file paths in several directories which have the same parent directory.'''
     images = []
     for parent, _, filenames in os.walk(dir_name):
@@ -43,7 +42,7 @@ def get_img_file(dir_name: str) -> list:
     return images
 
 
-def box_crop(boxes: np.ndarray, labels: np.ndarray, scores: np.ndarray, crop: list, img_shape: list):
+def box_crop(boxes: np.ndarray, labels: np.ndarray, scores: np.ndarray, crop: List[int], img_shape: List[int]) -> Tuple:
     """Crop the boxes ,labels, scores according to the given shape"""
 
     x, y, w, h = map(float, crop)
@@ -103,7 +102,7 @@ def draw_boxes_on_image(image_path: str,
                         boxes: np.ndarray,
                         scores: np.ndarray,
                         labels: np.ndarray,
-                        label_names: list,
+                        label_names: List[str],
                         score_thresh: float = 0.5,
                         save_path: str = 'result'):
     """Draw boxes on images."""
@@ -149,7 +148,7 @@ def draw_boxes_on_image(image_path: str,
     plt.close('all')
 
 
-def get_label_infos(file_list: str):
+def get_label_infos(file_list: str) -> str:
     """Get label names by corresponding category ids."""
     from pycocotools.coco import COCO
     map_label = COCO(file_list)
@@ -179,7 +178,7 @@ def gram_matrix(data: paddle.Tensor) -> paddle.Tensor:
     return gram
 
 
-def npmax(array: np.ndarray):
+def npmax(array: np.ndarray) -> Tuple[int]:
     """Get max value and index."""
     arrayindex = array.argmax(1)
     arrayvalue = array.max(1)
@@ -188,7 +187,7 @@ def npmax(array: np.ndarray):
     return i, j
 
 
-def visualize(image:  Union[np.ndarray, str], result: np.ndarray, weight: float = 0.6):
+def visualize(image:  Union[np.ndarray, str], result: np.ndarray, weight: float = 0.6) -> np.ndarray:
     """
     Convert segmentation result to color image, and save added image.
 
@@ -218,15 +217,15 @@ def visualize(image:  Union[np.ndarray, str], result: np.ndarray, weight: float 
     return vis_result
 
 
-def get_pseudo_color_map(pred: np.ndarray):
+def get_pseudo_color_map(pred: np.ndarray) -> PIL.Image.Image:
     '''visualization the segmentation mask.'''
-    pred_mask = PILImage.fromarray(pred.astype(np.uint8), mode='P')
+    pred_mask = PIL.Image.fromarray(pred.astype(np.uint8), mode='P')
     color_map = get_color_map_list(256)
     pred_mask.putpalette(color_map)
     return pred_mask
 
 
-def get_color_map_list(num_classes: int):
+def get_color_map_list(num_classes: int) -> List[int]:
     """
     Returns the color map for visualizing the segmentation mask,
     which can support arbitrary number of classes.
@@ -253,7 +252,7 @@ def get_color_map_list(num_classes: int):
     return color_map
 
 
-def get_reverse_list(ori_shape: list, transforms: list):
+def get_reverse_list(ori_shape: List[int], transforms: List[Callable]) -> List[tuple]:
     """
     get reverse list of transform.
 
@@ -278,7 +277,7 @@ def get_reverse_list(ori_shape: list, transforms: list):
     return reverse_list
 
 
-def reverse_transform(pred: np.ndarray, ori_shape: list, transforms: list):
+def reverse_transform(pred: paddle.Tensor, ori_shape: List[int], transforms: List[int]) -> paddle.Tensor:
     """recover pred to origin shape"""
     reverse_list = get_reverse_list(ori_shape, transforms)
     for item in reverse_list[::-1]:

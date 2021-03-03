@@ -1,4 +1,4 @@
-# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+from typing import List
 
 import paddle
+import numpy as np
 import paddle.nn as nn
 import paddle.nn.functional as F
 from paddlehub.module.module import moduleinfo
@@ -24,11 +26,11 @@ import ocrnet_hrnetw18.layers as L
 from ocrnet_hrnetw18.hrnet import HRNet_W18
 
 @moduleinfo(
-    name="ocrnet_hrnetw18",
+    name="ocrnet_hrnetw18_voc",
     type="CV/semantic_segmentation",
     author="paddlepaddle",
     author_email="",
-    summary="OCRNetHRNetW18 is a segmentation model.",
+    summary="OCRNetHRNetW18 is a segmentation model pretrained by pascal voc.",
     version="1.0.0",
     meta=ImageSegmentationModule)
 class OCRNetHRNetW18(nn.Layer):
@@ -52,7 +54,7 @@ class OCRNetHRNetW18(nn.Layer):
 
     def __init__(self,
                  num_classes: int = 21,
-                 backbone_indices: list = [0],
+                 backbone_indices: List[int] = [0],
                  ocr_mid_channels: int = 512,
                  ocr_key_channels: int = 256,
                  align_corners: bool = False,
@@ -80,10 +82,10 @@ class OCRNetHRNetW18(nn.Layer):
             self.set_dict(model_dict)
             print("load pretrained parameters success")
 
-    def transform(self, img):
+    def transform(self, img: np.ndarray) -> np.ndarray:
         return self.transforms(img)
 
-    def forward(self, x):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         feats = self.backbone(x)
         feats = [feats[i] for i in self.backbone_indices]
         logit_list = self.head(feats)
@@ -129,7 +131,7 @@ class OCRHead(nn.Layer):
             nn.Conv2D(in_channels[self.indices[0]], self.num_classes, 1))
 
 
-    def forward(self, feat_list: list):
+    def forward(self, feat_list: List[paddle.Tensor]) -> paddle.Tensor:
         feat_shallow, feat_deep = feat_list[self.indices[0]], feat_list[
             self.indices[1]]
 
@@ -146,7 +148,7 @@ class OCRHead(nn.Layer):
 class SpatialGatherBlock(nn.Layer):
     """Aggregation layer to compute the pixel-region representation."""
 
-    def forward(self, pixels: paddle.Tensor, regions: paddle.Tensor):
+    def forward(self, pixels: paddle.Tensor, regions: paddle.Tensor) -> paddle.Tensor:
         n, c, h, w = pixels.shape
         _, k, _, _ = regions.shape
 
@@ -170,10 +172,10 @@ class SpatialOCRModule(nn.Layer):
     """Aggregate the global object representation to update the representation for each pixel."""
 
     def __init__(self,
-                 in_channels,
-                 key_channels,
-                 out_channels,
-                 dropout_rate=0.1):
+                 in_channels: int,
+                 key_channels: int,
+                 out_channels: int,
+                 dropout_rate: float = 0.1):
         super().__init__()
 
         self.attention_block = ObjectAttentionBlock(in_channels, key_channels)
@@ -181,7 +183,7 @@ class SpatialOCRModule(nn.Layer):
             L.ConvBNReLU(2 * in_channels, out_channels, 1),
             nn.Dropout2D(dropout_rate))
 
-    def forward(self, pixels, regions):
+    def forward(self, pixels: paddle.Tensor, regions: paddle.Tensor) -> paddle.Tensor:
         context = self.attention_block(pixels, regions)
         feats = paddle.concat([context, pixels], axis=1)
         feats = self.conv1x1(feats)
@@ -210,7 +212,7 @@ class ObjectAttentionBlock(nn.Layer):
 
         self.f_up = L.ConvBNReLU(key_channels, in_channels, 1)
 
-    def forward(self, x: paddle.Tensor, proxy: paddle.Tensor):
+    def forward(self, x: paddle.Tensor, proxy: paddle.Tensor) -> paddle.Tensor:
         n, _, h, w = x.shape
 
         # query : from (n, c1, h1, w1) to (n, h1*w1, key_channels)

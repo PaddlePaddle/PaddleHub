@@ -1,4 +1,4 @@
-# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
+# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class BasicBlock(nn.Layer):
 
         self.shortcut = shortcut
 
-    def forward(self, inputs: paddle.Tensor):
+    def forward(self, inputs: paddle.Tensor) -> paddle.Tensor:
         y = self.conv0(inputs)
         conv1 = self.conv1(y)
 
@@ -124,7 +124,7 @@ class ResNet50_vd(nn.Layer):
                 shortcut = True
             self.stage_list.append(block_list)
 
-    def forward(self, inputs: paddle.Tensor):
+    def forward(self, inputs: paddle.Tensor) -> paddle.Tensor:
         y = self.conv1_1(inputs)
         y = self.conv1_2(y)
         y = self.conv1_3(y)

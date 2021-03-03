@@ -1,5 +1,5 @@
 # coding: utf8
-# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 
 import os
 import random
+from typing import Callable, Union, List, Tuple
 
 import cv2
 import numpy as np
@@ -36,7 +37,7 @@ class Compose:
         ValueError: when the length of 'transforms' is less than 1.
     """
 
-    def __init__(self, transforms, to_rgb=True):
+    def __init__(self, transforms: Callable, to_rgb: bool = True):
         if not isinstance(transforms, list):
             raise TypeError('The transforms must be a list!')
         if len(transforms) < 1:
@@ -45,7 +46,7 @@ class Compose:
         self.transforms = transforms
         self.to_rgb = to_rgb
 
-    def __call__(self, im, label=None):
+    def __call__(self, im:  Union[np.ndarray, str], label:  Union[np.ndarray, str] = None) -> Tuple:
         """
         Args:
             im (str|np.ndarray): It is either image path or image object.
@@ -78,7 +79,7 @@ class ColorMap:
     def __init__(self, num_classes: int = 256):
         self.num_classes = num_classes + 1
 
-    def __call__(self):
+    def __call__(self) -> np.ndarray:
         color_map = self.num_classes * [0, 0, 0]
         for i in range(0, self.num_classes):
             j = 0
@@ -104,7 +105,7 @@ class SegmentVisual:
         self.weight = weight
         self.get_color_map_list = ColorMap(256)
 
-    def __call__(self, image: str, result: np.ndarray, save_dir: str):
+    def __call__(self, image: str, result: np.ndarray, save_dir: str) -> np.ndarray:
         color_map = self.get_color_map_list()
         color_map = np.array(color_map).astype("uint8")
         # Use OpenCV LUT for color mapping
@@ -139,9 +140,9 @@ class Padding:
     """
 
     def __init__(self,
-                 target_size,
-                 im_padding_value=(128, 128, 128),
-                 label_padding_value=255):
+                 target_size:  Union[List[int], Tuple[int], int],
+                 im_padding_value:  Union[List[int], Tuple[int], int] = (128, 128, 128),
+                 label_padding_value: int = 255):
         if isinstance(target_size, list) or isinstance(target_size, tuple):
             if len(target_size) != 2:
                 raise ValueError(
@@ -155,7 +156,7 @@ class Padding:
         self.im_padding_value = im_padding_value
         self.label_padding_value = label_padding_value
 
-    def __call__(self, im, label=None):
+    def __call__(self, im: np.ndarray , label: np.ndarray = None) -> Tuple:
         """
         Args:
             im (np.ndarray): The Image data.
@@ -178,23 +179,11 @@ class Padding:
                 'The size of image should be less than `target_size`, but the size of image ({}, {}) is larger than `target_size` ({}, {})'
                     .format(im_width, im_height, target_width, target_height))
         else:
-            im = cv2.copyMakeBorder(
-                im,
-                0,
-                pad_height,
-                0,
-                pad_width,
-                cv2.BORDER_CONSTANT,
-                value=self.im_padding_value)
+            im = cv2.copyMakeBorder(im, 0, pad_height, 0, pad_width, cv2.BORDER_CONSTANT, 
+                                    value=self.im_padding_value)
             if label is not None:
-                label = cv2.copyMakeBorder(
-                    label,
-                    0,
-                    pad_height,
-                    0,
-                    pad_width,
-                    cv2.BORDER_CONSTANT,
-                    value=self.label_padding_value)
+                label = cv2.copyMakeBorder(label, 0, pad_height, 0, pad_width, cv2.BORDER_CONSTANT,
+                                           value=self.label_padding_value)
         if label is None:
             return (im,)
         else:
@@ -205,13 +194,14 @@ class Normalize:
     """
     Normalize an image.
     Args:
-        mean (list, optional): The mean value of a data set. Default: [0.5, 0.5, 0.5].
-        std (list, optional): The standard deviation of a data set. Default: [0.5, 0.5, 0.5].
+        mean (list|tuple): The mean value of a data set. Default: [0.5, 0.5, 0.5].
+        std (list|tuple): The standard deviation of a data set. Default: [0.5, 0.5, 0.5].
     Raises:
         ValueError: When mean/std is not list or any value in std is 0.
     """
 
-    def __init__(self, mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)):
+    def __init__(self, mean: Union[List[float], Tuple[float]] = (0.5, 0.5, 0.5), 
+                 std:  Union[List[float], Tuple[float]] = (0.5, 0.5, 0.5)):
         self.mean = mean
         self.std = std
         if not (isinstance(self.mean, (list, tuple))
@@ -223,7 +213,7 @@ class Normalize:
         if reduce(lambda x, y: x * y, self.std) == 0:
             raise ValueError('{}: std is invalid!'.format(self))
 
-    def __call__(self, im, label=None):
+    def __call__(self, im: np.ndarray, label: np.ndarray = None) -> Tuple:
         """
         Args:
             im (np.ndarray): The Image data.
@@ -267,7 +257,7 @@ class Resize:
         'LANCZOS4': cv2.INTER_LANCZOS4
     }
 
-    def __init__(self, target_size=(512, 512), interp='LINEAR'):
+    def __init__(self, target_size: Union[List[int], Tuple[int]] = (512, 512), interp: str = 'LINEAR'):
         self.interp = interp
         if not (interp == "RANDOM" or interp in self.interp_dict):
             raise ValueError("`interp` should be one of {}".format(
@@ -284,7 +274,7 @@ class Resize:
 
         self.target_size = target_size
 
-    def __call__(self, im, label=None):
+    def __call__(self, im: np.ndarray, label: np.ndarray = None) -> Tuple:
         """
         Args:
             im (np.ndarray): The Image data.

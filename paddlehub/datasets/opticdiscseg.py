@@ -1,5 +1,5 @@
 # coding:utf-8
-# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -22,48 +22,57 @@ from PIL import Image
 
 import paddlehub.env as hubenv
 from paddlehub.utils.download import download_data
-
+from paddlehub.datasets.base_seg_dataset import SegDataset
 
 @download_data(url='https://paddleseg.bj.bcebos.com/dataset/optic_disc_seg.zip')
-class OpticDiscSeg(paddle.io.Dataset):
+class OpticDiscSeg(SegDataset):
     """
-    Dataset for image segmentation.
+    OpticDiscSeg dataset is extraced from iChallenge-AMD
+    (https://ai.baidu.com/broad/subordinate?dataset=amd).
 
     Args:
-       transform(callmethod) : The method of preprocess images.
-       mode(str): The mode for preparing dataset.
-
-    Returns:
-        DataSet: An iterable object for data iterating
+        transforms (Callable): Transforms for image.
+        mode (str, optional): Which part of dataset to use. it is one of ('train', 'val', 'test'). Default: 'train'.
+        edge (bool, optional): Whether to compute edge while training. Default: False
     """
 
     def __init__(self,
-                 transform: Callable,
-                 mode: str = "train"):
-        self.transforms = transform
+                 transforms=None,
+                 mode='train'):
+        self.transforms = transforms
+        mode = mode.lower()
         self.mode = mode
+        self.file_list = list()
         self.num_classes = 2
+        self.ignore_index = 255
 
-        if self.mode == 'train':
-            self.file = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', 'train_list.txt')
-        elif self.mode == 'test':
-            self.file = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', 'test_list.txt')
+        if mode not in ['train', 'val', 'test']:
+            raise ValueError(
+                "`mode` should be 'train', 'val' or 'test', but got {}.".format(
+                    mode))
+
+        if self.transforms is None:
+            raise ValueError("`transforms` is necessary, but it is None.")
+
+
+        if mode == 'train':
+            file_path = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', 'train_list.txt')
+        elif mode == 'test':
+            file_path = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', 'test_list.txt')
         else:
-            self.file = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', 'val_list.txt')
-            
-        self.data=[]
-        with open(self.file, 'r') as f:
-            for line in f.readlines():
-                line = line.strip()
-                if line !='':
-                    self.data.append(line)
+            file_path = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', 'val_list.txt')
 
-    def __getitem__(self, idx):
-        items = self.data[idx].split(' ')
-        image_path = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', items[0])
-        grt_path = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', items[1])
-        im, label = self.transforms(im=image_path, label=grt_path)
-        return im, label
-
-    def __len__(self):
-        return len(self.data)
+        with open(file_path, 'r') as f:
+            for line in f:
+                items = line.strip().split()
+                if len(items) != 2:
+                    if mode == 'train' or mode == 'val':
+                        raise Exception(
+                            "File list format incorrect! It should be"
+                            " image_name label_name\\n")
+                    image_path = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', items[0])
+                    grt_path = None
+                else:
+                    image_path = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', items[0])
+                    grt_path = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', items[1])
+                self.file_list.append([image_path, grt_path])

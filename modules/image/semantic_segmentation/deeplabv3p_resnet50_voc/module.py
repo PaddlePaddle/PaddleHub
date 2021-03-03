@@ -1,4 +1,4 @@
-# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
+# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os
-from typing import Union
+from typing import Union, List, Tuple
 
 import paddle
 from paddle import nn
@@ -29,7 +29,7 @@ import deeplabv3p_resnet50.layers as L
 
 
 @moduleinfo(
-    name="deeplabv3p_resnet50",
+    name="deeplabv3p_resnet50_voc",
     type="CV/semantic_segmentation",
     author="paddlepaddle",
     author_email="",
@@ -59,16 +59,16 @@ class DeepLabV3PResnet50(nn.Layer):
         aspp_out_channels (int): the output channels of ASPP module.
         align_corners (bool, optional): An argument of F.interpolate. It should be set to False when the feature size is even,
             e.g. 1024x512, otherwise it is True, e.g. 769x769. Default: False.
-        load_checkpoint (str): the path of pretrained model. Default to None.
+        pretrained (str): the path of pretrained model. Default to None.
     """
 
     def __init__(self,
                  num_classes: int = 21,
-                 backbone_indices: tuple = (0, 3),
-                 aspp_ratios: tuple = (1, 12, 24, 36),
+                 backbone_indices: Tuple[int] = (0, 3),
+                 aspp_ratios: Tuple[int] = (1, 12, 24, 36),
                  aspp_out_channels: int = 256,
                  align_corners=False,
-                 load_checkpoint: str = None):
+                 pretrained: str = None):
         super(DeepLabV3PResnet50, self).__init__()
         self.backbone = ResNet50_vd()
         backbone_channels = [self.backbone.feat_channels[i] for i in backbone_indices]
@@ -78,8 +78,8 @@ class DeepLabV3PResnet50(nn.Layer):
         self.align_corners = align_corners
         self.transforms = T.Compose([T.Padding(target_size=(512, 512)), T.Normalize()])
 
-        if load_checkpoint is not None:
-            model_dict = paddle.load(load_checkpoint)
+        if pretrained is not None:
+            model_dict = paddle.load(pretrained)
             self.set_dict(model_dict)
             print("load custom parameters success")
 
@@ -89,10 +89,10 @@ class DeepLabV3PResnet50(nn.Layer):
             self.set_dict(model_dict)
             print("load pretrained parameters success")
 
-    def transform(self, img: Union[np.ndarray, str]):
+    def transform(self, img: Union[np.ndarray, str]) -> Union[np.ndarray, str]:
         return self.transforms(img)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> List[paddle.Tensor]:
         feat_list = self.backbone(x)
         logit_list = self.head(feat_list)
         return [
@@ -123,8 +123,8 @@ class DeepLabV3PHead(nn.Layer):
             is even, e.g. 1024x512, otherwise it is True, e.g. 769x769.
     """
 
-    def __init__(self, num_classes: int, backbone_indices: tuple, backbone_channels: tuple,
-                 aspp_ratios: tuple, aspp_out_channels: int, align_corners: bool):
+    def __init__(self, num_classes: int, backbone_indices: Tuple[paddle.Tensor], backbone_channels:  Tuple[paddle.Tensor],
+                 aspp_ratios:  Tuple[float], aspp_out_channels: int, align_corners: bool):
         super().__init__()
 
         self.aspp = L.ASPPModule(
@@ -137,7 +137,7 @@ class DeepLabV3PHead(nn.Layer):
         self.decoder = Decoder(num_classes, backbone_channels[0], align_corners)
         self.backbone_indices = backbone_indices
 
-    def forward(self, feat_list: list):
+    def forward(self, feat_list: List[paddle.Tensor]) -> List[paddle.Tensor]:
         logit_list = []
         low_level_feat = feat_list[self.backbone_indices[0]]
         x = feat_list[self.backbone_indices[1]]
@@ -172,7 +172,7 @@ class Decoder(nn.Layer):
 
         self.align_corners = align_corners
 
-    def forward(self, x: paddle.Tensor, low_level_feat: paddle.Tensor):
+    def forward(self, x: paddle.Tensor, low_level_feat: paddle.Tensor) -> paddle.Tensor:
         low_level_feat = self.conv_bn_relu1(low_level_feat)
         x = F.interpolate(
             x,

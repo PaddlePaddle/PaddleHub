@@ -1,4 +1,4 @@
-# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -145,7 +145,7 @@ class HRNet_W18(nn.Layer):
             name="st4",
             align_corners=align_corners)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         conv1 = self.conv_layer1_1(x)
         conv2 = self.conv_layer1_2(conv1)
 
@@ -201,7 +201,7 @@ class Layer1(nn.Layer):
                     name=name + '_' + str(i + 1)))
             self.bottleneck_block_list.append(bottleneck_block)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         conv = x
         for block_func in self.bottleneck_block_list:
             conv = block_func(conv)
@@ -239,7 +239,7 @@ class TransitionLayer(nn.Layer):
                         bias_attr=False))
             self.conv_bn_func_list.append(residual)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         outs = []
         for idx, conv_bn_func in enumerate(self.conv_bn_func_list):
             if conv_bn_func is None:
@@ -277,7 +277,7 @@ class Branches(nn.Layer):
                              str(j + 1)))
                 self.basic_block_list[i].append(basic_block_func)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         outs = []
         for idx, input in enumerate(x):
             conv = input
@@ -337,7 +337,7 @@ class BottleneckBlock(nn.Layer):
                 reduction_ratio=16,
                 name=name + '_fc')
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         residual = x
         conv1 = self.conv1(x)
         conv2 = self.conv2(conv1)
@@ -396,7 +396,7 @@ class BasicBlock(nn.Layer):
                 reduction_ratio=16,
                 name=name + '_fc')
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         residual = x
         conv1 = self.conv1(x)
         conv2 = self.conv2(conv1)
@@ -435,7 +435,7 @@ class SELayer(nn.Layer):
             weight_attr=paddle.ParamAttr(
                 initializer=nn.initializer.Uniform(-stdv, stdv)))
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         pool = self.pool2d_gap(x)
         pool = paddle.reshape(pool, shape=[-1, self._num_channels])
         squeeze = self.squeeze(pool)
@@ -488,7 +488,7 @@ class Stage(nn.Layer):
 
             self.stage_func_list.append(stage_func)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         out = x
         for idx in range(self._num_modules):
             out = self.stage_func_list[idx](out)
@@ -520,7 +520,7 @@ class HighResolutionModule(nn.Layer):
             name=name,
             align_corners=align_corners)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         out = self.branches_func(x)
         out = self.fuse_func(out)
         return out
@@ -581,7 +581,7 @@ class FuseLayers(nn.Layer):
                             pre_num_filters = out_channels[j]
                         self.residual_func_list.append(residual_func)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         outs = []
         residual_func_idx = 0
         for i in range(self._actual_ch):

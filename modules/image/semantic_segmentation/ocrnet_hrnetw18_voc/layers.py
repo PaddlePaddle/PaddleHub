@@ -1,4 +1,4 @@
-# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
+# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ class ConvBNLayer(nn.Layer):
         self._batch_norm = SyncBatchNorm(out_channels)
         self._act_op = Activation(act=act)
 
-    def forward(self, inputs: paddle.Tensor):
+    def forward(self, inputs: paddle.Tensor) -> paddle.Tensor:
         if self.is_vd_mode:
             inputs = self._pool2d_avg(inputs)
         y = self._conv(inputs)
@@ -117,7 +117,7 @@ class BottleneckBlock(nn.Layer):
 
         self.shortcut = shortcut
 
-    def forward(self, inputs: paddle.Tensor):
+    def forward(self, inputs: paddle.Tensor) -> paddle.Tensor:
         y = self.conv0(inputs)
         if self.dilation > 1:
             padding = self.dilation
@@ -156,7 +156,7 @@ class SeparableConvBNReLU(nn.Layer):
         self.piontwise_conv = ConvBNReLU(
             in_channels, out_channels, kernel_size=1, groups=1)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         x = self.depthwise_conv(x)
         x = self.piontwise_conv(x)
         return x
@@ -176,7 +176,7 @@ class ConvBN(nn.Layer):
             in_channels, out_channels, kernel_size, padding=padding, **kwargs)
         self._batch_norm = SyncBatchNorm(out_channels)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         x = self._conv(x)
         x = self._batch_norm(x)
         return x
@@ -197,7 +197,7 @@ class ConvBNReLU(nn.Layer):
             in_channels, out_channels, kernel_size, padding=padding, **kwargs)
         self._batch_norm = SyncBatchNorm(out_channels)
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         x = self._conv(x)
         x = self._batch_norm(x)
         x = F.relu(x)
@@ -254,7 +254,7 @@ class Activation(nn.Layer):
                 raise KeyError("{} does not exist in the current {}".format(
                     act, act_dict.keys()))
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
 
         if self._act is not None:
             return self.act_func(x)
@@ -318,7 +318,7 @@ class ASPPModule(nn.Layer):
 
         self.dropout = nn.Dropout(p=0.1)  # drop rate
 
-    def forward(self, x: paddle.Tensor):
+    def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         outputs = []
         for block in self.aspp_blocks:
             y = block(x)
