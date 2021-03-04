@@ -404,63 +404,80 @@ class TransformerModule(RunModule, TextServing):
     _tasks_supported = [
         'seq-cls',
         'token-cls',
+        'text-matching',
     ]
 
-    def _convert_text_to_input(self, tokenizer, text: List[str], max_seq_len: int, split_char: str):
+    def _convert_text_to_input(self, tokenizer, texts: List[str], max_seq_len: int, split_char: str):
         pad_to_max_seq_len = False if self.task is None else True
         if self.task == 'token-cls':  # Extra processing of token-cls task
-            tokens = text[0].split(split_char)
-            text[0], _ = reseg_token_label(tokenizer=tokenizer, tokens=tokens)
+            tokens = texts[0].split(split_char)
+            texts[0], _ = reseg_token_label(tokenizer=tokenizer, tokens=tokens)
             is_split_into_words = True
         else:
             is_split_into_words = False
 
-        if len(text) == 1:
+        encoded_inputs = []
+        if self.task == 'text-matching':
+            if len(texts) != 2:
+                raise RuntimeError(
+                    'The input texts must have two sequences, but got %d. Please check your inputs.' % len(texts))
+
             if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
-                encoded_inputs = tokenizer.encode(
-                    text[0], text_pair=None, max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len)
+                encoded_inputs.append(tokenizer.encode(
+                    texts[0], text_pair=None, max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len))
+                encoded_inputs.append(tokenizer.encode(
+                    texts[1], text_pair=None, max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len))
             else:
-                encoded_inputs = tokenizer(
-                    text=text[0],
-                    max_seq_len=max_seq_len,
-                    pad_to_max_seq_len=True,
-                    is_split_into_words=is_split_into_words,
-                    return_length=True)
-        elif len(text) == 2:
-            if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
-                encoded_inputs = tokenizer.encode(
-                    text[0], text_pair=text[1], max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len)
-            else:
-                encoded_inputs = tokenizer(
-                    text=text[0],
-                    text_pair=text[1],
-                    max_seq_len=max_seq_len,
-                    pad_to_max_seq_len=True,
-                    is_split_into_words=is_split_into_words,
-                    return_length=True)
+                encoded_inputs.append(tokenizer(text=texts[0], text_pair=None, max_seq_len=max_seq_len, \
+                        pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+                encoded_inputs.append(tokenizer(text=texts[1], text_pair=None, max_seq_len=max_seq_len, \
+                        pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
         else:
-            raise RuntimeError(
-                'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
+            if len(texts) == 1:
+                if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
+                    encoded_inputs.append(tokenizer.encode(texts[0], text_pair=None, \
+                        max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len))
+                else:
+                    encoded_inputs.append(tokenizer(text=texts[0], max_seq_len=max_seq_len, \
+                        pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+            elif len(texts) == 2:
+                if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
+                    encoded_inputs.append(tokenizer.encode(texts[0], text_pair=texts[1], \
+                        max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len))
+                else:
+                    encoded_inputs.append(tokenizer(text=texts[0], text_pair=texts[1], max_seq_len=max_seq_len, \
+                        pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+            else:
+                raise RuntimeError(
+                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
         return encoded_inputs
 
     def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int, split_char: str):
         def _parse_batch(batch):
             input_ids = [entry[0] for entry in batch]
             segment_ids = [entry[1] for entry in batch]
-            return input_ids, segment_ids
+
+            if self.task != 'text-matching':
+                return input_ids, segment_ids
+            else:
+                input_ids2 = [entry[2] for entry in batch]
+                segment_ids2 = [entry[3] for entry in batch]
+                return input_ids, segment_ids, input_ids2, segment_ids2
 
         tokenizer = self.get_tokenizer()
         examples = []
-        for text in data:
-            encoded_inputs = self._convert_text_to_input(tokenizer, text, max_seq_len, split_char)
-            input_ids = encoded_inputs['input_ids']
 
-            if Version(paddlenlp.__version__) >= Version('2.0.0rc5'):
-                token_type_ids = encoded_inputs['token_type_ids']
-            else:
-                token_type_ids = encoded_inputs['segment_ids']
-
-            examples.append((input_ids, token_type_ids))
+        for texts in data:
+            encoded_inputs = self._convert_text_to_input(tokenizer, texts, max_seq_len, split_char)
+            example = []
+            for inp in encoded_inputs:
+                input_ids = inp['input_ids']
+                if Version(paddlenlp.__version__) >= Version('2.0.0rc5'):
+                    token_type_ids = inp['token_type_ids']
+                else:
+                    token_type_ids = inp['segment_ids']
+                example.extend((input_ids, token_type_ids))
+            examples.append(example)
 
         # Seperates data into some batches.
         one_batch = []
@@ -488,6 +505,9 @@ class TransformerModule(RunModule, TextServing):
         elif self.task == 'token-cls':
             predictions, avg_loss, metric = self(
                 input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
+        elif self.task == 'text-matching':
+            predictions, avg_loss, metric = self(
+                input_ids=batch[0], token_type_ids=batch[1], input_ids2=batch[2], token_type_ids2=batch[3], labels=batch[4])
         self.metric.reset()
         return {'loss': avg_loss, 'metrics': metric}
 
@@ -506,6 +526,9 @@ class TransformerModule(RunModule, TextServing):
         elif self.task == 'token-cls':
             predictions, avg_loss, metric = self(
                 input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
+        elif self.task == 'text-matching':
+            predictions, avg_loss, metric = self(
+                input_ids=batch[0], token_type_ids=batch[1], input_ids2=batch[2], token_type_ids2=batch[3], labels=batch[4])
         self.metric.reset()
         return {'metrics': metric}
 
@@ -549,7 +572,8 @@ class TransformerModule(RunModule, TextServing):
             raise RuntimeError(f'Unknown task {self.task}, current tasks supported:\n'
                                '1. seq-cls: sequence classification;\n'
                                '2. token-cls: sequence labeling;\n'
-                               '3. None: embedding')
+                               '3. text-matching: text matching;\n'
+                               '4. None: embedding')
 
         paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
 
@@ -557,26 +581,40 @@ class TransformerModule(RunModule, TextServing):
         results = []
         self.eval()
         for batch in batches:
-            input_ids, segment_ids = batch
-            input_ids = paddle.to_tensor(input_ids)
-            segment_ids = paddle.to_tensor(segment_ids)
-
-            if self.task == 'seq-cls':
-                probs = self(input_ids, segment_ids)
+            if self.task == 'text-matching':
+                input_ids, segment_ids, input_ids2, segment_ids2 = batch
+                input_ids = paddle.to_tensor(input_ids)
+                segment_ids = paddle.to_tensor(segment_ids)
+                input_ids2 = paddle.to_tensor(input_ids2)
+                segment_ids2 = paddle.to_tensor(segment_ids2)
+                probs = self(input_ids=input_ids, token_type_ids=segment_ids, input_ids2=input_ids2, token_type_ids2=segment_ids2)
                 idx = paddle.argmax(probs, axis=1).numpy()
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
                 results.extend(labels)
-            elif self.task == 'token-cls':
-                probs = self(input_ids, segment_ids)
-                batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
-                batch_ids = batch_ids.tolist()
-                token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
-                results.extend(token_labels)
-            elif self.task == None:
-                sequence_output, pooled_output = self(input_ids, segment_ids)
-                results.append([pooled_output.squeeze(0).numpy().tolist(), sequence_output.squeeze(0).numpy().tolist()])
+            else:
+                input_ids, segment_ids = batch
+                input_ids = paddle.to_tensor(input_ids)
+                segment_ids = paddle.to_tensor(segment_ids)
 
+                if self.task == 'seq-cls':
+                    probs = self(input_ids, segment_ids)
+                    idx = paddle.argmax(probs, axis=1).numpy()
+                    idx = idx.tolist()
+                    labels = [self.label_map[i] for i in idx]
+                    results.extend(labels)
+                elif self.task == 'token-cls':
+                    probs = self(input_ids, segment_ids)
+                    batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
+                    batch_ids = batch_ids.tolist()
+                    token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
+                    results.extend(token_labels)
+                elif self.task == None:
+                    sequence_output, pooled_output = self(input_ids, segment_ids)
+                    results.append([
+                        pooled_output.squeeze(0).numpy().tolist(),
+                        sequence_output.squeeze(0).numpy().tolist()
+                    ])
         return results
 
 

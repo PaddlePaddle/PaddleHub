@@ -71,6 +71,12 @@ class ErnieTiny(nn.Layer):
             self.metric = ChunkEvaluator(
                 label_list=[self.label_map[i] for i in sorted(self.label_map.keys())]
             )
+        elif task == 'text-matching':
+            self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-tiny', **kwargs)
+            self.dropout = paddle.nn.Dropout(0.1)
+            self.classifier = paddle.nn.Linear(self.model.config['hidden_size']*3, 2)
+            self.criterion = paddle.nn.loss.CrossEntropyLoss()
+            self.metric = paddle.metric.Accuracy()
         elif task is None:
             self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-tiny', **kwargs)
         else:
@@ -84,8 +90,11 @@ class ErnieTiny(nn.Layer):
             self.set_state_dict(state_dict)
             logger.info('Loaded parameters from %s' % os.path.abspath(load_checkpoint))
 
-    def forward(self, input_ids, token_type_ids=None, position_ids=None, attention_mask=None, seq_lengths=None, labels=None):
+    def forward(self, input_ids, token_type_ids=None, input_ids2=None, token_type_ids2=None, position_ids=None, attention_mask=None, seq_lengths=None, labels=None):
         result = self.model(input_ids, token_type_ids, position_ids, attention_mask)
+        if input_ids2 is not None:
+            result2 = self.model(input_ids2, token_type_ids2, None, None)
+
         if self.task == 'seq-cls':
             logits = result
             probs = F.softmax(logits, axis=1)
@@ -108,6 +117,19 @@ class ErnieTiny(nn.Layer):
                 _, _, f1_score = map(float, self.metric.accumulate())
                 return token_level_probs, loss, {'f1_score': f1_score}
             return token_level_probs
+        elif self.task == 'text-matching':
+            _, emb1 = result       # embedding of text_a
+            _, emb2 = result2      # embedding of text_b
+            sub = paddle.abs(paddle.subtract(emb1, emb2))
+            projection = paddle.concat([emb1, emb2, sub], axis=-1)
+            logits = self.classifier(projection)
+            probs = F.softmax(logits)
+            if labels is not None:
+                loss = self.criterion(logits, labels)
+                correct = self.metric.compute(probs, labels)
+                acc = self.metric.update(correct)
+                return probs, loss, {'acc': acc}
+            return probs
         else:
             sequence_output, pooled_output = result
             return sequence_output, pooled_output
