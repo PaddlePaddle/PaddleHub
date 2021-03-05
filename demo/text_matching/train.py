@@ -42,7 +42,7 @@ if __name__ == '__main__':
         learning_rate=args.learning_rate, parameters=model.parameters())
     trainer = hub.Trainer(model, optimizer, checkpoint_dir=args.checkpoint_dir, use_gpu=args.use_gpu)
     trainer.train(
-        dev_dataset,
+        train_dataset,
         epochs=args.num_epoch,
         batch_size=args.batch_size,
         eval_dataset=dev_dataset,

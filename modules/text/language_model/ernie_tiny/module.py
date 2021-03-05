@@ -90,10 +90,27 @@ class ErnieTiny(nn.Layer):
             self.set_state_dict(state_dict)
             logger.info('Loaded parameters from %s' % os.path.abspath(load_checkpoint))
 
-    def forward(self, input_ids, token_type_ids=None, input_ids2=None, token_type_ids2=None, position_ids=None, attention_mask=None, seq_lengths=None, labels=None):
-        result = self.model(input_ids, token_type_ids, position_ids, attention_mask)
-        if input_ids2 is not None:
-            result2 = self.model(input_ids2, token_type_ids2, None, None)
+    def forward(self,
+                input_ids=None,
+                token_type_ids=None,
+                position_ids=None,
+                attention_mask=None,
+                query_input_ids=None,
+                query_token_type_ids=None,
+                query_position_ids=None,
+                query_attention_mask=None,
+                title_input_ids=None,
+                title_token_type_ids=None,
+                title_position_ids=None,
+                title_attention_mask=None,
+                seq_lengths=None,
+                labels=None):
+
+        if self.task != 'text-matching':
+            result = self.model(input_ids, token_type_ids, position_ids, attention_mask)
+        else:
+            query_result = self.model(query_input_ids, query_token_type_ids, query_position_ids, query_attention_mask)
+            title_result = self.model(title_input_ids, title_token_type_ids, title_position_ids, title_attention_mask)
 
         if self.task == 'seq-cls':
             logits = result
@@ -118,10 +135,26 @@ class ErnieTiny(nn.Layer):
                 return token_level_probs, loss, {'f1_score': f1_score}
             return token_level_probs
         elif self.task == 'text-matching':
-            _, emb1 = result       # embedding of text_a
-            _, emb2 = result2      # embedding of text_b
-            sub = paddle.abs(paddle.subtract(emb1, emb2))
-            projection = paddle.concat([emb1, emb2, sub], axis=-1)
+            query_token_embedding, _ = query_result
+            query_token_embedding = self.dropout(query_token_embedding)
+            query_attention_mask = paddle.unsqueeze(
+                (query_input_ids != self.model.pad_token_id).astype(self.model.pooler.dense.weight.dtype), axis=2)
+            query_token_embedding = query_token_embedding * query_attention_mask
+            query_sum_embedding = paddle.sum(query_token_embedding, axis=1)
+            query_sum_mask = paddle.sum(query_attention_mask, axis=1)
+            query_mean = query_sum_embedding / query_sum_mask
+
+            title_token_embedding, _ = title_result
+            title_token_embedding = self.dropout(title_token_embedding)
+            title_attention_mask = paddle.unsqueeze(
+                (title_input_ids != self.model.pad_token_id).astype(self.model.pooler.dense.weight.dtype), axis=2)
+            title_token_embedding = title_token_embedding * title_attention_mask
+            title_sum_embedding = paddle.sum(title_token_embedding, axis=1)
+            title_sum_mask = paddle.sum(title_attention_mask, axis=1)
+            title_mean = title_sum_embedding / title_sum_mask
+
+            sub = paddle.abs(paddle.subtract(query_mean, title_mean))
+            projection = paddle.concat([query_mean, title_mean, sub], axis=-1)
             logits = self.classifier(projection)
             probs = F.softmax(logits)
             if labels is not None:

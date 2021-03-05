@@ -551,14 +551,10 @@ class TextMatchingDataset(BaseNLPDataset, paddle.io.Dataset):
         records = []
         for example in examples:
             if isinstance(self.tokenizer, PretrainedTokenizer):
-                if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
-                    record_a = self.tokenizer.encode(text=example.text_a, max_seq_len=self.max_seq_len)
-                    record_b = self.tokenizer.encode(text=example.text_b, max_seq_len=self.max_seq_len)
-                else:
-                    record_a = self.tokenizer(text=example.text_a, max_seq_len=self.max_seq_len, \
-                        pad_to_max_seq_len=True, return_length=True)
-                    record_b = self.tokenizer(text=example.text_b, max_seq_len=self.max_seq_len, \
-                        pad_to_max_seq_len=True, return_length=True)
+                record_a = self.tokenizer(text=example.text_a, max_seq_len=self.max_seq_len, \
+                    pad_to_max_seq_len=True, return_length=True)
+                record_b = self.tokenizer(text=example.text_b, max_seq_len=self.max_seq_len, \
+                    pad_to_max_seq_len=True, return_length=True)
                 record = {'text_a': record_a, 'text_b': record_b}
             else:
                 raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of PretrainedTokenizer".format(type(self.tokenizer)))
@@ -574,20 +570,17 @@ class TextMatchingDataset(BaseNLPDataset, paddle.io.Dataset):
 
     def __getitem__(self, idx):
         record = self.records[idx]
-        input_ids = np.array(record['text_a']['input_ids'])
-        input_ids2 = np.array(record['text_b']['input_ids'])
         if isinstance(self.tokenizer, PretrainedTokenizer):
-            if Version(paddlenlp.__version__) >= Version('2.0.0rc5'):
-                token_type_ids = np.array(record['text_a']['token_type_ids'])
-                token_type_ids2 = np.array(record['text_b']['token_type_ids'])
-            else:
-                token_type_ids = np.array(record['text_a']['segment_ids'])
-                token_type_ids2 = np.array(record['text_b']['segment_ids'])
+            query_input_ids = np.array(record['text_a']['input_ids'])
+            query_token_type_ids = np.array(record['text_a']['token_type_ids'])
+            title_input_ids = np.array(record['text_b']['input_ids'])
+            title_token_type_ids = np.array(record['text_b']['token_type_ids'])
 
             if 'label' in record.keys():
-                return input_ids, token_type_ids, input_ids2, token_type_ids2, np.array(record['label'], dtype=np.int64)
+                return query_input_ids, query_token_type_ids, title_input_ids, title_token_type_ids, \
+                    np.array(record['label'], dtype=np.int64)
             else:
-                return input_ids, token_type_ids, input_ids2, token_type_ids2
+                return query_input_ids, query_token_type_ids, title_input_ids, title_token_type_ids
         else:
             raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of PretrainedTokenizer".format(type(self.tokenizer)))
 

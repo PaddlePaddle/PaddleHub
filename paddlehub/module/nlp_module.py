@@ -421,17 +421,10 @@ class TransformerModule(RunModule, TextServing):
             if len(texts) != 2:
                 raise RuntimeError(
                     'The input texts must have two sequences, but got %d. Please check your inputs.' % len(texts))
-
-            if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
-                encoded_inputs.append(tokenizer.encode(
-                    texts[0], text_pair=None, max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len))
-                encoded_inputs.append(tokenizer.encode(
-                    texts[1], text_pair=None, max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len))
-            else:
-                encoded_inputs.append(tokenizer(text=texts[0], text_pair=None, max_seq_len=max_seq_len, \
-                        pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
-                encoded_inputs.append(tokenizer(text=texts[1], text_pair=None, max_seq_len=max_seq_len, \
-                        pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+            encoded_inputs.append(tokenizer(text=texts[0], text_pair=None, max_seq_len=max_seq_len, \
+                    pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+            encoded_inputs.append(tokenizer(text=texts[1], text_pair=None, max_seq_len=max_seq_len, \
+                    pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
         else:
             if len(texts) == 1:
                 if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
@@ -454,15 +447,16 @@ class TransformerModule(RunModule, TextServing):
 
     def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int, split_char: str):
         def _parse_batch(batch):
-            input_ids = [entry[0] for entry in batch]
-            segment_ids = [entry[1] for entry in batch]
-
             if self.task != 'text-matching':
+                input_ids = [entry[0] for entry in batch]
+                segment_ids = [entry[1] for entry in batch]
                 return input_ids, segment_ids
             else:
-                input_ids2 = [entry[2] for entry in batch]
-                segment_ids2 = [entry[3] for entry in batch]
-                return input_ids, segment_ids, input_ids2, segment_ids2
+                query_input_ids = [entry[0] for entry in batch]
+                query_segment_ids = [entry[1] for entry in batch]
+                title_input_ids = [entry[2] for entry in batch]
+                title_segment_ids = [entry[3] for entry in batch]
+                return query_input_ids, query_segment_ids, title_input_ids, title_segment_ids
 
         tokenizer = self.get_tokenizer()
         examples = []
@@ -506,8 +500,8 @@ class TransformerModule(RunModule, TextServing):
             predictions, avg_loss, metric = self(
                 input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
         elif self.task == 'text-matching':
-            predictions, avg_loss, metric = self(
-                input_ids=batch[0], token_type_ids=batch[1], input_ids2=batch[2], token_type_ids2=batch[3], labels=batch[4])
+            predictions, avg_loss, metric = self(query_input_ids=batch[0], query_token_type_ids=batch[1], \
+                title_input_ids=batch[2], title_token_type_ids=batch[3], labels=batch[4])
         self.metric.reset()
         return {'loss': avg_loss, 'metrics': metric}
 
@@ -527,9 +521,8 @@ class TransformerModule(RunModule, TextServing):
             predictions, avg_loss, metric = self(
                 input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
         elif self.task == 'text-matching':
-            predictions, avg_loss, metric = self(
-                input_ids=batch[0], token_type_ids=batch[1], input_ids2=batch[2], token_type_ids2=batch[3], labels=batch[4])
-        self.metric.reset()
+            predictions, avg_loss, metric = self(query_input_ids=batch[0], query_token_type_ids=batch[1], \
+                title_input_ids=batch[2], title_token_type_ids=batch[3], labels=batch[4])
         return {'metrics': metric}
 
     def get_embedding(self, data: List[List[str]], use_gpu=False):
@@ -582,12 +575,13 @@ class TransformerModule(RunModule, TextServing):
         self.eval()
         for batch in batches:
             if self.task == 'text-matching':
-                input_ids, segment_ids, input_ids2, segment_ids2 = batch
-                input_ids = paddle.to_tensor(input_ids)
-                segment_ids = paddle.to_tensor(segment_ids)
-                input_ids2 = paddle.to_tensor(input_ids2)
-                segment_ids2 = paddle.to_tensor(segment_ids2)
-                probs = self(input_ids=input_ids, token_type_ids=segment_ids, input_ids2=input_ids2, token_type_ids2=segment_ids2)
+                query_input_ids, query_segment_ids, title_input_ids, title_segment_ids = batch
+                query_input_ids = paddle.to_tensor(query_input_ids)
+                query_segment_ids = paddle.to_tensor(query_segment_ids)
+                title_input_ids = paddle.to_tensor(title_input_ids)
+                title_segment_ids = paddle.to_tensor(title_segment_ids)
+                probs = self(query_input_ids=query_input_ids, query_token_type_ids=query_segment_ids, \
+                    title_input_ids=title_input_ids, title_token_type_ids=title_segment_ids)
                 idx = paddle.argmax(probs, axis=1).numpy()
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
