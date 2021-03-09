@@ -1,4 +1,4 @@
-# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ if __name__ == '__main__':
         ['一只蜜蜂落在日历上（打一成语）', '一只蜜蜂停在日历上（猜一成语）'],
         ['一盒香烟不拆开能存放多久？', '一条没拆封的香烟能存放多久。'],
     ]
-    label_map = {0: 'unmatch', 1: 'match'}
+    label_map = {0: 'similar', 1: 'dissimilar'}
 
     model = hub.Module(
         name='ernie_tiny',

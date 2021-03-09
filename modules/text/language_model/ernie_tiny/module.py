@@ -29,7 +29,7 @@ from paddlehub.utils.log import logger
 
 @moduleinfo(
     name="ernie_tiny",
-    version="2.0.1",
+    version="2.0.2",
     summary="Baidu's ERNIE-tiny, Enhanced Representation through kNowledge IntEgration, tiny version, max_seq_len=512",
     author="paddlepaddle",
     author_email="",
