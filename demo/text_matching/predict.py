@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     model = hub.Module(
         name='ernie_tiny',
-        version='2.0.1',
+        version='2.0.2',
         task='text-matching',
         load_checkpoint='./checkpoint/best_model/model.pdparams',
         label_map=label_map)
