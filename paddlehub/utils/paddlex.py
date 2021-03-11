@@ -16,7 +16,7 @@
 import os
 import shutil
 
-from paddlehub.server.server import module_server
+from paddlehub.server.server import module_server, CacheUpdater
 from paddlehub.utils import log, utils, xarfile
 
 
@@ -35,12 +35,15 @@ class ResourceNotFoundError(Exception):
 
 def download(name: str, save_path: str, version: str = None):
     '''The download interface provided to PaddleX for downloading the specified model and resource files.'''
+
+    CacheUpdater("x_download", name, version).start()
+
     file = os.path.join(save_path, name)
     file = os.path.realpath(file)
     if os.path.exists(file):
         return
 
-    resources = module_server.search_resouce(name=name, version=version, type='Model')
+    resources = module_server.search_resource(name=name, version=version, type='Model')
     if not resources:
         raise ResourceNotFoundError(name, version)
 

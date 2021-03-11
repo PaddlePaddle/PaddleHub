@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# FIXME(zhangxuefei): remove this file after paddlenlp is released.
-
 import copy
 import functools
 import inspect
@@ -25,6 +22,7 @@ from typing import List, Tuple
 
 import paddle
 import paddle.nn as nn
+from packaging.version import Version
 from paddle.dataset.common import DATA_HOME
 from paddle.utils.download import get_path_from_url
 from paddlehub.module.module import serving, RunModule, runnable
@@ -32,8 +30,10 @@ from paddlehub.module.module import serving, RunModule, runnable
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import reseg_token_label
 
+import paddlenlp
 from paddlenlp.embeddings.token_embedding import EMBEDDING_HOME, EMBEDDING_URL_ROOT
 from paddlenlp.data import JiebaTokenizer
+from paddlehub.compat.module.nlp_module import DataFormatError
 
 __all__ = [
     'PretrainedModel',
@@ -359,14 +359,9 @@ class TextServing(object):
     """
     A base class for text model which supports serving.
     """
+
     @serving
-    def predict_method(
-            self,
-            data: List[List[str]],
-            max_seq_len: int = 128,
-            batch_size: int = 1,
-            use_gpu: bool = False
-    ):
+    def predict_method(self, data: List[List[str]], max_seq_len: int = 128, batch_size: int = 1, use_gpu: bool = False):
         """
         Run predict method as a service.
         Serving as a task which is specified from serving config.
@@ -393,20 +388,16 @@ class TextServing(object):
 
             if self.task == 'token-cls':
                 # remove labels of [CLS] token and pad tokens
-                results = [
-                    token_labels[1:len(data[i][0])+1] for i, token_labels in enumerate(results)
-                ]
+                results = [token_labels[1:len(data[i][0]) + 1] for i, token_labels in enumerate(results)]
             return results
-        elif self.task is None:                 # embedding service
+        elif self.task is None:  # embedding service
             results = self.get_embedding(data, use_gpu)
             return results
-        else:                                   # unknown service
-            logger.error(
-                f'Unknown task {self.task}, current tasks supported:\n'
-                '1. seq-cls: sequence classification service;\n'
-                '2. token-cls: sequence labeling service;\n'
-                '3. None: embedding service'
-            )
+        else:  # unknown service
+            logger.error(f'Unknown task {self.task}, current tasks supported:\n'
+                         '1. seq-cls: sequence classification service;\n'
+                         '2. token-cls: sequence labeling service;\n'
+                         '3. None: embedding service')
         return
 
 
@@ -417,34 +408,74 @@ class TransformerModule(RunModule, TextServing):
     _tasks_supported = [
         'seq-cls',
         'token-cls',
+        'text-matching',
     ]
 
-    def _convert_text_to_input(self, tokenizer, text: List[str], max_seq_len: int, split_char: str):
+    def _convert_text_to_input(self, tokenizer, texts: List[str], max_seq_len: int, split_char: str):
         pad_to_max_seq_len = False if self.task is None else True
         if self.task == 'token-cls':  # Extra processing of token-cls task
-            tokens = text[0].split(split_char)
-            text[0], _ = reseg_token_label(tokenizer=tokenizer, tokens=tokens)
-
-        if len(text) == 1:
-            encoded_inputs = tokenizer.encode(text[0], text_pair=None, max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len)
-        elif len(text) == 2:
-            encoded_inputs = tokenizer.encode(text[0], text_pair=text[1], max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len)
+            tokens = texts[0].split(split_char)
+            texts[0], _ = reseg_token_label(tokenizer=tokenizer, tokens=tokens)
+            is_split_into_words = True
         else:
-            raise RuntimeError(
-                'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
+            is_split_into_words = False
+
+        encoded_inputs = []
+        if self.task == 'text-matching':
+            if len(texts) != 2:
+                raise RuntimeError(
+                    'The input texts must have two sequences, but got %d. Please check your inputs.' % len(texts))
+            encoded_inputs.append(tokenizer(text=texts[0], text_pair=None, max_seq_len=max_seq_len, \
+                    pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+            encoded_inputs.append(tokenizer(text=texts[1], text_pair=None, max_seq_len=max_seq_len, \
+                    pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+        else:
+            if len(texts) == 1:
+                if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
+                    encoded_inputs.append(tokenizer.encode(texts[0], text_pair=None, \
+                        max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len))
+                else:
+                    encoded_inputs.append(tokenizer(text=texts[0], max_seq_len=max_seq_len, \
+                        pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+            elif len(texts) == 2:
+                if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
+                    encoded_inputs.append(tokenizer.encode(texts[0], text_pair=texts[1], \
+                        max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len))
+                else:
+                    encoded_inputs.append(tokenizer(text=texts[0], text_pair=texts[1], max_seq_len=max_seq_len, \
+                        pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+            else:
+                raise RuntimeError(
+                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
         return encoded_inputs
 
     def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int, split_char: str):
         def _parse_batch(batch):
-            input_ids = [entry[0] for entry in batch]
-            segment_ids = [entry[1] for entry in batch]
-            return input_ids, segment_ids
+            if self.task != 'text-matching':
+                input_ids = [entry[0] for entry in batch]
+                segment_ids = [entry[1] for entry in batch]
+                return input_ids, segment_ids
+            else:
+                query_input_ids = [entry[0] for entry in batch]
+                query_segment_ids = [entry[1] for entry in batch]
+                title_input_ids = [entry[2] for entry in batch]
+                title_segment_ids = [entry[3] for entry in batch]
+                return query_input_ids, query_segment_ids, title_input_ids, title_segment_ids
 
         tokenizer = self.get_tokenizer()
         examples = []
-        for text in data:
-            encoded_inputs = self._convert_text_to_input(tokenizer, text, max_seq_len, split_char)
-            examples.append((encoded_inputs['input_ids'], encoded_inputs['segment_ids']))
+
+        for texts in data:
+            encoded_inputs = self._convert_text_to_input(tokenizer, texts, max_seq_len, split_char)
+            example = []
+            for inp in encoded_inputs:
+                input_ids = inp['input_ids']
+                if Version(paddlenlp.__version__) >= Version('2.0.0rc5'):
+                    token_type_ids = inp['token_type_ids']
+                else:
+                    token_type_ids = inp['segment_ids']
+                example.extend((input_ids, token_type_ids))
+            examples.append(example)
 
         # Seperates data into some batches.
         one_batch = []
@@ -470,7 +501,11 @@ class TransformerModule(RunModule, TextServing):
         if self.task == 'seq-cls':
             predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
         elif self.task == 'token-cls':
-            predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
+            predictions, avg_loss, metric = self(
+                input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
+        elif self.task == 'text-matching':
+            predictions, avg_loss, metric = self(query_input_ids=batch[0], query_token_type_ids=batch[1], \
+                title_input_ids=batch[2], title_token_type_ids=batch[3], labels=batch[4])
         self.metric.reset()
         return {'loss': avg_loss, 'metrics': metric}
 
@@ -487,8 +522,11 @@ class TransformerModule(RunModule, TextServing):
         if self.task == 'seq-cls':
             predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
         elif self.task == 'token-cls':
-            predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
-        self.metric.reset()
+            predictions, avg_loss, metric = self(
+                input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
+        elif self.task == 'text-matching':
+            predictions, avg_loss, metric = self(query_input_ids=batch[0], query_token_type_ids=batch[1], \
+                title_input_ids=batch[2], title_token_type_ids=batch[3], labels=batch[4])
         return {'metrics': metric}
 
     def get_embedding(self, data: List[List[str]], use_gpu=False):
@@ -504,20 +542,14 @@ class TransformerModule(RunModule, TextServing):
         if self.task is not None:
             raise RuntimeError("The get_embedding method is only valid when task is None, but got task %s" % self.task)
 
-        return self.predict(
-            data=data,
-            use_gpu=use_gpu
-        )
+        return self.predict(data=data, use_gpu=use_gpu)
 
-    def predict(
-            self,
-            data: List[List[str]],
-            max_seq_len: int = 128,
-            split_char: str = '\002',
-            batch_size: int = 1,
-            use_gpu: bool = False
-    ):
-
+    def predict(self,
+                data: List[List[str]],
+                max_seq_len: int = 128,
+                split_char: str = '\002',
+                batch_size: int = 1,
+                use_gpu: bool = False):
         """
         Predicts the data labels.
 
@@ -534,12 +566,11 @@ class TransformerModule(RunModule, TextServing):
         """
         if self.task not in self._tasks_supported \
                 and self.task is not None:      # None for getting embedding
-            raise RuntimeError(
-                f'Unknown task {self.task}, current tasks supported:\n'
-                '1. seq-cls: sequence classification;\n'
-                '2. token-cls: sequence labeling;\n'
-                '3. None: embedding'
-            )
+            raise RuntimeError(f'Unknown task {self.task}, current tasks supported:\n'
+                               '1. seq-cls: sequence classification;\n'
+                               '2. token-cls: sequence labeling;\n'
+                               '3. text-matching: text matching;\n'
+                               '4. None: embedding')
 
         paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
 
@@ -547,29 +578,41 @@ class TransformerModule(RunModule, TextServing):
         results = []
         self.eval()
         for batch in batches:
-            input_ids, segment_ids = batch
-            input_ids = paddle.to_tensor(input_ids)
-            segment_ids = paddle.to_tensor(segment_ids)
-
-            if self.task == 'seq-cls':
-                probs = self(input_ids, segment_ids)
+            if self.task == 'text-matching':
+                query_input_ids, query_segment_ids, title_input_ids, title_segment_ids = batch
+                query_input_ids = paddle.to_tensor(query_input_ids)
+                query_segment_ids = paddle.to_tensor(query_segment_ids)
+                title_input_ids = paddle.to_tensor(title_input_ids)
+                title_segment_ids = paddle.to_tensor(title_segment_ids)
+                probs = self(query_input_ids=query_input_ids, query_token_type_ids=query_segment_ids, \
+                    title_input_ids=title_input_ids, title_token_type_ids=title_segment_ids)
                 idx = paddle.argmax(probs, axis=1).numpy()
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
                 results.extend(labels)
-            elif self.task == 'token-cls':
-                probs = self(input_ids, segment_ids)
-                batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
-                batch_ids = batch_ids.tolist()
-                token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
-                results.extend(token_labels)
-            elif self.task == None:
-                sequence_output, pooled_output = self(input_ids, segment_ids)
-                results.append([
-                    pooled_output.squeeze(0).numpy().tolist(),
-                    sequence_output.squeeze(0).numpy().tolist()
-                ])
+            else:
+                input_ids, segment_ids = batch
+                input_ids = paddle.to_tensor(input_ids)
+                segment_ids = paddle.to_tensor(segment_ids)
 
+                if self.task == 'seq-cls':
+                    probs = self(input_ids, segment_ids)
+                    idx = paddle.argmax(probs, axis=1).numpy()
+                    idx = idx.tolist()
+                    labels = [self.label_map[i] for i in idx]
+                    results.extend(labels)
+                elif self.task == 'token-cls':
+                    probs = self(input_ids, segment_ids)
+                    batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
+                    batch_ids = batch_ids.tolist()
+                    token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
+                    results.extend(token_labels)
+                elif self.task == None:
+                    sequence_output, pooled_output = self(input_ids, segment_ids)
+                    results.append([
+                        pooled_output.squeeze(0).numpy().tolist(),
+                        sequence_output.squeeze(0).numpy().tolist()
+                    ])
         return results
 
 
@@ -577,6 +620,7 @@ class EmbeddingServing(object):
     """
     A base class for embedding model which supports serving.
     """
+
     @serving
     def calc_similarity(self, data: List[List[str]]):
         """
@@ -595,8 +639,7 @@ class EmbeddingServing(object):
             for word in word_pair:
                 if self.get_idx_from_word(word) == \
                         self.get_idx_from_word(self.vocab.unk_token):
-                    raise RuntimeError(
-                        f'Word "{word}" is not in vocab. Please check your inputs.')
+                    raise RuntimeError(f'Word "{word}" is not in vocab. Please check your inputs.')
             results.append(str(self.cosine_sim(*word_pair)))
         return results
 
@@ -629,5 +672,5 @@ class EmbeddingModule(RunModule, EmbeddingServing):
         """
         if self.embedding_name.endswith('.en'):  # English
             raise NotImplementedError  # TODO: (chenxiaojie) add tokenizer of English embedding
-        else:                                    # Chinese
+        else:  # Chinese
             return JiebaTokenizer(self.vocab)

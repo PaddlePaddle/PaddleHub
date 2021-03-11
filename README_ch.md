@@ -12,6 +12,14 @@
 ![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
 
 
+## AI创造营·PaddleHub创意赛（火热招募）🔥🔥
+
+诚邀各位开发者参加 **AI创造营·PaddleHub创意赛** 第一期。基于PaddleHub实现AI创意项目，只要你的脑洞够强，飞桨小哥哥亲手pick你出道！更有丰厚奖品带回家（1万元RMB、Switch游戏机&健身环、机械键盘、小度耳机、小度熊）。扫描下方图片中二维码参与报名，也可以点击[前往报名](https://aistudio.baidu.com/aistudio/competition/detail/72)立即报名。比赛时间2021年3月1号-2021年3月31号，快来参加吧~
+
+<p align="center">
+ <img src="./docs/imgs/Creation.png" align="middle"
+</p>
+
 ## 简介
 - PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型。
 - **【无需深度学习背景、无需数据与训练过程】**，可快速使用AI模型，享受人工智能时代红利。
@@ -20,6 +28,7 @@
 
 
 ## 近期更新
+- **2021.02.18**，发布v2.0.0版本，模型开发调试更简单，finetune接口更加灵活易用。视觉类任务迁移学习能力全面升级，支持[图像分类](./demo/image_classification/README.md)、[图像着色](./demo/colorization/README.md)、[风格迁移](./demo/style_transfer/README.md)等多种任务；BERT、ERNIE、RoBERTa等Transformer类模型升级至动态图，支持[文本分类](./demo/text_classification/README.md)、[序列标注](./demo/sequence_labeling/README.md)的Fine-Tune能力；优化服务化部署Serving能力，支持多卡预测、自动负载均衡，性能大幅度提升；新增自动数据增强能力[Auto Augment](./demo/autoaug/README.md)，能高效地搜索适合数据集的数据增强策略组合。新增[词向量模型](./modules/text/embedding)61个，其中包含中文模型51个，英文模型10个；新增[图像分割](./modules/thirdparty/image/semantic_segmentation)模型4个、[深度模型](./modules/thirdparty/image/depth_estimation)2个、[图像生成](./modules/thirdparty/image/Image_gan/style_transfer)模型7个、[文本生成](./modules/thirdparty/text/text_generation)模型3个。预训练模型总量达到[**【274】**](https://www.paddlepaddle.org.cn/hublist) 个。
 - **2020.11.20**，发布2.0-beta版本，全面迁移动态图编程模式，服务化部署Serving能力升级；新增手部关键点检测1个、图像动漫化类12个、图片编辑类3个，语音合成类3个，句法分析1个，预训练模型总量到达 **【182】** 个。
 - **2020.10.09**，新增OCR多语言系列模型4个，图像编辑模型4个，预训练模型总量到达 **【162】** 个。
 - **2020.09.27**，新增文本生成模型6个，图像分割模型1个，预训练模型总量到达 **【154】** 个。
@@ -80,6 +89,13 @@
 </div>
 
 
+### 图像生成
+- 包含人像动漫化、街景动漫化、风格迁移。
+- 感谢CopyRight@[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、CopyRight@[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)提供预训练模型。
+<div align="center">
+<img src="./docs/imgs/Readme_Related/ImageGAN.gif"  width = "640" height = "600" />
+</div>
+
 ### 目标检测
 - 包含行人检测、车辆检测，更有工业级超大规模预训练模型可选。--
 - 感谢CopyRight@[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)提供预训练模型，训练能力开放，欢迎体验。
@@ -91,14 +107,23 @@
 - 包含单人、多人身体关键点检测、面部关键点检测、手部关键点检测。
 - 感谢CopyRight@[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)开源预训练模型。
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "458" height = "400" />
+<img src="./docs/imgs/Readme_Related/Image_keypoint.gif"  width = "642" height = "550" />
 </div>
 
 ### 图像分割
-- 包含效果卓越的人像抠图模型、ACE2P人体解析世界冠军模型
-- 感谢CopyRight@[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)提供预训练模型，训练能力开放，欢迎体验。
+- 包含效果卓越的人像抠图模型、ACE2P人体解析世界冠军模型、动态天空置换算法
+- 感谢CopyRight@[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)、感谢CopyRight@[Zhengxia Zou](https://github.com/jiupinjia/SkyAR)提供预训练模型，训练能力开放，欢迎体验。
 <div align="center">
 <img src="./docs/imgs/Readme_Related/ImageSeg_Human.gif"  width = "642" height = "400" />
+</div>
+
+<div align="center">
+<img src="./docs/imgs/Readme_Related/9dis.gif"  width = "642" height = "200" />
+</div>
+
+<div align="center">
+
+（第二张动图来自于CopyRight@[jiupinjia/SkyAR](https://github.com/jiupinjia/SkyAR#district-9-ship-video-source))
 </div>
 
 ### 图像分类
@@ -108,18 +133,18 @@
 <img src="./docs/imgs/Readme_Related/ImageClas_animal_dish_wild.gif"  width = "530" height = "400" />
 </div>
 
-### 词法分析
-- 效果优秀的中文分词、词性标注与命名实体识别的模型。
-- 感谢CopyRight@[LAC](https://github.com/baidu/LAC)提供预训练模型，训练能力开放，欢迎体验。
-<div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "640" height = "233" />
-</div>
-
 ### 文本生成
 - 包含AI写诗、AI对联、AI情话、AI藏头诗，多种算法可选。
 - 感谢CopyRight@[ERNIE](https://github.com/PaddlePaddle/ERNIE)提供预训练模型，训练能力开放，欢迎体验。
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_Textgen_poetry.gif"  width = "850" height = "400" />
+</div>
+
+### 词法分析
+- 效果优秀的中文分词、词性标注与命名实体识别的模型。
+- 感谢CopyRight@[LAC](https://github.com/baidu/LAC)提供预训练模型，训练能力开放，欢迎体验。
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Text_Lexical Analysis.png"  width = "640" height = "233" />
 </div>
 
 ### 句法分析
@@ -205,28 +230,30 @@
     - [命令行调用](./docs/docs_ch/quick_experience/cmd_quick_run.md)
     - [Python API调用](./docs/docs_ch/quick_experience/python_use_hub.md)
     - [示例体验项目demo](./docs/docs_ch/quick_experience/more_demos.md)
-- 丰富的预训练模型 182
+- 丰富的预训练模型 274
     - [精品特色模型](./docs/docs_ch/figures.md)
-    - 计算机视觉 126 个
+    - 计算机视觉 141 个
       - [图像分类 64 个](./modules/image/classification/README.md)
       - [目标检测 13 个](./modules/image/object_detection/README.md)
       - [人脸检测 7 个](./modules/image/face_detection/README.md)  
-      - [关键点检测 3 个](./modules/image/keypoint_detection/README.md)
-      - [图像分割 7 个](./modules/image/semantic_segmentation/README.md)
+      - [关键点检测 5 个](./modules/image/keypoint_detection/README.md)
+      - [图像分割 13 个](./modules/image/semantic_segmentation/README.md)
       - [文本识别 8 个](./modules/image/text_recognition/README.md)
-      - [图像生成 17 个](./modules/image/Image_gan/README.md)
-      - [图像编辑 7 个](./modules/image/Image_editing/README.md)
-    - 自然语言处理 48 个
+      - [图像生成 22 个](./modules/image/Image_gan/README.md)
+      - [图像编辑 9 个](./modules/image/Image_editing/README.md)
+    - 自然语言处理 122 个
       - [词法分析 2 个](./modules/text/lexical_analysis/README.md)
       - [句法分析 1 个](./modules/text/syntactic_analysis/README.md)
       - [情感分析 7 个](./modules/text/sentiment_analysis/README.md)
       - [文本审核 3 个](./modules/text/text_review/README.md)
-      - [文本生成 9 个](./modules/text/text_generation/README.md)
-      - [语义模型 26 个](./modules/text/language_model/README.md)
+      - [文本生成 12 个](./modules/text/text_generation/README.md)
+      - [语义模型 36 个](./modules/text/language_model/README.md)
+      - [词向量 61 个](https://www.paddlepaddle.org.cn/hublist)
     - 语音 3 个
       - [语音合成 3 个](./modules/audio/README.md)
-    - 视频5个
+    - 视频8个
       - [视频分类 5 个](./modules/video/README.md)
+      - [视频修复 3 个](https://www.paddlepaddle.org.cn/hublist)
 - 部署
     - [本地Inference部署](./docs/docs_ch/quick_experience/python_use_hub.md)
     - [一行代码服务化部署](./docs/docs_ch/tutorial/serving.md)
@@ -252,12 +279,11 @@
 ## 致谢开发者
 我们非常欢迎您为PaddleHub贡献代码，也十分感谢您的反馈。
 
-* 非常感谢[肖培楷](https://github.com/jm12138)贡献了街景动漫化，人像动漫化和手势关键点识别三个module
+* 非常感谢[肖培楷](https://github.com/jm12138)贡献了街景动漫化，人像动漫化、手势关键点识别、天空置换、深度估计、人像分割等module
 * 非常感谢[Austendeng](https://github.com/Austendeng)贡献了修复SequenceLabelReader的pr
 * 非常感谢[cclauss](https://github.com/cclauss)贡献了优化travis-ci检查的pr
 * 非常感谢[奇想天外](http://www.cheerthink.com/)贡献了口罩检测的demo
 * 非常感谢[mhlwsk](https://github.com/mhlwsk)贡献了修复序列标注预测demo的pr
-* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)贡献了看图作诗的module
-* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)和[七年期限](https://github.com/1084667371)联合贡献了看图写诗中秋特别版module
+* 非常感谢[zbp-xxxp](https://github.com/zbp-xxxp)和[七年期限](https://github.com/1084667371)联合贡献了看图写诗中秋特别版module、谣言预测、请教条生成等module
 * 非常感谢[livingbody](https://github.com/livingbody)贡献了基于PaddleHub能力的风格迁移和中秋看图写诗微信小程序
-
+* 非常感谢[BurrowsWang](https://github.com/BurrowsWang)修复Markdown表格显示问题

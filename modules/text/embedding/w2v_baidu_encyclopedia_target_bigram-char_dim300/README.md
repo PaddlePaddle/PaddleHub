@@ -56,6 +56,25 @@ def dot(
 * `word_a`： 需要计算内积的单词a。
 * `word_b`： 需要计算内积的单词b。
 
+
+```python
+def get_vocab_path()
+```
+获取本地词表文件的路径信息。
+
+
+```python
+def get_tokenizer(*args, **kwargs)
+```
+获取当前模型的tokenizer，返回一个JiebaTokenizer的实例，当前只支持中文embedding模型。
+
+**参数**
+* `*args`： 额外传递的列表形式的参数。
+* `**kwargs`： 额外传递的字典形式的参数。
+
+关于额外参数的详情，可查看[paddlenlp.data.tokenizer.JiebaTokenizer](https://github.com/PaddlePaddle/models/blob/develop/PaddleNLP/paddlenlp/data/tokenizer.py)
+
+
 更多api详情和用法可参考[paddlenlp.embeddings](https://github.com/PaddlePaddle/models/tree/release/2.0-beta/PaddleNLP/paddlenlp/embeddings)
 
 ## 代码示例
@@ -125,3 +144,6 @@ paddlehub >= 2.0.0
 
   初始发布
 
+* 1.0.1
+
+  支持基于embedding的文本分类和序列标注finetune任务

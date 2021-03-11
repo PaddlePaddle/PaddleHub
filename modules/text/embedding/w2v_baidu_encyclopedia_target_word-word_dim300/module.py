@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
 from paddlenlp.embeddings import TokenEmbedding
-from paddlehub.module.module import moduleinfo, serving
+from paddlehub.module.module import moduleinfo
 from paddlehub.module.nlp_module import EmbeddingModule
 
 
 @moduleinfo(
     name="w2v_baidu_encyclopedia_target_word-word_dim300",
-    version="1.0.0",
+    version="1.0.1",
     summary="",
     author="paddlepaddle",
     author_email="",
@@ -30,7 +29,7 @@ class Embedding(TokenEmbedding):
     """
     Embedding model
     """
-    embedding_name = 'w2v.baidu_encyclopedia.target.word-word.dim300'
+    embedding_name = "w2v.baidu_encyclopedia.target.word-word.dim300"
 
     def __init__(self, *args, **kwargs):
         super(Embedding, self).__init__(embedding_name=self.embedding_name, *args, **kwargs)
