@@ -151,3 +151,7 @@ paddlehub >= 2.0.0
 * 1.0.0
 
   初始发布，动态图版本模型，支持文本分类`seq-cls`和序列标注`token-cls`任务的fine-tune
+
+* 1.0.1
+
+  增加文本匹配任务`text-matching`

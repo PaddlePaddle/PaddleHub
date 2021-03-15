@@ -28,7 +28,7 @@ from paddlehub.utils.log import logger
 
 @moduleinfo(
     name="electra-small",
-    version="1.0.0",
+    version="1.0.1",
     summary=
     "electra-small, 12-layer, 256-hidden, 4-heads, 14M parameters. The module is executed as paddle.dygraph.",
     author="paddlepaddle",
@@ -80,6 +80,12 @@ class Electra(nn.Layer):
             self.metric = ChunkEvaluator(
                 label_list=[self.label_map[i] for i in sorted(self.label_map.keys())]
             )
+        elif task == 'text-matching':
+            self.model = ElectraModel.from_pretrained(pretrained_model_name_or_path='electra-small', **kwargs)
+            self.dropout = paddle.nn.Dropout(0.1)
+            self.classifier = paddle.nn.Linear(self.model.config['hidden_size']*3, 2)
+            self.criterion = paddle.nn.loss.CrossEntropyLoss()
+            self.metric = paddle.metric.Accuracy()
         elif task is None:
             self.model = ElectraModel.from_pretrained(pretrained_model_name_or_path='electra-small', **kwargs)
         else:
@@ -93,8 +99,28 @@ class Electra(nn.Layer):
             self.set_state_dict(state_dict)
             logger.info('Loaded parameters from %s' % os.path.abspath(load_checkpoint))
 
-    def forward(self, input_ids, token_type_ids=None, position_ids=None, attention_mask=None, seq_lengths=None, labels=None):
-        result = self.model(input_ids, token_type_ids, position_ids, attention_mask)
+    def forward(self,
+                input_ids=None,
+                token_type_ids=None,
+                position_ids=None,
+                attention_mask=None,
+                query_input_ids=None,
+                query_token_type_ids=None,
+                query_position_ids=None,
+                query_attention_mask=None,
+                title_input_ids=None,
+                title_token_type_ids=None,
+                title_position_ids=None,
+                title_attention_mask=None,
+                seq_lengths=None,
+                labels=None):
+
+        if self.task != 'text-matching':
+            result = self.model(input_ids, token_type_ids, position_ids, attention_mask)
+        else:
+            query_result = self.model(query_input_ids, query_token_type_ids, query_position_ids, query_attention_mask)
+            title_result = self.model(title_input_ids, title_token_type_ids, title_position_ids, title_attention_mask)
+
         if self.task == 'seq-cls':
             logits = result
             probs = F.softmax(logits, axis=1)
@@ -117,6 +143,35 @@ class Electra(nn.Layer):
                 _, _, f1_score = map(float, self.metric.accumulate())
                 return token_level_probs, loss, {'f1_score': f1_score}
             return token_level_probs
+        elif self.task == 'text-matching':
+            query_token_embedding = query_result
+            query_token_embedding = self.dropout(query_token_embedding)
+            query_attention_mask = paddle.unsqueeze(
+                (query_input_ids != self.model.pad_token_id).astype(query_token_embedding.dtype), axis=2)
+            query_token_embedding = query_token_embedding * query_attention_mask
+            query_sum_embedding = paddle.sum(query_token_embedding, axis=1)
+            query_sum_mask = paddle.sum(query_attention_mask, axis=1)
+            query_mean = query_sum_embedding / query_sum_mask
+
+            title_token_embedding = title_result
+            title_token_embedding = self.dropout(title_token_embedding)
+            title_attention_mask = paddle.unsqueeze(
+                (title_input_ids != self.model.pad_token_id).astype(title_token_embedding.dtype), axis=2)
+            title_token_embedding = title_token_embedding * title_attention_mask
+            title_sum_embedding = paddle.sum(title_token_embedding, axis=1)
+            title_sum_mask = paddle.sum(title_attention_mask, axis=1)
+            title_mean = title_sum_embedding / title_sum_mask
+
+            sub = paddle.abs(paddle.subtract(query_mean, title_mean))
+            projection = paddle.concat([query_mean, title_mean, sub], axis=-1)
+            logits = self.classifier(projection)
+            probs = F.softmax(logits)
+            if labels is not None:
+                loss = self.criterion(logits, labels)
+                correct = self.metric.compute(probs, labels)
+                acc = self.metric.update(correct)
+                return probs, loss, {'acc': acc}
+            return probs
         else:
             sequence_output, pooled_output = result
             return sequence_output, pooled_output

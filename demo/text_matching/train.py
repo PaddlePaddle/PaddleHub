@@ -31,7 +31,7 @@ parser.add_argument("--save_interval", type=int, default=2, help="Save checkpoin
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    model = hub.Module(name='ernie_tiny', version='2.0.1', task='text-matching')
+    model = hub.Module(name='ernie_tiny', version='2.0.2', task='text-matching')
     tokenizer = model.get_tokenizer()
 
     train_dataset = LCQMC(tokenizer=tokenizer, max_seq_len=args.max_seq_len, mode='train')
