@@ -48,7 +48,7 @@ $ hub run DriverStatusRecognition --image 1.png --use_gpu True
 # 效果展示
 
 ## 原图
-![](https://ai-studio-static-online.cdn.bcebos.com/da3d4ca593c94d8f9fb96d5aa81523ebd7c6ea6dbfa24853831db51fb0098a5e)
+<img src="/docs/imgs/Readme_Related/Image_Classification_Drivers.png">
 
 ## 输出结果
 ~~~
@@ -61,5 +61,5 @@ $ hub run DriverStatusRecognition --image 1.png --use_gpu True
 郑博培、彭兆帅
 
 # 依赖
-paddlepaddle >= 2.0.0
+paddlepaddle >= 2.0.0<br>
 paddlehub >= 2.0.0
