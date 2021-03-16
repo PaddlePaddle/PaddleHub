@@ -2,21 +2,21 @@ import os
 import paddle
 import numpy as np
 import paddle.nn as nn
-from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import moduleinfo, serving
 from paddlenlp.transformers import GPT2ForPretraining, GPT2ChineseTokenizer, GPT2Model
 
 
 @moduleinfo(
-    name="GPT2_Base_CN",  # 模型名称
+    name="GPT2_CPM_LM",  # 模型名称
     type="NLP/NLG",  # 模型类型
     author="jm12138",  # 作者名称
     author_email="jm12138@qq.com",  # 作者邮箱
-    summary="GPT2_Base_CN",  # 模型介绍
+    summary="GPT2_CPM_LM",  # 模型介绍
     version="1.0.0"  # 版本号
 )
-class GPT2_Base_CN(nn.Layer):
+class GPT2_CPM_LM(nn.Layer):
     def __init__(self, max_len=512):
-        super(GPT2_Base_CN, self).__init__()
+        super(GPT2_CPM_LM, self).__init__()
         # 实例化模型
         gpt2 = GPT2Model(
             vocab_size=30000,
@@ -166,3 +166,13 @@ class GPT2_Base_CN(nn.Layer):
                 break
 
         return self.tokenizer.decode(ids)
+
+    # Hub Serving
+    @serving
+    def serving_method(self, text, mode='search', **kwargs):
+        if mode == 'search':
+            results = self.greedy_search(text, **kwargs)
+        else:
+            results = self.nucleus_sample(text, **kwargs)
+
+        return results

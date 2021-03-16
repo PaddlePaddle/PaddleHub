@@ -1,7 +1,7 @@
 import paddle
 import numpy as np
 import paddle.nn as nn
-from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import moduleinfo, serving
 from paddlenlp.transformers import GPT2ForPretraining, GPT2ChineseTokenizer
 
 
@@ -135,3 +135,13 @@ class GPT2_Base_CN(nn.Layer):
                 break
 
         return self.tokenizer.decode(ids)
+
+    # Hub Serving
+    @serving
+    def serving_method(self, text, mode='search', **kwargs):
+        if mode == 'search':
+            results = self.greedy_search(text, **kwargs)
+        else:
+            results = self.nucleus_sample(text, **kwargs)
+
+        return results
