@@ -49,5 +49,5 @@ $ hub run WatermeterSegmentation --image 1.png --use_gpu True
 郑博培、彭兆帅
 
 # 依赖
-paddlepaddle >= 2.0.0
+paddlepaddle >= 2.0.0<br>
 paddlehub >= 2.0.0
