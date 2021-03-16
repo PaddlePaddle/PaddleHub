@@ -49,7 +49,7 @@ $ hub run SnakeIdentification --image 1.png --use_gpu True
 # 效果展示
 
 ## 原图
-![](https://ai-studio-static-online.cdn.bcebos.com/818dcf6d44554137b835c1b8f07a86a6ff2688da2b2e44cb984c7a4e61ceacbe)
+<img src="/docs/imgs/Readme_Related/Image_Classification_Snake.png">
 
 ## 输出结果
 ~~~
