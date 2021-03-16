@@ -15,7 +15,7 @@ from paddlenlp.transformers import GPT2ForPretraining, GPT2ChineseTokenizer, GPT
     version="1.0.0"  # 版本号
 )
 class GPT2_CPM_LM(nn.Layer):
-    def __init__(self, max_len=512):
+    def __init__(self):
         super(GPT2_CPM_LM, self).__init__()
         # 实例化模型
         gpt2 = GPT2Model(

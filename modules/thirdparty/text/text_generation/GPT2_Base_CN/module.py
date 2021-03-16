@@ -14,7 +14,7 @@ from paddlenlp.transformers import GPT2ForPretraining, GPT2ChineseTokenizer
     version="1.0.0"  # 版本号
 )
 class GPT2_Base_CN(nn.Layer):
-    def __init__(self, max_len=512):
+    def __init__(self):
         super(GPT2_Base_CN, self).__init__()
         # 加载 PaddleNLP 自带的预训练中文 GPT2 模型
         self.model = GPT2ForPretraining.from_pretrained('gpt2-base-cn')
