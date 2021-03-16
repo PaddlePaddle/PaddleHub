@@ -56,7 +56,7 @@ $ hub run spinalnet_res50_gemstone --input_path "/PATH/TO/IMAGE" --top_k 5
 
 ## 代码步骤
 
-使用PaddleHub Fine-tune API进行Fine-tune可以分为4个步骤。
+使用PaddleHub Fine-tune API进行Fine-tune可以分为5个步骤。
 
 ### Step1: 加载必要的库
 ```python
