@@ -40,10 +40,10 @@ $ hub run WatermeterSegmentation --image 1.png --use_gpu True
 # 效果展示
 
 ## 原图
-<img src="PaddleHub/docs/imgs/Readme_Related/ImageSeg_WaterInput.png">
+<img src="/docs/imgs/Readme_Related/ImageSeg_WaterInput.png">
 
 ## 输出结果
-<img src="PaddleHub/docs/imgs/Readme_Related/ImageSeg_WaterOutput.png">
+<img src="/docs/imgs/Readme_Related/ImageSeg_WaterOutput.png">
 
 # 贡献者
 郑博培、彭兆帅
