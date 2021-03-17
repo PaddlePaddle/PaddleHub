@@ -1,0 +1,59 @@
+Model: ResNet50_vd_ssld
+Transforms:
+- ResizeByShort:
+    max_size: -1
+    short_size: 256
+- CenterCrop:
+    crop_size: 224
+- Normalize:
+    mean:
+    - 0.485
+    - 0.456
+    - 0.406
+    std:
+    - 0.229
+    - 0.224
+    - 0.225
+TransformsMode: RGB
+_Attributes:
+  eval_metrics:
+    acc1: 0.9801980198019802
+  fixed_input_shape: null
+  labels:
+  - Abudefduf_vaigiensis
+  - Acanthurus_nigrofuscus
+  - Amphiprion_clarkia
+  - Balistapus_undulates
+  - Canthigaster_valentine
+  - Chaetodon_lunulatus
+  - Chaetodon_trifascialis
+  - Chromis_chrysura
+  - Dascyllus_reticulatus
+  - Hemigymnus_fasciatus
+  - Hemigymnus_melapterus
+  - Lutjanus_fulvus
+  - Myripristis_kuntee
+  - Ncoglyphidodon_nigroris
+  - Neoniphon_samara
+  - Pempheris_vanicolensis
+  - Plectroglyphidodon_dickii
+  - Pomacentrus_moluccensis
+  - Scaridae
+  - Scolopsis_bilineata
+  - Siganus_fuscescens
+  - Zanclus_cornutus
+  - Zebrasoma_scopas
+  model_type: classifier
+  num_classes: 23
+_ModelInputsOutputs:
+  test_inputs:
+  - - image
+    - image
+  test_outputs:
+  - - predict
+    - softmax_0.tmp_0
+_init_params:
+  num_classes: 23
+completed_epochs: 0
+status: Infer
+version: 1.3.7
