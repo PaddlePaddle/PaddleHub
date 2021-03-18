@@ -1,4 +1,4 @@
-# copyright (c) 2020 nanting03. All Rights Reserve.
+# copyright (c) 2021 nanting03. All Rights Reserve.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
 # limitations under the License.
 import os
 from typing import Union
-# from PIL import Image
+
 import numpy as np
 import paddle
 import paddle.nn as nn
 import paddlehub.vision.transforms as T
-# import paddle.vision.transforms as T
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.cv_module import ImageClassifierModule
 
@@ -168,7 +167,7 @@ class ResNet(nn.Layer):
             author_email="975348977@qq.com",
             summary="spinalnet_res50_gemstone is a classification model, "
             "this module is trained with Gemstone dataset.",
-            version="1.1.0",
+            version="1.0.0",
             meta=ImageClassifierModule)
 class SpinalNet_ResNet50(nn.Layer):
     def __init__(self, label_list: list = None, load_checkpoint: str = None):

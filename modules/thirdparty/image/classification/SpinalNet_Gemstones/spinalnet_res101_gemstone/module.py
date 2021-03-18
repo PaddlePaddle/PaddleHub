@@ -1,4 +1,4 @@
-# copyright (c) 2020 nanting03. All Rights Reserve.
+# copyright (c) 2021 nanting03. All Rights Reserve.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ class ResNet(nn.Layer):
             author_email="975348977@qq.com",
             summary="spinalnet_res101_gemstone is a classification model, "
             "this module is trained with Gemstone dataset.",
-            version="1.1.0",
+            version="1.0.0",
             meta=ImageClassifierModule)
 class SpinalNet_ResNet101(nn.Layer):
     def __init__(self, label_list: list = None, load_checkpoint: str = None):

@@ -5,7 +5,7 @@
 ## 1. 首先要安装PaddleHub2.0版
 
 ```shell
-$pip install -U paddlehub==2.0.0rc0
+$pip install -U paddlehub==2.0.0
 ```
 
 ## 2. 在本地加载封装的模型
@@ -15,40 +15,40 @@ $import paddlehub as hub
 ```
 ### 加载spinalnet_res50_gemstone
 ```shell
-$spinal_res50 = hub.Module(directory="SpinalNet_Gemstones/spinalnet_res50_gemstone/")
+$spinal_res50 = hub.Module(name="SpinalNet_Gemstones/spinalnet_res50_gemstone/")
 ```
 ### 加载spinalnet_vgg16_gemstone
 ```shell
-$spinal_vgg16 = hub.Module(directory="SpinalNet_Gemstones/spinalnet_vgg16_gemstone/")
+$spinal_vgg16 = hub.Module(name="SpinalNet_Gemstones/spinalnet_vgg16_gemstone/")
 ```
 ### 加载spinalnet_res101_gemstone
 ```shell
-$spinal_res101 = hub.Module(directory="SpinalNet_Gemstones/spinalnet_res101_gemstone/")
+$spinal_res101 = hub.Module(name="SpinalNet_Gemstones/spinalnet_res101_gemstone/")
 ```
 ## 3. 预测
 
 ### 使用spinalnet_res50_gemstone预测
 ```shell
-$result_res50 = spinal_res50.predict(['SpinalNet_Gemstones/testImages/Kunzite/kunzite_28.jpg', 'SpinalNet_Gemstones/testImages/Fluorite/fluorite_18.jpg', 'SpinalNet_Gemstones/testImages/Cats Eye/cats_eye_3.jpg'])
+$result_res50 = spinal_res50.predict(['/PATH/TO/IMAGE'])
 $print(result_res50)
 ```
 ### 使用spinalnet_vgg16_gemstone预测
 ```shell
-$result_vgg16 = spinal_vgg16.predict(['SpinalNet_Gemstones/testImages/Kunzite/kunzite_28.jpg', 'SpinalNet_Gemstones/testImages/Fluorite/fluorite_18.jpg', 'SpinalNet_Gemstones/testImages/Cats Eye/cats_eye_3.jpg'])
+$result_vgg16 = spinal_vgg16.predict(['/PATH/TO/IMAGE'])
 $print(result_vgg16)
 ```
 ### 使用spinalnet_res101_gemstone预测
 ```shell
-$sresult_res101 = spinal_res101.predict(['SpinalNet_Gemstones/testImages/Kunzite/kunzite_28.jpg', 'SpinalNet_Gemstones/testImages/Fluorite/fluorite_18.jpg', 'SpinalNet_Gemstones/testImages/Cats Eye/cats_eye_3.jpg'])
+$sresult_res101 = spinal_res101.predict(['/PATH/TO/IMAGE'])
 $print(result_res101)
 ```
-
-
-## 4. 对PaddleHub模型进行训练微调
+## 4. 命令行预测
 
 ```shell
 $ hub run spinalnet_res50_gemstone --input_path "/PATH/TO/IMAGE" --top_k 5
 ```
+
+## 5. 对PaddleHub模型进行训练微调
 
 ## 如何开始Fine-tune
 

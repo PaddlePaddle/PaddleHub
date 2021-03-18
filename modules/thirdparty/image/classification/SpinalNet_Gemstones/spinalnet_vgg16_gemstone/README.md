@@ -10,7 +10,8 @@
 预训练模型位于https://aistudio.baidu.com/asistudio/datasetdetail/69923
 
 ## API
-```加载该模型后，使用PadduleHub2.0的默认图像分类API
+加载该模型后，使用PadduleHub2.0的默认图像分类API
+```
 def Predict(images, batch_size, top_k):
 ```
 
