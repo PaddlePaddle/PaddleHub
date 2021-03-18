@@ -22,8 +22,8 @@ from paddlehub.module.module import moduleinfo
 import paddlehub.vision.segmentation_transforms as T
 from paddlehub.module.cv_module import ImageSegmentationModule
 
-import ocrnet_hrnetw18.layers as L
-from ocrnet_hrnetw18.hrnet import HRNet_W18
+import ocrnet_hrnetw18_voc.layers as L
+from ocrnet_hrnetw18_voc.hrnet import HRNet_W18
 
 @moduleinfo(
     name="ocrnet_hrnetw18_voc",

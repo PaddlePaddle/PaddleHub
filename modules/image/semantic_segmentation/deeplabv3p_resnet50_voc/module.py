@@ -23,8 +23,8 @@ from paddlehub.module.module import moduleinfo
 import paddlehub.vision.segmentation_transforms as T
 from paddlehub.module.cv_module import ImageSegmentationModule
 
-from deeplabv3p_resnet50.resnet import ResNet50_vd
-import deeplabv3p_resnet50.layers as L
+from deeplabv3p_resnet50_voc.resnet import ResNet50_vd
+import deeplabv3p_resnet50_voc.layers as L
 
 
 

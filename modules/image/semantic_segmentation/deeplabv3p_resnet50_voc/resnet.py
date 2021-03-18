@@ -15,7 +15,7 @@
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
-import deeplabv3p_resnet50.layers as L
+import deeplabv3p_resnet50_voc.layers as L
 
 
 class BasicBlock(nn.Layer):

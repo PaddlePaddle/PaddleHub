@@ -18,7 +18,7 @@ import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
 
-import ocrnet_hrnetw18.layers as L
+import ocrnet_hrnetw18_voc.layers as L
 
 
 class HRNet_W18(nn.Layer):
