@@ -1,6 +1,9 @@
 MarineBiometrics
+
 类别 图像 - 图像分类
+
 网络 ResNet50_vd_ssld
+
 数据集 Fish4Knowledge
 
 # 模型概述
@@ -62,4 +65,5 @@ $ hub run MarineBiometrics --image 1.png --use_gpu True
 
 # 依赖
 paddlepaddle >= 2.0.0
+
 paddlehub >= 2.0.0
