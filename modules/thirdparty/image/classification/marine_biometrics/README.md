@@ -27,7 +27,8 @@ $ hub run MarineBiometrics --image 1.png --use_gpu True
 # 代码示例
 
 ## API调用
-...
+
+~~~
 import cv2
 import paddlehub as hub
 
@@ -39,7 +40,7 @@ images = [cv2.imread('PATH/TO/IMAGE')]
 results = module.predict(images=images)
 for result in results:
     print(result)
-...
+~~~
 
 ## 命令行调用
 ~~~
