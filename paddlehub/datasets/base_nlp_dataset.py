@@ -469,3 +469,120 @@ class SeqLabelingDataset(BaseNLPDataset, paddle.io.Dataset):
 
     def __len__(self):
         return len(self.records)
+
+
+class TextMatchingDataset(BaseNLPDataset, paddle.io.Dataset):
+    """
+    The dataset class which is fit for all datatset of text matching.
+    """
+
+    def __init__(self,
+                 base_path: str,
+                 tokenizer: PretrainedTokenizer,
+                 max_seq_len: int = 128,
+                 mode: str = "train",
+                 data_file: str = None,
+                 label_file: str = None,
+                 label_list: list = None,
+                 is_file_with_header: bool = False):
+        """
+        Ags:
+            base_path (:obj:`str`): The directory to the whole dataset.
+            tokenizer (:obj:`PretrainedTokenizer`):
+                It tokenizes the text and encodes the data as model needed.
+            max_seq_len (:obj:`int`, `optional`, defaults to :128):
+                If set to a number, will limit the total sequence returned so that it has a maximum length.
+            mode (:obj:`str`, `optional`, defaults to `train`):
+                It identifies the dataset mode (train, test or dev).
+            data_file(:obj:`str`, `optional`, defaults to :obj:`None`):
+                The data file name, which is relative to the base_path.
+            label_file(:obj:`str`, `optional`, defaults to :obj:`None`):
+                The label file name, which is relative to the base_path.
+                It is all labels of the dataset, one line one label.
+            label_list(:obj:`List[str]`, `optional`, defaults to :obj:`None`):
+                The list of all labels of the dataset
+            is_file_with_header(:obj:bool, `optional`, default to :obj: False) :
+                Whether or not the file is with the header introduction.
+        """
+        super(TextMatchingDataset, self).__init__(
+            base_path=base_path,
+            tokenizer=tokenizer,
+            max_seq_len=max_seq_len,
+            mode=mode,
+            data_file=data_file,
+            label_file=label_file,
+            label_list=label_list)
+        self.examples = self._read_file(self.data_file, is_file_with_header)
+
+        self.records = self._convert_examples_to_records(self.examples)
+
+    def _read_file(self, input_file, is_file_with_header: bool = False) -> List[InputExample]:
+        """
+        Reads a tab separated value file.
+        Args:
+            input_file (:obj:str) : The file to be read.
+            is_file_with_header(:obj:bool, `optional`, default to :obj: False) :
+                Whether or not the file is with the header introduction.
+        Returns:
+            examples (:obj:`List[InputExample]`): All the input data.
+        """
+        if not os.path.exists(input_file):
+            raise RuntimeError("The file {} is not found.".format(input_file))
+        else:
+            with io.open(input_file, "r", encoding="UTF-8") as f:
+                reader = csv.reader(f, delimiter="\t", quotechar=None)
+                examples = []
+                seq_id = 0
+                header = next(reader) if is_file_with_header else None
+                for line in reader:
+                    example = InputExample(guid=seq_id, text_a=line[0], text_b=line[1], label=line[2])
+                    seq_id += 1
+                    examples.append(example)
+                return examples
+
+    def _convert_examples_to_records(self, examples: List[InputExample]) -> List[dict]:
+        """
+        Converts all examples to records which the model needs.
+        Args:
+            examples(obj:`List[InputExample]`): All data examples returned by _read_file.
+        Returns:
+            records(:obj:`List[dict]`): All records which the model needs.
+        """
+        records = []
+        for example in examples:
+            if isinstance(self.tokenizer, PretrainedTokenizer):
+                record_a = self.tokenizer(text=example.text_a, max_seq_len=self.max_seq_len, \
+                    pad_to_max_seq_len=True, return_length=True)
+                record_b = self.tokenizer(text=example.text_b, max_seq_len=self.max_seq_len, \
+                    pad_to_max_seq_len=True, return_length=True)
+                record = {'text_a': record_a, 'text_b': record_b}
+            else:
+                raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of PretrainedTokenizer".format(type(self.tokenizer)))
+
+            if not record:
+                logger.info(
+                    "The text %s has been dropped as it has no words in the vocab after tokenization." % example.text_a)
+                continue
+            if example.label:
+                record['label'] = self.label_map[example.label]
+            records.append(record)
+        return records
+
+    def __getitem__(self, idx):
+        record = self.records[idx]
+        if isinstance(self.tokenizer, PretrainedTokenizer):
+            query_input_ids = np.array(record['text_a']['input_ids'])
+            query_token_type_ids = np.array(record['text_a']['token_type_ids'])
+            title_input_ids = np.array(record['text_b']['input_ids'])
+            title_token_type_ids = np.array(record['text_b']['token_type_ids'])
+
+            if 'label' in record.keys():
+                return query_input_ids, query_token_type_ids, title_input_ids, title_token_type_ids, \
+                    np.array(record['label'], dtype=np.int64)
+            else:
+                return query_input_ids, query_token_type_ids, title_input_ids, title_token_type_ids
+        else:
+            raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of PretrainedTokenizer".format(type(self.tokenizer)))
+
+    def __len__(self):
+        return len(self.records)
