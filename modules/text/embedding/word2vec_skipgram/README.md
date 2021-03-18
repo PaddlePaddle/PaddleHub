@@ -24,10 +24,16 @@ Word2vec是常用的词嵌入（word embedding）模型。该PaddleHub Module基
 
 ```python
 import paddlehub as hub
-import cv2
 
-word2vec_skipgram = hub.Module(name="word2vec_skipgram")
-inputs, outputs, program = tencent_ailab_chinese_embedding.context(trainable=True, max_seq_len=128, num_slots=1)
+# Load word2vec pretrained model
+module = hub.Module(name="word2vec_skipgram")
+inputs, outputs, program = module.context(trainable=True)
+
+# Must feed all the tensor of module need
+word_ids = inputs["text"]
+
+# Use the pretrained word embeddings
+embedding = outputs["emb"]
 ```
 
 ## 依赖
