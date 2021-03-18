@@ -1,4 +1,4 @@
-MarineBiometrics
+marine_biometrics
 
 类别 图像 - 图像分类
 
@@ -7,16 +7,16 @@ MarineBiometrics
 数据集 Fish4Knowledge
 
 # 模型概述
-海洋生物识别（MarineBiometrics），该模型可准确识别鱼的种类。该PaddleHub Module支持API预测及命令行预测。
+海洋生物识别（marine_biometrics），该模型可准确识别鱼的种类。该PaddleHub Module支持API预测及命令行预测。
 
 # 选择模型版本进行安装
-$ hub install MarineBiometrics==1.0.0
+$ hub install marine_biometrics==1.0.0
 
 # 在线体验
 [AI Studio快速体验](https://aistudio.baidu.com/aistudio/projectdetail/1667809)
 
 # 命令行预测示例
-$ hub run MarineBiometrics --image 1.png --use_gpu True
+$ hub run marine_biometrics --image 1.png --use_gpu True
 
 # Module API说明
 ## def predict(data)
@@ -47,7 +47,7 @@ for result in results:
 
 ## 命令行调用
 ~~~
-$ hub run MarineBiometrics --image 1.png --use_gpu True
+$ hub run marine_biometrics --image 1.png --use_gpu True
 ~~~
 
 # 效果展示
