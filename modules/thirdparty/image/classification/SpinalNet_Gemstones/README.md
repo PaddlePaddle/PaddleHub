@@ -10,37 +10,37 @@ $pip install -U paddlehub==2.0.0
 
 ## 2. 在本地加载封装的模型
 
-```shell
-$import paddlehub as hub
+```Python
+import paddlehub as hub
 ```
 ### 加载spinalnet_res50_gemstone
-```shell
-$spinal_res50 = hub.Module(name="SpinalNet_Gemstones/spinalnet_res50_gemstone/")
+```Python
+spinal_res50 = hub.Module(name="spinalnet_res50_gemstone")
 ```
 ### 加载spinalnet_vgg16_gemstone
-```shell
-$spinal_vgg16 = hub.Module(name="SpinalNet_Gemstones/spinalnet_vgg16_gemstone/")
+```Python
+spinal_vgg16 = hub.Module(name="spinalnet_vgg16_gemstone")
 ```
 ### 加载spinalnet_res101_gemstone
-```shell
-$spinal_res101 = hub.Module(name="SpinalNet_Gemstones/spinalnet_res101_gemstone/")
+```Python
+spinal_res101 = hub.Module(name="spinalnet_res101_gemstone")
 ```
 ## 3. 预测
 
 ### 使用spinalnet_res50_gemstone预测
-```shell
-$result_res50 = spinal_res50.predict(['/PATH/TO/IMAGE'])
-$print(result_res50)
+```Python
+result_res50 = spinal_res50.predict(['/PATH/TO/IMAGE'])
+print(result_res50)
 ```
 ### 使用spinalnet_vgg16_gemstone预测
-```shell
-$result_vgg16 = spinal_vgg16.predict(['/PATH/TO/IMAGE'])
-$print(result_vgg16)
+```Python
+result_vgg16 = spinal_vgg16.predict(['/PATH/TO/IMAGE'])
+print(result_vgg16)
 ```
 ### 使用spinalnet_res101_gemstone预测
-```shell
-$sresult_res101 = spinal_res101.predict(['/PATH/TO/IMAGE'])
-$print(result_res101)
+```Python
+sresult_res101 = spinal_res101.predict(['/PATH/TO/IMAGE'])
+print(result_res101)
 ```
 ## 4. 命令行预测
 
@@ -97,8 +97,8 @@ trainer.train(gem_train, epochs=5, batch_size=128, eval_dataset=gem_validate, sa
 ### Step5: 微调后再预测
 
 ```python
-spinal_res50 = hub.Module(directory="SpinalNet_Gemstones/spinalnet_res50_gemstone/")
-result_res50 = spinal_res50.predict(['SpinalNet_Gemstones/testImages/Kunzite/kunzite_28.jpg', 'SpinalNet_Gemstones/testImages/Fluorite/fluorite_18.jpg', 'SpinalNet_Gemstones/testImages/Cats Eye/cats_eye_3.jpg'])
+spinal_res50 = hub.Module(name="spinalnet_res50_gemstone")
+result_res50 = spinal_res50.predict(['/PATH/TO/IMAGE'])
 print(result_res50)
 ```
 
@@ -113,6 +113,6 @@ https://github.com/PaddleHub/modules/thirdparty/image/classification/SpinalNet_G
 
 ### 依赖
 
-paddlepaddle >= 2.0.0rc
+paddlepaddle >= 2.0.0
 
-paddlehub >= 2.0.0-rc
+paddlehub >= 2.0.0
