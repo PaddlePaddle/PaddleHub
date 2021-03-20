@@ -50,7 +50,7 @@ $ hub run food_classification --image 1.png --use_gpu True
 # 效果展示
 
 ## 原图
-<img src="/docs/imgs/Image_Classification_apple_pie.png">
+<img src="/docs/imgs/Readme_Related/Image_Classification_apple_pie.png">
 
 ## 输出结果
 ~~~
