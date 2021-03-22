@@ -11,10 +11,6 @@ food_classification
 # 选择模型版本进行安装
 $ hub install food_classification==1.0.0
 
-
-# 命令行预测示例
-$ hub run food_classification --image /PATH/TO/IMAGE --use_gpu True
-
 # Module API说明
     def predict(self,
                     images=None,
