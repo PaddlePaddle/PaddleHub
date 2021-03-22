@@ -68,7 +68,7 @@ $ hub run food_classification --input_path /PATH/TO/IMAGE --use_gpu True
 ```
 
 # 贡献者
-郑博培、彭兆帅
+彭兆帅、郑博培
 
 # 依赖
 paddlepaddle >= 2.0.0
