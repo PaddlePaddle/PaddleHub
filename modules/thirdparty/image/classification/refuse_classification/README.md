@@ -11,14 +11,17 @@ refuse_classification
 $ hub install refuse_classification==1.0.0
 
 # 命令行预测示例
-$ hub run refuse_classification --image 1.png --use_gpu True
+$ hub run refuse_classification --image /PATH/TO/IMAGE --use_gpu True
 
 # Module API说明
-## def predict(data)
+## def predict(data=None,
+               batch_size=1,
+               use_gpu=False):
 垃圾分类预测接口，输入一张图像，输出该图像上垃圾的类别
 ### 参数
 - data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
-
+- batch_size：int类型，预测时的batch大小。
+- use_gpu：bool类型，是否使用GPU。
 ### 返回
 - result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
 
@@ -42,7 +45,7 @@ for result in results:
 
 ## 命令行调用
 ~~~
-$ hub run refuse_classification --image 1.png --use_gpu True
+$ hub run refuse_classification --image /PATH/TO/IMAGE --use_gpu True
 ~~~
 
 # 效果展示
