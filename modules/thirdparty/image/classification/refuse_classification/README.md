@@ -5,26 +5,29 @@ refuse_classification
 网络 ResNet50_vd_ssld
 
 # 模型概述
-垃圾分类（refuse_classification），该模型可准确识别可回收垃圾、厨余垃圾、有害垃圾和其他垃圾。该PaddleHub Module支持API预测及命令行预测。
+垃圾分类（refuse_classification），该模型可准确识别可回收垃圾、厨余垃圾、有害垃圾和其他垃圾。该PaddleHub Module支持API预测及Serving预测部署。
 
 # 选择模型版本进行安装
 $ hub install refuse_classification==1.0.0
 
-# 命令行预测示例
-$ hub run refuse_classification --image /PATH/TO/IMAGE --use_gpu True
-
 # Module API说明
-## def predict(data=None,
-               batch_size=1,
-               use_gpu=False):
+
+~~~
+def predict(data=None,
+            batch_size=1,
+            use_gpu=False):
+~~~
+
 垃圾分类预测接口，输入一张图像，输出该图像上垃圾的类别
 ### 参数
 - data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
 - batch_size：int类型，预测时的batch大小。
 - use_gpu：bool类型，是否使用GPU。
 ### 返回
-- result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
-
+- res (list[dict]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
+    - category_id (int): 类别的id；
+    - category（str）: 类别
+    - score（float）: 准确率
 # 代码示例
 
 ## API调用
@@ -43,10 +46,6 @@ for result in results:
     print(result)
 ~~~
 
-## 命令行调用
-~~~
-$ hub run refuse_classification --image /PATH/TO/IMAGE --use_gpu True
-~~~
 
 # 效果展示
 
