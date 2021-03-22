@@ -59,7 +59,7 @@ $ hub run refuse_classification --image /PATH/TO/IMAGE --use_gpu True
 ~~~
 
 # 贡献者
-郑博培
+郑博培、彭兆帅
 
 # 依赖
 paddlepaddle >= 2.0.0
