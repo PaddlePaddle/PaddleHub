@@ -16,13 +16,24 @@ $ hub install food_classification==1.0.0
 $ hub run food_classification --image /PATH/TO/IMAGE --use_gpu True
 
 # Module API说明
-## def predict(data)
+    def predict(self,
+                    images=None,
+                    paths=None,
+                    batch_size=1,
+                    use_gpu=False,
+                    **kwargs):
 美食分类预测接口，输入一张图像，输出该图像上食物的类别
 ### 参数
-- data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
+* images (list[numpy.ndarray]): 图片数据，ndarray.shape 为 [H, W, C]，BGR格式；
+* paths (list[str]): 图片的路径；
+* batch_size (int): batch 的大小；
+* use_gpu (bool): 是否使用 GPU；
 
 ### 返回
-- result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
+* res (list[dict]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
+    * category_id (int): 类别的id；
+    * category（str）: 类别
+    * score（float）: 准确率
 
 # 代码示例
 
