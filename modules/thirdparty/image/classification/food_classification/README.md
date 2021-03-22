@@ -1,11 +1,11 @@
-food_classification
+# food_classification
 
 类别 图像 - 图像分类
 
 网络 ResNet50_vd_ssld
 
 
-# 模型概述
+> 模型概述
 美食分类（food_classification），该模型可识别苹果派，小排骨，烤面包，牛肉馅饼，牛肉鞑靼。该PaddleHub Module支持API预测及命令行预测。
 
 # 选择模型版本进行安装
