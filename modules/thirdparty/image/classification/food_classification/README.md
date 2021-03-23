@@ -11,7 +11,7 @@
 
 > 选择模型版本进行安装
 
-```python
+```shell
 $ hub install food_classification==1.0.0
 ```
 > Module API说明
@@ -59,7 +59,7 @@ for result in results:
 ```
 
 ### 命令行调用
-```python
+```shell
 $ hub run food_classification --input_path /PATH/TO/IMAGE --use_gpu True
 ```
 
