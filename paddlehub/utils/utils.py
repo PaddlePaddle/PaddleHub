@@ -27,6 +27,7 @@ import time
 import tempfile
 import traceback
 import types
+import librosa
 from typing import Generator, List
 from urllib.parse import urlparse
 
@@ -39,7 +40,6 @@ import paddlehub.utils as utils
 
 class Version(packaging.version.Version):
     '''Extended implementation of packaging.version.Version'''
-
     def match(self, condition: str) -> bool:
         '''
         Determine whether the given condition are met
@@ -105,7 +105,6 @@ class Version(packaging.version.Version):
 
 class Timer(object):
     '''Calculate runing speed and estimated time of arrival(ETA)'''
-
     def __init__(self, total_step: int):
         self.total_step = total_step
         self.last_start_step = 0
@@ -385,3 +384,36 @@ def trunc_sequence(ids: List[int], max_seq_len: int):
         f'The input length {len(ids)} is less than max_seq_len {max_seq_len}. ' \
         'Please check the input list and max_seq_len if you really want to truncate a sequence.'
     return ids[:max_seq_len]
+
+
+def extract_melspectrogram(y,
+                           sample_rate: int = 32000,
+                           window_size: int = 1024,
+                           hop_size: int = 320,
+                           mel_bins: int = 64,
+                           fmin: int = 50,
+                           fmax: int = 14000,
+                           window: str = 'hann',
+                           center: bool = True,
+                           pad_mode: str = 'reflect',
+                           ref: float = 1.0,
+                           amin: float = 1e-10,
+                           top_db: float = None):
+    '''
+    Extract Mel Spectrogram from a waveform.
+    '''
+
+    s = librosa.stft(y,
+                     n_fft=window_size,
+                     hop_length=hop_size,
+                     win_length=window_size,
+                     window=window,
+                     center=center,
+                     pad_mode=pad_mode)
+
+    power = np.abs(s)**2
+    melW = librosa.filters.mel(sr=sample_rate, n_fft=window_size, n_mels=mel_bins, fmin=fmin, fmax=fmax)
+    mel = np.matmul(melW, power)
+    db = librosa.power_to_db(mel, ref=ref, amin=amin, top_db=None)
+    db = db.transpose()
+    return db
