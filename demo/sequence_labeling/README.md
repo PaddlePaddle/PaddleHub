@@ -176,7 +176,7 @@ label_map = {
 model = hub.Module(
     name='ernie_tiny',
     version='2.0.1',
-    task='token_cls',
+    task='token-cls',
     load_checkpoint='./token_cls_save_dir/best_model/model.pdparams',
     label_map=label_map,
 )
