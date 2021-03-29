@@ -20,32 +20,21 @@ import paddle.nn.functional as F
 from paddlehub.utils.log import logger
 
 
-class ConvBlock(nn.Layer):
+class ConvBlock5x5(nn.Layer):
     def __init__(self, in_channels, out_channels):
-        super(ConvBlock, self).__init__()
+        super(ConvBlock5x5, self).__init__()
 
         self.conv1 = nn.Conv2D(in_channels=in_channels,
                                out_channels=out_channels,
-                               kernel_size=(3, 3),
+                               kernel_size=(5, 5),
                                stride=(1, 1),
-                               padding=(1, 1),
-                               bias_attr=False)
-        self.conv2 = nn.Conv2D(in_channels=out_channels,
-                               out_channels=out_channels,
-                               kernel_size=(3, 3),
-                               stride=(1, 1),
-                               padding=(1, 1),
+                               padding=(2, 2),
                                bias_attr=False)
         self.bn1 = nn.BatchNorm2D(out_channels)
-        self.bn2 = nn.BatchNorm2D(out_channels)
 
     def forward(self, x, pool_size=(2, 2), pool_type='avg'):
         x = self.conv1(x)
         x = self.bn1(x)
-        x = F.relu(x)
-
-        x = self.conv2(x)
-        x = self.bn2(x)
         x = F.relu(x)
 
         if pool_type == 'max':
@@ -60,29 +49,27 @@ class ConvBlock(nn.Layer):
         return x
 
 
-class CNN14(nn.Layer):
-    emb_size = 2048
+class CNN6(nn.Layer):
+    emb_size = 512
 
     def __init__(self, extract_embedding: bool = True, checkpoint: str = None):
 
-        super(CNN14, self).__init__()
+        super(CNN6, self).__init__()
         self.bn0 = nn.BatchNorm2D(64)
-        self.conv_block1 = ConvBlock(in_channels=1, out_channels=64)
-        self.conv_block2 = ConvBlock(in_channels=64, out_channels=128)
-        self.conv_block3 = ConvBlock(in_channels=128, out_channels=256)
-        self.conv_block4 = ConvBlock(in_channels=256, out_channels=512)
-        self.conv_block5 = ConvBlock(in_channels=512, out_channels=1024)
-        self.conv_block6 = ConvBlock(in_channels=1024, out_channels=2048)
+        self.conv_block1 = ConvBlock5x5(in_channels=1, out_channels=64)
+        self.conv_block2 = ConvBlock5x5(in_channels=64, out_channels=128)
+        self.conv_block3 = ConvBlock5x5(in_channels=128, out_channels=256)
+        self.conv_block4 = ConvBlock5x5(in_channels=256, out_channels=512)
 
-        self.fc1 = nn.Linear(2048, self.emb_size)
+        self.fc1 = nn.Linear(512, self.emb_size)
         self.fc_audioset = nn.Linear(self.emb_size, 527)
 
         if checkpoint is not None and os.path.isfile(checkpoint):
             state_dict = paddle.load(checkpoint)
             self.set_state_dict(state_dict)
-            logger.info(f'Loaded CNN14 pretrained parameters from: {checkpoint}')
+            print(f'Loaded CNN6 pretrained parameters from: {checkpoint}')
         else:
-            logger.error('No valid checkpoints for CNN14. Start training from scratch.')
+            print('No valid checkpoints for CNN6. Start training from scratch.')
 
         self.extract_embedding = extract_embedding
 
@@ -102,12 +89,6 @@ class CNN14(nn.Layer):
         x = F.dropout(x, p=0.2, training=self.training)
 
         x = self.conv_block4(x, pool_size=(2, 2), pool_type='avg')
-        x = F.dropout(x, p=0.2, training=self.training)
-
-        x = self.conv_block5(x, pool_size=(2, 2), pool_type='avg')
-        x = F.dropout(x, p=0.2, training=self.training)
-
-        x = self.conv_block6(x, pool_size=(1, 1), pool_type='avg')
         x = F.dropout(x, p=0.2, training=self.training)
 
         x = x.mean(axis=3)

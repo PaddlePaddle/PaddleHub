@@ -26,10 +26,10 @@ from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.audio_module import AudioClassifierModule
 
-from panns_cnn14.network import CNN14
+from panns_cnn10.network import CNN10
 
 
-@moduleinfo(name="panns_cnn14",
+@moduleinfo(name="panns_cnn10",
             version="1.0.0",
             summary="",
             author="qiuqiangkong",
@@ -54,15 +54,15 @@ class PANN(nn.Layer):
             self.num_class = num_class
 
         if task == 'sound-cls':
-            self.cnn14 = CNN14(extract_embedding=True,
-                               checkpoint=os.path.join(MODULE_HOME, 'panns_cnn14', 'cnn14.pdparams'))
+            self.cnn10 = CNN10(extract_embedding=True,
+                               checkpoint=os.path.join(MODULE_HOME, 'panns_cnn10', 'cnn10.pdparams'))
             self.dropout = nn.Dropout(0.1)
-            self.fc = nn.Linear(self.cnn14.emb_size, num_class)
+            self.fc = nn.Linear(self.cnn10.emb_size, num_class)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy()
         else:
-            self.cnn14 = CNN14(extract_embedding=False,
-                               checkpoint=os.path.join(MODULE_HOME, 'panns_cnn14', 'cnn14.pdparams'))
+            self.cnn10 = CNN10(extract_embedding=False,
+                               checkpoint=os.path.join(MODULE_HOME, 'panns_cnn10', 'cnn10.pdparams'))
 
         self.task = task
         if load_checkpoint is not None and os.path.isfile(load_checkpoint):
@@ -75,7 +75,7 @@ class PANN(nn.Layer):
         feats = feats.unsqueeze(1)
 
         if self.task == 'sound-cls':
-            embeddings = self.cnn14(feats)
+            embeddings = self.cnn10(feats)
             embeddings = self.dropout(embeddings)
             logits = self.fc(embeddings)
             probs = F.softmax(logits, axis=1)
@@ -87,5 +87,5 @@ class PANN(nn.Layer):
                 return probs, loss, {'acc': acc}
             return probs
         else:
-            audioset_logits = self.cnn14(feats)
+            audioset_logits = self.cnn10(feats)
             return audioset_logits
