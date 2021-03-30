@@ -27,7 +27,6 @@ import time
 import tempfile
 import traceback
 import types
-import librosa
 from typing import Generator, List
 from urllib.parse import urlparse
 
@@ -36,6 +35,7 @@ import packaging.version
 
 import paddlehub.env as hubenv
 import paddlehub.utils as utils
+from paddlehub.utils.log import logger
 
 
 class Version(packaging.version.Version):
@@ -302,7 +302,7 @@ def record_exception(msg: str) -> str:
     '''Record the current exception infomation into the PaddleHub log file witch will be automatically stored according to date.'''
     tb = traceback.format_exc()
     file = record(tb)
-    utils.log.logger.warning('{}. Detailed error information can be found in the {}.'.format(msg, file))
+    logger.warning('{}. Detailed error information can be found in the {}.'.format(msg, file))
 
 
 def get_record_file() -> str:
@@ -402,6 +402,11 @@ def extract_melspectrogram(y,
     '''
     Extract Mel Spectrogram from a waveform.
     '''
+    try:
+        import librosa
+    except Exception:
+        logger.error('Failed to import librosa. Please check that librosa and numba are correctly installed.')
+        raise
 
     s = librosa.stft(y,
                      n_fft=window_size,
