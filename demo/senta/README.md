@@ -51,7 +51,8 @@ $ sh run_finetune.sh
 
 ```python
 module = hub.Module(name="senta_bilstm")
-inputs, outputs, program = module.context(trainable=True, max_seq_len=96)
+inputs, outputs, program = module.context(
+    trainable=True, max_seq_len=128)
 ```
 
 其中最大序列长度`max_seq_len`是可以调整的参数，根据任务文本长度不同可以调整该值。
@@ -92,10 +93,10 @@ tokenizer = hub.CustomTokenizer(
 
 ### Step3: 准备数据集
 ```python
-dataset = hub.dataset.LCQMC(tokenizer=tokenizer, max_seq_len=128)
+dataset = hub.dataset.ChnSentiCorp(tokenizer=tokenizer, max_seq_len=128)
 ```
 
-`hub.dataset.LCQMC()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录；
+`hub.dataset.ChnSentiCorp()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录；
 
 `max_seq_len` 需要与Step1中context接口传入的序列长度保持一致；
 
@@ -141,8 +142,6 @@ PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStr
 ### Step4: 构建网络并创建分类迁移任务进行Fine-tune
 ```python
 sent_feature = outputs["sentence_feature"]
-
-feed_list = [inputs["words"].name]
 
 cls_task = hub.TextClassifierTask(
     dataset=dataset,
