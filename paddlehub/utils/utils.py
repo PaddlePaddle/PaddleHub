@@ -15,31 +15,31 @@
 
 import base64
 import contextlib
-import cv2
 import hashlib
 import importlib
 import math
 import os
-import requests
 import socket
 import sys
-import time
 import tempfile
+import time
 import traceback
 import types
 from typing import Generator, List
 from urllib.parse import urlparse
 
+import cv2
 import numpy as np
 import packaging.version
+import requests
 
 import paddlehub.env as hubenv
 import paddlehub.utils as utils
+from paddlehub.utils.log import logger
 
 
 class Version(packaging.version.Version):
     '''Extended implementation of packaging.version.Version'''
-
     def match(self, condition: str) -> bool:
         '''
         Determine whether the given condition are met
@@ -105,7 +105,6 @@ class Version(packaging.version.Version):
 
 class Timer(object):
     '''Calculate runing speed and estimated time of arrival(ETA)'''
-
     def __init__(self, total_step: int):
         self.total_step = total_step
         self.last_start_step = 0
@@ -303,7 +302,7 @@ def record_exception(msg: str) -> str:
     '''Record the current exception infomation into the PaddleHub log file witch will be automatically stored according to date.'''
     tb = traceback.format_exc()
     file = record(tb)
-    utils.log.logger.warning('{}. Detailed error information can be found in the {}.'.format(msg, file))
+    logger.warning('{}. Detailed error information can be found in the {}.'.format(msg, file))
 
 
 def get_record_file() -> str:
@@ -385,3 +384,41 @@ def trunc_sequence(ids: List[int], max_seq_len: int):
         f'The input length {len(ids)} is less than max_seq_len {max_seq_len}. ' \
         'Please check the input list and max_seq_len if you really want to truncate a sequence.'
     return ids[:max_seq_len]
+
+
+def extract_melspectrogram(y,
+                           sample_rate: int = 32000,
+                           window_size: int = 1024,
+                           hop_size: int = 320,
+                           mel_bins: int = 64,
+                           fmin: int = 50,
+                           fmax: int = 14000,
+                           window: str = 'hann',
+                           center: bool = True,
+                           pad_mode: str = 'reflect',
+                           ref: float = 1.0,
+                           amin: float = 1e-10,
+                           top_db: float = None):
+    '''
+    Extract Mel Spectrogram from a waveform.
+    '''
+    try:
+        import librosa
+    except Exception:
+        logger.error('Failed to import librosa. Please check that librosa and numba are correctly installed.')
+        raise
+
+    s = librosa.stft(y,
+                     n_fft=window_size,
+                     hop_length=hop_size,
+                     win_length=window_size,
+                     window=window,
+                     center=center,
+                     pad_mode=pad_mode)
+
+    power = np.abs(s)**2
+    melW = librosa.filters.mel(sr=sample_rate, n_fft=window_size, n_mels=mel_bins, fmin=fmin, fmax=fmax)
+    mel = np.matmul(melW, power)
+    db = librosa.power_to_db(mel, ref=ref, amin=amin, top_db=None)
+    db = db.transpose()
+    return db
