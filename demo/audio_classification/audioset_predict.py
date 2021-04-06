@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import ast
 import argparse
-
-import paddlehub as hub
-from paddlehub.env import MODULE_HOME
+import ast
+import os
 
 import librosa
 import numpy as np
+
+import paddlehub as hub
+from paddlehub.env import MODULE_HOME
 
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--wav", type=str, required=True, help="Audio file to infer.")
@@ -29,27 +29,19 @@ parser.add_argument("--model_type", type=str, default='panns_cnn14', help="Selec
 parser.add_argument("--topk", type=int, default=10, help="Show top k results of audioset labels.")
 args = parser.parse_args()
 
-
-def show_topk(k, label_map, file, result):
-    result = np.asarray(result)
-    topk_idx = (-result).argsort()[:k]
-    msg = f'[{file}]\n'
-    for idx in topk_idx:
-        label, score = label_map[idx], result[idx]
-        msg += f'{label}: {score}\n'
-    print(msg)
-
-
 if __name__ == '__main__':
-    model = hub.Module(name=args.model_type, version='1.0.0', task=None)
-
     label_file = os.path.join(MODULE_HOME, args.model_type, 'audioset_labels.txt')
     label_map = {}
     with open(label_file, 'r') as f:
         for i, l in enumerate(f.readlines()):
             label_map[i] = l.strip()
 
+    model = hub.Module(name=args.model_type, version='1.0.0', task=None, label_map=label_map)
+
     data = [librosa.load(args.wav, sr=args.sr)[0]]  # (t, num_mel_bins)
     result = model.predict(data, sample_rate=args.sr, batch_size=1, feat_type='mel', use_gpu=True)
 
-    show_topk(args.topk, label_map, os.path.abspath(args.wav), result[0])
+    msg = f'[{args.wav}]\n'
+    for label, score in list(result[0].items())[:args.topk]:
+        msg += f'{label}: {score}\n'
+    print(msg)

@@ -116,6 +116,7 @@ trainer.evaluate(dev_dataset, batch_size=16)
 
 ```python
 import os
+
 import librosa
 
 import paddlehub as hub
@@ -137,7 +138,7 @@ model = hub.Module(name='panns_cnn14',
 data = [librosa.load(wav, sr=sr)[0]]
 result = model.predict(data, sample_rate=sr, batch_size=1, feat_type='mel', use_gpu=True)
 
-print('File: {} \t Lable: {}'.format(os.path.abspath(wav), result[0]))
+print(result[0])  # result[0]包含音频文件属于各类别的概率值
 ```
 
 
@@ -149,24 +150,13 @@ print('File: {} \t Lable: {}'.format(os.path.abspath(wav), result[0]))
 
 ```python
 import os
+
 import librosa
 import numpy as np
 
 import paddlehub as hub
 from paddlehub.env import MODULE_HOME
 
-
-def show_topk(k, label_map, file, result):
-    """
-    展示topk得分的类别和对应的分数。
-    """
-    result = np.asarray(result)
-    topk_idx = (-result).argsort()[:k]
-    msg = f'[{file}]\n'
-    for idx in topk_idx:
-        label, score = label_map[idx], result[idx]
-        msg += f'{label}: {score}\n'
-    print(msg)
 
 wav = './cat.wav'  # 存储在本地的需要预测的wav文件
 sr = 44100  # 音频文件的采样率
@@ -184,5 +174,8 @@ with open(label_file, 'r') as f:
 data = [librosa.load(wav, sr=sr)[0]]
 result = model.predict(data, sample_rate=sr, batch_size=1, feat_type='mel', use_gpu=True)
 
-show_topk(topk, label_map, os.path.abspath(wav), result[0])
+# 打印topk的类别和对应得分
+for label, score in list(result[0].items())[:topk]:
+    msg += f'{label}: {score}\n'
+print(msg)
 ```

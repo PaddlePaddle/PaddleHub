@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
+import ast
+
 import paddle
+
 import paddlehub as hub
 from paddlehub.datasets import ESC50
-
-import ast
-import argparse
 
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--num_epoch", type=int, default=50, help="Number of epoches for fine-tuning.")
@@ -29,7 +30,6 @@ parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning 
 parser.add_argument("--batch_size", type=int, default=16, help="Total examples' number in batch for training.")
 parser.add_argument("--checkpoint_dir", type=str, default='./checkpoint', help="Directory to model checkpoint")
 parser.add_argument("--save_interval", type=int, default=10, help="Save checkpoint every n epoch.")
-
 args = parser.parse_args()
 
 if __name__ == "__main__":

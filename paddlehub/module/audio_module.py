@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import OrderedDict
 from typing import List, Tuple
 
-import paddle
-from paddlehub.module.module import serving, RunModule, runnable
-from paddlehub.utils.utils import extract_melspectrogram
 import numpy as np
+import paddle
+
+from paddlehub.module.module import RunModule, runnable, serving
+from paddlehub.utils.utils import extract_melspectrogram
 
 
 class AudioClassifierModule(RunModule):
@@ -84,14 +86,12 @@ class AudioClassifierModule(RunModule):
         self.eval()
         for batch in batches:
             feats = paddle.to_tensor(batch)
-            if self.task == 'sound-cls':
-                probs = self(feats)
-                idx = paddle.argmax(probs, axis=1).numpy()
-                idx = idx.tolist()
-                labels = [self.label_map[i] for i in idx]
-                results.extend(labels)
-            else:
-                audioset_scores = self(feats)
-                results.extend(audioset_scores.numpy().tolist())
+            scores = self(feats)
+
+            for score in scores.numpy():
+                result = OrderedDict()
+                for i in (-score).argsort():
+                    result[self.label_map[i]] = score[i]
+                results.append(result)
 
         return results

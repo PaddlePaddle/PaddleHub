@@ -15,23 +15,23 @@
 
 import base64
 import contextlib
-import cv2
 import hashlib
 import importlib
 import math
 import os
-import requests
 import socket
 import sys
-import time
 import tempfile
+import time
 import traceback
 import types
 from typing import Generator, List
 from urllib.parse import urlparse
 
+import cv2
 import numpy as np
 import packaging.version
+import requests
 
 import paddlehub.env as hubenv
 import paddlehub.utils as utils

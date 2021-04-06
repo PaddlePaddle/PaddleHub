@@ -13,9 +13,9 @@
 # limitations under the License.
 
 from paddlehub.datasets.canvas import Canvas
-from paddlehub.datasets.flowers import Flowers
-from paddlehub.datasets.minicoco import MiniCOCO
 from paddlehub.datasets.chnsenticorp import ChnSentiCorp
-from paddlehub.datasets.msra_ner import MSRA_NER
-from paddlehub.datasets.lcqmc import LCQMC
 from paddlehub.datasets.esc50 import ESC50
+from paddlehub.datasets.flowers import Flowers
+from paddlehub.datasets.lcqmc import LCQMC
+from paddlehub.datasets.minicoco import MiniCOCO
+from paddlehub.datasets.msra_ner import MSRA_NER

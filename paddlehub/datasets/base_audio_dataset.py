@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict, Tuple, Optional, Union
-
 import csv
 import io
 import os
-import numpy as np
+from typing import Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import paddle
+
 from paddlehub.utils.utils import extract_melspectrogram
 
 

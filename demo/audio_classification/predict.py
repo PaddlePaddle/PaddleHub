@@ -12,19 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import ast
 import argparse
+import ast
+import os
+
+import librosa
 
 import paddlehub as hub
 from paddlehub.datasets import ESC50
-
-import librosa
 
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--wav", type=str, required=True, help="Audio file to infer.")
 parser.add_argument("--sr", type=int, default=44100, help="Sample rate of inference audio.")
 parser.add_argument("--model_type", type=str, default='panns_cnn14', help="Select model to to inference.")
+parser.add_argument("--topk", type=int, default=1, help="Show top k results of prediction labels.")
 parser.add_argument("--checkpoint",
                     type=str,
                     default='./checkpoint/best_model/model.pdparams',
@@ -44,4 +45,7 @@ if __name__ == '__main__':
     data = [librosa.load(args.wav, sr=args.sr)[0]]
     result = model.predict(data, sample_rate=args.sr, batch_size=1, feat_type='mel', use_gpu=True)
 
-    print('File: {} \t Lable: {}'.format(os.path.abspath(args.wav), result[0]))
+    msg = f'[{args.wav}]\n'
+    for label, score in list(result[0].items())[:args.topk]:
+        msg += f'{label}: {score}\n'
+    print(msg)

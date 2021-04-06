@@ -12,27 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict
-
-import os
 import math
+import os
+from typing import Dict
 
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
-
-from paddlehub.utils.log import logger
-from paddlehub.env import MODULE_HOME
-from paddlehub.module.module import moduleinfo
-from paddlehub.module.audio_module import AudioClassifierModule
-
 from panns_cnn10.network import CNN10
+
+from paddlehub.env import MODULE_HOME
+from paddlehub.module.audio_module import AudioClassifierModule
+from paddlehub.module.module import moduleinfo
+from paddlehub.utils.log import logger
 
 
 @moduleinfo(name="panns_cnn10",
             version="1.0.0",
             summary="",
-            author="qiuqiangkong",
+            author="Baidu",
             author_email="",
             type="audio/sound_classification",
             meta=AudioClassifierModule)

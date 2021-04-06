@@ -14,9 +14,9 @@
 
 import os
 
+from paddlehub.datasets.base_audio_dataset import AudioClassificationDataset
 from paddlehub.env import DATA_HOME
 from paddlehub.utils.download import download_data
-from paddlehub.datasets.base_audio_dataset import AudioClassificationDataset
 
 
 @download_data(url="https://bj.bcebos.com/paddlehub-dataset/esc50.tar.gz")
