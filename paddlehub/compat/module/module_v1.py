@@ -18,6 +18,7 @@ import os
 from typing import Tuple, List
 
 import paddle
+import paddle2onnx
 from easydict import EasyDict
 
 from paddlehub.compat import paddle_utils
@@ -254,6 +255,7 @@ class ModuleV1(object):
         '''
         return self.default_signature != None
 
+    @paddle_utils.run_in_static_mode
     def save_inference_model(self,
                              dirname: str,
                              model_filename: str = None,
@@ -279,3 +281,30 @@ class ModuleV1(object):
             target_vars=list(fetch_dict.values()),
             model_filename=model_filename,
             params_filename=params_filename)
+
+    def export_onnx_model(self, dirname: str, **kwargs):
+        '''
+        Export the model to ONNX format.
+
+        Args:
+            dirname(str): The directory to save the onnx model.
+            **kwargs(dict|optional): Other export configuration options for compatibility, some may be removed
+            in the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
+            for more information.
+        '''
+        feed_dict, fetch_dict, program = self.context(for_test=True, trainable=False)
+        inputs = set([var.name for var in feed_dict.values()])
+        if self.type == 'CV/classification':
+            outputs = [fetch_dict['class_probs']]
+        else:
+            outputs = set([var.name for var in fetch_dict.values()])
+            outputs = [program.global_block().vars[key] for key in outputs]
+
+        save_file = os.path.join(dirname, '{}.onnx'.format(self.name))
+        paddle2onnx.program2onnx(
+            program=program,
+            scope=paddle.static.global_scope(),
+            feed_var_names=inputs,
+            target_vars=outputs,
+            save_file=save_file,
+            **kwargs)

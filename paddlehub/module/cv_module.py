@@ -17,7 +17,7 @@ import time
 import os
 import base64
 import argparse
-from typing import List, Union
+from typing import List, Union, Tuple
 from collections import OrderedDict
 
 import cv2
@@ -630,3 +630,112 @@ class StyleTransferModule(RunModule, ImageServing):
             '--input_path', type=str, help="path to image.")
         self.arg_input_group.add_argument(
             '--style_path', type=str, help="path to style image.")
+        
+
+class ImageSegmentationModule(ImageServing, RunModule):
+    def training_step(self, batch: List[paddle.Tensor], batch_idx: int) -> dict:
+        '''
+        One step for training, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Tensor]): The one batch data, which contains images, ground truth boxes, labels and scores.
+            batch_idx(int): The index of batch.
+
+        Returns:
+            results(dict): The model outputs, such as loss.
+        '''
+
+        return self.validation_step(batch, batch_idx)
+
+    def validation_step(self, batch: List[paddle.Tensor], batch_idx: int) -> dict:
+        """
+         One step for validation, which should be called as forward computation.
+
+        Args:
+            batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
+            batch_idx(int): The index of batch.
+
+        Returns:
+            results(dict) : The model outputs, such as metrics.
+        """
+        
+        label = batch[1].astype('int64')
+        criterionCE = nn.loss.CrossEntropyLoss()
+        logits = self(batch[0])
+        loss = 0
+        for i in range(len(logits)):
+            logit = logits[i]
+            if logit.shape[-2:] != label.shape[-2:]:
+                logit = F.resize_bilinear(logit, label.shape[-2:])
+            logit = logit.transpose([0,2,3,1])
+            loss_ce = criterionCE(logit, label)
+            loss += loss_ce / len(logits)
+        return {"loss": loss}
+
+    def predict(self, images: Union[str, np.ndarray], batch_size: int = 1, visualization: bool = True, save_path: str = 'seg_result') -> List[np.ndarray]:
+        '''
+        Obtain segmentation results.
+
+        Args:
+            images(list[str|np.array]): Content image path or BGR image.
+            batch_size(int): Batch size for prediciton.
+            visualization(bool): Whether to save colorized images.
+            save_path(str) : Path to save colorized images.
+
+        Returns:
+            output(list[np.ndarray]) : The segmentation mask.
+        '''
+        self.eval()
+        result=[]
+        
+        total_num = len(images)
+        loop_num = int(np.ceil(total_num / batch_size))
+        for iter_id in range(loop_num):
+            batch_data = []
+            handle_id = iter_id * batch_size
+            for image_id in range(batch_size):
+                try:
+                    image, _ = self.transform(images[handle_id + image_id])
+                    batch_data.append(image)
+                except:
+                    pass
+            batch_image = np.array(batch_data).astype('float32')
+            pred = self(paddle.to_tensor(batch_image))
+            pred = paddle.argmax(pred[0], axis=1, keepdim=True, dtype='int32')
+            
+            for num in range(pred.shape[0]):
+                if isinstance(images[handle_id+num], str):
+                    image = cv2.imread(images[handle_id+num])
+                else:
+                    image = images[handle_id+num]
+                h, w, c = image.shape
+                pred_final = utils.reverse_transform(pred[num: num+1], (h,w), self.transforms.transforms)
+                pred_final = paddle.squeeze(pred_final)
+                pred_final = pred_final.numpy().astype('uint8')
+                
+                if visualization:
+                    added_image = utils.visualize(images[handle_id+num], pred_final, weight=0.6)
+                    pred_mask = utils.get_pseudo_color_map(pred_final)
+                    pred_image_path = os.path.join(save_path, 'image', str(time.time()) + ".png")
+                    pred_mask_path = os.path.join(save_path, 'mask', str(time.time()) + ".png")
+                    if not os.path.exists(os.path.dirname(pred_image_path)):
+                        os.makedirs(os.path.dirname(pred_image_path))
+                    if not os.path.exists(os.path.dirname(pred_mask_path)):
+                        os.makedirs(os.path.dirname(pred_mask_path))
+                    cv2.imwrite(pred_image_path, added_image)
+                    pred_mask.save(pred_mask_path)
+            
+                result.append(pred_final)
+        return result
+    
+    @serving
+    def serving_method(self, images: List[str], **kwargs):
+        """
+        Run as a service.
+        """
+        images_decode = [base64_to_cv2(image) for image in images]
+        visual = self.predict(images=images_decode, **kwargs)
+        final=[]
+        for mask in visual:
+            final.append(cv2_to_base64(mask)) 
+        return final

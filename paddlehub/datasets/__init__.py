@@ -19,3 +19,6 @@ from paddlehub.datasets.flowers import Flowers
 from paddlehub.datasets.lcqmc import LCQMC
 from paddlehub.datasets.minicoco import MiniCOCO
 from paddlehub.datasets.msra_ner import MSRA_NER
+from paddlehub.datasets.lcqmc import LCQMC
+from paddlehub.datasets.base_seg_dataset import SegDataset
+from paddlehub.datasets.opticdiscseg import OpticDiscSeg
