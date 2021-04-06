@@ -254,6 +254,7 @@ class ModuleV1(object):
         '''
         return self.default_signature != None
 
+    @paddle_utils.run_in_static_mode
     def save_inference_model(self,
                              dirname: str,
                              model_filename: str = None,
