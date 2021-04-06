@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = '2.0.4'
+__version__ = '2.1.0'
 
 import paddle
 from packaging.version import Version
 _paddle_version = Version(paddle.__version__)
-if _paddle_version < Version('2.0.0'):
+if _paddle_version < Version('2.0.0') and _paddle_version != Version('0.0.0'):
     raise RuntimeError(
         'Version mismatch in PaddleHub and PaddlePaddle, you need to upgrade PaddlePaddle to version 2.0.0 or above.')
 
