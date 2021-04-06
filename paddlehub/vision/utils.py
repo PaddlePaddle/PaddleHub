@@ -1,4 +1,4 @@
-# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,14 @@
 # limitations under the License.
 
 import os
+from typing import Callable, Union, List, Tuple
 
+import cv2
 import paddle
 import PIL
 import numpy as np
 import matplotlib as plt
+import paddle.nn.functional as F
 
 
 def is_image_file(filename: str) -> bool:
@@ -26,7 +29,7 @@ def is_image_file(filename: str) -> bool:
     return ext in ['.bmp', '.dib', '.png', '.jpg', '.jpeg', '.pbm', '.pgm', '.ppm', '.tif', '.tiff']
 
 
-def get_img_file(dir_name: str) -> list:
+def get_img_file(dir_name: str) -> List[str]:
     '''Get all image file paths in several directories which have the same parent directory.'''
     images = []
     for parent, _, filenames in os.walk(dir_name):
@@ -39,7 +42,7 @@ def get_img_file(dir_name: str) -> list:
     return images
 
 
-def box_crop(boxes: np.ndarray, labels: np.ndarray, scores: np.ndarray, crop: list, img_shape: list):
+def box_crop(boxes: np.ndarray, labels: np.ndarray, scores: np.ndarray, crop: List[int], img_shape: List[int]) -> Tuple:
     """Crop the boxes ,labels, scores according to the given shape"""
 
     x, y, w, h = map(float, crop)
@@ -99,7 +102,7 @@ def draw_boxes_on_image(image_path: str,
                         boxes: np.ndarray,
                         scores: np.ndarray,
                         labels: np.ndarray,
-                        label_names: list,
+                        label_names: List[str],
                         score_thresh: float = 0.5,
                         save_path: str = 'result'):
     """Draw boxes on images."""
@@ -145,7 +148,7 @@ def draw_boxes_on_image(image_path: str,
     plt.close('all')
 
 
-def get_label_infos(file_list: str):
+def get_label_infos(file_list: str) -> str:
     """Get label names by corresponding category ids."""
     from pycocotools.coco import COCO
     map_label = COCO(file_list)
@@ -175,10 +178,115 @@ def gram_matrix(data: paddle.Tensor) -> paddle.Tensor:
     return gram
 
 
-def npmax(array: np.ndarray):
+def npmax(array: np.ndarray) -> Tuple[int]:
     """Get max value and index."""
     arrayindex = array.argmax(1)
     arrayvalue = array.max(1)
     i = arrayvalue.argmax()
     j = arrayindex[i]
     return i, j
+
+
+def visualize(image:  Union[np.ndarray, str], result: np.ndarray, weight: float = 0.6) -> np.ndarray:
+    """
+    Convert segmentation result to color image, and save added image.
+
+    Args:
+        image (str|np.ndarray): The path of origin image or bgr image.
+        result (np.ndarray): The predict result of image.
+        weight (float): The image weight of visual image, and the result weight is (1 - weight). Default: 0.6
+
+    Returns:
+        vis_result (np.ndarray): return the visualized result.
+    """
+
+    color_map = get_color_map_list(256)
+    color_map = [color_map[i:i + 3] for i in range(0, len(color_map), 3)]
+    color_map = np.array(color_map).astype("uint8")
+    # Use OpenCV LUT for color mapping
+    c1 = cv2.LUT(result, color_map[:, 0])
+    c2 = cv2.LUT(result, color_map[:, 1])
+    c3 = cv2.LUT(result, color_map[:, 2])
+    pseudo_img = np.dstack((c1, c2, c3))
+    if isinstance(image, str):
+        im = cv2.imread(image)
+    else:
+        im = image
+    vis_result = cv2.addWeighted(im, weight, pseudo_img, 1 - weight, 0)
+
+    return vis_result
+
+
+def get_pseudo_color_map(pred: np.ndarray) -> PIL.Image.Image:
+    '''visualization the segmentation mask.'''
+    pred_mask = PIL.Image.fromarray(pred.astype(np.uint8), mode='P')
+    color_map = get_color_map_list(256)
+    pred_mask.putpalette(color_map)
+    return pred_mask
+
+
+def get_color_map_list(num_classes: int) -> List[int]:
+    """
+    Returns the color map for visualizing the segmentation mask,
+    which can support arbitrary number of classes.
+
+    Args:
+        num_classes (int): Number of classes.
+
+    Returns:
+        (list). The color map.
+    """
+
+    num_classes += 1
+    color_map = num_classes * [0, 0, 0]
+    for i in range(0, num_classes):
+        j = 0
+        lab = i
+        while lab:
+            color_map[i * 3] |= (((lab >> 0) & 1) << (7 - j))
+            color_map[i * 3 + 1] |= (((lab >> 1) & 1) << (7 - j))
+            color_map[i * 3 + 2] |= (((lab >> 2) & 1) << (7 - j))
+            j += 1
+            lab >>= 3
+    color_map = color_map[3:]
+    return color_map
+
+
+def get_reverse_list(ori_shape: List[int], transforms: List[Callable]) -> List[tuple]:
+    """
+    get reverse list of transform.
+
+    Args:
+        ori_shape (list): Origin shape of image.
+        transforms (list): List of transform.
+
+    Returns:
+        list: List of tuple, there are two format:
+            ('resize', (h, w)) The image shape before resize,
+            ('padding', (h, w)) The image shape before padding.
+    """
+    reverse_list = []
+    h, w = ori_shape[0], ori_shape[1]
+    for op in transforms:
+        if op.__class__.__name__ in ['Resize', 'ResizeByLong']:
+            reverse_list.append(('resize', (h, w)))
+            h, w = op.target_size[0], op.target_size[1]
+        if op.__class__.__name__ in ['Padding']:
+            reverse_list.append(('padding', (h, w)))
+            w, h = op.target_size[0], op.target_size[1]
+    return reverse_list
+
+
+def reverse_transform(pred: paddle.Tensor, ori_shape: List[int], transforms: List[int]) -> paddle.Tensor:
+    """recover pred to origin shape"""
+    reverse_list = get_reverse_list(ori_shape, transforms)
+    for item in reverse_list[::-1]:
+        if item[0] == 'resize':
+            h, w = item[1][0], item[1][1]
+            pred = F.interpolate(pred, (h, w), mode='nearest')
+        elif item[0] == 'padding':
+            h, w = item[1][0], item[1][1]
+            pred = pred[:, :, 0:h, 0:w]
+        else:
+            raise Exception("Unexpected info '{}' in im_info".format(item[0]))
+    return pred
