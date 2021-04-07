@@ -260,13 +260,24 @@ class ModuleV1(object):
                              dirname: str,
                              model_filename: str = None,
                              params_filename: str = None,
-                             combined: bool = False):
+                             combined: bool = False,
+                             **kwargs):
+        '''
+        Export the model to Paddle Inference format.
+
+        Args:
+            dirname(str): The directory to save the paddle inference model.
+            model_filename(str): The name of the saved model file. Default to `__model__`.
+            params_filename(str): The name of the saved parameters file, only takes effect when `combined` is True.
+                Default to `__params__`.
+            combined(bool): Whether to save all parameters in a combined file. Default to True.
+        '''
         if hasattr(self, 'processor'):
             if hasattr(self.processor, 'save_inference_model'):
                 return self.processor.save_inference_model(dirname, model_filename, params_filename, combined)
 
+        model_filename = '__model__' if not model_filename else model_filename
         if combined:
-            model_filename = '__model__' if not model_filename else model_filename
             params_filename = '__params__' if not params_filename else params_filename
 
         place = paddle.CPUPlace()
@@ -281,6 +292,8 @@ class ModuleV1(object):
             target_vars=list(fetch_dict.values()),
             model_filename=model_filename,
             params_filename=params_filename)
+
+        log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
 
     @paddle_utils.run_in_static_mode
     def export_onnx_model(self, dirname: str, **kwargs):

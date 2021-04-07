@@ -169,10 +169,108 @@ class RunModule(object):
 
         return _sub_modules
 
+    def save_inference_model(self,
+                             dirname: str,
+                             model_filename: str = None,
+                             params_filename: str = None,
+                             input_spec: List[paddle.static.InputSpec] = None,
+                             include_sub_modules: bool = True,
+                             combined: bool = True):
+        '''
+        Export the model to Paddle Inference format.
+
+        Args:
+            dirname(str): The directory to save the paddle inference model.
+            model_filename(str): The name of the saved model file. Default to `__model__`.
+            params_filename(str): The name of the saved parameters file, only takes effect when `combined` is True.
+                Default to `__params__`.
+            input_spec(list): Describes the input of the saved model's forward method, which can be described by
+                InputSpec or example Tensor. If None, all input variables of the original Layer's forward method
+                would be the inputs of the saved model. Default None.
+            include_sub_modules(bool): Whether to export sub modules. Default to True.
+            combined(bool): Whether to save all parameters in a combined file. Default to True.
+        '''
+        if include_sub_modules:
+            for key, _sub_module in self.sub_modules().items():
+                try:
+                    sub_dirname = os.path.normpath(os.path.join(dirname, key))
+                    _sub_module.save_inference_model(
+                        sub_dirname,
+                        include_sub_modules=include_sub_modules,
+                        model_filename=model_filename,
+                        params_filename=params_filename,
+                        combined=combined)
+                except:
+                    utils.record_exception('Failed to save sub module {}'.format(_sub_module.name))
+
+        if isinstance(self, paddle.nn.Layer):
+            save_file = os.path.join(dirname, '{}'.format(self.name))
+            if not input_spec:
+                if hasattr(self, 'input_spec'):
+                    input_spec = self.input_spec
+                else:
+                    _type = self.type.lower()
+                    if _type.startswith('cv/image'):
+                        input_spec = [paddle.static.InputSpec(shape=[None, 3, None, None], dtype='float32')]
+                    else:
+                        raise RuntimeError(
+                            'Module {} lacks `input_spec`, please specify it when calling `save_inference_model`.'.
+                            format(self.name))
+
+            net = paddle.jit.to_static(self, input_spec)
+            paddle.jit.save(net, save_file)
+
+            log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
+            return
+
+        if not self._pretrained_model_path:
+            raise RuntimeError('Module {} does not support exporting models in Paddle Inference format.'.format(
+                self.name))
+        elif not os.path.exists(self._pretrained_model_path):
+            log.logger.warning('The model path of Module {} does not exist.'.format(self.name))
+            return
+
+        model_filename = '__model__' if not model_filename else model_filename
+        if combined:
+            params_filename = '__params__' if not params_filename else params_filename
+
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
+
+        _model_filename = None
+        _params_filename = None
+
+        if os.path.exists(os.path.join(self._pretrained_model_path, 'model')):
+            _model_filename = 'model'
+
+        if os.path.exists(os.path.join(self._pretrained_model_path, 'params')):
+            _params_filename = 'params'
+
+        if os.path.exists(os.path.join(self._pretrained_model_path, '__params__')):
+            _params_filename = '__params__'
+
+        program, feeded_var_names, target_vars = paddle.fluid.io.load_inference_model(
+            dirname=self._pretrained_model_path,
+            executor=exe,
+            model_filename=_model_filename,
+            params_filename=_params_filename,
+        )
+
+        paddle.fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
+
+        log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
+
     def export_onnx_model(self,
                           dirname: str,
                           input_spec: List[paddle.static.InputSpec] = None,
-                          export_sub_modules: bool = True,
+                          include_sub_modules: bool = True,
                           **kwargs):
         '''
         Export the model to ONNX format.
@@ -182,41 +280,40 @@ class RunModule(object):
             input_spec(list): Describes the input of the saved model's forward method, which can be described by
                 InputSpec or example Tensor. If None, all input variables of the original Layer's forward method
                 would be the inputs of the saved model. Default None.
-            export_sub_modules(bool): Whether to export sub modules. Default to True.
+            include_sub_modules(bool): Whether to export sub modules. Default to True.
             **kwargs(dict|optional): Other export configuration options for compatibility, some may be removed in
                 the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
                 for more information.
         '''
-        if export_sub_modules:
+        if include_sub_modules:
             for key, _sub_module in self.sub_modules().items():
                 try:
                     sub_dirname = os.path.normpath(os.path.join(dirname, key))
-                    _sub_module.export_onnx_model(sub_dirname, export_sub_modules=export_sub_modules, **kwargs)
+                    _sub_module.export_onnx_model(sub_dirname, include_sub_modules=include_sub_modules, **kwargs)
                 except:
                     utils.record_exception('Failed to export sub module {}'.format(_sub_module.name))
 
-        if not self._pretrained_model_path:
-            if isinstance(self, paddle.nn.Layer):
-                save_file = os.path.join(dirname, '{}'.format(self.name))
-                if not input_spec:
-                    if hasattr(self, 'input_spec'):
-                        input_spec = self.input_spec
+        if isinstance(self, paddle.nn.Layer):
+            save_file = os.path.join(dirname, '{}'.format(self.name))
+            if not input_spec:
+                if hasattr(self, 'input_spec'):
+                    input_spec = self.input_spec
+                else:
+                    _type = self.type.lower()
+                    if _type.startswith('cv/image'):
+                        input_spec = [paddle.static.InputSpec(shape=[None, 3, None, None], dtype='float32')]
                     else:
-                        _type = self.type.lower()
-                        if _type.startswith('cv/image'):
-                            input_spec = [paddle.static.InputSpec(shape=[None, 3, None, None], dtype='float32')]
-                        else:
-                            raise RuntimeError(
-                                'Module {} lacks `input_spec`, please specify it when calling `export_onnx_model`.'.
-                                format(self.name))
+                        raise RuntimeError(
+                            'Module {} lacks `input_spec`, please specify it when calling `export_onnx_model`.'.format(
+                                self.name))
 
-                paddle.onnx.export(self, save_file, input_spec=input_spec, **kwargs)
-                return
+            paddle.onnx.export(self, save_file, input_spec=input_spec, **kwargs)
+            return
 
+        if not self._pretrained_model_path:
             raise RuntimeError('Module {} does not support exporting models in ONNX format.'.format(self.name))
-
-        if not os.path.exists(self._pretrained_model_path):
-            log.logger.warning('The model path of Module {} does not exist'.format(self.name))
+        elif not os.path.exists(self._pretrained_model_path):
+            log.logger.warning('The model path of Module {} does not exist.'.format(self.name))
             return
 
         place = paddle.CPUPlace()
