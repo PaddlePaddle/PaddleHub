@@ -147,7 +147,11 @@ class Trainer(object):
             pickle.dump(self.best_metrics, file)
 
     def _load_metrics(self):
-        with open(os.path.join(self.checkpoint_dir, 'metrics.pkl'), 'rb') as file:
+        metrics_file = os.path.join(self.checkpoint_dir, 'metrics.pkl')
+        if not os.path.exists(metrics_file):
+            return
+
+        with open(metrics_file, 'rb') as file:
             self.best_metrics = pickle.load(file)
 
     def train(self,
