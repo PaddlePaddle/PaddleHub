@@ -282,6 +282,7 @@ class ModuleV1(object):
             model_filename=model_filename,
             params_filename=params_filename)
 
+    @paddle_utils.run_in_static_mode
     def export_onnx_model(self, dirname: str, **kwargs):
         '''
         Export the model to ONNX format.
@@ -289,8 +290,8 @@ class ModuleV1(object):
         Args:
             dirname(str): The directory to save the onnx model.
             **kwargs(dict|optional): Other export configuration options for compatibility, some may be removed
-            in the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
-            for more information.
+                in the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
+                for more information.
         '''
         feed_dict, fetch_dict, program = self.context(for_test=True, trainable=False)
         inputs = set([var.name for var in feed_dict.values()])
@@ -308,3 +309,12 @@ class ModuleV1(object):
             target_vars=outputs,
             save_file=save_file,
             **kwargs)
+
+    def sub_modules(self, recursive: bool = True):
+        '''
+        Get all sub modules.
+
+        Args:
+            recursive(bool): Whether to get sub modules recursively. Default to True.
+        '''
+        return []

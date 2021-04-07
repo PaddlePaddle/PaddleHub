@@ -407,6 +407,13 @@ class TransformerModule(RunModule, TextServing):
         'text-matching',
     ]
 
+    @property
+    def input_spec(self):
+        return [
+            paddle.static.InputSpec(shape=[None, None], dtype='int64'),
+            paddle.static.InputSpec(shape=[None, None], dtype='int64')
+        ]
+
     def _convert_text_to_input(self, tokenizer, texts: List[str], max_seq_len: int, split_char: str):
         pad_to_max_seq_len = False if self.task is None else True
         if self.task == 'token-cls':  # Extra processing of token-cls task
@@ -442,7 +449,7 @@ class TransformerModule(RunModule, TextServing):
                         pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
             else:
                 raise RuntimeError(
-                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(text))
+                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(texts))
         return encoded_inputs
 
     def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int, split_char: str):
@@ -605,10 +612,9 @@ class TransformerModule(RunModule, TextServing):
                     results.extend(token_labels)
                 elif self.task == None:
                     sequence_output, pooled_output = self(input_ids, segment_ids)
-                    results.append([
-                        pooled_output.squeeze(0).numpy().tolist(),
-                        sequence_output.squeeze(0).numpy().tolist()
-                    ])
+                    results.append(
+                        [pooled_output.squeeze(0).numpy().tolist(),
+                         sequence_output.squeeze(0).numpy().tolist()])
         return results
 
 

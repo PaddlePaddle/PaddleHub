@@ -135,7 +135,7 @@ class RunModule(object):
     @property
     def _pretrained_model_path(self):
         _pretrained_model_attrs = [
-            'pretrained_model_path', 'rec_pretrained_model_path', 'default_pretrained_model_path'
+            'pretrained_model_path', 'rec_pretrained_model_path', 'default_pretrained_model_path', 'model_path'
         ]
 
         for _attr in _pretrained_model_attrs:
@@ -147,30 +147,77 @@ class RunModule(object):
 
         return None
 
-    def export_onnx_model(self, dirname: str, **kwargs):
+    def sub_modules(self, recursive: bool = True):
+        '''
+        Get all sub modules.
+
+        Args:
+            recursive(bool): Whether to get sub modules recursively. Default to True.
+        '''
+        _sub_modules = {}
+        for key, item in self.__dict__.items():
+            if id(item) == id(self):
+                continue
+
+            if isinstance(item, (RunModule, ModuleV1)):
+                _sub_modules[key] = item
+                if not recursive:
+                    continue
+
+                for _k, _v in item.sub_modules(recursive):
+                    _sub_modules['{}/{}'.format(key, _k)] = _v
+
+        return _sub_modules
+
+    def export_onnx_model(self,
+                          dirname: str,
+                          input_spec: List[paddle.static.InputSpec] = None,
+                          export_sub_modules: bool = True,
+                          **kwargs):
         '''
         Export the model to ONNX format.
 
         Args:
             dirname(str): The directory to save the onnx model.
-            **kwargs(dict|optional): Other export configuration options for compatibility, some may be removed
-            in the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
-            for more information.
+            input_spec(list): Describes the input of the saved model's forward method, which can be described by
+                InputSpec or example Tensor. If None, all input variables of the original Layer's forward method
+                would be the inputs of the saved model. Default None.
+            export_sub_modules(bool): Whether to export sub modules. Default to True.
+            **kwargs(dict|optional): Other export configuration options for compatibility, some may be removed in
+                the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
+                for more information.
         '''
+        if export_sub_modules:
+            for key, _sub_module in self.sub_modules().items():
+                try:
+                    sub_dirname = os.path.normpath(os.path.join(dirname, key))
+                    _sub_module.export_onnx_model(sub_dirname, export_sub_modules=export_sub_modules, **kwargs)
+                except:
+                    utils.record_exception('Failed to export sub module {}'.format(_sub_module.name))
+
         if not self._pretrained_model_path:
             if isinstance(self, paddle.nn.Layer):
                 save_file = os.path.join(dirname, '{}'.format(self.name))
-                if hasattr(self, 'input_spec'):
-                    input_spec = self.input_sepc
-                else:
-                    _type = self.type.lower()
-                    if _type.startswith('cv/image'):
-                        input_spec = paddle.static.InputSpec(shape=[None, 3, None, None], dtype='float32')
+                if not input_spec:
+                    if hasattr(self, 'input_spec'):
+                        input_spec = self.input_spec
                     else:
-                        raise NotImplementedError
-                paddle.onnx.export(self, save_file, input_spec=[input_spec])
+                        _type = self.type.lower()
+                        if _type.startswith('cv/image'):
+                            input_spec = [paddle.static.InputSpec(shape=[None, 3, None, None], dtype='float32')]
+                        else:
+                            raise RuntimeError(
+                                'Module {} lacks `input_spec`, please specify it when calling `export_onnx_model`.'.
+                                format(self.name))
+
+                paddle.onnx.export(self, save_file, input_spec=input_spec, **kwargs)
                 return
-            raise NotImplementedError
+
+            raise RuntimeError('Module {} does not support exporting models in ONNX format.'.format(self.name))
+
+        if not os.path.exists(self._pretrained_model_path):
+            log.logger.warning('The model path of Module {} does not exist'.format(self.name))
+            return
 
         place = paddle.CPUPlace()
         exe = paddle.static.Executor(place)
