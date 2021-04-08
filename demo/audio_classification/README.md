@@ -179,3 +179,9 @@ for label, score in list(result[0].items())[:topk]:
     msg += f'{label}: {score}\n'
 print(msg)
 ```
+
+### 依赖
+
+paddlepaddle >= 2.0.0
+
+paddlehub >= 2.1.0
