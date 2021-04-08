@@ -283,4 +283,5 @@ We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 * Many thanks to [zbp-xxxp](https://github.com/zbp-xxxp) and [七年期限](https://github.com/1084667371),Jointly contributed to the Mid-Autumn Festival Special Edition Module
 * Many thanks to [livingbody](https://github.com/livingbody)，Contributed models for style transfer based on PaddleHub's capabilities and Mid-Autumn Festival WeChat Mini Program
 * Many thanks to [BurrowsWang](https://github.com/BurrowsWang) for fixing Markdown table display problem
+* Many thanks to [huqi](https://github.com/hu-qi) for fixing readme typo
 
