@@ -51,7 +51,6 @@ trainer = Trainer(model, optimizer, checkpoint_dir='test_ckpt_img_ocr', use_gpu=
 
 #### 优化策略
 
-Paddle2.0rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详细参见[策略](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/optimizer/optimizer/Optimizer_cn.html)。
 
 其中`Adam`:
 
@@ -157,7 +156,7 @@ https://github.com/PaddlePaddle/PaddleSeg
 
 ### 依赖
 
-paddlepaddle >= 2.0.0rc
+paddlepaddle >= 2.0.0
 
 paddlehub >= 2.0.0
 
