@@ -81,7 +81,7 @@ ELECTRA-Small, Chinese             | `hub.Module(name='chinese-electra-small')`
 ```python
 train_dataset = LCQMC(tokenizer=model.get_tokenizer(), max_seq_len=128, mode='train')
 dev_dataset = LCQMC(tokenizer=model.get_tokenizer(), max_seq_len=128, mode='dev')
-dev_dataset = LCQMC(tokenizer=model.get_tokenizer(), max_seq_len=128, mode='test')
+test_dataset = LCQMC(tokenizer=model.get_tokenizer(), max_seq_len=128, mode='test')
 ```
 
 * `tokenizer`：表示该module所需用到的tokenizer，其将对输入文本完成切词，并转化成module运行所需模型输入格式。
