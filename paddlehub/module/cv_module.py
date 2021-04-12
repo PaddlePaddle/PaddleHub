@@ -660,20 +660,6 @@ class ImageSegmentationModule(ImageServing, RunModule):
             loss += loss_ce / len(logits)
             
         return {"loss": loss}
-        
-
-
-    def validation_step(self, batch: List[paddle.Tensor], batch_idx: int) -> dict:
-        """
-         One step for validation, which should be called as forward computation.
-
-        Args:
-            batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
-            batch_idx(int): The index of batch.
-
-        """
-
-        return None
 
     def predict(self, images: Union[str, np.ndarray], batch_size: int = 1, visualization: bool = True, save_path: str = 'seg_result') -> List[np.ndarray]:
         '''

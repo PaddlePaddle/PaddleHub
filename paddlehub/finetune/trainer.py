@@ -67,6 +67,7 @@ class Trainer(object):
 
         if not isinstance(self.model, paddle.nn.Layer):
             raise TypeError('The model {} is not a `paddle.nn.Layer` object.'.format(self.model.__name__))
+        
 
         if self.local_rank == 0 and not os.path.exists(self.checkpoint_dir):
             os.makedirs(self.checkpoint_dir)
@@ -178,6 +179,10 @@ class Trainer(object):
             collate_fn(callable): function to generate mini-batch data by merging the sample list.
                 None for only stack each fields of sample in axis 0(same as :attr::`np.stack(..., axis=0)`). Default None
         '''
+        if eval_dataset is not None:
+            if not hasattr(self, 'model.validation_step'):
+                raise NotImplementedError('This finetuning model does not implement validation, please refer to related code in demo folder')
+
         batch_sampler = paddle.io.DistributedBatchSampler(
             train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
         loader = paddle.io.DataLoader(
@@ -298,8 +303,7 @@ class Trainer(object):
             with logger.processing('Evaluation on validation dataset'):
                 for batch_idx, batch in enumerate(loader):
                     result = self.validation_step(batch, batch_idx)
-                    if result is  None:
-                        raise NotImplementedError('This finetuning model does not implement validation, please refer to related code in demo folder')
+                    
                     loss = result.get('loss', None)
                     metrics = result.get('metrics', {})
                     bs = batch[0].shape[0]
