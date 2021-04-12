@@ -139,6 +139,7 @@ class Logger(object):
                 index += 1
 
         t = threading.Thread(target=_printer)
+        t.daemon = True
         t.start()
         yield
         end = True

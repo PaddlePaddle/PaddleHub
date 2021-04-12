@@ -12,13 +12,6 @@ English | [简体中文](README_ch.md)
 ![python version](https://img.shields.io/badge/python-3.6+-orange.svg)
 ![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
 
-## AI Creation Camp·PaddleHub Creative Competition (Hot Recruitment)🔥🔥
-
-Developers are sincerely invited to participate in the first phase of **AI Creation Camp·PaddleHub Creative Competition**. Realize AI creative projects based on PaddleHub. As long as your ideas are novel, you will have generous prizes to take home (10,000 RMB, Switch game console & fitness ring, mechanical keyboard, Xiaodu headphones, Xiaodu toy bear). Scan the QR code in the picture below to register, or click [Register Now](https://aistudio.baidu.com/aistudio/competition/detail/72) to register immediately. The competition time is from March 1, 2021 to March 31, 2021. 
-
-<p align="center">
- <img src="./docs/imgs/Creation.png" align="middle"
-</p>
 
 
 ## Introduction
@@ -283,4 +276,5 @@ We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 * Many thanks to [zbp-xxxp](https://github.com/zbp-xxxp) and [七年期限](https://github.com/1084667371),Jointly contributed to the Mid-Autumn Festival Special Edition Module
 * Many thanks to [livingbody](https://github.com/livingbody)，Contributed models for style transfer based on PaddleHub's capabilities and Mid-Autumn Festival WeChat Mini Program
 * Many thanks to [BurrowsWang](https://github.com/BurrowsWang) for fixing Markdown table display problem
+* Many thanks to [huqi](https://github.com/hu-qi) for fixing readme typo
 
