@@ -179,9 +179,8 @@ class Trainer(object):
             collate_fn(callable): function to generate mini-batch data by merging the sample list.
                 None for only stack each fields of sample in axis 0(same as :attr::`np.stack(..., axis=0)`). Default None
         '''
-        if eval_dataset is not None:
-            if not hasattr(self, 'model.validation_step'):
-                raise NotImplementedError('This finetuning model does not implement validation, please refer to related code in demo folder')
+        if eval_dataset is not None and not hasattr(self.model, 'validation_step'):
+            raise NotImplementedError('The specified finetuning model does not support evaluation.')
 
         batch_sampler = paddle.io.DistributedBatchSampler(
             train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
