@@ -15,7 +15,6 @@
 
 import os
 import subprocess
-from pip._internal.utils.misc import get_installed_distributions
 from typing import IO
 
 from paddlehub.utils.utils import Version
@@ -24,6 +23,7 @@ from paddlehub.utils.io import discard_oe, typein
 
 def get_installed_packages() -> dict:
     '''Get all packages installed in current python environment'''
+    from pip._internal.utils.misc import get_installed_distributions
     return {item.key: Version(item.version) for item in get_installed_distributions()}
 
 
