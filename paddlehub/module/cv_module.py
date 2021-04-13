@@ -643,21 +643,8 @@ class ImageSegmentationModule(ImageServing, RunModule):
 
         Returns:
             results(dict): The model outputs, such as loss.
+            
         '''
-
-        return self.validation_step(batch, batch_idx)
-
-    def validation_step(self, batch: List[paddle.Tensor], batch_idx: int) -> dict:
-        """
-         One step for validation, which should be called as forward computation.
-
-        Args:
-            batch(list[paddle.Tensor]): The one batch data, which contains images and labels.
-            batch_idx(int): The index of batch.
-
-        Returns:
-            results(dict) : The model outputs, such as metrics.
-        """
         
         label = batch[1].astype('int64')
         criterionCE = nn.loss.CrossEntropyLoss()
@@ -666,10 +653,12 @@ class ImageSegmentationModule(ImageServing, RunModule):
         for i in range(len(logits)):
             logit = logits[i]
             if logit.shape[-2:] != label.shape[-2:]:
-                logit = F.resize_bilinear(logit, label.shape[-2:])
+                logit = F.interpolate(logit, label.shape[-2:],  mode='bilinear')
+            
             logit = logit.transpose([0,2,3,1])
             loss_ce = criterionCE(logit, label)
             loss += loss_ce / len(logits)
+            
         return {"loss": loss}
 
     def predict(self, images: Union[str, np.ndarray], batch_size: int = 1, visualization: bool = True, save_path: str = 'seg_result') -> List[np.ndarray]:
