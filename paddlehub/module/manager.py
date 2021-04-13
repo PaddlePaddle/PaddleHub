@@ -155,19 +155,21 @@ class LocalModuleManager(object):
                 version: str = None,
                 source: str = None,
                 update: bool = False,
-                branch: str = None) -> HubModule:
+                branch: str = None,
+                ignore_env_mismatch: bool = False) -> HubModule:
         '''
         Install a HubModule from name or directory or archive file or url. When installing with the name parameter, if a
         module that meets the conditions (both name and version) already installed, the installation step will be skipped.
         When installing with other parameter, The locally installed modules will be uninstalled.
 
         Args:
-            name      (str|optional): module name to install
-            directory (str|optional): directory containing  module code
-            archive   (str|optional): archive file containing  module code
-            url       (str|optional): url points to a archive file containing module code
-            version   (str|optional): module version, use with name parameter
-            source    (str|optional): source containing module code, use with name paramete
+            name                (str|optional): module name to install
+            directory           (str|optional): directory containing  module code
+            archive             (str|optional): archive file containing  module code
+            url                 (str|optional): url points to a archive file containing module code
+            version             (str|optional): module version, use with name parameter
+            source              (str|optional): source containing module code, use with name paramete
+            ignore_env_mismatch (str|optional): Whether to ignore the environment mismatch when installing the Module.
         '''
         if name:
 
@@ -185,7 +187,7 @@ class LocalModuleManager(object):
                     return hub_module_cls
                 if source:
                     return self._install_from_source(name, version, source, update, branch)
-                return self._install_from_name(name, version)
+                return self._install_from_name(name, version, ignore_env_mismatch)
         elif directory:
             return self._install_from_directory(directory)
         elif archive:
@@ -255,7 +257,7 @@ class LocalModuleManager(object):
 
             return self._install_from_archive(file)
 
-    def _install_from_name(self, name: str, version: str = None) -> HubModule:
+    def _install_from_name(self, name: str, version: str = None, ignore_env_mismatch: bool = False) -> HubModule:
         '''Install HubModule by name search result'''
         result = module_server.search_module(name=name, version=version)
         for item in result:
@@ -277,7 +279,24 @@ class LocalModuleManager(object):
 
         # Cannot find a HubModule that meets the version
         if valid_infos:
-            raise EnvironmentMismatchError(name=name, info=valid_infos, version=version)
+            if not ignore_env_mismatch:
+                raise EnvironmentMismatchError(name=name, info=valid_infos, version=version)
+
+            # If `ignore_env_mismatch` is set, ignore the problem of environmental mismatch, such as PaddlePaddle or PaddleHub
+            # version incompatibility. This may cause some unexpected problems during installation or running, but it is useful
+            # in some cases, for example, the development version of PaddlePaddle(with version number `0.0.0`) is installed
+            # locally.
+            if version:
+                if version in valid_infos:
+                    url = valid_infos[version]['url']
+                else:
+                    raise HubModuleNotFoundError(name=name, info=module_infos, version=version)
+            else:
+                # Get the maximum version number.
+                version = sorted([utils.Version(_v) for _v in valid_infos.keys()])[-1]
+                url = valid_infos[str(version)]['url']
+            log.logger.warning('Ignore environmental mismatch of The Module {}-{}'.format(name, version))
+            return self._install_from_url(url)
         raise HubModuleNotFoundError(name=name, info=module_infos, version=version)
 
     def _install_from_source(self, name: str, version: str, source: str, update: bool = False,

@@ -359,16 +359,16 @@ class Module(object):
         name(str): Module name.
         directory(str|optional): Directory of the module to be loaded, only takes effect when the `name` is not specified.
         version(str|optional): The version limit of the module, only takes effect when the `name` is specified. When the local
-                               Module does not meet the specified version conditions, PaddleHub will re-request the server to
-                               download the appropriate Module. Default to None, This means that the local Module will be used.
-                               If the Module does not exist, PaddleHub will download the latest version available from the
-                               server according to the usage environment.
+            Module does not meet the specified version conditions, PaddleHub will re-request the server to download the
+            appropriate Module. Default to None, This means that the local Module will be used. If the Module does not exist,
+            PaddleHub will download the latest version available from the server according to the usage environment.
         source(str|optional): Url of a git repository. If this parameter is specified, PaddleHub will no longer download the
-                              specified Module from the default server, but will look for it in the specified repository.
-                              Default to None.
-        update(bool|optional): Whether to update the locally cached git repository, only takes effect when the `source`
-                               is specified. Default to False.
+            specified Module from the default server, but will look for it in the specified repository. Default to None.
+        update(bool|optional): Whether to update the locally cached git repository, only takes effect when the `source` is
+            specified. Default to False.
         branch(str|optional): The branch of the specified git repository. Default to None.
+        ignore_env_mismatch(bool|optional): Whether to ignore the environment mismatch when installing the Module. Default to
+            False.
     '''
 
     def __new__(cls,
@@ -379,13 +379,20 @@ class Module(object):
                 source: str = None,
                 update: bool = False,
                 branch: str = None,
+                ignore_env_mismatch: bool = False,
                 **kwargs):
         if cls.__name__ == 'Module':
             from paddlehub.server.server import CacheUpdater
             # This branch come from hub.Module(name='xxx') or hub.Module(directory='xxx')
             if name:
                 module = cls.init_with_name(
-                    name=name, version=version, source=source, update=update, branch=branch, **kwargs)
+                    name=name,
+                    version=version,
+                    source=source,
+                    update=update,
+                    branch=branch,
+                    ignore_env_mismatch=ignore_env_mismatch,
+                    **kwargs)
                 CacheUpdater("update_cache", module=name, version=version).start()
             elif directory:
                 module = cls.init_with_directory(directory=directory, **kwargs)
@@ -470,13 +477,20 @@ class Module(object):
                        source: str = None,
                        update: bool = False,
                        branch: str = None,
+                       ignore_env_mismatch: bool = False,
                        **kwargs) -> Union[RunModule, ModuleV1]:
         '''Initialize Module according to the specified name.'''
         from paddlehub.module.manager import LocalModuleManager
         manager = LocalModuleManager()
         user_module_cls = manager.search(name, source=source, branch=branch)
         if not user_module_cls or not user_module_cls.version.match(version):
-            user_module_cls = manager.install(name=name, version=version, source=source, update=update, branch=branch)
+            user_module_cls = manager.install(
+                name=name,
+                version=version,
+                source=source,
+                update=update,
+                branch=branch,
+                ignore_env_mismatch=ignore_env_mismatch)
 
         directory = manager._get_normalized_path(user_module_cls.name)
 

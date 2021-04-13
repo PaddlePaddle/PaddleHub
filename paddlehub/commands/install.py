@@ -25,10 +25,21 @@ from paddlehub.server.server import CacheUpdater
 
 @register(name='hub.install', description='Install PaddleHub module.')
 class InstallCommand:
+    def __init__(self):
+        self.parser = argparse.ArgumentParser(prog='hub install', add_help=True)
+        self.parser.add_argument(
+            '--ignore_env_mismatch',
+            action='store_true',
+            help='Whether to ignore the environment mismatch when installing the Module.')
+
     def execute(self, argv: List) -> bool:
         if not argv:
             print("ERROR: You must give at least one module to install.")
             return False
+
+        options = [arg for arg in argv if arg.startswith('-')]
+        argv = [arg for arg in argv if not arg.startswith('-')]
+        args = self.parser.parse_args(options)
 
         manager = LocalModuleManager()
         for _arg in argv:
@@ -41,5 +52,5 @@ class InstallCommand:
                 name = _arg[0]
                 version = None if len(_arg) == 1 else _arg[1]
                 CacheUpdater("hub_install", name, version).start()
-                manager.install(name=name, version=version)
+                manager.install(name=name, version=version, ignore_env_mismatch=args.ignore_env_mismatch)
         return True
