@@ -1,5 +1,33 @@
 # 更新历史
 
+## `v2.1.0`
+
+### 【1、版本迭代】
+
+ - 模型支持：新增基于VOC数据集的高精度语义分割模型2个，语音分类模型3个。
+ - 迁移学习能力升级：新增图像语义分割、文本语义匹配、语音分类等相关任务的Fine-Tune能力以及相关任务数据集。
+
+### 【2、部署能力重要升级】
+
+ - 完善部署能力：新增ONNX和PaddleInference等模型格式的导出功能。
+ - **重要开源生态合作**：新增[BentoML](https://github.com/bentoml/BentoML) 云原生服务化部署能力，可以支持统一的多框架模型管理和模型部署的工作流，[详细教程](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.1/demo/serving/BentoML)，更多内容可以参考BentoML 最新 v0.12.1 [Releasenote](https://github.com/bentoml/BentoML/releases/tag/v0.12.1)
+   （感谢@ [parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic)）的贡献与支持
+
+### 【3、Bug fixes】
+
+ - [#7da1230](https://github.com/PaddlePaddle/PaddleHub/commit/7da12302dd77e3d739da72821d41715ad8a7c79c) 修复了模型未记录评估指标时无法恢复训练的问题。
+ - [#b0b3144](https://github.com/PaddlePaddle/PaddleHub/commit/b0b3144eff34e47cac8fc450c8b7cb6c557f9b84) 修复了评估过程出现异常时线程没有正常退出的问题。
+ - [#30aace4](https://github.com/PaddlePaddle/PaddleHub/commit/30aace46414bbeef02beb75b7128f48fada82150) 优化模型安装流程，提升易用性。
+
+## `v2.0.0`
+
+* 发布 2.0版本，全面迁移动态图编程模式，模型开发调试更加方便，finetune接口更加灵活易用。
+* 视觉类任务迁移学习能力全面升级，支持图像分类、图像着色、风格迁移等多种任务。
+* BERT、ERNIE、RoBERTa等Transformer类模型升级至动态图，支持文本分类、序列标注的Fine-Tune能力。
+* 新增词向量模型61个，其中包含中文模型51个，英文模型10个。
+* 优化服务化部署Serving能力，支持多卡预测、自动负载均衡，性能大幅度提升。
+* 新增自动数据增强能力Auto Augment，能高效地搜索适合数据集的数据增强策略组合。
+
 ## `v2.0.0-beta1`
 
 * BERT、ERNIE、RoBERTa等Transformer类模型升级至动态图，增加[文本分类](../../demo/text_classification)的Fine-Tune能力
