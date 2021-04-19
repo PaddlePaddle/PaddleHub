@@ -162,8 +162,6 @@ wav = './cat.wav'  # 存储在本地的需要预测的wav文件
 sr = 44100  # 音频文件的采样率
 topk = 10  # 展示音频得分前10的标签和分数
 
-model = hub.Module(name='panns_cnn14', version='1.0.0', task=None)
-
 # 读取audioset数据集的label文件
 label_file = os.path.join(MODULE_HOME, 'panns_cnn14', 'audioset_labels.txt')
 label_map = {}
@@ -171,10 +169,13 @@ with open(label_file, 'r') as f:
     for i, l in enumerate(f.readlines()):
         label_map[i] = l.strip()
 
+model = hub.Module(name='panns_cnn14', version='1.0.0', task=None, label_map=label_map)
+
 data = [librosa.load(wav, sr=sr)[0]]
 result = model.predict(data, sample_rate=sr, batch_size=1, feat_type='mel', use_gpu=True)
 
 # 打印topk的类别和对应得分
+msg = ''
 for label, score in list(result[0].items())[:topk]:
     msg += f'{label}: {score}\n'
 print(msg)
