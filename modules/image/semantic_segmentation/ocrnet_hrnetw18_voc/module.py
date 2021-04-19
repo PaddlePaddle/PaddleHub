@@ -69,7 +69,7 @@ class OCRNetHRNetW18(nn.Layer):
             ocr_mid_channels=ocr_mid_channels,
             ocr_key_channels=ocr_key_channels)
         self.align_corners = align_corners
-        self.transforms = T.Compose([T.Padding(target_size=(512, 512)), T.Normalize()])
+        self.transforms = T.Compose([T.Normalize()])
 
         if pretrained is not None:
             model_dict = paddle.load(pretrained)

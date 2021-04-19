@@ -76,7 +76,7 @@ class DeepLabV3PResnet50(nn.Layer):
                                    backbone_channels, aspp_ratios,
                                    aspp_out_channels, align_corners)
         self.align_corners = align_corners
-        self.transforms = T.Compose([T.Padding(target_size=(512, 512)), T.Normalize()])
+        self.transforms = T.Compose([T.Normalize()])
 
         if pretrained is not None:
             model_dict = paddle.load(pretrained)
