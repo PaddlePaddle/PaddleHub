@@ -8,18 +8,18 @@ English | [简体中文](README_ch.md)
 ------------------------------------------------------------------------------------------
 
 <p align="center">
-    <a href=""><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
-    <a href=""><img src="https://img.shields.io/github/v/release/PaddlePaddle/PaddleHub?color=ffa"></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
+    <a href="https://github.com/PaddlePaddle/PaddleHub/releases"><img src="https://img.shields.io/github/v/release/PaddlePaddle/PaddleHub?color=ffa"></a>
     <a href=""><img src="https://img.shields.io/badge/python-3.6+-aff.svg"></a>
     <a href=""><img src="https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg"></a>
     <a href=""><img src="https://img.shields.io/pypi/format/paddlehub?color=c77"></a>
 </p>
 <p align="center">
-    <a href=""><img src="https://img.shields.io/github/contributors/PaddlePaddle/PaddleHub?color=9ea"></a>
-    <a href=""><img src="https://img.shields.io/github/commit-activity/m/PaddlePaddle/PaddleHub?color=3af"></a>
-    <a href=""><img src="https://img.shields.io/pypi/dm/paddlehub?color=9cf"></a>
-    <a href=""><img src="https://img.shields.io/github/issues/PaddlePaddle/PaddleHub?color=9cc"></a>
-    <a href=""><img src="https://img.shields.io/github/stars/PaddlePaddle/PaddleHub?color=ccf"></a>
+    <a href="https://github.com/PaddlePaddle/PaddleHub/graphs/contributors"><img src="https://img.shields.io/github/contributors/PaddlePaddle/PaddleHub?color=9ea"></a>
+    <a href="https://github.com/PaddlePaddle/PaddleHub/commits"><img src="https://img.shields.io/github/commit-activity/m/PaddlePaddle/PaddleHub?color=3af"></a>
+    <a href="https://pypi.org/project/paddlehub/"><img src="https://img.shields.io/pypi/dm/paddlehub?color=9cf"></a>
+    <a href="https://github.com/PaddlePaddle/PaddleHub/issues"><img src="https://img.shields.io/github/issues/PaddlePaddle/PaddleHub?color=9cc"></a>
+    <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers"><img src="https://img.shields.io/github/stars/PaddlePaddle/PaddleHub?color=ccf"></a>
 </p>
 
 ## Introduction
