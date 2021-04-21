@@ -7,12 +7,20 @@ English | [简体中文](README_ch.md)
 
 ------------------------------------------------------------------------------------------
 
-[![License](https://img.shields.io/badge/license-Apache%202-red.svg)](LICENSE)
-[![Version](https://img.shields.io/github/release/PaddlePaddle/PaddleHub.svg)](https://github.com/PaddlePaddle/PaddleHub/releases)
-![python version](https://img.shields.io/badge/python-3.6+-orange.svg)
-![support os](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-yellow.svg)
-
-
+<p align="center">
+    <a href=""><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
+    <a href=""><img src="https://img.shields.io/github/v/release/PaddlePaddle/PaddleHub?color=ffa"></a>
+    <a href=""><img src="https://img.shields.io/badge/python-3.6+-aff.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg"></a>
+    <a href=""><img src="https://img.shields.io/pypi/format/paddlehub?color=c77"></a>
+</p>
+<p align="center">
+    <a href=""><img src="https://img.shields.io/github/contributors/PaddlePaddle/PaddleHub?color=9ea"></a>
+    <a href=""><img src="https://img.shields.io/github/commit-activity/m/PaddlePaddle/PaddleHub?color=3af"></a>
+    <a href=""><img src="https://img.shields.io/pypi/dm/paddlehub?color=9cf"></a>
+    <a href=""><img src="https://img.shields.io/github/issues/PaddlePaddle/PaddleHub?color=9cc"></a>
+    <a href=""><img src="https://img.shields.io/github/stars/PaddlePaddle/PaddleHub?color=ccf"></a>
+</p>
 
 ## Introduction
 - PaddleHub aims to provide developers with rich, high-quality, and directly usable pre-trained models.
@@ -266,9 +274,38 @@ The release of this project is certified by the <a href="./LICENSE">Apache 2.0 l
 <a name="Contribution"></a>
 ## Contribution
 
-<a href="https://github.com/PaddlePaddle/PaddleHub/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=PaddlePaddle/PaddleHub" />
-</a>
+<p align="center">
+    <a href="https://github.com/nepeplwu"><img src="https://avatars.githubusercontent.com/u/45024560?v=4" width=100 height=100></a>
+    <a href="https://github.com/Steffy-zxf"><img src="https://avatars.githubusercontent.com/u/48793257?v=4" width=100 height=100></a>
+    <a href="https://github.com/ZeyuChen"><img src="https://avatars.githubusercontent.com/u/1371212?v=4" width=100 height=100></a>
+    <a href="https://github.com/ShenYuhan"><img src="https://avatars.githubusercontent.com/u/28444161?v=4" width=100 height=100></a>
+    <a href="https://github.com/kinghuin"><img src="https://avatars.githubusercontent.com/u/11913168?v=4" width=100 height=100></a>
+    <a href="https://github.com/haoyuying"><img src="https://avatars.githubusercontent.com/u/35907364?v=4" width=100 height=100></a>
+    <a href="https://github.com/grasswolfs"><img src="https://avatars.githubusercontent.com/u/23690325?v=4" width=100 height=100></a>
+    <a href="https://github.com/sjtubinlong"><img src="https://avatars.githubusercontent.com/u/2063170?v=4" width=100 height=100></a>
+    <a href="https://github.com/KPatr1ck"><img src="https://avatars.githubusercontent.com/u/22954146?v=4" width=100 height=100></a>
+    <a href="https://github.com/jm12138"><img src="https://avatars.githubusercontent.com/u/15712990?v=4" width=100 height=100></a>
+    <a href="https://github.com/DesmonDay"><img src="https://avatars.githubusercontent.com/u/20554008?v=4" width=100 height=100></a>
+    <a href="https://github.com/adaxiadaxi"><img src="https://avatars.githubusercontent.com/u/58928121?v=4" width=100 height=100></a>
+    <a href="https://github.com/chunzhang-hub"><img src="https://avatars.githubusercontent.com/u/63036966?v=4" width=100 height=100></a>
+    <a href="https://github.com/linshuliang"><img src="https://avatars.githubusercontent.com/u/15993091?v=4" width=100 height=100></a>
+    <a href="https://github.com/eepgxxy"><img src="https://avatars.githubusercontent.com/u/15946195?v=4" width=100 height=100></a>
+    <a href="https://github.com/houj04"><img src="https://avatars.githubusercontent.com/u/35131887?v=4" width=100 height=100></a>
+    <a href="https://github.com/paopjian"><img src="https://avatars.githubusercontent.com/u/20377352?v=4" width=100 height=100></a>
+    <a href="https://github.com/zbp-xxxp"><img src="https://avatars.githubusercontent.com/u/58476312?v=4" width=100 height=100></a>
+    <a href="https://github.com/dxxxp"><img src="https://avatars.githubusercontent.com/u/15886898?v=4" width=100 height=100></a>
+    <a href="https://github.com/1084667371"><img src="https://avatars.githubusercontent.com/u/50902619?v=4" width=100 height=100></a>
+    <a href="https://github.com/Channingss"><img src="https://avatars.githubusercontent.com/u/12471701?v=4" width=100 height=100></a>
+    <a href="https://github.com/Austendeng"><img src="https://avatars.githubusercontent.com/u/16330293?v=4" width=100 height=100></a>
+    <a href="https://github.com/BurrowsWang"><img src="https://avatars.githubusercontent.com/u/478717?v=4" width=100 height=100></a>
+    <a href="https://github.com/cqvu"><img src="https://avatars.githubusercontent.com/u/37096589?v=4" width=100 height=100></a>
+    <a href="https://github.com/Haijunlv"><img src="https://avatars.githubusercontent.com/u/28926237?v=4" width=100 height=100></a>
+    <a href="https://github.com/holyseven"><img src="https://avatars.githubusercontent.com/u/13829174?v=4" width=100 height=100></a>
+    <a href="https://github.com/MRXLT"><img src="https://avatars.githubusercontent.com/u/16594411?v=4" width=100 height=100></a>
+    <a href="https://github.com/cclauss"><img src="https://avatars.githubusercontent.com/u/3709715?v=4" width=100 height=100></a>
+    <a href="https://github.com/hu-qi"><img src="https://avatars.githubusercontent.com/u/17986122?v=4" width=100 height=100></a>
+    <a href="https://github.com/jayhenry"><img src="https://avatars.githubusercontent.com/u/4285375?v=4" width=100 height=100></a>
+</p>
 
 We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 
