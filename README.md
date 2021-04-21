@@ -114,7 +114,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 <div align="center">
-  
+
 (The second gif comes from  CopyRight@[jiupinjia/SkyAR](https://github.com/jiupinjia/SkyAR#district-9-ship-video-source))
 </div>
 
@@ -265,6 +265,11 @@ The release of this project is certified by the <a href="./LICENSE">Apache 2.0 l
 
 <a name="Contribution"></a>
 ## Contribution
+
+<a href="https://github.com/PaddlePaddle/PaddleHub/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=PaddlePaddle/PaddleHub" />
+</a>
+
 We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 
 * Many thanks to [肖培楷](https://github.com/jm12138), Contributed to street scene cartoonization, portrait cartoonization, gesture key point recognition, sky replacement, depth estimation, portrait segmentation and other modules
@@ -277,4 +282,3 @@ We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 * Many thanks to [livingbody](https://github.com/livingbody)，Contributed models for style transfer based on PaddleHub's capabilities and Mid-Autumn Festival WeChat Mini Program
 * Many thanks to [BurrowsWang](https://github.com/BurrowsWang) for fixing Markdown table display problem
 * Many thanks to [huqi](https://github.com/hu-qi) for fixing readme typo
-

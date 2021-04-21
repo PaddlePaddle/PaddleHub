@@ -269,6 +269,11 @@
 
 <a name="致谢"></a>
 ## 致谢开发者
+
+<a href="https://github.com/PaddlePaddle/PaddleHub/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=PaddlePaddle/PaddleHub" />
+</a>
+
 我们非常欢迎您为PaddleHub贡献代码，也十分感谢您的反馈。
 
 * 非常感谢[肖培楷](https://github.com/jm12138)贡献了街景动漫化，人像动漫化、手势关键点识别、天空置换、深度估计、人像分割等module
