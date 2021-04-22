@@ -393,7 +393,7 @@ class ChineseOCRDBCRNNServer(hub.Module):
                 # rec_res.append([preds_text, score])
                 rec_res[indices[beg_img_no + rno]] = [preds_text, score]
 
-            return rec_res
+        return rec_res
 
     def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
         detector_dir = os.path.join(dirname, 'text_detector')
