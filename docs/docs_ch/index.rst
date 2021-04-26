@@ -1,18 +1,28 @@
-#########################################
-PaddleHub 文档
-#########################################
+===========================
+关于PaddleHub
+===========================
 
-..  toctree::
-    :caption: 目录
-    :maxdepth: 2
-    :titlesonly:
+欢迎使用PaddleHub！这是一个基于飞桨框架的预训练模型应用工具，旨在降低AI模型的使用门槛并促动AI社区的发展。无论您是AI领域的资深开发者，还是对该领域不甚了解却非常感兴趣的用户，PaddleHub都可以对您产生帮助。ou are a senior developer in the AI ​​industry nor an interested person who knows nothing about the AI ​​field, you can benefit from PaddleHub.
 
-    概述<overview>
-    安装<install>
-    快速体验<quick_experience/quick_index>
-    部署预训练模型<tutorial/Serving_index>
-    API<reference/ref_index>
-    命令行参考<tutorial/cmdintro>
-    FAQ<faq>
-    社区贡献<contribution/contri_index>
-    更新历史<release>
+* PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型。
+* **【无需深度学习背景、无需数据与训练过程】**，可快速使用AI模型，享受人工智能时代红利。
+* 涵盖CV、NLP、Audio、Video主流四大品类，支持**一键预测**、**一键服务化部署**和**快速迁移学习**
+* 全部模型开源下载，**离线可运行**。
+
+------------
+
+===========================
+概览
+===========================
+.. toctree::
+   :maxdepth: 2
+   :titlesonly:
+
+   快速入门PaddleHub<get_start_index>
+   教程<tutorial_index>
+   API<api_index>
+   常见问题<faq>
+   社区<community_index>
+   发版信息<release>
+
+   

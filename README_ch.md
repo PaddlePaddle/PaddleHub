@@ -227,11 +227,10 @@
 
 ## 文档教程
 
-- [PIP安装](./docs/docs_ch/installation.md)
+- [PIP安装](./docs/docs_ch/get_start/installation.rst)
 - 快速开始
-    - [命令行调用](./docs/docs_ch/quick_experience/cmd_quick_run.md)
-    - [Python API调用](./docs/docs_ch/quick_experience/python_use_hub.md)
-    - [示例体验项目demo](./docs/docs_ch/quick_experience/more_demos.md)
+    - [Python API调用](./docs/docs_ch/get_start/python_use_hub.rst)
+    - [示例体验项目demo](./docs/docs_ch/community/more_demos.md)
 - 丰富的预训练模型 274
     - [精品特色模型](./docs/docs_ch/figures.md)
     - 计算机视觉 141 个
@@ -257,16 +256,13 @@
       - [视频分类 5 个](./modules/video/README.md)
       - [视频修复 3 个](https://www.paddlepaddle.org.cn/hublist)
 - 部署
-    - [本地Inference部署](./docs/docs_ch/quick_experience/python_use_hub.md)
     - [一行代码服务化部署](./docs/docs_ch/tutorial/serving.md)
     - [移动端 Lite 部署（跳转Lite教程）](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
 - 进阶文档
-    - [命令行工具详解](./docs/docs_ch/tutorial/cmdintro.md)
-    - [自定义数据迁移学习](./docs/docs_ch/tutorial/how_to_load_data.md)
+    - [命令行工具详解](./docs/docs_ch/tutorial/cmd_usage.rst)
 - 社区交流
     - [加入技术交流群](#欢迎加入PaddleHub技术交流群)
-    - [贡献预训练模型](./docs/docs_ch/contribution/contri_pretrained_model.md)
-    - [贡献代码](./docs/docs_ch/contribution/contri_pr.md)
+    - [贡献代码](./docs/docs_ch/contribution/contribute_code.md)
 - [FAQ](./docs/docs_ch/faq.md)  
 - [更新历史](./docs/docs_ch/release.md)
 - [许可证书](#许可证书)

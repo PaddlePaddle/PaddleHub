@@ -1,23 +1,22 @@
-# 更新历史
+# Release Note
 
 ## `v2.1.0`
 
-### 【1、版本迭代】
+### [ 1. Improvements]
 
- - 模型支持：新增基于VOC数据集的高精度语义分割模型2个，语音分类模型3个。
- - 迁移学习能力升级：新增图像语义分割、文本语义匹配、语音分类等相关任务的Fine-Tune能力以及相关任务数据集。
+- Add supports for five new models, including two high-precision semantic segmentation models based on VOC dataset and three voice classification models.
+- Enforce the transfer learning capabilities for image semantic segmentation, text semantic matching and voice classification on related datasets.
 
-### 【2、部署能力重要升级】
+### [ 2. Upgrades of deployment capabilities]
 
- - 完善部署能力：新增ONNX和PaddleInference等模型格式的导出功能。
- - **重要开源生态合作**：新增[BentoML](https://github.com/bentoml/BentoML) 云原生服务化部署能力，可以支持统一的多框架模型管理和模型部署的工作流，[详细教程](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.1/demo/serving/BentoML)，更多内容可以参考BentoML 最新 v0.12.1 [Releasenote](https://github.com/bentoml/BentoML/releases/tag/v0.12.1)
-   （感谢@ [parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic)）的贡献与支持
+- Add the export function APIs for two kinds of model formats, i.,e,  ONNX and PaddleInference.
+- **Important Open-Source Ecological Cooperation**: add the support for [BentoML](https://github.com/bentoml/BentoML/), which is  a cloud native framework for serving  deployment. Users can easily serve pre-trained models from [PaddleHub](https://github.com/PaddlePaddle/PaddleHub) by following the [Tutorial notebooks](https:// github.com/PaddlePaddle/PaddleHub/tree/release/v2.1/demo/serving/BentoML).  Also, see this announcement and [Release note](https://github.com/bentoml/BentoML/releases/tag/v0.12.1)  from BentoML. (Many thanks to @[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic) for contributing this feature in PaddleHub)
 
-### 【3、Bug fixes】
+### [ 3. Bug fixes ]
 
- - [#7da1230](https://github.com/PaddlePaddle/PaddleHub/commit/7da12302dd77e3d739da72821d41715ad8a7c79c) 修复了模型未记录评估指标时无法恢复训练的问题。
- - [#b0b3144](https://github.com/PaddlePaddle/PaddleHub/commit/b0b3144eff34e47cac8fc450c8b7cb6c557f9b84) 修复了评估过程出现异常时线程没有正常退出的问题。
- - [#30aace4](https://github.com/PaddlePaddle/PaddleHub/commit/30aace46414bbeef02beb75b7128f48fada82150) 优化模型安装流程，提升易用性。
+ - [#7da1230](https://github.com/PaddlePaddle/PaddleHub/commit/7da12302dd77e3d739da72821d41715ad8a7c79c) Fixed the problem that the model cannot resume training if metrics is not recorded.
+ - [#b0b3144](https://github.com/PaddlePaddle/PaddleHub/commit/b0b3144eff34e47cac8fc450c8b7cb6c557f9b84) Fixed the problem that the thread did not exit normally when the evaluation process was abnormal.
+ - [#30aace4](https://github.com/PaddlePaddle/PaddleHub/commit/30aace46414bbeef02beb75b7128f48fada82150) Improve the model installation process.
 
 ## `v2.0.0`
 
