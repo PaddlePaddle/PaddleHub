@@ -225,7 +225,7 @@ If you have any questions during the use of the model, you can join the official
 If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the operating class will invite you to join the group.
 
 ## Documentation Tutorial
-- [PIP Installation](./docs/docs_en/installation_en.md)
+- [PIP Installation](./docs/docs_en/get_start/installation.rst)
 - Quick Start
     - [Command Line](./docs/docs_en/quick_experience/cmd_quick_run_en.md)
     - [Python API](./docs/docs_en/quick_experience/python_use_hub_en.md)
@@ -259,16 +259,13 @@ If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the 
     - Industrial Application
       - [Meter Readings 2 ](./modules/image/industrial_application/meter_readings/barometer_reader/README.md)
 - Deploy
-    - [Local Inference Deployment](./docs/docs_en/quick_experience/python_use_hub_en.md)
-    - [One Line of Code Service deployment](./docs/docs_en/tutorial/serving_en.md)
+    - [One Line of Code Service deployment](./docs/docs_en/tutorial/serving.md)
     - [Mobile Device Deployment](https://paddle-lite.readthedocs.io/zh/latest/quick_start/tutorial.html)
 - Advanced documentation
-    - [Command Line Interface Usage](./docs/docs_en/tutorial/cmdintro_en.md)
-    - [How to Load Customized Dataset](./docs/docs_en/tutorial/how_to_load_data_en.md)
+    - [Command Line Interface Usage](./docs/docs_en/tutorial/cmd_usage.rst)
 - Community
     - [Join Technical Group](#Welcome_joinus)
-    - [Contribute Pre-trained Models](./docs/docs_en/contribution/contri_pretrained_model_en.md)
-    - [Contribute Code](./docs/docs_en/contribution/contri_pr_en.md)
+    - [Contribute Code](./docs/docs_en/community/contribute_code.md)
 - [License](#License)
 - [Contribution](#Contribution)
 
