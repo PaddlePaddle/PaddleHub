@@ -25,10 +25,11 @@ English | [简体中文](README_ch.md)
 ## Introduction
 - PaddleHub aims to provide developers with rich, high-quality, and directly usable pre-trained models.
 - **No need for deep learning background**, you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
-- Covers 4 major categories of Image, Text, Audio, and Video, and supports **one-click prediction**, **easy service deployment** and **transfer learning**
+- Covers 5 major categories of Image, Text, Audio, Video, and Industrial application, and supports **one-click prediction**, **easy service deployment** and **transfer learning**
 - All models are **OPEN SOURCE**, **FREE** to download and use them in offline scenario.
 
 ### Recent updates
+- **2021.04.27:** The v2.1.0 version is released. **[Improvements]** Add supports for five new models, including two high-precision semantic segmentation models based on VOC dataset and three voice classification models. Enforce the transfer learning capabilities for image semantic segmentation, text semantic matching and voice classification on related datasets. **[Upgrades of deployment capabilities]** Add the export function APIs for two kinds of model formats, i.,e, ONNX and PaddleInference. **Important Open-Source Ecological Cooperation:** add the support for [BentoML](https://github.com/bentoml/BentoML/), which is a cloud native framework for serving deployment. Users can easily serve pre-trained models from PaddleHub by following the [Tutorial notebooks](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/demo/serving/bentoml/cloud-native-model-serving-with-bentoml.ipynb). Also, see this announcement and [Release note](https://github.com/bentoml/BentoML/releases/tag/v0.12.1) from BentoML. (Many thanks to @[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic) for contributing this feature in PaddleHub). **[Bug fixes]** [#7da1230](https://github.com/PaddlePaddle/PaddleHub/commit/7da12302dd77e3d739da72821d41715ad8a7c79c) Fixed the problem that the model cannot resume training if metrics is not recorded. [#b0b3144](https://github.com/PaddlePaddle/PaddleHub/commit/b0b3144eff34e47cac8fc450c8b7cb6c557f9b84) Fixed the problem that the thread did not exit normally when the evaluation process was abnormal. [#30aace4](https://github.com/PaddlePaddle/PaddleHub/commit/30aace46414bbeef02beb75b7128f48fada82150) Improve the model installation process. The total number of pre-trained models reaches **【300】**.
 - **2021.02.18:** The v2.0.0 version is released, making model development and debugging easier, and the finetune task is more flexible and easy to use.The ability to transfer learning for visual tasks is fully upgraded, supporting various tasks such as image classification, image coloring, and style transfer; Transformer models such as BERT, ERNIE, and RoBERTa are upgraded to dynamic graphs, supporting Fine-Tune capabilities for text classification and sequence labeling; Optimize the Serving capability, support multi-card prediction, automatic load balancing, and greatly improve performance; the new automatic data enhancement capability Auto Augment can efficiently search for data enhancement strategy combinations suitable for data sets. 61 new word vector models were added, including 51 Chinese models and 10 English models; add 4 image segmentation models, 2 depth models, 7 image generation models, and 3 text generation models, the total number of pre-trained models reaches **【274】**.
 - **2020.12.1:** Release 2.0-beta1 version, migrate ERNIE, RoBERTa, BERT to dynamic graph mode. Add text classification fine-tune task based on large-scale pre-trained models.
 - **2020.11.20:** Release 2.0-beta version, fully migrate the dynamic graph programming mode, and upgrade the service deployment Serving capability; add 1 hand key point detection model, 12 image cartoonization models, 3 image editing models, 3 speech synthesis models, syntax Analyzing one, the total number of pre-trained models reaches **【182】**.
@@ -39,7 +40,7 @@ English | [简体中文](README_ch.md)
 
 
 ## Features
-- **Abundant Pre-trained Models**: 180+ pre-trained models covering the 4 major categories including Image, Text, Audio, and Video, all open source and free for download and offline usage.
+- **Abundant Pre-trained Models**: 300+ pre-trained models covering the 5 major categories including Image, Text, Audio, Video, and Industrial application. All of them are free for download and offline usage.
 - **Quick Model Prediction**: Model prediction can be realized through a few lines of scripts to quickly experience the model effect.
 - **Model As Service**: A one-line command to build deep learning model API service deployment capabilities.
 - **Easy-to-use Transfer Learning**: Just few lines of code you can complete the transfer-learning task like image classification and text classification based on high quality pre-trained models.
@@ -229,30 +230,34 @@ If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the 
     - [Command Line](./docs/docs_en/quick_experience/cmd_quick_run_en.md)
     - [Python API](./docs/docs_en/quick_experience/python_use_hub_en.md)
     - [More Demos](./docs/docs_en/quick_experience/more_demos_en.md)
-- Rich Pre-trained Models 274
+- Rich Pre-trained Models 300
     - [Boutique Featured Models](./docs/docs_en/figures_en.md)
-    - Computer Vision 141
-      - [Image Classification 64 ](./modules/image/classification/README_en.md)
+    - Computer Vision 161
+      - [Image Classification 77 ](./modules/image/classification/README_en.md)
       - [Object Detection 13 ](./modules/image/object_detection/README_en.md)
       - [Face Detection 7 ](./modules/image/face_detection/README_en.md)  
       - [Key Point Detection 5 ](./modules/image/keypoint_detection/README_en.md)
-      - [Image Segmentation 13 ](./modules/image/semantic_segmentation/README_en.md)
-      - [Text Recognition 8 ](./modules/image/text_recognition/README_en.md)
-      - [Image Generation 22 ](./modules/image/Image_gan/README_en.md)
+      - [Image Segmentation 15 ](./modules/image/semantic_segmentation/README_en.md)
+      - [Text Recognition 9 ](./modules/image/text_recognition/README_en.md)
+      - [Image Generation 23 ](./modules/image/Image_gan/README_en.md)
       - [Image Editing 9 ](./modules/image/Image_editing/README_en.md)
-    - Natural Language Processing 122
+      - [Depth Estimation 2 ](./modules/thirdparty/image/depth_estimation)
+      - [Instance Segmentation 1 ](./modules/image/instance_segmentation/solov2/README.md)
+    - Natural Language Processing 126
       - [Lexical Analysis 2 ](./modules/text/lexical_analysis/README_en.md)
       - [Syntactic Analysis 1 ](./modules/text/syntactic_analysis/README_en.md)
       - [Sentiment Analysis 7 ](./modules/text/sentiment_analysis/README_en.md)
       - [Text Review 3 ](./modules/text/text_review/README_en.md)
       - [Text Generation 12 ](./modules/text/text_generation/README_en.md)
-      - [Semantic Models 36 ](./modules/text/language_model/README_en.md)
+      - [Semantic Models 40 ](./modules/text/language_model/README_en.md)
       - [Word Vector 61](https://www.paddlepaddle.org.cn/hublist)
     - Audio 3
       - [Speech Synthesis 3 ](./modules/audio/README_en.md)
     - Video 8
       - [Video Classification 5 ](./modules/video/README_en.md)
       - [Video Repair 3 ](https://www.paddlepaddle.org.cn/hublist)
+    - Industrial Application
+      - [Meter Readings 2 ](./modules/image/industrial_application/meter_readings/barometer_reader/README.md)
 - Deploy
     - [Local Inference Deployment](./docs/docs_en/quick_experience/python_use_hub_en.md)
     - [One Line of Code Service deployment](./docs/docs_en/tutorial/serving_en.md)
@@ -319,3 +324,4 @@ We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 * Many thanks to [livingbody](https://github.com/livingbody)，Contributed models for style transfer based on PaddleHub's capabilities and Mid-Autumn Festival WeChat Mini Program
 * Many thanks to [BurrowsWang](https://github.com/BurrowsWang) for fixing Markdown table display problem
 * Many thanks to [huqi](https://github.com/hu-qi) for fixing readme typo
+* Many thanks to @[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic) for contributing this feature in PaddleHub
