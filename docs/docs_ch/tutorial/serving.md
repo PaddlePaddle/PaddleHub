@@ -234,4 +234,3 @@ $ PaddleHub Serving will stop.
 * [人脸检测-基于pyramidbox_lite_server_mask](../../../demo/serving/module_serving/object_detection_pyramidbox_lite_server_mask)
 
 &emsp;&emsp;该示例展示了利用pyramidbox_lite_server_mask完成人脸口罩检测，检测人脸位置以及戴口罩的置信度。
-

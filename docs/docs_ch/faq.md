@@ -36,22 +36,9 @@ paddlehub.server_check()
 # 如果无法连接远端PaddleHub-Server，则显示Request Hub-Server unsuccessfully.
 ```
 
-## PaddleHub Module是否支持多线程，如何加快Module训练或预测的速度。
+## PaddleHub Module是否支持多线程加速预测？
 
-PaddleHub Module不支持多线程，可以通过使用GPU、加大batch_size等措施加速训练或者预测。
-以下示例为加速LAC Module分词的方法：
-
-```python
-results = lac.lexical_analysis(data=inputs, use_gpu=True, batch_size=10)
-```
-
-## 如何获取输入句子经过ERNIE编码后的句子表示Embedding？
-
-具体参考[BERT Services](./tutorial/bert_service.md)使用说明
-
-## 在虚拟机Python2环境中使用hub命令报错“Illegal instruction”
-
-请先排除numpy的版本问题：使用pip show numpy检查numpy的版本，如果是1.16.0~1.16.3会出现[numpy错误](https://github.com/numpy/numpy/issues/9532)，请pip uinstall numpy后再用pip install numpy<1.17.0安装新版本的numpy。
+由于PaddlePaddle自身的限制，PaddleHub无法通过多线程来加速模型预测。
 
 ## 如何修改PaddleHub的修改预训练模型存放路径？
 
