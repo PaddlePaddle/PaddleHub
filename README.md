@@ -230,7 +230,7 @@ If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the 
     - [Python API](./docs/docs_en/get_start/python_use_hub.rst)
     - [More Demos](./docs/docs_en/community/more_demos.md)
 - Rich Pre-trained Models 300
-    - [Boutique Featured Models](./docs/docs_en/figures_en.md)
+    - [Boutique Featured Models](./docs/docs_en/figures.md)
     - Computer Vision 161
       - [Image Classification 77 ](./modules/image/classification/README_en.md)
       - [Object Detection 13 ](./modules/image/object_detection/README_en.md)
