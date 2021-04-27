@@ -203,7 +203,11 @@ class ImageColorizeModule(RunModule, ImageServing):
         Returns:
             results(dict) : The model outputs, such as metrics.
         '''
-        img = self.preprocess(batch[0])
+        if paddle.__version__.split('.')[0] == '2' and int(paddle.__version__.split('.')[1]) > 0:
+            img = self.preprocess(batch)
+        else:
+            img = self.preprocess(batch[0])
+            
         out_class, out_reg = self(img['A'], img['hint_B'], img['mask_B'])
 
         # loss
