@@ -227,9 +227,8 @@ If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the 
 ## Documentation Tutorial
 - [PIP Installation](./docs/docs_en/get_start/installation.rst)
 - Quick Start
-    - [Command Line](./docs/docs_en/quick_experience/cmd_quick_run_en.md)
-    - [Python API](./docs/docs_en/quick_experience/python_use_hub_en.md)
-    - [More Demos](./docs/docs_en/quick_experience/more_demos_en.md)
+    - [Python API](./docs/docs_en/get_start/python_use_hub.rst)
+    - [More Demos](./docs/docs_en/community/more_demos.md)
 - Rich Pre-trained Models 300
     - [Boutique Featured Models](./docs/docs_en/figures_en.md)
     - Computer Vision 161
