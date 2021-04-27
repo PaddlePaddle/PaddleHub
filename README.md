@@ -320,4 +320,4 @@ We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 * Many thanks to [livingbody](https://github.com/livingbody)，Contributed models for style transfer based on PaddleHub's capabilities and Mid-Autumn Festival WeChat Mini Program
 * Many thanks to [BurrowsWang](https://github.com/BurrowsWang) for fixing Markdown table display problem
 * Many thanks to [huqi](https://github.com/hu-qi) for fixing readme typo
-* Many thanks to @[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic) for contributing this feature in PaddleHub
+* Many thanks to [parano](https://github.com/parano) [cqvu](https://github.com/cqvu) [deehrlic](https://github.com/deehrlic) for contributing this feature in PaddleHub
