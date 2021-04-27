@@ -11,7 +11,7 @@ if __name__ == '__main__':
                            T.RGB2LAB()], to_rgb=True)
 
     color_set = Canvas(transform=transform, mode='train')
-    model = hub.Module(name='user_guided_colorization', load_checkpoint='/PATH/TO/CHECKPOINT')
+    model = hub.Module(name='user_guided_colorization')
 
     model.set_config(classification=True, prob=1)
     optimizer = paddle.optimizer.Adam(learning_rate=0.0001, parameters=model.parameters())
@@ -20,5 +20,5 @@ if __name__ == '__main__':
 
     model.set_config(classification=False, prob=0.125)
     optimizer = paddle.optimizer.Adam(learning_rate=0.00001, parameters=model.parameters())
-    trainer = Trainer(model, optimizer, checkpoint_dir='img_colorization_ckpt_reg_1', use_gpu=True)
+    trainer = Trainer(model, optimizer, checkpoint_dir='img_colorization_ckpt_reg_1')
     trainer.train(color_set, epochs=101, batch_size=25, log_interval=10, save_interval=10)

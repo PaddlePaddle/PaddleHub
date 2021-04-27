@@ -31,7 +31,7 @@ import paddlehub.vision.transforms as T
 import paddlehub.vision.functional as Func
 from paddlehub.vision import utils
 from paddlehub.module.module import serving, RunModule, runnable
-from paddlehub.utils.utils import base64_to_cv2, cv2_to_base64
+from paddlehub.utils.utils import base64_to_cv2, cv2_to_base64, Version
 
 
 class ImageServing(object):
@@ -203,7 +203,7 @@ class ImageColorizeModule(RunModule, ImageServing):
         Returns:
             results(dict) : The model outputs, such as metrics.
         '''
-        if paddle.__version__.split('.')[0] == '2' and int(paddle.__version__.split('.')[1]) > 0:
+        if Version(paddle.__version__) >= '2.1':
             img = self.preprocess(batch)
         else:
             img = self.preprocess(batch[0])
