@@ -19,16 +19,17 @@ import numpy as np
 import paddle
 import paddle.nn as nn
 from paddlehub.module.module import moduleinfo, serving
-from paddlehub.utils.utils import post_process_response, get_in_turn_repetition, select_response
 from paddlenlp.data import Pad
 from paddlenlp.transformers import UnifiedTransformerLMHeadModel, UnifiedTransformerTokenizer
+
+from unified_transformer_12L_cn.utils import post_process_response, get_in_turn_repetition, select_response
 
 
 @moduleinfo(
     name="unified_transformer_12L_cn",
     version="1.0.0",
     summary="",
-    author="Baidu",
+    author="PaddlePaddle",
     author_email="",
     type="nlp/text_generation",
 )
@@ -49,10 +50,11 @@ class UnifiedTransformer(nn.Layer):
                                               max_seq_len=max_seq_len,
                                               add_start_token_as_response=True)
 
-    def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int, padding: bool = False):
+    def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int):
         """
         Generate input batches.
         """
+        padding = False if batch_size == 1 else True
         pad_func = Pad(pad_val=self.tokenizer.pad_token_id, pad_right=False)
 
         def pad_mask(batch_attention_mask):
@@ -122,7 +124,7 @@ class UnifiedTransformer(nn.Layer):
                 num_beams=0,
                 length_penalty=1.0,
                 early_stopping=False,
-                num_return_sequences=5):
+                num_return_sequences=1):
 
         ids, scores = self.model.generate(input_ids=input_ids,
                                           token_type_ids=token_type_ids,
@@ -146,9 +148,7 @@ class UnifiedTransformer(nn.Layer):
                 data: Union[List[List[str]], str],
                 max_seq_len: int = 512,
                 batch_size: int = 1,
-                num_samples: int = 5,
                 use_gpu: bool = False,
-                is_cn: bool = True,
                 **kwargs):
 
         if self._interactive_mode:
@@ -168,13 +168,10 @@ class UnifiedTransformer(nn.Layer):
         self.eval()
         for batch in batches:
             input_ids, token_type_ids, position_ids, attention_mask = map(paddle.to_tensor, batch)
-            ids, scores = self(input_ids,
-                               token_type_ids,
-                               position_ids,
-                               attention_mask,
-                               num_return_sequences=num_samples,
-                               **kwargs)
-            results.extend(select_response(ids, scores, self.tokenizer, num_samples=num_samples, is_cn=is_cn))
+            ids, scores = self(input_ids, token_type_ids, position_ids, attention_mask, **kwargs)
+            num_samples = 1 if 'num_return_sequences' not in kwargs\
+                else kwargs['num_return_sequences']
+            results.extend(select_response(ids, scores, self.tokenizer, num_samples=num_samples, is_cn=True))
 
         if self._interactive_mode:
             self.context.append(results[0].strip())
