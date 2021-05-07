@@ -1,5 +1,5 @@
 ```shell
-$ hub install unified_transformer_12L_cn==1.0.0
+$ hub install plato_mini==1.0.0
 ```
 
 ## 概述
@@ -8,7 +8,7 @@ $ hub install unified_transformer_12L_cn==1.0.0
 
 [UnifiedTransformer](https://arxiv.org/abs/2006.16779)以[Transformer](https://arxiv.org/abs/1706.03762) 编码器为网络基本组件，采用灵活的注意力机制，十分适合文本生成任务，并在模型输入中加入了标识不同对话技能的special token，使得模型能同时支持闲聊对话、推荐对话和知识对话。
 
-unified_transformer_12L_cn包含12层的transformer结构，头数为12，隐藏层参数为768，参数量为132M。该预训练模型使用了样本量为60M的文本数据和20M的对话数据的大型中文对话数据集进行预训练，具体训练详情可以查看[LUGE-Dialogue](https://github.com/PaddlePaddle/Knover/tree/luge-dialogue/luge-dialogue)。
+plato_mini包含6层的transformer结构，头数为12，隐藏层参数为768，参数量为89M。该模型在十亿级别的中文对话数据上进行预训练，通过PaddleHub加载后可直接用于对话任务。
 
 ## API
 
@@ -46,7 +46,7 @@ def interactive_mode(max_turn=3)
 # 非交互模式
 import paddlehub as hub
 
-model = hub.Module(name='unified_transformer_12L_cn')
+model = hub.Module(name='plato_mini')
 data = [["你是谁？"], ["你好啊。", "吃饭了吗？",]]
 result = model.predict(data)
 ```
@@ -55,7 +55,7 @@ result = model.predict(data)
 # 交互模式
 import paddlehub as hub
 
-model = hub.Module(name='unified_transformer_12L_cn')
+model = hub.Module(name='plato_mini')
 with model.interactive_mode(max_turn=3):
     while True:
         human_utterance = input("[Human]: ").strip()
@@ -72,7 +72,7 @@ PaddleHub Serving可以部署在线服务。
 运行启动命令：
 
 ```shell
-$ hub serving start -m unified_transformer_12L_cn
+$ hub serving start -m plato_mini
 ```
 
 这样就完成了一个对话机器人服务化API的部署，默认端口号为8866。
@@ -90,7 +90,7 @@ import json
 texts = [["今天是个好日子"], ["天气预报说今天要下雨"]]
 data = {"data": texts}
 # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
-url = "http://127.0.0.1:8866/predict/unified_transformer_12L_cn"
+url = "http://127.0.0.1:8866/predict/plato_mini"
 # 指定post请求的headers为application/json方式
 headers = {"Content-Type": "application/json"}
 

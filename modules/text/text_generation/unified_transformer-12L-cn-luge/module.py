@@ -1,4 +1,4 @@
-# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import contextlib
+from collections import deque
 from typing import List, Union
 
 import numpy as np
@@ -22,7 +23,7 @@ from paddlehub.module.module import moduleinfo, serving
 from paddlenlp.data import Pad
 from paddlenlp.transformers import UnifiedTransformerLMHeadModel, UnifiedTransformerTokenizer
 
-from unified_transformer_12L_cn_luge.utils import post_process_response, get_in_turn_repetition, select_response
+from unified_transformer_12L_cn_luge.utils import select_response
 
 
 @moduleinfo(
@@ -46,9 +47,9 @@ class UnifiedTransformer(nn.Layer):
         Convert input strings to tokens.
         """
         return self.tokenizer.dialogue_encode(texts,
-                                              task_type='chitchat',
                                               max_seq_len=max_seq_len,
-                                              add_start_token_as_response=True)
+                                              add_start_token_as_response=True,
+                                              is_split_into_words=False)
 
     def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int):
         """
@@ -105,9 +106,9 @@ class UnifiedTransformer(nn.Layer):
         """
         self._interactive_mode = True
         self.max_turn = max_turn
-        self.context = []
+        self.context = deque(maxlen=self.max_turn)
         yield
-        self.context = []
+        self.context.clear()
         self._interactive_mode = False
 
     def forward(self,
@@ -154,7 +155,7 @@ class UnifiedTransformer(nn.Layer):
         if self._interactive_mode:
             if isinstance(data, str):
                 self.context.append(data.strip())
-                data = [self.context[-self.max_turn:]]
+                data = [list(self.context)]
             else:
                 raise ValueError("In the interactive mode, the input data should be a string.")
         elif not isinstance(data, list):
@@ -169,9 +170,14 @@ class UnifiedTransformer(nn.Layer):
         for batch in batches:
             input_ids, token_type_ids, position_ids, attention_mask = map(paddle.to_tensor, batch)
             ids, scores = self(input_ids, token_type_ids, position_ids, attention_mask, **kwargs)
-            num_samples = 1 if 'num_return_sequences' not in kwargs\
+            num_return_sequences = 1 if 'num_return_sequences' not in kwargs\
                 else kwargs['num_return_sequences']
-            results.extend(select_response(ids, scores, self.tokenizer, num_samples=num_samples, is_cn=True))
+            results.extend(
+                select_response(ids,
+                                scores,
+                                self.tokenizer,
+                                num_return_sequences=num_return_sequences,
+                                keep_space=False))
 
         if self._interactive_mode:
             self.context.append(results[0].strip())

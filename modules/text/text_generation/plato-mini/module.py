@@ -23,11 +23,11 @@ from paddlehub.module.module import moduleinfo, serving
 from paddlenlp.data import Pad
 from paddlenlp.transformers import UnifiedTransformerLMHeadModel, UnifiedTransformerTokenizer
 
-from unified_transformer_12L_cn.utils import select_response
+from plato_mini.utils import select_response
 
 
 @moduleinfo(
-    name="unified_transformer_12L_cn",
+    name="plato-mini",
     version="1.0.0",
     summary="",
     author="PaddlePaddle",
@@ -38,8 +38,8 @@ class UnifiedTransformer(nn.Layer):
     def __init__(self):
         super(UnifiedTransformer, self).__init__()
 
-        self.model = UnifiedTransformerLMHeadModel.from_pretrained('unified_transformer-12L-cn')
-        self.tokenizer = UnifiedTransformerTokenizer.from_pretrained('unified_transformer-12L-cn')
+        self.model = UnifiedTransformerLMHeadModel.from_pretrained('plato-mini')
+        self.tokenizer = UnifiedTransformerTokenizer.from_pretrained('plato-mini')
         self._interactive_mode = False
 
     def _convert_text_to_input(self, texts: List[str], max_seq_len: int):

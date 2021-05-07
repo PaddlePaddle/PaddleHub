@@ -8,7 +8,7 @@ $ hub install unified_transformer_12L_cn_luge==1.0.0
 
 [UnifiedTransformer](https://arxiv.org/abs/2006.16779)以[Transformer](https://arxiv.org/abs/1706.03762) 编码器为网络基本组件，采用灵活的注意力机制，十分适合文本生成任务，并在模型输入中加入了标识不同对话技能的special token，使得模型能同时支持闲聊对话、推荐对话和知识对话。
 
-unified_transformer_12L_cn_luge包含12层的transformer结构，头数为12，隐藏层参数为1024，参数量为132M。该预训练模型使用了样本量为60M的文本数据和20M的对话数据的大型中文对话数据集进行预训练，然后在luge-dialogue的训练集合上进行finetune，具体训练详情可以查看[LUGE-Dialogue](https://github.com/PaddlePaddle/Knover/tree/luge-dialogue/luge-dialogue)。
+unified_transformer_12L_cn_luge包含12层的transformer结构，头数为12，隐藏层参数为768，参数量为132M。该预训练模型使用了样本量为60M的文本数据和20M的对话数据的大型中文对话数据集进行预训练，然后在luge-dialogue的训练集合上进行finetune，具体训练详情可以查看[LUGE-Dialogue](https://github.com/PaddlePaddle/Knover/tree/luge-dialogue/luge-dialogue)。
 
 ## API
 
