@@ -1,5 +1,5 @@
 ```shell
-$ hub install wmt_en-de==1.0.0
+$ hub install transformer_en-de==1.0.0
 ```
 
 ## 概述
