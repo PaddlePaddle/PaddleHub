@@ -22,7 +22,7 @@ from paddlehub.module.module import moduleinfo, serving
 from paddlenlp.data import Pad, Vocab
 from paddlenlp.transformers import InferTransformerModel, position_encoding_init
 
-from utils import MTTokenizer, post_process_seq
+from transformer_en_de.utils import MTTokenizer, post_process_seq
 
 
 @moduleinfo(
