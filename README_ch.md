@@ -21,7 +21,7 @@
     <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers"><img src="https://img.shields.io/github/stars/PaddlePaddle/PaddleHub?color=ccf"></a>
 </p>
 
-### | [**快速开始**](#极简快速开始) |  [**教程文档**](https://paddlehub.readthedocs.io/zh_CN/release-v2.1/) | [**模型搜索**](https://www.paddlepaddle.org.cn/hublist) |  [**演示Demo**](https://www.paddlepaddle.org.cn/hub) |
+### | [**快速开始**](#快速开始) |  [**教程文档**](https://paddlehub.readthedocs.io/zh_CN/release-v2.1/) | [**模型搜索**](https://www.paddlepaddle.org.cn/hublist) |  [**演示Demo**](https://www.paddlepaddle.org.cn/hub) |
 
 
 ## 简介与特性
