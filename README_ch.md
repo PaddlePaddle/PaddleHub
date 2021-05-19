@@ -54,7 +54,7 @@
 
 ### **文本类（129个）**
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "140" />
+<img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "240" />
 </div>
 
 - 感谢CopyRight@[ERNIE](https://github.com/PaddlePaddle/ERNIE)、[LAC](https://github.com/baidu/LAC)、[DDParser](https://github.com/baidu/DDParser)提供相关预训练模型，训练能力开放，欢迎体验。
