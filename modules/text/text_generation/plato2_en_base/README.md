@@ -140,9 +140,9 @@ https://github.com/PaddlePaddle/Knover
 
 ### 依赖
 
-paddlepaddle >= 1.8.2
+1.8.2 <= paddlepaddle < 2.0.0
 
-paddlehub >= 1.7.0
+1.7.0 <= paddlehub < 2.0.0
 
 
 ## 更新历史
