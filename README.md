@@ -1,9 +1,10 @@
 English | [简体中文](README_ch.md)
 
 <p align="center">
- <img src="./docs/imgs/paddlehub_logo.jpg" align="middle"
-</p>
-
+ <img src="./docs/imgs/paddlehub_logo.jpg" align="middle">
+  <h3> <a href=#QuickStart> QuickStart </a> | <a href="https://paddlehub.readthedocs.io/en/release-v2.1"> Tutorial </a> | <a href="https://www.paddlepaddle.org.cn/hublist"> Models List </a> | <a href="https://www.paddlepaddle.org.cn/hub"> Demos </a> </h3>
+  </h3>
+</div>
 
 ------------------------------------------------------------------------------------------
 
@@ -22,7 +23,7 @@ English | [简体中文](README_ch.md)
     <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers"><img src="https://img.shields.io/github/stars/PaddlePaddle/PaddleHub?color=ccf"></a>
 </p>
 
-### | [**QuickStart**](#QuickStart) |  [**Tutorials**](https://paddlehub.readthedocs.io/en/release-v2.1/) | [**Models List**](https://www.paddlepaddle.org.cn/hublist) |  [**Demos**](https://www.paddlepaddle.org.cn/hub) |
+
 
 ## Introduction and Features
 - PaddleHub aims to provide developers with rich, high-quality, and directly usable pre-trained models.
@@ -117,6 +118,7 @@ If you have any questions during the use of the model, you can join the official
 </div>  
 If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the operating class will invite you to join the group.
 
+<a name="QuickStart"></a>
 ## QuickStart
 
 ```python
