@@ -2,7 +2,9 @@
 
 <p align="center">
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle">
-  <h3> <a href=#QuickStart> 快速开始 </a> | <a href="https://paddlehub.readthedocs.io/zh_CN/release-v2.1//"> 教程文档 </a> | <a href="https://www.paddlepaddle.org.cn/hublist/"> 模型搜索 </a> | <a href="https://www.paddlepaddle.org.cn/hub/"> 演示Demo </a> </h3>
+<p align="center">
+<div align="center">  
+  <h3> <a href=#QuickStart> 快速开始 </a> | <a href="https://paddlehub.readthedocs.io/zh_CN/release-v2.1//"> 教程文档 </a> | <a href="https://www.paddlepaddle.org.cn/hublist/"> 模型搜索 </a> | <a href="https://www.paddlepaddle.org.cn/hub/"> 演示Demo </a>
   </h3>
 </div>
 

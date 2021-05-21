@@ -2,8 +2,9 @@ English | [简体中文](README_ch.md)
 
 <p align="center">
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle">
+<p align="center">
+<div align="center">  
   <h3> <a href=#QuickStart> QuickStart </a> | <a href="https://paddlehub.readthedocs.io/en/release-v2.1"> Tutorial </a> | <a href="https://www.paddlepaddle.org.cn/hublist"> Models List </a> | <a href="https://www.paddlepaddle.org.cn/hub"> Demos </a> </h3>
-  </h3>
 </div>
 
 ------------------------------------------------------------------------------------------
