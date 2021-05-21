@@ -123,7 +123,11 @@
 </div>  
 如扫码失败，请添加微信15704308458，并备注“Hub”，运营同学会邀请您入群。  
 
-## QuickStart
+<div id="QuickStart">
+ 
+## 快速开始
+ 
+</div>
 
 ```python
 !pip install --upgrade paddlepaddle -i https://mirror.baidu.com/pypi/simple
