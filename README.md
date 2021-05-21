@@ -54,7 +54,7 @@ English | [简体中文](README_ch.md)
 
 ### **Natural Language Processing (129 models)**
 <div align="center">
-<img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "140" />
+<img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "240" />
 </div>
 
 - Many thanks to CopyRight@[ERNIE](https://github.com/PaddlePaddle/ERNIE)、[LAC](https://github.com/baidu/LAC)、[DDParser](https://github.com/baidu/DDParser)for the pre-trained models, you can try to train your models with them.
