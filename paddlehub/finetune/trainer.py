@@ -299,7 +299,7 @@ class Trainer(object):
             sum_metrics = defaultdict(int)
             avg_metrics = defaultdict(int)
 
-            with logger.processing('Evaluation on validation dataset'):
+            with logger.processing('Evaluation on validation dataset\n'):
                 for batch_idx, batch in enumerate(loader):
                     result = self.validation_step(batch, batch_idx)
                     
