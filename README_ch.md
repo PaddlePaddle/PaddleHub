@@ -49,6 +49,7 @@
 ## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)**
 
 ### **图像类（161个）**
+- 包括关键点检测、人像分割、人脸检测、文本识别、图像动漫化等
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_all.gif"  width = "530" height = "400" />
 </div>
@@ -57,6 +58,7 @@
 
 
 ### **文本类（129个）**
+- 包括词法分析、句法分析、情绪识别、文本审核、对联/情话生成、对话模型等
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "240" />
 </div>
