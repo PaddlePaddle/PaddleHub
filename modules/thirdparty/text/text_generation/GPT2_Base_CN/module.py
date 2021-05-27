@@ -38,18 +38,15 @@ class GPT2_Base_CN(nn.Layer):
 
             # 初始预测
             ids = self.tokenizer.encode(text)
-            input_id = paddle.to_tensor(
-                np.array(ids).reshape(1, -1).astype('int64'))
+            input_id = paddle.to_tensor(np.array(ids).reshape(1, -1).astype('int64'))
             output, cached_kvs = self.model(input_id, use_cache=True)
             next_token = int(np.argmax(output[0, -1].numpy()))
             ids.append(next_token)
 
             # 使用缓存进行继续预测
-            for i in range(max_len-1):
-                input_id = paddle.to_tensor(
-                    np.array([next_token]).reshape(1, -1).astype('int64'))
-                output, cached_kvs = self.model(
-                    input_id, use_cache=True, cache=cached_kvs)
+            for i in range(max_len - 1):
+                input_id = paddle.to_tensor(np.array([next_token]).reshape(1, -1).astype('int64'))
+                output, cached_kvs = self.model(input_id, use_cache=True, cache=cached_kvs)
                 next_token = int(np.argmax(output[0, -1].numpy()))
                 ids.append(next_token)
 
@@ -79,14 +76,12 @@ class GPT2_Base_CN(nn.Layer):
         if top_p < 1.0:
             sorted_logits = paddle.sort(logits, descending=True)
             sorted_indices = paddle.argsort(logits, descending=True).numpy()
-            cumulative_probs = paddle.cumsum(paddle.nn.functional.softmax(
-                sorted_logits, axis=-1), axis=-1).numpy()
+            cumulative_probs = paddle.cumsum(paddle.nn.functional.softmax(sorted_logits, axis=-1), axis=-1).numpy()
 
             # Remove tokens with cumulative probability above the threshold
             sorted_indices_to_remove = cumulative_probs > top_p
             # Shift the indices to the right to keep also the first token above the threshold
-            sorted_indices_to_remove[...,
-                                     1:] = sorted_indices_to_remove[..., :-1]
+            sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1]
             sorted_indices_to_remove[..., 0] = 0
 
             indices_to_remove = sorted_indices[sorted_indices_to_remove]
@@ -94,7 +89,14 @@ class GPT2_Base_CN(nn.Layer):
 
         return paddle.to_tensor(logits_np)
 
-    def nucleus_sample(self, text, max_len=32, end_word=None, repitition_penalty=1.0, temperature=1.0, top_k=0, top_p=1.0):
+    def nucleus_sample(self,
+                       text,
+                       max_len=32,
+                       end_word=None,
+                       repitition_penalty=1.0,
+                       temperature=1.0,
+                       top_k=0,
+                       top_p=1.0):
         with paddle.no_grad():
             # 终止标志
             if end_word is not None:
@@ -103,33 +105,28 @@ class GPT2_Base_CN(nn.Layer):
 
             # 初始预测
             ids = self.tokenizer.encode(text)
-            input_id = paddle.to_tensor(
-                np.array(ids).reshape(1, -1).astype('int64'))
+            input_id = paddle.to_tensor(np.array(ids).reshape(1, -1).astype('int64'))
             output, cached_kvs = self.model(input_id, use_cache=True)
             next_token_logits = output[0, -1, :]
             for id in set(ids):
                 next_token_logits[id] /= repitition_penalty
             next_token_logits = next_token_logits / temperature
-            filtered_logits = self.top_k_top_p_filtering(
-                next_token_logits, top_k=top_k, top_p=top_p)
-            next_token = paddle.multinomial(paddle.nn.functional.softmax(
-                filtered_logits, axis=-1), num_samples=1).numpy()
+            filtered_logits = self.top_k_top_p_filtering(next_token_logits, top_k=top_k, top_p=top_p)
+            next_token = paddle.multinomial(
+                paddle.nn.functional.softmax(filtered_logits, axis=-1), num_samples=1).numpy()
             ids += [int(next_token)]
 
             # 使用缓存进行继续预测
-            for i in range(max_len-1):
-                input_id = paddle.to_tensor(
-                    np.array([next_token]).reshape(1, -1).astype('int64'))
-                output, cached_kvs = self.model(
-                    input_id, use_cache=True, cache=cached_kvs)
+            for i in range(max_len - 1):
+                input_id = paddle.to_tensor(np.array([next_token]).reshape(1, -1).astype('int64'))
+                output, cached_kvs = self.model(input_id, use_cache=True, cache=cached_kvs)
                 next_token_logits = output[0, -1, :]
                 for id in set(ids):
                     next_token_logits[id] /= repitition_penalty
                 next_token_logits = next_token_logits / temperature
-                filtered_logits = self.top_k_top_p_filtering(
-                    next_token_logits, top_k=top_k, top_p=top_p)
-                next_token = paddle.multinomial(paddle.nn.functional.softmax(
-                    filtered_logits, axis=-1), num_samples=1).numpy()
+                filtered_logits = self.top_k_top_p_filtering(next_token_logits, top_k=top_k, top_p=top_p)
+                next_token = paddle.multinomial(
+                    paddle.nn.functional.softmax(filtered_logits, axis=-1), num_samples=1).numpy()
                 ids += [int(next_token)]
 
                 # 根据终止标志停止预测

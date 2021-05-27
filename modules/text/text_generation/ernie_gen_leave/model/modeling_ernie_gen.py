@@ -24,25 +24,18 @@ class ErnieModelForGeneration(ErnieModel):
         cfg['return_additional_info'] = True
         cfg['has_pooler'] = False
         super(ErnieModelForGeneration, self).__init__(cfg, name=name)
-        initializer = F.initializer.TruncatedNormal(
-            scale=cfg['initializer_range'])
+        initializer = F.initializer.TruncatedNormal(scale=cfg['initializer_range'])
         d_model = cfg['hidden_size']
         d_vocab = cfg['vocab_size']
 
         self.mlm = _build_linear(
-            d_model,
-            d_model,
-            append_name(name, 'mask_lm_trans_fc'),
-            initializer,
-            act=cfg['hidden_act'])
-        self.mlm_ln = _build_ln(
-            d_model, name=append_name(name, 'mask_lm_trans'))
+            d_model, d_model, append_name(name, 'mask_lm_trans_fc'), initializer, act=cfg['hidden_act'])
+        self.mlm_ln = _build_ln(d_model, name=append_name(name, 'mask_lm_trans'))
         self.mlm_bias = L.create_parameter(
             dtype='float32',
             shape=[d_vocab],
             attr=F.ParamAttr(
-                name=append_name(name, 'mask_lm_out_fc.b_0'),
-                initializer=F.initializer.Constant(value=0.0)),
+                name=append_name(name, 'mask_lm_out_fc.b_0'), initializer=F.initializer.Constant(value=0.0)),
             is_bias=True,
         )
 
@@ -56,23 +49,17 @@ class ErnieModelForGeneration(ErnieModel):
         elif tgt_labels is None:
             encoded = self.mlm(encoded)
             encoded = self.mlm_ln(encoded)
-            logits = L.matmul(
-                encoded, self.word_emb.weight, transpose_y=True) + self.mlm_bias
+            logits = L.matmul(encoded, self.word_emb.weight, transpose_y=True) + self.mlm_bias
             output_ids = L.argmax(logits, -1)
             return output_ids, logits, info
         else:
             encoded_2d = L.gather_nd(encoded, tgt_pos)
             encoded_2d = self.mlm(encoded_2d)
             encoded_2d = self.mlm_ln(encoded_2d)
-            logits_2d = L.matmul(
-                encoded_2d, self.word_emb.weight,
-                transpose_y=True) + self.mlm_bias
+            logits_2d = L.matmul(encoded_2d, self.word_emb.weight, transpose_y=True) + self.mlm_bias
             if len(tgt_labels.shape) == 1:
                 tgt_labels = L.reshape(tgt_labels, [-1, 1])
 
             loss = L.reduce_mean(
-                L.softmax_with_cross_entropy(
-                    logits_2d,
-                    tgt_labels,
-                    soft_label=(tgt_labels.shape[-1] != 1)))
+                L.softmax_with_cross_entropy(logits_2d, tgt_labels, soft_label=(tgt_labels.shape[-1] != 1)))
             return loss, logits_2d, info

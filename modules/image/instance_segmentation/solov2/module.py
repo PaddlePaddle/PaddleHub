@@ -33,20 +33,16 @@ class Detector(object):
         threshold (float): threshold to reserve the result for output.
     """
 
-    def __init__(self,
-                 min_subgraph_size: int = 60,
-                 use_gpu=False,
-                 threshold: float = 0.5):
+    def __init__(self, min_subgraph_size: int = 60, use_gpu=False, threshold: float = 0.5):
 
         model_dir = os.path.join(self.directory, 'solov2_r50_fpn_1x')
-        self.predictor = D.load_predictor(
-            model_dir,
-            min_subgraph_size=min_subgraph_size,
-            use_gpu=use_gpu)
-        self.compose = [P.Resize(max_size=1333),
-                        P.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                        P.Permute(),
-                        P.PadStride(stride=32)]
+        self.predictor = D.load_predictor(model_dir, min_subgraph_size=min_subgraph_size, use_gpu=use_gpu)
+        self.compose = [
+            P.Resize(max_size=1333),
+            P.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            P.Permute(),
+            P.PadStride(stride=32)
+        ]
 
     def transform(self, im: Union[str, np.ndarray]):
         im, im_info = P.preprocess(im, self.compose)
@@ -61,17 +57,14 @@ class Detector(object):
         for box in np_boxes:
             print('class_id:{:d}, confidence:{:.4f},'
                   'left_top:[{:.2f},{:.2f}],'
-                  ' right_bottom:[{:.2f},{:.2f}]'.format(
-                int(box[0]), box[1], box[2], box[3], box[4], box[5]))
+                  ' right_bottom:[{:.2f},{:.2f}]'.format(int(box[0]), box[1], box[2], box[3], box[4], box[5]))
         results['boxes'] = np_boxes
         if np_masks is not None:
             np_masks = np_masks[expect_boxes, :, :, :]
             results['masks'] = np_masks
         return results
 
-    def predict(self,
-                image: Union[str, np.ndarray],
-                threshold: float = 0.5):
+    def predict(self, image: Union[str, np.ndarray], threshold: float = 0.5):
         '''
         Args:
             image (str/np.ndarray): path of image/ np.ndarray read by cv2
@@ -117,12 +110,9 @@ class DetectorSOLOv2(Detector):
         use_gpu (bool): whether use gpu
         threshold (float): threshold to reserve the result for output.
     """
-    def __init__(self,
-                 use_gpu: bool = False,
-                 threshold: float = 0.5):
-        super(DetectorSOLOv2, self).__init__(
-            use_gpu=use_gpu,
-            threshold=threshold)
+
+    def __init__(self, use_gpu: bool = False, threshold: float = 0.5):
+        super(DetectorSOLOv2, self).__init__(use_gpu=use_gpu, threshold=threshold)
 
     def predict(self,
                 image: Union[str, np.ndarray],
@@ -135,7 +125,7 @@ class DetectorSOLOv2(Detector):
             threshold (float): threshold of predicted box' score
             visualization (bool): Whether to save visualization result.
             save_dir (str): save path.
-        
+
         '''
 
         inputs, im_info = self.transform(image)
@@ -148,14 +138,11 @@ class DetectorSOLOv2(Detector):
 
         self.predictor.zero_copy_run()
         output_names = self.predictor.get_output_names()
-        np_label = self.predictor.get_output_tensor(output_names[
-                                                        0]).copy_to_cpu()
-        np_score = self.predictor.get_output_tensor(output_names[
-                                                        1]).copy_to_cpu()
-        np_segms = self.predictor.get_output_tensor(output_names[
-                                                        2]).copy_to_cpu()
+        np_label = self.predictor.get_output_tensor(output_names[0]).copy_to_cpu()
+        np_score = self.predictor.get_output_tensor(output_names[1]).copy_to_cpu()
+        np_segms = self.predictor.get_output_tensor(output_names[2]).copy_to_cpu()
         output = dict(segm=np_segms, label=np_label, score=np_score)
-        
+
         if visualization:
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)

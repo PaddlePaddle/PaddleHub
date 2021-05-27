@@ -12,7 +12,6 @@ import paddle.nn as nn
 from paddlex.seg import transforms as T
 from paddlehub.module.module import moduleinfo, runnable, serving
 
-
 METER_SHAPE = 512
 CIRCLE_CENTER = [256, 256]
 CIRCLE_RADIUS = 250
@@ -44,26 +43,28 @@ def cv2_to_base64(image: np.ndarray):
     return base64.b64encode(data.tostring()).decode('utf8')
 
 
-@moduleinfo(name="barometer_reader",
-            type="CV/image_editing",
-            author="paddlepaddle",
-            author_email="",
-            summary="meter_reader implements the detection and automatic reading of traditional mechanical pointer meters based on Meter detection and  pointer segmentation.",
-            version="1.0.0")
+@moduleinfo(
+    name="barometer_reader",
+    type="CV/image_editing",
+    author="paddlepaddle",
+    author_email="",
+    summary=
+    "meter_reader implements the detection and automatic reading of traditional mechanical pointer meters based on Meter detection and  pointer segmentation.",
+    version="1.0.0")
 class BarometerReader(nn.Layer):
     def __init__(self):
         super(BarometerReader, self).__init__()
         self.detector = pdx.load_model(os.path.join(self.directory, 'meter_det_inference_model'))
         self.segmenter = pdx.load_model(os.path.join(self.directory, 'meter_seg_inference_model'))
         self.seg_transform = T.Compose([T.Normalize()])
-        
+
     def read_process(self, label_maps: np.ndarray):
         line_images = self.creat_line_image(label_maps)
         scale_data, pointer_data = self.convert_1d_data(line_images)
         self.scale_mean_filtration(scale_data)
         result = self.get_meter_reader(scale_data, pointer_data)
         return result
-    
+
     def creat_line_image(self, meter_image: np.ndarray):
         line_image = np.zeros((LINE_HEIGHT, LINE_WIDTH), dtype=np.uint8)
         for row in range(LINE_HEIGHT):
@@ -121,8 +122,7 @@ class BarometerReader(nn.Layer):
             if pointer_flag:
                 if pointer_data[i] == 0 and pointer_data[i + 1] == 0:
                     one_pointer_end = i - 1
-                    pointer_location = (
-                        one_pointer_start + one_pointer_end) / 2
+                    pointer_location = (one_pointer_start + one_pointer_end) / 2
                     one_pointer_start = 0
                     one_pointer_end = 0
                     pointer_flag = False
@@ -135,20 +135,19 @@ class BarometerReader(nn.Layer):
                 if scale_location[i] <= pointer_location and pointer_location < scale_location[i + 1]:
                     scales = i + (pointer_location - scale_location[i]) / (
                         scale_location[i + 1] - scale_location[i] + 1e-05) + 1
-            ratio = (pointer_location - scale_location[0]) / (
-                scale_location[scale_num - 1] - scale_location[0] + 1e-05)
+            ratio = (pointer_location - scale_location[0]) / (scale_location[scale_num - 1] - scale_location[0] + 1e-05)
         result = {'scale_num': scale_num, 'scales': scales, 'ratio': ratio}
         return result
-    
-    def predict(self, 
-                im_file: Union[str, np.ndarray], 
-                score_threshold: float = 0.5, 
-                seg_batch_size: int = 2, 
-                erode_kernel: int = 4, 
-                use_erode: bool = True, 
-                visualization: bool = False, 
-                save_dir: str ='output'):
-        
+
+    def predict(self,
+                im_file: Union[str, np.ndarray],
+                score_threshold: float = 0.5,
+                seg_batch_size: int = 2,
+                erode_kernel: int = 4,
+                use_erode: bool = True,
+                visualization: bool = False,
+                save_dir: str = 'output'):
+
         if isinstance(im_file, str):
             im = cv2.imread(im_file).astype('float32')
         else:
@@ -168,21 +167,15 @@ class BarometerReader(nn.Layer):
             xmax = min(im.shape[1], int(xmin + w - 1))
             ymax = min(im.shape[0], int(ymin + h - 1))
             sub_image = im[ymin:(ymax + 1), xmin:(xmax + 1), :]
-            
+
             # Resize the image with shape (METER_SHAPE, METER_SHAPE)
             meter_shape = sub_image.shape
             scale_x = float(METER_SHAPE) / float(meter_shape[1])
             scale_y = float(METER_SHAPE) / float(meter_shape[0])
-            meter_meter = cv2.resize(
-                sub_image,
-                None,
-                None,
-                fx=scale_x,
-                fy=scale_y,
-                interpolation=cv2.INTER_LINEAR)
+            meter_meter = cv2.resize(sub_image, None, None, fx=scale_x, fy=scale_y, interpolation=cv2.INTER_LINEAR)
             meter_meter = meter_meter.astype('float32')
             resized_meters.append(meter_meter)
-            
+
         meter_num = len(resized_meters)
         seg_results = list()
         for i in range(0, meter_num, seg_batch_size):
@@ -190,22 +183,20 @@ class BarometerReader(nn.Layer):
             meter_images = list()
             for j in range(i, im_size):
                 meter_images.append(resized_meters[j - i])
-                
-            result = self.segmenter.batch_predict(
-                transforms=self.seg_transform,
-                img_file_list=meter_images)
+
+            result = self.segmenter.batch_predict(transforms=self.seg_transform, img_file_list=meter_images)
 
             if use_erode:
                 kernel = np.ones((erode_kernel, erode_kernel), np.uint8)
                 for i in range(len(result)):
                     result[i]['label_map'] = cv2.erode(result[i]['label_map'], kernel)
             seg_results.extend(result)
-            
+
         results = list()
         for i, seg_result in enumerate(seg_results):
             result = self.read_process(seg_result['label_map'])
             results.append(result)
-        
+
         meter_values = list()
         for i, result in enumerate(results):
             if result['scale_num'] > TYPE_THRESHOLD:
@@ -222,9 +213,9 @@ class BarometerReader(nn.Layer):
             visual_results.append(res)
         if visualization:
             pdx.det.visualize(im_file, visual_results, -1, save_dir=save_dir)
-            
+
         return visual_results
-    
+
     @serving
     def serving_method(self, image: str, **kwargs):
         """
@@ -239,7 +230,7 @@ class BarometerReader(nn.Layer):
             result['category'] = str(result['category'])
             res.append(result)
         return res
-        
+
     @runnable
     def run_cmd(self, argvs: list):
         """
@@ -250,21 +241,16 @@ class BarometerReader(nn.Layer):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
         results = self.predict(im_file=args.input_path)
         return results
 
-
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")

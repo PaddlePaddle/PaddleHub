@@ -193,8 +193,8 @@ class ResNet50_vd(nn.Layer):
             label_list = []
             label_file = os.path.join(self.directory, 'label_list.txt')
             files = open(label_file)
-            for line in files.readlines():  
-                line=line.strip('\n') 
+            for line in files.readlines():
+                line = line.strip('\n')
                 label_list.append(line)
             self.labels = label_list
             class_dim = len(self.labels)
@@ -246,9 +246,14 @@ class ResNet50_vd(nn.Layer):
             self.model_dict = paddle.load(checkpoint)
             self.set_dict(self.model_dict)
             print("load pretrained checkpoint success")
-            
+
     def transforms(self, images: Union[str, np.ndarray]):
-        transforms = T.Compose([T.Resize((256, 256)), T.CenterCrop(224), T.Normalize(mean=[0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])], to_rgb=True)
+        transforms = T.Compose([
+            T.Resize((256, 256)),
+            T.CenterCrop(224),
+            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ],
+                               to_rgb=True)
         return transforms(images)
 
     def forward(self, inputs: paddle.Tensor):

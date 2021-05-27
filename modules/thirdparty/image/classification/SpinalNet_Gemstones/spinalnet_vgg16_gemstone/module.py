@@ -61,16 +61,9 @@ def make_layers(cfg, batch_norm=False):
 
 cfgs = {
     'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'B':
-    [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'D': [
-        64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512,
-        512, 512, 'M'
-    ],
-    'E': [
-        64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512,
-        'M', 512, 512, 512, 512, 'M'
-    ],
+    'B': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+    'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
+    'E': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
 }
 
 
@@ -86,14 +79,15 @@ def vgg16(batch_norm=False, **kwargs):
     return _vgg(model_name, 'D', batch_norm, **kwargs)
 
 
-@moduleinfo(name="spinalnet_vgg16_gemstone",
-            type="CV/classification",
-            author="nanting03",
-            author_email="975348977@qq.com",
-            summary="spinalnet_vgg16_gemstone is a classification model, "
-            "this module is trained with Gemstone dataset.",
-            version="1.0.0",
-            meta=ImageClassifierModule)
+@moduleinfo(
+    name="spinalnet_vgg16_gemstone",
+    type="CV/classification",
+    author="nanting03",
+    author_email="975348977@qq.com",
+    summary="spinalnet_vgg16_gemstone is a classification model, "
+    "this module is trained with Gemstone dataset.",
+    version="1.0.0",
+    meta=ImageClassifierModule)
 class SpinalNet_VGG16(nn.Layer):
     def __init__(self, label_list: list = None, load_checkpoint: str = None):
         super(SpinalNet_VGG16, self).__init__()
@@ -142,8 +136,7 @@ class SpinalNet_VGG16(nn.Layer):
             nn.BatchNorm1D(layer_width),
             nn.ReLU(),
         )
-        self.fc_out = nn.Sequential(nn.Dropout(p=0.5),
-                                    nn.Linear(layer_width * 4, class_dim))
+        self.fc_out = nn.Sequential(nn.Dropout(p=0.5), nn.Linear(layer_width * 4, class_dim))
 
         if load_checkpoint is not None:
             self.model_dict = paddle.load(load_checkpoint)[0]
@@ -151,8 +144,7 @@ class SpinalNet_VGG16(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(self.directory,
-                                      'spinalnet_vgg16.pdparams')
+            checkpoint = os.path.join(self.directory, 'spinalnet_vgg16.pdparams')
             self.model_dict = paddle.load(checkpoint)
             self.set_dict(self.model_dict)
             print("load pretrained checkpoint success")
@@ -173,14 +165,9 @@ class SpinalNet_VGG16(nn.Layer):
         y = paddle.flatten(y, 1)
 
         y1 = self.fc_spinal_layer1(y[:, 0:self.half_in_size])
-        y2 = self.fc_spinal_layer2(
-            paddle.concat([y[:, self.half_in_size:2 * self.half_in_size], y1],
-                          axis=1))
-        y3 = self.fc_spinal_layer3(
-            paddle.concat([y[:, 0:self.half_in_size], y2], axis=1))
-        y4 = self.fc_spinal_layer4(
-            paddle.concat([y[:, self.half_in_size:2 * self.half_in_size], y3],
-                          axis=1))
+        y2 = self.fc_spinal_layer2(paddle.concat([y[:, self.half_in_size:2 * self.half_in_size], y1], axis=1))
+        y3 = self.fc_spinal_layer3(paddle.concat([y[:, 0:self.half_in_size], y2], axis=1))
+        y4 = self.fc_spinal_layer4(paddle.concat([y[:, self.half_in_size:2 * self.half_in_size], y3], axis=1))
 
         y = paddle.concat([y1, y2, y3, y4], axis=1)
 

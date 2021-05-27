@@ -35,6 +35,7 @@ class DetectCatagory:
         label_ids(List(int)): The dataset label ids.
         category_to_id_map(dict): Mapping relations of category and id for images.
     """
+
     def __init__(self, attrbox: Callable, data_dir: str):
         self.attrbox = attrbox
         self.img_dir = data_dir
@@ -62,6 +63,7 @@ class ParseImages:
     Returns:
         imgs(dict): The input for detection model, it is a dict.
     """
+
     def __init__(self, attrbox: Callable, data_dir: str, category_to_id_map: dict):
         self.attrbox = attrbox
         self.img_dir = data_dir
@@ -94,6 +96,7 @@ class GTAnotations:
     Returns:
         img(dict): Set specific value on the attributes of 'gt boxes' and 'gt labels' for input.
     """
+
     def __init__(self, attrbox: Callable, category_to_id_map: dict):
         self.attrbox = attrbox
         self.category_to_id_map = category_to_id_map
@@ -154,6 +157,7 @@ class DetectionData(paddle.io.Dataset):
     Returns:
         DataSet: An iterable object for data iterating
     """
+
     def __init__(self, transform: Callable, size: int = 416, mode: str = 'train'):
         self.mode = mode
         self.transform = transform

@@ -31,6 +31,7 @@ class Compose:
         to_rgb(bool): Whether to transform the input from BGR mode to RGB mode, default is False.
         channel_first(bool): whether to permute image from channel laste to channel first
     """
+
     def __init__(self, transforms: Callable, to_rgb: bool = False, channel_first: bool = True):
         if not isinstance(transforms, list):
             raise TypeError('The transforms must be a list!')
@@ -41,7 +42,7 @@ class Compose:
         self.to_rgb = to_rgb
         self.channel_first = channel_first
 
-    def __call__(self, im:  Union[np.ndarray, str]):
+    def __call__(self, im: Union[np.ndarray, str]):
         if isinstance(im, str):
             im = cv2.imread(im).astype('float32')
 
@@ -57,15 +58,19 @@ class Compose:
             im = F.permute(im)
         return im
 
+
 class Permute:
     """
     Repermute the input image from [H, W, C] to [C, H, W].
     """
+
     def __init__(self):
         pass
+
     def __call__(self, im):
         im = F.permute(im)
         return im
+
 
 class RandomHorizontalFlip:
     """
@@ -74,6 +79,7 @@ class RandomHorizontalFlip:
     Args:
         prob(float): The probability for flipping the image horizontally, default is 0.5.
     """
+
     def __init__(self, prob: float = 0.5):
         self.prob = prob
 
@@ -90,6 +96,7 @@ class RandomVerticalFlip:
     Args:
         prob(float): The probability for flipping the image vertically, default is 0.5.
     """
+
     def __init__(self, prob: float = 0.5):
         self.prob = prob
 
@@ -146,6 +153,7 @@ class ResizeByLong:
     Args:
         long_size(int|list[int]): The target size of long side.
     """
+
     def __init__(self, long_size: Union[List[int], int]):
         self.long_size = long_size
 
@@ -162,6 +170,7 @@ class ResizeRangeScaling:
         min_value(int): The minimum value for targeted size.
         max_value(int): The maximum value for targeted size.
     """
+
     def __init__(self, min_value: int = 400, max_value: int = 600):
         if min_value > max_value:
             raise ValueError('min_value must be less than max_value, '
@@ -188,6 +197,7 @@ class ResizeStepScaling:
         scale_step_size(float): Scale interval.
 
     """
+
     def __init__(self, min_scale_factor: float = 0.75, max_scale_factor: float = 1.25, scale_step_size: float = 0.25):
         if min_scale_factor > max_scale_factor:
             raise ValueError('min_scale_factor must be less than max_scale_factor, '
@@ -224,6 +234,7 @@ class Normalize:
         std(list): Standard deviation for normalization.
         channel_first(bool): im channel firest or last
     """
+
     def __init__(self, mean: list = [0.5, 0.5, 0.5], std: list = [0.5, 0.5, 0.5], channel_first: bool = False):
         self.mean = mean
         self.std = std
@@ -253,6 +264,7 @@ class Padding:
         target_size(Union[List[int], Tuple[int], int]): Targeted image size.
         im_padding_value(list): Border value for 3 channels, default is [127.5, 127.5, 127.5].
     """
+
     def __init__(self, target_size: Union[List[int], Tuple[int], int], im_padding_value: list = [127.5, 127.5, 127.5]):
         if isinstance(target_size, list) or isinstance(target_size, tuple):
             if len(target_size) != 2:
@@ -292,6 +304,7 @@ class RandomPaddingCrop:
         crop_size(Union[List[int], Tuple[int], int]): Targeted image size.
         im_padding_value(list): Border value for 3 channels, default is [127.5, 127.5, 127.5].
     """
+
     def __init__(self, crop_size, im_padding_value=[127.5, 127.5, 127.5]):
         if isinstance(crop_size, list) or isinstance(crop_size, tuple):
             if len(crop_size) != 2:
@@ -339,6 +352,7 @@ class RandomBlur:
     Args:
         prob(float): The probability to blur the image, default is 0.1.
     """
+
     def __init__(self, prob: float = 0.1):
         self.prob = prob
 
@@ -370,6 +384,7 @@ class RandomRotation:
         max_rotation(float): Upper bound of rotation angle.
         im_padding_value(list): Border value for 3 channels, default is [127.5, 127.5, 127.5].
     """
+
     def __init__(self, max_rotation: float = 15, im_padding_value: list = [127.5, 127.5, 127.5]):
         self.max_rotation = max_rotation
         self.im_padding_value = im_padding_value
@@ -401,8 +416,6 @@ class RandomRotation:
         return im
 
 
-
-
 class RandomDistort:
     """
     Random adjust brightness, contrast, saturation and hue according to the given random range and probability, respectively.
@@ -418,6 +431,7 @@ class RandomDistort:
         hue_range(float): Boundary of hue.
         hue_prob(float): Probability for disturb the hue of image.
     """
+
     def __init__(self,
                  brightness_range: float = 0.5,
                  brightness_prob: float = 0.5,

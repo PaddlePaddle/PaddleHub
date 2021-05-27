@@ -116,4 +116,3 @@ https://github.com/PaddlePaddle/PaddleDetection
 paddlepaddle >= 2.0.0
 
 paddlehub >= 2.0.0
-

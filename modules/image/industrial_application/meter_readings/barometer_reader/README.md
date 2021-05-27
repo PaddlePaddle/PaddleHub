@@ -12,13 +12,13 @@ $ hub run barometer_reader --input_path "/PATH/TO/IMAGE"
 ## API
 
 ```python
-def predict(self, 
-            im_file: Union[str, np.ndarray], 
-            score_threshold: float = 0.5, 
-            seg_batch_size: int = 2, 
-            erode_kernel: int = 4, 
-            use_erode: bool = True, 
-            visualization: bool = False, 
+def predict(self,
+            im_file: Union[str, np.ndarray],
+            score_threshold: float = 0.5,
+            seg_batch_size: int = 2,
+            erode_kernel: int = 4,
+            use_erode: bool = True,
+            visualization: bool = False,
             save_dir: str ='output'):
 ```
 
@@ -111,5 +111,3 @@ paddlepaddle >= 2.0.0
 paddlehub >= 2.0.0
 
 paddlex >= 1.3.0
-
-

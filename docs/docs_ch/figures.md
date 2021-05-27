@@ -93,6 +93,3 @@ $ hub serving start -m chinese_ocr_db_crnn_mobile
 </p>
 
 * 如需在线快速体验，请点击[PaddleHub教程合集](https://aistudio.baidu.com/aistudio/projectdetail/231146)，可使用AI Studio平台提供的GPU算力进行快速尝试。
-
-
-

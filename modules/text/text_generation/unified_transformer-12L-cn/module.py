@@ -46,10 +46,8 @@ class UnifiedTransformer(nn.Layer):
         """
         Convert input strings to tokens.
         """
-        return self.tokenizer.dialogue_encode(texts,
-                                              max_seq_len=max_seq_len,
-                                              add_start_token_as_response=True,
-                                              is_split_into_words=False)
+        return self.tokenizer.dialogue_encode(
+            texts, max_seq_len=max_seq_len, add_start_token_as_response=True, is_split_into_words=False)
 
     def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int):
         """
@@ -127,20 +125,21 @@ class UnifiedTransformer(nn.Layer):
                 early_stopping=False,
                 num_return_sequences=1):
 
-        ids, scores = self.model.generate(input_ids=input_ids,
-                                          token_type_ids=token_type_ids,
-                                          position_ids=position_ids,
-                                          attention_mask=attention_mask,
-                                          max_length=max_length,
-                                          min_length=min_length,
-                                          decode_strategy=decode_strategy,
-                                          temperature=temperature,
-                                          top_k=top_k,
-                                          top_p=top_p,
-                                          num_beams=num_beams,
-                                          length_penalty=length_penalty,
-                                          early_stopping=early_stopping,
-                                          num_return_sequences=num_return_sequences)
+        ids, scores = self.model.generate(
+            input_ids=input_ids,
+            token_type_ids=token_type_ids,
+            position_ids=position_ids,
+            attention_mask=attention_mask,
+            max_length=max_length,
+            min_length=min_length,
+            decode_strategy=decode_strategy,
+            temperature=temperature,
+            top_k=top_k,
+            top_p=top_p,
+            num_beams=num_beams,
+            length_penalty=length_penalty,
+            early_stopping=early_stopping,
+            num_return_sequences=num_return_sequences)
 
         return ids, scores
 
@@ -173,11 +172,8 @@ class UnifiedTransformer(nn.Layer):
             num_return_sequences = 1 if 'num_return_sequences' not in kwargs\
                 else kwargs['num_return_sequences']
             results.extend(
-                select_response(ids,
-                                scores,
-                                self.tokenizer,
-                                num_return_sequences=num_return_sequences,
-                                keep_space=False))
+                select_response(
+                    ids, scores, self.tokenizer, num_return_sequences=num_return_sequences, keep_space=False))
 
         if self._interactive_mode:
             self.context.append(results[0].strip())

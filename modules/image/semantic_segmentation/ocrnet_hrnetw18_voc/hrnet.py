@@ -51,8 +51,8 @@ class HRNet_W18(nn.Layer):
     def __init__(self,
                  pretrained: str = None,
                  stage1_num_modules: int = 1,
-                 stage1_num_blocks: tuple = (4,),
-                 stage1_num_channels: tuple = (64,),
+                 stage1_num_blocks: tuple = (4, ),
+                 stage1_num_channels: tuple = (64, ),
                  stage2_num_modules: int = 1,
                  stage2_num_blocks: tuple = (4, 4),
                  stage2_num_channels: tuple = (18, 36),
@@ -83,20 +83,10 @@ class HRNet_W18(nn.Layer):
         self.feat_channels = [sum(stage4_num_channels)]
 
         self.conv_layer1_1 = L.ConvBNReLU(
-            in_channels=3,
-            out_channels=64,
-            kernel_size=3,
-            stride=2,
-            padding='same',
-            bias_attr=False)
+            in_channels=3, out_channels=64, kernel_size=3, stride=2, padding='same', bias_attr=False)
 
         self.conv_layer1_2 = L.ConvBNReLU(
-            in_channels=64,
-            out_channels=64,
-            kernel_size=3,
-            stride=2,
-            padding='same',
-            bias_attr=False)
+            in_channels=64, out_channels=64, kernel_size=3, stride=2, padding='same', bias_attr=False)
 
         self.la1 = Layer1(
             num_channels=64,
@@ -106,9 +96,7 @@ class HRNet_W18(nn.Layer):
             name="layer2")
 
         self.tr1 = TransitionLayer(
-            in_channels=[self.stage1_num_channels[0] * 4],
-            out_channels=self.stage2_num_channels,
-            name="tr1")
+            in_channels=[self.stage1_num_channels[0] * 4], out_channels=self.stage2_num_channels, name="tr1")
 
         self.st2 = Stage(
             num_channels=self.stage2_num_channels,
@@ -120,9 +108,7 @@ class HRNet_W18(nn.Layer):
             align_corners=align_corners)
 
         self.tr2 = TransitionLayer(
-            in_channels=self.stage2_num_channels,
-            out_channels=self.stage3_num_channels,
-            name="tr2")
+            in_channels=self.stage2_num_channels, out_channels=self.stage3_num_channels, name="tr2")
         self.st3 = Stage(
             num_channels=self.stage3_num_channels,
             num_modules=self.stage3_num_modules,
@@ -133,9 +119,7 @@ class HRNet_W18(nn.Layer):
             align_corners=align_corners)
 
         self.tr3 = TransitionLayer(
-            in_channels=self.stage3_num_channels,
-            out_channels=self.stage4_num_channels,
-            name="tr3")
+            in_channels=self.stage3_num_channels, out_channels=self.stage4_num_channels, name="tr3")
         self.st4 = Stage(
             num_channels=self.stage4_num_channels,
             num_modules=self.stage4_num_modules,
@@ -161,30 +145,16 @@ class HRNet_W18(nn.Layer):
         st4 = self.st4(tr3)
 
         x0_h, x0_w = st4[0].shape[2:]
-        x1 = F.interpolate(
-            st4[1], (x0_h, x0_w),
-            mode='bilinear',
-            align_corners=self.align_corners)
-        x2 = F.interpolate(
-            st4[2], (x0_h, x0_w),
-            mode='bilinear',
-            align_corners=self.align_corners)
-        x3 = F.interpolate(
-            st4[3], (x0_h, x0_w),
-            mode='bilinear',
-            align_corners=self.align_corners)
+        x1 = F.interpolate(st4[1], (x0_h, x0_w), mode='bilinear', align_corners=self.align_corners)
+        x2 = F.interpolate(st4[2], (x0_h, x0_w), mode='bilinear', align_corners=self.align_corners)
+        x3 = F.interpolate(st4[3], (x0_h, x0_w), mode='bilinear', align_corners=self.align_corners)
         x = paddle.concat([st4[0], x1, x2, x3], axis=1)
 
         return [x]
 
 
 class Layer1(nn.Layer):
-    def __init__(self,
-                 num_channels: int,
-                 num_filters: int,
-                 num_blocks: int,
-                 has_se: bool = False,
-                 name: str = None):
+    def __init__(self, num_channels: int, num_filters: int, num_blocks: int, has_se: bool = False, name: str = None):
         super(Layer1, self).__init__()
 
         self.bottleneck_block_list = []
@@ -253,12 +223,7 @@ class TransitionLayer(nn.Layer):
 
 
 class Branches(nn.Layer):
-    def __init__(self,
-                 num_blocks: int,
-                 in_channels: int,
-                 out_channels: int,
-                 has_se: bool = False,
-                 name: str = None):
+    def __init__(self, num_blocks: int, in_channels: int, out_channels: int, has_se: bool = False, name: str = None):
         super(Branches, self).__init__()
 
         self.basic_block_list = []
@@ -273,8 +238,7 @@ class Branches(nn.Layer):
                         num_channels=in_ch,
                         num_filters=out_channels[i],
                         has_se=has_se,
-                        name=name + '_branch_layer_' + str(i + 1) + '_' +
-                             str(j + 1)))
+                        name=name + '_branch_layer_' + str(i + 1) + '_' + str(j + 1)))
                 self.basic_block_list[i].append(basic_block_func)
 
     def forward(self, x: paddle.Tensor) -> paddle.Tensor:
@@ -301,11 +265,7 @@ class BottleneckBlock(nn.Layer):
         self.downsample = downsample
 
         self.conv1 = L.ConvBNReLU(
-            in_channels=num_channels,
-            out_channels=num_filters,
-            kernel_size=1,
-            padding='same',
-            bias_attr=False)
+            in_channels=num_channels, out_channels=num_filters, kernel_size=1, padding='same', bias_attr=False)
 
         self.conv2 = L.ConvBNReLU(
             in_channels=num_filters,
@@ -316,26 +276,15 @@ class BottleneckBlock(nn.Layer):
             bias_attr=False)
 
         self.conv3 = L.ConvBN(
-            in_channels=num_filters,
-            out_channels=num_filters * 4,
-            kernel_size=1,
-            padding='same',
-            bias_attr=False)
+            in_channels=num_filters, out_channels=num_filters * 4, kernel_size=1, padding='same', bias_attr=False)
 
         if self.downsample:
             self.conv_down = L.ConvBN(
-                in_channels=num_channels,
-                out_channels=num_filters * 4,
-                kernel_size=1,
-                padding='same',
-                bias_attr=False)
+                in_channels=num_channels, out_channels=num_filters * 4, kernel_size=1, padding='same', bias_attr=False)
 
         if self.has_se:
             self.se = SELayer(
-                num_channels=num_filters * 4,
-                num_filters=num_filters * 4,
-                reduction_ratio=16,
-                name=name + '_fc')
+                num_channels=num_filters * 4, num_filters=num_filters * 4, reduction_ratio=16, name=name + '_fc')
 
     def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         residual = x
@@ -375,26 +324,14 @@ class BasicBlock(nn.Layer):
             padding='same',
             bias_attr=False)
         self.conv2 = L.ConvBN(
-            in_channels=num_filters,
-            out_channels=num_filters,
-            kernel_size=3,
-            padding='same',
-            bias_attr=False)
+            in_channels=num_filters, out_channels=num_filters, kernel_size=3, padding='same', bias_attr=False)
 
         if self.downsample:
             self.conv_down = L.ConvBNReLU(
-                in_channels=num_channels,
-                out_channels=num_filters,
-                kernel_size=1,
-                padding='same',
-                bias_attr=False)
+                in_channels=num_channels, out_channels=num_filters, kernel_size=1, padding='same', bias_attr=False)
 
         if self.has_se:
-            self.se = SELayer(
-                num_channels=num_filters,
-                num_filters=num_filters,
-                reduction_ratio=16,
-                name=name + '_fc')
+            self.se = SELayer(num_channels=num_filters, num_filters=num_filters, reduction_ratio=16, name=name + '_fc')
 
     def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         residual = x
@@ -423,17 +360,11 @@ class SELayer(nn.Layer):
         med_ch = int(num_channels / reduction_ratio)
         stdv = 1.0 / math.sqrt(num_channels * 1.0)
         self.squeeze = nn.Linear(
-            num_channels,
-            med_ch,
-            weight_attr=paddle.ParamAttr(
-                initializer=nn.initializer.Uniform(-stdv, stdv)))
+            num_channels, med_ch, weight_attr=paddle.ParamAttr(initializer=nn.initializer.Uniform(-stdv, stdv)))
 
         stdv = 1.0 / math.sqrt(med_ch * 1.0)
         self.excitation = nn.Linear(
-            med_ch,
-            num_filters,
-            weight_attr=paddle.ParamAttr(
-                initializer=nn.initializer.Uniform(-stdv, stdv)))
+            med_ch, num_filters, weight_attr=paddle.ParamAttr(initializer=nn.initializer.Uniform(-stdv, stdv)))
 
     def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         pool = self.pool2d_gap(x)
@@ -442,8 +373,7 @@ class SELayer(nn.Layer):
         squeeze = F.relu(squeeze)
         excitation = self.excitation(squeeze)
         excitation = F.sigmoid(excitation)
-        excitation = paddle.reshape(
-            excitation, shape=[-1, self._num_channels, 1, 1])
+        excitation = paddle.reshape(excitation, shape=[-1, self._num_channels, 1, 1])
         out = x * excitation
         return out
 
@@ -507,11 +437,7 @@ class HighResolutionModule(nn.Layer):
         super(HighResolutionModule, self).__init__()
 
         self.branches_func = Branches(
-            num_blocks=num_blocks,
-            in_channels=num_channels,
-            out_channels=num_filters,
-            has_se=has_se,
-            name=name)
+            num_blocks=num_blocks, in_channels=num_channels, out_channels=num_filters, has_se=has_se, name=name)
 
         self.fuse_func = FuseLayers(
             in_channels=num_filters,
@@ -557,8 +483,7 @@ class FuseLayers(nn.Layer):
                     for k in range(i - j):
                         if k == i - j - 1:
                             residual_func = self.add_sublayer(
-                                "residual_{}_layer_{}_{}_{}".format(
-                                    name, i + 1, j + 1, k + 1),
+                                "residual_{}_layer_{}_{}_{}".format(name, i + 1, j + 1, k + 1),
                                 L.ConvBN(
                                     in_channels=pre_num_filters,
                                     out_channels=out_channels[i],
@@ -569,8 +494,7 @@ class FuseLayers(nn.Layer):
                             pre_num_filters = out_channels[i]
                         else:
                             residual_func = self.add_sublayer(
-                                "residual_{}_layer_{}_{}_{}".format(
-                                    name, i + 1, j + 1, k + 1),
+                                "residual_{}_layer_{}_{}_{}".format(name, i + 1, j + 1, k + 1),
                                 L.ConvBNReLU(
                                     in_channels=pre_num_filters,
                                     out_channels=out_channels[j],
@@ -592,11 +516,7 @@ class FuseLayers(nn.Layer):
                     y = self.residual_func_list[residual_func_idx](x[j])
                     residual_func_idx += 1
 
-                    y = F.interpolate(
-                        y,
-                        residual_shape,
-                        mode='bilinear',
-                        align_corners=self.align_corners)
+                    y = F.interpolate(y, residual_shape, mode='bilinear', align_corners=self.align_corners)
                     residual = residual + y
                 elif j < i:
                     y = x[j]

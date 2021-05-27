@@ -21,7 +21,6 @@ from model import BoWModel
 import ast
 import argparse
 
-
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--hub_embedding_name", type=str, default='w2v_baidu_encyclopedia_target_word-word_dim300', help="")
 parser.add_argument("--num_epoch", type=int, default=10, help="Number of epoches for fine-tuning.")
@@ -30,10 +29,13 @@ parser.add_argument("--max_seq_len", type=int, default=128, help="Number of word
 parser.add_argument("--batch_size", type=int, default=64, help="Total examples' number in batch for training.")
 parser.add_argument("--checkpoint_dir", type=str, default='./checkpoint', help="Directory to model checkpoint")
 parser.add_argument("--save_interval", type=int, default=5, help="Save checkpoint every n epoch.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for fine-tuning, input should be True or False")
+parser.add_argument(
+    "--use_gpu",
+    type=ast.literal_eval,
+    default=True,
+    help="Whether use GPU for fine-tuning, input should be True or False")
 
 args = parser.parse_args()
-
 
 if __name__ == '__main__':
     embedder = hub.Module(name=args.hub_embedding_name)
@@ -44,8 +46,7 @@ if __name__ == '__main__':
     test_dataset = ChnSentiCorp(tokenizer=tokenizer, max_seq_len=args.max_seq_len, mode='test')
 
     model = BoWModel(embedder=embedder)
-    optimizer = paddle.optimizer.AdamW(
-        learning_rate=args.learning_rate, parameters=model.parameters())
+    optimizer = paddle.optimizer.AdamW(learning_rate=args.learning_rate, parameters=model.parameters())
     trainer = hub.Trainer(model, optimizer, checkpoint_dir=args.checkpoint_dir, use_gpu=args.use_gpu)
     trainer.train(
         train_dataset,

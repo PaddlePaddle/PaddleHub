@@ -24,9 +24,7 @@ if __name__ == '__main__':
         '华裔作家韩素音女士曾三次到大足，称“大足石窟是一座未被开发的金矿”。',
     ]
     data = [[split_char.join(text)] for text in text_a]
-    label_map = {
-        idx: label for idx, label in enumerate(label_list)
-    }
+    label_map = {idx: label for idx, label in enumerate(label_list)}
 
     model = hub.Module(
         name='ernie_tiny',
@@ -39,4 +37,3 @@ if __name__ == '__main__':
     results = model.predict(data=data, max_seq_len=128, batch_size=1, use_gpu=True)
     for idx, text in enumerate(text_a):
         print(f'Text:\n{text} \nLable: \n{", ".join(results[idx][1:len(text)+1])} \n')
-

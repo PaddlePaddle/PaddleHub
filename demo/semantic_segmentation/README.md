@@ -56,7 +56,7 @@ trainer = Trainer(model, optimizer, checkpoint_dir='test_ckpt_img_ocr', use_gpu=
 
 * `learning_rate`: 全局学习率。
 *  `parameters`: 待优化模型参数。
- 
+
 #### 运行配置
 `Trainer` 主要控制Fine-tune的训练，包含以下可控制的参数:
 
@@ -159,5 +159,3 @@ https://github.com/PaddlePaddle/PaddleSeg
 paddlepaddle >= 2.0.0
 
 paddlehub >= 2.0.0
-
-

@@ -91,20 +91,22 @@ class ESC50(AudioClassificationDataset):
         else:
             data_file = 'dev.npz'
 
-        feat_cfg = dict(sample_rate=self.sample_rate,
-                        window_size=1024,
-                        hop_size=320,
-                        mel_bins=64,
-                        fmin=50,
-                        fmax=14000,
-                        window='hann')
+        feat_cfg = dict(
+            sample_rate=self.sample_rate,
+            window_size=1024,
+            hop_size=320,
+            mel_bins=64,
+            fmin=50,
+            fmax=14000,
+            window='hann')
 
-        super().__init__(base_path=base_path,
-                         data_file=data_file,
-                         file_type='npz',
-                         mode=mode,
-                         feat_type=feat_type,
-                         feat_cfg=feat_cfg)
+        super().__init__(
+            base_path=base_path,
+            data_file=data_file,
+            file_type='npz',
+            mode=mode,
+            feat_type=feat_type,
+            feat_cfg=feat_cfg)
 
 
 if __name__ == "__main__":

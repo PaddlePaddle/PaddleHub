@@ -67,7 +67,6 @@ class Trainer(object):
 
         if not isinstance(self.model, paddle.nn.Layer):
             raise TypeError('The model {} is not a `paddle.nn.Layer` object.'.format(self.model.__name__))
-        
 
         if self.local_rank == 0 and not os.path.exists(self.checkpoint_dir):
             os.makedirs(self.checkpoint_dir)
@@ -302,7 +301,7 @@ class Trainer(object):
             with logger.processing('Evaluation on validation dataset'):
                 for batch_idx, batch in enumerate(loader):
                     result = self.validation_step(batch, batch_idx)
-                    
+
                     loss = result.get('loss', None)
                     metrics = result.get('metrics', {})
                     bs = batch[0].shape[0]
@@ -368,7 +367,7 @@ class Trainer(object):
             batch_idx(int) : The index of batch.
         '''
         if self.nranks > 1:
-            result = self.model._layers.validation_step(batch, batch_idx) 
+            result = self.model._layers.validation_step(batch, batch_idx)
         else:
             result = self.model.validation_step(batch, batch_idx)
         return result

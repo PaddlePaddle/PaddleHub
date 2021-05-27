@@ -312,7 +312,7 @@ class Candidate:
         subset = np.delete(subset, deleteIdx, axis=0)
 
         return candidate, subset
-    
+
 
 class ResizeScaling:
     """Resize images by scaling method.

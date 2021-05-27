@@ -40,6 +40,7 @@ class UserGuidedColorization(nn.Layer):
         load_checkpoint (str): Pretrained checkpoint path.
 
     """
+
     def __init__(self, use_tanh: bool = True, load_checkpoint: str = None):
         super(UserGuidedColorization, self).__init__()
         self.input_nc = 4

@@ -27,21 +27,22 @@ from paddlehub.module.module import moduleinfo
 from paddlehub.utils.log import logger
 
 
-@moduleinfo(name="panns_cnn14",
-            version="1.0.0",
-            summary="",
-            author="Baidu",
-            author_email="",
-            type="audio/sound_classification",
-            meta=AudioClassifierModule)
+@moduleinfo(
+    name="panns_cnn14",
+    version="1.0.0",
+    summary="",
+    author="Baidu",
+    author_email="",
+    type="audio/sound_classification",
+    meta=AudioClassifierModule)
 class PANN(nn.Layer):
     def __init__(
-        self,
-        task: str,
-        num_class: int = None,
-        label_map: Dict = None,
-        load_checkpoint: str = None,
-        **kwargs,
+            self,
+            task: str,
+            num_class: int = None,
+            label_map: Dict = None,
+            load_checkpoint: str = None,
+            **kwargs,
     ):
         super(PANN, self).__init__()
 
@@ -52,15 +53,15 @@ class PANN(nn.Layer):
             self.num_class = num_class
 
         if task == 'sound-cls':
-            self.cnn14 = CNN14(extract_embedding=True,
-                               checkpoint=os.path.join(MODULE_HOME, 'panns_cnn14', 'cnn14.pdparams'))
+            self.cnn14 = CNN14(
+                extract_embedding=True, checkpoint=os.path.join(MODULE_HOME, 'panns_cnn14', 'cnn14.pdparams'))
             self.dropout = nn.Dropout(0.1)
             self.fc = nn.Linear(self.cnn14.emb_size, num_class)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy()
         else:
-            self.cnn14 = CNN14(extract_embedding=False,
-                               checkpoint=os.path.join(MODULE_HOME, 'panns_cnn14', 'cnn14.pdparams'))
+            self.cnn14 = CNN14(
+                extract_embedding=False, checkpoint=os.path.join(MODULE_HOME, 'panns_cnn14', 'cnn14.pdparams'))
 
         self.task = task
         if load_checkpoint is not None and os.path.isfile(load_checkpoint):
