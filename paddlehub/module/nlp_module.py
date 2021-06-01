@@ -1,7 +1,6 @@
-# coding:utf-8
-# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,574 +11,668 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import argparse
-import ast
+import copy
+import functools
+import inspect
+import io
+import json
 import os
-import re
 import six
+from typing import List, Tuple
 
 import paddle
-import numpy as np
-import paddle.fluid as fluid
+import paddle.nn as nn
+from packaging.version import Version
+from paddle.dataset.common import DATA_HOME
+from paddle.utils.download import get_path_from_url
+from paddlehub.module.module import serving, RunModule, runnable
 
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
-from paddlehub.common import paddle_helper, tmp_dir
-from paddlehub.common.utils import sys_stdin_encoding, version_compare
-from paddlehub.io.parser import txt_parser
-from paddlehub.module.module import runnable
+from paddlehub.utils.log import logger
+from paddlehub.utils.utils import reseg_token_label
+
+import paddlenlp
+from paddlenlp.embeddings.token_embedding import EMBEDDING_HOME, EMBEDDING_URL_ROOT
+from paddlenlp.data import JiebaTokenizer
+from paddlehub.compat.module.nlp_module import DataFormatError
+
+__all__ = [
+    'PretrainedModel',
+    'register_base_model',
+    'TransformerModule',
+]
 
 
-class DataFormatError(Exception):
-    def __init__(self, *args):
-        self.args = args
+def fn_args_to_dict(func, *args, **kwargs):
+    """
+    Inspect function `func` and its arguments for running, and extract a
+    dict mapping between argument names and keys.
+    """
+    if hasattr(inspect, 'getfullargspec'):
+        (spec_args, spec_varargs, spec_varkw, spec_defaults, _, _, _) = inspect.getfullargspec(func)
+    else:
+        (spec_args, spec_varargs, spec_varkw, spec_defaults) = inspect.getargspec(func)
+    # add positional argument values
+    init_dict = dict(zip(spec_args, args))
+    # add default argument values
+    kwargs_dict = dict(zip(spec_args[-len(spec_defaults):], spec_defaults)) if spec_defaults else {}
+    kwargs_dict.update(kwargs)
+    init_dict.update(kwargs_dict)
+    return init_dict
 
 
-class NLPBaseModule(hub.Module):
-    def _initialize(self):
+class InitTrackerMeta(type(nn.Layer)):
+    """
+    This metaclass wraps the `__init__` method of a class to add `init_config`
+    attribute for instances of that class, and `init_config` use a dict to track
+    the initial configuration. If the class has `_wrap_init` method, it would be
+    hooked after `__init__` and called as `_wrap_init(self, init_fn, init_args)`.
+    Since InitTrackerMeta would be used as metaclass for pretrained model classes,
+    which always are Layer and `type(nn.Layer)` is not `type`, thus use `type(nn.Layer)`
+    rather than `type` as base class for it to avoid inheritance metaclass
+    conflicts.
+    """
+
+    def __init__(cls, name, bases, attrs):
+        init_func = cls.__init__
+        # If attrs has `__init__`, wrap it using accessable `_wrap_init`.
+        # Otherwise, no need to wrap again since the super cls has been wraped.
+        # TODO: remove reduplicated tracker if using super cls `__init__`
+        help_func = getattr(cls, '_wrap_init', None) if '__init__' in attrs else None
+        cls.__init__ = InitTrackerMeta.init_and_track_conf(init_func, help_func)
+        super(InitTrackerMeta, cls).__init__(name, bases, attrs)
+
+    @staticmethod
+    def init_and_track_conf(init_func, help_func=None):
         """
-        initialize with the necessary elements
-        This method must be overrided.
+        wraps `init_func` which is `__init__` method of a class to add `init_config`
+        attribute for instances of that class.
+        Args:
+            init_func (callable): It should be the `__init__` method of a class.
+            help_func (callable, optional): If provided, it would be hooked after
+                `init_func` and called as `_wrap_init(self, init_func, *init_args, **init_args)`.
+                Default None.
+
+        Returns:
+            function: the wrapped function
         """
-        raise NotImplementedError()
+
+        @functools.wraps(init_func)
+        def __impl__(self, *args, **kwargs):
+            # keep full configuration
+            init_func(self, *args, **kwargs)
+            # registed helper by `_wrap_init`
+            if help_func:
+                help_func(self, init_func, *args, **kwargs)
+            self.init_config = kwargs
+            if args:
+                kwargs['init_args'] = args
+            kwargs['init_class'] = self.__class__.__name__
+
+        return __impl__
+
+
+def register_base_model(cls):
+    """
+    Add a `base_model_class` attribute for the base class of decorated class,
+    representing the base model class in derived classes of the same architecture.
+    Args:
+        cls (class): the name of the model
+    """
+    base_cls = cls.__bases__[0]
+    assert issubclass(base_cls,
+                      PretrainedModel), "`register_base_model` should be used on subclasses of PretrainedModel."
+    base_cls.base_model_class = cls
+    return cls
+
+
+@six.add_metaclass(InitTrackerMeta)
+class PretrainedModel(nn.Layer):
+    """
+    The base class for all pretrained models. It provides some attributes and
+    common methods for all pretrained models, including attributes `init_config`,
+    `config` for initialized arguments and methods for saving, loading.
+    It also includes some class attributes (should be set by derived classes):
+    - `model_config_file` (str): represents the file name for saving and loading
+      model configuration, it's value is `model_config.json`.
+    - `resource_files_names` (dict): use this to map resources to specific file
+      names for saving and loading.
+    - `pretrained_resource_files_map` (dict): The dict has the same keys as
+      `resource_files_names`, the values are also dict mapping specific pretrained
+      model name to URL linking to pretrained model.
+    - `pretrained_init_configuration` (dict): The dict has pretrained model names
+      as keys, and the values are also dict preserving corresponding configuration
+      for model initialization.
+
+    - `base_model_prefix` (str): represents the the attribute associated to the
+      base model in derived classes of the same architecture adding layers on
+      top of the base model.
+    """
+    model_config_file = "model_config.json"
+    pretrained_init_configuration = {}
+    # TODO: more flexible resource handle, namedtuple with fileds as:
+    # resource_name, saved_file, handle_name_for_load(None for used as __init__
+    # arguments), handle_name_for_save
+    resource_files_names = {"model_state": "model_state.pdparams"}
+    pretrained_resource_files_map = {}
+    base_model_prefix = ""
+
+    def _wrap_init(self, original_init, *args, **kwargs):
+        """
+        It would be hooked after `__init__` to add a dict including arguments of
+        `__init__` as a attribute named `config` of the prtrained model instance.
+        """
+        init_dict = fn_args_to_dict(original_init, *args, **kwargs)
+        self.config = init_dict
+
+    @property
+    def base_model(self):
+        return getattr(self, self.base_model_prefix, self)
+
+    @property
+    def model_name_list(self):
+        return list(self.pretrained_init_configuration.keys())
+
+    def get_input_embeddings(self):
+        base_model = getattr(self, self.base_model_prefix, self)
+        if base_model is not self:
+            return base_model.get_input_embeddings()
+        else:
+            raise NotImplementedError
+
+    def get_output_embeddings(self):
+        return None  # Overwrite for models with output embeddings
+
+    @classmethod
+    def from_pretrained(cls, pretrained_model_name_or_path, *args, **kwargs):
+        """
+        Instantiate an instance of `PretrainedModel` from a predefined
+        model specified by name or path.
+        Args:
+            pretrained_model_name_or_path (str): A name of or a file path to a
+                pretrained model.
+            *args (tuple): position arguments for `__init__`. If provide, use
+                this as position argument values for model initialization.
+            **kwargs (dict): keyword arguments for `__init__`. If provide, use
+                this to update pre-defined keyword argument values for model
+                initialization.
+        Returns:
+            PretrainedModel: An instance of PretrainedModel.
+        """
+        pretrained_models = list(cls.pretrained_init_configuration.keys())
+        resource_files = {}
+        init_configuration = {}
+        if pretrained_model_name_or_path in pretrained_models:
+            for file_id, map_list in cls.pretrained_resource_files_map.items():
+                resource_files[file_id] = map_list[pretrained_model_name_or_path]
+            init_configuration = copy.deepcopy(cls.pretrained_init_configuration[pretrained_model_name_or_path])
+        else:
+            if os.path.isdir(pretrained_model_name_or_path):
+                for file_id, file_name in cls.resource_files_names.items():
+                    full_file_name = os.path.join(pretrained_model_name_or_path, file_name)
+                    resource_files[file_id] = full_file_name
+                resource_files["model_config_file"] = os.path.join(pretrained_model_name_or_path, cls.model_config_file)
+            else:
+                raise ValueError("Calling {}.from_pretrained() with a model identifier or the "
+                                 "path to a directory instead. The supported model "
+                                 "identifiers are as follows: {}".format(cls.__name__,
+                                                                         cls.pretrained_init_configuration.keys()))
+        # FIXME(chenzeyu01): We should use another data path for storing model
+        default_root = os.path.join(DATA_HOME, pretrained_model_name_or_path)
+        resolved_resource_files = {}
+        for file_id, file_path in resource_files.items():
+            path = os.path.join(default_root, file_path.split('/')[-1])
+            if file_path is None or os.path.isfile(file_path):
+                resolved_resource_files[file_id] = file_path
+            elif os.path.exists(path):
+                logger.info("Already cached %s" % path)
+                resolved_resource_files[file_id] = path
+            else:
+                logger.info("Downloading %s and saved to %s" % (file_path, default_root))
+                resolved_resource_files[file_id] = get_path_from_url(file_path, default_root)
+
+        # Prepare model initialization kwargs
+        # Did we saved some inputs and kwargs to reload ?
+        model_config_file = resolved_resource_files.pop("model_config_file", None)
+        if model_config_file is not None:
+            with io.open(model_config_file, encoding="utf-8") as f:
+                init_kwargs = json.load(f)
+        else:
+            init_kwargs = init_configuration
+        # position args are stored in kwargs, maybe better not include
+        init_args = init_kwargs.pop("init_args", ())
+        # class name corresponds to this configuration
+        init_class = init_kwargs.pop("init_class", cls.base_model_class.__name__)
+
+        # Check if the loaded config matches the current model class's __init__
+        # arguments. If not match, the loaded config is for the base model class.
+        if init_class == cls.base_model_class.__name__:
+            base_args = init_args
+            base_kwargs = init_kwargs
+            derived_args = ()
+            derived_kwargs = {}
+            base_arg_index = None
+        else:  # extract config for base model
+            derived_args = list(init_args)
+            derived_kwargs = init_kwargs
+            for i, arg in enumerate(init_args):
+                if isinstance(arg, dict) and "init_class" in arg:
+                    assert arg.pop("init_class") == cls.base_model_class.__name__, (
+                        "pretrained base model should be {}").format(cls.base_model_class.__name__)
+                    base_arg_index = i
+                    break
+            for arg_name, arg in init_kwargs.items():
+                if isinstance(arg, dict) and "init_class" in arg:
+                    assert arg.pop("init_class") == cls.base_model_class.__name__, (
+                        "pretrained base model should be {}").format(cls.base_model_class.__name__)
+                    base_arg_index = arg_name
+                    break
+            base_args = arg.pop("init_args", ())
+            base_kwargs = arg
+        if cls == cls.base_model_class:
+            # Update with newly provided args and kwargs for base model
+            base_args = base_args if not args else args
+            base_kwargs.update(kwargs)
+            model = cls(*base_args, **base_kwargs)
+        else:
+            # Update with newly provided args and kwargs for derived model
+            base_model = cls.base_model_class(*base_args, **base_kwargs)
+            if base_arg_index is not None:
+                derived_args[base_arg_index] = base_model
+            else:
+                derived_args = (base_model, )  # assume at the first position
+            derived_args = derived_args if not args else args
+            derived_kwargs.update(kwargs)
+            model = cls(*derived_args, **derived_kwargs)
+
+        # Maybe need more ways to load resources.
+        weight_path = list(resolved_resource_files.values())[0]
+        assert weight_path.endswith(".pdparams"), "suffix of weight must be .pdparams"
+        state_dict = paddle.load(weight_path)
+
+        # Make sure we are able to load base models as well as derived models
+        # (with heads)
+        start_prefix = ""
+        model_to_load = model
+        state_to_load = state_dict
+        unexpected_keys = []
+        missing_keys = []
+        if not hasattr(model, cls.base_model_prefix) and any(
+                s.startswith(cls.base_model_prefix) for s in state_dict.keys()):
+            # base model
+            state_to_load = {}
+            start_prefix = cls.base_model_prefix + "."
+            for k, v in state_dict.items():
+                if k.startswith(cls.base_model_prefix):
+                    state_to_load[k[len(start_prefix):]] = v
+                else:
+                    unexpected_keys.append(k)
+        if hasattr(model,
+                   cls.base_model_prefix) and not any(s.startswith(cls.base_model_prefix) for s in state_dict.keys()):
+            # derived model (base model with heads)
+            model_to_load = getattr(model, cls.base_model_prefix)
+            for k in model.state_dict().keys():
+                if not k.startswith(cls.base_model_prefix):
+                    missing_keys.append(k)
+        if len(missing_keys) > 0:
+            logger.info("Weights of {} not initialized from pretrained model: {}".format(
+                model.__class__.__name__, missing_keys))
+        if len(unexpected_keys) > 0:
+            logger.info("Weights from pretrained model not used in {}: {}".format(model.__class__.__name__,
+                                                                                  unexpected_keys))
+        model_to_load.set_state_dict(state_to_load)
+        if paddle.in_dynamic_mode():
+            return model
+        return model, state_to_load
+
+    def save_pretrained(self, save_directory):
+        """
+        Save model configuration and related resources (model state) to files
+        under `save_directory`.
+        Args:
+            save_directory (str): Directory to save files into.
+        """
+        assert os.path.isdir(save_directory), "Saving directory ({}) should be a directory".format(save_directory)
+        # save model config
+        model_config_file = os.path.join(save_directory, self.model_config_file)
+        model_config = self.init_config
+        # If init_config contains a Layer, use the layer's init_config to save
+        for key, value in model_config.items():
+            if key == "init_args":
+                args = []
+                for arg in value:
+                    args.append(arg.init_config if isinstance(arg, PretrainedModel) else arg)
+                model_config[key] = tuple(args)
+            elif isinstance(value, PretrainedModel):
+                model_config[key] = value.init_config
+        with io.open(model_config_file, "w", encoding="utf-8") as f:
+            f.write(json.dumps(model_config, ensure_ascii=False))
+        # save model
+        file_name = os.path.join(save_directory, list(self.resource_files_names.values())[0])
+        paddle.save(self.state_dict(), file_name)
+
+
+class TextServing(object):
+    """
+    A base class for text model which supports serving.
+    """
+
+    @serving
+    def predict_method(self, data: List[List[str]], max_seq_len: int = 128, batch_size: int = 1, use_gpu: bool = False):
+        """
+        Run predict method as a service.
+        Serving as a task which is specified from serving config.
+        Tasks supported:
+        1. seq-cls: sequence classification;
+        2. token-cls: sequence labeling;
+        3. None: embedding.
+
+        Args:
+            data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
+            max_seq_len (:obj:`int`, `optional`, defaults to 128):
+                If set to a number, will limit the total sequence returned so that it has a maximum length.
+            batch_size(obj:`int`, defaults to 1): The number of batch.
+            use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
+
+        Returns:
+            results(obj:`list`): All the predictions labels.
+        """
+        if self.task in self._tasks_supported:  # cls service
+            if self.label_map:
+                # compatible with json decoding label_map
+                self.label_map = {int(k): v for k, v in self.label_map.items()}
+            results = self.predict(data, max_seq_len, batch_size, use_gpu)
+
+            if self.task == 'token-cls':
+                # remove labels of [CLS] token and pad tokens
+                results = [token_labels[1:len(data[i][0]) + 1] for i, token_labels in enumerate(results)]
+            return results
+        elif self.task is None:  # embedding service
+            results = self.get_embedding(data, use_gpu)
+            return results
+        else:  # unknown service
+            logger.error(f'Unknown task {self.task}, current tasks supported:\n'
+                         '1. seq-cls: sequence classification service;\n'
+                         '2. token-cls: sequence labeling service;\n'
+                         '3. None: embedding service')
+        return
+
+
+class TransformerModule(RunModule, TextServing):
+    """
+    The base class for Transformer models.
+    """
+    _tasks_supported = [
+        'seq-cls',
+        'token-cls',
+        'text-matching',
+    ]
+
+    @property
+    def input_spec(self):
+        return [
+            paddle.static.InputSpec(shape=[None, None], dtype='int64'),
+            paddle.static.InputSpec(shape=[None, None], dtype='int64')
+        ]
+
+    def _convert_text_to_input(self, tokenizer, texts: List[str], max_seq_len: int, split_char: str):
+        pad_to_max_seq_len = False if self.task is None else True
+        if self.task == 'token-cls':  # Extra processing of token-cls task
+            tokens = texts[0].split(split_char)
+            texts[0], _ = reseg_token_label(tokenizer=tokenizer, tokens=tokens)
+            is_split_into_words = True
+        else:
+            is_split_into_words = False
+
+        encoded_inputs = []
+        if self.task == 'text-matching':
+            if len(texts) != 2:
+                raise RuntimeError(
+                    'The input texts must have two sequences, but got %d. Please check your inputs.' % len(texts))
+            encoded_inputs.append(tokenizer(text=texts[0], text_pair=None, max_seq_len=max_seq_len, \
+                    pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+            encoded_inputs.append(tokenizer(text=texts[1], text_pair=None, max_seq_len=max_seq_len, \
+                    pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+        else:
+            if len(texts) == 1:
+                if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
+                    encoded_inputs.append(tokenizer.encode(texts[0], text_pair=None, \
+                        max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len))
+                else:
+                    encoded_inputs.append(tokenizer(text=texts[0], max_seq_len=max_seq_len, \
+                        pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+            elif len(texts) == 2:
+                if Version(paddlenlp.__version__) <= Version('2.0.0rc2'):
+                    encoded_inputs.append(tokenizer.encode(texts[0], text_pair=texts[1], \
+                        max_seq_len=max_seq_len, pad_to_max_seq_len=pad_to_max_seq_len))
+                else:
+                    encoded_inputs.append(tokenizer(text=texts[0], text_pair=texts[1], max_seq_len=max_seq_len, \
+                        pad_to_max_seq_len=True, is_split_into_words=is_split_into_words, return_length=True))
+            else:
+                raise RuntimeError(
+                    'The input text must have one or two sequence, but got %d. Please check your inputs.' % len(texts))
+        return encoded_inputs
+
+    def _batchify(self, data: List[List[str]], max_seq_len: int, batch_size: int, split_char: str):
+        def _parse_batch(batch):
+            if self.task != 'text-matching':
+                input_ids = [entry[0] for entry in batch]
+                segment_ids = [entry[1] for entry in batch]
+                return input_ids, segment_ids
+            else:
+                query_input_ids = [entry[0] for entry in batch]
+                query_segment_ids = [entry[1] for entry in batch]
+                title_input_ids = [entry[2] for entry in batch]
+                title_segment_ids = [entry[3] for entry in batch]
+                return query_input_ids, query_segment_ids, title_input_ids, title_segment_ids
+
+        tokenizer = self.get_tokenizer()
+        examples = []
+
+        for texts in data:
+            encoded_inputs = self._convert_text_to_input(tokenizer, texts, max_seq_len, split_char)
+            example = []
+            for inp in encoded_inputs:
+                input_ids = inp['input_ids']
+                if Version(paddlenlp.__version__) >= Version('2.0.0rc5'):
+                    token_type_ids = inp['token_type_ids']
+                else:
+                    token_type_ids = inp['segment_ids']
+                example.extend((input_ids, token_type_ids))
+            examples.append(example)
+
+        # Seperates data into some batches.
+        one_batch = []
+        for example in examples:
+            one_batch.append(example)
+            if len(one_batch) == batch_size:
+                yield _parse_batch(one_batch)
+                one_batch = []
+        if one_batch:
+            # The last batch whose size is less than the config batch_size setting.
+            yield _parse_batch(one_batch)
+
+    def training_step(self, batch: List[paddle.Tensor], batch_idx: int):
+        """
+        One step for training, which should be called as forward computation.
+        Args:
+            batch(:obj:List[paddle.Tensor]): The one batch data, which contains the model needed,
+                such as input_ids, sent_ids, pos_ids, input_mask and labels.
+            batch_idx(int): The index of batch.
+        Returns:
+            results(:obj: Dict) : The model outputs, such as loss and metrics.
+        """
+        if self.task == 'seq-cls':
+            predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
+        elif self.task == 'token-cls':
+            predictions, avg_loss, metric = self(
+                input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
+        elif self.task == 'text-matching':
+            predictions, avg_loss, metric = self(query_input_ids=batch[0], query_token_type_ids=batch[1], \
+                title_input_ids=batch[2], title_token_type_ids=batch[3], labels=batch[4])
+        self.metric.reset()
+        return {'loss': avg_loss, 'metrics': metric}
+
+    def validation_step(self, batch: List[paddle.Tensor], batch_idx: int):
+        """
+        One step for validation, which should be called as forward computation.
+        Args:
+            batch(:obj:List[paddle.Tensor]): The one batch data, which contains the model needed,
+                such as input_ids, sent_ids, pos_ids, input_mask and labels.
+            batch_idx(int): The index of batch.
+        Returns:
+            results(:obj: Dict) : The model outputs, such as metrics.
+        """
+        if self.task == 'seq-cls':
+            predictions, avg_loss, metric = self(input_ids=batch[0], token_type_ids=batch[1], labels=batch[2])
+        elif self.task == 'token-cls':
+            predictions, avg_loss, metric = self(
+                input_ids=batch[0], token_type_ids=batch[1], seq_lengths=batch[2], labels=batch[3])
+        elif self.task == 'text-matching':
+            predictions, avg_loss, metric = self(query_input_ids=batch[0], query_token_type_ids=batch[1], \
+                title_input_ids=batch[2], title_token_type_ids=batch[3], labels=batch[4])
+        return {'metrics': metric}
+
+    def get_embedding(self, data: List[List[str]], use_gpu=False):
+        """
+        Get token level embeddings and sentence level embeddings from model.
+        Args:
+            data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
+            use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
+
+        Returns:
+            results(obj:`list`): All the tokens and sentences embeddings.
+        """
+        if self.task is not None:
+            raise RuntimeError("The get_embedding method is only valid when task is None, but got task %s" % self.task)
+
+        return self.predict(data=data, use_gpu=use_gpu)
+
+    def predict(self,
+                data: List[List[str]],
+                max_seq_len: int = 128,
+                split_char: str = '\002',
+                batch_size: int = 1,
+                use_gpu: bool = False):
+        """
+        Predicts the data labels.
+
+        Args:
+            data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
+            max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
+                If set to a number, will limit the total sequence returned so that it has a maximum length.
+            split_char(obj:`str`, defaults to '\002'): The char used to split input tokens in token-cls task.
+            batch_size(obj:`int`, defaults to 1): The number of batch.
+            use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
+
+        Returns:
+            results(obj:`list`): All the predictions labels.
+        """
+        if self.task not in self._tasks_supported \
+                and self.task is not None:      # None for getting embedding
+            raise RuntimeError(f'Unknown task {self.task}, current tasks supported:\n'
+                               '1. seq-cls: sequence classification;\n'
+                               '2. token-cls: sequence labeling;\n'
+                               '3. text-matching: text matching;\n'
+                               '4. None: embedding')
+
+        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
+
+        batches = self._batchify(data, max_seq_len, batch_size, split_char)
+        results = []
+        self.eval()
+        for batch in batches:
+            if self.task == 'text-matching':
+                query_input_ids, query_segment_ids, title_input_ids, title_segment_ids = batch
+                query_input_ids = paddle.to_tensor(query_input_ids)
+                query_segment_ids = paddle.to_tensor(query_segment_ids)
+                title_input_ids = paddle.to_tensor(title_input_ids)
+                title_segment_ids = paddle.to_tensor(title_segment_ids)
+                probs = self(query_input_ids=query_input_ids, query_token_type_ids=query_segment_ids, \
+                    title_input_ids=title_input_ids, title_token_type_ids=title_segment_ids)
+                idx = paddle.argmax(probs, axis=1).numpy()
+                idx = idx.tolist()
+                labels = [self.label_map[i] for i in idx]
+                results.extend(labels)
+            else:
+                input_ids, segment_ids = batch
+                input_ids = paddle.to_tensor(input_ids)
+                segment_ids = paddle.to_tensor(segment_ids)
+
+                if self.task == 'seq-cls':
+                    probs = self(input_ids, segment_ids)
+                    idx = paddle.argmax(probs, axis=1).numpy()
+                    idx = idx.tolist()
+                    labels = [self.label_map[i] for i in idx]
+                    results.extend(labels)
+                elif self.task == 'token-cls':
+                    probs = self(input_ids, segment_ids)
+                    batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
+                    batch_ids = batch_ids.tolist()
+                    token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
+                    results.extend(token_labels)
+                elif self.task == None:
+                    sequence_output, pooled_output = self(input_ids, segment_ids)
+                    results.append(
+                        [pooled_output.squeeze(0).numpy().tolist(),
+                         sequence_output.squeeze(0).numpy().tolist()])
+        return results
+
+
+class EmbeddingServing(object):
+    """
+    A base class for embedding model which supports serving.
+    """
+
+    @serving
+    def calc_similarity(self, data: List[List[str]]):
+        """
+        Calculate similarities of giving word pairs.
+        """
+        results = []
+        for word_pair in data:
+            if len(word_pair) != 2:
+                raise RuntimeError(
+                    f'The input must have two words, but got {len(word_pair)}. Please check your inputs.')
+            if not isinstance(word_pair[0], str) or not isinstance(word_pair[1], str):
+                raise RuntimeError(
+                    f'The types of text pair must be (str, str), but got'
+                    f' ({type(word_pair[0]).__name__}, {type(word_pair[1]).__name__}). Please check your inputs.')
+
+            for word in word_pair:
+                if self.get_idx_from_word(word) == \
+                        self.get_idx_from_word(self.vocab.unk_token):
+                    raise RuntimeError(f'Word "{word}" is not in vocab. Please check your inputs.')
+            results.append(str(self.cosine_sim(*word_pair)))
+        return results
+
+
+class EmbeddingModule(RunModule, EmbeddingServing):
+    """
+    The base class for Embedding models.
+    """
+    base_url = 'https://paddlenlp.bj.bcebos.com/models/embeddings/'
+
+    def _download_vocab(self):
+        """
+        Download vocab from url
+        """
+        url = EMBEDDING_URL_ROOT + '/' + f'vocab.{self.embedding_name}'
+        get_path_from_url(url, EMBEDDING_HOME)
 
     def get_vocab_path(self):
         """
-        Get the path to the vocabulary whih was used to pretrain
-
-        Returns:
-             self.vocab_path(str): the path to vocabulary
+        Get local vocab path
         """
-        return self.vocab_path
+        vocab_path = os.path.join(EMBEDDING_HOME, f'vocab.{self.embedding_name}')
+        if not os.path.exists(vocab_path):
+            self._download_vocab()
+        return vocab_path
 
-
-class NLPPredictionModule(NLPBaseModule):
-    def _set_config(self):
+    def get_tokenizer(self, *args, **kwargs):
         """
-        predictor config setting
+        Get tokenizer of embedding module
         """
-        cpu_config = AnalysisConfig(self.pretrained_model_path)
-        cpu_config.disable_glog_info()
-        cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
-
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-            use_gpu = True
-        except:
-            use_gpu = False
-        if use_gpu:
-            gpu_config = AnalysisConfig(self.pretrained_model_path)
-            gpu_config.disable_glog_info()
-            gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
-
-    def texts2tensor(self, texts):
-        """
-        Tranform the texts(dict) to PaddleTensor
-        Args:
-             texts(list): each element is a dict that must have a named 'processed' key whose value is word_ids, such as
-                          texts = [{'processed': [23, 89, 43, 906]}]
-        Returns:
-             tensor(PaddleTensor): tensor with texts data
-        """
-        lod = [0]
-        data = []
-        for i, text in enumerate(texts):
-            data += text['processed']
-            lod.append(len(text['processed']) + lod[i])
-        tensor = PaddleTensor(np.array(data).astype('int64'))
-        tensor.name = "words"
-        tensor.lod = [lod]
-        tensor.shape = [lod[-1], 1]
-        return tensor
-
-    def to_unicode(self, texts):
-        """
-        Convert each element's type(str) of texts(list) to unicode in python2.7
-        Args:
-             texts(list): each element's type is str in python2.7
-        Returns:
-             texts(list): each element's type is unicode in python2.7
-        """
-        if six.PY2:
-            unicode_texts = []
-            for text in texts:
-                if isinstance(text, six.string_types):
-                    unicode_texts.append(
-                        text.decode(sys_stdin_encoding()).decode("utf8"))
-                else:
-                    unicode_texts.append(text)
-            texts = unicode_texts
-        return texts
-
-    @runnable
-    def run_cmd(self, argvs):
-        """
-        Run as a command
-        """
-        self.parser = argparse.ArgumentParser(
-            description='Run the %s module.' % self.name,
-            prog='hub run %s' % self.name,
-            usage='%(prog)s',
-            add_help=True)
-
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
-        self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
-
-        self.add_module_config_arg()
-        self.add_module_input_arg()
-
-        args = self.parser.parse_args(argvs)
-
-        try:
-            input_data = self.check_input_data(args)
-        except DataFormatError and RuntimeError:
-            self.parser.print_help()
-            return None
-
-        results = self.predict(
-            texts=input_data, use_gpu=args.use_gpu, batch_size=args.batch_size)
-
-        return results
-
-    def add_module_config_arg(self):
-        """
-        Add the command config options
-        """
-        self.arg_config_group.add_argument(
-            '--use_gpu',
-            type=ast.literal_eval,
-            default=False,
-            help="whether use GPU for prediction")
-
-        self.arg_config_group.add_argument(
-            '--batch_size',
-            type=int,
-            default=1,
-            help="batch size for prediction")
-
-    def add_module_input_arg(self):
-        """
-        Add the command input options
-        """
-        self.arg_input_group.add_argument(
-            '--input_file',
-            type=str,
-            default=None,
-            help="file contain input data")
-        self.arg_input_group.add_argument(
-            '--input_text', type=str, default=None, help="text to predict")
-
-    def check_input_data(self, args):
-        input_data = []
-        if args.input_file:
-            if not os.path.exists(args.input_file):
-                print("File %s is not exist." % args.input_file)
-                raise RuntimeError
-            else:
-                input_data = txt_parser.parse(args.input_file, use_strip=True)
-        elif args.input_text:
-            if args.input_text.strip() != '':
-                if six.PY2:
-                    input_data = [
-                        args.input_text.decode(
-                            sys_stdin_encoding()).decode("utf8")
-                    ]
-                else:
-                    input_data = [args.input_text]
-            else:
-                print(
-                    "ERROR: The input data is inconsistent with expectations.")
-
-        if input_data == []:
-            print("ERROR: The input data is inconsistent with expectations.")
-            raise DataFormatError
-
-        return input_data
-
-
-class _TransformerEmbeddingTask(hub.BaseTask):
-    def __init__(self,
-                 pooled_feature,
-                 seq_feature,
-                 feed_list,
-                 data_reader,
-                 config=None):
-        main_program = pooled_feature.block.program
-        super(_TransformerEmbeddingTask, self).__init__(
-            main_program=main_program,
-            data_reader=data_reader,
-            feed_list=feed_list,
-            config=config,
-            metrics_choices=[])
-        self.pooled_feature = pooled_feature
-        self.seq_feature = seq_feature
-
-    def _build_net(self):
-        # ClassifyReader will return the seqence length of an input text
-        self.seq_len = fluid.layers.data(
-            name="seq_len", shape=[1], dtype='int64', lod_level=0)
-        return [self.pooled_feature, self.seq_feature]
-
-    def _postprocessing(self, run_states):
-        results = []
-        for batch_state in run_states:
-            batch_result = batch_state.run_results
-            batch_pooled_features = batch_result[0]
-            batch_seq_features = batch_result[1]
-            for i in range(len(batch_pooled_features)):
-                results.append(
-                    [batch_pooled_features[i], batch_seq_features[i]])
-        return results
-
-    @property
-    def feed_list(self):
-        feed_list = [varname
-                     for varname in self._base_feed_list] + [self.seq_len.name]
-        return feed_list
-
-    @property
-    def fetch_list(self):
-        fetch_list = [output.name
-                      for output in self.outputs] + [self.seq_len.name]
-        return fetch_list
-
-
-class TransformerModule(NLPBaseModule):
-    """
-    Tranformer Module base class can be used by BERT, ERNIE, RoBERTa and so on.
-    """
-
-    def __init__(self,
-                 name=None,
-                 directory=None,
-                 module_dir=None,
-                 version=None,
-                 max_seq_len=128,
-                 **kwargs):
-        if not directory:
-            return
-        super(TransformerModule, self).__init__(
-            name=name,
-            directory=directory,
-            module_dir=module_dir,
-            version=version,
-            **kwargs)
-
-        self.max_seq_len = max_seq_len
-        if version_compare(paddle.__version__, '1.8'):
-            with tmp_dir() as _dir:
-                input_dict, output_dict, program = self.context(
-                    max_seq_len=max_seq_len)
-                fluid.io.save_inference_model(
-                    dirname=_dir,
-                    main_program=program,
-                    feeded_var_names=[
-                        input_dict['input_ids'].name,
-                        input_dict['position_ids'].name,
-                        input_dict['segment_ids'].name,
-                        input_dict['input_mask'].name
-                    ],
-                    target_vars=[
-                        output_dict["pooled_output"],
-                        output_dict["sequence_output"]
-                    ],
-                    executor=fluid.Executor(fluid.CPUPlace()))
-
-                with fluid.dygraph.guard():
-                    self.model_runner = fluid.dygraph.StaticModelRunner(_dir)
-
-    def init_pretraining_params(self, exe, pretraining_params_path,
-                                main_program):
-        assert os.path.exists(
-            pretraining_params_path
-        ), "[%s] cann't be found." % pretraining_params_path
-
-        def existed_params(var):
-            if not isinstance(var, fluid.framework.Parameter):
-                return False
-            return os.path.exists(
-                os.path.join(pretraining_params_path, var.name))
-
-        fluid.io.load_vars(
-            exe,
-            pretraining_params_path,
-            main_program=main_program,
-            predicate=existed_params)
-
-    def param_prefix(self):
-        return "@HUB_%s@" % self.name
-
-    def context(
-            self,
-            max_seq_len=None,
-            trainable=True,
-            num_slots=1,
-    ):
-        """
-        get inputs, outputs and program from pre-trained module
-
-        Args:
-            max_seq_len (int): It will limit the total sequence returned so that it has a maximum length.
-            trainable (bool): Whether fine-tune the pre-trained module parameters or not.
-            num_slots(int): It's number of data inputted to the model, selectted as following options:
-                - 1(default): There's only one data to be feeded in the model, e.g. the module is used for sentence classification task.
-                - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
-                - 3: There are three data to be feeded in the model, e.g. the module is used for text matching task (pair-wise).
-
-        Returns: inputs, outputs, program.
-                 The inputs is a dict with keys named input_ids, position_ids, segment_ids, input_mask and task_ids
-                 The outputs is a dict with two keys named pooled_output and sequence_output.
-
-        """
-        assert num_slots >= 1 and num_slots <= 3, "num_slots must be 1, 2, or 3, but the input is %d" % num_slots
-        if not max_seq_len:
-            max_seq_len = self.max_seq_len
-
-        assert max_seq_len <= self.MAX_SEQ_LEN and max_seq_len >= 1, "max_seq_len({}) should be in the range of [1, {}]".format(
-            max_seq_len, self.MAX_SEQ_LEN)
-
-        module_program = fluid.Program()
-        startup_program = fluid.Program()
-        with fluid.program_guard(module_program, startup_program):
-            with fluid.unique_name.guard():
-                input_ids = fluid.layers.data(
-                    name='input_ids',
-                    shape=[-1, max_seq_len, 1],
-                    dtype='int64',
-                    lod_level=0)
-                position_ids = fluid.layers.data(
-                    name='position_ids',
-                    shape=[-1, max_seq_len, 1],
-                    dtype='int64',
-                    lod_level=0)
-                segment_ids = fluid.layers.data(
-                    name='segment_ids',
-                    shape=[-1, max_seq_len, 1],
-                    dtype='int64',
-                    lod_level=0)
-                input_mask = fluid.layers.data(
-                    name='input_mask',
-                    shape=[-1, max_seq_len, 1],
-                    dtype='float32',
-                    lod_level=0)
-                pooled_output, sequence_output = self.net(
-                    input_ids, position_ids, segment_ids, input_mask)
-
-                data_list = [(input_ids, position_ids, segment_ids, input_mask)]
-                output_name_list = [(pooled_output.name, sequence_output.name)]
-
-                if num_slots > 1:
-                    input_ids_2 = fluid.layers.data(
-                        name='input_ids_2',
-                        shape=[-1, max_seq_len, 1],
-                        dtype='int64',
-                        lod_level=0)
-                    position_ids_2 = fluid.layers.data(
-                        name='position_ids_2',
-                        shape=[-1, max_seq_len, 1],
-                        dtype='int64',
-                        lod_level=0)
-                    segment_ids_2 = fluid.layers.data(
-                        name='segment_ids_2',
-                        shape=[-1, max_seq_len, 1],
-                        dtype='int64',
-                        lod_level=0)
-                    input_mask_2 = fluid.layers.data(
-                        name='input_mask_2',
-                        shape=[-1, max_seq_len, 1],
-                        dtype='float32',
-                        lod_level=0)
-                    pooled_output_2, sequence_output_2 = self.net(
-                        input_ids_2, position_ids_2, segment_ids_2,
-                        input_mask_2)
-                    data_list.append((input_ids_2, position_ids_2,
-                                      segment_ids_2, input_mask_2))
-                    output_name_list.append((pooled_output_2.name,
-                                             sequence_output_2.name))
-
-                if num_slots > 2:
-                    input_ids_3 = fluid.layers.data(
-                        name='input_ids_3',
-                        shape=[-1, max_seq_len, 1],
-                        dtype='int64',
-                        lod_level=0)
-                    position_ids_3 = fluid.layers.data(
-                        name='position_ids_3',
-                        shape=[-1, max_seq_len, 1],
-                        dtype='int64',
-                        lod_level=0)
-                    segment_ids_3 = fluid.layers.data(
-                        name='segment_ids_3',
-                        shape=[-1, max_seq_len, 1],
-                        dtype='int64',
-                        lod_level=0)
-                    input_mask_3 = fluid.layers.data(
-                        name='input_mask_3',
-                        shape=[-1, max_seq_len, 1],
-                        dtype='float32',
-                        lod_level=0)
-                    pooled_output_3, sequence_output_3 = self.net(
-                        input_ids_3, position_ids_3, segment_ids_3,
-                        input_mask_3)
-                    data_list.append((input_ids_3, position_ids_3,
-                                      segment_ids_3, input_mask_3))
-                    output_name_list.append((pooled_output_3.name,
-                                             sequence_output_3.name))
-
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
-
-        # To be compatible with the module v1
-        vars = filter(
-            lambda var: var not in [
-                "input_ids", "position_ids", "segment_ids", "input_mask",
-                "input_ids_2", "position_ids_2", "segment_ids_2",
-                "input_mask_2", "input_ids_3", "position_ids_3",
-                "segment_ids_3", "input_mask_3"
-            ], list(module_program.global_block().vars.keys()))
-        paddle_helper.add_vars_prefix(
-            program=module_program, prefix=self.param_prefix(), vars=vars)
-        self.init_pretraining_params(
-            exe, self.params_path, main_program=module_program)
-
-        self.params_layer = {}
-        for param in module_program.global_block().iter_parameters():
-            param.trainable = trainable
-            match = re.match(r'.*layer_(\d+).*', param.name)
-            if match:
-                # layer num begins from 0
-                layer = match.group(1)
-                self.params_layer[param.name] = int(layer)
-
-        inputs = {}
-        outputs = {}
-        for index, data in enumerate(data_list):
-
-            if index == 0:
-                inputs['input_ids'] = data[0]
-                inputs['position_ids'] = data[1]
-                inputs['segment_ids'] = data[2]
-                inputs['input_mask'] = data[3]
-                outputs['pooled_output'] = module_program.global_block().vars[
-                    self.param_prefix() + output_name_list[0][0]]
-                outputs["sequence_output"] = module_program.global_block().vars[
-                    self.param_prefix() + output_name_list[0][1]]
-            else:
-                inputs['input_ids_%s' % (index + 1)] = data[0]
-                inputs['position_ids_%s' % (index + 1)] = data[1]
-                inputs['segment_ids_%s' % (index + 1)] = data[2]
-                inputs['input_mask_%s' % (index + 1)] = data[3]
-                outputs['pooled_output_%s' %
-                        (index + 1)] = module_program.global_block().vars[
-                            self.param_prefix() + output_name_list[index][0]]
-                outputs["sequence_output_%s" %
-                        (index + 1)] = module_program.global_block().vars[
-                            self.param_prefix() + output_name_list[index][1]]
-
-        return inputs, outputs, module_program
-
-    def get_embedding(self, texts, max_seq_len=512, use_gpu=False,
-                      batch_size=1):
-        """
-        get pooled_output and sequence_output for input texts.
-        Warnings: this method depends on Paddle Inference Library, it may not work properly in PaddlePaddle <= 1.6.2.
-
-        Args:
-            texts (list): each element is a text sample, each sample include text_a and text_b where text_b can be omitted.
-                          for example: [[sample0_text_a, sample0_text_b], [sample1_text_a, sample1_text_b], ...]
-            max_seq_len (int): the max sequence length.
-            use_gpu (bool): use gpu or not, default False.
-            batch_size (int): the data batch size, default 1.
-
-        Returns:
-            pooled_outputs(list): its element is a numpy array, the first feature of each text sample.
-            sequence_outputs(list): its element is a numpy array, the whole features of each text sample.
-        """
-        if not hasattr(
-                self, "emb_job"
-        ) or self.emb_job["batch_size"] != batch_size or self.emb_job[
-                "use_gpu"] != use_gpu:
-            inputs, outputs, program = self.context(
-                trainable=True, max_seq_len=max_seq_len)
-
-            reader = hub.reader.ClassifyReader(
-                dataset=None,
-                vocab_path=self.get_vocab_path(),
-                max_seq_len=max_seq_len,
-                sp_model_path=self.get_spm_path() if hasattr(
-                    self, "get_spm_path") else None,
-                word_dict_path=self.get_word_dict_path() if hasattr(
-                    self, "word_dict_path") else None)
-
-            feed_list = [
-                inputs["input_ids"].name,
-                inputs["position_ids"].name,
-                inputs["segment_ids"].name,
-                inputs["input_mask"].name,
-            ]
-
-            pooled_feature, seq_feature = outputs["pooled_output"], outputs[
-                "sequence_output"]
-
-            config = hub.RunConfig(
-                use_data_parallel=False,
-                use_cuda=use_gpu,
-                batch_size=batch_size)
-
-            self.emb_job = {}
-            self.emb_job["task"] = _TransformerEmbeddingTask(
-                pooled_feature=pooled_feature,
-                seq_feature=seq_feature,
-                feed_list=feed_list,
-                data_reader=reader,
-                config=config,
-            )
-            self.emb_job["batch_size"] = batch_size
-            self.emb_job["use_gpu"] = use_gpu
-
-        return self.emb_job["task"].predict(
-            data=texts, return_result=True, accelerate_mode=True)
-
-    def get_spm_path(self):
-        if hasattr(self, "spm_path"):
-            return self.spm_path
-        else:
-            return None
-
-    def get_word_dict_path(self):
-        if hasattr(self, "word_dict_path"):
-            return self.word_dict_path
-        else:
-            return None
-
-    def get_params_layer(self):
-        if not hasattr(self, "params_layer"):
-            raise AttributeError(
-                "The module context has not been initialized. "
-                "Please call context() before using get_params_layer")
-        return self.params_layer
-
-    def forward(self, input_ids, position_ids, segment_ids, input_mask):
-        if version_compare(paddle.__version__, '1.8'):
-            pooled_output, sequence_output = self.model_runner(
-                input_ids, position_ids, segment_ids, input_mask)
-            return {
-                'pooled_output': pooled_output,
-                'sequence_output': sequence_output
-            }
-        else:
-            raise RuntimeError(
-                '{} only support dynamic graph mode in paddle >= 1.8'.format(
-                    self.name))
+        if self.embedding_name.endswith('.en'):  # English
+            raise NotImplementedError  # TODO: (chenxiaojie) add tokenizer of English embedding
+        else:  # Chinese
+            return JiebaTokenizer(self.vocab)

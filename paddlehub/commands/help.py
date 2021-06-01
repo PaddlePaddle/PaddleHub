@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -13,40 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from typing import List
 
-from paddlehub.commands.base_command import BaseCommand
-from paddlehub.common.hub_server import CacheUpdater
+import paddlehub as hub
+from paddlehub.commands import register, _commands
 
 
-class HelpCommand(BaseCommand):
-    name = "help"
-
-    def __init__(self, name):
-        super(HelpCommand, self).__init__(name)
-        self.show_in_help = True
-        self.description = "Show help for commands."
-
-    def get_all_commands(self):
-        return BaseCommand.command_dict
-
-    def execute(self, argv):
-        CacheUpdater("hub_help").start()
-        hub_command = BaseCommand.command_dict["hub"]
-        help_text = "\n"
-        help_text += "Usage:\n"
-        help_text += "%s <command> [options]\n" % hub_command.name
-        help_text += "\n"
-        help_text += "Commands:\n"
-        for command_name, command in self.get_all_commands().items():
-            if not command.show_in_help or not command.description:
+@register(name='hub.help', description='Show help for commands.')
+class HelpCommand:
+    def execute(self, argv: List) -> bool:
+        msg = 'Usage:\n'
+        msg += '    hub <command> <options>\n\n'
+        msg += 'Commands:\n'
+        for command, detail in _commands['hub'].items():
+            if command.startswith('_'):
                 continue
-            help_text += "  %-15s\t\t%s\n" % (command.name, command.description)
 
-        print(help_text)
+            if not '_description' in detail:
+                continue
+            msg += '    {:<15}        {}\n'.format(command, detail['_description'])
+
+        print(msg)
         return True
-
-
-command = HelpCommand.instance()

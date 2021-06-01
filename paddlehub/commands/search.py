@@ -13,66 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import argparse
+import os
+from typing import List
 
-import paddlehub as hub
-from paddlehub.common import utils
-from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.common.cml_utils import TablePrinter
-from paddlehub.common.hub_server import CacheUpdater
+from paddlehub.commands import register
+from paddlehub.module.manager import LocalModuleManager
+from paddlehub.server.server import module_server
+from paddlehub.utils import log, platform
+from paddlehub.server.server import CacheUpdater
 
 
-class SearchCommand(BaseCommand):
-    name = "search"
+@register(name='hub.search', description='Search PaddleHub pretrained model through model keywords.')
+class SearchCommand:
+    def execute(self, argv: List) -> bool:
+        argv = '.*' if not argv else argv[0]
 
-    def __init__(self, name):
-        super(SearchCommand, self).__init__(name)
-        self.show_in_help = True
-        self.description = "Search PaddleHub pretrained model through model keywords."
-        self.parser = self.parser = argparse.ArgumentParser(
-            description=self.__class__.__doc__,
-            prog='%s %s <key>' % (ENTRY, name),
-            usage='%(prog)s',
-            add_help=False)
+        widths = [20, 8, 30] if platform.is_windows() else [30, 8, 40]
+        table = log.Table(widths=widths)
+        table.append(*['ModuleName', 'Version', 'Summary'], aligns=['^', '^', '^'], colors=["blue", "blue", "blue"])
+        CacheUpdater("hub_search", argv).start()
+        results = module_server.search_module(name=argv)
 
-    def execute(self, argv):
-        if not argv:
-            argv = ['.*']
+        for result in results:
+            if 'Module' == result['type']:
+                table.append(result['name'], result['version'], result['summary'])
 
-        resource_name = argv[0]
-        CacheUpdater("hub_search", resource_name).start()
-        extra = {"command": "search"}
-        resource_list = hub.HubServer().search_resource(
-            resource_name, resource_type="Module", extra=extra)
-        if utils.is_windows():
-            placeholders = [20, 8, 8, 20]
-        else:
-            placeholders = [30, 8, 8, 25]
-        tp = TablePrinter(
-            titles=["ResourceName", "Type", "Version", "Summary"],
-            placeholders=placeholders)
-        if len(resource_list) == 0:
-            if hub.HubServer()._server_check() is False:
-                print(
-                    "Request Hub-Server unsuccessfully, please check your network."
-                )
-        for resource_name, resource_type, resource_version, resource_summary in resource_list:
-            if resource_type == "Module":
-                colors = ["yellow", None, None, None]
-            else:
-                colors = ["light_red", None, None, None]
-            tp.add_line(
-                contents=[
-                    resource_name, resource_type, resource_version,
-                    resource_summary
-                ],
-                colors=colors)
-        print(tp.get_text())
+        print(table)
         return True
-
-
-command = SearchCommand.instance()

@@ -63,10 +63,8 @@ class CVModuleInfo(BaseModuleInfo):
             "googlenet_imagenet": "predict_classification",
             "alexnet_imagenet": "predict_classification",
             "yolov3_coco2017": "predict_object_detection",
-            "ultra_light_fast_generic_face_detector_1mb_640":
-            "predict_object_detection",
-            "ultra_light_fast_generic_face_detector_1mb_320":
-            "predict_object_detection",
+            "ultra_light_fast_generic_face_detector_1mb_640": "predict_object_detection",
+            "ultra_light_fast_generic_face_detector_1mb_320": "predict_object_detection",
             "ssd_mobilenet_v1_pascal": "predict_object_detection",
             "pyramidbox_face_detection": "predict_object_detection",
             "faster_rcnn_coco2017": "predict_object_detection",

@@ -1,9 +1,0 @@
-name: slda_webpage
-dir: "modules/text/semantic_model/slda_webpage"
-exclude:
-  - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/slda_webpage.tar.gz
-    dest: .
-    uncompress: True
