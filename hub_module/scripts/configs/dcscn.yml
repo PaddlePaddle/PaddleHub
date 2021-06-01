@@ -1,9 +1,0 @@
-name: dcscn
-dir: "modules/image/super_resolution/dcscn"
-exclude:
-    - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/model/image/image_editing/dcscn_model.tar.gz
-    dest: .
-    uncompress: True

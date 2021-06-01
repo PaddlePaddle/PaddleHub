@@ -1,9 +1,0 @@
-name: humanseg_lite
-dir: "modules/image/semantic_segmentation/humanseg_lite"
-exclude:
-    - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/model/image/semantic_segmentation/humanseg_lite_inference.tar.gz
-    dest: .
-    uncompress: True
