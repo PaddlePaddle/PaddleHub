@@ -66,3 +66,40 @@ common = EasyDict(paddle_helper=paddle_utils)
 dataset = EasyDict(Couplet=couplet.Couplet)
 finetune = EasyDict(strategy=EasyDict(ULMFiTStrategy=ULMFiTStrategy))
 logger = EasyDict(logger=log.logger)
+
+
+# Alias for paddle.hub.*
+def load(*args, **kwargs):
+    if _paddle_version < Version('2.1.0') and _paddle_version != Version('0.0.0'):
+        raise RuntimeError(
+            '`hub.load` is only available in PaddlePaddle 2.1 and above, please upgrade the PaddlePaddle version.')
+
+    from paddle.hub import load as phload
+    from paddlehub.server.server import CacheUpdater
+
+    CacheUpdater("paddle.hub.load").start()
+    return phload(*args, **kwargs)
+
+
+def list(*args, **kwargs):
+    if _paddle_version < Version('2.1.0') and _paddle_version != Version('0.0.0'):
+        raise RuntimeError(
+            '`hub.list` is only available in PaddlePaddle 2.1 and above, please upgrade the PaddlePaddle version.')
+
+    from paddle.hub import list as phlist
+    from paddlehub.server.server import CacheUpdater
+
+    CacheUpdater("paddle.hub.list").start()
+    return phlist(*args, **kwargs)
+
+
+def help(*args, **kwargs):
+    if _paddle_version < Version('2.1.0') and _paddle_version != Version('0.0.0'):
+        raise RuntimeError(
+            '`hub.help` is only available in PaddlePaddle 2.1 and above, please upgrade the PaddlePaddle version.')
+
+    from paddle.hub import help as phhelp
+    from paddlehub.server.server import CacheUpdater
+
+    CacheUpdater("paddle.hub.help").start()
+    return phhelp(*args, **kwargs)
