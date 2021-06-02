@@ -18,7 +18,7 @@ import io
 import json
 import os
 import six
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import paddle
 import paddle.nn as nn
@@ -552,7 +552,8 @@ class TransformerModule(RunModule, TextServing):
                 max_seq_len: int = 128,
                 split_char: str = '\002',
                 batch_size: int = 1,
-                use_gpu: bool = False):
+                use_gpu: bool = False,
+                return_prob: bool = False) -> Union[List[str], Tuple[List[str], paddle.Tensor]]:
         """
         Predicts the data labels.
 
@@ -579,8 +580,12 @@ class TransformerModule(RunModule, TextServing):
 
         batches = self._batchify(data, max_seq_len, batch_size, split_char)
         results = []
+        batch_probs = []
         self.eval()
         for batch in batches:
+            # set local variable to catch probs
+            probs = None
+
             if self.task == 'text-matching':
                 query_input_ids, query_segment_ids, title_input_ids, title_segment_ids = batch
                 query_input_ids = paddle.to_tensor(query_input_ids)
@@ -589,6 +594,7 @@ class TransformerModule(RunModule, TextServing):
                 title_segment_ids = paddle.to_tensor(title_segment_ids)
                 probs = self(query_input_ids=query_input_ids, query_token_type_ids=query_segment_ids, \
                     title_input_ids=title_input_ids, title_token_type_ids=title_segment_ids)
+
                 idx = paddle.argmax(probs, axis=1).numpy()
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
@@ -615,6 +621,11 @@ class TransformerModule(RunModule, TextServing):
                     results.append(
                         [pooled_output.squeeze(0).numpy().tolist(),
                          sequence_output.squeeze(0).numpy().tolist()])
+            if return_prob and probs is not None:
+                batch_probs.append(probs)
+        
+        if return_prob:
+            return results, paddle.concat(batch_probs, axis=0)
         return results
 
 
