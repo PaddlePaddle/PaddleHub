@@ -123,7 +123,13 @@ If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the 
 ## QuickStart
 
 ```python
+# install paddlepaddle with gpu
+# !pip install --upgrade paddlepaddle-gpu -i https://mirror.baidu.com/pypi/simple
+
+# or install paddlepaddle with cpu
 !pip install --upgrade paddlepaddle -i https://mirror.baidu.com/pypi/simple
+
+# install paddlehub
 !pip install --upgrade paddlehub -i https://mirror.baidu.com/pypi/simple
 
 import paddlehub as hub
