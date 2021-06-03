@@ -2,7 +2,6 @@
 
 ## 模型预测
 
-
 若想使用我们提供的预训练模型进行预测，可使用如下脚本：
 
 ```python
@@ -15,8 +14,6 @@ if __name__ == '__main__':
     img = cv2.imread("/PATH/TO/IMAGE")
     model.predict(images=[img], visualization=True)
 ```
-
-
 
 
 ## 如何开始Fine-tune

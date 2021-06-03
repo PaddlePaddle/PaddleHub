@@ -17,7 +17,6 @@ if __name__ == '__main__':
 ```
 
 
-
 ## 如何开始Fine-tune
 
 在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用fcn_hrnetw18_cityscapes模型对OpticDiscSeg等数据集进行Fine-tune。
