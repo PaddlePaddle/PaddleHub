@@ -623,7 +623,6 @@ class TransformerModule(RunModule, TextServing):
                          sequence_output.squeeze(0).numpy().tolist()])
             if return_prob and probs is not None:
                 batch_probs.append(probs)
-        
         if return_prob:
             return results, paddle.concat(batch_probs, axis=0)
         return results
