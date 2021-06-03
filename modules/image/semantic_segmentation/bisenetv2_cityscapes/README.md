@@ -1,11 +1,27 @@
 # PaddleHub 图像分割
 
-本示例将展示如何使用PaddleHub对预训练模型进行finetune并完成预测任务。
+## 模型预测
+
+若想使用我们提供的预训练模型进行预测，可使用如下脚本：
+
+```python
+import paddle
+import cv2
+import paddlehub as hub
+
+if __name__ == '__main__':
+    model = hub.Module(name='bisenetv2_cityscapes')
+    img = cv2.imread("/PATH/TO/IMAGE")
+    model.predict(images=[img], visualization=True)
+```
+
 
 
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用bisenet_cityscapes模型对OpticDiscSeg等数据集进行Fine-tune。
+本示例将展示如何使用PaddleHub对预训练模型进行finetune并完成预测任务。
+
+在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用bisenetv2_cityscapes模型对OpticDiscSeg等数据集进行Fine-tune。
 
 ## 代码步骤
 
@@ -35,7 +51,7 @@ train_reader = OpticDiscSeg(transform， mode='train')
 ### Step3: 加载预训练模型
 
 ```python
-model = hub.Module(name='bisenet_cityscapes', num_classes=2, pretrained=None)
+model = hub.Module(name='bisenetv2_cityscapes', num_classes=2, pretrained=None)
 ```
 * `name`: 选择预训练模型的名字。
 * `num_classes`: 分割模型的类别数目。
@@ -88,7 +104,7 @@ import cv2
 import paddlehub as hub
 
 if __name__ == '__main__':
-    model = hub.Module(name='bisenet_cityscapes', pretrained='/PATH/TO/CHECKPOINT')
+    model = hub.Module(name='bisenetv2_cityscapes', pretrained='/PATH/TO/CHECKPOINT')
     img = cv2.imread("/PATH/TO/IMAGE")
     model.predict(images=[img], visualization=True)
 ```
@@ -110,7 +126,7 @@ PaddleHub Serving可以部署一个在线图像分割服务。
 运行启动命令：
 
 ```shell
-$ hub serving start -m bisenet_cityscapes
+$ hub serving start -m bisenetv2_cityscapes
 ```
 
 这样就完成了一个图像分割服务化API的部署，默认端口号为8866。
@@ -144,7 +160,7 @@ def base64_to_cv2(b64str):
 org_im = cv2.imread('/PATH/TO/IMAGE')
 data = {'images':[cv2_to_base64(org_im)]}
 headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/bisenet_cityscapes"
+url = "http://127.0.0.1:8866/predict/bisenetv2_cityscapes"
 r = requests.post(url=url, headers=headers, data=json.dumps(data))
 mask = base64_to_cv2(r.json()["results"][0])
 ```
@@ -155,6 +171,6 @@ https://github.com/PaddlePaddle/PaddleSeg
 
 ### 依赖
 
-paddlepaddle >= 2.0.0rc
+paddlepaddle >= 2.0.0
 
 paddlehub >= 2.0.0

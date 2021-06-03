@@ -1,6 +1,21 @@
 # PaddleHub 图像分割
 
-本示例将展示如何使用PaddleHub对预训练模型进行finetune并完成预测任务。
+
+## 模型预测
+
+
+若想使用我们提供的预训练模型进行预测，可使用如下脚本：
+
+```python
+import paddle
+import cv2
+import paddlehub as hub
+
+if __name__ == '__main__':
+    model = hub.Module(name='fcn_hrnetw18_voc')
+    img = cv2.imread("/PATH/TO/IMAGE")
+    model.predict(images=[img], visualization=True)
+```
 
 
 ## 如何开始Fine-tune
@@ -155,6 +170,6 @@ https://github.com/PaddlePaddle/PaddleSeg
 
 ### 依赖
 
-paddlepaddle >= 2.0.0rc
+paddlepaddle >= 2.0.0
 
 paddlehub >= 2.0.0

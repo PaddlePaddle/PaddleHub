@@ -1,6 +1,20 @@
 # PaddleHub 图像分割
 
-本示例将展示如何使用PaddleHub对预训练模型进行finetune并完成预测任务。
+## 模型预测
+
+
+若想使用我们提供的预训练模型进行预测，可使用如下脚本：
+
+```python
+import paddle
+import cv2
+import paddlehub as hub
+
+if __name__ == '__main__':
+    model = hub.Module(name='fcn_hrnetw48_cityscapes')
+    img = cv2.imread("/PATH/TO/IMAGE")
+    model.predict(images=[img], visualization=True)
+```
 
 
 ## 如何开始Fine-tune
@@ -51,9 +65,7 @@ trainer = Trainer(model, optimizer, checkpoint_dir='test_ckpt_img_ocr', use_gpu=
 
 #### 优化策略
 
-Paddle2.0提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详细参见[策略](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/optimizer/optimizer/Optimizer_cn.html)。
-
-其中`Adam`:
+Paddle2.0提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，其中`Adam`:
 
 * `learning_rate`: 全局学习率。
 *  `parameters`: 待优化模型参数。
@@ -157,6 +169,6 @@ https://github.com/PaddlePaddle/PaddleSeg
 
 ### 依赖
 
-paddlepaddle >= 2.0.0rc
+paddlepaddle >= 2.0.0
 
 paddlehub >= 2.0.0

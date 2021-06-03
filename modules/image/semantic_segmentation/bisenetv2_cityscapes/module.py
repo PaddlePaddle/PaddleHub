@@ -27,7 +27,7 @@ import bisenet_cityscapes.layers as layers
 
 
 @moduleinfo(
-    name="bisenet_cityscapes",
+    name="bisenetv2_cityscapes",
     type="CV/semantic_segmentation",
     author="paddlepaddle",
     author_email="",
