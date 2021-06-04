@@ -1,2 +1,3 @@
 nltk==3.2.5
+jieba
 subword-nmt

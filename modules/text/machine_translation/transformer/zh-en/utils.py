@@ -12,10 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import re
 from typing import List
 
 import codecs
+import jieba
+
+jieba.setLogLevel(logging.INFO)
+
 try:
     import nltk
     nltk.data.find('misc/perluniprops')
@@ -23,13 +28,12 @@ try:
 except LookupError:
     nltk.download('perluniprops')
     nltk.download('nonbreaking_prefixes')
-from nltk.tokenize.moses import MosesTokenizer, MosesDetokenizer
+from nltk.tokenize.moses import MosesDetokenizer
 from subword_nmt.apply_bpe import BPE
 
 
 class MTTokenizer(object):
-    def __init__(self, bpe_codes_file: str, lang_src: str = 'en', lang_trg: str = 'de', separator='@@'):
-        self.moses_tokenizer = MosesTokenizer(lang=lang_src)
+    def __init__(self, bpe_codes_file: str, lang_src: str = 'zh', lang_trg: str = 'en', separator='@@'):
         self.moses_detokenizer = MosesDetokenizer(lang=lang_trg)
         self.bpe_tokenizer = BPE(codes=codecs.open(bpe_codes_file, encoding='utf-8'),
                                  merges=-1,
@@ -41,8 +45,9 @@ class MTTokenizer(object):
         """
         Convert source string into bpe tokens.
         """
-        moses_tokens = self.moses_tokenizer.tokenize(text)
-        tokenized_text = ' '.join(moses_tokens)
+        text = text.replace(' ', '')  # Remove blanks in Chinese text.
+        jieba_tokens = list(jieba.cut(text))
+        tokenized_text = ' '.join(jieba_tokens)
         tokenized_bpe_text = self.bpe_tokenizer.process_line(tokenized_text)  # Apply bpe to text
         bpe_tokens = tokenized_bpe_text.split(' ')
         return bpe_tokens
