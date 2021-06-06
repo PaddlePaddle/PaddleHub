@@ -552,8 +552,7 @@ class TransformerModule(RunModule, TextServing):
                 max_seq_len: int = 128,
                 split_char: str = '\002',
                 batch_size: int = 1,
-                use_gpu: bool = False,
-                return_prob: bool = False) -> Union[List[str], Tuple[List[str], paddle.Tensor]]:
+                use_gpu: bool = False):
         """
         Predicts the data labels.
 
@@ -580,7 +579,6 @@ class TransformerModule(RunModule, TextServing):
 
         batches = self._batchify(data, max_seq_len, batch_size, split_char)
         results = []
-        batch_probs = []
         self.eval()
         for batch in batches:
             # set local variable to catch probs
@@ -598,7 +596,8 @@ class TransformerModule(RunModule, TextServing):
                 idx = paddle.argmax(probs, axis=1).numpy()
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
-                results.extend(labels)
+
+                results.extend(list(zip(labels, probs.numpy().tolist())))
             else:
                 input_ids, segment_ids = batch
                 input_ids = paddle.to_tensor(input_ids)
@@ -609,22 +608,20 @@ class TransformerModule(RunModule, TextServing):
                     idx = paddle.argmax(probs, axis=1).numpy()
                     idx = idx.tolist()
                     labels = [self.label_map[i] for i in idx]
-                    results.extend(labels)
+                    results.extend(list(zip(labels, probs.numpy().tolist())))
                 elif self.task == 'token-cls':
                     probs = self(input_ids, segment_ids)
                     batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
                     batch_ids = batch_ids.tolist()
                     token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
-                    results.extend(token_labels)
+                    results.extend(list(zip(token_labels, probs.numpy().tolist())))
+
                 elif self.task == None:
                     sequence_output, pooled_output = self(input_ids, segment_ids)
                     results.append(
                         [pooled_output.squeeze(0).numpy().tolist(),
                          sequence_output.squeeze(0).numpy().tolist()])
-            if return_prob and probs is not None:
-                batch_probs.append(probs)
-        if return_prob:
-            return results, paddle.concat(batch_probs, axis=0)
+                
         return results
 
 
