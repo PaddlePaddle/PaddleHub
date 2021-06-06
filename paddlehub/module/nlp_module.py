@@ -596,13 +596,11 @@ class TransformerModule(RunModule, TextServing):
                 idx = paddle.argmax(probs, axis=1).numpy()
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
-
                 results.extend(list(zip(labels, probs.numpy().tolist())))
             else:
                 input_ids, segment_ids = batch
                 input_ids = paddle.to_tensor(input_ids)
                 segment_ids = paddle.to_tensor(segment_ids)
-
                 if self.task == 'seq-cls':
                     probs = self(input_ids, segment_ids)
                     idx = paddle.argmax(probs, axis=1).numpy()
@@ -615,13 +613,11 @@ class TransformerModule(RunModule, TextServing):
                     batch_ids = batch_ids.tolist()
                     token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
                     results.extend(list(zip(token_labels, probs.numpy().tolist())))
-
                 elif self.task == None:
                     sequence_output, pooled_output = self(input_ids, segment_ids)
                     results.append(
                         [pooled_output.squeeze(0).numpy().tolist(),
                          sequence_output.squeeze(0).numpy().tolist()])
-                
         return results
 
 
