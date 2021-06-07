@@ -117,7 +117,7 @@ If you have any questions during the use of the model, you can join the official
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
 </div>  
-If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the operating class will invite you to join the group.
+please add WeChat above and send "Hub" to the robot, the robot will invite you to join the group automatically.
 
 <a name="QuickStart"></a>
 ## QuickStart

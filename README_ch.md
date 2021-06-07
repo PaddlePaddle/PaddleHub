@@ -124,7 +124,7 @@
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
 </div>  
-如扫码失败，请添加微信15704308458，并备注“Hub”，运营同学会邀请您入群。  
+扫码备注"Hub"加好友之后，再发送“Hub”，会自动邀请您入群。  
 
 <div id="QuickStart">
 
