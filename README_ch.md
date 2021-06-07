@@ -149,6 +149,8 @@ print(results)
 ！hub serving start -m lac
 ```
 
+ 更多迁移学习能力可以参考[教程文档](https://paddlehub.readthedocs.io/zh_CN/release-v2.1/transfer_learning_index.html)
+
 
 
 
