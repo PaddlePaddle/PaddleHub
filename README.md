@@ -136,6 +136,7 @@ results = lac.cut(text=test_text, use_gpu=False, batch_size=1, return_tag=True)
 print(results)
 #{'word': ['今天', '是', '个', '好天气', '。'], 'tag': ['TIME', 'v', 'q', 'n', 'w']}
 ```
+More API for transfer learning, please refer [Tutorial](https://paddlehub.readthedocs.io/en/release-v2.1/transfer_learning_index.html)
 
 <a name="License"></a>
 ## License
