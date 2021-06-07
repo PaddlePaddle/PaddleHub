@@ -210,3 +210,4 @@ print(results)
 * 非常感谢[BurrowsWang](https://github.com/BurrowsWang)修复Markdown表格显示问题
 * 非常感谢[huqi](https://github.com/hu-qi)修复了readme中的错别字
 * 非常感谢[parano](https://github.com/parano)、[cqvu](https://github.com/cqvu)、[deehrlic](https://github.com/deehrlic)三位的贡献与支持
+* 非常感谢[paopjian](https://github.com/paopjian)修改了中文readme模型搜索指向的的网站地址错误[#1424](https://github.com/PaddlePaddle/PaddleHub/issues/1424)

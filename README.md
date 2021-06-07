@@ -195,3 +195,4 @@ We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 * Many thanks to [BurrowsWang](https://github.com/BurrowsWang) for fixing Markdown table display problem
 * Many thanks to [huqi](https://github.com/hu-qi) for fixing readme typo
 * Many thanks to [parano](https://github.com/parano) [cqvu](https://github.com/cqvu) [deehrlic](https://github.com/deehrlic) for contributing this feature in PaddleHub
+* Many thanks to [paopjian](https://github.com/paopjian) for correcting the wrong website address [#1424](https://github.com/PaddlePaddle/PaddleHub/issues/1424)
