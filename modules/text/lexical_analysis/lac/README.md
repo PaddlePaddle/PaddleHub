@@ -109,7 +109,7 @@ $ hub serving start -c serving_config.json
 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
 ```python
-import request
+import requests
 import json
 
 # 待预测数据
