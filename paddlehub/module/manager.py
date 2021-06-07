@@ -1,5 +1,5 @@
-#coding:utf-8
-# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# coding:utf-8
+# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -13,331 +13,386 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 import shutil
-import tarfile
 
-from functools import cmp_to_key
-import tarfile
 import sys
-import importlib
-import inspect
+from collections import OrderedDict
+from typing import List
 
-import paddlehub as hub
-from paddlehub.common import utils
-from paddlehub.common.downloader import default_downloader
-from paddlehub.common.dir import MODULE_HOME
-from paddlehub.common.cml_utils import paint_modules_info
-from paddlehub.common.logger import logger
-from paddlehub.common import tmp_dir
-from paddlehub.module import module_desc_pb2
-from paddlehub.version import hub_version as sys_hub_verion
-from paddle import __version__ as sys_paddle_version
+import filelock
+
+from paddlehub.env import MODULE_HOME, TMP_HOME
+from paddlehub.module.module import Module as HubModule
+from paddlehub.server import module_server
+from paddlehub.utils import xarfile, log, utils, pypi
+
+
+class HubModuleNotFoundError(Exception):
+    def __init__(self, name: str, info: dict = None, version: str = None, source: str = None):
+        self.name = name
+        self.version = version
+        self.info = info
+        self.source = source
+
+    def __str__(self):
+        msg = '{}'.format(self.name)
+        if self.version:
+            msg += '-{}'.format(self.version)
+
+        if self.source:
+            msg += ' from {}'.format(self.source)
+
+        tips = 'No HubModule named {} was found'.format(log.FormattedText(text=msg, color='red'))
+
+        if self.info:
+            sort_infos = sorted(self.info.items(), key=lambda x: utils.Version(x[0]))
+
+            table = log.Table()
+            table.append(
+                *['Name', 'Version', 'PaddlePaddle Version Required', 'PaddleHub Version Required'],
+                widths=[15, 10, 35, 35],
+                aligns=['^', '^', '^', '^'],
+                colors=['cyan', 'cyan', 'cyan', 'cyan'])
+
+            for _ver, info in sort_infos:
+                paddle_version = 'Any' if not info['paddle_version'] else ', '.join(info['paddle_version'])
+                hub_version = 'Any' if not info['hub_version'] else ', '.join(info['hub_version'])
+                table.append(self.name, _ver, paddle_version, hub_version, aligns=['^', '^', '^', '^'])
+
+            tips += ':\n{}'.format(table)
+        return tips
+
+
+class EnvironmentMismatchError(Exception):
+    def __init__(self, name: str, info: dict, version: str = None):
+        self.name = name
+        self.version = version
+        self.info = info
+
+    def __str__(self):
+        msg = '{}'.format(self.name)
+        if self.version:
+            msg += '-{}'.format(self.version)
+
+        tips = '{} cannot be installed because some conditions are not met'.format(
+            log.FormattedText(text=msg, color='red'))
+
+        if self.info:
+            sort_infos = sorted(self.info.items(), key=lambda x: utils.Version(x[0]))
+
+            table = log.Table()
+            table.append(
+                *['Name', 'Version', 'PaddlePaddle Version Required', 'PaddleHub Version Required'],
+                widths=[15, 10, 35, 35],
+                aligns=['^', '^', '^', '^'],
+                colors=['cyan', 'cyan', 'cyan', 'cyan'])
+
+            import paddle
+            import paddlehub
+
+            for _ver, info in sort_infos:
+                paddle_version = 'Any' if not info['paddle_version'] else ', '.join(info['paddle_version'])
+                for version in info['paddle_version']:
+                    if not utils.Version(paddle.__version__).match(version):
+                        paddle_version = '{}(Mismatch)'.format(paddle_version)
+                        break
+
+                hub_version = 'Any' if not info['hub_version'] else ', '.join(info['hub_version'])
+                for version in info['hub_version']:
+                    if not utils.Version(paddlehub.__version__).match(version):
+                        hub_version = '{}(Mismatch)'.format(hub_version)
+                        break
+
+                table.append(self.name, _ver, paddle_version, hub_version, aligns=['^', '^', '^', '^'])
+
+            tips += ':\n{}'.format(table)
+        return tips
 
 
 class LocalModuleManager(object):
-    def __init__(self, module_home=None):
-        self.local_modules_dir = module_home if module_home else MODULE_HOME
-        self.modules_dict = {}
-        if not os.path.exists(self.local_modules_dir):
-            utils.mkdir(self.local_modules_dir)
-        elif os.path.isfile(self.local_modules_dir):
-            raise ValueError("Module home should be a folder, not a file")
+    '''
+    LocalModuleManager is used to manage PaddleHub's local Module, which supports the installation, uninstallation,
+    and search of HubModule. LocalModuleManager is a singleton object related to the path, in other words, when the
+    LocalModuleManager object of the same home directory is generated multiple times, the same object is returned.
 
-    def check_module_valid(self, module_path):
-        try:
-            desc_pb_path = os.path.join(module_path, 'module_desc.pb')
-            if os.path.exists(desc_pb_path) and os.path.isfile(desc_pb_path):
-                info = {}
-                desc = module_desc_pb2.ModuleDesc()
-                with open(desc_pb_path, "rb") as fp:
-                    desc.ParseFromString(fp.read())
-                info['version'] = desc.attr.map.data["module_info"].map.data[
-                    "version"].s
-                info['name'] = desc.attr.map.data["module_info"].map.data[
-                    "name"].s
-                return True, info
-            else:
-                module_file = os.path.realpath(
-                    os.path.join(module_path, 'module.py'))
-                if os.path.exists(module_file):
-                    basename = os.path.split(module_path)[-1]
-                    dirname = os.path.join(
-                        *list(os.path.split(module_path)[:-1]))
-                    sys.path.insert(0, dirname)
-                    _module = importlib.import_module(
-                        "{}.module".format(basename))
-                    for _item, _cls in inspect.getmembers(
-                            _module, inspect.isclass):
-                        _item = _module.__dict__[_item]
-                        _file = os.path.realpath(
-                            sys.modules[_item.__module__].__file__)
-                        if issubclass(
-                                _item,
-                                hub.Module) and _file.startswith(module_file):
-                            version = _item._version
-                            break
-                    sys.path.pop(0)
-                    return True, {'version': version, 'name': _item._name}
-                logger.warning(
-                    "%s does not exist, the module will be reinstalled" %
-                    desc_pb_path)
-        except:
-            pass
-        return False, None
+    Args:
+        home (str): The directory where PaddleHub modules are stored, the default is ~/.paddlehub/modules
+    '''
+    _instance_map = {}
 
-    def all_modules(self, update=False):
-        if not update and self.modules_dict:
-            return self.modules_dict
-        self.modules_dict = {}
-        for sub_dir_name in os.listdir(self.local_modules_dir):
-            sub_dir_path = os.path.join(self.local_modules_dir, sub_dir_name)
-            if os.path.isdir(sub_dir_path):
-                if "-" in sub_dir_name:
-                    sub_dir_name = sub_dir_name.replace("-", "_")
-                    new_sub_dir_path = os.path.join(self.local_modules_dir,
-                                                    sub_dir_name)
-                    shutil.move(sub_dir_path, new_sub_dir_path)
-                    sub_dir_path = new_sub_dir_path
-                valid, info = self.check_module_valid(sub_dir_path)
-                if valid:
-                    module_name = info['name']
-                    self.modules_dict[module_name] = (sub_dir_path,
-                                                      info['version'])
-        return self.modules_dict
+    def __new__(cls, home: str = MODULE_HOME):
+        home = MODULE_HOME if not home else home
+        if home in cls._instance_map:
+            return cls._instance_map[home]
+        cls._instance_map[home] = super(LocalModuleManager, cls).__new__(cls)
+        return cls._instance_map[home]
 
-    def search_module(self, module_name, module_version=None, update=False):
-        self.all_modules(update=update)
-        return self.modules_dict.get(module_name, None)
+    def __init__(self, home: str = None):
+        home = MODULE_HOME if not home else home
+        self.home = home
+        self._local_modules = OrderedDict()
 
-    def install_module(self,
-                       module_name=None,
-                       module_dir=None,
-                       module_package=None,
-                       module_version=None,
-                       upgrade=False,
-                       extra=None):
-        md5_value = installed_module_version = None
-        from_user_dir = True if module_dir else False
-<<<<<<< HEAD
-        if module_name:
-            self.all_modules(update=True)
-            module_info = self.modules_dict.get(module_name, None)
-            if module_info:
-                if not module_version or module_version == self.modules_dict[
-                        module_name][1]:
-                    module_dir = self.modules_dict[module_name][0]
-                    module_tag = module_name if not module_version else '%s-%s' % (
-                        module_name, module_version)
-                    tips = "Module %s already installed in %s" % (module_tag,
-                                                                  module_dir)
-                    return True, tips, self.modules_dict[module_name]
+        # Most HubModule can be regarded as a python package, so we need to add the home
+        # directory to sys.path
+        if not home in sys.path:
+            sys.path.insert(0, home)
 
-            search_result = hub.default_hub_server.get_module_url(
-                module_name, version=module_version, extra=extra)
-            name = search_result.get('name', None)
-            url = search_result.get('url', None)
-            md5_value = search_result.get('md5', None)
-            installed_module_version = search_result.get('version', None)
-            if not url or (module_version is not None
-                           and installed_module_version != module_version) or (
-                               name != module_name):
-                if default_hub_server._server_check() is False:
-                    tips = "Request Hub-Server unsuccessfully, please check your network."
+    def _get_normalized_path(self, name: str) -> str:
+        return os.path.join(self.home, self._get_normalized_name(name))
+
+    def _get_normalized_name(self, name: str) -> str:
+        # Some HubModules contain '-'  in name (eg roberta_wwm_ext_chinese_L-3_H-1024_A-16).
+        # Replace '-' with '_' to comply with python naming conventions.
+        return name.replace('-', '_')
+
+    def install(self,
+                *,
+                name: str = None,
+                directory: str = None,
+                archive: str = None,
+                url: str = None,
+                version: str = None,
+                source: str = None,
+                update: bool = False,
+                branch: str = None,
+                ignore_env_mismatch: bool = False) -> HubModule:
+        '''
+        Install a HubModule from name or directory or archive file or url. When installing with the name parameter, if a
+        module that meets the conditions (both name and version) already installed, the installation step will be skipped.
+        When installing with other parameter, The locally installed modules will be uninstalled.
+
+        Args:
+            name                (str|optional): module name to install
+            directory           (str|optional): directory containing  module code
+            archive             (str|optional): archive file containing  module code
+            url                 (str|optional): url points to a archive file containing module code
+            version             (str|optional): module version, use with name parameter
+            source              (str|optional): source containing module code, use with name paramete
+            ignore_env_mismatch (str|optional): Whether to ignore the environment mismatch when installing the Module.
+        '''
+        if name:
+
+            lock = filelock.FileLock(os.path.join(TMP_HOME, name))
+            with lock:
+                hub_module_cls = self.search(name, source, branch)
+                if hub_module_cls and hub_module_cls.version.match(version):
+                    directory = self._get_normalized_path(hub_module_cls.name)
+                    if version:
+                        msg = 'Module {}-{} already installed in {}'.format(hub_module_cls.name, hub_module_cls.version,
+                                                                            directory)
+                    else:
+                        msg = 'Module {} already installed in {}'.format(hub_module_cls.name, directory)
+                    log.logger.info(msg)
+                    return hub_module_cls
+                if source:
+                    return self._install_from_source(name, version, source, update, branch)
+                return self._install_from_name(name, version, ignore_env_mismatch)
+        elif directory:
+            return self._install_from_directory(directory)
+        elif archive:
+            return self._install_from_archive(archive)
+        elif url:
+            return self._install_from_url(url)
+        else:
+            raise RuntimeError('Attempt to install a module, but no parameters were specified.')
+
+    def uninstall(self, name: str) -> bool:
+        '''Return True if uninstall successfully else False'''
+        if not os.path.exists(self._get_normalized_path(name)):
+            log.logger.info('{} is not installed'.format(name))
+            return False
+
+        shutil.rmtree(self._get_normalized_path(name))
+        if name in self._local_modules:
+            log.logger.info('Successfully uninstalled {}-{}'.format(name, self._local_modules[name].version))
+            self._local_modules.pop(name)
+        else:
+            log.logger.info('Successfully uninstalled {}'.format(name))
+        return True
+
+    def search(self, name: str, source: str = None, branch: str = None) -> HubModule:
+        '''Return HubModule If a HubModule with a specific name is found, otherwise None.'''
+        module = None
+
+        if name in self._local_modules:
+            module = self._local_modules[name]
+        else:
+            module_dir = self._get_normalized_path(name)
+            if os.path.exists(module_dir):
+                try:
+                    module = self._local_modules[name] = HubModule.load(module_dir)
+                except:
+                    utils.record_exception('An error was encountered while loading {}'.format(name))
+
+        if not module:
+            return None
+
+        if source and source != module.source:
+            return None
+
+        if branch and branch != module.branch:
+            return None
+
+        return module
+
+    def list(self) -> List[HubModule]:
+        '''List all installed HubModule.'''
+        for subdir in os.listdir(self.home):
+            fulldir = os.path.join(self.home, subdir)
+
+            try:
+                self._local_modules[subdir] = HubModule.load(fulldir)
+            except:
+                utils.record_exception('An error was encountered while loading {}'.format(subdir))
+
+        return [module for module in self._local_modules.values()]
+
+    def _install_from_url(self, url: str) -> HubModule:
+        '''Install HubModule from url'''
+        with utils.generate_tempdir() as _tdir:
+            with log.ProgressBar('Download {}'.format(url)) as bar:
+                for file, ds, ts in utils.download_with_progress(url, _tdir):
+                    bar.update(float(ds) / ts)
+
+            return self._install_from_archive(file)
+
+    def _install_from_name(self, name: str, version: str = None, ignore_env_mismatch: bool = False) -> HubModule:
+        '''Install HubModule by name search result'''
+        result = module_server.search_module(name=name, version=version)
+        for item in result:
+            if name.lower() == item['name'].lower() and utils.Version(item['version']).match(version):
+                return self._install_from_url(item['url'])
+
+        module_infos = module_server.get_module_compat_info(name=name)
+        # The HubModule with the specified name cannot be found
+        if not module_infos:
+            raise HubModuleNotFoundError(name=name, version=version)
+
+        valid_infos = {}
+        if version:
+            for _ver, _info in module_infos.items():
+                if utils.Version(_ver).match(version):
+                    valid_infos[_ver] = _info
+        else:
+            valid_infos = module_infos.copy()
+
+        # Cannot find a HubModule that meets the version
+        if valid_infos:
+            if not ignore_env_mismatch:
+                raise EnvironmentMismatchError(name=name, info=valid_infos, version=version)
+
+            # If `ignore_env_mismatch` is set, ignore the problem of environmental mismatch, such as PaddlePaddle or PaddleHub
+            # version incompatibility. This may cause some unexpected problems during installation or running, but it is useful
+            # in some cases, for example, the development version of PaddlePaddle(with version number `0.0.0`) is installed
+            # locally.
+            if version:
+                if version in valid_infos:
+                    url = valid_infos[version]['url']
                 else:
-                    tips = "Can't find module %s" % module_name
-                    if module_version:
-                        tips += " with version %s" % module_version
-                    module_tag = module_name if not module_version else '%s-%s' % (
-                        module_name, module_version)
-                return False, tips, None
-
-            result, tips, module_zip_file = default_downloader.download_file(
-                url=url,
-                save_path=hub.CACHE_HOME,
-                save_name=module_name,
-                replace=True,
-                print_progress=True)
-            result, tips, module_dir = default_downloader.uncompress(
-                file=module_zip_file,
-                dirname=MODULE_HOME,
-                delete_file=True,
-                print_progress=True)
-
-        if module_package:
-            with tarfile.open(module_package, "r:gz") as tar:
-                file_names = tar.getnames()
-                size = len(file_names) - 1
-                module_dir = os.path.split(file_names[0])[0]
-                module_dir = os.path.join(hub.CACHE_HOME, module_dir)
-                # remove cache
-                if os.path.exists(module_dir):
-                    shutil.rmtree(module_dir)
-                for index, file_name in enumerate(file_names):
-                    tar.extract(file_name, hub.CACHE_HOME)
-
-        if module_dir:
-            if not module_name:
-                module_name = hub.Module(directory=module_dir).name
-            self.all_modules(update=False)
-            module_info = self.modules_dict.get(module_name, None)
-            if module_info:
-                module_dir = self.modules_dict[module_name][0]
-                module_tag = module_name if not module_version else '%s-%s' % (
-                    module_name, module_version)
-                tips = "Module %s already installed in %s" % (module_tag,
-                                                              module_dir)
-                return True, tips, self.modules_dict[module_name]
-
-            if md5_value:
-                with open(
-                        os.path.join(MODULE_HOME, module_dir, "md5.txt"),
-                        "w") as fp:
-                    fp.write(md5_value)
-            save_path = os.path.join(MODULE_HOME, module_name)
-            if os.path.exists(save_path):
-                shutil.move(save_path)
-            if from_user_dir:
-                shutil.copytree(module_dir, save_path)
+                    raise HubModuleNotFoundError(name=name, info=module_infos, version=version)
             else:
-                shutil.move(module_dir, save_path)
-            module_dir = save_path
-            tips = "Successfully installed %s" % module_name
-            if installed_module_version:
-                tips += "-%s" % installed_module_version
-            return True, tips, (module_dir, installed_module_version)
-        tips = "Download %s-%s failed" % (module_name, module_version)
-        return False, tips, module_dir
-=======
-        with tmp_dir() as _dir:
-            if module_name:
-                self.all_modules(update=True)
-                module_info = self.modules_dict.get(module_name, None)
-                if module_info:
-                    if not module_version or module_version == self.modules_dict[
-                            module_name][1]:
-                        module_dir = self.modules_dict[module_name][0]
-                        module_tag = module_name if not module_version else '%s-%s' % (
-                            module_name, module_version)
-                        tips = "Module %s already installed in %s" % (
-                            module_tag, module_dir)
-                        return True, tips, self.modules_dict[module_name]
+                # Get the maximum version number.
+                version = sorted([utils.Version(_v) for _v in valid_infos.keys()])[-1]
+                url = valid_infos[str(version)]['url']
+            log.logger.warning('Ignore environmental mismatch of The Module {}-{}'.format(name, version))
+            return self._install_from_url(url)
+        raise HubModuleNotFoundError(name=name, info=module_infos, version=version)
 
-                search_result = hub.HubServer().get_module_url(
-                    module_name, version=module_version, extra=extra)
-                name = search_result.get('name', None)
-                url = search_result.get('url', None)
-                md5_value = search_result.get('md5', None)
-                installed_module_version = search_result.get('version', None)
-                if not url or (module_version is not None
-                               and installed_module_version != module_version
-                               ) or (name != module_name):
-                    if hub.HubServer()._server_check() is False:
-                        tips = "Request Hub-Server unsuccessfully, please check your network."
-                        return False, tips, None
-                    module_versions_info = hub.HubServer().search_module_info(
-                        module_name)
-                    if module_versions_info is None:
-                        tips = "Can't find module %s, please check your spelling." \
-                               % (module_name)
-                    elif module_version is not None and module_version not in [
-                            item[1] for item in module_versions_info
-                    ]:
-                        tips = "Can't find module %s with version %s, all versions are listed below." \
-                               % (module_name, module_version)
-                        tips += paint_modules_info(module_versions_info)
-                    else:
-                        tips = "The version of PaddlePaddle(%s) or PaddleHub(%s) can not match module, please upgrade your PaddlePaddle or PaddleHub according to the form below." \
-                               % (sys_paddle_version, sys_hub_verion)
-                        tips += paint_modules_info(module_versions_info)
+    def _install_from_source(self, name: str, version: str, source: str, update: bool = False,
+                             branch: str = None) -> HubModule:
+        '''Install a HubModule from git repository'''
+        result = module_server.search_module(name=name, source=source, version=version, update=update, branch=branch)
+        for item in result:
+            if item['name'] == name and item['version'].match(version):
 
-                    return False, tips, None
+                # uninstall local module
+                local_module = self.search(name)
+                if local_module and local_module.source == source and local_module.branch == branch:
+                    self._local_modules[name] = local_module
+                    return self._local_modules[name]
 
-                result, tips, module_zip_file = default_downloader.download_file(
-                    url=url,
-                    save_path=_dir,
-                    save_name=module_name,
-                    replace=True,
-                    print_progress=True)
-                result, tips, module_dir = default_downloader.uncompress(
-                    file=module_zip_file,
-                    dirname=os.path.join(_dir, "tmp_module"),
-                    delete_file=True,
-                    print_progress=True)
+                if os.path.exists(self._get_normalized_path(name)):
+                    self.uninstall(name)
 
-            if module_package:
-                with tarfile.open(module_package, "r:gz") as tar:
-                    file_names = tar.getnames()
-                    size = len(file_names) - 1
-                    module_name = file_names[0]
-                    module_dir = os.path.join(_dir, module_name)
-                    for index, file_name in enumerate(file_names):
-                        tar.extract(file_name, _dir)
-                    if "-" in module_name:
-                        module_name = module_name.replace("-", "_")
-                        new_module_dir = os.path.join(_dir, module_name)
-                        shutil.move(module_dir, new_module_dir)
-                        module_dir = new_module_dir
-                    module_name = hub.Module(directory=module_dir).name
+                installed_path = self._get_normalized_path(name)
+                shutil.copytree(item['path'], installed_path)
 
-            if from_user_dir:
-                module_name = hub.Module(directory=module_dir).name
-                module_version = hub.Module(directory=module_dir).version
-                self.all_modules(update=False)
-                module_info = self.modules_dict.get(module_name, None)
-                if module_info:
-                    if module_version == module_info[1]:
-                        module_dir = self.modules_dict[module_name][0]
-                        module_tag = module_name if not module_version else '%s-%s' % (
-                            module_name, module_version)
-                        tips = "Module %s already installed in %s" % (
-                            module_tag, module_dir)
-                        return True, tips, self.modules_dict[module_name]
+                source_info_file = os.path.join(installed_path, '_source_info.yaml')
+                with open(source_info_file, 'w') as file:
+                    file.write('source: {}\n'.format(source))
+                    file.write('branch: {}'.format(branch))
 
-            if module_dir:
-                if md5_value:
-                    with open(
-                            os.path.join(MODULE_HOME, module_dir, "md5.txt"),
-                            "w") as fp:
-                        fp.write(md5_value)
+                # Install python package requirements, This behavior needs to occur before Module.load,
+                # otherwise the model will fail to load due to missing dependencies.
+                self._install_module_requirements(installed_path)
 
-                save_path = os.path.join(MODULE_HOME,
-                                         module_name.replace("-", "_"))
-                if save_path != module_dir:
-                    if os.path.exists(save_path):
-                        shutil.rmtree(save_path)
-                    if from_user_dir:
-                        shutil.copytree(module_dir, save_path)
-                    else:
-                        shutil.move(module_dir, save_path)
-                module_dir = save_path
-                tips = "Successfully installed %s" % module_name
-                if installed_module_version:
-                    tips += "-%s" % installed_module_version
-                return True, tips, (module_dir, installed_module_version)
-            tips = "Download %s-%s failed" % (module_name, module_version)
-            return False, tips, module_dir
->>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
+                self._local_modules[name] = HubModule.load(installed_path)
 
-    def uninstall_module(self, module_name, module_version=None):
-        self.all_modules(update=True)
-        if not module_name in self.modules_dict:
-            tips = "%s is not installed" % module_name
-            return True, tips
-        if module_version and module_version != self.modules_dict[module_name][
-                1]:
-            tips = "%s-%s is not installed" % (module_name, module_version)
-            return True, tips
-        tips = "Successfully uninstalled %s" % module_name
-        if module_version:
-            tips += '-%s' % module_version
-        module_dir = self.modules_dict[module_name][0]
-        shutil.rmtree(module_dir)
-        return True, tips
+                if version:
+                    log.logger.info('Successfully installed {}-{}'.format(name, version))
+                else:
+                    log.logger.info('Successfully installed {}'.format(name))
+                return self._local_modules[name]
 
+        raise HubModuleNotFoundError(name=name, version=version, source=source)
 
-default_module_manager = LocalModuleManager()
+    def _install_from_directory(self, directory: str) -> HubModule:
+        '''Install a HubModule from directory containing module.py'''
+        module_info = HubModule.load_module_info(directory)
+
+        # A temporary directory is copied here for two purposes:
+        # 1. Avoid affecting user-specified directory (for example, a __pycache__
+        #    directory will be generated).
+        # 2. HubModule is essentially a python package. When internal package
+        #    references are made in it, the correct package name is required.
+        with utils.generate_tempdir() as _dir:
+            tempdir = os.path.join(_dir, module_info.name)
+            tempdir = self._get_normalized_name(tempdir)
+            shutil.copytree(directory, tempdir)
+
+            # Uninstall local module
+            if os.path.exists(self._get_normalized_path(module_info.name)):
+                self.uninstall(module_info.name)
+
+            shutil.copytree(directory, self._get_normalized_path(module_info.name))
+
+            # Install python package requirements, This behavior needs to occur before Module.load,
+            # otherwise the model will fail to load due to missing dependencies.
+            self._install_module_requirements(directory)
+
+            hub_module_cls = HubModule.load(self._get_normalized_path(module_info.name))
+            self._local_modules[module_info.name] = hub_module_cls
+
+            log.logger.info('Successfully installed {}-{}'.format(hub_module_cls.name, hub_module_cls.version))
+            return hub_module_cls
+
+    def _install_from_archive(self, archive: str) -> HubModule:
+        '''Install HubModule from archive file (eg xxx.tar.gz)'''
+        with utils.generate_tempdir() as _tdir:
+            with log.ProgressBar('Decompress {}'.format(archive)) as bar:
+                for path, ds, ts in xarfile.unarchive_with_progress(archive, _tdir):
+                    bar.update(float(ds) / ts)
+
+            # Sometimes the path contains '.'
+            path = os.path.normpath(path)
+            directory = os.path.join(_tdir, path.split(os.sep)[0])
+            return self._install_from_directory(directory)
+
+    def _install_module_requirements(self, directory: str):
+
+        rfile = os.path.join(directory, 'requirements.txt')
+        if not os.path.exists(rfile):
+            return
+
+        file = utils.get_record_file()
+        with open(file, 'a') as _stream:
+
+            with log.logger.processing('Installing dependent packages from {}'.format(rfile)):
+                result = pypi.install_from_file(rfile, ostream=_stream, estream=_stream)
+                if result:
+                    log.logger.info('Successfully installed dependent packages.')
+                else:
+                    log.logger.warning(
+                        'Some errors occurred while installing dependent packages. Detailed error information can be found in the {}.'
+                        .format(file))

@@ -13,43 +13,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Setup for pip package."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import platform
 
-import six
 from setuptools import find_packages
 from setuptools import setup
 
-from paddlehub.version import hub_version
+import paddlehub as hub
 
 with open("requirements.txt") as fin:
     REQUIRED_PACKAGES = fin.read()
 
 setup(
     name='paddlehub',
-    version=hub_version.replace('-', ''),
+    version=hub.__version__.replace('-', ''),
     description=
     ('A toolkit for managing pretrained models of PaddlePaddle and helping user getting started with transfer learning more efficiently.'
      ),
     long_description='',
     url='https://github.com/PaddlePaddle/PaddleHub',
     author='PaddlePaddle Author',
-    author_email='paddle-dev@baidu.com',
+    author_email='',
     install_requires=REQUIRED_PACKAGES,
     packages=find_packages(),
     package_data={
-        'paddlehub/serving/templates': [
-            'paddlehub/serving/templates/serving_config.json',
-            'paddlehub/serving/templates/main.html'
+        'paddlehub/command/tmpl': [
+            'paddlehub/command/tmpl/init_py.tmpl', 'paddlehub/command/tmpl/serving_demo.tmpl',
+            'paddlehub/command/tmpl/x_model.tmpl'
         ]
     },
     include_package_data=True,
-    data_files=[('paddlehub/serving/templates', [
-        'paddlehub/serving/templates/serving_config.json',
-        'paddlehub/serving/templates/main.html'
+    data_files=[('paddlehub/commands/tmpl', [
+        'paddlehub/commands/tmpl/init_py.tmpl', 'paddlehub/commands/tmpl/serving_demo.tmpl',
+        'paddlehub/commands/tmpl/x_model.tmpl'
     ])],
     include_data_files=True,
     # PyPI package information.
@@ -59,10 +55,6 @@ setup(
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Topic :: Scientific/Engineering',
@@ -74,4 +66,4 @@ setup(
     ],
     license='Apache 2.0',
     keywords=('paddlehub paddlepaddle fine-tune transfer-learning'),
-    entry_points={'console_scripts': ['hub=paddlehub.commands.hub:main']})
+    entry_points={'console_scripts': ['hub=paddlehub.commands.utils:execute']})

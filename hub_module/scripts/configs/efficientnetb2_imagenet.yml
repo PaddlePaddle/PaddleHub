@@ -1,9 +1,0 @@
-name: efficientnetb2_imagenet
-dir: "modules/image/classification/efficientnetb2_imagenet"
-exclude:
-  - README.md
-resources:
-  -
-    url: https://bj.bcebos.com/paddlehub/model/image/classification/efficientnetb2_imagenet_infer_model.tar.gz
-    dest: .
-    uncompress: True

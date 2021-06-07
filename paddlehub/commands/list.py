@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -13,39 +13,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from typing import List
 
-from paddlehub.common import utils
-from paddlehub.common.downloader import default_downloader
-from paddlehub.module.manager import default_module_manager
-from paddlehub.commands.base_command import BaseCommand
-from paddlehub.common.cml_utils import TablePrinter
-from paddlehub.common.hub_server import CacheUpdater
+import paddlehub as hub
+from paddlehub.commands import register
+from paddlehub.module.manager import LocalModuleManager
+from paddlehub.utils import log, platform
 
 
-class ListCommand(BaseCommand):
-    name = "list"
+@register(name='hub.list', description='Show help for commands.')
+class ListCommand:
+    def execute(self, argv: List) -> bool:
+        manager = LocalModuleManager()
 
-    def __init__(self, name):
-        super(ListCommand, self).__init__(name)
-        self.show_in_help = True
-        self.description = "List all installed PaddleHub modules."
+        widths = [20, 40] if platform.is_windows() else [25, 50]
+        aligns = ['^', '<']
+        table = log.Table(widths=widths, aligns=aligns)
 
-    def execute(self, argv):
-        CacheUpdater("hub_list").start()
-        all_modules = default_module_manager.all_modules()
-        if utils.is_windows():
-            placeholders = [20, 40]
-        else:
-            placeholders = [25, 50]
-        tp = TablePrinter(
-            titles=["ModuleName", "Path"], placeholders=placeholders)
-        for module_name, module_dir in all_modules.items():
-            tp.add_line(contents=[module_name, module_dir[0]])
-        print(tp.get_text())
+        table.append('ModuleName', 'Path', colors=['green', 'green'])
+
+        for module in manager.list():
+            table.append(module.name, module.directory)
+
+        print(table)
         return True
-
-
-command = ListCommand.instance()

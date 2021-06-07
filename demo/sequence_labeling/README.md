@@ -1,195 +1,195 @@
-# PaddleHub 序列标注
+# PaddleHub Transformer模型fine-tune序列标注（动态图）
+
+在2017年之前，工业界和学术界对NLP文本处理依赖于序列模型[Recurrent Neural Network (RNN)](https://baike.baidu.com/item/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/23199490?fromtitle=RNN&fromid=5707183&fr=aladdin).
+
+![](http://colah.github.io/posts/2015-09-NN-Types-FP/img/RNN-general.png)
+
+近年来随着深度学习的发展，模型参数数量飞速增长，为了训练这些参数，需要更大的数据集来避免过拟合。然而，对于大部分NLP任务来说，构建大规模的标注数据集成本过高，非常困难，特别是对于句法和语义相关的任务。相比之下，大规模的未标注语料库的构建则相对容易。最近的研究表明，基于大规模未标注语料库的预训练模型（Pretrained Models, PTM) 能够习得通用的语言表示，将预训练模型Fine-tune到下游任务，能够获得出色的表现。另外，预训练模型能够避免从零开始训练模型。
+
+![](https://ai-studio-static-online.cdn.bcebos.com/327f44ff3ed24493adca5ddc4dc24bf61eebe67c84a6492f872406f464fde91e)
+
+
+本示例将展示如何使用PaddleHub Transformer模型（如 ERNIE、BERT、RoBERTa等模型）Module 以动态图方式fine-tune并完成预测任务。
 
 ## 如何开始Fine-tune
 
-在完成安装PaddlePaddle与PaddleHub后，通过执行脚本`sh run_sequence_label.sh`即可开始使用ERNIE对MSRA_NER数据集进行Fine-tune。
 
-其中脚本参数说明如下：
+我们以微软亚洲研究院发布的中文实体识别数据集MSRA-NER为示例数据集，可以运行下面的命令，在训练集（train.tsv）上进行模型训练，并在开发集（dev.tsv）验证。通过如下命令，即可启动训练。
 
-```bash
-# 模型相关
---use_gpu: 是否使用GPU，默认为False；
---batch_size: 批处理大小，请结合显存情况进行调整，若出现显存不足，请适当调低这一参数；
---learning_rate: Fine-tune的最大学习率；
---weight_decay: 控制正则项力度的参数，用于防止过拟合，默认为0.01；
---warmup_proportion: 学习率warmup策略的比例，如果0.1，则学习率会在前10%训练step的过程中从0慢慢增长到learning_rate, 而后再缓慢衰减，默认为0；
---num_epoch: Fine-tune迭代的轮数；
---max_seq_len: ERNIE/BERT模型使用的最大序列长度，最大不能超过512, 若出现显存不足，请适当调低这一参数；
---use_data_parallel: 是否使用并行计算，默认True。打开该功能依赖nccl库；
-
-# 任务相关
---checkpoint_dir: 模型保存路径，PaddleHub会自动保存验证集上表现最好的模型。
+```shell
+# 设置使用的GPU卡号
+export CUDA_VISIBLE_DEVICES=0
+python train.py
 ```
+
 
 ## 代码步骤
 
-使用PaddleHub Fine-tune API进行Fine-tune可以分为4个步骤：
+使用PaddleHub Fine-tune API进行Fine-tune可以分为4个步骤。
 
-### Step1: 加载预训练模型
+### Step1: 选择模型
 
+在命名实体识别的任务中，因不同的数据集标识实体的标签不同，评测的方式也有所差异。因此，在初始化模型的之前，需要先确定实际标签的形式，下方的`label_list`则是MSRA-NER数据集中使用的标签类别。  
+如果用户使用的实体识别的数据集的标签方式与MSRA-NER不同，则需要自行根据数据集确定。
+```python
+label_list = hub.datasets.MSRA_NER.label_list
+label_map = {
+    idx: label for idx, label in enumerate(label_list)
+}
+```
+
+接下来创建任务所使用的`model`
 ```python
 import paddlehub as hub
 
-module = hub.Module(name="ernie")
-inputs, outputs, program = module.context(trainable=True, max_seq_len=128)
+model = hub.Module(name='ernie_tiny', version='2.0.1', task='token-cls', label_map=label_map)
 ```
-其中最大序列长度`max_seq_len`是可以调整的参数，建议值128，根据任务文本长度不同可以调整该值，但最大不超过512。
 
-PaddleHub还提供BERT等模型可供选择, 模型对应的加载示例如下：
+其中，参数：
 
-   模型名                           | PaddleHub Module
+* `name`：模型名称，可以选择`ernie`，`ernie_tiny`，`bert-base-cased`， `bert-base-chinese`, `roberta-wwm-ext`，`roberta-wwm-ext-large`等。
+* `version`：module版本号
+* `task`：fine-tune任务。此处为`token-cls`，表示序列标注任务。
+* `label_map`：数据集中的标签信息，实体识别任务中需要根据不同标签种类对模型性能进行评价。
+
+PaddleHub还提供BERT等模型可供选择, 当前支持序列标注任务的模型对应的加载示例如下：
+
+模型名                           | PaddleHub Module
 ---------------------------------- | :------:
 ERNIE, Chinese                     | `hub.Module(name='ernie')`
 ERNIE tiny, Chinese                | `hub.Module(name='ernie_tiny')`
 ERNIE 2.0 Base, English            | `hub.Module(name='ernie_v2_eng_base')`
 ERNIE 2.0 Large, English           | `hub.Module(name='ernie_v2_eng_large')`
-BERT-Base, Uncased                 | `hub.Module(name='bert_uncased_L-12_H-768_A-12')`
-BERT-Large, Uncased                | `hub.Module(name='bert_uncased_L-24_H-1024_A-16')`
-BERT-Base, Cased                   | `hub.Module(name='bert_cased_L-12_H-768_A-12')`
-BERT-Large, Cased                  | `hub.Module(name='bert_cased_L-24_H-1024_A-16')`
-BERT-Base, Multilingual Cased      | `hub.Module(nane='bert_multi_cased_L-12_H-768_A-12')`
-BERT-Base, Chinese                 | `hub.Module(name='bert_chinese_L-12_H-768_A-12')`
-BERT-wwm, Chinese                  | `hub.Module(name='bert_wwm_chinese_L-12_H-768_A-12')`
-BERT-wwm-ext, Chinese              | `hub.Module(name='bert_wwm_ext_chinese_L-12_H-768_A-12')`
-RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta_wwm_ext_chinese_L-12_H-768_A-12')`
-RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta_wwm_ext_chinese_L-24_H-1024_A-16')`
+BERT-Base, English Cased           | `hub.Module(name='bert-base-cased')`
+BERT-Base, English Uncased         | `hub.Module(name='bert-base-uncased')`
+BERT-Large, English Cased          | `hub.Module(name='bert-large-cased')`
+BERT-Large, English Uncased        | `hub.Module(name='bert-large-uncased')`
+BERT-Base, Multilingual Cased      | `hub.Module(nane='bert-base-multilingual-cased')`
+BERT-Base, Multilingual Uncased    | `hub.Module(nane='bert-base-multilingual-uncased')`
+BERT-Base, Chinese                 | `hub.Module(name='bert-base-chinese')`
+BERT-wwm, Chinese                  | `hub.Module(name='chinese-bert-wwm')`
+BERT-wwm-ext, Chinese              | `hub.Module(name='chinese-bert-wwm-ext')`
+RoBERTa-wwm-ext, Chinese           | `hub.Module(name='roberta-wwm-ext')`
+RoBERTa-wwm-ext-large, Chinese     | `hub.Module(name='roberta-wwm-ext-large')`
+RBT3, Chinese                      | `hub.Module(name='rbt3')`
+RBTL3, Chinese                     | `hub.Module(name='rbtl3')`
+ELECTRA-Small, English             | `hub.Module(name='electra-small')`
+ELECTRA-Base, English              | `hub.Module(name='electra-base')`
+ELECTRA-Large, English             | `hub.Module(name='electra-large')`
+ELECTRA-Base, Chinese              | `hub.Module(name='chinese-electra-base')`
+ELECTRA-Small, Chinese             | `hub.Module(name='chinese-electra-small')`
 
-更多模型请参考[PaddleHub官网](https://www.paddlepaddle.org.cn/hub?filter=hot&value=1)。
+通过以上的一行代码，`model`初始化为一个适用于序列标注任务的模型，为ERNIE Tiny的预训练模型后拼接上一个输出token共享的全连接网络（Full Connected）。  
+![](https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=224484727,3049769188&fm=15&gp=0.jpg)
 
-如果想尝试BERT模型，只需要更换Module中的`name`参数即可。
-```python
-# 更换name参数即可无缝切换BERT中文模型, 代码示例如下
-module = hub.Module(name="bert_chinese_L-12_H-768_A-12")
-```
+以上图片来自于：https://arxiv.org/pdf/1810.04805.pdf
 
-### Step2: 准备数据集并使用tokenizer预处理数据
-```python
-tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
-dataset = hub.dataset.MSRA_NER(
-    tokenizer=tokenizer, max_seq_len=128)
-```
-**NOTE**:
-* 即使是使用ernie_tiny预训练模型，也请使用BertTokenizer，而不要使用ErnieTinyTokenizer。因为序列标注任务需要为每一个字进行标注。
-
-数据集的准备代码可以参考[msra_ner.py](../../paddlehub/dataset/msra_ner.py)。
-
-`hub.dataset.MSRA_NER()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录；
-
-`module.get_vaocab_path()` 会返回预训练模型对应的词表；
-
-`max_seq_len` 需要与Step1中context接口传入的序列长度保持一致；
-
-dataset将调用传入的tokenizer提供的encode接口对全量数据进行预处理，您可以通过以下方式观察数据的处理流程：
-```
-single_result = tokenizer.encode(text="hello", text_pair="world", max_seq_len=10) # BertTokenizer
-# {'input_ids': [3, 1, 5, 39825, 5, 0, 0, 0, 0, 0], 'segment_ids': [0, 0, 0, 1, 1, 0, 0, 0, 0, 0], 'seq_len': 5, 'input_mask': [1, 1, 1, 1, 1, 0, 0, 0, 0, 0], 'position_ids': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
-dataset_result = dataset.get_dev_records() # set dataset max_seq_len = 10
-# {'input_ids': [101, 100, 100, 1962, 100, 100, 1744, 100, 1749, 102], 'segment_ids': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'seq_len': 10, 'input_mask': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 'position_ids': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 'label': [6, 6, 6, 6, 6, 6, 6, 6, 6, 6]}
-```
-
-#### 自定义数据集
-
-如果想加载自定义数据集完成迁移学习，详细参见[自定义数据集](../../docs/tutorial/how_to_load_data.md)。
-
-### Step3：选择优化策略和运行配置
+### Step2: 下载并加载数据集
 
 ```python
-strategy = hub.AdamWeightDecayStrategy(
-    learning_rate=5e-5,
-    weight_decay=0.01,
-    warmup_proportion=0.0,
-    lr_scheduler="linear_decay",
-)
-
-config = hub.RunConfig(use_cuda=True, num_epoch=3, batch_size=32, strategy=strategy)
+train_dataset = hub.datasets.MSRA_NER(
+    tokenizer=model.get_tokenizer(), max_seq_len=128, mode='train')
+dev_dataset = hub.datasets.MSRA_NER(
+    tokenizer=model.get_tokenizer(), max_seq_len=128, mode='dev')
 ```
+
+* `tokenizer`：表示该module所需用到的tokenizer，其将对输入文本完成切词，并转化成module运行所需模型输入格式。
+* `mode`：选择数据模式，可选项有 `train`, `test`, `val`， 默认为`train`。
+* `max_seq_len`：ERNIE/BERT模型使用的最大序列长度，若出现显存不足，请适当调低这一参数。
+
+预训练模型ERNIE对中文数据的处理是以字为单位，tokenizer作用为将原始输入文本转化成模型model可以接受的输入数据形式。 PaddleHub 2.0中的各种预训练模型已经内置了相应的tokenizer，可以通过`model.get_tokenizer`方法获取。
+
+![](https://bj.bcebos.com/paddlehub/paddlehub-img/ernie_network_1.png)
+![](https://bj.bcebos.com/paddlehub/paddlehub-img/ernie_network_2.png)
+
+### Step3:  选择优化策略和运行配置
+
+```python
+optimizer = paddle.optimizer.AdamW(learning_rate=5e-5, parameters=model.parameters())
+trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_token_cls', use_gpu=False)
+
+trainer.train(train_dataset, epochs=3, batch_size=32, eval_dataset=dev_dataset)
+
+# 在测试集上评估当前训练模型
+trainer.evaluate(test_dataset, batch_size=32)
+```
+
 #### 优化策略
 
-PaddleHub提供了许多优化策略，如`AdamWeightDecayStrategy`、`ULMFiTStrategy`、`DefaultFinetuneStrategy`等，详细信息参见[策略](../../docs/reference/strategy.md)。
+Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`, `AdamW`等，详细参见[策略](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/optimizer/optimizer/Optimizer_cn.html)。
 
-针对ERNIE与BERT类任务，PaddleHub封装了适合这一任务的迁移学习优化策略`AdamWeightDecayStrategy`；
+其中`AdamW`:
 
-`learning_rate`: fine-tune过程中的最大学习率；
-`weight_decay`: 模型的正则项参数，默认0.01，如果模型有过拟合倾向，可适当调高这一参数；
-`warmup_proportion`: 如果warmup_proportion>0, 例如0.1, 则学习率会在前10%的steps中线性增长至最高值learning_rate；
-`lr_scheduler`: 有两种策略可选（1）`linear_decay`策略学习率会在最高点后以线性方式衰减；（2） `noam_decay`策略学习率会在最高点以多项式形式衰减；
+* `learning_rate`: 全局学习率。默认为1e-3；
+* `parameters`: 待优化模型参数。
 
 #### 运行配置
-`RunConfig` 主要控制fine-tune的训练，包含以下可控制的参数:
 
-* `log_interval`: 进度日志打印间隔，默认每10个step打印一次；
-* `eval_interval`: 模型评估的间隔，默认每100个step评估一次验证集；
-* `save_ckpt_interval`: 模型保存间隔，请根据任务大小配置，默认只保存验证集效果最好的模型和训练结束的模型；
-* `use_cuda`: 是否使用GPU训练，默认为False；
-* `checkpoint_dir`: 模型checkpoint保存路径, 若用户没有指定，程序会自动生成；
-* `num_epoch`: fine-tune的轮数；
+`Trainer` 主要控制Fine-tune的训练，包含以下可控制的参数:
+
+* `model`: 被优化模型；
+* `optimizer`: 优化器选择；
+* `use_gpu`: 是否使用GPU训练，默认为False;
+* `use_vdl`: 是否使用vdl可视化训练过程；
+* `checkpoint_dir`: 保存模型参数的地址；
+* `compare_metrics`: 保存最优模型的衡量指标；
+
+`trainer.train` 主要控制具体的训练过程，包含以下可控制的参数：
+
+* `train_dataset`: 训练时所用的数据集；
+* `epochs`: 训练轮数；
 * `batch_size`: 训练的批大小，如果使用GPU，请根据实际情况调整batch_size；
-* `enable_memory_optim`: 是否使用内存优化， 默认为True；
-* `strategy`: fine-tune优化策略；
-
-### Step4: 构建网络并创建序列标注迁移任务进行Fine-tune
-```python
-
-sequence_output = outputs["sequence_output"]
-
-seq_label_task = hub.SequenceLabelTask(
-    dataset=dataset,
-    feature=sequence_output,
-    max_seq_len=128,
-    num_classes=dataset.num_labels,
-    config=config,
-    add_crf=False)
-
-seq_label_task.finetune_and_eval()
-```
-
-**NOTE:**
-1. `outputs["sequence_output"]`返回了ERNIE/BERT模型输入单词的对应输出,可以用于单词的特征表达；
-2. `hub.SequenceLabelTask`通过输入特征，迁移的类别数，可以生成适用于序列标注的迁移任务`SequenceLabelTask`；
-3. `hub.SequenceLabelTask`通过add_crf, 选择是否加入crf作为decoder。如果add_crf=True, 则在预训练模型计算图加入fc+crf层，否则只在在预训练模型计算图加入fc层；
-
-#### 自定义迁移任务
-
-如果想改变迁移任务组网，详细参见[自定义迁移任务](../../docs/tutorial/how_to_define_task.md)。
-
-## 可视化
-
-Fine-tune API训练过程中会自动对关键训练指标进行打点，启动程序后执行下面命令：
-
-```bash
-$ visualdl --logdir $CKPT_DIR/visualization --host ${HOST_IP} --port ${PORT_NUM}
-```
-其中${HOST_IP}为本机IP地址，${PORT_NUM}为可用端口号，如本机IP地址为192.168.0.1，端口号8040，用浏览器打开192.168.0.1:8040，即可看到训练过程中指标的变化情况。
+* `num_workers`: workers的数量，默认为0；
+* `eval_dataset`: 验证集；
+* `log_interval`: 打印日志的间隔， 单位为执行批训练的次数。
+* `save_interval`: 保存模型的间隔频次，单位为执行训练的轮数。
 
 ## 模型预测
 
-通过Fine-tune完成模型训练后，在对应的ckpt目录下，会自动保存验证集上效果最好的模型。
-配置脚本参数
+当完成Fine-tune后，Fine-tune过程在验证集上表现最优的模型会被保存在`${CHECKPOINT_DIR}/best_model`目录下，其中`${CHECKPOINT_DIR}`目录为Fine-tune时所选择的保存checkpoint的目录。
+
+我们以以下数据为待预测数据，使用该模型来进行预测
+
+```text
+去年十二月二十四日，市委书记张敬涛召集县市主要负责同志研究信访工作时，提出三问：『假如上访群众是我们的父母姐妹，你会用什么样的感情对待他们？
+新华社北京5月7日电国务院副总理李岚清今天在中南海会见了美国前商务部长芭芭拉·弗兰克林。
+根据测算，海卫1表面温度已经从“旅行者”号探测器1989年造访时的零下236摄氏度上升到零下234摄氏度。
+华裔作家韩素音女士曾三次到大足，称“大足石窟是一座未被开发的金矿”。
 ```
-CKPT_DIR="ckpt_sequence_label/"
-python predict.py --checkpoint_dir $CKPT_DIR --max_seq_len 128
+
+```python
+import paddlehub as hub
+
+split_char = "\002"
+label_list = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
+text_a = [
+    '去年十二月二十四日，市委书记张敬涛召集县市主要负责同志研究信访工作时，提出三问：『假如上访群众是我们的父母姐妹，你会用什么样的感情对待他们？',
+    '新华社北京5月7日电国务院副总理李岚清今天在中南海会见了美国前商务部长芭芭拉·弗兰克林。',
+    '根据测算，海卫1表面温度已经从“旅行者”号探测器1989年造访时的零下236摄氏度上升到零下234摄氏度。',
+    '华裔作家韩素音女士曾三次到大足，称“大足石窟是一座未被开发的金矿”。',
+]
+data = [[split_char.join(text)] for text in text_a]
+label_map = {
+    idx: label for idx, label in enumerate(label_list)
+}
+
+model = hub.Module(
+    name='ernie_tiny',
+    version='2.0.1',
+    task='token-cls',
+    load_checkpoint='./token_cls_save_dir/best_model/model.pdparams',
+    label_map=label_map,
+)
+
+results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)
+for idx, text in enumerate(text_a):
+    print(f'Data: {text} \t Lable: {", ".join(results[idx][1:len(text)+1])}')
 ```
-其中CKPT_DIR为Fine-tune API保存最佳模型的路径, max_seq_len是ERNIE模型的最大序列长度，*请与训练时配置的参数保持一致*。
 
-参数配置正确后，请执行脚本`sh run_predict.sh`，即可看到以下文本分类预测结果, 以及最终准确率。
-如需了解更多预测步骤，请参考`predict.py`
+参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
 
-我们在AI Studio上提供了IPython NoteBook形式的demo，您可以直接在平台上在线体验，链接如下：
+### 依赖
 
-|预训练模型|任务类型|数据集|AIStudio链接|备注|
-|-|-|-|-|-|
-|ResNet|图像分类|猫狗数据集DogCat|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147010)||
-|ERNIE|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147006)||
-|ERNIE|文本分类|中文新闻分类数据集THUNEWS|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/221999)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成文本分类迁移学习。|
-|ERNIE|序列标注|中文序列标注数据集MSRA_NER|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/147009)||
-|ERNIE|序列标注|中文快递单数据集Express|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/184200)|本教程讲述了如何将自定义数据集加载，并利用Fine-tune API完成序列标注迁移学习。|
-|ERNIE Tiny|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/186443)||
-|Senta|文本分类|中文情感分类数据集ChnSentiCorp|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/216846)|本教程讲述了任何利用Senta和Fine-tune API完成情感分类迁移学习。|
-|Senta|情感分析预测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215814)||
-|LAC|词法分析|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215711)||
-|Ultra-Light-Fast-Generic-Face-Detector-1MB|人脸检测|N/A|[点击体验](https://aistudio.baidu.com/aistudio/projectdetail/215962)||
+paddlepaddle >= 2.0.0rc
 
-
-## 超参优化AutoDL Finetuner
-
-PaddleHub还提供了超参优化（Hyperparameter Tuning）功能， 自动搜索最优模型超参得到更好的模型效果。详细信息参见[AutoDL Finetuner超参优化功能教程](../../docs/tutorial/autofinetune.md)。
+paddlehub >= 2.0.0

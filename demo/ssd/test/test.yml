@@ -1,4 +1,0 @@
-input_data:
-  image:
-    type : IMAGE
-    key : IMAGE_PATH

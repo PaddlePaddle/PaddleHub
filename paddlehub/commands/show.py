@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 # Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
@@ -13,126 +13,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
-import argparse
+from typing import List
 
-from paddlehub.common import utils
-from paddlehub.commands.base_command import BaseCommand, ENTRY
-from paddlehub.common.cml_utils import TablePrinter
-from paddlehub.module.manager import default_module_manager
-from paddlehub.module.module import Module
-from paddlehub.io.parser import yaml_parser
-from paddlehub.common.hub_server import CacheUpdater
+from paddlehub.commands import register
+from paddlehub.module.manager import LocalModuleManager
+from paddlehub.utils import log, platform
+from paddlehub.module.module import Module, InvalidHubModule
 
 
-class ShowCommand(BaseCommand):
-    name = "show"
-
-    def __init__(self, name):
-        super(ShowCommand, self).__init__(name)
-        self.show_in_help = True
-        self.description = "Show the information of PaddleHub module."
-        self.parser = self.parser = argparse.ArgumentParser(
-            description=self.__class__.__doc__,
-            prog='%s %s <module_name/module_dir>' % (ENTRY, name),
-            usage='%(prog)s',
-            add_help=False)
-
-    def show_model_info(self, model_info_file):
-        model_info = yaml_parser.parse(model_info_file)
-        if utils.is_windows():
-            placeholders = [15, 40]
-        else:
-            placeholders = [15, 50]
-        tp = TablePrinter(
-            titles=["ModelName", model_info['name']],
-            placeholders=placeholders,
-            title_colors=["yellow", None],
-            title_aligns=["^", "<"])
-        tp.add_line(
-            contents=["Type", model_info['type']],
-            colors=["yellow", None],
-            aligns=["^", "<"])
-        tp.add_line(
-            contents=["Version", model_info['version']],
-            colors=["yellow", None],
-            aligns=["^", "<"])
-        tp.add_line(
-            contents=["Summary", model_info['description']],
-            colors=["yellow", None],
-            aligns=["^", "<"])
-        tp.add_line(
-            contents=["Author", model_info['author']],
-            colors=["yellow", None],
-            aligns=["^", "<"])
-        tp.add_line(
-            contents=["Author-Email", model_info['author_email']],
-            colors=["yellow", None],
-            aligns=["^", "<"])
-        print(tp.get_text())
-        return True
-
-    def show_module_info(self, module_dir):
-        module = Module(module_dir=module_dir)
-        if utils.is_windows():
-            placeholders = [15, 40]
-        else:
-            placeholders = [15, 50]
-        tp = TablePrinter(
-            titles=["ModuleName", module.name],
-            placeholders=placeholders,
-            title_colors=["light_red", None],
-            title_aligns=["^", "<"])
-        tp.add_line(
-            contents=["Version", module.version],
-            colors=["light_red", None],
-            aligns=["^", "<"])
-        tp.add_line(
-            contents=["Summary", module.summary],
-            colors=["light_red", None],
-            aligns=["^", "<"])
-        tp.add_line(
-            contents=["Author", module.author],
-            colors=["light_red", None],
-            aligns=["^", "<"])
-        tp.add_line(
-            contents=["Author-Email", module.author_email],
-            colors=["light_red", None],
-            aligns=["^", "<"])
-        tp.add_line(
-            contents=["Location", module_dir[0]],
-            colors=["light_red", None],
-            aligns=["^", "<"])
-        print(tp.get_text())
-        return True
-
-    def execute(self, argv):
+@register(name='hub.show', description='Show the information of PaddleHub module.')
+class ShowCommand:
+    def execute(self, argv: List) -> bool:
         if not argv:
-            print("ERROR: Please specify a module or a model\n")
-            self.help()
+            print("ERROR: You must give one module to show.")
             return False
+        argv = argv[0]
 
-        module_name = argv[0]
-        CacheUpdater("hub_show", module_name).start()
+        if os.path.exists(argv) and os.path.isdir(argv):
+            try:
+                module = Module.load(argv)
+            except InvalidHubModule:
+                print('{} is not a valid HubModule'.format(argv))
+                return False
+            except:
+                print('Some exception occurred while loading the {}'.format(argv))
+                return False
+        else:
+            module = LocalModuleManager().search(argv)
+            if not module:
+                print('{} is not existed!'.format(argv))
+                return False
 
-        # nlp model
-        model_info_file = os.path.join(module_name, "info.yml")
-        if os.path.exists(model_info_file):
-            self.show_model_info(model_info_file)
-            return True
+        widths = [15, 40] if platform.is_windows else [15, 50]
+        aligns = ['^', '<']
+        colors = ['cyan', '']
+        table = log.Table(widths=widths, colors=colors, aligns=aligns)
 
-        cwd = os.getcwd()
-        module_dir = default_module_manager.search_module(module_name)
-        if not module_dir or not os.path.exists(module_dir[0]):
-            print("%s is not existed!" % module_name)
-            return True
-
-        self.show_module_info(module_dir)
+        table.append('ModuleName', module.name)
+        table.append('Version', str(module.version))
+        table.append('Summary', module.summary)
+        table.append('Author', module.author)
+        table.append('Author-Email', module.author_email)
+        table.append('Location', module.directory)
+        print(table)
         return True
-
-
-command = ShowCommand.instance()

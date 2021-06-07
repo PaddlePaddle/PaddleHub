@@ -1,7 +1,0 @@
-name: retinanet_resnet50_fpn_coco2017
-dir: "modules/image/object_detection/retinanet_resnet50_fpn_coco2017"
-resources:
-  -
-    url: https://paddlehub.bj.bcebos.com/model/cv/retinanet_resnet50_fpn_model.tar.gz
-    dest: retinanet_resnet50_fpn_model
-    uncompress: True

@@ -22,4 +22,4 @@ if __name__ == '__main__':
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果
-    print(r.json()["results"])
+    print(r.json())

@@ -1,18 +1,20 @@
-pre-commit
-protobuf >= 3.6.0
-yapf == 0.26.0
-six >= 1.10.0
-flask >= 1.1.0
-flake8
-visualdl >= 2.0.0b
-cma >= 2.7.0
-sentencepiece
+colorama
 colorlog
+easydict
+filelock
+flask >= 1.1.0
+gitpython
+numpy
+matplotlib
+opencv-python
+packaging
+paddle2onnx >= 0.5.1
+paddlenlp >= 2.0.0rc5
+Pillow
+pyyaml
+pyzmq
+rarfile
 tqdm
-nltk
-
-# pandas no longer support python2 in version 0.25 and above
-pandas ; python_version >= "3"
-
+visualdl >= 2.0.0
 # gunicorn not support windows
 gunicorn >= 19.10.0; sys_platform != "win32"

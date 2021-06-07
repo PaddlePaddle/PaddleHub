@@ -1,7 +1,0 @@
-name: yolov3_darknet53_coco2017
-dir: "modules/image/object_detection/yolov3_darknet53_coco2017"
-resources:
-  -
-    url: https://paddlehub.bj.bcebos.com/model/cv/yolov3_darknet53_model.tar.gz
-    dest: yolov3_darknet53_model
-    uncompress: True

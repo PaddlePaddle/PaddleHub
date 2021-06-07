@@ -1,5 +1,5 @@
 # coding:utf-8
-# Copyright (c) 2019  PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"
 # you may not use this file except in compliance with the License.
@@ -13,247 +13,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import os
-import time
-import sys
-import functools
+import ast
+import builtins
+import codecs
 import inspect
-import importlib
-<<<<<<< HEAD
-import tarfile
-from collections import defaultdict
-from shutil import copyfile
-=======
-import shutil
->>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
+import os
+import re
+import sys
+from typing import Callable, Generic, List, Optional, Union
 
 import paddle
-import paddle.fluid as fluid
+import paddle2onnx
+from easydict import EasyDict
 
-from paddlehub.common import utils
-from paddlehub.common import paddle_helper
-from paddlehub.common.dir import CACHE_HOME
-from paddlehub.common.lock import lock
-from paddlehub.common.logger import logger
-from paddlehub.common.hub_server import CacheUpdater
-from paddlehub.module import module_desc_pb2
-<<<<<<< HEAD
-from paddlehub.module import check_info_pb2
-from paddlehub.module.manager import default_module_manager
-from paddlehub.module.checker import ModuleChecker
-from paddlehub.module.signature import Signature, create_signature
-from paddlehub.module.base_processor import BaseProcessor
-from paddlehub.io.parser import yaml_parser
-from paddlehub import version
-=======
-from paddlehub.module.manager import default_module_manager
-from paddlehub.module.checker import ModuleChecker
-from paddlehub.module.signature import Signature, create_signature
->>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
-
-# PaddleHub module dir name
-ASSETS_DIRNAME = "assets"
-MODEL_DIRNAME = "model"
-MODULE_DESC_PBNAME = "module_desc.pb"
-PYTHON_DIR = "python"
-PROCESSOR_NAME = "processor"
-# PaddleHub var prefix
-HUB_VAR_PREFIX = "@HUB_%s@"
-# PaddleHub Module package suffix
-HUB_PACKAGE_SUFFIX = "phm"
+from paddlehub.utils import parser, log, utils
+from paddlehub.compat import paddle_utils
+from paddlehub.compat.module.module_v1 import ModuleV1
 
 
-def create_module(directory, name, author, email, module_type, summary,
-                  version):
-    save_file_name = "{}-{}.{}".format(name, version, HUB_PACKAGE_SUFFIX)
+class InvalidHubModule(Exception):
+    def __init__(self, directory: str):
+        self.directory = directory
 
-    # record module info and serialize
-    desc = module_desc_pb2.ModuleDesc()
-    attr = desc.attr
-    attr.type = module_desc_pb2.MAP
-    module_info = attr.map.data['module_info']
-    module_info.type = module_desc_pb2.MAP
-    utils.from_pyobj_to_module_attr(name, module_info.map.data['name'])
-    utils.from_pyobj_to_module_attr(author, module_info.map.data['author'])
-    utils.from_pyobj_to_module_attr(email, module_info.map.data['author_email'])
-    utils.from_pyobj_to_module_attr(module_type, module_info.map.data['type'])
-    utils.from_pyobj_to_module_attr(summary, module_info.map.data['summary'])
-    utils.from_pyobj_to_module_attr(version, module_info.map.data['version'])
-
-    module_desc_path = os.path.join(directory, "module_desc.pb")
-    with open(module_desc_path, "wb") as f:
-        f.write(desc.SerializeToString())
-
-    # generate check info
-    checker = ModuleChecker(directory)
-    checker.generate_check_info()
-
-    # add __init__
-    module_init_1 = os.path.join(directory, "__init__.py")
-    with open(module_init_1, "a") as file:
-        file.write("")
-
-    module_init_2 = os.path.join(directory, "python", "__init__.py")
-    with open(module_init_2, "a") as file:
-        file.write("")
-
-    # package the module
-    with tarfile.open(save_file_name, "w:gz") as tar:
-        for dirname, _, files in os.walk(directory):
-            for file in files:
-                tar.add(os.path.join(dirname, file))
-
-    os.remove(module_desc_path)
-    os.remove(checker.pb_path)
-    os.remove(module_init_1)
-    os.remove(module_init_2)
+    def __str__(self):
+        return '{} is not a valid HubModule'.format(self.directory)
 
 
-class Module(object):
-    def __new__(cls, name=None, directory=None, module_dir=None, version=None):
-        module = None
-
-        if cls.__name__ == "Module":
-            if name:
-                module = cls.init_with_name(name=name, version=version)
-            elif directory:
-                module = cls.init_with_directory(directory=directory)
-            elif module_dir:
-                logger.warning(
-                    "Parameter module_dir is deprecated, please use directory to specify the path"
-                )
-                if isinstance(module_dir, list) or isinstance(
-                        module_dir, tuple):
-                    directory = module_dir[0]
-                    version = module_dir[1]
-                else:
-                    directory = module_dir
-                module = cls.init_with_directory(directory=directory)
-
-        if not module:
-            module = object.__new__(cls)
-        CacheUpdater(name, version).start()
-        return module
-
-    def __init__(self, name=None, directory=None, module_dir=None,
-                 version=None):
-        if not directory:
-            return
-        self._code_version = "v2"
-        self._directory = directory
-        self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
-        self._desc = module_desc_pb2.ModuleDesc()
-        with open(self.module_desc_path, "rb") as file:
-            self._desc.ParseFromString(file.read())
-
-        module_info = self.desc.attr.map.data['module_info']
-        self._name = utils.from_module_attr_to_pyobj(
-            module_info.map.data['name'])
-        self._author = utils.from_module_attr_to_pyobj(
-            module_info.map.data['author'])
-        self._author_email = utils.from_module_attr_to_pyobj(
-            module_info.map.data['author_email'])
-        self._version = utils.from_module_attr_to_pyobj(
-            module_info.map.data['version'])
-        self._type = utils.from_module_attr_to_pyobj(
-            module_info.map.data['type'])
-        self._summary = utils.from_module_attr_to_pyobj(
-            module_info.map.data['summary'])
-
-        self._initialize()
-
-    @classmethod
-    def init_with_name(cls, name, version=None):
-        fp_lock = open(os.path.join(CACHE_HOME, name), "a")
-        lock.flock(fp_lock, lock.LOCK_EX)
-        log_msg = "Installing %s module" % name
-        if version:
-            log_msg += "-%s" % version
-        logger.info(log_msg)
-        extra = {"command": "install"}
-        result, tips, module_dir = default_module_manager.install_module(
-            module_name=name, module_version=version, extra=extra)
-        if not result:
-            logger.error(tips)
-            raise RuntimeError(tips)
-
-<<<<<<< HEAD
-        logger.info(tips)
-        lock.flock(fp_lock, lock.LOCK_UN)
-        return cls.init_with_directory(directory=module_dir[0])
-
-    @classmethod
-    def init_with_directory(cls, directory):
-        desc_file = os.path.join(directory, MODULE_DESC_PBNAME)
-        checker = ModuleChecker(directory)
-        checker.check()
-
-        module_code_version = checker.module_code_version
-        if module_code_version == "v2":
-            basename = os.path.split(directory)[-1]
-            dirname = os.path.join(*list(os.path.split(directory)[:-1]))
-            sys.path.append(dirname)
-            pymodule = importlib.import_module(
-                "{}.python.module".format(basename))
-            return pymodule.HubModule(directory=directory)
-        return ModuleV1(directory=directory)
-
-    @property
-    def desc(self):
-        return self._desc
-
-    @property
-    def directory(self):
-        return self._directory
-
-    @property
-    def author(self):
-        return self._author
-
-    @property
-    def author_email(self):
-        return self._author_email
-
-    @property
-    def summary(self):
-        return self._summary
-
-    @property
-    def type(self):
-        return self._type
-
-    @property
-    def version(self):
-        return self._version
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def name_prefix(self):
-        return self._name_prefix
-
-    @property
-    def code_version(self):
-        return self._code_version
-
-    @property
-    def is_runable(self):
-        return False
-
-    def _initialize(self):
-        pass
-=======
+_module_serving_func = {}
 _module_runnable_func = {}
 
 
-def runnable(func):
-    mod = func.__module__ + "." + inspect.stack()[1][3]
+def runnable(func: Callable) -> Callable:
+    '''Mark a Module method as runnable, when the command `hub run` is used, the method will be called.'''
+    mod = func.__module__ + '.' + inspect.stack()[1][3]
     _module_runnable_func[mod] = func.__name__
 
     def _wrapper(*args, **kwargs):
@@ -262,11 +54,9 @@ def runnable(func):
     return _wrapper
 
 
-_module_serving_func = {}
-
-
-def serving(func):
-    mod = func.__module__ + "." + inspect.stack()[1][3]
+def serving(func: Callable) -> Callable:
+    '''Mark a Module method as serving method, when the command `hub serving` is used, the method will be called.'''
+    mod = func.__module__ + '.' + inspect.stack()[1][3]
     _module_serving_func[mod] = func.__name__
 
     def _wrapper(*args, **kwargs):
@@ -275,674 +65,505 @@ def serving(func):
     return _wrapper
 
 
-def moduleinfo(name, version, author, author_email, summary, type):
-    def _wrapper(cls):
-        if not issubclass(cls, Module):
-            raise RuntimeError
-        cls._name = name
-        cls._version = version
-        cls._author = author
-        cls._author_email = author_email
-        cls._summary = summary
-        cls._type = type
-        return cls
+class RunModule(object):
+    '''The base class of PaddleHub Module, users can inherit this class to implement to realize custom class.'''
 
-    return _wrapper
+    def __init__(self, *args, **kwargs):
+        super(RunModule, self).__init__()
 
-
-class Module(fluid.dygraph.Layer):
-    def __new__(cls,
-                name=None,
-                directory=None,
-                module_dir=None,
-                version=None,
-                **kwargs):
-        if cls.__name__ == "Module":
-            if name:
-                module = cls.init_with_name(
-                    name=name, version=version, **kwargs)
-            elif directory:
-                module = cls.init_with_directory(directory=directory, **kwargs)
-            elif module_dir:
-                logger.warning(
-                    "Parameter module_dir is deprecated, please use directory to specify the path"
-                )
-                if isinstance(module_dir, list) or isinstance(
-                        module_dir, tuple):
-                    directory = module_dir[0]
-                    version = module_dir[1]
-                else:
-                    directory = module_dir
-                module = cls.init_with_directory(directory=directory, **kwargs)
-            CacheUpdater("update_cache", module.name, module.version).start()
-        else:
-            if not name and not directory:
-                directory = os.path.dirname(
-                    os.path.abspath(sys.modules[cls.__module__].__file__))
-                module = Module.init_with_directory(
-                    directory=directory, **kwargs)
-            else:
-                module = fluid.dygraph.Layer.__new__(cls)
-
-        return module
-
-    def __init__(self,
-                 name=None,
-                 directory=None,
-                 module_dir=None,
-                 version=None,
-                 **kwargs):
-        # Avoid module being initialized multiple times
-        if "_is_initialize" in self.__dict__ and self._is_initialize:
-            return
-
-        super(Module, self).__init__()
-        _run_func_name = self._get_func_name(self.__class__,
-                                             _module_runnable_func)
-        self._run_func = getattr(self,
-                                 _run_func_name) if _run_func_name else None
-        self._serving_func_name = self._get_func_name(self.__class__,
-                                                      _module_serving_func)
-        self._directory = directory
-        self._initialize(**kwargs)
-        self._is_initialize = True
-        self._code_version = "v2"
-
-    def _get_func_name(self, current_cls, module_func_dict):
-        mod = current_cls.__module__ + "." + current_cls.__name__
+    def _get_func_name(self, current_cls: Generic, module_func_dict: dict) -> Optional[str]:
+        mod = current_cls.__module__ + '.' + current_cls.__name__
         if mod in module_func_dict:
             _func_name = module_func_dict[mod]
             return _func_name
         elif current_cls.__bases__:
             for base_class in current_cls.__bases__:
-                return self._get_func_name(base_class, module_func_dict)
+                base_run_func = self._get_func_name(base_class, module_func_dict)
+                if base_run_func:
+                    return base_run_func
         else:
             return None
 
-    @classmethod
-    def init_with_name(cls, name, version=None, **kwargs):
-        fp_lock = open(os.path.join(CACHE_HOME, name), "a")
-        lock.flock(fp_lock, lock.LOCK_EX)
-        log_msg = "Installing %s module" % name
-        if version:
-            log_msg += "-%s" % version
-        logger.info(log_msg)
-        extra = {"command": "install"}
-        result, tips, module_dir = default_module_manager.install_module(
-            module_name=name, module_version=version, extra=extra)
-        if not result:
-            logger.error(tips)
-            raise RuntimeError(tips)
+    # After the 2.0.0rc version, paddle uses the dynamic graph mode by default, which will cause the
+    # execution of the static graph model to fail, so compatibility protection is required.
+    def __getattribute__(self, attr):
+        _attr = object.__getattribute__(self, attr)
 
-        logger.info(tips)
-        lock.flock(fp_lock, lock.LOCK_UN)
-        return cls.init_with_directory(directory=module_dir[0], **kwargs)
+        # If the acquired attribute is a built-in property of the object, skip it.
+        if re.match('__.*__', attr):
+            return _attr
+        # If the module is a dynamic graph model, skip it.
+        elif isinstance(self, paddle.nn.Layer):
+            return _attr
+        # If the acquired attribute is not a class method, skip it.
+        elif not inspect.ismethod(_attr):
+            return _attr
+
+        return paddle_utils.run_in_static_mode(_attr)
 
     @classmethod
-    def init_with_directory(cls, directory, **kwargs):
-        desc_file = os.path.join(directory, MODULE_DESC_PBNAME)
-        if os.path.exists(desc_file):
-            checker = ModuleChecker(directory)
-            checker.check()
-            return ModuleV1(directory=directory, **kwargs)
+    def get_py_requirements(cls) -> List[str]:
+        '''Get Module's python package dependency list.'''
+        py_module = sys.modules[cls.__module__]
+        directory = os.path.dirname(py_module.__file__)
+        req_file = os.path.join(directory, 'requirements.txt')
+        if not os.path.exists(req_file):
+            return []
+        with codecs.open(req_file, 'r', encoding='utf8') as file:
+            return file.read().split('\n')
 
+    @property
+    def _run_func_name(self):
+        return self._get_func_name(self.__class__, _module_runnable_func)
+
+    @property
+    def _run_func(self):
+        return getattr(self, self._run_func_name) if self._run_func_name else None
+
+    @property
+    def is_runnable(self) -> bool:
+        '''
+        Whether the Module is runnable, in other words, whether can we execute the Module through the
+        `hub run` command.
+        '''
+        return True if self._run_func else False
+
+    @property
+    def serving_func_name(self):
+        return self._get_func_name(self.__class__, _module_serving_func)
+
+    @property
+    def _pretrained_model_path(self):
+        _pretrained_model_attrs = [
+            'pretrained_model_path', 'rec_pretrained_model_path', 'default_pretrained_model_path', 'model_path'
+        ]
+
+        for _attr in _pretrained_model_attrs:
+            if hasattr(self, _attr):
+                path = getattr(self, _attr)
+                if os.path.exists(path) and os.path.isfile(path):
+                    path = os.path.dirname(path)
+                return path
+
+        return None
+
+    def sub_modules(self, recursive: bool = True):
+        '''
+        Get all sub modules.
+
+        Args:
+            recursive(bool): Whether to get sub modules recursively. Default to True.
+        '''
+        _sub_modules = {}
+        for key, item in self.__dict__.items():
+            if id(item) == id(self):
+                continue
+
+            if isinstance(item, (RunModule, ModuleV1)):
+                _sub_modules[key] = item
+                if not recursive:
+                    continue
+
+                for _k, _v in item.sub_modules(recursive):
+                    _sub_modules['{}/{}'.format(key, _k)] = _v
+
+        return _sub_modules
+
+    def save_inference_model(self,
+                             dirname: str,
+                             model_filename: str = None,
+                             params_filename: str = None,
+                             input_spec: List[paddle.static.InputSpec] = None,
+                             include_sub_modules: bool = True,
+                             combined: bool = True):
+        '''
+        Export the model to Paddle Inference format.
+
+        Args:
+            dirname(str): The directory to save the paddle inference model.
+            model_filename(str): The name of the saved model file. Default to `__model__`.
+            params_filename(str): The name of the saved parameters file, only takes effect when `combined` is True.
+                Default to `__params__`.
+            input_spec(list): Describes the input of the saved model's forward method, which can be described by
+                InputSpec or example Tensor. If None, all input variables of the original Layer's forward method
+                would be the inputs of the saved model. Default None.
+            include_sub_modules(bool): Whether to export sub modules. Default to True.
+            combined(bool): Whether to save all parameters in a combined file. Default to True.
+        '''
+        if include_sub_modules:
+            for key, _sub_module in self.sub_modules().items():
+                try:
+                    sub_dirname = os.path.normpath(os.path.join(dirname, key))
+                    _sub_module.save_inference_model(
+                        sub_dirname,
+                        include_sub_modules=include_sub_modules,
+                        model_filename=model_filename,
+                        params_filename=params_filename,
+                        combined=combined)
+                except:
+                    utils.record_exception('Failed to save sub module {}'.format(_sub_module.name))
+
+        if isinstance(self, paddle.nn.Layer):
+            save_file = os.path.join(dirname, '{}'.format(self.name))
+            if not input_spec:
+                if hasattr(self, 'input_spec'):
+                    input_spec = self.input_spec
+                else:
+                    _type = self.type.lower()
+                    if _type.startswith('cv/image'):
+                        input_spec = [paddle.static.InputSpec(shape=[None, 3, None, None], dtype='float32')]
+                    else:
+                        raise RuntimeError(
+                            'Module {} lacks `input_spec`, please specify it when calling `save_inference_model`.'.
+                            format(self.name))
+
+            net = paddle.jit.to_static(self, input_spec)
+            paddle.jit.save(net, save_file)
+
+            log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
+            return
+
+        if not self._pretrained_model_path:
+            raise RuntimeError('Module {} does not support exporting models in Paddle Inference format.'.format(
+                self.name))
+        elif not os.path.exists(self._pretrained_model_path):
+            log.logger.warning('The model path of Module {} does not exist.'.format(self.name))
+            return
+
+        model_filename = '__model__' if not model_filename else model_filename
+        if combined:
+            params_filename = '__params__' if not params_filename else params_filename
+
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
+
+        _model_filename = None
+        _params_filename = None
+
+        if os.path.exists(os.path.join(self._pretrained_model_path, 'model')):
+            _model_filename = 'model'
+
+        if os.path.exists(os.path.join(self._pretrained_model_path, 'params')):
+            _params_filename = 'params'
+
+        if os.path.exists(os.path.join(self._pretrained_model_path, '__params__')):
+            _params_filename = '__params__'
+
+        program, feeded_var_names, target_vars = paddle.fluid.io.load_inference_model(
+            dirname=self._pretrained_model_path,
+            executor=exe,
+            model_filename=_model_filename,
+            params_filename=_params_filename,
+        )
+
+        paddle.fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
+
+        log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
+
+    def export_onnx_model(self,
+                          dirname: str,
+                          input_spec: List[paddle.static.InputSpec] = None,
+                          include_sub_modules: bool = True,
+                          **kwargs):
+        '''
+        Export the model to ONNX format.
+
+        Args:
+            dirname(str): The directory to save the onnx model.
+            input_spec(list): Describes the input of the saved model's forward method, which can be described by
+                InputSpec or example Tensor. If None, all input variables of the original Layer's forward method
+                would be the inputs of the saved model. Default None.
+            include_sub_modules(bool): Whether to export sub modules. Default to True.
+            **kwargs(dict|optional): Other export configuration options for compatibility, some may be removed in
+                the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
+                for more information.
+        '''
+        if include_sub_modules:
+            for key, _sub_module in self.sub_modules().items():
+                try:
+                    sub_dirname = os.path.normpath(os.path.join(dirname, key))
+                    _sub_module.export_onnx_model(sub_dirname, include_sub_modules=include_sub_modules, **kwargs)
+                except:
+                    utils.record_exception('Failed to export sub module {}'.format(_sub_module.name))
+
+        if isinstance(self, paddle.nn.Layer):
+            save_file = os.path.join(dirname, '{}'.format(self.name))
+            if not input_spec:
+                if hasattr(self, 'input_spec'):
+                    input_spec = self.input_spec
+                else:
+                    _type = self.type.lower()
+                    if _type.startswith('cv/image'):
+                        input_spec = [paddle.static.InputSpec(shape=[None, 3, None, None], dtype='float32')]
+                    else:
+                        raise RuntimeError(
+                            'Module {} lacks `input_spec`, please specify it when calling `export_onnx_model`.'.format(
+                                self.name))
+
+            paddle.onnx.export(self, save_file, input_spec=input_spec, **kwargs)
+            return
+
+        if not self._pretrained_model_path:
+            raise RuntimeError('Module {} does not support exporting models in ONNX format.'.format(self.name))
+        elif not os.path.exists(self._pretrained_model_path):
+            log.logger.warning('The model path of Module {} does not exist.'.format(self.name))
+            return
+
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
+
+        model_filename = None
+        params_filename = None
+
+        if os.path.exists(os.path.join(self._pretrained_model_path, 'model')):
+            model_filename = 'model'
+
+        if os.path.exists(os.path.join(self._pretrained_model_path, 'params')):
+            params_filename = 'params'
+
+        if os.path.exists(os.path.join(self._pretrained_model_path, '__params__')):
+            params_filename = '__params__'
+
+        save_file = os.path.join(dirname, '{}.onnx'.format(self.name))
+
+        program, inputs, outputs = paddle.fluid.io.load_inference_model(
+            dirname=self._pretrained_model_path,
+            model_filename=model_filename,
+            params_filename=params_filename,
+            executor=exe)
+
+        paddle2onnx.program2onnx(
+            program=program,
+            scope=paddle.static.global_scope(),
+            feed_var_names=inputs,
+            target_vars=outputs,
+            save_file=save_file,
+            **kwargs)
+
+
+class Module(object):
+    '''
+    In PaddleHub, Module represents an executable module, which usually a pre-trained model that can be used for end-to-end
+    prediction, such as a face detection model or a lexical analysis model, or a pre-trained model that requires finetuning,
+    such as BERT/ERNIE. When loading a Module with a specified name, if the Module does not exist locally, PaddleHub will
+    automatically request the server or the specified Git source to download the resource.
+
+    Args:
+        name(str): Module name.
+        directory(str|optional): Directory of the module to be loaded, only takes effect when the `name` is not specified.
+        version(str|optional): The version limit of the module, only takes effect when the `name` is specified. When the local
+            Module does not meet the specified version conditions, PaddleHub will re-request the server to download the
+            appropriate Module. Default to None, This means that the local Module will be used. If the Module does not exist,
+            PaddleHub will download the latest version available from the server according to the usage environment.
+        source(str|optional): Url of a git repository. If this parameter is specified, PaddleHub will no longer download the
+            specified Module from the default server, but will look for it in the specified repository. Default to None.
+        update(bool|optional): Whether to update the locally cached git repository, only takes effect when the `source` is
+            specified. Default to False.
+        branch(str|optional): The branch of the specified git repository. Default to None.
+        ignore_env_mismatch(bool|optional): Whether to ignore the environment mismatch when installing the Module. Default to
+            False.
+    '''
+
+    def __new__(cls,
+                *,
+                name: str = None,
+                directory: str = None,
+                version: str = None,
+                source: str = None,
+                update: bool = False,
+                branch: str = None,
+                ignore_env_mismatch: bool = False,
+                **kwargs):
+        if cls.__name__ == 'Module':
+            from paddlehub.server.server import CacheUpdater
+            # This branch come from hub.Module(name='xxx') or hub.Module(directory='xxx')
+            if name:
+                module = cls.init_with_name(
+                    name=name,
+                    version=version,
+                    source=source,
+                    update=update,
+                    branch=branch,
+                    ignore_env_mismatch=ignore_env_mismatch,
+                    **kwargs)
+                CacheUpdater("update_cache", module=name, version=version).start()
+            elif directory:
+                module = cls.init_with_directory(directory=directory, **kwargs)
+                CacheUpdater("update_cache", module=directory, version="0.0.0").start()
+        else:
+            module = object.__new__(cls)
+
+        return module
+
+    @classmethod
+    def load(cls, directory: str) -> Generic:
+        '''Load the Module object defined in the specified directory.'''
         if directory.endswith(os.sep):
             directory = directory[:-1]
+
+        # If the module description file existed, try to load as ModuleV1
+        desc_file = os.path.join(directory, 'module_desc.pb')
+        if os.path.exists(desc_file):
+            return ModuleV1.load(directory)
+
         basename = os.path.split(directory)[-1]
         dirname = os.path.join(*list(os.path.split(directory)[:-1]))
-        sys.path.insert(0, dirname)
-        _module = importlib.import_module("{}.module".format(basename))
-        for _item, _cls in inspect.getmembers(_module, inspect.isclass):
-            _item = _module.__dict__[_item]
-            _file = os.path.realpath(sys.modules[_item.__module__].__file__)
-            _module_path = os.path.realpath(
-                os.path.join(directory, "module.py"))
-            if issubclass(_item, Module) and _file.startswith(_module_path):
-                user_module = _item(directory=directory, **kwargs)
+        py_module = utils.load_py_module(dirname, '{}.module'.format(basename))
+
+        for _item, _cls in inspect.getmembers(py_module, inspect.isclass):
+            _item = py_module.__dict__[_item]
+            if hasattr(_item, '_hook_by_hub') and issubclass(_item, RunModule):
+                user_module_cls = _item
                 break
-        sys.path.pop(0)
-        return user_module
-
-    @property
-    def run_func(self):
-        return self._run_func
-
-    @property
-    def directory(self):
-        return self._directory
-
-    @property
-    def author(self):
-        return self.__class__._author
-
-    @property
-    def author_email(self):
-        return self.__class__._author_email
-
-    @property
-    def summary(self):
-        return self.__class__._summary
-
-    @property
-    def type(self):
-        return self.__class__._type
-
-    @property
-    def version(self):
-        return self.__class__._version
-
-    @property
-    def name(self):
-        return self.__class__._name
-
-    @property
-    def code_version(self):
-        return self._code_version
-
-    @property
-    def is_runnable(self):
-        return self._run_func != None
-
-    @property
-    def serving_func_name(self):
-        return self._serving_func_name
-
-    def _initialize(self):
-        pass
-
-    def forward(self, *args, **kwargs):
-        raise RuntimeError('{} does not support dynamic graph mode yet.'.format(
-            self.name))
->>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
-
-
-class ModuleHelper(object):
-    def __init__(self, directory):
-        self.directory = directory
-
-    def module_desc_path(self):
-        return os.path.join(self.directory, MODULE_DESC_PBNAME)
-
-    def model_path(self):
-        return os.path.join(self.directory, MODEL_DIRNAME)
-
-    def processor_path(self):
-        return os.path.join(self.directory, PYTHON_DIR)
-
-    def processor_name(self):
-        return PROCESSOR_NAME
-
-    def assets_path(self):
-        return os.path.join(self.directory, ASSETS_DIRNAME)
-
-
-class ModuleV1(Module):
-    def __init__(self, name=None, directory=None, module_dir=None,
-                 version=None):
-        if not directory:
-            return
-        super(ModuleV1, self).__init__(name, directory, module_dir, version)
-<<<<<<< HEAD
-        self._code_version = "v1"
-=======
->>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
-        self.program = None
-        self.assets = []
-        self.helper = None
-        self.signatures = {}
-        self.default_signature = None
-        self.processor = None
-        self.extra_info = {}
-<<<<<<< HEAD
-=======
-        self._code_version = "v1"
-
-        # parse desc
-        self.module_desc_path = os.path.join(self.directory, MODULE_DESC_PBNAME)
-        self._desc = module_desc_pb2.ModuleDesc()
-        with open(self.module_desc_path, "rb") as file:
-            self._desc.ParseFromString(file.read())
-
-        module_info = self.desc.attr.map.data['module_info']
-        self._name = utils.from_module_attr_to_pyobj(
-            module_info.map.data['name'])
-        self._author = utils.from_module_attr_to_pyobj(
-            module_info.map.data['author'])
-        self._author_email = utils.from_module_attr_to_pyobj(
-            module_info.map.data['author_email'])
-        self._version = utils.from_module_attr_to_pyobj(
-            module_info.map.data['version'])
-        self._type = utils.from_module_attr_to_pyobj(
-            module_info.map.data['type'])
-        self._summary = utils.from_module_attr_to_pyobj(
-            module_info.map.data['summary'])
->>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
-
-        # cache data
-        self.last_call_name = None
-        self.cache_feed_dict = None
-        self.cache_fetch_dict = None
-        self.cache_program = None
-
-        self.helper = ModuleHelper(directory)
-        exe = fluid.Executor(fluid.CPUPlace())
-        self.program, _, _ = fluid.io.load_inference_model(
-            self.helper.model_path(), executor=exe)
-        for block in self.program.blocks:
-            for op in block.ops:
-                if "op_callstack" in op.all_attrs():
-                    op._set_attr("op_callstack", [""])
-        self._load_processor()
-        self._load_assets()
-        self._recover_from_desc()
-        self._generate_sign_attr()
-        self._generate_extra_info()
-        self._restore_parameter(self.program)
-        self._recover_variable_info(self.program)
-<<<<<<< HEAD
-=======
-
-    @property
-    def serving_func_name(self):
-        serving_func_name = self.desc.attr.map.data['default_signature'].s
-        return serving_func_name if serving_func_name != "" else None
-
-    @property
-    def desc(self):
-        return self._desc
-
-    @property
-    def author(self):
-        return self._author
-
-    @property
-    def author_email(self):
-        return self._author_email
-
-    @property
-    def summary(self):
-        return self._summary
-
-    @property
-    def type(self):
-        return self._type
-
-    @property
-    def version(self):
-        return self._version
-
-    @property
-    def name(self):
-        return self._name
->>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
-
-    def _dump_processor(self):
-        import inspect
-        pymodule = inspect.getmodule(self.processor)
-        pycode = inspect.getsource(pymodule)
-        processor_path = self.helper.processor_path()
-        processor_md5 = utils.md5(pycode)
-        processor_md5 += str(time.time())
-        processor_name = utils.md5(processor_md5)
-        output_file = os.path.join(processor_path, processor_name + ".py")
-        utils.mkdir(processor_path)
-        with open(output_file, "w") as file:
-            file.write(pycode)
-        utils.from_pyobj_to_module_attr(
-            processor_name, self.desc.attr.map.data['processor_info'])
-
-    def _load_processor(self):
-        processor_path = self.helper.processor_path()
-        if os.path.exists(processor_path):
-            sys.path.append(processor_path)
-            processor_name = utils.from_module_attr_to_pyobj(
-                self.desc.attr.map.data['processor_info'])
-            self.processor = __import__(processor_name).Processor(module=self)
         else:
-            self.processor = None
+            raise InvalidHubModule(directory)
 
-    def _dump_assets(self):
-        utils.mkdir(self.helper.assets_path())
-        for asset in self.assets:
-            filename = os.path.basename(asset)
-            newfile = os.path.join(self.helper.assets_path(), filename)
-            shutil.copyfile(asset, newfile)
+        user_module_cls.directory = directory
 
-    def _load_assets(self):
-        assets_path = self.helper.assets_path()
-        self.assets = []
-        for file in os.listdir(assets_path):
-            filepath = os.path.join(self.helper.assets_path(), file)
-            self.assets.append(filepath)
-
-    def _restore_parameter(self, program):
-        global_block = program.global_block()
-        param_attrs = self.desc.attr.map.data['param_attrs']
-        for key, param_attr in param_attrs.map.data.items():
-            param = paddle_helper.from_module_attr_to_param(param_attr)
-            param['name'] = self.get_var_name_with_prefix(key)
-            if (param['name'] not in global_block.vars):
-                continue
-            var = global_block.var(param['name'])
-            global_block.create_parameter(
-                shape=var.shape,
-                dtype=var.dtype,
-                type=var.type,
-                lod_level=var.lod_level,
-                error_clip=var.error_clip,
-                stop_gradient=var.stop_gradient,
-                is_data=var.is_data,
-                **param)
-
-    def _recover_variable_info(self, program):
-        var_infos = self.desc.attr.map.data['var_infos']
-        for var_info in var_infos.map.data:
-            idx = utils.from_module_attr_to_pyobj(
-                var_infos.map.data[var_info].map.data['block_id'])
-            stop_gradient = utils.from_module_attr_to_pyobj(
-                var_infos.map.data[var_info].map.data['stop_gradient'])
-            block = program.blocks[idx]
-            var_name = self.get_var_name_with_prefix(var_info)
-            if var_name in block.vars:
-                var = block.vars[var_name]
-                var.stop_gradient = stop_gradient
-
-    def get_extra_info(self, key):
-        return self.extra_info.get(key, None)
-
-    def _generate_extra_info(self):
-        for key in self.extra_info:
-            self.__dict__["get_%s" % key] = functools.partial(
-                self.get_extra_info, key=key)
-
-    def _generate_sign_attr(self):
-        self._check_signatures()
-        for sign in self.signatures:
-            self.__dict__[sign] = functools.partial(
-                self.__call__, sign_name=sign)
-
-    def get_vocab_path(self):
-        for assets_file in self.assets:
-            if "vocab.txt" in assets_file:
-                return assets_file
-        return None
-
-    def get_word_dict_path(self):
-        for assets_file in self.assets:
-            if "dict.wordseg.pickle" in assets_file:
-                return assets_file
-        return None
-
-    def get_spm_path(self):
-        for assets_file in self.assets:
-            if "spm_cased_simp_sampled.model" in assets_file:
-                return assets_file
-        return None
-
-    def _recover_from_desc(self):
-        # recover signature
-        for sign, module_var in self.desc.sign2var.items():
-            inputs = []
-            outputs = []
-            feed_names = []
-            fetch_names = []
-            for var in module_var.feed_desc:
-                variable = self.program.global_block().vars[var.var_name]
-                inputs.append(variable)
-                feed_names.append(var.alias)
-
-            for var in module_var.fetch_desc:
-                variable = self.program.global_block().vars[var.var_name]
-                outputs.append(variable)
-                fetch_names.append(var.alias)
-
-            self.signatures[sign] = create_signature(
-                sign,
-                inputs=inputs,
-                outputs=outputs,
-                feed_names=feed_names,
-                fetch_names=fetch_names)
-
-        # recover default signature
-        default_signature_name = utils.from_module_attr_to_pyobj(
-            self.desc.attr.map.data['default_signature'])
-        self.default_signature = self.signatures[
-            default_signature_name].name if default_signature_name else None
-
-        # recover module info
-        module_info = self.desc.attr.map.data['module_info']
-        self._name = utils.from_module_attr_to_pyobj(
-            module_info.map.data['name'])
-        self._author = utils.from_module_attr_to_pyobj(
-            module_info.map.data['author'])
-        self._author_email = utils.from_module_attr_to_pyobj(
-            module_info.map.data['author_email'])
-        self._version = utils.from_module_attr_to_pyobj(
-            module_info.map.data['version'])
-        self._type = utils.from_module_attr_to_pyobj(
-            module_info.map.data['type'])
-        self._summary = utils.from_module_attr_to_pyobj(
-            module_info.map.data['summary'])
-
-        # recover extra info
-        extra_info = self.desc.attr.map.data['extra_info']
-        self.extra_info = {}
-        for key, value in extra_info.map.data.items():
-            self.extra_info[key] = utils.from_module_attr_to_pyobj(value)
-
-        # recover name prefix
-        self._name_prefix = utils.from_module_attr_to_pyobj(
-            self.desc.attr.map.data["name_prefix"])
-
-    def __call__(self, sign_name, data, use_gpu=False, batch_size=1, **kwargs):
-        self.check_processor()
-
-        def _get_reader_and_feeder(data_format, data, place):
-            def _reader(process_data):
-                for item in zip(*process_data):
-                    yield item
-
-            process_data = []
-            feed_name_list = []
-            for key in data_format:
-                process_data.append([value['processed'] for value in data[key]])
-                feed_name_list.append(data_format[key]['feed_key'])
-            feeder = fluid.DataFeeder(feed_list=feed_name_list, place=place)
-            return functools.partial(_reader, process_data=process_data), feeder
-
-        if self.last_call_name != sign_name:
-            self.last_call_name = sign_name
-            self.cache_feed_dict, self.cache_fetch_dict, self.cache_program = self.context(
-                sign_name, for_test=True)
-        feed_dict = self.cache_feed_dict
-        fetch_dict = self.cache_fetch_dict
-        program = self.cache_program
-
-        fetch_list = list(set([value for key, value in fetch_dict.items()]))
-        with fluid.program_guard(program):
-            result = []
-            index = 0
-            try:
-                _places = os.environ["CUDA_VISIBLE_DEVICES"]
-                int(_places[0])
-            except:
-                use_gpu = False
-
-            place = fluid.CUDAPlace(0) if use_gpu else fluid.CPUPlace()
-
-            exe = fluid.Executor(place=place)
-            data = self.processor.preprocess(
-                sign_name=sign_name, data_dict=data)
-            data_format = self.processor.data_format(sign_name=sign_name)
-            reader, feeder = _get_reader_and_feeder(data_format, data, place)
-            reader = paddle.batch(reader, batch_size=batch_size)
-            for batch in reader():
-                data_out = exe.run(
-                    feed=feeder.feed(batch),
-                    fetch_list=fetch_list,
-                    return_numpy=False)
-                sub_data = {
-                    key: value[index:index + len(batch)]
-                    for key, value in data.items()
-                }
-                result += self.processor.postprocess(sign_name, data_out,
-                                                     sub_data, **kwargs)
-                index += len(batch)
-
-        return result
-
-    def check_processor(self):
-        if not self.processor:
-            raise ValueError("This Module is not callable!")
-
-    @property
-<<<<<<< HEAD
-    def is_runable(self):
-        return self.default_signature != None
-
-=======
-    def is_runnable(self):
-        return self.default_signature != None
-
-    @property
-    def code_version(self):
-        return self._code_version
-
->>>>>>> 68d55d77dfadfdd25492102ff532cb7170b66061
-    def context(self,
-                sign_name=None,
-                for_test=False,
-                trainable=True,
-                regularizer=None,
-                max_seq_len=128,
-                learning_rate=1e-3):
-        """
-        Args:
-            max_seq_len(int): maximum sequence length, this option is only
-            available for BERT/ERNIE module
-        """
-
-        if sign_name:
-            if sign_name not in self.signatures:
-                raise KeyError(
-                    "Module did not have a signature with name %s" % sign_name)
-            signature = self.signatures[sign_name]
+        source_info_file = os.path.join(directory, '_source_info.yaml')
+        if os.path.exists(source_info_file):
+            info = parser.yaml_parser.parse(source_info_file)
+            user_module_cls.source = info.get('source', '')
+            user_module_cls.branch = info.get('branch', '')
         else:
-            inputs = [
-                input for signature in self.signatures.values()
-                for input in signature.inputs
-            ]
-            outputs = [
-                output for signature in self.signatures.values()
-                for output in signature.outputs
-            ]
-            feed_names = [
-                feed_name for signature in self.signatures.values()
-                for feed_name in signature.feed_names
-            ]
-            fetch_names = [
-                fetch_name for signature in self.signatures.values()
-                for fetch_name in signature.fetch_names
-            ]
-            signature = create_signature(
-                name="hub_temp_signature",
-                inputs=inputs,
-                outputs=outputs,
-                feed_names=feed_names,
-                fetch_names=fetch_names,
-                for_predict=False)
+            user_module_cls.source = ''
+            user_module_cls.branch = ''
 
-        program = self.program.clone(for_test=for_test)
-        paddle_helper.remove_feed_fetch_op(program)
+        # In the case of multiple cards, the following code can set each process to use the correct place.
+        if issubclass(user_module_cls, paddle.nn.Layer):
+            place = paddle.get_device().split(':')[0]
+            paddle.set_device(place)
 
-        if not for_test:
-            paddle_helper.set_parameter_trainable(program, trainable)
+        return user_module_cls
 
-            paddle_helper.set_parameter_learning_rate(program, learning_rate)
+    @classmethod
+    def load_module_info(cls, directory: str) -> EasyDict:
+        '''Load the infomation of Module object defined in the specified directory.'''
+        # If is ModuleV1
+        desc_file = os.path.join(directory, 'module_desc.pb')
+        if os.path.exists(desc_file):
+            return ModuleV1.load_module_info(directory)
 
-            paddle_helper.set_parameter_regularizer(program, regularizer)
+        # If is ModuleV2
+        module_file = os.path.join(directory, 'module.py')
+        with codecs.open(module_file, 'r', encoding='utf8') as file:
+            pycode = file.read()
+            ast_module = ast.parse(pycode)
 
-            self._restore_parameter(program)
+            for _body in ast_module.body:
+                if not isinstance(_body, ast.ClassDef):
+                    continue
 
-        self._recover_variable_info(program)
+                for _decorator in _body.decorator_list:
+                    if _decorator.func.id != 'moduleinfo':
+                        continue
 
-        paddle_helper.set_op_attr(program, is_test=for_test)
-        feed_dict = {}
-        fetch_dict = {}
-        for index, var in enumerate(signature.inputs):
-            feed_dict[index] = program.global_block().var(var.name)
-            key = signature.feed_names[index]
-            if key:
-                feed_dict[key] = program.global_block().var(var.name)
-
-        for index, var in enumerate(signature.outputs):
-            fetch_dict[index] = program.global_block().var(var.name)
-            key = signature.fetch_names[index]
-            if key:
-                fetch_dict[key] = program.global_block().var(var.name)
-
-        # update BERT/ERNIE's input tensor's sequence length to max_seq_len
-        if "bert" in self.name or self.name.startswith("ernie"):
-            MAX_SEQ_LENGTH = 512
-            if max_seq_len > MAX_SEQ_LENGTH or max_seq_len <= 0:
-                raise ValueError(
-                    "max_seq_len({}) should be in the range of [1, {}]".format(
-                        max_seq_len, MAX_SEQ_LENGTH))
-            logger.info(
-                "Set maximum sequence length of input tensor to {}".format(
-                    max_seq_len))
-            if self.name.startswith("ernie_v2"):
-                feed_list = [
-                    "input_ids", "position_ids", "segment_ids", "input_mask",
-                    "task_ids"
-                ]
+                    info = {key.arg: key.value.s for key in _decorator.keywords if key.arg != 'meta'}
+                    return EasyDict(info)
             else:
-                feed_list = [
-                    "input_ids", "position_ids", "segment_ids", "input_mask"
-                ]
-            for tensor_name in feed_list:
-                seq_tensor_shape = [-1, max_seq_len, 1]
-                logger.info("The shape of input tensor[{}] set to {}".format(
-                    tensor_name, seq_tensor_shape))
-                program.global_block().var(
-                    feed_dict[tensor_name].name).desc.set_shape(
-                        seq_tensor_shape)
+                raise InvalidHubModule(directory)
 
-        # record num parameters loaded by paddlehub
-        num_param_loaded = 0
-        for param in program.global_block().iter_parameters():
-            num_param_loaded += 1
-        logger.info(
-            "%d pretrained paramaters loaded by PaddleHub" % num_param_loaded)
+    @classmethod
+    def init_with_name(cls,
+                       name: str,
+                       version: str = None,
+                       source: str = None,
+                       update: bool = False,
+                       branch: str = None,
+                       ignore_env_mismatch: bool = False,
+                       **kwargs) -> Union[RunModule, ModuleV1]:
+        '''Initialize Module according to the specified name.'''
+        from paddlehub.module.manager import LocalModuleManager
+        manager = LocalModuleManager()
+        user_module_cls = manager.search(name, source=source, branch=branch)
+        if not user_module_cls or not user_module_cls.version.match(version):
+            user_module_cls = manager.install(
+                name=name,
+                version=version,
+                source=source,
+                update=update,
+                branch=branch,
+                ignore_env_mismatch=ignore_env_mismatch)
 
-        return feed_dict, fetch_dict, program
+        directory = manager._get_normalized_path(user_module_cls.name)
 
-    def get_name_prefix(self):
-        return self._name_prefix
+        # The HubModule in the old version will use the _initialize method to initialize,
+        # this function will be obsolete in a future version
+        if hasattr(user_module_cls, '_initialize'):
+            log.logger.warning(
+                'The _initialize method in HubModule will soon be deprecated, you can use the __init__() to handle the initialization of the object'
+            )
+            user_module = user_module_cls(directory=directory)
+            user_module._initialize(**kwargs)
+            return user_module
 
-    def get_var_name_with_prefix(self, var_name):
-        return self.get_name_prefix() + var_name
+        if issubclass(user_module_cls, ModuleV1):
+            return user_module_cls(directory=directory, **kwargs)
 
-    def _check_signatures(self):
-        if not self.signatures:
-            raise ValueError("Signatures should not be None")
+        user_module_cls.directory = directory
+        return user_module_cls(**kwargs)
 
-        for key, sign in self.signatures.items():
-            if not isinstance(sign, Signature):
-                raise TypeError(
-                    "Item in Signatures shoule be an instance of paddlehub.Signature"
-                )
+    @classmethod
+    def init_with_directory(cls, directory: str, **kwargs) -> Union[RunModule, ModuleV1]:
+        '''Initialize Module according to the specified directory.'''
+        user_module_cls = cls.load(directory)
 
-            for input in sign.inputs:
-                _tmp_program = input.block.program
-                if not self.program == _tmp_program:
-                    raise ValueError(
-                        "All input and outputs variables in signature should come from the same Program"
-                    )
+        # The HubModule in the old version will use the _initialize method to initialize,
+        # this function will be obsolete in a future version
+        if hasattr(user_module_cls, '_initialize'):
+            log.logger.warning(
+                'The _initialize method in HubModule will soon be deprecated, you can use the __init__() to handle the initialization of the object'
+            )
+            user_module = user_module_cls(directory=directory)
+            user_module._initialize(**kwargs)
+            return user_module
 
-            for output in sign.outputs:
-                _tmp_program = output.block.program
-                if not self.program == _tmp_program:
-                    raise ValueError(
-                        "All input and outputs variables in signature should come from the same Program"
-                    )
+        if issubclass(user_module_cls, ModuleV1):
+            return user_module_cls(directory=directory, **kwargs)
+
+        user_module_cls.directory = directory
+        return user_module_cls(**kwargs)
+
+
+def moduleinfo(name: str,
+               version: str,
+               author: str = None,
+               author_email: str = None,
+               summary: str = None,
+               type: str = None,
+               meta=None) -> Callable:
+    '''
+    Mark Module information for a python class, and the class will automatically be extended to inherit HubModule. In other words, python classes
+    marked with moduleinfo can be loaded through hub.Module.
+    '''
+
+    def _wrapper(cls: Generic) -> Generic:
+        wrap_cls = cls
+        _meta = RunModule if not meta else meta
+        if not issubclass(cls, _meta):
+            _bases = []
+            for _b in cls.__bases__:
+                if issubclass(_meta, _b):
+                    continue
+                _bases.append(_b)
+            _bases.append(_meta)
+            _bases = tuple(_bases)
+            wrap_cls = builtins.type(cls.__name__, _bases, dict(cls.__dict__))
+
+        wrap_cls.name = name
+        wrap_cls.version = utils.Version(version)
+        wrap_cls.author = author
+        wrap_cls.author_email = author_email
+        wrap_cls.summary = summary
+        wrap_cls.type = type
+        wrap_cls._hook_by_hub = True
+        return wrap_cls
+
+    return _wrapper

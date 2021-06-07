@@ -1,5 +1,4 @@
-#coding:utf-8
-#   Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,82 +11,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Fine-tuning on sequence labeling task """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import argparse
-import ast
-import numpy as np
-import os
-import time
-
-import paddle
-import paddle.fluid as fluid
 import paddlehub as hub
 
-# yapf: disable
-parser = argparse.ArgumentParser(__doc__)
-parser.add_argument("--checkpoint_dir", type=str, default=None, help="Directory to model checkpoint")
-parser.add_argument("--max_seq_len", type=int, default=512, help="Number of words of the longest seqence.")
-parser.add_argument("--batch_size",     type=int,   default=1, help="Total examples' number in batch for training.")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=False, help="Whether use GPU for fine-tuning, input should be True or False")
-args = parser.parse_args()
-# yapf: enable.
-
 if __name__ == '__main__':
-    # loading Paddlehub ERNIE pretrained model
-    module = hub.Module(name="ernie_tiny")
-    inputs, outputs, program = module.context(max_seq_len=args.max_seq_len)
-
-    # Download dataset and get its label list and label num
-    # If you just want labels information, you can omit its tokenizer parameter to avoid preprocessing the train set.
-    dataset = hub.dataset.MSRA_NER()
-    num_classes = dataset.num_labels
-    label_list = dataset.get_labels()
-
-    # Construct transfer learning network
-    # Use "sequence_output" for token-level output.
-    sequence_output = outputs["sequence_output"]
-
-    # Setup RunConfig for PaddleHub Fine-tune API
-    config = hub.RunConfig(
-        use_data_parallel=False,
-        use_cuda=args.use_gpu,
-        batch_size=args.batch_size,
-        checkpoint_dir=args.checkpoint_dir,
-        strategy=hub.finetune.strategy.DefaultFinetuneStrategy())
-
-    # Define a sequence labeling fine-tune task by PaddleHub's API
-    # if add crf, the network use crf as decoder
-    seq_label_task = hub.SequenceLabelTask(
-        feature=sequence_output,
-        max_seq_len=args.max_seq_len,
-        num_classes=num_classes,
-        config=config,
-        add_crf=False)
-
-    # Data to be predicted
+    split_char = "\002"
+    label_list = ["B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "O"]
     text_a = [
-        "我们变而以书会友，以书结缘，把欧美、港台流行的食品类图谱、画册、工具书汇集一堂。",
-        "为了跟踪国际最新食品工艺、流行趋势，大量搜集海外专业书刊资料是提高技艺的捷径。",
-        "其中线装古籍逾千册；民国出版物几百种；珍本四册、稀见本四百余册，出版时间跨越三百余年。",
-        "有的古木交柯，春机荣欣，从诗人句中得之，而入画中，观之令人心驰。",
-        "不过重在晋趣，略增明人气息，妙在集古有道、不露痕迹罢了。",
+        '去年十二月二十四日，市委书记张敬涛召集县市主要负责同志研究信访工作时，提出三问：『假如上访群众是我们的父母姐妹，你会用什么样的感情对待他们？',
+        '新华社北京5月7日电国务院副总理李岚清今天在中南海会见了美国前商务部长芭芭拉·弗兰克林。',
+        '根据测算，海卫1表面温度已经从“旅行者”号探测器1989年造访时的零下236摄氏度上升到零下234摄氏度。',
+        '华裔作家韩素音女士曾三次到大足，称“大足石窟是一座未被开发的金矿”。',
     ]
+    data = [[split_char.join(text)] for text in text_a]
+    label_map = {idx: label for idx, label in enumerate(label_list)}
 
-    # Add 0x02 between characters to match the format of training data,
-    # otherwise the length of prediction results will not match the input string
-    # if the input string contains non-Chinese characters.
-    formatted_text_a = list(map("\002".join, text_a))
+    model = hub.Module(
+        name='ernie_tiny',
+        version='2.0.1',
+        task='token-cls',
+        load_checkpoint='./token_cls_save_dir/best/model.pdparams',
+        label_map=label_map,
+    )
 
-    # Use the appropriate tokenizer to preprocess the data
-    # For ernie_tiny, it use BertTokenizer too.
-    tokenizer = hub.BertTokenizer(vocab_file=module.get_vocab_path())
-    encoded_data = [
-        tokenizer.encode(text=text, max_seq_len=args.max_seq_len)
-        for text in formatted_text_a
-    ]
-    print(seq_label_task.predict(data=encoded_data, label_list=label_list))
+    results = model.predict(data=data, max_seq_len=128, batch_size=1, use_gpu=True)
+    for idx, text in enumerate(text_a):
+        print(f'Text:\n{text} \nLable: \n{", ".join(results[idx][1:len(text)+1])} \n')

@@ -1,9 +1,0 @@
-name: videotag_tsn_lstm
-dir: "modules/video/classification/videotag_tsn_lstm"
-exclude:
-  - README.md
-resources:
-  -
-    url: https://paddlehub.bj.bcebos.com/model/video/video_classifcation/videotag_tsn_lstm.tar.gz
-    dest: weights
-    uncompress: True
