@@ -24,11 +24,12 @@ class MTTokenizer(object):
     def __init__(self, bpe_codes_file: str, lang_src: str = 'en', lang_trg: str = 'de', separator='@@'):
         self.moses_tokenizer = MosesTokenizer(lang=lang_src)
         self.moses_detokenizer = MosesDetokenizer(lang=lang_trg)
-        self.bpe_tokenizer = BPE(codes=codecs.open(bpe_codes_file, encoding='utf-8'),
-                                 merges=-1,
-                                 separator=separator,
-                                 vocab=None,
-                                 glossaries=None)
+        self.bpe_tokenizer = BPE(
+            codes=codecs.open(bpe_codes_file, encoding='utf-8'),
+            merges=-1,
+            separator=separator,
+            vocab=None,
+            glossaries=None)
 
     def tokenize(self, text: str):
         """

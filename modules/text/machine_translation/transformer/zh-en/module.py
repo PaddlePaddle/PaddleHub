@@ -83,29 +83,31 @@ class MTTransformer(nn.Layer):
 
         self.max_length = max_length
         self.beam_size = beam_size
-        self.tokenizer = MTTokenizer(bpe_codes_file=bpe_codes_file,
-                                     lang_src=self.lang_config['source'],
-                                     lang_trg=self.lang_config['target'])
-        self.src_vocab = Vocab.load_vocabulary(filepath=src_vocab_file,
-                                               unk_token=self.vocab_config['unk_token'],
-                                               bos_token=self.vocab_config['bos_token'],
-                                               eos_token=self.vocab_config['eos_token'])
-        self.trg_vocab = Vocab.load_vocabulary(filepath=trg_vocab_file,
-                                               unk_token=self.vocab_config['unk_token'],
-                                               bos_token=self.vocab_config['bos_token'],
-                                               eos_token=self.vocab_config['eos_token'])
+        self.tokenizer = MTTokenizer(
+            bpe_codes_file=bpe_codes_file, lang_src=self.lang_config['source'], lang_trg=self.lang_config['target'])
+        self.src_vocab = Vocab.load_vocabulary(
+            filepath=src_vocab_file,
+            unk_token=self.vocab_config['unk_token'],
+            bos_token=self.vocab_config['bos_token'],
+            eos_token=self.vocab_config['eos_token'])
+        self.trg_vocab = Vocab.load_vocabulary(
+            filepath=trg_vocab_file,
+            unk_token=self.vocab_config['unk_token'],
+            bos_token=self.vocab_config['bos_token'],
+            eos_token=self.vocab_config['eos_token'])
         self.src_vocab_size = (len(self.src_vocab) + self.vocab_config['pad_factor'] - 1) \
             // self.vocab_config['pad_factor'] * self.vocab_config['pad_factor']
         self.trg_vocab_size = (len(self.trg_vocab) + self.vocab_config['pad_factor'] - 1) \
             // self.vocab_config['pad_factor'] * self.vocab_config['pad_factor']
-        self.transformer = InferTransformerModel(src_vocab_size=self.src_vocab_size,
-                                                 trg_vocab_size=self.trg_vocab_size,
-                                                 bos_id=self.vocab_config['bos_id'],
-                                                 eos_id=self.vocab_config['eos_id'],
-                                                 max_length=self.max_length + 1,
-                                                 max_out_len=max_out_len,
-                                                 beam_size=self.beam_size,
-                                                 **self.model_config)
+        self.transformer = InferTransformerModel(
+            src_vocab_size=self.src_vocab_size,
+            trg_vocab_size=self.trg_vocab_size,
+            bos_id=self.vocab_config['bos_id'],
+            eos_id=self.vocab_config['eos_id'],
+            max_length=self.max_length + 1,
+            max_out_len=max_out_len,
+            beam_size=self.beam_size,
+            **self.model_config)
 
         state_dict = paddle.load(checkpoint)
 
