@@ -6,9 +6,10 @@ from paddlehub.datasets import Canvas
 
 if __name__ == '__main__':
 
-    transform = T.Compose([T.Resize((256, 256), interpolation='NEAREST'),
-                           T.RandomPaddingCrop(crop_size=176),
-                           T.RGB2LAB()], to_rgb=True)
+    transform = T.Compose(
+        [T.Resize((256, 256), interpolation='NEAREST'),
+         T.RandomPaddingCrop(crop_size=176),
+         T.RGB2LAB()], to_rgb=True)
 
     color_set = Canvas(transform=transform, mode='train')
     model = hub.Module(name='user_guided_colorization', load_checkpoint='/PATH/TO/CHECKPOINT')

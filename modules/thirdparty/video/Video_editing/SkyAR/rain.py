@@ -29,7 +29,7 @@ class Rain():
         return rain_layer
 
     def _create_haze_layer(self, rain_layer):
-        return 0.1*np.ones_like(rain_layer)
+        return 0.1 * np.ones_like(rain_layer)
 
     def forward(self, img):
         # get input image size
@@ -54,7 +54,7 @@ class Rain():
         img_out = 1 - (1 - rain_layer) * (1 - img)
 
         # gamma and light correction
-        img_out = self.light_correction*(img_out**self.gamma)
+        img_out = self.light_correction * (img_out**self.gamma)
 
         # check boundary
         img_out = np.clip(img_out, a_min=0, a_max=1.)

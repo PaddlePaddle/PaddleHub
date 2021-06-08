@@ -24,3 +24,4 @@ In order to make it easier for developers to apply transfer learning, Paddle has
    finetune/style_transfer.md
    finetune/semantic_segmentation.md
    finetune/audio_classification.md
+   finetune/customized_dataset.md

@@ -24,7 +24,7 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 人像分割
 =============================================
 
-人像分割任务旨在将输入图片中的人像和背景区分开来。该任务有很多的应用场景，例如背景虚化、背景替换、影视后期处理等等。我们使用`humanseg_lite <https://www.paddlepaddle.org.cn/hubdetail?name=humanseg_lite&en_category=ImageSegmentation>`_ 来展示这个功能。
+人像分割任务旨在将输入图片中的人像和背景区分开来。该任务有很多的应用场景，例如背景虚化、背景替换、影视后期处理等等。我们使用 `humanseg_lite <https://www.paddlepaddle.org.cn/hubdetail?name=humanseg_lite&en_category=ImageSegmentation>`_ 来展示这个功能。
 
 .. code-block:: python
 
@@ -43,7 +43,7 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 人体解析
 =============================================
 
-人体解析是人像分割的细粒度任务。该任务旨在提取输入图片中人体的不同部件。相关模型经常和新兴的GAN模型一起使用，应用场景包括美颜、换衣服等等。我们使用`ace2p <https://www.paddlepaddle.org.cn/hubdetail?name=ace2p&en_category=ImageSegmentation>`_  来展示这个功能。
+人体解析是人像分割的细粒度任务。该任务旨在提取输入图片中人体的不同部件。相关模型经常和新兴的GAN模型一起使用，应用场景包括美颜、换衣服等等。我们使用 `ace2p <https://www.paddlepaddle.org.cn/hubdetail?name=ace2p&en_category=ImageSegmentation>`_  来展示这个功能。
 
 .. code-block:: python
 
@@ -62,7 +62,7 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 人脸检测 
 =============================================
 
-人脸检测任务旨在检测出输入图片中的每一张人脸的位置。应用的场景包括视频监控、人流量估计等等场景。我们使用`ultra_light_fast_generic_face_detector_1mb_640 <https://www.paddlepaddle.org.cn/hubdetail?name=ultra_light_fast_generic_face_detector_1mb_640&en_category=FaceDetection>`_ 来展示这个功能。
+人脸检测任务旨在检测出输入图片中的每一张人脸的位置。应用的场景包括视频监控、人流量估计等等场景。我们使用 `ultra_light_fast_generic_face_detector_1mb_640 <https://www.paddlepaddle.org.cn/hubdetail?name=ultra_light_fast_generic_face_detector_1mb_640&en_category=FaceDetection>`_ 来展示这个功能。
 
 .. code-block:: python
 
@@ -81,7 +81,7 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 关键点检测
 =============================================
 
-关键点检测任务旨在识别输入图片中每一个人体的不同关键点信息，例如头部、肩膀、关节等等。依赖于模型能力的不同，能够检测到的关键点数量也不同。该任务一般用于人体美型、人体姿态估计等等，我们使用`openpose_body_estimation <https://www.paddlepaddle.org.cn/hubdetail?name=openpose_body_estimation&en_category=KeyPointDetection>`_ 来展示这个功能。
+关键点检测任务旨在识别输入图片中每一个人体的不同关键点信息，例如头部、肩膀、关节等等。依赖于模型能力的不同，能够检测到的关键点数量也不同。该任务一般用于人体美型、人体姿态估计等等，我们使用 `openpose_body_estimation <https://www.paddlepaddle.org.cn/hubdetail?name=openpose_body_estimation&en_category=KeyPointDetection>`_ 来展示这个功能。
 
 .. code-block:: python
 
@@ -100,7 +100,7 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
 中文词法分析
 =============================================
 
-中文词法分析旨在对输入的语句进行分词、词性分析、命名实体识别，我们使用`lac <https://www.paddlepaddle.org.cn/hubdetail?name=lac&en_category=LexicalAnalysis>`_ 来展示这个功能。
+中文词法分析旨在对输入的语句进行分词、词性分析、命名实体识别，我们使用 `lac <https://www.paddlepaddle.org.cn/hubdetail?name=lac&en_category=LexicalAnalysis>`_ 来展示这个功能。
 
 .. code-block:: python
 

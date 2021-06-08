@@ -40,6 +40,7 @@ from paddlehub.utils.log import logger
 
 class Version(packaging.version.Version):
     '''Extended implementation of packaging.version.Version'''
+
     def match(self, condition: str) -> bool:
         '''
         Determine whether the given condition are met
@@ -105,6 +106,7 @@ class Version(packaging.version.Version):
 
 class Timer(object):
     '''Calculate runing speed and estimated time of arrival(ETA)'''
+
     def __init__(self, total_step: int):
         self.total_step = total_step
         self.last_start_step = 0
@@ -408,13 +410,14 @@ def extract_melspectrogram(y,
         logger.error('Failed to import librosa. Please check that librosa and numba are correctly installed.')
         raise
 
-    s = librosa.stft(y,
-                     n_fft=window_size,
-                     hop_length=hop_size,
-                     win_length=window_size,
-                     window=window,
-                     center=center,
-                     pad_mode=pad_mode)
+    s = librosa.stft(
+        y,
+        n_fft=window_size,
+        hop_length=hop_size,
+        win_length=window_size,
+        window=window,
+        center=center,
+        pad_mode=pad_mode)
 
     power = np.abs(s)**2
     melW = librosa.filters.mel(sr=sample_rate, n_fft=window_size, n_mels=mel_bins, fmin=fmin, fmax=fmax)

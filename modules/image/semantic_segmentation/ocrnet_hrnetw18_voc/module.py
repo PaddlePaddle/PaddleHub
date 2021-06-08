@@ -25,6 +25,7 @@ from paddlehub.module.cv_module import ImageSegmentationModule
 import ocrnet_hrnetw18_voc.layers as L
 from ocrnet_hrnetw18_voc.hrnet import HRNet_W18
 
+
 @moduleinfo(
     name="ocrnet_hrnetw18_voc",
     type="CV/semantic_segmentation",
@@ -90,11 +91,8 @@ class OCRNetHRNetW18(nn.Layer):
         feats = [feats[i] for i in self.backbone_indices]
         logit_list = self.head(feats)
         logit_list = [
-            F.interpolate(
-                logit,
-                x.shape[2:],
-                mode='bilinear',
-                align_corners=self.align_corners) for logit in logit_list]
+            F.interpolate(logit, x.shape[2:], mode='bilinear', align_corners=self.align_corners) for logit in logit_list
+        ]
         return logit_list
 
 
@@ -108,32 +106,23 @@ class OCRHead(nn.Layer):
         ocr_key_channels(int, optional): The number of key channels in ObjectAttentionBlock. Default: 256.
     """
 
-    def __init__(self,
-                 num_classes: int,
-                 in_channels: int,
-                 ocr_mid_channels: int = 512,
-                 ocr_key_channels: int = 256):
+    def __init__(self, num_classes: int, in_channels: int, ocr_mid_channels: int = 512, ocr_key_channels: int = 256):
         super().__init__()
 
         self.num_classes = num_classes
         self.spatial_gather = SpatialGatherBlock()
-        self.spatial_ocr = SpatialOCRModule(ocr_mid_channels, ocr_key_channels,
-                                            ocr_mid_channels)
+        self.spatial_ocr = SpatialOCRModule(ocr_mid_channels, ocr_key_channels, ocr_mid_channels)
 
         self.indices = [-2, -1] if len(in_channels) > 1 else [-1, -1]
 
-        self.conv3x3_ocr = L.ConvBNReLU(
-            in_channels[self.indices[1]], ocr_mid_channels, 3, padding=1)
+        self.conv3x3_ocr = L.ConvBNReLU(in_channels[self.indices[1]], ocr_mid_channels, 3, padding=1)
         self.cls_head = nn.Conv2D(ocr_mid_channels, self.num_classes, 1)
         self.aux_head = nn.Sequential(
-            L.ConvBNReLU(in_channels[self.indices[0]],
-                              in_channels[self.indices[0]], 1),
+            L.ConvBNReLU(in_channels[self.indices[0]], in_channels[self.indices[0]], 1),
             nn.Conv2D(in_channels[self.indices[0]], self.num_classes, 1))
 
-
     def forward(self, feat_list: List[paddle.Tensor]) -> paddle.Tensor:
-        feat_shallow, feat_deep = feat_list[self.indices[0]], feat_list[
-            self.indices[1]]
+        feat_shallow, feat_deep = feat_list[self.indices[0]], feat_list[self.indices[1]]
 
         soft_regions = self.aux_head(feat_shallow)
         pixels = self.conv3x3_ocr(feat_deep)
@@ -171,17 +160,11 @@ class SpatialGatherBlock(nn.Layer):
 class SpatialOCRModule(nn.Layer):
     """Aggregate the global object representation to update the representation for each pixel."""
 
-    def __init__(self,
-                 in_channels: int,
-                 key_channels: int,
-                 out_channels: int,
-                 dropout_rate: float = 0.1):
+    def __init__(self, in_channels: int, key_channels: int, out_channels: int, dropout_rate: float = 0.1):
         super().__init__()
 
         self.attention_block = ObjectAttentionBlock(in_channels, key_channels)
-        self.conv1x1 = nn.Sequential(
-            L.ConvBNReLU(2 * in_channels, out_channels, 1),
-            nn.Dropout2D(dropout_rate))
+        self.conv1x1 = nn.Sequential(L.ConvBNReLU(2 * in_channels, out_channels, 1), nn.Dropout2D(dropout_rate))
 
     def forward(self, pixels: paddle.Tensor, regions: paddle.Tensor) -> paddle.Tensor:
         context = self.attention_block(pixels, regions)
@@ -201,12 +184,10 @@ class ObjectAttentionBlock(nn.Layer):
         self.key_channels = key_channels
 
         self.f_pixel = nn.Sequential(
-            L.ConvBNReLU(in_channels, key_channels, 1),
-            L.ConvBNReLU(key_channels, key_channels, 1))
+            L.ConvBNReLU(in_channels, key_channels, 1), L.ConvBNReLU(key_channels, key_channels, 1))
 
         self.f_object = nn.Sequential(
-            L.ConvBNReLU(in_channels, key_channels, 1),
-            L.ConvBNReLU(key_channels, key_channels, 1))
+            L.ConvBNReLU(in_channels, key_channels, 1), L.ConvBNReLU(key_channels, key_channels, 1))
 
         self.f_down = L.ConvBNReLU(in_channels, key_channels, 1)
 

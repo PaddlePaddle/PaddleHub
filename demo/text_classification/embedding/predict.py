@@ -19,16 +19,18 @@ from model import BoWModel
 import ast
 import argparse
 
-
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--hub_embedding_name", type=str, default='w2v_baidu_encyclopedia_target_word-word_dim300', help="")
 parser.add_argument("--max_seq_len", type=int, default=128, help="Number of words of the longest seqence.")
 parser.add_argument("--batch_size", type=int, default=64, help="Total examples' number in batch for training.")
 parser.add_argument("--checkpoint", type=str, default='./checkpoint/best_model/model.pdparams', help="Model checkpoint")
-parser.add_argument("--use_gpu", type=ast.literal_eval, default=True, help="Whether use GPU for fine-tuning, input should be True or False")
+parser.add_argument(
+    "--use_gpu",
+    type=ast.literal_eval,
+    default=True,
+    help="Whether use GPU for fine-tuning, input should be True or False")
 
 args = parser.parse_args()
-
 
 if __name__ == '__main__':
     # Data to be prdicted
@@ -44,12 +46,9 @@ if __name__ == '__main__':
 
     embedder = hub.Module(name=args.hub_embedding_name)
     tokenizer = embedder.get_tokenizer()
-    model = BoWModel(
-        embedder=embedder,
-        tokenizer=tokenizer,
-        load_checkpoint=args.checkpoint,
-        label_map=label_map)
+    model = BoWModel(embedder=embedder, tokenizer=tokenizer, load_checkpoint=args.checkpoint, label_map=label_map)
 
-    results = model.predict(data, max_seq_len=args.max_seq_len, batch_size=args.batch_size, use_gpu=args.use_gpu, return_result=False)
+    results = model.predict(
+        data, max_seq_len=args.max_seq_len, batch_size=args.batch_size, use_gpu=args.use_gpu, return_result=False)
     for idx, text in enumerate(data):
-         print('Data: {} \t Lable: {}'.format(text[0], results[idx]))
+        print('Data: {} \t Lable: {}'.format(text[0], results[idx]))

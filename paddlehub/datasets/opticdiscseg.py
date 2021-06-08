@@ -24,6 +24,7 @@ import paddlehub.env as hubenv
 from paddlehub.utils.download import download_data
 from paddlehub.datasets.base_seg_dataset import SegDataset
 
+
 @download_data(url='https://paddleseg.bj.bcebos.com/dataset/optic_disc_seg.zip')
 class OpticDiscSeg(SegDataset):
     """
@@ -36,9 +37,7 @@ class OpticDiscSeg(SegDataset):
         edge (bool, optional): Whether to compute edge while training. Default: False
     """
 
-    def __init__(self,
-                 transforms: Callable = None,
-                 mode: str = 'train'):
+    def __init__(self, transforms: Callable = None, mode: str = 'train'):
         self.transforms = transforms
         mode = mode.lower()
         self.mode = mode
@@ -47,13 +46,10 @@ class OpticDiscSeg(SegDataset):
         self.ignore_index = 255
 
         if mode not in ['train', 'val', 'test']:
-            raise ValueError(
-                "`mode` should be 'train', 'val' or 'test', but got {}.".format(
-                    mode))
+            raise ValueError("`mode` should be 'train', 'val' or 'test', but got {}.".format(mode))
 
         if self.transforms is None:
             raise ValueError("`transforms` is necessary, but it is None.")
-
 
         if mode == 'train':
             file_path = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', 'train_list.txt')
@@ -67,9 +63,7 @@ class OpticDiscSeg(SegDataset):
                 items = line.strip().split()
                 if len(items) != 2:
                     if mode == 'train' or mode == 'val':
-                        raise Exception(
-                            "File list format incorrect! It should be"
-                            " image_name label_name\\n")
+                        raise Exception("File list format incorrect! It should be" " image_name label_name\\n")
                     image_path = os.path.join(hubenv.DATA_HOME, 'optic_disc_seg', items[0])
                     grt_path = None
                 else:

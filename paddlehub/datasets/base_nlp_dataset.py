@@ -557,7 +557,9 @@ class TextMatchingDataset(BaseNLPDataset, paddle.io.Dataset):
                     pad_to_max_seq_len=True, return_length=True)
                 record = {'text_a': record_a, 'text_b': record_b}
             else:
-                raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of PretrainedTokenizer".format(type(self.tokenizer)))
+                raise RuntimeError(
+                    "Unknown type of self.tokenizer: {}, it must be an instance of PretrainedTokenizer".format(
+                        type(self.tokenizer)))
 
             if not record:
                 logger.info(
@@ -582,7 +584,9 @@ class TextMatchingDataset(BaseNLPDataset, paddle.io.Dataset):
             else:
                 return query_input_ids, query_token_type_ids, title_input_ids, title_token_type_ids
         else:
-            raise RuntimeError("Unknown type of self.tokenizer: {}, it must be an instance of PretrainedTokenizer".format(type(self.tokenizer)))
+            raise RuntimeError(
+                "Unknown type of self.tokenizer: {}, it must be an instance of PretrainedTokenizer".format(
+                    type(self.tokenizer)))
 
     def __len__(self):
         return len(self.records)

@@ -34,32 +34,38 @@ def read_images(paths):
         images.append(cv2.imread(path))
     return images
 
+
 '''旋转图像并剪裁'''
+
+
 def rotate(
         img,  # 图片
-        pt1, pt2, pt3, pt4,
+        pt1,
+        pt2,
+        pt3,
+        pt4,
         imgOutSrc):
     # print(pt1,pt2,pt3,pt4)
-    withRect = math.sqrt((pt4[0] - pt1[0]) ** 2 + (pt4[1] - pt1[1]) ** 2)  # 矩形框的宽度
-    heightRect = math.sqrt((pt1[0] - pt2[0]) ** 2 + (pt1[1] - pt2[1]) **2)
+    withRect = math.sqrt((pt4[0] - pt1[0])**2 + (pt4[1] - pt1[1])**2)  # 矩形框的宽度
+    heightRect = math.sqrt((pt1[0] - pt2[0])**2 + (pt1[1] - pt2[1])**2)
     # print("矩形的宽度",withRect, "矩形的高度", heightRect)
     angle = acos((pt4[0] - pt1[0]) / withRect) * (180 / math.pi)  # 矩形框旋转角度
     # print("矩形框旋转角度", angle)
 
     if withRect > heightRect:
-        if pt4[1]>pt1[1]:
+        if pt4[1] > pt1[1]:
             pass
             # print("顺时针旋转")
         else:
             # print("逆时针旋转")
-            angle=-angle
+            angle = -angle
 
     else:
         # print("逆时针旋转")
-        angle=90 - angle
+        angle = 90 - angle
 
     height = img.shape[0]  # 原始图像高度
-    width = img.shape[1]   # 原始图像宽度
+    width = img.shape[1]  # 原始图像宽度
     rotateMat = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)  # 按angle角度旋转图像
     heightNew = int(width * fabs(sin(radians(angle))) + height * fabs(cos(radians(angle))))
     widthNew = int(height * fabs(sin(radians(angle))) + width * fabs(cos(radians(angle))))
@@ -67,7 +73,7 @@ def rotate(
     rotateMat[0, 2] += (widthNew - width) / 2
     rotateMat[1, 2] += (heightNew - height) / 2
     imgRotation = cv2.warpAffine(img, rotateMat, (widthNew, heightNew), borderValue=(255, 255, 255))
-    # cv2.imwrite("imgRotation.jpg", imgRotation) 
+    # cv2.imwrite("imgRotation.jpg", imgRotation)
 
     # 旋转后图像的四点坐标
     [[pt1[0]], [pt1[1]]] = np.dot(rotateMat, np.array([[pt1[0]], [pt1[1]], [1]]))
@@ -76,13 +82,14 @@ def rotate(
     [[pt4[0]], [pt4[1]]] = np.dot(rotateMat, np.array([[pt4[0]], [pt4[1]], [1]]))
 
     # 处理反转的情况
-    if pt2[1]>pt4[1]:
-        pt2[1],pt4[1]=pt4[1],pt2[1]
-    if pt1[0]>pt3[0]:
-        pt1[0],pt3[0]=pt3[0],pt1[0]
+    if pt2[1] > pt4[1]:
+        pt2[1], pt4[1] = pt4[1], pt2[1]
+    if pt1[0] > pt3[0]:
+        pt1[0], pt3[0] = pt3[0], pt1[0]
 
     imgOut = imgRotation[int(pt2[1]):int(pt4[1]), int(pt1[0]):int(pt3[0])]
-    cv2.imwrite(imgOutSrc, imgOut) # 裁减得到的旋转矩形框
+    cv2.imwrite(imgOutSrc, imgOut)  # 裁减得到的旋转矩形框
+
 
 @moduleinfo(
     name='WatermeterSegmentation',
@@ -93,18 +100,10 @@ def rotate(
     version='1.0.0')
 class MODULE(hub.Module):
     def _initialize(self, **kwargs):
-        self.default_pretrained_model_path = os.path.join(
-            self.directory, 'assets')
-        self.model = pdx.deploy.Predictor(self.default_pretrained_model_path,
-                                          **kwargs)
+        self.default_pretrained_model_path = os.path.join(self.directory, 'assets')
+        self.model = pdx.deploy.Predictor(self.default_pretrained_model_path, **kwargs)
 
-    def predict(self,
-                images=None,
-                paths=None,
-                data=None,
-                batch_size=1,
-                use_gpu=False,
-                **kwargs):
+    def predict(self, images=None, paths=None, data=None, batch_size=1, use_gpu=False, **kwargs):
 
         all_data = images if images is not None else read_images(paths)
         total_num = len(all_data)
@@ -130,11 +129,11 @@ class MODULE(hub.Module):
         result = self.predict(images=[im])
 
         # 将多边形polygon转矩形
-        contours, hier = cv2.findContours(result[0]['label_map'], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) 
+        contours, hier = cv2.findContours(result[0]['label_map'], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         print(type(contours[0]))
         n = 0
         m = 0
-        for index,contour in enumerate(contours):
+        for index, contour in enumerate(contours):
             if len(contour) > n:
                 n = len(contour)
                 m = index
@@ -181,7 +180,6 @@ class MODULE(hub.Module):
             res.append(result)
         return res
 
-
     @runnable
     def run_cmd(self, argvs):
         """
@@ -192,36 +190,27 @@ class MODULE(hub.Module):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.predict(
-            paths=[args.input_path],
-            use_gpu=args.use_gpu)
+        results = self.predict(paths=[args.input_path], use_gpu=args.use_gpu)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu',
-            type=bool,
-            default=False,
-            help="whether use GPU or not")
+        self.arg_config_group.add_argument('--use_gpu', type=bool, default=False, help="whether use GPU or not")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
+
 
 if __name__ == '__main__':
     module = MODULE(directory='./new_model')

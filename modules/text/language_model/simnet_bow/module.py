@@ -29,12 +29,13 @@ class DataFormatError(Exception):
         self.args = args
 
 
-@moduleinfo(name="simnet_bow",
-            version="1.2.0",
-            summary="Baidu's open-source similarity network model based on bow_pairwise.",
-            author="baidu-nlp",
-            author_email="",
-            type="nlp/sentiment_analysis")
+@moduleinfo(
+    name="simnet_bow",
+    version="1.2.0",
+    summary="Baidu's open-source similarity network model based on bow_pairwise.",
+    author="baidu-nlp",
+    author_email="",
+    type="nlp/sentiment_analysis")
 class SimnetBow(hub.Module):
     def _initialize(self):
         """
@@ -106,40 +107,42 @@ class SimnetBow(hub.Module):
             seq_len_used = fluid.layers.squeeze(seq_len, axes=[1])
 
             # Add embedding layer.
-            w_param_attrs = fluid.ParamAttr(name="emb",
-                                            initializer=fluid.initializer.TruncatedNormal(scale=0.02),
-                                            trainable=trainable)
+            w_param_attrs = fluid.ParamAttr(
+                name="emb", initializer=fluid.initializer.TruncatedNormal(scale=0.02), trainable=trainable)
             dict_dim = 500002
-            emb_1 = fluid.layers.embedding(input=text_1,
-                                           size=[dict_dim, 128],
-                                           is_sparse=True,
-                                           padding_idx=dict_dim - 1,
-                                           dtype='float32',
-                                           param_attr=w_param_attrs)
+            emb_1 = fluid.layers.embedding(
+                input=text_1,
+                size=[dict_dim, 128],
+                is_sparse=True,
+                padding_idx=dict_dim - 1,
+                dtype='float32',
+                param_attr=w_param_attrs)
             emb_1_name = emb_1.name
             data_list = [text_1]
             emb_name_list = [emb_1_name]
 
             if num_slots > 1:
                 text_2 = fluid.data(name='text_2', shape=[-1, max_seq_len], dtype='int64', lod_level=0)
-                emb_2 = fluid.embedding(input=text_2,
-                                        size=[dict_dim, 128],
-                                        is_sparse=True,
-                                        padding_idx=dict_dim - 1,
-                                        dtype='float32',
-                                        param_attr=w_param_attrs)
+                emb_2 = fluid.embedding(
+                    input=text_2,
+                    size=[dict_dim, 128],
+                    is_sparse=True,
+                    padding_idx=dict_dim - 1,
+                    dtype='float32',
+                    param_attr=w_param_attrs)
                 emb_2_name = emb_2.name
                 data_list.append(text_2)
                 emb_name_list.append(emb_2_name)
 
             if num_slots > 2:
                 text_3 = fluid.data(name='text_3', shape=[-1, max_seq_len], dtype='int64', lod_level=0)
-                emb_3 = fluid.embedding(input=text_3,
-                                        size=[dict_dim, 128],
-                                        is_sparse=True,
-                                        padding_idx=dict_dim - 1,
-                                        dtype='float32',
-                                        param_attr=w_param_attrs)
+                emb_3 = fluid.embedding(
+                    input=text_3,
+                    size=[dict_dim, 128],
+                    is_sparse=True,
+                    padding_idx=dict_dim - 1,
+                    dtype='float32',
+                    param_attr=w_param_attrs)
                 emb_3_name = emb_3.name
                 data_list.append(text_3)
                 emb_name_list.append(emb_3_name)
@@ -295,10 +298,8 @@ class SimnetBow(hub.Module):
         """
         Run as a command
         """
-        self.parser = argparse.ArgumentParser(description="Run the simnet_bow module.",
-                                              prog='hub run simnet_bow',
-                                              usage='%(prog)s',
-                                              add_help=True)
+        self.parser = argparse.ArgumentParser(
+            description="Run the simnet_bow module.", prog='hub run simnet_bow', usage='%(prog)s', add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -323,10 +324,8 @@ class SimnetBow(hub.Module):
         """
         Add the command config options
         """
-        self.arg_config_group.add_argument('--use_gpu',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether use GPU for prediction")
+        self.arg_config_group.add_argument(
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU for prediction")
 
         self.arg_config_group.add_argument('--batch_size', type=int, default=1, help="batch size for prediction")
 

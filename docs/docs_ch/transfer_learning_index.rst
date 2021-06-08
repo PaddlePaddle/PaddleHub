@@ -24,3 +24,4 @@
    finetune/style_transfer.md
    finetune/semantic_segmentation.md
    finetune/audio_classification.md
+   finetune/customized_dataset.md

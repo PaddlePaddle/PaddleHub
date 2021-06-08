@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # -*- coding: utf-8 -*-
 # *******************************************************************************
 #
@@ -36,8 +35,7 @@ import paddlehub.vision.transforms as transforms
 from PIL import ImageFile
 from auto_augment.autoaug.transform.autoaug_transform import AutoAugTransform
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-__imagenet_stats = {'mean': [0.485, 0.456, 0.406],
-                    'std': [0.229, 0.224, 0.225]}
+__imagenet_stats = {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}
 
 
 class PbaAugment(object):
@@ -45,14 +43,13 @@ class PbaAugment(object):
     pytorch 分类 PbaAugment transform
     """
 
-    def __init__(
-            self,
-            input_size: int = 224,
-            scale_size: int = 256,
-            normalize: Optional[list] = None,
-            pre_transform: bool = True,
-            stage: str = "search",
-            **kwargs) -> None:
+    def __init__(self,
+                 input_size: int = 224,
+                 scale_size: int = 256,
+                 normalize: Optional[list] = None,
+                 pre_transform: bool = True,
+                 stage: str = "search",
+                 **kwargs) -> None:
         """
 
         Args:
@@ -64,27 +61,20 @@ class PbaAugment(object):
         """
 
         if normalize is None:
-            normalize = {
-                'mean': [
-                    0.485, 0.456, 0.406], 'std': [
-                    0.229, 0.224, 0.225]}
+            normalize = {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}
 
         policy = kwargs["policy"]
         assert stage in ["search", "train"]
         train_epochs = kwargs["hp_policy_epochs"]
-        self.auto_aug_transform = AutoAugTransform.create(
-            policy, stage=stage, train_epochs=train_epochs)
+        self.auto_aug_transform = AutoAugTransform.create(policy, stage=stage, train_epochs=train_epochs)
         #self.auto_aug_transform = PbtAutoAugmentClassiferTransform(conf)
         if pre_transform:
             self.pre_transform = transforms.Resize(input_size)
 
         self.post_transform = transforms.Compose(
-            transforms=[
-                transforms.Permute(),
-                transforms.Normalize(**normalize, channel_first=True)
-            ],
-            channel_first = False
-        )
+            transforms=[transforms.Permute(),
+                        transforms.Normalize(**normalize, channel_first=True)],
+            channel_first=False)
         self.cur_epoch = 0
 
     def set_epoch(self, indx: int) -> None:
@@ -164,15 +154,14 @@ class PicReader(paddle.io.Dataset):
     PicReader
     """
 
-    def __init__(
-            self,
-            root_path: str,
-            list_file: str,
-            meta: bool = False,
-            transform: Optional[callable] = None,
-            class_to_id_dict: Optional[dict] = None,
-            cache_img: bool = False,
-            **kwargs) -> None:
+    def __init__(self,
+                 root_path: str,
+                 list_file: str,
+                 meta: bool = False,
+                 transform: Optional[callable] = None,
+                 class_to_id_dict: Optional[dict] = None,
+                 cache_img: bool = False,
+                 **kwargs) -> None:
         """
 
         Args:
@@ -222,8 +211,7 @@ class PicReader(paddle.io.Dataset):
                 img = cv2.resize(img, (scale_size, scale_size))
                 self.cache_img_buff[image_path] = img
             except BaseException:
-                print("img_path:{} can not by cv2".format(
-                    image_path).format(image_path))
+                print("img_path:{} can not by cv2".format(image_path).format(image_path))
 
                 pass
 
@@ -265,9 +253,7 @@ class PicReader(paddle.io.Dataset):
 
         with open(self.list_file) as f:
             lines = f.read().splitlines()
-            print(
-                "PicReader:: found {} picture in `{}'".format(
-                    len(lines), self.list_file))
+            print("PicReader:: found {} picture in `{}'".format(len(lines), self.list_file))
             for i, line in enumerate(lines):
                 record = re.split(delimiter, line)
                 # record = line.split()
@@ -401,20 +387,12 @@ def _read_classes(csv_file: str) -> dict:
                 class_name = row.strip()
                 # print(class_id, class_name)
             except ValueError:
-                six.raise_from(
-                    ValueError(
-                        'line {}: format should be \'class_name\''.format(line)),
-                    None)
+                six.raise_from(ValueError('line {}: format should be \'class_name\''.format(line)), None)
 
-            class_id = _parse(
-                line,
-                int,
-                'line {}: malformed class ID: {{}}'.format(line))
+            class_id = _parse(line, int, 'line {}: malformed class ID: {{}}'.format(line))
 
             if class_name in result:
-                raise ValueError(
-                    'line {}: duplicate class name: \'{}\''.format(
-                        line, class_name))
+                raise ValueError('line {}: duplicate class name: \'{}\''.format(line, class_name))
             result[class_name] = class_id
     return result
 
@@ -439,10 +417,7 @@ def _init_loader(hparams: dict, TrainTransform=None) -> tuple:
     epochs = hparams.task_config.classifier.epochs
     no_cache_img = hparams.task_config.classifier.get("no_cache_img", False)
 
-    normalize = {
-        'mean': [
-            0.485, 0.456, 0.406], 'std': [
-            0.229, 0.224, 0.225]}
+    normalize = {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}
 
     if TrainTransform is None:
         TrainTransform = PbaAugment(
@@ -453,10 +428,7 @@ def _init_loader(hparams: dict, TrainTransform=None) -> tuple:
             hp_policy_epochs=epochs,
         )
     delimiter = hparams.data_config.delimiter
-    kwargs = dict(
-        conf=hparams,
-        delimiter=delimiter
-    )
+    kwargs = dict(conf=hparams, delimiter=delimiter)
 
     if hparams.task_config.classifier.use_class_map:
         class_to_id_dict = _read_classes(label_list=hparams.data_config.label_list)
@@ -475,13 +447,11 @@ def _init_loader(hparams: dict, TrainTransform=None) -> tuple:
         list_file=val_list,
         transform=transforms.Compose(
             transforms=[
-                transforms.Resize(
-                    (224,
-                     224)),
+                transforms.Resize((224, 224)),
                 transforms.Permute(),
-                transforms.Normalize(
-                    **normalize, channel_first=True)],
-            channel_first = False),
+                transforms.Normalize(**normalize, channel_first=True)
+            ],
+            channel_first=False),
         class_to_id_dict=class_to_id_dict,
         cache_img=not no_cache_img,
         **kwargs)

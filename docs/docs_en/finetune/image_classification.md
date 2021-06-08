@@ -46,7 +46,7 @@ flowers_validate = Flowers(transforms, mode='val')
 ### Step3: 加载预训练模型
 
 ```python
-module = hub.Module(name="resnet50_vd_imagenet_ssld", label_list=["roses", "tulips", "daisy", "sunflowers", "dandelion"])
+model = hub.Module(name="resnet50_vd_imagenet_ssld", label_list=["roses", "tulips", "daisy", "sunflowers", "dandelion"])
 ```
 * `name`: 选择预训练模型的名字。
 * `label_list`: 设置输出分类类别，默认为Imagenet2012类别。
@@ -56,7 +56,7 @@ PaddleHub提供许多图像分类预训练模型，如xception、mobilenet、eff
 如果想尝试efficientnet模型，只需要更换Module中的`name`参数即可.
 ```python
 # 更换name参数即可无缝切换efficientnet模型, 代码示例如下
-module = hub.Module(name="efficientnetb7_imagenet")
+model = hub.Module(name="efficientnetb7_imagenet")
 ```
 **NOTE:**目前部分模型还没有完全升级到2.0版本，敬请期待。
 
@@ -71,9 +71,7 @@ trainer.train(flowers, epochs=100, batch_size=32, eval_dataset=flowers_validate,
 
 #### 优化策略
 
-Paddle2.0-rc提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等，详细参见[策略](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/optimizer/optimizer/Optimizer_cn.html)。
-
-其中`Adam`:
+Paddle2.0提供了多种优化器选择，如`SGD`, `Adam`, `Adamax`等, 其中`Adam`:
 
 * `learning_rate`: 全局学习率。默认为1e-3；
 * `parameters`: 待优化模型参数。

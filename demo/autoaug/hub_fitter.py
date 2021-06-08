@@ -23,6 +23,7 @@ logger = log.get_logger(level=logging.INFO)
 import auto_augment
 auto_augment_path = auto_augment.__file__
 
+
 class HubFitterClassifer(object):
     """Trains an instance of the Model class."""
 
@@ -43,8 +44,7 @@ class HubFitterClassifer(object):
         # `import paddle`. Otherwise, it would not take any effect.
         set_paddle_flags(
             # enable GC to save memory
-            FLAGS_fraction_of_gpu_memory_to_use=hparams.resource_config.gpu,
-        )
+            FLAGS_fraction_of_gpu_memory_to_use=hparams.resource_config.gpu, )
         import paddle
         import paddlehub as hub
         from paddlehub_utils.trainer import CustomTrainer
@@ -63,23 +63,18 @@ class HubFitterClassifer(object):
         paddle.disable_static(paddle.CUDAPlace(paddle.distributed.get_rank()))
 
         train_dataset, eval_dataset = _init_loader(self.hparams)
-        model = hub.Module(name=hparams["task_config"]["classifier"]["model_name"], label_list=self.class_to_id_dict.keys(), load_checkpoint=None)
+        model = hub.Module(
+            name=hparams["task_config"]["classifier"]["model_name"],
+            label_list=self.class_to_id_dict.keys(),
+            load_checkpoint=None)
 
-        optimizer = paddle.optimizer.Adam(
-            learning_rate=0.001, parameters=model.parameters())
-        trainer = CustomTrainer(
-            model=model,
-            optimizer=optimizer,
-            checkpoint_dir='img_classification_ckpt')
+        optimizer = paddle.optimizer.Adam(learning_rate=0.001, parameters=model.parameters())
+        trainer = CustomTrainer(model=model, optimizer=optimizer, checkpoint_dir='img_classification_ckpt')
         self.model = model
         self.optimizer = optimizer
 
         trainer.init_train_and_eval(
-            train_dataset,
-            epochs=100,
-            batch_size=32,
-            eval_dataset=eval_dataset,
-            save_interval=1)
+            train_dataset, epochs=100, batch_size=32, eval_dataset=eval_dataset, save_interval=1)
         self.trainer = trainer
 
     def _fit_param(self, show: bool = False) -> None:
@@ -123,8 +118,7 @@ class HubFitterClassifer(object):
 
         """
         self.hparams = new_hparams
-        self.trainer.train_loader.dataset.reset_policy(
-            new_hparams.search_space)
+        self.trainer.train_loader.dataset.reset_policy(new_hparams.search_space)
         return None
 
     def save_model(self, checkpoint_dir: str, step: Optional[str] = None) -> str:
@@ -134,8 +128,7 @@ class HubFitterClassifer(object):
           step: If provided, creates a checkpoint with the given step
             number, instead of overwriting the existing checkpoints.
         """
-        checkpoint_path = os.path.join(checkpoint_dir,
-                                       'epoch') + '-' + str(step)
+        checkpoint_path = os.path.join(checkpoint_dir, 'epoch') + '-' + str(step)
         logger.info('Saving model checkpoint to {}'.format(checkpoint_path))
         self.trainer.save_model(os.path.join(checkpoint_path, "checkpoint"))
 
@@ -145,8 +138,7 @@ class HubFitterClassifer(object):
         """Loads a checkpoint with the architecture structure stored in the name."""
         ckpt_path = os.path.join(checkpoint_path, "checkpoint")
         self.trainer.load_model(ckpt_path)
-        logger.info(
-            'Loaded child model checkpoint from {}'.format(checkpoint_path))
+        logger.info('Loaded child model checkpoint from {}'.format(checkpoint_path))
 
     def eval_child_model(self, mode: str, pass_id: int = 0) -> dict:
         """Evaluate the child model.
@@ -204,10 +196,7 @@ class HubFitterClassifer(object):
         """Trains the model `m` for one epoch."""
         start_time = time.time()
         train_acc = self.train_one_epoch(curr_epoch)
-        logger.info(
-            'Epoch:{} time(min): {}'.format(
-                curr_epoch,
-                (time.time() - start_time) / 60.0))
+        logger.info('Epoch:{} time(min): {}'.format(curr_epoch, (time.time() - start_time) / 60.0))
         return train_acc
 
     def _compute_final_accuracies(self, iteration: int) -> dict:
@@ -228,8 +217,7 @@ class HubFitterClassifer(object):
         self._fit_param()
         train_acc = self._run_training_loop(epoch)
         valid_acc = self.eval_child_model(mode="val", pass_id=epoch)
-        logger.info('valid acc: {}'.format(
-            valid_acc))
+        logger.info('valid acc: {}'.format(valid_acc))
         all_metric = {}
         all_metric.update(train_acc)
         all_metric.update(valid_acc)

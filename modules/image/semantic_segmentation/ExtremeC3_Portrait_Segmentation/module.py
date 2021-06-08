@@ -6,6 +6,7 @@ import numpy as np
 from paddle.nn import Layer
 from paddlehub.module.module import moduleinfo
 
+
 @moduleinfo(
     name="ExtremeC3_Portrait_Segmentation",  # 模型名称
     type="CV/semantic_segmentation",  # 模型类型
@@ -26,7 +27,7 @@ class ExtremeC3_Portrait_Segmentation(Layer):
         self.model.eval()
 
         # 均值方差
-        self.mean = [107.304565, 115.69884, 132.35703 ]
+        self.mean = [107.304565, 115.69884, 132.35703]
         self.std = [63.97182, 65.1337, 68.29726]
 
     # 读取数据函数
@@ -107,20 +108,12 @@ class ExtremeC3_Portrait_Segmentation(Layer):
                 cv2.imwrite(os.path.join(output_dir, 'result_mask_%d.png' % i), mask)
                 cv2.imwrite(os.path.join(output_dir, 'result_%d.png' % i), result)
 
-            results.append({
-                'mask': mask,
-                'result': result
-            })
+            results.append({'mask': mask, 'result': result})
 
         return results
 
     # 关键点检测函数
-    def Segmentation(self,
-                       images=None,
-                       paths=None,
-                       batch_size=1,
-                       output_dir='output',
-                       visualization=False):
+    def Segmentation(self, images=None, paths=None, batch_size=1, output_dir='output', visualization=False):
         # 加载数据处理器
         datas = self.load_datas(paths, images)
 

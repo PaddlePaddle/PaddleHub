@@ -77,8 +77,7 @@ class ErnieTokenizer(object):
                  encoding='utf8',
                  special_token_list=[]):
         if not isinstance(vocab, dict):
-            raise ValueError(
-                'expect `vocab` to be instance of dict, got %s' % type(vocab))
+            raise ValueError('expect `vocab` to be instance of dict, got %s' % type(vocab))
         self.vocab = vocab
         self.lower = lower
         self.prefix = wordpiece_prefix
@@ -89,9 +88,7 @@ class ErnieTokenizer(object):
         self.unk_id = unk_token and self.vocab[unk_token]
         self.mask_id = mask_token and self.vocab[mask_token]
         self.unk_token = unk_token
-        special_tokens = {
-            pad_token, cls_token, sep_token, unk_token, mask_token
-        } | set(special_token_list)
+        special_tokens = {pad_token, cls_token, sep_token, unk_token, mask_token} | set(special_token_list)
         pat_str = ''
         for t in special_tokens:
             if t is None:
@@ -135,11 +132,9 @@ class ErnieTokenizer(object):
         len2 = len(id2)
         half = seqlen // 2
         if len1 > len2:
-            len1_truncated, len2_truncated = max(half, seqlen - len2), min(
-                half, len2)
+            len1_truncated, len2_truncated = max(half, seqlen - len2), min(half, len2)
         else:
-            len1_truncated, len2_truncated = min(half, seqlen - len1), max(
-                half, seqlen - len1)
+            len1_truncated, len2_truncated = min(half, seqlen - len1), max(half, seqlen - len1)
         return id1[:len1_truncated], id2[:len2_truncated]
 
     def build_for_ernie(self, text_id, pair_id=[]):
@@ -155,17 +150,14 @@ class ErnieTokenizer(object):
         return ret_id, ret_id_type
 
     def encode(self, text, pair=None, truncate_to=None):
-        text_id = np.array(
-            self.convert_tokens_to_ids(self.tokenize(text)), dtype=np.int64)
+        text_id = np.array(self.convert_tokens_to_ids(self.tokenize(text)), dtype=np.int64)
         text_id_type = np.zeros_like(text_id, dtype=np.int64)
         if pair is not None:
-            pair_id = np.array(
-                self.convert_tokens_to_ids(self.tokenize(pair)), dtype=np.int64)
+            pair_id = np.array(self.convert_tokens_to_ids(self.tokenize(pair)), dtype=np.int64)
         else:
             pair_id = []
         if truncate_to is not None:
-            text_id, pair_id = self.truncate(
-                text_id, [] if pair_id is None else pair_id, truncate_to)
+            text_id, pair_id = self.truncate(text_id, [] if pair_id is None else pair_id, truncate_to)
 
         ret_id, ret_id_type = self.build_for_ernie(text_id, pair_id)
         return ret_id, ret_id_type

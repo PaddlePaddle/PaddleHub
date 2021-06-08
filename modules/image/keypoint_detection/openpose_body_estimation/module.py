@@ -206,11 +206,8 @@ class BodyPoseModel(nn.Layer):
             img_name = str(time.time()) + '.png'
             save_path = os.path.join(save_path, img_name)
             cv2.imwrite(save_path, canvas)
-            
-        results = {
-            'candidate': candidate,
-            'subset': subset,
-            'data': canvas}
+
+        results = {'candidate': candidate, 'subset': subset, 'data': canvas}
 
         return results
 
@@ -221,11 +218,11 @@ class BodyPoseModel(nn.Layer):
         """
         images_decode = [P.base64_to_cv2(image) for image in images]
         results = self.predict(img=images_decode[0], **kwargs)
-        final={}
+        final = {}
         final['candidate'] = P.cv2_to_base64(results['candidate'])
         final['subset'] = P.cv2_to_base64(results['subset'])
         final['data'] = P.cv2_to_base64(results['data'])
-        
+
         return final
 
     @runnable
@@ -238,19 +235,13 @@ class BodyPoseModel(nn.Layer):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.predict(
-            img=args.input_path,
-            save_path=args.output_dir,
-            visualization=args.visualization)
+        results = self.predict(img=args.input_path, save_path=args.output_dir, visualization=args.visualization)
 
         return results
 
@@ -260,19 +251,12 @@ class BodyPoseModel(nn.Layer):
         """
 
         self.arg_config_group.add_argument(
-            '--output_dir',
-            type=str,
-            default='openpose_body',
-            help="The directory to save output images.")
+            '--output_dir', type=str, default='openpose_body', help="The directory to save output images.")
         self.arg_config_group.add_argument(
-            '--visualization',
-            type=bool,
-            default=True,
-            help="whether to save output as images.")
+            '--visualization', type=bool, default=True, help="whether to save output as images.")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")

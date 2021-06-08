@@ -27,10 +27,7 @@ def _fetch_from_remote(url, force_download=False):
             r = requests.get(url, stream=True)
             total_len = int(r.headers.get('content-length'))
             for chunk in tqdm(
-                    r.iter_content(chunk_size=1024),
-                    total=total_len // 1024,
-                    desc='downloading %s' % url,
-                    unit='KB'):
+                    r.iter_content(chunk_size=1024), total=total_len // 1024, desc='downloading %s' % url, unit='KB'):
                 if chunk:
                     f.write(chunk)
                     f.flush()

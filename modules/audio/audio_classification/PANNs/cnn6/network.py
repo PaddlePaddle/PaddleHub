@@ -25,12 +25,13 @@ class ConvBlock5x5(nn.Layer):
     def __init__(self, in_channels, out_channels):
         super(ConvBlock5x5, self).__init__()
 
-        self.conv1 = nn.Conv2D(in_channels=in_channels,
-                               out_channels=out_channels,
-                               kernel_size=(5, 5),
-                               stride=(1, 1),
-                               padding=(2, 2),
-                               bias_attr=False)
+        self.conv1 = nn.Conv2D(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=(5, 5),
+            stride=(1, 1),
+            padding=(2, 2),
+            bias_attr=False)
         self.bn1 = nn.BatchNorm2D(out_channels)
 
     def forward(self, x, pool_size=(2, 2), pool_type='avg'):

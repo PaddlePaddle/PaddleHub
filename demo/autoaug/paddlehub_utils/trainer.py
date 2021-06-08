@@ -18,25 +18,23 @@ from paddle.distributed import ParallelEnv
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import Timer
 
+
 class CustomTrainer(Trainer):
     def __init__(self, **kwargs) -> None:
         super(CustomTrainer, self).__init__(**kwargs)
 
     def init_train_and_eval(self,
-            train_dataset: paddle.io.Dataset,
-            epochs: int = 1,
-            batch_size: int = 1,
-            num_workers: int = 0,
-            eval_dataset: paddle.io.Dataset = None,
-            log_interval: int = 10,
-            save_interval: int = 10) -> None:
+                            train_dataset: paddle.io.Dataset,
+                            epochs: int = 1,
+                            batch_size: int = 1,
+                            num_workers: int = 0,
+                            eval_dataset: paddle.io.Dataset = None,
+                            log_interval: int = 10,
+                            save_interval: int = 10) -> None:
         self.batch_sampler, self.train_loader = self.init_train(train_dataset, batch_size, num_workers)
         self.eval_loader = self.init_evaluate(eval_dataset, batch_size, num_workers)
 
-    def init_train(self,
-              train_dataset: paddle.io.Dataset,
-              batch_size: int = 1,
-              num_workers: int = 0) -> tuple:
+    def init_train(self, train_dataset: paddle.io.Dataset, batch_size: int = 1, num_workers: int = 0) -> tuple:
         use_gpu = True
         place = paddle.CUDAPlace(ParallelEnv().dev_id) if use_gpu else paddle.CPUPlace()
         paddle.disable_static(place)
@@ -47,7 +45,8 @@ class CustomTrainer(Trainer):
             train_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
         return batch_sampler, loader
 
-    def train_one_epoch(self, loader: paddle.io.DataLoader, timer: Timer, current_epoch: int, epochs: int, log_interval: int, steps_per_epoch: int) -> None:
+    def train_one_epoch(self, loader: paddle.io.DataLoader, timer: Timer, current_epoch: int, epochs: int,
+                        log_interval: int, steps_per_epoch: int) -> None:
         avg_loss = 0
         avg_metrics = defaultdict(int)
         self.model.train()
@@ -70,15 +69,13 @@ class CustomTrainer(Trainer):
                 if self.use_vdl:
                     self.log_writer.add_scalar(tag='TRAIN/loss', step=timer.current_step, value=avg_loss)
 
-                print_msg = 'Epoch={}/{}, Step={}/{}'.format(current_epoch, epochs, batch_idx + 1,
-                                                             steps_per_epoch)
+                print_msg = 'Epoch={}/{}, Step={}/{}'.format(current_epoch, epochs, batch_idx + 1, steps_per_epoch)
                 print_msg += ' loss={:.4f}'.format(avg_loss)
 
                 for metric, value in avg_metrics.items():
                     value /= log_interval
                     if self.use_vdl:
-                        self.log_writer.add_scalar(
-                            tag='TRAIN/{}'.format(metric), step=timer.current_step, value=value)
+                        self.log_writer.add_scalar(tag='TRAIN/{}'.format(metric), step=timer.current_step, value=value)
                     print_msg += ' {}={:.4f}'.format(metric, value)
 
                 print_msg += ' lr={:.6f} step/sec={:.2f} | ETA {}'.format(lr, timer.timing, timer.eta)
@@ -139,9 +136,7 @@ class CustomTrainer(Trainer):
                         self.save_model(best_model_path)
                         self._save_metrics()
 
-                        metric_msg = [
-                            '{}={:.4f}'.format(metric, value) for metric, value in self.best_metrics.items()
-                        ]
+                        metric_msg = ['{}={:.4f}'.format(metric, value) for metric, value in self.best_metrics.items()]
                         metric_msg = ' '.join(metric_msg)
                         logger.eval('Saving best model to {} [best {}]'.format(best_model_path, metric_msg))
 
