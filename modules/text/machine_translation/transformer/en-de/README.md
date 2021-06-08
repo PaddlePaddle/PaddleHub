@@ -6,7 +6,7 @@ $ hub install transformer_en-de==1.0.0
 
 2017 年，Google机器翻译团队在其发表的论文[Attention Is All You Need](https://arxiv.org/abs/1706.03762)中，提出了用于完成机器翻译（Machine Translation）等序列到序列（Seq2Seq）学习任务的一种全新网络结构——Transformer。Tranformer网络完全使用注意力（Attention）机制来实现序列到序列的建模，并且取得了很好的效果。
 
-transformer_en-de包含6层的transformer结构，头数为8，隐藏层参数为512，参数量为64M。该模型在[WMT'14 EN-DE数据集](http://www.statmt.org/wmt14/translation-task.html)进行了预训练，加载后可直接用于预测。
+transformer_en-de包含6层的transformer结构，头数为8，隐藏层参数为512，参数量为64M。该模型在[WMT'14 EN-DE数据集](http://www.statmt.org/wmt14/translation-task.html)进行了预训练，加载后可直接用于预测，提供了英文翻译为德文的能力。
 
 关于机器翻译的Transformer模型训练方式和详情，可查看[Machine Translation using Transformer](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/examples/machine_translation/transformer)。
 

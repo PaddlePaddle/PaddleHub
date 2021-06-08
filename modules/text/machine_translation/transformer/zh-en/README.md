@@ -6,7 +6,7 @@ $ hub install transformer_zh-en==1.0.0
 
 2017 年，Google机器翻译团队在其发表的论文[Attention Is All You Need](https://arxiv.org/abs/1706.03762)中，提出了用于完成机器翻译（Machine Translation）等序列到序列（Seq2Seq）学习任务的一种全新网络结构——Transformer。Tranformer网络完全使用注意力（Attention）机制来实现序列到序列的建模，并且取得了很好的效果。
 
-transformer_zh-en包含6层的transformer结构，头数为8，隐藏层参数为512，参数量为64M。该模型在[CWMT2021的数据集](http://nlp.nju.edu.cn/cwmt-wmt)进行了预训练，加载后可直接用于预测。
+transformer_zh-en包含6层的transformer结构，头数为8，隐藏层参数为512，参数量为64M。该模型在[CWMT2021的数据集](http://nlp.nju.edu.cn/cwmt-wmt)进行了预训练，加载后可直接用于预测, 提供了中文翻译为英文的能力。
 
 关于机器翻译的Transformer模型训练方式和详情，可查看[Machine Translation using Transformer](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/examples/machine_translation/transformer)。
 
@@ -76,7 +76,7 @@ for idx, st in enumerate(src_texts):
 $ hub serving start -m transformer_zh-en
 ```
 
-通过以上命令可完成一个英德机器翻译API的部署，默认端口号为8866。
+通过以上命令可完成一个中英机器翻译API的部署，默认端口号为8866。
 
 **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
 
