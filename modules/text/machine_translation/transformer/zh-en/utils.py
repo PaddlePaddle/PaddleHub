@@ -21,14 +21,7 @@ import jieba
 
 jieba.setLogLevel(logging.INFO)
 
-try:
-    import nltk
-    nltk.data.find('misc/perluniprops')
-    nltk.data.find('corpora/nonbreaking_prefixes')
-except LookupError:
-    nltk.download('perluniprops')
-    nltk.download('nonbreaking_prefixes')
-from nltk.tokenize.moses import MosesDetokenizer
+from sacremoses import MosesTokenizer, MosesDetokenizer
 from subword_nmt.apply_bpe import BPE
 
 
