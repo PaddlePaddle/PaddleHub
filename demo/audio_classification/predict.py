@@ -26,21 +26,20 @@ parser.add_argument("--wav", type=str, required=True, help="Audio file to infer.
 parser.add_argument("--sr", type=int, default=44100, help="Sample rate of inference audio.")
 parser.add_argument("--model_type", type=str, default='panns_cnn14', help="Select model to to inference.")
 parser.add_argument("--topk", type=int, default=1, help="Show top k results of prediction labels.")
-parser.add_argument("--checkpoint",
-                    type=str,
-                    default='./checkpoint/best_model/model.pdparams',
-                    help="Checkpoint of model.")
+parser.add_argument(
+    "--checkpoint", type=str, default='./checkpoint/best_model/model.pdparams', help="Checkpoint of model.")
 args = parser.parse_args()
 
 if __name__ == '__main__':
     label_map = {idx: label for idx, label in enumerate(ESC50.label_list)}
 
-    model = hub.Module(name=args.model_type,
-                       version='1.0.0',
-                       task='sound-cls',
-                       num_class=ESC50.num_class,
-                       label_map=label_map,
-                       load_checkpoint=args.checkpoint)
+    model = hub.Module(
+        name=args.model_type,
+        version='1.0.0',
+        task='sound-cls',
+        num_class=ESC50.num_class,
+        label_map=label_map,
+        load_checkpoint=args.checkpoint)
 
     data = [librosa.load(args.wav, sr=args.sr)[0]]
     result = model.predict(data, sample_rate=args.sr, batch_size=1, feat_type='mel', use_gpu=True)

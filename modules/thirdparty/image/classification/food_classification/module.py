@@ -41,18 +41,10 @@ def read_images(paths):
     version='1.0.0')
 class MODULE(hub.Module):
     def _initialize(self, **kwargs):
-        self.default_pretrained_model_path = os.path.join(
-            self.directory, 'assets')
-        self.model = pdx.deploy.Predictor(self.default_pretrained_model_path,
-                                          **kwargs)
+        self.default_pretrained_model_path = os.path.join(self.directory, 'assets')
+        self.model = pdx.deploy.Predictor(self.default_pretrained_model_path, **kwargs)
 
-    def predict(self,
-                images=None,
-                paths=None,
-                data=None,
-                batch_size=1,
-                use_gpu=False,
-                **kwargs):
+    def predict(self, images=None, paths=None, data=None, batch_size=1, use_gpu=False, **kwargs):
 
         all_data = images if images is not None else read_images(paths)
         total_num = len(all_data)
@@ -110,36 +102,27 @@ class MODULE(hub.Module):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.predict(
-            paths=[args.input_path],
-            use_gpu=args.use_gpu)
+        results = self.predict(paths=[args.input_path], use_gpu=args.use_gpu)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu',
-            type=bool,
-            default=False,
-            help="whether use GPU or not")
+        self.arg_config_group.add_argument('--use_gpu', type=bool, default=False, help="whether use GPU or not")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
+
 
 if __name__ == '__main__':
     module = MODULE(directory='./new_model')

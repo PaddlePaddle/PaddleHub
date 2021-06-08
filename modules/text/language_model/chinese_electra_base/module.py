@@ -60,37 +60,27 @@ class Electra(nn.Layer):
             task = 'seq-cls'
             logger.warning(
                 "current task name 'sequence_classification' was renamed to 'seq-cls', "
-                "'sequence_classification' has been deprecated and will be removed in the future.",
-            )
+                "'sequence_classification' has been deprecated and will be removed in the future.", )
         if task == 'seq-cls':
             self.model = ElectraForSequenceClassification.from_pretrained(
-                pretrained_model_name_or_path='chinese-electra-base',
-                num_classes=self.num_classes,
-                **kwargs
-            )
+                pretrained_model_name_or_path='chinese-electra-base', num_classes=self.num_classes, **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy()
         elif task == 'token-cls':
             self.model = ElectraForTokenClassification.from_pretrained(
-                pretrained_model_name_or_path='chinese-electra-base',
-                num_classes=self.num_classes,
-                **kwargs
-            )
+                pretrained_model_name_or_path='chinese-electra-base', num_classes=self.num_classes, **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
-            self.metric = ChunkEvaluator(
-                label_list=[self.label_map[i] for i in sorted(self.label_map.keys())]
-            )
+            self.metric = ChunkEvaluator(label_list=[self.label_map[i] for i in sorted(self.label_map.keys())])
         elif task == 'text-matching':
             self.model = ElectraModel.from_pretrained(pretrained_model_name_or_path='chinese-electra-base', **kwargs)
             self.dropout = paddle.nn.Dropout(0.1)
-            self.classifier = paddle.nn.Linear(self.model.config['hidden_size']*3, 2)
+            self.classifier = paddle.nn.Linear(self.model.config['hidden_size'] * 3, 2)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy()
         elif task is None:
             self.model = ElectraModel.from_pretrained(pretrained_model_name_or_path='chinese-electra-base', **kwargs)
         else:
-            raise RuntimeError("Unknown task {}, task should be one in {}".format(
-                task, self._tasks_supported))
+            raise RuntimeError("Unknown task {}, task should be one in {}".format(task, self._tasks_supported))
 
         self.task = task
 
@@ -138,8 +128,7 @@ class Electra(nn.Layer):
                 loss = self.criterion(logits, labels.unsqueeze(-1))
                 num_infer_chunks, num_label_chunks, num_correct_chunks = \
                     self.metric.compute(None, seq_lengths, preds, labels)
-                self.metric.update(
-                    num_infer_chunks.numpy(), num_label_chunks.numpy(), num_correct_chunks.numpy())
+                self.metric.update(num_infer_chunks.numpy(), num_label_chunks.numpy(), num_correct_chunks.numpy())
                 _, _, f1_score = map(float, self.metric.accumulate())
                 return token_level_probs, loss, {'f1_score': f1_score}
             return token_level_probs
@@ -181,5 +170,4 @@ class Electra(nn.Layer):
         """
         Gets the tokenizer that is customized for this module.
         """
-        return ElectraTokenizer.from_pretrained(
-            pretrained_model_name_or_path='chinese-electra-base', *args, **kwargs)
+        return ElectraTokenizer.from_pretrained(pretrained_model_name_or_path='chinese-electra-base', *args, **kwargs)

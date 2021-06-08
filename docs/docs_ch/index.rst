@@ -2,7 +2,7 @@
 关于PaddleHub
 ===========================
 
-欢迎使用PaddleHub！这是一个基于飞桨框架的预训练模型应用工具，旨在降低AI模型的使用门槛并促动AI社区的发展。无论您是AI领域的资深开发者，还是对该领域不甚了解却非常感兴趣的用户，PaddleHub都可以对您产生帮助。ou are a senior developer in the AI ​​industry nor an interested person who knows nothing about the AI ​​field, you can benefit from PaddleHub.
+欢迎使用PaddleHub！这是一个基于飞桨框架的预训练模型应用工具，旨在降低AI模型的使用门槛并促动AI社区的发展。无论您是AI领域的资深开发者，还是对该领域不甚了解却非常感兴趣的用户，PaddleHub都可以对您产生帮助。
 
 * PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型。
 * **【无需深度学习背景、无需数据与训练过程】**，可快速使用AI模型，享受人工智能时代红利。

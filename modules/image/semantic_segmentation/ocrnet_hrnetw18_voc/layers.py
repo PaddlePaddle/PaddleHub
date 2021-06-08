@@ -30,22 +30,20 @@ def SyncBatchNorm(*args, **kwargs):
 class ConvBNLayer(nn.Layer):
     """Basic conv bn relu layer."""
 
-    def __init__(
-            self,
-            in_channels: int,
-            out_channels: int,
-            kernel_size: int,
-            stride: int = 1,
-            dilation: int = 1,
-            groups: int = 1,
-            is_vd_mode: bool = False,
-            act: str = None,
-            name: str = None):
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int,
+                 stride: int = 1,
+                 dilation: int = 1,
+                 groups: int = 1,
+                 is_vd_mode: bool = False,
+                 act: str = None,
+                 name: str = None):
         super(ConvBNLayer, self).__init__()
 
         self.is_vd_mode = is_vd_mode
-        self._pool2d_avg = AvgPool2D(
-            kernel_size=2, stride=2, padding=0, ceil_mode=True)
+        self._pool2d_avg = AvgPool2D(kernel_size=2, stride=2, padding=0, ceil_mode=True)
         self._conv = Conv2D(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -83,11 +81,7 @@ class BottleneckBlock(nn.Layer):
         super(BottleneckBlock, self).__init__()
 
         self.conv0 = ConvBNLayer(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=1,
-            act='relu',
-            name=name + "_branch2a")
+            in_channels=in_channels, out_channels=out_channels, kernel_size=1, act='relu', name=name + "_branch2a")
 
         self.dilation = dilation
 
@@ -100,11 +94,7 @@ class BottleneckBlock(nn.Layer):
             dilation=dilation,
             name=name + "_branch2b")
         self.conv2 = ConvBNLayer(
-            in_channels=out_channels,
-            out_channels=out_channels * 4,
-            kernel_size=1,
-            act=None,
-            name=name + "_branch2c")
+            in_channels=out_channels, out_channels=out_channels * 4, kernel_size=1, act=None, name=name + "_branch2c")
 
         if not shortcut:
             self.short = ConvBNLayer(
@@ -139,12 +129,7 @@ class BottleneckBlock(nn.Layer):
 class SeparableConvBNReLU(nn.Layer):
     """Depthwise Separable Convolution."""
 
-    def __init__(self,
-                 in_channels: int,
-                 out_channels: int,
-                 kernel_size: int,
-                 padding: str = 'same',
-                 **kwargs: dict):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, padding: str = 'same', **kwargs: dict):
         super(SeparableConvBNReLU, self).__init__()
         self.depthwise_conv = ConvBN(
             in_channels,
@@ -153,8 +138,7 @@ class SeparableConvBNReLU(nn.Layer):
             padding=padding,
             groups=in_channels,
             **kwargs)
-        self.piontwise_conv = ConvBNReLU(
-            in_channels, out_channels, kernel_size=1, groups=1)
+        self.piontwise_conv = ConvBNReLU(in_channels, out_channels, kernel_size=1, groups=1)
 
     def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         x = self.depthwise_conv(x)
@@ -165,15 +149,9 @@ class SeparableConvBNReLU(nn.Layer):
 class ConvBN(nn.Layer):
     """Basic conv bn layer"""
 
-    def __init__(self,
-                 in_channels: int,
-                 out_channels: int,
-                 kernel_size: int,
-                 padding: str = 'same',
-                 **kwargs: dict):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, padding: str = 'same', **kwargs: dict):
         super(ConvBN, self).__init__()
-        self._conv = Conv2D(
-            in_channels, out_channels, kernel_size, padding=padding, **kwargs)
+        self._conv = Conv2D(in_channels, out_channels, kernel_size, padding=padding, **kwargs)
         self._batch_norm = SyncBatchNorm(out_channels)
 
     def forward(self, x: paddle.Tensor) -> paddle.Tensor:
@@ -185,16 +163,10 @@ class ConvBN(nn.Layer):
 class ConvBNReLU(nn.Layer):
     """Basic conv bn relu layer."""
 
-    def __init__(self,
-                 in_channels: int,
-                 out_channels: int,
-                 kernel_size: int,
-                 padding: str = 'same',
-                 **kwargs: dict):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, padding: str = 'same', **kwargs: dict):
         super(ConvBNReLU, self).__init__()
 
-        self._conv = Conv2D(
-            in_channels, out_channels, kernel_size, padding=padding, **kwargs)
+        self._conv = Conv2D(in_channels, out_channels, kernel_size, padding=padding, **kwargs)
         self._batch_norm = SyncBatchNorm(out_channels)
 
     def forward(self, x: paddle.Tensor) -> paddle.Tensor:
@@ -251,8 +223,7 @@ class Activation(nn.Layer):
                 act_name = act_dict[act]
                 self.act_func = eval("activation.{}()".format(act_name))
             else:
-                raise KeyError("{} does not exist in the current {}".format(
-                    act, act_dict.keys()))
+                raise KeyError("{} does not exist in the current {}".format(act, act_dict.keys()))
 
     def forward(self, x: paddle.Tensor) -> paddle.Tensor:
 
@@ -276,13 +247,7 @@ class ASPPModule(nn.Layer):
         image_pooling (bool, optional): If augmented with image-level features. Default: False
     """
 
-    def __init__(self,
-                 aspp_ratios,
-                 in_channels,
-                 out_channels,
-                 align_corners,
-                 use_sep_conv=False,
-                 image_pooling=False):
+    def __init__(self, aspp_ratios, in_channels, out_channels, align_corners, use_sep_conv=False, image_pooling=False):
         super().__init__()
 
         self.align_corners = align_corners
@@ -311,10 +276,7 @@ class ASPPModule(nn.Layer):
             out_size += 1
         self.image_pooling = image_pooling
 
-        self.conv_bn_relu = ConvBNReLU(
-            in_channels=out_channels * out_size,
-            out_channels=out_channels,
-            kernel_size=1)
+        self.conv_bn_relu = ConvBNReLU(in_channels=out_channels * out_size, out_channels=out_channels, kernel_size=1)
 
         self.dropout = nn.Dropout(p=0.1)  # drop rate
 
@@ -322,20 +284,12 @@ class ASPPModule(nn.Layer):
         outputs = []
         for block in self.aspp_blocks:
             y = block(x)
-            y = F.interpolate(
-                y,
-                x.shape[2:],
-                mode='bilinear',
-                align_corners=self.align_corners)
+            y = F.interpolate(y, x.shape[2:], mode='bilinear', align_corners=self.align_corners)
             outputs.append(y)
 
         if self.image_pooling:
             img_avg = self.global_avg_pool(x)
-            img_avg = F.interpolate(
-                img_avg,
-                x.shape[2:],
-                mode='bilinear',
-                align_corners=self.align_corners)
+            img_avg = F.interpolate(img_avg, x.shape[2:], mode='bilinear', align_corners=self.align_corners)
             outputs.append(img_avg)
 
         x = paddle.concat(outputs, axis=1)

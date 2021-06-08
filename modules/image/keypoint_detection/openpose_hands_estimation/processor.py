@@ -213,8 +213,8 @@ class DrawHandPose:
         bg.draw()
         canvas = np.frombuffer(bg.tostring_rgb(), dtype='uint8').reshape(int(height), int(width), 3)
         return canvas
-    
-    
+
+
 class ResizeScaling:
     """Resize images by scaling method.
 
@@ -231,7 +231,8 @@ class ResizeScaling:
         scale = scale_search * self.target / img.shape[0]
         resize_img = cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=self.interpolation)
         return resize_img
-    
+
+
 def npmax(array: np.ndarray):
     """Get max value and index."""
     arrayindex = array.argmax(1)

@@ -27,6 +27,7 @@ class InputExample(object):
     """
     Input example of one audio sample.
     """
+
     def __init__(self, guid: int, source: Union[list, str], label: Optional[str] = None):
         self.guid = guid
         self.source = source
@@ -37,6 +38,7 @@ class BaseAudioDataset(object):
     """
     Base class of speech dataset.
     """
+
     def __init__(self, base_path: str, data_file: str, mode: Optional[str] = "train"):
         self.data_file = os.path.join(base_path, data_file)
         self.mode = mode
@@ -92,19 +94,20 @@ class AudioClassificationDataset(BaseAudioDataset, paddle.io.Dataset):
             if self.feat_type == 'raw':
                 record['feat'] = example.source
             elif self.feat_type == 'mel':
-                record['feat'] = extract_melspectrogram(example.source,
-                                                        sample_rate=self.feat_cfg['sample_rate'],
-                                                        window_size=self.feat_cfg['window_size'],
-                                                        hop_size=self.feat_cfg['hop_size'],
-                                                        mel_bins=self.feat_cfg['mel_bins'],
-                                                        fmin=self.feat_cfg['fmin'],
-                                                        fmax=self.feat_cfg['fmax'],
-                                                        window=self.feat_cfg['window'],
-                                                        center=True,
-                                                        pad_mode='reflect',
-                                                        ref=1.0,
-                                                        amin=1e-10,
-                                                        top_db=None)
+                record['feat'] = extract_melspectrogram(
+                    example.source,
+                    sample_rate=self.feat_cfg['sample_rate'],
+                    window_size=self.feat_cfg['window_size'],
+                    hop_size=self.feat_cfg['hop_size'],
+                    mel_bins=self.feat_cfg['mel_bins'],
+                    fmin=self.feat_cfg['fmin'],
+                    fmax=self.feat_cfg['fmax'],
+                    window=self.feat_cfg['window'],
+                    center=True,
+                    pad_mode='reflect',
+                    ref=1.0,
+                    amin=1e-10,
+                    top_db=None)
             else:
                 raise RuntimeError(\
                     f"Unknown type of self.feat_type: {self.feat_type}, it must be one in {self._supported_features}")

@@ -27,7 +27,6 @@ from deeplabv3p_resnet50_voc.resnet import ResNet50_vd
 import deeplabv3p_resnet50_voc.layers as L
 
 
-
 @moduleinfo(
     name="deeplabv3p_resnet50_voc",
     type="CV/semantic_segmentation",
@@ -72,9 +71,8 @@ class DeepLabV3PResnet50(nn.Layer):
         super(DeepLabV3PResnet50, self).__init__()
         self.backbone = ResNet50_vd()
         backbone_channels = [self.backbone.feat_channels[i] for i in backbone_indices]
-        self.head = DeepLabV3PHead(num_classes, backbone_indices,
-                                   backbone_channels, aspp_ratios,
-                                   aspp_out_channels, align_corners)
+        self.head = DeepLabV3PHead(num_classes, backbone_indices, backbone_channels, aspp_ratios, aspp_out_channels,
+                                   align_corners)
         self.align_corners = align_corners
         self.transforms = T.Compose([T.Normalize()])
 
@@ -96,11 +94,8 @@ class DeepLabV3PResnet50(nn.Layer):
         feat_list = self.backbone(x)
         logit_list = self.head(feat_list)
         return [
-            F.interpolate(
-                logit,
-                x.shape[2:],
-                mode='bilinear',
-                align_corners=self.align_corners) for logit in logit_list]
+            F.interpolate(logit, x.shape[2:], mode='bilinear', align_corners=self.align_corners) for logit in logit_list
+        ]
 
 
 class DeepLabV3PHead(nn.Layer):
@@ -123,17 +118,13 @@ class DeepLabV3PHead(nn.Layer):
             is even, e.g. 1024x512, otherwise it is True, e.g. 769x769.
     """
 
-    def __init__(self, num_classes: int, backbone_indices: Tuple[paddle.Tensor], backbone_channels:  Tuple[paddle.Tensor],
-                 aspp_ratios:  Tuple[float], aspp_out_channels: int, align_corners: bool):
+    def __init__(self, num_classes: int, backbone_indices: Tuple[paddle.Tensor],
+                 backbone_channels: Tuple[paddle.Tensor], aspp_ratios: Tuple[float], aspp_out_channels: int,
+                 align_corners: bool):
         super().__init__()
 
         self.aspp = L.ASPPModule(
-            aspp_ratios,
-            backbone_channels[1],
-            aspp_out_channels,
-            align_corners,
-            use_sep_conv=True,
-            image_pooling=True)
+            aspp_ratios, backbone_channels[1], aspp_out_channels, align_corners, use_sep_conv=True, image_pooling=True)
         self.decoder = Decoder(num_classes, backbone_channels[0], align_corners)
         self.backbone_indices = backbone_indices
 
@@ -160,25 +151,17 @@ class Decoder(nn.Layer):
     def __init__(self, num_classes: int, in_channels: int, align_corners: bool):
         super(Decoder, self).__init__()
 
-        self.conv_bn_relu1 = L.ConvBNReLU(
-            in_channels=in_channels, out_channels=48, kernel_size=1)
+        self.conv_bn_relu1 = L.ConvBNReLU(in_channels=in_channels, out_channels=48, kernel_size=1)
 
-        self.conv_bn_relu2 = L.SeparableConvBNReLU(
-            in_channels=304, out_channels=256, kernel_size=3, padding=1)
-        self.conv_bn_relu3 = L.SeparableConvBNReLU(
-            in_channels=256, out_channels=256, kernel_size=3, padding=1)
-        self.conv = nn.Conv2D(
-            in_channels=256, out_channels=num_classes, kernel_size=1)
+        self.conv_bn_relu2 = L.SeparableConvBNReLU(in_channels=304, out_channels=256, kernel_size=3, padding=1)
+        self.conv_bn_relu3 = L.SeparableConvBNReLU(in_channels=256, out_channels=256, kernel_size=3, padding=1)
+        self.conv = nn.Conv2D(in_channels=256, out_channels=num_classes, kernel_size=1)
 
         self.align_corners = align_corners
 
     def forward(self, x: paddle.Tensor, low_level_feat: paddle.Tensor) -> paddle.Tensor:
         low_level_feat = self.conv_bn_relu1(low_level_feat)
-        x = F.interpolate(
-            x,
-            low_level_feat.shape[2:],
-            mode='bilinear',
-            align_corners=self.align_corners)
+        x = F.interpolate(x, low_level_feat.shape[2:], mode='bilinear', align_corners=self.align_corners)
         x = paddle.concat([x, low_level_feat], axis=1)
         x = self.conv_bn_relu2(x)
         x = self.conv_bn_relu3(x)

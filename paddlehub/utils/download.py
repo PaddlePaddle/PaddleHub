@@ -23,7 +23,6 @@ from paddlehub.utils import log, utils, xarfile
 
 
 def download_data(url):
-
     def _wrapper(Dataset):
         def _check_download():
             save_name = os.path.basename(url).split('.')[0]

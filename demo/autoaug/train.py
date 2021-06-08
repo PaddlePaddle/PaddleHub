@@ -24,9 +24,20 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config",help="config file",)
-parser.add_argument("--workspace",default=None, help="work_space",)
-parser.add_argument("--policy",default=None, help="data aug policy",)
+parser.add_argument(
+    "--config",
+    help="config file",
+)
+parser.add_argument(
+    "--workspace",
+    default=None,
+    help="work_space",
+)
+parser.add_argument(
+    "--policy",
+    default=None,
+    help="data aug policy",
+)
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -39,10 +50,7 @@ if __name__ == '__main__':
 
     input_size = task_config.classifier.input_size
     scale_size = task_config.classifier.scale_size
-    normalize = {
-        'mean': [
-            0.485, 0.456, 0.406], 'std': [
-            0.229, 0.224, 0.225]}
+    normalize = {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}
     epochs = task_config.classifier.epochs
 
     policy = args.policy
@@ -50,13 +58,11 @@ if __name__ == '__main__':
         print("use normal train transform")
         TrainTransform = transforms.Compose(
             transforms=[
-                transforms.Resize(
-                    (input_size,
-                     input_size)),
+                transforms.Resize((input_size, input_size)),
                 transforms.Permute(),
-                transforms.Normalize(
-                    **normalize, channel_first=True)],
-            channel_first = False)
+                transforms.Normalize(**normalize, channel_first=True)
+            ],
+            channel_first=False)
     else:
         TrainTransform = PbaAugment(
             input_size=input_size,
@@ -64,17 +70,12 @@ if __name__ == '__main__':
             normalize=normalize,
             policy=policy,
             hp_policy_epochs=epochs,
-            stage="train"
-        )
+            stage="train")
     train_dataset, eval_dataset = _init_loader(config, TrainTransform=TrainTransform)
     class_to_id_dict = _read_classes(config.data_config.label_list)
-    model = hub.Module(name=config.task_config.classifier.model_name, label_list=class_to_id_dict.keys(), load_checkpoint=None)
+    model = hub.Module(
+        name=config.task_config.classifier.model_name, label_list=class_to_id_dict.keys(), load_checkpoint=None)
 
-    optimizer = paddle.optimizer.Adam(
-        learning_rate=0.001, parameters=model.parameters())
-    trainer = CustomTrainer(
-        model=model,
-        optimizer=optimizer,
-        checkpoint_dir='img_classification_ckpt')
+    optimizer = paddle.optimizer.Adam(learning_rate=0.001, parameters=model.parameters())
+    trainer = CustomTrainer(model=model, optimizer=optimizer, checkpoint_dir='img_classification_ckpt')
     trainer.train(train_dataset, epochs=epochs, batch_size=32, eval_dataset=eval_dataset, save_interval=10)
-

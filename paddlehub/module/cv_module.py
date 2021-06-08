@@ -72,7 +72,7 @@ class ImageClassifierModule(RunModule, ImageServing):
         labels = paddle.unsqueeze(batch[1], axis=-1)
 
         preds, feature = self(images)
-    
+
         loss, _ = F.softmax_with_cross_entropy(preds, labels, return_softmax=True, axis=1)
         loss = paddle.mean(loss)
         acc = paddle.metric.accuracy(preds, labels)
@@ -94,7 +94,7 @@ class ImageClassifierModule(RunModule, ImageServing):
         res = []
         total_num = len(images)
         loop_num = int(np.ceil(total_num / batch_size))
- 
+
         for iter_id in range(loop_num):
             batch_data = []
             handle_id = iter_id * batch_size
@@ -108,14 +108,14 @@ class ImageClassifierModule(RunModule, ImageServing):
             preds, feature = self(paddle.to_tensor(batch_image))
             preds = F.softmax(preds, axis=1).numpy()
             pred_idxs = np.argsort(preds)[:, ::-1][:, :top_k]
-            
+
             for i, pred in enumerate(pred_idxs):
                 res_dict = {}
                 for k in pred:
                     class_name = self.labels[int(k)]
                     res_dict[class_name] = preds[i][k]
-                     
-                res.append(res_dict)   
+
+                res.append(res_dict)
 
         return res
 
@@ -126,8 +126,8 @@ class ImageClassifierModule(RunModule, ImageServing):
         """
         top_k = int(top_k)
         images_decode = [base64_to_cv2(image) for image in images]
-        resdicts = self.predict(images=images_decode, top_k=top_k,**kwargs)
-        final={}
+        resdicts = self.predict(images=images_decode, top_k=top_k, **kwargs)
+        final = {}
         for resdict in resdicts:
             for key, value in resdict.items():
                 resdict[key] = float(value)
@@ -144,18 +144,13 @@ class ImageClassifierModule(RunModule, ImageServing):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.predict(
-            images=[args.input_path],
-            top_k=args.top_k)
+        results = self.predict(images=[args.input_path], top_k=args.top_k)
 
         return results
 
@@ -164,20 +159,15 @@ class ImageClassifierModule(RunModule, ImageServing):
         Add the command config options.
         """
 
-        self.arg_config_group.add_argument(
-            '--top_k',
-            type=int,
-            default=1,
-            help="top_k classification result.")
+        self.arg_config_group.add_argument('--top_k', type=int, default=1, help="top_k classification result.")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
 
-       
+
 class ImageColorizeModule(RunModule, ImageServing):
     def training_step(self, batch: int, batch_idx: int) -> dict:
         '''
@@ -207,7 +197,7 @@ class ImageColorizeModule(RunModule, ImageServing):
             img = self.preprocess(batch)
         else:
             img = self.preprocess(batch[0])
-            
+
         out_class, out_reg = self(img['A'], img['hint_B'], img['mask_B'])
 
         # loss
@@ -288,11 +278,11 @@ class ImageColorizeModule(RunModule, ImageServing):
         """
         images_decode = [base64_to_cv2(image) for image in images]
         visual = self.predict(images=images_decode, **kwargs)
-        final={}
+        final = {}
         for i, visual_ret in enumerate(visual):
             h, w, c = images_decode[i].shape
             for key, value in visual_ret.items():
-                value = cv2.resize(cv2.cvtColor(value,cv2.COLOR_RGB2BGR), (w, h), cv2.INTER_NEAREST)
+                value = cv2.resize(cv2.cvtColor(value, cv2.COLOR_RGB2BGR), (w, h), cv2.INTER_NEAREST)
                 visual_ret[key] = cv2_to_base64(value)
         final['data'] = visual
         return final
@@ -307,19 +297,13 @@ class ImageColorizeModule(RunModule, ImageServing):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.predict(
-            images=[args.input_path],
-            visualization=args.visualization,
-            save_path=args.output_dir)
+        results = self.predict(images=[args.input_path], visualization=args.visualization, save_path=args.output_dir)
 
         return results
 
@@ -329,22 +313,15 @@ class ImageColorizeModule(RunModule, ImageServing):
         """
 
         self.arg_config_group.add_argument(
-            '--output_dir',
-            type=str,
-            default='colorization',
-            help="save visualization result.")
+            '--output_dir', type=str, default='colorization', help="save visualization result.")
         self.arg_config_group.add_argument(
-            '--visualization',
-            type=bool,
-            default=True,
-            help="whether to save output as images.")
+            '--visualization', type=bool, default=True, help="whether to save output as images.")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
 
 
 class Yolov3Module(RunModule, ImageServing):
@@ -523,7 +500,12 @@ class StyleTransferModule(RunModule, ImageServing):
 
         return {'loss': loss, 'metrics': {'content gap': content_loss, 'style gap': style_loss}}
 
-    def predict(self, origin: list, style: Union[str, np.ndarray], batch_size: int = 1, visualization: bool = True, save_path: str = 'style_tranfer'):
+    def predict(self,
+                origin: list,
+                style: Union[str, np.ndarray],
+                batch_size: int = 1,
+                visualization: bool = True,
+                save_path: str = 'style_tranfer'):
         '''
         Colorize images
 
@@ -554,7 +536,7 @@ class StyleTransferModule(RunModule, ImageServing):
                 except:
                     pass
 
-            batch_image = np.array(batch_data)    
+            batch_image = np.array(batch_data)
             content = paddle.to_tensor(batch_image)
 
             self.setTarget(style)
@@ -578,7 +560,7 @@ class StyleTransferModule(RunModule, ImageServing):
         images_decode = [base64_to_cv2(image) for image in images[0]]
         style_decode = base64_to_cv2(images[1])
         results = self.predict(origin=images_decode, style=style_decode, **kwargs)
-        final={}
+        final = {}
         final['data'] = [cv2_to_base64(result) for result in results]
         return final
 
@@ -592,12 +574,9 @@ class StyleTransferModule(RunModule, ImageServing):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
@@ -608,33 +587,25 @@ class StyleTransferModule(RunModule, ImageServing):
             visualization=args.visualization)
 
         return results
-        
+
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
 
         self.arg_config_group.add_argument(
-            '--output_dir',
-            type=str,
-            default='style_tranfer',
-            help="The directory to save output images.")
+            '--output_dir', type=str, default='style_tranfer', help="The directory to save output images.")
 
         self.arg_config_group.add_argument(
-            '--visualization',
-            type=bool,
-            default=True,
-            help="whether to save output as images.")
+            '--visualization', type=bool, default=True, help="whether to save output as images.")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
-        self.arg_input_group.add_argument(
-            '--style_path', type=str, help="path to style image.")
-        
+        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument('--style_path', type=str, help="path to style image.")
+
 
 class ImageSegmentationModule(ImageServing, RunModule):
     def training_step(self, batch: List[paddle.Tensor], batch_idx: int) -> dict:
@@ -647,9 +618,9 @@ class ImageSegmentationModule(ImageServing, RunModule):
 
         Returns:
             results(dict): The model outputs, such as loss.
-            
+
         '''
-        
+
         label = batch[1].astype('int64')
         criterionCE = nn.loss.CrossEntropyLoss()
         logits = self(batch[0])
@@ -657,15 +628,19 @@ class ImageSegmentationModule(ImageServing, RunModule):
         for i in range(len(logits)):
             logit = logits[i]
             if logit.shape[-2:] != label.shape[-2:]:
-                logit = F.interpolate(logit, label.shape[-2:],  mode='bilinear')
-            
-            logit = logit.transpose([0,2,3,1])
+                logit = F.interpolate(logit, label.shape[-2:], mode='bilinear')
+
+            logit = logit.transpose([0, 2, 3, 1])
             loss_ce = criterionCE(logit, label)
             loss += loss_ce / len(logits)
-            
+
         return {"loss": loss}
 
-    def predict(self, images: Union[str, np.ndarray], batch_size: int = 1, visualization: bool = True, save_path: str = 'seg_result') -> List[np.ndarray]:
+    def predict(self,
+                images: Union[str, np.ndarray],
+                batch_size: int = 1,
+                visualization: bool = True,
+                save_path: str = 'seg_result') -> List[np.ndarray]:
         '''
         Obtain segmentation results.
 
@@ -679,8 +654,8 @@ class ImageSegmentationModule(ImageServing, RunModule):
             output(list[np.ndarray]) : The segmentation mask.
         '''
         self.eval()
-        result=[]
-        
+        result = []
+
         total_num = len(images)
         loop_num = int(np.ceil(total_num / batch_size))
         for iter_id in range(loop_num):
@@ -695,19 +670,19 @@ class ImageSegmentationModule(ImageServing, RunModule):
             batch_image = np.array(batch_data).astype('float32')
             pred = self(paddle.to_tensor(batch_image))
             pred = paddle.argmax(pred[0], axis=1, keepdim=True, dtype='int32')
-            
+
             for num in range(pred.shape[0]):
-                if isinstance(images[handle_id+num], str):
-                    image = cv2.imread(images[handle_id+num])
+                if isinstance(images[handle_id + num], str):
+                    image = cv2.imread(images[handle_id + num])
                 else:
-                    image = images[handle_id+num]
+                    image = images[handle_id + num]
                 h, w, c = image.shape
-                pred_final = utils.reverse_transform(pred[num: num+1], (h,w), self.transforms.transforms)
+                pred_final = utils.reverse_transform(pred[num:num + 1], (h, w), self.transforms.transforms)
                 pred_final = paddle.squeeze(pred_final)
                 pred_final = pred_final.numpy().astype('uint8')
-                
+
                 if visualization:
-                    added_image = utils.visualize(images[handle_id+num], pred_final, weight=0.6)
+                    added_image = utils.visualize(images[handle_id + num], pred_final, weight=0.6)
                     pred_mask = utils.get_pseudo_color_map(pred_final)
                     pred_image_path = os.path.join(save_path, 'image', str(time.time()) + ".png")
                     pred_mask_path = os.path.join(save_path, 'mask', str(time.time()) + ".png")
@@ -717,10 +692,10 @@ class ImageSegmentationModule(ImageServing, RunModule):
                         os.makedirs(os.path.dirname(pred_mask_path))
                     cv2.imwrite(pred_image_path, added_image)
                     pred_mask.save(pred_mask_path)
-            
+
                 result.append(pred_final)
         return result
-    
+
     @serving
     def serving_method(self, images: List[str], **kwargs):
         """
@@ -728,7 +703,7 @@ class ImageSegmentationModule(ImageServing, RunModule):
         """
         images_decode = [base64_to_cv2(image) for image in images]
         visual = self.predict(images=images_decode, **kwargs)
-        final=[]
+        final = []
         for mask in visual:
-            final.append(cv2_to_base64(mask)) 
+            final.append(cv2_to_base64(mask))
         return final

@@ -46,7 +46,7 @@ class Compose:
         self.transforms = transforms
         self.to_rgb = to_rgb
 
-    def __call__(self, im:  Union[np.ndarray, str], label:  Union[np.ndarray, str] = None) -> Tuple:
+    def __call__(self, im: Union[np.ndarray, str], label: Union[np.ndarray, str] = None) -> Tuple:
         """
         Args:
             im (str|np.ndarray): It is either image path or image object.
@@ -140,23 +140,20 @@ class Padding:
     """
 
     def __init__(self,
-                 target_size:  Union[List[int], Tuple[int], int],
-                 im_padding_value:  Union[List[int], Tuple[int], int] = (128, 128, 128),
+                 target_size: Union[List[int], Tuple[int], int],
+                 im_padding_value: Union[List[int], Tuple[int], int] = (128, 128, 128),
                  label_padding_value: int = 255):
         if isinstance(target_size, list) or isinstance(target_size, tuple):
             if len(target_size) != 2:
-                raise ValueError(
-                    '`target_size` should include 2 elements, but it is {}'.
-                        format(target_size))
+                raise ValueError('`target_size` should include 2 elements, but it is {}'.format(target_size))
         else:
-            raise TypeError(
-                "Type of target_size is invalid. It should be list or tuple, now is {}"
-                    .format(type(target_size)))
+            raise TypeError("Type of target_size is invalid. It should be list or tuple, now is {}".format(
+                type(target_size)))
         self.target_size = target_size
         self.im_padding_value = im_padding_value
         self.label_padding_value = label_padding_value
 
-    def __call__(self, im: np.ndarray , label: np.ndarray = None) -> Tuple:
+    def __call__(self, im: np.ndarray, label: np.ndarray = None) -> Tuple:
         """
         Args:
             im (np.ndarray): The Image data.
@@ -177,15 +174,14 @@ class Padding:
         if pad_height < 0 or pad_width < 0:
             raise ValueError(
                 'The size of image should be less than `target_size`, but the size of image ({}, {}) is larger than `target_size` ({}, {})'
-                    .format(im_width, im_height, target_width, target_height))
+                .format(im_width, im_height, target_width, target_height))
         else:
-            im = cv2.copyMakeBorder(im, 0, pad_height, 0, pad_width, cv2.BORDER_CONSTANT, 
-                                    value=self.im_padding_value)
+            im = cv2.copyMakeBorder(im, 0, pad_height, 0, pad_width, cv2.BORDER_CONSTANT, value=self.im_padding_value)
             if label is not None:
-                label = cv2.copyMakeBorder(label, 0, pad_height, 0, pad_width, cv2.BORDER_CONSTANT,
-                                           value=self.label_padding_value)
+                label = cv2.copyMakeBorder(
+                    label, 0, pad_height, 0, pad_width, cv2.BORDER_CONSTANT, value=self.label_padding_value)
         if label is None:
-            return (im,)
+            return (im, )
         else:
             return (im, label)
 
@@ -200,15 +196,13 @@ class Normalize:
         ValueError: When mean/std is not list or any value in std is 0.
     """
 
-    def __init__(self, mean: Union[List[float], Tuple[float]] = (0.5, 0.5, 0.5), 
-                 std:  Union[List[float], Tuple[float]] = (0.5, 0.5, 0.5)):
+    def __init__(self,
+                 mean: Union[List[float], Tuple[float]] = (0.5, 0.5, 0.5),
+                 std: Union[List[float], Tuple[float]] = (0.5, 0.5, 0.5)):
         self.mean = mean
         self.std = std
-        if not (isinstance(self.mean, (list, tuple))
-                and isinstance(self.std, (list, tuple))):
-            raise ValueError(
-                "{}: input type is invalid. It should be list or tuple".format(
-                    self))
+        if not (isinstance(self.mean, (list, tuple)) and isinstance(self.std, (list, tuple))):
+            raise ValueError("{}: input type is invalid. It should be list or tuple".format(self))
         from functools import reduce
         if reduce(lambda x, y: x * y, self.std) == 0:
             raise ValueError('{}: std is invalid!'.format(self))
@@ -227,7 +221,7 @@ class Normalize:
         im = F.normalize(im, mean, std)
 
         if label is None:
-            return (im,)
+            return (im, )
         else:
             return (im, label)
 
@@ -260,17 +254,13 @@ class Resize:
     def __init__(self, target_size: Union[List[int], Tuple[int]] = (512, 512), interp: str = 'LINEAR'):
         self.interp = interp
         if not (interp == "RANDOM" or interp in self.interp_dict):
-            raise ValueError("`interp` should be one of {}".format(
-                self.interp_dict.keys()))
+            raise ValueError("`interp` should be one of {}".format(self.interp_dict.keys()))
         if isinstance(target_size, list) or isinstance(target_size, tuple):
             if len(target_size) != 2:
-                raise ValueError(
-                    '`target_size` should include 2 elements, but it is {}'.
-                        format(target_size))
+                raise ValueError('`target_size` should include 2 elements, but it is {}'.format(target_size))
         else:
-            raise TypeError(
-                "Type of `target_size` is invalid. It should be list or tuple, but it is {}"
-                    .format(type(target_size)))
+            raise TypeError("Type of `target_size` is invalid. It should be list or tuple, but it is {}".format(
+                type(target_size)))
 
         self.target_size = target_size
 
@@ -298,10 +288,9 @@ class Resize:
             interp = self.interp
         im = F.resize(im, self.target_size, self.interp_dict[interp])
         if label is not None:
-            label = F.resize(label, self.target_size,
-                           cv2.INTER_NEAREST)
+            label = F.resize(label, self.target_size, cv2.INTER_NEAREST)
 
         if label is None:
-            return (im,)
+            return (im, )
         else:
             return (im, label)

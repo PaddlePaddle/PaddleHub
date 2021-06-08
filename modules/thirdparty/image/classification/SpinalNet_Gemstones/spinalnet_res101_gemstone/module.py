@@ -43,20 +43,11 @@ class BottleneckBlock(nn.Layer):
         self.conv1 = nn.Conv2D(inplanes, width, 1, bias_attr=False)
         self.bn1 = norm_layer(width)
 
-        self.conv2 = nn.Conv2D(width,
-                               width,
-                               3,
-                               padding=dilation,
-                               stride=stride,
-                               groups=groups,
-                               dilation=dilation,
-                               bias_attr=False)
+        self.conv2 = nn.Conv2D(
+            width, width, 3, padding=dilation, stride=stride, groups=groups, dilation=dilation, bias_attr=False)
         self.bn2 = norm_layer(width)
 
-        self.conv3 = nn.Conv2D(width,
-                               planes * self.expansion,
-                               1,
-                               bias_attr=False)
+        self.conv3 = nn.Conv2D(width, planes * self.expansion, 1, bias_attr=False)
         self.bn3 = norm_layer(planes * self.expansion)
         self.relu = nn.ReLU()
         self.downsample = downsample
@@ -88,13 +79,7 @@ class BottleneckBlock(nn.Layer):
 class ResNet(nn.Layer):
     def __init__(self, block=BottleneckBlock, depth=101, with_pool=True):
         super(ResNet, self).__init__()
-        layer_cfg = {
-            18: [2, 2, 2, 2],
-            34: [3, 4, 6, 3],
-            50: [3, 4, 6, 3],
-            101: [3, 4, 23, 3],
-            152: [3, 8, 36, 3]
-        }
+        layer_cfg = {18: [2, 2, 2, 2], 34: [3, 4, 6, 3], 50: [3, 4, 6, 3], 101: [3, 4, 23, 3], 152: [3, 8, 36, 3]}
         layers = layer_cfg[depth]
         self.with_pool = with_pool
         self._norm_layer = nn.BatchNorm2D
@@ -102,12 +87,7 @@ class ResNet(nn.Layer):
         self.inplanes = 64
         self.dilation = 1
 
-        self.conv1 = nn.Conv2D(3,
-                               self.inplanes,
-                               kernel_size=7,
-                               stride=2,
-                               padding=3,
-                               bias_attr=False)
+        self.conv1 = nn.Conv2D(3, self.inplanes, kernel_size=7, stride=2, padding=3, bias_attr=False)
         self.bn1 = self._norm_layer(self.inplanes)
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2D(kernel_size=3, stride=2, padding=1)
@@ -127,18 +107,12 @@ class ResNet(nn.Layer):
             stride = 1
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
-                nn.Conv2D(self.inplanes,
-                          planes * block.expansion,
-                          1,
-                          stride=stride,
-                          bias_attr=False),
+                nn.Conv2D(self.inplanes, planes * block.expansion, 1, stride=stride, bias_attr=False),
                 norm_layer(planes * block.expansion),
             )
 
         layers = []
-        layers.append(
-            block(self.inplanes, planes, stride, downsample, 1, 64,
-                  previous_dilation, norm_layer))
+        layers.append(block(self.inplanes, planes, stride, downsample, 1, 64, previous_dilation, norm_layer))
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
             layers.append(block(self.inplanes, planes, norm_layer=norm_layer))
@@ -161,14 +135,15 @@ class ResNet(nn.Layer):
         return x
 
 
-@moduleinfo(name="spinalnet_res101_gemstone",
-            type="CV/classification",
-            author="nanting03",
-            author_email="975348977@qq.com",
-            summary="spinalnet_res101_gemstone is a classification model, "
-            "this module is trained with Gemstone dataset.",
-            version="1.0.0",
-            meta=ImageClassifierModule)
+@moduleinfo(
+    name="spinalnet_res101_gemstone",
+    type="CV/classification",
+    author="nanting03",
+    author_email="975348977@qq.com",
+    summary="spinalnet_res101_gemstone is a classification model, "
+    "this module is trained with Gemstone dataset.",
+    version="1.0.0",
+    meta=ImageClassifierModule)
 class SpinalNet_ResNet101(nn.Layer):
     def __init__(self, label_list: list = None, load_checkpoint: str = None):
         super(SpinalNet_ResNet101, self).__init__()
@@ -194,20 +169,16 @@ class SpinalNet_ResNet101(nn.Layer):
         self.half_in_size = half_in_size
 
         self.fc_spinal_layer1 = nn.Sequential(
-            nn.Dropout(p=0.5), nn.Linear(half_in_size, layer_width),
-            nn.BatchNorm1D(layer_width), nn.ReLU())
+            nn.Dropout(p=0.5), nn.Linear(half_in_size, layer_width), nn.BatchNorm1D(layer_width), nn.ReLU())
         self.fc_spinal_layer2 = nn.Sequential(
-            nn.Dropout(p=0.5), nn.Linear(half_in_size + layer_width,
-                                         layer_width),
-            nn.BatchNorm1D(layer_width), nn.ReLU())
+            nn.Dropout(p=0.5), nn.Linear(half_in_size + layer_width, layer_width), nn.BatchNorm1D(layer_width),
+            nn.ReLU())
         self.fc_spinal_layer3 = nn.Sequential(
-            nn.Dropout(p=0.5), nn.Linear(half_in_size + layer_width,
-                                         layer_width),
-            nn.BatchNorm1D(layer_width), nn.ReLU())
+            nn.Dropout(p=0.5), nn.Linear(half_in_size + layer_width, layer_width), nn.BatchNorm1D(layer_width),
+            nn.ReLU())
         self.fc_spinal_layer4 = nn.Sequential(
-            nn.Dropout(p=0.5), nn.Linear(half_in_size + layer_width,
-                                         layer_width),
-            nn.BatchNorm1D(layer_width), nn.ReLU())
+            nn.Dropout(p=0.5), nn.Linear(half_in_size + layer_width, layer_width), nn.BatchNorm1D(layer_width),
+            nn.ReLU())
         self.fc_out = nn.Sequential(
             nn.Dropout(p=0.5),
             nn.Linear(layer_width * 4, class_dim),
@@ -219,8 +190,7 @@ class SpinalNet_ResNet101(nn.Layer):
             print("load custom checkpoint success")
 
         else:
-            checkpoint = os.path.join(self.directory,
-                                      'spinalnet_res101.pdparams')
+            checkpoint = os.path.join(self.directory, 'spinalnet_res101.pdparams')
             self.model_dict = paddle.load(checkpoint)
             self.set_dict(self.model_dict)
             print("load pretrained checkpoint success")
@@ -240,14 +210,9 @@ class SpinalNet_ResNet101(nn.Layer):
         y = paddle.flatten(y, 1)
 
         y1 = self.fc_spinal_layer1(y[:, 0:self.half_in_size])
-        y2 = self.fc_spinal_layer2(
-            paddle.concat([y[:, self.half_in_size:2 * self.half_in_size], y1],
-                          axis=1))
-        y3 = self.fc_spinal_layer3(
-            paddle.concat([y[:, 0:self.half_in_size], y2], axis=1))
-        y4 = self.fc_spinal_layer4(
-            paddle.concat([y[:, self.half_in_size:2 * self.half_in_size], y3],
-                          axis=1))
+        y2 = self.fc_spinal_layer2(paddle.concat([y[:, self.half_in_size:2 * self.half_in_size], y1], axis=1))
+        y3 = self.fc_spinal_layer3(paddle.concat([y[:, 0:self.half_in_size], y2], axis=1))
+        y4 = self.fc_spinal_layer4(paddle.concat([y[:, self.half_in_size:2 * self.half_in_size], y3], axis=1))
 
         y = paddle.concat([y1, y2, y3, y4], axis=1)
 

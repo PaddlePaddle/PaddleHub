@@ -3,10 +3,7 @@ import numpy as np
 from sklearn.neighbors import KernelDensity
 
 __all__ = [
-    'build_transformation_matrix',
-    'update_transformation_matrix',
-    'estimate_partial_transform',
-    'removeOutliers',
+    'build_transformation_matrix', 'update_transformation_matrix', 'estimate_partial_transform', 'removeOutliers',
     'guidedfilter'
 ]
 
@@ -48,8 +45,7 @@ def estimate_partial_transform(matched_keypoints):
     :return: transform as list of [dx, dy, da]
     """
     prev_matched_kp, cur_matched_kp = matched_keypoints
-    transform = cv2.estimateAffinePartial2D(np.array(prev_matched_kp),
-                                            np.array(cur_matched_kp))[0]
+    transform = cv2.estimateAffinePartial2D(np.array(prev_matched_kp), np.array(cur_matched_kp))[0]
 
     if transform is not None:
         # translation x
@@ -83,16 +79,14 @@ def boxfilter(img, r):
     imDst = np.zeros_like(img)
 
     imCum = np.cumsum(img, 0)
-    imDst[0: r+1, :] = imCum[r: 2*r+1, :]
-    imDst[r+1: rows-r, :] = imCum[2*r+1: rows, :] - imCum[0: rows-2*r-1, :]
-    imDst[rows-r: rows, :] = np.tile(imCum[rows-1, :],
-                                     [r, 1]) - imCum[rows-2*r-1: rows-r-1, :]
+    imDst[0:r + 1, :] = imCum[r:2 * r + 1, :]
+    imDst[r + 1:rows - r, :] = imCum[2 * r + 1:rows, :] - imCum[0:rows - 2 * r - 1, :]
+    imDst[rows - r:rows, :] = np.tile(imCum[rows - 1, :], [r, 1]) - imCum[rows - 2 * r - 1:rows - r - 1, :]
 
     imCum = np.cumsum(imDst, 1)
-    imDst[:, 0: r+1] = imCum[:, r: 2*r+1]
-    imDst[:, r+1: cols-r] = imCum[:, 2*r+1: cols] - imCum[:, 0: cols-2*r-1]
-    imDst[:, cols-r: cols] = np.tile(imCum[:, cols-1],
-                                     [r, 1]).T - imCum[:, cols-2*r-1: cols-r-1]
+    imDst[:, 0:r + 1] = imCum[:, r:2 * r + 1]
+    imDst[:, r + 1:cols - r] = imCum[:, 2 * r + 1:cols] - imCum[:, 0:cols - 2 * r - 1]
+    imDst[:, cols - r:cols] = np.tile(imCum[:, cols - 1], [r, 1]).T - imCum[:, cols - 2 * r - 1:cols - r - 1]
 
     return imDst
 

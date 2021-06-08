@@ -23,23 +23,14 @@ import paddle.fluid.dygraph as D
 
 def gen_bias(encoder_inputs, decoder_inputs, step):
     decoder_bsz, decoder_seqlen = decoder_inputs.shape[:2]
-    attn_bias = L.reshape(
-        L.range(0, decoder_seqlen, 1, dtype='float32') + 1, [1, -1, 1])
-    decoder_bias = L.cast(
-        (L.matmul(attn_bias, 1. / attn_bias, transpose_y=True) >= 1.),
-        'float32')  #[1, 1, decoderlen, decoderlen]
-    encoder_bias = L.unsqueeze(
-        L.cast(L.ones_like(encoder_inputs), 'float32'),
-        [1])  #[bsz, 1, encoderlen]
-    encoder_bias = L.expand(
-        encoder_bias, [1, decoder_seqlen, 1])  #[bsz,decoderlen, encoderlen]
-    decoder_bias = L.expand(decoder_bias,
-                            [decoder_bsz, 1, 1])  #[bsz, decoderlen, decoderlen]
+    attn_bias = L.reshape(L.range(0, decoder_seqlen, 1, dtype='float32') + 1, [1, -1, 1])
+    decoder_bias = L.cast((L.matmul(attn_bias, 1. / attn_bias, transpose_y=True) >= 1.),
+                          'float32')  #[1, 1, decoderlen, decoderlen]
+    encoder_bias = L.unsqueeze(L.cast(L.ones_like(encoder_inputs), 'float32'), [1])  #[bsz, 1, encoderlen]
+    encoder_bias = L.expand(encoder_bias, [1, decoder_seqlen, 1])  #[bsz,decoderlen, encoderlen]
+    decoder_bias = L.expand(decoder_bias, [decoder_bsz, 1, 1])  #[bsz, decoderlen, decoderlen]
     if step > 0:
-        bias = L.concat([
-            encoder_bias,
-            L.ones([decoder_bsz, decoder_seqlen, step], 'float32'), decoder_bias
-        ], -1)
+        bias = L.concat([encoder_bias, L.ones([decoder_bsz, decoder_seqlen, step], 'float32'), decoder_bias], -1)
     else:
         bias = L.concat([encoder_bias, decoder_bias], -1)
     return bias
@@ -71,27 +62,16 @@ def greedy_search_infilling(model,
     ids = L.stack([cls_ids, attn_ids], -1)
     for step in range(max_decode_len):
         bias = gen_bias(q_ids, ids, step)
-        pos_ids = D.to_variable(
-            np.tile(np.array([[step, step + 1]], dtype=np.int64), [d_batch, 1]))
+        pos_ids = D.to_variable(np.tile(np.array([[step, step + 1]], dtype=np.int64), [d_batch, 1]))
         pos_ids += seqlen
         _, logits, info = model(
-            ids,
-            L.ones_like(ids) * tgt_type_id,
-            pos_ids=pos_ids,
-            attn_bias=bias,
-            past_cache=past_cache)
+            ids, L.ones_like(ids) * tgt_type_id, pos_ids=pos_ids, attn_bias=bias, past_cache=past_cache)
         gen_ids = L.argmax(logits, -1)
 
         past_cached_k, past_cached_v = past_cache
         cached_k, cached_v = info['caches']
-        cached_k = [
-            L.concat([pk, k[:, :1, :]], 1)
-            for pk, k in zip(past_cached_k, cached_k)
-        ]  # concat cached
-        cached_v = [
-            L.concat([pv, v[:, :1, :]], 1)
-            for pv, v in zip(past_cached_v, cached_v)
-        ]
+        cached_k = [L.concat([pk, k[:, :1, :]], 1) for pk, k in zip(past_cached_k, cached_k)]  # concat cached
+        cached_v = [L.concat([pv, v[:, :1, :]], 1) for pv, v in zip(past_cached_v, cached_v)]
         past_cache = (cached_k, cached_v)
 
         gen_ids = gen_ids[:, 1]
@@ -107,10 +87,8 @@ def greedy_search_infilling(model,
     return output_ids
 
 
-BeamSearchState = namedtuple('BeamSearchState',
-                             ['log_probs', 'lengths', 'finished'])
-BeamSearchOutput = namedtuple('BeamSearchOutput',
-                              ['scores', 'predicted_ids', 'beam_parent_ids'])
+BeamSearchState = namedtuple('BeamSearchState', ['log_probs', 'lengths', 'finished'])
+BeamSearchOutput = namedtuple('BeamSearchOutput', ['scores', 'predicted_ids', 'beam_parent_ids'])
 
 
 def log_softmax(x):
@@ -120,8 +98,7 @@ def log_softmax(x):
 
 def mask_prob(p, onehot_eos, finished):
     is_finished = L.cast(L.reshape(finished, [-1, 1]) != 0, 'float32')
-    p = is_finished * (1. - L.cast(onehot_eos, 'float32')) * -9999. + (
-        1. - is_finished) * p
+    p = is_finished * (1. - L.cast(onehot_eos, 'float32')) * -9999. + (1. - is_finished) * p
     return p
 
 
@@ -130,8 +107,7 @@ def hyp_score(log_probs, length, length_penalty):
     return log_probs / lp
 
 
-def beam_search_step(state, logits, eos_id, beam_width, is_first_step,
-                     length_penalty):
+def beam_search_step(state, logits, eos_id, beam_width, is_first_step, length_penalty):
     """logits.shape == [B*W, V]"""
     beam_size, vocab_size = logits.shape  # as batch size=1 in this hub module. the first dim means bsz * beam_size equals beam_size
     logits_np = logits.numpy()
@@ -140,8 +116,7 @@ def beam_search_step(state, logits, eos_id, beam_width, is_first_step,
     logits = D.to_variable(logits_np)
 
     bsz, beam_width = state.log_probs.shape
-    onehot_eos = L.cast(
-        F.one_hot(L.ones([1], 'int64') * eos_id, vocab_size), 'int64')  #[1, V]
+    onehot_eos = L.cast(F.one_hot(L.ones([1], 'int64') * eos_id, vocab_size), 'int64')  #[1, V]
 
     probs = L.log(L.softmax(logits))  #[B*W, V]
     probs = mask_prob(probs, onehot_eos, state.finished)  #[B*W, V]
@@ -156,32 +131,24 @@ def beam_search_step(state, logits, eos_id, beam_width, is_first_step,
     alllen = L.reshape(alllen, [-1, beam_width * vocab_size])
     allscore = hyp_score(allprobs, alllen, length_penalty)
     if is_first_step:
-        allscore = L.reshape(
-            allscore,
-            [bsz, beam_width, -1])[:, 0, :]  # first step only consiter beam 0
+        allscore = L.reshape(allscore, [bsz, beam_width, -1])[:, 0, :]  # first step only consiter beam 0
     scores, idx = L.topk(allscore, k=beam_width)  #[B, W]
     next_beam_id = idx // vocab_size  #[B, W]
     next_word_id = idx % vocab_size
 
-    gather_idx = L.concat([L.where(idx != -1)[:, :1],
-                           L.reshape(idx, [-1, 1])], 1)
+    gather_idx = L.concat([L.where(idx != -1)[:, :1], L.reshape(idx, [-1, 1])], 1)
     next_probs = L.reshape(L.gather_nd(allprobs, gather_idx), idx.shape)
     next_len = L.reshape(L.gather_nd(alllen, gather_idx), idx.shape)
 
-    gather_idx = L.concat(
-        [L.where(next_beam_id != -1)[:, :1],
-         L.reshape(next_beam_id, [-1, 1])], 1)
-    next_finished = L.reshape(
-        L.gather_nd(state.finished, gather_idx),
-        state.finished.shape)  #[gather new beam state according to new beam id]
+    gather_idx = L.concat([L.where(next_beam_id != -1)[:, :1], L.reshape(next_beam_id, [-1, 1])], 1)
+    next_finished = L.reshape(L.gather_nd(state.finished, gather_idx),
+                              state.finished.shape)  #[gather new beam state according to new beam id]
 
     next_finished += L.cast(next_word_id == eos_id, 'int64')
     next_finished = L.cast(next_finished > 0, 'int64')
 
-    next_state = BeamSearchState(
-        log_probs=next_probs, lengths=next_len, finished=next_finished)
-    output = BeamSearchOutput(
-        scores=scores, predicted_ids=next_word_id, beam_parent_ids=next_beam_id)
+    next_state = BeamSearchState(log_probs=next_probs, lengths=next_len, finished=next_finished)
+    output = BeamSearchOutput(scores=scores, predicted_ids=next_word_id, beam_parent_ids=next_beam_id)
 
     return output, next_state
 
@@ -210,22 +177,20 @@ def beam_search_infilling(model,
 
     def reorder_(t, parent_id):
         """reorder cache according to parent beam id"""
-        gather_idx = L.where(parent_id != -1)[:, 0] * beam_width + L.reshape(
-            parent_id, [-1])
+        gather_idx = L.where(parent_id != -1)[:, 0] * beam_width + L.reshape(parent_id, [-1])
         t = L.gather(t, gather_idx)
         return t
 
     def tile_(t, times):
         _shapes = list(t.shape[1:])
-        ret = L.reshape(
-            L.expand(L.unsqueeze(t, [1]), [
-                1,
-                times,
-            ] + [
-                1,
-            ] * len(_shapes)), [
-                -1,
-            ] + _shapes)
+        ret = L.reshape(L.expand(L.unsqueeze(t, [1]), [
+            1,
+            times,
+        ] + [
+            1,
+        ] * len(_shapes)), [
+            -1,
+        ] + _shapes)
         return ret
 
     cached_k, cached_v = info['caches']
@@ -241,18 +206,11 @@ def beam_search_infilling(model,
     ids = L.stack([cls_ids, attn_ids], -1)
     for step in range(max_decode_len):
         bias = gen_bias(q_ids, ids, step)
-        pos_ids = D.to_variable(
-            np.tile(
-                np.array([[step, step + 1]], dtype=np.int64),
-                [d_batch * beam_width, 1]))
+        pos_ids = D.to_variable(np.tile(np.array([[step, step + 1]], dtype=np.int64), [d_batch * beam_width, 1]))
         pos_ids += seqlen
 
         _, logits, info = model(
-            ids,
-            L.ones_like(ids) * tgt_type_id,
-            pos_ids=pos_ids,
-            attn_bias=bias,
-            past_cache=past_cache)
+            ids, L.ones_like(ids) * tgt_type_id, pos_ids=pos_ids, attn_bias=bias, past_cache=past_cache)
 
         output, state = beam_search_step(
             state,
@@ -266,17 +224,14 @@ def beam_search_infilling(model,
         past_cached_k, past_cached_v = past_cache
         cached_k, cached_v = info['caches']
         cached_k = [
-            reorder_(L.concat([pk, k[:, :1, :]], 1), output.beam_parent_ids)
-            for pk, k in zip(past_cached_k, cached_k)
+            reorder_(L.concat([pk, k[:, :1, :]], 1), output.beam_parent_ids) for pk, k in zip(past_cached_k, cached_k)
         ]  # concat cached
         cached_v = [
-            reorder_(L.concat([pv, v[:, :1, :]], 1), output.beam_parent_ids)
-            for pv, v in zip(past_cached_v, cached_v)
+            reorder_(L.concat([pv, v[:, :1, :]], 1), output.beam_parent_ids) for pv, v in zip(past_cached_v, cached_v)
         ]
         past_cache = (cached_k, cached_v)
 
-        pred_ids_flatten = L.reshape(output.predicted_ids,
-                                     [d_batch * beam_width])
+        pred_ids_flatten = L.reshape(output.predicted_ids, [d_batch * beam_width])
         ids = L.stack([pred_ids_flatten, attn_ids], 1)
 
         if state.finished.numpy().all():
@@ -286,8 +241,7 @@ def beam_search_infilling(model,
     final_parent_ids = L.stack([o.beam_parent_ids for o in outputs], 0)
     final_ids = L.gather_tree(final_ids, final_parent_ids)  #[:, :,
     #0]  #pick best beam
-    final_ids = L.transpose(
-        L.reshape(final_ids, [-1, d_batch * 1, beam_width]), [1, 2, 0])
+    final_ids = L.transpose(L.reshape(final_ids, [-1, d_batch * 1, beam_width]), [1, 2, 0])
     return final_ids
 
 

@@ -35,8 +35,7 @@ from .model.modeling_ernie_gen import ErnieModelForGeneration
 @moduleinfo(
     name="ernie_gen_leave",
     version="1.0.0",
-    summary=
-    "",
+    summary="",
     author="彭兆帅，郑博培",
     author_email="1084667371@qq.com，2733821739@qq.com",
     type="nlp/text_generation",
@@ -53,10 +52,7 @@ class ErnieGen(hub.NLPPredictionModule):
             ernie_cfg = dict(json.loads(ernie_cfg_file.read()))
         ernie_vocab_path = os.path.join(assets_path, 'vocab.txt')
         with open(ernie_vocab_path, encoding='utf8') as ernie_vocab_file:
-            ernie_vocab = {
-                j.strip().split('\t')[0]: i
-                for i, j in enumerate(ernie_vocab_file.readlines())
-            }
+            ernie_vocab = {j.strip().split('\t')[0]: i for i, j in enumerate(ernie_vocab_file.readlines())}
 
         with fluid.dygraph.guard(fluid.CPUPlace()):
             with fluid.unique_name.guard():
@@ -83,13 +79,10 @@ class ErnieGen(hub.NLPPredictionModule):
         Returns:
              results(list): the predict result.
         """
-        if texts and isinstance(texts, list) and all(texts) and all(
-            [isinstance(text, str) for text in texts]):
+        if texts and isinstance(texts, list) and all(texts) and all([isinstance(text, str) for text in texts]):
             predicted_data = texts
         else:
-            raise ValueError(
-                "The input texts should be a list with nonempty string elements."
-            )
+            raise ValueError("The input texts should be a list with nonempty string elements.")
 
         if use_gpu and "CUDA_VISIBLE_DEVICES" not in os.environ:
             use_gpu = False
@@ -134,13 +127,9 @@ class ErnieGen(hub.NLPPredictionModule):
         Add the command config options
         """
         self.arg_config_group.add_argument(
-            '--use_gpu',
-            type=ast.literal_eval,
-            default=False,
-            help="whether use GPU for prediction")
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU for prediction")
 
-        self.arg_config_group.add_argument(
-            '--beam_width', type=int, default=5, help="the beam search width")
+        self.arg_config_group.add_argument('--beam_width', type=int, default=5, help="the beam search width")
 
     @runnable
     def run_cmd(self, argvs):
@@ -153,12 +142,9 @@ class ErnieGen(hub.NLPPredictionModule):
             usage='%(prog)s',
             add_help=True)
 
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, optional.")
+            title="Config options", description="Run configuration for controlling module behavior, optional.")
 
         self.add_module_config_arg()
         self.add_module_input_arg()
@@ -171,7 +157,6 @@ class ErnieGen(hub.NLPPredictionModule):
             self.parser.print_help()
             return None
 
-        results = self.generate(
-            texts=input_data, use_gpu=args.use_gpu, beam_width=args.beam_width)
+        results = self.generate(texts=input_data, use_gpu=args.use_gpu, beam_width=args.beam_width)
 
         return results

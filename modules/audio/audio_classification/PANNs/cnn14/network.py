@@ -25,18 +25,20 @@ class ConvBlock(nn.Layer):
     def __init__(self, in_channels, out_channels):
         super(ConvBlock, self).__init__()
 
-        self.conv1 = nn.Conv2D(in_channels=in_channels,
-                               out_channels=out_channels,
-                               kernel_size=(3, 3),
-                               stride=(1, 1),
-                               padding=(1, 1),
-                               bias_attr=False)
-        self.conv2 = nn.Conv2D(in_channels=out_channels,
-                               out_channels=out_channels,
-                               kernel_size=(3, 3),
-                               stride=(1, 1),
-                               padding=(1, 1),
-                               bias_attr=False)
+        self.conv1 = nn.Conv2D(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=(3, 3),
+            stride=(1, 1),
+            padding=(1, 1),
+            bias_attr=False)
+        self.conv2 = nn.Conv2D(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            kernel_size=(3, 3),
+            stride=(1, 1),
+            padding=(1, 1),
+            bias_attr=False)
         self.bn1 = nn.BatchNorm2D(out_channels)
         self.bn2 = nn.BatchNorm2D(out_channels)
 

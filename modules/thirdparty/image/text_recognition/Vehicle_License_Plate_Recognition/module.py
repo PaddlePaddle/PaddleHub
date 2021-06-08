@@ -13,16 +13,13 @@ from paddlehub.module.module import moduleinfo, serving
     author="jm12138",
     author_email="",
     summary="Vehicle_License_Plate_Recognition",
-    version="1.0.0"
-)
+    version="1.0.0")
 class Vehicle_License_Plate_Recognition(nn.Layer):
     def __init__(self):
         super(Vehicle_License_Plate_Recognition, self).__init__()
         self.vlpr = PaddleOCR(
             det_model_dir=os.path.join(self.directory, 'det_vlpr'),
-            rec_model_dir=os.path.join(
-                self.directory, 'ch_ppocr_server_v2.0_rec_infer')
-        )
+            rec_model_dir=os.path.join(self.directory, 'ch_ppocr_server_v2.0_rec_infer'))
 
     @staticmethod
     def base64_to_cv2(b64str):
@@ -38,17 +35,11 @@ class Vehicle_License_Plate_Recognition(nn.Layer):
         if isinstance(images, list):
             for item in images:
                 for bbox, text in self.vlpr.ocr(item):
-                    results.append({
-                        'license': text[0],
-                        'bbox': bbox
-                    })
+                    results.append({'license': text[0], 'bbox': bbox})
 
         elif isinstance(images, (str, np.ndarray)):
             for bbox, text in self.vlpr.ocr(images):
-                results.append({
-                    'license': text[0],
-                    'bbox': bbox
-                })
+                results.append({'license': text[0], 'bbox': bbox})
 
         return results
 

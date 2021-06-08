@@ -165,7 +165,7 @@ import json
 
 text = "今天是个好日子"
 data = {
-    "text": text, 
+    "text": text,
     "mode": "sample", # 'search' or 'sample'
     # 可以更加需要设置上述 API 中提到的其他参数
 }
@@ -180,7 +180,7 @@ r = requests.post(url=url, headers=headers, data=json.dumps(data))
 https://github.com/jm12138/CPM-Generate-Paddle
 
 ## 依赖
-paddlepaddle >= 2.0.0 
+paddlepaddle >= 2.0.0
 
 paddlehub >= 2.0.0
 

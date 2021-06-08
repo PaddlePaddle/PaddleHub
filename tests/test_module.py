@@ -14,10 +14,8 @@ class TestHubModule(unittest.TestCase):
         self.assertEqual(results[0]['tag'], ['TIME', 'v', 'q', 'n'])
         self.assertEqual(results[1]['word'], ['天气预报', '说', '今天', '要', '下雨'])
         self.assertEqual(results[1]['tag'], ['n', 'v', 'TIME', 'v', 'v'])
-        self.assertEqual(results[2]['word'],
-                         ['下', '一班', '地铁', '马上', '就要', '到', '了'])
-        self.assertEqual(results[2]['tag'],
-                         ['f', 'm', 'n', 'd', 'v', 'v', 'xc'])
+        self.assertEqual(results[2]['word'], ['下', '一班', '地铁', '马上', '就要', '到', '了'])
+        self.assertEqual(results[2]['tag'], ['f', 'm', 'n', 'd', 'v', 'v', 'xc'])
 
     def test_senta(self):
         senta = hub.Module(name="senta_bilstm")
@@ -45,13 +43,11 @@ class TestHubModule(unittest.TestCase):
             if result['similarity'] > max_score:
                 max_score = result['similarity']
                 result_text = result['text_2']
-        print("The most matching with the %s is %s" % (test_text_1[0],
-                                                       result_text))
+        print("The most matching with the %s is %s" % (test_text_1[0], result_text))
 
     def test_ssd(self):
         ssd = hub.Module(name="ssd_mobilenet_v1_pascal")
-        test_img_path = os.path.join(
-            os.path.dirname(__file__), "resources", "test_img_cat.jpg")
+        test_img_path = os.path.join(os.path.dirname(__file__), "resources", "test_img_cat.jpg")
         input_dict = {"image": [test_img_path]}
         results = ssd.object_detection(data=input_dict)
         for result in results:
