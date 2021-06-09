@@ -1,0 +1,7 @@
+librosa
+nltk
+pypinyin
+scipy
+soundfile
+webrtcvad
+yaml
