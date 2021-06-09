@@ -58,56 +58,53 @@ class VoiceCloner(nn.Layer):
                                     'waveflow_ljspeech_ckpt_0.3/step-2000000.pdparams')
 
         # Speaker encoder
-        self.speaker_processor = SpeakerVerificationPreprocessor(sampling_rate=16000,
-                                                                 audio_norm_target_dBFS=-30,
-                                                                 vad_window_length=30,
-                                                                 vad_moving_average_width=8,
-                                                                 vad_max_silence_length=6,
-                                                                 mel_window_length=25,
-                                                                 mel_window_step=10,
-                                                                 n_mels=40,
-                                                                 partial_n_frames=160,
-                                                                 min_pad_coverage=0.75,
-                                                                 partial_overlap_ratio=0.5)
+        self.speaker_processor = SpeakerVerificationPreprocessor(
+            sampling_rate=16000,
+            audio_norm_target_dBFS=-30,
+            vad_window_length=30,
+            vad_moving_average_width=8,
+            vad_max_silence_length=6,
+            mel_window_length=25,
+            mel_window_step=10,
+            n_mels=40,
+            partial_n_frames=160,
+            min_pad_coverage=0.75,
+            partial_overlap_ratio=0.5)
         self.speaker_encoder = LSTMSpeakerEncoder(n_mels=40, num_layers=3, hidden_size=256, output_size=256)
         self.speaker_encoder.set_state_dict(paddle.load(speaker_encoder_ckpt))
         self.speaker_encoder.eval()
 
         # Voice synthesizer
-        self.synthesizer = Tacotron2(vocab_size=68,
-                                     n_tones=10,
-                                     d_mels=80,
-                                     d_encoder=512,
-                                     encoder_conv_layers=3,
-                                     encoder_kernel_size=5,
-                                     d_prenet=256,
-                                     d_attention_rnn=1024,
-                                     d_decoder_rnn=1024,
-                                     attention_filters=32,
-                                     attention_kernel_size=31,
-                                     d_attention=128,
-                                     d_postnet=512,
-                                     postnet_kernel_size=5,
-                                     postnet_conv_layers=5,
-                                     reduction_factor=1,
-                                     p_encoder_dropout=0.5,
-                                     p_prenet_dropout=0.5,
-                                     p_attention_dropout=0.1,
-                                     p_decoder_dropout=0.1,
-                                     p_postnet_dropout=0.5,
-                                     d_global_condition=256,
-                                     use_stop_token=False)
+        self.synthesizer = Tacotron2(
+            vocab_size=68,
+            n_tones=10,
+            d_mels=80,
+            d_encoder=512,
+            encoder_conv_layers=3,
+            encoder_kernel_size=5,
+            d_prenet=256,
+            d_attention_rnn=1024,
+            d_decoder_rnn=1024,
+            attention_filters=32,
+            attention_kernel_size=31,
+            d_attention=128,
+            d_postnet=512,
+            postnet_kernel_size=5,
+            postnet_conv_layers=5,
+            reduction_factor=1,
+            p_encoder_dropout=0.5,
+            p_prenet_dropout=0.5,
+            p_attention_dropout=0.1,
+            p_decoder_dropout=0.1,
+            p_postnet_dropout=0.5,
+            d_global_condition=256,
+            use_stop_token=False)
         self.synthesizer.set_state_dict(paddle.load(synthesizer_ckpt))
         self.synthesizer.eval()
 
         # Vocoder
-        self.vocoder = ConditionalWaveFlow(upsample_factors=[16, 16],
-                                           n_flows=8,
-                                           n_layers=8,
-                                           n_group=16,
-                                           channels=128,
-                                           n_mels=80,
-                                           kernel_size=[3, 3])
+        self.vocoder = ConditionalWaveFlow(
+            upsample_factors=[16, 16], n_flows=8, n_layers=8, n_group=16, channels=128, n_mels=80, kernel_size=[3, 3])
         self.vocoder.set_state_dict(paddle.load(vocoder_ckpt))
         self.vocoder.eval()
 
