@@ -78,8 +78,9 @@ $ hub serving start -c serving_config.json
   "modules_info": {
     "jieba_paddle": {
       "init_args": {
-        "version": "2.2.0"
-      }
+        "version": "1.0.0"
+      },
+      "predict_args": {}
     }
   },
   "port": 8866,
