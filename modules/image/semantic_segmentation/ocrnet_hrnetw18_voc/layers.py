@@ -15,7 +15,6 @@
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
-from paddle.nn.layer import activation
 from paddle.nn import Conv2D, AvgPool2D
 
 
