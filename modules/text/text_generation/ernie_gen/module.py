@@ -29,9 +29,9 @@ from paddlenlp.data import Stack, Tuple, Pad
 from paddlenlp.metrics import Rouge1, Rouge2
 from paddlenlp.transformers import ErnieTokenizer, ErnieForGeneration, LinearDecayWithWarmup
 
-from encode import convert_example, after_padding
-from decode import post_process, beam_search_infilling
-from model import StackModel
+from .encode import convert_example, after_padding
+from .decode import post_process, beam_search_infilling
+from .model import StackModel
 
 
 @moduleinfo(
