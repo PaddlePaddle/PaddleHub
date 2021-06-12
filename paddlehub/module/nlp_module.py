@@ -552,7 +552,8 @@ class TransformerModule(RunModule, TextServing):
                 max_seq_len: int = 128,
                 split_char: str = '\002',
                 batch_size: int = 1,
-                use_gpu: bool = False):
+                use_gpu: bool = False,
+                return_prob: bool = False):
         """
         Predicts the data labels.
 
@@ -563,6 +564,7 @@ class TransformerModule(RunModule, TextServing):
             split_char(obj:`str`, defaults to '\002'): The char used to split input tokens in token-cls task.
             batch_size(obj:`int`, defaults to 1): The number of batch.
             use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
+            return_prob(obj:`bool`, defaults to `False`): Whether to return label probabilities. 
 
         Returns:
             results(obj:`list`): All the predictions labels.
@@ -579,11 +581,10 @@ class TransformerModule(RunModule, TextServing):
 
         batches = self._batchify(data, max_seq_len, batch_size, split_char)
         results = []
+        batch_probs = []
+
         self.eval()
         for batch in batches:
-            # set local variable to catch probs
-            probs = None
-
             if self.task == 'text-matching':
                 query_input_ids, query_segment_ids, title_input_ids, title_segment_ids = batch
                 query_input_ids = paddle.to_tensor(query_input_ids)
@@ -596,7 +597,6 @@ class TransformerModule(RunModule, TextServing):
                 idx = paddle.argmax(probs, axis=1).numpy()
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
-                results.extend(list(zip(labels, probs.numpy().tolist())))
             else:
                 input_ids, segment_ids = batch
                 input_ids = paddle.to_tensor(input_ids)
@@ -606,18 +606,25 @@ class TransformerModule(RunModule, TextServing):
                     idx = paddle.argmax(probs, axis=1).numpy()
                     idx = idx.tolist()
                     labels = [self.label_map[i] for i in idx]
-                    results.extend(list(zip(labels, probs.numpy().tolist())))
                 elif self.task == 'token-cls':
                     probs = self(input_ids, segment_ids)
                     batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
                     batch_ids = batch_ids.tolist()
-                    token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
-                    results.extend(list(zip(token_labels, probs.numpy().tolist())))
+                    # token labels
+                    labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
                 elif self.task == None:
                     sequence_output, pooled_output = self(input_ids, segment_ids)
                     results.append(
                         [pooled_output.squeeze(0).numpy().tolist(),
                          sequence_output.squeeze(0).numpy().tolist()])
+            if self.task:
+                # save probs only when return prob
+                if return_prob:
+                    batch_probs.extend(probs.numpy().tolist())
+                results.extend(labels)
+
+        if self.task and return_prob:
+            return results, batch_probs
         return results
 
 
