@@ -18,7 +18,7 @@ import io
 import json
 import os
 import six
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import paddle
 import paddle.nn as nn
@@ -581,6 +581,9 @@ class TransformerModule(RunModule, TextServing):
         results = []
         self.eval()
         for batch in batches:
+            # set local variable to catch probs
+            probs = None
+
             if self.task == 'text-matching':
                 query_input_ids, query_segment_ids, title_input_ids, title_segment_ids = batch
                 query_input_ids = paddle.to_tensor(query_input_ids)
@@ -589,27 +592,27 @@ class TransformerModule(RunModule, TextServing):
                 title_segment_ids = paddle.to_tensor(title_segment_ids)
                 probs = self(query_input_ids=query_input_ids, query_token_type_ids=query_segment_ids, \
                     title_input_ids=title_input_ids, title_token_type_ids=title_segment_ids)
+
                 idx = paddle.argmax(probs, axis=1).numpy()
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
-                results.extend(labels)
+                results.extend(list(zip(labels, probs.numpy().tolist())))
             else:
                 input_ids, segment_ids = batch
                 input_ids = paddle.to_tensor(input_ids)
                 segment_ids = paddle.to_tensor(segment_ids)
-
                 if self.task == 'seq-cls':
                     probs = self(input_ids, segment_ids)
                     idx = paddle.argmax(probs, axis=1).numpy()
                     idx = idx.tolist()
                     labels = [self.label_map[i] for i in idx]
-                    results.extend(labels)
+                    results.extend(list(zip(labels, probs.numpy().tolist())))
                 elif self.task == 'token-cls':
                     probs = self(input_ids, segment_ids)
                     batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
                     batch_ids = batch_ids.tolist()
                     token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
-                    results.extend(token_labels)
+                    results.extend(list(zip(token_labels, probs.numpy().tolist())))
                 elif self.task == None:
                     sequence_output, pooled_output = self(input_ids, segment_ids)
                     results.append(
