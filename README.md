@@ -27,15 +27,16 @@ English | [简体中文](README_ch.md)
 
 
 ## Introduction and Features
-- PaddleHub aims to provide developers with rich, high-quality, and directly usable pre-trained models.
-- **Abundant Pre-trained Models**: 300+ pre-trained models covering the 5 major categories including Image, Text, Audio, Video, and Industrial application. All of them are free for download and offline usage.
-- **No need for deep learning background**: you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
-- **Quick Model Prediction**: Model prediction can be realized through a few lines of scripts to quickly experience the model effect.
+- **PaddleHub** aims to provide developers with rich, high-quality, and directly usable pre-trained models.
+- **Abundant Pre-trained Models**: 300+ pre-trained models cover the 5 major categories, including Image, Text, Audio, Video, and Industrial application. All of them are free for download and offline usage.
+- **No Need for Deep Learning Background**: you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
+- **Quick Model Prediction**: model prediction can be realized through a few lines of scripts to quickly experience the model effect.
 - **Model As Service**: one-line command to build deep learning model API service deployment capabilities.
-- **Easy-to-use Transfer Learning**: few lines of code to complete the transfer-learning task such as image classification and text classification based on high quality pre-trained models.
+- **Easy-to-use Transfer Learning**: few lines of codes to complete the transfer-learning task such as image classification and text classification based on high quality pre-trained models.
 - **Cross-platform**: support Linux, Windows, MacOS and other operating systems.
 
 ### Recent updates
+- **2021.05.12:** Add an open-domain dialogue system, i.e., [plato-mini](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration), to make it easy to build a chatbot in wechat with the help of the wechaty, [See Demo](https://github.com/KPatr1ck/paddlehub-wechaty-demo)
 - **2021.04.27:** The v2.1.0 version is released. [1] Add supports for five new models, including two high-precision semantic segmentation models based on VOC dataset and three voice classification models. [2] Enforce the transfer learning capabilities for image semantic segmentation, text semantic matching and voice classification on related datasets. [3] Add the export function APIs for two kinds of model formats, i.,e, ONNX and PaddleInference. [4] Add the support for [BentoML](https://github.com/bentoml/BentoML/), which is a cloud native framework for serving deployment. Users can easily serve pre-trained models from PaddleHub by following the [Tutorial notebooks](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/demo/serving/bentoml/cloud-native-model-serving-with-bentoml.ipynb). Also, see this announcement and [Release note](https://github.com/bentoml/BentoML/releases/tag/v0.12.1) from BentoML. (Many thanks to @[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic) for contributing this feature in PaddleHub). [5] The total number of pre-trained models reaches **【300】**.
 - **2021.02.18:** The v2.0.0 version is released, making model development and debugging easier, and the finetune task is more flexible and easy to use.The ability to transfer learning for visual tasks is fully upgraded, supporting various tasks such as image classification, image coloring, and style transfer; Transformer models such as BERT, ERNIE, and RoBERTa are upgraded to dynamic graphs, supporting Fine-Tune capabilities for text classification and sequence labeling; Optimize the Serving capability, support multi-card prediction, automatic load balancing, and greatly improve performance; the new automatic data enhancement capability Auto Augment can efficiently search for data enhancement strategy combinations suitable for data sets. 61 new word vector models were added, including 51 Chinese models and 10 English models; add 4 image segmentation models, 2 depth models, 7 image generation models, and 3 text generation models, the total number of pre-trained models reaches **【274】**.
 - [【more】](./docs/docs_en/release.md)
@@ -117,7 +118,7 @@ If you have any questions during the use of the model, you can join the official
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
 </div>  
-If you fail to scan the code, please add WeChat 15704308458 and note "Hub", the operating class will invite you to join the group.
+please add WeChat above and send "Hub" to the robot, the robot will invite you to join the group automatically.
 
 <a name="QuickStart"></a>
 ## QuickStart
@@ -135,6 +136,7 @@ results = lac.cut(text=test_text, use_gpu=False, batch_size=1, return_tag=True)
 print(results)
 #{'word': ['今天', '是', '个', '好天气', '。'], 'tag': ['TIME', 'v', 'q', 'n', 'w']}
 ```
+More API for transfer learning, please refer [Tutorial](https://paddlehub.readthedocs.io/en/release-v2.1/transfer_learning_index.html)
 
 <a name="License"></a>
 ## License
@@ -193,3 +195,4 @@ We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 * Many thanks to [BurrowsWang](https://github.com/BurrowsWang) for fixing Markdown table display problem
 * Many thanks to [huqi](https://github.com/hu-qi) for fixing readme typo
 * Many thanks to [parano](https://github.com/parano) [cqvu](https://github.com/cqvu) [deehrlic](https://github.com/deehrlic) for contributing this feature in PaddleHub
+* Many thanks to [paopjian](https://github.com/paopjian) for correcting the wrong website address [#1424](https://github.com/PaddlePaddle/PaddleHub/issues/1424)

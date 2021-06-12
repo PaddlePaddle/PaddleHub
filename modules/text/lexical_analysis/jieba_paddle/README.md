@@ -78,8 +78,9 @@ $ hub serving start -c serving_config.json
   "modules_info": {
     "jieba_paddle": {
       "init_args": {
-        "version": "2.2.0"
-      }
+        "version": "1.0.0"
+      },
+      "predict_args": {}
     }
   },
   "port": 8866,
@@ -96,7 +97,7 @@ $ hub serving start -c serving_config.json
 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
 ```python
-import request
+import requests
 import json
 
 # 待预测数据

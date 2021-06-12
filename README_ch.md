@@ -29,11 +29,11 @@
 
 
 ## 简介与特性
-- PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型。
-- **【模型种类丰富】**: 涵盖CV、NLP、Audio、Video、工业应用主流五大品类的 300+ 预训练模型，全部开源下载，离线可运行。
-- **【超低使用门槛】**：无需深度学习背景、无需数据与训练过程，可快速使用AI模型，
-- **【一键模型快速预测】**：通过一行命令行或者极简的Python API实现模型调用，可快速体验模型效果。
-- **【一键模型转服务化】**：一行命令，搭建深度学习模型API服务化部署能力。
+- PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型
+- **【模型种类丰富】**: 涵盖CV、NLP、Audio、Video、工业应用主流五大品类的 300+ 预训练模型，全部开源下载，离线可运行
+- **【超低使用门槛】**：无需深度学习背景、无需数据与训练过程，可快速使用AI模型
+- **【一键模型快速预测】**：通过一行命令行或者极简的Python API实现模型调用，可快速体验模型效果
+- **【一键模型转服务化】**：一行命令，搭建深度学习模型API服务化部署能力
 - **【十行代码迁移学习】**：十行代码完成图片分类、文本分类的迁移学习任务
 - **【跨平台兼容性】**：可运行于Linux、Windows、MacOS等多种操作系统
 
@@ -124,7 +124,7 @@
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
 </div>  
-如扫码失败，请添加微信15704308458，并备注“Hub”，运营同学会邀请您入群。  
+扫码备注"Hub"加好友之后，再发送“Hub”，会自动邀请您入群。  
 
 <div id="QuickStart">
 
@@ -148,6 +148,8 @@ print(results)
 # 一行代码启动serving 服务，更多模型搜索可参考 https://www.paddlepaddle.org.cn/hublist
 ！hub serving start -m lac
 ```
+
+ 更多迁移学习能力可以参考[教程文档](https://paddlehub.readthedocs.io/zh_CN/release-v2.1/transfer_learning_index.html)
 
 
 
@@ -208,3 +210,4 @@ print(results)
 * 非常感谢[BurrowsWang](https://github.com/BurrowsWang)修复Markdown表格显示问题
 * 非常感谢[huqi](https://github.com/hu-qi)修复了readme中的错别字
 * 非常感谢[parano](https://github.com/parano)、[cqvu](https://github.com/cqvu)、[deehrlic](https://github.com/deehrlic)三位的贡献与支持
+* 非常感谢[paopjian](https://github.com/paopjian)修改了中文readme模型搜索指向的的网站地址错误[#1424](https://github.com/PaddlePaddle/PaddleHub/issues/1424)
