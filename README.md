@@ -133,6 +133,7 @@ please add WeChat above and send "Hub" to the robot, the robot will invite you t
 # install paddlehub
 !pip install --upgrade paddlehub -i https://mirror.baidu.com/pypi/simple
 
+
 import paddlehub as hub
 
 lac = hub.Module(name="lac")
