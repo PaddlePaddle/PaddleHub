@@ -19,7 +19,6 @@ import re
 
 from parakeet.frontend import Vocab
 import tqdm
-import yaml
 
 zh_pattern = re.compile("[\u4e00-\u9fa5]")
 
@@ -180,75 +179,3 @@ def split_syllable(syllable: str):
         phones.append(syllable)
         tones.append(tone)
     return phones, tones
-
-
-def load_aishell3_transcription(line: str):
-    sentence_id, pinyin, text = line.strip().split("|")
-    syllables = pinyin.strip().split()
-
-    results = []
-
-    for syllable in syllables:
-        if syllable in _pauses:
-            results.append(syllable)
-        elif not ernized(syllable):
-            results.append(syllable)
-        else:
-            results.append(syllable[:-2] + syllable[-1])
-            results.append('&r5')
-
-    phones = []
-    tones = []
-    for syllable in results:
-        p, t = split_syllable(syllable)
-        phones.extend(p)
-        tones.extend(t)
-    for p in phones:
-        assert p in _phones, p
-    return {"sentence_id": sentence_id, "text": text, "syllables": results, "phones": phones, "tones": tones}
-
-
-def process_aishell3(dataset_root, output_dir):
-    dataset_root = Path(dataset_root).expanduser()
-    output_dir = Path(output_dir).expanduser()
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    prosody_label_path = dataset_root / "label_train-set.txt"
-    with open(prosody_label_path, 'rt') as f:
-        lines = [line.strip() for line in f]
-
-    records = lines[5:]
-
-    processed_records = []
-    for record in tqdm.tqdm(records):
-        new_record = load_aishell3_transcription(record)
-        processed_records.append(new_record)
-        print(new_record)
-
-    with open(output_dir / "metadata.pickle", 'wb') as f:
-        pickle.dump(processed_records, f)
-
-    with open(output_dir / "metadata.yaml", 'wt', encoding="utf-8") as f:
-        yaml.safe_dump(processed_records, f, default_flow_style=None, allow_unicode=True)
-
-    print("metadata done!")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Preprocess transcription of AiShell3 and save them in a compact file(yaml and pickle).")
-    parser.add_argument(
-        "--input",
-        type=str,
-        default="~/datasets/aishell3/train",
-        help="path of the training dataset,(contains a label_train-set.txt).")
-    parser.add_argument(
-        "--output",
-        type=str,
-        help="the directory to save the processed transcription."
-        "If not provided, it would be the same as the input.")
-    args = parser.parse_args()
-    if args.output is None:
-        args.output = args.input
-
-    process_aishell3(args.input, args.output)
