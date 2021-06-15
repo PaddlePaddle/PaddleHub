@@ -124,8 +124,8 @@ please add WeChat above and send "Hub" to the robot, the robot will invite you t
 ## QuickStart
 
 ```python
-!pip install --upgrade paddlepaddle -i https://mirror.baidu.com/pypi/simple
-!pip install --upgrade paddlehub -i https://mirror.baidu.com/pypi/simple
+!pip install --upgrade paddlepaddle 
+!pip install --upgrade paddlehub
 
 import paddlehub as hub
 

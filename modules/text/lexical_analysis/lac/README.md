@@ -88,9 +88,10 @@ $ hub serving start -c serving_config.json
   "modules_info": {
     "lac": {
       "init_args": {
-        "version": "2.1.0"
+        "version": "2.1.0",
         "user_dict": "./test_dict.txt"
-      }
+      },
+      "predict_args": {}
     }
   },
   "port": 8866,

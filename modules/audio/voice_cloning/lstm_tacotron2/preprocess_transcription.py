@@ -237,14 +237,16 @@ def process_aishell3(dataset_root, output_dir):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Preprocess transcription of AiShell3 and save them in a compact file(yaml and pickle).")
-    parser.add_argument("--input",
-                        type=str,
-                        default="~/datasets/aishell3/train",
-                        help="path of the training dataset,(contains a label_train-set.txt).")
-    parser.add_argument("--output",
-                        type=str,
-                        help="the directory to save the processed transcription."
-                        "If not provided, it would be the same as the input.")
+    parser.add_argument(
+        "--input",
+        type=str,
+        default="~/datasets/aishell3/train",
+        help="path of the training dataset,(contains a label_train-set.txt).")
+    parser.add_argument(
+        "--output",
+        type=str,
+        help="the directory to save the processed transcription."
+        "If not provided, it would be the same as the input.")
     args = parser.parse_args()
     if args.output is None:
         args.output = args.input

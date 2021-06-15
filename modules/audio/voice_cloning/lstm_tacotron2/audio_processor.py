@@ -194,17 +194,14 @@ class SpeakerVerificationPreprocessor(object):
         return wav
 
     def melspectrogram(self, wav):
-        mel = librosa.feature.melspectrogram(wav,
-                                             sr=self.sampling_rate,
-                                             n_fft=self.n_fft,
-                                             hop_length=self.hop_length,
-                                             n_mels=self.n_mels)
+        mel = librosa.feature.melspectrogram(
+            wav, sr=self.sampling_rate, n_fft=self.n_fft, hop_length=self.hop_length, n_mels=self.n_mels)
         mel = mel.astype(np.float32).T
         return mel
 
     def extract_mel_partials(self, wav):
-        wav_slices, mel_slices = compute_partial_slices(len(wav), self.partial_n_frames, self.hop_length,
-                                                        self.min_pad_coverage, self.partial_overlap_ratio)
+        wav_slices, mel_slices = compute_partial_slices(
+            len(wav), self.partial_n_frames, self.hop_length, self.min_pad_coverage, self.partial_overlap_ratio)
 
         # pad audio if needed
         max_wave_length = wav_slices[-1].stop
