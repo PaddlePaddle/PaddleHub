@@ -31,7 +31,7 @@ from paddlehub.utils.log import logger
     name="panns_cnn14",
     version="1.0.0",
     summary="",
-    author="Baidu",
+    author="paddlepaddle",
     author_email="",
     type="audio/sound_classification",
     meta=AudioClassifierModule)
