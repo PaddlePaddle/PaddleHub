@@ -28,6 +28,6 @@ if __name__ == '__main__':
         task='seq-cls',
         load_checkpoint='./test_ernie_text_cls/best_model/model.pdparams',
         label_map=label_map)
-    results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)
+    results, probs = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False, return_prob=True)
     for idx, text in enumerate(data):
         print('Data: {} \t Lable: {}'.format(text[0], results[idx]))
