@@ -23,14 +23,9 @@ from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import moduleinfo
 from paddlehub.utils.log import logger
 from paddlenlp.data import Pad
-import soundfile as sf
-
-if not importlib.util.find_spec('parakeet'):
-    raise ImportError('The module requires additional dependencies: "parakeet".\n'
-                      'You can install parakeet via "git clone https://github.com'
-                      '/PaddlePaddle/Parakeet -b release/v0.3 && pip install -e Parakeet"')
 from parakeet.models import ConditionalWaveFlow, Tacotron2
 from parakeet.models.lstm_speaker_encoder import LSTMSpeakerEncoder
+import soundfile as sf
 
 from .audio_processor import SpeakerVerificationPreprocessor
 from .chinese_g2p import convert_sentence
@@ -41,7 +36,7 @@ from .preprocess_transcription import voc_phones, voc_tones, phone_pad_token, to
     name="lstm_tacotron2",
     version="1.0.0",
     summary="",
-    author="Baidu",
+    author="paddlepaddle",
     author_email="",
     type="audio/voice_cloning",
 )
