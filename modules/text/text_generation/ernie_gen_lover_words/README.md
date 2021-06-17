@@ -91,6 +91,8 @@ paddlepaddle >= 1.8.2
 
 paddlehub >= 1.7.0
 
+paddlenlp >= 2.0.0
+
 
 ## 更新历史
 
@@ -101,3 +103,7 @@ paddlehub >= 1.7.0
 * 1.0.1
 
   完善API的输入文本检查
+
+* 1.1.0
+
+  接入PaddleNLP

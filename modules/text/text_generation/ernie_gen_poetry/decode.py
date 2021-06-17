@@ -86,12 +86,6 @@ def greedy_search_infilling(model,
                                 attn_bias=bias,
                                 past_cache=past_cache)
 
-        if logits.shape[-1] > vocab_size:
-            logits[:, :, vocab_size:] = 0
-        logits[:, :, pad_id] = 0
-        logits[:, :, unk_id] = 0
-        logits[:, :, attn_id] = 0
-
         gen_ids = paddle.argmax(logits, -1)
 
         past_cached_k, past_cached_v = past_cache
@@ -232,11 +226,6 @@ def beam_search_infilling(model,
                                 pos_ids=pos_ids,
                                 attn_bias=bias,
                                 past_cache=past_cache)
-        if logits.shape[-1] > vocab_size:
-            logits[:, :, vocab_size:] = 0
-        logits[:, :, pad_id] = 0
-        logits[:, :, unk_id] = 0
-        logits[:, :, attn_id] = 0
 
         output, state = beam_search_step(state,
                                          logits[:, 1],
