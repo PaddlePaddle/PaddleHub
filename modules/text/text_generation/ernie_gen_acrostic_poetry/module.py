@@ -31,7 +31,7 @@ from ernie_gen_acrostic_poetry.decode import beam_search_infilling
 
 @moduleinfo(
     name="ernie_gen_acrostic_poetry",
-    version="1.0.2",
+    version="1.1.0",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning. This module has fine-tuned for poetry generation task.",
     author="adaxiadaxi",

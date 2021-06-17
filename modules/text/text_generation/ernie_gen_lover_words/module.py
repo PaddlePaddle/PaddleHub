@@ -31,7 +31,7 @@ from ernie_gen_lover_words.decode import beam_search_infilling
 
 @moduleinfo(
     name="ernie_gen_lover_words",
-    version="1.0.2",
+    version="1.1.0",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning. This module has fine-tuned for lover's words generation task.",
     author="adaxiadaxi",

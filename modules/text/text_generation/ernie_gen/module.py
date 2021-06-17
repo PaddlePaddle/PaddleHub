@@ -36,7 +36,7 @@ from .model import StackModel
 
 @moduleinfo(
     name="ernie_gen",
-    version="1.0.3",
+    version="1.1.0",
     summary="ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning.",
     author="baidu",
     author_email="",
@@ -348,7 +348,7 @@ class ErnieGen(hub.Module):
         def read(data_path):
             with open(data_path, 'r', encoding='utf-8') as fp:
                 for line in fp.readlines():
-                    words, labels = line.strip('\n').split('\t')
+                    order, words, labels = line.strip('\n').split('\t')
                     yield {'tokens': words, 'labels': labels}
 
         if isinstance(datafiles, str):
