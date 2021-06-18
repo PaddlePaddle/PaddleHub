@@ -125,13 +125,13 @@ please add WeChat above and send "Hub" to the robot, the robot will invite you t
 
 ```python
 # install paddlepaddle with gpu
-# !pip install --upgrade paddlepaddle-gpu -i https://mirror.baidu.com/pypi/simple
+# !pip install --upgrade paddlepaddle-gpu
 
 # or install paddlepaddle with cpu
-!pip install --upgrade paddlepaddle -i https://mirror.baidu.com/pypi/simple
+!pip install --upgrade paddlepaddle
 
 # install paddlehub
-!pip install --upgrade paddlehub -i https://mirror.baidu.com/pypi/simple
+!pip install --upgrade paddlehub
 
 
 import paddlehub as hub
