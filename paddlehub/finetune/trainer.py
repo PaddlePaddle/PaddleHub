@@ -241,7 +241,7 @@ class Trainer(object):
                     avg_loss = 0
                     avg_metrics = defaultdict(int)
 
-                if self.current_epoch % save_interval == 0 and batch_idx + 1 == steps_per_epoch and self.local_rank == 0:
+                if ((batch_idx + 1) % save_interval == 0 or batch_idx + 1 == steps_per_epoch) and self.local_rank == 0:
                     if eval_dataset:
                         result = self.evaluate(eval_dataset, batch_size, num_workers, collate_fn=collate_fn)
                         eval_loss = result.get('loss', None)
