@@ -32,7 +32,7 @@ PaddleHub采用模型即软件的设计理念，所有的预训练模型与Pytho
     # module = hub.Module(name="humanseg_lite", version="1.1.1")
     module = hub.Module(name="humanseg_lite")
 
-    res = module.segmentation(
+    res = module.segment(
         paths = ["./test_image.jpg"], 
         visualization=True, 
         output_dir='humanseg_output')
