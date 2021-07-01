@@ -91,7 +91,6 @@ class InitTrackerMeta(type(nn.Layer)):
             help_func (callable, optional): If provided, it would be hooked after
                 `init_func` and called as `_wrap_init(self, init_func, *init_args, **init_args)`.
                 Default None.
-
         Returns:
             function: the wrapped function
         """
@@ -142,7 +141,6 @@ class PretrainedModel(nn.Layer):
     - `pretrained_init_configuration` (dict): The dict has pretrained model names
       as keys, and the values are also dict preserving corresponding configuration
       for model initialization.
-
     - `base_model_prefix` (str): represents the the attribute associated to the
       base model in derived classes of the same architecture adding layers on
       top of the base model.
@@ -365,14 +363,12 @@ class TextServing(object):
         1. seq-cls: sequence classification;
         2. token-cls: sequence labeling;
         3. None: embedding.
-
         Args:
             data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
             max_seq_len (:obj:`int`, `optional`, defaults to 128):
                 If set to a number, will limit the total sequence returned so that it has a maximum length.
             batch_size(obj:`int`, defaults to 1): The number of batch.
             use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
-
         Returns:
             results(obj:`list`): All the predictions labels.
         """
@@ -465,11 +461,12 @@ class TransformerModule(RunModule, TextServing):
                 title_segment_ids = [entry[3] for entry in batch]
                 return query_input_ids, query_segment_ids, title_input_ids, title_segment_ids
 
-        tokenizer = self.get_tokenizer()
+        if not hasattr(self, 'tokenizer'):
+            self.tokenizer = self.get_tokenizer()
         examples = []
 
         for texts in data:
-            encoded_inputs = self._convert_text_to_input(tokenizer, texts, max_seq_len, split_char)
+            encoded_inputs = self._convert_text_to_input(self.tokenizer, texts, max_seq_len, split_char)
             example = []
             for inp in encoded_inputs:
                 input_ids = inp['input_ids']
@@ -538,7 +535,6 @@ class TransformerModule(RunModule, TextServing):
         Args:
             data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
             use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
-
         Returns:
             results(obj:`list`): All the tokens and sentences embeddings.
         """
@@ -556,7 +552,6 @@ class TransformerModule(RunModule, TextServing):
                 return_prob: bool = False):
         """
         Predicts the data labels.
-
         Args:
             data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
             max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
@@ -564,8 +559,7 @@ class TransformerModule(RunModule, TextServing):
             split_char(obj:`str`, defaults to '\002'): The char used to split input tokens in token-cls task.
             batch_size(obj:`int`, defaults to 1): The number of batch.
             use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
-            return_prob(obj:`bool`, defaults to `False`): Whether to return label probabilities. 
-
+            return_prob(obj:`bool`, defaults to `False`): Whether to return label probabilities.
         Returns:
             results(obj:`list`): All the predictions labels.
         """
