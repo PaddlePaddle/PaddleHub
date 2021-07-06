@@ -193,7 +193,7 @@ class ImageColorizeModule(RunModule, ImageServing):
         Returns:
             results(dict) : The model outputs, such as metrics.
         '''
-        if Version(paddle.__version__) >= '2.1':
+        if Version(paddle.__version__) >= '2.1' or Version(paddle.__version__) == '0.0.0':
             img = self.preprocess(batch)
         else:
             img = self.preprocess(batch[0])
