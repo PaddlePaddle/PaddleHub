@@ -14,28 +14,24 @@
 # limitations under the License.
 import ast
 import json
+import argparse
+import os
 
-import paddle.fluid as fluid
+import numpy as np
+import paddle
 import paddlehub as hub
 from paddlehub.module.module import runnable
 from paddlehub.module.nlp_module import DataFormatError
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo, serving
+from paddlenlp.transformers import ErnieTokenizer, ErnieForGeneration
 
-import argparse
-import os
-import numpy as np
-
-import paddle.fluid.dygraph as D
-
-from ernie_gen_lover_words.model.tokenizing_ernie import ErnieTokenizer
-from ernie_gen_lover_words.model.decode import beam_search_infilling
-from ernie_gen_lover_words.model.modeling_ernie_gen import ErnieModelForGeneration
+from ernie_gen_lover_words.decode import beam_search_infilling
 
 
 @moduleinfo(
     name="ernie_gen_lover_words",
-    version="1.0.1",
+    version="1.1.0",
     summary=
     "ERNIE-GEN is a multi-flow language generation framework for both pre-training and fine-tuning. This module has fine-tuned for lover's words generation task.",
     author="adaxiadaxi",
@@ -43,29 +39,19 @@ from ernie_gen_lover_words.model.modeling_ernie_gen import ErnieModelForGenerati
     type="nlp/text_generation",
 )
 class ErnieGen(hub.NLPPredictionModule):
-    def _initialize(self):
+    def __init__(self):
         """
         initialize with the necessary elements
         """
         assets_path = os.path.join(self.directory, "assets")
-        gen_checkpoint_path = os.path.join(assets_path, "ernie_gen_lover_words")
-        ernie_cfg_path = os.path.join(assets_path, 'ernie_config.json')
-        with open(ernie_cfg_path, encoding='utf8') as ernie_cfg_file:
-            ernie_cfg = dict(json.loads(ernie_cfg_file.read()))
-        ernie_vocab_path = os.path.join(assets_path, 'vocab.txt')
-        with open(ernie_vocab_path, encoding='utf8') as ernie_vocab_file:
-            ernie_vocab = {j.strip().split('\t')[0]: i for i, j in enumerate(ernie_vocab_file.readlines())}
-
-        with fluid.dygraph.guard(fluid.CPUPlace()):
-            with fluid.unique_name.guard():
-                self.model = ErnieModelForGeneration(ernie_cfg)
-                finetuned_states, _ = D.load_dygraph(gen_checkpoint_path)
-                self.model.set_dict(finetuned_states)
-
-        self.tokenizer = ErnieTokenizer(ernie_vocab)
-        self.rev_dict = {v: k for k, v in self.tokenizer.vocab.items()}
-        self.rev_dict[self.tokenizer.pad_id] = ''  # replace [PAD]
-        self.rev_dict[self.tokenizer.unk_id] = ''  # replace [PAD]
+        gen_checkpoint_path = os.path.join(assets_path, "ernie_gen_lover_words.pdparams")
+        self.model = ErnieForGeneration.from_pretrained("ernie-1.0")
+        model_state = paddle.load(gen_checkpoint_path)
+        self.model.set_dict(model_state)
+        self.tokenizer = ErnieTokenizer.from_pretrained("ernie-1.0")
+        self.rev_dict = self.tokenizer.vocab.idx_to_token
+        self.rev_dict[self.tokenizer.vocab['[PAD]']] = ''  # replace [PAD]
+        self.rev_dict[self.tokenizer.vocab['[UNK]']] = ''  # replace [PAD]
         self.rev_lookup = np.vectorize(lambda i: self.rev_dict[i])
 
     @serving
@@ -81,6 +67,8 @@ class ErnieGen(hub.NLPPredictionModule):
         Returns:
              results(list): the poetry continuations.
         """
+        paddle.disable_static()
+
         if texts and isinstance(texts, list) and all(texts) and all([isinstance(text, str) for text in texts]):
             predicted_data = texts
         else:
@@ -91,37 +79,35 @@ class ErnieGen(hub.NLPPredictionModule):
             logger.warning(
                 "use_gpu has been set False as you didn't set the environment variable CUDA_VISIBLE_DEVICES while using use_gpu=True"
             )
-        if use_gpu:
-            place = fluid.CUDAPlace(0)
-        else:
-            place = fluid.CPUPlace()
+        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
+        self.model.eval()
+        results = []
+        for text in predicted_data:
+            sample_results = []
+            encode_text = self.tokenizer.encode(text)
+            src_ids = paddle.to_tensor(encode_text['input_ids']).unsqueeze(0)
+            src_sids = paddle.to_tensor(encode_text['token_type_ids']).unsqueeze(0)
+            output_ids = beam_search_infilling(
+                self.model,
+                src_ids,
+                src_sids,
+                eos_id=self.tokenizer.vocab['[SEP]'],
+                sos_id=self.tokenizer.vocab['[CLS]'],
+                attn_id=self.tokenizer.vocab['[MASK]'],
+                pad_id=self.tokenizer.vocab['[PAD]'],
+                unk_id=self.tokenizer.vocab['[UNK]'],
+                vocab_size=len(self.tokenizer.vocab),
+                max_decode_len=80,
+                max_encode_len=20,
+                beam_width=beam_width,
+                tgt_type_id=1)
+            output_str = self.rev_lookup(output_ids[0])
 
-        with fluid.dygraph.guard(place):
-            self.model.eval()
-            results = []
-            for text in predicted_data:
-                sample_results = []
-                ids, sids = self.tokenizer.encode(text)
-                src_ids = D.to_variable(np.expand_dims(ids, 0))
-                src_sids = D.to_variable(np.expand_dims(sids, 0))
-                output_ids = beam_search_infilling(
-                    self.model,
-                    src_ids,
-                    src_sids,
-                    eos_id=self.tokenizer.sep_id,
-                    sos_id=self.tokenizer.cls_id,
-                    attn_id=self.tokenizer.vocab['[MASK]'],
-                    max_decode_len=80,
-                    max_encode_len=20,
-                    beam_width=beam_width,
-                    tgt_type_id=1)
-                output_str = self.rev_lookup(output_ids[0].numpy())
-
-                for ostr in output_str.tolist():
-                    if '[SEP]' in ostr:
-                        ostr = ostr[:ostr.index('[SEP]')]
-                    sample_results.append("".join(ostr))
-                results.append(sample_results)
+            for ostr in output_str.tolist():
+                if '[SEP]' in ostr:
+                    ostr = ostr[:ostr.index('[SEP]')]
+                sample_results.append("".join(ostr))
+            results.append(sample_results)
         return results
 
     def add_module_config_arg(self):
@@ -166,5 +152,5 @@ class ErnieGen(hub.NLPPredictionModule):
 
 if __name__ == "__main__":
     module = ErnieGen()
-    for result in module.generate(['昔年旅南服，始识王荆州。', '高名出汉阴，禅阁跨香岑。'], beam_width=5):
+    for result in module.generate(['情人节', '故乡', '小编带大家了解一下程序员情人节', '昔年旅南服，始识王荆州。', '高名出汉阴，禅阁跨香岑。'], beam_width=5):
         print(result)

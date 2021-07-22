@@ -30,7 +30,7 @@ from unified_transformer_12L_cn.utils import select_response
     name="unified_transformer_12L_cn",
     version="1.0.0",
     summary="",
-    author="PaddlePaddle",
+    author="paddlepaddle",
     author_email="",
     type="nlp/text_generation",
 )

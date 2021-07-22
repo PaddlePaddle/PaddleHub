@@ -170,9 +170,11 @@ https://github.com/PaddlePaddle/ERNIE/blob/repro/ernie-gen/
 
 ### 依赖
 
-paddlepaddle >= 1.8.2
+paddlepaddle >= 2.0.0
 
-paddlehub >= 1.7.0
+paddlehub >= 2.0.0
+
+paddlenlp >= 2.0.0
 
 
 ## 更新历史
@@ -188,3 +190,7 @@ paddlehub >= 1.7.0
 * 1.0.2
 
   修复windows运行中的bug
+
+* 1.1.0
+
+  接入PaddleNLP

@@ -18,7 +18,7 @@ import io
 import json
 import os
 import six
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import paddle
 import paddle.nn as nn
@@ -91,7 +91,6 @@ class InitTrackerMeta(type(nn.Layer)):
             help_func (callable, optional): If provided, it would be hooked after
                 `init_func` and called as `_wrap_init(self, init_func, *init_args, **init_args)`.
                 Default None.
-
         Returns:
             function: the wrapped function
         """
@@ -142,7 +141,6 @@ class PretrainedModel(nn.Layer):
     - `pretrained_init_configuration` (dict): The dict has pretrained model names
       as keys, and the values are also dict preserving corresponding configuration
       for model initialization.
-
     - `base_model_prefix` (str): represents the the attribute associated to the
       base model in derived classes of the same architecture adding layers on
       top of the base model.
@@ -365,14 +363,12 @@ class TextServing(object):
         1. seq-cls: sequence classification;
         2. token-cls: sequence labeling;
         3. None: embedding.
-
         Args:
             data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
             max_seq_len (:obj:`int`, `optional`, defaults to 128):
                 If set to a number, will limit the total sequence returned so that it has a maximum length.
             batch_size(obj:`int`, defaults to 1): The number of batch.
             use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
-
         Returns:
             results(obj:`list`): All the predictions labels.
         """
@@ -465,11 +461,12 @@ class TransformerModule(RunModule, TextServing):
                 title_segment_ids = [entry[3] for entry in batch]
                 return query_input_ids, query_segment_ids, title_input_ids, title_segment_ids
 
-        tokenizer = self.get_tokenizer()
+        if not hasattr(self, 'tokenizer'):
+            self.tokenizer = self.get_tokenizer()
         examples = []
 
         for texts in data:
-            encoded_inputs = self._convert_text_to_input(tokenizer, texts, max_seq_len, split_char)
+            encoded_inputs = self._convert_text_to_input(self.tokenizer, texts, max_seq_len, split_char)
             example = []
             for inp in encoded_inputs:
                 input_ids = inp['input_ids']
@@ -538,7 +535,6 @@ class TransformerModule(RunModule, TextServing):
         Args:
             data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
             use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
-
         Returns:
             results(obj:`list`): All the tokens and sentences embeddings.
         """
@@ -552,10 +548,10 @@ class TransformerModule(RunModule, TextServing):
                 max_seq_len: int = 128,
                 split_char: str = '\002',
                 batch_size: int = 1,
-                use_gpu: bool = False):
+                use_gpu: bool = False,
+                return_prob: bool = False):
         """
         Predicts the data labels.
-
         Args:
             data (obj:`List(List(str))`): The processed data whose each element is the list of a single text or a pair of texts.
             max_seq_len (:obj:`int`, `optional`, defaults to :int:`None`):
@@ -563,7 +559,7 @@ class TransformerModule(RunModule, TextServing):
             split_char(obj:`str`, defaults to '\002'): The char used to split input tokens in token-cls task.
             batch_size(obj:`int`, defaults to 1): The number of batch.
             use_gpu(obj:`bool`, defaults to `False`): Whether to use gpu to run or not.
-
+            return_prob(obj:`bool`, defaults to `False`): Whether to return label probabilities.
         Returns:
             results(obj:`list`): All the predictions labels.
         """
@@ -579,6 +575,8 @@ class TransformerModule(RunModule, TextServing):
 
         batches = self._batchify(data, max_seq_len, batch_size, split_char)
         results = []
+        batch_probs = []
+
         self.eval()
         for batch in batches:
             if self.task == 'text-matching':
@@ -589,32 +587,38 @@ class TransformerModule(RunModule, TextServing):
                 title_segment_ids = paddle.to_tensor(title_segment_ids)
                 probs = self(query_input_ids=query_input_ids, query_token_type_ids=query_segment_ids, \
                     title_input_ids=title_input_ids, title_token_type_ids=title_segment_ids)
+
                 idx = paddle.argmax(probs, axis=1).numpy()
                 idx = idx.tolist()
                 labels = [self.label_map[i] for i in idx]
-                results.extend(labels)
             else:
                 input_ids, segment_ids = batch
                 input_ids = paddle.to_tensor(input_ids)
                 segment_ids = paddle.to_tensor(segment_ids)
-
                 if self.task == 'seq-cls':
                     probs = self(input_ids, segment_ids)
                     idx = paddle.argmax(probs, axis=1).numpy()
                     idx = idx.tolist()
                     labels = [self.label_map[i] for i in idx]
-                    results.extend(labels)
                 elif self.task == 'token-cls':
                     probs = self(input_ids, segment_ids)
                     batch_ids = paddle.argmax(probs, axis=2).numpy()  # (batch_size, max_seq_len)
                     batch_ids = batch_ids.tolist()
-                    token_labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
-                    results.extend(token_labels)
+                    # token labels
+                    labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
                 elif self.task == None:
                     sequence_output, pooled_output = self(input_ids, segment_ids)
                     results.append(
                         [pooled_output.squeeze(0).numpy().tolist(),
                          sequence_output.squeeze(0).numpy().tolist()])
+            if self.task:
+                # save probs only when return prob
+                if return_prob:
+                    batch_probs.extend(probs.numpy().tolist())
+                results.extend(labels)
+
+        if self.task and return_prob:
+            return results, batch_probs
         return results
 
 

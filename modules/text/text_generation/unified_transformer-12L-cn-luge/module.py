@@ -30,7 +30,7 @@ from unified_transformer_12L_cn_luge.utils import select_response
     name="unified_transformer_12L_cn_luge",
     version="1.0.0",
     summary="",
-    author="PaddlePaddle",
+    author="paddlepaddle",
     author_email="",
     type="nlp/text_generation",
 )
