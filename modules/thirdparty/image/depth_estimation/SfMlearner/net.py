@@ -1,6 +1,4 @@
 import paddle
-# import math
-# from x2paddle.op_mapper.pytorch2paddle import pytorch_custom_layer as x2paddle_nn
 class Conv1(paddle.nn.Layer):
     def __init__(self, ):
         super(Conv1, self).__init__()
