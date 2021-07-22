@@ -54,7 +54,8 @@ def convert_example(tokenizer,
         else:
             tgt_labels = tgt_ids
 
-        return (src_ids, src_pids, src_sids, tgt_ids, tgt_pids, tgt_sids, attn_ids, tgt_labels)
+        return [np.asarray(item, dtype=np.int64) for item \
+            in [src_ids, src_pids, src_sids, tgt_ids, tgt_pids, tgt_sids, attn_ids, tgt_labels]]
 
     return warpper
 
