@@ -85,5 +85,5 @@ class SfMlearner:
     @runnable
     def run_cmd(self, argvs):
         args = self.parser.parse_args(argvs)
-        self.estimation(args.img_dir, args.output_dir, args.USE_GPU,
-                        outpput_disp=args.output_disp, output_depth=args.output_depth)
+        self.estimation(args.pretrained, args.img_dir, args.output_dir, args.USE_GPU,
+                        output_disp=args.output_disp, output_depth=args.output_depth)
