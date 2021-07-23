@@ -151,3 +151,6 @@
   - 程序执行时，会创建新文件夹`transfer_result`，并将转换后的文件保存到该目录下
   - 输出图片如下：
     - <img src="../../imgs/Install_Related/windows/after_transfer.png" alt="transferred image" width="600" align="center"/>
+
+## 第六步：飞桨预训练模型探索之旅
+- 恭喜你，到这里PaddleHub在windows环境下的安装和入门案例就全部完成了，快快开启你更多的深度学习模型探索之旅吧。[【更多模型探索，跳转飞桨官网】](https://www.paddlepaddle.org.cn/hublist)
