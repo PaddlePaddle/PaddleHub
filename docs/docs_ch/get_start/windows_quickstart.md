@@ -1,4 +1,4 @@
-# 图片风格转换文档
+# 零基础windows安装并实现图像风格迁移
 
 ## 第1步：安装Anaconda
 
@@ -151,12 +151,3 @@
   - 程序执行时，会创建新文件夹`transfer_result`，并将转换后的文件保存到该目录下
   - 输出图片如下：
     - <img src="../../imgs/Install_Related/windows/after_transfer.png" alt="transferred image" width="600" align="center"/>
-
-
-
-
-
-
-
-
-
