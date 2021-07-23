@@ -12,7 +12,7 @@ English | [简体中文](README_ch.md)
 <p align="center">
     <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
     <a href="https://github.com/PaddlePaddle/PaddleHub/releases"><img src="https://img.shields.io/github/v/release/PaddlePaddle/PaddleHub?color=ffa"></a>
-    <a href=""><img src="https://img.shields.io/badge/python-3.6+-aff.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/python-3.6.2+-aff.svg"></a>
     <a href=""><img src="https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg"></a>
     <a href=""><img src="https://img.shields.io/pypi/format/paddlehub?color=c77"></a>
 </p>

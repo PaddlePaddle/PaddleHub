@@ -7,8 +7,8 @@
 ========================
 
 * 操作系统：Windows/Mac/Linux
-* Python>=3.6
-* PaddlePaddle>=2.0.0
+* Python >= 3.6.2
+* PaddlePaddle >= 2.0.0
 
 .. code-block:: shell
 
