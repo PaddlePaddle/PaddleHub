@@ -27,7 +27,7 @@
   - ```shell
     # 在命令行输入以下命令，创建名为paddle_env的环境
     # 此处为加速下载，使用清华源
-    conda create -name paddle_env python=3.8 --channel https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/  # 这是一行命令
+    conda create --name paddle_env python=3.8 --channel https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/  # 这是一行命令
     ```
 
   - 该命令会创建1个名为paddle_env、python版本为3.8的可执行环境，根据网络状态，需要花费一段时间
