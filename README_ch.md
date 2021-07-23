@@ -128,8 +128,17 @@
 
 <div id="QuickStart">
 
+
+
+
 ## 快速开始
 
+
+[【零基础windows安装并实现图像风格迁移】](./docs/docs_ch/get_start/windows_quickstart.md)
+
+[【Linux and Mac安装并实现中文分词】](./docs/docs_ch/get_start/linux_mac_quickstart.md)
+
+### 极简中文分词案例  
 </div>
 
 ```python
