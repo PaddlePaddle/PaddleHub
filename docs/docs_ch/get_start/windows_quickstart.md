@@ -1,4 +1,4 @@
-# 零基础windows安装并实现图像风格迁移
+# 图片风格转换文档
 
 ## 第1步：安装Anaconda
 
@@ -8,18 +8,18 @@
 - Anaconda下载：
   - 地址：https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/?C=M&O=D
   - 大部分win10电脑均为64位操作系统，选择x86_64版本；若电脑为32位操作系统，则选择x86.exe
-  - <img src="../../imgs/Install_Related/windows/Anaconda_download.png" alt="anaconda download" width="800" align="left"/>
+  - <img src="../../imgs/Install_Related/windows/Anaconda_download.png" alt="anaconda download" width="800" align="center"/>
   - 下载完成后，双击安装程序进入图形界面
   - 默认安装位置为C盘，建议将安装位置更改到D盘：
-    - <img src="../../imgs/Install_Related/windows/anaconda_install_folder.png" alt="install config" width="500" align="left"/>
+    - <img src="../../imgs/Install_Related/windows/anaconda_install_folder.png" alt="install config" width="500" align="center"/>
   - 勾选conda加入环境变量，忽略警告：
-    - <img src="../../imgs/Install_Related/windows/anaconda_install_env.png" alt="add conda to path" width="500" align="left"/>
+    - <img src="../../imgs/Install_Related/windows/anaconda_install_env.png" alt="add conda to path" width="500" align="center"/>
 
 ## 第2步：打开终端并创建conda环境
 
 - 使用管理员模式打开Anaconda Prompt终端，（这种方式启动的时候会初始化环境变量，可以找到conda命令）左下角Windows Start Menu -> Anaconda3 -> Anaconda Prompt启动控制台 -> 鼠标右键更多 -> 以管理员身份执行（避免部分目录缺少conda相关的写权限）
 
-  - <img src="../../imgs/Install_Related/windows/Anaconda_start.png" alt="anaconda download" width="800" align="left"/>
+  - <img src="../../imgs/Install_Related/windows/Anaconda_start.png" alt="anaconda download" width="800" align="center"/>
 
 
 - 创建新的conda环境
@@ -34,7 +34,7 @@
 
   - 之后命令行中会输出提示信息，输入y并回车继续安装
 
-  - <img src="../../imgs/Install_Related/windows/conda_new_env.png" alt="conda create" width="700" align="left"/>
+  - <img src="../../imgs/Install_Related/windows/conda_new_env.png" alt="conda create" width="700" align="center"/>
 
 - 激活刚创建的conda环境，在命令行中输入以下命令：
 
@@ -45,7 +45,7 @@
     where python
     ```
 
-  - <img src="../../imgs/Install_Related/windows/conda_list_env.png" alt="create environment" width="600" align="left"/>
+  - <img src="../../imgs/Install_Related/windows/conda_list_env.png" alt="create environment" width="600" align="center"/>
 
   - 以上anaconda环境和python环境安装完毕
 
@@ -93,7 +93,7 @@
 
   - 模型的说明文档：[https://www.paddlepaddle.org.cn/hubsearch?filter=en_category&value=%7B%22scenes%22%3A%5B%22GANs%22%5D%7D](https://www.paddlepaddle.org.cn/hubsearch?filter=en_category&value={"scenes"%3A["GANs"]})
 
-  - <img src="../../imgs/Install_Related/windows/paddlehub_modulelist.png" alt="model introduction" width="700" align="left"/>
+  - <img src="../../imgs/Install_Related/windows/paddlehub_modulelist.png" alt="model introduction" width="700" align="center"/>
 
 ## 第5步：准备风格迁移数据和代码
 
@@ -113,9 +113,9 @@
 
 - 分别放置待转换图片和风格图片
   - 将待转换图片放置到`D:\style_transfer\pic.jpg`
-    - <img src="../../imgs/Install_Related/windows/pic.jpg" alt="pic.jpg" width="400" align="left"/>
+    - <img src="../../imgs/Install_Related/windows/pic.jpg" alt="pic.jpg" width="400" align="center"/>
   - 将风格图片放置到`D:\style_transfer\fangao.jpg`
-    - <img src="../../imgs/Install_Related/windows/fangao.jpg" alt="fangao.jpg" width="350" align="left"/>
+    - <img src="../../imgs/Install_Related/windows/fangao.jpg" alt="fangao.jpg" width="350" align="center"/>
 
 ### 代码
 
@@ -139,8 +139,9 @@
 
     # 读入图片并开始风格转换
     result = stylepro_artistic.style_transfer(
-                        images=[{'content': cv2.imread(picture), 'styles': [cv2.imread(style_image)]}],
-                       visualization=True
+                        images=[{'content': cv2.imread(picture),
+                                 'styles': [cv2.imread(style_image)]}],
+                        visualization=True
     )
     ```
 
@@ -149,4 +150,13 @@
   - 在命令行中，输入`python style_transfer.py`
   - 程序执行时，会创建新文件夹`transfer_result`，并将转换后的文件保存到该目录下
   - 输出图片如下：
-    - <img src="../../imgs/Install_Related/windows/after_transfer.png" alt="transferred image" width="600" align="left"/>
+    - <img src="../../imgs/Install_Related/windows/after_transfer.png" alt="transferred image" width="600" align="center"/>
+
+
+
+
+
+
+
+
+
