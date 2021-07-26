@@ -41,7 +41,7 @@
   - ```shell
     # 激活paddle_env环境
     conda activate paddle_env
-    # 参看当前python的位置
+    # 查看当前python的位置
     where python
     ```
 
@@ -58,7 +58,7 @@
     # 确认当前所用的pip是否是paddle_env环境下的pip
     where pip
     # 默认安装CPU版本，安装paddle时建议使用百度源
-    pip install paddle -i https://mirror.baidu.com/pypi/simple
+    pip install paddlepaddle -i https://mirror.baidu.com/pypi/simple
     ```
 
   - 若需要安装GPU版本，则请打开[paddle官网](https://www.paddlepaddle.org.cn/)选择适合的版本
@@ -75,14 +75,7 @@
 
   - paddlehub的介绍文档：https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/README_ch.md
 
-- 安装完paddlehub后，继续在paddle_env环境中安装opencv：
-
-  - ```shell
-    # 在命令行中输入以下命令
-    pip install opencv-python -i https://pypi.tuna.tsinghua.edu.cn/simple
-    ```
-
-## 第4步：安装paddlehub和并下载模型
+## 第4步：安装paddlehub并下载模型
 
 - 安装完paddlehub后，下载风格迁移模型：
 
