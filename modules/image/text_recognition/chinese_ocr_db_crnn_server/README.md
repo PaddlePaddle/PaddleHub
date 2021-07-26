@@ -10,7 +10,7 @@
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg" hspace='10'/> <br />
 </p>
-<center>样例结果示例</center>
+<center> 样例结果示例 </center>
 
 ## 模型基本信息
 
@@ -23,10 +23,10 @@ chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[c
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/rcnn.png" hspace='10'/> <br />
 </p>
 
-更多详情参考[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
+更多详情参考：[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
 
 ### 模型大小
-200.36MB  下载
+200.36MB
 
 ### 最新更新日期 
 2020-06-21
@@ -39,15 +39,28 @@ chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[c
 
 ## 环境依赖     
 
-paddlepaddle >= 1.7.2  [如何安装paddle](https://github.com/PaddlePaddle/Paddle#installation)
+paddlepaddle >= 1.7.2      [如何安装paddle](https://github.com/PaddlePaddle/Paddle#installation)
 
-paddlehub >= 1.6.0   [如何安装paddlehub](https://paddlehub.readthedocs.io/en/release-v2.1/get_start/installation.html)
+paddlehub >= 1.6.0         [如何安装paddlehub](https://paddlehub.readthedocs.io/en/release-v2.1/get_start/installation.html)
 
 shapely
 
 pyclipper
+
+```shell
+$ pip install shapely pyclipper
+```
+
 					                                 
 ## 命令行预测
+
+### 安装
+
+```shell
+$ hub install chinese_ocr_db_crnn_mobile==1.1.2
+```
+
+### 命令行预测
 
 ```shell
 $ hub run chinese_ocr_db_crnn_server --input_path "/PATH/TO/IMAGE"
@@ -55,9 +68,28 @@ $ hub run chinese_ocr_db_crnn_server --input_path "/PATH/TO/IMAGE"
 
 **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**
 
-## API
+通过命令行方式实现文字识别模型的调用，更多请见[PaddleHub命令行指令](https://paddlehub.readthedocs.io/en/release-v2.1/tutorial/cmd_usage.html)
 
-### \_\_init\_\_(text_detector_module=None, enable_mkldnn=False)
+## 模型API预测
+
+### 代码示例
+
+```python
+import paddlehub as hub
+import cv2
+
+ocr = hub.Module(name="chinese_ocr_db_crnn_server")
+result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
+
+# or
+# result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
+```
+
+### API
+
+```python
+\_\_init\_\_(text_detector_module=None, enable_mkldnn=False)
+```
 
 构造ChineseOCRDBCRNNServer对象
 
@@ -100,20 +132,7 @@ def recognize_text(images=[],
       如果无识别结果则data为\[\]
     * save_path (str, optional): 识别结果的保存路径，如不保存图片则save_path为''
 
-### 代码示例
 
-```python
-import paddlehub as hub
-import cv2
-
-ocr = hub.Module(name="chinese_ocr_db_crnn_server")
-result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
-
-# or
-# result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
-```
-
-* 样例结果示例
 
 
 ## 服务部署
@@ -154,12 +173,6 @@ r = requests.post(url=url, headers=headers, data=json.dumps(data))
 # 打印预测结果
 print(r.json()["results"])
 ```
-
-## 查看代码
-
-https://github.com/PaddlePaddle/PaddleOCR
-
-### 依赖
 
 
 ## 更新历史
