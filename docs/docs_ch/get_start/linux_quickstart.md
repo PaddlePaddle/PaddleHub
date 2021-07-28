@@ -158,9 +158,9 @@
 
 - 分别放置待转换图片和风格图片：
 
-  - 将待转换图片放置到用户目录的`style_transfer/pic.jpg`
+  - 将待转换图片放置到`~/style_transfer/pic.jpg`
     - <img src="../../imgs/Install_Related/linux/pic.jpg" alt="pic.jpg" width="400" align="center"/>
-  - 将风格图片放置到用户目录的`style_transfer/fangao.jpg`
+  - 将风格图片放置到`~/style_transfer/fangao.jpg`
     - <img src="../../imgs/Install_Related/linux/fangao.jpg" alt="fangao.jpg" width="350" align="center"/>
 
 ### 代码
@@ -169,7 +169,7 @@
 
   - ```shell
     # 以下命令均在命令行执行
-    $ pwd # 查看当前目录是否为style_transfer，若不是则输入：cd ~/Desktop/style_transfer
+    $ pwd # 查看当前目录是否为style_transfer，若不是则输入：cd ~/style_transfer
     $ touch style_transfer.py  # 创建空文件
     $ vim style_transfer.py  # 使用vim编辑器打开代码文件
     # 先输入i进入编辑模式

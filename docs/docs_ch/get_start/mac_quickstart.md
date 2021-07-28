@@ -23,7 +23,7 @@
 
   - 加入环境变量是为了让系统能识别conda命令
 
-  - 在终端中打开`~/.bash_profile`，输入以下命令：
+  - 输入以下命令，在终端中打开`~/.bash_profile`：
 
     - ```shell
       vim ~/.bash_profile
@@ -144,7 +144,7 @@
 
   - 将待转换图片放置到桌面的`style_transfer/pic.jpg`
     - <img src="../../imgs/Install_Related/mac/pic.jpg" alt="pic.jpg" width="400" align="center"/>
-  - 将风格图片放置到桌面的`style_transfer\fangao.jpg`
+  - 将风格图片放置到桌面的`style_transfer/fangao.jpg`
     - <img src="../../imgs/Install_Related/mac/fangao.jpg" alt="fangao.jpg" width="350" align="center"/>
 
 ### 代码
