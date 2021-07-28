@@ -206,6 +206,7 @@ print(results)
     <a href="https://github.com/hlmu"><img src="https://avatars.githubusercontent.com/u/30133236?v=4" width=75 height=75></a>
     <a href="https://github.com/yma-admin"><img src="https://avatars.githubusercontent.com/u/40477813?v=4" width=75 height=75></a>
     <a href="https://github.com/brooklet"><img src="https://avatars.githubusercontent.com/u/1585799?v=4" width=75 height=75></a>
+    <a href="https://github.com/brooklet"><img src="https://avatars.githubusercontent.com/u/50263321?v=4" width=75 height=75></a>
 </p>
 
 我们非常欢迎您为PaddleHub贡献代码，也十分感谢您的反馈。
