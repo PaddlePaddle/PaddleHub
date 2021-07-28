@@ -17,9 +17,9 @@
 
 ## 第2步：打开终端并创建conda环境
 
-- 使用管理员模式打开Anaconda Prompt终端，（这种方式启动的时候会初始化环境变量，可以找到conda命令）左下角Windows Start Menu -> Anaconda3 -> Anaconda Prompt启动控制台 -> 鼠标右键更多 -> 以管理员身份执行（避免部分目录缺少conda相关的写权限）
-
-  - <img src="../../imgs/Install_Related/windows/Anaconda_start.png" alt="anaconda download" width="800" align="center"/>
+- 打开Anaconda Prompt终端
+  - 左下角Windows Start Menu -> Anaconda3 -> Anaconda Prompt启动控制台
+  - <img src="../../imgs/Install_Related/windows/anaconda_prompt.png" alt="anaconda download" width="300" align="center"/>
 
 
 - 创建新的conda环境
@@ -121,15 +121,15 @@
   - ```python
     import paddlehub as hub
     import cv2
-
+  
     # 待转换图片的绝对地址
     picture = 'D:\\style_transfer\\pic.jpg'  # 注意代码中此处为双反斜杠
     # 风格图片的绝对地址
     style_image = 'D:\\style_transfer\\fangao.jpg'
-
+  
     # 创建风格转移网络并加载参数
     stylepro_artistic = hub.Module(name="stylepro_artistic")
-
+  
     # 读入图片并开始风格转换
     result = stylepro_artistic.style_transfer(
                         images=[{'content': cv2.imread(picture),
