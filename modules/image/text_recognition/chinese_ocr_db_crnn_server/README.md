@@ -1,78 +1,72 @@
-类别：图像-文字识别 <br/>
-网络：Differentiable Binarization+RCNN <br/>
-数据集： icdar2015数据集 <br/>
-是否支持Fine-tuning：否 <br/>
-[查看模型代码](https://github.com/PaddlePaddle/PaddleOCR) <br/>
-[模型应用教程](https://aistudio.baidu.com/aistudio/projectdetail/507159) <br/>
+|模型名称|chinese_ocr_db_crnn_server|
+| :--- | :---: | 
+|类别|图像-文字识别|
+|网络|Differentiable Binarization+RCNN|
+|数据集|icdar2015数据集|
+|是否支持Fine-tuning|否|
+|模型大小|200.36MB|
+|最新更新日期|2020-06-21|
+|数据指标|mAP@0.98|
 
-## 应用效果展示
+模型使用的教程详见：[应用教程](https://aistudio.baidu.com/aistudio/projectdetail/507159) <br/>
+如需获取该模型的开源代码请到：[模型代码](https://github.com/PaddlePaddle/PaddleOCR) <br/>
+
+
+## 一、应用效果展示
 [OCR文字识别场景在线体验](https://www.paddlepaddle.org.cn/hub/scene/ocr)
 <p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg" hspace='10'/> <br />
+<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg"  width = "450" height = "300" hspace='10'/> <br />
 </p>
 <center> 样例结果示例 </center>
 
-## 模型基本信息
+## 二、模型基本信息
 
 ### 模型介绍
 
-chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_server Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_server&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积循环神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个通用的OCR模型，支持直接预测。
+- chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_server Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_server&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积循环神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个通用的OCR模型，支持直接预测。
 
 
 <p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/rcnn.png" hspace='10'/> <br />
+<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/rcnn.png" width = "300" height = "450" hspace='10'/> <br />
 </p>
 
-更多详情参考：[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
+- 更多详情参考：[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
 
-### 模型大小
-200.36MB
+## 三、安装与命令行预测
 
-### 最新更新日期 
-2020-06-21
+### 1、环境依赖     
 
-### 数据指标
+- paddlepaddle >= 1.7.2      [如何安装paddle](https://github.com/PaddlePaddle/Paddle#installation)
 
-| Metric | Vaule | 
-| :---| :------: | 
-| mAP	 |  0.98 |   
+- paddlehub >= 1.6.0         [如何安装paddlehub](https://paddlehub.readthedocs.io/en/release-v2.1/get_start/installation.html)
 
-## 环境依赖     
+- shapely
 
-paddlepaddle >= 1.7.2      [如何安装paddle](https://github.com/PaddlePaddle/Paddle#installation)
-
-paddlehub >= 1.6.0         [如何安装paddlehub](https://paddlehub.readthedocs.io/en/release-v2.1/get_start/installation.html)
-
-shapely
-
-pyclipper
+- pyclipper
 
 ```shell
 $ pip install shapely pyclipper
 ```
+**该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**					                                
 
-					                                 
-## 命令行预测
-
-### 安装
+### 2、安装
 
 ```shell
 $ hub install chinese_ocr_db_crnn_mobile==1.1.2
 ```
+如您安装时遇到问题，可参考：[零基础windows安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/windows_quickstart.md)
 
-### 命令行预测
+### 3、命令行预测
 
 ```shell
 $ hub run chinese_ocr_db_crnn_server --input_path "/PATH/TO/IMAGE"
 ```
 
-**该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**
-
 通过命令行方式实现文字识别模型的调用，更多请见[PaddleHub命令行指令](https://paddlehub.readthedocs.io/en/release-v2.1/tutorial/cmd_usage.html)
 
-## 模型API预测
+## 四、模型API预测
 
-### 代码示例
+### 1、代码示例
 
 ```python
 import paddlehub as hub
@@ -85,10 +79,10 @@ result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 # result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
 ```
 
-### API
+### 2、API
 
 ```python
-\_\_init\_\_(text_detector_module=None, enable_mkldnn=False)
+_init_(text_detector_module=None, enable_mkldnn=False)
 ```
 
 构造ChineseOCRDBCRNNServer对象
@@ -135,7 +129,7 @@ def recognize_text(images=[],
 
 
 
-## 服务部署
+## 五、服务部署
 
 PaddleHub Serving 可以部署一个目标检测的在线服务。
 
