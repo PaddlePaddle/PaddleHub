@@ -1,5 +1,5 @@
 ```shell
-$ hub install bert-base-cased==2.0.1
+$ hub install bert-base-cased==2.0.2
 ```
 
 <p align="center">
@@ -87,7 +87,7 @@ label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
     name='bert-base-cased',
-    version='2.0.1',
+    version='2.0.2',
     task='seq-cls',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
