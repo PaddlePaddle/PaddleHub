@@ -71,7 +71,7 @@ class BertWwm(nn.Layer):
             self.model = BertForTokenClassification.from_pretrained(
                 pretrained_model_name_or_path='bert-wwm-ext-chinese', num_classes=self.num_classes, **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
-            self.metric = ChunkEvaluator(label_list=[self.label_map[i] for i in sorted(self.label_map.keys())], suffix)
+            self.metric = ChunkEvaluator(label_list=[self.label_map[i] for i in sorted(self.label_map.keys())], suffix=suffix)
         elif task == 'text-matching':
             self.model = BertModel.from_pretrained(pretrained_model_name_or_path='bert-wwm-ext-chinese', **kwargs)
             self.dropout = paddle.nn.Dropout(0.1)

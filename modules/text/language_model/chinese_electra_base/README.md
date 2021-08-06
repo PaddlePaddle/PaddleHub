@@ -15,8 +15,8 @@ def __init__(
         load_checkpoint=None,
         label_map=None,
         num_classes=2,
-    suffix=False,
-    **kwargs,
+        suffix=False,
+        **kwargs,
 )
 ```
 
