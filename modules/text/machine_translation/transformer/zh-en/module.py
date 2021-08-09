@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
 import os
+from packaging.version import Version
+from typing import List
 
 import paddle
 import paddle.nn as nn
 from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import moduleinfo, serving
+import paddlenlp
 from paddlenlp.data import Pad, Vocab
 from paddlenlp.transformers import InferTransformerModel, position_encoding_init
 
@@ -27,7 +29,7 @@ from transformer_zh_en.utils import MTTokenizer, post_process_seq
 
 @moduleinfo(
     name="transformer_zh-en",
-    version="1.0.0",
+    version="1.0.1",
     summary="",
     author="PaddlePaddle",
     author_email="",
@@ -42,8 +44,6 @@ class MTTransformer(nn.Layer):
 
     # Model config
     model_config = {
-        # Number of sub-layers to be stacked in the encoder and decoder.
-        "n_layer": 6,
         # Number of head used in multi-head attention.
         "n_head": 8,
         # The dimension for word embeddings, which is also the last dimension of
@@ -58,6 +58,12 @@ class MTTransformer(nn.Layer):
         # Dropout rate
         'dropout': 0
     }
+
+    # Number of sub-layers to be stacked in the encoder and decoder.
+    if Version(paddlenlp.__version__) <= Version('2.0.5'):
+        model_config.update({"n_layer": 6})
+    else:
+        model_config.update({"num_encoder_layers": 6, "num_decoder_layers": 6})
 
     # Vocab config
     vocab_config = {

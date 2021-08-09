@@ -13,7 +13,7 @@
 <p align="center">
     <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
     <a href="https://github.com/PaddlePaddle/PaddleHub/releases"><img src="https://img.shields.io/github/v/release/PaddlePaddle/PaddleHub?color=ffa"></a>
-    <a href=""><img src="https://img.shields.io/badge/python-3.6+-aff.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/python-3.6.2+-aff.svg"></a>
     <a href=""><img src="https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg"></a>
     <a href=""><img src="https://img.shields.io/pypi/format/paddlehub?color=c77"></a>
 </p>
@@ -128,8 +128,18 @@
 
 <div id="QuickStart">
 
+
+
+
 ## 快速开始
 
+[【零基础windows安装并实现图像风格迁移】](./docs/docs_ch/get_start/windows_quickstart.md)
+
+[【零基础mac安装并实现图像风格迁移】](./docs/docs_ch/get_start/mac_quickstart.md)
+
+[【零基础linux安装并实现图像风格迁移】](./docs/docs_ch/get_start/linux_quickstart.md)
+
+### 极简中文分词案例  
 </div>
 
 ```python
@@ -196,6 +206,7 @@ print(results)
     <a href="https://github.com/hlmu"><img src="https://avatars.githubusercontent.com/u/30133236?v=4" width=75 height=75></a>
     <a href="https://github.com/yma-admin"><img src="https://avatars.githubusercontent.com/u/40477813?v=4" width=75 height=75></a>
     <a href="https://github.com/brooklet"><img src="https://avatars.githubusercontent.com/u/1585799?v=4" width=75 height=75></a>
+    <a href="https://github.com/brooklet"><img src="https://avatars.githubusercontent.com/u/50263321?v=4" width=75 height=75></a>
 </p>
 
 我们非常欢迎您为PaddleHub贡献代码，也十分感谢您的反馈。

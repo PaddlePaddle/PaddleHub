@@ -28,13 +28,12 @@ class Animegan_V2_Shinkai_53(Module):
     def style_transfer(self,
                        images=None,
                        paths=None,
-                       batch_size=1,
                        output_dir='output',
                        visualization=False,
                        min_size=32,
                        max_size=1024):
         # 加载数据处理器
-        processor = Processor(images, paths, batch_size, output_dir, min_size, max_size)
+        processor = Processor(images=images, paths=paths, batch_size=1, output_dir=output_dir, min_size=min_size, max_size=max_size)
 
         # 模型预测
         outputs = self.model.predict(processor.input_datas)
