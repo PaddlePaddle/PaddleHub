@@ -23,6 +23,7 @@ from flask import Flask, request
 from paddlehub.serving.device import InferenceServer
 from paddlehub.serving.client import InferenceClientProxy
 from paddlehub.utils import utils, log
+import flask_cors
 
 filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
 
@@ -110,6 +111,7 @@ def create_app(client_port: int = 5559, modules_name: list = []):
     '''
     app_instance = Flask(__name__)
     app_instance.config["JSON_AS_ASCII"] = False
+    CORS(app_instance)
     app_instance.logger = log.get_file_logger(filename)
     pid = os.getpid()
 
