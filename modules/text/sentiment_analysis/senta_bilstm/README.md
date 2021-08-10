@@ -1,100 +1,187 @@
-# SentaBiLSTM API说明
+|模型名称|senta_bilstm|
+| :--- | :---: | 
+|类别|文本-情感分析|
+|网络|BiLSTM|
+|数据集|百度自建数据集|
+|是否支持Fine-tuning|是|
+|模型大小| |
+|最新更新日期| |
+|数据指标| |
 
-## sentiment_classify(texts=[], data={}, use_gpu=False, batch_size=1)
+- 模型使用的教程详见：[情感分析-一键预测](https://aistudio.baidu.com/aistudio/projectdetail/215814) | [情感分析-Finetune](https://aistudio.baidu.com/aistudio/projectdetail/216846) <br/> 
+- 如需获取该模型的开源代码请到：[模型代码](https://github.com/PaddlePaddle/models/tree/develop/PaddleNLP/sentiment_classification) <br/>
 
-senta_bilstm预测接口，预测输入句子的情感分类(二分类，积极/消极）
 
-**参数**
+## 一、模型介绍
 
-* texts(list): 待预测数据，如果使用texts参数，则不用传入data参数，二选一即可
-* data(dict): 预测数据，key必须为text，value是带预测数据。如果使用data参数，则不用传入texts参数，二选一即可。建议使用texts参数，data参数后续会废弃。
-* use_gpu(bool): 是否使用GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置
-* batch_size(int): 批处理大小
+- 情感倾向分析（Sentiment Classification，简称Senta）针对带有主观描述的中文文本，可自动判断该文本的情感极性类别并给出相应的置信度，能够帮助企业理解用户消费习惯、分析热点话题和危机舆情监控，为企业提供有利的决策支持。该模型基于一个双向LSTM结构，情感类型分为积极、消极。
 
-**返回**
+## 二、安装
 
-* results(list): 情感分类结果
+- ### 1、环境依赖  
 
-### context(trainable=False, max_seq_len=128, num_slots=1)
+  - paddlepaddle >= 1.8.0      [如何安装paddle](https://github.com/PaddlePaddle/Paddle#installation)
+  
+  - paddlehub >= 1.8.0        [如何安装paddlehub](https://paddlehub.readthedocs.io/en/release-v2.1/get_start/installation.html)
 
-获取该Module的预训练program以及program相应的输入输出。
+- ### 2、安装
 
-**参数**
+  - ```shell
+    $ hub install senta_bilstm==1.2.0
+    ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/mac_quickstart.md)
 
-* trainable(bool): trainable=True表示program中的参数在Fine-tune时需要微调，否则保持不变。
-* max_seq_len(int): 模型使用的最大序列长度。
-* num_slots(int): 输入到模型所需要的文本个数，如完成单句文本分类任务，则num_slots=1；完成pointwise文本匹配任务，则num_slots=2；完成pairtwise文本匹配任务，则num_slots=3；
+## 三、模型API预测
 
-**返回**
+- ### 1、命令行预测
 
-* inputs(dict): program的输入变量
-* outputs(dict): program的输出变量
-* main_program(Program): 带有预训练参数的program
+  - ```shell
+    $ hub run senta_bilstm --input_text "这家餐厅很好吃"
+    ```
+  - 或者
+  - ```shell
+    $ hub run senta_bilstm --input_file test.txt
+    ```
+  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](https://paddlehub.readthedocs.io/en/release-v2.1/tutorial/cmd_usage.html)
 
-## get_labels()
+- ### 2、预测代码示例
 
-获取senta_bilstm的类别
+  - ```python
+    import paddlehub as hub
 
-**返回**
+    senta = hub.Module(name="senta_bilstm")
+    test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
+    results = senta.sentiment_classify(texts=test_text, 
+                                       use_gpu=True,
+                                       batch_size=1)
+        
+    for result in results:
+        print(result['text'])
+        print(result['sentiment_label'])
+        print(result['sentiment_key'])
+        print(result['positive_probs'])
+        print(result['negative_probs'])
+    
+    # 这家餐厅很好吃 1 positive 0.9407 0.0593
+    # 这部电影真的很差劲 0 negative 0.02 0.98
+    ```
 
-* labels(dict): senta_bilstm的类别(二分类，积极/消极)
+- ### 3、Finetune代码示例
 
-## get_vocab_path()
+  - ```python
+    import paddlehub as hub
 
-获取预训练时使用的词汇表
+    senta = hub.Module(name="senta_bilstm")
+    inputs, outputs, program = senta.context(trainable=True)
 
-**返回**
+    words = inputs["text"]
+    sent_feature = outputs["sentence_feature"]
+    ```
+  - 利用该PaddleHub Module Fine-tune示例，可参考[情感分析示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.6/demo/senta)
 
-* vocab_path(str): 词汇表路径
+- ### 4、API
 
-# SentaBiLSTM 服务部署
+  - ```python
+    sentiment_classify(texts=[], data={}, use_gpu=False, batch_size=1)
+    ```
+    
+    - senta_bilstm预测接口，预测输入句子的情感分类(二分类，积极/消极）
 
-PaddleHub Serving可以部署一个在线情感分析服务，可以将此接口用于在线web应用。
+    - **参数**
 
-## 第一步：启动PaddleHub Serving
+      - texts(list): 待预测数据，如果使用texts参数，则不用传入data参数，二选一即可
+      - data(dict): 预测数据，key必须为text，value是带预测数据。如果使用data参数，则不用传入texts参数，二选一即可。建议使用texts参数，data参数后续会废弃。
+      - use_gpu(bool): 是否使用GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置
+      - batch_size(int): 批处理大小
 
-运行启动命令：
-```shell
-$ hub serving start -m senta_bilstm  
-```
+    - **返回**
 
-启动时会显示加载模型过程，启动成功后显示
-```shell
-Loading senta_bilstm successful.
-```
+      - results(list): 情感分类结果
 
-这样就完成了服务化API的部署，默认端口号为8866。
+  - ```python
+    context(trainable=False, max_seq_len=128, num_slots=1)
+    ```
+    - 获取该Module的预训练program以及program相应的输入输出。
 
-**NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
+    - **参数**
 
-## 第二步：发送预测请求
+      - trainable(bool): trainable=True表示program中的参数在Fine-tune时需要微调，否则保持不变。
+      - max_seq_len(int): 模型使用的最大序列长度。
+      - num_slots(int): 输入到模型所需要的文本个数，如完成单句文本分类任务，则num_slots=1；完成pointwise文本匹配任务，则num_slots=2；完成pairtwise文本匹配任务，则num_slots=3；
 
-配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+    - **返回**
 
-```python
-import requests
-import json
+      - inputs(dict): program的输入变量
+      - outputs(dict): program的输出变量
+      - main_program(Program): 带有预训练参数的program
 
-# 待预测数据
-text = ["这家餐厅很好吃", "这部电影真的很差劲"]
+  - ```python
+    get_labels()
+    ```
+    - 获取senta_bilstm的类别
 
-# 设置运行配置
-# 对应本地预测senta_bilstm.sentiment_classify(texts=text, batch_size=1, use_gpu=True)
-data = {"texts": text, "batch_size": 1, "use_gpu":True}
+    - **返回**
 
-# 指定预测方法为senta_bilstm并发送post请求，content-type类型应指定json方式
-# HOST_IP为服务器IP
-url = "http://HOST_IP:8866/predict/senta_bilstm"
-headers = {"Content-Type": "application/json"}
-r = requests.post(url=url, headers=headers, data=json.dumps(data))
+      - labels(dict): senta_bilstm的类别(二分类，积极/消极)
 
-# 打印预测结果
-print(json.dumps(r.json(), indent=4, ensure_ascii=False))
-```
+  - ```python
+    get_vocab_path()
+    ```
+    - 获取预训练时使用的词汇表
 
-关于PaddleHub Serving更多信息参考[服务部署](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md)
+    - **返回**
 
-## 更新历史
+      - vocab_path(str): 词汇表路径
+
+## 四、服务部署
+
+- PaddleHub Serving可以部署一个在线情感分析服务，可以将此接口用于在线web应用。
+
+- ### 第一步：启动PaddleHub Serving
+
+  - 运行启动命令：
+  - ```shell
+    $ hub serving start -m senta_bilstm  
+    ```
+
+  - 启动时会显示加载模型过程，启动成功后显示
+  - ```shell
+    Loading senta_bilstm successful.
+    ```
+
+  - 这样就完成了服务化API的部署，默认端口号为8866。
+
+  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
+
+- ### 第二步：发送预测请求
+
+  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+
+  - ```python
+    import requests
+    import json
+
+    # 待预测数据
+    text = ["这家餐厅很好吃", "这部电影真的很差劲"]
+
+    # 设置运行配置
+    # 对应本地预测senta_bilstm.sentiment_classify(texts=text, batch_size=1, use_gpu=True)
+    data = {"texts": text, "batch_size": 1, "use_gpu":True}
+
+    # 指定预测方法为senta_bilstm并发送post请求，content-type类型应指定json方式
+    # HOST_IP为服务器IP
+    url = "http://HOST_IP:8866/predict/senta_bilstm"
+    headers = {"Content-Type": "application/json"}
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+    # 打印预测结果
+    print(json.dumps(r.json(), indent=4, ensure_ascii=False))
+    ```
+
+  - 关于PaddleHub Serving更多信息参考[服务部署](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md)
+
+## 五、更新历史
 
 * 1.0.0
 
