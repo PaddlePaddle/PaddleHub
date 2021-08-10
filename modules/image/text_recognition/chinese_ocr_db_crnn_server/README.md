@@ -8,168 +8,165 @@
 |最新更新日期|2020-06-21|
 |数据指标|mAP@0.98|
 
-模型使用的教程详见：[应用教程](https://aistudio.baidu.com/aistudio/projectdetail/507159) <br/>
-如需获取该模型的开源代码请到：[模型代码](https://github.com/PaddlePaddle/PaddleOCR) <br/>
+- 模型使用的教程详见：[应用教程](https://aistudio.baidu.com/aistudio/projectdetail/507159) <br/>
+- 如需获取该模型的开源代码请到：[模型代码](https://github.com/PaddlePaddle/PaddleOCR) <br/>
 
 
 ## 一、应用效果展示
-[OCR文字识别场景在线体验](https://www.paddlepaddle.org.cn/hub/scene/ocr)
+- [OCR文字识别场景在线体验](https://www.paddlepaddle.org.cn/hub/scene/ocr)
+- 样例结果示例；
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg"  width = "450" height = "300" hspace='10'/> <br />
 </p>
-<center> 样例结果示例 </center>
 
-## 二、模型基本信息
 
-### 模型介绍
+## 二、模型介绍
 
-&emsp; &emsp; chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_server Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_server&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积循环神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个通用的OCR模型，支持直接预测。
-
+- chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_server Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_server&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积循环神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个通用的OCR模型，支持直接预测。
 
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/rcnn.png" width = "300" height = "450" hspace='10'/> <br />
 </p>
 
-&emsp; &emsp; 更多详情参考：[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
+- 更多详情参考：[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
 
-## 三、安装与命令行预测
+## 三、安装
 
-### 1、环境依赖     
+- ### 1、环境依赖     
 
-&emsp; &emsp; paddlepaddle >= 1.7.2      [如何安装paddle](https://github.com/PaddlePaddle/Paddle#installation)
+  - paddlepaddle >= 1.7.2      [如何安装paddle](https://github.com/PaddlePaddle/Paddle#installation)
 
-&emsp; &emsp; paddlehub >= 1.6.0         [如何安装paddlehub](https://paddlehub.readthedocs.io/en/release-v2.1/get_start/installation.html)
+  - paddlehub >= 1.6.0         [如何安装paddlehub](https://paddlehub.readthedocs.io/en/release-v2.1/get_start/installation.html)
 
-&emsp; &emsp; shapely
+  - shapely
 
-&emsp; &emsp; pyclipper
+  - pyclipper
 
-```shell
-$ pip install shapely pyclipper
-```
-&emsp; &emsp; **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**					                                
+  - ```shell
+    $ pip install shapely pyclipper
+    ```
+  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**					                                
 
-### 2、安装
+- ### 2、安装
 
-```shell
-$ hub install chinese_ocr_db_crnn_mobile==1.1.2
-```
-&emsp; &emsp; 如您安装时遇到问题，可参考：[零基础windows安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/windows_quickstart.md)
-
-### 3、命令行预测
-
-```shell
-$ hub run chinese_ocr_db_crnn_server --input_path "/PATH/TO/IMAGE"
-```
-
-&emsp; &emsp; 通过命令行方式实现文字识别模型的调用，更多请见[PaddleHub命令行指令](https://paddlehub.readthedocs.io/en/release-v2.1/tutorial/cmd_usage.html)
+  - ```shell
+    $ hub install chinese_ocr_db_crnn_mobile==1.1.2
+    ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 四、模型API预测
 
-### 1、代码示例
+- ### 1、命令行预测
 
-```python
-import paddlehub as hub
-import cv2
+  - ```shell
+    $ hub run chinese_ocr_db_crnn_server --input_path "/PATH/TO/IMAGE"
+    ```
+  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](https://paddlehub.readthedocs.io/en/release-v2.1/tutorial/cmd_usage.html)
 
-ocr = hub.Module(name="chinese_ocr_db_crnn_server")
-result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
+- ### 2、代码示例
 
-# or
-# result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
-```
+  - ```python
+    import paddlehub as hub
+    import cv2
 
-### 2、API
+    ocr = hub.Module(name="chinese_ocr_db_crnn_server")
+    result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
-```python
-_init_(text_detector_module=None, enable_mkldnn=False)
-```
+    # or
+    # result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
+    ```
 
-&emsp; &emsp; 构造ChineseOCRDBCRNNServer对象
+- ### 3、API
 
-**参数**
+  - ```python
+    _init_(text_detector_module=None, enable_mkldnn=False)
+    ```
 
-&emsp; &emsp; * text_detector_module(str): 文字检测PaddleHub Module名字，如设置为None，则默认使用[chinese_text_detection_db_server Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_server&en_category=TextRecognition)。其作用为检测图片当中的文本。<br/>
-&emsp; &emsp; * enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
+    - 构造ChineseOCRDBCRNNServer对象
 
-```python
-def recognize_text(images=[],
-                    paths=[],
-                    use_gpu=False,
-                    output_dir='ocr_result',
-                    visualization=False,
-                    box_thresh=0.5,
-                    text_thresh=0.5,
-                    angle_classification_thresh=0.9)
-```
+    - **参数**
 
-&emsp; &emsp; 预测API，检测输入图片中的所有中文文本的位置。
+      - text_detector_module(str): 文字检测PaddleHub Module名字，如设置为None，则默认使用[chinese_text_detection_db_server Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_server&en_category=TextRecognition)。其作用为检测图片当中的文本。<br/>
+      - enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
 
-**参数**
+  - ```python
+    def recognize_text(images=[],
+                       paths=[],
+                       use_gpu=False,
+                       output_dir='ocr_result',
+                       visualization=False,
+                       box_thresh=0.5,
+                       text_thresh=0.5,
+                       angle_classification_thresh=0.9)
+    ```
 
-&emsp; &emsp; * paths (list\[str\]): 图片的路径； <br/>
-&emsp; &emsp; * images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式； <br/>
-&emsp; &emsp; * use\_gpu (bool): 是否使用 GPU；**若使用GPU，请先设置CUDA_VISIBLE_DEVICES环境变量** <br/>
-&emsp; &emsp; * box\_thresh (float): 检测文本框置信度的阈值； <br/>
-&emsp; &emsp; * text\_thresh (float): 识别中文文本置信度的阈值； <br/>
-&emsp; &emsp; * angle_classification_thresh(float): 文本角度分类置信度的阈值 <br/>
-&emsp; &emsp; * visualization (bool): 是否将识别结果保存为图片文件； <br/>
-&emsp; &emsp; * output\_dir (str): 图片的保存路径，默认设为 ocr\_result；
+    - 预测API，检测输入图片中的所有中文文本的位置。
 
-**返回**
+    - **参数**
 
-* res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
-    * data (list\[dict\]): 识别文本结果，列表中每一个元素为 dict，各字段为：
-        * text(str): 识别得到的文本
-        * confidence(float): 识别文本结果置信度
-        * text_box_position(list): 文本框在原图中的像素坐标，4*2的矩阵，依次表示文本框左下、右下、右上、左上顶点的坐标
+      - paths (list\[str\]): 图片的路径； <br/>
+      - images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式； <br/>
+      - use\_gpu (bool): 是否使用 GPU；**若使用GPU，请先设置CUDA_VISIBLE_DEVICES环境变量** <br/>
+      - box\_thresh (float): 检测文本框置信度的阈值； <br/>
+      - text\_thresh (float): 识别中文文本置信度的阈值； <br/>
+      - angle_classification_thresh(float): 文本角度分类置信度的阈值 <br/>
+      - visualization (bool): 是否将识别结果保存为图片文件； <br/>
+      - output\_dir (str): 图片的保存路径，默认设为 ocr\_result；
+
+    - **返回**
+
+      - res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
+        - data (list\[dict\]): 识别文本结果，列表中每一个元素为 dict，各字段为：
+          - text(str): 识别得到的文本
+          - confidence(float): 识别文本结果置信度
+          - text_box_position(list): 文本框在原图中的像素坐标，4*2的矩阵，依次表示文本框左下、右下、右上、左上顶点的坐标
       如果无识别结果则data为\[\]
-    * save_path (str, optional): 识别结果的保存路径，如不保存图片则save_path为''
-
+        - save_path (str, optional): 识别结果的保存路径，如不保存图片则save_path为''
 
 
 
 ## 五、服务部署
 
-&emsp; &emsp; PaddleHub Serving 可以部署一个目标检测的在线服务。
+- PaddleHub Serving 可以部署一个目标检测的在线服务。
 
-### 第一步：启动PaddleHub Serving
+- ### 第一步：启动PaddleHub Serving
 
-&emsp; &emsp; 运行启动命令：
-```shell
-$ hub serving start -m chinese_ocr_db_crnn_server
-```
+  - 运行启动命令：
+  - ```shell
+    $ hub serving start -m chinese_ocr_db_crnn_server
+    ```
 
-&emsp; &emsp; 这样就完成了一个目标检测的服务化API的部署，默认端口号为8866。
+  - 这样就完成了一个目标检测的服务化API的部署，默认端口号为8866。
 
-&emsp; &emsp; **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
+  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 
-### 第二步：发送预测请求
+- ### 第二步：发送预测请求
 
-&emsp; &emsp; 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-```python
-import requests
-import json
-import cv2
-import base64
+  - ```python
+    import requests
+    import json
+    import cv2
+    import base64
 
-def cv2_to_base64(image):
-    data = cv2.imencode('.jpg', image)[1]
-    return base64.b64encode(data.tostring()).decode('utf8')
+    def cv2_to_base64(image):
+        data = cv2.imencode('.jpg', image)[1]
+        return base64.b64encode(data.tostring()).decode('utf8')
 
-# 发送HTTP请求
-data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
-headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/chinese_ocr_db_crnn_server"
-r = requests.post(url=url, headers=headers, data=json.dumps(data))
+    # 发送HTTP请求
+    data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
+    headers = {"Content-type": "application/json"}
+    url = "http://127.0.0.1:8866/predict/chinese_ocr_db_crnn_server"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
-# 打印预测结果
-print(r.json()["results"])
-```
+    # 打印预测结果
+    print(r.json()["results"])
+    ```
 
 
-## 更新历史
+## 六、更新历史
 
 * 1.0.0
 
