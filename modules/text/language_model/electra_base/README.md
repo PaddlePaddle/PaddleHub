@@ -1,5 +1,5 @@
 ```shell
-$ hub install electra-base==1.0.0
+$ hub install electra-base==1.0.1
 ```
 
 <p align="center">
@@ -86,7 +86,7 @@ label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
     name='electra-base',
-    version='1.0.0',
+    version='1.0.1',
     task='seq-cls',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
