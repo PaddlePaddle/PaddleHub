@@ -16,6 +16,8 @@
 
 - 情感倾向分析（Sentiment Classification，简称Senta）针对带有主观描述的中文文本，可自动判断该文本的情感极性类别并给出相应的置信度，能够帮助企业理解用户消费习惯、分析热点话题和危机舆情监控，为企业提供有利的决策支持。该模型基于一个双向LSTM结构，情感类型分为积极、消极。
 
+
+
 ## 二、安装
 
 - ### 1、环境依赖  
@@ -31,6 +33,8 @@
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/mac_quickstart.md)
+
+
 
 ## 三、模型API预测
 
@@ -79,6 +83,7 @@
     sent_feature = outputs["sentence_feature"]
     ```
   - 利用该PaddleHub Module Fine-tune示例，可参考[情感分析示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.6/demo/senta)
+
 
 - ### 4、API
 
@@ -134,6 +139,8 @@
 
       - vocab_path(str): 词汇表路径
 
+
+
 ## 四、服务部署
 
 - PaddleHub Serving可以部署一个在线情感分析服务，可以将此接口用于在线web应用。
@@ -153,6 +160,7 @@
   - 这样就完成了服务化API的部署，默认端口号为8866。
 
   - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
+
 
 - ### 第二步：发送预测请求
 
@@ -180,6 +188,8 @@
     ```
 
   - 关于PaddleHub Serving更多信息参考[服务部署](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md)
+
+
 
 ## 五、更新历史
 
