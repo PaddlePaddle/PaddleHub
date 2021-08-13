@@ -1,3 +1,4 @@
+# senta_bilstm
 |模型名称|senta_bilstm|
 | :--- | :---: | 
 |类别|文本-情感分析|
