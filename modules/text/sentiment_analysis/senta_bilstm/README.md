@@ -29,10 +29,10 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install senta_bilstm==1.2.0
+    $ hub install senta_bilstm
     ```
-  - 如您安装时遇到问题，可参考：[零基础windows安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/windows_quickstart.md)
- | [零基础Linux安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/mac_quickstart.md)
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 
 
@@ -82,7 +82,6 @@
     words = inputs["text"]
     sent_feature = outputs["sentence_feature"]
     ```
-  - 利用该PaddleHub Module Fine-tune示例，可参考[情感分析示例](https://github.com/PaddlePaddle/PaddleHub/tree/release/v1.6/demo/senta)
 
 
 - ### 4、API
@@ -187,7 +186,7 @@
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
     ```
 
-  - 关于PaddleHub Serving更多信息参考[服务部署](https://github.com/PaddlePaddle/PaddleHub/blob/release/v1.6/docs/tutorial/serving.md)
+  - 关于PaddleHub Serving更多信息参考[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
 
 
 
@@ -204,3 +203,6 @@
 * 1.2.0
 
   模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
+  - ```shell
+    $ hub install senta_bilstm==1.2.0
+    ```
