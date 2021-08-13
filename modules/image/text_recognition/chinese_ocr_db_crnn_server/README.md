@@ -90,7 +90,7 @@
 
     - **参数**
 
-      - text_detector_module(str): 文字检测PaddleHub Module名字，如设置为None，则默认使用[chinese_text_detection_db_server Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_server&en_category=TextRecognition)。其作用为检测图片当中的文本。<br/>
+      - text_detector_module(str): 文字检测PaddleHub Module名字，如设置为None，则默认使用[chinese_text_detection_db_server Module](../chinese_text_detection_db_server/)。其作用为检测图片当中的文本。<br/>
       - enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
 
   - ```python
