@@ -33,7 +33,7 @@
 
   - 更多详情参考：[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
 
-## 三、安装
+## 二、安装
 
 - ### 1、环境依赖     
 
@@ -58,7 +58,7 @@
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
-## 四、模型API预测
+## 三、模型API预测
 
 - ### 1、命令行预测
 
@@ -129,7 +129,7 @@
 
 
 
-## 五、服务部署
+## 四、服务部署
 
 - PaddleHub Serving 可以部署一个目标检测的在线服务。
 
@@ -169,7 +169,7 @@
     ```
 
 
-## 六、更新历史
+## 五、更新历史
 
 * 1.0.0
 
