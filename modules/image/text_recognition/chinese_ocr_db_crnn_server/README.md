@@ -10,9 +10,6 @@
 |最新更新日期|2020-06-21|
 |数据指标|mAP@0.98|
 
-- 模型使用的教程详见：[应用教程](https://aistudio.baidu.com/aistudio/projectdetail/507159) <br/>
-- 如需获取该模型的开源代码请到：[模型代码](https://github.com/PaddlePaddle/PaddleOCR) <br/>
-
 
 ## 一、模型基本信息
 
@@ -37,9 +34,9 @@
 
 - ### 1、环境依赖     
 
-  - paddlepaddle >= 1.7.2      [如何安装paddle](https://github.com/PaddlePaddle/Paddle#installation)
+  - paddlepaddle >= 1.7.2    
 
-  - paddlehub >= 1.6.0         [如何安装paddlehub](https://paddlehub.readthedocs.io/en/release-v2.1/get_start/installation.html)
+  - paddlehub >= 1.6.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
   - shapely
 
@@ -65,7 +62,7 @@
   - ```shell
     $ hub run chinese_ocr_db_crnn_server --input_path "/PATH/TO/IMAGE"
     ```
-  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](https://paddlehub.readthedocs.io/en/release-v2.1/tutorial/cmd_usage.html)
+  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、代码示例
 
