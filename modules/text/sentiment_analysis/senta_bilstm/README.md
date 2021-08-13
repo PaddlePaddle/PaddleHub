@@ -9,10 +9,6 @@
 |最新更新日期| |
 |数据指标| |
 
-- 模型使用的教程详见：[情感分析-一键预测](https://aistudio.baidu.com/aistudio/projectdetail/215814) | [情感分析-Finetune](https://aistudio.baidu.com/aistudio/projectdetail/216846) <br/> 
-- 如需获取该模型的开源代码请到：[模型代码](https://github.com/PaddlePaddle/models/tree/develop/PaddleNLP/sentiment_classification) <br/>
-
-
 ## 一、模型介绍
 
 - 情感倾向分析（Sentiment Classification，简称Senta）针对带有主观描述的中文文本，可自动判断该文本的情感极性类别并给出相应的置信度，能够帮助企业理解用户消费习惯、分析热点话题和危机舆情监控，为企业提供有利的决策支持。该模型基于一个双向LSTM结构，情感类型分为积极、消极。
@@ -23,9 +19,9 @@
 
 - ### 1、环境依赖  
 
-  - paddlepaddle >= 1.8.0      [如何安装paddle](https://github.com/PaddlePaddle/Paddle#installation)
+  - paddlepaddle >= 1.8.0
   
-  - paddlehub >= 1.8.0        [如何安装paddlehub](https://paddlehub.readthedocs.io/en/release-v2.1/get_start/installation.html)
+  - paddlehub >= 1.8.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
@@ -48,7 +44,7 @@
   - ```shell
     $ hub run senta_bilstm --input_file test.txt
     ```
-  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](https://paddlehub.readthedocs.io/en/release-v2.1/tutorial/cmd_usage.html)
+  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
 
