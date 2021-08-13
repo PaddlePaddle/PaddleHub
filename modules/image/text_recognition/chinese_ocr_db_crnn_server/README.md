@@ -25,7 +25,7 @@
 
 - ### 模型介绍
 
-  - chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_server Module](../../chinese_text_detection_db_server/)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积循环神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个通用的OCR模型，支持直接预测。
+  - chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_server Module](../chinese_text_detection_db_server/)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积循环神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个通用的OCR模型，支持直接预测。
 
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/rcnn.png" width = "300" height = "450" hspace='10'/> <br />
@@ -55,8 +55,8 @@
   - ```shell
     $ hub install chinese_ocr_db_crnn_mobile
     ```
-  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../blob/release/v2.1/docs/docs_ch/get_start/windows_quickstart.md)
- | [零基础Linux安装](../../../../blob/release/v2.1/docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/mac_quickstart.md)
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 四、模型API预测
 
