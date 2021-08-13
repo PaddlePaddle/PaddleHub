@@ -1,3 +1,5 @@
+# chinese_ocr_db_crnn_server
+
 |模型名称|chinese_ocr_db_crnn_server|
 | :--- | :---: | 
 |类别|图像-文字识别|
@@ -12,23 +14,24 @@
 - 如需获取该模型的开源代码请到：[模型代码](https://github.com/PaddlePaddle/PaddleOCR) <br/>
 
 
-## 一、应用效果展示
-- [OCR文字识别场景在线体验](https://www.paddlepaddle.org.cn/hub/scene/ocr)
-- 样例结果示例；
+## 一、模型基本信息
+
+- ### 应用效果展示
+  - [OCR文字识别场景在线体验](https://www.paddlepaddle.org.cn/hub/scene/ocr)
+  - 样例结果示例：
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg"  width = "450" height = "300" hspace='10'/> <br />
 </p>
 
+- ### 模型介绍
 
-## 二、模型介绍
-
-- chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_server Module](https://www.paddlepaddle.org.cn/hubdetail?name=chinese_text_detection_db_server&en_category=TextRecognition)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积循环神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个通用的OCR模型，支持直接预测。
+  - chinese_ocr_db_crnn_server Module用于识别图片当中的汉字。其基于[chinese_text_detection_db_server Module](../../chinese_text_detection_db_server/)检测得到的文本框，继续识别文本框中的中文文字。识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积循环神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个通用的OCR模型，支持直接预测。
 
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/rcnn.png" width = "300" height = "450" hspace='10'/> <br />
 </p>
 
-- 更多详情参考：[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
+  - 更多详情参考：[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
 
 ## 三、安装
 
@@ -50,10 +53,10 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install chinese_ocr_db_crnn_mobile==1.1.2
+    $ hub install chinese_ocr_db_crnn_mobile
     ```
-  - 如您安装时遇到问题，可参考：[零基础windows安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/windows_quickstart.md)
- | [零基础Linux安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/mac_quickstart.md)
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../blob/release/v2.1/docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../blob/release/v2.1/docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../PaddleHub/blob/release/v2.1/docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 四、模型API预测
 
@@ -183,3 +186,11 @@
 * 1.1.1
 
    支持文本中空格识别。
+   
+* 1.1.2
+
+   修复检出字段无法超过30个问题。
+   
+  - ```shell
+    $ hub install chinese_ocr_db_crnn_mobile==1.1.2
+    ```
