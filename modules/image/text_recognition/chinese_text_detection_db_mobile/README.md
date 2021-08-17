@@ -16,7 +16,8 @@
 - ### 应用效果展示
   - 样例结果示例：
 <p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg"  width = "450" height = "300" hspace='10'/> <br />
+<img width="1080" alt="package" src="https://user-images.githubusercontent.com/76040149/129722926-3ae45dd1-6467-4373-95aa-95ac83d5a6ee.png">
+
 </p>
 
 - ### 模型介绍
