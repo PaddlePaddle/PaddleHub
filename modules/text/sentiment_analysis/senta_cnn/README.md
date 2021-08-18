@@ -45,7 +45,7 @@
   - ```shell
     $ hub run senta_cnn --input_file test.txt
     ```
-  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+  - 通过命令行方式实现文字识别模型的调用，更多请见：[PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
 
@@ -185,7 +185,7 @@
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
     ```
 
-  - 关于PaddleHub Serving更多信息参考[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
+  - 关于PaddleHub Serving更多信息参考：[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
 
 
 
