@@ -67,8 +67,8 @@
         print(result['positive_probs'])
         print(result['negative_probs'])
     
-    # 这家餐厅很好吃 1 positive 0.9407 0.0593
-    # 这部电影真的很差劲 0 negative 0.02 0.98
+    # 这家餐厅很好吃 1 positive 0.9285 0.0715
+    # 这部电影真的很差劲 0 negative 0.0187 0.9813
     ```
 
 - ### 3、Finetune代码示例
