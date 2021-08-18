@@ -6,7 +6,7 @@
 |网络|Differentiable Binarization+RCNN|
 |数据集|icdar2015数据集|
 |是否支持Fine-tuning|否|
-|模型大小|200.36MB|
+|模型大小|116MB|
 |最新更新日期|2020-06-21|
 |数据指标|mAP@0.98|
 
