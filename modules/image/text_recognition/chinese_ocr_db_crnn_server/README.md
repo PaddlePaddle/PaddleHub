@@ -70,7 +70,7 @@
     import paddlehub as hub
     import cv2
 
-    ocr = hub.Module(name="chinese_ocr_db_crnn_server")
+    ocr = hub.Module(name="chinese_ocr_db_crnn_server", enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
     result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
     # or
