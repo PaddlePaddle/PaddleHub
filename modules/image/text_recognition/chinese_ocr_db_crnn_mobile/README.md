@@ -29,7 +29,7 @@
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/rcnn.png" width = "300" height = "450"  hspace='10'/> <br />
 </p>
 
-  - 更多详情参考[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
+  - 更多详情参考：[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
 
 
 
@@ -75,7 +75,7 @@
     import paddlehub as hub
     import cv2
 
-    ocr = hub.Module(name="chinese_ocr_db_crnn_mobile")
+    ocr = hub.Module(name="chinese_ocr_db_crnn_mobile", enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
     result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
     # or
