@@ -189,5 +189,5 @@
    修复检出字段无法超过30个问题。
    
   - ```shell
-    $ hub install chinese_ocr_db_crnn_mobile==1.1.2
+    $ hub install chinese_ocr_db_crnn_server==1.1.2
     ```
