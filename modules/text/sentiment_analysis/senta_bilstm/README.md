@@ -13,7 +13,7 @@
 
 - ### 模型介绍
 
-  - 情感倾向分析（Sentiment Classification，简称Senta）针对带有主观描述的中文文本，可自动判断该文本的情感极性类别并给出相应的置信度，能够帮助企业理解用户消费习惯、分析热点话题和危机舆情监控，为企业提供有利的决策支持。该模型基于一个双向LSTM结构，情感类型分为积极、消极。
+  - 情感倾向分析（Sentiment Classification，简称Senta）针对带有主观描述的中文文本，可自动判断该文本的情感极性类别并给出相应的置信度，能够帮助企业理解用户消费习惯、分析热点话题和危机舆情监控，为企业提供有利的决策支持。该模型基于一个双向LSTM结构，情感类型分为积极、消极。该PaddleHub Module支持预测和Fine-tune。
 
 
 
@@ -56,7 +56,7 @@
     senta = hub.Module(name="senta_bilstm")
     test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
     results = senta.sentiment_classify(texts=test_text, 
-                                       use_gpu=True,
+                                       use_gpu=False,
                                        batch_size=1)
         
     for result in results:
