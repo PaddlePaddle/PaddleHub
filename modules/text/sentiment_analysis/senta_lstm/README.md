@@ -205,6 +205,6 @@
 
   模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
   
-    - ```shell
-    $ hub install senta_lstm==1.2.0
+  - ```shell
+    $ hub install senta_lstm
     ```
