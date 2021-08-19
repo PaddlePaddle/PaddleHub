@@ -1,5 +1,5 @@
 ```shell
-$ hub install ernie_tiny==2.0.1
+$ hub install ernie_tiny==2.0.2
 ```
 ## 在线体验
 <a class="ant-btn large" href="https://aistudio.baidu.com/aistudio/projectDetail/79380" target="_blank">AI Studio 快速体验</a>
@@ -96,7 +96,7 @@ label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
     name='ernie_tiny',
-    version='2.0.1',
+    version='2.0.2',
     task='sequence_classification',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
