@@ -154,10 +154,16 @@ test_text = ["今天是个好天气。"]
 results = lac.cut(text=test_text, use_gpu=False, batch_size=1, return_tag=True)
 print(results)
 #{'word': ['今天', '是', '个', '好天气', '。'], 'tag': ['TIME', 'v', 'q', 'n', 'w']}
-
-# 一行代码启动serving 服务，更多模型搜索可参考 https://www.paddlepaddle.org.cn/hublist
-！hub serving start -m lac
 ```
+
+### 一行代码启动lac（词法分析）服务，
+</div>
+
+```python
+!hub serving start -m lac
+```
+
+ 更多模型介绍可以参考[模型搜索](https://www.paddlepaddle.org.cn/hublist)
 
  更多迁移学习能力可以参考[教程文档](https://paddlehub.readthedocs.io/zh_CN/release-v2.1/transfer_learning_index.html)
 
