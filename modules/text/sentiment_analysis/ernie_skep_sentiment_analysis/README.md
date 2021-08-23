@@ -5,8 +5,8 @@
 |网络|SKEP|
 |数据集|百度自建数据集|
 |是否支持Fine-tuning|否|
-|模型大小|-|
-|最新更新日期|2021-08-19|
+|模型大小|2.54G|
+|最新更新日期|2021-02-26|
 |数据指标|-|
 
 
@@ -21,7 +21,7 @@
 <img src="https://bj.bcebos.com/paddlehub/model/nlp/skep.png" width='600' hspace='10'/> <br />
 </p>
 
-  - 更多详情参考ACL 2020论文:[SKEP: Sentiment Knowledge Enhanced Pre-training for Sentiment Analysis](https://arxiv.org/abs/2005.05635)
+  - 更多详情参考ACL 2020论文：[SKEP: Sentiment Knowledge Enhanced Pre-training for Sentiment Analysis](https://arxiv.org/abs/2005.05635)
 
 
 ## 二、安装
