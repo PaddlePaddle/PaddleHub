@@ -80,7 +80,7 @@
 - ### 3、API
 
   - ```python
-    _init_(text_detector_module=None, enable_mkldnn=False)
+    def _init_(text_detector_module=None, enable_mkldnn=False)
     ```
 
     - 构造ChineseOCRDBCRNNServer对象
