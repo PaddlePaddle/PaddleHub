@@ -43,11 +43,11 @@
   - ```shell
     $ hub run senta_lstm --input_text "这家餐厅很好吃"
     ```
-  - 或者
+    或者
   - ```shell
     $ hub run senta_lstm --input_file test.txt
     ```
-    test.txt 存放待预测文本， 如：
+    - test.txt 存放待预测文本， 如：
       > 这家餐厅很好吃
  
       > 这部电影真的很差劲
