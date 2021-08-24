@@ -144,12 +144,12 @@
 - ## 第一步：启动PaddleHub Serving
 
   - 运行启动命令：
-  - ```shell
+    ```shell
     $ hub serving start -c serving_config.json
     ```
 
   - `serving_config.json`的内容如下：
-  - ```json
+    ```json
     {
       "modules_info": {
         "jieba_paddle": {
@@ -172,7 +172,7 @@
 
   - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-  - ```python
+    ```python
     import requests
     import json
 
