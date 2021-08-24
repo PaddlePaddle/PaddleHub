@@ -45,10 +45,15 @@
   - ```shell
     $ hub run senta_gru --input_text "今天天气真好"
     ```
-  - 或者
+    或者
   - ```shell
     $ hub run senta_gru --input_file test.txt
     ```
+    - test.txt 存放待预测文本， 如：
+      > 这家餐厅很好吃
+ 
+      > 这部电影真的很差劲
+      
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -136,12 +141,12 @@
 - ## 第一步：启动PaddleHub Serving
 
   - 运行启动命令：
-  - ```shell
+    ```shell
     $ hub serving start -m senta_gru
     ```
 
   - 启动时会显示加载模型过程，启动成功后显示
-  - ```shell
+    ```shell
     Loading senta_gru successful.
     ```
 
@@ -153,7 +158,7 @@
 
   - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-  - ```python
+    ```python
     import requests
     import json
 
