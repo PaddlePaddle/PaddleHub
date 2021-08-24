@@ -71,7 +71,7 @@
     # 这部电影真的很差劲 0 negative 0.0187 0.9813
     ```
     
- - ### 3、API
+- ### 3、API
 
   - ```python
     def sentiment_classify(texts=[], data={}, use_gpu=False, batch_size=1)
