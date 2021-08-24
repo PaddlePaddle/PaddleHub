@@ -6,8 +6,8 @@
 |网络|Differentiable Binarization|
 |数据集|icdar2015数据集|
 |是否支持Fine-tuning|否|
-|模型大小|-|
-|最新更新日期|2021-08-17|
+|模型大小|2.6MB|
+|最新更新日期|2021-02-26|
 |数据指标|-|
 
 
@@ -28,7 +28,7 @@
 <img src="https://bj.bcebos.com/paddlehub/model/image/ocr/db_algo.png"  hspace='10'/> <br />
 </p>
 
-更多详情参考[Real-time Scene Text Detection with Differentiable Binarization](https://arxiv.org/pdf/1911.08947.pdf)
+更多详情参考：[Real-time Scene Text Detection with Differentiable Binarization](https://arxiv.org/pdf/1911.08947.pdf)
 
 
 ## 二、安装
