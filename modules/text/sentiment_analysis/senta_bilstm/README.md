@@ -4,9 +4,9 @@
 |类别|文本-情感分析|
 |网络|BiLSTM|
 |数据集|百度自建数据集|
-|是否支持Fine-tuning|是|
+|是否支持Fine-tuning|否|
 |模型大小|690MB|
-|最新更新日期|-|
+|最新更新日期|2021-02-26|
 |数据指标|-|
 
 ## 一、模型基本信息
@@ -185,7 +185,7 @@
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
     ```
 
-  - 关于PaddleHub Serving更多信息参考[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
+  - 关于PaddleHub Serving更多信息参考：[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
 
 
 
