@@ -56,8 +56,15 @@
 - ### 2、预测代码示例
 
   - ```python
+    import paddlehub as hub
 
-
+    jieba = hub.Module(name="jieba_paddle")
+    
+    results = jieba.cut("今天是个好日子", cut_all=False, HMM=True)
+    print(results)
+    
+    # ['今天', '是', '个', '好日子']
+    ```
 
 
  - ### 3、API
