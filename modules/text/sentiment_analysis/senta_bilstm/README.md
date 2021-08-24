@@ -42,10 +42,15 @@
   - ```shell
     $ hub run senta_bilstm --input_text "这家餐厅很好吃"
     ```
-  - 或者
+    或者
   - ```shell
     $ hub run senta_bilstm --input_file test.txt
-    ```
+    ```    
+    - test.txt 存放待预测文本， 如：
+      > 这家餐厅很好吃
+ 
+      > 这部电影真的很差劲
+      
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
