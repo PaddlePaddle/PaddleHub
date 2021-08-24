@@ -6,8 +6,8 @@
 |网络|Differentiable Binarization|
 |数据集|icdar2015数据集|
 |是否支持Fine-tuning|否|
-|模型大小|-|
-|最新更新日期|2021-08-17|
+|模型大小|47MB|
+|最新更新日期|2021-02-26|
 |数据指标|-|
 
 
@@ -164,14 +164,14 @@
 
   初始发布
 
-* 1.0.2
+* 1.0.1
 
   支持mkldnn加速CPU计算
 
-* 1.0.3
+* 1.0.2
 
   增加更多预训练数据，更新预训练参数
   
   - ```shell
-    $ hub install chinese_text_detection_db_server==1.0.3
+    $ hub install chinese_text_detection_db_server==1.0.2
     ```
