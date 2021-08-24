@@ -18,9 +18,12 @@
 
   - videotag_tsn_lstm是一个基于千万短视频预训练的视频分类模型，可直接预测短视频的中文标签。模型分为视频特征抽取和序列建模两个阶段，前者使用TSN网络提取视频特征，后者基于前者输出使用AttentionLSTM网络进行序列建模实现分类。模型基于百度实际短视频场景中的大规模数据训练得到，在实际业务中取得89.9%的Top-1精度，同时具有良好的泛化能力，适用于多种短视频中文标签分类场景。该PaddleHub Module可支持预测。
 
-![image](https://paddlehub.bj.bcebos.com/model/video/video_classifcation/VideoTag_TSN_AttentionLSTM.png 'width'=300)
 
-具体网络结构可参考论文：[TSN](https://arxiv.org/abs/1608.00859) 和 [AttentionLSTM](https://arxiv.org/abs/1503.08909)。
+<p align="center">
+<img src="https://paddlehub.bj.bcebos.com/model/video/video_classifcation/VideoTag_TSN_AttentionLSTM.png"  width = "450"  hspace='10'/> <br />
+</p>
+
+  - 具体网络结构可参考论文：[TSN](https://arxiv.org/abs/1608.00859) 和 [AttentionLSTM](https://arxiv.org/abs/1503.08909)。
 
 
 
@@ -68,7 +71,6 @@
     results = videotag.classify(paths=["1.mp4","2.mp4"], use_gpu=False)  # 示例文件请在上方下载
     print(results)
     
-
     #[{'path': '1.mp4', 'prediction': {'训练': 0.9771281480789185, '蹲': 0.9389840960502625, '杠铃': 0.8554490804672241, '健身房': 0.8479971885681152}}, {'path': '2.mp4', 'prediction': {'舞蹈': 0.8504238724708557}}]
 
 
@@ -94,7 +96,7 @@
 
     - **返回**
 
-      - results(list\[dict\]): result中的每个元素为对应输入的预测结果，预测单个mp4文件时仅有1个元素。每个预测结果为dict，包含mp4文件路径path及其分类概率。例：
+      - results(list\[dict\]): result中的每个元素为对应输入的预测结果，预测单个mp4文件时仅有1个元素。每个预测结果为dict，包含mp4文件路径path及其分类概率。
 
 
 ## 五、更新历史
