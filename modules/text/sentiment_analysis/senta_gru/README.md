@@ -179,7 +179,7 @@
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
     ```
 
-  - 关于PaddleHub Serving更多信息参考[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
+  - 关于PaddleHub Serving更多信息参考：[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
 
 ## 更新历史
 
@@ -195,6 +195,6 @@
 
   模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
   
-    - ```shell
+  - ```shell
     $ hub install senta_gru==1.2.0
     ```
