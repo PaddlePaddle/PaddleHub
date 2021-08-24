@@ -123,6 +123,7 @@ please add WeChat above and send "Hub" to the robot, the robot will invite you t
 <a name="QuickStart"></a>
 ## QuickStart
 
+### The installation of required components.
 ```python
 # install paddlepaddle with gpu
 # !pip install --upgrade paddlepaddle-gpu
@@ -132,8 +133,11 @@ please add WeChat above and send "Hub" to the robot, the robot will invite you t
 
 # install paddlehub
 !pip install --upgrade paddlehub
+```
 
+### The simplest cases of Chinese word segmentation.
 
+```python
 import paddlehub as hub
 
 lac = hub.Module(name="lac")
@@ -143,6 +147,15 @@ results = lac.cut(text=test_text, use_gpu=False, batch_size=1, return_tag=True)
 print(results)
 #{'word': ['今天', '是', '个', '好天气', '。'], 'tag': ['TIME', 'v', 'q', 'n', 'w']}
 ```
+### The simplest command of deploying lac service.
+</div>
+
+```python
+!hub serving start -m lac
+```
+
+More model description, please refer [Models List](https://www.paddlepaddle.org.cn/hublist)
+
 More API for transfer learning, please refer [Tutorial](https://paddlehub.readthedocs.io/en/release-v2.1/transfer_learning_index.html)
 
 <a name="License"></a>
