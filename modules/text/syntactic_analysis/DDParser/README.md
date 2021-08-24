@@ -91,7 +91,7 @@
     - **返回**
 
       - results(list\[dict\]): 依存分析结果。每个元素都是dict类型，包含以下信息：  
-        - ```python
+     
             {
                 'word': list[str], 分词结果。
                 'head': list[int], 当前成分其支配者的id。
@@ -100,7 +100,7 @@
                 'postag': list[str], 词性标签，只有当texts的元素是未分词的字符串时包含这个键。
                 'visual': 图像数组，可以使用cv2.imshow显示图像或cv2.imwrite保存图像。
             }
-          ```
+      
 
   - ```python
     def visualize(word, head, deprel)
