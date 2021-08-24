@@ -170,7 +170,7 @@ class ResNet50vdAnimals(hub.Module):
         elif use_device == "gpu":
             predictor = self.gpu_predictor
         else:
-            raise Exception("not supported device: " + use_device)
+            raise Exception("Unsupported device: " + use_device)
 
         all_data = list()
         for yield_data in reader(images, paths):
