@@ -67,7 +67,7 @@
     ```
 
 
- - ### 3、API
+- ### 3、API
 
   - ```python
     def cut(sentence, use_paddle=True, cut_all=False, HMM=True)
