@@ -153,7 +153,7 @@
 - ### 第一步：启动PaddleHub Serving
 
   - 运行启动命令：
-  - ```shell
+    ```shell
     $ hub serving start -m ernie_skep_sentiment_analysis
     ```
 
@@ -165,7 +165,7 @@
 
   - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-  - ```python
+    ```python
     import requests
     import json
 
