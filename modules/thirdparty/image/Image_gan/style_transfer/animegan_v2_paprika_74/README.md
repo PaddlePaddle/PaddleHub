@@ -23,7 +23,6 @@ def style_transfer(
     self,
     images=None,
     paths=None,
-    batch_size=1,
     output_dir='output',
     visualization=False,
     min_size=32,
@@ -43,7 +42,6 @@ def style_transfer(
 
 * images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，默认为 None；
 * paths (list\[str\]): 图片的路径，默认为 None；
-* batch\_size (int): batch 的大小，默认设为 1；
 * visualization (bool): 是否将识别结果保存为图片文件，默认设为 False；
 * output\_dir (str): 图片的保存路径，默认设为 output；
 * min\_size (int): 输入图片的短边最小尺寸，默认设为 32；

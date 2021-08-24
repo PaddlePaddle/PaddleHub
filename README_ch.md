@@ -133,10 +133,11 @@
 
 ## 快速开始
 
-
 [【零基础windows安装并实现图像风格迁移】](./docs/docs_ch/get_start/windows_quickstart.md)
 
-[【Linux and Mac安装并实现中文分词】](./docs/docs_ch/get_start/linux_mac_quickstart.md)
+[【零基础mac安装并实现图像风格迁移】](./docs/docs_ch/get_start/mac_quickstart.md)
+
+[【零基础linux安装并实现图像风格迁移】](./docs/docs_ch/get_start/linux_quickstart.md)
 
 ### 极简中文分词案例  
 </div>
@@ -205,6 +206,7 @@ print(results)
     <a href="https://github.com/hlmu"><img src="https://avatars.githubusercontent.com/u/30133236?v=4" width=75 height=75></a>
     <a href="https://github.com/yma-admin"><img src="https://avatars.githubusercontent.com/u/40477813?v=4" width=75 height=75></a>
     <a href="https://github.com/brooklet"><img src="https://avatars.githubusercontent.com/u/1585799?v=4" width=75 height=75></a>
+    <a href="https://github.com/brooklet"><img src="https://avatars.githubusercontent.com/u/50263321?v=4" width=75 height=75></a>
 </p>
 
 我们非常欢迎您为PaddleHub贡献代码，也十分感谢您的反馈。
