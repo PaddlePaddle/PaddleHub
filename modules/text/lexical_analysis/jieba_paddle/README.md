@@ -1,15 +1,69 @@
-## 概述
+# jieba_paddle
 
-该Module是jieba使用PaddlePaddle深度学习框架搭建的切词网络（双向GRU）。
-同时也支持jieba的传统切词方法，如精确模式、全模式、搜索引擎模式等切词模式，使用方法和jieba保持一致。
+|模型名称|jieba_paddle|
+| :--- | :---: | 
+|类别|文本-词法分析|
+|网络|BiGRU+CRF|
+|数据集|百度自建数据集|
+|是否支持Fine-tuning|否|
+|模型大小|28KB|
+|最新更新日期|2021-02-26|
+|数据指标|-|
 
-更多信息参考：https://github.com/fxsjy/jieba
 
-## API 说明
 
-### cut(sentence, use_paddle=True, cut_all=False, HMM=True)
+## 一、模型基本信息
 
-jieba_paddle预测接口，预测输入句子的分词结果
+- ### 模型介绍
+
+  - 该Module是jieba使用PaddlePaddle深度学习框架搭建的切词网络（双向GRU）。同时也支持jieba的传统切词方法，如精确模式、全模式、搜索引擎模式等切词模式，使用方法和jieba保持一致。
+
+  - 更多信息参考：[jieba](https://github.com/fxsjy/jieba)
+
+
+
+## 二、安装
+
+- ### 1、环境依赖  
+
+  - paddlepaddle >= 1.8.0
+  
+  - paddlehub >= 1.8.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+
+- ### 2、安装
+
+  - ```shell
+    $ hub install jieba_paddle
+    ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+
+
+
+## 三、模型API预测
+
+- ### 1、命令行预测
+
+  - ```shell
+    $ hub run jieba_paddle --input_text "今天天气真好"
+    ```
+  - 或者
+  - ```shell
+    $ hub run senta_gru --input_file test.txt
+    ```
+  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+
+
+
+
+
+
+ - ### 3、API
+
+  - ```python
+    def cut(sentence, use_paddle=True, cut_all=False, HMM=True)
+    ```
+    - jieba_paddle预测接口，预测输入句子的分词结果
 
 **参数**
 
@@ -133,3 +187,6 @@ PaddleHub >= 1.8.0
 * 1.0.0
 
     初始发布
+  - ```shell
+    $ hub install jieba_paddle==1.0.0
+    ```
