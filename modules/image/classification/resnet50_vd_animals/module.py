@@ -145,7 +145,7 @@ class ResNet50vdAnimals(hub.Module):
                     param.trainable = trainable
         return inputs, outputs, context_prog
 
-    def classification(self, images=None, paths=None, batch_size=1, use_device="cpu", top_k=1):
+    def classification(self, images=None, paths=None, batch_size=1, use_gpu=False, top_k=1, use_device=None):
         """
         API for image classification.
 
@@ -153,24 +153,32 @@ class ResNet50vdAnimals(hub.Module):
             images (list[numpy.ndarray]): data of images, shape of each is [H, W, C], color space must be BGR.
             paths (list[str]): The paths of images.
             batch_size (int): batch size.
-            use_device (str): use cpu, gpu, xpu or npu.
+            use_gpu (bool): Whether to use gpu.
             top_k (int): Return top k results.
+            use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
             res (list[dict]): The classfication results.
         """
 
         # real predictor to use
-        if use_device == "cpu":
-            predictor = self.cpu_predictor
-        elif use_device == "xpu":
-            predictor = self.xpu_predictor
-        elif use_device == "npu":
-            predictor = self.npu_predictor
-        elif use_device == "gpu":
-            predictor = self.gpu_predictor
+        if use_device is not None:
+            if use_device == "cpu":
+                predictor = self.cpu_predictor
+            elif use_device == "xpu":
+                predictor = self.xpu_predictor
+            elif use_device == "npu":
+                predictor = self.npu_predictor
+            elif use_device == "gpu":
+                predictor = self.gpu_predictor
+            else:
+                raise Exception("Unsupported device: " + use_device)
         else:
-            raise Exception("not supported device: " + use_device)
+            # use_device is not set, therefore follow use_gpu
+            if use_gpu:
+                predictor = self.gpu_predictor
+            else:
+                predictor = self.cpu_predictor
 
         all_data = list()
         for yield_data in reader(images, paths):
@@ -245,19 +253,26 @@ class ResNet50vdAnimals(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.classification(paths=[args.input_path], batch_size=args.batch_size, use_device=args.use_device)
+        results = self.classification(paths=[args.input_path],
+                                      batch_size=args.batch_size,
+                                      top_k=args.top_k,
+                                      use_gpu=args.use_gpu,
+                                      use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument('--use_device',
-                                           default="cpu",
-                                           choices=["cpu", "gpu", "xpu", "npu"],
-                                           help="use cpu(default), gpu, xpu or npu.")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not.")
         self.arg_config_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
         self.arg_config_group.add_argument('--top_k', type=ast.literal_eval, default=1, help="Return top k results.")
+        self.arg_config_group.add_argument('--use_device',
+                                           choices=["cpu", "gpu", "xpu", "npu"],
+                                           help="use cpu, gpu, xpu or npu. overwites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
