@@ -18,7 +18,7 @@
 
   - videotag_tsn_lstm是一个基于千万短视频预训练的视频分类模型，可直接预测短视频的中文标签。模型分为视频特征抽取和序列建模两个阶段，前者使用TSN网络提取视频特征，后者基于前者输出使用AttentionLSTM网络进行序列建模实现分类。模型基于百度实际短视频场景中的大规模数据训练得到，在实际业务中取得89.9%的Top-1精度，同时具有良好的泛化能力，适用于多种短视频中文标签分类场景。该PaddleHub Module可支持预测。
 
-![image](https://paddlehub.bj.bcebos.com/model/video/video_classifcation/VideoTag_TSN_AttentionLSTM.png)
+![image](https://paddlehub.bj.bcebos.com/model/video/video_classifcation/VideoTag_TSN_AttentionLSTM.png 'width'=300)
 
 具体网络结构可参考论文：[TSN](https://arxiv.org/abs/1608.00859) 和 [AttentionLSTM](https://arxiv.org/abs/1503.08909)。
 
