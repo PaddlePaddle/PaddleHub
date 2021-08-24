@@ -5,8 +5,8 @@
 |网络|LSTM|
 |数据集|百度自建数据集|
 |是否支持Fine-tuning|是|
-|模型大小|-|
-|最新更新日期|2021-08-18|
+|模型大小|637MB|
+|最新更新日期|2021-02-26|
 |数据指标|-|
 
 
@@ -47,6 +47,11 @@
   - ```shell
     $ hub run senta_lstm --input_file test.txt
     ```
+    test.txt 存放待预测文本， 如：
+      > 这家餐厅很好吃
+ 
+      > 这部电影真的很差劲
+  
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -206,5 +211,5 @@
   模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
   
   - ```shell
-    $ hub install senta_lstm
+    $ hub install senta_lstm==1.2.0
     ```
