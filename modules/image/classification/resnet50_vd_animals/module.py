@@ -255,8 +255,8 @@ class ResNet50vdAnimals(hub.Module):
         args = self.parser.parse_args(argvs)
         results = self.classification(paths=[args.input_path],
                                       batch_size=args.batch_size,
-                                      top_k=args.top_k,
                                       use_gpu=args.use_gpu,
+                                      top_k=args.top_k,
                                       use_device=args.use_device)
         return results
 
@@ -272,7 +272,7 @@ class ResNet50vdAnimals(hub.Module):
         self.arg_config_group.add_argument('--top_k', type=ast.literal_eval, default=1, help="Return top k results.")
         self.arg_config_group.add_argument('--use_device',
                                            choices=["cpu", "gpu", "xpu", "npu"],
-                                           help="use cpu, gpu, xpu or npu. overwites use_gpu flag.")
+                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
