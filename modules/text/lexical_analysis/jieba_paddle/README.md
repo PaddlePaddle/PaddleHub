@@ -47,7 +47,7 @@
   - ```shell
     $ hub run jieba_paddle --input_text "今天天气真好"
     ```
-  - 或者
+    或者
   - ```shell
     $ hub run senta_gru --input_file test.txt
     ```
@@ -193,7 +193,7 @@
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
     ```
 
-  - 关于PaddleHub Serving更多信息参考[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
+  - 关于PaddleHub Serving更多信息参考：[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
 
 
 ## 五、更新历史
