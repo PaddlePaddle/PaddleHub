@@ -17,14 +17,10 @@
 - ### 应用效果展示
 
   - [realsr模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=realsr&en_category=ImageEditing)
-  - 样例结果示例(上方为原图，下方为效果图)：
-<p align="center">
-<img src="https://user-images.githubusercontent.com/35907364/130789728-939ea79a-c19e-49af-abf3-21cc8b8b0d90.jpg" width = "450" height = "300" hspace='10'/> <br />
-</p>
-
-<p align="center">
-<img src="https://user-images.githubusercontent.com/35907364/130789888-a0d4f78e-acd6-44c1-9570-7390e90ae8dc.png" width = "450" height = "300" hspace='10'/> <br />
-</p>
+  - 样例结果示例(左为原图，右为效果图)：
+    <p align="center">
+    <img src="https://user-images.githubusercontent.com/35907364/130789728-939ea79a-c19e-49af-abf3-21cc8b8b0d90.jpg" width = "450" height = "300" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130789888-a0d4f78e-acd6-44c1-9570-7390e90ae8dc.png" width = "450" height = "300" hspace='10'/>
+    </p>
 
 - ### 模型介绍
 
