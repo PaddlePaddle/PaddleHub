@@ -69,7 +69,7 @@
                             draw_threshold=0.5, use_gpu=False, from_device=False)
     # or read from a camera device
     # jde_tracker.mot_predict('0', output_dir='mot_result', visualization=True, \
-                            draw_threshold=0.5, use_gpu=False, from_device=True)
+    #                        draw_threshold=0.5, use_gpu=False, from_device=True)
     ```
 
 - ### 3、API
