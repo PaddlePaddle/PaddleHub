@@ -7,7 +7,7 @@
 |数据集|ILSVRC 2012|
 |是否支持Fine-tuning|否|
 |模型大小|834MB|
-|最新更新日期|2020-06-21|
+|最新更新日期|2021-04-13|
 
 
 ## 一、模型基本信息
@@ -15,10 +15,10 @@
 - ### 应用效果展示
 
   - [deoldify模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=deoldify&en_category=ImageEditing)
-  - 样例结果示例：
-<p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg"  width = "450" height = "300" hspace='10'/> <br />
-</p>
+    - 样例结果示例(左为原图，右为效果图)：
+    <p align="center">
+    <img src="https://user-images.githubusercontent.com/35907364/130886749-668dfa38-42ed-4a09-8d4a-b18af0475375.jpg" width = "450" height = "300" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130886685-76221736-839a-46a2-8415-e5e0dd3b345e.png" width = "450" height = "300" hspace='10'/>
+    </p>
 
 - ### 模型介绍
 
