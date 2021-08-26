@@ -6,18 +6,21 @@
 |网络|基于deoldify和realsr模型|
 |是否支持Fine-tuning|否|
 |模型大小|64MB+834MB|
-|最新更新日期|2020-06-21|
+|最新更新日期|2021-08-19|
 
 
 
 ## 一、模型基本信息
 
 - ### 应用效果展示
+  - [deoldify模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=deoldify&en_category=ImageEditing)
   - [realsr模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=realsr&en_category=ImageEditing)
-  - 样例结果示例：
-<p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg"  width = "450" height = "300" hspace='10'/> <br />
-</p>
+  
+  - 样例结果示例(左为原图，右为效果图)：
+    <p align="center">
+    <img src="https://user-images.githubusercontent.com/35907364/130897828-d0c86b81-63d1-4e9a-8095-bc000b8c7ca8.jpg" width = "260" height = "400" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130897762-5c9fa711-62bc-4067-8d44-f8feff8c574c.png" width = "260" height = "400" hspace='10'/>
+    </p>
+
 
 
 - ### 模型介绍
@@ -103,32 +106,32 @@
 
     - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-    ```python
-    import requests
-    import json
-    import base64
+        ```python
+        import requests
+        import json
+        import base64
 
-    import cv2
-    import numpy as np
+        import cv2
+        import numpy as np
 
-    def cv2_to_base64(image):
-        data = cv2.imencode('.jpg', image)[1]
-        return base64.b64encode(data.tostring()).decode('utf8')
-    def base64_to_cv2(b64str):
-        data = base64.b64decode(b64str.encode('utf8'))
-        data = np.fromstring(data, np.uint8)
-        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-        return data
+        def cv2_to_base64(image):
+            data = cv2.imencode('.jpg', image)[1]
+            return base64.b64encode(data.tostring()).decode('utf8')
+        def base64_to_cv2(b64str):
+            data = base64.b64decode(b64str.encode('utf8'))
+            data = np.fromstring(data, np.uint8)
+            data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+            return data
 
-    # 发送HTTP请求
-    org_im = cv2.imread('PATH/TO/IMAGE')
-    data = {'images':cv2_to_base64(org_im), 'model_select': ['Colorization', 'SuperResolution']}
-    headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/photo_restoration"
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
-    img = base64_to_cv2(r.json()["results"])
-    cv2.imwrite('PATH/TO/SAVE/IMAGE', img)
-    ```
+        # 发送HTTP请求
+        org_im = cv2.imread('PATH/TO/IMAGE')
+        data = {'images':cv2_to_base64(org_im), 'model_select': ['Colorization', 'SuperResolution']}
+        headers = {"Content-type": "application/json"}
+        url = "http://127.0.0.1:8866/predict/photo_restoration"
+        r = requests.post(url=url, headers=headers, data=json.dumps(data))
+        img = base64_to_cv2(r.json()["results"])
+        cv2.imwrite('PATH/TO/SAVE/IMAGE', img)
+        ```
 
 ## 五、更新历史
 

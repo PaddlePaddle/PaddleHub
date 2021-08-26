@@ -8,7 +8,7 @@
 |是否支持Fine-tuning|否|
 |模型大小|5.8MB|
 |指标|-|
-|最新更新日期|2020-06-21|
+|最新更新日期|2021-02-26|
 
 
 
@@ -17,11 +17,12 @@
 - ### 应用效果展示
 
   - [humanseg_mobile模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=humanseg_mobile&en_category=ImageSegmentation)
+  
   - 样例结果示例：
-<p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg"  width = "450" height = "300" hspace='10'/> <br />
-</p>
-
+    <p align="center">
+    <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130914325-3795e241-b611-46a1-aa70-ffc47326c86a.png" width = "337" height = "505" hspace='10'/>
+    </p>
+    
 - ### 模型介绍
 
     - HumanSeg-mobile采用了HRNet_w18_small_v1的网络结构，模型大小只有5.8M， 适用于移动端或服务端CPU的前置摄像头场景。

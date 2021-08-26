@@ -8,7 +8,7 @@
 |是否支持Fine-tuning|否|
 |模型大小|6.7MB|
 |指标|-|
-|最新更新日期|2020-06-21|
+|最新更新日期|2021-02-26|
 
 
 
@@ -16,11 +16,12 @@
 
 - ### 应用效果展示
     - [U2Netp模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=U2Netp&en_category=ImageSegmentation)
+    
+    - 样例结果示例：
+        <p align="center">
+        <img src="https://ai-studio-static-online.cdn.bcebos.com/4d77bc3a05cf48bba6f67b797978f4cdf10f38288b9645d59393dd85cef58eff" width = "450" height = "300" hspace='10'/> <img src="https://ai-studio-static-online.cdn.bcebos.com/11c9eba8de6d4316b672f10b285245061821f0a744e441f3b80c223881256ca0" width = "450" height = "300" hspace='10'/>
+        </p>
 
-    - 效果展示
-    ![](https://ai-studio-static-online.cdn.bcebos.com/4d77bc3a05cf48bba6f67b797978f4cdf10f38288b9645d59393dd85cef58eff)
-    ![](https://ai-studio-static-online.cdn.bcebos.com/865b7b6a262b4ce3bbba4a5c0d973d9eea428bc3e8af4f76a1cdab0c04e3dd33)
-    ![](https://ai-studio-static-online.cdn.bcebos.com/11c9eba8de6d4316b672f10b285245061821f0a744e441f3b80c223881256ca0)
 
 - ### 模型介绍
     

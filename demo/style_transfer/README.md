@@ -7,7 +7,7 @@
 |数据集|COCO2014|
 |是否支持Fine-tuning|是|
 |模型大小|68MB|
-|最新更新日期|2020-06-21|
+|最新更新日期|2021-07-29|
 
 
 ## 一、模型基本信息
@@ -15,10 +15,11 @@
 - ### 应用效果展示
 
   - [msgnet模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=msgnet&en_category=ImageEditing)
+  
   - 样例结果示例：
-<p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg"  width = "450" height = "300" hspace='10'/> <br />
-</p>
+    <p align="center">
+    <img src="https://user-images.githubusercontent.com/35907364/130910325-d72f34b2-d567-4e77-bb60-35148864301e.jpg" width = "450" height = "300" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130910195-9433e4a7-3596-4677-85d2-2ffc16939597.png" width = "450" height = "300" hspace='10'/>
+    </p>
 
 - ### 模型介绍
 
@@ -152,35 +153,35 @@ if __name__ == '__main__':
 
     - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-    ```python
-    import requests
-    import json
-    import cv2
-    import base64
+        ```python
+        import requests
+        import json
+        import cv2
+        import base64
 
-    import numpy as np
+        import numpy as np
 
 
-    def cv2_to_base64(image):
-        data = cv2.imencode('.jpg', image)[1]
-        return base64.b64encode(data.tostring()).decode('utf8')
+        def cv2_to_base64(image):
+            data = cv2.imencode('.jpg', image)[1]
+            return base64.b64encode(data.tostring()).decode('utf8')
 
-    def base64_to_cv2(b64str):
-        data = base64.b64decode(b64str.encode('utf8'))
-        data = np.fromstring(data, np.uint8)
-        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-        return data
+        def base64_to_cv2(b64str):
+            data = base64.b64decode(b64str.encode('utf8'))
+            data = np.fromstring(data, np.uint8)
+            data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+            return data
 
-    # 发送HTTP请求
-    org_im = cv2.imread('/PATH/TO/ORIGIN/IMAGE')
-    style_im = cv2.imread('/PATH/TO/STYLE/IMAGE')
-    data = {'images':[[cv2_to_base64(org_im)], cv2_to_base64(style_im)]}
-    headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/msgnet"
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
-    data = base64_to_cv2(r.json()["results"]['data'][0])
-    cv2.imwrite('style.png', data)
-    ```
+        # 发送HTTP请求
+        org_im = cv2.imread('/PATH/TO/ORIGIN/IMAGE')
+        style_im = cv2.imread('/PATH/TO/STYLE/IMAGE')
+        data = {'images':[[cv2_to_base64(org_im)], cv2_to_base64(style_im)]}
+        headers = {"Content-type": "application/json"}
+        url = "http://127.0.0.1:8866/predict/msgnet"
+        r = requests.post(url=url, headers=headers, data=json.dumps(data))
+        data = base64_to_cv2(r.json()["results"]['data'][0])
+        cv2.imwrite('style.png', data)
+        ```
 
 ## 五、更新历史
 

@@ -8,12 +8,13 @@
 |是否支持Fine-tuning|否|
 |模型大小|206MB|
 |指标|-|
-|最新更新日期|2020-06-21|
+|最新更新日期|2021-02-26|
 
 ## 一、模型基本信息
 
 - ### 应用效果展示
     - [SkyAR模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=SkyAR&en_category=ImageSegmentation)
+    
     - 样例结果示例：
         * 原始视频：
 

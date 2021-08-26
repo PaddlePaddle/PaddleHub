@@ -8,7 +8,7 @@
 |是否支持Fine-tuning|否|
 |模型大小|259MB|
 |指标|-|
-|最新更新日期|2020-06-21|
+|最新更新日期|2021-02-26|
 
 
 ## 一、模型基本信息
@@ -18,15 +18,20 @@
   - [ace2p模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=ace2p&en_category=ImageSegmentation)
 
   - 网络结构：
-  <p align="center">
-  <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/ace2p_network.jpg" hspace='10'/> <br />
-  </p>
+      <p align="center">
+      <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/ace2p_network.jpg" hspace='10'/> <br />
+      </p>
 
   - 调色板
 
-  <p align="left">
-  <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/ace2p_palette.jpg" hspace='10'/> <br />
-  </p>
+      <p align="left">
+      <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/ace2p_palette.jpg" hspace='10'/> <br />
+      </p>
+
+  - 样例结果示例：
+      <p align="center">
+      <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130913765-c9572c77-c6bf-46ec-9653-04ff356b4b85.png" width = "337" height = "505" hspace='10'/>
+      </p>
 
 - ### 模型介绍
 
@@ -119,8 +124,9 @@
 - ### 第一步：启动PaddleHub Serving
 
   - 运行启动命令：
+  
     ```shell
-    $ hub serving start -m ace2p
+     $ hub serving start -m ace2p
     ```
 
     - 这样就完成了一个人体解析服务化API的部署，默认端口号为8866。
@@ -131,36 +137,36 @@
 
   - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-  ```python
-  import requests
-  import json
-  import cv2
-  import base64
+      ```python
+      import requests
+      import json
+      import cv2
+      import base64
 
-  import numpy as np
-
-
-  def cv2_to_base64(image):
-      data = cv2.imencode('.jpg', image)[1]
-      return base64.b64encode(data.tostring()).decode('utf8')
+      import numpy as np
 
 
-  def base64_to_cv2(b64str):
-      data = base64.b64decode(b64str.encode('utf8'))
-      data = np.fromstring(data, np.uint8)
-      data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-      return data
+      def cv2_to_base64(image):
+          data = cv2.imencode('.jpg', image)[1]
+          return base64.b64encode(data.tostring()).decode('utf8')
 
 
-  # 发送HTTP请求
-  data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
-  headers = {"Content-type": "application/json"}
-  url = "http://127.0.0.1:8866/predict/ace2p"
-  r = requests.post(url=url, headers=headers, data=json.dumps(data))
+      def base64_to_cv2(b64str):
+          data = base64.b64decode(b64str.encode('utf8'))
+          data = np.fromstring(data, np.uint8)
+          data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+          return data
 
-  # 打印预测结果
-  print(base64_to_cv2(r.json()["results"][0]['data']))
-  ```
+
+      # 发送HTTP请求
+      data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
+      headers = {"Content-type": "application/json"}
+      url = "http://127.0.0.1:8866/predict/ace2p"
+      r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+      # 打印预测结果
+      print(base64_to_cv2(r.json()["results"][0]['data']))
+      ```
 
 
 ## 五、更新历史

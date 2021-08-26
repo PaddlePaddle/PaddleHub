@@ -8,18 +8,18 @@
 |是否支持Fine-tuning|否|
 |模型大小|541k|
 |指标|-|
-|最新更新日期|2020-06-21|
+|最新更新日期|2021-02-26|
 
 ## 一、模型基本信息
 
 - ### 应用效果展示
 
   - [humanseg_lite模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=humanseg_lite&en_category=ImageSegmentation)
+  
   - 样例结果示例：
-<p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/ocr_res.jpg"  width = "450" height = "300" hspace='10'/> <br />
-</p>
-
+    <p align="center">
+    <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130916087-7d537ad9-bbc8-4bce-9382-8eb132b35532.png" width = "337" height = "505" hspace='10'/>
+    </p>
 - ### 模型介绍
 
     - HumanSeg_lite是在ShuffleNetV2网络结构的基础上进行优化，进一步减小了网络规模，网络大小只有541K，量化后只有187K， 适用于手机自拍人像分割，且能在移动端进行实时分割。
@@ -206,35 +206,35 @@
 
     - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-    ```python
-    import requests
-    import json
-    import base64
+        ```python
+        import requests
+        import json
+        import base64
 
-    import cv2
-    import numpy as np
+        import cv2
+        import numpy as np
 
-    def cv2_to_base64(image):
-        data = cv2.imencode('.jpg', image)[1]
-        return base64.b64encode(data.tostring()).decode('utf8')
-    def base64_to_cv2(b64str):
-        data = base64.b64decode(b64str.encode('utf8'))
-        data = np.fromstring(data, np.uint8)
-        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-        return data
+        def cv2_to_base64(image):
+            data = cv2.imencode('.jpg', image)[1]
+            return base64.b64encode(data.tostring()).decode('utf8')
+        def base64_to_cv2(b64str):
+            data = base64.b64decode(b64str.encode('utf8'))
+            data = np.fromstring(data, np.uint8)
+            data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+            return data
 
-    # 发送HTTP请求
-    org_im = cv2.imread('/PATH/TO/IMAGE')
-    data = {'images':[cv2_to_base64(org_im)]}
-    headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/humanseg_lite"
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+        # 发送HTTP请求
+        org_im = cv2.imread('/PATH/TO/IMAGE')
+        data = {'images':[cv2_to_base64(org_im)]}
+        headers = {"Content-type": "application/json"}
+        url = "http://127.0.0.1:8866/predict/humanseg_lite"
+        r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
-    # 保存图片
-    mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2GRAY)
-    rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
-    cv2.imwrite("segment_human_lite.png", rgba)
-    ```
+        # 保存图片
+        mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2GRAY)
+        rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
+        cv2.imwrite("segment_human_lite.png", rgba)
+        ```
 
 
 ## 五、更新历史

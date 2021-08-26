@@ -8,7 +8,7 @@
 |是否支持Fine-tuning|否|
 |模型大小|0.038MB|
 |指标|-|
-|最新更新日期|2020-06-21|
+|最新更新日期|2021-02-26|
 
 ## 一、模型基本信息
 
@@ -16,9 +16,9 @@
 
     - [ExtremeC3_Portrait_Segmentation模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=ExtremeC3_Portrait_Segmentation&en_category=ImageSegmentation)
     - 样例结果示例：
-<p align="center">
-<img src="https://ai-studio-static-online.cdn.bcebos.com/1261398a98e24184852bdaff5a4e1dbd7739430f59fb47e8b84e3a2cfb976107"  hspace='10'/> <br />
-</p>
+        <p align="center">
+        <img src="https://ai-studio-static-online.cdn.bcebos.com/1261398a98e24184852bdaff5a4e1dbd7739430f59fb47e8b84e3a2cfb976107"  hspace='10'/> <br />
+        </p>
 
 
 - ### 模型介绍

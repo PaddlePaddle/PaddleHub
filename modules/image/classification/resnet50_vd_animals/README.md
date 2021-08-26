@@ -8,19 +8,17 @@
 |是否支持Fine-tuning|否|
 |模型大小|154MB|
 |指标|-|
-|最新更新日期|2020-06-21|
+|最新更新日期|2021-02-26|
 
 
 ## 一、模型基本信息
 
-- ### 应用效果展示
-
-
-    - [resnet50_vd_animals模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=resnet50_vd_animals&en_category=ImageClassification)
 
 - ### 模型介绍
 
     - ResNet-vd 其实就是 ResNet-D，是ResNet 原始结构的变种，可用于图像分类和特征提取。该 PaddleHub Module 采用百度自建动物数据集训练得到，支持7978种动物的分类识别。
+    
+    - [resnet50_vd_animals模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=resnet50_vd_animals&en_category=ImageClassification)
 
     - 模型的详情可参考[论文](https://arxiv.org/pdf/1812.01187.pdf)
 

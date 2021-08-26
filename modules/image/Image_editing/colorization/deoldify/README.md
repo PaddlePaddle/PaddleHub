@@ -15,7 +15,8 @@
 - ### 应用效果展示
 
   - [deoldify模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=deoldify&en_category=ImageEditing)
-    - 样例结果示例(左为原图，右为效果图)：
+  
+  - 样例结果示例(左为原图，右为效果图)：
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130886749-668dfa38-42ed-4a09-8d4a-b18af0475375.jpg" width = "450" height = "300" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130886685-76221736-839a-46a2-8415-e5e0dd3b345e.png" width = "450" height = "300" hspace='10'/>
     </p>
@@ -133,32 +134,32 @@
 
     - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-    ```python
-    import requests
-    import json
-    import base64
+        ```python
+        import requests
+        import json
+        import base64
 
-    import cv2
-    import numpy as np
+        import cv2
+        import numpy as np
 
-    def cv2_to_base64(image):
-        data = cv2.imencode('.jpg', image)[1]
-        return base64.b64encode(data.tostring()).decode('utf8')
-    def base64_to_cv2(b64str):
-        data = base64.b64decode(b64str.encode('utf8'))
-        data = np.fromstring(data, np.uint8)
-        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-        return data
+        def cv2_to_base64(image):
+            data = cv2.imencode('.jpg', image)[1]
+            return base64.b64encode(data.tostring()).decode('utf8')
+        def base64_to_cv2(b64str):
+            data = base64.b64decode(b64str.encode('utf8'))
+            data = np.fromstring(data, np.uint8)
+            data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+            return data
 
-    # 发送HTTP请求
-    org_im = cv2.imread('/PATH/TO/ORIGIN/IMAGE')
-    data = {'images':cv2_to_base64(org_im)}
-    headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/deoldify"
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
-    img = base64_to_cv2(r.json()["results"])
-    cv2.imwrite('/PATH/TO/SAVE/IMAGE', img)
-    ```
+        # 发送HTTP请求
+        org_im = cv2.imread('/PATH/TO/ORIGIN/IMAGE')
+        data = {'images':cv2_to_base64(org_im)}
+        headers = {"Content-type": "application/json"}
+        url = "http://127.0.0.1:8866/predict/deoldify"
+        r = requests.post(url=url, headers=headers, data=json.dumps(data))
+        img = base64_to_cv2(r.json()["results"])
+        cv2.imwrite('/PATH/TO/SAVE/IMAGE', img)
+        ```
 
 
 ## 五、更新历史

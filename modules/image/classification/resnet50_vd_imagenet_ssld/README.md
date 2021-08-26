@@ -28,7 +28,6 @@
     - paddlehub >= 2.0.0
 
 - ### 2、安装
-
     - ```shell
         $ hub install resnet50_vd_imagenet_ssld
       ```
@@ -199,3 +198,4 @@
 * 1.1.0
     
   升级为动态图版本
+
