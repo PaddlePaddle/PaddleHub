@@ -139,13 +139,18 @@
 
 [【零基础linux安装并实现图像风格迁移】](./docs/docs_ch/get_start/linux_quickstart.md)
 
-### 极简中文分词案例  
+### 快速安装相关组件
 </div>
 
 ```python
 !pip install --upgrade paddlepaddle -i https://mirror.baidu.com/pypi/simple
 !pip install --upgrade paddlehub -i https://mirror.baidu.com/pypi/simple
+```
 
+### 极简中文分词案例  
+</div>
+
+```python
 import paddlehub as hub
 
 lac = hub.Module(name="lac")
@@ -156,14 +161,14 @@ print(results)
 #{'word': ['今天', '是', '个', '好天气', '。'], 'tag': ['TIME', 'v', 'q', 'n', 'w']}
 ```
 
-### 一行代码启动lac（词法分析）服务，
+### 一行代码部署lac（词法分析）模型
 </div>
 
 ```python
 !hub serving start -m lac
 ```
 
- 更多模型介绍可以参考[模型搜索](https://www.paddlepaddle.org.cn/hublist)
+ 欢迎用户通过[模型搜索](https://www.paddlepaddle.org.cn/hublist)发现更多实用的预训练模型！
 
  更多迁移学习能力可以参考[教程文档](https://paddlehub.readthedocs.io/zh_CN/release-v2.1/transfer_learning_index.html)
 
