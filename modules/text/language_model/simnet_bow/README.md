@@ -38,9 +38,9 @@
 - ### 1、命令行预测
 
   - ```shell
-  $ hub run simnet_bow --text_1 "这道题很难" --text_2 "这道题不简单"
-  ```
-  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+    $ hub run simnet_bow --text_1 "这道题很难" --text_2 "这道题不简单"
+    ```
+    - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
 
