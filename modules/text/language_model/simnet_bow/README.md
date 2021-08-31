@@ -6,7 +6,7 @@
 |数据集|百度自建数据集|
 |是否支持Fine-tuning|否|
 |模型大小|245MB|
-|最新更新日期|2021-08-26|
+|最新更新日期|2021-02-26|
 |数据指标|-|
 
 
@@ -14,7 +14,7 @@
 
 - ### 模型介绍
 
-  - 短文本语义匹配(SimilarityNet, SimNet)是一个计算短文本相似度的框架，可以根据用户输入的两个文本，计算出相似度得分。SimNet框架在百度各产品上广泛应用，提供语义相似度计算训练和预测框架，适用于信息检索、新闻推荐、智能客服等多个应用场景，帮助企业解决语义匹配问题。该PaddleHub Module基于BOW网络结构，支持预测和Fine-tune。
+  - 短文本语义匹配(SimilarityNet, SimNet)是一个计算短文本相似度的模型，可以根据用户输入的两个文本，计算出相似度得分。SimNet在百度各产品上广泛应用，适用于信息检索、新闻推荐、智能客服等多个应用场景，帮助企业解决语义匹配问题。该PaddleHub Module基于BOW网络结构，支持预测。
 
 ## 二、安装
 
@@ -40,7 +40,6 @@
   - ```shell
   $ hub run simnet_bow --text_1 "这道题很难" --text_2 "这道题不简单"
   ```
-
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -64,7 +63,7 @@
 - ### 3、 API
 
   - ```python
-    similarity(texts=[], data={}, use_gpu=False, batch_size=1)
+    similarity(texts=[], use_gpu=False, batch_size=1)
     ```
 
     - simnet_bow预测接口，计算两个句子的cosin相似度
@@ -73,10 +72,6 @@
 
       - texts(list): 待预测数据，第一个元素(list)为第一顺序句子，第二个元素(list)为第二顺序句子，两个元素长度相同。
         如texts=[["这道题太难了", "这道题太难了", "这道题太难了"], ["这道题是上一年的考题", "这道题不简单", "这道题很有意思"]]。
-        如果使用texts参数，则不用传入data参数，二选一即可
-      - data(dict): 预测数据，key必须为'text_1' 和'text_2'，相应的value(list)是第一顺序句子和第二顺序句子。
-        如data={"text_1": ["这道题太难了", "这道题太难了", "这道题太难了"], "text_2": ["这道题是上一年的考题", "这道题不简单", "这道题很有意思"]}。
-        如果使用data参数，则不用传入texts参数，二选一即可。建议使用texts参数，data参数后续会废弃。
       - use_gpu(bool): 是否使用GPU预测，如果使用GPU预测，则在预测之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置
       - batch_size(int): 批处理大小
 
@@ -85,7 +80,7 @@
       - results(list): 带预测数据的cosin相似度
 
   - ```python
-    similarity(texts=[], data={}, use_gpu=False, batch_size=1)
+    context(trainable=False, max_seq_len=128, num_slots=1)
     ```
 
     - 获取该Module的预训练program以及program相应的输入输出。
@@ -176,6 +171,3 @@
 * 1.2.0
 
   模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
-  - ```shell
-    $ hub install simnet_bow==1.2.0
-    ```
