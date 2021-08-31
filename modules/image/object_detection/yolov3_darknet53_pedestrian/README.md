@@ -5,7 +5,7 @@
 |类别|图像 - 目标检测|
 |网络|YOLOv3|
 |数据集|百度自建大规模行人数据集|
-|是否支持Fine-tuning|是|
+|是否支持Fine-tuning|否|
 |模型大小|238MB|
 |最新更新日期|2021-03-15|
 |数据指标|-|
@@ -16,12 +16,12 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="./object_detection_pedestrian03.jpg"  width = "450" height = "300" hspace='10'/> <br />
+    <img src="https://user-images.githubusercontent.com/22424850/131492636-714c697c-3275-4c8c-a83a-cf971a91ba98.jpg"  width = "450" height = "300" hspace='10'/> <br />
     </p>
 
 - ### 模型介绍
 
-  - 行人检测是计算机视觉技术中的目标检测问题，用于判断图像中是否存在行人并给予精确定位，定位结果用矩形框表示。行人检测技术有很强的使用价值，它可以与行人跟踪、行人重识别等技术结合，应用于汽车无人驾驶系统、智能视频监控、人体行为分析、客流统计系统、智能交通等领域。yolov3_darknet53_pedestrian Module的网络为YOLOv3, 其中backbone为DarkNet53, 采用百度自建大规模车辆数据集训练得到，支持预测和finetune。
+  - 行人检测是计算机视觉技术中的目标检测问题，用于判断图像中是否存在行人并给予精确定位，定位结果用矩形框表示。行人检测技术有很强的使用价值，它可以与行人跟踪、行人重识别等技术结合，应用于汽车无人驾驶系统、智能视频监控、人体行为分析、客流统计系统、智能交通等领域。yolov3_darknet53_pedestrian Module的网络为YOLOv3, 其中backbone为DarkNet53, 采用百度自建大规模车辆数据集训练得到，目前仅支持预测。
 
 
 ## 二、安装
@@ -61,27 +61,6 @@
 - ### 3、API
 
   - ```python
-    def context(trainable=True,
-                pretrained=True,
-                get_prediction=False)
-    ```
-
-    - 提取特征，用于迁移学习。
-
-    - **参数**
-
-      - trainable(bool): 参数是否可训练；<br/>
-      - pretrained (bool): 是否加载预训练模型；<br/>
-      - get\_prediction (bool): 是否执行预测。
-    
-    - **返回**
-      - inputs (dict): 模型的输入，keys 包括 'image', 'im\_size'，相应的取值为：
-        - image (Variable): 图像变量
-        - im\_size (Variable): 图片的尺寸
-      - outputs (dict): 模型的输出。如果 get\_prediction 为 False，输出 'head\_features'、'body\_features'，否则输出 'bbox\_out'
-      - context\_prog (Program): 用于迁移学习的 Program
-
-  - ```python
     def object_detection(paths=None,
                          images=None,
                          batch_size=1,
@@ -96,7 +75,7 @@
     - **参数**
 
       - paths (list\[str\]): 图片的路径； <br/>
-      - images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式； <br/>
+      - images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；<br/>
       - batch\_size (int): batch 的大小；<br/>
       - use\_gpu (bool): 是否使用 GPU；<br/>
       - output\_dir (str): 图片的保存路径，默认设为 yolov3\_pedestrian\_detect\_output；<br/>
@@ -180,7 +159,7 @@
   初始发布
 
 * 1.0.1
-
+  
   
 
 * 1.0.2
