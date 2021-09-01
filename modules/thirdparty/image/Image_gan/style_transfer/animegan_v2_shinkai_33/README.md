@@ -44,13 +44,7 @@
   
 ## 三、模型API预测
 
-- ### 1、命令行预测
-
-  - ```shell
-    $ hub run animegan_v2_shinkai_33 --input_path "/PATH/TO/IMAGE"
-    ```
-
-- ### 2、代码示例
+- ### 1、代码示例
 
   - ```python
     import paddlehub as hub
@@ -62,7 +56,7 @@
     # result = model.style_transfer(paths=['/PATH/TO/IMAGE'])
     ```
 
-- ### 3、API
+- ### 2、API
 
   - ```python
     def style_transfer(images=None,

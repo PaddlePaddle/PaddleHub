@@ -42,13 +42,7 @@
   
 ## 三、模型API预测
 
-- ### 1、命令行预测
-
-  - ```shell
-    $ hub run Photo2Cartoon --input_path "/PATH/TO/IMAGE"
-    ```
-
-- ### 2、代码示例
+- ### 1、代码示例
 
   - ```python
     import paddlehub as hub
@@ -60,7 +54,7 @@
     # result = model.Cartoon_GEN(paths=['/PATH/TO/IMAGE'])
     ```
 
-- ### 3、API
+- ### 2、API
 
   - ```python
     def Cartoon_GEN(images=None,
@@ -88,48 +82,8 @@
       - res (list\[numpy.ndarray\]): 输出图像数据，ndarray.shape 为 \[H, W, C\]
 
 
-## 四、服务部署
 
-- PaddleHub Serving可以部署一个在线人像卡通化图像生成服务。
-
-- ### 第一步：启动PaddleHub Serving
-
-  - 运行启动命令：
-  - ```shell
-    $ hub serving start -m Photo2Cartoon
-    ```
-
-  - 这样就完成了一个人像卡通化图像生成的在线服务API的部署，默认端口号为8866。
-
-  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
-
-- ### 第二步：发送预测请求
-
-  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
-
-  - ```python
-    import requests
-    import json
-    import cv2
-    import base64
-
-
-    def cv2_to_base64(image):
-      data = cv2.imencode('.jpg', image)[1]
-      return base64.b64encode(data.tostring()).decode('utf8')
-
-    # 发送HTTP请求
-    data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
-    headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/Photo2Cartoon"
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
-
-    # 打印预测结果
-    print(r.json()["results"])
-    ```
-
-
-## 五、更新历史
+## 四、更新历史
 
 * 1.0.0
 
