@@ -15,8 +15,6 @@
 ## 一、模型基本信息
 
 - ### 应用效果展示
-
-  - [humanseg_server模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=humanseg_server&en_category=ImageSegmentation)
   
   - 样例结果示例：
     <p align="center">
@@ -40,7 +38,7 @@
 - ### 2、安装
 
     - ```shell
-        $ hub install humanseg_server
+      $ hub install humanseg_server
       ```
       
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
