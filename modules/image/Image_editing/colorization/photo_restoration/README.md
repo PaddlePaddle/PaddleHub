@@ -14,9 +14,6 @@
 ## 一、模型基本信息
 
 - ### 应用效果展示
-  - [deoldify模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=deoldify&en_category=ImageEditing)
-  - [realsr模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=realsr&en_category=ImageEditing)
-  
   - 样例结果示例(左为原图，右为效果图)：
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130897828-d0c86b81-63d1-4e9a-8095-bc000b8c7ca8.jpg" width = "260" height = "400" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130897762-5c9fa711-62bc-4067-8d44-f8feff8c574c.png" width = "260" height = "400" hspace='10'/>
@@ -40,12 +37,12 @@
     - NOTE: 使用该模型需要自行安装ffmpeg，若您使用conda环境，推荐使用如下语句进行安装。
 
       ```shell
-        $ conda install x264=='1!152.20180717' ffmpeg=4.0.2 -c conda-forge
+      $ conda install x264=='1!152.20180717' ffmpeg=4.0.2 -c conda-forge
       ```
    
 - ### 2、安装
     - ```shell
-        $ hub install photo_restoration
+      $ hub install photo_restoration
       ```
       
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
