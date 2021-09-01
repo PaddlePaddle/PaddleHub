@@ -17,8 +17,6 @@
 - ### 模型介绍
 
     - ResNet-vd 其实就是 ResNet-D，是ResNet 原始结构的变种，可用于图像分类和特征提取。该 PaddleHub Module 采用百度自建动物数据集训练得到，支持7978种动物的分类识别。
-    
-    - [resnet50_vd_animals模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=resnet50_vd_animals&en_category=ImageClassification)
 
     - 模型的详情可参考[论文](https://arxiv.org/pdf/1812.01187.pdf)
 
@@ -84,23 +82,6 @@
 
         - 返回预处理的图片标准差，也就是 \[0.229, 0.224, 0.225\]。
 
-
-    - ```python
-      def context(trainable=True, pretrained=True)
-      ```
-
-        - **参数**
-
-            * trainable (bool): 计算图的参数是否为可训练的；
-            * pretrained (bool): 是否加载默认的预训练模型。
-
-        -  **返回**
-
-            * inputs (dict): 计算图的输入，key 为 'image', value 为图片的张量；
-            * outputs (dict): 计算图的输出，key 为 'classification' 和 'feature_map'，其相应的值为：
-            * classification (paddle.fluid.framework.Variable): 分类结果，也就是全连接层的输出；
-            * feature\_map (paddle.fluid.framework.Variable): 特征匹配，全连接层前面的那个张量。
-            * context\_prog(fluid.Program): 计算图，用于迁移学习。
 
     - ```python
       def classification(images=None,
