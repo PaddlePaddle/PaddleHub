@@ -81,6 +81,7 @@
       - output\_dir (str): 图片的保存路径，默认设为 yolov3\_vehicles\_detect\_output；<br/>
       - score\_thresh (float): 识别置信度的阈值；<br/>
       - visualization (bool): 是否将识别结果保存为图片文件。
+      
       **NOTE:** paths和images两个参数选择其一进行提供数据
 
     - **返回**
