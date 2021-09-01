@@ -15,8 +15,6 @@
 
 - ### 应用效果展示
 
-  - [ace2p模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=ace2p&en_category=ImageSegmentation)
-
   - 网络结构：
       <p align="center">
       <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/ace2p_network.jpg" hspace='10'/> <br />
@@ -50,7 +48,7 @@
 - ### 2.安装
 
     - ```shell
-        $ hub install ace2p
+      $ hub install ace2p
       ```
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
       | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
