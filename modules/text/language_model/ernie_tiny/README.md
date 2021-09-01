@@ -1,8 +1,8 @@
-# ernie-tiny
-|模型名称|ernie-tiny|
+# ernie_tiny
+|模型名称|ernie_tiny|
 | :--- | :---: | 
 |类别|文本-语义模型|
-|网络|ernie-tiny|
+|网络|ernie_tiny|
 |数据集|百度自建数据集|
 |是否支持Fine-tuning|是|
 |模型大小|346MB|
