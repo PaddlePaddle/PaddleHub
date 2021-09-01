@@ -14,8 +14,6 @@
 
 - ### 应用效果展示
 
-  - [deeplabv3p_xception65_humanseg模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=deeplabv3p_xception65_humanseg&en_category=ImageSegmentation)
-
   - 样例结果示例：
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130913256-41056b21-1c3d-4ee2-b481-969c94754609.png" width = "337" height = "505" hspace='10'/>
@@ -41,7 +39,7 @@
 - ### 2、安装
 
     - ```shell
-        $ hub install deeplabv3p_xception65_humanseg
+      $ hub install deeplabv3p_xception65_humanseg
       ```
       
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
