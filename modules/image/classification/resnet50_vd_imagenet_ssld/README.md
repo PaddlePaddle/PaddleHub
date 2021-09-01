@@ -17,8 +17,6 @@
 
   - ResNet-vd 其实就是 ResNet-D，是ResNet 原始结构的变种，可用于图像分类和特征提取。
 
-  - [resnet50_vd_imagenet_ssld模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=resnet50_vd_imagenet_ssld&en_category=ImageClassification)
-
 
 ## 二、安装
 
@@ -30,7 +28,7 @@
 
 - ### 2、安装
     - ```shell
-        $ hub install resnet50_vd_imagenet_ssld
+      $ hub install resnet50_vd_imagenet_ssld
       ```
 
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
