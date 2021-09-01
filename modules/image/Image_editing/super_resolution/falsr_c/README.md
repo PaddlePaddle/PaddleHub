@@ -8,15 +8,13 @@
 |数据集|DIV2k|
 |是否支持Fine-tuning|否|
 |模型大小|4.4MB|
-|PSNR｜37.66｜
+|PSNR|37.66|
 |最新更新日期|2021-02-26|
 
 
 ## 一、模型基本信息
 
 - ### 应用效果展示
-
-  - [falsr_c模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=falsr_c&en_category=ImageEditing)
   
   - 样例结果示例(左为原图，右为效果图)：
     <p align="center">
@@ -34,9 +32,9 @@
 
 - ### 1、环境依赖
 
-  - paddlepaddle >= 1.8.0
+  - paddlepaddle >= 2.0.0
 
-  - paddlehub >= 1.7.1
+  - paddlehub >= 2.0.0
 
 
 - ### 2、安装
@@ -44,7 +42,7 @@
         $ hub install falsr_c
       ```
 
-    -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+    - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
     | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 三、模型API预测
