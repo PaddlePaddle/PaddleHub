@@ -15,8 +15,8 @@
 
 Ernie是百度提出的基于知识增强的持续学习语义理解模型，该模型将大数据预训练与多源丰富知识相结合，通过持续学习技术，不断吸收海量文本数据中词汇、结构、语义等方面的知识，实现模型效果不断进化。
 
-  - ## AI Studio在线体验
-    <a class="ant-btn large" href="https://aistudio.baidu.com/aistudio/projectDetail/79380" target="_blank">AI Studio 快速体验</a>
+
+  - <a class="ant-btn large" href="https://aistudio.baidu.com/aistudio/projectDetail/79380" target="_blank">AI Studio 快速体验</a>
 
     <p align="center">
     <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/ernie_network_1.png" hspace='10'/> <br />
@@ -75,73 +75,73 @@ for idx, text in enumerate(data):
 
 - ### 2、API
 
-- ```python
-  def __init__(
-      task=None,
-      load_checkpoint=None,
-      label_map=None,
-      num_classes=2,
-      suffix=False,
-      **kwargs,
-  )
-  ```
+  - ```python
+    def __init__(
+        task=None,
+        load_checkpoint=None,
+        label_map=None,
+        num_classes=2,
+        suffix=False,
+        **kwargs,
+    )
+    ```
 
-  - 创建Module对象（动态图组网版本）
+    - 创建Module对象（动态图组网版本）
 
-  - **参数**
+    - **参数**
 
-    - `task`： 任务名称，可为`seq-cls`(文本分类任务，原来的`sequence_classification`在未来会被弃用)或`token-cls`(序列标注任务)。
-    - `load_checkpoint`：使用PaddleHub Fine-tune api训练保存的模型参数文件路径。
-    - `label_map`：预测时的类别映射表。
-    - `num_classes`：分类任务的类别数，如果指定了`label_map`，此参数可不传，默认2分类。
-    - `suffix`: 序列标注任务的标签格式，如果设定为`True`，标签以'-B', '-I', '-E' 或者 '-S'为结尾，此参数默认为`False`。
-    - `**kwargs`：用户额外指定的关键字字典类型的参数。
+      - `task`： 任务名称，可为`seq-cls`(文本分类任务，原来的`sequence_classification`在未来会被弃用)或`token-cls`(序列标注任务)。
+      - `load_checkpoint`：使用PaddleHub Fine-tune api训练保存的模型参数文件路径。
+      - `label_map`：预测时的类别映射表。
+      - `num_classes`：分类任务的类别数，如果指定了`label_map`，此参数可不传，默认2分类。
+      - `suffix`: 序列标注任务的标签格式，如果设定为`True`，标签以'-B', '-I', '-E' 或者 '-S'为结尾，此参数默认为`False`。
+      - `**kwargs`：用户额外指定的关键字字典类型的参数。
 
-- ```python
-  def predict(
-      data,
-      max_seq_len=128,
-      batch_size=1,
-      use_gpu=False
-  )
-  ```
+  - ```python
+    def predict(
+        data,
+        max_seq_len=128,
+        batch_size=1,
+        use_gpu=False
+    )
+    ```
 
-  - **参数**
+    - **参数**
 
-  - * `data`： 待预测数据，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。每个样例文本数量（1个或者2个）需和训练时保持一致。
-  - * `max_seq_len`：模型处理文本的最大长度
-  - * `batch_size`：模型批处理大小
-  - * `use_gpu`：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
-
-  - **返回**
-
-  - `results`：list类型，不同任务类型的返回结果如下
-    - 文本分类：列表里包含每个句子的预测标签，格式为\[label\_1, label\_2, …,\]
-    - 序列标注：列表里包含每个句子每个token的预测标签，格式为\[\[token\_1, token\_2, …,\], \[token\_1, token\_2, …,\], …,\]
-
-- ```python
-  def get_embedding(
-    data,
-    use_gpu=False
-  )
-  ```
-
-  - 用于获取输入文本的句子粒度特征与字粒度特征
-
-  - **参数**
-
-    - * `data`：输入文本列表，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。
+    - * `data`： 待预测数据，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。每个样例文本数量（1个或者2个）需和训练时保持一致。
+    - * `max_seq_len`：模型处理文本的最大长度
+    - * `batch_size`：模型批处理大小
     - * `use_gpu`：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
 
-  - **返回**
+    - **返回**
 
-    - * `results`：list类型，格式为\[\[sample\_a\_pooled\_feature, sample\_a\_seq\_feature\], \[sample\_b\_pooled\_feature, sample\_b\_seq\_feature\],…,\]，其中每个元素都是对应样例的特征输出，每个样例都有句子粒度特征pooled\_feature与字粒度特征seq\_feature。  
+    - `results`：list类型，不同任务类型的返回结果如下
+      - 文本分类：列表里包含每个句子的预测标签，格式为\[label\_1, label\_2, …,\]
+      - 序列标注：列表里包含每个句子每个token的预测标签，格式为\[\[token\_1, token\_2, …,\], \[token\_1, token\_2, …,\], …,\]
+
+  - ```python
+    def get_embedding(
+      data,
+      use_gpu=False
+    )
+    ```
+
+    - 用于获取输入文本的句子粒度特征与字粒度特征
+
+    - **参数**
+
+      - * `data`：输入文本列表，格式为\[\[sample\_a\_text\_a, sample\_a\_text\_b\], \[sample\_b\_text\_a, sample\_b\_text\_b\],…,\]，其中每个元素都是一个样例，每个样例可以包含text\_a与text\_b。
+      - * `use_gpu`：是否使用gpu，默认为False。对于GPU用户，建议开启use_gpu。
+
+    - **返回**
+
+      - * `results`：list类型，格式为\[\[sample\_a\_pooled\_feature, sample\_a\_seq\_feature\], \[sample\_b\_pooled\_feature, sample\_b\_seq\_feature\],…,\]，其中每个元素都是对应样例的特征输出，每个样例都有句子粒度特征pooled\_feature与字粒度特征seq\_feature。  
 
 ## 四、服务部署
 
 - PaddleHub Serving可以部署一个在线获取预训练词向量。
 
-  - ### 第一步：启动PaddleHub Serving
+- ### 第一步：启动PaddleHub Serving
 
   - ```shell
     $ hub serving start -m ernie
@@ -151,7 +151,7 @@ for idx, text in enumerate(data):
 
   - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
 
-  - ### 第二步：发送预测请求
+- ### 第二步：发送预测请求
 
   - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
@@ -172,9 +172,8 @@ for idx, text in enumerate(data):
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
     print(r.json())
     ```
-  - ## 查看代码
-
-  https://github.com/PaddlePaddle/ERNIE
+  - 查看代码
+    https://github.com/PaddlePaddle/ERNIE
 
 ## 五、更新历史
 
