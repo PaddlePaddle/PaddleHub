@@ -14,7 +14,6 @@
 
 - ### 应用效果展示
 
-    - [ExtremeC3_Portrait_Segmentation模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=ExtremeC3_Portrait_Segmentation&en_category=ImageSegmentation)
     - 样例结果示例：
         <p align="center">
         <img src="https://ai-studio-static-online.cdn.bcebos.com/1261398a98e24184852bdaff5a4e1dbd7739430f59fb47e8b84e3a2cfb976107"  hspace='10'/> <br />
@@ -36,7 +35,7 @@
 - ### 2、安装
 
     - ```shell
-        $ hub install ExtremeC3_Portrait_Segmentation
+      $ hub install ExtremeC3_Portrait_Segmentation
       ```
       
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
