@@ -1,122 +1,140 @@
-## 模型概述
-UGATIT 图像风格转换模型
+# UGATIT_100w
 
-模型可将输入的人脸图像转换成动漫风格
-
-模型权重来自UGATIT-Paddle开源项目
-
-模型所使用的权重为genA2B_1000000
-
-模型详情请参考[UGATIT-Paddle开源项目](https://github.com/miraiwk/UGATIT-paddle)
-
-## 模型安装
-
-```shell
-$hub install UGATIT_100w
-```
+|模型名称|UGATIT_100w|
+| :--- | :---: | 
+|类别|图像 - 图像生成|
+|网络|U-GAT-IT|
+|数据集|selfie2anime|
+|是否支持Fine-tuning|否|
+|模型大小|41MB|
+|最新更新日期|2021-02-26|
+|数据指标|-|
 
 
-## API 说明
+## 一、模型基本信息
 
-```python
-def style_transfer(
-    self,
-    images=None,
-    paths=None,
-    batch_size=1,
-    output_dir='output',
-    visualization=False
-)
-```
+- ### 应用效果展示
+  - 样例结果示例：
+    <p align="center">
+    <img src="https://ai-studio-static-online.cdn.bcebos.com/d130fabd8bd34e53b2f942b3766eb6bbd3c19c0676d04abfbd5cc4b83b66f8b6"  width = "450" height = "300" hspace='10'/> <br />
+    </p> 
+    <p align="center">
+    <img src="https://ai-studio-static-online.cdn.bcebos.com/8538af03b3f14b1884fcf4eec48965baf939e35a783d40129085102057438c77"  width = "450" height = "300" hspace='10'/> <br />
+    </p> 
+    
 
-风格转换API，将输入的人脸图像转换成动漫风格。
+- ### 模型介绍
 
-转换效果图如下：
-
-![输入图像](https://ai-studio-static-online.cdn.bcebos.com/d130fabd8bd34e53b2f942b3766eb6bbd3c19c0676d04abfbd5cc4b83b66f8b6)
-![输出图像](https://ai-studio-static-online.cdn.bcebos.com/8538af03b3f14b1884fcf4eec48965baf939e35a783d40129085102057438c77)
-
-**参数**
-
-* images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，默认为 None；
-* paths (list\[str\]): 图片的路径，默认为 None；
-* batch\_size (int): batch 的大小，默认设为 1；
-* visualization (bool): 是否将识别结果保存为图片文件，默认设为 False；
-* output\_dir (str): 图片的保存路径，默认设为 output。
+  - UGATIT图像风格转换模型, 模型可将输入的人脸图像转换成动漫风格, 模型详情请参考[UGATIT-Paddle开源项目](https://github.com/miraiwk/UGATIT-paddle)。
 
 
-**返回**
+## 二、安装
 
-* res (list\[numpy.ndarray\]): 输出图像数据，ndarray.shape 为 \[H, W, C\]。
+- ### 1、环境依赖     
 
+  - paddlepaddle >= 1.8.0    
 
-## 预测代码示例
+  - paddlehub >= 1.8.0                            
 
-```python
-import cv2
-import paddlehub as hub
+- ### 2、安装
 
-# 模型加载
-# use_gpu：是否使用GPU进行预测
-model = hub.Module(name='UGATIT_100w', use_gpu=False)
+  - ```shell
+    $ hub install UGATIT_100w
+    ```
+  
+## 三、模型API预测
 
-# 模型预测
-result = model.style_transfer(images=[cv2.imread('/PATH/TO/IMAGE')])
+- ### 1、命令行预测
 
-# or
-# result = model.style_transfer(paths=['/PATH/TO/IMAGE'])
-```
+  - ```shell
+    $ hub run UGATIT_100w --input_path "/PATH/TO/IMAGE"
+    ```
 
-## 服务部署
+- ### 2、代码示例
 
-PaddleHub Serving可以部署一个在线图像风格转换服务。
+  - ```python
+    import paddlehub as hub
+    import cv2
 
-## 第一步：启动PaddleHub Serving
+    model = hub.Module(name="UGATIT_100w")
+    result = model.style_transfer(images=[cv2.imread('/PATH/TO/IMAGE')])
+    # or
+    # result = model.style_transfer(paths=['/PATH/TO/IMAGE'])
+    ```
 
-运行启动命令：
-```shell
-$ hub serving start -m UGATIT_100w
-```
+- ### 3、API
 
-这样就完成了一个图像风格转换的在线服务API的部署，默认端口号为8866。
+  - ```python
+    def style_transfer(images=None,
+                       paths=None,
+                       batch_size=1,
+                       output_dir='output',
+                       visualization=False)
+    ```
 
-**NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
+    - 风格转换API，将输入的人脸图像转换成动漫风格。
 
-## 第二步：发送预测请求
+    - **参数**
 
-配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+      - images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]；<br/>
+      - paths (list\[str\]): 图片的路径；<br/>
+      - batch\_size (int): batch的大小；<br/>
+      - visualization (bool): 是否将识别结果保存为图片文件；<br/>
+      - output\_dir (str): 图片的保存路径，默认设为 output；<br/>
 
-```python
-import requests
-import json
-import cv2
-import base64
-
-
-def cv2_to_base64(image):
-    data = cv2.imencode('.jpg', image)[1]
-    return base64.b64encode(data.tostring()).decode('utf8')
-
-
-# 发送HTTP请求
-data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
-headers = {"Content-type": "application/json"}
-url = "http://127.0.0.1:8866/predict/UGATIT_100w"
-r = requests.post(url=url, headers=headers, data=json.dumps(data))
-
-# 打印预测结果
-print(r.json()["results"])
-```
+      **NOTE:** paths和images两个参数选择其一进行提供数据
+    
+    - **返回**
+      - res (list\[numpy.ndarray\]): 输出图像数据，ndarray.shape 为 \[H, W, C\]
 
 
-## 模型相关信息
+## 四、服务部署
 
-### 模型代码
+- PaddleHub Serving可以部署一个在线图像风格转换服务。
 
-https://github.com/miraiwk/UGATIT-paddle
+- ### 第一步：启动PaddleHub Serving
 
-### 依赖
+  - 运行启动命令：
+  - ```shell
+    $ hub serving start -m UGATIT_100w
+    ```
 
-paddlepaddle >= 1.8.0
+  - 这样就完成了一个图像风格转换的在线服务API的部署，默认端口号为8866。
 
-paddlehub >= 1.8.0
+  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
+
+- ### 第二步：发送预测请求
+
+  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+
+  - ```python
+    import requests
+    import json
+    import cv2
+    import base64
+
+
+    def cv2_to_base64(image):
+      data = cv2.imencode('.jpg', image)[1]
+      return base64.b64encode(data.tostring()).decode('utf8')
+
+    # 发送HTTP请求
+    data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
+    headers = {"Content-type": "application/json"}
+    url = "http://127.0.0.1:8866/predict/UGATIT_100w"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+    # 打印预测结果
+    print(r.json()["results"])
+    ```
+
+
+## 五、更新历史
+
+* 1.0.0
+
+  初始发布
+   
+  - ```shell
+    $ hub install UGATIT_100w==1.0.0
+    ```
