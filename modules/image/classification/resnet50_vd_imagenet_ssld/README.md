@@ -7,6 +7,7 @@
 |数据集|ImageNet-2012|
 |是否支持Fine-tuning|是|
 |模型大小|148MB|
+|指标|-|
 |最新更新日期|2021-02-26|
 
 
@@ -23,7 +24,7 @@
 
 - ### 1、环境依赖
 
-    - paddlepaddle >= 2.0.0rc
+    - paddlepaddle >= 2.0.0
 
     - paddlehub >= 2.0.0
 

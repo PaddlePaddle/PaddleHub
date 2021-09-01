@@ -33,9 +33,9 @@
 
 - ### 1、环境依赖
 
-    - paddlepaddle >= 1.8.0
+    - paddlepaddle >= 2.0.0
 
-    - paddlehub >= 1.7.1
+    - paddlehub >= 2.0.0
 
 - ### 2、安装
 

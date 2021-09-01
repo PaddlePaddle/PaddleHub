@@ -6,6 +6,7 @@
 |网络|基于deoldify和realsr模型|
 |是否支持Fine-tuning|否|
 |模型大小|64MB+834MB|
+|指标｜-｜
 |最新更新日期|2021-08-19|
 
 
@@ -32,9 +33,9 @@
 
 - ### 1、环境依赖
 
-    - paddlepaddle >= 2.0.0rc
+    - paddlepaddle >= 2.0.0
 
-    - paddlehub >= 1.8.3
+    - paddlehub >= 2.0.0
 
     - NOTE: 使用该模型需要自行安装ffmpeg，若您使用conda环境，推荐使用如下语句进行安装。
 
@@ -46,6 +47,11 @@
     - ```shell
         $ hub install photo_restoration
       ```
+      
+    -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+      | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+
+
 
 ## 三、模型API预测
   - ### 1、代码示例

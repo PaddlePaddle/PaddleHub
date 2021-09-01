@@ -57,9 +57,9 @@
 
 - ### 1、环境依赖
 
-    - paddlepaddle >= 2.0.0rc0
+    - paddlepaddle >= 2.0.0
 
-    - paddlehub >= 2.0.0rc0
+    - paddlehub >= 2.0.0
 
 - ### 2、安装
 
