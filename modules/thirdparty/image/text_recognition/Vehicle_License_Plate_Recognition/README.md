@@ -43,13 +43,7 @@
   
 ## 三、模型API预测
 
-- ### 1、命令行预测
-
-  - ```shell
-    $ hub run Vehicle_License_Plate_Recognition --input_path "/PATH/TO/IMAGE"
-    ```
-
-- ### 2、代码示例
+- ### 1、代码示例
 
   - ```python
     import paddlehub as hub
@@ -59,7 +53,7 @@
     result = model.plate_recognition(images=[cv2.imread('/PATH/TO/IMAGE')])
     ```
 
-- ### 3、API
+- ### 2、API
 
   - ```python
     def plate_recognition(images)
