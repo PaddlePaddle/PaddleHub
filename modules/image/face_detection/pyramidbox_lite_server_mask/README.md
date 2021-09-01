@@ -204,14 +204,6 @@
 
   初始发布
 
-* 1.0.1
-
-* 1.1.0
-
-* 1.2.0
-
-* 1.3.0
-
 * 1.3.1
   - ```shell
     $ hub install pyramidbox_lite_server_mask==1.3.1

@@ -160,10 +160,6 @@
 
   初始发布
 
-* 1.1.0
-
-* 1.1.1
-
 * 1.1.2
   - ```shell
     $ hub install ultra_light_fast_generic_face_detector_1mb_320==1.1.2
