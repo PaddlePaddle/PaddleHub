@@ -40,7 +40,7 @@
 
 - ### 2、安装
     - ```shell
-        $ hub install U2Netp
+      $ hub install U2Netp
       ```
       
     - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
