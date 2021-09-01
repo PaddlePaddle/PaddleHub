@@ -13,7 +13,6 @@
 ## 一、模型基本信息
 
 - ### 应用效果展示
-    - [SkyAR模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=SkyAR&en_category=ImageSegmentation)
     
     - 样例结果示例：
         * 原始视频：
@@ -95,8 +94,6 @@
             relighting_factor=0.8, recoloring_factor=0.5, skybox_center_crop=0.5
         )
     ```
-
-    - 深度估计API
 
     - **参数**
 
