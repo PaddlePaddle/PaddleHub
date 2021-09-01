@@ -5,9 +5,9 @@
 |类别|图像 - 目标检测|
 |网络|faster_rcnn|
 |数据集|百度自建数据集|
-|是否支持Fine-tuning|否|
+|是否支持Fine-tuning|是|
 |模型大小|317MB|
-|最新更新日期|-|
+|最新更新日期|2021-02-26|
 |数据指标|-|
 
 
@@ -37,25 +37,7 @@
   
 ## 三、模型API预测
 
-- ### 1、命令行预测
-
-  - ```shell
-    $ hub run faster_rcnn_resnet50_fpn_venus --input_path "/PATH/TO/IMAGE"
-    ```
-
-- ### 2、代码示例
-
-  - ```python
-    import paddlehub as hub
-    import cv2
-
-    object_detector = hub.Module(name="faster_rcnn_resnet50_fpn_venus")
-    result = object_detector.object_detection(images=[cv2.imread('/PATH/TO/IMAGE')])
-    # or
-    # result = object_detector.object_detection((paths=['/PATH/TO/IMAGE'])
-    ```
-
-- ### 3、API
+- ### 1、API
 
   - ```python
     def context(num_classes=81,
@@ -113,48 +95,9 @@
       - combined: 是否将参数保存到统一的一个文件中。
 
 
-## 四、服务部署
-
-- PaddleHub Serving可以部署一个目标检测的在线服务。
-
-- ### 第一步：启动PaddleHub Serving
-
-  - 运行启动命令：
-  - ```shell
-    $ hub serving start -m faster_rcnn_resnet50_fpn_venus
-    ```
-
-  - 
-
-  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
-
-- ### 第二步：发送预测请求
-
-  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
-
-  - ```python
-    import requests
-    import json
-    import cv2
-    import base64
 
 
-    def cv2_to_base64(image):
-      data = cv2.imencode('.jpg', image)[1]
-      return base64.b64encode(data.tostring()).decode('utf8')
-
-    # 发送HTTP请求
-    data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
-    headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/faster_rcnn_resnet50_fpn_venus"
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
-
-    # 打印预测结果
-    print(r.json()["results"])
-    ```
-
-
-## 五、更新历史
+## 四、更新历史
 
 * 1.0.0
 
