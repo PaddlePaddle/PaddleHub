@@ -39,14 +39,14 @@
     - NOTE: 使用该模型需要自行安装ffmpeg，若您使用conda环境，推荐使用如下语句进行安装。
 
       ```shell
-        $ conda install x264=='1!152.20180717' ffmpeg=4.0.2 -c conda-forge
+      $ conda install x264=='1!152.20180717' ffmpeg=4.0.2 -c conda-forge
       ```
 
 
 - ### 2、安装
 
     - ```shell
-        $ hub install realsr
+      $ hub install realsr
       ```
       
     - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
