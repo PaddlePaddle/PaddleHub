@@ -15,7 +15,6 @@
 ## 一、模型基本信息
 
 - ### 应用效果展示
-    - [U2Net模型官网文档](https://www.paddlepaddle.org.cn/hubdetail?name=U2Net&en_category=ImageSegmentation)
 
     - 效果展示
     
@@ -36,11 +35,11 @@
     - paddlehub >= 2.0.0
 
 - ### 2、安装
-- ```shell
-        $ hub install U2Net
+    - ```shell
+      $ hub install U2Net
       ```
       
-    -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+    - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
       | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 三、模型API预测
