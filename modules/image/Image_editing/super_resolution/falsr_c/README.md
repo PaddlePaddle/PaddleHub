@@ -130,34 +130,33 @@
  - ### 第二步：发送预测请求
 
     - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+        ```python
+        import requests
+        import json
+        import base64
 
-          ```python
-          import requests
-          import json
-          import base64
+        import cv2
+        import numpy as np
 
-          import cv2
-          import numpy as np
+        def cv2_to_base64(image):
+            data = cv2.imencode('.jpg', image)[1]
+            return base64.b64encode(data.tostring()).decode('utf8')
+        def base64_to_cv2(b64str):
+            data = base64.b64decode(b64str.encode('utf8'))
+            data = np.fromstring(data, np.uint8)
+            data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+            return data
 
-          def cv2_to_base64(image):
-              data = cv2.imencode('.jpg', image)[1]
-              return base64.b64encode(data.tostring()).decode('utf8')
-          def base64_to_cv2(b64str):
-              data = base64.b64decode(b64str.encode('utf8'))
-              data = np.fromstring(data, np.uint8)
-              data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-              return data
-
-          # 发送HTTP请求
-          org_im = cv2.imread('/PATH/TO/IMAGE')
-          data = {'images':[cv2_to_base64(org_im)]}
-          headers = {"Content-type": "application/json"}
-          url = "http://127.0.0.1:8866/predict/falsr_c"
-          r = requests.post(url=url, headers=headers, data=json.dumps(data))
-          sr = base64_to_cv2(r.json()["results"][0]['data'])
-          cv2.imwrite('falsr_c_X2.png', sr)
-          print("save image as falsr_c_X2.png")
-          ```
+        # 发送HTTP请求
+        org_im = cv2.imread('/PATH/TO/IMAGE')
+        data = {'images':[cv2_to_base64(org_im)]}
+        headers = {"Content-type": "application/json"}
+        url = "http://127.0.0.1:8866/predict/falsr_c"
+        r = requests.post(url=url, headers=headers, data=json.dumps(data))
+        sr = base64_to_cv2(r.json()["results"][0]['data'])
+        cv2.imwrite('falsr_c_X2.png', sr)
+        print("save image as falsr_c_X2.png")
+        ```
 
 
 ## 五、更新历史
