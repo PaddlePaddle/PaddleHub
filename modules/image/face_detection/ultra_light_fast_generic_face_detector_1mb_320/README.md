@@ -81,6 +81,7 @@
       - output\_dir (str): 图片的保存路径，默认设为 face\_detector\_640\_predict\_output；<br/>
       - visualization (bool): 是否将识别结果保存为图片文件；<br/>
       - confs\_threshold (float): 置信度的阈值。
+      
       **NOTE:** paths和images两个参数选择其一进行提供数据
 
     - **返回**
