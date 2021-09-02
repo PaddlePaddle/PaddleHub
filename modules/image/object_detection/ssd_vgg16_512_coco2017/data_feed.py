@@ -34,7 +34,11 @@ class DecodeImage(object):
 
 
 class ResizeImage(object):
-    def __init__(self, target_size=0, max_size=0, interp=cv2.INTER_LINEAR, use_cv2=True):
+    def __init__(self,
+                 target_size=0,
+                 max_size=0,
+                 interp=cv2.INTER_LINEAR,
+                 use_cv2=True):
         """
         Rescale image to the specified target size, and capped at max_size
         if max_size != 0.
@@ -88,11 +92,18 @@ class ResizeImage(object):
             resize_h = selected_size
 
         if self.use_cv2:
-            im = cv2.resize(im, None, None, fx=im_scale_x, fy=im_scale_y, interpolation=self.interp)
+            im = cv2.resize(
+                im,
+                None,
+                None,
+                fx=im_scale_x,
+                fy=im_scale_y,
+                interpolation=self.interp)
         else:
             if self.max_size != 0:
-                raise TypeError('If you set max_size to cap the maximum size of image,'
-                                'please set use_cv2 to True to resize the image.')
+                raise TypeError(
+                    'If you set max_size to cap the maximum size of image,'
+                    'please set use_cv2 to True to resize the image.')
             im = im.astype('uint8')
             im = Image.fromarray(im)
             im = im.resize((int(resize_w), int(resize_h)), self.interp)
@@ -102,7 +113,11 @@ class ResizeImage(object):
 
 
 class NormalizeImage(object):
-    def __init__(self, mean=[0.485, 0.456, 0.406], std=[1, 1, 1], is_scale=True, is_channel_first=True):
+    def __init__(self,
+                 mean=[0.485, 0.456, 0.406],
+                 std=[1, 1, 1],
+                 is_scale=True,
+                 is_channel_first=True):
         """
         Args:
             mean (list): the pixel mean
@@ -158,9 +173,11 @@ class Permute(object):
 def reader(paths=[],
            images=None,
            decode_image=DecodeImage(to_rgb=True, with_mixup=False),
-           resize_image=ResizeImage(target_size=512, interp=1, max_size=0, use_cv2=False),
+           resize_image=ResizeImage(
+               target_size=512, interp=1, max_size=0, use_cv2=False),
            permute_image=Permute(to_bgr=False),
-           normalize_image=NormalizeImage(mean=[104, 117, 123], std=[1, 1, 1], is_scale=False)):
+           normalize_image=NormalizeImage(
+               mean=[104, 117, 123], std=[1, 1, 1], is_scale=False)):
     """
     data generator
 
@@ -176,7 +193,8 @@ def reader(paths=[],
     if paths is not None:
         assert type(paths) is list, "type(paths) is not list."
         for img_path in paths:
-            assert os.path.isfile(img_path), "The {} isn't a valid file path.".format(img_path)
+            assert os.path.isfile(
+                img_path), "The {} isn't a valid file path.".format(img_path)
             img = cv2.imread(img_path).astype('float32')
             img_list.append(img)
     if images is not None:

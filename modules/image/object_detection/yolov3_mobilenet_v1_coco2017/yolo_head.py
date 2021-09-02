@@ -13,7 +13,8 @@ __all__ = ['MultiClassNMS', 'YOLOv3Head']
 
 class MultiClassNMS(object):
     # __op__ = fluid.layers.multiclass_nms
-    def __init__(self, background_label, keep_top_k, nms_threshold, nms_top_k, normalized, score_threshold):
+    def __init__(self, background_label, keep_top_k, nms_threshold, nms_top_k,
+                 normalized, score_threshold):
         super(MultiClassNMS, self).__init__()
         self.background_label = background_label
         self.keep_top_k = keep_top_k
@@ -41,8 +42,8 @@ class YOLOv3Head(object):
                  num_classes=80,
                  ignore_thresh=0.7,
                  label_smooth=True,
-                 anchors=[[10, 13], [16, 30], [33, 23], [30, 61], [62, 45], [59, 119], [116, 90], [156, 198],
-                          [373, 326]],
+                 anchors=[[10, 13], [16, 30], [33, 23], [30, 61], [62, 45],
+                          [59, 119], [116, 90], [156, 198], [373, 326]],
                  anchor_masks=[[6, 7, 8], [3, 4, 5], [0, 1, 2]],
                  nms=MultiClassNMS(
                      background_label=-1,
@@ -61,7 +62,15 @@ class YOLOv3Head(object):
         self.nms = nms
         self.prefix_name = weight_prefix_name
 
-    def _conv_bn(self, input, ch_out, filter_size, stride, padding, act='leaky', is_test=True, name=None):
+    def _conv_bn(self,
+                 input,
+                 ch_out,
+                 filter_size,
+                 stride,
+                 padding,
+                 act='leaky',
+                 is_test=True,
+                 name=None):
         conv = fluid.layers.conv2d(
             input=input,
             num_filters=ch_out,
@@ -73,8 +82,10 @@ class YOLOv3Head(object):
             bias_attr=False)
 
         bn_name = name + ".bn"
-        bn_param_attr = ParamAttr(regularizer=L2Decay(self.norm_decay), name=bn_name + '.scale')
-        bn_bias_attr = ParamAttr(regularizer=L2Decay(self.norm_decay), name=bn_name + '.offset')
+        bn_param_attr = ParamAttr(
+            regularizer=L2Decay(self.norm_decay), name=bn_name + '.scale')
+        bn_bias_attr = ParamAttr(
+            regularizer=L2Decay(self.norm_decay), name=bn_name + '.offset')
         out = fluid.layers.batch_norm(
             input=conv,
             act=None,
@@ -96,17 +107,42 @@ class YOLOv3Head(object):
         conv = input
         for j in range(2):
             conv = self._conv_bn(
-                conv, channel, filter_size=1, stride=1, padding=0, is_test=is_test, name='{}.{}.0'.format(name, j))
+                conv,
+                channel,
+                filter_size=1,
+                stride=1,
+                padding=0,
+                is_test=is_test,
+                name='{}.{}.0'.format(name, j))
             conv = self._conv_bn(
-                conv, channel * 2, filter_size=3, stride=1, padding=1, is_test=is_test, name='{}.{}.1'.format(name, j))
+                conv,
+                channel * 2,
+                filter_size=3,
+                stride=1,
+                padding=1,
+                is_test=is_test,
+                name='{}.{}.1'.format(name, j))
         route = self._conv_bn(
-            conv, channel, filter_size=1, stride=1, padding=0, is_test=is_test, name='{}.2'.format(name))
+            conv,
+            channel,
+            filter_size=1,
+            stride=1,
+            padding=0,
+            is_test=is_test,
+            name='{}.2'.format(name))
         tip = self._conv_bn(
-            route, channel * 2, filter_size=3, stride=1, padding=1, is_test=is_test, name='{}.tip'.format(name))
+            route,
+            channel * 2,
+            filter_size=3,
+            stride=1,
+            padding=1,
+            is_test=is_test,
+            name='{}.tip'.format(name))
         return route, tip
 
     def _upsample(self, input, scale=2, name=None):
-        out = fluid.layers.resize_nearest(input=input, scale=float(scale), name=name)
+        out = fluid.layers.resize_nearest(
+            input=input, scale=float(scale), name=name)
         return out
 
     def _parse_anchors(self, anchors):
@@ -156,7 +192,10 @@ class YOLOv3Head(object):
             if i > 0:  # perform concat in first 2 detection_block
                 block = fluid.layers.concat(input=[route, block], axis=1)
             route, tip = self._detection_block(
-                block, channel=512 // (2**i), is_test=(not is_train), name=self.prefix_name + "yolo_block.{}".format(i))
+                block,
+                channel=512 // (2**i),
+                is_test=(not is_train),
+                name=self.prefix_name + "yolo_block.{}".format(i))
 
             # out channel number = mask_num * (5 + class_num)
             num_filters = len(self.anchor_masks[i]) * (self.num_classes + 5)
@@ -167,9 +206,12 @@ class YOLOv3Head(object):
                 stride=1,
                 padding=0,
                 act=None,
-                param_attr=ParamAttr(name=self.prefix_name + "yolo_output.{}.conv.weights".format(i)),
+                param_attr=ParamAttr(name=self.prefix_name +
+                                     "yolo_output.{}.conv.weights".format(i)),
                 bias_attr=ParamAttr(
-                    regularizer=L2Decay(0.), name=self.prefix_name + "yolo_output.{}.conv.bias".format(i)))
+                    regularizer=L2Decay(0.),
+                    name=self.prefix_name +
+                    "yolo_output.{}.conv.bias".format(i)))
             outputs.append(block_out)
 
             if i < len(blocks) - 1:

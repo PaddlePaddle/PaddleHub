@@ -45,11 +45,18 @@ class SmoothL1Loss(object):
 
     def __call__(self, x, y, inside_weight=None, outside_weight=None):
         return fluid.layers.smooth_l1(
-            x, y, inside_weight=inside_weight, outside_weight=outside_weight, sigma=self.sigma)
+            x,
+            y,
+            inside_weight=inside_weight,
+            outside_weight=outside_weight,
+            sigma=self.sigma)
 
 
 class BoxCoder(object):
-    def __init__(self, prior_box_var=[0.1, 0.1, 0.2, 0.2], code_type='decode_center_size', box_normalized=False,
+    def __init__(self,
+                 prior_box_var=[0.1, 0.1, 0.2, 0.2],
+                 code_type='decode_center_size',
+                 box_normalized=False,
                  axis=1):
         super(BoxCoder, self).__init__()
         self.prior_box_var = prior_box_var
@@ -78,14 +85,16 @@ class TwoFCHead(object):
             act='relu',
             name='fc6',
             param_attr=ParamAttr(name='fc6_w', initializer=Xavier(fan_out=fan)),
-            bias_attr=ParamAttr(name='fc6_b', learning_rate=2., regularizer=L2Decay(0.)))
+            bias_attr=ParamAttr(
+                name='fc6_b', learning_rate=2., regularizer=L2Decay(0.)))
         head_feat = fluid.layers.fc(
             input=fc6,
             size=self.mlp_dim,
             act='relu',
             name='fc7',
             param_attr=ParamAttr(name='fc7_w', initializer=Xavier()),
-            bias_attr=ParamAttr(name='fc7_b', learning_rate=2., regularizer=L2Decay(0.)))
+            bias_attr=ParamAttr(
+                name='fc7_b', learning_rate=2., regularizer=L2Decay(0.)))
 
         return head_feat
 
@@ -103,7 +112,12 @@ class BBoxHead(object):
     __inject__ = ['head', 'box_coder', 'nms', 'bbox_loss']
     __shared__ = ['num_classes']
 
-    def __init__(self, head, box_coder=BoxCoder(), nms=MultiClassNMS(), bbox_loss=SmoothL1Loss(), num_classes=81):
+    def __init__(self,
+                 head,
+                 box_coder=BoxCoder(),
+                 nms=MultiClassNMS(),
+                 bbox_loss=SmoothL1Loss(),
+                 num_classes=81):
         super(BBoxHead, self).__init__()
         self.head = head
         self.num_classes = num_classes
@@ -140,24 +154,30 @@ class BBoxHead(object):
         head_feat = self.get_head_feat(roi_feat)
         # when ResNetC5 output a single feature map
         if not isinstance(self.head, TwoFCHead):
-            head_feat = fluid.layers.pool2d(head_feat, pool_type='avg', global_pooling=True)
+            head_feat = fluid.layers.pool2d(
+                head_feat, pool_type='avg', global_pooling=True)
         cls_score = fluid.layers.fc(
             input=head_feat,
             size=self.num_classes,
             act=None,
             name='cls_score',
-            param_attr=ParamAttr(name='cls_score_w', initializer=Normal(loc=0.0, scale=0.01)),
-            bias_attr=ParamAttr(name='cls_score_b', learning_rate=2., regularizer=L2Decay(0.)))
+            param_attr=ParamAttr(
+                name='cls_score_w', initializer=Normal(loc=0.0, scale=0.01)),
+            bias_attr=ParamAttr(
+                name='cls_score_b', learning_rate=2., regularizer=L2Decay(0.)))
         bbox_pred = fluid.layers.fc(
             input=head_feat,
             size=4 * self.num_classes,
             act=None,
             name='bbox_pred',
-            param_attr=ParamAttr(name='bbox_pred_w', initializer=Normal(loc=0.0, scale=0.001)),
-            bias_attr=ParamAttr(name='bbox_pred_b', learning_rate=2., regularizer=L2Decay(0.)))
+            param_attr=ParamAttr(
+                name='bbox_pred_w', initializer=Normal(loc=0.0, scale=0.001)),
+            bias_attr=ParamAttr(
+                name='bbox_pred_b', learning_rate=2., regularizer=L2Decay(0.)))
         return cls_score, bbox_pred
 
-    def get_loss(self, roi_feat, labels_int32, bbox_targets, bbox_inside_weights, bbox_outside_weights):
+    def get_loss(self, roi_feat, labels_int32, bbox_targets,
+                 bbox_inside_weights, bbox_outside_weights):
         """
         Get bbox_head loss.
 
@@ -186,11 +206,19 @@ class BBoxHead(object):
             logits=cls_score, label=labels_int64, numeric_stable_mode=True)
         loss_cls = fluid.layers.reduce_mean(loss_cls)
         loss_bbox = self.bbox_loss(
-            x=bbox_pred, y=bbox_targets, inside_weight=bbox_inside_weights, outside_weight=bbox_outside_weights)
+            x=bbox_pred,
+            y=bbox_targets,
+            inside_weight=bbox_inside_weights,
+            outside_weight=bbox_outside_weights)
         loss_bbox = fluid.layers.reduce_mean(loss_bbox)
         return {'loss_cls': loss_cls, 'loss_bbox': loss_bbox}
 
-    def get_prediction(self, roi_feat, rois, im_info, im_shape, return_box_score=False):
+    def get_prediction(self,
+                       roi_feat,
+                       rois,
+                       im_info,
+                       im_shape,
+                       return_box_score=False):
         """
         Get prediction bounding box in test stage.
 
