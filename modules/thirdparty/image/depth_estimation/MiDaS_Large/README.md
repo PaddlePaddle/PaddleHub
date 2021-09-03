@@ -16,7 +16,7 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://img-blog.csdnimg.cn/20201227112600975.jpg"  width = "450" height = "300" hspace='10'/> <br />
+    <img src="https://img-blog.csdnimg.cn/20201227112600975.jpg"  width='70%' hspace='10'/> <br />
     </p> 
     
 
