@@ -16,10 +16,15 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://ai-studio-static-online.cdn.bcebos.com/bd002c4bb6a7427daf26988770bb18648b7d8d2bfd6746bfb9a429db4867727f"  width = "450" height = "300" hspace='10'/> <br />
-    </p> 
-    <p align="center">
-    <img src="https://ai-studio-static-online.cdn.bcebos.com/16195e03d7e0412d990349587c587a26d9ae9e2ed1ec4fa1b4dc994e948d1f7d"  width = "450" height = "300" hspace='10'/> <br />
+    <center>
+    <img src="https://ai-studio-static-online.cdn.bcebos.com/bd002c4bb6a7427daf26988770bb18648b7d8d2bfd6746bfb9a429db4867727f"  width = "450" height = "300" hspace='10'/> 
+    </center>
+    <center>输入图像</center>
+    <center>
+    <img src="https://ai-studio-static-online.cdn.bcebos.com/16195e03d7e0412d990349587c587a26d9ae9e2ed1ec4fa1b4dc994e948d1f7d"  width = "450" height = "300" hspace='10'/>
+    </center>
+    <center>输出图像</center>
+     <br />
     </p> 
     
 

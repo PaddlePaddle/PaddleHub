@@ -16,7 +16,7 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://paddlehub.bj.bcebos.com/resources/style.png"  width = "450" height = "300" hspace='10'/> <br />
+    <img src="https://paddlehub.bj.bcebos.com/resources/style.png"  width='80%' hspace='10'/> <br />
     </p> 
 
 - ### 模型介绍
