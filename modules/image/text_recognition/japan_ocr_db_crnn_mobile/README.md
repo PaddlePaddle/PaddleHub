@@ -16,7 +16,7 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/131634172-1307f1ef-83ce-431a-b465-3161414c009e.jpg" hspace='10'/> <br />
+    <img src="https://user-images.githubusercontent.com/22424850/131634172-1307f1ef-83ce-431a-b465-3161414c009e.jpg" width='80%' hspace='10'/> <br />
     </p> 
 
 - ### 模型介绍
