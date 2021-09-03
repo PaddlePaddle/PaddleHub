@@ -16,7 +16,7 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/131634172-1307f1ef-83ce-431a-b465-3161414c009e.jpg"  width = "450" height = "300" hspace='10'/> <br />
+    <img src="https://user-images.githubusercontent.com/22424850/131634172-1307f1ef-83ce-431a-b465-3161414c009e.jpg" hspace='10'/> <br />
     </p> 
 
 - ### 模型介绍
@@ -72,7 +72,7 @@
 - ### 3、API
 
   - ```python
-    _init_(text_detector_module=None, enable_mkldnn=False)
+    def __init__(text_detector_module=None, enable_mkldnn=False)
     ```
 
     - 构造JapanOCRDBCRNNMobile对象
