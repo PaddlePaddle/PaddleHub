@@ -16,8 +16,16 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/131604811-bce29c3f-66f7-45cb-a388-d739368bfeb9.jpg"  width = "450" height = "300" hspace='10'/> <br />
-    </p>
+    <center>
+    <img src="https://user-images.githubusercontent.com/22424850/131982190-c7b34fd8-f74f-4d82-8a1f-ffe0d492e158.jpg"  width='50%' hspace='10'/> 
+    </center>
+    <center>输入图像</center>
+    <center>
+    <img src="https://user-images.githubusercontent.com/22424850/131604811-bce29c3f-66f7-45cb-a388-d739368bfeb9.jpg"   width='50%' hspace='10'/>
+    </center>
+    <center>输出图像</center>
+    <br />
+    </p> 
 
 - ### 模型介绍
 
