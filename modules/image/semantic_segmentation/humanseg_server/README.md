@@ -61,7 +61,7 @@
 
     human_seg = hub.Module(name='humanseg_server')
     im = cv2.imread('/PATH/TO/IMAGE')
-    #visualization=True可以用于查看超分图片效果，可设置为False提升运行速度。
+    #visualization=True可以用于查看人像分割图片效果，可设置为False提升运行速度。
     res = human_seg.segment(images=[im],visualization=True)
     print(res[0]['data'])
     human_seg.video_segment('/PATH/TO/VIDEO')
