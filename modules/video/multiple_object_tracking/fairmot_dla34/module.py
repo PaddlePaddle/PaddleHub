@@ -43,8 +43,7 @@ if parent_path not in sys.path:
     summary="Fairmot is a model for multiple object tracking.",
     version="1.0.0")
 class FairmotTracker_1088x608(hub.Module):
-    def __init__(self):
-        super(FairmotTracker_1088x608, self).__init__()
+    def __init__(self, name='fairmot_dla34'):
         self.pretrained_model = os.path.join(self.directory, "fairmot_dla34_30e_1088x608")
 
     def tracking(self, video_stream, output_dir='mot_result', visualization=True, draw_threshold=0.5, use_gpu=False):
