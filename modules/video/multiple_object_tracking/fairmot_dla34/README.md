@@ -1,13 +1,13 @@
-# fairmot_dla34_30e_1088x608
+# fairmot_dla34
 
-|模型名称|fairmot_dla34_30e_1088x608|
-| :--- | :---: | 
+|模型名称|fairmot_dla34|
+| :--- | :---: |
 |类别|视频 - 多目标追踪|
 |网络|CenterNet|
 |数据集|Caltech Pedestrian+CityPersons+CUHK-SYSU+PRW+ETHZ+MOT17|
 |是否支持Fine-tuning|否|
 |模型大小|125MB|
-|最新更新日期|-|
+|最新更新日期|2021-08-26|
 |数据指标|-|
 
 
@@ -16,7 +16,7 @@
 - ### 应用效果展示
   - 样例结果示例：
   <p align="center">
-  <img src="demo/mot16_jde.gif"  width = "450" height = "300" hspace='10'/> <br />
+  <img src="https://user-images.githubusercontent.com/22424850/131989578-ec06e18f-e122-40b0-84d2-8772fd35391a.gif"  hspace='10'/> <br />
   </p>
 
 - ### 模型介绍
@@ -29,32 +29,32 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 2.1.0    
+  - paddlepaddle >= 2.1.0  
 
-  - paddlehub >= 1.6.0     
+  - paddlehub >= 1.6.0  
 
   - ppdet >= 2.1.0
 
-  - ffmpeg                       
+  - ffmpeg  
 
 - ### 2、安装
 
   - ```shell
-    $ hub install fairmot_dla34_30e_1088x608
+    $ hub install fairmot_dla34
     ```
-  
+
 ## 三、模型API预测
 
 - ### 1、命令行预测
 
   - ```shell
     # Read from a video file
-    $ hub run fairmot_dla34_30e_1088x608 --video_stream "/PATH/TO/VIDEO"
+    $ hub run fairmot_dla34 --video_stream "/PATH/TO/VIDEO"
 
     # Read from a camera device
-    $ hub run fairmot_dla34_30e_1088x608 --video_stream 0 --from_device
+    $ hub run fairmot_dla34 --video_stream 0 --from_device
     ```
 
 
@@ -63,13 +63,13 @@
   - ```python
     import paddlehub as hub
 
-    jde_tracker = hub.Module(name="fairmot_dla34_30e_1088x608")
+    tracker = hub.Module(name="fairmot_dla34")
     # Read from a video file
-    jde_tracker.mot_predict('/PATH/TO/VIDEO', output_dir='mot_result', visualization=True, \
-                            draw_threshold=0.5, use_gpu=False, from_device=False)
+    tracker.mot_predict('/PATH/TO/VIDEO', output_dir='mot_result', visualization=True,
+                        draw_threshold=0.5, use_gpu=False, from_device=False)
     # or read from a camera device
-    # jde_tracker.mot_predict('0', output_dir='mot_result', visualization=True, \
-    #                        draw_threshold=0.5, use_gpu=False, from_device=True)
+    # tracker.mot_predict('0', output_dir='mot_result', visualization=True,
+    #                     draw_threshold=0.5, use_gpu=False, from_device=True)
     ```
 
 - ### 3、API
@@ -91,7 +91,7 @@
       - output_dir (str): 结果保存路径的根目录，默认为当前目录； <br/>
       - visualization (bool): 是否保存追踪结果；<br/>
       - use\_gpu (bool): 是否使用 GPU；<br/>
-      - draw\_threshold (float): 预测置信度的阈值；<br/>      
+      - draw\_threshold (float): 预测置信度的阈值；<br/>  
       - from_device (bool): 是否从摄像设备读取视频，如若是，video_stream的输入会被当成设备索引号。
 
 ## 四、更新历史
@@ -101,5 +101,5 @@
   初始发布
 
   - ```shell
-    $ hub install fairmot_dla34_30e_1088x608==1.0.0
+    $ hub install fairmot_dla34==1.0.0
     ```
