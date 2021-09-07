@@ -43,12 +43,19 @@ if parent_path not in sys.path:
     summary="Fairmot is a model for multiple object tracking.",
     version="1.0.0")
 class FairmotTracker_1088x608(hub.Module):
-    def _initialize(self):
+    def __init__(self):
+        super(FairmotTracker_1088x608, self).__init__()
         self.pretrained_model = os.path.join(self.directory, "fairmot_dla34_30e_1088x608")
 
     def tracking(self, video_stream, output_dir='mot_result', visualization=True, draw_threshold=0.5, use_gpu=False):
         '''
+        Track a video, and save the prediction results into output_dir, if visualization is set as True.
 
+        video_stream: the video path
+        output_dir: specify the dir to save the results
+        visualization: if True, save the results as a video, otherwise not.
+        draw_threshold: the threshold for the prediction results
+        use_gpu: if True, use gpu to perform the computation, otherwise cpu.
         '''
         self.video_stream = video_stream
         self.output_dir = output_dir
@@ -78,6 +85,14 @@ class FairmotTracker_1088x608(hub.Module):
             draw_threshold=draw_threshold)
 
     def stream_mode(self, output_dir='mot_result', visualization=True, draw_threshold=0.5, use_gpu=False):
+        '''
+        Entering the stream mode enables image stream prediction. Users can predict the images like a stream and save the results to a video.
+
+        output_dir: specify the dir to save the results
+        visualization: if True, save the results as a video, otherwise not.
+        draw_threshold: the threshold for the prediction results
+        use_gpu: if True, use gpu to perform the computation, otherwise cpu.
+        '''
         self.output_dir = output_dir
         self.visualization = visualization
         self.draw_threshold = draw_threshold
@@ -116,6 +131,16 @@ class FairmotTracker_1088x608(hub.Module):
             os.system(cmd_str)
 
     def predict(self, images: list = []):
+        '''
+        Predict the images. This method should called in stream_mode.
+
+        images: the image list used for prediction.
+
+        Example:
+        tracker = hub.Module('fairmot_dla34')
+        with tracker.stream_mode(output_dir='image_stream_output', visualization=True, draw_threshold=0.5, use_gpu=True):
+            tracker.predict([images])
+        '''
         length = len(images)
         if length == 0:
             print('No images provided.')

@@ -52,9 +52,6 @@
   - ```shell
     # Read from a video file
     $ hub run fairmot_dla34 --video_stream "/PATH/TO/VIDEO"
-
-    # Read from a camera device
-    $ hub run fairmot_dla34 --video_stream 0 --from_device
     ```
 
 
@@ -65,34 +62,56 @@
 
     tracker = hub.Module(name="fairmot_dla34")
     # Read from a video file
-    tracker.mot_predict('/PATH/TO/VIDEO', output_dir='mot_result', visualization=True,
+    tracker.tracking('/PATH/TO/VIDEO', output_dir='mot_result', visualization=True,
                         draw_threshold=0.5, use_gpu=False, from_device=False)
-    # or read from a camera device
-    # tracker.mot_predict('0', output_dir='mot_result', visualization=True,
-    #                     draw_threshold=0.5, use_gpu=False, from_device=True)
+    # or read from a image stream
+    # with tracker.stream_mode(output_dir='image_stream_output', visualization=True, draw_threshold=0.5, use_gpu=True):
+    #    tracker.predict([images])
     ```
 
 - ### 3、API
 
   - ```python
-    def mot_predict(video_stream,
-                    output_dir='',
-                    visualization=True,
-                    draw_threshold=0.5,
-                    use_gpu=False,
-                    from_device=False
-                    )
+    def tracking(video_stream,
+                 output_dir='',
+                 visualization=True,
+                 draw_threshold=0.5,
+                 use_gpu=False)
     ```
-    - 预测API，完成对视频内容的多目标追踪，并存储追踪结果。
+    - 视频预测API，完成对视频内容的多目标追踪，并存储追踪结果。
 
     - **参数**
 
-      - video_stream (str): 视频流的来源，可以是视频文件的路径，也可以是本机摄像设备的设备索引号； <br/>
+      - video_stream (str): 视频文件的路径; <br/>
       - output_dir (str): 结果保存路径的根目录，默认为当前目录； <br/>
       - visualization (bool): 是否保存追踪结果；<br/>
       - use\_gpu (bool): 是否使用 GPU；<br/>
-      - draw\_threshold (float): 预测置信度的阈值；<br/>  
-      - from_device (bool): 是否从摄像设备读取视频，如若是，video_stream的输入会被当成设备索引号。
+      - draw\_threshold (float): 预测置信度的阈值。
+
+  - ```python
+    def stream_mode(output_dir='',
+                    visualization=True,
+                    draw_threshold=0.5,
+                    use_gpu=False)
+    ```
+    - 进入图片流预测模式API，在该模式中完成对图片流的多目标追踪，并存储追踪结果。
+
+    - **参数**
+
+      - output_dir (str): 结果保存路径的根目录，默认为当前目录； <br/>
+      - visualization (bool): 是否保存追踪结果；<br/>
+      - use\_gpu (bool): 是否使用 GPU；<br/>
+      - draw\_threshold (float): 预测置信度的阈值。
+
+  - ```python
+    def predict(images: list = [])
+    ```
+    - 对图片进行预测的API, 该接口必须在stream_mode API被调用后使用。
+
+    - **参数**
+
+      - images (list): 待预测的图片列表。
+
 
 ## 四、更新历史
 
