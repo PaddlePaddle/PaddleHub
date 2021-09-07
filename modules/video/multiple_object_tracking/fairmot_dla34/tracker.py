@@ -101,10 +101,11 @@ class StreamTracker(object):
         frame_id = 0
         self.status['mode'] = 'track'
         self.model.eval()
-
+        timer = Timer()
         while True:
             try:
                 data = next(iterator)
+                timer.tic()
                 pred_dets, pred_embs = self.model(data)
                 online_targets = self.model.tracker.update(pred_dets, pred_embs)
 
@@ -120,10 +121,10 @@ class StreamTracker(object):
                         online_tlwhs.append(tlwh)
                         online_ids.append(tid)
                         online_scores.append(tscore)
-
+                timer.toc()
                 # save results
                 results.append((frame_id + 1, online_tlwhs, online_scores, online_ids))
-                self.save_results(data, frame_id, online_ids, online_tlwhs, online_scores, 0, show_image, save_dir)
+                self.save_results(data, frame_id, online_ids, online_tlwhs, online_scores, timer.average_time, show_image, save_dir)
                 frame_id += 1
 
                 yield results, frame_id
@@ -154,7 +155,8 @@ class StreamTracker(object):
                 self.dataloader_iter, save_dir=save_dir, draw_threshold=draw_threshold)
         else:
             raise ValueError(model_type)
-
+        yield
+        results = []
         while True:
             with paddle.no_grad():
                 try:

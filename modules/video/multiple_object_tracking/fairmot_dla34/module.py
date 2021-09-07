@@ -20,7 +20,6 @@ import warnings
 warnings.filterwarnings('ignore')
 
 import paddle
-from paddle.distributed import ParallelEnv
 from ppdet.core.workspace import load_config, merge_config
 from ppdet.engine import Tracker
 from ppdet.utils.check import check_gpu, check_version, check_config
@@ -105,11 +104,12 @@ class FairmotTracker_1088x608(hub.Module):
             model_type='FairMOT',
             visualization=self.visualization,
             draw_threshold=self.draw_threshold)
+        next(self.tracker_generator)
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, traceback):
         seq = 'inputimages'
-        save_dir = os.path.join(self.output_dir, 'mot_outputs', seq) if self.args.visualization else None
-        if self.args.visualization:
+        save_dir = os.path.join(self.output_dir, 'mot_outputs', seq) if self.visualization else None
+        if self.visualization:
             output_video_path = os.path.join(save_dir, '..', '{}_vis.mp4'.format(seq))
             cmd_str = 'ffmpeg -f image2 -i {}/%05d.jpg -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" {}'.format(
                 save_dir, output_video_path)
@@ -174,7 +174,7 @@ class FairmotTracker_1088x608(hub.Module):
         self.arg_config_group.add_argument(
             '--output_dir', type=str, default='mot_result', help='Directory name for output tracking results.')
         self.arg_config_group.add_argument(
-            '--visualization', type=bool, default=True, help="whether to save output as images.")
+            '--visualization', action='store_true', help="whether to save output as images.")
         self.arg_config_group.add_argument(
             "--draw_threshold", type=float, default=0.5, help="Threshold to reserve the result for visualization.")
 

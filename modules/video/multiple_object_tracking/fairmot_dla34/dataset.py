@@ -136,7 +136,7 @@ class MOTImageStream:
     def __iter__(self):
         ct = 0
         while True:
-            if not self.imagequeue:
+            if self.imagequeue:
                 frame = self.imagequeue.popleft()
                 imgname = os.path.join(self.frameraw_dir, 'frame{}.png'.format(ct))
                 cv2.imwrite(imgname, frame)
@@ -149,7 +149,8 @@ class MOTImageStream:
                 ct += 1
                 if self.transform:
                     yield self.transform(rec)
-                yield rec
+                else:
+                    yield rec
             else:
                 return
 
@@ -186,6 +187,7 @@ class MOTVideoStreamReader:
         return self
 
     def to_tensor(self, batch):
+        paddle.disable_static()
         if isinstance(batch, np.ndarray):
             batch = paddle.to_tensor(batch)
         elif isinstance(batch, Mapping):
