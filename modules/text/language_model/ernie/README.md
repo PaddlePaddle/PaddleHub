@@ -39,7 +39,7 @@ Ernie是百度提出的基于知识增强的持续学习语义理解模型，该
 - ### 2、安装
 
   - ```shell
-    $ hub install ernie==2.0.2
+    $ hub install ernie
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -172,9 +172,6 @@ for idx, text in enumerate(data):
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
     print(r.json())
     ```
-    
-  - 查看代码
-    https://github.com/PaddlePaddle/ERNIE
 
 ## 五、更新历史
 
