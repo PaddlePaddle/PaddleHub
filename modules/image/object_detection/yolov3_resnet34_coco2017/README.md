@@ -1,7 +1,7 @@
 # yolov3_resnet34_coco2017
 
 |模型名称|yolov3_resnet34_coco2017|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 目标检测|
 |网络|YOLOv3|
 |数据集|COCO2017|
@@ -16,19 +16,9 @@
 - ### 应用效果展示
   - 样例结果示例：
      <p align="center">
-     <center>
-     <img src="https://user-images.githubusercontent.com/22424850/131983232-eae9cab2-b1c0-4a6e-83f4-166b49947e58.jpg"  width='50%' hspace='10'/> 
-     </center>
-     <br />
-     <center>输入图像</center>
-     <br />
-     <center>
      <img src="https://user-images.githubusercontent.com/22424850/131506781-b4ecb77b-5ab1-4795-88da-5f547f7f7f9c.jpg"   width='50%' hspace='10'/>
-     </center>
      <br />
-     <center>输出图像</center>
-     <br />
-     </p> 
+     </p>
 
 - ### 模型介绍
 
@@ -37,18 +27,18 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.6.2    
+  - paddlepaddle >= 1.6.2  
 
-  - paddlehub >= 1.6.0                            
+  - paddlehub >= 1.6.0  
 
 - ### 2、安装
 
   - ```shell
     $ hub install yolov3_resnet34_coco2017
     ```
-  
+
 ## 三、模型API预测
 
 - ### 1、命令行预测
@@ -92,7 +82,7 @@
       - output\_dir (str): 图片的保存路径，默认设为 detection\_result；<br/>
       - score\_thresh (float): 识别置信度的阈值；<br/>
       - visualization (bool): 是否将识别结果保存为图片文件。
-      
+
       **NOTE:** paths和images两个参数选择其一进行提供数据
 
     - **返回**
@@ -106,7 +96,7 @@
           - right (int): 边界框的右下角x坐标
           - bottom (int): 边界框的右下角y坐标
         - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
-  
+
   - ```python
     def save_inference_model(dirname,
                              model_filename=None,
