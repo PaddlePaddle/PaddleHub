@@ -14,6 +14,7 @@
 import os
 import sys
 import signal
+import glob
 import argparse
 # ignore warning log
 import warnings
@@ -26,6 +27,7 @@ from ppdet.utils.check import check_gpu, check_version, check_config
 from ppdet.utils.logger import setup_logger
 import paddlehub as hub
 from paddlehub.module.module import moduleinfo, serving, runnable
+import cv2
 
 from .tracker import StreamTracker
 
@@ -124,10 +126,25 @@ class JDETracker_1088x608(hub.Module):
         seq = 'inputimages'
         save_dir = os.path.join(self.output_dir, 'mot_outputs', seq) if self.visualization else None
         if self.visualization:
-            output_video_path = os.path.join(save_dir, '..', '{}_vis.mp4'.format(seq))
-            cmd_str = 'ffmpeg -f image2 -i {}/%05d.jpg -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" {}'.format(
-                save_dir, output_video_path)
-            os.system(cmd_str)
+            #### Save using ffmpeg
+            #output_video_path = os.path.join(save_dir, '..', '{}_vis.mp4'.format(seq))
+            #cmd_str = 'ffmpeg -f image2 -i {}/%05d.jpg -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" {}'.format(
+            #    save_dir, output_video_path)
+            #os.system(cmd_str)
+            #### Save using opencv
+            output_video_path = os.path.join(save_dir, '..', '{}_vis.avi'.format(seq))
+            imgnames = glob.glob(os.path.join(save_dir, '*.jpg'))
+            if len(imgnames) == 0:
+                logger.info('No output images to save for video')
+                return
+            img = cv2.imread(os.path.join(save_dir, '00000.jpg'))
+            video_writer = cv2.VideoWriter(output_video_path, fourcc=cv2.VideoWriter_fourcc('M','J','P','G'), fps=30, frameSize=[img.shape[1],img.shape[0]])
+            for i in range(len(imgnames)):
+                imgpath = os.path.join(save_dir, '{:05d}.jpg'.format(i))
+                img = cv2.imread(imgpath)
+                video_writer.write(img)
+            video_writer.release()
+            logger.info('Save video in {}'.format(output_video_path))
 
     def predict(self, images: list = []):
         '''
@@ -179,15 +196,31 @@ class JDETracker_1088x608(hub.Module):
         )
 
     def signalhandler(self, signum, frame):
-        seq = os.path.splitext(os.path.basename(self.args.video_stream))[0]
-        save_dir = os.path.join(self.args.output_dir, 'mot_outputs', seq) if self.args.visualization else None
-        if self.args.visualization:
-            output_video_path = os.path.join(save_dir, '..', '{}_vis.mp4'.format(seq))
-            cmd_str = 'ffmpeg -f image2 -i {}/%05d.jpg -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" {}'.format(
-                save_dir, output_video_path)
-            os.system(cmd_str)
+        seq = os.path.splitext(os.path.basename(self.video_stream))[0]
+        save_dir = os.path.join(self.output_dir, 'mot_outputs', seq) if self.visualization else None
+        if self.visualization:
+            #### Save using ffmpeg
+            #output_video_path = os.path.join(save_dir, '..', '{}_vis.mp4'.format(seq))
+            #cmd_str = 'ffmpeg -f image2 -i {}/%05d.jpg -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" {}'.format(
+            #    save_dir, output_video_path)
+            #os.system(cmd_str)
+            #### Save using opencv
+            output_video_path = os.path.join(save_dir, '..', '{}_vis.avi'.format(seq))
+            imgnames = glob.glob(os.path.join(save_dir, '*.jpg'))
+            if len(imgnames) == 0:
+                logger.info('No output images to save for video')
+                return
+            img = cv2.imread(os.path.join(save_dir, '00000.jpg'))
+            video_writer = cv2.VideoWriter(output_video_path, fourcc=cv2.VideoWriter_fourcc('M','J','P','G'), fps=30, frameSize=[img.shape[1],img.shape[0]])
+            for i in range(len(imgnames)):
+                imgpath = os.path.join(save_dir, '{:05d}.jpg'.format(i))
+                img = cv2.imread(imgpath)
+                video_writer.write(img)
+            video_writer.release()
+            logger.info('Save video in {}'.format(output_video_path))
             print('Program Interrupted! Save video in {}'.format(output_video_path))
             exit(0)
+     
 
     def add_module_config_arg(self):
         """
