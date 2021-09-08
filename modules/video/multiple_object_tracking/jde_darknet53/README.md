@@ -37,7 +37,7 @@
 
   - ppdet >= 2.1.0
 
-  - ffmpeg  
+  - opencv-python
 
 - ### 2、安装
 
