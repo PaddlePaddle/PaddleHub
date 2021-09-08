@@ -1,7 +1,7 @@
 # UGATIT_100w
 
 |模型名称|UGATIT_100w|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 图像生成|
 |网络|U-GAT-IT|
 |数据集|selfie2anime|
@@ -16,17 +16,16 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <center>
-    <img src="https://ai-studio-static-online.cdn.bcebos.com/d130fabd8bd34e53b2f942b3766eb6bbd3c19c0676d04abfbd5cc4b83b66f8b6"  height='80%' hspace='10'/> 
-    </center>
-    <center>输入图像</center>
-    <center>
+    <img src="https://ai-studio-static-online.cdn.bcebos.com/d130fabd8bd34e53b2f942b3766eb6bbd3c19c0676d04abfbd5cc4b83b66f8b6"  height='80%' hspace='10'/>
+    <br />
+    输入图像
+    <br />
     <img src="https://ai-studio-static-online.cdn.bcebos.com/8538af03b3f14b1884fcf4eec48965baf939e35a783d40129085102057438c77"   height='80%' hspace='10'/>
-    </center>
-    <center>输出图像</center>
-     <br />
-    </p> 
-    
+    <br />
+    输出图像
+    <br />
+    </p>
+
 
 - ### 模型介绍
 
@@ -35,18 +34,18 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.8.0    
+  - paddlepaddle >= 1.8.0  
 
-  - paddlehub >= 1.8.0                            
+  - paddlehub >= 1.8.0  
 
 - ### 2、安装
 
   - ```shell
     $ hub install UGATIT_100w
     ```
-  
+
 ## 三、模型API预测
 
 - ### 1、代码示例
@@ -82,7 +81,7 @@
       - output\_dir (str): 图片的保存路径，默认设为 output；<br/>
 
       **NOTE:** paths和images两个参数选择其一进行提供数据
-    
+
     - **返回**
       - res (list\[numpy.ndarray\]): 输出图像数据，ndarray.shape 为 \[H, W, C\]
 
@@ -133,7 +132,7 @@
 * 1.0.0
 
   初始发布
-   
+
   - ```shell
     $ hub install UGATIT_100w==1.0.0
     ```

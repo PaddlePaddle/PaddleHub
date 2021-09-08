@@ -1,7 +1,7 @@
 # animegan_v2_hayao_64
 
 |模型名称|animegan_v2_hayao_64|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 图像生成|
 |网络|AnimeGAN|
 |数据集|The Wind Rises|
@@ -16,16 +16,15 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <center>
-    <img src="https://ai-studio-static-online.cdn.bcebos.com/bd002c4bb6a7427daf26988770bb18648b7d8d2bfd6746bfb9a429db4867727f"  width = "450" height = "300" hspace='10'/> 
-    </center>
-    <center>输入图像</center>
-    <center>
+    <img src="https://ai-studio-static-online.cdn.bcebos.com/bd002c4bb6a7427daf26988770bb18648b7d8d2bfd6746bfb9a429db4867727f"  width = "450" height = "300" hspace='10'/>
+    <br />
+    输入图像
+    <br />
     <img src="https://ai-studio-static-online.cdn.bcebos.com/49620341f1fe4f00af4d93c22694897a1ae578a235844a1db1bbb4bd37bf750b"  width = "450" height = "300" hspace='10'/>
-    </center>
-    <center>输出图像</center>
+    <br />
+    输出图像
      <br />
-    </p> 
+    </p>
 
 - ### 模型介绍
 
@@ -34,18 +33,18 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.8.0    
+  - paddlepaddle >= 1.8.0  
 
-  - paddlehub >= 1.8.0                            
+  - paddlehub >= 1.8.0  
 
 - ### 2、安装
 
   - ```shell
     $ hub install animegan_v2_hayao_64
     ```
-  
+
 ## 三、模型API预测
 
 - ### 1、代码示例
@@ -83,7 +82,7 @@
       - max\_size (int): 输入图片的短边最大尺寸，默认设为 1024。
 
       **NOTE:** paths和images两个参数选择其一进行提供数据
-    
+
     - **返回**
       - res (list\[numpy.ndarray\]): 输出图像数据，ndarray.shape 为 \[H, W, C\]
 
@@ -142,7 +141,7 @@
 * 1.0.2
 
   删除batch_size选项
-   
+
   - ```shell
     $ hub install animegan_v2_hayao_64==1.0.2
     ```

@@ -1,7 +1,7 @@
 # U2Net_Portrait
 
 |模型名称|U2Net_Portrait|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 图像生成|
 |网络|U^2Net|
 |数据集|-|
@@ -16,17 +16,16 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <center>
-    <img src="https://ai-studio-static-online.cdn.bcebos.com/07f73466f3294373965e06c141c4781992f447104a94471dadfabc1c3d920861"  height='50%' hspace='10'/> 
-    </center>
-    <center>输入图像</center>
-    <center>
+    <img src="https://ai-studio-static-online.cdn.bcebos.com/07f73466f3294373965e06c141c4781992f447104a94471dadfabc1c3d920861"  height='50%' hspace='10'/>
+    <br />
+    输入图像
+    <br />
     <img src="https://ai-studio-static-online.cdn.bcebos.com/c6ab02cf27414a5ba5921d9e6b079b487f6cda6026dc4d6dbca8f0167ad7cae3"   height='50%' hspace='10'/>
-    </center>
-    <center>输出图像</center>
-     <br />
-    </p> 
-    
+    <br />
+    输出图像
+    <br />
+    </p>
+
 
 - ### 模型介绍
 
@@ -35,18 +34,18 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 2.0.0    
+  - paddlepaddle >= 2.0.0  
 
-  - paddlehub >= 2.0.0                            
+  - paddlehub >= 2.0.0  
 
 - ### 2、安装
 
   - ```shell
     $ hub install U2Net_Portrait
     ```
-  
+
 ## 三、模型API预测
 
 - ### 1、代码示例
@@ -85,7 +84,7 @@
       - visualization (bool) : 是否将结果保存为图片文件；；<br/>
 
       **NOTE:** paths和images两个参数选择其一进行提供数据
-    
+
     - **返回**
       - res (list\[numpy.ndarray\]): 输出图像数据，ndarray.shape 为 \[H, W, C\]
 
@@ -96,7 +95,7 @@
 * 1.0.0
 
   初始发布
-   
+
   - ```shell
     $ hub install U2Net_Portrait==1.0.0
     ```
