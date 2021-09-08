@@ -90,7 +90,8 @@ class MOTVideoStream:
                 ct += 1
                 if self.transform:
                     yield self.transform(rec)
-                yield rec
+                else:
+                    yield rec
             else:
                 return
 
