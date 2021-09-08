@@ -1,7 +1,7 @@
 # ultra_light_fast_generic_face_detector_1mb_640
 
 |模型名称|ultra_light_fast_generic_face_detector_1mb_640|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 人脸检测|
 |网络|Ultra-Light-Fast-Generic-Face-Detector-1MB|
 |数据集|WIDER FACE数据集|
@@ -16,16 +16,9 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <center>
-    <img src="https://user-images.githubusercontent.com/22424850/131982190-c7b34fd8-f74f-4d82-8a1f-ffe0d492e158.jpg"  width='50%' hspace='10'/> 
-    </center>
-    <center>输入图像</center>
-    <center>
     <img src="https://user-images.githubusercontent.com/22424850/131604811-bce29c3f-66f7-45cb-a388-d739368bfeb9.jpg"   width='50%' hspace='10'/>
-    </center>
-    <center>输出图像</center>
     <br />
-    </p> 
+    </p>
 
 - ### 模型介绍
 
@@ -34,18 +27,18 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.6.2    
+  - paddlepaddle >= 1.6.2  
 
-  - paddlehub >= 1.6.0                            
+  - paddlehub >= 1.6.0  
 
 - ### 2、安装
 
   - ```shell
     $ hub install ultra_light_fast_generic_face_detector_1mb_640
     ```
-  
+
 ## 三、模型API预测
 
 - ### 1、命令行预测
@@ -89,7 +82,7 @@
       - output\_dir (str): 图片的保存路径，默认设为 face\_detector\_640\_predict\_output；<br/>
       - visualization (bool): 是否将识别结果保存为图片文件；<br/>
       - confs\_threshold (float): 置信度的阈值。
-      
+
       **NOTE:** paths和images两个参数选择其一进行提供数据
 
     - **返回**
@@ -103,8 +96,8 @@
           - right (int): 边界框的右下角x坐标
           - bottom (int): 边界框的右下角y坐标
         - save\_path 字段为可视化图片的保存路径（仅当visualization=True时存在）
-  
-  
+
+
   - ```python
     def save_inference_model(dirname,
                              model_filename=None,

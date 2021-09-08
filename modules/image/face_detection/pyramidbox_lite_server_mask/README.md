@@ -1,7 +1,7 @@
 # pyramidbox_lite_server_mask
 
 |模型名称|pyramidbox_lite_server_mask|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 人脸检测|
 |网络|PyramidBox|
 |数据集|WIDER FACE数据集 + 百度自采人脸数据集|
@@ -16,17 +16,10 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <center>
-    <img src="https://user-images.githubusercontent.com/22424850/131981907-1118ffca-479c-418e-bab4-a00223467562.jpg"  width='50%' hspace='10'/> 
-    </center>
-    <center>输入图像</center>
-    <center>
     <img src="https://user-images.githubusercontent.com/22424850/131603304-690a2e3b-9f24-42f6-9297-a12ada884191.jpg"   width='50%' hspace='10'/>
-    </center>
-    <center>输出图像</center>
     <br />
-    </p> 
-  
+    </p>
+
 - ### 模型介绍
 
   - PyramidBox-Lite是基于2018年百度发表于计算机视觉顶级会议ECCV 2018的论文PyramidBox而研发的轻量级模型，模型基于主干网络FaceBoxes，对于光照、口罩遮挡、表情变化、尺度变化等常见问题具有很强的鲁棒性。该PaddleHub Module基于WIDER FACE数据集和百度自采人脸数据集进行训练，支持预测，可用于检测人脸是否佩戴口罩。
@@ -34,18 +27,18 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.6.2    
+  - paddlepaddle >= 1.6.2  
 
-  - paddlehub >= 1.6.0                            
+  - paddlehub >= 1.6.0  
 
 - ### 2、安装
 
   - ```shell
     $ hub install pyramidbox_lite_server_mask
     ```
-  
+
 ## 三、模型API预测
 
 - ### 1、命令行预测
@@ -55,7 +48,7 @@
     ```
 
 - ### 2、代码示例
-  
+
   - ```python
     import paddlehub as hub
     import cv2
@@ -101,7 +94,7 @@
       - use\_multi\_scale (bool) : 用于设置是否开启多尺度的人脸检测，开启多尺度人脸检测能够更好的检测到输入图像中不同尺寸的人脸，但是会增加模型计算量，降低预测速度；<br/>
       - shrink (float): 用于设置图片的缩放比例，该值越大，则对于输入图片中的小尺寸人脸有更好的检测效果（模型计算成本越高），反之则对于大尺寸人脸有更好的检测效果；<br/>
       - confs\_threshold (float): 置信度的阈值。
-      
+
       **NOTE:** paths和images两个参数选择其一进行提供数据
 
     - **返回**
@@ -115,7 +108,7 @@
           - top (int): 边界框的左上角y坐标
           - right (int): 边界框的右下角x坐标
           - bottom (int): 边界框的右下角y坐标
-  
+
   - ```python
     def set_face_detector_module(face_detector_module)
     ```
@@ -123,16 +116,16 @@
     - **参数**
 
       - face\_detector\_module (class): 人脸检测模型。
-  
+
   - ```python
     def get_face_detector_module()
     ```
     - 获取口罩检测模型中进行人脸检测的底座模型。
     - **返回**
-      
+
       - 当前模型使用的人脸检测模型
-  
- 
+
+
 
   - ```python
     def save_inference_model(dirname,

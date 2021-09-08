@@ -1,7 +1,7 @@
 # pyramidbox_lite_mobile
 
 |模型名称|pyramidbox_lite_mobile|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 人脸检测|
 |网络|PyramidBox|
 |数据集|WIDER FACE数据集 + 百度自采人脸数据集|
@@ -16,16 +16,9 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <center>
-    <img src="https://user-images.githubusercontent.com/22424850/131981574-27b9b160-f228-4156-84d6-8a224dab176d.jpg"  width='50%' hspace='10'/> 
-    </center>
-    <center>输入图像</center>
-    <center>
     <img src="https://user-images.githubusercontent.com/22424850/131602468-351eb3fb-81e3-4294-ac8e-b49a3a0232cb.jpg"   width='50%' hspace='10'/>
-    </center>
-    <center>输出图像</center>
     <br />
-    </p> 
+    </p>
 
 - ### 模型介绍
 
@@ -34,18 +27,18 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.6.2    
+  - paddlepaddle >= 1.6.2  
 
-  - paddlehub >= 1.6.0                            
+  - paddlehub >= 1.6.0  
 
 - ### 2、安装
 
   - ```shell
     $ hub install pyramidbox_lite_mobile
     ```
-  
+
 ## 三、模型API预测
 
 - ### 1、命令行预测
@@ -89,7 +82,7 @@
       - visualization (bool): 是否将识别结果保存为图片文件；<br/>
       - shrink (float): 用于设置图片的缩放比例，该值越大，则对于输入图片中的小尺寸人脸有更好的检测效果（模型计算成本越高），反之则对于大尺寸人脸有更好的检测效果；<br/>
       - confs\_threshold (float): 置信度的阈值。
-      
+
       **NOTE:** paths和images两个参数选择其一进行提供数据
 
     - **返回**
@@ -102,8 +95,8 @@
           - top (int): 边界框的左上角y坐标
           - right (int): 边界框的右下角x坐标
           - bottom (int): 边界框的右下角y坐标
-  
-  
+
+
   - ```python
     def save_inference_model(dirname,
                              model_filename=None,

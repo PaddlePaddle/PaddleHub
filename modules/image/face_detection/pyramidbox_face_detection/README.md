@@ -1,7 +1,7 @@
 # pyramidbox_face_detection
 
 |模型名称|pyramidbox_face_detection|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 人脸检测|
 |网络|PyramidBox|
 |数据集|WIDER FACE数据集|
@@ -16,16 +16,9 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <center>
-    <img src="https://user-images.githubusercontent.com/22424850/131981574-27b9b160-f228-4156-84d6-8a224dab176d.jpg"  width='50%' hspace='10'/> 
-    </center>
-    <center>输入图像</center>
-    <center>
     <img src="https://user-images.githubusercontent.com/22424850/131602468-351eb3fb-81e3-4294-ac8e-b49a3a0232cb.jpg"   width='50%' hspace='10'/>
-    </center>
-    <center>输出图像</center>
     <br />
-    </p> 
+    </p>
 
 
 - ### 模型介绍
@@ -35,18 +28,18 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.6.2    
+  - paddlepaddle >= 1.6.2  
 
-  - paddlehub >= 1.6.0                            
+  - paddlehub >= 1.6.0  
 
 - ### 2、安装
 
   - ```shell
     $ hub install pyramidbox_face_detection
     ```
-  
+
 ## 三、模型API预测
 
 - ### 1、命令行预测
@@ -74,7 +67,7 @@
                        paths=None,
                        use_gpu=False,
                        output_dir='detection_result',
-                       visualization=False,                  
+                       visualization=False,  
                        score_thresh=0.15)
     ```
 
@@ -88,7 +81,7 @@
       - output\_dir (str): 图片的保存路径，默认设为 detection\_result；<br/>
       - visualization (bool): 是否将识别结果保存为图片文件；<br/>
       - score_thresh (float): 置信度的阈值。
-      
+
       **NOTE:** paths和images两个参数选择其一进行提供数据
 
     - **返回**
@@ -101,8 +94,8 @@
           - top (int): 边界框的左上角y坐标
           - right (int): 边界框的右下角x坐标
           - bottom (int): 边界框的右下角y坐标
-  
-  
+
+
   - ```python
     def save_inference_model(dirname,
                              model_filename=None,
@@ -167,7 +160,7 @@
   初始发布
 
 * 1.1.0
-  
+
   修复numpy数据读取问题
   - ```shell
     $ hub install pyramidbox_face_detection==1.1.0
