@@ -130,21 +130,6 @@
 
       - results(list): embedding特征，格式为\[\[sample\_a\_pooled\_feature, sample\_a\_seq\_feature\], \[sample\_b\_pooled\_feature, sample\_b\_seq\_feature\],…,\]，其中每个元素都是对应样例的特征输出，每个样例都有句子粒度特征pooled\_feature与字粒度特征seq\_feature。
 
-  - ```python
-    def get_params_layer()
-    ```
-
-    - 用于获取参数层信息，该方法与ULMFiTStrategy联用可以严格按照层数设置分层学习率与逐层解冻。
-
-    - **参数**
-
-      - 无
-
-    - **返回**
-
-      - params_layer(dict): key为参数名，值为参数所在层数
-
-
 
 ## 四、服务部署
 
