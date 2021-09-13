@@ -109,7 +109,7 @@
 - ### 3、API
 
   - ```python
-    def _init_(user_dict=None)
+    def __init__(user_dict=None)
     ```
     - 构造LAC对象
 
@@ -151,23 +151,6 @@
     - **返回**
 
       - results(list): 分词结果
-
-
-  - ```python
-    def context(trainable=False)
-    ```
-    
-    - 获取lac的预训练program以及program的输入输出变量
-
-    - **参数**
-
-      - trainable(bool): trainable=True表示program中的参数在Fine-tune时需要微调，否则保持不变
-
-    - **返回**
-
-      - inputs(dict): program的输入变量
-      - outputs(dict): program的输出变量
-      - main_program(Program): 带有预训练参数的program
 
 
   - ```python
