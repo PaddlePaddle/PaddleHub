@@ -77,7 +77,7 @@
 - ### 3、API
 
   - ```python
-    sentiment_classify(texts=[], data={}, use_gpu=False, batch_size=1)
+    def sentiment_classify(texts=[], data={}, use_gpu=False, batch_size=1)
     ```
     
     - senta_cnn预测接口，预测输入句子的情感分类(二分类，积极/消极）
@@ -94,7 +94,7 @@
       - results(list): 情感分类结果
 
   - ```python
-    context(trainable=False, max_seq_len=128, num_slots=1)
+    def context(trainable=False, max_seq_len=128, num_slots=1)
     ```
 
     - 获取该Module的预训练program以及program相应的输入输出。
@@ -112,7 +112,7 @@
       - main_program(Program): 带有预训练参数的program
 
   - ```python
-    get_labels()
+    def get_labels()
     ```
 
     - 获取senta_cnn的类别
@@ -122,7 +122,7 @@
       - labels(dict): senta_cnn的类别(二分类，积极/消极)
 
   - ```python
-    get_vocab_path()
+    def get_vocab_path()
     ```
 
     - 获取预训练时使用的词汇表
