@@ -1,7 +1,7 @@
 # stgan_bald
 
 |模型名称|stgan_bald|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 图像生成|
 |网络|STGAN|
 |数据集|CelebA|
@@ -15,28 +15,31 @@
 
 - ### 应用效果展示
   - 详情请查看此链接：https://aistudio.baidu.com/aistudio/projectdetail/1145381
-  - 本模型为大家提供了小程序，欢迎大家体验: 
-  ![image](https://github.com/1084667371/stgan_bald/blob/main/images/code.jpg)
+  - 本模型为大家提供了小程序，欢迎大家体验:
+    <p align="center">
+    <img src="https://user-images.githubusercontent.com/22424850/133019389-1aee9ec5-0dce-4e0b-9757-2df5d1ab37b6.jpg"  width = "80%" hspace='10'/>
+     <br />
+    </p>
 
 - ### 模型介绍
 
-  - stgan_bald 以STGAN 为模型，使用 Celeba 数据集训练完成，该模型可自动根据图像生成1年、3年、5年的秃头效果。
+  - stgan_bald 以STGAN 为模型，使用 CelebA 数据集训练完成，该模型可自动根据图像生成1年、3年、5年的秃头效果。
 
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.8.2    
+  - paddlepaddle >= 1.8.2  
 
-  - paddlehub >= 1.8.0                            
+  - paddlehub >= 1.8.0  
 
 - ### 2、安装
 
   - ```shell
     $ hub install stgan_bald
     ```
-  
+
 ## 三、模型API预测
 
 - ### 1、代码示例
@@ -75,7 +78,7 @@
     - **返回**
 
       - res (list\[numpy.ndarray\]): 输出图像数据，ndarray.shape 为 \[H, W, C\]
-  
+
 ## 四、服务部署
 
 - PaddleHub Serving可以部署一个秃头生成器服务。
@@ -106,7 +109,7 @@
     def cv2_to_base64(image):
       data = cv2.imencode('.jpg', image)[1]
       return base64.b64encode(data.tostring()).decode('utf8')
-    
+
     def base64_to_cv2(b64str):
       data = base64.b64decode(b64str.encode('utf8'))
       data = np.fromstring(data, np.uint8)
