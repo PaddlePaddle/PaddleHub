@@ -16,16 +16,15 @@
 - ### 应用效果展示
   - 样例结果示例：
 <p align="center">
-<img width="1080" alt="package" src="https://user-images.githubusercontent.com/76040149/129722926-3ae45dd1-6467-4373-95aa-95ac83d5a6ee.png">
-
+<img src="https://user-images.githubusercontent.com/76040149/133101419-2d175dc4-2274-404d-b9f3-802f398a6ce4.jpg" width="500" alt="package" >
 </p>
 
 - ### 模型介绍
 
-  - Differentiable Binarization（简称DB）是一种基于分割的文本检测算法。在各种文本检测算法中，基于分割的检测算法可以更好地处理弯曲等不规则形状文本，因此往往能取得更好的检测效果。但分割法后处理步骤中将分割结果转化为检测框的流程复杂，耗时严重。DB将二值化阈值加入训练中学习，可以获得更准确的检测边界，从而简化后处理流程。该Module是一个超轻量级文本检测模型，支持直接预测。
+  - DB（Differentiable Binarization）是一种基于分割的文本检测算法。此类算法可以更好地处理弯曲等不规则形状文本，因此检测效果往往会更好。但其后处理步骤中将分割结果转化为检测框的流程复杂，耗时严重。DB将二值化阈值加入训练中学习，可以获得更准确的检测边界，从而简化后处理流程。该Module是一个超轻量级文本检测模型，支持直接预测。
 
 <p align="center">
-<img src="https://bj.bcebos.com/paddlehub/model/image/ocr/db_algo.png"  hspace='10'/> <br />
+<img src="https://user-images.githubusercontent.com/76040149/133101635-7fb142d3-9056-44da-8201-d931727d3977.png" width="800" hspace='10'/> <br />
 </p>
 
   - 更多详情参考：[Real-time Scene Text Detection with Differentiable Binarization](https://arxiv.org/pdf/1911.08947.pdf)
@@ -84,7 +83,7 @@
 - ### 3、API
 
   - ```python
-    _init_(enable_mkldnn=False)
+    __init__(enable_mkldnn=False)
     ```
     - 构造ChineseTextDetectionDBServer对象
 
