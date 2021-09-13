@@ -93,27 +93,6 @@
         - positive_probs: 输入预测文本情感极性属于positive的概率
         - negative_probs: 输入预测文本情感极性属于negative的概率
 
-  - ```python
-    def context(trainable=True, max_seq_len=128)
-    ```
-    - 用于获取Module的上下文信息，得到输入、输出以及预训练的Paddle Program副本
-
-    - **参数**
-      - trainable(bool): 设置为True时，Module中的参数在Fine-tune时也会随之训练，否则保持不变。
-      - max_seq_len(int): SKEP模型的最大序列长度，若序列长度不足，会通过padding方式补到**max_seq_len**, 若序列长度大于该值，则会以截断方式让序列长度为**max_seq_len**，max_seq_len可取值范围为0～512；
-
-    - **返回**
-      - inputs: dict类型，各字段为：
-        - input_ids(Variable): Token Embedding，shape为\[batch_size, max_seq_len\]，dtype为int64类型；
-        - position_id(Variable): Position Embedding，shape为\[batch_size, max_seq_len\]，dtype为int64类型；
-        - segment_ids(Variable): Sentence Embedding，shape为\[batch_size, max_seq_len\]，dtype为int64类型；
-        - input_mask(Variable): token是否为padding的标识，shape为\[batch_size, max_seq_len\]，dtype为int64类型；
-
-      - outputs：dict类型，Module的输出特征，各字段为：
-        - pooled_output(Variable): 句子粒度的特征，可用于文本分类等任务，shape为 \[batch_size, 768\]，dtype为int64类型；
-        - sequence_output(Variable): 字粒度的特征，可用于序列标注等任务，shape为 \[batch_size, seq_len, 768\]，dtype为int64类型；
-
-      - program：包含该Module计算图的Program。
 
   - ```python
     def get_embedding(texts, use_gpu=False, batch_size=1)
