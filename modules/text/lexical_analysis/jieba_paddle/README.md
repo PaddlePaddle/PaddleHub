@@ -97,6 +97,10 @@
       - sentence(str): 单句预测数据。
       - HMM 参数用来控制是否使用 HMM 模型， 默认为True；
 
+    - **返回**
+
+      - results(list): 分词结果
+
 
   - ```python
     def load_userdict(user_dict)
@@ -122,6 +126,10 @@
       - withWeight(bool): 为是否一并返回关键词权重值，默认值为 False
       - allowPOS(tuple): 仅包括指定词性的词，默认值为空，即不筛选
 
+    - **返回**
+
+      - results(list): 关键词结果
+
 
   - ```python
     def textrank(sentence, topK=20, withWeight=False, allowPOS=('ns', 'n', 'vn', 'v'))
@@ -135,6 +143,10 @@
       - topK(int): 返回几个 TF/IDF 权重最大的关键词，默认值为 20
       - withWeight(bool): 为是否一并返回关键词权重值，默认值为 False
       - allowPOS(tuple): 仅包括指定词性的词，默认值为('ns', 'n', 'vn', 'v')
+
+    - **返回**
+
+      - results(list): 关键词结果
 
 
 ## 四、服务部署
