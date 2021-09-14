@@ -23,7 +23,6 @@
 
   - 人脸关键点检测是人脸识别和分析领域中的关键一步，它是诸如自动人脸识别、表情分析、三维人脸重建及三维动画等其它人脸相关问题的前提和突破口。该 PaddleHub Module 的模型转换自 https://github.com/lsy17096535/face-landmark ，支持同一张图中的多个人脸检测。
 
-- 查看代码：https://github.com/lsy17096535/face-landmark
 
 ## 二、安装
 
