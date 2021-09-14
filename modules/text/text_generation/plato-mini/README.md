@@ -15,7 +15,7 @@
 - ### 模型介绍
   - [UnifiedTransformer](https://arxiv.org/abs/2006.16779)以[Transformer](https://arxiv.org/abs/1706.03762) 编码器为网络基本组件，采用灵活的注意力机制，十分适合文本生成任务，并在模型输入中加入了标识不同对话技能的special token，使得模型能同时支持闲聊对话、推荐对话和知识对话。
 该模型在十亿级别的中文对话数据上进行预训练，通过PaddleHub加载后可直接用于对话任务，仅支持中文对话。
-  - 代码：https://github.com/PaddlePaddle/Knover
+
 
 ## 二、安装
 
