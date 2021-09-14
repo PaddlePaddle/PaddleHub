@@ -37,8 +37,8 @@ logger = setup_logger('Predict')
             author_email="",
             summary="JDE is a joint detection and appearance embedding model for multiple object tracking.",
             version="1.0.0")
-class JDETracker_1088x608(hub.Module):
-    def __init__(self, name):
+class JDETracker_1088x608:
+    def __init__(self):
         self.pretrained_model = os.path.join(self.directory, "jde_darknet53_30e_1088x608")
 
     def tracking(self, video_stream, output_dir='mot_result', visualization=True, draw_threshold=0.5, use_gpu=False):
