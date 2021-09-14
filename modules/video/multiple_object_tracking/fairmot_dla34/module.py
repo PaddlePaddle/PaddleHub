@@ -37,8 +37,8 @@ logger = setup_logger('Predict')
             author_email="",
             summary="Fairmot is a model for multiple object tracking.",
             version="1.0.0")
-class FairmotTracker_1088x608(hub.Module):
-    def __init__(self, name):
+class FairmotTracker_1088x608:
+    def __init__(self):
         self.pretrained_model = os.path.join(self.directory, "fairmot_dla34_30e_1088x608")
 
     def tracking(self, video_stream, output_dir='mot_result', visualization=True, draw_threshold=0.5, use_gpu=False):
