@@ -20,9 +20,7 @@
 <img src="https://user-images.githubusercontent.com/76040149/133191670-8eb1c542-f8e8-4715-adb2-6346b976fab1.png"  width="600" hspace='10'/>
 </p>
 
-- 更多详情请参考：
-  - 论文：[ERNIE-GEN:An Enhanced Multi-Flow Pre-training and Fine-tuning Framework for Natural Language Generation](https://arxiv.org/abs/2001.11314)
-  - 代码：https://github.com/PaddlePaddle/ERNIE/blob/repro/ernie-gen/
+- 更多详情请参考：[ERNIE-GEN:An Enhanced Multi-Flow Pre-training and Fine-tuning Framework for Natural Language Generation](https://arxiv.org/abs/2001.11314)
 
 ## 二、安装
 
