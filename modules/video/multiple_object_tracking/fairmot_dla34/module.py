@@ -16,9 +16,6 @@ import sys
 import signal
 import argparse
 import glob
-# ignore warning log
-import warnings
-warnings.filterwarnings('ignore')
 
 import paddle
 from ppdet.core.workspace import load_config, merge_config
@@ -26,26 +23,22 @@ from ppdet.engine import Tracker
 from ppdet.utils.check import check_gpu, check_version, check_config
 from ppdet.utils.logger import setup_logger
 import paddlehub as hub
-from paddlehub.module.module import moduleinfo, serving, runnable
+from paddlehub.module.module import moduleinfo, runnable
 import cv2
 
 from .tracker import StreamTracker
 
 logger = setup_logger('Predict')
-parent_path = os.path.abspath(os.path.join(__file__, '..'))
-if parent_path not in sys.path:
-    sys.path.append(parent_path)
 
 
-@moduleinfo(
-    name="fairmot_dla34",
-    type="CV/multiple_object_tracking",
-    author="paddlepaddle",
-    author_email="",
-    summary="Fairmot is a model for multiple object tracking.",
-    version="1.0.0")
+@moduleinfo(name="fairmot_dla34",
+            type="CV/multiple_object_tracking",
+            author="paddlepaddle",
+            author_email="",
+            summary="Fairmot is a model for multiple object tracking.",
+            version="1.0.0")
 class FairmotTracker_1088x608(hub.Module):
-    def __init__(self, name='fairmot_dla34'):
+    def __init__(self, name):
         self.pretrained_model = os.path.join(self.directory, "fairmot_dla34_30e_1088x608")
 
     def tracking(self, video_stream, output_dir='mot_result', visualization=True, draw_threshold=0.5, use_gpu=False):
@@ -77,13 +70,12 @@ class FairmotTracker_1088x608(hub.Module):
         tracker.load_weights_jde(self.pretrained_model)
         signal.signal(signal.SIGINT, self.signalhandler)
         # inference
-        tracker.videostream_predict(
-            video_stream=video_stream,
-            output_dir=output_dir,
-            data_type='mot',
-            model_type='FairMOT',
-            visualization=visualization,
-            draw_threshold=draw_threshold)
+        tracker.videostream_predict(video_stream=video_stream,
+                                    output_dir=output_dir,
+                                    data_type='mot',
+                                    model_type='FairMOT',
+                                    visualization=visualization,
+                                    draw_threshold=draw_threshold)
 
     def stream_mode(self, output_dir='mot_result', visualization=True, draw_threshold=0.5, use_gpu=False):
         '''
@@ -114,12 +106,11 @@ class FairmotTracker_1088x608(hub.Module):
         return self
 
     def __enter__(self):
-        self.tracker_generator = self.tracker.imagestream_predict(
-            self.output_dir,
-            data_type='mot',
-            model_type='FairMOT',
-            visualization=self.visualization,
-            draw_threshold=self.draw_threshold)
+        self.tracker_generator = self.tracker.imagestream_predict(self.output_dir,
+                                                                  data_type='mot',
+                                                                  model_type='FairMOT',
+                                                                  visualization=self.visualization,
+                                                                  draw_threshold=self.draw_threshold)
         next(self.tracker_generator)
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -138,11 +129,10 @@ class FairmotTracker_1088x608(hub.Module):
                 logger.info('No output images to save for video')
                 return
             img = cv2.imread(os.path.join(save_dir, '00000.jpg'))
-            video_writer = cv2.VideoWriter(
-                output_video_path,
-                fourcc=cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
-                fps=30,
-                frameSize=[img.shape[1], img.shape[0]])
+            video_writer = cv2.VideoWriter(output_video_path,
+                                           fourcc=cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
+                                           fps=30,
+                                           frameSize=[img.shape[1], img.shape[0]])
             for i in range(len(imgnames)):
                 imgpath = os.path.join(save_dir, '{:05d}.jpg'.format(i))
                 img = cv2.imread(imgpath)
@@ -179,11 +169,10 @@ class FairmotTracker_1088x608(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the {} module.".format(self.name),
-            prog='hub run {}'.format(self.name),
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
+                                              prog='hub run {}'.format(self.name),
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -215,11 +204,10 @@ class FairmotTracker_1088x608(hub.Module):
                 logger.info('No output images to save for video')
                 return
             img = cv2.imread(os.path.join(save_dir, '00000.jpg'))
-            video_writer = cv2.VideoWriter(
-                output_video_path,
-                fourcc=cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
-                fps=30,
-                frameSize=[img.shape[1], img.shape[0]])
+            video_writer = cv2.VideoWriter(output_video_path,
+                                           fourcc=cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
+                                           fps=30,
+                                           frameSize=[img.shape[1], img.shape[0]])
             for i in range(len(imgnames)):
                 imgpath = os.path.join(save_dir, '{:05d}.jpg'.format(i))
                 img = cv2.imread(imgpath)
@@ -235,16 +223,22 @@ class FairmotTracker_1088x608(hub.Module):
         """
         self.arg_config_group.add_argument('--use_gpu', action='store_true', help="use GPU or not")
 
-        self.arg_config_group.add_argument(
-            '--output_dir', type=str, default='mot_result', help='Directory name for output tracking results.')
-        self.arg_config_group.add_argument(
-            '--visualization', action='store_true', help="whether to save output as images.")
-        self.arg_config_group.add_argument(
-            "--draw_threshold", type=float, default=0.5, help="Threshold to reserve the result for visualization.")
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='mot_result',
+                                           help='Directory name for output tracking results.')
+        self.arg_config_group.add_argument('--visualization',
+                                           action='store_true',
+                                           help="whether to save output as images.")
+        self.arg_config_group.add_argument("--draw_threshold",
+                                           type=float,
+                                           default=0.5,
+                                           help="Threshold to reserve the result for visualization.")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument(
-            '--video_stream', type=str, help="path to video stream, can be a video file or stream device number.")
+        self.arg_input_group.add_argument('--video_stream',
+                                          type=str,
+                                          help="path to video stream, can be a video file or stream device number.")

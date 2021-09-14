@@ -11,6 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+import sys
+import six
+from collections.abc import Mapping
+from collections import deque
+
 from ppdet.core.workspace import register, serializable
 from ppdet.utils.logger import setup_logger
 from ppdet.data.reader import BaseDataLoader, Compose
@@ -18,12 +24,7 @@ from paddle.fluid.dataloader.collate import default_collate_fn
 import cv2
 from imageio import imread, imwrite
 import numpy as np
-import os
-import sys
-import six
 import paddle
-from collections.abc import Mapping
-from collections import deque
 
 logger = setup_logger(__name__)
 
@@ -39,7 +40,6 @@ class MOTVideoStream:
             Set True when used during MOT model inference while saving
             images or video, or used in DeepSORT.
     """
-
     def __init__(self, video_stream=None, keep_ori_im=False, **kwargs):
         self.video_stream = video_stream
         self.keep_ori_im = keep_ori_im
@@ -106,7 +106,6 @@ class MOTImageStream:
             Set True when used during MOT model inference while saving
             images or video, or used in DeepSORT.
     """
-
     def __init__(self, sample_num=-1, keep_ori_im=False, **kwargs):
         self.keep_ori_im = keep_ori_im
         self._curr_iter = 0
@@ -168,9 +167,9 @@ class MOTVideoStreamReader:
         self.kwargs = kwargs
 
     def __call__(
-            self,
-            dataset,
-            worker_num,
+        self,
+        dataset,
+        worker_num,
     ):
         self.dataset = dataset
         # get data
