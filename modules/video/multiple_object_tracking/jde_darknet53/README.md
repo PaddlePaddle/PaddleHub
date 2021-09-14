@@ -31,10 +31,6 @@
 
 - ### 1、环境依赖  
 
-  - paddlepaddle >= 2.1.0  
-
-  - paddlehub >= 1.6.0  
-
   - ppdet >= 2.1.0
 
   - opencv-python
