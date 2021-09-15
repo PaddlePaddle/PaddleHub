@@ -14,7 +14,7 @@
 - ### 模型介绍
 
 <p align="center">
-<img src="https://bj.bcebos.com/paddlehub/paddlehub-img/bert_network.png"  width=750 height=300 hspace='10'/> <br />
+<img src="https://bj.bcebos.com/paddlehub/paddlehub-img/bert_network.png"  width=750 height=280 hspace='10'/> <br />
 </p>
 
 更多详情请参考[BERT论文](https://arxiv.org/abs/1810.04805)
