@@ -17,7 +17,7 @@
   - 主题模型(Topic Model)是以无监督学习的方式对文档的隐含语义结构进行聚类的统计模型，其中LDA(Latent Dirichlet Allocation)算法是主题模型的一种。LDA根据对词的共现信息的分析，拟合出词-文档-主题的分布，从而将词、文本映射到一个语义空间中。
 
     <p align="center">
-    <img src="https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/lda.png" width=400 hspace='10'/> <br />
+    <img src="https://bj.bcebos.com/paddlehub/model/nlp/semantic_model/lda.png" width=600 hspace='10'/> <br />
     </p>
 
     更多详情请参考[LDA论文](http://www.jmlr.org/papers/volume3/blei03a/blei03a.pdf)。
