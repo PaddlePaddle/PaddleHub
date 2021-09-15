@@ -61,8 +61,8 @@ for idx, text in enumerate(data):
 ```
 
 详情可参考PaddleHub示例：
-- [文本分类](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/text_classification)
-- [序列标注](https://github.com/PaddlePaddle/PaddleHub/tree/release/v2.0.0-beta/demo/sequence_labeling)
+- [文本分类](../../../../demo/text_classification)
+- [序列标注](../../../../demo/sequence_labeling)
 
 - ### 2、API
 
