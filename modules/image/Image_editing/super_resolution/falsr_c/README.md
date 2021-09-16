@@ -18,7 +18,7 @@
   
   - 样例结果示例(左为原图，右为效果图)：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/35907364/130789728-939ea79a-c19e-49af-abf3-21cc8b8b0d90.jpg" width = "450" height = "300" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130899031-a6f8c58a-5cb7-4105-b990-8cca5ae15368.png" width = "450" height = "300" hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/35907364/133558583-0b7049db-ed1f-4a16-8676-f2141fcb3dee.png" width = "450" height = "300" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130899031-a6f8c58a-5cb7-4105-b990-8cca5ae15368.png" width = "450" height = "300" hspace='10'/>
     </p>
 
 
