@@ -1,4 +1,4 @@
-# hrnet30_imagenetld
+# hrnet30_imagenet
 
 |模型名称|hrnet30_imagenet|
 | :--- | :---: |
