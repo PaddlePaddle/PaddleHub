@@ -15,21 +15,20 @@
 
     - 同声传译（Simultaneous Translation），即在句子完成之前进行翻译，同声传译的目标是实现同声传译的自动化，它可以与源语言同时翻译，延迟时间只有几秒钟。
     STACL 是论文 [STACL: Simultaneous Translation with Implicit Anticipation and Controllable Latency using Prefix-to-Prefix Framework](https://www.aclweb.org/anthology/P19-1289/) 中针对同传提出的适用于所有同传场景的翻译架构。
-    STACL 主要具有以下优势：
+        - STACL 主要具有以下优势：
 
-    Prefix-to-Prefix架构拥有预测能力，即在未看到源词的情况下仍然可以翻译出对应的目标词，克服了SOV→SVO等词序差异；
+            - Prefix-to-Prefix架构拥有预测能力，即在未看到源词的情况下仍然可以翻译出对应的目标词，克服了SOV→SVO等词序差异；
 
     <p align="center">
     <img src="https://user-images.githubusercontent.com/40840292/133761990-13e55d0f-5c3a-476c-8865-5808d13cba97.png"> <br />
     </p>
 
-    Wait-k策略可以不需要全句的源句，直接预测目标句，可以实现任意的字级延迟，同时保持较高的翻译质量。
+            - Wait-k策略可以不需要全句的源句，直接预测目标句，可以实现任意的字级延迟，同时保持较高的翻译质量。
 
     <p align="center">
     <img src="https://user-images.githubusercontent.com/40840292/133762098-6ea6f3ca-0d70-4a0a-981d-0fcc6f3cd96b.png"> <br />
     </p>
-    
-    该PaddleHub Module基于transformer网络结构，支持预测。
+    - 该PaddleHub Module基于transformer网络结构，采用wait-3策略进行中文到英文的翻译。
 
 ## 二、安装
 
