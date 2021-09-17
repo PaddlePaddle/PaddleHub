@@ -56,7 +56,7 @@
   - ```python
     import paddlehub as hub
 
-    nist_wait_1 = hub.Module(name="nist_wait_3")
+    nist_wait_3 = hub.Module(name="nist_wait_3")
 
     # 待预测数据（模拟同声传译实时输入）
     text = [
@@ -76,7 +76,7 @@
 
     for t in text:
         print("input: {}".format(t))
-        result = nist_wait_1.predict(t)
+        result = nist_wait_3.predict(t)
         print("model output: {}\n".format(result))
 
     # input: 他
@@ -190,7 +190,7 @@
         "他还说现在正在为这一会议作出安排。",      
     ]
 
-    # 指定预测方法为nist_wait_1并发送post请求，content-type类型应指定json方式
+    # 指定预测方法为nist_wait_3并发送post请求，content-type类型应指定json方式
     # HOST_IP为服务器IP
     url = "http://HOST_IP:8866/predict/nist_wait_3"
     headers = {"Content-Type": "application/json"}
