@@ -1,7 +1,7 @@
 # FCN_HRNet_W18_Face_Seg
 
 |模型名称|FCN_HRNet_W18_Face_Seg|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 图像生成|
 |网络|FCN_HRNet_W18|
 |数据集|-|
@@ -17,8 +17,8 @@
   - 样例结果示例：
     <p align="center">
     <img src="https://ai-studio-static-online.cdn.bcebos.com/88155299a7534f1084f8467a4d6db7871dc4729627d3471c9129d316dc4ff9bc"  width='70%' hspace='10'/> <br />
-    </p> 
-    
+    </p>
+
 
 - ### 模型介绍
 
@@ -27,18 +27,20 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 2.0.0    
+  - paddlepaddle >= 2.0.0  
 
-  - paddlehub >= 2.0.0                            
+  - paddlehub >= 2.0.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)  
 
 - ### 2、安装
 
   - ```shell
     $ hub install FCN_HRNet_W18_Face_Seg
     ```
-  
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+
 ## 三、模型API预测
 
 - ### 1、代码示例
@@ -74,7 +76,7 @@
       - visualization (bool) : 是否将结果保存为图片文件；；<br/>
 
       **NOTE:** paths和images两个参数选择其一进行提供数据
-    
+
     - **返回**
       - res (list\[numpy.ndarray\]): 输出图像数据，ndarray.shape 为 \[H, W, C\]
 
@@ -86,7 +88,7 @@
 * 1.0.0
 
   初始发布
-   
+
   - ```shell
     $ hub install FCN_HRNet_W18_Face_Seg==1.0.0
     ```
