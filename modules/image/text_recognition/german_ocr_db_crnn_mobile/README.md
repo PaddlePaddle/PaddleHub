@@ -1,7 +1,7 @@
 # german_ocr_db_crnn_mobile
 
 |模型名称|german_ocr_db_crnn_mobile|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-文字识别|
 |网络|Differentiable Binarization+CRNN|
 |数据集|icdar2015数据集|
@@ -16,8 +16,8 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/131634062-530c6391-a09b-42a3-bebe-d37362305c42.jpg"  width="80%" hspace='10'/> <br />
-    </p> 
+    <img src="https://user-images.githubusercontent.com/22424850/133761772-8c47f25f-0d95-45b4-8075-867dbbd14c86.jpg"  width="80%" hspace='10'/> <br />
+    </p>
 
 - ### 模型介绍
 
@@ -25,11 +25,11 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.8.0    
+  - paddlepaddle >= 1.8.0  
 
-  - paddlehub >= 1.8.0   
+  - paddlehub >= 1.8.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
   - shapely
 
@@ -38,14 +38,15 @@
   - ```shell
     $ pip install shapely pyclipper
     ```
-  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**					                                
+  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**  
 
 - ### 2、安装
 
   - ```shell
     $ hub install german_ocr_db_crnn_mobile
     ```
-  
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 三、模型API预测
 
@@ -54,7 +55,8 @@
   - ```shell
     $ hub run german_ocr_db_crnn_mobile --input_path "/PATH/TO/IMAGE"
     ```
-  
+  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+
 
 - ### 2、代码示例
 
@@ -163,7 +165,7 @@
 * 1.0.0
 
   初始发布
-   
+
   - ```shell
     $ hub install german_ocr_db_crnn_mobile==1.0.0
     ```

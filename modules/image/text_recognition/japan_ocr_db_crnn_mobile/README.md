@@ -1,7 +1,7 @@
 # japan_ocr_db_crnn_mobile
 
 |模型名称|japan_ocr_db_crnn_mobile|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-文字识别|
 |网络|Differentiable Binarization+CRNN|
 |数据集|icdar2015数据集|
@@ -16,8 +16,8 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/131634172-1307f1ef-83ce-431a-b465-3161414c009e.jpg" width='80%' hspace='10'/> <br />
-    </p> 
+    <img src="https://user-images.githubusercontent.com/22424850/133761650-91f24c1e-f437-47b1-8cfb-a074e7150ff5.jpg" width='80%' hspace='10'/> <br />
+    </p>
 
 - ### 模型介绍
 
@@ -25,11 +25,11 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.8.0    
+  - paddlepaddle >= 1.8.0  
 
-  - paddlehub >= 1.8.0   
+  - paddlehub >= 1.8.0    | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
   - shapely
 
@@ -38,14 +38,16 @@
   - ```shell
     $ pip install shapely pyclipper
     ```
-  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**					                                
+  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**  
 
 - ### 2、安装
 
   - ```shell
     $ hub install japan_ocr_db_crnn_mobile
     ```
-  
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+
 
 ## 三、模型API预测
 
@@ -54,7 +56,7 @@
   - ```shell
     $ hub run japan_ocr_db_crnn_mobile --input_path "/PATH/TO/IMAGE"
     ```
-  
+  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、代码示例
 
@@ -105,7 +107,7 @@
       - text\_thresh (float): 识别日文文本置信度的阈值； <br/>
       - angle_classification_thresh(float): 文本角度分类置信度的阈值 <br/>
       - visualization (bool): 是否将识别结果保存为图片文件。
-      
+
 
     - **返回**
 
@@ -164,7 +166,7 @@
 * 1.0.0
 
   初始发布
-   
+
   - ```shell
     $ hub install japan_ocr_db_crnn_mobile==1.0.0
     ```
