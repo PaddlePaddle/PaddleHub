@@ -40,6 +40,9 @@
   - ```shell
     $ hub install jde_darknet53
     ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+
 
 ## 三、模型API预测
 
@@ -49,7 +52,7 @@
     # Read from a video file
     $ hub run jde_darknet53 --video_stream "/PATH/TO/VIDEO"
     ```
-
+  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、代码示例
 
