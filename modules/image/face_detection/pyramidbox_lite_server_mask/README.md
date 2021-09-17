@@ -31,13 +31,15 @@
 
   - paddlepaddle >= 1.6.2  
 
-  - paddlehub >= 1.6.0  
+  - paddlehub >= 1.6.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
   - ```shell
     $ hub install pyramidbox_lite_server_mask
     ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 三、模型API预测
 
@@ -46,6 +48,7 @@
   - ```shell
     $ hub run pyramidbox_lite_server_mask --input_path "/PATH/TO/IMAGE"
     ```
+  - 通过命令行方式实现人脸检测模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、代码示例
 
