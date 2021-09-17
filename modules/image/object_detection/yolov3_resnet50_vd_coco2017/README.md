@@ -22,7 +22,7 @@
 
 - ### 模型介绍
 
-  - YOLOv3是由Joseph Redmon和Ali Farhadi提出的单阶段检测器, 该检测器与达到同样精度的传统目标检测方法相比，推断速度能达到接近两倍。 YOLOv3将输入图像分成S*S个格子，每个格子预测B个bounding box，每个bounding box预测内容包括: Location(x, y, w, h)、Confidence Score和C个类别的概率，因此YOLOv3输出层的channel数为S*S*B*(5 + C)。YOLOv3的loss函数由三部分组成：Location误差，Confidence误差和分类误差。该PaddleHub Module预训练数据集为COCO2017，目前仅支持预测。
+  - YOLOv3是由Joseph Redmon和Ali Farhadi提出的单阶段检测器, 该检测器与达到同样精度的传统目标检测方法相比，推断速度能达到接近两倍。 YOLOv3将输入图像划分格子，并对每个格子预测bounding box。YOLOv3的loss函数由三部分组成：Location误差，Confidence误差和分类误差。该PaddleHub Module预训练数据集为COCO2017，目前仅支持预测。
 
 
 ## 二、安装
@@ -48,7 +48,7 @@
   - ```shell
     $ hub run yolov3_resnet50_vd_coco2017 --input_path "/PATH/TO/IMAGE"
     ```
-  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+  - 通过命令行方式实现目标检测模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 - ### 2、代码示例
 
   - ```python

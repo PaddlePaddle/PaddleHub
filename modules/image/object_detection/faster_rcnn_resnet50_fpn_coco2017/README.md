@@ -22,7 +22,7 @@
 
 - ### 模型介绍
 
-  - Faster_RCNN是两阶段目标检测器。通过对图像生成候选区域，提取特征，判别特征类别并修正候选框位置。Faster_RCNN整体网络可以分为4个主要内容，一是ResNet-50作为基础卷积层，二是区域生成网络，三是Rol Align，四是检测层。Faster_RCNN是在MS-COCO数据集上预训练的模型。目前仅支持预测。
+  - Faster_RCNN是两阶段目标检测器，对图像生成候选区域、提取特征、判别特征类别并修正候选框位置。Faster_RCNN整体网络可以分为4个部分，一是ResNet-50作为基础卷积层，二是区域生成网络，三是Rol Align，四是检测层。Faster_RCNN是在MS-COCO数据集上预训练的模型。目前仅支持预测。
 
 
 ## 二、安装
@@ -48,7 +48,7 @@
   - ```shell
     $ hub run faster_rcnn_resnet50_fpn_coco2017 --input_path "/PATH/TO/IMAGE"
     ```
-  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+  - 通过命令行方式实现目标检测模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、代码示例
 

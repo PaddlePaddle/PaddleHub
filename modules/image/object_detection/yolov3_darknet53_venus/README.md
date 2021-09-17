@@ -15,7 +15,7 @@
 
 - ### 模型介绍
 
-  - YOLOv3是由Joseph Redmon和Ali Farhadi提出的单阶段检测器, 该检测器与达到同样精度的传统目标检测方法相比，推断速度能达到接近两倍。 YOLOv3将输入图像分成S*S个格子，每个格子预测B个bounding box，每个bounding box预测内容包括: Location(x, y, w, h)、Confidence Score和C个类别的概率，因此YOLOv3输出层的channel数为S*S*B*(5 + C)。YOLOv3的loss函数由三部分组成：Location误差，Confidence误差和分类误差。该PaddleHub Module是由800+tag,170w图片，1000w+检测框训练的大规模通用检测模型，在8个数据集上MAP平均提升5.36%，iou=0.5的准确率提升4.53%。对比于其他通用检测模型，使用该Module进行finetune，可以更快收敛，达到较优效果。
+  - YOLOv3是由Joseph Redmon和Ali Farhadi提出的单阶段检测器, 该检测器与达到同样精度的传统目标检测方法相比，推断速度能达到接近两倍。 YOLOv3将输入图像划分格子，并对每个格子预测bounding box。YOLOv3的loss函数由三部分组成：Location误差，Confidence误差和分类误差。该PaddleHub Module是由800+tag,170w图片，1000w+检测框训练的大规模通用检测模型，在8个数据集上MAP平均提升5.36%，iou=0.5的准确率提升4.53%。对比于其他通用检测模型，使用该Module进行finetune，可以更快收敛，达到较优效果。
 
 
 ## 二、安装
