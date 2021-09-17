@@ -1,7 +1,7 @@
 # stylepro_artistic
 
 |模型名称|stylepro_artistic|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 图像生成|
 |网络|StyleProNet|
 |数据集|MS-COCO + WikiArt|
@@ -17,7 +17,7 @@
   - 样例结果示例：
     <p align="center">
     <img src="https://paddlehub.bj.bcebos.com/resources/style.png"  width='80%' hspace='10'/> <br />
-    </p> 
+    </p>
 
 - ### 模型介绍
 
@@ -26,18 +26,20 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.6.2    
+  - paddlepaddle >= 1.6.2  
 
-  - paddlehub >= 1.6.0                            
+  - paddlehub >= 1.6.0     | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)  
 
 - ### 2、安装
 
   - ```shell
     $ hub install stylepro_artistic
     ```
-  
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+
 ## 三、模型API预测
 
 - ### 1、命令行预测
@@ -45,7 +47,7 @@
   - ```shell
     $ hub run stylepro_artistic --input_path "/PATH/TO/IMAGE"
     ```
-
+  - 通过命令行方式实现风格转换模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 - ### 2、代码示例
 
   - ```python
@@ -101,8 +103,8 @@
       - res (list\[dict\]): 识别结果的列表，列表中每一个元素为 OrderedDict，关键字有 date, save\_path，相应取值为：
         - save\_path (str): 保存图片的路径
         - data (numpy.ndarray): 风格转换的图片数据
-  
-  
+
+
   - ```python
     def save_inference_model(dirname,
                              model_filename=None,
@@ -149,7 +151,7 @@
     def cv2_to_base64(image):
       data = cv2.imencode('.jpg', image)[1]
       return base64.b64encode(data.tostring()).decode('utf8')
-    
+
     def base64_to_cv2(b64str):
       data = base64.b64decode(b64str.encode('utf8'))
       data = np.fromstring(data, np.uint8)

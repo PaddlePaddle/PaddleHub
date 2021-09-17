@@ -38,13 +38,15 @@
 
   - paddlepaddle >= 2.0.0  
 
-  - paddlehub >= 2.0.0  
+  - paddlehub >= 2.0.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
   - ```shell
     $ hub install U2Net_Portrait
     ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 三、模型API预测
 

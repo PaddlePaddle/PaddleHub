@@ -15,11 +15,6 @@
 
 - ### 应用效果展示
   - 详情请查看此链接：https://aistudio.baidu.com/aistudio/projectdetail/1145381
-  - 本模型为大家提供了小程序，欢迎大家体验:
-    <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/133019389-1aee9ec5-0dce-4e0b-9757-2df5d1ab37b6.jpg"  width = "80%" hspace='10'/>
-     <br />
-    </p>
 
 - ### 模型介绍
 
@@ -32,14 +27,15 @@
 
   - paddlepaddle >= 1.8.2  
 
-  - paddlehub >= 1.8.0  
+  - paddlehub >= 1.8.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
   - ```shell
     $ hub install stgan_bald
     ```
-
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 ## 三、模型API预测
 
 - ### 1、代码示例
