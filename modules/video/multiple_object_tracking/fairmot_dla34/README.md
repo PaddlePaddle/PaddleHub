@@ -40,7 +40,8 @@
   - ```shell
     $ hub install fairmot_dla34
     ```
-
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 ## 三、模型API预测
 
 - ### 1、命令行预测
@@ -49,7 +50,7 @@
     # Read from a video file
     $ hub run fairmot_dla34 --video_stream "/PATH/TO/VIDEO"
     ```
-
+  - 通过命令行方式实现多目标追踪模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、代码示例
 
