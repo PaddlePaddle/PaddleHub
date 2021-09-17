@@ -52,7 +52,7 @@
     # Read from a video file
     $ hub run jde_darknet53 --video_stream "/PATH/TO/VIDEO"
     ```
-  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+  - 通过命令行方式实现多目标追踪模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、代码示例
 
