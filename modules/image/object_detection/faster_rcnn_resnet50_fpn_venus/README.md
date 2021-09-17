@@ -1,7 +1,7 @@
 # faster_rcnn_resnet50_fpn_venus
 
 |模型名称|faster_rcnn_resnet50_fpn_venus|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 目标检测|
 |网络|faster_rcnn|
 |数据集|百度自建数据集|
@@ -20,18 +20,20 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.6.2    
+  - paddlepaddle >= 1.6.2  
 
-  - paddlehub >= 1.6.0                            
+  - paddlehub >= 1.6.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)  
 
 - ### 2、安装
 
   - ```shell
     $ hub install faster_rcnn_resnet50_fpn_venus
     ```
-  
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+
 ## 三、模型API预测
 
 - ### 1、API
@@ -50,7 +52,7 @@
       - trainable (bool): 参数是否可训练；<br/>
       - pretrained (bool): 是否加载预训练模型；<br/>
       - get\_prediction (bool): 可选值为 'train'/'predict'，'train' 用于训练，'predict' 用于预测。
-    
+
     - **返回**
       - inputs (dict): 模型的输入，相应的取值为：
         当phase为'train'时，包含：
@@ -63,7 +65,7 @@
         当 phase 为 'predict'时，包含：
           - image (Variable): 图像变量
           - im\_size (Variable): 图像的尺寸
-          - im\_info (Variable): 图像缩放信息 
+          - im\_info (Variable): 图像缩放信息
       - outputs (dict): 模型的输出，响应的取值为：
         当 phase 为 'train'时，包含：
           - head_features (Variable): 所提取的特征
@@ -75,7 +77,7 @@
           - rois (Variable): 提取的roi
           - bbox\_out (Variable): 预测结果
       - context\_prog (Program): 用于迁移学习的 Program
-  
+
   - ```python
     def save_inference_model(dirname,
                              model_filename=None,

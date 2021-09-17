@@ -1,7 +1,7 @@
 # yolov3_darknet53_venus
 
 |模型名称|yolov3_darknet53_venus|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像 - 目标检测|
 |网络|YOLOv3|
 |数据集|百度自建数据集|
@@ -20,18 +20,20 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.6.2    
+  - paddlepaddle >= 1.6.2  
 
-  - paddlehub >= 1.6.0                            
+  - paddlehub >= 1.6.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)  
 
 - ### 2、安装
 
   - ```shell
     $ hub install yolov3_darknet53_venus
     ```
-  
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+
 ## 三、模型API预测
 
 - ### 1、API
@@ -49,7 +51,7 @@
       - trainable(bool): 参数是否可训练；<br/>
       - pretrained (bool): 是否加载预训练模型；<br/>
       - get\_prediction (bool): 是否执行预测。
-    
+
     - **返回**
       - inputs (dict): 模型的输入，keys 包括 'image', 'im\_size'，相应的取值为：
         - image (Variable): 图像变量
@@ -90,7 +92,7 @@
           - right (int): 边界框的右下角x坐标
           - bottom (int): 边界框的右下角y坐标
         - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
-  
+
   - ```python
     def save_inference_model(dirname,
                              model_filename=None,
