@@ -42,7 +42,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install nist_wait_3
+    $ hub install transformer_nist_wait_3
     ```
 
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
@@ -55,7 +55,7 @@
   - ```python
     import paddlehub as hub
 
-    nist_wait_3 = hub.Module(name="nist_wait_3")
+    model = hub.Module(name="transformer_nist_wait_3")
 
     # 待预测数据（模拟同声传译实时输入）
     text = [
@@ -75,7 +75,7 @@
 
     for t in text:
         print("input: {}".format(t))
-        result = nist_wait_3.translate(t)
+        result = model.translate(t)
         print("model output: {}\n".format(result))
 
     # input: 他
@@ -152,13 +152,13 @@
   - 运行启动命令：
 
   - ```shell
-    $ hub serving start -m nist_wait_3
+    $ hub serving start -m transformer_nist_wait_3
     ```
 
   - 启动时会显示加载模型过程，启动成功后显示
 
   - ```shell
-    Loading nist_wait_3 successful.
+    Loading transformer_nist_wait_3 successful.
     ```
 
   - 这样就完成了服务化API的部署，默认端口号为8866。
@@ -189,9 +189,9 @@
         "他还说现在正在为这一会议作出安排。",      
     ]
 
-    # 指定预测方法为nist_wait_3并发送post请求，content-type类型应指定json方式
+    # 指定预测方法为transformer_nist_wait_3并发送post请求，content-type类型应指定json方式
     # HOST_IP为服务器IP
-    url = "http://HOST_IP:8866/predict/nist_wait_3"
+    url = "http://HOST_IP:8866/predict/transformer_nist_wait_3"
     headers = {"Content-Type": "application/json"}
     for t in text:
         print("input: {}".format(t))
@@ -206,5 +206,5 @@
 * 1.0.0
     初始发布
     ```shell
-    hub install nist_wait_3==1.0.0
+    hub install transformer_nist_wait_3==1.0.0
     ```

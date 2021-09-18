@@ -26,7 +26,7 @@ from processor import STACLTokenizer, predict
 
 
 @moduleinfo(
-    name="nist_wait_3",
+    name="transformer_nist_wait_3",
     version="1.0.0",
     summary="",
     author="PaddlePaddle",
@@ -55,10 +55,10 @@ class STTransformer():
                  max_out_len=256,
                  ):
         super(STTransformer, self).__init__()
-        bpe_codes_fpath = os.path.join(MODULE_HOME, "nist_wait_1", "assets", "2M.zh2en.dict4bpe.zh")
-        src_vocab_fpath = os.path.join(MODULE_HOME, "nist_wait_1", "assets", "nist.20k.zh.vocab")
-        trg_vocab_fpath = os.path.join(MODULE_HOME, "nist_wait_1", "assets", "nist.10k.en.vocab")
-        params_fpath = os.path.join(MODULE_HOME, "nist_wait_1", "assets", "transformer.pdparams")
+        bpe_codes_fpath = os.path.join(MODULE_HOME, "transformer_nist_wait_3", "assets", "2M.zh2en.dict4bpe.zh")
+        src_vocab_fpath = os.path.join(MODULE_HOME, "transformer_nist_wait_3", "assets", "nist.20k.zh.vocab")
+        trg_vocab_fpath = os.path.join(MODULE_HOME, "transformer_nist_wait_3", "assets", "nist.10k.en.vocab")
+        params_fpath = os.path.join(MODULE_HOME, "transformer_nist_wait_3", "assets", "transformer.pdparams")
         self.max_length = max_length
         self.max_out_len = max_out_len
         self.tokenizer = STACLTokenizer(
