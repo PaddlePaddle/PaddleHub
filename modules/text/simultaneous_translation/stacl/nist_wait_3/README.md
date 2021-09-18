@@ -36,10 +36,6 @@
 
   - paddlehub >= 2.1.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
-  - subword_nmt == 0.3.7
-
-  - jieba == 0.42.1
-
 - ### 2、安装
 
   - ```shell
