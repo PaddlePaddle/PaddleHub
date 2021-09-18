@@ -21,8 +21,8 @@ from paddlenlp.transformers import WordEmbedding, PositionalEmbedding
 from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import moduleinfo, serving
 
-from model import SimultaneousTransformer
-from processor import STACLTokenizer, predict
+from transformer_nist_wait_3.model import SimultaneousTransformer
+from transformer_nist_wait_3.processor import STACLTokenizer, predict
 
 
 @moduleinfo(
