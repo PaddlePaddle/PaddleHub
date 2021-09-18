@@ -1,5 +1,5 @@
 # transformer_nist_wait_1
-|模型名称|transformer_nist_wati_1|
+|模型名称|transformer_nist_wait_1|
 | :--- | :---: | 
 |类别|同声传译|
 |网络|transformer|
