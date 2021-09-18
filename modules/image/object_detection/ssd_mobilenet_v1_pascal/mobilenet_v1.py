@@ -31,7 +31,8 @@ class MobileNet(object):
                  conv_group_scale=1,
                  conv_learning_rate=1.0,
                  with_extra_blocks=False,
-                 extra_block_filters=[[256, 512], [128, 256], [128, 256], [64, 128]],
+                 extra_block_filters=[[256, 512], [128, 256], [128, 256],
+                                      [64, 128]],
                  weight_prefix_name='',
                  class_dim=1000,
                  yolo_v3=False):
@@ -56,7 +57,9 @@ class MobileNet(object):
                    use_cudnn=True,
                    name=None):
         parameter_attr = ParamAttr(
-            learning_rate=self.conv_learning_rate, initializer=fluid.initializer.MSRA(), name=name + "_weights")
+            learning_rate=self.conv_learning_rate,
+            initializer=fluid.initializer.MSRA(),
+            name=name + "_weights")
         conv = fluid.layers.conv2d(
             input=input,
             num_filters=num_filters,
@@ -71,8 +74,10 @@ class MobileNet(object):
 
         bn_name = name + "_bn"
         norm_decay = self.norm_decay
-        bn_param_attr = ParamAttr(regularizer=L2Decay(norm_decay), name=bn_name + '_scale')
-        bn_bias_attr = ParamAttr(regularizer=L2Decay(norm_decay), name=bn_name + '_offset')
+        bn_param_attr = ParamAttr(
+            regularizer=L2Decay(norm_decay), name=bn_name + '_scale')
+        bn_bias_attr = ParamAttr(
+            regularizer=L2Decay(norm_decay), name=bn_name + '_offset')
         return fluid.layers.batch_norm(
             input=conv,
             act=act,
@@ -81,7 +86,14 @@ class MobileNet(object):
             moving_mean_name=bn_name + '_mean',
             moving_variance_name=bn_name + '_variance')
 
-    def depthwise_separable(self, input, num_filters1, num_filters2, num_groups, stride, scale, name=None):
+    def depthwise_separable(self,
+                            input,
+                            num_filters1,
+                            num_filters2,
+                            num_groups,
+                            stride,
+                            scale,
+                            name=None):
         depthwise_conv = self._conv_norm(
             input=input,
             filter_size=3,
@@ -101,7 +113,13 @@ class MobileNet(object):
             name=name + "_sep")
         return pointwise_conv
 
-    def _extra_block(self, input, num_filters1, num_filters2, num_groups, stride, name=None):
+    def _extra_block(self,
+                     input,
+                     num_filters1,
+                     num_filters2,
+                     num_groups,
+                     stride,
+                     name=None):
         pointwise_conv = self._conv_norm(
             input=input,
             filter_size=1,
@@ -124,44 +142,70 @@ class MobileNet(object):
         scale = self.conv_group_scale
         blocks = []
         # input 1/1
-        out = self._conv_norm(input, 3, int(32 * scale), 2, 1, name=self.prefix_name + "conv1")
+        out = self._conv_norm(
+            input, 3, int(32 * scale), 2, 1, name=self.prefix_name + "conv1")
         # 1/2
-        out = self.depthwise_separable(out, 32, 64, 32, 1, scale, name=self.prefix_name + "conv2_1")
-        out = self.depthwise_separable(out, 64, 128, 64, 2, scale, name=self.prefix_name + "conv2_2")
+        out = self.depthwise_separable(
+            out, 32, 64, 32, 1, scale, name=self.prefix_name + "conv2_1")
+        out = self.depthwise_separable(
+            out, 64, 128, 64, 2, scale, name=self.prefix_name + "conv2_2")
         # 1/4
-        out = self.depthwise_separable(out, 128, 128, 128, 1, scale, name=self.prefix_name + "conv3_1")
-        out = self.depthwise_separable(out, 128, 256, 128, 2, scale, name=self.prefix_name + "conv3_2")
+        out = self.depthwise_separable(
+            out, 128, 128, 128, 1, scale, name=self.prefix_name + "conv3_1")
+        out = self.depthwise_separable(
+            out, 128, 256, 128, 2, scale, name=self.prefix_name + "conv3_2")
         # 1/8
         blocks.append(out)
-        out = self.depthwise_separable(out, 256, 256, 256, 1, scale, name=self.prefix_name + "conv4_1")
-        out = self.depthwise_separable(out, 256, 512, 256, 2, scale, name=self.prefix_name + "conv4_2")
+        out = self.depthwise_separable(
+            out, 256, 256, 256, 1, scale, name=self.prefix_name + "conv4_1")
+        out = self.depthwise_separable(
+            out, 256, 512, 256, 2, scale, name=self.prefix_name + "conv4_2")
         # 1/16
         blocks.append(out)
         for i in range(5):
-            out = self.depthwise_separable(out, 512, 512, 512, 1, scale, name=self.prefix_name + "conv5_" + str(i + 1))
+            out = self.depthwise_separable(
+                out,
+                512,
+                512,
+                512,
+                1,
+                scale,
+                name=self.prefix_name + "conv5_" + str(i + 1))
         module11 = out
 
-        out = self.depthwise_separable(out, 512, 1024, 512, 2, scale, name=self.prefix_name + "conv5_6")
+        out = self.depthwise_separable(
+            out, 512, 1024, 512, 2, scale, name=self.prefix_name + "conv5_6")
         # 1/32
-        out = self.depthwise_separable(out, 1024, 1024, 1024, 1, scale, name=self.prefix_name + "conv6")
+        out = self.depthwise_separable(
+            out, 1024, 1024, 1024, 1, scale, name=self.prefix_name + "conv6")
         module13 = out
         blocks.append(out)
         if self.yolo_v3:
             return blocks
         if not self.with_extra_blocks:
-            out = fluid.layers.pool2d(input=out, pool_type='avg', global_pooling=True)
+            out = fluid.layers.pool2d(
+                input=out, pool_type='avg', global_pooling=True)
             out = fluid.layers.fc(
                 input=out,
                 size=self.class_dim,
-                param_attr=ParamAttr(initializer=fluid.initializer.MSRA(), name="fc7_weights"),
+                param_attr=ParamAttr(
+                    initializer=fluid.initializer.MSRA(), name="fc7_weights"),
                 bias_attr=ParamAttr(name="fc7_offset"))
             out = fluid.layers.softmax(out)
             blocks.append(out)
             return blocks
 
         num_filters = self.extra_block_filters
-        module14 = self._extra_block(module13, num_filters[0][0], num_filters[0][1], 1, 2, self.prefix_name + "conv7_1")
-        module15 = self._extra_block(module14, num_filters[1][0], num_filters[1][1], 1, 2, self.prefix_name + "conv7_2")
-        module16 = self._extra_block(module15, num_filters[2][0], num_filters[2][1], 1, 2, self.prefix_name + "conv7_3")
-        module17 = self._extra_block(module16, num_filters[3][0], num_filters[3][1], 1, 2, self.prefix_name + "conv7_4")
+        module14 = self._extra_block(module13, num_filters[0][0],
+                                     num_filters[0][1], 1, 2,
+                                     self.prefix_name + "conv7_1")
+        module15 = self._extra_block(module14, num_filters[1][0],
+                                     num_filters[1][1], 1, 2,
+                                     self.prefix_name + "conv7_2")
+        module16 = self._extra_block(module15, num_filters[2][0],
+                                     num_filters[2][1], 1, 2,
+                                     self.prefix_name + "conv7_3")
+        module17 = self._extra_block(module16, num_filters[3][0],
+                                     num_filters[3][1], 1, 2,
+                                     self.prefix_name + "conv7_4")
         return module11, module13, module14, module15, module16, module17
