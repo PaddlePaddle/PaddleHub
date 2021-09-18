@@ -1,1 +1,2 @@
 ppdet >= 2.1.0
+opencv-python
