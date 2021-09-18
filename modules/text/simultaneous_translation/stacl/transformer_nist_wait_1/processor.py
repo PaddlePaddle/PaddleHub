@@ -74,7 +74,7 @@ def post_process_seq(seq,
     return seq
 
 
-def translate(tokenized_src, 
+def predict(tokenized_src, 
               decoder_max_length, 
               is_last, 
               cache, 

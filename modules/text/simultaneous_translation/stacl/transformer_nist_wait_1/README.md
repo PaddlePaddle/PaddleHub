@@ -126,7 +126,7 @@
         - **参数**
 
             - max_length(int): 输入文本的最大长度，默认值为256。
-            - max_out_len(int): 输出文本的最大解码长度，默认值为256。
+            - max_out_len(int): 输出文本的最大解码长度，超过最大解码长度时会截断句子的后半部分，默认值为256。
 
     - ```python
       translate(text, use_gpu=False)

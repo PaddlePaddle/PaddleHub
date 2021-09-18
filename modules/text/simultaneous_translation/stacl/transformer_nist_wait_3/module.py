@@ -22,7 +22,7 @@ from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import moduleinfo, serving
 
 from model import SimultaneousTransformer
-from processor import STACLTokenizer, translate
+from processor import STACLTokenizer, predict
 
 
 @moduleinfo(
@@ -111,7 +111,7 @@ class STTransformer():
             user_input_tokenized.append(tokenized_src[i])
             if bpe_str[i] in ['。', '？', '！']:
                 is_last = True
-            result, cache, bos_id = translate(
+            result, cache, bos_id = predict(
                 user_input_tokenized, 
                 decoder_max_length,
                 is_last, 
