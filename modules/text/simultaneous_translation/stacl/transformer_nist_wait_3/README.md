@@ -17,22 +17,19 @@
     STACL 是论文 [STACL: Simultaneous Translation with Implicit Anticipation and Controllable Latency using Prefix-to-Prefix Framework](https://www.aclweb.org/anthology/P19-1289/) 中针对同传提出的适用于所有同传场景的翻译架构。
     - STACL 主要具有以下优势：
 
-     - Prefix-to-Prefix架构拥有预测能力，即在未看到源词的情况下仍然可以翻译出对应的目标词，克服了SOV→SVO等词序差异；
-     - Wait-k策略可以不需要全句的源句，直接预测目标句，可以实现任意的字级延迟，同时保持较高的翻译质量。
-
-    - Prefix-to-Prefix架构
+    - Prefix-to-Prefix架构拥有预测能力，即在未看到源词的情况下仍然可以翻译出对应的目标词，克服了SOV→SVO等词序差异
     <p align="center">
     <img src="https://user-images.githubusercontent.com/40840292/133761990-13e55d0f-5c3a-476c-8865-5808d13cba97.png"> <br />
     </p>
-     - 和传统的机器翻译模型主要的区别在于翻译时是否需要利用全句的源句。上图中，Seq2Seq模型需要等到全句的源句（1-5）全部输入Encoder后，Decoder才开始解码进行翻译；而STACL架构采用了Wait-k（图中Wait-2）的策略，当源句只有两个词（1和2）输入到Encoder后，Decoder即可开始解码预测目标句的第一个词。
+     和传统的机器翻译模型主要的区别在于翻译时是否需要利用全句的源句。上图中，Seq2Seq模型需要等到全句的源句（1-5）全部输入Encoder后，Decoder才开始解码进行翻译；而STACL架构采用了Wait-k（图中Wait-2）的策略，当源句只有两个词（1和2）输入到Encoder后，Decoder即可开始解码预测目标句的第一个词。
 
-    - Wait-K策略
+    - Wait-k策略可以不需要全句的源句，直接预测目标句，可以实现任意的字级延迟，同时保持较高的翻译质量。
     <p align="center">
     <img src="https://user-images.githubusercontent.com/40840292/133762098-6ea6f3ca-0d70-4a0a-981d-0fcc6f3cd96b.png"> <br />
     </p>
-     - Wait-k策略首先等待源句单词，然后与源句的其余部分同时翻译，即输出总是隐藏在输入后面。这是受到同声传译人员的启发，同声传译人员通常会在几秒钟内开始翻译演讲者的演讲，在演讲者结束几秒钟后完成。例如，如果k=2，第一个目标词使用前2个源词预测，第二个目标词使用前3个源词预测，以此类推。上图中，(a)simultaneous: our wait-2 等到"布什"和"总统"输入后就开始解码预测"pres."，而(b) non-simultaneous baseline 为传统的翻译模型，需要等到整句"布什 总统 在 莫斯科 与 普京 会晤"才开始解码预测。
+     Wait-k策略首先等待源句单词，然后与源句的其余部分同时翻译，即输出总是隐藏在输入后面。这是受到同声传译人员的启发，同声传译人员通常会在几秒钟内开始翻译演讲者的演讲，在演讲者结束几秒钟后完成。例如，如果k=2，第一个目标词使用前2个源词预测，第二个目标词使用前3个源词预测，以此类推。上图中，(a)simultaneous: our wait-2 等到"布什"和"总统"输入后就开始解码预测"pres."，而(b) non-simultaneous baseline 为传统的翻译模型，需要等到整句"布什 总统 在 莫斯科 与 普京 会晤"才开始解码预测。
     
-    - 该PaddleHub Module基于transformer网络结构，采用wait-3策略进行中文到英文的翻译。
+  - 该PaddleHub Module基于transformer网络结构，采用wait-3策略进行中文到英文的翻译。
 
 ## 二、安装
 
