@@ -1,2 +1,2 @@
-jieba
-subword-nmt
+jieba==0.42.1 
+subword-nmt==0.3.7

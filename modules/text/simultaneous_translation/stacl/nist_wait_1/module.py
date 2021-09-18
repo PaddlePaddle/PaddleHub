@@ -86,7 +86,7 @@ class STTransformer():
         self.transformer.load_dict(model_dict)
 
     @serving
-    def predict(self, text, use_gpu=False):
+    def translate(self, text, use_gpu=False):
         paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
 
         # Word segmentation
