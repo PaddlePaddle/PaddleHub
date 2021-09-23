@@ -101,7 +101,7 @@ def process_image(org_im, face):
     return image_in
 
 
-def reader(face_detector, shrink, confs_threshold, images, paths, use_gpu, use_multi_scale):
+def reader(face_detector, shrink, confs_threshold, images, paths, use_gpu, use_multi_scale, use_device=None):
     """
     Preprocess to yield image.
 
@@ -113,6 +113,7 @@ def reader(face_detector, shrink, confs_threshold, images, paths, use_gpu, use_m
         paths (list[str]): paths to images.
         use_gpu (bool): whether to use gpu in face_detector.
         use_multi_scale (bool): whether to enable multi-scale face detection.
+        use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
     Yield:
         element (collections.OrderedDict): info of original image, preprocessed image, contains 3 keys:
             org_im (numpy.ndarray) : original image.
@@ -144,12 +145,12 @@ def reader(face_detector, shrink, confs_threshold, images, paths, use_gpu, use_m
             scale_res = list()
             detect_faces = list()
             for scale in multi_scales:
-                _detect_res = face_detector.face_detection(
-                    images=[element['org_im']],
-                    use_gpu=use_gpu,
-                    visualization=False,
-                    shrink=scale,
-                    confs_threshold=confs_threshold)
+                _detect_res = face_detector.face_detection(images=[element['org_im']],
+                                                           use_gpu=use_gpu,
+                                                           visualization=False,
+                                                           shrink=scale,
+                                                           confs_threshold=confs_threshold,
+                                                           use_device=use_device)
 
                 _s = list()
                 for _face in _detect_res[0]['data']:
@@ -158,7 +159,6 @@ def reader(face_detector, shrink, confs_threshold, images, paths, use_gpu, use_m
 
                 if _s:
                     scale_res.append(np.array(_s))
-
             scale_res = np.row_stack(scale_res)
             scale_res = bbox_vote(scale_res)
             keep_index = np.where(scale_res[:, 4] >= confs_threshold)[0]
@@ -167,12 +167,12 @@ def reader(face_detector, shrink, confs_threshold, images, paths, use_gpu, use_m
                 face = {'left': data[0], 'top': data[1], 'right': data[2], 'bottom': data[3], 'confidence': data[4]}
                 detect_faces.append(face)
         else:
-            _detect_res = face_detector.face_detection(
-                images=[element['org_im']],
-                use_gpu=use_gpu,
-                visualization=False,
-                shrink=shrink,
-                confs_threshold=confs_threshold)
+            _detect_res = face_detector.face_detection(images=[element['org_im']],
+                                                       use_gpu=use_gpu,
+                                                       visualization=False,
+                                                       shrink=shrink,
+                                                       confs_threshold=confs_threshold,
+                                                       use_device=use_device)
             detect_faces = _detect_res[0]['data']
 
         element['preprocessed'] = list()
