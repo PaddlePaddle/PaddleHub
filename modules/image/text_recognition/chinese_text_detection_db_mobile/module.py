@@ -9,7 +9,9 @@ import math
 import os
 import time
 
-from paddle.fluid.core import AnalysisConfig, create_paddle_predictor, PaddleTensor
+from paddle.inference import Config
+from paddle.inference import create_predictor
+
 from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo, runnable, serving
 from PIL import Image
@@ -53,6 +55,14 @@ class ChineseTextDetectionDB(hub.Module):
                 'This module requires the shapely, pyclipper tools. The running environment does not meet the requirements. Please install the two packages.'
             )
 
+    def _get_device_id(self, places):
+        try:
+            places = os.environ[places]
+            id = int(places)
+        except:
+            id = -1
+        return id
+
     def _set_config(self):
         """
         predictor config setting
@@ -60,36 +70,49 @@ class ChineseTextDetectionDB(hub.Module):
         model_file_path = os.path.join(self.pretrained_model_path, 'model')
         params_file_path = os.path.join(self.pretrained_model_path, 'params')
 
-        config = AnalysisConfig(model_file_path, params_file_path)
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-            use_gpu = True
-        except:
-            use_gpu = False
+        config = Config(model_file_path, params_file_path)
 
-        if use_gpu:
-            config.enable_use_gpu(8000, 0)
+        # detect npu
+        npu_id = self._get_device_id("FLAGS_selected_npus")
+        if npu_id != -1:
+            # use npu
+            self.use_device = "npu"
+            config.enable_npu(device_id=npu_id)
         else:
-            config.disable_gpu()
-            config.set_cpu_math_library_num_threads(6)
-            if self.enable_mkldnn:
-                # cache 10 different shapes for mkldnn to avoid memory leak
-                config.set_mkldnn_cache_capacity(10)
-                config.enable_mkldnn()
+            # detect gpu
+            gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
+            if gpu_id != -1:
+                # use gpu
+                self.use_device = "gpu"
+                config.enable_use_gpu(memory_pool_init_size_mb=8000, device_id=gpu_id)
+            else:
+                # detect xpu
+                xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
+                if xpu_id != -1:
+                    # use xpu
+                    self.use_device = "xpu"
+                    config.enable_xpu(100)
+                else:
+                    self.use_device = "cpu"
+                    config.disable_gpu()
+                    config.set_cpu_math_library_num_threads(6)
+                    if self.enable_mkldnn:
+                        # cache 10 different shapes for mkldnn to avoid memory leak
+                        config.set_mkldnn_cache_capacity(10)
+                        config.enable_mkldnn()
 
         config.disable_glog_info()
 
         # use zero copy
         config.delete_pass("conv_transpose_eltwiseadd_bn_fuse_pass")
         config.switch_use_feed_fetch_ops(False)
-        self.predictor = create_paddle_predictor(config)
+        self.predictor = create_predictor(config)
         input_names = self.predictor.get_input_names()
-        self.input_tensor = self.predictor.get_input_tensor(input_names[0])
+        self.input_tensor = self.predictor.get_input_handle(input_names[0])
         output_names = self.predictor.get_output_names()
         self.output_tensors = []
         for output_name in output_names:
-            output_tensor = self.predictor.get_output_tensor(output_name)
+            output_tensor = self.predictor.get_output_handle(output_name)
             self.output_tensors.append(output_tensor)
 
     def read_images(self, paths=[]):
@@ -153,7 +176,8 @@ class ChineseTextDetectionDB(hub.Module):
                     use_gpu=False,
                     output_dir='detection_result',
                     visualization=False,
-                    box_thresh=0.5):
+                    box_thresh=0.5,
+                    use_device=None):
         """
         Get the text box in the predicted images.
         Args:
@@ -163,21 +187,24 @@ class ChineseTextDetectionDB(hub.Module):
             output_dir (str): The directory to store output images.
             visualization (bool): Whether to save image or not.
             box_thresh(float): the threshold of the detected text box's confidence
+            use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
         Returns:
             res (list): The result of text detection box and save path of images.
         """
         self.check_requirements()
 
         from chinese_text_detection_db_mobile.processor import DBProcessTest, DBPostProcess, draw_boxes, get_image_ext
-
-        if use_gpu:
-            try:
-                _places = os.environ["CUDA_VISIBLE_DEVICES"]
-                int(_places[0])
-            except:
+        if use_device is not None:
+            # check 'use_device' match 'device on init'
+            if use_device != self.use_device:
                 raise RuntimeError(
-                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES via export CUDA_VISIBLE_DEVICES=cuda_device_id."
+                    "the 'use_device' parameter when calling detect_text, does not match internal device found on init."
                 )
+        else:
+            # check 'use_gpu' match 'device on init'
+            if use_gpu == True and self.use_device != 'gpu' or use_gpu == False and self.use_device == 'gpu':
+                raise RuntimeError(
+                    "the 'use_gpu' parameter when calling detect_text, does not match internal device found on init.")
 
         if images != [] and isinstance(images, list) and paths == []:
             predicted_data = images
@@ -209,7 +236,7 @@ class ChineseTextDetectionDB(hub.Module):
             else:
                 im = im.copy()
                 self.input_tensor.copy_from_cpu(im)
-                self.predictor.zero_copy_run()
+                self.predictor.run()
 
                 outputs = []
                 for output_tensor in self.output_tensors:
@@ -251,20 +278,18 @@ class ChineseTextDetectionDB(hub.Module):
 
         model_file_path = os.path.join(self.pretrained_model_path, 'model')
         params_file_path = os.path.join(self.pretrained_model_path, 'params')
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.pretrained_model_path,
-            model_filename=model_file_path,
-            params_filename=params_file_path,
-            executor=exe)
+        program, feeded_var_names, target_vars = fluid.io.load_inference_model(dirname=self.pretrained_model_path,
+                                                                               model_filename=model_file_path,
+                                                                               params_filename=params_file_path,
+                                                                               executor=exe)
 
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+        fluid.io.save_inference_model(dirname=dirname,
+                                      main_program=program,
+                                      executor=exe,
+                                      feeded_var_names=feeded_var_names,
+                                      target_vars=target_vars,
+                                      model_filename=model_filename,
+                                      params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -280,11 +305,10 @@ class ChineseTextDetectionDB(hub.Module):
         """
         Run as a command
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the %s module." % self.name,
-            prog='hub run %s' % self.name,
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the %s module." % self.name,
+                                              prog='hub run %s' % self.name,
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -294,20 +318,32 @@ class ChineseTextDetectionDB(hub.Module):
         self.add_module_input_arg()
 
         args = self.parser.parse_args(argvs)
-        results = self.detect_text(
-            paths=[args.input_path], use_gpu=args.use_gpu, output_dir=args.output_dir, visualization=args.visualization)
+        results = self.detect_text(paths=[args.input_path],
+                                   use_gpu=args.use_gpu,
+                                   output_dir=args.output_dir,
+                                   visualization=args.visualization,
+                                   use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
-        self.arg_config_group.add_argument(
-            '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not")
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='detection_result',
+                                           help="The directory to save output images.")
+        self.arg_config_group.add_argument('--visualization',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_device',
+                                           choices=["cpu", "gpu", "xpu", "npu"],
+                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
