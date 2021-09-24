@@ -52,13 +52,22 @@ def ConvNorm(input,
         dilation=dilation,
         groups=groups,
         act=None,
-        param_attr=ParamAttr(name=name + "_weights", initializer=initializer, learning_rate=lr_scale),
+        param_attr=ParamAttr(
+            name=name + "_weights",
+            initializer=initializer,
+            learning_rate=lr_scale),
         bias_attr=False,
         name=name + '.conv2d.output.1')
 
     norm_lr = 0. if freeze_norm else 1.
-    pattr = ParamAttr(name=norm_name + '_scale', learning_rate=norm_lr * lr_scale, regularizer=L2Decay(norm_decay))
-    battr = ParamAttr(name=norm_name + '_offset', learning_rate=norm_lr * lr_scale, regularizer=L2Decay(norm_decay))
+    pattr = ParamAttr(
+        name=norm_name + '_scale',
+        learning_rate=norm_lr * lr_scale,
+        regularizer=L2Decay(norm_decay))
+    battr = ParamAttr(
+        name=norm_name + '_offset',
+        learning_rate=norm_lr * lr_scale,
+        regularizer=L2Decay(norm_decay))
 
     if norm_type in ['bn', 'sync_bn']:
         global_stats = True if freeze_norm else False
@@ -75,15 +84,27 @@ def ConvNorm(input,
         bias = fluid.framework._get_var(battr.name)
     elif norm_type == 'gn':
         out = fluid.layers.group_norm(
-            input=conv, act=act, name=norm_name + '.output.1', groups=norm_groups, param_attr=pattr, bias_attr=battr)
+            input=conv,
+            act=act,
+            name=norm_name + '.output.1',
+            groups=norm_groups,
+            param_attr=pattr,
+            bias_attr=battr)
         scale = fluid.framework._get_var(pattr.name)
         bias = fluid.framework._get_var(battr.name)
     elif norm_type == 'affine_channel':
         scale = fluid.layers.create_parameter(
-            shape=[conv.shape[1]], dtype=conv.dtype, attr=pattr, default_initializer=fluid.initializer.Constant(1.))
+            shape=[conv.shape[1]],
+            dtype=conv.dtype,
+            attr=pattr,
+            default_initializer=fluid.initializer.Constant(1.))
         bias = fluid.layers.create_parameter(
-            shape=[conv.shape[1]], dtype=conv.dtype, attr=battr, default_initializer=fluid.initializer.Constant(0.))
-        out = fluid.layers.affine_channel(x=conv, scale=scale, bias=bias, act=act)
+            shape=[conv.shape[1]],
+            dtype=conv.dtype,
+            attr=battr,
+            default_initializer=fluid.initializer.Constant(0.))
+        out = fluid.layers.affine_channel(
+            x=conv, scale=scale, bias=bias, act=act)
     if freeze_norm:
         scale.stop_gradient = True
         bias.stop_gradient = True
@@ -140,10 +161,15 @@ class FPN(object):
                 body_input,
                 self.num_chan,
                 1,
-                param_attr=ParamAttr(name=lateral_name + "_w", initializer=Xavier(fan_out=fan)),
-                bias_attr=ParamAttr(name=lateral_name + "_b", learning_rate=2., regularizer=L2Decay(0.)),
+                param_attr=ParamAttr(
+                    name=lateral_name + "_w", initializer=Xavier(fan_out=fan)),
+                bias_attr=ParamAttr(
+                    name=lateral_name + "_b",
+                    learning_rate=2.,
+                    regularizer=L2Decay(0.)),
                 name=lateral_name)
-        topdown = fluid.layers.resize_nearest(upper_output, scale=2., name=topdown_name)
+        topdown = fluid.layers.resize_nearest(
+            upper_output, scale=2., name=topdown_name)
         return lateral + topdown
 
     def get_output(self, body_dict):
@@ -182,14 +208,20 @@ class FPN(object):
                 body_input,
                 self.num_chan,
                 1,
-                param_attr=ParamAttr(name=fpn_inner_name + "_w", initializer=Xavier(fan_out=fan)),
-                bias_attr=ParamAttr(name=fpn_inner_name + "_b", learning_rate=2., regularizer=L2Decay(0.)),
+                param_attr=ParamAttr(
+                    name=fpn_inner_name + "_w",
+                    initializer=Xavier(fan_out=fan)),
+                bias_attr=ParamAttr(
+                    name=fpn_inner_name + "_b",
+                    learning_rate=2.,
+                    regularizer=L2Decay(0.)),
                 name=fpn_inner_name)
         for i in range(1, num_backbone_stages):
             body_name = body_name_list[i]
             body_input = body_dict[body_name]
             top_output = self.fpn_inner_output[i - 1]
-            fpn_inner_single = self._add_topdown_lateral(body_name, body_input, top_output)
+            fpn_inner_single = self._add_topdown_lateral(
+                body_name, body_input, top_output)
             self.fpn_inner_output[i] = fpn_inner_single
         fpn_dict = {}
         fpn_name_list = []
@@ -213,15 +245,24 @@ class FPN(object):
                     self.num_chan,
                     filter_size=3,
                     padding=1,
-                    param_attr=ParamAttr(name=fpn_name + "_w", initializer=Xavier(fan_out=fan)),
-                    bias_attr=ParamAttr(name=fpn_name + "_b", learning_rate=2., regularizer=L2Decay(0.)),
+                    param_attr=ParamAttr(
+                        name=fpn_name + "_w", initializer=Xavier(fan_out=fan)),
+                    bias_attr=ParamAttr(
+                        name=fpn_name + "_b",
+                        learning_rate=2.,
+                        regularizer=L2Decay(0.)),
                     name=fpn_name)
             fpn_dict[fpn_name] = fpn_output
             fpn_name_list.append(fpn_name)
-        if not self.has_extra_convs and self.max_level - self.min_level == len(spatial_scale):
+        if not self.has_extra_convs and self.max_level - self.min_level == len(
+                spatial_scale):
             body_top_name = fpn_name_list[0]
             body_top_extension = fluid.layers.pool2d(
-                fpn_dict[body_top_name], 1, 'max', pool_stride=2, name=body_top_name + '_subsampled_2x')
+                fpn_dict[body_top_name],
+                1,
+                'max',
+                pool_stride=2,
+                name=body_top_name + '_subsampled_2x')
             fpn_dict[body_top_name + '_subsampled_2x'] = body_top_extension
             fpn_name_list.insert(0, body_top_name + '_subsampled_2x')
             spatial_scale.insert(0, spatial_scale[0] * 0.5)
@@ -241,8 +282,12 @@ class FPN(object):
                     filter_size=3,
                     stride=2,
                     padding=1,
-                    param_attr=ParamAttr(name=fpn_name + "_w", initializer=Xavier(fan_out=fan)),
-                    bias_attr=ParamAttr(name=fpn_name + "_b", learning_rate=2., regularizer=L2Decay(0.)),
+                    param_attr=ParamAttr(
+                        name=fpn_name + "_w", initializer=Xavier(fan_out=fan)),
+                    bias_attr=ParamAttr(
+                        name=fpn_name + "_b",
+                        learning_rate=2.,
+                        regularizer=L2Decay(0.)),
                     name=fpn_name)
                 fpn_dict[fpn_name] = fpn_blob
                 fpn_name_list.insert(0, fpn_name)

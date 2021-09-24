@@ -57,8 +57,8 @@ def draw_bounding_box_on_image(image_path, data_list, save_dir):
         if image.mode == 'RGB':
             text = data['label'] + ": %.2f%%" % (100 * data['confidence'])
             textsize_width, textsize_height = draw.textsize(text=text)
-            draw.rectangle(xy=(left, top - (textsize_height + 5), left + textsize_width + 10, top),
-                           fill=(255, 255, 255))
+            draw.rectangle(
+                xy=(left, top - (textsize_height + 5), left + textsize_width + 10, top), fill=(255, 255, 255))
             draw.text(xy=(left, top - 15), text=text, fill=(0, 0, 0))
 
     save_name = get_save_image_name(image, save_dir, image_path)
@@ -116,17 +116,24 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir, 
 
     check_dir(output_dir)
 
-    assert type(paths) is list, "type(paths) is not list."
-    if handle_id < len(paths):
-        unhandled_paths = paths[handle_id:]
-        unhandled_paths_num = len(unhandled_paths)
-    else:
-        unhandled_paths_num = 0
+    if paths:
+        assert type(paths) is list, "type(paths) is not list."
+        if handle_id < len(paths):
+            unhandled_paths = paths[handle_id:]
+            unhandled_paths_num = len(unhandled_paths)
+        else:
+            unhandled_paths_num = 0
+    if images is not None:
+        if handle_id < len(images):
+            unhandled_paths = None
+            unhandled_paths_num = len(images) - handle_id
+        else:
+            unhandled_paths_num = 0
 
     output = list()
     for index in range(len(lod) - 1):
         output_i = {'data': []}
-        if index < unhandled_paths_num:
+        if unhandled_paths and index < unhandled_paths_num:
             org_img_path = unhandled_paths[index]
             org_img = Image.open(org_img_path)
         else:

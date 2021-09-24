@@ -8,7 +8,10 @@ from paddle.fluid.param_attr import ParamAttr
 from paddle.fluid.initializer import Normal
 from paddle.fluid.regularizer import L2Decay
 
-__all__ = ['AnchorGenerator', 'RPNTargetAssign', 'GenerateProposals', 'RPNHead', 'FPNRPNHead']
+__all__ = [
+    'AnchorGenerator', 'RPNTargetAssign', 'GenerateProposals', 'RPNHead',
+    'FPNRPNHead'
+]
 
 
 class AnchorGenerator(object):
@@ -45,7 +48,12 @@ class RPNTargetAssign(object):
 
 class GenerateProposals(object):
     # __op__ = fluid.layers.generate_proposals
-    def __init__(self, pre_nms_top_n=6000, post_nms_top_n=1000, nms_thresh=.5, min_size=.1, eta=1.):
+    def __init__(self,
+                 pre_nms_top_n=6000,
+                 post_nms_top_n=1000,
+                 nms_thresh=.5,
+                 min_size=.1,
+                 eta=1.):
         super(GenerateProposals, self).__init__()
         self.pre_nms_top_n = pre_nms_top_n
         self.post_nms_top_n = post_nms_top_n
@@ -65,9 +73,17 @@ class RPNHead(object):
         test_proposal (object): `GenerateProposals` instance for testing
         num_classes (int): number of classes in rpn output
     """
-    __inject__ = ['anchor_generator', 'rpn_target_assign', 'train_proposal', 'test_proposal']
+    __inject__ = [
+        'anchor_generator', 'rpn_target_assign', 'train_proposal',
+        'test_proposal'
+    ]
 
-    def __init__(self, anchor_generator, rpn_target_assign, train_proposal, test_proposal, num_classes=1):
+    def __init__(self,
+                 anchor_generator,
+                 rpn_target_assign,
+                 train_proposal,
+                 test_proposal,
+                 num_classes=1):
         super(RPNHead, self).__init__()
         self.anchor_generator = anchor_generator
         self.rpn_target_assign = rpn_target_assign
@@ -95,8 +111,10 @@ class RPNHead(object):
             padding=1,
             act='relu',
             name='conv_rpn',
-            param_attr=ParamAttr(name="conv_rpn_w", initializer=Normal(loc=0., scale=0.01)),
-            bias_attr=ParamAttr(name="conv_rpn_b", learning_rate=2., regularizer=L2Decay(0.)))
+            param_attr=ParamAttr(
+                name="conv_rpn_w", initializer=Normal(loc=0., scale=0.01)),
+            bias_attr=ParamAttr(
+                name="conv_rpn_b", learning_rate=2., regularizer=L2Decay(0.)))
         # Generate anchors self.anchor_generator
         self.anchor, self.anchor_var = fluid.layers.anchor_generator(
             input=rpn_conv,
@@ -115,8 +133,13 @@ class RPNHead(object):
             padding=0,
             act=None,
             name='rpn_cls_score',
-            param_attr=ParamAttr(name="rpn_cls_logits_w", initializer=Normal(loc=0., scale=0.01)),
-            bias_attr=ParamAttr(name="rpn_cls_logits_b", learning_rate=2., regularizer=L2Decay(0.)))
+            param_attr=ParamAttr(
+                name="rpn_cls_logits_w", initializer=Normal(loc=0.,
+                                                            scale=0.01)),
+            bias_attr=ParamAttr(
+                name="rpn_cls_logits_b",
+                learning_rate=2.,
+                regularizer=L2Decay(0.)))
         # Proposal bbox regression deltas
         self.rpn_bbox_pred = fluid.layers.conv2d(
             rpn_conv,
@@ -126,8 +149,12 @@ class RPNHead(object):
             padding=0,
             act=None,
             name='rpn_bbox_pred',
-            param_attr=ParamAttr(name="rpn_bbox_pred_w", initializer=Normal(loc=0., scale=0.01)),
-            bias_attr=ParamAttr(name="rpn_bbox_pred_b", learning_rate=2., regularizer=L2Decay(0.)))
+            param_attr=ParamAttr(
+                name="rpn_bbox_pred_w", initializer=Normal(loc=0., scale=0.01)),
+            bias_attr=ParamAttr(
+                name="rpn_bbox_pred_b",
+                learning_rate=2.,
+                regularizer=L2Decay(0.)))
         return self.rpn_cls_score, self.rpn_bbox_pred
 
     def get_proposals(self, body_feats, im_info, mode='train'):
@@ -150,15 +177,22 @@ class RPNHead(object):
         rpn_cls_score, rpn_bbox_pred = self._get_output(body_feat)
 
         if self.num_classes == 1:
-            rpn_cls_prob = fluid.layers.sigmoid(rpn_cls_score, name='rpn_cls_prob')
+            rpn_cls_prob = fluid.layers.sigmoid(
+                rpn_cls_score, name='rpn_cls_prob')
         else:
-            rpn_cls_score = fluid.layers.transpose(rpn_cls_score, perm=[0, 2, 3, 1])
-            rpn_cls_score = fluid.layers.reshape(rpn_cls_score, shape=(0, 0, 0, -1, self.num_classes))
-            rpn_cls_prob_tmp = fluid.layers.softmax(rpn_cls_score, use_cudnn=False, name='rpn_cls_prob')
-            rpn_cls_prob_slice = fluid.layers.slice(rpn_cls_prob_tmp, axes=[4], starts=[1], ends=[self.num_classes])
+            rpn_cls_score = fluid.layers.transpose(
+                rpn_cls_score, perm=[0, 2, 3, 1])
+            rpn_cls_score = fluid.layers.reshape(
+                rpn_cls_score, shape=(0, 0, 0, -1, self.num_classes))
+            rpn_cls_prob_tmp = fluid.layers.softmax(
+                rpn_cls_score, use_cudnn=False, name='rpn_cls_prob')
+            rpn_cls_prob_slice = fluid.layers.slice(
+                rpn_cls_prob_tmp, axes=[4], starts=[1], ends=[self.num_classes])
             rpn_cls_prob, _ = fluid.layers.topk(rpn_cls_prob_slice, 1)
-            rpn_cls_prob = fluid.layers.reshape(rpn_cls_prob, shape=(0, 0, 0, -1))
-            rpn_cls_prob = fluid.layers.transpose(rpn_cls_prob, perm=[0, 3, 1, 2])
+            rpn_cls_prob = fluid.layers.reshape(
+                rpn_cls_prob, shape=(0, 0, 0, -1))
+            rpn_cls_prob = fluid.layers.transpose(
+                rpn_cls_prob, perm=[0, 3, 1, 2])
         prop_op = self.train_proposal if mode == 'train' else self.test_proposal
         # prop_op
         rpn_rois, rpn_roi_probs = fluid.layers.generate_proposals(
@@ -174,20 +208,24 @@ class RPNHead(object):
             eta=prop_op.eta)
         return rpn_rois
 
-    def _transform_input(self, rpn_cls_score, rpn_bbox_pred, anchor, anchor_var):
+    def _transform_input(self, rpn_cls_score, rpn_bbox_pred, anchor,
+                         anchor_var):
         rpn_cls_score = fluid.layers.transpose(rpn_cls_score, perm=[0, 2, 3, 1])
         rpn_bbox_pred = fluid.layers.transpose(rpn_bbox_pred, perm=[0, 2, 3, 1])
         anchor = fluid.layers.reshape(anchor, shape=(-1, 4))
         anchor_var = fluid.layers.reshape(anchor_var, shape=(-1, 4))
-        rpn_cls_score = fluid.layers.reshape(x=rpn_cls_score, shape=(0, -1, self.num_classes))
+        rpn_cls_score = fluid.layers.reshape(
+            x=rpn_cls_score, shape=(0, -1, self.num_classes))
         rpn_bbox_pred = fluid.layers.reshape(x=rpn_bbox_pred, shape=(0, -1, 4))
         return rpn_cls_score, rpn_bbox_pred, anchor, anchor_var
 
     def _get_loss_input(self):
         for attr in ['rpn_cls_score', 'rpn_bbox_pred', 'anchor', 'anchor_var']:
             if not getattr(self, attr, None):
-                raise ValueError("self.{} should not be None,".format(attr), "call RPNHead.get_proposals first")
-        return self._transform_input(self.rpn_cls_score, self.rpn_bbox_pred, self.anchor, self.anchor_var)
+                raise ValueError("self.{} should not be None,".format(attr),
+                                 "call RPNHead.get_proposals first")
+        return self._transform_input(self.rpn_cls_score, self.rpn_bbox_pred,
+                                     self.anchor, self.anchor_var)
 
     def get_loss(self, im_info, gt_box, is_crowd, gt_label=None):
         """
@@ -227,7 +265,8 @@ class RPNHead(object):
                     use_random=self.rpn_target_assign.use_random)
             score_tgt = fluid.layers.cast(x=score_tgt, dtype='float32')
             score_tgt.stop_gradient = True
-            rpn_cls_loss = fluid.layers.sigmoid_cross_entropy_with_logits(x=score_pred, label=score_tgt)
+            rpn_cls_loss = fluid.layers.sigmoid_cross_entropy_with_logits(
+                x=score_pred, label=score_tgt)
         else:
             score_pred, loc_pred, score_tgt, loc_tgt, bbox_weight = \
                 self.rpn_target_assign(
@@ -245,13 +284,19 @@ class RPNHead(object):
             rpn_cls_loss = fluid.layers.softmax_with_cross_entropy(
                 logits=score_pred, label=labels_int64, numeric_stable_mode=True)
 
-        rpn_cls_loss = fluid.layers.reduce_mean(rpn_cls_loss, name='loss_rpn_cls')
+        rpn_cls_loss = fluid.layers.reduce_mean(
+            rpn_cls_loss, name='loss_rpn_cls')
 
         loc_tgt = fluid.layers.cast(x=loc_tgt, dtype='float32')
         loc_tgt.stop_gradient = True
         rpn_reg_loss = fluid.layers.smooth_l1(
-            x=loc_pred, y=loc_tgt, sigma=3.0, inside_weight=bbox_weight, outside_weight=bbox_weight)
-        rpn_reg_loss = fluid.layers.reduce_sum(rpn_reg_loss, name='loss_rpn_bbox')
+            x=loc_pred,
+            y=loc_tgt,
+            sigma=3.0,
+            inside_weight=bbox_weight,
+            outside_weight=bbox_weight)
+        rpn_reg_loss = fluid.layers.reduce_sum(
+            rpn_reg_loss, name='loss_rpn_bbox')
         score_shape = fluid.layers.shape(score_tgt)
         score_shape = fluid.layers.cast(x=score_shape, dtype='float32')
         norm = fluid.layers.reduce_prod(score_shape)
@@ -286,7 +331,8 @@ class FPNRPNHead(RPNHead):
                  min_level=2,
                  max_level=6,
                  num_classes=1):
-        super(FPNRPNHead, self).__init__(anchor_generator, rpn_target_assign, train_proposal, test_proposal)
+        super(FPNRPNHead, self).__init__(anchor_generator, rpn_target_assign,
+                                         train_proposal, test_proposal)
         self.anchor_start_size = anchor_start_size
         self.num_chan = num_chan
         self.min_level = min_level
@@ -328,13 +374,19 @@ class FPNRPNHead(RPNHead):
             padding=1,
             act='relu',
             name=conv_name,
-            param_attr=ParamAttr(name=conv_share_name + '_w', initializer=Normal(loc=0., scale=0.01)),
-            bias_attr=ParamAttr(name=conv_share_name + '_b', learning_rate=2., regularizer=L2Decay(0.)))
+            param_attr=ParamAttr(
+                name=conv_share_name + '_w',
+                initializer=Normal(loc=0., scale=0.01)),
+            bias_attr=ParamAttr(
+                name=conv_share_name + '_b',
+                learning_rate=2.,
+                regularizer=L2Decay(0.)))
 
         # self.anchor_generator
         self.anchors, self.anchor_var = fluid.layers.anchor_generator(
             input=conv_rpn_fpn,
-            anchor_sizes=(self.anchor_start_size * 2.**(feat_lvl - self.min_level), ),
+            anchor_sizes=(self.anchor_start_size * 2.**
+                          (feat_lvl - self.min_level), ),
             stride=(2.**feat_lvl, 2.**feat_lvl),
             aspect_ratios=self.anchor_generator.aspect_ratios,
             variance=self.anchor_generator.variance)
@@ -346,16 +398,26 @@ class FPNRPNHead(RPNHead):
             filter_size=1,
             act=None,
             name=cls_name,
-            param_attr=ParamAttr(name=cls_share_name + '_w', initializer=Normal(loc=0., scale=0.01)),
-            bias_attr=ParamAttr(name=cls_share_name + '_b', learning_rate=2., regularizer=L2Decay(0.)))
+            param_attr=ParamAttr(
+                name=cls_share_name + '_w',
+                initializer=Normal(loc=0., scale=0.01)),
+            bias_attr=ParamAttr(
+                name=cls_share_name + '_b',
+                learning_rate=2.,
+                regularizer=L2Decay(0.)))
         self.rpn_bbox_pred = fluid.layers.conv2d(
             input=conv_rpn_fpn,
             num_filters=num_anchors * 4,
             filter_size=1,
             act=None,
             name=bbox_name,
-            param_attr=ParamAttr(name=bbox_share_name + '_w', initializer=Normal(loc=0., scale=0.01)),
-            bias_attr=ParamAttr(name=bbox_share_name + '_b', learning_rate=2., regularizer=L2Decay(0.)))
+            param_attr=ParamAttr(
+                name=bbox_share_name + '_w',
+                initializer=Normal(loc=0., scale=0.01)),
+            bias_attr=ParamAttr(
+                name=bbox_share_name + '_b',
+                learning_rate=2.,
+                regularizer=L2Decay(0.)))
         return self.rpn_cls_score, self.rpn_bbox_pred
 
     def _get_single_proposals(self, body_feat, im_info, feat_lvl, mode='train'):
@@ -375,20 +437,29 @@ class FPNRPNHead(RPNHead):
                 shape of (rois_num, 1).
         """
 
-        rpn_cls_score_fpn, rpn_bbox_pred_fpn = self._get_output(body_feat, feat_lvl)
+        rpn_cls_score_fpn, rpn_bbox_pred_fpn = self._get_output(
+            body_feat, feat_lvl)
 
         prop_op = self.train_proposal if mode == 'train' else self.test_proposal
         if self.num_classes == 1:
-            rpn_cls_prob_fpn = fluid.layers.sigmoid(rpn_cls_score_fpn, name='rpn_cls_prob_fpn' + str(feat_lvl))
+            rpn_cls_prob_fpn = fluid.layers.sigmoid(
+                rpn_cls_score_fpn, name='rpn_cls_prob_fpn' + str(feat_lvl))
         else:
-            rpn_cls_score_fpn = fluid.layers.transpose(rpn_cls_score_fpn, perm=[0, 2, 3, 1])
-            rpn_cls_score_fpn = fluid.layers.reshape(rpn_cls_score_fpn, shape=(0, 0, 0, -1, self.num_classes))
+            rpn_cls_score_fpn = fluid.layers.transpose(
+                rpn_cls_score_fpn, perm=[0, 2, 3, 1])
+            rpn_cls_score_fpn = fluid.layers.reshape(
+                rpn_cls_score_fpn, shape=(0, 0, 0, -1, self.num_classes))
             rpn_cls_prob_fpn = fluid.layers.softmax(
-                rpn_cls_score_fpn, use_cudnn=False, name='rpn_cls_prob_fpn' + str(feat_lvl))
-            rpn_cls_prob_fpn = fluid.layers.slice(rpn_cls_prob_fpn, axes=[4], starts=[1], ends=[self.num_classes])
+                rpn_cls_score_fpn,
+                use_cudnn=False,
+                name='rpn_cls_prob_fpn' + str(feat_lvl))
+            rpn_cls_prob_fpn = fluid.layers.slice(
+                rpn_cls_prob_fpn, axes=[4], starts=[1], ends=[self.num_classes])
             rpn_cls_prob_fpn, _ = fluid.layers.topk(rpn_cls_prob_fpn, 1)
-            rpn_cls_prob_fpn = fluid.layers.reshape(rpn_cls_prob_fpn, shape=(0, 0, 0, -1))
-            rpn_cls_prob_fpn = fluid.layers.transpose(rpn_cls_prob_fpn, perm=[0, 3, 1, 2])
+            rpn_cls_prob_fpn = fluid.layers.reshape(
+                rpn_cls_prob_fpn, shape=(0, 0, 0, -1))
+            rpn_cls_prob_fpn = fluid.layers.transpose(
+                rpn_cls_prob_fpn, perm=[0, 3, 1, 2])
         # prop_op
         rpn_rois_fpn, rpn_roi_prob_fpn = fluid.layers.generate_proposals(
             scores=rpn_cls_prob_fpn,
@@ -423,7 +494,8 @@ class FPNRPNHead(RPNHead):
         for lvl in range(self.min_level, self.max_level + 1):
             fpn_feat_name = fpn_feat_names[self.max_level - lvl]
             fpn_feat = fpn_feats[fpn_feat_name]
-            rois_fpn, roi_probs_fpn = self._get_single_proposals(fpn_feat, im_info, lvl, mode)
+            rois_fpn, roi_probs_fpn = self._get_single_proposals(
+                fpn_feat, im_info, lvl, mode)
             self.fpn_rpn_list.append((self.rpn_cls_score, self.rpn_bbox_pred))
             rois_list.append(rois_fpn)
             roi_probs_list.append(roi_probs_fpn)
@@ -432,7 +504,12 @@ class FPNRPNHead(RPNHead):
         prop_op = self.train_proposal if mode == 'train' else self.test_proposal
         post_nms_top_n = prop_op.post_nms_top_n
         rois_collect = fluid.layers.collect_fpn_proposals(
-            rois_list, roi_probs_list, self.min_level, self.max_level, post_nms_top_n, name='collect')
+            rois_list,
+            roi_probs_list,
+            self.min_level,
+            self.max_level,
+            post_nms_top_n,
+            name='collect')
         return rois_collect
 
     def _get_loss_input(self):
@@ -441,8 +518,9 @@ class FPNRPNHead(RPNHead):
         anchors = []
         anchor_vars = []
         for i in range(len(self.fpn_rpn_list)):
-            single_input = self._transform_input(self.fpn_rpn_list[i][0], self.fpn_rpn_list[i][1], self.anchors_list[i],
-                                                 self.anchor_var_list[i])
+            single_input = self._transform_input(
+                self.fpn_rpn_list[i][0], self.fpn_rpn_list[i][1],
+                self.anchors_list[i], self.anchor_var_list[i])
             rpn_clses.append(single_input[0])
             rpn_bboxes.append(single_input[1])
             anchors.append(single_input[2])
