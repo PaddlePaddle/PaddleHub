@@ -1,5 +1,5 @@
 ```shell
-$ hub install bert-large-uncased==2.0.1
+$ hub install bert-large-uncased==2.0.2
 ```
 
 <p align="center">
@@ -16,6 +16,7 @@ def __init__(
     load_checkpoint=None,
     label_map=None,
     num_classes=2,
+    suffix=False,
     **kwargs,
 )
 ```
@@ -28,7 +29,9 @@ def __init__(
 * `load_checkpoint`：使用PaddleHub Fine-tune api训练保存的模型参数文件路径。
 * `label_map`：预测时的类别映射表。
 * `num_classes`：分类任务的类别数，如果指定了`label_map`，此参数可不传，默认2分类。
+* `suffix`: 序列标注任务的标签格式，如果设定为`True`，标签以'-B', '-I', '-E' 或者 '-S'为结尾，此参数默认为`False`。
 * `**kwargs`：用户额外指定的关键字字典类型的参数。
+
 ```python
 def predict(
     data,
@@ -84,7 +87,7 @@ label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
     name='bert-large-uncased',
-    version='2.0.1',
+    version='2.0.2',
     task='seq-cls',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)

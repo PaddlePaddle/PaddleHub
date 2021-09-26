@@ -30,7 +30,7 @@ from faster_rcnn_resnet50_fpn_coco2017.roi_extractor import FPNRoIAlign
 
 @moduleinfo(
     name="faster_rcnn_resnet50_fpn_coco2017",
-    version="1.0.0",
+    version="1.0.1",
     type="cv/object_detection",
     summary=
     "Baidu's Faster-RCNN model for object detection, whose backbone is ResNet50, processed with Feature Pyramid Networks",
@@ -39,8 +39,10 @@ from faster_rcnn_resnet50_fpn_coco2017.roi_extractor import FPNRoIAlign
 class FasterRCNNResNet50RPN(hub.Module):
     def _initialize(self):
         # default pretrained model, Faster-RCNN with backbone ResNet50, shape of input tensor is [3, 800, 1333]
-        self.default_pretrained_model_path = os.path.join(self.directory, "faster_rcnn_resnet50_fpn_model")
-        self.label_names = load_label_info(os.path.join(self.directory, "label_file.txt"))
+        self.default_pretrained_model_path = os.path.join(
+            self.directory, "faster_rcnn_resnet50_fpn_model")
+        self.label_names = load_label_info(
+            os.path.join(self.directory, "label_file.txt"))
         self._set_config()
 
     def _set_config(self):
@@ -64,7 +66,11 @@ class FasterRCNNResNet50RPN(hub.Module):
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_paddle_predictor(gpu_config)
 
-    def context(self, num_classes=81, trainable=True, pretrained=True, phase='train'):
+    def context(self,
+                num_classes=81,
+                trainable=True,
+                pretrained=True,
+                phase='train'):
         """
         Distill the Head Features, so as to perform transfer learning.
 
@@ -83,15 +89,26 @@ class FasterRCNNResNet50RPN(hub.Module):
         startup_program = fluid.Program()
         with fluid.program_guard(context_prog, startup_program):
             with fluid.unique_name.guard():
-                image = fluid.layers.data(name='image', shape=[-1, 3, -1, -1], dtype='float32')
+                image = fluid.layers.data(
+                    name='image', shape=[-1, 3, -1, -1], dtype='float32')
                 # backbone
-                backbone = ResNet(norm_type='affine_channel', depth=50, feature_maps=[2, 3, 4, 5], freeze_at=2)
+                backbone = ResNet(
+                    norm_type='affine_channel',
+                    depth=50,
+                    feature_maps=[2, 3, 4, 5],
+                    freeze_at=2)
                 body_feats = backbone(image)
                 # fpn
-                fpn = FPN(max_level=6, min_level=2, num_chan=256, spatial_scale=[0.03125, 0.0625, 0.125, 0.25])
+                fpn = FPN(
+                    max_level=6,
+                    min_level=2,
+                    num_chan=256,
+                    spatial_scale=[0.03125, 0.0625, 0.125, 0.25])
                 var_prefix = '@HUB_{}@'.format(self.name)
-                im_info = fluid.layers.data(name='im_info', shape=[3], dtype='float32', lod_level=0)
-                im_shape = fluid.layers.data(name='im_shape', shape=[3], dtype='float32', lod_level=0)
+                im_info = fluid.layers.data(
+                    name='im_info', shape=[3], dtype='float32', lod_level=0)
+                im_shape = fluid.layers.data(
+                    name='im_shape', shape=[3], dtype='float32', lod_level=0)
                 body_feat_names = list(body_feats.keys())
                 body_feats, spatial_scale = fpn.get_output(body_feats)
                 # rpn_head: RPNHead
@@ -99,9 +116,12 @@ class FasterRCNNResNet50RPN(hub.Module):
                 rois = rpn_head.get_proposals(body_feats, im_info, mode=phase)
                 # train
                 if phase == 'train':
-                    gt_bbox = fluid.layers.data(name='gt_bbox', shape=[4], dtype='float32', lod_level=1)
-                    is_crowd = fluid.layers.data(name='is_crowd', shape=[1], dtype='int32', lod_level=1)
-                    gt_class = fluid.layers.data(name='gt_class', shape=[1], dtype='int32', lod_level=1)
+                    gt_bbox = fluid.layers.data(
+                        name='gt_bbox', shape=[4], dtype='float32', lod_level=1)
+                    is_crowd = fluid.layers.data(
+                        name='is_crowd', shape=[1], dtype='int32', lod_level=1)
+                    gt_class = fluid.layers.data(
+                        name='gt_class', shape=[1], dtype='int32', lod_level=1)
                     rpn_loss = rpn_head.get_loss(im_info, gt_bbox, is_crowd)
                     # bbox_assigner: BBoxAssigner
                     bbox_assigner = self.bbox_assigner(num_classes)
@@ -122,7 +142,10 @@ class FasterRCNNResNet50RPN(hub.Module):
                     rois = outs[0]
 
                 roi_extractor = self.roi_extractor()
-                roi_feat = roi_extractor(head_inputs=body_feats, rois=rois, spatial_scale=spatial_scale)
+                roi_feat = roi_extractor(
+                    head_inputs=body_feats,
+                    rois=rois,
+                    spatial_scale=spatial_scale)
                 # head_feat
                 bbox_head = self.bbox_head(num_classes)
                 head_feat = bbox_head.head(roi_feat)
@@ -138,13 +161,18 @@ class FasterRCNNResNet50RPN(hub.Module):
                         'is_crowd': var_prefix + is_crowd.name
                     }
                     outputs = {
-                        'head_features': var_prefix + head_feat.name,
-                        'rpn_cls_loss': var_prefix + rpn_loss['rpn_cls_loss'].name,
-                        'rpn_reg_loss': var_prefix + rpn_loss['rpn_reg_loss'].name,
-                        'generate_proposal_labels': [var_prefix + var.name for var in outs]
+                        'head_features':
+                        var_prefix + head_feat.name,
+                        'rpn_cls_loss':
+                        var_prefix + rpn_loss['rpn_cls_loss'].name,
+                        'rpn_reg_loss':
+                        var_prefix + rpn_loss['rpn_reg_loss'].name,
+                        'generate_proposal_labels':
+                        [var_prefix + var.name for var in outs]
                     }
                 elif phase == 'predict':
-                    pred = bbox_head.get_prediction(roi_feat, rois, im_info, im_shape)
+                    pred = bbox_head.get_prediction(roi_feat, rois, im_info,
+                                                    im_shape)
                     inputs = {
                         'image': var_prefix + image.name,
                         'im_info': var_prefix + im_info.name,
@@ -159,9 +187,13 @@ class FasterRCNNResNet50RPN(hub.Module):
                 add_vars_prefix(startup_program, var_prefix)
 
                 global_vars = context_prog.global_block().vars
-                inputs = {key: global_vars[value] for key, value in inputs.items()}
+                inputs = {
+                    key: global_vars[value]
+                    for key, value in inputs.items()
+                }
                 outputs = {
-                    key: global_vars[value] if not isinstance(value, list) else [global_vars[var] for var in value]
+                    key: global_vars[value] if not isinstance(value, list) else
+                    [global_vars[var] for var in value]
                     for key, value in outputs.items()
                 }
 
@@ -177,9 +209,14 @@ class FasterRCNNResNet50RPN(hub.Module):
                         if num_classes != 81:
                             if 'bbox_pred' in var.name or 'cls_score' in var.name:
                                 return False
-                        return os.path.exists(os.path.join(self.default_pretrained_model_path, var.name))
+                        return os.path.exists(
+                            os.path.join(self.default_pretrained_model_path,
+                                         var.name))
 
-                    fluid.io.load_vars(exe, self.default_pretrained_model_path, predicate=_if_exist)
+                    fluid.io.load_vars(
+                        exe,
+                        self.default_pretrained_model_path,
+                        predicate=_if_exist)
                 return inputs, outputs, context_prog
 
     def rpn_head(self):
@@ -195,8 +232,16 @@ class FasterRCNNResNet50RPN(hub.Module):
                 rpn_negative_overlap=0.3,
                 rpn_positive_overlap=0.7,
                 rpn_straddle_thresh=0.0),
-            train_proposal=GenerateProposals(min_size=0.0, nms_thresh=0.7, post_nms_top_n=2000, pre_nms_top_n=2000),
-            test_proposal=GenerateProposals(min_size=0.0, nms_thresh=0.7, post_nms_top_n=1000, pre_nms_top_n=1000),
+            train_proposal=GenerateProposals(
+                min_size=0.0,
+                nms_thresh=0.7,
+                post_nms_top_n=2000,
+                pre_nms_top_n=2000),
+            test_proposal=GenerateProposals(
+                min_size=0.0,
+                nms_thresh=0.7,
+                post_nms_top_n=1000,
+                pre_nms_top_n=1000),
             anchor_start_size=32,
             num_chan=256,
             min_level=2,
@@ -204,12 +249,18 @@ class FasterRCNNResNet50RPN(hub.Module):
 
     def roi_extractor(self):
         return FPNRoIAlign(
-            canconical_level=4, canonical_size=224, max_level=5, min_level=2, box_resolution=7, sampling_ratio=2)
+            canconical_level=4,
+            canonical_size=224,
+            max_level=5,
+            min_level=2,
+            box_resolution=7,
+            sampling_ratio=2)
 
     def bbox_head(self, num_classes):
         return BBoxHead(
             head=TwoFCHead(mlp_dim=1024),
-            nms=MultiClassNMS(keep_top_k=100, nms_threshold=0.5, score_threshold=0.05),
+            nms=MultiClassNMS(
+                keep_top_k=100, nms_threshold=0.5, score_threshold=0.05),
             num_classes=num_classes)
 
     def bbox_assigner(self, num_classes):
@@ -222,7 +273,11 @@ class FasterRCNNResNet50RPN(hub.Module):
             fg_thresh=0.5,
             class_nums=num_classes)
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
@@ -278,7 +333,7 @@ class FasterRCNNResNet50RPN(hub.Module):
                 int(_places[0])
             except:
                 raise RuntimeError(
-                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
                 )
 
         paths = paths if paths else list()
@@ -308,7 +363,9 @@ class FasterRCNNResNet50RPN(hub.Module):
             padding_image_tensor = PaddleTensor(padding_image.copy())
             padding_info_tensor = PaddleTensor(padding_info.copy())
             padding_shape_tensor = PaddleTensor(padding_shape.copy())
-            feed_list = [padding_image_tensor, padding_info_tensor, padding_shape_tensor]
+            feed_list = [
+                padding_image_tensor, padding_info_tensor, padding_shape_tensor
+            ]
 
             if use_gpu:
                 data_out = self.gpu_predictor.run(feed_list)
@@ -333,17 +390,29 @@ class FasterRCNNResNet50RPN(hub.Module):
         Add the command config options
         """
         self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+            '--use_gpu',
+            type=ast.literal_eval,
+            default=False,
+            help="whether use GPU or not")
 
-        self.arg_config_group.add_argument('--batch_size', type=int, default=1, help="batch size for prediction")
+        self.arg_config_group.add_argument(
+            '--batch_size',
+            type=int,
+            default=1,
+            help="batch size for prediction")
 
     def add_module_input_arg(self):
         """
         Add the command input options
         """
-        self.arg_input_group.add_argument('--input_path', type=str, default=None, help="input data")
+        self.arg_input_group.add_argument(
+            '--input_path', type=str, default=None, help="input data")
 
-        self.arg_input_group.add_argument('--input_file', type=str, default=None, help="file contain input data")
+        self.arg_input_group.add_argument(
+            '--input_file',
+            type=str,
+            default=None,
+            help="file contain input data")
 
     def check_input_data(self, args):
         input_data = []
@@ -372,9 +441,12 @@ class FasterRCNNResNet50RPN(hub.Module):
             prog="hub run {}".format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options", description="Run configuration for controlling module behavior, not required.")
+            title="Config options",
+            description=
+            "Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
 
         self.add_module_input_arg()
@@ -386,5 +458,7 @@ class FasterRCNNResNet50RPN(hub.Module):
         else:
             for image_path in input_data:
                 if not os.path.exists(image_path):
-                    raise RuntimeError("File %s or %s is not exist." % image_path)
-        return self.object_detection(paths=input_data, use_gpu=args.use_gpu, batch_size=args.batch_size)
+                    raise RuntimeError(
+                        "File %s or %s is not exist." % image_path)
+        return self.object_detection(
+            paths=input_data, use_gpu=args.use_gpu, batch_size=args.batch_size)

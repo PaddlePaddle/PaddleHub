@@ -31,7 +31,8 @@ def test_reader(paths=None, images=None):
     img_list = list()
     if paths:
         for img_path in paths:
-            assert os.path.isfile(img_path), "The {} isn't a valid file path.".format(img_path)
+            assert os.path.isfile(
+                img_path), "The {} isn't a valid file path.".format(img_path)
             img = cv2.imread(img_path).astype('float32')
             img_list.append(img)
     if images is not None:
@@ -66,7 +67,13 @@ def test_reader(paths=None, images=None):
         # im_info holds the resize info of image.
         im_info = np.array([resize_h, resize_w, im_scale]).astype('float32')
 
-        im = cv2.resize(im, None, None, fx=im_scale, fy=im_scale, interpolation=cv2.INTER_LINEAR)
+        im = cv2.resize(
+            im,
+            None,
+            None,
+            fx=im_scale,
+            fy=im_scale,
+            interpolation=cv2.INTER_LINEAR)
 
         # HWC --> CHW
         im = np.swapaxes(im, 1, 2)
@@ -75,11 +82,14 @@ def test_reader(paths=None, images=None):
 
 
 def padding_minibatch(batch_data, coarsest_stride=0, use_padded_im_info=True):
-    max_shape_org = np.array([data['image'].shape for data in batch_data]).max(axis=0)
+    max_shape_org = np.array(
+        [data['image'].shape for data in batch_data]).max(axis=0)
     if coarsest_stride > 0:
         max_shape = np.zeros((3)).astype('int32')
-        max_shape[1] = int(np.ceil(max_shape_org[1] / coarsest_stride) * coarsest_stride)
-        max_shape[2] = int(np.ceil(max_shape_org[2] / coarsest_stride) * coarsest_stride)
+        max_shape[1] = int(
+            np.ceil(max_shape_org[1] / coarsest_stride) * coarsest_stride)
+        max_shape[2] = int(
+            np.ceil(max_shape_org[2] / coarsest_stride) * coarsest_stride)
     else:
         max_shape = max_shape_org.astype('int32')
 
@@ -90,12 +100,15 @@ def padding_minibatch(batch_data, coarsest_stride=0, use_padded_im_info=True):
     for data in batch_data:
         im_c, im_h, im_w = data['image'].shape
         # image
-        padding_im = np.zeros((im_c, max_shape[1], max_shape[2]), dtype=np.float32)
+        padding_im = np.zeros((im_c, max_shape[1], max_shape[2]),
+                              dtype=np.float32)
         padding_im[:, 0:im_h, 0:im_w] = data['image']
         padding_image.append(padding_im)
         # im_info
-        data['im_info'][0] = max_shape[1] if use_padded_im_info else max_shape_org[1]
-        data['im_info'][1] = max_shape[2] if use_padded_im_info else max_shape_org[2]
+        data['im_info'][
+            0] = max_shape[1] if use_padded_im_info else max_shape_org[1]
+        data['im_info'][
+            1] = max_shape[2] if use_padded_im_info else max_shape_org[2]
         padding_info.append(data['im_info'])
         padding_shape.append(data['im_shape'])
 
