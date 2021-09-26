@@ -323,16 +323,3 @@ class ChineseTextDetectionDB(hub.Module):
         Add the command input options
         """
         self.arg_input_group.add_argument('--input_path', type=str, default=None, help="diretory to image")
-
-
-if __name__ == '__main__':
-    db = ChineseTextDetectionDB()
-    image_path = [
-        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/korean_1.jpg',
-        # '/mnt/zhangxuefei/PaddleOCR/doc/imgs/2.jpg',
-        # '/mnt/zhangxuefei/PaddleOCR/doc/imgs/12.jpg',
-        # '/mnt/zhangxuefei/PaddleOCR/doc/imgs/test_image.jpg'
-    ]
-    res = db.detect_text(paths=image_path, visualization=True)
-    db.save_inference_model('save')
-    print(res)
