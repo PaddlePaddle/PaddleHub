@@ -14,8 +14,15 @@ from paddlehub.module.module import moduleinfo, runnable, serving
 
 def base64_to_cv2(b64str):
     data = base64.b64decode(b64str.encode('utf8'))
-    data = np.fromstring(data, np.uint8)
+    data = np.frombuffer(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    return data
+
+
+def base64_to_np(b64tuple):
+    data, shape = b64tuple
+    data = base64.b64decode(data.encode('utf8'))
+    data = np.frombuffer(data, np.float32).reshape(shape)
     return data
 
 
@@ -23,6 +30,12 @@ def cv2_to_base64(image):
     # return base64.b64encode(image)
     data = cv2.imencode('.jpg', image)[1]
     return base64.b64encode(data.tostring()).decode('utf8')
+
+
+def np_to_base64(array):
+    shape = array.shape
+    data = base64.b64encode(array).decode('utf8')
+    return data, shape
 
 
 def read_images(paths):
@@ -83,7 +96,9 @@ class MODULE(hub.Module):
             if isinstance(result, dict):
                 # result_new = dict()
                 for key, value in result.items():
-                    if isinstance(value, np.ndarray):
+                    if key == 'score_map':
+                        result[key] = np_to_base64(value)
+                    elif isinstance(value, np.ndarray):
                         result[key] = cv2_to_base64(value)
                     elif isinstance(value, np.generic):
                         result[key] = np.asscalar(value)
@@ -91,7 +106,9 @@ class MODULE(hub.Module):
             elif isinstance(result, list):
                 for index in range(len(result)):
                     for key, value in result[index].items():
-                        if isinstance(value, np.ndarray):
+                        if key == 'score_map':
+                            result[index][key] = np_to_base64(value)
+                        elif isinstance(value, np.ndarray):
                             result[index][key] = cv2_to_base64(value)
                         elif isinstance(value, np.generic):
                             result[index][key] = np.asscalar(value)
