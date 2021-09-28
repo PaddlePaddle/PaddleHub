@@ -10,14 +10,14 @@
 | Latest update date   |   2021-02-26   |
 |   Data indicators    |       -        |
 
-## 1 Basic Information of Module
+## I. Basic Information of Module
 
 - ### Module Introduction
   - Pornography detection model can automatically distinguish whether the text is pornographic or not and give the corresponding confidence, and identify the pornographic description, vulgar communication and filthy text in the text.
   - porn_detection_gru adopts GRU network structure and cuts words according to word granularity, which has high prediction speed. The maximum sentence length of this model is 256 words, and only prediction is supported.
 
 
-## 2 Installation
+## II. Installation
 
 - ### 1、Environmental dependence
 
@@ -35,7 +35,7 @@
 
 
 
-## 3 Module API and Prediction
+## III. Module API and Prediction
 
 - ### 1、Command line Prediction
 
@@ -117,7 +117,7 @@
 
 
 
-## 4 服务部署
+## IV. Server Deployment
 
 - PaddleHub Serving can deploy an online pornography detection service and you can use this interface for online Web applications.
 
@@ -167,7 +167,7 @@
 
 
 
-## 5 Release Note
+## V. Release Note
 
 * 1.0.0
 
