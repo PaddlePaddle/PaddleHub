@@ -31,7 +31,7 @@
 
 - ### 1、环境依赖  
 
-  - ppdet >= 2.1.0
+  - paddledet >= 2.1.0
 
   - opencv-python
 
