@@ -96,7 +96,7 @@ def postprocess(data_out, org_im, org_im_path, org_im_width, org_im_height, outp
     output['data'] = list()
     output['path'] = org_im_path
 
-    if data_out.shape[0] == 0:
+    if data_out.shape[1] != 6::
         print("No face detected in {}".format(org_im_path))
     else:
         det_conf = data_out[:, 1]
