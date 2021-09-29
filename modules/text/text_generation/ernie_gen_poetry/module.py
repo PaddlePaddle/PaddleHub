@@ -54,8 +54,36 @@ class ErnieGen(hub.NLPPredictionModule):
         self.rev_dict[self.tokenizer.vocab['[UNK]']] = ''  # replace [PAD]
         self.rev_lookup = np.vectorize(lambda i: self.rev_dict[i])
 
+        # detect npu
+        npu_id = self._get_device_id("FLAGS_selected_npus")
+        if npu_id != -1:
+            # use npu
+            self.use_device = "npu"
+        else:
+            # detect gpu
+            gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
+            if gpu_id != -1:
+                # use gpu
+                self.use_device = "gpu"
+            else:
+                # detect xpu
+                xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
+                if xpu_id != -1:
+                    # use xpu
+                    self.use_device = "xpu"
+                else:
+                    self.use_device = "cpu"
+
+    def _get_device_id(self, places):
+        try:
+            places = os.environ[places]
+            id = int(places)
+        except:
+            id = -1
+        return id
+
     @serving
-    def generate(self, texts, use_gpu=False, beam_width=5):
+    def generate(self, texts, use_gpu=False, beam_width=5, use_device=None):
         """
         Get the continuation of the input poetry.
 
@@ -63,6 +91,7 @@ class ErnieGen(hub.NLPPredictionModule):
              texts(list): the front part of a poetry.
              use_gpu(bool): whether use gpu to predict or not
              beam_width(int): the beam search width.
+             use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
              results(list): the poetry continuations.
@@ -91,12 +120,26 @@ class ErnieGen(hub.NLPPredictionModule):
                         % text)
                 break
 
-        if use_gpu and "CUDA_VISIBLE_DEVICES" not in os.environ:
-            use_gpu = False
-            logger.warning(
-                "use_gpu has been set False as you didn't set the environment variable CUDA_VISIBLE_DEVICES while using use_gpu=True"
-            )
-        paddle.set_device('gpu') if use_gpu else paddle.set_device('cpu')
+        if use_device is not None:
+            # check 'use_device' match 'device on init'
+            if use_device != self.use_device:
+                raise RuntimeError(
+                    "the 'use_device' parameter when calling generate, does not match internal device found on init.")
+        else:
+            # use_device is None, follow use_gpu flag
+            if use_gpu == False:
+                use_device = "cpu"
+            elif use_gpu == True and self.use_device != 'gpu':
+                use_device = "cpu"
+                logger.warning(
+                    "use_gpu has been set False as you didn't set the environment variable CUDA_VISIBLE_DEVICES while using use_gpu=True"
+                )
+            else:
+                # use_gpu and self.use_device are both true
+                use_device = "gpu"
+
+        paddle.set_device(use_device)
+
         self.model.eval()
         results = []
         for text in predicted_data:
@@ -104,20 +147,19 @@ class ErnieGen(hub.NLPPredictionModule):
             encode_text = self.tokenizer.encode(text)
             src_ids = paddle.to_tensor(encode_text['input_ids']).unsqueeze(0)
             src_sids = paddle.to_tensor(encode_text['token_type_ids']).unsqueeze(0)
-            output_ids = beam_search_infilling(
-                self.model,
-                src_ids,
-                src_sids,
-                eos_id=self.tokenizer.vocab['[SEP]'],
-                sos_id=self.tokenizer.vocab['[CLS]'],
-                attn_id=self.tokenizer.vocab['[MASK]'],
-                pad_id=self.tokenizer.vocab['[PAD]'],
-                unk_id=self.tokenizer.vocab['[UNK]'],
-                vocab_size=len(self.tokenizer.vocab),
-                max_decode_len=80,
-                max_encode_len=20,
-                beam_width=beam_width,
-                tgt_type_id=1)
+            output_ids = beam_search_infilling(self.model,
+                                               src_ids,
+                                               src_sids,
+                                               eos_id=self.tokenizer.vocab['[SEP]'],
+                                               sos_id=self.tokenizer.vocab['[CLS]'],
+                                               attn_id=self.tokenizer.vocab['[MASK]'],
+                                               pad_id=self.tokenizer.vocab['[PAD]'],
+                                               unk_id=self.tokenizer.vocab['[UNK]'],
+                                               vocab_size=len(self.tokenizer.vocab),
+                                               max_decode_len=80,
+                                               max_encode_len=20,
+                                               beam_width=beam_width,
+                                               tgt_type_id=1)
             output_str = self.rev_lookup(output_ids[0])
 
             for ostr in output_str.tolist():
@@ -131,21 +173,24 @@ class ErnieGen(hub.NLPPredictionModule):
         """
         Add the command config options
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU for prediction")
-
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU for prediction")
         self.arg_config_group.add_argument('--beam_width', type=int, default=5, help="the beam search width")
+        self.arg_config_group.add_argument('--use_device',
+                                           choices=["cpu", "gpu", "xpu", "npu"],
+                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     @runnable
     def run_cmd(self, argvs):
         """
         Run as a command
         """
-        self.parser = argparse.ArgumentParser(
-            description='Run the %s module.' % self.name,
-            prog='hub run %s' % self.name,
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description='Run the %s module.' % self.name,
+                                              prog='hub run %s' % self.name,
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -162,7 +207,10 @@ class ErnieGen(hub.NLPPredictionModule):
             self.parser.print_help()
             return None
 
-        results = self.generate(texts=input_data, use_gpu=args.use_gpu, beam_width=args.beam_width)
+        results = self.generate(texts=input_data,
+                                use_gpu=args.use_gpu,
+                                beam_width=args.beam_width,
+                                use_device=args.use_device)
 
         return results
 
