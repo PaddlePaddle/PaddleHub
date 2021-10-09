@@ -87,7 +87,7 @@
                 * `transforms`: 数据预处理方式。
                 * `mode`: 选择数据模式，可选项有 `train`, `test`, `val`， 默认为`train`。
 
-                * [canvas.py](../../paddlehub/datasets/canvas.py)。`hub.datasets.Canvas()` 会自动从网络下载数据集并解压到用户目录下`HOME/.paddlehub/dataset`目录。
+                * `hub.datasets.Canvas()` 会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录。
 
 
         - Step3: 加载预训练模型
