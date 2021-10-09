@@ -88,7 +88,7 @@
 
     - **返回**
 
-      * res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，关键字有 'save\_path', 'data'，对应的取值为：
+      * res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，关键字有 'save\_path'， 'data'，对应的取值为：
         * save\_path (str, optional): 可视化图片的保存路径（仅当visualization=True时存在）；
         * data (numpy.ndarray): 超分辨后图像。
 
