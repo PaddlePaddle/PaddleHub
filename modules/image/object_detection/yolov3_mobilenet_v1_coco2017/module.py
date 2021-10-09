@@ -9,7 +9,10 @@ from functools import partial
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+
+from paddle.inference import Config
+from paddle.inference import create_predictor
+
 from paddlehub.module.module import moduleinfo, runnable, serving
 from paddlehub.common.paddle_helper import add_vars_prefix
 
@@ -23,39 +26,63 @@ from yolov3_mobilenet_v1_coco2017.yolo_head import MultiClassNMS, YOLOv3Head
     name="yolov3_mobilenet_v1_coco2017",
     version="1.0.2",
     type="CV/object_detection",
-    summary=
-    "Baidu's YOLOv3 model for object detection with backbone MobileNet_V1, trained with dataset COCO2017.",
+    summary="Baidu's YOLOv3 model for object detection with backbone MobileNet_V1, trained with dataset COCO2017.",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com")
 class YOLOv3MobileNetV1Coco2017(hub.Module):
     def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(
-            self.directory, "yolov3_mobilenet_v1_model")
-        self.label_names = load_label_info(
-            os.path.join(self.directory, "label_file.txt"))
+        self.default_pretrained_model_path = os.path.join(self.directory, "yolov3_mobilenet_v1_model")
+        self.label_names = load_label_info(os.path.join(self.directory, "label_file.txt"))
         self._set_config()
+
+    def _get_device_id(self, places):
+        try:
+            places = os.environ[places]
+            id = int(places)
+        except:
+            id = -1
+        return id
 
     def _set_config(self):
         """
         predictor config setting.
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+
+        # create default cpu predictor
+        cpu_config = Config(self.default_pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         cpu_config.switch_ir_optim(False)
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-            use_gpu = True
-        except:
-            use_gpu = False
-        if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        # create predictors using various types of devices
+
+        # npu
+        npu_id = self._get_device_id("FLAGS_selected_npus")
+        if npu_id != -1:
+            # use npu
+            npu_config = Config(self.default_pretrained_model_path)
+            npu_config.disable_glog_info()
+            npu_config.enable_npu(device_id=npu_id)
+            self.npu_predictor = create_predictor(npu_config)
+
+        # gpu
+        gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
+        if gpu_id != -1:
+            # use gpu
+            gpu_config = Config(self.default_pretrained_model_path)
             gpu_config.disable_glog_info()
-            gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=gpu_id)
+            self.gpu_predictor = create_predictor(gpu_config)
+
+        # xpu
+        xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
+        if xpu_id != -1:
+            # use xpu
+            xpu_config = Config(self.default_pretrained_model_path)
+            xpu_config.disable_glog_info()
+            xpu_config.enable_xpu(100)
+            self.xpu_predictor = create_predictor(xpu_config)
 
     def context(self, trainable=True, pretrained=True, get_prediction=False):
         """
@@ -76,24 +103,17 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
         with fluid.program_guard(context_prog, startup_program):
             with fluid.unique_name.guard():
                 # image
-                image = fluid.layers.data(
-                    name='image', shape=[3, 608, 608], dtype='float32')
+                image = fluid.layers.data(name='image', shape=[3, 608, 608], dtype='float32')
                 # backbone
-                backbone = MobileNet(
-                    norm_type='sync_bn',
-                    norm_decay=0.,
-                    conv_group_scale=1,
-                    with_extra_blocks=False)
+                backbone = MobileNet(norm_type='sync_bn', norm_decay=0., conv_group_scale=1, with_extra_blocks=False)
                 # body_feats
                 body_feats = backbone(image)
                 # im_size
-                im_size = fluid.layers.data(
-                    name='im_size', shape=[2], dtype='int32')
+                im_size = fluid.layers.data(name='im_size', shape=[2], dtype='int32')
                 # yolo_head
                 yolo_head = YOLOv3Head(num_classes=80)
                 # head_features
-                head_features, body_features = yolo_head._get_outputs(
-                    body_feats, is_train=trainable)
+                head_features, body_features = yolo_head._get_outputs(body_feats, is_train=trainable)
 
                 place = fluid.CPUPlace()
                 exe = fluid.Executor(place)
@@ -102,35 +122,24 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
                 # var_prefix
                 var_prefix = '@HUB_{}@'.format(self.name)
                 # name of inputs
-                inputs = {
-                    'image': var_prefix + image.name,
-                    'im_size': var_prefix + im_size.name
-                }
+                inputs = {'image': var_prefix + image.name, 'im_size': var_prefix + im_size.name}
                 # name of outputs
                 if get_prediction:
                     bbox_out = yolo_head.get_prediction(head_features, im_size)
                     outputs = {'bbox_out': [var_prefix + bbox_out.name]}
                 else:
                     outputs = {
-                        'head_features':
-                        [var_prefix + var.name for var in head_features],
-                        'body_features':
-                        [var_prefix + var.name for var in body_features]
+                        'head_features': [var_prefix + var.name for var in head_features],
+                        'body_features': [var_prefix + var.name for var in body_features]
                     }
                 # add_vars_prefix
                 add_vars_prefix(context_prog, var_prefix)
                 add_vars_prefix(startup_program, var_prefix)
                 # inputs
-                inputs = {
-                    key: context_prog.global_block().vars[value]
-                    for key, value in inputs.items()
-                }
+                inputs = {key: context_prog.global_block().vars[value] for key, value in inputs.items()}
                 # outputs
                 outputs = {
-                    key: [
-                        context_prog.global_block().vars[varname]
-                        for varname in value
-                    ]
+                    key: [context_prog.global_block().vars[varname] for varname in value]
                     for key, value in outputs.items()
                 }
                 # trainable
@@ -140,14 +149,9 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
                 if pretrained:
 
                     def _if_exist(var):
-                        return os.path.exists(
-                            os.path.join(self.default_pretrained_model_path,
-                                         var.name))
+                        return os.path.exists(os.path.join(self.default_pretrained_model_path, var.name))
 
-                    fluid.io.load_vars(
-                        exe,
-                        self.default_pretrained_model_path,
-                        predicate=_if_exist)
+                    fluid.io.load_vars(exe, self.default_pretrained_model_path, predicate=_if_exist)
                 else:
                     exe.run(startup_program)
 
@@ -160,7 +164,8 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
                          use_gpu=False,
                          output_dir='detection_result',
                          score_thresh=0.5,
-                         visualization=True):
+                         visualization=True,
+                         use_device=None):
         """API of Object Detection.
 
         Args:
@@ -171,6 +176,7 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
             output_dir (str): The path to store output images.
             visualization (bool): Whether to save image or not.
             score_thresh (float): threshold for object detecion.
+            use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
             res (list[dict]): The result of coco2017 detecion. keys include 'data', 'save_path', the corresponding value is:
@@ -183,14 +189,24 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
                     confidence (float): The confidence of detection result.
                 save_path (str, optional): The path to save output images.
         """
-        if use_gpu:
-            try:
-                _places = os.environ["CUDA_VISIBLE_DEVICES"]
-                int(_places[0])
-            except:
-                raise RuntimeError(
-                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
-                )
+        # real predictor to use
+        if use_device is not None:
+            if use_device == "cpu":
+                predictor = self.cpu_predictor
+            elif use_device == "xpu":
+                predictor = self.xpu_predictor
+            elif use_device == "npu":
+                predictor = self.npu_predictor
+            elif use_device == "gpu":
+                predictor = self.gpu_predictor
+            else:
+                raise Exception("Unsupported device: " + use_device)
+        else:
+            # use_device is not set, therefore follow use_gpu
+            if use_gpu:
+                predictor = self.gpu_predictor
+            else:
+                predictor = self.cpu_predictor
 
         paths = paths if paths else list()
         data_reader = partial(reader, paths, images)
@@ -198,32 +214,35 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
         res = []
         for iter_id, feed_data in enumerate(batch_reader()):
             feed_data = np.array(feed_data)
-            image_tensor = PaddleTensor(np.array(list(feed_data[:, 0])))
-            im_size_tensor = PaddleTensor(np.array(list(feed_data[:, 1])))
-            if use_gpu:
-                data_out = self.gpu_predictor.run(
-                    [image_tensor, im_size_tensor])
-            else:
-                data_out = self.cpu_predictor.run(
-                    [image_tensor, im_size_tensor])
 
-            output = postprocess(
-                paths=paths,
-                images=images,
-                data_out=data_out,
-                score_thresh=score_thresh,
-                label_names=self.label_names,
-                output_dir=output_dir,
-                handle_id=iter_id * batch_size,
-                visualization=visualization)
+            input_names = predictor.get_input_names()
+            image_data = np.array(list(feed_data[:, 0]))
+            image_size_data = np.array(list(feed_data[:, 1]))
+
+            image_tensor = predictor.get_input_handle(input_names[0])
+            image_tensor.reshape(image_data.shape)
+            image_tensor.copy_from_cpu(image_data.copy())
+
+            image_size_tensor = predictor.get_input_handle(input_names[1])
+            image_size_tensor.reshape(image_size_data.shape)
+            image_size_tensor.copy_from_cpu(image_size_data.copy())
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+
+            output = postprocess(paths=paths,
+                                 images=images,
+                                 data_out=output_handle,
+                                 score_thresh=score_thresh,
+                                 label_names=self.label_names,
+                                 output_dir=output_dir,
+                                 handle_id=iter_id * batch_size,
+                                 visualization=visualization)
             res.extend(output)
         return res
 
-    def save_inference_model(self,
-                             dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True):
+    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
@@ -233,14 +252,13 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
         program, feeded_var_names, target_vars = fluid.io.load_inference_model(
             dirname=self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+        fluid.io.save_inference_model(dirname=dirname,
+                                      main_program=program,
+                                      executor=exe,
+                                      feeded_var_names=feeded_var_names,
+                                      target_vars=target_vars,
+                                      model_filename=model_filename,
+                                      params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -256,62 +274,52 @@ class YOLOv3MobileNetV1Coco2017(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the {} module.".format(self.name),
-            prog='hub run {}'.format(self.name),
-            usage='%(prog)s',
-            add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
+                                              prog='hub run {}'.format(self.name),
+                                              usage='%(prog)s',
+                                              add_help=True)
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.object_detection(
-            paths=[args.input_path],
-            batch_size=args.batch_size,
-            use_gpu=args.use_gpu,
-            output_dir=args.output_dir,
-            visualization=args.visualization,
-            score_thresh=args.score_thresh)
+        results = self.object_detection(paths=[args.input_path],
+                                        batch_size=args.batch_size,
+                                        use_gpu=args.use_gpu,
+                                        output_dir=args.output_dir,
+                                        visualization=args.visualization,
+                                        score_thresh=args.score_thresh,
+                                        use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu',
-            type=ast.literal_eval,
-            default=False,
-            help="whether use GPU or not")
-        self.arg_config_group.add_argument(
-            '--output_dir',
-            type=str,
-            default='detection_result',
-            help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--visualization',
-            type=ast.literal_eval,
-            default=False,
-            help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not")
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='detection_result',
+                                           help="The directory to save output images.")
+        self.arg_config_group.add_argument('--visualization',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_device',
+                                           choices=["cpu", "gpu", "xpu", "npu"],
+                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
-        self.arg_input_group.add_argument(
-            '--batch_size',
-            type=ast.literal_eval,
-            default=1,
-            help="batch size.")
-        self.arg_input_group.add_argument(
-            '--score_thresh',
-            type=ast.literal_eval,
-            default=0.5,
-            help="threshold for object detecion.")
+        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
+        self.arg_input_group.add_argument('--score_thresh',
+                                          type=ast.literal_eval,
+                                          default=0.5,
+                                          help="threshold for object detecion.")
