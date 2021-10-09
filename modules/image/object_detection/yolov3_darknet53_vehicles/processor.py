@@ -94,8 +94,6 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir, 
         paths (list[str]): The paths of images.
         images (list(numpy.ndarray)): images data, shape of each is [H, W, C]
         data_out (lod_tensor): data output of predictor.
-        batch_size (int): batch size.
-        use_gpu (bool): Whether to use gpu.
         output_dir (str): The path to store output images.
         visualization (bool): Whether to save image or not.
         score_thresh (float): the low limit of bounding box.
@@ -113,23 +111,29 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir, 
                 confidence (float): The confidence of detection result.
             save_path (str): The path to save output images.
     """
-    lod_tensor = data_out[0]
-    lod = lod_tensor.lod[0]
-    results = lod_tensor.as_ndarray()
+    results = data_out.copy_to_cpu()
+    lod = data_out.lod()[0]
 
     check_dir(output_dir)
 
-    assert type(paths) is list, "type(paths) is not list."
-    if handle_id < len(paths):
-        unhandled_paths = paths[handle_id:]
-        unhandled_paths_num = len(unhandled_paths)
-    else:
-        unhandled_paths_num = 0
+    if paths:
+        assert type(paths) is list, "type(paths) is not list."
+        if handle_id < len(paths):
+            unhandled_paths = paths[handle_id:]
+            unhandled_paths_num = len(unhandled_paths)
+        else:
+            unhandled_paths_num = 0
+    if images is not None:
+        if handle_id < len(images):
+            unhandled_paths = None
+            unhandled_paths_num = len(images) - handle_id
+        else:
+            unhandled_paths_num = 0
 
     output = list()
     for index in range(len(lod) - 1):
         output_i = {'data': []}
-        if index < unhandled_paths_num:
+        if unhandled_paths and index < unhandled_paths_num:
             org_img_path = unhandled_paths[index]
             org_img = Image.open(org_img_path)
         else:

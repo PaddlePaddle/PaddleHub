@@ -22,7 +22,8 @@ nonlocal_params = {
 }
 
 
-def space_nonlocal(input, dim_in, dim_out, prefix, dim_inner, max_pool_stride=2):
+def space_nonlocal(input, dim_in, dim_out, prefix, dim_inner,
+                   max_pool_stride=2):
     cur = input
     theta = fluid.layers.conv2d(input = cur, num_filters = dim_inner, \
                                 filter_size = [1, 1], stride = [1, 1], \
@@ -82,7 +83,8 @@ def space_nonlocal(input, dim_in, dim_out, prefix, dim_inner, max_pool_stride=2)
             theta_phi_sc = fluid.layers.scale(theta_phi, scale=dim_inner**-.5)
         else:
             theta_phi_sc = theta_phi
-        p = fluid.layers.softmax(theta_phi_sc, name=prefix + '_affinity' + '_prob')
+        p = fluid.layers.softmax(
+            theta_phi_sc, name=prefix + '_affinity' + '_prob')
     else:
         # not clear about what is doing in xlw's code
         p = None  # not implemented
@@ -96,7 +98,8 @@ def space_nonlocal(input, dim_in, dim_out, prefix, dim_inner, max_pool_stride=2)
     # reshape back
     # e.g. (8, 1024, 784) => (8, 1024, 4, 14, 14)
     t_shape = t.shape
-    t_re = fluid.layers.reshape(t, shape=list(theta_shape), actual_shape=theta_shape_op)
+    t_re = fluid.layers.reshape(
+        t, shape=list(theta_shape), actual_shape=theta_shape_op)
     blob_out = t_re
     blob_out = fluid.layers.conv2d(input = blob_out, num_filters = dim_out, \
                                   filter_size = [1, 1], stride = [1, 1], padding = [0, 0], \

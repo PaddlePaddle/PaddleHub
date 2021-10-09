@@ -1,115 +1,140 @@
-```shell
-$ hub install plato_mini==1.0.0
-```
+# plato-mini
 
-## 概述
+| 模型名称            |       plato-mini       |
+| :------------------ | :--------------------: |
+| 类别                |     文本-文本生成      |
+| 网络                |  Unified Transformer   |
+| 数据集              | 十亿级别的中文对话数据 |
+| 是否支持Fine-tuning |           否           |
+| 模型大小            |         5.28K          |
+| 最新更新日期        |       2021-06-30       |
+| 数据指标            |           -            |
 
-近年来，人机对话系统受到了学术界和产业界的广泛关注并取得了不错的发展。开放域对话系统旨在建立一个开放域的多轮对话系统，使得机器可以流畅自然地与人进行语言交互，既可以进行日常问候类的闲聊，又可以完成特定功能，以使得开放域对话系统具有实际应用价值。具体的说，开放域对话可以继续拆分为支持不同功能的对话形式，例如对话式推荐，知识对话技术等，如何解决并有效融合以上多个技能面临诸多挑战。
+## 一、模型基本信息
 
-[UnifiedTransformer](https://arxiv.org/abs/2006.16779)以[Transformer](https://arxiv.org/abs/1706.03762) 编码器为网络基本组件，采用灵活的注意力机制，十分适合文本生成任务，并在模型输入中加入了标识不同对话技能的special token，使得模型能同时支持闲聊对话、推荐对话和知识对话。
-
-plato_mini包含6层的transformer结构，头数为12，隐藏层参数为768，参数量为89M。该模型在十亿级别的中文对话数据上进行预训练，通过PaddleHub加载后可直接用于对话任务。
-
-## API
-
-```python
-def predict(data: Union[List[List[str]], str],
-            max_seq_len: int = 512,
-            batch_size: int = 1,
-            use_gpu: bool = False,
-            **kwargs):
-```
-预测API，输入对话上下文，输出机器回复。
-
-**参数**
-- `data`(Union[List[List[str]], str]): 在非交互模式中，数据类型为List[List[str]]，每个样本是一个List[str]，表示为对话内容
-- `max_seq_len`(int): 每个样本的最大文本长度
-- `batch_size`(int): 进行预测的batch_size
-- `use_gpu`(bool): 是否使用gpu执行预测
-- `kwargs`: 预测时传给模型的额外参数，以keyword方式传递。其余的参数详情请查看[UnifiedTransformer](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/examples/dialogue/unified_transformer)。
-
-**返回**
-* `results`(List[str]): 每个元素为相应对话中模型的新回复
-
-```python
-def interactive_mode(max_turn=3)
-```
-进入交互模式。交互模式中，predict接口的data将支持字符串类型。
-
-**参数**
-- `max_turn`(int): 模型能记忆的对话轮次，当`max_turn`为1时，模型只能记住当前对话，无法获知之前的对话内容。
+- ### 模型介绍
+  - [UnifiedTransformer](https://arxiv.org/abs/2006.16779)以[Transformer](https://arxiv.org/abs/1706.03762) 编码器为网络基本组件，采用灵活的注意力机制，十分适合文本生成任务，并在模型输入中加入了标识不同对话技能的special token，使得模型能同时支持闲聊对话、推荐对话和知识对话。
+该模型在十亿级别的中文对话数据上进行预训练，通过PaddleHub加载后可直接用于对话任务，仅支持中文对话。
 
 
-**代码示例**
+## 二、安装
 
-```python
-# 非交互模式
-import paddlehub as hub
+- ### 1、环境依赖
 
-model = hub.Module(name='plato_mini')
-data = [["你是谁？"], ["你好啊。", "吃饭了吗？",]]
-result = model.predict(data)
-```
+  - paddlepaddle >= 2.0.0
+  - paddlehub >= 2.1.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+  
+- ### 2、安装
 
-```python
-# 交互模式
-import paddlehub as hub
+  - ```shell
+    $ hub install plato-mini
+    ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
-model = hub.Module(name='plato_mini')
-with model.interactive_mode(max_turn=3):
-    while True:
-        human_utterance = input("[Human]: ").strip()
-        robot_utterance = model.predict(human_utterance)[0]
-        print("[Bot]: %s"%robot_utterance)
-```
+## 三、模型API预测
 
-## 服务部署
+- plato-mini不支持一行预测，仅支持python代码预测
 
-PaddleHub Serving可以部署在线服务。
+- ### 1、预测代码示例
 
-### Step1: 启动PaddleHub Serving
+  - ```python
+    # 非交互模式
+    import paddlehub as hub
+    
+    model = hub.Module(name='plato-mini')
+    data = [["你是谁？"], ["你好啊。", "吃饭了吗？",]]
+    result = model.predict(data)
+    print(result)
+    
+    # ['我是一个小角色,我是在玩游戏', '吃过了呢,你吃了没?']
+    # 每次的运行结果可能有所不同
+    ```
+    
+  - ```python
+    # 交互模式
+    # 使用命令行与机器人对话
+    import paddlehub as hub
+    import readline
+    
+    model = hub.Module(name='plato-mini')
+    with model.interactive_mode(max_turn=3):
+        while True:
+            human_utterance = input("[Human]: ").strip()
+            robot_utterance = model.predict(human_utterance)[0]
+            print("[Bot]: %s"%robot_utterance)
+    ```
 
-运行启动命令：
+- ### 2、API
 
-```shell
-$ hub serving start -m plato_mini
-```
+  - ```python
+    def predict(data, max_seq_len=512, batch_size=1, use_gpu=False, **kwargs):
+    ```
 
-这样就完成了一个对话机器人服务化API的部署，默认端口号为8866。
+    - 预测API，输入对话上下文，输出机器回复。
+    - **参数**
+      - data(Union[List[List[str](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration)], str]): 在非交互模式中，数据类型为List[List[str](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration)]，每个样本是一个List[str](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration)，表示为对话内容
+      - max_seq_len(int): 每个样本的最大文本长度
+      - batch_size(int): 进行预测的batch_size
+      - use_gpu(bool): 是否使用gpu执行预测
+      - kwargs: 预测时传给模型的额外参数，以keyword方式传递。其余的参数详情请查看[UnifiedTransformer](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/examples/dialogue/unified_transformer)。
+    - **返回**
+      - results(List[str](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration)): 每个元素为相应对话中模型的新回复
+    
+  - ```python
+    def interactive_mode(max_turn=3):
+    ```
+  
+    - 配置交互模式并进入。
+    - **参数**
+      - max_turn(int): 模型能记忆的对话轮次，当max_turn为1时，模型只能记住当前对话，无法获知之前的对话内容。
 
-**NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
 
-### Step2: 发送预测请求
+## 四、服务部署
 
-配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+- PaddleHub Serving可以部署一个在线对话机器人服务。
 
-```python
-import requests
-import json
+- ### 第一步：启动PaddleHub Serving
 
-texts = [["今天是个好日子"], ["天气预报说今天要下雨"]]
-data = {"data": texts}
-# 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
-url = "http://127.0.0.1:8866/predict/plato_mini"
-# 指定post请求的headers为application/json方式
-headers = {"Content-Type": "application/json"}
+  - 运行启动命令：
+  - ```shell
+    $ hub serving start -m plato-mini -p 8866
+    ```
 
-r = requests.post(url=url, headers=headers, data=json.dumps(data))
-print(r.json())
-```
+  - 这样就完成了一个对话机器人服务化API的部署，默认端口号为8866。
+  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA_VISIBLE_DEVICES环境变量，否则不用设置。
 
-## 查看代码
 
-https://github.com/PaddlePaddle/Knover
+- ### 第二步：发送预测请求
 
-## 依赖
+  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-paddlepaddle >= 2.0.0
+  - ```python
+    import requests
+    import json
+    
+    texts = [["今天是个好日子"], ["天气预报说今天要下雨"]]
+    data = {"data": texts}
+    # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
+    url = "http://127.0.0.1:8866/predict/plato_mini"
+    # 指定post请求的headers为application/json方式
+    headers = {"Content-Type": "application/json"}
+    
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+    print(r.json())
+    
+    # {'msg': '', 'results': ['是个好日子啊!', '下雨就不出门了,在家宅着吧'], 'status': '000'}
+    # 每次的运行结果可能有所不同
+    ```
+    
+  - 关于PaddleHub Serving更多信息参考[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
 
-paddlehub >= 2.1.0
-
-## 更新历史
+## 五、更新历史
 
 * 1.0.0
 
   初始发布
+  
+  - ```shell
+    $ hub install plato-mini==1.0.0
+    ```
