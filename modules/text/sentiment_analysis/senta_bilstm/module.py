@@ -17,13 +17,12 @@ from senta_bilstm.net import bilstm_net
 from senta_bilstm.processor import load_vocab, preprocess, postprocess
 
 
-@moduleinfo(
-    name="senta_bilstm",
-    version="1.2.0",
-    summary="Baidu's open-source Sentiment Classification System.",
-    author="baidu-nlp",
-    author_email="",
-    type="nlp/sentiment_analysis")
+@moduleinfo(name="senta_bilstm",
+            version="1.2.0",
+            summary="Baidu's open-source Sentiment Classification System.",
+            author="baidu-nlp",
+            author_email="",
+            type="nlp/sentiment_analysis")
 class SentaBiLSTM(hub.NLPPredictionModule):
     def _initialize(self):
         """
@@ -75,16 +74,16 @@ class SentaBiLSTM(hub.NLPPredictionModule):
             seq_len_used = fluid.layers.squeeze(seq_len, axes=[1])
 
             # Add embedding layer.
-            w_param_attrs = fluid.ParamAttr(
-                name="embedding_0.w_0", initializer=fluid.initializer.TruncatedNormal(scale=0.02), trainable=trainable)
+            w_param_attrs = fluid.ParamAttr(name="embedding_0.w_0",
+                                            initializer=fluid.initializer.TruncatedNormal(scale=0.02),
+                                            trainable=trainable)
             dict_dim = 1256607
-            emb_1 = fluid.layers.embedding(
-                input=text_1,
-                size=[dict_dim, 128],
-                is_sparse=True,
-                padding_idx=dict_dim - 1,
-                dtype='float32',
-                param_attr=w_param_attrs)
+            emb_1 = fluid.layers.embedding(input=text_1,
+                                           size=[dict_dim, 128],
+                                           is_sparse=True,
+                                           padding_idx=dict_dim - 1,
+                                           dtype='float32',
+                                           param_attr=w_param_attrs)
             emb_1_name = emb_1.name
             data_list = [text_1]
             emb_name_list = [emb_1_name]
@@ -96,26 +95,24 @@ class SentaBiLSTM(hub.NLPPredictionModule):
 
             if num_slots > 1:
                 text_2 = fluid.data(name='text_2', shape=[-1, max_seq_len], dtype='int64', lod_level=0)
-                emb_2 = fluid.embedding(
-                    input=text_2,
-                    size=[dict_dim, 128],
-                    is_sparse=True,
-                    padding_idx=dict_dim - 1,
-                    dtype='float32',
-                    param_attr=w_param_attrs)
+                emb_2 = fluid.embedding(input=text_2,
+                                        size=[dict_dim, 128],
+                                        is_sparse=True,
+                                        padding_idx=dict_dim - 1,
+                                        dtype='float32',
+                                        param_attr=w_param_attrs)
                 emb_2_name = emb_2.name
                 data_list.append(text_2)
                 emb_name_list.append(emb_2_name)
 
             if num_slots > 2:
                 text_3 = fluid.data(name='text_3', shape=[-1, max_seq_len], dtype='int64', lod_level=0)
-                emb_3 = fluid.embedding(
-                    input=text_3,
-                    size=[dict_dim, 128],
-                    is_sparse=True,
-                    padding_idx=dict_dim - 1,
-                    dtype='float32',
-                    param_attr=w_param_attrs)
+                emb_3 = fluid.embedding(input=text_3,
+                                        size=[dict_dim, 128],
+                                        is_sparse=True,
+                                        padding_idx=dict_dim - 1,
+                                        dtype='float32',
+                                        param_attr=w_param_attrs)
                 emb_3_name = emb_3.name
                 data_list.append(text_3)
                 emb_name_list.append(emb_3_name)
@@ -153,7 +150,7 @@ class SentaBiLSTM(hub.NLPPredictionModule):
             return inputs, outputs, main_program
 
     @serving
-    def sentiment_classify(self, texts=[], data={}, use_gpu=False, batch_size=1):
+    def sentiment_classify(self, texts=[], data={}, use_gpu=False, batch_size=1, use_device=None):
         """
         Get the sentiment prediction results results with the texts as input
 
@@ -162,18 +159,29 @@ class SentaBiLSTM(hub.NLPPredictionModule):
              data(dict): key must be 'text', value is the texts to be predicted, if data not texts
              use_gpu(bool): whether use gpu to predict or not
              batch_size(int): the program deals once with one batch
+             use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
              results(list): the word segmentation results
         """
-        if use_gpu:
-            try:
-                _places = os.environ["CUDA_VISIBLE_DEVICES"]
-                int(_places[0])
-            except:
-                raise RuntimeError(
-                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
-                )
+        # real predictor to use
+        if use_device is not None:
+            if use_device == "cpu":
+                predictor = self.cpu_predictor
+            elif use_device == "xpu":
+                predictor = self.xpu_predictor
+            elif use_device == "npu":
+                predictor = self.npu_predictor
+            elif use_device == "gpu":
+                predictor = self.gpu_predictor
+            else:
+                raise Exception("Unsupported device: " + use_device)
+        else:
+            # use_device is not set, therefore follow use_gpu
+            if use_gpu:
+                predictor = self.gpu_predictor
+            else:
+                predictor = self.cpu_predictor
 
         if texts != [] and isinstance(texts, list) and data == {}:
             predicted_data = texts
@@ -193,14 +201,10 @@ class SentaBiLSTM(hub.NLPPredictionModule):
                 batch_data = predicted_data[start_idx:]
 
             start_idx = start_idx + batch_size
-            processed_results = preprocess(self.word_seg_module, batch_data, self.word_dict, use_gpu, batch_size)
-            tensor_words = self.texts2tensor(processed_results)
-
-            if use_gpu:
-                batch_out = self.gpu_predictor.run([tensor_words])
-            else:
-                batch_out = self.cpu_predictor.run([tensor_words])
-            batch_result = postprocess(batch_out[0], processed_results)
+            processed_results = preprocess(self.word_seg_module, batch_data, self.word_dict, use_gpu, batch_size,
+                                           use_device)
+            predictor_output = self._internal_predict(predictor, processed_results)
+            batch_result = postprocess(predictor_output, processed_results)
             results += batch_result
         return results
 
