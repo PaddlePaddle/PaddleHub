@@ -1,12 +1,12 @@
-# resnet50_vd_dishes
+# mobilenet_v3_large_imagenet_ssld
 
-|模型名称|resnet50_vd_dishes|
+|模型名称|mobilenet_v3_large_imagenet_ssld|
 | :--- | :---: |
 |类别|图像-图像分类|
-|网络|ResNet50_vd|
-|数据集|百度自建菜品数据集|
-|是否支持Fine-tuning|否|
-|模型大小|158MB|
+|网络|Mobilenet_v3_large|
+|数据集|ImageNet-2012|
+|是否支持Fine-tuning|是|
+|模型大小|23MB|
 |最新更新日期|-|
 |数据指标|-|
 
@@ -19,13 +19,8 @@
 
 - ### 模型介绍
 
-  - ResNet-vd是ResNet原始结构的变种，可用于图像分类和特征提取。该 PaddleHub Module 采用百度自建菜品数据集训练得到，支持8416种菜品的分类识别。
+  - MobileNetV3是Google在2019年发布的新模型，作者通过结合NAS与NetAdapt进行搜索得到该网络结构，提供了Large和Small两个版本，分别适用于对资源不同要求的情况。对比于MobileNetV2，新的模型在速度和精度方面均有提升。该PaddleHubModule的模型结构为MobileNetV3 Large，基于ImageNet-2012数据集并采用PaddleClas提供的SSLD蒸馏方法训练得到，接受输入图片大小为224 x 224 x 3，支持finetune，也可以直接通过命令行或者Python接口进行预测。
 
-<p align="center">
-<img src="http://bj.bcebos.com/ibox-thumbnail98/77fa9b7003e4665867855b2b65216519?authorization=bce-auth-v1%2Ffbe74140929444858491fbf2b6bc0935%2F2020-04-08T11%3A05%3A10Z%2F1800%2F%2F1df0ecb4a52adefeae240c9e2189e8032560333e399b3187ef1a76e4ffa5f19f" width = "800"  hspace='10'/> <br />
-</p>
-
-  - 更多详情参考：[Bag of Tricks for Image Classification with Convolutional Neural Networks](https://arxiv.org/pdf/1812.01187.pdf)
 
 ## 二、安装
 
@@ -39,7 +34,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install resnet50_vd_dishes
+    $ hub install mobilenet_v3_large_imagenet_ssld
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -49,9 +44,9 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run resnet50_vd_dishes --input_path "/PATH/TO/IMAGE"
+    $ hub run mobilenet_v3_large_imagenet_ssld --input_path "/PATH/TO/IMAGE"
     ```
-  - 通过命令行方式实现菜品分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+  - 通过命令行方式实现分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、代码示例
 
@@ -59,7 +54,7 @@
     import paddlehub as hub
     import cv2
 
-    classifier = hub.Module(name="resnet50_vd_dishes")
+    classifier = hub.Module(name="mobilenet_v3_large_imagenet_ssld")
     result = classifier.classification(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
     # result = classifier.classification(paths=['/PATH/TO/IMAGE'])
@@ -118,16 +113,16 @@
 
 ## 四、服务部署
 
-- PaddleHub Serving可以部署一个菜品分类的在线服务。
+- PaddleHub Serving可以部署一个动物识别的在线服务。
 
 - ### 第一步：启动PaddleHub Serving
 
   - 运行启动命令：
   - ```shell
-    $ hub serving start -m resnet50_vd_dishes
+    $ hub serving start -m mobilenet_v3_large_imagenet_ssld
     ```
 
-  - 这样就完成了一个菜品分类的在线服务的部署，默认端口号为8866。
+  - 这样就完成了一个动物识别的在线服务的部署，默认端口号为8866。
 
   - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 
@@ -148,7 +143,7 @@
     # 发送HTTP请求
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/resnet50_vd_dishes"
+    url = "http://127.0.0.1:8866/predict/mobilenet_v3_large_imagenet_ssld"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果
@@ -163,5 +158,5 @@
   初始发布
 
   - ```shell
-    $ hub install resnet50_vd_dishes==1.0.0
+    $ hub install mobilenet_v3_large_imagenet_ssld==1.0.0
     ```

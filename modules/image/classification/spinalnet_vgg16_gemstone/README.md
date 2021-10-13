@@ -1,12 +1,12 @@
-# xception41_imagenet
+# spinalnet_vgg16_gemstone
 
-|模型名称|xception41_imagenet|
+|模型名称|spinalnet_vgg16_gemstone|
 | :--- | :---: |
 |类别|图像-图像分类|
-|网络|Xception|
-|数据集|ImageNet-2012|
+|网络|vgg16|
+|数据集|gemstone|
 |是否支持Fine-tuning|是|
-|模型大小|MB|
+|模型大小|1.5GB|
 |最新更新日期|-|
 |数据指标|-|
 
@@ -19,21 +19,20 @@
 
 - ### 模型介绍
 
-  - Xception 全称为 Extreme Inception，是 Google 于 2016年提出的 Inception V3 的改进模型。Xception 采用了深度可分离卷积(depthwise separable convolution) 来替换原来 Inception V3 中的卷积操作，整体的网络结构是带有残差连接的深度可分离卷积层的线性堆叠。该PaddleHub Module结构为Xception41，基于ImageNet-2012数据集训练，接受输入图片大小为224 x 224 x 3，支持直接通过命令行或者 Python 接口进行预测。
-
+  - 使用PaddleHub的SpinalNet预训练模型进行宝石识别或finetune并完成宝石的预测任务。
 ## 二、安装
 
 - ### 1、环境依赖  
 
-  - paddlepaddle >= 1.4.0  
+  - paddlepaddle >= 2.0.0  
 
-  - paddlehub >= 1.0.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
+  - paddlehub >= 2.0.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
 
 - ### 2、安装
 
   - ```shell
-    $ hub install xception41_imagenet
+    $ hub install spinalnet_vgg16_gemstone
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -43,7 +42,7 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run xception41_imagenet --input_path "/PATH/TO/IMAGE"
+    $ hub run spinalnet_vgg16_gemstone --input_path "/PATH/TO/IMAGE"
     ```
   - 通过命令行方式实现图像分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
@@ -53,20 +52,19 @@
     import paddlehub as hub
     import cv2
 
-    classifier = hub.Module(name="xception41_imagenet")
-    test_img_path = "/PATH/TO/IMAGE"
-    input_dict = {"image": [test_img_path]}
-    result = classifier.classification(data=input_dict)
+    classifier = hub.Module(name="spinalnet_vgg16_gemstone")
+    result = classifier.predict(['/PATH/TO/IMAGE']）
+    print(result)
     ```
 
 - ### 3、API
 
   - ```python
-    def classification(data)
+    def predict(images)
     ```
 
     - **参数**
-      - data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
+      - images: list类型，待预测的图像。
 
     - **返回**
       - result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
@@ -80,7 +78,6 @@
 * 1.0.0
 
   初始发布
-
   - ```shell
-    $ hub install xception41_imagenet==1.0.0
+    $ hub install spinalnet_vgg16_gemstone==1.0.0
     ```

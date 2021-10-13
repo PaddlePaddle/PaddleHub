@@ -1,12 +1,12 @@
-# vgg19_imagenet
+# inception_v4_imagenet
 
-|模型名称|vgg19_imagenet|
+|模型名称|inception_v4_imagenet|
 | :--- | :---: |
 |类别|图像-图像分类|
-|网络|vgg19_imagenet|
+|网络|Inception_V4|
 |数据集|ImageNet-2012|
 |是否支持Fine-tuning|是|
-|模型大小|549MB|
+|模型大小|167MB|
 |最新更新日期|-|
 |数据指标|-|
 
@@ -19,7 +19,7 @@
 
 - ### 模型介绍
 
-  - VGG是牛津大学计算机视觉组和DeepMind在2014年提出的一种图像分类模型。该系列模型探索了卷积神经网络的深度与其性能之间的关系，通过实验证明了增加网络的深度能够在一定程度上影响网络最终的性能，到目前为止，VGG仍然被许多其他图像任务用作特征提取的BackBone网络。该PaddleHub Module结构为VGG19，基于ImageNet-2012数据集训练，接受输入图片大小为224 x 224 x 3，支持直接通过命令行或者Python接口进行预测。
+  - Inception 结构最初由 GoogLeNet 引入，因此 GoogLeNet 也被称为 Inception-v1，在 Inception-v1 的基础上引入了 Batch Normalization，得到了 Inception-v2 ；在 Inception-v2 的基础上引入了分解，得到了Inception-v3。Inception 结构有着良好的性能，且计算量低，而残差连接可加快收敛速度，可用于训练更深的网络，于是Inception V4 的作者尝试将 Inception 结构和残差连接结合，同时也设计了不用残差连接的Inception-v4。通过将三个残差和一个Inception-v4进行组合，在 ImageNet 数据集上 top-5 错误率上仅有 3.08%。
 
 ## 二、安装
 
@@ -33,7 +33,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install vgg19_imagenet
+    $ hub install inception_v4_imagenet
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -43,7 +43,7 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run vgg19_imagenet --input_path "/PATH/TO/IMAGE"
+    $ hub run inception_v4_imagenet --input_path "/PATH/TO/IMAGE"
     ```
   - 通过命令行方式实现图像分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
@@ -53,7 +53,7 @@
     import paddlehub as hub
     import cv2
 
-    classifier = hub.Module(name="vgg19_imagenet")
+    classifier = hub.Module(name="inception_v4_imagenet")
     test_img_path = "/PATH/TO/IMAGE"
     input_dict = {"image": [test_img_path]}
     result = classifier.classification(data=input_dict)
@@ -82,5 +82,5 @@
   初始发布
 
   - ```shell
-    $ hub install vgg19_imagenet==1.0.0
+    $ hub install inception_v4_imagenet==1.0.0
     ```

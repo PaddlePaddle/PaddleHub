@@ -1,84 +1,92 @@
 # food_classification
 
-类别 图像 - 图像分类
+|模型名称|food_classification|
+| :--- | :---: |
+|类别|图像-图像分类|
+|网络|ResNet50_vd_ssld|
+|数据集|美食数据集|
+|是否支持Fine-tuning|否|
+|模型大小|91MB|
+|最新更新日期|-|
+|数据指标|-|
 
-网络 ResNet50_vd_ssld
+
+## 一、模型基本信息
+
+- ### 应用效果展示
+  - 样例结果示例：
 
 
-> 模型概述
+- ### 模型介绍
 
-美食分类（food_classification），该模型可识别苹果派，小排骨，烤面包，牛肉馅饼，牛肉鞑靼。该PaddleHub Module支持API预测及命令行预测。
+  - 美食分类（food_classification），该模型可识别苹果派，小排骨，烤面包，牛肉馅饼，牛肉鞑靼。该PaddleHub Module支持API预测及命令行预测。
 
-> 选择模型版本进行安装
+## 二、安装
 
-```shell
-$ hub install food_classification==1.0.0
-```
-> Module API说明
+- ### 1、环境依赖  
 
-```python
-def predict(self,
-                images=None,
-                paths=None,
-                batch_size=1,
-                use_gpu=False,
-                **kwargs):
-```
-美食分类预测接口，输入一张图像，输出该图像上食物的类别
+  - paddlepaddle >= 2.0.0  
 
-参数
+  - paddlehub >= 2.0.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
-* images (list[numpy.ndarray]): 图片数据，ndarray.shape 为 [H, W, C]，BGR格式；
-* paths (list[str]): 图片的路径；
-* batch_size (int): batch 的大小；
-* use_gpu (bool): 是否使用 GPU；
+  - paddlex >= 1.3.7
 
-返回
 
-* res (list[dict]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
-    * category_id (int): 类别的id；
-    * category（str）: 类别;
-    * score（float）: 准确率;
+- ### 2、安装
 
-## 代码示例
+  - ```shell
+    $ hub install food_classification
+    ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
-### API调用
+## 三、模型API预测
 
-```python
-import cv2
-import paddlehub as hub
+- ### 1、命令行预测
 
-module = hub.Module(name="food_classification")
+  - ```shell
+    $ hub run food_classification --input_path /PATH/TO/IMAGE
+    ```
+  - 通过命令行方式实现图像分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-images = [cv2.imread('PATH/TO/IMAGE')]
+- ### 2、代码示例
 
-# execute predict and print the result
-results = module.predict(images=images)
-for result in results:
-    print(result)
-```
+  - ```python
+    import paddlehub as hub
+    import cv2
 
-### 命令行调用
-```shell
-$ hub run food_classification --input_path /PATH/TO/IMAGE --use_gpu True
-```
+    classifier = hub.Module(name="food_classification")
+    images = [cv2.imread('PATH/TO/IMAGE')]
+    results = module.predict(images=images)
+    for result in results:
+        print(result)
+    ```
 
-## 效果展示
+- ### 3、API
 
-### 原图
-<img src="/docs/imgs/Readme_Related/Image_Classification_apple_pie.png">
+  - ```python
+    def predict(images)
+    ```
 
-### 输出结果
-```python
-[{'category_id': 0, 'category': 'apple_pie', 'score': 0.9985085}]
-```
+    - **参数**
+      - images：list类型，待检测的图像。
 
-## 贡献者
-彭兆帅、郑博培
+    - **返回**
+      - result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型:
+        - category_id (int): 类别的id；
+        - category（str）: 类别;
+        - score（float）: 准确率
 
-## 依赖
-paddlepaddle >= 2.0.0
 
-paddlehub >= 2.0.0
 
-paddlex >= 1.3.7
+
+
+## 四、更新历史
+
+* 1.0.0
+
+  初始发布
+
+  - ```shell
+    $ hub install food_classification==1.0.0
+    ```

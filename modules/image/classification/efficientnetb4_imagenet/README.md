@@ -1,12 +1,12 @@
-# resnet50_vd_dishes
+# efficientnetb4_imagenet
 
-|模型名称|resnet50_vd_dishes|
+|模型名称|efficientnetb4_imagenet|
 | :--- | :---: |
 |类别|图像-图像分类|
-|网络|ResNet50_vd|
-|数据集|百度自建菜品数据集|
-|是否支持Fine-tuning|否|
-|模型大小|158MB|
+|网络|EfficientNet|
+|数据集|ImageNet-2012|
+|是否支持Fine-tuning|是|
+|模型大小|77MB|
 |最新更新日期|-|
 |数据指标|-|
 
@@ -19,13 +19,8 @@
 
 - ### 模型介绍
 
-  - ResNet-vd是ResNet原始结构的变种，可用于图像分类和特征提取。该 PaddleHub Module 采用百度自建菜品数据集训练得到，支持8416种菜品的分类识别。
+  - EfficientNet 是谷歌的开源新模型，论文在 ICML 2019 发表。该模型从如何权衡网络的深度、宽度以及分辨率出发提出了复合扩展方法，使用了一个复合系数通过一种规范化的方式统一对网络的深度、宽度以及分辨率进行扩展。EfficientNet 的基线网络是一个轻量级网络，它的主干网络由 MBConv 构成，同时采取了 squeeze-and-excitation 操作对网络结构进行优化。EfficientNet 系列模型先在小的基线网络使用网格搜索，然后直接使用不同的复合系数进行扩展，从而有效地减少了模型参数，提高了图像识别效率。该 PaddleHub Module结构为 EfficientNetB4，基于 ImageNet-2012 数据集训练，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者 Python 接口进行预测。
 
-<p align="center">
-<img src="http://bj.bcebos.com/ibox-thumbnail98/77fa9b7003e4665867855b2b65216519?authorization=bce-auth-v1%2Ffbe74140929444858491fbf2b6bc0935%2F2020-04-08T11%3A05%3A10Z%2F1800%2F%2F1df0ecb4a52adefeae240c9e2189e8032560333e399b3187ef1a76e4ffa5f19f" width = "800"  hspace='10'/> <br />
-</p>
-
-  - 更多详情参考：[Bag of Tricks for Image Classification with Convolutional Neural Networks](https://arxiv.org/pdf/1812.01187.pdf)
 
 ## 二、安装
 
@@ -39,7 +34,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install resnet50_vd_dishes
+    $ hub install efficientnetb4_imagenet
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -49,9 +44,9 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run resnet50_vd_dishes --input_path "/PATH/TO/IMAGE"
+    $ hub run efficientnetb4_imagenet --input_path "/PATH/TO/IMAGE"
     ```
-  - 通过命令行方式实现菜品分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+  - 通过命令行方式实现分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、代码示例
 
@@ -59,7 +54,7 @@
     import paddlehub as hub
     import cv2
 
-    classifier = hub.Module(name="resnet50_vd_dishes")
+    classifier = hub.Module(name="efficientnetb4_imagenet")
     result = classifier.classification(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
     # result = classifier.classification(paths=['/PATH/TO/IMAGE'])
@@ -118,16 +113,16 @@
 
 ## 四、服务部署
 
-- PaddleHub Serving可以部署一个菜品分类的在线服务。
+- PaddleHub Serving可以部署一个图像识别的在线服务。
 
 - ### 第一步：启动PaddleHub Serving
 
   - 运行启动命令：
   - ```shell
-    $ hub serving start -m resnet50_vd_dishes
+    $ hub serving start -m efficientnetb4_imagenet
     ```
 
-  - 这样就完成了一个菜品分类的在线服务的部署，默认端口号为8866。
+  - 这样就完成了一个图像识别的在线服务的部署，默认端口号为8866。
 
   - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 
@@ -148,7 +143,7 @@
     # 发送HTTP请求
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/resnet50_vd_dishes"
+    url = "http://127.0.0.1:8866/predict/efficientnetb4_imagenet"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果
@@ -162,6 +157,9 @@
 
   初始发布
 
+* 1.1.0
+
+  提升预测性能以及易用性
   - ```shell
-    $ hub install resnet50_vd_dishes==1.0.0
+    $ hub install efficientnetb4_imagenet==1.1.0
     ```

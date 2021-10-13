@@ -6,7 +6,7 @@
 |网络|VGG|
 |数据集|ImageNet-2012|
 |是否支持Fine-tuning|是|
-|模型大小|MB|
+|模型大小|528MB|
 |最新更新日期|-|
 |数据指标|-|
 
@@ -45,7 +45,7 @@
   - ```shell
     $ hub run vgg16_imagenet --input_path "/PATH/TO/IMAGE"
     ```
-  - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+  - 通过命令行方式实现图像分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、代码示例
 
