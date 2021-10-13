@@ -113,7 +113,7 @@
 
 ## 四、服务部署
 
-- PaddleHub Serving可以部署一个动物识别的在线服务。
+- PaddleHub Serving可以部署一个图像识别的在线服务。
 
 - ### 第一步：启动PaddleHub Serving
 
@@ -122,7 +122,7 @@
     $ hub serving start -m mobilenet_v3_large_imagenet_ssld
     ```
 
-  - 这样就完成了一个动物识别的在线服务的部署，默认端口号为8866。
+  - 这样就完成了一个图像识别的在线服务的部署，默认端口号为8866。
 
   - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 

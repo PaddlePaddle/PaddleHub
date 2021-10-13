@@ -1,64 +1,92 @@
-SnakeIdentification
-类别 图像 - 图像分类
-网络 ResNet50_vd_ssld
-数据集 蛇种数据集
+# SnakeIdentification
 
-# 模型概述
-蛇种识别（SnakeIdentification），该模型可准确识别蛇的种类，并精准判断蛇的毒性。该PaddleHub Module支持API预测及命令行预测。
+|模型名称|SnakeIdentification|
+| :--- | :---: |
+|类别|图像-图像分类|
+|网络|ResNet50_vd_ssld|
+|数据集|蛇种数据集|
+|是否支持Fine-tuning|否|
+|模型大小|84MB|
+|最新更新日期|-|
+|数据指标|-|
 
-# 选择模型版本进行安装
-$ hub install SnakeIdentification==1.0.0
 
-# 在线体验
-[AI Studio快速体验](https://aistudio.baidu.com/aistudio/projectdetail/1646951)
+## 一、模型基本信息
 
-# 命令行预测示例
-$ hub run SnakeIdentification --image 1.png --use_gpu True
+- ### 应用效果展示
+  - 样例结果示例：
 
-# Module API说明
-## def predict(data)
-蛇种识别预测接口，输入一张图像，输出该图像上蛇的类别
-### 参数
-- data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
 
-### 返回
-- result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
+- ### 模型介绍
 
-# 代码示例
+  - 蛇种识别（SnakeIdentification），该模型可准确识别蛇的种类，并精准判断蛇的毒性。该PaddleHub Module支持API预测及命令行预测。
 
-## API调用
-~~~
-import cv2
-import paddlehub as hub
+## 二、安装
 
-module = hub.Module(name="SnakeIdentification")
+- ### 1、环境依赖  
 
-images = [cv2.imread('snake_data/class_1/2421.jpg')]
+  - paddlepaddle >= 2.0.0  
 
-# execute predict and print the result
-results = module.predict(images=images)
-for result in results:
-    print(result)
-~~~
+  - paddlehub >= 2.0.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
-## 命令行调用
-~~~
-$ hub run SnakeIdentification --image 1.png --use_gpu True
-~~~
+  - paddlex >= 1.3.7
 
-# 效果展示
 
-## 原图
-<img src="/docs/imgs/Readme_Related/Image_Classification_Snake.png">
+- ### 2、安装
 
-## 输出结果
-~~~
-[{'category_id': 0, 'category': '水蛇', 'score': 0.9999205}]
-~~~
+  - ```shell
+    $ hub install SnakeIdentification
+    ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
-# 贡献者
-郑博培、彭兆帅
+- ### 3、在线体验
+  [AI Studio 快速体验](https://aistudio.baidu.com/aistudio/projectdetail/1646951)
 
-# 依赖
-paddlepaddle >= 2.0.0<br>
-paddlehub >= 2.0.0
+## 三、模型API预测
+
+- ### 1、命令行预测
+
+  - ```shell
+    $ hub run SnakeIdentification --input_path /PATH/TO/IMAGE
+    ```
+  - 通过命令行方式实现图像分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+
+- ### 2、代码示例
+
+  - ```python
+    import paddlehub as hub
+    import cv2
+
+    classifier = hub.Module(name="SnakeIdentification")
+    images = [cv2.imread('PATH/TO/IMAGE')]
+    results = module.predict(images=images)
+    for result in results:
+        print(result)
+    ```
+
+- ### 3、API
+
+  - ```python
+    def predict(images)
+    ```
+
+    - **参数**
+      - images：list类型，待检测的图像。
+
+    - **返回**
+      - result：list类型，每个元素为对应输入图片的预测结果。
+
+
+
+
+
+## 四、更新历史
+
+* 1.0.0
+
+  初始发布
+
+  - ```shell
+    $ hub install SnakeIdentification==1.0.0
+    ```

@@ -1,12 +1,12 @@
-# mobilenet_v2_animals
+# mobilenet_v3_small_imagenet_ssld
 
-|模型名称|mobilenet_v2_animals|
+|模型名称|mobilenet_v3_small_imagenet_ssld|
 | :--- | :---: |
 |类别|图像-图像分类|
-|网络|MobileNet_v2|
-|数据集|百度自建动物数据集|
-|是否支持Fine-tuning|否|
-|模型大小|50MB|
+|网络|Mobilenet_v3_Small|
+|数据集|ImageNet-2012|
+|是否支持Fine-tuning|是|
+|模型大小|13MB|
 |最新更新日期|-|
 |数据指标|-|
 
@@ -19,8 +19,7 @@
 
 - ### 模型介绍
 
-  - MobileNet V2 是一个轻量化的卷积神经网络，它在 MobileNet 的基础上，做了 Inverted Residuals 和 Linear bottlenecks 这两大改进。该 PaddleHub Module 是在百度自建动物数据集上训练得到的，可用于图像分类和特征提取，当前已支持7978种动物的分类识别。模型的详情可参考[论文](https://arxiv.org/pdf/1801.04381.pdf)。
-
+  - MobileNetV3是Google在2019年发布的新模型，作者通过结合NAS与NetAdapt进行搜索得到该网络结构，提供了Large和Small两个版本，分别适用于对资源不同要求的情况。对比于MobileNetV2，新的模型在速度和精度方面均有提升。该PaddleHubModule的模型结构为MobileNetV3 Small，基于ImageNet-2012数据集并采用PaddleClas提供的SSLD蒸馏方法训练得到，接受输入图片大小为224 x 224 x 3，支持finetune，也可以直接通过命令行或者Python接口进行预测。
 
 
 ## 二、安装
@@ -35,7 +34,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install mobilenet_v2_animals
+    $ hub install mobilenet_v3_small_imagenet_ssld
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -45,7 +44,7 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run mobilenet_v2_animals --input_path "/PATH/TO/IMAGE"
+    $ hub run mobilenet_v3_small_imagenet_ssld --input_path "/PATH/TO/IMAGE"
     ```
   - 通过命令行方式实现分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
@@ -55,7 +54,7 @@
     import paddlehub as hub
     import cv2
 
-    classifier = hub.Module(name="mobilenet_v2_animals")
+    classifier = hub.Module(name="mobilenet_v3_small_imagenet_ssld")
     result = classifier.classification(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
     # result = classifier.classification(paths=['/PATH/TO/IMAGE'])
@@ -114,16 +113,16 @@
 
 ## 四、服务部署
 
-- PaddleHub Serving可以部署一个动物识别的在线服务。
+- PaddleHub Serving可以部署一个图像识别的在线服务。
 
 - ### 第一步：启动PaddleHub Serving
 
   - 运行启动命令：
   - ```shell
-    $ hub serving start -m mobilenet_v2_animals
+    $ hub serving start -m mobilenet_v3_small_imagenet_ssld
     ```
 
-  - 这样就完成了一个动物识别的在线服务的部署，默认端口号为8866。
+  - 这样就完成了一个图像识别的在线服务的部署，默认端口号为8866。
 
   - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
 
@@ -144,7 +143,7 @@
     # 发送HTTP请求
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/mobilenet_v2_animals"
+    url = "http://127.0.0.1:8866/predict/mobilenet_v3_small_imagenet_ssld"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果
@@ -157,6 +156,7 @@
 * 1.0.0
 
   初始发布
+
   - ```shell
-    $ hub install mobilenet_v2_animals==1.0.0
+    $ hub install mobilenet_v3_small_imagenet_ssld==1.0.0
     ```
