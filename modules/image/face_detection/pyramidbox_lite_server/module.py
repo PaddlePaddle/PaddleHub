@@ -19,12 +19,13 @@ from pyramidbox_lite_server.data_feed import reader
 from pyramidbox_lite_server.processor import postprocess, base64_to_cv2
 
 
-@moduleinfo(name="pyramidbox_lite_server",
-            type="CV/face_detection",
-            author="baidu-vis",
-            author_email="",
-            summary="PyramidBox-Lite-Server is a high-performance face detection model.",
-            version="1.2.0")
+@moduleinfo(
+    name="pyramidbox_lite_server",
+    type="CV/face_detection",
+    author="baidu-vis",
+    author_email="",
+    summary="PyramidBox-Lite-Server is a high-performance face detection model.",
+    version="1.2.0")
 class PyramidBoxLiteServer(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_lite_server_face_detection")
@@ -149,15 +150,16 @@ class PyramidBoxLiteServer(hub.Module):
             output_handle = predictor.get_output_handle(output_names[0])
             predictor_output = output_handle.copy_to_cpu()
 
-            out = postprocess(data_out=predictor_output,
-                              org_im=element['org_im'],
-                              org_im_path=element['org_im_path'],
-                              image_width=element['image_width'],
-                              image_height=element['image_height'],
-                              output_dir=output_dir,
-                              visualization=visualization,
-                              shrink=shrink,
-                              confs_threshold=confs_threshold)
+            out = postprocess(
+                data_out=predictor_output,
+                org_im=element['org_im'],
+                org_im_path=element['org_im_path'],
+                image_width=element['image_width'],
+                image_height=element['image_height'],
+                output_dir=output_dir,
+                visualization=visualization,
+                shrink=shrink,
+                confs_threshold=confs_threshold)
             res.append(out)
         return res
 
@@ -171,13 +173,14 @@ class PyramidBoxLiteServer(hub.Module):
         program, feeded_var_names, target_vars = fluid.io.load_inference_model(
             dirname=self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(dirname=dirname,
-                                      main_program=program,
-                                      executor=exe,
-                                      feeded_var_names=feeded_var_names,
-                                      target_vars=target_vars,
-                                      model_filename=model_filename,
-                                      params_filename=params_filename)
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -193,44 +196,41 @@ class PyramidBoxLiteServer(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
-                                              prog='hub run {}'.format(self.name),
-                                              usage='%(prog)s',
-                                              add_help=True)
+        self.parser = argparse.ArgumentParser(
+            description="Run the {} module.".format(self.name),
+            prog='hub run {}'.format(self.name),
+            usage='%(prog)s',
+            add_help=True)
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
             title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.face_detection(paths=[args.input_path],
-                                      use_gpu=args.use_gpu,
-                                      output_dir=args.output_dir,
-                                      visualization=args.visualization,
-                                      shrink=args.shrink,
-                                      confs_threshold=args.confs_threshold,
-                                      use_device=args.use_device)
+        results = self.face_detection(
+            paths=[args.input_path],
+            use_gpu=args.use_gpu,
+            output_dir=args.output_dir,
+            visualization=args.visualization,
+            shrink=args.shrink,
+            confs_threshold=args.confs_threshold,
+            use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument('--use_gpu',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether use GPU or not")
-        self.arg_config_group.add_argument('--output_dir',
-                                           type=str,
-                                           default='detection_result',
-                                           help="The directory to save output images.")
-        self.arg_config_group.add_argument('--visualization',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether to save output as images.")
-        self.arg_config_group.add_argument('--use_device',
-                                           choices=["cpu", "gpu", "xpu", "npu"],
-                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
+        self.arg_config_group.add_argument(
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+        self.arg_config_group.add_argument(
+            '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
@@ -242,7 +242,5 @@ class PyramidBoxLiteServer(hub.Module):
             type=ast.literal_eval,
             default=0.5,
             help="resize the image to shrink * original_shape before feeding into network.")
-        self.arg_input_group.add_argument('--confs_threshold',
-                                          type=ast.literal_eval,
-                                          default=0.6,
-                                          help="confidence threshold.")
+        self.arg_input_group.add_argument(
+            '--confs_threshold', type=ast.literal_eval, default=0.6, help="confidence threshold.")

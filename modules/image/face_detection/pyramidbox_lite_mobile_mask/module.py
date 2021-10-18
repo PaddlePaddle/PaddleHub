@@ -208,12 +208,13 @@ class PyramidBoxLiteMobileMask(hub.Module):
             detect_faces_list = [handled['face'] for handled in all_element[i]['preprocessed']]
             interval_left = sum(element_image_num[0:i])
             interval_right = interval_left + element_image_num[i]
-            out = postprocess(confidence_out=predict_out[interval_left:interval_right],
-                              org_im=all_element[i]['org_im'],
-                              org_im_path=all_element[i]['org_im_path'],
-                              detected_faces=detect_faces_list,
-                              output_dir=output_dir,
-                              visualization=visualization)
+            out = postprocess(
+                confidence_out=predict_out[interval_left:interval_right],
+                org_im=all_element[i]['org_im'],
+                org_im_path=all_element[i]['org_im_path'],
+                detected_faces=detect_faces_list,
+                output_dir=output_dir,
+                visualization=visualization)
             res.append(out)
         return res
 
@@ -236,13 +237,14 @@ class PyramidBoxLiteMobileMask(hub.Module):
         program, feeded_var_names, target_vars = fluid.io.load_inference_model(
             dirname=self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(dirname=dirname,
-                                      main_program=program,
-                                      executor=exe,
-                                      feeded_var_names=feeded_var_names,
-                                      target_vars=target_vars,
-                                      model_filename=model_filename,
-                                      params_filename=params_filename)
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -258,44 +260,41 @@ class PyramidBoxLiteMobileMask(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
-                                              prog='hub run {}'.format(self.name),
-                                              usage='%(prog)s',
-                                              add_help=True)
+        self.parser = argparse.ArgumentParser(
+            description="Run the {} module.".format(self.name),
+            prog='hub run {}'.format(self.name),
+            usage='%(prog)s',
+            add_help=True)
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
             title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.face_detection(paths=[args.input_path],
-                                      use_gpu=args.use_gpu,
-                                      output_dir=args.output_dir,
-                                      visualization=args.visualization,
-                                      shrink=args.shrink,
-                                      confs_threshold=args.confs_threshold,
-                                      use_device=args.use_device)
+        results = self.face_detection(
+            paths=[args.input_path],
+            use_gpu=args.use_gpu,
+            output_dir=args.output_dir,
+            visualization=args.visualization,
+            shrink=args.shrink,
+            confs_threshold=args.confs_threshold,
+            use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument('--use_gpu',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether use GPU or not")
-        self.arg_config_group.add_argument('--output_dir',
-                                           type=str,
-                                           default='detection_result',
-                                           help="The directory to save output images.")
-        self.arg_config_group.add_argument('--visualization',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether to save output as images.")
-        self.arg_config_group.add_argument('--use_device',
-                                           choices=["cpu", "gpu", "xpu", "npu"],
-                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
+        self.arg_config_group.add_argument(
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+        self.arg_config_group.add_argument(
+            '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
@@ -307,7 +306,5 @@ class PyramidBoxLiteMobileMask(hub.Module):
             type=ast.literal_eval,
             default=0.5,
             help="resize the image to `shrink * original_shape` before feeding into network.")
-        self.arg_input_group.add_argument('--confs_threshold',
-                                          type=ast.literal_eval,
-                                          default=0.6,
-                                          help="confidence threshold.")
+        self.arg_input_group.add_argument(
+            '--confs_threshold', type=ast.literal_eval, default=0.6, help="confidence threshold.")
