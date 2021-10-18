@@ -26,14 +26,15 @@ from pyramidbox_lite_server_mask.processor import postprocess, base64_to_cv2
     author_email="",
     summary=
     "PyramidBox-Lite-Server-Mask is a high-performance face detection model used to detect whether people wear masks.",
-    version="1.3.0")
+    version="1.3.1")
 class PyramidBoxLiteServerMask(hub.Module):
     def _initialize(self, face_detector_module=None):
         """
         Args:
             face_detector_module (class): module to detect face.
         """
-        self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_lite_server_mask_model")
+        self.default_pretrained_model_path = os.path.join(
+            self.directory, "pyramidbox_lite_server_mask_model")
         if face_detector_module is None:
             self.face_detector = hub.Module(name='pyramidbox_lite_server')
         else:
@@ -163,14 +164,16 @@ class PyramidBoxLiteServerMask(hub.Module):
 
         # get all data
         all_element = list()
-        for yield_data in reader(self.face_detector, shrink, confs_threshold, images, paths, use_gpu, use_multi_scale,
-                                 use_device):
+        for yield_data in reader(self.face_detector, shrink, confs_threshold,
+                                 images, paths, use_gpu, use_multi_scale):
             all_element.append(yield_data)
 
         image_list = list()
         element_image_num = list()
         for i in range(len(all_element)):
-            element_image = [handled['image'] for handled in all_element[i]['preprocessed']]
+            element_image = [
+                handled['image'] for handled in all_element[i]['preprocessed']
+            ]
             element_image_num.append(len(element_image))
             image_list.extend(element_image)
 
@@ -204,7 +207,9 @@ class PyramidBoxLiteServerMask(hub.Module):
         # postprocess one by one
         res = list()
         for i in range(len(all_element)):
-            detect_faces_list = [handled['face'] for handled in all_element[i]['preprocessed']]
+            detect_faces_list = [
+                handled['face'] for handled in all_element[i]['preprocessed']
+            ]
             interval_left = sum(element_image_num[0:i])
             interval_right = interval_left + element_image_num[i]
             out = postprocess(confidence_out=predict_out[interval_left:interval_right],
@@ -216,16 +221,31 @@ class PyramidBoxLiteServerMask(hub.Module):
             res.append(out)
         return res
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
         classifier_dir = os.path.join(dirname, 'mask_detector')
         detector_dir = os.path.join(dirname, 'pyramidbox_lite')
-        self._save_classifier_model(classifier_dir, model_filename, params_filename, combined)
-        self._save_detector_model(detector_dir, model_filename, params_filename, combined)
+        self._save_classifier_model(classifier_dir, model_filename,
+                                    params_filename, combined)
+        self._save_detector_model(detector_dir, model_filename, params_filename,
+                                  combined)
 
-    def _save_detector_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        self.face_detector.save_inference_model(dirname, model_filename, params_filename, combined)
+    def _save_detector_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
+        self.face_detector.save_inference_model(dirname, model_filename,
+                                                params_filename, combined)
 
-    def _save_classifier_model(self, dirname, model_filename=None, params_filename=None, combined=True):
+    def _save_classifier_model(self,
+                               dirname,
+                               model_filename=None,
+                               params_filename=None,
+                               combined=True):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
@@ -257,13 +277,17 @@ class PyramidBoxLiteServerMask(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
-                                              prog='hub run {}'.format(self.name),
-                                              usage='%(prog)s',
-                                              add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
+        self.parser = argparse.ArgumentParser(
+            description="Run the {} module.".format(self.name),
+            prog='hub run {}'.format(self.name),
+            usage='%(prog)s',
+            add_help=True)
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options", description="Run configuration for controlling module behavior, not required.")
+            title="Config options",
+            description=
+            "Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
@@ -300,13 +324,17 @@ class PyramidBoxLiteServerMask(hub.Module):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument(
+            '--input_path', type=str, help="path to image.")
         self.arg_input_group.add_argument(
             '--shrink',
             type=ast.literal_eval,
             default=0.5,
-            help="resize the image to `shrink * original_shape` before feeding into network.")
-        self.arg_input_group.add_argument('--confs_threshold',
-                                          type=ast.literal_eval,
-                                          default=0.6,
-                                          help="confidence threshold.")
+            help=
+            "resize the image to `shrink * original_shape` before feeding into network."
+        )
+        self.arg_input_group.add_argument(
+            '--confs_threshold',
+            type=ast.literal_eval,
+            default=0.6,
+            help="confidence threshold.")
