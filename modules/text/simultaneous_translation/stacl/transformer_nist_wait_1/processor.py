@@ -29,6 +29,8 @@ class STACLTokenizer:
                  special_token=["<s>", "<e>", "<unk>"]):
         bpe_parser = subword_nmt.create_apply_bpe_parser()
         bpe_args = bpe_parser.parse_args(args=['-c', bpe_codes_fpath])
+        bpe_args.codes.close()
+        bpe_args.codes = open(bpe_codes_fpath, 'r', encoding='utf-8')
         self.bpe = subword_nmt.BPE(bpe_args.codes, bpe_args.merges,
                                    bpe_args.separator, None,
                                    bpe_args.glossaries)
