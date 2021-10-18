@@ -195,7 +195,7 @@
     headers = {"Content-Type": "application/json"}
     for t in text:
         print("input: {}".format(t))
-        r = requests.post(url=url, headers=headers, data=json.dumps(t))
+        result = requests.post(url=url, headers=headers, data=json.dumps(t))
         # 打印预测结果
         print("model output: {}\n".format(result))
 
