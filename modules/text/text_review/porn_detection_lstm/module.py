@@ -17,12 +17,13 @@ from paddlehub.reader import tokenization
 from porn_detection_lstm.processor import load_vocab, preprocess, postprocess
 
 
-@moduleinfo(name="porn_detection_lstm",
-            version="1.1.0",
-            summary="Baidu's open-source Porn Detection Model.",
-            author="baidu-nlp",
-            author_email="",
-            type="nlp/sentiment_analysis")
+@moduleinfo(
+    name="porn_detection_lstm",
+    version="1.1.0",
+    summary="Baidu's open-source Porn Detection Model.",
+    author="baidu-nlp",
+    author_email="",
+    type="nlp/sentiment_analysis")
 class PornDetectionLSTM(hub.NLPPredictionModule):
     def _initialize(self):
         """
@@ -53,8 +54,8 @@ class PornDetectionLSTM(hub.NLPPredictionModule):
         """
         place = fluid.CPUPlace()
         exe = fluid.Executor(place)
-        program, feed_target_names, fetch_targets = fluid.io.load_inference_model(dirname=self.pretrained_model_path,
-                                                                                  executor=exe)
+        program, feed_target_names, fetch_targets = fluid.io.load_inference_model(
+            dirname=self.pretrained_model_path, executor=exe)
 
         with open(self.param_file, 'r') as file:
             params_list = file.readlines()
@@ -62,9 +63,8 @@ class PornDetectionLSTM(hub.NLPPredictionModule):
             param = param.strip()
             var = program.global_block().var(param)
             var_info = get_variable_info(var)
-            program.global_block().create_parameter(shape=var_info['shape'],
-                                                    dtype=var_info['dtype'],
-                                                    name=var_info['name'])
+            program.global_block().create_parameter(
+                shape=var_info['shape'], dtype=var_info['dtype'], name=var_info['name'])
 
         for param in program.global_block().iter_parameters():
             param.trainable = trainable

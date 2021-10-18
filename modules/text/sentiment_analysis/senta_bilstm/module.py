@@ -17,12 +17,13 @@ from senta_bilstm.net import bilstm_net
 from senta_bilstm.processor import load_vocab, preprocess, postprocess
 
 
-@moduleinfo(name="senta_bilstm",
-            version="1.2.0",
-            summary="Baidu's open-source Sentiment Classification System.",
-            author="baidu-nlp",
-            author_email="",
-            type="nlp/sentiment_analysis")
+@moduleinfo(
+    name="senta_bilstm",
+    version="1.2.0",
+    summary="Baidu's open-source Sentiment Classification System.",
+    author="baidu-nlp",
+    author_email="",
+    type="nlp/sentiment_analysis")
 class SentaBiLSTM(hub.NLPPredictionModule):
     def _initialize(self):
         """
@@ -74,16 +75,16 @@ class SentaBiLSTM(hub.NLPPredictionModule):
             seq_len_used = fluid.layers.squeeze(seq_len, axes=[1])
 
             # Add embedding layer.
-            w_param_attrs = fluid.ParamAttr(name="embedding_0.w_0",
-                                            initializer=fluid.initializer.TruncatedNormal(scale=0.02),
-                                            trainable=trainable)
+            w_param_attrs = fluid.ParamAttr(
+                name="embedding_0.w_0", initializer=fluid.initializer.TruncatedNormal(scale=0.02), trainable=trainable)
             dict_dim = 1256607
-            emb_1 = fluid.layers.embedding(input=text_1,
-                                           size=[dict_dim, 128],
-                                           is_sparse=True,
-                                           padding_idx=dict_dim - 1,
-                                           dtype='float32',
-                                           param_attr=w_param_attrs)
+            emb_1 = fluid.layers.embedding(
+                input=text_1,
+                size=[dict_dim, 128],
+                is_sparse=True,
+                padding_idx=dict_dim - 1,
+                dtype='float32',
+                param_attr=w_param_attrs)
             emb_1_name = emb_1.name
             data_list = [text_1]
             emb_name_list = [emb_1_name]
@@ -95,24 +96,26 @@ class SentaBiLSTM(hub.NLPPredictionModule):
 
             if num_slots > 1:
                 text_2 = fluid.data(name='text_2', shape=[-1, max_seq_len], dtype='int64', lod_level=0)
-                emb_2 = fluid.embedding(input=text_2,
-                                        size=[dict_dim, 128],
-                                        is_sparse=True,
-                                        padding_idx=dict_dim - 1,
-                                        dtype='float32',
-                                        param_attr=w_param_attrs)
+                emb_2 = fluid.embedding(
+                    input=text_2,
+                    size=[dict_dim, 128],
+                    is_sparse=True,
+                    padding_idx=dict_dim - 1,
+                    dtype='float32',
+                    param_attr=w_param_attrs)
                 emb_2_name = emb_2.name
                 data_list.append(text_2)
                 emb_name_list.append(emb_2_name)
 
             if num_slots > 2:
                 text_3 = fluid.data(name='text_3', shape=[-1, max_seq_len], dtype='int64', lod_level=0)
-                emb_3 = fluid.embedding(input=text_3,
-                                        size=[dict_dim, 128],
-                                        is_sparse=True,
-                                        padding_idx=dict_dim - 1,
-                                        dtype='float32',
-                                        param_attr=w_param_attrs)
+                emb_3 = fluid.embedding(
+                    input=text_3,
+                    size=[dict_dim, 128],
+                    is_sparse=True,
+                    padding_idx=dict_dim - 1,
+                    dtype='float32',
+                    param_attr=w_param_attrs)
                 emb_3_name = emb_3.name
                 data_list.append(text_3)
                 emb_name_list.append(emb_3_name)
