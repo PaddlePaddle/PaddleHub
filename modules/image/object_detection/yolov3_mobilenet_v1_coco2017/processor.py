@@ -57,8 +57,8 @@ def draw_bounding_box_on_image(image_path, data_list, save_dir):
         if image.mode == 'RGB':
             text = data['label'] + ": %.2f%%" % (100 * data['confidence'])
             textsize_width, textsize_height = draw.textsize(text=text)
-            draw.rectangle(xy=(left, top - (textsize_height + 5), left + textsize_width + 10, top),
-                           fill=(255, 255, 255))
+            draw.rectangle(
+                xy=(left, top - (textsize_height + 5), left + textsize_width + 10, top), fill=(255, 255, 255))
             draw.text(xy=(left, top - 15), text=text, fill=(0, 0, 0))
 
     save_name = get_save_image_name(image, save_dir, image_path)

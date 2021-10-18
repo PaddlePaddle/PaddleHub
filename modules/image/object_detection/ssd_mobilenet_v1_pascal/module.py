@@ -22,12 +22,13 @@ from ssd_mobilenet_v1_pascal.processor import load_label_info, postprocess, base
 from ssd_mobilenet_v1_pascal.data_feed import reader
 
 
-@moduleinfo(name="ssd_mobilenet_v1_pascal",
-            version="1.1.2",
-            type="cv/object_detection",
-            summary="SSD with backbone MobileNet_V1, trained with dataset Pasecal VOC.",
-            author="paddlepaddle",
-            author_email="paddle-dev@baidu.com")
+@moduleinfo(
+    name="ssd_mobilenet_v1_pascal",
+    version="1.1.2",
+    type="cv/object_detection",
+    summary="SSD with backbone MobileNet_V1, trained with dataset Pasecal VOC.",
+    author="paddlepaddle",
+    author_email="paddle-dev@baidu.com")
 class SSDMobileNetv1(hub.Module):
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(self.directory, "ssd_mobilenet_v1_model")
@@ -125,15 +126,10 @@ class SSDMobileNetv1(hub.Module):
                 inputs = {'image': var_prefix + image.name, 'im_size': var_prefix + im_size.name}
                 # names of outputs
                 if get_prediction:
-                    locs, confs, box, box_var = fluid.layers.multi_box_head(inputs=body_feats,
-                                                                            image=image,
-                                                                            num_classes=21,
-                                                                            **self.multi_box_head_config)
-                    pred = fluid.layers.detection_output(loc=locs,
-                                                         scores=confs,
-                                                         prior_box=box,
-                                                         prior_box_var=box_var,
-                                                         **self.output_decoder_config)
+                    locs, confs, box, box_var = fluid.layers.multi_box_head(
+                        inputs=body_feats, image=image, num_classes=21, **self.multi_box_head_config)
+                    pred = fluid.layers.detection_output(
+                        loc=locs, scores=confs, prior_box=box, prior_box_var=box_var, **self.output_decoder_config)
                     outputs = {'bbox_out': [var_prefix + pred.name]}
                 else:
                     outputs = {'body_features': [var_prefix + var.name for var in body_feats]}
@@ -238,14 +234,15 @@ class SSDMobileNetv1(hub.Module):
             output_names = predictor.get_output_names()
             output_handle = predictor.get_output_handle(output_names[0])
 
-            output = postprocess(paths=paths,
-                                 images=images,
-                                 data_out=output_handle,
-                                 score_thresh=score_thresh,
-                                 label_names=self.label_names,
-                                 output_dir=output_dir,
-                                 handle_id=iter_id * batch_size,
-                                 visualization=visualization)
+            output = postprocess(
+                paths=paths,
+                images=images,
+                data_out=output_handle,
+                score_thresh=score_thresh,
+                label_names=self.label_names,
+                output_dir=output_dir,
+                handle_id=iter_id * batch_size,
+                visualization=visualization)
             res.extend(output)
         return res
 
@@ -259,13 +256,14 @@ class SSDMobileNetv1(hub.Module):
         program, feeded_var_names, target_vars = fluid.io.load_inference_model(
             dirname=self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(dirname=dirname,
-                                      main_program=program,
-                                      executor=exe,
-                                      feeded_var_names=feeded_var_names,
-                                      target_vars=target_vars,
-                                      model_filename=model_filename,
-                                      params_filename=params_filename)
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -281,44 +279,41 @@ class SSDMobileNetv1(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
-                                              prog='hub run {}'.format(self.name),
-                                              usage='%(prog)s',
-                                              add_help=True)
+        self.parser = argparse.ArgumentParser(
+            description="Run the {} module.".format(self.name),
+            prog='hub run {}'.format(self.name),
+            usage='%(prog)s',
+            add_help=True)
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
             title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.object_detection(paths=[args.input_path],
-                                        batch_size=args.batch_size,
-                                        use_gpu=args.use_gpu,
-                                        output_dir=args.output_dir,
-                                        visualization=args.visualization,
-                                        score_thresh=args.score_thresh,
-                                        use_device=args.use_device)
+        results = self.object_detection(
+            paths=[args.input_path],
+            batch_size=args.batch_size,
+            use_gpu=args.use_gpu,
+            output_dir=args.output_dir,
+            visualization=args.visualization,
+            score_thresh=args.score_thresh,
+            use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument('--use_gpu',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether use GPU or not")
-        self.arg_config_group.add_argument('--output_dir',
-                                           type=str,
-                                           default='detection_result',
-                                           help="The directory to save output images.")
-        self.arg_config_group.add_argument('--visualization',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether to save output as images.")
-        self.arg_config_group.add_argument('--use_device',
-                                           choices=["cpu", "gpu", "xpu", "npu"],
-                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
+        self.arg_config_group.add_argument(
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+        self.arg_config_group.add_argument(
+            '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
@@ -326,7 +321,5 @@ class SSDMobileNetv1(hub.Module):
         """
         self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
         self.arg_input_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
-        self.arg_input_group.add_argument('--score_thresh',
-                                          type=ast.literal_eval,
-                                          default=0.5,
-                                          help="threshold for object detecion.")
+        self.arg_input_group.add_argument(
+            '--score_thresh', type=ast.literal_eval, default=0.5, help="threshold for object detecion.")
