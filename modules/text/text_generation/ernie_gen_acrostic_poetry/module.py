@@ -110,8 +110,8 @@ class ErnieGen(hub.NLPPredictionModule):
             raise ValueError("The input texts should be a list with nonempty string elements.")
         for i, text in enumerate(texts):
             if len(text) > self.line:
-                logger.warning('The input text: %s, contains more than %i characters, which will be cut off' %
-                               (text, self.line))
+                logger.warning(
+                    'The input text: %s, contains more than %i characters, which will be cut off' % (text, self.line))
                 texts[i] = text[:self.line]
 
             for char in text:
@@ -147,19 +147,20 @@ class ErnieGen(hub.NLPPredictionModule):
             encode_text = self.tokenizer.encode(text)
             src_ids = paddle.to_tensor(encode_text['input_ids']).unsqueeze(0)
             src_sids = paddle.to_tensor(encode_text['token_type_ids']).unsqueeze(0)
-            output_ids = beam_search_infilling(self.model,
-                                               src_ids,
-                                               src_sids,
-                                               eos_id=self.tokenizer.vocab['[SEP]'],
-                                               sos_id=self.tokenizer.vocab['[CLS]'],
-                                               attn_id=self.tokenizer.vocab['[MASK]'],
-                                               pad_id=self.tokenizer.vocab['[PAD]'],
-                                               unk_id=self.tokenizer.vocab['[UNK]'],
-                                               vocab_size=len(self.tokenizer.vocab),
-                                               max_decode_len=80,
-                                               max_encode_len=20,
-                                               beam_width=beam_width,
-                                               tgt_type_id=1)
+            output_ids = beam_search_infilling(
+                self.model,
+                src_ids,
+                src_sids,
+                eos_id=self.tokenizer.vocab['[SEP]'],
+                sos_id=self.tokenizer.vocab['[CLS]'],
+                attn_id=self.tokenizer.vocab['[MASK]'],
+                pad_id=self.tokenizer.vocab['[PAD]'],
+                unk_id=self.tokenizer.vocab['[UNK]'],
+                vocab_size=len(self.tokenizer.vocab),
+                max_decode_len=80,
+                max_encode_len=20,
+                beam_width=beam_width,
+                tgt_type_id=1)
             output_str = self.rev_lookup(output_ids[0])
 
             for ostr in output_str.tolist():
@@ -173,24 +174,24 @@ class ErnieGen(hub.NLPPredictionModule):
         """
         Add the command config options
         """
-        self.arg_config_group.add_argument('--use_gpu',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether use GPU for prediction")
+        self.arg_config_group.add_argument(
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU for prediction")
         self.arg_config_group.add_argument('--beam_width', type=int, default=5, help="the beam search width")
-        self.arg_config_group.add_argument('--use_device',
-                                           choices=["cpu", "gpu", "xpu", "npu"],
-                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     @runnable
     def run_cmd(self, argvs):
         """
         Run as a command
         """
-        self.parser = argparse.ArgumentParser(description='Run the %s module.' % self.name,
-                                              prog='hub run %s' % self.name,
-                                              usage='%(prog)s',
-                                              add_help=True)
+        self.parser = argparse.ArgumentParser(
+            description='Run the %s module.' % self.name,
+            prog='hub run %s' % self.name,
+            usage='%(prog)s',
+            add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -207,10 +208,8 @@ class ErnieGen(hub.NLPPredictionModule):
             self.parser.print_help()
             return None
 
-        results = self.generate(texts=input_data,
-                                use_gpu=args.use_gpu,
-                                beam_width=args.beam_width,
-                                use_device=args.use_device)
+        results = self.generate(
+            texts=input_data, use_gpu=args.use_gpu, beam_width=args.beam_width, use_device=args.use_device)
 
         return results
 
