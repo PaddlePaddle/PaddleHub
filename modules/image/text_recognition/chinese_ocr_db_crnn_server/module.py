@@ -127,9 +127,8 @@ class ChineseOCRDBCRNNServer(hub.Module):
         text detect module
         """
         if not self._text_detector_module:
-            self._text_detector_module = hub.Module(name='chinese_text_detection_db_server',
-                                                    enable_mkldnn=self.enable_mkldnn,
-                                                    version='1.0.2')
+            self._text_detector_module = hub.Module(
+                name='chinese_text_detection_db_server', enable_mkldnn=self.enable_mkldnn, version='1.0.2')
         return self._text_detector_module
 
     def read_images(self, paths=[]):
@@ -158,10 +157,8 @@ class ChineseOCRDBCRNNServer(hub.Module):
         img_crop_height = int(max(np.linalg.norm(points[0] - points[3]), np.linalg.norm(points[1] - points[2])))
         pts_std = np.float32([[0, 0], [img_crop_width, 0], [img_crop_width, img_crop_height], [0, img_crop_height]])
         M = cv2.getPerspectiveTransform(points, pts_std)
-        dst_img = cv2.warpPerspective(img,
-                                      M, (img_crop_width, img_crop_height),
-                                      borderMode=cv2.BORDER_REPLICATE,
-                                      flags=cv2.INTER_CUBIC)
+        dst_img = cv2.warpPerspective(
+            img, M, (img_crop_width, img_crop_height), borderMode=cv2.BORDER_REPLICATE, flags=cv2.INTER_CUBIC)
         dst_img_height, dst_img_width = dst_img.shape[0:2]
         if dst_img_height * 1.0 / dst_img_width >= 1.5:
             dst_img = np.rot90(dst_img)
@@ -259,10 +256,8 @@ class ChineseOCRDBCRNNServer(hub.Module):
 
         assert predicted_data != [], "There is not any image to be predicted. Please check the input data."
 
-        detection_results = self.text_detector_module.detect_text(images=predicted_data,
-                                                                  use_gpu=self.use_gpu,
-                                                                  box_thresh=box_thresh,
-                                                                  use_device=use_device)
+        detection_results = self.text_detector_module.detect_text(
+            images=predicted_data, use_gpu=self.use_gpu, box_thresh=box_thresh, use_device=use_device)
 
         boxes = [np.array(item['data']).astype(np.float32) for item in detection_results]
         all_results = []
@@ -278,8 +273,8 @@ class ChineseOCRDBCRNNServer(hub.Module):
                     tmp_box = copy.deepcopy(boxes[num_box])
                     img_crop = self.get_rotate_crop_image(original_image, tmp_box)
                     img_crop_list.append(img_crop)
-                img_crop_list, angle_list = self._classify_text(img_crop_list,
-                                                                angle_classification_thresh=angle_classification_thresh)
+                img_crop_list, angle_list = self._classify_text(
+                    img_crop_list, angle_classification_thresh=angle_classification_thresh)
                 rec_results = self._recognize_text(img_crop_list)
 
                 # if the recognized text confidence score is lower than text_thresh, then drop it
@@ -311,23 +306,18 @@ class ChineseOCRDBCRNNServer(hub.Module):
         return results
 
     def save_result_image(
-        self,
-        original_image,
-        detection_boxes,
-        rec_results,
-        output_dir='ocr_result',
-        text_thresh=0.5,
+            self,
+            original_image,
+            detection_boxes,
+            rec_results,
+            output_dir='ocr_result',
+            text_thresh=0.5,
     ):
         image = Image.fromarray(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
         txts = [item[0] for item in rec_results]
         scores = [item[1] for item in rec_results]
-        draw_img = draw_ocr(image,
-                            detection_boxes,
-                            txts,
-                            scores,
-                            font_file=self.font_file,
-                            draw_txt=True,
-                            drop_score=text_thresh)
+        draw_img = draw_ocr(
+            image, detection_boxes, txts, scores, font_file=self.font_file, draw_txt=True, drop_score=text_thresh)
 
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -455,18 +445,20 @@ class ChineseOCRDBCRNNServer(hub.Module):
 
         model_file_path = os.path.join(self.rec_pretrained_model_path, 'model')
         params_file_path = os.path.join(self.rec_pretrained_model_path, 'params')
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(dirname=self.rec_pretrained_model_path,
-                                                                               model_filename=model_file_path,
-                                                                               params_filename=params_file_path,
-                                                                               executor=exe)
+        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+            dirname=self.rec_pretrained_model_path,
+            model_filename=model_file_path,
+            params_filename=params_file_path,
+            executor=exe)
 
-        fluid.io.save_inference_model(dirname=dirname,
-                                      main_program=program,
-                                      executor=exe,
-                                      feeded_var_names=feeded_var_names,
-                                      target_vars=target_vars,
-                                      model_filename=model_filename,
-                                      params_filename=params_filename)
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     def _save_classifier_model(self, dirname, model_filename=None, params_filename=None, combined=True):
         if combined:
@@ -477,28 +469,31 @@ class ChineseOCRDBCRNNServer(hub.Module):
 
         model_file_path = os.path.join(self.cls_pretrained_model_path, 'model')
         params_file_path = os.path.join(self.cls_pretrained_model_path, 'params')
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(dirname=self.cls_pretrained_model_path,
-                                                                               model_filename=model_file_path,
-                                                                               params_filename=params_file_path,
-                                                                               executor=exe)
+        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+            dirname=self.cls_pretrained_model_path,
+            model_filename=model_file_path,
+            params_filename=params_file_path,
+            executor=exe)
 
-        fluid.io.save_inference_model(dirname=dirname,
-                                      main_program=program,
-                                      executor=exe,
-                                      feeded_var_names=feeded_var_names,
-                                      target_vars=target_vars,
-                                      model_filename=model_filename,
-                                      params_filename=params_filename)
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     @runnable
     def run_cmd(self, argvs):
         """
         Run as a command
         """
-        self.parser = argparse.ArgumentParser(description="Run the %s module." % self.name,
-                                              prog='hub run %s' % self.name,
-                                              usage='%(prog)s',
-                                              add_help=True)
+        self.parser = argparse.ArgumentParser(
+            description="Run the %s module." % self.name,
+            prog='hub run %s' % self.name,
+            usage='%(prog)s',
+            add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -508,32 +503,28 @@ class ChineseOCRDBCRNNServer(hub.Module):
         self.add_module_input_arg()
 
         args = self.parser.parse_args(argvs)
-        results = self.recognize_text(paths=[args.input_path],
-                                      use_gpu=args.use_gpu,
-                                      output_dir=args.output_dir,
-                                      visualization=args.visualization,
-                                      use_device=args.use_device)
+        results = self.recognize_text(
+            paths=[args.input_path],
+            use_gpu=args.use_gpu,
+            output_dir=args.output_dir,
+            visualization=args.visualization,
+            use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options
         """
-        self.arg_config_group.add_argument('--use_gpu',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether use GPU or not")
-        self.arg_config_group.add_argument('--output_dir',
-                                           type=str,
-                                           default='ocr_result',
-                                           help="The directory to save output images.")
-        self.arg_config_group.add_argument('--visualization',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether to save output as images.")
-        self.arg_config_group.add_argument('--use_device',
-                                           choices=["cpu", "gpu", "xpu", "npu"],
-                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
+        self.arg_config_group.add_argument(
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+        self.arg_config_group.add_argument(
+            '--output_dir', type=str, default='ocr_result', help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """

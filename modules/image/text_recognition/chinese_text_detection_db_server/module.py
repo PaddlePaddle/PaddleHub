@@ -262,18 +262,20 @@ class ChineseTextDetectionDBServer(hub.Module):
 
         model_file_path = os.path.join(self.pretrained_model_path, 'model')
         params_file_path = os.path.join(self.pretrained_model_path, 'params')
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(dirname=self.pretrained_model_path,
-                                                                               model_filename=model_file_path,
-                                                                               params_filename=params_file_path,
-                                                                               executor=exe)
+        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+            dirname=self.pretrained_model_path,
+            model_filename=model_file_path,
+            params_filename=params_file_path,
+            executor=exe)
 
-        fluid.io.save_inference_model(dirname=dirname,
-                                      main_program=program,
-                                      executor=exe,
-                                      feeded_var_names=feeded_var_names,
-                                      target_vars=target_vars,
-                                      model_filename=model_filename,
-                                      params_filename=params_filename)
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -289,10 +291,11 @@ class ChineseTextDetectionDBServer(hub.Module):
         """
         Run as a command
         """
-        self.parser = argparse.ArgumentParser(description="Run the %s module." % self.name,
-                                              prog='hub run %s' % self.name,
-                                              usage='%(prog)s',
-                                              add_help=True)
+        self.parser = argparse.ArgumentParser(
+            description="Run the %s module." % self.name,
+            prog='hub run %s' % self.name,
+            usage='%(prog)s',
+            add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -302,32 +305,28 @@ class ChineseTextDetectionDBServer(hub.Module):
         self.add_module_input_arg()
 
         args = self.parser.parse_args(argvs)
-        results = self.detect_text(paths=[args.input_path],
-                                   use_gpu=args.use_gpu,
-                                   output_dir=args.output_dir,
-                                   visualization=args.visualization,
-                                   use_device=args.use_device)
+        results = self.detect_text(
+            paths=[args.input_path],
+            use_gpu=args.use_gpu,
+            output_dir=args.output_dir,
+            visualization=args.visualization,
+            use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options
         """
-        self.arg_config_group.add_argument('--use_gpu',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether use GPU or not")
-        self.arg_config_group.add_argument('--output_dir',
-                                           type=str,
-                                           default='detection_result',
-                                           help="The directory to save output images.")
-        self.arg_config_group.add_argument('--visualization',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether to save output as images.")
-        self.arg_config_group.add_argument('--use_device',
-                                           choices=["cpu", "gpu", "xpu", "npu"],
-                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
+        self.arg_config_group.add_argument(
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+        self.arg_config_group.add_argument(
+            '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
