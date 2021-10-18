@@ -40,7 +40,11 @@ def postprocess(im, output_dir, save_im_name, visualization, size):
             os.makedirs(output_dir)
         # save image
         save_path = os.path.join(output_dir, save_im_name)
-        cv2.imwrite(save_path, im)
+        try:
+            cv2.imwrite(save_path, im)
+            print('Notice: an image has been proccessed and saved in path "{}".'.format(os.path.abspath(save_path)))
+        except Exception as e:
+            print('Exception {}: Fail to save output image in path "{}".'.format(e, os.path.abspath(save_path)))
         result['save_path'] = save_path
     return result
 

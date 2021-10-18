@@ -51,8 +51,8 @@ class FPNRoIAlign(object):
         name_list = list(head_inputs.keys())
         input_name_list = name_list[-num_roi_lvls:]
         spatial_scale = spatial_scale[-num_roi_lvls:]
-        rois_dist, restore_index = fluid.layers.distribute_fpn_proposals(rois, k_min, k_max, self.canconical_level,
-                                                                         self.canonical_size)
+        rois_dist, restore_index = fluid.layers.distribute_fpn_proposals(
+            rois, k_min, k_max, self.canconical_level, self.canonical_size)
         # rois_dist is in ascend order
         roi_out_list = []
         resolution = is_mask and self.mask_resolution or self.box_resolution

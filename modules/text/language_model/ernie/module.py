@@ -47,6 +47,7 @@ class Ernie(nn.Layer):
             load_checkpoint: str = None,
             label_map: Dict = None,
             num_classes: int = 2,
+            suffix: bool = False,
             **kwargs,
     ):
         super(Ernie, self).__init__()
@@ -70,7 +71,7 @@ class Ernie(nn.Layer):
             self.model = ErnieForTokenClassification.from_pretrained(
                 pretrained_model_name_or_path='ernie-1.0', num_classes=self.num_classes, **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
-            self.metric = ChunkEvaluator(label_list=[self.label_map[i] for i in sorted(self.label_map.keys())])
+            self.metric = ChunkEvaluator(label_list=[self.label_map[i] for i in sorted(self.label_map.keys())], suffix=suffix)
         elif task == 'text-matching':
             self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-1.0', **kwargs)
             self.dropout = paddle.nn.Dropout(0.1)

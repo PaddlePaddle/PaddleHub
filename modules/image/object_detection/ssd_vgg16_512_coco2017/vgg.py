@@ -27,8 +27,8 @@ class VGG(object):
                  depth=16,
                  with_extra_blocks=False,
                  normalizations=[20., -1, -1, -1, -1, -1],
-                 extra_block_filters=[[256, 512, 1, 2, 3], [128, 256, 1, 2, 3], [128, 256, 0, 1, 3],
-                                      [128, 256, 0, 1, 3]],
+                 extra_block_filters=[[256, 512, 1, 2, 3], [128, 256, 1, 2, 3],
+                                      [128, 256, 0, 1, 3], [128, 256, 0, 1, 3]],
                  class_dim=1000):
         assert depth in [16, 19], "depth {} not in [16, 19]"
         self.depth = depth
@@ -60,7 +60,8 @@ class VGG(object):
         res_layer = []
         layers = []
         for k, v in enumerate(vgg_base):
-            conv = self._conv_block(conv, v, nums[k], name="conv{}_".format(k + 1))
+            conv = self._conv_block(
+                conv, v, nums[k], name="conv{}_".format(k + 1))
             layers.append(conv)
             if self.with_extra_blocks:
                 if k == 4:
@@ -76,19 +77,25 @@ class VGG(object):
                 input=conv,
                 size=fc_dim,
                 act='relu',
-                param_attr=fluid.param_attr.ParamAttr(name=fc_name[0] + "_weights"),
-                bias_attr=fluid.param_attr.ParamAttr(name=fc_name[0] + "_offset"))
+                param_attr=fluid.param_attr.ParamAttr(
+                    name=fc_name[0] + "_weights"),
+                bias_attr=fluid.param_attr.ParamAttr(
+                    name=fc_name[0] + "_offset"))
             fc2 = fluid.layers.fc(
                 input=fc1,
                 size=fc_dim,
                 act='relu',
-                param_attr=fluid.param_attr.ParamAttr(name=fc_name[1] + "_weights"),
-                bias_attr=fluid.param_attr.ParamAttr(name=fc_name[1] + "_offset"))
+                param_attr=fluid.param_attr.ParamAttr(
+                    name=fc_name[1] + "_weights"),
+                bias_attr=fluid.param_attr.ParamAttr(
+                    name=fc_name[1] + "_offset"))
             out = fluid.layers.fc(
                 input=fc2,
                 size=self.class_dim,
-                param_attr=fluid.param_attr.ParamAttr(name=fc_name[2] + "_weights"),
-                bias_attr=fluid.param_attr.ParamAttr(name=fc_name[2] + "_offset"))
+                param_attr=fluid.param_attr.ParamAttr(
+                    name=fc_name[2] + "_weights"),
+                bias_attr=fluid.param_attr.ParamAttr(
+                    name=fc_name[2] + "_offset"))
             out = fluid.layers.softmax(out)
             res_layer.append(out)
             return [out]
@@ -103,7 +110,14 @@ class VGG(object):
         layers = []
         for k, v in enumerate(cfg):
             assert len(v) == 5, "extra_block_filters size not fix"
-            conv = self._extra_block(conv, v[0], v[1], v[2], v[3], v[4], name="conv{}_".format(6 + k))
+            conv = self._extra_block(
+                conv,
+                v[0],
+                v[1],
+                v[2],
+                v[3],
+                v[4],
+                name="conv{}_".format(6 + k))
             layers.append(conv)
 
         return layers
@@ -121,10 +135,23 @@ class VGG(object):
                 name=name + str(i + 1))
         return conv
 
-    def _extra_block(self, input, num_filters1, num_filters2, padding_size, stride_size, filter_size, name=None):
+    def _extra_block(self,
+                     input,
+                     num_filters1,
+                     num_filters2,
+                     padding_size,
+                     stride_size,
+                     filter_size,
+                     name=None):
         # 1x1 conv
         conv_1 = self._conv_layer(
-            input=input, num_filters=int(num_filters1), filter_size=1, stride=1, act='relu', padding=0, name=name + "1")
+            input=input,
+            num_filters=int(num_filters1),
+            filter_size=1,
+            stride=1,
+            act='relu',
+            padding=0,
+            name=name + "1")
 
         # 3x3 conv
         conv_2 = self._conv_layer(
@@ -157,11 +184,17 @@ class VGG(object):
             act=act,
             use_cudnn=use_cudnn,
             param_attr=ParamAttr(name=name + "_weights"),
-            bias_attr=ParamAttr(name=name + "_biases") if self.with_extra_blocks else False,
+            bias_attr=ParamAttr(
+                name=name + "_biases") if self.with_extra_blocks else False,
             name=name + '.conv2d.output.1')
         return conv
 
-    def _pooling_block(self, conv, pool_size, pool_stride, pool_padding=0, ceil_mode=True):
+    def _pooling_block(self,
+                       conv,
+                       pool_size,
+                       pool_stride,
+                       pool_padding=0,
+                       ceil_mode=True):
         pool = fluid.layers.pool2d(
             input=conv,
             pool_size=pool_size,
@@ -175,10 +208,17 @@ class VGG(object):
         from paddle.fluid.layer_helper import LayerHelper
         from paddle.fluid.initializer import Constant
         helper = LayerHelper("Scale")
-        l2_norm = fluid.layers.l2_normalize(input, axis=1)  # l2 norm along channel
+        l2_norm = fluid.layers.l2_normalize(
+            input, axis=1)  # l2 norm along channel
         shape = [1] if channel_shared else [input.shape[1]]
         scale = helper.create_parameter(
-            attr=helper.param_attr, shape=shape, dtype=input.dtype, default_initializer=Constant(init_scale))
+            attr=helper.param_attr,
+            shape=shape,
+            dtype=input.dtype,
+            default_initializer=Constant(init_scale))
         out = fluid.layers.elementwise_mul(
-            x=l2_norm, y=scale, axis=-1 if channel_shared else 1, name="conv4_3_norm_scale")
+            x=l2_norm,
+            y=scale,
+            axis=-1 if channel_shared else 1,
+            name="conv4_3_norm_scale")
         return out

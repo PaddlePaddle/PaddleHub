@@ -160,13 +160,17 @@ def reader(face_detector, shrink, confs_threshold, images, paths, use_gpu, use_m
 
                 if _s:
                     scale_res.append(np.array(_s))
-            scale_res = np.row_stack(scale_res)
-            scale_res = bbox_vote(scale_res)
-            keep_index = np.where(scale_res[:, 4] >= confs_threshold)[0]
-            scale_res = scale_res[keep_index, :]
-            for data in scale_res:
-                face = {'left': data[0], 'top': data[1], 'right': data[2], 'bottom': data[3], 'confidence': data[4]}
-                detect_faces.append(face)
+
+            if scale_res:
+                scale_res = np.row_stack(scale_res)
+                scale_res = bbox_vote(scale_res)
+                keep_index = np.where(scale_res[:, 4] >= confs_threshold)[0]
+                scale_res = scale_res[keep_index, :]
+                for data in scale_res:
+                    face = {'left': data[0], 'top': data[1], 'right': data[2], 'bottom': data[3], 'confidence': data[4]}
+                    detect_faces.append(face)
+            else:
+                detect_faces = []
         else:
             _detect_res = face_detector.face_detection(
                 images=[element['org_im']],

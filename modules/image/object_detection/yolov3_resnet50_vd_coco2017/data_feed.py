@@ -26,7 +26,8 @@ def reader(paths=[], images=None):
     if paths:
         assert type(paths) is list, "type(paths) is not list."
         for img_path in paths:
-            assert os.path.isfile(img_path), "The {} isn't a valid file path.".format(img_path)
+            assert os.path.isfile(
+                img_path), "The {} isn't a valid file path.".format(img_path)
             img = cv2.imread(img_path).astype('float32')
             img_list.append(img)
     if images is not None:
@@ -50,7 +51,8 @@ def reader(paths=[], images=None):
 
         im_scale_x = float(target_size) / float(im_shape[1])
         im_scale_y = float(target_size) / float(im_shape[0])
-        im = cv2.resize(im, None, None, fx=im_scale_x, fy=im_scale_y, interpolation=2)
+        im = cv2.resize(
+            im, None, None, fx=im_scale_x, fy=im_scale_y, interpolation=2)
 
         # normalize image
         mean = [0.485, 0.456, 0.406]

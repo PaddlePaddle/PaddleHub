@@ -26,7 +26,7 @@ from pyramidbox_lite_server_mask.processor import postprocess, base64_to_cv2
     author_email="",
     summary=
     "PyramidBox-Lite-Server-Mask is a high-performance face detection model used to detect whether people wear masks.",
-    version="1.3.0")
+    version="1.3.1")
 class PyramidBoxLiteServerMask(hub.Module):
     def _initialize(self, face_detector_module=None):
         """
@@ -163,8 +163,7 @@ class PyramidBoxLiteServerMask(hub.Module):
 
         # get all data
         all_element = list()
-        for yield_data in reader(self.face_detector, shrink, confs_threshold, images, paths, use_gpu, use_multi_scale,
-                                 use_device):
+        for yield_data in reader(self.face_detector, shrink, confs_threshold, images, paths, use_gpu, use_multi_scale):
             all_element.append(yield_data)
 
         image_list = list()
