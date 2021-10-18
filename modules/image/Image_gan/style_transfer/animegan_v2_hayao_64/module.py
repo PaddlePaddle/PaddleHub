@@ -22,11 +22,8 @@ class Animegan_V2_Hayao_64(Module):
         self.model_path = os.path.join(self.directory, "animegan_v2_hayao_64")
 
         # 加载模型
-        self.model = Model(modelpath=self.model_path,
-                           use_gpu=use_gpu,
-                           use_mkldnn=False,
-                           combined=False,
-                           use_device=use_device)
+        self.model = Model(
+            modelpath=self.model_path, use_gpu=use_gpu, use_mkldnn=False, combined=False, use_device=use_device)
 
     # 风格转换函数
     def style_transfer(self,
@@ -37,12 +34,8 @@ class Animegan_V2_Hayao_64(Module):
                        min_size=32,
                        max_size=1024):
         # 加载数据处理器
-        processor = Processor(images=images,
-                              paths=paths,
-                              batch_size=1,
-                              output_dir=output_dir,
-                              min_size=min_size,
-                              max_size=max_size)
+        processor = Processor(
+            images=images, paths=paths, batch_size=1, output_dir=output_dir, min_size=min_size, max_size=max_size)
 
         # 模型预测
         outputs = self.model.predict(processor.input_datas)
