@@ -31,7 +31,7 @@
 
 - ### 1、环境依赖  
 
-  - ppdet >= 2.1.0
+  - paddledet >= 2.1.0
 
   - opencv-python
 
@@ -62,7 +62,7 @@
     tracker = hub.Module(name="jde_darknet53")
     # Read from a video file
     tracker.tracking('/PATH/TO/VIDEO', output_dir='mot_result', visualization=True,
-                        draw_threshold=0.5, use_gpu=False, from_device=False)
+                        draw_threshold=0.5, use_gpu=False)
     # or read from a image stream
     # with tracker.stream_mode(output_dir='image_stream_output', visualization=True, draw_threshold=0.5, use_gpu=True):
     #    tracker.predict([images])
