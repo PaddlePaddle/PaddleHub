@@ -163,7 +163,8 @@ class PyramidBoxLiteServerMask(hub.Module):
 
         # get all data
         all_element = list()
-        for yield_data in reader(self.face_detector, shrink, confs_threshold, images, paths, use_gpu, use_multi_scale):
+        for yield_data in reader(self.face_detector, shrink, confs_threshold, images, paths, use_gpu, use_multi_scale,
+                                 use_device):
             all_element.append(yield_data)
 
         image_list = list()
