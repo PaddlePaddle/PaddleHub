@@ -17,7 +17,7 @@
   - 样例结果示例：
 
     <p align="center">
-    <img src="https://paddlehub.bj.bcebos.com/paddlehub-img/attgan_demo.JPG" width=1200><br/>
+    <img src="https://user-images.githubusercontent.com/35907364/137855667-43c5c40c-28f5-45d8-accc-028e185b988f.JPG" width=1200><br/>
     图1. AttGAN的效果图(图片属性分别为：original image, Bald, Bangs, Black_Hair, Blond_Hair, Brown_Hair, Bushy_Eyebrows, Eyeglasses, Gender, Mouth_Slightly_Open, Mustache, No_Beard, Pale_Skin, Aged)<br/>
     </p>
 
