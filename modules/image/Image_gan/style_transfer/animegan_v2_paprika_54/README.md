@@ -30,7 +30,7 @@
 
 - ### 模型介绍
 
-  - AnimeGAN V1 图像风格转换模型, 模型可将输入的图像转换成宫崎骏动漫风格，模型权重转换自[AnimeGAN V1官方开源项目](https://github.com/TachibanaYoshino/AnimeGAN)。
+  - AnimeGAN V2 图像风格转换模型, 模型可将输入的图像转换成宫崎骏动漫风格，模型权重转换自[AnimeGAN V2官方开源项目](https://github.com/TachibanaYoshino/AnimeGAN)。
 
 
 ## 二、安装
