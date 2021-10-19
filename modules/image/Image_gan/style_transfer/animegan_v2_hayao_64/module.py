@@ -17,14 +17,15 @@ from animegan_v2_hayao_64.processor import base64_to_cv2, cv2_to_base64, Process
 )
 class Animegan_V2_Hayao_64(Module):
     # 初始化函数
-    def __init__(self, name=None, use_gpu=False):
+    def __init__(self, name=None, use_gpu=False, use_device=None):
         # 设置模型路径
         self.model_path = os.path.join(self.directory, "animegan_v2_hayao_64")
 
         # 加载模型
-        self.model = Model(modelpath=self.model_path, use_gpu=use_gpu, use_mkldnn=False, combined=False)
+        self.model = Model(
+            modelpath=self.model_path, use_gpu=use_gpu, use_mkldnn=False, combined=False, use_device=use_device)
 
-    # 关键点检测函数
+    # 风格转换函数
     def style_transfer(self,
                        images=None,
                        paths=None,
