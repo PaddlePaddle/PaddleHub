@@ -67,10 +67,19 @@ def _handle_single(im_path=None, im_arr=None):
     Returns:
         im (numpy.ndarray): preprocessed data, with shape (1, 3, 512, 512).
     """
+    im = None
     if im_path is not None:
-        im = cv2.imread(im_path)[:, :, ::-1].astype(np.float32)
+        im = cv2.imread(im_path)
+        if im is None:
+            raise FileNotFoundError('Error: The file path "{}"  may not exist or is not a valid image file, please provide a valid path.'.format(im_path))
+        else:
+            assert(len(im.shape) == 3, 'The input image shape should be [H, W, 3], but got {}'.format(im.shape))
+            assert(im.shape[2] == 3,  'The input image should have 3 channels, but got {}'.format(im.shape[2]))
+            im = im[:, :, ::-1].astype(np.float32)    ### Image should have 3-channels, and BGR format is arranged by cv2, we should change it to RGB.
     if im_arr is not None:
         im = im_arr[:, :, ::-1].astype(np.float32)
+    if im is None:
+        raise ValueError('No image data is provided. Please check the input "images" and "paths".')
     w, h = im.shape[1], im.shape[0]
     im = cv2.resize(im, (512, 512), interpolation=cv2.INTER_LINEAR)
     im = im.transpose((2, 0, 1))

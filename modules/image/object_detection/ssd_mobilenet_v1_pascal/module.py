@@ -21,15 +21,17 @@ from ssd_mobilenet_v1_pascal.data_feed import reader
 
 @moduleinfo(
     name="ssd_mobilenet_v1_pascal",
-    version="1.1.1",
+    version="1.1.2",
     type="cv/object_detection",
     summary="SSD with backbone MobileNet_V1, trained with dataset Pasecal VOC.",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com")
 class SSDMobileNetv1(hub.Module):
     def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "ssd_mobilenet_v1_model")
-        self.label_names = load_label_info(os.path.join(self.directory, "label_file.txt"))
+        self.default_pretrained_model_path = os.path.join(
+            self.directory, "ssd_mobilenet_v1_model")
+        self.label_names = load_label_info(
+            os.path.join(self.directory, "label_file.txt"))
         self.model_config = None
         self._set_config()
 
@@ -81,34 +83,55 @@ class SSDMobileNetv1(hub.Module):
         with fluid.program_guard(context_prog, startup_program):
             with fluid.unique_name.guard():
                 # image
-                image = fluid.layers.data(name='image', shape=[3, 300, 300], dtype='float32')
+                image = fluid.layers.data(
+                    name='image', shape=[3, 300, 300], dtype='float32')
                 # backbone
                 backbone = MobileNet(**self.mobilenet_config)
                 # body_feats
                 body_feats = backbone(image)
                 # im_size
-                im_size = fluid.layers.data(name='im_size', shape=[2], dtype='int32')
+                im_size = fluid.layers.data(
+                    name='im_size', shape=[2], dtype='int32')
                 # var_prefix
                 var_prefix = '@HUB_{}@'.format(self.name)
                 # names of inputs
-                inputs = {'image': var_prefix + image.name, 'im_size': var_prefix + im_size.name}
+                inputs = {
+                    'image': var_prefix + image.name,
+                    'im_size': var_prefix + im_size.name
+                }
                 # names of outputs
                 if get_prediction:
                     locs, confs, box, box_var = fluid.layers.multi_box_head(
-                        inputs=body_feats, image=image, num_classes=21, **self.multi_box_head_config)
+                        inputs=body_feats,
+                        image=image,
+                        num_classes=21,
+                        **self.multi_box_head_config)
                     pred = fluid.layers.detection_output(
-                        loc=locs, scores=confs, prior_box=box, prior_box_var=box_var, **self.output_decoder_config)
+                        loc=locs,
+                        scores=confs,
+                        prior_box=box,
+                        prior_box_var=box_var,
+                        **self.output_decoder_config)
                     outputs = {'bbox_out': [var_prefix + pred.name]}
                 else:
-                    outputs = {'body_features': [var_prefix + var.name for var in body_feats]}
+                    outputs = {
+                        'body_features':
+                        [var_prefix + var.name for var in body_feats]
+                    }
 
                 # add_vars_prefix
                 add_vars_prefix(context_prog, var_prefix)
                 add_vars_prefix(fluid.default_startup_program(), var_prefix)
                 # inputs
-                inputs = {key: context_prog.global_block().vars[value] for key, value in inputs.items()}
+                inputs = {
+                    key: context_prog.global_block().vars[value]
+                    for key, value in inputs.items()
+                }
                 outputs = {
-                    out_key: [context_prog.global_block().vars[varname] for varname in out_value]
+                    out_key: [
+                        context_prog.global_block().vars[varname]
+                        for varname in out_value
+                    ]
                     for out_key, out_value in outputs.items()
                 }
                 # trainable
@@ -121,9 +144,14 @@ class SSDMobileNetv1(hub.Module):
                 if pretrained:
 
                     def _if_exist(var):
-                        return os.path.exists(os.path.join(self.default_pretrained_model_path, var.name))
+                        return os.path.exists(
+                            os.path.join(self.default_pretrained_model_path,
+                                         var.name))
 
-                    fluid.io.load_vars(exe, self.default_pretrained_model_path, predicate=_if_exist)
+                    fluid.io.load_vars(
+                        exe,
+                        self.default_pretrained_model_path,
+                        predicate=_if_exist)
                 else:
                     exe.run(startup_program)
 
@@ -166,7 +194,7 @@ class SSDMobileNetv1(hub.Module):
                 int(_places[0])
             except:
                 raise RuntimeError(
-                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
                 )
 
         paths = paths if paths else list()
@@ -196,7 +224,11 @@ class SSDMobileNetv1(hub.Module):
             res.extend(output)
         return res
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
@@ -234,9 +266,12 @@ class SSDMobileNetv1(hub.Module):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options", description="Run configuration for controlling module behavior, not required.")
+            title="Config options",
+            description=
+            "Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
@@ -254,17 +289,34 @@ class SSDMobileNetv1(hub.Module):
         Add the command config options.
         """
         self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+            '--use_gpu',
+            type=ast.literal_eval,
+            default=False,
+            help="whether use GPU or not")
         self.arg_config_group.add_argument(
-            '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
+            '--output_dir',
+            type=str,
+            default='detection_result',
+            help="The directory to save output images.")
         self.arg_config_group.add_argument(
-            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+            '--visualization',
+            type=ast.literal_eval,
+            default=False,
+            help="whether to save output as images.")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
-        self.arg_input_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
         self.arg_input_group.add_argument(
-            '--score_thresh', type=ast.literal_eval, default=0.5, help="threshold for object detecion.")
+            '--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument(
+            '--batch_size',
+            type=ast.literal_eval,
+            default=1,
+            help="batch size.")
+        self.arg_input_group.add_argument(
+            '--score_thresh',
+            type=ast.literal_eval,
+            default=0.5,
+            help="threshold for object detecion.")

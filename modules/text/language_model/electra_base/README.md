@@ -1,5 +1,5 @@
 ```shell
-$ hub install electra-base==1.0.0
+$ hub install electra-base==1.0.1
 ```
 
 <p align="center">
@@ -15,6 +15,7 @@ def __init__(
         load_checkpoint=None,
         label_map=None,
         num_classes=2,
+        suffix=False,
         **kwargs,
 )
 ```
@@ -27,6 +28,7 @@ def __init__(
 * `load_checkpoint`：使用PaddleHub Fine-tune api训练保存的模型参数文件路径。
 * `label_map`：预测时的类别映射表。
 * `num_classes`：分类任务的类别数，如果指定了`label_map`，此参数可不传，默认2分类。
+* `suffix`: 序列标注任务的标签格式，如果设定为`True`，标签以'-B', '-I', '-E' 或者 '-S'为结尾，此参数默认为`False`。
 * `**kwargs`：用户额外指定的关键字字典类型的参数。
 
 ```python
@@ -84,7 +86,7 @@ label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
     name='electra-base',
-    version='1.0.0',
+    version='1.0.1',
     task='seq-cls',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
@@ -127,7 +129,7 @@ text = [["今天是个好日子"], ["天气预报说今天要下雨"]]
 # 对应本地部署，则为module.get_embedding(data=text)
 data = {"data": text}
 # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
-url = "http://10.12.121.132:8866/predict/electra-base"
+url = "http://127.0.0.1:8866/predict/electra-base"
 # 指定post请求的headers为application/json方式
 headers = {"Content-Type": "application/json"}
 

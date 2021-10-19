@@ -21,15 +21,18 @@ from yolov3_darknet53_pedestrian.yolo_head import MultiClassNMS, YOLOv3Head
 
 @moduleinfo(
     name="yolov3_darknet53_pedestrian",
-    version="1.0.1",
+    version="1.0.2",
     type="CV/object_detection",
-    summary="Baidu's YOLOv3 model for pedestrian detection, with backbone DarkNet53.",
+    summary=
+    "Baidu's YOLOv3 model for pedestrian detection, with backbone DarkNet53.",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com")
 class YOLOv3DarkNet53Pedestrian(hub.Module):
     def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "yolov3_darknet53_pedestrian_model")
-        self.label_names = load_label_info(os.path.join(self.directory, "label_file.txt"))
+        self.default_pretrained_model_path = os.path.join(
+            self.directory, "yolov3_darknet53_pedestrian_model")
+        self.label_names = load_label_info(
+            os.path.join(self.directory, "label_file.txt"))
         self._set_config()
 
     def _set_config(self):
@@ -73,18 +76,20 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
         with fluid.program_guard(context_prog, startup_program):
             with fluid.unique_name.guard():
                 # image
-                image = fluid.layers.data(name='image', shape=[3, 608, 608], dtype='float32')
+                image = fluid.layers.data(
+                    name='image', shape=[3, 608, 608], dtype='float32')
                 # backbone
                 backbone = DarkNet(norm_type='sync_bn', norm_decay=0., depth=53)
                 # body_feats
                 body_feats = backbone(image)
                 # im_size
-                im_size = fluid.layers.data(name='im_size', shape=[2], dtype='int32')
+                im_size = fluid.layers.data(
+                    name='im_size', shape=[2], dtype='int32')
                 # yolo_head
                 yolo_head = YOLOv3Head(
                     anchor_masks=[[6, 7, 8], [3, 4, 5], [0, 1, 2]],
-                    anchors=[[10, 13], [16, 30], [33, 23], [30, 61], [62, 45], [59, 119], [116, 90], [156, 198],
-                             [373, 326]],
+                    anchors=[[10, 13], [16, 30], [33, 23], [30, 61], [62, 45],
+                             [59, 119], [116, 90], [156, 198], [373, 326]],
                     norm_decay=0.,
                     num_classes=1,
                     ignore_thresh=0.7,
@@ -97,7 +102,8 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
                         normalized=False,
                         score_threshold=0.01))
                 # head_features
-                head_features, body_features = yolo_head._get_outputs(body_feats, is_train=trainable)
+                head_features, body_features = yolo_head._get_outputs(
+                    body_feats, is_train=trainable)
 
                 place = fluid.CPUPlace()
                 exe = fluid.Executor(place)
@@ -106,24 +112,35 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
                 # var_prefix
                 var_prefix = '@HUB_{}@'.format(self.name)
                 # name of inputs
-                inputs = {'image': var_prefix + image.name, 'im_size': var_prefix + im_size.name}
+                inputs = {
+                    'image': var_prefix + image.name,
+                    'im_size': var_prefix + im_size.name
+                }
                 # name of outputs
                 if get_prediction:
                     bbox_out = yolo_head.get_prediction(head_features, im_size)
                     outputs = {'bbox_out': [var_prefix + bbox_out.name]}
                 else:
                     outputs = {
-                        'head_features': [var_prefix + var.name for var in head_features],
-                        'body_features': [var_prefix + var.name for var in body_features]
+                        'head_features':
+                        [var_prefix + var.name for var in head_features],
+                        'body_features':
+                        [var_prefix + var.name for var in body_features]
                     }
                 # add_vars_prefix
                 add_vars_prefix(context_prog, var_prefix)
                 add_vars_prefix(fluid.default_startup_program(), var_prefix)
                 # inputs
-                inputs = {key: context_prog.global_block().vars[value] for key, value in inputs.items()}
+                inputs = {
+                    key: context_prog.global_block().vars[value]
+                    for key, value in inputs.items()
+                }
                 # outputs
                 outputs = {
-                    key: [context_prog.global_block().vars[varname] for varname in value]
+                    key: [
+                        context_prog.global_block().vars[varname]
+                        for varname in value
+                    ]
                     for key, value in outputs.items()
                 }
                 # trainable
@@ -133,9 +150,14 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
                 if pretrained:
 
                     def _if_exist(var):
-                        return os.path.exists(os.path.join(self.default_pretrained_model_path, var.name))
+                        return os.path.exists(
+                            os.path.join(self.default_pretrained_model_path,
+                                         var.name))
 
-                    fluid.io.load_vars(exe, self.default_pretrained_model_path, predicate=_if_exist)
+                    fluid.io.load_vars(
+                        exe,
+                        self.default_pretrained_model_path,
+                        predicate=_if_exist)
                 else:
                     exe.run(startup_program)
 
@@ -177,7 +199,7 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
                 int(_places[0])
             except:
                 raise RuntimeError(
-                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
                 )
 
         paths = paths if paths else list()
@@ -189,9 +211,11 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
             image_tensor = PaddleTensor(np.array(list(feed_data[:, 0])))
             im_size_tensor = PaddleTensor(np.array(list(feed_data[:, 1])))
             if use_gpu:
-                data_out = self.gpu_predictor.run([image_tensor, im_size_tensor])
+                data_out = self.gpu_predictor.run(
+                    [image_tensor, im_size_tensor])
             else:
-                data_out = self.cpu_predictor.run([image_tensor, im_size_tensor])
+                data_out = self.cpu_predictor.run(
+                    [image_tensor, im_size_tensor])
 
             output = postprocess(
                 paths=paths,
@@ -205,7 +229,11 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
             res.extend(output)
         return res
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
+    def save_inference_model(self,
+                             dirname,
+                             model_filename=None,
+                             params_filename=None,
+                             combined=True):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
@@ -243,9 +271,12 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options", description="Run configuration for controlling module behavior, not required.")
+            title="Config options",
+            description=
+            "Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
@@ -263,20 +294,34 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
         Add the command config options.
         """
         self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+            '--use_gpu',
+            type=ast.literal_eval,
+            default=False,
+            help="whether use GPU or not")
         self.arg_config_group.add_argument(
             '--output_dir',
             type=str,
             default='yolov3_pedestrian_detect_output',
             help="The directory to save output images.")
         self.arg_config_group.add_argument(
-            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+            '--visualization',
+            type=ast.literal_eval,
+            default=False,
+            help="whether to save output as images.")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
-        self.arg_input_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
         self.arg_input_group.add_argument(
-            '--score_thresh', type=ast.literal_eval, default=0.2, help="threshold for object detecion.")
+            '--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument(
+            '--batch_size',
+            type=ast.literal_eval,
+            default=1,
+            help="batch size.")
+        self.arg_input_group.add_argument(
+            '--score_thresh',
+            type=ast.literal_eval,
+            default=0.2,
+            help="threshold for object detecion.")

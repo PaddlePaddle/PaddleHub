@@ -22,7 +22,7 @@ from stylepro_artistic.data_feed import reader
 
 @moduleinfo(
     name="stylepro_artistic",
-    version="1.0.1",
+    version="1.0.2",
     type="cv/style_transfer",
     summary="StylePro Artistic is an algorithm for Arbitrary image style, which is parameter-free, fast yet effective.",
     author="baidu-bdl",
