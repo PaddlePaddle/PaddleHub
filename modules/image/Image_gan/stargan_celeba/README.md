@@ -17,7 +17,7 @@
   - 样例结果示例：
 
     <p align="center">
-    <img src="https://paddlehub.bj.bcebos.com/paddlehub-img/stargan_demo.PNG" width=600><br/>
+    <img src="https://user-images.githubusercontent.com/35907364/137855887-f0abca76-2735-4275-b7ad-242decf31bb3.PNG" width=600><br/>
     图1. StarGAN的效果图 (属性分别为：origial image, Black_Hair, Blond_Hair, Brown_Hair, Male, Aged)<br/>
     </p>
 
