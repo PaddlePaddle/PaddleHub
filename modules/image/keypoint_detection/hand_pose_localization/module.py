@@ -18,12 +18,13 @@ from hand_pose_localization.processor import base64_to_cv2, Processor
 )
 class Hand_Pose_Localization(Module):
     # 初始化函数
-    def __init__(self, name=None, use_gpu=False):
+    def __init__(self, name=None, use_gpu=False, use_device=None):
         # 设置模型路径
         self.model_path = os.path.join(self.directory, "hand_pose_localization")
 
         # 加载模型
-        self.model = Model(modelpath=self.model_path, use_gpu=use_gpu, use_mkldnn=False, combined=True)
+        self.model = Model(
+            modelpath=self.model_path, use_gpu=use_gpu, use_mkldnn=False, combined=True, use_device=use_device)
 
     # 关键点检测函数
     def keypoint_detection(self, images=None, paths=None, batch_size=1, output_dir='output', visualization=False):

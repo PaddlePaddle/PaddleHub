@@ -9,7 +9,10 @@ import argparse
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+
+from paddle.inference import Config
+from paddle.inference import create_predictor
+
 from paddlehub.module.module import moduleinfo, runnable, serving
 
 from human_pose_estimation_resnet50_mpii.processor import base64_to_cv2, postprocess
@@ -30,26 +33,53 @@ class HumanPoseEstimation(hub.Module):
         self.default_pretrained_model_path = os.path.join(self.directory, "pose-resnet50-mpii-384x384")
         self._set_config()
 
+    def _get_device_id(self, places):
+        try:
+            places = os.environ[places]
+            id = int(places)
+        except:
+            id = -1
+        return id
+
     def _set_config(self):
         """
         predictor config setting
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+
+        # create default cpu predictor
+        cpu_config = Config(self.default_pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-            use_gpu = True
-        except:
-            use_gpu = False
-        if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        # create predictors using various types of devices
+
+        # npu
+        npu_id = self._get_device_id("FLAGS_selected_npus")
+        if npu_id != -1:
+            # use npu
+            npu_config = Config(self.default_pretrained_model_path)
+            npu_config.disable_glog_info()
+            npu_config.enable_npu(device_id=npu_id)
+            self.npu_predictor = create_predictor(npu_config)
+
+        # gpu
+        gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
+        if gpu_id != -1:
+            # use gpu
+            gpu_config = Config(self.default_pretrained_model_path)
             gpu_config.disable_glog_info()
-            gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=gpu_id)
+            self.gpu_predictor = create_predictor(gpu_config)
+
+        # xpu
+        xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
+        if xpu_id != -1:
+            # use xpu
+            xpu_config = Config(self.default_pretrained_model_path)
+            xpu_config.disable_glog_info()
+            xpu_config.enable_xpu(100)
+            self.xpu_predictor = create_predictor(xpu_config)
 
     def keypoint_detection(self,
                            images=None,
@@ -57,7 +87,8 @@ class HumanPoseEstimation(hub.Module):
                            batch_size=1,
                            use_gpu=False,
                            output_dir='output_pose',
-                           visualization=False):
+                           visualization=False,
+                           use_device=None):
         """
         API for human pose estimation and tracking.
 
@@ -68,12 +99,33 @@ class HumanPoseEstimation(hub.Module):
             use_gpu (bool): Whether to use gpu.
             output_dir (str): The path to store output images.
             visualization (bool): Whether to save image or not.
+            use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
             res (list[dict]): each element of res is a dict, keys contains 'path', 'data', the corresponding valus are:
                 path (str): the path of original image.
                 data (OrderedDict): The key points of human pose.
         """
+
+        # real predictor to use
+        if use_device is not None:
+            if use_device == "cpu":
+                predictor = self.cpu_predictor
+            elif use_device == "xpu":
+                predictor = self.xpu_predictor
+            elif use_device == "npu":
+                predictor = self.npu_predictor
+            elif use_device == "gpu":
+                predictor = self.gpu_predictor
+            else:
+                raise Exception("Unsupported device: " + use_device)
+        else:
+            # use_device is not set, therefore follow use_gpu
+            if use_gpu:
+                predictor = self.gpu_predictor
+            else:
+                predictor = self.cpu_predictor
+
         all_data = list()
         for yield_data in reader(images, paths):
             all_data.append(yield_data)
@@ -92,9 +144,18 @@ class HumanPoseEstimation(hub.Module):
                     pass
             # feed batch image
             batch_image = np.array([data['image'] for data in batch_data])
-            batch_image = PaddleTensor(batch_image.copy())
-            output = self.gpu_predictor.run([batch_image]) if use_gpu else self.cpu_predictor.run([batch_image])
-            output = np.expand_dims(output[0].as_ndarray(), axis=1)
+
+            input_names = predictor.get_input_names()
+            input_tensor = predictor.get_input_handle(input_names[0])
+            input_tensor.reshape(batch_image.shape)
+            input_tensor.copy_from_cpu(batch_image.copy())
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+            predictor_output = output_handle.copy_to_cpu()
+
+            output = np.expand_dims(predictor_output, axis=1)
+
             # postprocess one by one
             for i in range(len(batch_data)):
                 out = postprocess(
@@ -157,7 +218,8 @@ class HumanPoseEstimation(hub.Module):
             batch_size=args.batch_size,
             use_gpu=args.use_gpu,
             output_dir=args.output_dir,
-            visualization=args.visualization)
+            visualization=args.visualization,
+            use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
@@ -171,6 +233,10 @@ class HumanPoseEstimation(hub.Module):
         self.arg_config_group.add_argument(
             '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
         self.arg_config_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
