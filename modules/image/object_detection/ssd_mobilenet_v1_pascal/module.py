@@ -10,7 +10,10 @@ import yaml
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+
+from paddle.inference import Config
+from paddle.inference import create_predictor
+
 from paddlehub.module.module import moduleinfo, runnable, serving
 from paddlehub.common.paddle_helper import add_vars_prefix
 
@@ -28,32 +31,59 @@ from ssd_mobilenet_v1_pascal.data_feed import reader
     author_email="paddle-dev@baidu.com")
 class SSDMobileNetv1(hub.Module):
     def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(
-            self.directory, "ssd_mobilenet_v1_model")
-        self.label_names = load_label_info(
-            os.path.join(self.directory, "label_file.txt"))
+        self.default_pretrained_model_path = os.path.join(self.directory, "ssd_mobilenet_v1_model")
+        self.label_names = load_label_info(os.path.join(self.directory, "label_file.txt"))
         self.model_config = None
         self._set_config()
 
+    def _get_device_id(self, places):
+        try:
+            places = os.environ[places]
+            id = int(places)
+        except:
+            id = -1
+        return id
+
     def _set_config(self):
-        # predictor config setting.
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        """
+        predictor config setting.
+        """
+
+        # create default cpu predictor
+        cpu_config = Config(self.default_pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         cpu_config.switch_ir_optim(False)
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-            use_gpu = True
-        except:
-            use_gpu = False
-        if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        # create predictors using various types of devices
+
+        # npu
+        npu_id = self._get_device_id("FLAGS_selected_npus")
+        if npu_id != -1:
+            # use npu
+            npu_config = Config(self.default_pretrained_model_path)
+            npu_config.disable_glog_info()
+            npu_config.enable_npu(device_id=npu_id)
+            self.npu_predictor = create_predictor(npu_config)
+
+        # gpu
+        gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
+        if gpu_id != -1:
+            # use gpu
+            gpu_config = Config(self.default_pretrained_model_path)
             gpu_config.disable_glog_info()
-            gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=gpu_id)
+            self.gpu_predictor = create_predictor(gpu_config)
+
+        # xpu
+        xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
+        if xpu_id != -1:
+            # use xpu
+            xpu_config = Config(self.default_pretrained_model_path)
+            xpu_config.disable_glog_info()
+            xpu_config.enable_xpu(100)
+            self.xpu_predictor = create_predictor(xpu_config)
 
         # model config setting.
         if not self.model_config:
@@ -83,55 +113,34 @@ class SSDMobileNetv1(hub.Module):
         with fluid.program_guard(context_prog, startup_program):
             with fluid.unique_name.guard():
                 # image
-                image = fluid.layers.data(
-                    name='image', shape=[3, 300, 300], dtype='float32')
+                image = fluid.layers.data(name='image', shape=[3, 300, 300], dtype='float32')
                 # backbone
                 backbone = MobileNet(**self.mobilenet_config)
                 # body_feats
                 body_feats = backbone(image)
                 # im_size
-                im_size = fluid.layers.data(
-                    name='im_size', shape=[2], dtype='int32')
+                im_size = fluid.layers.data(name='im_size', shape=[2], dtype='int32')
                 # var_prefix
                 var_prefix = '@HUB_{}@'.format(self.name)
                 # names of inputs
-                inputs = {
-                    'image': var_prefix + image.name,
-                    'im_size': var_prefix + im_size.name
-                }
+                inputs = {'image': var_prefix + image.name, 'im_size': var_prefix + im_size.name}
                 # names of outputs
                 if get_prediction:
                     locs, confs, box, box_var = fluid.layers.multi_box_head(
-                        inputs=body_feats,
-                        image=image,
-                        num_classes=21,
-                        **self.multi_box_head_config)
+                        inputs=body_feats, image=image, num_classes=21, **self.multi_box_head_config)
                     pred = fluid.layers.detection_output(
-                        loc=locs,
-                        scores=confs,
-                        prior_box=box,
-                        prior_box_var=box_var,
-                        **self.output_decoder_config)
+                        loc=locs, scores=confs, prior_box=box, prior_box_var=box_var, **self.output_decoder_config)
                     outputs = {'bbox_out': [var_prefix + pred.name]}
                 else:
-                    outputs = {
-                        'body_features':
-                        [var_prefix + var.name for var in body_feats]
-                    }
+                    outputs = {'body_features': [var_prefix + var.name for var in body_feats]}
 
                 # add_vars_prefix
                 add_vars_prefix(context_prog, var_prefix)
                 add_vars_prefix(fluid.default_startup_program(), var_prefix)
                 # inputs
-                inputs = {
-                    key: context_prog.global_block().vars[value]
-                    for key, value in inputs.items()
-                }
+                inputs = {key: context_prog.global_block().vars[value] for key, value in inputs.items()}
                 outputs = {
-                    out_key: [
-                        context_prog.global_block().vars[varname]
-                        for varname in out_value
-                    ]
+                    out_key: [context_prog.global_block().vars[varname] for varname in out_value]
                     for out_key, out_value in outputs.items()
                 }
                 # trainable
@@ -144,14 +153,9 @@ class SSDMobileNetv1(hub.Module):
                 if pretrained:
 
                     def _if_exist(var):
-                        return os.path.exists(
-                            os.path.join(self.default_pretrained_model_path,
-                                         var.name))
+                        return os.path.exists(os.path.join(self.default_pretrained_model_path, var.name))
 
-                    fluid.io.load_vars(
-                        exe,
-                        self.default_pretrained_model_path,
-                        predicate=_if_exist)
+                    fluid.io.load_vars(exe, self.default_pretrained_model_path, predicate=_if_exist)
                 else:
                     exe.run(startup_program)
 
@@ -165,7 +169,8 @@ class SSDMobileNetv1(hub.Module):
                          use_gpu=False,
                          output_dir='detection_result',
                          score_thresh=0.5,
-                         visualization=True):
+                         visualization=True,
+                         use_device=None):
         """API of Object Detection.
 
         Args:
@@ -176,6 +181,7 @@ class SSDMobileNetv1(hub.Module):
             output_dir (str): The path to store output images.
             visualization (bool): Whether to save image or not.
             score_thresh (float): threshold for object detecion.
+            use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
             res (list[dict]): The result of coco2017 detecion. keys include 'data', 'save_path', the corresponding value is:
@@ -188,14 +194,24 @@ class SSDMobileNetv1(hub.Module):
                     confidence (float): The confidence of detection result.
                 save_path (str, optional): The path to save output images.
         """
-        if use_gpu:
-            try:
-                _places = os.environ["CUDA_VISIBLE_DEVICES"]
-                int(_places[0])
-            except:
-                raise RuntimeError(
-                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
-                )
+        # real predictor to use
+        if use_device is not None:
+            if use_device == "cpu":
+                predictor = self.cpu_predictor
+            elif use_device == "xpu":
+                predictor = self.xpu_predictor
+            elif use_device == "npu":
+                predictor = self.npu_predictor
+            elif use_device == "gpu":
+                predictor = self.gpu_predictor
+            else:
+                raise Exception("Unsupported device: " + use_device)
+        else:
+            # use_device is not set, therefore follow use_gpu
+            if use_gpu:
+                predictor = self.gpu_predictor
+            else:
+                predictor = self.cpu_predictor
 
         paths = paths if paths else list()
         if data and 'image' in data:
@@ -206,16 +222,22 @@ class SSDMobileNetv1(hub.Module):
         res = []
         for iter_id, feed_data in enumerate(batch_reader()):
             feed_data = np.array(feed_data)
-            image_tensor = PaddleTensor(np.array(list(feed_data[:, 0])).copy())
-            if use_gpu:
-                data_out = self.gpu_predictor.run([image_tensor])
-            else:
-                data_out = self.cpu_predictor.run([image_tensor])
+
+            input_names = predictor.get_input_names()
+            image_data = np.array(list(feed_data[:, 0]))
+
+            image_tensor = predictor.get_input_handle(input_names[0])
+            image_tensor.reshape(image_data.shape)
+            image_tensor.copy_from_cpu(image_data.copy())
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
 
             output = postprocess(
                 paths=paths,
                 images=images,
-                data_out=data_out,
+                data_out=output_handle,
                 score_thresh=score_thresh,
                 label_names=self.label_names,
                 output_dir=output_dir,
@@ -224,11 +246,7 @@ class SSDMobileNetv1(hub.Module):
             res.extend(output)
         return res
 
-    def save_inference_model(self,
-                             dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True):
+    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
@@ -266,12 +284,9 @@ class SSDMobileNetv1(hub.Module):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
@@ -281,7 +296,8 @@ class SSDMobileNetv1(hub.Module):
             use_gpu=args.use_gpu,
             output_dir=args.output_dir,
             visualization=args.visualization,
-            score_thresh=args.score_thresh)
+            score_thresh=args.score_thresh,
+            use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
@@ -289,34 +305,21 @@ class SSDMobileNetv1(hub.Module):
         Add the command config options.
         """
         self.arg_config_group.add_argument(
-            '--use_gpu',
-            type=ast.literal_eval,
-            default=False,
-            help="whether use GPU or not")
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
         self.arg_config_group.add_argument(
-            '--output_dir',
-            type=str,
-            default='detection_result',
-            help="The directory to save output images.")
+            '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
         self.arg_config_group.add_argument(
-            '--visualization',
-            type=ast.literal_eval,
-            default=False,
-            help="whether to save output as images.")
+            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
+        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
         self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
-        self.arg_input_group.add_argument(
-            '--batch_size',
-            type=ast.literal_eval,
-            default=1,
-            help="batch size.")
-        self.arg_input_group.add_argument(
-            '--score_thresh',
-            type=ast.literal_eval,
-            default=0.5,
-            help="threshold for object detecion.")
+            '--score_thresh', type=ast.literal_eval, default=0.5, help="threshold for object detecion.")

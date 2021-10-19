@@ -94,8 +94,6 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir, 
         paths (list[str]): The paths of images.
         images (list(numpy.ndarray)): images data, shape of each is [H, W, C]
         data_out (lod_tensor): data output of predictor.
-        batch_size (int): batch size.
-        use_gpu (bool): Whether to use gpu.
         output_dir (str): The path to store output images.
         visualization (bool): Whether to save image or not.
         score_thresh (float): the low limit of bounding box.
@@ -113,9 +111,8 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir, 
                 confidence (float): The confidence of detection result.
             save_path (str): The path to save output images.
     """
-    lod_tensor = data_out[0]
-    lod = lod_tensor.lod[0]
-    results = lod_tensor.as_ndarray()
+    results = data_out.copy_to_cpu()
+    lod = data_out.lod()[0]
 
     check_dir(output_dir)
 
