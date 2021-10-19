@@ -151,7 +151,7 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
             return inputs, outputs, main_program
 
     @serving
-    def emotion_classify(self, texts=[], data={}, use_gpu=False, batch_size=1):
+    def emotion_classify(self, texts=[], data={}, use_gpu=False, batch_size=1, use_device=None):
         """
         Get the emotion prediction results results with the texts as input
         Args:
@@ -161,15 +161,26 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
              batch_size(int): the program deals once with one batch
         Returns:
              results(list): the emotion prediction results
+             use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
         """
-        if use_gpu:
-            try:
-                _places = os.environ["CUDA_VISIBLE_DEVICES"]
-                int(_places[0])
-            except:
-                raise RuntimeError(
-                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
-                )
+        # real predictor to use
+        if use_device is not None:
+            if use_device == "cpu":
+                predictor = self.cpu_predictor
+            elif use_device == "xpu":
+                predictor = self.xpu_predictor
+            elif use_device == "npu":
+                predictor = self.npu_predictor
+            elif use_device == "gpu":
+                predictor = self.gpu_predictor
+            else:
+                raise Exception("Unsupported device: " + use_device)
+        else:
+            # use_device is not set, therefore follow use_gpu
+            if use_gpu:
+                predictor = self.gpu_predictor
+            else:
+                predictor = self.cpu_predictor
 
         if texts != [] and isinstance(texts, list) and data == {}:
             predicted_data = texts
@@ -189,14 +200,10 @@ class EmotionDetectionTextCNN(hub.NLPPredictionModule):
             else:
                 batch_data = predicted_data[start_idx:]
             start_idx = start_idx + batch_size
-            processed_results = preprocess(self.word_seg_module, batch_data, self.vocab, use_gpu, batch_size)
-            tensor_words = self.texts2tensor(processed_results)
-
-            if use_gpu:
-                batch_out = self.gpu_predictor.run([tensor_words])
-            else:
-                batch_out = self.cpu_predictor.run([tensor_words])
-            batch_result = postprocess(batch_out[0], processed_results)
+            processed_results = preprocess(self.word_seg_module, batch_data, self.vocab, use_gpu, batch_size,
+                                           use_device)
+            predictor_output = self._internal_predict(predictor, processed_results)
+            batch_result = postprocess(predictor_output, processed_results)
             results += batch_result
         return results
 

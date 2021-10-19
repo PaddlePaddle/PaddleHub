@@ -167,7 +167,13 @@ class ModuleV1(object):
             program.global_block().var(feed_dict[tensor_name].name).desc.set_shape(seq_tensor_shape)
 
     @paddle_utils.run_in_static_mode
-    def __call__(self, sign_name: str, data: dict, use_gpu: bool = False, batch_size: int = 1, **kwargs):
+    def __call__(self,
+                 sign_name: str,
+                 data: dict,
+                 use_gpu: bool = False,
+                 batch_size: int = 1,
+                 use_device: str = None,
+                 **kwargs):
         '''Call the specified signature function for prediction.'''
 
         def _get_reader_and_feeder(data_format, data, place):
@@ -188,7 +194,18 @@ class ModuleV1(object):
         with paddle.static.program_guard(program):
             result = []
             index = 0
-            place = paddle.CUDAPlace(0) if use_gpu else paddle.CPUPlace()
+
+            if use_device is not None:
+                if use_device == "xpu":
+                    place = paddle.XPUPlace(0)
+                elif use_device == "npu":
+                    place = paddle.NPUPlace(0)
+                elif use_device == "gpu":
+                    place = paddle.CUDAPlace(0)
+                else:
+                    place = paddle.CPUPlace()
+            else:
+                place = paddle.CUDAPlace(0) if use_gpu else paddle.CPUPlace()
 
             exe = paddle.static.Executor(place=place)
             data = self.processor.preprocess(sign_name=sign_name, data_dict=data)

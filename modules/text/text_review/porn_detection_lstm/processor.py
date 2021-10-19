@@ -52,7 +52,7 @@ def postprocess(predict_out, texts):
     Convert model's output tensor to pornography label
     """
     result = []
-    predict_out = predict_out.as_ndarray()
+    predict_out = predict_out.copy_to_cpu()
     for index in range(len(texts)):
         result_i = {}
         result_i['text'] = texts[index]['origin']

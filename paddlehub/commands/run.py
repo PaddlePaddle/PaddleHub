@@ -68,6 +68,10 @@ class RunCommand:
         arg_config_group.add_argument(
             '--use_gpu', type=ast.literal_eval, default=False, help='whether use GPU for prediction')
         arg_config_group.add_argument('--batch_size', type=int, default=1, help='batch size for prediction')
+        arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
         module_type = module.type.lower()
         if module_type.startswith('cv'):
@@ -83,4 +87,8 @@ class RunCommand:
         input_data = {key: [args.input_path] if module_type.startswith('cv') else [args.input_text]}
 
         return module(
-            sign_name=module.default_signature, data=input_data, use_gpu=args.use_gpu, batch_size=args.batch_size)
+            sign_name=module.default_signature,
+            data=input_data,
+            use_gpu=args.use_gpu,
+            batch_size=args.batch_size,
+            use_device=args.use_device)

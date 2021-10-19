@@ -78,7 +78,7 @@ class PornDetectionLSTM(hub.NLPPredictionModule):
         return inputs, outputs, program
 
     @serving
-    def detection(self, texts=[], data={}, use_gpu=False, batch_size=1):
+    def detection(self, texts=[], data={}, use_gpu=False, batch_size=1, use_device=None):
         """
         Get the porn prediction results results with the texts as input
 
@@ -87,15 +87,29 @@ class PornDetectionLSTM(hub.NLPPredictionModule):
              data(dict): key must be 'text', value is the texts to be predicted, if data not texts
              use_gpu(bool): whether use gpu to predict or not
              batch_size(int): the program deals once with one batch
+             use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
              results(list): the porn prediction results
         """
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-        except:
-            use_gpu = False
+        # real predictor to use
+        if use_device is not None:
+            if use_device == "cpu":
+                predictor = self.cpu_predictor
+            elif use_device == "xpu":
+                predictor = self.xpu_predictor
+            elif use_device == "npu":
+                predictor = self.npu_predictor
+            elif use_device == "gpu":
+                predictor = self.gpu_predictor
+            else:
+                raise Exception("Unsupported device: " + use_device)
+        else:
+            # use_device is not set, therefore follow use_gpu
+            if use_gpu:
+                predictor = self.gpu_predictor
+            else:
+                predictor = self.cpu_predictor
 
         if texts != [] and isinstance(texts, list) and data == {}:
             predicted_data = texts
@@ -116,13 +130,8 @@ class PornDetectionLSTM(hub.NLPPredictionModule):
 
             start_idx = start_idx + batch_size
             processed_results = preprocess(batch_data, self.tokenizer, self.vocab, self.sequence_max_len)
-            tensor_words = self.texts2tensor(processed_results)
-
-            if use_gpu:
-                batch_out = self.gpu_predictor.run([tensor_words])
-            else:
-                batch_out = self.cpu_predictor.run([tensor_words])
-            batch_result = postprocess(batch_out[0], processed_results)
+            predictor_output = self._internal_predict(predictor, processed_results)
+            batch_result = postprocess(predictor_output, processed_results)
             results += batch_result
         return results
 
