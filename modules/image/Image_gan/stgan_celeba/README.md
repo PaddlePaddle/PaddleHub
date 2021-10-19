@@ -17,7 +17,7 @@
   - 样例结果示例：
 
     <p align="center">
-    <img src="https://paddlehub.bj.bcebos.com/paddlehub-img/stgan_demo.JPG" width=1200><br/>
+    <img src="https://user-images.githubusercontent.com/35907364/137856070-2a43facd-cda0-473f-8935-e61f5dd583d8.JPGG" width=1200><br/>
     STGAN的效果图(图片属性分别为：original image, Bald, Bangs, Black_Hair, Blond_Hair, Brown_Hair, Bushy_Eyebrows, Eyeglasses, Gender, Mouth_Slightly_Open, Mustache, No_Beard, Pale_Skin, Aged)<br/>
     </p>
 
