@@ -158,12 +158,13 @@ class HumanPoseEstimation(hub.Module):
 
             # postprocess one by one
             for i in range(len(batch_data)):
-                out = postprocess(out_heatmaps=output[i],
-                                  org_im=batch_data[i]['org_im'],
-                                  org_im_shape=batch_data[i]['org_im_shape'],
-                                  org_im_path=batch_data[i]['org_im_path'],
-                                  output_dir=output_dir,
-                                  visualization=visualization)
+                out = postprocess(
+                    out_heatmaps=output[i],
+                    org_im=batch_data[i]['org_im'],
+                    org_im_shape=batch_data[i]['org_im_shape'],
+                    org_im_path=batch_data[i]['org_im_path'],
+                    output_dir=output_dir,
+                    visualization=visualization)
                 res.append(out)
         return res
 
@@ -177,13 +178,14 @@ class HumanPoseEstimation(hub.Module):
         program, feeded_var_names, target_vars = fluid.io.load_inference_model(
             dirname=self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(dirname=dirname,
-                                      main_program=program,
-                                      executor=exe,
-                                      feeded_var_names=feeded_var_names,
-                                      target_vars=target_vars,
-                                      model_filename=model_filename,
-                                      params_filename=params_filename)
+        fluid.io.save_inference_model(
+            dirname=dirname,
+            main_program=program,
+            executor=exe,
+            feeded_var_names=feeded_var_names,
+            target_vars=target_vars,
+            model_filename=model_filename,
+            params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -199,10 +201,11 @@ class HumanPoseEstimation(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(description="Run the human_pose_estimation_resnet50_mpii module.",
-                                              prog='hub run human_pose_estimation_resnet50_mpii',
-                                              usage='%(prog)s',
-                                              add_help=True)
+        self.parser = argparse.ArgumentParser(
+            description="Run the human_pose_estimation_resnet50_mpii module.",
+            prog='hub run human_pose_estimation_resnet50_mpii',
+            usage='%(prog)s',
+            add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -210,34 +213,30 @@ class HumanPoseEstimation(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.keypoint_detection(paths=[args.input_path],
-                                          batch_size=args.batch_size,
-                                          use_gpu=args.use_gpu,
-                                          output_dir=args.output_dir,
-                                          visualization=args.visualization,
-                                          use_device=args.use_device)
+        results = self.keypoint_detection(
+            paths=[args.input_path],
+            batch_size=args.batch_size,
+            use_gpu=args.use_gpu,
+            output_dir=args.output_dir,
+            visualization=args.visualization,
+            use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument('--use_gpu',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether use GPU or not")
-        self.arg_config_group.add_argument('--output_dir',
-                                           type=str,
-                                           default='output_pose',
-                                           help="The directory to save output images.")
-        self.arg_config_group.add_argument('--visualization',
-                                           type=ast.literal_eval,
-                                           default=False,
-                                           help="whether to save output as images.")
+        self.arg_config_group.add_argument(
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+        self.arg_config_group.add_argument(
+            '--output_dir', type=str, default='output_pose', help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
         self.arg_config_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
-        self.arg_config_group.add_argument('--use_device',
-                                           choices=["cpu", "gpu", "xpu", "npu"],
-                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
