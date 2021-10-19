@@ -9,7 +9,10 @@ import os
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+
+from paddle.inference import Config
+from paddle.inference import create_predictor
+
 from paddlehub.module.module import moduleinfo, runnable, serving
 
 from pyramidbox_lite_server.data_feed import reader
@@ -29,26 +32,53 @@ class PyramidBoxLiteServer(hub.Module):
         self._set_config()
         self.processor = self
 
+    def _get_device_id(self, places):
+        try:
+            places = os.environ[places]
+            id = int(places)
+        except:
+            id = -1
+        return id
+
     def _set_config(self):
         """
         predictor config setting
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+
+        # create default cpu predictor
+        cpu_config = Config(self.default_pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-            use_gpu = True
-        except:
-            use_gpu = False
-        if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        # create predictors using various types of devices
+
+        # npu
+        npu_id = self._get_device_id("FLAGS_selected_npus")
+        if npu_id != -1:
+            # use npu
+            npu_config = Config(self.default_pretrained_model_path)
+            npu_config.disable_glog_info()
+            npu_config.enable_npu(device_id=npu_id)
+            self.npu_predictor = create_predictor(npu_config)
+
+        # gpu
+        gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
+        if gpu_id != -1:
+            # use gpu
+            gpu_config = Config(self.default_pretrained_model_path)
             gpu_config.disable_glog_info()
-            gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=gpu_id)
+            self.gpu_predictor = create_predictor(gpu_config)
+
+        # xpu
+        xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
+        if xpu_id != -1:
+            # use xpu
+            xpu_config = Config(self.default_pretrained_model_path)
+            xpu_config.disable_glog_info()
+            xpu_config.enable_xpu(100)
+            self.xpu_predictor = create_predictor(xpu_config)
 
     def face_detection(self,
                        images=None,
@@ -58,7 +88,8 @@ class PyramidBoxLiteServer(hub.Module):
                        output_dir='detection_result',
                        visualization=False,
                        shrink=0.5,
-                       confs_threshold=0.6):
+                       confs_threshold=0.6,
+                       use_device=None):
         """
         API for face detection.
 
@@ -70,18 +101,29 @@ class PyramidBoxLiteServer(hub.Module):
             visualization (bool): Whether to save image or not.
             shrink (float): parameter to control the resize scale in preprocess.
             confs_threshold (float): confidence threshold.
+            use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
             res (list[dict]): The result of face detection and save path of images.
         """
-        if use_gpu:
-            try:
-                _places = os.environ["CUDA_VISIBLE_DEVICES"]
-                int(_places[0])
-            except:
-                raise RuntimeError(
-                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
-                )
+        # real predictor to use
+        if use_device is not None:
+            if use_device == "cpu":
+                predictor = self.cpu_predictor
+            elif use_device == "xpu":
+                predictor = self.xpu_predictor
+            elif use_device == "npu":
+                predictor = self.npu_predictor
+            elif use_device == "gpu":
+                predictor = self.gpu_predictor
+            else:
+                raise Exception("Unsupported device: " + use_device)
+        else:
+            # use_device is not set, therefore follow use_gpu
+            if use_gpu:
+                predictor = self.gpu_predictor
+            else:
+                predictor = self.cpu_predictor
 
         # compatibility with older versions
         if data:
@@ -97,11 +139,19 @@ class PyramidBoxLiteServer(hub.Module):
         res = list()
         # process one by one
         for element in reader(images, paths, shrink):
-            image = np.expand_dims(element['image'], axis=0).astype('float32')
-            image_tensor = PaddleTensor(image.copy())
-            data_out = self.gpu_predictor.run([image_tensor]) if use_gpu else self.cpu_predictor.run([image_tensor])
+            batch_image = np.expand_dims(element['image'], axis=0).astype('float32')
+
+            input_names = predictor.get_input_names()
+            input_tensor = predictor.get_input_handle(input_names[0])
+            input_tensor.reshape(batch_image.shape)
+            input_tensor.copy_from_cpu(batch_image.copy())
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+            predictor_output = output_handle.copy_to_cpu()
+
             out = postprocess(
-                data_out=data_out[0].as_ndarray(),
+                data_out=predictor_output,
                 org_im=element['org_im'],
                 org_im_path=element['org_im_path'],
                 image_width=element['image_width'],
@@ -163,7 +213,8 @@ class PyramidBoxLiteServer(hub.Module):
             output_dir=args.output_dir,
             visualization=args.visualization,
             shrink=args.shrink,
-            confs_threshold=args.confs_threshold)
+            confs_threshold=args.confs_threshold,
+            use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
@@ -176,6 +227,10 @@ class PyramidBoxLiteServer(hub.Module):
             '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
         self.arg_config_group.add_argument(
             '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """

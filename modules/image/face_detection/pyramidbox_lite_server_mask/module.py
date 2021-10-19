@@ -9,7 +9,10 @@ import os
 import numpy as np
 import paddle.fluid as fluid
 import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+
+from paddle.inference import Config
+from paddle.inference import create_predictor
+
 from paddlehub.module.module import moduleinfo, runnable, serving
 
 from pyramidbox_lite_server_mask.data_feed import reader
@@ -30,8 +33,7 @@ class PyramidBoxLiteServerMask(hub.Module):
         Args:
             face_detector_module (class): module to detect face.
         """
-        self.default_pretrained_model_path = os.path.join(
-            self.directory, "pyramidbox_lite_server_mask_model")
+        self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_lite_server_mask_model")
         if face_detector_module is None:
             self.face_detector = hub.Module(name='pyramidbox_lite_server')
         else:
@@ -39,27 +41,53 @@ class PyramidBoxLiteServerMask(hub.Module):
         self._set_config()
         self.processor = self
 
+    def _get_device_id(self, places):
+        try:
+            places = os.environ[places]
+            id = int(places)
+        except:
+            id = -1
+        return id
+
     def _set_config(self):
         """
         predictor config setting
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+
+        # create default cpu predictor
+        cpu_config = Config(self.default_pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
-        try:
-            _places = os.environ["CUDA_VISIBLE_DEVICES"]
-            int(_places[0])
-            use_gpu = True
-        except:
-            use_gpu = False
-        if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        # create predictors using various types of devices
+
+        # npu
+        npu_id = self._get_device_id("FLAGS_selected_npus")
+        if npu_id != -1:
+            # use npu
+            npu_config = Config(self.default_pretrained_model_path)
+            npu_config.disable_glog_info()
+            npu_config.enable_npu(device_id=npu_id)
+            self.npu_predictor = create_predictor(npu_config)
+
+        # gpu
+        gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
+        if gpu_id != -1:
+            # use gpu
+            gpu_config = Config(self.default_pretrained_model_path)
             gpu_config.disable_glog_info()
-            gpu_config.enable_use_gpu(
-                memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=gpu_id)
+            self.gpu_predictor = create_predictor(gpu_config)
+
+        # xpu
+        xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
+        if xpu_id != -1:
+            # use xpu
+            xpu_config = Config(self.default_pretrained_model_path)
+            xpu_config.disable_glog_info()
+            xpu_config.enable_xpu(100)
+            self.xpu_predictor = create_predictor(xpu_config)
 
     def set_face_detector_module(self, face_detector_module):
         """
@@ -82,7 +110,8 @@ class PyramidBoxLiteServerMask(hub.Module):
                        output_dir='detection_result',
                        use_multi_scale=False,
                        shrink=0.5,
-                       confs_threshold=0.6):
+                       confs_threshold=0.6,
+                       use_device=None):
         """
         API for face detection.
 
@@ -97,18 +126,29 @@ class PyramidBoxLiteServerMask(hub.Module):
                 it reduce the prediction speed for the increase model calculation.
             shrink (float): parameter to control the resize scale in preprocess.
             confs_threshold (float): confidence threshold.
+            use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
             res (list[dict]): The result of face detection and save path of images.
         """
-        if use_gpu:
-            try:
-                _places = os.environ["CUDA_VISIBLE_DEVICES"]
-                int(_places[0])
-            except:
-                raise RuntimeError(
-                    "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
-                )
+        # real predictor to use
+        if use_device is not None:
+            if use_device == "cpu":
+                predictor = self.cpu_predictor
+            elif use_device == "xpu":
+                predictor = self.xpu_predictor
+            elif use_device == "npu":
+                predictor = self.npu_predictor
+            elif use_device == "gpu":
+                predictor = self.gpu_predictor
+            else:
+                raise Exception("Unsupported device: " + use_device)
+        else:
+            # use_device is not set, therefore follow use_gpu
+            if use_gpu:
+                predictor = self.gpu_predictor
+            else:
+                predictor = self.cpu_predictor
 
         # compatibility with older versions
         if data:
@@ -123,16 +163,14 @@ class PyramidBoxLiteServerMask(hub.Module):
 
         # get all data
         all_element = list()
-        for yield_data in reader(self.face_detector, shrink, confs_threshold,
-                                 images, paths, use_gpu, use_multi_scale):
+        for yield_data in reader(self.face_detector, shrink, confs_threshold, images, paths, use_gpu, use_multi_scale,
+                                 use_device):
             all_element.append(yield_data)
 
         image_list = list()
         element_image_num = list()
         for i in range(len(all_element)):
-            element_image = [
-                handled['image'] for handled in all_element[i]['preprocessed']
-            ]
+            element_image = [handled['image'] for handled in all_element[i]['preprocessed']]
             element_image_num.append(len(element_image))
             image_list.extend(element_image)
 
@@ -149,23 +187,24 @@ class PyramidBoxLiteServerMask(hub.Module):
                 except:
                     pass
 
-            image_arr = np.squeeze(np.array(batch_data), axis=1)
-            image_tensor = PaddleTensor(image_arr.copy())
-            data_out = self.gpu_predictor.run([
-                image_tensor
-            ]) if use_gpu else self.cpu_predictor.run([image_tensor])
-            # len(data_out) == 1
-            # data_out[0].as_ndarray().shape == (-1, 2)
-            data_out = data_out[0].as_ndarray()
-            predict_out = np.concatenate((predict_out, data_out))
+            batch_image = np.squeeze(np.array(batch_data), axis=1)
+
+            input_names = predictor.get_input_names()
+            input_tensor = predictor.get_input_handle(input_names[0])
+            input_tensor.reshape(batch_image.shape)
+            input_tensor.copy_from_cpu(batch_image.copy())
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+            predictor_output = output_handle.copy_to_cpu()
+
+            predict_out = np.concatenate((predict_out, predictor_output))
 
         predict_out = predict_out[1:]
         # postprocess one by one
         res = list()
         for i in range(len(all_element)):
-            detect_faces_list = [
-                handled['face'] for handled in all_element[i]['preprocessed']
-            ]
+            detect_faces_list = [handled['face'] for handled in all_element[i]['preprocessed']]
             interval_left = sum(element_image_num[0:i])
             interval_right = interval_left + element_image_num[i]
             out = postprocess(
@@ -178,31 +217,16 @@ class PyramidBoxLiteServerMask(hub.Module):
             res.append(out)
         return res
 
-    def save_inference_model(self,
-                             dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True):
+    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
         classifier_dir = os.path.join(dirname, 'mask_detector')
         detector_dir = os.path.join(dirname, 'pyramidbox_lite')
-        self._save_classifier_model(classifier_dir, model_filename,
-                                    params_filename, combined)
-        self._save_detector_model(detector_dir, model_filename, params_filename,
-                                  combined)
+        self._save_classifier_model(classifier_dir, model_filename, params_filename, combined)
+        self._save_detector_model(detector_dir, model_filename, params_filename, combined)
 
-    def _save_detector_model(self,
-                             dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True):
-        self.face_detector.save_inference_model(dirname, model_filename,
-                                                params_filename, combined)
+    def _save_detector_model(self, dirname, model_filename=None, params_filename=None, combined=True):
+        self.face_detector.save_inference_model(dirname, model_filename, params_filename, combined)
 
-    def _save_classifier_model(self,
-                               dirname,
-                               model_filename=None,
-                               params_filename=None,
-                               combined=True):
+    def _save_classifier_model(self, dirname, model_filename=None, params_filename=None, combined=True):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
@@ -240,12 +264,9 @@ class PyramidBoxLiteServerMask(hub.Module):
             prog='hub run {}'.format(self.name),
             usage='%(prog)s',
             add_help=True)
-        self.arg_input_group = self.parser.add_argument_group(
-            title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options",
-            description=
-            "Run configuration for controlling module behavior, not required.")
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
@@ -255,7 +276,8 @@ class PyramidBoxLiteServerMask(hub.Module):
             output_dir=args.output_dir,
             visualization=args.visualization,
             shrink=args.shrink,
-            confs_threshold=args.confs_threshold)
+            confs_threshold=args.confs_threshold,
+            use_device=args.use_device)
         return results
 
     def add_module_config_arg(self):
@@ -263,36 +285,25 @@ class PyramidBoxLiteServerMask(hub.Module):
         Add the command config options.
         """
         self.arg_config_group.add_argument(
-            '--use_gpu',
-            type=ast.literal_eval,
-            default=False,
-            help="whether use GPU or not")
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
         self.arg_config_group.add_argument(
-            '--output_dir',
-            type=str,
-            default='detection_result',
-            help="The directory to save output images.")
+            '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
         self.arg_config_group.add_argument(
-            '--visualization',
-            type=ast.literal_eval,
-            default=False,
-            help="whether to save output as images.")
+            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument(
+            '--use_device',
+            choices=["cpu", "gpu", "xpu", "npu"],
+            help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument(
-            '--input_path', type=str, help="path to image.")
+        self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
         self.arg_input_group.add_argument(
             '--shrink',
             type=ast.literal_eval,
             default=0.5,
-            help=
-            "resize the image to `shrink * original_shape` before feeding into network."
-        )
+            help="resize the image to `shrink * original_shape` before feeding into network.")
         self.arg_input_group.add_argument(
-            '--confs_threshold',
-            type=ast.literal_eval,
-            default=0.6,
-            help="confidence threshold.")
+            '--confs_threshold', type=ast.literal_eval, default=0.6, help="confidence threshold.")
