@@ -75,7 +75,7 @@
     # Visualization mode
     module = hub.Module(name="ddparser", return_visual=True)
     data = module.visualize("百度是一家高科技公司")
-    cv2.imwrite('test.jpg',data)
+    cv2.imwrite('test.jpg', data)
     ```
     
 - ### 3、API
