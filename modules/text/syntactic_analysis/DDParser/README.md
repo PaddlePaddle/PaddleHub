@@ -88,13 +88,14 @@
       batch_size=1,
       return_visual=False)
     ```
+    - 模块初始化。
     
     - **参数**
 
       - tree(bool): 输出结果是否需要满足树状结构，默认为True。
       - prob(bool): 是否输出概率值，默认为False。
       - use_pos(bool): 是否输出词性标签，默认为False。
-      - batch_size(int): 批大小，默认为1.
+      - batch_size(int): 批大小，默认为1。
       - return_visual(bool): 是否返回可视化结果（需配合visualize api使用），默认为False。
 
   - ```python
