@@ -121,7 +121,7 @@
 
 ## 四、服务部署
 
-- PaddleHub Serving可以部署一个在线情感分析服务，可以将此接口用于在线web应用。
+- PaddleHub Serving可以部署一个在线句法分析服务，可以将此接口用于在线web应用。
 
 - ## 第一步：启动PaddleHub Serving
 
