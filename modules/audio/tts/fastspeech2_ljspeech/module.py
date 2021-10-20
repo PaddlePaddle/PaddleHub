@@ -34,7 +34,7 @@ import yaml
 
 @moduleinfo(name="fastspeech2_ljspeech", version="1.0.0", summary="", author="Baidu", author_email="", type="audio/tts")
 class FastSpeech(paddle.nn.Layer):
-    def __init__(self, output_dir='./wavs', **kwargs):
+    def __init__(self, output_dir='./wavs'):
         super(FastSpeech, self).__init__()
         fastspeech2_res_dir = os.path.join(MODULE_HOME, 'fastspeech2_ljspeech',
                                            'assets/fastspeech2_nosil_ljspeech_ckpt_0.5')
@@ -119,8 +119,12 @@ class FastSpeech(paddle.nn.Layer):
             'Input data should be List[str], but got {}'.format(type(sentences))
 
         paddle.set_device(device)
+        wav_files = []
         for i, sentence in enumerate(sentences):
             wav = self(sentence)
-            sf.write(str(self.output_dir / (str(i + 1) + ".wav")), wav.numpy(), samplerate=self.samplerate)
+            wav_file = str(self.output_dir.absolute() / (str(i + 1) + ".wav"))
+            sf.write(wav_file, wav.numpy(), samplerate=self.samplerate)
+            wav_files.append(wav_file)
 
         logger.info('{} wave files have been generated in {}'.format(len(sentences), self.output_dir.absolute()))
+        return wav_files

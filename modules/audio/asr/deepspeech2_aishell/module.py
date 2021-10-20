@@ -20,6 +20,7 @@ import numpy as np
 from paddlehub.env import MODULE_HOME
 from paddlehub.module.module import moduleinfo, serving
 from paddlehub.utils.log import logger
+from paddle.utils.download import get_path_from_url
 
 try:
     import swig_decoders
@@ -39,6 +40,9 @@ from deepspeech.exps.deepspeech2.config import get_cfg_defaults
 from deepspeech.utils.utility import UpdateConfig
 from .deepspeech_tester import DeepSpeech2Tester
 
+LM_URL = 'https://deepspeech.bj.bcebos.com/zh_lm/zh_giga.no_cna_cmn.prune01244.klm'
+LM_MD5 = '29e02312deb2e59b3c8686c7966d4fe3'
+
 
 @moduleinfo(name="deepspeech2_aishell", version="1.0.0", summary="", author="Baidu", author_email="", type="audio/asr")
 class DeepSpeech2(paddle.nn.Layer):
@@ -49,6 +53,12 @@ class DeepSpeech2(paddle.nn.Layer):
         res_dir = os.path.join(MODULE_HOME, 'deepspeech2_aishell', 'assets')
         conf_file = os.path.join(res_dir, 'conf/deepspeech2.yaml')
         checkpoint = os.path.join(res_dir, 'checkpoints/avg_1.pdparams')
+        # Download LM manually cause its large size.
+        lm_path = os.path.join(res_dir, 'data', 'lm')
+        lm_file = os.path.join(lm_path, LM_URL.split('/')[-1])
+        if not os.path.isfile(lm_file):
+            logger.info(f'Downloading lm from {LM_URL}.')
+            get_path_from_url(url=LM_URL, root_dir=lm_path, md5sum=LM_MD5)
 
         # config
         self.model_type = 'offline'
@@ -78,4 +88,4 @@ class DeepSpeech2(paddle.nn.Layer):
         self.check_audio(audio_file)
 
         paddle.set_device(device)
-        return self.tester.test(audio_file)
+        return self.tester.test(audio_file)[0]
