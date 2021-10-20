@@ -15,12 +15,20 @@ from paddlenlp import Taskflow
     author_email="",
     type="nlp/syntactic_analysis")
 class ddparser(hub.NLPPredictionModule):
-    def __init__(self, 
+    def __init__(self,
+                 tree=True,
                  prob=False, 
                  use_pos=False,
+                 batch_size=1,
                  return_visual=False,
                  ):
-        self.ddp = Taskflow("dependency_parsing", prob=prob, use_pos=use_pos, return_visual=return_visual)
+        self.ddp = Taskflow(
+            "dependency_parsing",
+            tree=tree, 
+            prob=prob, 
+            use_pos=use_pos,
+            batch_size=batch_size,
+            return_visual=return_visual)
 
     @serving
     def serving_parse(self, texts):
