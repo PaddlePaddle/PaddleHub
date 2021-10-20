@@ -145,7 +145,7 @@
 
 ## 四、服务部署
 
-- PaddleHub Serving可以部署一个在线语义匹配服务，可以将此接口用于在线web应用。
+- PaddleHub Serving可以部署一个在线同声传译服务(需要用户配置一个语音转文本应用预先将语音输入转为中文文字)，可以将此接口用于在线web应用。
 
 - ### 第一步：启动PaddleHub Serving
 
