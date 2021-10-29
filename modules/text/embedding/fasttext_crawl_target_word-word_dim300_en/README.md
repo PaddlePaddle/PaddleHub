@@ -35,17 +35,17 @@
 
 - ### 1、预测代码示例
 
-```python
-import paddlehub as hub
-embedding = hub.Module(name='fasttext_crawl_target_word-word_dim300_en')
+  - ```python
+    import paddlehub as hub
+    embedding = hub.Module(name='fasttext_crawl_target_word-word_dim300_en')
 
-# 获取单词的embedding
-embedding.search("中国")
-# 计算两个词向量的余弦相似度
-embedding.cosine_sim("中国", "美国")
-# 计算两个词向量的内积
-embedding.dot("中国", "美国")
-```
+    # 获取单词的embedding
+    embedding.search("中国")
+    # 计算两个词向量的余弦相似度
+    embedding.cosine_sim("中国", "美国")
+    # 计算两个词向量的内积
+    embedding.dot("中国", "美国")
+    ```
 
 - ### 2、API
 
