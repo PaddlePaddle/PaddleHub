@@ -21,15 +21,29 @@ DeepSpeech2是百度于2015年提出的适用于英文和中文的end-to-end语�
 <img src="https://raw.githubusercontent.com/PaddlePaddle/DeepSpeech/Hub/docs/images/ds2offlineModel.png" hspace='10'/> <br />
 </p>
 
-<p align="center">
-<img src="https://nvidia.github.io/OpenSeq2Seq/html/_images/ds2.png" hspace='10'/> <br />
-</p>
-
 更多详情请参考[Deep Speech 2: End-to-End Speech Recognition in English and Mandarin](https://arxiv.org/abs/1512.02595)
 
 ## 二、安装
 
-- ### 1、环境依赖
+- ### 1、系统依赖
+
+  - libsndfile, swig >= 3.0
+    - Linux
+      ```shell
+      $ sudo apt-get install libsndfile swig
+      or
+      $ sudo yum install libsndfile swig
+      ```
+    - MacOs
+      ```
+      $ brew install libsndfile swig
+      ```
+
+- ### 2、环境依赖
+  - swig_decoder:
+    ```
+    git clone https://github.com/paddlepaddle/deepspeech && cd DeepSpeech && git reset --hard b53171694e7b87abe7ea96870b2f4d8e0e2b1485 && cd deepspeech/decoders/ctcdecoder/swig && sh setup.sh
+    ```
 
   - paddlepaddle >= 2.1.0
 

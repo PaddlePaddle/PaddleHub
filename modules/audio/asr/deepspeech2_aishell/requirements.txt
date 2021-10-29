@@ -2,7 +2,6 @@
 loguru
 yacs
 jsonlines
-python-speech-features
 scipy==1.2.1
 sentencepiece
 resampy==0.2.2

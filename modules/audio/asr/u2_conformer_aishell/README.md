@@ -1,58 +1,61 @@
-# deepspeech2_aishell
+# u2_conformer_aishell
 
-|模型名称|deepspeech2_aishell|
+|模型名称|u2_conformer_aishell|
 | :--- | :---: |
 |类别|语音-语音识别|
 |网络|DeepSpeech2|
 |数据集|AISHELL-1|
 |是否支持Fine-tuning|否|
-|模型大小|306MB|
-|最新更新日期|2021-10-20|
-|数据指标|中文CER 0.065|
+|模型大小|284MB|
+|最新更新日期|2021-11-01|
+|数据指标|中文CER 0.055|
 
 ## 一、模型基本信息
 
 ### 模型介绍
 
-DeepSpeech2是百度于2015年提出的适用于英文和中文的end-to-end语音识别模型。deepspeech2_aishell使用了DeepSpeech2离线模型的结构，模型主要由2层卷积网络和3层GRU组成，并在中文普通话开源语音数据集[AISHELL-1](http://www.aishelltech.com/kysjcp)进行了预训练，该模型在其测试集上的CER指标是0.065。
+U2 Conformer模型是一种适用于英文和中文的end-to-end语音识别模型。u2_conformer_aishell采用了conformer的encoder和transformer的decoder的模型结构，并且使用了ctc-prefix beam search的方式进行一遍打分，再利用attention decoder进行二次打分的方式进行解码来得到最终结果。
 
+u2_conformer_aishell在中文普通话开源语音数据集[AISHELL-1](http://www.aishelltech.com/kysjcp)进行了预训练，该模型在其测试集上的CER指标是0.055257。
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/PaddlePaddle/DeepSpeech/Hub/docs/images/ds2offlineModel.png" hspace='10'/> <br />
+<img src="https://paddlehub.bj.bcebos.com/paddlehub-img/conformer.png" hspace='10'/> <br />
 </p>
 
-更多详情请参考[Deep Speech 2: End-to-End Speech Recognition in English and Mandarin](https://arxiv.org/abs/1512.02595)
+<p align="center">
+<img src="https://paddlehub.bj.bcebos.com/paddlehub-img/u2_conformer.png" hspace='10'/> <br />
+</p>
+
+更多详情请参考:
+- [Unified Streaming and Non-streaming Two-pass End-to-end Model for Speech Recognition](https://arxiv.org/abs/2012.05481)
+- [Conformer: Convolution-augmented Transformer for Speech Recognition](https://arxiv.org/abs/2005.08100)
 
 ## 二、安装
 
 - ### 1、系统依赖
 
-  - libsndfile, swig >= 3.0
+  - libsndfile
     - Linux
       ```shell
-      $ sudo apt-get install libsndfile swig
+      $ sudo apt-get install libsndfile
       or
-      $ sudo yum install libsndfile swig
+      $ sudo yum install libsndfile
       ```
     - MacOs
       ```
-      $ brew install libsndfile swig
+      $ brew install libsndfile
       ```
 
 - ### 2、环境依赖
-  - swig_decoder:
-    ```
-    git clone https://github.com/PaddlePaddle/DeepSpeech.git && cd DeepSpeech && git reset --hard b53171694e7b87abe7ea96870b2f4d8e0e2b1485 && cd deepspeech/decoders/ctcdecoder/swig && sh setup.sh
-    ```
 
   - paddlepaddle >= 2.1.0
 
   - paddlehub >= 2.1.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
-- ### 2、安装
+- ### 3、安装
 
   - ```shell
-    $ hub install deepspeech2_aishell
+    $ hub install u2_conformer_aishell
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -69,7 +72,7 @@ DeepSpeech2是百度于2015年提出的适用于英文和中文的end-to-end语�
     wav_file = '/path/to/test_input.wav'
 
     model = hub.Module(
-        name='deepspeech2_aishell',
+        name='u2_conformer_aishell',
         version='1.0.0')
     text = model.speech_recognize(wav_file)
 
@@ -115,7 +118,7 @@ DeepSpeech2是百度于2015年提出的适用于英文和中文的end-to-end语�
 - ### 第一步：启动PaddleHub Serving
 
   - ```shell
-    $ hub serving start -m deepspeech2_aishell
+    $ hub serving start -m u2_conformer_aishell
     ```
 
   - 这样就完成了一个语音识别服务化API的部署，默认端口号为8866。
@@ -137,7 +140,7 @@ DeepSpeech2是百度于2015年提出的适用于英文和中文的end-to-end语�
     data = {"audio_file": file}
 
     # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
-    url = "http://127.0.0.1:8866/predict/deepspeech2_aishell"
+    url = "http://127.0.0.1:8866/predict/u2_conformer_aishell"
 
     # 指定post请求的headers为application/json方式
     headers = {"Content-Type": "application/json"}
@@ -153,5 +156,5 @@ DeepSpeech2是百度于2015年提出的适用于英文和中文的end-to-end语�
   初始发布
 
   ```shell
-  $ hub install deepspeech2_aishell
+  $ hub install u2_conformer_aishell
   ```

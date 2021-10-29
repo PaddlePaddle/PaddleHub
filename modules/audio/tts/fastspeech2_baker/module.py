@@ -37,7 +37,7 @@ class FastSpeech(paddle.nn.Layer):
     def __init__(self, output_dir='./wavs'):
         super(FastSpeech, self).__init__()
         fastspeech2_res_dir = os.path.join(MODULE_HOME, 'fastspeech2_baker', 'assets/fastspeech2_nosil_baker_ckpt_0.4')
-        pwg_res_dir = os.path.join(MODULE_HOME, 'fastspeech2_baker', 'assets/parallel_wavegan_baker_ckpt_0.4')
+        pwg_res_dir = os.path.join(MODULE_HOME, 'fastspeech2_baker', 'assets/pwg_baker_ckpt_0.4')
 
         phones_dict = os.path.join(fastspeech2_res_dir, 'phone_id_map.txt')
         with open(phones_dict, "r") as f:
@@ -61,10 +61,10 @@ class FastSpeech(paddle.nn.Layer):
         with open(pwg_config) as f:
             pwg_config = CfgNode(yaml.safe_load(f))
 
-        pwg_params = os.path.join(pwg_res_dir, 'pwg_generator.pdparams')
+        pwg_checkpoint = os.path.join(pwg_res_dir, 'pwg_snapshot_iter_400000.pdz')
         vocoder = PWGGenerator(**pwg_config["generator_params"])
-        vocoder.set_state_dict(paddle.load(pwg_params))
-        logger.info('Load vocoder params from %s' % os.path.abspath(pwg_params))
+        vocoder.set_state_dict(paddle.load(pwg_checkpoint)["generator_params"])
+        logger.info('Load vocoder params from %s' % os.path.abspath(pwg_checkpoint))
         vocoder.remove_weight_norm()
         vocoder.eval()
 

@@ -27,8 +27,9 @@ try:
 except ModuleNotFoundError as e:
     logger.error(e)
     logger.info('The module requires additional dependencies: swig_decoders. '
-                'Please install via \'git clone -b Hub https://github.com/PaddlePaddle/DeepSpeech '
-                '&& cd DeepSpeech/deepspeech/decoders/swig && sh setup.sh\'')
+                'please install via:\n\'git clone https://github.com/PaddlePaddle/DeepSpeech.git '
+                '&& cd DeepSpeech && git reset --hard b53171694e7b87abe7ea96870b2f4d8e0e2b1485 '
+                '&& cd deepspeech/decoders/ctcdecoder/swig && sh setup.sh\'')
     sys.exit(1)
 
 import paddle

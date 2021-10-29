@@ -10,3 +10,4 @@ kaldiio
 typeguard
 tensorboardX
 editdistance
+textgrid
