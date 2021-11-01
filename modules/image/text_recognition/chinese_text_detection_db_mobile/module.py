@@ -29,7 +29,7 @@ def base64_to_cv2(b64str):
 
 @moduleinfo(
     name="chinese_text_detection_db_mobile",
-    version="1.0.3",
+    version="1.0.4",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
@@ -103,26 +103,6 @@ class ChineseTextDetectionDB(hub.Module):
             images.append(img)
         return images
 
-    def clip_det_res(self, points, img_height, img_width):
-        for pno in range(points.shape[0]):
-            points[pno, 0] = int(min(max(points[pno, 0], 0), img_width - 1))
-            points[pno, 1] = int(min(max(points[pno, 1], 0), img_height - 1))
-        return points
-
-    def filter_tag_det_res(self, dt_boxes, image_shape):
-        img_height, img_width = image_shape[0:2]
-        dt_boxes_new = []
-        for box in dt_boxes:
-            box = self.order_points_clockwise(box)
-            box = self.clip_det_res(box, img_height, img_width)
-            rect_width = int(np.linalg.norm(box[0] - box[1]))
-            rect_height = int(np.linalg.norm(box[0] - box[3]))
-            if rect_width <= 10 or rect_height <= 10:
-                continue
-            dt_boxes_new.append(box)
-        dt_boxes = np.array(dt_boxes_new)
-        return dt_boxes
-
     def order_points_clockwise(self, pts):
         """
         reference from: https://github.com/jrosebr1/imutils/blob/master/imutils/perspective.py
@@ -146,6 +126,35 @@ class ChineseTextDetectionDB(hub.Module):
 
         rect = np.array([tl, tr, br, bl], dtype="float32")
         return rect
+
+    def clip_det_res(self, points, img_height, img_width):
+        for pno in range(points.shape[0]):
+            points[pno, 0] = int(min(max(points[pno, 0], 0), img_width - 1))
+            points[pno, 1] = int(min(max(points[pno, 1], 0), img_height - 1))
+        return points
+
+    def filter_tag_det_res(self, dt_boxes, image_shape):
+        img_height, img_width = image_shape[0:2]
+        dt_boxes_new = []
+        for box in dt_boxes:
+            box = self.order_points_clockwise(box)
+            box = self.clip_det_res(box, img_height, img_width)
+            rect_width = int(np.linalg.norm(box[0] - box[1]))
+            rect_height = int(np.linalg.norm(box[0] - box[3]))
+            if rect_width <= 3 or rect_height <= 3:
+                continue
+            dt_boxes_new.append(box)
+        dt_boxes = np.array(dt_boxes_new)
+        return dt_boxes
+
+    def filter_tag_det_res_only_clip(self, dt_boxes, image_shape):
+        img_height, img_width = image_shape[0:2]
+        dt_boxes_new = []
+        for box in dt_boxes:
+            box = self.clip_det_res(box, img_height, img_width)
+            dt_boxes_new.append(box)
+        dt_boxes = np.array(dt_boxes_new)
+        return dt_boxes
 
     def detect_text(self,
                     images=[],
@@ -193,7 +202,7 @@ class ChineseTextDetectionDB(hub.Module):
             'thresh': 0.3,
             'box_thresh': 0.5,
             'max_candidates': 1000,
-            'unclip_ratio': 2.0
+            'unclip_ratio': 1.6
         })
 
         all_imgs = []
@@ -314,14 +323,3 @@ class ChineseTextDetectionDB(hub.Module):
         Add the command input options
         """
         self.arg_input_group.add_argument('--input_path', type=str, default=None, help="diretory to image")
-
-
-if __name__ == '__main__':
-    db = ChineseTextDetectionDB()
-    image_path = [
-        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/2.jpg', '/mnt/zhangxuefei/PaddleOCR/doc/imgs/12.jpg',
-        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/test_image.jpg'
-    ]
-    res = db.detect_text(paths=image_path, visualization=True)
-    db.save_inference_model('save')
-    print(res)
