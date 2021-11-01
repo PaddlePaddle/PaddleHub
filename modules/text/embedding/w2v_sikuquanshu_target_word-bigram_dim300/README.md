@@ -123,6 +123,8 @@
       - `*args`： 额外传递的列表形式的参数。
       - `**kwargs`： 额外传递的字典形式的参数。
 
+    - 关于额外参数的详情可参考[paddlenlp.data.tokenizer.JiebaTokenizer](https://github.com/PaddlePaddle/models/blob/release/2.0-beta/PaddleNLP/paddlenlp/data/tokenizer.py)
+
   - 更多api详情和用法可参考[paddlenlp.embeddings](https://github.com/PaddlePaddle/models/tree/release/2.0-beta/PaddleNLP/paddlenlp/embeddings)
 
 
