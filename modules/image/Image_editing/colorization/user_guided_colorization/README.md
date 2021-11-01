@@ -58,7 +58,7 @@
 
         model = hub.Module(name='user_guided_colorization')
         model.set_config(prob=0.1)
-        result = model.predict(images=['PATH/TO/IMAGE'])
+        result = model.predict(images=['/PATH/TO/IMAGE'])
     ```
 - ### 3.如何开始Fine-tune
 
