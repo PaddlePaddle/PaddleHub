@@ -38,9 +38,7 @@
 
 ## 三、模型API预测
 
-- ### 1、代码示例
-
-    - 预测代码示例：
+- ### 1、预测代码示例
 
     ```python
     import paddlehub as hub
