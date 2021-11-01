@@ -51,7 +51,7 @@
     import cv2
 
     classifier = hub.Module(name="spinalnet_res101_gemstone")
-    result = classifier.predict(['/PATH/TO/IMAGE']）
+    result = classifier.predict(['/PATH/TO/IMAGE'])
     print(result)
     ```
 
