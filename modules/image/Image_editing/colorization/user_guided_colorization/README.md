@@ -3,7 +3,7 @@
 |模型名称|user_guided_colorization|
 | :--- | :---: | 
 |类别|图像-图像编辑|
-|网络|siggraph|
+|网络| Local and Global Hints Network |
 |数据集|ILSVRC 2012|
 |是否支持Fine-tuning|是|
 |模型大小|131MB|
