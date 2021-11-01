@@ -129,7 +129,7 @@ text = [["今天是个好日子"], ["天气预报说今天要下雨"]]
 # 对应本地部署，则为module.get_embedding(data=text)
 data = {"data": text}
 # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
-url = "http://10.12.121.132:8866/predict/bert-base-multilingual-cased"
+url = "http://127.0.0.1:8866/predict/bert-base-multilingual-cased"
 # 指定post请求的headers为application/json方式
 headers = {"Content-Type": "application/json"}
 
