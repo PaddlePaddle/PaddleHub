@@ -68,15 +68,3 @@ class wordtag(hub.NLPPredictionModule):
         results = self.predict(texts=input_data)
 
         return results
-
-
-if __name__ == "__main__":
-    module = wordtag()
-    # Data to be predicted
-    test_text = "《孤女》是2010年九州出版社出版的小说，作者是余兼羽。"
-    results = module.predict(test_text)
-    print(results)
-    # List input
-    test_text = ["热梅茶是一道以梅子为主要原料制作的茶饮", "《孤女》是2010年九州出版社出版的小说，作者是余兼羽"]
-    results = module.predict(test_text)
-    print(results)
