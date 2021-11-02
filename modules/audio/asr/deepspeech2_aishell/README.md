@@ -49,7 +49,7 @@ DeepSpeech2是百度于2015年提出的适用于英文和中文的end-to-end语�
 
   - paddlehub >= 2.1.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
-- ### 2、安装
+- ### 3、安装
 
   - ```shell
     $ hub install deepspeech2_aishell

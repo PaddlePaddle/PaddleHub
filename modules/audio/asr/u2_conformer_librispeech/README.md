@@ -52,7 +52,7 @@ u2_conformer_libirspeech在英文开源语音数据集[LibriSpeech ASR corpus](h
 
   - paddlehub >= 2.1.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
-- ### 2、安装
+- ### 3、安装
 
   - ```shell
     $ hub install u2_conformer_librispeech
@@ -65,7 +65,7 @@ u2_conformer_libirspeech在英文开源语音数据集[LibriSpeech ASR corpus](h
 
 - ### 1、预测代码示例
 
-    ```python
+  - ```python
     import paddlehub as hub
 
     # 采样率为16k，格式为wav的英文语音音频
