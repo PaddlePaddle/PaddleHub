@@ -1,1 +1,2 @@
-LAC
+paddlenlp==2.1.1
+LAC==2.1.2

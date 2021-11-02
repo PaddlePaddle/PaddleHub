@@ -99,29 +99,3 @@ class ddparser(hub.NLPPredictionModule):
             raise TypeError(
                 "Invalid inputs, input text should be str, but type of {} found!".format(type(text))
             )
-
-
-if __name__ == "__main__":
-    module = ddparser()
-    # Data to be predicted
-    test_text = "百度是一家高科技公司"
-    results = module.parse(test_text)
-    print(results)
-    # List input
-    test_text = ["百度是一家高科技公司", "他送了一本书"]
-    results = module.parse(test_text)
-    print(results)
-    
-    # Use POS Tag and probability
-    module = ddparser(prob=True, use_pos=True)
-    test_text = "百度是一家高科技公司"
-    results = module.parse(texts=test_text)
-    print(results)
-
-    # Visualization
-    module = ddparser(return_visual=True)
-    result = module.visualize("百度是一家高科技公司")
-
-    import cv2
-    import numpy as np
-    cv2.imwrite('test.jpg', result)
