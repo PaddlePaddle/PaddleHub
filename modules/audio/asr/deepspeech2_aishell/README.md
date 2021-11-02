@@ -66,7 +66,7 @@ DeepSpeech2是百度于2015年提出的适用于英文和中文的end-to-end语�
     import paddlehub as hub
 
     # 采样率为16k，格式为wav的中文语音音频
-    wav_file = '/path/to/test_input.wav'
+    wav_file = '/PATH/TO/AUDIO'
 
     model = hub.Module(
         name='deepspeech2_aishell',
@@ -75,10 +75,6 @@ DeepSpeech2是百度于2015年提出的适用于英文和中文的end-to-end语�
 
     print(text)
     ```
-
-    详情可参考PaddleHub示例：
-    - [离线语音识别](../../../../demo/speech_recognition)
-
 
 - ### 2、API
   - ```python

@@ -69,7 +69,7 @@ u2_conformer_libirspeech在英文开源语音数据集[LibriSpeech ASR corpus](h
     import paddlehub as hub
 
     # 采样率为16k，格式为wav的英文语音音频
-    wav_file = '/path/to/test_input.wav'
+    wav_file = '/PATH/TO/AUDIO'
 
     model = hub.Module(
         name='u2_conformer_librispeech',
@@ -78,10 +78,6 @@ u2_conformer_libirspeech在英文开源语音数据集[LibriSpeech ASR corpus](h
 
     print(text)
     ```
-
-    详情可参考PaddleHub示例：
-    - [离线语音识别](../../../../demo/speech_recognition)
-
 
 - ### 2、API
   - ```python

@@ -69,7 +69,7 @@ u2_conformer_aishell在中文普通话开源语音数据集[AISHELL-1](http://ww
     import paddlehub as hub
 
     # 采样率为16k，格式为wav的中文语音音频
-    wav_file = '/path/to/test_input.wav'
+    wav_file = '/PATH/TO/AUDIO'
 
     model = hub.Module(
         name='u2_conformer_aishell',
@@ -78,10 +78,6 @@ u2_conformer_aishell在中文普通话开源语音数据集[AISHELL-1](http://ww
 
     print(text)
     ```
-
-    详情可参考PaddleHub示例：
-    - [离线语音识别](../../../../demo/speech_recognition)
-
 
 - ### 2、API
   - ```python
