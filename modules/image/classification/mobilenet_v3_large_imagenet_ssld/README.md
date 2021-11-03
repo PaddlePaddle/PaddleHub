@@ -5,7 +5,7 @@
 |类别|图像-图像分类|
 |网络|Mobilenet_v3_large|
 |数据集|ImageNet-2012|
-|是否支持Fine-tuning|是|
+|是否支持Fine-tuning|否|
 |模型大小|23MB|
 |最新更新日期|-|
 |数据指标|-|

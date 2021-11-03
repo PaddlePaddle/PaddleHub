@@ -55,7 +55,7 @@
 
     classifier = hub.Module(name="food_classification")
     images = [cv2.imread('/PATH/TO/IMAGE')]
-    results = module.predict(images=images)
+    results = classifier.predict(images=images)
     for result in results:
         print(result)
     ```
