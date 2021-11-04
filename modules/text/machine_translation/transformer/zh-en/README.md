@@ -112,6 +112,8 @@ paddlepaddle >= 2.0.0
 
 paddlehub >= 2.1.0
 
+paddlenlp >= 2.1.0
+
 ## 更新历史
 
 * 1.0.0
