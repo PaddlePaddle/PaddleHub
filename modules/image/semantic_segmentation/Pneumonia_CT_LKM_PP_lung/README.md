@@ -30,7 +30,7 @@
 - ### 2、安装
 
     - ```shell
-      $ hub install Pneumonia_CT_LKM_PP==1.0.0
+      $ hub install Pneumonia_CT_LKM_PP_lung==1.0.0
       ```
       
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
@@ -43,7 +43,7 @@
     ```python
     import paddlehub as hub
 
-    pneumonia = hub.Module(name="Pneumonia_CT_LKM_PP")
+    pneumonia = hub.Module(name="Pneumonia_CT_LKM_PP_lung")
 
     input_only_lesion_np_path = "/PATH/TO/ONLY_LESION_NP"
     input_both_lesion_np_path = "/PATH/TO/LESION_NP"
