@@ -195,9 +195,9 @@
     headers = {"Content-Type": "application/json"}
     for t in text:
         print("input: {}".format(t))
-        result = requests.post(url=url, headers=headers, data=json.dumps(t))
+        result = requests.post(url=url, headers=headers, data=json.dumps({"text": t}))
         # 打印预测结果
-        print("model output: {}\n".format(result))
+        print("model output: {}\n".format(result.json()['results']))
 
   - 关于PaddleHub Serving更多信息参考：[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
 
