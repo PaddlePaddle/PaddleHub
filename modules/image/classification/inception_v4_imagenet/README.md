@@ -17,7 +17,7 @@
 
 - ### 模型介绍
 
-  - Inception 结构最初由 GoogLeNet 引入，因此 GoogLeNet 也被称为 Inception-v1，在 Inception-v1 的基础上引入了 Batch Normalization，得到了 Inception-v2 ；在 Inception-v2 的基础上引入了分解，得到了Inception-v3。Inception 结构有着良好的性能，且计算量低，而残差连接可加快收敛速度，可用于训练更深的网络，于是Inception V4 的作者尝试将 Inception 结构和残差连接结合，同时也设计了不用残差连接的Inception-v4。通过将三个残差和一个Inception-v4进行组合，在 ImageNet 数据集上 top-5 错误率上仅有 3.08%。
+  - Inception 结构最初由 GoogLeNet 引入，因此 GoogLeNet 也被称为 Inception-v1，通过在 Inception-v1 的基础上引入Batch Normalization、分解、残差连接等技术，设计出了Inception-v4。
 
 ## 二、安装
 
@@ -62,12 +62,12 @@
   - ```python
     def classification(data)
     ```
-
+    - 分类接口API。
     - **参数**
       - data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
 
     - **返回**
-      - result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
+      - result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率。
 
 
 

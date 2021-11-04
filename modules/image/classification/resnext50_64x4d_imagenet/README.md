@@ -17,7 +17,7 @@
 
 - ### 模型介绍
 
-  - ResNeXt 是由 UC San Diego 和 Facebook AI 研究所于2017年提出的图像分类模型。沿袭了 VGG/ResNets 的堆叠思想，ResNeXt 使用相同形状的块来加深网络，并且像 Inception 网络一样，采用 split-transform-merge 策略来增加网络的分支数，但 ResNeXt 的各个分支的拓扑结构都是一样的，从而可减少超参的数目。分支数被命名为 cardinality，增加 cardinality 比加深和加宽（增加 filter channels）更有效。ResNeXt50_64x4d，表示 layers 为 50， 分支数(cardinality) 为 64，每个分支的输入输出 channels 为4。该 PaddleHub Module 使用 ImageNet-2012数据集训练，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者 Python 接口进行预测。
+  - ResNeXt 是由 UC San Diego 和 Facebook AI 研究所于2017年提出的图像分类模型，模型沿袭了 VGG/ResNets 的堆叠思想，并采用 split-transform-merge 策略来增加网络的分支数。resnext50_64x4d，表示 layers 为 50， 分支数为 64，每个分支的输入输出 channels 为4。该 PaddleHub Module 在包含数十亿张社交媒体图片的数据集上进行弱监督训练，并使用ImageNet-2012数据集finetune，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者 Python 接口进行预测。
 
 ## 二、安装
 
@@ -62,7 +62,7 @@
   - ```python
     def classification(data)
     ```
-
+    - 分类接口API。
     - **参数**
       - data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
 

@@ -68,7 +68,7 @@
   - ```python
     def predict(images)
     ```
-
+    - 分类接口API。
     - **参数**
       - images：list类型，待检测的图像。
 

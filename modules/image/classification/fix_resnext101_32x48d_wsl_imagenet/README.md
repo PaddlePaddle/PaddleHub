@@ -17,7 +17,7 @@
 
 - ### 模型介绍
 
-  - ResNeXt 是由 UC San Diego 和 Facebook AI 研究所于2017年提出的图像分类模型。沿袭了 VGG/ResNets 的堆叠思想，ResNeXt 使用相同形状的块来加深网络，并且像 Inception 网络一样，采用 split-transform-merge 策略来增加网络的分支数，但 ResNeXt 的各个分支的拓扑结构都是一样的，从而可减少超参的数目。分支数被命名为 cardinality，增加 cardinality 比加深和加宽（增加 filter channels）更有效。ResNeXt101_32x48d，表示 layers 为 101， 分支数(cardinality) 为 32，每个分支的输入输出 channels 为48。该 PaddleHub Module 在包含数十亿张社交媒体图片的数据集上进行弱监督训练，并使用ImageNet-2012数据集finetune，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者 Python 接口进行预测。
+  - ResNeXt 是由 UC San Diego 和 Facebook AI 研究所于2017年提出的图像分类模型，模型沿袭了 VGG/ResNets 的堆叠思想，并采用 split-transform-merge 策略来增加网络的分支数。该 PaddleHub Module 在包含数十亿张社交媒体图片的数据集上进行弱监督训练，并使用ImageNet-2012数据集finetune，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者 Python 接口进行预测。
 
 
 ## 二、安装
@@ -60,20 +60,6 @@
 
 - ### 3、API
 
-  - ```python
-    def context(trainable=True, pretrained=True)
-    ```
-    - **参数**
-      - trainable (bool): 计算图的参数是否为可训练的；<br/>
-      - pretrained (bool): 是否加载默认的预训练模型。
-
-    - **返回**
-      - inputs (dict): 计算图的输入，key 为 'image', value 为图片的张量；<br/>
-      - outputs (dict): 计算图的输出，key 为 'classification' 和 'feature_map'，其相应的值为：
-        - classification (paddle.fluid.framework.Variable): 分类结果，也就是全连接层的输出；
-        - feature\_map (paddle.fluid.framework.Variable): 特征匹配，全连接层前面的那个张量。
-      - context\_prog(fluid.Program): 计算图，用于迁移学习。
-
 
   - ```python
     def classification(images=None,
@@ -82,7 +68,7 @@
                        use_gpu=False,
                        top_k=1):
     ```
-
+    - 分类接口API。
     - **参数**
 
       - images (list\[numpy.ndarray\]): 图片数据，每一个图片数据的shape 均为 \[H, W, C\]，颜色空间为 BGR； <br/>
@@ -95,17 +81,6 @@
 
       - res (list\[dict\]): 分类结果，列表的每一个元素均为字典，其中 key 为识别的菜品类别，value为置信度。
 
-  - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
-    ```
-    - **参数**
-      - dirname: 存在模型的目录名称；<br/>
-      - model_filename: 模型文件名称，默认为\_\_model\_\_; <br/>
-      - params_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效); <br/>
-      - combined: 是否将参数保存到统一的一个文件中。
 
 
 

@@ -62,7 +62,7 @@
   - ```python
     def classification(data)
     ```
-
+    - 分类接口API。
     - **参数**
       - data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
 

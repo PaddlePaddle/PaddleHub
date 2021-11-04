@@ -17,7 +17,7 @@
 
 - ### 模型介绍
 
-  - DPN(Dual Path Networks) 是 ImageNet 2017 目标定位冠军的图像分类模型，DPN 融合了 ResNet 和 DenseNet 的核心思想。ResNet 通过跨层参数共享和保留中间特征的方式，可以有效地降低特征冗余度，重复利用已有特征，但缺点在于难以利用高层特征图再挖掘底层特征。DenseNet 的每一层都在之前所有层的输出中重新提取有用信息，可以有效地利用高层信息再次挖掘底层的新特征，但却存在特征上的冗余。DPN 有着以上两种拓扑路径的长处，可以共享公共特征，并通过双路径架构保留灵活性来探索新的特征。该PaddleHub Module结构为 DPN68，基于ImageNet-2012数据集训练，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者Python接口进行预测。
+  - DPN(Dual Path Networks) 是 ImageNet 2017 目标定位冠军的图像分类模型，融合了 ResNet 和 DenseNet 的核心思想。该PaddleHub Module结构为 DPN68，基于ImageNet-2012数据集训练，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者Python接口进行预测。
 
 
 ## 二、安装
@@ -63,12 +63,12 @@
   - ```python
     def classification(data)
     ```
-
+    - 分类接口API。
     - **参数**
       - data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
 
     - **返回**
-      - result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
+      - result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率。
 
 
 

@@ -60,20 +60,6 @@
 
 - ### 3、API
 
-  - ```python
-    def context(trainable=True, pretrained=True)
-    ```
-    - **参数**
-      - trainable (bool): 计算图的参数是否为可训练的；<br/>
-      - pretrained (bool): 是否加载默认的预训练模型。
-
-    - **返回**
-      - inputs (dict): 计算图的输入，key 为 'image', value 为图片的张量；<br/>
-      - outputs (dict): 计算图的输出，key 为 'classification' 和 'feature_map'，其相应的值为：
-        - classification (paddle.fluid.framework.Variable): 分类结果，也就是全连接层的输出；
-        - feature\_map (paddle.fluid.framework.Variable): 特征匹配，全连接层前面的那个张量。
-      - context\_prog(fluid.Program): 计算图，用于迁移学习。
-
 
   - ```python
     def classification(images=None,
@@ -82,7 +68,7 @@
                        use_gpu=False,
                        top_k=1):
     ```
-
+    - 分类接口API。
     - **参数**
 
       - images (list\[numpy.ndarray\]): 图片数据，每一个图片数据的shape 均为 \[H, W, C\]，颜色空间为 BGR； <br/>
@@ -95,17 +81,6 @@
 
       - res (list\[dict\]): 分类结果，列表的每一个元素均为字典，其中 key 为识别的菜品类别，value为置信度。
 
-  - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
-    ```
-    - **参数**
-      - dirname: 存在模型的目录名称；<br/>
-      - model_filename: 模型文件名称，默认为\_\_model\_\_; <br/>
-      - params_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效); <br/>
-      - combined: 是否将参数保存到统一的一个文件中。
 
 
 

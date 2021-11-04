@@ -62,12 +62,12 @@
   - ```python
     def classification(data)
     ```
-
+    - 分类接口API。
     - **参数**
       - data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
 
     - **返回**
-      - result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
+      - result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率。
 
 
 
