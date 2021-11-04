@@ -1,5 +1,5 @@
 ```shell
-$ hub install transformer_zh-en==1.0.0
+$ hub install transformer_zh-en==1.0.1
 ```
 
 ## 概述
