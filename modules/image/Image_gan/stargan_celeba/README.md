@@ -58,7 +58,7 @@
     - style 指定拟转换的属性，可选择 "Black_Hair", "Blond_Hair", "Brown_Hair", "Female", "Male", "Aged" 中的一个。
 
 
-- ### 2、代码示例
+- ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub

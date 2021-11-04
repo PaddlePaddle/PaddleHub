@@ -51,7 +51,7 @@
   - ```
     $ hub run falsr_a --input_path "/PATH/TO/IMAGE"
     ```
-- ### 2、预测代码示例
+- ### 2、预测预测代码示例
 
   ```python
   import cv2
