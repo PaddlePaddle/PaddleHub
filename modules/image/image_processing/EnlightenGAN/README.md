@@ -24,7 +24,8 @@
 ## 二、安装
 
 - ### 1、环境依赖  
-  -
+  - onnxruntime
+  - x2paddle
   - pillow
 
 - ### 2、安装
@@ -61,7 +62,7 @@
   - ```python
     def enlightening(input_path, output_path='./enlightening_result.png', use_gpu=False)
     ```
-    - 。
+    - 暗光增强API。
 
     - **参数**
 
