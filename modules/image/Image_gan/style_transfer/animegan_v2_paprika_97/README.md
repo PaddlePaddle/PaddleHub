@@ -57,7 +57,7 @@
     import paddlehub as hub
     import cv2
 
-    model = hub.Module(name=animegan_v2_paprika_97")
+    model = hub.Module(name="animegan_v2_paprika_97")
     result = model.style_transfer(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
     # result = model.style_transfer(paths=['/PATH/TO/IMAGE'])
