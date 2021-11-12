@@ -1,69 +1,85 @@
-marine_biometrics
+# marine_biometrics
 
-类别 图像 - 图像分类
+|模型名称|marine_biometrics|
+| :--- | :---: |
+|类别|图像-图像分类|
+|网络|ResNet50_vd_ssld|
+|数据集|Fish4Knowledge|
+|是否支持Fine-tuning|否|
+|模型大小|84MB|
+|最新更新日期|-|
+|数据指标|-|
 
-网络 ResNet50_vd_ssld
 
-数据集 Fish4Knowledge
+## 一、模型基本信息
 
-# 模型概述
-海洋生物识别（marine_biometrics），该模型可准确识别鱼的种类。该PaddleHub Module支持API预测及命令行预测。
 
-# 选择模型版本进行安装
-$ hub install marine_biometrics==1.0.0
 
-# 在线体验
-[AI Studio快速体验](https://aistudio.baidu.com/aistudio/projectdetail/1667809)
+- ### 模型介绍
 
-# 命令行预测示例
-$ hub run marine_biometrics --image 1.png --use_gpu True
+  - 海洋生物识别（marine_biometrics），该模型可准确识别鱼的种类。该PaddleHub Module支持API预测及命令行预测。
 
-# Module API说明
-## def predict(data)
-海洋生物识别预测接口，输入一张图像，输出该图像上鱼的类别
-### 参数
-- data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
+## 二、安装
 
-### 返回
-- result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
+- ### 1、环境依赖  
 
-# 代码示例
+  - paddlepaddle >= 2.0.0  
 
-## API调用
+  - paddlehub >= 2.0.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
-~~~
-import cv2
-import paddlehub as hub
 
-module = hub.Module(name="MarineBiometrics")
+- ### 2、安装
 
-images = [cv2.imread('PATH/TO/IMAGE')]
+  - ```shell
+    $ hub install marine_biometrics
+    ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
-# execute predict and print the result
-results = module.predict(images=images)
-for result in results:
-    print(result)
-~~~
+## 三、模型API预测
 
-## 命令行调用
-~~~
-$ hub run marine_biometrics --image 1.png --use_gpu True
-~~~
+- ### 1、命令行预测
 
-# 效果展示
+  - ```shell
+    $ hub run marine_biometrics --input_path "/PATH/TO/IMAGE"
+    ```
+  - 通过命令行方式实现图像分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-## 原图
-<img src="/docs/imgs/Readme_Related/Image_Classification_MarineBiometrics.png">
+- ### 2、预测代码示例
 
-## 输出结果
-~~~
-[{'category_id': 16, 'category': 'Plectroglyphidodon_dickii', 'score': 0.9932127}]
-~~~
+  - ```python
+    import paddlehub as hub
+    import cv2
 
-# 贡献者
-郑博培、彭兆帅
+    classifier = hub.Module(name="marine_biometrics")
+    images = [cv2.imread('/PATH/TO/IMAGE')]
+    results = classifier.predict(images=images)
+    for result in results:
+        print(result)
+    ```
 
-# 依赖
-paddlepaddle >= 2.0.0
+- ### 3、API
 
-paddlehub >= 2.0.0
+  - ```python
+    def predict(images)
+    ```
+    - 分类接口API。
+    - **参数**
+      - images：list类型，待检测的图像。
+
+    - **返回**
+      - result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
+
+
+
+
+
+## 四、更新历史
+
+* 1.0.0
+
+  初始发布
+
+  - ```shell
+    $ hub install marine_biometrics==1.0.0
+    ```

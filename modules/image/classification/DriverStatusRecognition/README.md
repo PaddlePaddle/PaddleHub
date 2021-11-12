@@ -1,65 +1,90 @@
-DriverStatusRecognition
-类别 图像 - 图像分类
-网络 MobileNetV3_small_ssld
-数据集 分心司机检测数据集
+# DriverStatusRecognition
 
-# 模型概述
-驾驶员状态识别（DriverStatusRecognition），该模型可挖掘出人在疲劳状态下的表情特征，然后将这些定性的表情特征进行量化，提取出面部特征点及特征指标作为判断依据，再结合实验数据总结出基于这些参数的识别方法，最后输入获取到的状态数据进行识别和判断。该PaddleHub Module支持API预测及命令行预测。
+|模型名称|DriverStatusRecognition|
+| :--- | :---: |
+|类别|图像-图像分类|
+|网络|MobileNetV3_small_ssld|
+|数据集|分心司机检测数据集|
+|是否支持Fine-tuning|否|
+|模型大小|6MB|
+|最新更新日期|-|
+|数据指标|-|
 
-# 选择模型版本进行安装
-$ hub install DriverStatusRecognition==1.0.0
 
-# 在线体验
-[AI Studio快速体验](https://aistudio.baidu.com/aistudio/projectdetail/1649513)
+## 一、模型基本信息
 
-# 命令行预测示例
-$ hub run DriverStatusRecognition --image 1.png --use_gpu True
 
-# Module API说明
-## def predict(data)
-驾驶员状态识别预测接口，输入一张图像，输出该图像上驾驶员的状态
-### 参数
-- data：dict类型，key为image，str类型，value为待检测的图片路径，list类型。
 
-### 返回
-- result：list类型，每个元素为对应输入图片的预测结果。预测结果为dict类型，key为该图片分类结果label，value为该label对应的概率
+- ### 模型介绍
 
-# 代码示例
+  - 驾驶员状态识别（DriverStatusRecognition），该模型可挖掘出人在疲劳状态下的表情特征，然后将这些定性的表情特征进行量化，提取出面部特征点及特征指标作为判断依据，再结合实验数据总结出基于这些参数的识别方法，最后输入获取到的状态数据进行识别和判断。该PaddleHub Module支持API预测及命令行预测。
 
-## API调用
-~~~
-import cv2
-import paddlehub as hub
+## 二、安装
 
-module = hub.Module(directory='DriverStatusRecognition') # 一行代码实现模型调用
+- ### 1、环境依赖  
 
-images = [cv2.imread('work/imgs/test/img_1622.jpg'), cv2.imread('work/imgs/test/img_14165.jpg'), cv2.imread('work/imgs/test/img_47183.jpg')]
-results = module.predict(images=images)
+  - paddlepaddle >= 2.0.0  
 
-for result in results:
-    print(result)
-~~~
+  - paddlehub >= 2.0.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
-## 命令行调用
-~~~
-$ hub run DriverStatusRecognition --image 1.png --use_gpu True
-~~~
+  - paddlex >= 1.3.7
 
-# 效果展示
 
-## 原图
-<img src="/docs/imgs/Readme_Related/Image_Classification_Drivers.png">
+- ### 2、安装
 
-## 输出结果
-~~~
-[{'category_id': 5, 'category': 'ch5', 'score': 0.47390476}]
-[{'category_id': 2, 'category': 'ch2', 'score': 0.99997914}]
-[{'category_id': 1, 'category': 'ch1', 'score': 0.99996376}]
-~~~
+  - ```shell
+    $ hub install DriverStatusRecognition
+    ```
+  - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
-# 贡献者
-郑博培、彭兆帅
+- ### 3、在线体验
+  [AI Studio 快速体验](https://aistudio.baidu.com/aistudio/projectdetail/1649513)
 
-# 依赖
-paddlepaddle >= 2.0.0<br>
-paddlehub >= 2.0.0
+## 三、模型API预测
+
+- ### 1、命令行预测
+
+  - ```shell
+    $ hub run DriverStatusRecognition --input_path /PATH/TO/IMAGE
+    ```
+  - 通过命令行方式实现图像分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+
+- ### 2、预测代码示例
+
+  - ```python
+    import paddlehub as hub
+    import cv2
+
+    classifier = hub.Module(name="DriverStatusRecognition")
+    images = [cv2.imread('/PATH/TO/IMAGE')]
+    results = classifier.predict(images=images)
+    for result in results:
+        print(result)
+    ```
+
+- ### 3、API
+
+  - ```python
+    def predict(images)
+    ```
+    - 分类接口API。
+    - **参数**
+      - images：list类型，待检测的图像。
+
+    - **返回**
+      - result：list类型，每个元素为对应输入图片的预测结果。
+
+
+
+
+
+## 四、更新历史
+
+* 1.0.0
+
+  初始发布
+
+  - ```shell
+    $ hub install DriverStatusRecognition==1.0.0
+    ```
