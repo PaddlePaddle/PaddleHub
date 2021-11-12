@@ -4,10 +4,10 @@
 | :--- | :---: |
 |类别|图像 - 图像生成|
 |网络|AnimeGAN|
-|数据集|The Wind Rises|
+|数据集|Paprika|
 |是否支持Fine-tuning|否|
 |模型大小|9.4MB|
-|最新更新日期|2021-07-30|
+|最新更新日期|2021-02-26|
 |数据指标|-|
 
 
@@ -16,21 +16,20 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/35907364/136652269-48b8c902-3a2b-46b7-a9f2-d500097bbb0e.jpg"  width = "450" height = "300" hspace='10'/>
-     <br />
+    <img src="https://ai-studio-static-online.cdn.bcebos.com/bd002c4bb6a7427daf26988770bb18648b7d8d2bfd6746bfb9a429db4867727f"  width = "450" height = "300" hspace='10'/>
+    <br />
     输入图像
-     <br />
-    <img src="https://user-images.githubusercontent.com/35907364/136653120-e081cd59-bc2b-4a91-a437-3a7d478e0763.jpg"  width = "450" height = "300" hspace='10'/>
-     <br />
+    <br />
+    <img src="https://ai-studio-static-online.cdn.bcebos.com/6574669d87b24bab9627c6e33896528b4a0bf5af1cd84ca29655d68719f2d551"  width = "450" height = "300" hspace='10'/>
+    <br />
     输出图像
      <br />
     </p>
 
 
-
 - ### 模型介绍
 
-  - AnimeGAN V2 图像风格转换模型, 模型可将输入的图像转换成宫崎骏动漫风格，模型权重转换自[AnimeGAN V2官方开源项目](https://github.com/TachibanaYoshino/AnimeGAN)。
+  - AnimeGAN V2 图像风格转换模型, 模型可将输入的图像转换成今敏红辣椒动漫风格，模型权重转换自[AnimeGAN V2官方开源项目](https://github.com/TachibanaYoshino/AnimeGANv2)。
 
 
 ## 二、安装
@@ -81,11 +80,9 @@
       - images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]；<br/>
       - paths (list\[str\]): 图片的路径；<br/>
       - output\_dir (str): 图片的保存路径，默认设为 output；<br/>
-      - visualization (bool): 是否将识别结果保存为图片文件；<br/>
+      - visualization (bool): 是否将结果保存为图片文件；<br/>
       - min\_size (int): 输入图片的短边最小尺寸，默认设为 32；<br/>
       - max\_size (int): 输入图片的短边最大尺寸，默认设为 1024。
-
-      **NOTE:** paths和images两个参数选择其一进行提供数据
 
     - **返回**
       - res (list\[numpy.ndarray\]): 输出图像数据，ndarray.shape 为 \[H, W, C\]
@@ -145,3 +142,7 @@
 * 1.0.2
 
   删除batch_size选项
+
+  - ```shell
+    $ hub install animegan_v2_paprika_54==1.0.2
+    ```
