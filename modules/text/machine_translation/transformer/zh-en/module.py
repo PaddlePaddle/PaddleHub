@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-from packaging.version import Version
 from typing import List
 
 import paddle
@@ -56,14 +55,11 @@ class MTTransformer(nn.Layer):
         # Vocabularies in source and target should be same for weight sharing.
         "weight_sharing": False,
         # Dropout rate
-        'dropout': 0
+        'dropout': 0,
+        # Number of sub-layers to be stacked in the encoder and decoder.
+        "num_encoder_layers": 6, 
+        "num_decoder_layers": 6
     }
-
-    # Number of sub-layers to be stacked in the encoder and decoder.
-    if Version(paddlenlp.__version__) <= Version('2.0.5'):
-        model_config.update({"n_layer": 6})
-    else:
-        model_config.update({"num_encoder_layers": 6, "num_decoder_layers": 6})
 
     # Vocab config
     vocab_config = {
