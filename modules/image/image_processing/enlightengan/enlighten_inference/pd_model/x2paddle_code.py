@@ -200,20 +200,3 @@ class ONNXModel(paddle.nn.Layer):
         x2paddle_255 = paddle.multiply(x=x2paddle_254, y=x2paddle_158)
         x2paddle_output = paddle.add(x=x2paddle_255, y=x2paddle_257)
         return x2paddle_output, x2paddle_255
-
-
-def main(x2paddle_input):
-    # There are 1 inputs.
-    # x2paddle_input: shape-[-1, 3, 512, 512], type-float32.
-    paddle.disable_static()
-    params = paddle.load('/work/ToTransferInHub/EnlightenGAN-inference/enlighten_inference/pd_model/model.pdparams')
-    model = ONNXModel()
-    model.set_dict(params, use_structured_name=True)
-    model.eval()
-    out = model(x2paddle_input)
-    return out
-
-
-if __name__ == '__main__':
-    inputtensor = paddle.randn([1, 3, 512, 512])
-    main(inputtensor)
