@@ -22,7 +22,7 @@
     <img src="https://user-images.githubusercontent.com/35907364/136653401-6644bd46-d280-4c15-8d48-680b7eb152cb.png" width = "300" height = "450" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/136648959-40493c9c-08ec-46cd-a2a2-5e2038dcbfa7.png" width = "300" height = "450" hspace='10'/>
     </p>
 
-  - user_guided_colorization 是基于''Real-Time User-Guided Image Colorization with Learned Deep Priors"的着色模型，该模型利用预先提供的着色块对图像进行着色。
+  - user_guided_colorization 是基于"Real-Time User-Guided Image Colorization with Learned Deep Priors"的着色模型，该模型利用预先提供的着色块对图像进行着色。
 
 
 ## 二、安装
