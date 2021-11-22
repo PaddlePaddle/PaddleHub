@@ -19,7 +19,7 @@ import paddle
 import paddlehub as hub
 from paddlehub.module.module import moduleinfo, runnable, serving
 import numpy as np
-from PIL import Image
+import cv2
 
 from .enlighten_inference import EnlightenOnnxModel
 from .enlighten_inference.pd_model.x2paddle_code import ONNXModel
@@ -73,7 +73,7 @@ class EnlightenGAN:
 
         if paths != None:
             for path in paths:
-                image = np.array(Image.open(path))
+                image = cv2.imread(path)[:, :, ::-1]
                 image = np.expand_dims(np.transpose(image, (2, 0, 1)).astype(np.float32) / 255., 0)
                 inputtensor = paddle.to_tensor(image)
                 out, out1 = self.model(inputtensor)
@@ -87,7 +87,7 @@ class EnlightenGAN:
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir, exist_ok=True)
             for i, out in enumerate(results):
-                Image.fromarray(out).save(os.path.join(os.path.join(output_dir, 'output_{}.png'.format(i))))
+                cv2.imwrite(os.path.join(output_dir, 'output_{}.png'.format(i)), out[:, :, ::-1])
 
         return results
 
