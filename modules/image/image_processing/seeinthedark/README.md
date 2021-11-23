@@ -13,6 +13,19 @@
 
 ## 一、模型基本信息  
 
+- ### 应用效果展示
+  - 样例结果示例：
+    <p align="center">
+    <img src="https://user-images.githubusercontent.com/22424850/142962370-a957d7b3-8050-4f5a-8462-3d6e49facb33.png"  width = "450" height = "300" hspace='10'/>
+    <br />
+    输入图像
+    <br />
+    <img src="https://user-images.githubusercontent.com/22424850/142962460-4a1b31ef-0eec-423b-ab3d-8622f3e8261a.png"  width = "450" height = "300" hspace='10'/>
+    <br />
+    输出图像
+     <br />
+    </p>
+
 - ### 模型介绍
 
   - 通过大量暗光条件下短曝光和长曝光组成的图像对，以RAW图像为输入，RGB图像为参照进行训练，该模型实现端到端直接将暗光下的RAW图像处理得到可见的RGB图像。
@@ -25,7 +38,6 @@
 
 - ### 1、环境依赖  
   - rawpy
-  - pillow
 
 - ### 2、安装
 
@@ -53,26 +65,64 @@
     denoiser = hub.Module(name="seeinthedark")
     input_path = "/PATH/TO/IMAGE"
     # Read from a raw file
-    denoiser.denoising(input_path, output_path='./denoising_result.png', use_gpu=True)  
+    denoiser.denoising(paths=[input_path], output_path='./denoising_result.png', use_gpu=True)  
     ```
 
 - ### 3、API
 
   - ```python
-    def denoising(input_path, output_path='./denoising_result.png', use_gpu=False)
+    def denoising(images=None, paths=None, output_dir='./denoising_result/', use_gpu=False, visualization=True)
     ```
     - 暗光增强API，完成对暗光RAW图像的降噪并处理生成RGB图像。
 
     - **参数**
-
-      - input\_path (str): 暗光图像文件的路径，Sony的RAW格式; <br/>
-      - output\_path (str): 结果保存的路径, 需要指定输出文件名； <br/>
+      - images (list\[numpy.ndarray\]): 输入的图像，单通道的马赛克图像; <br/>
+      - paths (list\[str\]): 暗光图像文件的路径，Sony的RAW格式；<br/>
+      - output\_dir (str): 结果保存的路径； <br/>
       - use\_gpu (bool): 是否使用 GPU；<br/>
+      - visualization(bool): 是否保存结果到本地文件夹
+
+## 四、服务部署
+
+- PaddleHub Serving可以部署一个在线图像风格转换服务。
+
+- ### 第一步：启动PaddleHub Serving
+
+  - 运行启动命令：
+  - ```shell
+    $ hub serving start -m seeinthedark
+    ```
+
+  - 这样就完成了一个图像风格转换的在线服务API的部署，默认端口号为8866。
+
+  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
+
+- ### 第二步：发送预测请求
+
+  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
+
+  - ```python
+    import requests
+    import json
+    import rawpy
+    import base64
 
 
+    def cv2_to_base64(image):
+      data = cv2.imencode('.jpg', image)[1]
+      return base64.b64encode(data.tostring()).decode('utf8')
+
+    # 发送HTTP请求
+    data = {'images':[cv2_to_base64(rawpy.imread("/PATH/TO/IMAGE").raw_image_visible)]}
+    headers = {"Content-type": "application/json"}
+    url = "http://127.0.0.1:8866/predict/seeinthedark/"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+    # 打印预测结果
+    print(r.json()["results"])
 
 
-## 四、更新历史
+## 五、更新历史
 
 * 1.0.0
 
