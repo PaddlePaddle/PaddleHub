@@ -3,11 +3,11 @@
 |模型名称|DDParser|
 | :--- | :---: | 
 |类别|文本-句法分析|
-|网络|LSTM|
+|网络|Deep Biaffine Attention|
 |数据集|搜索query、网页文本、语音输入等数据|
 |是否支持Fine-tuning|否|
-|模型大小|33MB|
-|最新更新日期|2021-02-26|
+|模型大小|61MB|
+|最新更新日期|2021-10-26|
 |数据指标|-|
 
 
@@ -24,15 +24,11 @@
 
 - ### 1、环境依赖  
 
-  - paddlepaddle >= 1.8.2
+  - paddlepaddle >= 2.1.0
   
-  - paddlehub >= 1.7.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+  - paddlenlp >= 2.1.0
 
-  - 额外依赖ddparser
-  
-  - ```shell
-    $ pip install ddparser
-    ```    
+  - paddlehub >= 2.1.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
@@ -41,9 +37,6 @@
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
-
-
-
 
 ## 三、模型API预测
 
@@ -60,33 +53,59 @@
     import cv2
     import paddlehub as hub
 
+    # Load ddparser
     module = hub.Module(name="ddparser")
 
-    test_text = ["百度是一家高科技公司"]
-    results = module.parse(texts=test_text)
+    # String input
+    results = module.parse("百度是一家高科技公司")
     print(results)
+    # [{'word': ['百度', '是', '一家', '高科技', '公司'], 'head': [2, 0, 5, 5, 2], 'deprel': ['SBV', 'HED', 'ATT', 'ATT', 'VOB']}]
 
-    test_tokens = [['百度', '是', '一家', '高科技', '公司']]
-    results = module.parse(texts=test_text, return_visual = True)
+    # List input
+    results = module.parse(["百度是一家高科技公司", "他送了一本书"])
     print(results)
+    # [{'word': ['百度', '是', '一家', '高科技', '公司'], 'head': [2, 0, 5, 5, 2], 'deprel': ['SBV', 'HED', 'ATT', 'ATT', 'VOB']}, {'word': ['他', '送', '了', '一本', '书'], 'head': [2, 0, 2, 5, 2], 'deprel': ['SBV', 'HED', 'MT', 'ATT', 'VOB']}]
 
-    result = results[0]
-    data = module.visualize(result['word'],result['head'],result['deprel'])
-    # or data = result['visual']
-    cv2.imwrite('test.jpg',data)
+    # Use POS Tag and probability
+    module = hub.Module(name="ddparser", prob=True, use_pos=True)
+    results = module.parse("百度是一家高科技公司")
+    print(results)
+    # [{'word': ['百度', '是', '一家', '高科技', '公司'], 'head': [2, 0, 5, 5, 2], 'deprel': ['SBV', 'HED', 'ATT', 'ATT', 'VOB'], 'postag': ['ORG', 'v', 'm', 'n', 'n'], 'prob': [1.0, 1.0, 1.0, 1.0, 1.0]}]
+
+    # Visualization mode
+    module = hub.Module(name="ddparser", return_visual=True)
+    data = module.visualize("百度是一家高科技公司")
+    cv2.imwrite('test.jpg', data)
     ```
     
 - ### 3、API
 
   - ```python
-    def parse(texts=[], return\_visual=False)
+    def __init__(
+      tree=True,
+      prob=False,
+      use_pos=False,
+      batch_size=1,
+      return_visual=False)
+    ```
+    - 模块初始化。
+    
+    - **参数**
+
+      - tree(bool): 输出结果是否需要满足树状结构，默认为True。
+      - prob(bool): 是否输出概率值，默认为False。
+      - use_pos(bool): 是否输出词性标签，默认为False。
+      - batch_size(int): 批大小，默认为1。
+      - return_visual(bool): 是否返回可视化结果（需配合visualize api使用），默认为False。
+
+  - ```python
+    def parse(texts)
     ```
     - 依存分析接口，输入文本，输出依存关系。
 
     - **参数**
 
-      - texts(list\[list\[str\] or list\[str\]]): 待预测数据。各元素可以是未分词的字符串，也可以是已分词的token列表。
-      - return\_visual(bool): 是否返回依存分析可视化结果。如果为True，返回结果中将包含'visual'字段。
+      - texts(str or list\[str\]]): 待预测数据。
 
     - **返回**
 
@@ -98,31 +117,29 @@
                 'deprel': list[str], 当前成分与支配者的依存关系。
                 'prob': list[float], 从属者和支配者依存的概率。
                 'postag': list[str], 词性标签，只有当texts的元素是未分词的字符串时包含这个键。
-                'visual': 图像数组，可以使用cv2.imshow显示图像或cv2.imwrite保存图像。
+                'visual': numpy.ndarray, 图像数组，可以使用cv2.imshow显示图像或cv2.imwrite保存图像。
             }
       
 
   - ```python
-    def visualize(word, head, deprel)
+    def visualize(text)
     ```
 
-    - 可视化接口，输入依存分析接口得到的信息，输出依存图形数组。
+    - 可视化接口，输入文本信息，输出依存图形数组。
 
     - **参数**
 
-      - word(list\[list\[str\]\): 分词信息。
-      - head(list\[int\]): 当前成分其支配者的id。
-      - deprel(list\[str\]): 当前成分与支配者的依存关系。
+      - text(str): 输入文本，支持string格式的单条文本输入。
 
     - **返回**
 
-      - data(numpy.array): 图像数组。可以使用cv2.imshow显示图像或cv2.imwrite保存图像。
+      - data(numpy.ndarray): 图像数组。可以使用cv2.imshow显示图像或cv2.imwrite保存图像。
 
 
 
 ## 四、服务部署
 
-- PaddleHub Serving可以部署一个在线情感分析服务，可以将此接口用于在线web应用。
+- PaddleHub Serving可以部署一个在线句法分析服务，可以将此接口用于在线web应用。
 
 - ## 第一步：启动PaddleHub Serving
 
@@ -148,30 +165,33 @@
     import requests
     import json
 
-    import numpy as np
-    import cv2
-
-    # 待预测数据
+    # 待预测数据(input string)
     text = ["百度是一家高科技公司"]
 
     # 设置运行配置
-    return_visual = True
-    data = {"texts": text, "return_visual": return_visual}
+    data = {"texts": text}
     
     # 指定预测方法为DuDepParser并发送post请求，content-type类型应指定json方式
-    url = "http://0.0.0.0:8866/predict/ddparser"
+    url = "http://127.0.0.1:8866/predict/ddparser"
     headers = {"Content-Type": "application/json"}
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
-    results = r.json()['results']
 
-    for i in range(len(results)):
-      print(results[i]['word'])
-      # 不同于本地调用parse接口，serving返回的图像是list类型的，需要先用numpy加载再显示或保存。
-      cv2.imwrite('%s.jpg'%i, np.array(results[i]['visual']))
+    print(r.json())
+    # {'msg': '', 'results': [{'deprel': ['SBV', 'HED', 'ATT', 'VOB'], 'head': ['2', '0', '4', '2'], 'word': ['百度', '是', '一家', '公司']}], 'status': '000'}
+
+    # 待预测数据(input list)
+    text = ["百度是一家公司", "他送了一本书"]
+
+    # 设置运行配置
+    data = {"texts": text}
+
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+    print(r.json())
+    # {'msg': '', 'results': [{'deprel': ['SBV', 'HED', 'ATT', 'VOB'], 'head': ['2', '0', '4', '2'], 'word': ['百度', '是', '一家', '公司']}, {'deprel': ['SBV', 'HED', 'MT', 'ATT', 'VOB'], 'head': ['2', '0', '2', '5', '2'], 'word': ['他', '送', '了', '一本', '书']}], 'status': '000'}
+    
     ```
 
   - 关于PaddleHub Serving更多信息参考：[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
-
 
 
 ## 五、更新历史
@@ -180,6 +200,10 @@
 
   初始发布
 
+* 1.1.0
+
+  适配paddlepaddle 2.1版本
+
   - ```shell
-    $ hub install ddparser==1.0.0
+    $ hub install ddparser==1.1.0
     ```

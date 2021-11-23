@@ -39,12 +39,16 @@
 </table>
 </div>
 
+**Deoldify Huggingface Web Demo**: Integrated to [Huggingface Spaces](https://huggingface.co/spaces) with [Gradio](https://github.com/gradio-app/gradio). See demo: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/akhaliq/deoldify)
+
 ### Image Generation
 - Including portrait cartoonization, street scene cartoonization, and style transfer.
 - Many thanks to CopyRight@[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、CopyRight@[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)for the pre-trained models.
 <div align="center">
 <img src="../imgs/Readme_Related/ImageGAN.gif"  width = "640" height = "600" />
 </div>
+
+**UGATIT Selfie2anime Huggingface Web Demo**: Integrated to [Huggingface Spaces](https://huggingface.co/spaces) with [Gradio](https://github.com/gradio-app/gradio). See demo: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/akhaliq/U-GAT-IT-selfie2anime)
 
 
 ### Object Detection

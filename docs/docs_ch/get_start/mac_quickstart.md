@@ -192,7 +192,7 @@
     - <img src="../../imgs/Install_Related/mac/output_img.png" alt="output image" width="600" align="center"/>
 
 ## 第6步：飞桨预训练模型探索之旅
-- 恭喜你，到这里PaddleHub在windows环境下的安装和入门案例就全部完成了，快快开启你更多的深度学习模型探索之旅吧。[【更多模型探索，跳转飞桨官网】](https://www.paddlepaddle.org.cn/hublist)
+- 恭喜你，到这里PaddleHub在mac环境下的安装和入门案例就全部完成了，快快开启你更多的深度学习模型探索之旅吧。[【更多模型探索，跳转飞桨官网】](https://www.paddlepaddle.org.cn/hublist)
 
 
 
