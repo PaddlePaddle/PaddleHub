@@ -14,7 +14,7 @@ class EnlightenOnnxModel:
         self.graph = InferenceSession(model or get_relative_path(__file__, 'enlighten.onnx'))
 
     def __repr__(self):
-        return f'<EnlightenGAN OnnxModel {id(self)}>'
+        return '<EnlightenGAN OnnxModel> {}'.format(id(self))
 
     def _pad(self, img):
         h, w, _ = img.shape
@@ -26,7 +26,7 @@ class EnlightenOnnxModel:
 
     def _preprocess(self, img):
         if len(img.shape) != 3:
-            raise ValueError(f'Incorrect shape: expected 3, got {len(img.shape)}')
+            raise ValueError('Incorrect shape: expected 3, got {}'.format(img.shape))
         return np.expand_dims(np.transpose(img, (2, 0, 1)).astype(np.float32) / 255., 0)
 
     def predict(self, img):
