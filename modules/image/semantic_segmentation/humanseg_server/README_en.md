@@ -248,6 +248,7 @@
     Added video portrait split interface
 
     Added video stream portrait segmentation interface
+    
 * 1.1.1
 
-   Fix the video memory leakage problem of on cudnn 8.0.4
+   Fix memory leakage problem of on cudnn 8.0.4

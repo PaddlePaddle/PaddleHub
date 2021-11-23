@@ -77,7 +77,7 @@
                        T.RGB2LAB()], to_rgb=True)
               ```
 
-                - `transforms` The data enhancement module defines lots of data preprocessing methods. Users can replace the data preprocessing methods according to their needs.
+              - `transforms` The data enhancement module defines lots of data preprocessing methods. Users can replace the data preprocessing methods according to their needs.
 
         - Step2: Download the dataset
             - ```python

@@ -57,7 +57,7 @@
   - ### 1、命令行预测
 
     ```shell
-    $ hub install ace2p==1.1.0
+    $ hub run ace2p --input_path "/PATH/TO/IMAGE"
     ```
 
   - ### 2、代码示例
