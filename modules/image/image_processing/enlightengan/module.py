@@ -31,6 +31,9 @@ from .util import base64_to_cv2
 class EnlightenGAN:
     def __init__(self):
         self.pretrained_model = os.path.join(self.directory, "enlighten_inference/pd_model")
+        self.model = ONNXModel()
+        params = paddle.load(os.path.join(self.pretrained_model, 'model.pdparams'))
+        self.model.set_dict(params, use_structured_name=True)
 
     def enlightening(self,
                      images=None,
@@ -54,9 +57,6 @@ class EnlightenGAN:
         if images == None and paths == None:
             print('No image provided. Please input an image or a image path.')
             return
-        self.model = ONNXModel()
-        params = paddle.load(os.path.join(self.pretrained_model, 'model.pdparams'))
-        self.model.set_dict(params, use_structured_name=True)
         self.model.eval()
 
         if images != None:
