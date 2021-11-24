@@ -22,7 +22,7 @@
 
 - ### 模型介绍
 
-  - multi_languages_ocr Module用于识别图片当中的汉字。其基于paddleocr模块，检测得到的文本框，识别文本框中的中文文字,再对检测文本框进行角度分类。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。该Module是一个超轻量级中文OCR模型，支持直接预测。
+  - multi_languages_ocr Module用于识别图片当中的汉字。其基于PaddleOCR模块，检测得到的文本框，识别文本框中的文字,再对检测文本框进行角度分类。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。该Module是一个支持80种语言的检测和识别，支持轻量高精度英文模型检测识别，支持直接预测。
 
 
 <p align="center">
@@ -37,10 +37,11 @@
 
 - ### 1、环境依赖  
 
-  - paddlepaddle >= 1.7.2  
+  - PaddlePaddle >= 1.8.0  
+
   - PaddleOCR >= 2.0.1   | [如何安装PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.3/doc/doc_ch/quickstart.md#1)
 
-  - paddlehub >= 1.6.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
+  - PaddleHub >= 1.8.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
   - shapely
 
@@ -77,10 +78,10 @@
     import cv2
 
     ocr = hub.Module(name="multi_languages_ocr", enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
-    result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
+    result = ocr.predict(images=[cv2.imread('/PATH/TO/IMAGE')])
 
     # or
-    # result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
+    # result = ocr.predict(paths=['/PATH/TO/IMAGE'])
     ```
 
 - ### 3、API

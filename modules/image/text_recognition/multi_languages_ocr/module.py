@@ -36,7 +36,8 @@ class MultiLangOCR(hub.Module):
         self.det = det
         self.rec = rec
         self.use_angle_cls = use_angle_cls
-        self.engine = PaddleOCR(use_gpu=use_gpu, det=det, rec=rec, use_angle_cls=use_angle_cls, lang=lang)
+        self.engine = PaddleOCR(
+            lang=lang, det=det, rec=rec, use_angle_cls=use_angle_cls, use_gpu=use_gpu, enable_mkldnn=enable_mkldnn)
 
     def read_images(self, paths=[]):
         images = []
