@@ -3,8 +3,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import argparse
+import ast
 import os
 import sys
+
 sys.path.insert(0, ".")
 
 import copy
@@ -113,6 +116,29 @@ class MultiLangOCR(hub.Module):
             return ".png"
         return ".jpg"
 
+    @runnable
+    def run_cmd(self, argvs):
+        """
+        Run as a command
+        """
+        self.parser = argparse.ArgumentParser(
+            description="Run the %s module." % self.name,
+            prog='hub run %s' % self.name,
+            usage='%(prog)s',
+            add_help=True)
+
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
+        self.arg_config_group = self.parser.add_argument_group(
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
+
+        self.add_module_config_arg()
+        self.add_module_input_arg()
+
+        args = self.parser.parse_args(argvs)
+        results = self.recognize_text(
+            paths=[args.input_path], use_gpu=args.use_gpu, output_dir=args.output_dir, visualization=args.visualization)
+        return results
+
     @serving
     def serving_method(self, images, **kwargs):
         """
@@ -121,6 +147,45 @@ class MultiLangOCR(hub.Module):
         images_decode = [base64_to_cv2(image) for image in images]
         results = self.predict(images_decode, **kwargs)
         return results
+
+    @runnable
+    def run_cmd(self, argvs):
+        """
+        Run as a command
+        """
+        self.parser = argparse.ArgumentParser(
+            description="Run the %s module." % self.name,
+            prog='hub run %s' % self.name,
+            usage='%(prog)s',
+            add_help=True)
+
+        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
+        self.arg_config_group = self.parser.add_argument_group(
+            title="Config options", description="Run configuration for controlling module behavior, not required.")
+
+        self.add_module_config_arg()
+        self.add_module_input_arg()
+
+        args = self.parser.parse_args(argvs)
+        results = self.predict(paths=[args.input_path], output_dir=args.output_dir, visualization=args.visualization)
+        return results
+
+    def add_module_config_arg(self):
+        """
+        Add the command config options
+        """
+        # self.arg_config_group.add_argument(
+        #     '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+        self.arg_config_group.add_argument(
+            '--output_dir', type=str, default='ocr_result', help="The directory to save output images.")
+        self.arg_config_group.add_argument(
+            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+
+    def add_module_input_arg(self):
+        """
+        Add the command input options
+        """
+        self.arg_input_group.add_argument('--input_path', type=str, default=None, help="diretory to image")
 
 
 if __name__ == '__main__':
