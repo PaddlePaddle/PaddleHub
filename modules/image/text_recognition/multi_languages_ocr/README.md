@@ -22,7 +22,8 @@
 
 - ### 模型介绍
 
-  - multi_languages_ocr Module用于识别图片当中的汉字。其基于PaddleOCR模块，检测得到的文本框，识别文本框中的文字,再对检测文本框进行角度分类。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。该Module是一个支持80种语言的检测和识别，支持轻量高精度英文模型检测识别，支持直接预测。
+  - multi_languages_ocr Module用于识别图片当中的文字。其基于PaddleOCR模块，检测得到的文本框，识别文本框中的文字,再对检测文本框进行角度分类。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。
+    该Module不仅提供了通用场景下的中英文模型，也提供了[80个语言](#语种缩写)的小语种模型。
 
 
 <p align="center">
