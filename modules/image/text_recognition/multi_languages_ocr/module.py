@@ -4,10 +4,9 @@ import ast
 import time
 
 import cv2
-import paddlehub as hub
-from paddlehub.module.module import moduleinfo, runnable, serving
 from paddleocr import PaddleOCR, draw_ocr
 from paddleocr.tools.infer.utility import base64_to_cv2
+from paddlehub.module.module import moduleinfo, runnable, serving
 
 
 @moduleinfo(
