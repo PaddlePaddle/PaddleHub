@@ -73,9 +73,8 @@
 
 - ### 2、代码示例
 
-Paddleocr目前支持80个语种，可以通过修改--lang参数进行切换，具体支持的[语种](#语种缩写)可查看表格。
-
-
+  - Paddleocr目前支持80个语种，可以通过修改--lang参数进行切换，具体支持的[语种](#语种缩写)可查看表格。
+  
   - ```python
     import paddlehub as hub
     import cv2
