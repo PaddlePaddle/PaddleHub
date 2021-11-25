@@ -37,7 +37,7 @@
 
 - ### 1、环境依赖  
 
-  - PaddlePaddle >= 1.8.0  
+  - PaddlePaddle >= 2.0.0  
 
   - PaddleOCR >= 2.0.1   | [如何安装PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.3/doc/doc_ch/quickstart.md#1)
 
@@ -81,7 +81,7 @@
     result = ocr.predict(images=[cv2.imread('/PATH/TO/IMAGE')])
 
     # or
-    # result = ocr.predict(paths=['/PATH/TO/IMAGE'])
+    # result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
     ```
 
 - ### 3、API
@@ -108,7 +108,7 @@
 
 
   - ```python
-    def predict(images=[],
+    def recognize_text(images=[],
                 paths=[],
                 output_dir='ocr_result',
                 visualization=False)

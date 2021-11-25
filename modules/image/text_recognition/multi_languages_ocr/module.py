@@ -52,7 +52,7 @@ class MultiLangOCR(hub.Module):
             images.append(img)
         return images
 
-    def predict(self, images=[], paths=[], output_dir='ocr_result', visualization=True):
+    def recognize_text(self, images=[], paths=[], output_dir='ocr_result', visualization=True):
         """
         Get the text in the predicted images.
         Args:
@@ -142,7 +142,7 @@ class MultiLangOCR(hub.Module):
 
         args = self.parser.parse_args(argvs)
         results = self.recognize_text(
-            paths=[args.input_path], use_gpu=args.use_gpu, output_dir=args.output_dir, visualization=args.visualization)
+            paths=[args.input_path], output_dir=args.output_dir, visualization=args.visualization)
         return results
 
     @serving
@@ -151,7 +151,7 @@ class MultiLangOCR(hub.Module):
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.predict(images_decode, **kwargs)
+        results = self.recognize_text(images_decode, **kwargs)
         return results
 
     @runnable
@@ -173,7 +173,8 @@ class MultiLangOCR(hub.Module):
         self.add_module_input_arg()
 
         args = self.parser.parse_args(argvs)
-        results = self.predict(paths=[args.input_path], output_dir=args.output_dir, visualization=args.visualization)
+        results = self.recognize_text(
+            paths=[args.input_path], output_dir=args.output_dir, visualization=args.visualization)
         return results
 
     def add_module_config_arg(self):
@@ -192,13 +193,3 @@ class MultiLangOCR(hub.Module):
         Add the command input options
         """
         self.arg_input_group.add_argument('--input_path', type=str, default=None, help="diretory to image")
-
-
-if __name__ == '__main__':
-    ocr = MultiLangOCR()
-    image_path = [
-        './doc/imgs/11.jpg',
-        './doc/imgs/12.jpg',
-    ]
-    res = ocr.predict(paths=image_path)
-    print(res)
