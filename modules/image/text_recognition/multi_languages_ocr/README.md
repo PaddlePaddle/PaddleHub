@@ -78,13 +78,13 @@
     import paddlehub as hub
     import cv2
 
-    ocr = hub.Module(name="multi_languages_ocr", lang='ch', enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
+    ocr = hub.Module(name="multi_languages_ocr", lang='en', enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
     result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
     # or
     # result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
     ```
-  - Paddleocr目前支持80个语种，可以通过修改--lang参数进行切换，具体支持的[语种](#语种缩写)可查看表格。
+  - Paddleocr目前支持80个语种，可以通过修改lang参数进行切换，对于英文模型，指定lang=en，具体支持的[语种](#语种缩写)可查看表格。
 
 - ### 3、API
 
@@ -104,7 +104,7 @@
       - lang(bool): 多语言选择。默认为ch。
       - det(bool): 是否开启检测。默认为True。
       - rec(bool): 是否开启识别。默认为True。
-      - use_angle_cls(bool): 是否开启方向判断。默认为False。
+      - use_angle_cls(bool): 是否开启方向判断, 用于设置使用方向分类器识别180度旋转文字。默认为False。
       - use_gpu(bool): 是否开启gpu。默认为False。
       - enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
 
