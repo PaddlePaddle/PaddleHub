@@ -30,8 +30,8 @@ from paddleocr import PaddleOCR, draw_ocr
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
-class MultiLangOCR(hub.Module):
-    def _initialize(self, lang="ch", det=True, rec=True, use_angle_cls=False, use_gpu=False, enable_mkldnn=False):
+class MultiLangOCR:
+    def __init__(self, lang="ch", det=True, rec=True, use_angle_cls=False, use_gpu=False, enable_mkldnn=False):
         """
         initialize with the necessary elements
         """
