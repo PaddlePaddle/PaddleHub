@@ -120,7 +120,7 @@
 
       - paths (list\[str\]): 图片的路径；
       - images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
-      - visualization (bool): 是否将识别结果保存为图片文件；
+      - visualization (bool): 是否将识别结果保存为图片文件, 仅支持检测开启时候；
       - output\_dir (str): 图片的保存路径，默认设为 ocr\_result；
 
     - **返回**

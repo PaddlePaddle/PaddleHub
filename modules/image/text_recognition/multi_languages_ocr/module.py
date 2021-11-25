@@ -4,8 +4,11 @@ import ast
 import time
 
 import cv2
+import numpy as np
+from PIL import Image, ImageDraw
 from paddleocr import PaddleOCR, draw_ocr
 from paddleocr.tools.infer.utility import base64_to_cv2
+from paddleocr.ppocr.utils.logging import get_logger
 from paddlehub.module.module import moduleinfo, runnable, serving
 
 
@@ -25,6 +28,7 @@ class MultiLangOCR:
         self.det = det
         self.rec = rec
         self.use_angle_cls = use_angle_cls
+        self.logger = get_logger()
         self.engine = PaddleOCR(
             lang=lang, det=det, rec=rec, use_angle_cls=use_angle_cls, use_gpu=use_gpu, enable_mkldnn=enable_mkldnn)
 
@@ -38,7 +42,7 @@ class MultiLangOCR:
             images.append(img)
         return images
 
-    def recognize_text(self, images=[], paths=[], output_dir='ocr_result', visualization=True):
+    def recognize_text(self, images=[], paths=[], output_dir='ocr_result', visualization=False):
         """
         Get the text in the predicted images.
         Args:
@@ -69,9 +73,20 @@ class MultiLangOCR:
             rec_results = self.engine.ocr(img, det=self.det, rec=self.rec, cls=self.use_angle_cls)
             rec_res_final = []
             for line in rec_results:
-                boxes = line[0]
-                text, score = line[1]
-                rec_res_final.append({'text': text, 'confidence': float(score), 'text_region': boxes})
+                if self.det and self.rec:
+                    boxes = line[0]
+                    text, score = line[1]
+                    rec_res_final.append({'text': text, 'confidence': float(score), 'text_box_position': boxes})
+                elif self.det and not self.rec:
+                    boxes = line
+                    rec_res_final.append({'text_box_position': boxes})
+                else:
+                    if self.use_angle_cls and not self.rec:
+                        orientation, score = line
+                        rec_res_final.append({'orientation': orientation, 'confidence': float(score)})
+                    else:
+                        text, score = line
+                        rec_res_final.append({'text': text, 'confidence': float(score)})
 
             result['data'] = rec_res_final
             if visualization and result['data']:
@@ -80,19 +95,22 @@ class MultiLangOCR:
             all_results.append(result)
         return all_results
 
-    def save_result_image(
-            self,
-            original_image,
-            rec_results,
-            output_dir='ocr_result',
-    ):
-        from PIL import Image
+    def save_result_image(self, original_image, rec_results, output_dir='ocr_result'):
         image = Image.fromarray(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
-        boxes = [line[0] for line in rec_results]
-        txts = [line[1][0] for line in rec_results]
-        scores = [line[1][1] for line in rec_results]
-        font_file = os.path.join(self.directory, 'assets', 'fonts/simfang.ttf')
-        im_show = draw_ocr(image, boxes, txts, scores, font_path=font_file)
+        if self.det and self.rec:
+            boxes = [line[0] for line in rec_results]
+            txts = [line[1][0] for line in rec_results]
+            scores = [line[1][1] for line in rec_results]
+            font_file = os.path.join(self.directory, 'assets', 'fonts/simfang.ttf')
+            im_show = draw_ocr(image, boxes, txts, scores, font_path=font_file)
+        elif self.det and not self.rec:
+            boxes = rec_results
+            im_show = self.draw_boxes(image, boxes)
+            im_show = np.array(im_show)
+        else:
+            self.logger.warning("only cls or rec not supported visualization.")
+            return ""
+
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -102,6 +120,24 @@ class MultiLangOCR:
         im_show = Image.fromarray(im_show)
         im_show.save(save_file_path)
         return save_file_path
+
+    def draw_boxes(self, image, boxes, scores=None, drop_score=0.5):
+        img = image.copy()
+        draw = ImageDraw.Draw(img)
+        if scores is None:
+            scores = [1] * len(boxes)
+        for (box, score) in zip(boxes, scores):
+            if score < drop_score:
+                continue
+            draw.line([(box[0][0], box[0][1]), (box[1][0], box[1][1])], fill='red')
+            draw.line([(box[1][0], box[1][1]), (box[2][0], box[2][1])], fill='red')
+            draw.line([(box[2][0], box[2][1]), (box[3][0], box[3][1])], fill='red')
+            draw.line([(box[3][0], box[3][1]), (box[0][0], box[0][1])], fill='red')
+            draw.line([(box[0][0] - 1, box[0][1] + 1), (box[1][0] - 1, box[1][1] + 1)], fill='red')
+            draw.line([(box[1][0] - 1, box[1][1] + 1), (box[2][0] - 1, box[2][1] + 1)], fill='red')
+            draw.line([(box[2][0] - 1, box[2][1] + 1), (box[3][0] - 1, box[3][1] + 1)], fill='red')
+            draw.line([(box[3][0] - 1, box[3][1] + 1), (box[0][0] - 1, box[0][1] + 1)], fill='red')
+        return img
 
     def get_image_ext(self, image):
         if image.shape[2] == 4:
