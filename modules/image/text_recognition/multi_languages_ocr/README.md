@@ -99,7 +99,7 @@
     - 构造MultiLangOCR对象
 
     - **参数**
-      - lang(bool): 语言选择。默认为ch。
+      - lang(bool): 多语言选择。默认为ch。
       - det(bool): 是否开启检测。默认为True。
       - rec(bool): 是否开启识别。默认为True。
       - use_angle_cls(bool): 是否开启方向判断。默认为False。

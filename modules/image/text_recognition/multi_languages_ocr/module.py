@@ -81,7 +81,13 @@ class MultiLangOCR(hub.Module):
                 continue
             original_image = img.copy()
             rec_results = self.engine.ocr(img, det=self.det, rec=self.rec, cls=self.use_angle_cls)
-            result['data'] = rec_results
+            rec_res_final = []
+            for line in rec_results:
+                boxes = line[0]
+                text, score = line[1]
+                rec_res_final.append({'text': text, 'confidence': float(score), 'text_region': boxes})
+
+            result['data'] = rec_res_final
             if visualization and result['data']:
                 result['save_path'] = self.save_result_image(original_image, rec_results, output_dir)
 
