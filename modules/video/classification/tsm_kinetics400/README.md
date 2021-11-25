@@ -16,9 +16,7 @@
 
 - ### 模型介绍
 
-  - TSN（Temporal Segment Network）是视频分类领域经典的基于2D-CNN的解决方案。该方法主要解决视频的长时间行为判断问题，通过稀疏采样视频帧的方式代替稠密采样，既能捕获视频全局信息，也能去除冗余，降低计算量。最终将每帧特征平均融合后得到视频的整体特征，并用于分类。TSN的训练数据采用由DeepMind公布的Kinetics-400动作识别数据集。该PaddleHub Module可支持预测。
-
-  - 具体网络结构可参考论文：[TSN](https://arxiv.org/abs/1608.00859)。
+  - TSM（Temporal Shift Module）是由MIT和IBM Watson AI Lab的JiLin，ChuangGan和SongHan等人提出的通过时间位移来提高网络视频理解能力的模块。TSM的训练数据采用由DeepMind公布的Kinetics-400动作识别数据集。该PaddleHub Module可支持预测。
 
 
 
