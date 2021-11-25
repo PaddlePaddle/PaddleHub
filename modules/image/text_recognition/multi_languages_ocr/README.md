@@ -109,12 +109,12 @@
 
   - ```python
     def recognize_text(images=[],
-                paths=[],
-                output_dir='ocr_result',
-                visualization=False)
+                       paths=[],
+                       output_dir='ocr_result',
+                       visualization=False)
     ```
 
-    - 预测API，检测输入图片中的所有中文文本的位置。
+    - 预测API，检测输入图片中的所有文本的位置。
 
     - **参数**
 
@@ -127,6 +127,10 @@
 
       - res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
         - data (list\[dict\]): 识别文本结果，列表中每一个元素为 dict，各字段为：
+          - text(str): 识别得到的文本
+          - confidence(float): 识别文本结果置信度
+          - text_box_position(list): 文本框在原图中的像素坐标，4*2的矩阵，依次表示文本框左下、右下、右上、左上顶点的坐标
+        如果无识别结果则data为\[\]
         - save_path (str, optional): 识别结果的保存路径，如不保存图片则save_path为''
 
 
