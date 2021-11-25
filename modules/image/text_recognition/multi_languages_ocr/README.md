@@ -41,7 +41,7 @@
 
   - PaddleOCR >= 2.0.1   | [如何安装PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.3/doc/doc_ch/quickstart.md#1)
 
-  - PaddleHub >= 1.8.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
+  - PaddleHub >= 2.0.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
   - shapely
 
@@ -162,7 +162,7 @@
     # 发送HTTP请求
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/chinese_ocr_db_crnn_mobile"
+    url = "http://127.0.0.1:8866/predict/multi_languages_ocr"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果
