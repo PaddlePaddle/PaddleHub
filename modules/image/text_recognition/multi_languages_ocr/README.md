@@ -87,7 +87,7 @@
 - ### 3、API
 
   - ```python
-    def _initialize(self,
+    def __init__(self,
                 lang="ch",
                 det=True,
                 rec=True,
