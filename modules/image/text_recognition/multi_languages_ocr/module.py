@@ -1,26 +1,13 @@
-# -*- coding:utf-8 -*-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import argparse
-import ast
 import os
-import sys
-
-sys.path.insert(0, ".")
-
-import copy
-
-from paddlehub.module.module import moduleinfo, runnable, serving
-import cv2
+import ast
 import time
-import numpy as np
-import paddlehub as hub
-from paddleocr import *
-from tools.infer.utility import base64_to_cv2
 
+import cv2
+import paddlehub as hub
+from paddlehub.module.module import moduleinfo, runnable, serving
 from paddleocr import PaddleOCR, draw_ocr
+from paddleocr.tools.infer.utility import base64_to_cv2
 
 
 @moduleinfo(
