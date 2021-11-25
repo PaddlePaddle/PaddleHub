@@ -108,29 +108,6 @@ class MultiLangOCR:
             return ".png"
         return ".jpg"
 
-    @runnable
-    def run_cmd(self, argvs):
-        """
-        Run as a command
-        """
-        self.parser = argparse.ArgumentParser(
-            description="Run the %s module." % self.name,
-            prog='hub run %s' % self.name,
-            usage='%(prog)s',
-            add_help=True)
-
-        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
-        self.arg_config_group = self.parser.add_argument_group(
-            title="Config options", description="Run configuration for controlling module behavior, not required.")
-
-        self.add_module_config_arg()
-        self.add_module_input_arg()
-
-        args = self.parser.parse_args(argvs)
-        results = self.recognize_text(
-            paths=[args.input_path], output_dir=args.output_dir, visualization=args.visualization)
-        return results
-
     @serving
     def serving_method(self, images, **kwargs):
         """
