@@ -78,7 +78,7 @@
     import cv2
 
     ocr = hub.Module(name="multi_languages_ocr", enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
-    result = ocr.predict(images=[cv2.imread('/PATH/TO/IMAGE')])
+    result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
     # or
     # result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
