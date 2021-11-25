@@ -2,7 +2,7 @@
 
 |Module Name |animegan_v2_paprika_54|
 | :--- | :---: |
-|Category |image generation|
+|Category |Image generation|
 |Network|AnimeGAN|
 |Dataset|Paprika|
 |Fine-tuning supported or not|No|
@@ -19,11 +19,11 @@
     <p align="center">
     <img src="https://ai-studio-static-online.cdn.bcebos.com/bd002c4bb6a7427daf26988770bb18648b7d8d2bfd6746bfb9a429db4867727f"  width = "450" height = "300" hspace='10'/>
     <br />
-    输入图像
+    Input image
     <br />
     <img src="https://ai-studio-static-online.cdn.bcebos.com/6574669d87b24bab9627c6e33896528b4a0bf5af1cd84ca29655d68719f2d551"  width = "450" height = "300" hspace='10'/>
     <br />
-    输出图像
+    Output image
      <br />
     </p>
 
@@ -40,7 +40,7 @@
 
   - paddlepaddle >= 1.8.0  
 
-  - paddlehub >= 1.8.0  | [How to install PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+  - paddlehub >= 1.8.0  | [How to install PaddleHub](../../../../docs/docs_en/get_start/installation.rst)
 
 - ### 2、Installation
 
@@ -48,8 +48,8 @@
     $ hub install animegan_v2_paprika_54
     ```
 
-  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 
 ## III. Module API Prediction
@@ -81,12 +81,12 @@
 
     - **Parameters**
 
-      - images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
-      - paths (list\[str\]): image path;
-      - output\_dir (str): save path of images, `output` by default;
-      - visualization (bool): Whether to save the results as picture files;
-      - min\_size (int): minimum size, default is  32;
-      - max\_size (int): maximum size, default is 1024.
+      - images (list\[numpy.ndarray\]): Image data, ndarray.shape is in the format [H, W, C], BGR.
+      - paths (list\[str\]): Image path.
+      - output\_dir (str): Save path of images, `output` by default.
+      - visualization (bool): Whether to save the results as picture files.
+      - min\_size (int): Minimum size, default is  32.
+      - max\_size (int): Maximum size, default is 1024.
 
       **NOTE:** Choose one of `paths` and `images` to provide input data.
 
@@ -102,9 +102,9 @@
 
   - Run the startup command:
 
-  - ```shell
-    $ hub serving start -m animegan_v2_paprika_54
-    ```
+    - ```shell
+      $ hub serving start -m animegan_v2_paprika_54
+      ```
 
   - The servitization API is now deployed and the default port number is 8866.
 
@@ -114,26 +114,26 @@
 
    - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-  - ```python
-    import requests
-    import json
-    import cv2
-    import base64
+      - ```python
+        import requests
+        import json
+        import cv2
+        import base64
 
 
-    def cv2_to_base64(image):
-      data = cv2.imencode('.jpg', image)[1]
-      return base64.b64encode(data.tostring()).decode('utf8')
+        def cv2_to_base64(image):
+          data = cv2.imencode('.jpg', image)[1]
+          return base64.b64encode(data.tostring()).decode('utf8')
 
-    # Send an HTTP request
-    data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
-    headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/animegan_v2_paprika_54"
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+        # Send an HTTP request
+        data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
+        headers = {"Content-type": "application/json"}
+        url = "http://127.0.0.1:8866/predict/animegan_v2_paprika_54"
+        r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
-    # print prediction results
-    print(r.json()["results"])
-    ```
+        # print prediction results
+        print(r.json()["results"])
+        ```
 
 
 ## V. Release Note

@@ -2,7 +2,7 @@
 
 |Module Name|photo_restoration|
 | :--- | :---: | 
-|Category|image editing|
+|Category|Image editing|
 |Network|deoldify and realsr|
 |Fine-tuning supported or not|No|
 |Module Size |64MB+834MB|
@@ -47,8 +47,8 @@
       $ hub install photo_restoration
       ```
       
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 
 ## III. Module API Prediction
@@ -56,7 +56,7 @@
 - ### 1、Prediction Code Example
 
 
-    ```python
+  - ```python
     import cv2
     import paddlehub as hub
 
@@ -68,7 +68,7 @@
 - ### 2、API
 
 
-    ```python
+  - ```python
     def run_image(self,
                   input,
                   model_select= ['Colorization', 'SuperResolution'],
@@ -79,16 +79,16 @@
 
     - **Parameter**
 
-        - input (numpy.ndarray｜str): image data，numpy.ndarray or str. ndarray.shape is in the format [H, W, C], BGR;
+        - input (numpy.ndarray｜str): Image data，numpy.ndarray or str. ndarray.shape is in the format [H, W, C], BGR.
 
         - model_select (list\[str\]): Mode selection，\['Colorization'\] only colorize the input image， \['SuperResolution'\] only increase the image resolution；
         default is \['Colorization', 'SuperResolution'\]。
 
-        - save_path (str): save path, default is 'photo_restoration'.
+        - save_path (str): Save path, default is 'photo_restoration'.
 
      - **Return**
 
-        - output (numpy.ndarray): restoration result，ndarray.shape is in the format [H, W, C], BGR.
+        - output (numpy.ndarray): Restoration result，ndarray.shape is in the format [H, W, C], BGR.
 
 
 ## IV. Server Deployment
@@ -103,15 +103,15 @@
           $ hub serving start -m photo_restoration
           ```
 
-        - The servitization API is now deployed and the default port number is 8866.
+    - The servitization API is now deployed and the default port number is 8866.
 
-        - **NOTE:**  If GPU is used for prediction, set CUDA_VISIBLE_DEVICES environment variable before the service, otherwise it need not be set.
+    - **NOTE:**  If GPU is used for prediction, set CUDA_VISIBLE_DEVICES environment variable before the service, otherwise it need not be set.
 
 - ### Step 2: Send a predictive request
 
     - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-        ```python
+      - ```python
         import requests
         import json
         import base64

@@ -2,7 +2,7 @@
 
 |Module Name |reasr|
 | :--- | :---: | 
-|Category |image editing|
+|Category |Image editing|
 |Network|LP-KPN|
 |Dataset |RealSR dataset|
 |Fine-tuning supported or not|No|
@@ -23,7 +23,7 @@
 
 - ### Module Introduction
 
-  - realsr is a super resolution model for image and video based on "Toward Real-World Single Image Super-Resolution: A New Benchmark and A New Mode". This model provides super resolution result with scale factor x4.
+  - Realsr is a super resolution model for image and video based on "Toward Real-World Single Image Super-Resolution: A New Benchmark and A New Mode". This model provides super resolution result with scale factor x4.
   
   - For more information, please refer to: [realsr](https://github.com/csjcai/RealSR)
   
@@ -47,8 +47,8 @@
       $ hub install realsr
       ```
       
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
     
 
@@ -56,60 +56,60 @@
 
   - ### 1、Prediction Code Example
 
-    ```python
-    import paddlehub as hub
+    - ```python
+      import paddlehub as hub
 
-    model = hub.Module(name='realsr')
-    model.predict('/PATH/TO/IMAGE/OR/VIDEO')
-    ```
+      model = hub.Module(name='realsr')
+      model.predict('/PATH/TO/IMAGE/OR/VIDEO')
+      ```
   - ### 2、API
 
     - ```python
       def predict(self, input):
       ```
 
-    - Prediction API.
+      - Prediction API.
 
-    - **Parameter**
+      - **Parameter**
 
-        - input (str): image path.
+          - input (str): image path.
 
-    - **Return**
+      - **Return**
 
-        - If input is image path, the output is：
-          - pred_img(np.ndarray): image data, ndarray.shape is in the format [H, W, C], BGR;
-          - out_path(str): save path of images.
+          - If input is image path, the output is：
+            - pred_img(np.ndarray): image data, ndarray.shape is in the format [H, W, C], BGR.
+            - out_path(str): save path of images.
 
-        - If input is video path, the output is ：
-          - frame_pattern_combined(str): save path of frames from output video;
-          - vid_out_path(str): save path of output video.
+          - If input is video path, the output is ：
+            - frame_pattern_combined(str): save path of frames from output video.
+            - vid_out_path(str): save path of output video.
 
     - ```python
       def run_image(self, img):
       ```
       - Prediction API for images.
 
-    - **Parameter**
+      - **Parameter**
 
-        - img (str｜np.ndarray): image data,  str or ndarray. ndarray.shape is in the format [H, W, C], BGR.
+          - img (str｜np.ndarray): Image data,  str or ndarray. ndarray.shape is in the format [H, W, C], BGR.
 
-    - **Return**
+      - **Return**
 
-        - pred_img(np.ndarray): ndarray.shape is in the format [H, W, C], BGR.
+          - pred_img(np.ndarray): Prediction result, ndarray.shape is in the format [H, W, C], BGR.
 
     - ```python
       def run_video(self, video):
       ```
        -  Prediction API for video.
 
-       - **Parameter**
+          - **Parameter**
 
-         - video(str): video path.
+            - video(str): Video path.
 
-       - **Return**
+          - **Return**
 
-         - frame_pattern_combined(str): save path of frames from output video;
-         - vid_out_path(str): save path of output video.
+            - frame_pattern_combined(str): Save path of frames from output video.
+            - vid_out_path(str): Save path of output video.
 
 
 ## IV. Server Deployment
@@ -124,41 +124,41 @@
       $ hub serving start -m realsr
       ```
 
-    - The servitization API is now deployed and the default port number is 8866.
+  - The servitization API is now deployed and the default port number is 8866.
 
-    - **NOTE:**  If GPU is used for prediction, set CUDA_VISIBLE_DEVICES environment variable before the service, otherwise it need not be set.
+  - **NOTE:**  If GPU is used for prediction, set CUDA_VISIBLE_DEVICES environment variable before the service, otherwise it need not be set.
 
 - ### Step 2: Send a predictive request
 
     - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-    - ```python
-      import requests
-      import json
-      import base64
+      - ```python
+        import requests
+        import json
+        import base64
 
-      import cv2
-      import numpy as np
+        import cv2
+        import numpy as np
 
-      def cv2_to_base64(image):
-          data = cv2.imencode('.jpg', image)[1]
-          return base64.b64encode(data.tostring()).decode('utf8')
-      def base64_to_cv2(b64str):
-          data = base64.b64decode(b64str.encode('utf8'))
-          data = np.fromstring(data, np.uint8)
-          data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-          return data
+        def cv2_to_base64(image):
+            data = cv2.imencode('.jpg', image)[1]
+            return base64.b64encode(data.tostring()).decode('utf8')
+        def base64_to_cv2(b64str):
+            data = base64.b64decode(b64str.encode('utf8'))
+            data = np.fromstring(data, np.uint8)
+            data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+            return data
 
-      # 发送HTTP请求
-      org_im = cv2.imread('/PATH/TO/IMAGE')
-      data = {'images':cv2_to_base64(org_im)}
-      headers = {"Content-type": "application/json"}
-      url = "http://127.0.0.1:8866/predict/realsr"
-      r = requests.post(url=url, headers=headers, data=json.dumps(data))
-      img = base64_to_cv2(r.json()["results"])
-      cv2.imwrite('/PATH/TO/SAVE/IMAGE', img)
 
-      ```
+        org_im = cv2.imread('/PATH/TO/IMAGE')
+        data = {'images':cv2_to_base64(org_im)}
+        headers = {"Content-type": "application/json"}
+        url = "http://127.0.0.1:8866/predict/realsr"
+        r = requests.post(url=url, headers=headers, data=json.dumps(data))
+        img = base64_to_cv2(r.json()["results"])
+        cv2.imwrite('/PATH/TO/SAVE/IMAGE', img)
+
+        ```
 
 
 ## V. Release Note

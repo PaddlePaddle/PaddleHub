@@ -23,7 +23,7 @@
 
 - ### Module Introduction
 
-  - falsr_b is a lightweight super-resolution model based on `Accurate and Lightweight Super-Resolution with Neural Architecture Search`. The model uses a multi-objective approach to deal with the over-segmentation problem, and uses an elastic search strategy based on a hybrid controller to improve the performance of the model. This model provides super resolution result with scale factor x2.
+  - Falsr_b is a lightweight super-resolution model based on "Accurate and Lightweight Super-Resolution with Neural Architecture Search". The model uses a multi-objective approach to deal with the over-segmentation problem, and uses an elastic search strategy based on a hybrid controller to improve the performance of the model. This model provides super resolution result with scale factor x2.
 
   - For more information, please refer to:[falsr_b](https://github.com/xiaomi-automl/FALSR)
 
@@ -42,8 +42,8 @@
       $ hub install falsr_b
       ```
 
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 
 ## III. Module API Prediction
@@ -53,6 +53,7 @@
   - ```
     $ hub run falsr_b --input_path "/PATH/TO/IMAGE"
     ```
+  - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
 
 - ### 2、Prediction Code Example
 
@@ -82,16 +83,16 @@
 
     - **Parameter**
 
-      * images (list\[numpy.ndarray\]): image data，ndarray.shape is in the format \[H, W, C\]，BGR;
-      * paths (list\[str\]): image path;
-      * use\_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**;
-      * visualization (bool): Whether to save the recognition results as picture files;
-      * output\_dir (str): save path of images, "dcscn_output" by default.
+      * images (list\[numpy.ndarray\]): Image data，ndarray.shape is in the format \[H, W, C\]，BGR.
+      * paths (list\[str\]): Image path.
+      * use\_gpu (bool): Use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**.
+      * visualization (bool): Whether to save the recognition results as picture files.
+      * output\_dir (str): Save path of images, "dcscn_output" by default.
 
     - **Return**
       * res (list\[dict\]): The list of model results, where each element is dict and each field is: 
         * save\_path (str, optional): Save path of the result, save_path is '' if no image is saved.
-        * data (numpy.ndarray): result of super resolution.
+        * data (numpy.ndarray): Result of super resolution.
 
   - ```python
     def save_inference_model(self,
@@ -106,8 +107,8 @@
     - **Parameters**
 
       * dirname: Save path.
-      * model\_filename: model file name，defalt is \_\_model\_\_
-      * params\_filename: parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
+      * model\_filename: Model file name，defalt is \_\_model\_\_
+      * params\_filename: Parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
       * combined: Whether to save the parameters to a unified file.
 
 
@@ -126,15 +127,15 @@
         $ hub serving start -m falsr_b
         ```
 
-      - The servitization API is now deployed and the default port number is 8866.
+    - The servitization API is now deployed and the default port number is 8866.
 
-      - **NOTE:**  If GPU is used for prediction, set CUDA_VISIBLE_DEVICES environment variable before the service, otherwise it need not be set.
+    - **NOTE:**  If GPU is used for prediction, set CUDA_VISIBLE_DEVICES environment variable before the service, otherwise it need not be set.
 
 - ### Step 2: Send a predictive request
 
     - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-        ```python
+      - ```python
         import requests
         import json
         import base64

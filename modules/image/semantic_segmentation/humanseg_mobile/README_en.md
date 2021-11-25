@@ -2,7 +2,7 @@
 
 |Module Name |humanseg_mobile|
 | :--- | :---: | 
-|Category |image segmentation|
+|Category |Image segmentation|
 |Network|hrnet|
 |Dataset|Baidu self-built dataset|
 |Fine-tuning supported or not|No|
@@ -40,17 +40,20 @@
       $ hub install humanseg_mobile
       ```
       
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 ## III. Module API Prediction
 
 - ### 1、Command line Prediction
 
-    ```
-    hub run humanseg_mobile --input_path "/PATH/TO/IMAGE"
+    - ```
+      hub run humanseg_mobile --input_path "/PATH/TO/IMAGE"
     
-    ```
+      ```
+    - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
+
+    
 - ### 2、Prediction Code Example
     - Image segmentation and video segmentation example：
         ```python
@@ -112,17 +115,17 @@
 
     - **Parameter**
 
-        * images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
-        * paths (list\[str\]): image path;
-        * batch\_size (int): batch size;
-        * use\_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
-        * visualization (bool): Whether to save the results as picture files;
+        * images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR.
+        * paths (list\[str\]): image path.
+        * batch\_size (int): batch size.
+        * use\_gpu (bool): use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
+        * visualization (bool): Whether to save the results as picture files.
         * output\_dir (str): save path of images, humanseg_mobile_output by default.
 
     - **Return**
 
         * res (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
-            * save\_path (str, optional): Save path of the result;
+            * save\_path (str, optional): Save path of the result.
             * data (numpy.ndarray): The result of portrait segmentation. 
 
     ```python
@@ -138,17 +141,17 @@
 
     - **Parameter**
 
-        * frame_org (numpy.ndarray): single frame for prediction，ndarray.shape is in the format [H, W, C], BGR;
-        * frame_id (int): The number of the current frame;
-        * prev_gray (numpy.ndarray): Grayscale image of the previous network input;
+        * frame_org (numpy.ndarray): single frame for prediction，ndarray.shape is in the format [H, W, C], BGR.
+        * frame_id (int): The number of the current frame.
+        * prev_gray (numpy.ndarray): Grayscale image of the previous network input.
         * prev_cfd (numpy.ndarray): The fusion image from optical flow and the prediction result from previous frame.
-        * use\_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
+        * use\_gpu (bool): Use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
 
 
     - **Return**
 
-        * img_matting (numpy.ndarray): The result of portrait segmentation;
-        * cur_gray (numpy.ndarray): Grayscale image of the current network input;
+        * img_matting (numpy.ndarray): The result of portrait segmentation.
+        * cur_gray (numpy.ndarray): Grayscale image of the current network input.
         * optflow_map (numpy.ndarray): The fusion image from optical flow and the prediction result from current frame.
 
 
@@ -164,7 +167,7 @@
     - **Parameter**
 
         * video\_path (str): Video path for segmentation。If None, the video will be obtained from the local camera, and a window will display the online segmentation result.
-        * use\_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
+        * use\_gpu (bool): Use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
         * save\_dir (str): save path of video.
 
 
@@ -181,8 +184,8 @@
     - **Parameters**
 
       * dirname: Save path.
-      * model\_filename: model file name，defalt is \_\_model\_\_
-      * params\_filename: parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
+      * model\_filename: Model file name，defalt is \_\_model\_\_
+      * params\_filename: Parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
       * combined: Whether to save the parameters to a unified file.
 
 
@@ -193,11 +196,11 @@
 
 - ### Step 1: Start PaddleHub Serving
 
-  - Run the startup command:
+    - Run the startup command:
 
-    ```shell
-    $ hub serving start -m humanseg_mobile
-    ```
+        -  ```shell
+           $ hub serving start -m humanseg_mobile
+           ```
 
     - The servitization API is now deployed and the default port number is 8866.
 

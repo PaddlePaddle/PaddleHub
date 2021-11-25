@@ -2,7 +2,7 @@
 
 |Module Name|SkyAR|
 | :--- | :---: |
-|Category|video editing|
+|Category|Video editing|
 |Network|UNet|
 |Dataset|-|
 |Fine-tuning supported or not|No|
@@ -63,11 +63,11 @@
 
 - ### 2、Installation
 
-    ```shell
-    $hub install SkyAR
-    ```
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - ```shell
+      $hub install SkyAR
+      ```
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 ## III. Module API Prediction
 
@@ -99,13 +99,10 @@
 
         * video_path(str)：input video path.
         * save_path(str)：save videp path.
-        * config(str): SkyBox configuration, all preset configurations are as follows, if you use a custom SkyBox, please set it to None:
-        ```
-        [
-            'cloudy', 'district9ship', 'floatingcastle', 'galaxy', 'jupiter',
+        * config(str): SkyBox configuration, all preset configurations are as follows:  `['cloudy', 'district9ship', 'floatingcastle', 'galaxy', 'jupiter',
             'rainy', 'sunny', 'sunset', 'supermoon', 'thunderstorm'
-        ]
-        ```
+        ]`, if you use a custom SkyBox, please set it to None.
+    
         * skybox_img(str)：custom SkyBox image path
         * skybox_video(str)：custom SkyBox video path
         * is_video_sky(bool)：customize whether SkyBox is a video

@@ -23,9 +23,9 @@
 
 - ### Module Introduction
 
-  - falsr_a is a lightweight super-resolution model based on `Accurate and Lightweight Super-Resolution with Neural Architecture Search`. The model uses a multi-objective approach to deal with the over-segmentation problem, and uses an elastic search strategy based on a hybrid controller to improve the performance of the model. This model provides super resolution result with scale factor x2.
+  - Falsr_a is a lightweight super-resolution model based on "Accurate and Lightweight Super-Resolution with Neural Architecture Search". The model uses a multi-objective approach to deal with the over-segmentation problem, and uses an elastic search strategy based on a hybrid controller to improve the performance of the model. This model provides super resolution result with scale factor x2.
 
-  - For more information, please refer to:[falsr_a](https://github.com/xiaomi-automl/FALSR)
+  - For more information, please refer to: [falsr_a](https://github.com/xiaomi-automl/FALSR)
 
 ## II. Installation
 
@@ -42,8 +42,8 @@
       $ hub install falsr_a
       ```
 
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 
 ## III. Module API Prediction
@@ -53,19 +53,20 @@
   - ```
     $ hub run falsr_a --input_path "/PATH/TO/IMAGE"
     ```
+  - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
 
 - ### 2、Prediction Code Example
 
-  ```python
-  import cv2
-  import paddlehub as hub
+  - ```python
+    import cv2
+    import paddlehub as hub
 
-  sr_model = hub.Module(name='falsr_a')
-  im = cv2.imread('/PATH/TO/IMAGE').astype('float32')
-  res = sr_model.reconstruct(images=[im], visualization=True)
-  print(res[0]['data'])
-  sr_model.save_inference_model()
-  ```
+    sr_model = hub.Module(name='falsr_a')
+    im = cv2.imread('/PATH/TO/IMAGE').astype('float32')
+    res = sr_model.reconstruct(images=[im], visualization=True)
+    print(res[0]['data'])
+    sr_model.save_inference_model()
+    ```
 
 - ### 3、API
 
@@ -82,10 +83,10 @@
 
     - **Parameter**
 
-      * images (list\[numpy.ndarray\]): image data，ndarray.shape is in the format \[H, W, C\]，BGR;
-      * paths (list\[str\]): image path;
-      * use\_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**;
-      * visualization (bool): Whether to save the recognition results as picture files;
+      * images (list\[numpy.ndarray\]): image data，ndarray.shape is in the format \[H, W, C\]，BGR.
+      * paths (list\[str\]): image path.
+      * use\_gpu (bool): use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**.
+      * visualization (bool): Whether to save the recognition results as picture files.
       * output\_dir (str): save path of images, "dcscn_output" by default.
 
     - **Return**
@@ -126,15 +127,15 @@
         $ hub serving start -m falsr_a
         ```
 
-      - The servitization API is now deployed and the default port number is 8866.
+    - The servitization API is now deployed and the default port number is 8866.
 
-      - **NOTE:**  If GPU is used for prediction, set CUDA_VISIBLE_DEVICES environment variable before the service, otherwise it need not be set.
+    - **NOTE:**  If GPU is used for prediction, set CUDA_VISIBLE_DEVICES environment variable before the service, otherwise it need not be set.
 
 - ### Step 2: Send a predictive request
 
     - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-        ```python
+      - ```python
         import requests
         import json
         import base64

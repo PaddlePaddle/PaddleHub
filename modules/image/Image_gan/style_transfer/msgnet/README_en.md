@@ -2,7 +2,7 @@
 
 |Module Name|msgnet|
 | :--- | :---: | 
-|Category|image editing|
+|Category|Image editing|
 |Network|msgnet|
 |Dataset|COCO2014|
 |Fine-tuning supported or not|Yes|
@@ -38,30 +38,30 @@
       $ hub install msgnet
       ```
 
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 
 ## III. Module API Prediction
 
 - ### 1、Command line Prediction
 
-```
-$ hub run msgnet --input_path "/PATH/TO/ORIGIN/IMAGE" --style_path "/PATH/TO/STYLE/IMAGE"
-```
+  - ```
+    $ hub run msgnet --input_path "/PATH/TO/ORIGIN/IMAGE" --style_path "/PATH/TO/STYLE/IMAGE"
+    ```
+  - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
+
 
 - ### 2、Prediction Code Example
 
-```python
-import paddle
-import paddlehub as hub
+    -  ```python
+        import paddle
+        import paddlehub as hub
 
-if __name__ == '__main__':
-    model = hub.Module(name='msgnet')
-    result = model.predict(origin=["/PATH/TO/ORIGIN/IMAGE"], style="/PATH/TO/STYLE/IMAGE", visualization=True, save_path ="/PATH/TO/SAVE/IMAGE")
-```
-
-
+        if __name__ == '__main__':
+            model = hub.Module(name='msgnet')
+            result = model.predict(origin=["/PATH/TO/ORIGIN/IMAGE"], style="/PATH/TO/STYLE/IMAGE", visualization=True, save_path ="/PATH/TO/SAVE/IMAGE")
+        ```
 
 - ### 3.Fine-tune and Encapsulation
 
@@ -111,20 +111,20 @@ if __name__ == '__main__':
     - Model prediction
 
         -   When Fine-tune is completed, the model with the best performance on the verification set will be saved in the `${CHECKPOINT_DIR}/best_model` directory. We use this model to make predictions. The `predict.py` script is as follows:
-            ```python
-            import paddle
-            import paddlehub as hub
+            -   ```python
+                import paddle
+                import paddlehub as hub
 
-            if __name__ == '__main__':
-                model = hub.Module(name='msgnet', load_checkpoint="/PATH/TO/CHECKPOINT")
-                result = model.predict(origin=["/PATH/TO/ORIGIN/IMAGE"], style="/PATH/TO/STYLE/IMAGE", visualization=True, save_path ="/PATH/TO/SAVE/IMAGE")
-            ```
+                if __name__ == '__main__':
+                    model = hub.Module(name='msgnet', load_checkpoint="/PATH/TO/CHECKPOINT")
+                    result = model.predict(origin=["/PATH/TO/ORIGIN/IMAGE"], style="/PATH/TO/STYLE/IMAGE", visualization=True, save_path ="/PATH/TO/SAVE/IMAGE")
+                ```
 
-            - **Args**
-                * `origin`: Image path or ndarray data with format [H, W, C], BGR;
-                * `style`: Style image path;
-                * `visualization`: Whether to save the recognition results as picture files;
-                * `save_path`: Save path of the result, default is 'style_tranfer'.
+                - **Parameters**
+                    * `origin`: Image path or ndarray data with format [H, W, C], BGR.
+                    * `style`: Style image path.
+                    * `visualization`: Whether to save the recognition results as picture files.
+                    * `save_path`: Save path of the result, default is 'style_tranfer'.
 
 
 ## IV. Server Deployment
@@ -135,9 +135,9 @@ if __name__ == '__main__':
 
     - Run the startup command:
 
-    - ```shell
-      $ hub serving start -m msgnet
-      ```
+        - ```shell
+        $ hub serving start -m msgnet
+        ```
 
     - The servitization API is now deployed and the default port number is 8866.
 
@@ -148,35 +148,35 @@ if __name__ == '__main__':
 
     - With a configured server, use the following lines of code to send the prediction request and obtain the result:
 
-        ```python
-        import requests
-        import json
-        import cv2
-        import base64
+        -   ```python
+            import requests
+            import json
+            import cv2
+            import base64
 
-        import numpy as np
+            import numpy as np
 
 
-        def cv2_to_base64(image):
-            data = cv2.imencode('.jpg', image)[1]
-            return base64.b64encode(data.tostring()).decode('utf8')
+            def cv2_to_base64(image):
+                data = cv2.imencode('.jpg', image)[1]
+                return base64.b64encode(data.tostring()).decode('utf8')
 
-        def base64_to_cv2(b64str):
-            data = base64.b64decode(b64str.encode('utf8'))
-            data = np.fromstring(data, np.uint8)
-            data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-            return data
+            def base64_to_cv2(b64str):
+                data = base64.b64decode(b64str.encode('utf8'))
+                data = np.fromstring(data, np.uint8)
+                data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+                return data
 
-        # Send an HTTP request
-        org_im = cv2.imread('/PATH/TO/ORIGIN/IMAGE')
-        style_im = cv2.imread('/PATH/TO/STYLE/IMAGE')
-        data = {'images':[[cv2_to_base64(org_im)], cv2_to_base64(style_im)]}
-        headers = {"Content-type": "application/json"}
-        url = "http://127.0.0.1:8866/predict/msgnet"
-        r = requests.post(url=url, headers=headers, data=json.dumps(data))
-        data = base64_to_cv2(r.json()["results"]['data'][0])
-        cv2.imwrite('style.png', data)
-        ```
+            # Send an HTTP request
+            org_im = cv2.imread('/PATH/TO/ORIGIN/IMAGE')
+            style_im = cv2.imread('/PATH/TO/STYLE/IMAGE')
+            data = {'images':[[cv2_to_base64(org_im)], cv2_to_base64(style_im)]}
+            headers = {"Content-type": "application/json"}
+            url = "http://127.0.0.1:8866/predict/msgnet"
+            r = requests.post(url=url, headers=headers, data=json.dumps(data))
+            data = base64_to_cv2(r.json()["results"]['data'][0])
+            cv2.imwrite('style.png', data)
+            ```
 
 ## V. Release Note
 

@@ -2,7 +2,7 @@
 
 |Module Name|Pneumonia_CT_LKM_PP_lung|
 | :--- | :---: | 
-|Category|image segmentation|
+|Category|Image segmentation|
 |Network |-|
 |Dataset|-|
 |Fine-tuning supported or not|No|
@@ -64,7 +64,7 @@
 
 - ### 2、API
 
-    ```python
+  - ```python
     def segmentation(data)
     ```
 
@@ -72,16 +72,16 @@
 
     - **Parameter**
 
-        * data (dict): key is "image_np_path", value is the list of results which contains lesion and lung segmentation masks. 
+        * data (dict): Key is "image_np_path", value is the list of results which contains lesion and lung segmentation masks. 
         
 
     - **Return**
 
-        * result  (list\[dict\]): the list of recognition results, where each element is dict and each field is: 
-            * input_lesion_np_path: input path of lesion;
-            * output_lesion_np: segmentation result path of lesion;
-            * input_lung_np_path: input path of lung;
-            * output_lung_np：segmentation result path of lung.
+        * result  (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
+            * input_lesion_np_path: Input path of lesion.
+            * output_lesion_np: Segmentation result path of lesion.
+            * input_lung_np_path: Input path of lung.
+            * output_lung_np: Segmentation result path of lung.
 
 
 ## IV. Release Note

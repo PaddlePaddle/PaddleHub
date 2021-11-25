@@ -2,7 +2,7 @@
 
 |Module Name|resnet_v2_50_imagenet|
 | :--- | :---: |
-|Category |image classification|
+|Category |Image classification|
 |Network|ResNet V2|
 |Dataset|ImageNet-2012|
 |Fine-tuning supported or not|No|
@@ -23,7 +23,7 @@
 
   - paddlepaddle >= 1.4.0  
 
-  - paddlehub >= 1.0.0  | [How to install PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+  - paddlehub >= 1.0.0  | [How to install PaddleHub](../../../../docs/docs_en/get_start/installation.rst)
 
 
 - ### 2、Installation
@@ -31,8 +31,8 @@
   - ```shell
     $ hub install resnet_v2_50_imagenet
     ```
-  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 
 ## III. Module API Prediction
@@ -64,10 +64,10 @@
     - Prediction API for classification.
 
     - **Parameter**
-      - data (dict): key is 'image'，value is the list of image path.
+      - data (dict): Key is 'image'，value is the list of image path.
 
     - **Return**
-      - result (list[dict]): the list of classification results，key is the prediction label, value is the corresponding confidence.
+      - result (list[dict]): The list of classification results，key is the prediction label, value is the corresponding confidence.
 
 
 
@@ -79,6 +79,7 @@
   First release
 
 - 1.0.1
+
   Fix encoding problem in python2
   
   - ```shell

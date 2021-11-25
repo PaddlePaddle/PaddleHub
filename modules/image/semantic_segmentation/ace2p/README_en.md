@@ -2,7 +2,7 @@
 
 |Module Name|ace2p|
 | :--- | :---: | 
-|Category|image segmentation|
+|Category|Image segmentation|
 |Network|ACE2P|
 |Dataset|LIP|
 |Fine-tuning supported or not|No|
@@ -50,21 +50,24 @@
     - ```shell
       $ hub install ace2p
       ```
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 
 ## III. Module API Prediction
 
 - ### 1、Command line Prediction
 
-    ```shell
-    $ hub run ace2p --input_path "/PATH/TO/IMAGE"
-    ```
+    - ```shell
+      $ hub run ace2p --input_path "/PATH/TO/IMAGE"
+      ```
+
+    - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
+
 
 - ### 2、Prediction Code Example
 
-    ```python
+  - ```python
     import paddlehub as hub
     import cv2
 
@@ -72,48 +75,48 @@
     result = human_parser.segmentation(images=[cv2.imread('/PATH/TO/IMAGE')])
     ```
   
-    - ### 3、API
+- ### 3、API
 
-      ```python
-      def segmentation(images=None,
-                      paths=None,
-                      batch_size=1,
-                      use_gpu=False,
-                      output_dir='ace2p_output',
-                      visualization=False):
-      ```
+  - ```python
+    def segmentation(images=None,
+                    paths=None,
+                    batch_size=1,
+                    use_gpu=False,
+                    output_dir='ace2p_output',
+                    visualization=False):
+    ```
 
-      - Prediction API, used for human parsing.
+    - Prediction API, used for human parsing.
 
     - **Parameter**
 
-        * images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
-        * paths (list\[str\]): image path;
-        * batch\_size (int): batch size;
-        * use\_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
-        * output\_dir (str): save path of output, default is 'ace2p_output';
+        * images (list\[numpy.ndarray\]): Image data, ndarray.shape is in the format [H, W, C], BGR.
+        * paths (list\[str\]): Image path.
+        * batch\_size (int): Batch size.
+        * use\_gpu (bool): Use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
+        * output\_dir (str): Save path of output, default is 'ace2p_output'.
         * visualization (bool): Whether to save the recognition results as picture files.
 
     - **Return**
 
         * res (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
-            * save\_path (str, optional): Save path of the result;
+            * save\_path (str, optional): Save path of the result.
             * data (numpy.ndarray): The result of portrait segmentation. 
 
 
-      ```python
-      def save_inference_model(dirname,
-                              model_filename=None,
-                              params_filename=None,
-                              combined=True)
-      ```
+  - ```python
+    def save_inference_model(dirname,
+                            model_filename=None,
+                            params_filename=None,
+                            combined=True)
+    ```
 
     - Save the model to the specified path.
 
     - **Parameters**
       * dirname: Save path.
-      * model\_filename: model file name，defalt is \_\_model\_\_
-      * params\_filename: parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
+      * model\_filename: mMdel file name，defalt is \_\_model\_\_
+      * params\_filename: Parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
       * combined: Whether to save the parameters to a unified file.
 
 
@@ -125,9 +128,9 @@
 
   - Run the startup command:
   
-    ```shell
-     $ hub serving start -m ace2p
-    ```
+    - ```shell
+      $ hub serving start -m ace2p
+      ```
 
   - The servitization API is now deployed and the default port number is 8866.
 
@@ -138,7 +141,7 @@
   - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
 
-      ```python
+    - ```python
       import requests
       import json
       import cv2

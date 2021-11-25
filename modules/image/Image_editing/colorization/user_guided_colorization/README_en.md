@@ -24,7 +24,7 @@
 
 - ### Module Introduction
 
-  - user_guided_colorization is a colorization model based on "Real-Time User-Guided Image Colorization with Learned Deep Priors"，this model uses pre-supplied coloring blocks to color the gray image.
+  - User_guided_colorization is a colorization model based on "Real-Time User-Guided Image Colorization with Learned Deep Priors"，this model uses pre-supplied coloring blocks to color the gray image.
 
 ## II. Installation
 
@@ -40,8 +40,8 @@
       $ hub install user_guided_colorization
       ```
 
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)   
+    - In case of any problems during installation, please refer to: [Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)   
 
 ## III. Module API Prediction
 
@@ -50,6 +50,8 @@
     ```shell
     $ hub run user_guided_colorization --input_path "/PATH/TO/IMAGE"
     ```
+
+     - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
 - ### 2、Prediction Code Example
 
     ```python
@@ -69,6 +71,7 @@
     - Steps:
 
         - Step1: Define the data preprocessing method
+
             - ```python
               import paddlehub.vision.transforms as T
 
@@ -77,7 +80,7 @@
                        T.RGB2LAB()], to_rgb=True)
               ```
 
-              - `transforms` The data enhancement module defines lots of data preprocessing methods. Users can replace the data preprocessing methods according to their needs.
+              - `transforms`: The data enhancement module defines lots of data preprocessing methods. Users can replace the data preprocessing methods according to their needs.
 
         - Step2: Download the dataset
             - ```python
@@ -86,9 +89,9 @@
               color_set = Canvas(transform=transform, mode='train')
               ```
 
-                * `transforms`: data preprocessing methods.
+                * `transforms`: Data preprocessing methods.
                 * `mode`: Select the data mode, the options are `train`, `test`, `val`. Default is `train`.
-                * `hub.datasets.Canvas()` The dataset will be automatically downloaded from the network and decompressed to the `$HOME/.paddlehub/dataset` directory under the user directory.
+                * `hub.datasets.Canvas()`: The dataset will be automatically downloaded from the network and decompressed to the `$HOME/.paddlehub/dataset` directory under the user directory.
 
 
         - Step3: Load the pre-trained model
@@ -97,7 +100,7 @@
               model = hub.Module(name='user_guided_colorization', load_checkpoint=None)
               model.set_config(classification=True, prob=1)
               ```
-                * `name`: model name.
+                * `name`: Model name.
                 * `load_checkpoint`: Whether to load the self-trained model, if it is None, load the provided parameters.
                 * `classification`: The model is trained by two mode. At the beginning, `classification` is set to True, which is used for shallow network training. In the later stage of training, set `classification` to False, which is used to train the output layer of the network.
                 * `prob`: The probability that a priori color block is not added to each input image, the default is 1, that is, no prior color block is added. For example, when `prob` is set to 0.9, the probability that there are two a priori color blocks on a picture is(1-0.9)*(1-0.9)*0.9=0.009.
@@ -115,20 +118,20 @@
 
             - `Trainer` mainly control the training of Fine-tune, including the following controllable parameters:
 
-                * `model`: Optimized model;
-                * `optimizer`: Optimizer selection;
-                * `use_vdl`: Whether to use vdl to visualize the training process;
-                * `checkpoint_dir`: The storage address of the model parameters;
-                * `compare_metrics`: The measurement index of the optimal model;
+                * `model`: Optimized model.
+                * `optimizer`: Optimizer selection.
+                * `use_vdl`: Whether to use vdl to visualize the training process.
+                * `checkpoint_dir`: The storage address of the model parameters.
+                * `compare_metrics`: The measurement index of the optimal model.
 
             - `trainer.train` mainly control the specific training process, including the following controllable parameters:
 
-                * `train_dataset`: Training dataset;
-                * `epochs`: Epochs of training process;
-                * `batch_size`: Batch size;
+                * `train_dataset`: Training dataset.
+                * `epochs`: Epochs of training process.
+                * `batch_size`: Batch size.
                 * `num_workers`: Number of workers.
-                * `eval_dataset`: Validation dataset;
-                * `log_interval`:The interval for printing logs;
+                * `eval_dataset`: Validation dataset.
+                * `log_interval`:The interval for printing logs.
                 * `save_interval`: The interval for saving model parameters.
 
     - Model prediction
@@ -156,9 +159,9 @@
 
     - Run the startup command:
 
-    - ```shell
-      $ hub serving start -m user_guided_colorization
-      ```
+      - ```shell
+        $ hub serving start -m user_guided_colorization
+        ```
 
     - The servitization API is now deployed and the default port number is 8866.
 
@@ -167,33 +170,32 @@
 - ### Step 2: Send a predictive request
 
     - With a configured server, use the following lines of code to send the prediction request and obtain the result
+      - ```python
+        import requests
+        import json
+        import cv2
+        import base64
+        import numpy as np
 
-       ```python
-       import requests
-       import json
-       import cv2
-       import base64
-       import numpy as np
+        def cv2_to_base64(image):
+            data = cv2.imencode('.jpg', image)[1]
+            return base64.b64encode(data.tostring()).decode('utf8')
 
-       def cv2_to_base64(image):
-           data = cv2.imencode('.jpg', image)[1]
-           return base64.b64encode(data.tostring()).decode('utf8')
+        def base64_to_cv2(b64str):
+            data = base64.b64decode(b64str.encode('utf8'))
+            data = np.fromstring(data, np.uint8)
+            data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+            return data
 
-       def base64_to_cv2(b64str):
-           data = base64.b64decode(b64str.encode('utf8'))
-           data = np.fromstring(data, np.uint8)
-           data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-           return data
-
-       # Send an HTTP request
-       org_im = cv2.imread('/PATH/TO/IMAGE')
-       data = {'images':[cv2_to_base64(org_im)]}
-       headers = {"Content-type": "application/json"}
-       url = "http://127.0.0.1:8866/predict/user_guided_colorization"
-       r = requests.post(url=url, headers=headers, data=json.dumps(data))
-       data = base64_to_cv2(r.json()["results"]['data'][0]['fake_reg'])
-       cv2.imwrite('color.png', data)
-       ```
+        # Send an HTTP request
+        org_im = cv2.imread('/PATH/TO/IMAGE')
+        data = {'images':[cv2_to_base64(org_im)]}
+        headers = {"Content-type": "application/json"}
+        url = "http://127.0.0.1:8866/predict/user_guided_colorization"
+        r = requests.post(url=url, headers=headers, data=json.dumps(data))
+        data = base64_to_cv2(r.json()["results"]['data'][0]['fake_reg'])
+        cv2.imwrite('color.png', data)
+        ```
 
 
 ## V. Release Note

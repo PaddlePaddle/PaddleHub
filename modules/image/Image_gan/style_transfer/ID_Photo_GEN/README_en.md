@@ -2,7 +2,7 @@
 
 |Module Name |ID_Photo_GEN|
 | :--- | :---: |
-|Category|image generation|
+|Category|Image generation|
 |Network|HRNet_W18|
 |Dataset |-|
 |Fine-tuning supported or not |No|
@@ -39,8 +39,8 @@
     $ hub install ID_Photo_GEN
     ```
 
-  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
  
  
 ## III. Module API Prediction
@@ -77,12 +77,12 @@
     - Prediction API, generating ID photos.
 
     - **Parameter**
-        * images (list[np.ndarray]): image data, ndarray.shape is in the format [H, W, C], BGR;
-        * paths (list[str]): image path
-        * batch_size (int): batch size
-        * output_dir (str): save path of images, output by default.
-        * visualization (bool): Whether to save the recognition results as picture files;
-        * use_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
+        * images (list[np.ndarray]): Image data, ndarray.shape is in the format [H, W, C], BGR.
+        * paths (list[str]): Image path
+        * batch_size (int): Batch size
+        * output_dir (str): Save path of images, output by default.
+        * visualization (bool): Whether to save the recognition results as picture files.
+        * use_gpu (bool): Use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
 
         **NOTE:** Choose one of `paths` and `images` to provide input data.
 

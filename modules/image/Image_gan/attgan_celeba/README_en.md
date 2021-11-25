@@ -33,7 +33,7 @@
 
   - paddlepaddle >= 1.5.2 
 
-  - paddlehub >= 1.0.0  | [How to install PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+  - paddlehub >= 1.0.0  | [How to install PaddleHub](../../../../docs/docs_en/get_start/installation.rst)
 
 - ### 2、Installation
 
@@ -41,8 +41,8 @@
     $ hub install attgan_celeba==1.0.0
     ```
 
-  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md).
+  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md).
 
  
 
@@ -56,9 +56,12 @@
 
   - **Parameters**
 
-    - image: image path
+    - image: Input image path.
 
     - style: Specify the attributes to be converted. The options are "Bald", "Bangs", "Black_Hair", "Blond_Hair", "Brown_Hair", "Bushy_Eyebrows", "Eyeglasses", "Gender", "Mouth_Slightly_Open", "Mustache", "No_Beard", "Pale_Skin", "Aged". You can choose one of the options.
+
+  - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
+
 
 
 - ### 2、Prediction Code Example
@@ -89,7 +92,7 @@
 
     - **Parameter**
 
-      - data(list[dict]): each element in the list is dict and each field is: 
+      - data(list[dict]): Each element in the list is dict and each field is: 
           - image (list\[str\])： Each element in the list is the path of the image to be converted.
           - style (list\[str\])： Each element in the list is a string, fill in the face attributes to be converted.
 

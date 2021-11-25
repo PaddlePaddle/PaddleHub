@@ -2,7 +2,7 @@
 
 |Module Name|Pneumonia_CT_LKM_PP|
 | :--- | :---: | 
-|Category|image segmentation|
+|Category|Image segmentation|
 |Network |-|
 |Dataset|-|
 |Fine-tuning supported or not|No|
@@ -32,8 +32,8 @@
       $ hub install Pneumonia_CT_LKM_PP==1.0.0
       ```
       
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 ## III. Module API Prediction
 
@@ -64,24 +64,24 @@
 
 - ### 2、API
 
-    ```python
-    def segmentation(data)
-    ```
+    - ```python
+      def segmentation(data)
+      ```
 
-    - Prediction API, used for CT analysis of pneumonia.
+        - Prediction API, used for CT analysis of pneumonia.
 
-    - **Parameter**
+        - **Parameter**
 
-        * data (dict): key is "image_np_path", value is the list of results which contains lesion and lung segmentation masks. 
-        
+            * data (dict): key is "image_np_path", value is the list of results which contains lesion and lung segmentation masks. 
+            
 
-    - **Return**
+        - **Return**
 
-        * result  (list\[dict\]): the list of recognition results, where each element is dict and each field is: 
-            * input_lesion_np_path: input path of lesion;
-            * output_lesion_np: segmentation result path of lesion;
-            * input_lung_np_path: input path of lung;
-            * output_lung_np：segmentation result path of lung.
+            * result  (list\[dict\]): the list of recognition results, where each element is dict and each field is: 
+                * input_lesion_np_path: input path of lesion.
+                * output_lesion_np: segmentation result path of lesion.
+                * input_lung_np_path: input path of lung.
+                * output_lung_np：segmentation result path of lung.
 
 
 ## IV. Release Note

@@ -2,7 +2,7 @@
 
 |Module Name|UGATIT_92w|
 | :--- | :---: |
-|Category|image editing|
+|Category|Image editing|
 |Network |U-GAT-IT|
 |Dataset|selfie2anime|
 |Fine-tuning supported or not|No|
@@ -40,8 +40,8 @@
     $ hub install UGATIT_92w
     ```
 
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
  
 ## III. Module API Prediction
 
@@ -73,17 +73,17 @@
     - Style transfer API, convert the input face image into anime style.
 
     - **Parameters**
-        * images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
-        * paths (list\[str\]): image path，default is None；
-        * batch\_size (int): batch size, default is 1；
-        * visualization (bool): Whether to save the recognition results as picture files, default is False;
+        * images (list\[numpy.ndarray\]): Image data, ndarray.shape is in the format [H, W, C], BGR.
+        * paths (list\[str\]): Image path，default is None；
+        * batch\_size (int): Batch size, default is 1；
+        * visualization (bool): Whether to save the recognition results as picture files, default is False.
         * output\_dir (str): save path of images, `output` by default.
 
       **NOTE:** Choose one of `paths` and `images` to provide input data.
 
     - **Return**
 
-      - res (list\[numpy.ndarray\]): result,  ndarray.shape is in the format [H, W, C].
+      - res (list\[numpy.ndarray\]): Style tranfer result,  ndarray.shape is in the format [H, W, C].
 
 ## IV. Server Deployment
 
@@ -93,9 +93,9 @@
 
   - Run the startup command:
   
-  - ```shell
-    $ hub serving start -m UGATIT_92w
-    ```
+    - ```shell
+      $ hub serving start -m UGATIT_92w
+      ```
 
   - The servitization API is now deployed and the default port number is 8866.
 
@@ -105,27 +105,27 @@
 
   - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-  - ```python
-    import requests
-    import json
-    import cv2
-    import base64
+    - ```python
+      import requests
+      import json
+      import cv2
+      import base64
 
 
-    def cv2_to_base64(image):
-        data = cv2.imencode('.jpg', image)[1]
-        return base64.b64encode(data.tostring()).decode('utf8')
+      def cv2_to_base64(image):
+          data = cv2.imencode('.jpg', image)[1]
+          return base64.b64encode(data.tostring()).decode('utf8')
 
 
-    # Send an HTTP request
-    data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
-    headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/UGATIT_92w"
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+      # Send an HTTP request
+      data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
+      headers = {"Content-type": "application/json"}
+      url = "http://127.0.0.1:8866/predict/UGATIT_92w"
+      r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
-    # print prediction results
-    print(r.json()["results"])
-    ```
+      # print prediction results
+      print(r.json()["results"])
+      ```
 
 ## V. Release Note
 

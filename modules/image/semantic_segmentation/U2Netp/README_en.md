@@ -2,7 +2,7 @@
 
 |Module Name |U2Netp|
 | :--- | :---: |
-|Category |image segmentation|
+|Category |Image segmentation|
 |Network |U^2Net|
 |Dataset|-|
 |Fine-tuning supported or not|No|
@@ -44,8 +44,8 @@
       $ hub install U2Netp
       ```
 
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md) 
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md) 
 
 ## III. Module API Prediction
 
@@ -79,15 +79,15 @@
     - Prediction API, obtaining segmentation result.
 
     - **Parameter**
-        * images (list[np.ndarray]) : image data, ndarray.shape is in the format [H, W, C], BGR;
-        * paths (list[str]) : image path;
-        * batch_size (int) : batch size;
-        * input_size (int) : input image size, default is 320;
-        * output_dir (str) : save path of images, 'output' by default;
-        * visualization (bool) : whether to save the results as picture files.
+        * images (list[np.ndarray]) : Image data, ndarray.shape is in the format [H, W, C], BGR.
+        * paths (list[str]) : Image path.
+        * batch_size (int) : Batch size.
+        * input_size (int) : Input image size, default is 320.
+        * output_dir (str) : Save path of images, 'output' by default.
+        * visualization (bool) : Whether to save the results as picture files.
 
     - **Return**
-        * results (list[np.ndarray]): the list of segmentation results.
+        * results (list[np.ndarray]): The list of segmentation results.
 
 ## IV. Release Note
 

@@ -2,7 +2,7 @@
 
 |Module Name |humanseg_lite|
 | :--- | :---: | 
-|Category |image segmentation|
+|Category |Image segmentation|
 |Network|shufflenet|
 |Dataset|Baidu self-built dataset|
 |Fine-tuning supported or not|No|
@@ -40,20 +40,23 @@
       $ hub install humanseg_lite
       ```
       
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 ## III. Module API Prediction
 
 - ### 1、Command line Prediction
 
-    ```
-    hub run humanseg_lite --input_path "/PATH/TO/IMAGE"
-    
-    ```
+    - ```
+      hub run humanseg_lite --input_path "/PATH/TO/IMAGE"
+        
+      ```
+
+    - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
+
 - ### 2、Prediction Code Example
     - Image segmentation and video segmentation example：
-        ```python
+      - ```python
         import cv2
         import paddlehub as hub
 
@@ -67,7 +70,7 @@
         ```
     - Video prediction example:
 
-        ```python
+      - ```python
         import cv2
         import numpy as np
         import paddlehub as hub
@@ -99,91 +102,90 @@
 
 - ### 3、API
 
-    ```python
-    def segment(images=None,
+    - ```python
+      def segment(images=None,
                 paths=None,
                 batch_size=1,
                 use_gpu=False,
                 visualization=False,
                 output_dir='humanseg_lite_output')
-    ```
+      ```
 
-    - Prediction API, generating segmentation result.
+        - Prediction API, generating segmentation result.
 
-    - **Parameter**
+        - **Parameter**
 
-        * images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
-        * paths (list\[str\]): image path;
-        * batch\_size (int): batch size;
-        * use\_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
-        * visualization (bool): Whether to save the results as picture files;
-        * output\_dir (str): save path of images, humanseg_lite_output by default.
+            * images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR.
+            * paths (list\[str\]): image path.
+            * batch\_size (int): batch size.
+            * use\_gpu (bool): use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
+            * visualization (bool): Whether to save the results as picture files.
+            * output\_dir (str): save path of images, humanseg_lite_output by default.
 
-    - **Return**
+        - **Return**
 
-        * res (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
-            * save\_path (str, optional): Save path of the result;
-            * data (numpy.ndarray): The result of portrait segmentation. 
+            * res (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
+                * save\_path (str, optional): Save path of the result.
+                * data (numpy.ndarray): The result of portrait segmentation. 
 
-    ```python
-    def video_stream_segment(self,
+    - ```python
+      def video_stream_segment(self,
                             frame_org,
                             frame_id,
                             prev_gray,
                             prev_cfd,
                             use_gpu=False):
-    ```
+      ```
+        -  Prediction API, used to segment video portraits frame by frame.
 
-    -  Prediction API, used to segment video portraits frame by frame.
+        - **Parameter**
 
-    - **Parameter**
-
-        * frame_org (numpy.ndarray): single frame for prediction，ndarray.shape is in the format [H, W, C], BGR;
-        * frame_id (int): The number of the current frame;
-        * prev_gray (numpy.ndarray): Grayscale image of the previous network input;
-        * prev_cfd (numpy.ndarray): The fusion image from optical flow and the prediction result from previous frame.
-        * use\_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
-
-
-    - **Return**
-
-        * img_matting (numpy.ndarray): The result of portrait segmentation;
-        * cur_gray (numpy.ndarray): Grayscale image of the current network input;
-        * optflow_map (numpy.ndarray): The fusion image from optical flow and the prediction result from current frame.
+            * frame_org (numpy.ndarray): single frame for prediction，ndarray.shape is in the format [H, W, C], BGR.
+            * frame_id (int): The number of the current frame.
+            * prev_gray (numpy.ndarray): Grayscale image of the previous network input.
+            * prev_cfd (numpy.ndarray): The fusion image from optical flow and the prediction result from previous frame.
+            * use\_gpu (bool): use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
 
 
-    ```python
-    def video_segment(self,
-                      video_path=None,
-                      use_gpu=False,
-                      save_dir='humanseg_lite_video_result'):
-    ```
+        - **Return**
 
-    -  Prediction API to produce video segmentation result.
-
-    - **Parameter**
-
-        * video\_path (str): Video path for segmentation。If None, the video will be obtained from the local camera, and a window will display the online segmentation result.
-        * use\_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
-        * save\_dir (str): save path of video.
+            * img_matting (numpy.ndarray): The result of portrait segmentation.
+            * cur_gray (numpy.ndarray): Grayscale image of the current network input.
+            * optflow_map (numpy.ndarray): The fusion image from optical flow and the prediction result from current frame.
 
 
-    ```python
-    def save_inference_model(dirname='humanseg_lite_model',
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
-    ```
+    - ```python
+      def video_segment(self,
+                        video_path=None,
+                        use_gpu=False,
+                        save_dir='humanseg_lite_video_result'):
+        ```
+
+        -  Prediction API to produce video segmentation result.
+
+        - **Parameter**
+
+            * video\_path (str): Video path for segmentation。If None, the video will be obtained from the local camera, and a window will display the online segmentation result.
+            * use\_gpu (bool): use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
+            * save\_dir (str): save path of video.
 
 
-    - Save the model to the specified path.
+    -  ```python
+       def save_inference_model(dirname='humanseg_lite_model',
+                                model_filename=None,
+                                params_filename=None,
+                                combined=True)
+       ```
 
-    - **Parameters**
 
-      * dirname: Save path.
-      * model\_filename: model file name，defalt is \_\_model\_\_
-      * params\_filename: parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
-      * combined: Whether to save the parameters to a unified file.
+        - Save the model to the specified path.
+
+        - **Parameters**
+
+            * dirname: Save path.
+            * model\_filename: model file name，defalt is \_\_model\_\_
+            * params\_filename: parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
+            * combined: Whether to save the parameters to a unified file.
 
 
 
@@ -193,11 +195,11 @@
 
 - ### Step 1: Start PaddleHub Serving
 
-  - Run the startup command:
+    - Run the startup command:
 
-    ```shell
-    $ hub serving start -m humanseg_lite
-    ```
+        - ```shell
+          hub serving start -m humanseg_lite
+          ```
 
     - The servitization API is now deployed and the default port number is 8866.
 
@@ -207,34 +209,34 @@
 
     - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-        ```python
-        import requests
-        import json
-        import base64
+        -   ```python
+            import requests
+            import json
+            import base64
 
-        import cv2
-        import numpy as np
+            import cv2
+            import numpy as np
 
-        def cv2_to_base64(image):
-            data = cv2.imencode('.jpg', image)[1]
-            return base64.b64encode(data.tostring()).decode('utf8')
-        def base64_to_cv2(b64str):
-            data = base64.b64decode(b64str.encode('utf8'))
-            data = np.fromstring(data, np.uint8)
-            data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-            return data
+            def cv2_to_base64(image):
+                data = cv2.imencode('.jpg', image)[1]
+                return base64.b64encode(data.tostring()).decode('utf8')
+            def base64_to_cv2(b64str):
+                data = base64.b64decode(b64str.encode('utf8'))
+                data = np.fromstring(data, np.uint8)
+                data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+                return data
 
-        # Send an HTTP request
-        org_im = cv2.imread('/PATH/TO/IMAGE')
-        data = {'images':[cv2_to_base64(org_im)]}
-        headers = {"Content-type": "application/json"}
-        url = "http://127.0.0.1:8866/predict/humanseg_lite"
-        r = requests.post(url=url, headers=headers, data=json.dumps(data))
+            # Send an HTTP request
+            org_im = cv2.imread('/PATH/TO/IMAGE')
+            data = {'images':[cv2_to_base64(org_im)]}
+            headers = {"Content-type": "application/json"}
+            url = "http://127.0.0.1:8866/predict/humanseg_lite"
+            r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
-        mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2GRAY)
-        rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
-        cv2.imwrite("segment_human_lite.png", rgba)
-        ```
+            mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2GRAY)
+            rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
+            cv2.imwrite("segment_human_lite.png", rgba)
+            ```
 
 
 ## V. Release Note
@@ -245,7 +247,7 @@
 
 - 1.1.0
     
-    Added video portrait split interface
+    Added video portrait segmentation interface
 
     Added video stream portrait segmentation interface
 * 1.1.1

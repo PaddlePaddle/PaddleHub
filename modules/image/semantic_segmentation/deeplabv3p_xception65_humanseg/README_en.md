@@ -2,7 +2,7 @@
 
 |Module Name |deeplabv3p_xception65_humanseg|
 | :--- | :---: | 
-|Category|image segmentation|
+|Category|Image segmentation|
 |Network|deeplabv3p|
 |Dataset|Baidu self-built dataset|
 |Fine-tuning supported or not|No|
@@ -41,72 +41,72 @@
     - ```shell
       $ hub install deeplabv3p_xception65_humanseg
       ```
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
 
 ## III. Module API Prediction
 
 - ### 1、Command line Prediction
 
-  ```shell
-  hub run deeplabv3p_xception65_humanseg --input_path "/PATH/TO/IMAGE"
-  ```
+  - ```shell
+    hub run deeplabv3p_xception65_humanseg --input_path "/PATH/TO/IMAGE"
+    ```
+  - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
 
 
 
 - ### 2、Prediction Code Example
 
-  ```python
-  import paddlehub as hub
-  import cv2
+  - ```python
+    import paddlehub as hub
+    import cv2
 
-  human_seg = hub.Module(name="deeplabv3p_xception65_humanseg")
-  result = human_seg.segmentation(images=[cv2.imread('/PATH/TO/IMAGE')])
-
-  ```
+    human_seg = hub.Module(name="deeplabv3p_xception65_humanseg")
+    result = human_seg.segmentation(images=[cv2.imread('/PATH/TO/IMAGE')])
+    ```
 
 - ### 3.API
 
-    ```python
-    def segmentation(images=None,
-                    paths=None,
-                    batch_size=1,
-                    use_gpu=False,
-                    visualization=False,
-                    output_dir='humanseg_output')
-    ```
+    - ```python
+      def segmentation(images=None,
+                      paths=None,
+                      batch_size=1,
+                      use_gpu=False,
+                      visualization=False,
+                      output_dir='humanseg_output')
+      ```
 
-    - Prediction API, generating segmentation result.
+      - Prediction API, generating segmentation result.
 
-    - **Parameter**
-      * images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
-      * paths (list\[str\]): image path;
-      * batch\_size (int): batch size;
-      * use\_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
-      * visualization (bool): Whether to save the recognition results as picture files;
-      * output\_dir (str): save path of images.
+      - **Parameter**
+        * images (list\[numpy.ndarray\]): Image data, ndarray.shape is in the format [H, W, C], BGR.
+        * paths (list\[str\]): Image path.
+        * batch\_size (int): Batch size.
+        * use\_gpu (bool): Use GPU or not. **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
+        * visualization (bool): Whether to save the recognition results as picture files.
+        * output\_dir (str): Save path of images.
 
-    - **Return**
+      - **Return**
 
-        * res (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
-            * save\_path (str, optional): Save path of the result;
-            * data (numpy.ndarray): The result of portrait segmentation. 
+          * res (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
+              * save\_path (str, optional): Save path of the result.
+              * data (numpy.ndarray): The result of portrait segmentation. 
 
-    ```python
-    def save_inference_model(dirname,
-                            model_filename=None,
-                            params_filename=None,
-                            combined=True)
-    ```
+    - ```python
+      def save_inference_model(dirname,
+                              model_filename=None,
+                              params_filename=None,
+                              combined=True)
+      ```
 
-    - Save the model to the specified path.
+      - Save the model to the specified path.
 
-    - **Parameters**
-      * dirname: Save path.
-      * model\_filename: model file name，defalt is \_\_model\_\_
-      * params\_filename: parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
-      * combined: Whether to save the parameters to a unified file.
+      - **Parameters**
+        * dirname: Save path.
+        * model\_filename: Model file name，defalt is \_\_model\_\_
+        * params\_filename: Parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
+        * combined: Whether to save the parameters to a unified file.
 
 
 ## IV. Server Deployment
@@ -117,9 +117,9 @@
 
     - Run the startup command:
 
-    - ```shell
-      $ hub serving start -m deeplabv3p_xception65_humanseg
-      ```
+      - ```shell
+        $ hub serving start -m deeplabv3p_xception65_humanseg
+        ```
 
     - **NOTE:**  If GPU is used for prediction, set CUDA_VISIBLE_DEVICES environment variable before the service, otherwise it need not be set.
 
@@ -128,7 +128,7 @@
 
   - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-      ```python
+    - ```python
       import requests
       import json
       import cv2

@@ -2,7 +2,7 @@
 
 |Module Name|resnet50_vd_imagenet_ssld|
 | :--- | :---: | 
-|Category |image classification|
+|Category |Image classification|
 |Network|ResNet_vd|
 |Dataset|ImageNet-2012|
 |Fine-tuning supported or notFine-tuning|Yes|
@@ -32,8 +32,8 @@
       $ hub install resnet50_vd_imagenet_ssld
       ```
 
-    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)   
+    - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)   
 
 ## III. Module API Prediction
 
@@ -69,7 +69,7 @@
                                     to_rgb=True)
               ```
 
-             - `transforms` The data enhancement module defines lots of data preprocessing methods. Users can replace the data preprocessing methods according to their needs.
+             - `transforms`: The data enhancement module defines lots of data preprocessing methods. Users can replace the data preprocessing methods according to their needs.
 
 
         - Step2: Download the dataset
@@ -108,20 +108,20 @@
 
             - `Trainer` mainly control the training of Fine-tune, including the following controllable parameters:
 
-                * `model`: Optimized model;
-                * `optimizer`: Optimizer selection;
-                * `use_vdl`: Whether to use vdl to visualize the training process;
-                * `checkpoint_dir`: The storage address of the model parameters;
-                * `compare_metrics`: The measurement index of the optimal model;
+                * `model`: Optimized model.
+                * `optimizer`: Optimizer selection.
+                * `use_vdl`: Whether to use vdl to visualize the training process.
+                * `checkpoint_dir`: The storage address of the model parameters.
+                * `compare_metrics`: The measurement index of the optimal model.
 
             - `trainer.train` mainly control the specific training process, including the following controllable parameters:
 
-                * `train_dataset`: Training dataset;
-                * `epochs`: Epochs of training process;
-                * `batch_size`: Batch size;
+                * `train_dataset`: Training dataset.
+                * `epochs`: Epochs of training process.
+                * `batch_size`: Batch size.
                 * `num_workers`: Number of workers.
-                * `eval_dataset`: Validation dataset;
-                * `log_interval`:The interval for printing logs;
+                * `eval_dataset`: Validation dataset.
+                * `log_interval`:The interval for printing logs.
                 * `save_interval`: The interval for saving model parameters.
 
 
@@ -147,9 +147,9 @@
 
     - Run the startup command:
 
-    - ```shell
-      $ hub serving start -m resnet50_vd_imagenet_ssld
-      ```
+        - ```shell
+          $ hub serving start -m resnet50_vd_imagenet_ssld
+          ```
 
     - The servitization API is now deployed and the default port number is 8866.
 
@@ -159,7 +159,7 @@
 
     - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-        ```python
+      - ```python
         import requests
         import json
         import cv2
@@ -195,4 +195,4 @@
 
 * 1.1.0
     
-  Upgrade to dynamic version.
+  Upgrade to dynamic version
