@@ -103,18 +103,22 @@ class MultiLangOCR:
             txts = [line[1][0] for line in rec_results]
             scores = [line[1][1] for line in rec_results]
             fonts_lang = 'fonts/simfang'
-            if self.lang == 'korean':
-                fonts_lang = 'fonts/korean.ttf'
-            if self.lang == 'ug':
-                fonts_lang = 'fonts/uyghur.ttf'
-            if self.lang == 'ur':
-                fonts_lang = 'fonts/urdu.ttf'
-            if self.lang == 'te':
-                fonts_lang = 'fonts/telugu.ttf'
-            if self.lang == 'es':
-                fonts_lang = 'fonts/spanish.ttf'
-            if self.lang == 'ne':
-                fonts_lang = 'fonts/nepali.ttf'
+            lang_fonts = {
+                'korean': 'korean',
+                'japan': 'japan',
+                'fr': 'french',
+                'german': 'german',
+                'hi': 'hindi',
+                'ne': 'nepali',
+                'fa': 'persian',
+                'es': 'spanish',
+                'ta': 'tamil',
+                'te': 'telugu',
+                'ur': 'urdu',
+                'ug': 'uyghur',
+            }
+            if self.lang in lang_fonts.keys():
+                fonts_lang = 'fonts/' + lang_fonts[self.lang] + '.ttf'
             font_file = os.path.join(self.directory, 'assets', fonts_lang)
             im_show = draw_ocr(image, boxes, txts, scores, font_path=font_file)
         elif self.det and not self.rec:
