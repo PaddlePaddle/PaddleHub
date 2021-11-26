@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - 由于人工标注的数据集在规模上已经接近其函数极限，Facebook 的研发人员采用了一种独特的迁移学习研究，通过使用 hashtag 作为标注，在包含数十亿张社交媒体图片的数据集上进行训练，这为大规模训练转向弱监督学习(Weakly Supervised Learning) 取得了重大突破.在 ImageNet 图像识别基准上，ResNeXt101_32x48d_wsl 的 Top-1 达到了 85.4% 的准确率.该 PaddleHub Module结构为 ResNeXt101_32x48d_wsl，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者 Python 接口进行预测.
+  - The scale of dataset annotated by people is close to limit, researchers in Facebook adopt a new method of transfer learning to train the network. They use hashtag to annotate images, and trained on billions of social images, then transfer to weakly supervised learning. The top-1 accuracy of ResNeXt101_32x48d_wsl on ImageNet reaches 85.4%. This module is based on ResNeXt101_32x48d_wsl, and can predict an image of size 224*224*3.
 
 ## II.Installation
 
