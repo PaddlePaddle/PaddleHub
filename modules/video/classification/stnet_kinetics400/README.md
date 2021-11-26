@@ -53,7 +53,7 @@
     hub run stnet_kinetics400 --input_file test.txt 
     ```    
     
-  - Note: test.txt 存放待分类视频的存放路径
+  - test.txt 存放待分类视频的存放路径
 
 
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
