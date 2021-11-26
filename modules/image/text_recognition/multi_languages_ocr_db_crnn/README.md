@@ -130,8 +130,9 @@
         - data (list\[dict\]): 识别文本结果，列表中每一个元素为 dict，各字段为：
           - text(str): 识别得到的文本
           - confidence(float): 识别文本结果置信度
-          - text_box_position(list): 文本框在原图中的像素坐标，4*2的矩阵，依次表示文本框左下、右下、右上、左上顶点的坐标
-        如果无识别结果则data为\[\]
+          - text_box_position(list): 文本框在原图中的像素坐标，4*2的矩阵，依次表示文本框左下、右下、右上、左上顶点的坐标，如果无识别结果则data为\[\]
+          - orientation(str): 分类的方向，仅在只有方向分类开启时输出
+          - score(float): 分类的得分，仅在只有方向分类开启时输出
         - save_path (str, optional): 识别结果的保存路径，如不保存图片则save_path为''
 
 

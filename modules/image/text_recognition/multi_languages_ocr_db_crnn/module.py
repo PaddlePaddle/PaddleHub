@@ -83,7 +83,7 @@ class MultiLangOCR:
                 else:
                     if self.use_angle_cls and not self.rec:
                         orientation, score = line
-                        rec_res_final.append({'orientation': orientation, 'confidence': float(score)})
+                        rec_res_final.append({'orientation': orientation, 'score': float(score)})
                     else:
                         text, score = line
                         rec_res_final.append({'text': text, 'confidence': float(score)})
