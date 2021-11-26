@@ -30,8 +30,8 @@
 </p>
 
   - 更多详情参考：
-    [Real-time Scene Text Detection with Differentiable Binarization](https://arxiv.org/pdf/1911.08947.pdf)
-    [An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
+    - [Real-time Scene Text Detection with Differentiable Binarization](https://arxiv.org/pdf/1911.08947.pdf)
+    - [An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
 
 
 
@@ -39,7 +39,9 @@
 
 - ### 1、环境依赖  
 
-  - PaddlePaddle >= 2.0.0  
+  - PaddlePaddle >= 2.0.2  
+
+  - Python >= 3.6  
 
   - PaddleOCR >= 2.0.1   | [如何安装PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.3/doc/doc_ch/quickstart.md#1)
 
@@ -50,7 +52,9 @@
   - pyclipper
 
   - ```shell
-    $ pip install shapely pyclipper
+    $ pip3.6 install "paddleocr>=2.0.1" # 推荐使用2.0.1+版本
+    $ pip3.6 install shapely -i https://pypi.tuna.tsinghua.edu.cn/simple
+    $ pip3.6 install pyclipper -i https://pypi.tuna.tsinghua.edu.cn/simple
     ```
   - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**  
 
@@ -85,7 +89,7 @@
     # or
     # result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
     ```
-  - Paddleocr目前支持80个语种，可以通过修改lang参数进行切换，对于英文模型，指定lang=en，具体支持的[语种](#语种缩写)可查看表格。
+  - multi_languages_ocr_db_crnn目前支持80个语种，可以通过修改lang参数进行切换，对于英文模型，指定lang=en，具体支持的[语种](#语种缩写)可查看表格。
 
 - ### 3、API
 
