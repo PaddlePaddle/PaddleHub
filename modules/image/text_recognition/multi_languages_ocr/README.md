@@ -1,6 +1,6 @@
-# multi_languages_ocr
+# multi_languages_ocr_db_crnn
 
-|模型名称|multi_languages_ocr|
+|模型名称|multi_languages_ocr_db_crnn|
 | :--- | :---: |
 |类别|图像-文字识别|
 |网络|Differentiable Binarization+RCNN|
@@ -22,7 +22,7 @@
 
 - ### 模型介绍
 
-  - multi_languages_ocr Module用于识别图片当中的文字。其基于PaddleOCR模块，检测得到的文本框，识别文本框中的文字,再对检测文本框进行角度分类。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。
+  - multi_languages_ocr_db_crnn Module用于识别图片当中的文字。其基于PaddleOCR模块，检测得到的文本框，识别文本框中的文字,再对检测文本框进行角度分类。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。
     该Module不仅提供了通用场景下的中英文模型，也提供了[80个语言](#语种缩写)的小语种模型。
 
 
@@ -56,7 +56,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install multi_languages_ocr
+    $ hub install multi_languages_ocr_db_crnn
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -68,7 +68,7 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run multi_languages_ocr --input_path "/PATH/TO/IMAGE"
+    $ hub run multi_languages_ocr_db_crnn --input_path "/PATH/TO/IMAGE"
     ```
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
@@ -78,7 +78,7 @@
     import paddlehub as hub
     import cv2
 
-    ocr = hub.Module(name="multi_languages_ocr", lang='en', enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
+    ocr = hub.Module(name="multi_languages_ocr_db_crnn", lang='en', enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
     result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
     # or
@@ -144,7 +144,7 @@
 
   - 运行启动命令：
   - ```shell
-    $ hub serving start -m multi_languages_ocr
+    $ hub serving start -m multi_languages_ocr_db_crnn
     ```
 
   - 这样就完成了一个目标检测的服务化API的部署，默认端口号为8866。
@@ -168,7 +168,7 @@
     # 发送HTTP请求
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/multi_languages_ocr"
+    url = "http://127.0.0.1:8866/predict/multi_languages_ocr_db_crnn"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果

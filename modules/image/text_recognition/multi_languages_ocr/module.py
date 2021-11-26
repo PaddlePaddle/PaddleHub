@@ -13,7 +13,7 @@ from paddlehub.module.module import moduleinfo, runnable, serving
 
 
 @moduleinfo(
-    name="multi_languages_ocr",
+    name="multi_languages_ocr_db_crnn",
     version="1.0.0",
     summary="ocr service",
     author="paddle-dev",
