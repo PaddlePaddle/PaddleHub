@@ -128,10 +128,10 @@
       - visualization (bool): 是否将识别结果保存为图片文件, 仅有检测开启时有效, 默认为False；
       - box\_thresh (float): 检测文本框置信度的阈值；
       - angle_classification_thresh(float): 文本方向分类置信度的阈值
-      - lang(bool): 多语言选择。默认为ch。
-      - det(bool): 是否开启检测。默认为True。
-      - rec(bool): 是否开启识别。默认为True。
-      - use_angle_cls(bool): 是否开启方向判断, 用于设置使用方向分类器识别180度旋转文字。默认为False。
+      - lang(str): 多语言模型选择。默认为中文模型，即lang="ch"。
+      - det(bool): 是否开启文字检测。默认为True。
+      - rec(bool): 是否开启文字识别。默认为True。
+      - use_angle_cls(bool): 是否开启方向分类, 用于设置使用方向分类器识别180度旋转文字。默认为False。
 
     - **返回**
 
