@@ -28,6 +28,7 @@ class MultiLangOCR:
         self.det = det
         self.rec = rec
         self.use_angle_cls = use_angle_cls
+        self.lang = lang
         self.logger = get_logger()
         self.engine = PaddleOCR(
             lang=lang, det=det, rec=rec, use_angle_cls=use_angle_cls, use_gpu=use_gpu, enable_mkldnn=enable_mkldnn)
@@ -101,7 +102,10 @@ class MultiLangOCR:
             boxes = [line[0] for line in rec_results]
             txts = [line[1][0] for line in rec_results]
             scores = [line[1][1] for line in rec_results]
-            font_file = os.path.join(self.directory, 'assets', 'fonts/simfang.ttf')
+            fonts_lang = 'fonts/simfang'
+            if self.lang == 'korean':
+                fonts_lang = 'fonts/korean.ttf'
+            font_file = os.path.join(self.directory, 'assets', fonts_lang)
             im_show = draw_ocr(image, boxes, txts, scores, font_path=font_file)
         elif self.det and not self.rec:
             boxes = rec_results
