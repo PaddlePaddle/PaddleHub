@@ -27,11 +27,11 @@ class MultiLangOCR:
 
         self.det = det
         self.rec = rec
-        self.use_angle_cls = use_angle_cls
         self.lang = lang
+        self.use_gpu = use_gpu
+        self.use_angle_cls = use_angle_cls
+        self.enable_mkldnn = enable_mkldnn
         self.logger = get_logger()
-        self.engine = PaddleOCR(
-            lang=lang, det=det, rec=rec, use_angle_cls=use_angle_cls, use_gpu=use_gpu, enable_mkldnn=enable_mkldnn)
 
     def read_images(self, paths=[]):
         images = []
@@ -63,6 +63,15 @@ class MultiLangOCR:
             raise TypeError("The input data is inconsistent with expectations.")
 
         assert predicted_data != [], "There is not any image to be predicted. Please check the input data."
+
+        engine = PaddleOCR(
+            lang=self.lang,
+            det=self.det,
+            rec=self.rec,
+            use_angle_cls=self.use_angle_cls,
+            use_gpu=self.use_gpu,
+            enable_mkldnn=self.enable_mkldnn)
+
         all_results = []
         for img in predicted_data:
             result = {'save_path': ''}
@@ -71,7 +80,7 @@ class MultiLangOCR:
                 all_results.append(result)
                 continue
             original_image = img.copy()
-            rec_results = self.engine.ocr(img, det=self.det, rec=self.rec, cls=self.use_angle_cls)
+            rec_results = engine.ocr(img, det=self.det, rec=self.rec, cls=self.use_angle_cls)
             rec_res_final = []
             for line in rec_results:
                 if self.det and self.rec:
