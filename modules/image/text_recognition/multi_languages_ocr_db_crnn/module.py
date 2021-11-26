@@ -20,15 +20,10 @@ from paddlehub.module.module import moduleinfo, runnable, serving
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
 class MultiLangOCR:
-    def __init__(self, lang="ch", det=True, rec=True, use_angle_cls=False, enable_mkldnn=False):
+    def __init__(self, enable_mkldnn=False):
         """
         initialize with the necessary elements
         """
-
-        self.det = det
-        self.rec = rec
-        self.lang = lang
-        self.use_angle_cls = use_angle_cls
         self.enable_mkldnn = enable_mkldnn
         self.logger = get_logger()
 
@@ -49,7 +44,11 @@ class MultiLangOCR:
                        output_dir='ocr_result',
                        visualization=False,
                        box_thresh=0.6,
-                       angle_classification_thresh=0.9):
+                       angle_classification_thresh=0.9,
+                       lang="ch",
+                       det=True,
+                       rec=True,
+                       use_angle_cls=False):
         """
         Get the text in the predicted images.
         Args:
@@ -60,6 +59,10 @@ class MultiLangOCR:
             visualization (bool): Whether to save image or not.
             box_thresh(float): the threshold of the detected text box's confidence
             angle_classification_thresh(float): the threshold of the angle classification confidence
+            lang(str): the selection of languages
+            det(bool): Whether to use text detector.
+            rec(bool): Whether to use text recognizer.
+            use_angle_cls(bool): Whether to use text orientation classifier.
         Returns:
             res (list): The result of text detection box and save path of images.
         """
@@ -73,6 +76,10 @@ class MultiLangOCR:
 
         assert predicted_data != [], "There is not any image to be predicted. Please check the input data."
 
+        self.lang = lang
+        self.det = det
+        self.rec = rec
+        self.use_angle_cls = use_angle_cls
         engine = PaddleOCR(
             lang=self.lang,
             det=self.det,
@@ -203,14 +210,25 @@ class MultiLangOCR:
 
         self.parser.add_argument(
             '--input_path', type=str, default=None, help="diretory to image. Required.", required=True)
-        self.parser.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+        self.parser.add_argument('--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
         self.parser.add_argument(
             '--output_dir', type=str, default='ocr_result', help="The directory to save output images.")
         self.parser.add_argument(
             '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.parser.add_argument('--lang', type=str, default='ch', help="the selection of languages")
+        self.parser.add_argument('--det', type=ast.literal_eval, default=True, help="whether use text detector or not")
+        self.parser.add_argument(
+            '--rec', type=ast.literal_eval, default=True, help="whether use text recognizer or not")
+        self.parser.add_argument(
+            '--use_angle_cls', type=ast.literal_eval, default=False, help="whether text orientation classifier or not")
 
         args = self.parser.parse_args(argvs)
         results = self.recognize_text(
-            paths=[args.input_path], output_dir=args.output_dir, visualization=args.visualization)
+            paths=[args.input_path],
+            output_dir=args.output_dir,
+            visualization=args.visualization,
+            lang=args.lang,
+            det=args.det,
+            rec=args.rec,
+            use_angle_cls=args.use_angle_cls)
         return results
