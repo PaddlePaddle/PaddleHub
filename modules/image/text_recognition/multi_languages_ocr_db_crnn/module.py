@@ -102,10 +102,9 @@ class MultiLangOCR:
             boxes = [line[0] for line in rec_results]
             txts = [line[1][0] for line in rec_results]
             scores = [line[1][1] for line in rec_results]
-            fonts_lang = 'fonts/simfang'
+            fonts_lang = 'fonts/simfang.ttf'
             lang_fonts = {
                 'korean': 'korean',
-                'japan': 'japan',
                 'fr': 'french',
                 'german': 'german',
                 'hi': 'hindi',
