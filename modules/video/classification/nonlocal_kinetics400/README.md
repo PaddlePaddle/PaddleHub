@@ -52,7 +52,8 @@
     hub run nonlocal_kinetics400 --input_file test.txt --use_gpu True
     ```    
     
-  - Note: test.txt 存放待分类视频的存放路径；该PaddleHub Module目前只支持在GPU环境下使用，在使用前，请使用下述命令指定GPU设备（设备ID请根据实际情况指定）
+  - test.txt 存放待分类视频的存放路径；
+  - Note: 该PaddleHub Module目前只支持在GPU环境下使用，在使用前，请使用下述命令指定GPU设备（设备ID请根据实际情况指定）
   
   - ```shell
     export CUDA_VISIBLE_DEVICES=0
