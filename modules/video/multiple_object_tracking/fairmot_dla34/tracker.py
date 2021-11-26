@@ -41,7 +41,8 @@ class StreamTracker(object):
         self.optimizer = None
 
         # build model
-        self.model = create(cfg.architecture)
+        with paddle.no_grad():
+            self.model = create(cfg.architecture)
 
         self.status = {}
         self.start_epoch = 0
