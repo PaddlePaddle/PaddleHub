@@ -21,7 +21,7 @@
 
 - ### 模型介绍
 
-  - multi_languages_ocr_db_crnn Module用于识别图片当中的文字。其基于PaddleOCR模块，检测得到的文本框，识别文本框中的文字,再对检测文本框进行角度分类。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。
+  - multi_languages_ocr_db_crnn Module用于识别图片当中的文字。其基于PaddleOCR模块，检测得到文本框，识别文本框中的文字,再对检测文本框进行角度分类。最终检测算法采用DB(Differentiable Binarization)，而识别文字算法则采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。
     该Module不仅提供了通用场景下的中英文模型，也提供了[80个语言](#语种缩写)的小语种模型。
 
 
@@ -29,7 +29,9 @@
 <img src="https://user-images.githubusercontent.com/76040149/133098254-7c642826-d6d7-4dd0-986e-371622337867.png" width = "300" height = "450"  hspace='10'/> <br />
 </p>
 
-  - 更多详情参考：[An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
+  - 更多详情参考：
+    [Real-time Scene Text Detection with Differentiable Binarization](https://arxiv.org/pdf/1911.08947.pdf)
+    [An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition](https://arxiv.org/pdf/1507.05717.pdf)
 
 
 
@@ -116,7 +118,7 @@
                        angle_classification_thresh=0.9)
     ```
 
-    - 预测API，检测输入图片中的所有文本的位置。
+    - 预测API，检测输入图片中的所有文本的位置和识别文本结果。
 
     - **参数**
 
