@@ -27,7 +27,7 @@ from .util import base64_to_cv2
 
 
 @moduleinfo(
-    name="EnlightenGAN", type="CV/enlighten", author="paddlepaddle", author_email="", summary="", version="1.0.0")
+    name="enlightengan", type="CV/enlighten", author="paddlepaddle", author_email="", summary="", version="1.0.0")
 class EnlightenGAN:
     def __init__(self):
         self.pretrained_model = os.path.join(self.directory, "enlighten_inference/pd_model")
