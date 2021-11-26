@@ -105,6 +105,16 @@ class MultiLangOCR:
             fonts_lang = 'fonts/simfang'
             if self.lang == 'korean':
                 fonts_lang = 'fonts/korean.ttf'
+            if self.lang == 'ug':
+                fonts_lang = 'fonts/uyghur.ttf'
+            if self.lang == 'ur':
+                fonts_lang = 'fonts/urdu.ttf'
+            if self.lang == 'te':
+                fonts_lang = 'fonts/telugu.ttf'
+            if self.lang == 'es':
+                fonts_lang = 'fonts/spanish.ttf'
+            if self.lang == 'ne':
+                fonts_lang = 'fonts/nepali.ttf'
             font_file = os.path.join(self.directory, 'assets', fonts_lang)
             im_show = draw_ocr(image, boxes, txts, scores, font_path=font_file)
         elif self.det and not self.rec:
