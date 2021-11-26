@@ -20,7 +20,7 @@ from paddlehub.module.module import moduleinfo, runnable, serving
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
 class MultiLangOCR:
-    def __init__(self, lang="ch", det=True, rec=True, use_angle_cls=False, use_gpu=False, enable_mkldnn=False):
+    def __init__(self, lang="ch", det=True, rec=True, use_angle_cls=False, enable_mkldnn=False):
         """
         initialize with the necessary elements
         """
@@ -28,7 +28,6 @@ class MultiLangOCR:
         self.det = det
         self.rec = rec
         self.lang = lang
-        self.use_gpu = use_gpu
         self.use_angle_cls = use_angle_cls
         self.enable_mkldnn = enable_mkldnn
         self.logger = get_logger()
@@ -43,14 +42,24 @@ class MultiLangOCR:
             images.append(img)
         return images
 
-    def recognize_text(self, images=[], paths=[], output_dir='ocr_result', visualization=False):
+    def recognize_text(self,
+                       images=[],
+                       paths=[],
+                       use_gpu=False,
+                       output_dir='ocr_result',
+                       visualization=False,
+                       box_thresh=0.6,
+                       angle_classification_thresh=0.9):
         """
         Get the text in the predicted images.
         Args:
             images (list(numpy.ndarray)): images data, shape of each is [H, W, C]. If images not paths
             paths (list[str]): The paths of images. If paths not images
+            use_gpu (bool): Whether to use gpu.
             output_dir (str): The directory to store output images.
             visualization (bool): Whether to save image or not.
+            box_thresh(float): the threshold of the detected text box's confidence
+            angle_classification_thresh(float): the threshold of the angle classification confidence
         Returns:
             res (list): The result of text detection box and save path of images.
         """
@@ -69,7 +78,9 @@ class MultiLangOCR:
             det=self.det,
             rec=self.rec,
             use_angle_cls=self.use_angle_cls,
-            use_gpu=self.use_gpu,
+            det_db_box_thresh=box_thresh,
+            cls_thresh=angle_classification_thresh,
+            use_gpu=use_gpu,
             enable_mkldnn=self.enable_mkldnn)
 
         all_results = []
@@ -192,6 +203,8 @@ class MultiLangOCR:
 
         self.parser.add_argument(
             '--input_path', type=str, default=None, help="diretory to image. Required.", required=True)
+        self.parser.add_argument(
+            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
         self.parser.add_argument(
             '--output_dir', type=str, default='ocr_result', help="The directory to save output images.")
         self.parser.add_argument(

@@ -93,7 +93,6 @@
                 det=True,
                 rec=True,
                 use_angle_cls=False,
-                use_gpu=False,
                 enable_mkldnn=False)
     ```
 
@@ -104,15 +103,17 @@
       - det(bool): 是否开启检测。默认为True。
       - rec(bool): 是否开启识别。默认为True。
       - use_angle_cls(bool): 是否开启方向判断, 用于设置使用方向分类器识别180度旋转文字。默认为False。
-      - use_gpu(bool): 是否开启gpu。默认为False。
       - enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
 
 
   - ```python
     def recognize_text(images=[],
                        paths=[],
+                       use_gpu=False,
                        output_dir='ocr_result',
-                       visualization=False)
+                       visualization=False,
+                       box_thresh=0.6,
+                       angle_classification_thresh=0.9)
     ```
 
     - 预测API，检测输入图片中的所有文本的位置。
@@ -121,6 +122,9 @@
 
       - paths (list\[str\]): 图片的路径；
       - images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
+      - use\_gpu (bool): 是否使用 GPU；**若使用GPU，请先设置CUDA_VISIBLE_DEVICES环境变量**
+      - box\_thresh (float): 检测文本框置信度的阈值；
+      - angle_classification_thresh(float): 文本方向分类置信度的阈值
       - visualization (bool): 是否将识别结果保存为图片文件, 仅有检测开启时有效, 默认为False；
       - output\_dir (str): 图片的保存路径，默认设为 ocr\_result；
 
