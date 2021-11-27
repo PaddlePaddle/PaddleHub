@@ -34,9 +34,6 @@ class MultiLangOCR:
         self.enable_mkldnn = enable_mkldnn
         self.logger = get_logger()
         if len(sys.argv) == 1:
-            argv = sys.argv
-            argc = len(sys.argv)
-            print("huangshenghui:::: ", argv, argc)
             self.lang = lang
             self.det = det
             self.rec = rec
