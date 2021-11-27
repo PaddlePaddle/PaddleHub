@@ -83,8 +83,8 @@
     import paddlehub as hub
     import cv2
 
-    ocr = hub.Module(name="multi_languages_ocr_db_crnn", enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
-    result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')], lang='en')
+    ocr = hub.Module(name="multi_languages_ocr_db_crnn", lang='en', enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
+    result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
     # or
     # result = ocr.recognize_text(paths=['/PATH/TO/IMAGE'])
@@ -94,12 +94,16 @@
 - ### 3、API
 
   - ```python
-    def __init__(self, enable_mkldnn=False)
+    def __init__(self, lang="ch", det=True, rec=True, use_angle_cls=False, enable_mkldnn=False)
     ```
 
     - 构造MultiLangOCR对象
 
     - **参数**
+      - lang(str): 多语言模型选择。默认为中文模型，即lang="ch"。
+      - det(bool): 是否开启文字检测。默认为True。
+      - rec(bool): 是否开启文字识别。默认为True。
+      - use_angle_cls(bool): 是否开启方向分类, 用于设置使用方向分类器识别180度旋转文字。默认为False。
       - enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
 
 
@@ -110,11 +114,7 @@
                        output_dir='ocr_result',
                        visualization=False,
                        box_thresh=0.6,
-                       angle_classification_thresh=0.9,
-                       lang="ch",
-                       det=True,
-                       rec=True,
-                       use_angle_cls=False)
+                       angle_classification_thresh=0.9)
     ```
 
     - 预测API，检测输入图片中的所有文本的位置和识别文本结果。
@@ -128,10 +128,6 @@
       - visualization (bool): 是否将识别结果保存为图片文件, 仅有检测开启时有效, 默认为False；
       - box\_thresh (float): 检测文本框置信度的阈值；
       - angle_classification_thresh(float): 文本方向分类置信度的阈值
-      - lang(str): 多语言模型选择。默认为中文模型，即lang="ch"。
-      - det(bool): 是否开启文字检测。默认为True。
-      - rec(bool): 是否开启文字识别。默认为True。
-      - use_angle_cls(bool): 是否开启方向分类, 用于设置使用方向分类器识别180度旋转文字。默认为False。
 
     - **返回**
 
