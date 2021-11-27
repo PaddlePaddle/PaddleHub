@@ -13,7 +13,6 @@
 ## 一、模型基本信息
 
 - ### 应用效果展示
-  - [OCR文字识别场景在线体验](https://www.paddlepaddle.org.cn/hub/scene/ocr)
   - 样例结果示例：
 <p align="center">
 <img src="https://user-images.githubusercontent.com/76040149/133097562-d8c9abd1-6c70-4d93-809f-fa4735764836.png"  width = "600" hspace='10'/> <br />
