@@ -74,6 +74,7 @@
 
   - ```shell
     $ hub run multi_languages_ocr_db_crnn --input_path "/PATH/TO/IMAGE"
+    $ hub run multi_languages_ocr_db_crnn --input_path "/PATH/TO/IMAGE" --lang "ch"  --det True --rec True --use_angle_cls True
     ```
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
