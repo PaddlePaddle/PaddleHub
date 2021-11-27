@@ -33,7 +33,8 @@ class MultiLangOCR:
         """
         self.enable_mkldnn = enable_mkldnn
         self.logger = get_logger()
-        if len(sys.argv) == 1:
+        argc = len(sys.argv)
+        if argc == 1 or argc > 1 and sys.argv[1] == 'serving':
             self.lang = lang
             self.det = det
             self.rec = rec
