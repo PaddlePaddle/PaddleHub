@@ -18,6 +18,8 @@ from paddleocr.tools.infer.utility import base64_to_cv2
 from paddleocr.ppocr.utils.logging import get_logger
 from paddlehub.module.module import moduleinfo, runnable, serving
 
+from .utils import read_images, draw_boxes, get_image_ext, mkdir
+
 
 @moduleinfo(
     name="multi_languages_ocr_db_crnn",
@@ -55,16 +57,6 @@ class MultiLangOCR:
             self.rec_model_dir = self.engine.text_detector.args.rec_model_dir
             self.cls_model_dir = self.engine.text_detector.args.cls_model_dir
 
-    def read_images(self, paths=[]):
-        images = []
-        for img_path in paths:
-            assert os.path.isfile(img_path), "The {} isn't a valid file.".format(img_path)
-            img = cv2.imread(img_path)
-            if img is None:
-                continue
-            images.append(img)
-        return images
-
     def recognize_text(self,
                        images=[],
                        paths=[],
@@ -90,7 +82,7 @@ class MultiLangOCR:
         if images != [] and isinstance(images, list) and paths == []:
             predicted_data = images
         elif images == [] and isinstance(paths, list) and paths != []:
-            predicted_data = self.read_images(paths)
+            predicted_data = read_images(paths)
         else:
             raise TypeError("The input data is inconsistent with expectations.")
 
@@ -155,7 +147,7 @@ class MultiLangOCR:
             im_show = draw_ocr(image, boxes, txts, scores, font_path=font_file)
         elif self.det and not self.rec:
             boxes = rec_results
-            im_show = self.draw_boxes(image, boxes)
+            im_show = draw_boxes(image, boxes)
             im_show = np.array(im_show)
         else:
             self.logger.warning("only cls or rec not supported visualization.")
@@ -164,35 +156,12 @@ class MultiLangOCR:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        ext = self.get_image_ext(original_image)
+        ext = get_image_ext(original_image)
         saved_name = 'ndarray_{}{}'.format(time.time(), ext)
         save_file_path = os.path.join(output_dir, saved_name)
         im_show = Image.fromarray(im_show)
         im_show.save(save_file_path)
         return save_file_path
-
-    def draw_boxes(self, image, boxes, scores=None, drop_score=0.5):
-        img = image.copy()
-        draw = ImageDraw.Draw(img)
-        if scores is None:
-            scores = [1] * len(boxes)
-        for (box, score) in zip(boxes, scores):
-            if score < drop_score:
-                continue
-            draw.line([(box[0][0], box[0][1]), (box[1][0], box[1][1])], fill='red')
-            draw.line([(box[1][0], box[1][1]), (box[2][0], box[2][1])], fill='red')
-            draw.line([(box[2][0], box[2][1]), (box[3][0], box[3][1])], fill='red')
-            draw.line([(box[3][0], box[3][1]), (box[0][0], box[0][1])], fill='red')
-            draw.line([(box[0][0] - 1, box[0][1] + 1), (box[1][0] - 1, box[1][1] + 1)], fill='red')
-            draw.line([(box[1][0] - 1, box[1][1] + 1), (box[2][0] - 1, box[2][1] + 1)], fill='red')
-            draw.line([(box[2][0] - 1, box[2][1] + 1), (box[3][0] - 1, box[3][1] + 1)], fill='red')
-            draw.line([(box[3][0] - 1, box[3][1] + 1), (box[0][0] - 1, box[0][1] + 1)], fill='red')
-        return img
-
-    def get_image_ext(self, image):
-        if image.shape[2] == 4:
-            return ".png"
-        return ".jpg"
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -307,11 +276,6 @@ class MultiLangOCR:
                     path, exe, model_filename=model_filename, params_filename=params_filename)
 
             onnx_proto = p2o.run_convert(program, input_shape_dict=input_shape_dict, opset_version=opset_version)
-            self.mkdir(save_file)
+            mkdir(save_file)
             with open(save_file, "wb") as f:
                 f.write(onnx_proto.SerializeToString())
-
-    def mkdir(self, path):
-        sub_dir = os.path.dirname(path)
-        if not os.path.exists(sub_dir):
-            os.makedirs(sub_dir)
