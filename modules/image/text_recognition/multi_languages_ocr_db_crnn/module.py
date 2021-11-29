@@ -11,6 +11,8 @@ from PIL import Image, ImageDraw
 
 import paddle
 import paddle2onnx
+import paddle2onnx as p2o
+import paddle.fluid as fluid
 from paddleocr import PaddleOCR, draw_ocr
 from paddleocr.tools.infer.utility import base64_to_cv2
 from paddleocr.ppocr.utils.logging import get_logger
@@ -241,7 +243,12 @@ class MultiLangOCR:
             '--use_angle_cls', type=ast.literal_eval, default=False, help="whether text orientation classifier or not")
         return parser
 
-    def export_onnx_model(self, dirname: str, input_spec: List[paddle.static.InputSpec] = None, opset_version=10, **kwargs):
+    def export_onnx_model(self,
+                          dirname: str,
+                          input_spec: List[paddle.static.InputSpec] = None,
+                          input_shape_dict=None,
+                          opset_version=10,
+                          **kwargs):
         '''
         Export the model to ONNX format.
 
@@ -250,12 +257,22 @@ class MultiLangOCR:
             input_spec(list): Describes the input of the saved model's forward method, which can be described by
                 InputSpec or example Tensor. If None, all input variables of the original Layer's forward method
                 would be the inputs of the saved model. Default None.
+            input_shape_dict: dictionary ``{ input_name: input_value }, eg. {'x': [-1, 3, -1, -1]}``
             **kwargs(dict|optional): Other export configuration options for compatibility, some may be removed in
                 the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
                 for more information.
         '''
+
+        if input_shape_dict is not None and not isinstance(input_shape_dict, dict):
+            raise Exception("input_shape_dict should be dict, eg. {'x': [-1, 3, -1, -1]}.")
+
         if opset_version <= 9:
             raise Exception("opset_version <= 9 is not surpported, please try with higher opset_version >=10.")
+
+        v0, v1, v2 = paddle2onnx.__version__.split('.')
+        if int(v1) < 9:
+            raise ImportError("paddle2onnx>=0.9.0 is required")
+
         if isinstance(self, paddle.nn.Layer):
             save_file = os.path.join(dirname, '{}'.format(self.name))
             if not input_spec:
@@ -279,16 +296,37 @@ class MultiLangOCR:
             params_filename = 'inference.pdiparams'
             save_file = os.path.join(dirname, '{}_{}.onnx'.format(self.name, key))
 
-            place = paddle.CPUPlace()
-            exe = paddle.static.Executor(place)
-            program, inputs, outputs = paddle.fluid.io.load_inference_model(
-                dirname=path, model_filename=model_filename, params_filename=params_filename, executor=exe)
+            # convert model save with 'paddle.fluid.io.save_inference_model'
+            if hasattr(paddle, 'enable_static'):
+                paddle.enable_static()
+            exe = fluid.Executor(fluid.CPUPlace())
+            if model_filename is None and params_filename is None:
+                [program, feed_var_names, fetch_vars] = fluid.io.load_inference_model(path, exe)
+            else:
+                [program, feed_var_names, fetch_vars] = fluid.io.load_inference_model(
+                    path, exe, model_filename=model_filename, params_filename=params_filename)
 
-            paddle2onnx.program2onnx(
-                program=program,
-                scope=paddle.static.global_scope(),
-                feed_var_names=inputs,
-                target_vars=outputs,
+            OP_WITHOUT_KERNEL_SET = {
+                'feed', 'fetch', 'recurrent', 'go', 'rnn_memory_helper_grad', 'conditional_block', 'while', 'send',
+                'recv', 'listen_and_serv', 'fl_listen_and_serv', 'ncclInit', 'select', 'checkpoint_notify',
+                'gen_bkcl_id', 'c_gen_bkcl_id', 'gen_nccl_id', 'c_gen_nccl_id', 'c_comm_init', 'c_sync_calc_stream',
+                'c_sync_comm_stream', 'queue_generator', 'dequeue', 'enqueue', 'heter_listen_and_serv', 'c_wait_comm',
+                'c_wait_compute', 'c_gen_hccl_id', 'c_comm_init_hccl', 'copy_cross_scope'
+            }
+            if input_shape_dict is not None:
+                for k, v in input_shape_dict.items():
+                    program.blocks[0].var(k).desc.set_shape(v)
+                for i in range(len(program.blocks[0].ops)):
+                    if program.blocks[0].ops[i].type in OP_WITHOUT_KERNEL_SET:
+                        continue
+                    program.blocks[0].ops[i].desc.infer_shape(program.blocks[0].desc)
+
+            p2o.program2onnx(
+                program,
+                fluid.global_scope(),
+                save_file,
+                feed_var_names=feed_var_names,
+                target_vars=fetch_vars,
                 opset_version=opset_version,
-                save_file=save_file,
-                **kwargs)
+                enable_onnx_checker=True,
+                operator_export_type='ONNX')
