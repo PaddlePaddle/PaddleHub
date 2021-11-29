@@ -306,27 +306,12 @@ class MultiLangOCR:
                 [program, feed_var_names, fetch_vars] = fluid.io.load_inference_model(
                     path, exe, model_filename=model_filename, params_filename=params_filename)
 
-            OP_WITHOUT_KERNEL_SET = {
-                'feed', 'fetch', 'recurrent', 'go', 'rnn_memory_helper_grad', 'conditional_block', 'while', 'send',
-                'recv', 'listen_and_serv', 'fl_listen_and_serv', 'ncclInit', 'select', 'checkpoint_notify',
-                'gen_bkcl_id', 'c_gen_bkcl_id', 'gen_nccl_id', 'c_gen_nccl_id', 'c_comm_init', 'c_sync_calc_stream',
-                'c_sync_comm_stream', 'queue_generator', 'dequeue', 'enqueue', 'heter_listen_and_serv', 'c_wait_comm',
-                'c_wait_compute', 'c_gen_hccl_id', 'c_comm_init_hccl', 'copy_cross_scope'
-            }
-            if input_shape_dict is not None:
-                for k, v in input_shape_dict.items():
-                    program.blocks[0].var(k).desc.set_shape(v)
-                for i in range(len(program.blocks[0].ops)):
-                    if program.blocks[0].ops[i].type in OP_WITHOUT_KERNEL_SET:
-                        continue
-                    program.blocks[0].ops[i].desc.infer_shape(program.blocks[0].desc)
+            onnx_proto = p2o.run_convert(program, input_shape_dict=input_shape_dict, opset_version=opset_version)
+            self.mkdir(save_file)
+            with open(save_file, "wb") as f:
+                f.write(onnx_proto.SerializeToString())
 
-            p2o.program2onnx(
-                program,
-                fluid.global_scope(),
-                save_file,
-                feed_var_names=feed_var_names,
-                target_vars=fetch_vars,
-                opset_version=opset_version,
-                enable_onnx_checker=True,
-                operator_export_type='ONNX')
+    def mkdir(self, path):
+        sub_dir = os.path.dirname(path)
+        if not os.path.exists(sub_dir):
+            os.makedirs(sub_dir)
