@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|image classification|
 |Network|MobileNet_v2|
-|Dataset|百度自建菜品Dataset|
+|Dataset|Baidu food Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|52MB|
 |Latest update date|-|
@@ -17,13 +17,13 @@
 
 - ### Module Introduction
 
-  - MobileNet V2 是一个轻量化的卷积神经网络，它在 MobileNet 的基础上，做了 Inverted Residuals 和 Linear bottlenecks 这两大改进.该 PaddleHub Module 是在百度自建菜品数据集上训练得到的，可用于图像分类和特征提取，当前已支持8416种菜品的分类识别.
+  - MobileNet is a light-weight convolution network. This module is trained on Baidu food dataset, and can classify 8416 kinds of food.
 
 <p align="center">
 <img src="http://bj.bcebos.com/ibox-thumbnail98/e7b22762cf42ab0e1e1fab6b8720938b?authorization=bce-auth-v1%2Ffbe74140929444858491fbf2b6bc0935%2F2020-04-08T11%3A49%3A16Z%2F1800%2F%2Faf385f56da3c8ee1298588939d93533a72203c079ae1187affa2da555b9898ea" width = "800"  hspace='10'/> <br />
 </p>
 
-  - 更多详情参考：[MobileNetV2: Inverted Residuals and Linear Bottlenecks](https://arxiv.org/pdf/1801.04381.pdf)
+  - For more information, please refer to：[MobileNetV2: Inverted Residuals and Linear Bottlenecks](https://arxiv.org/pdf/1801.04381.pdf)
 
 ## II.Installation
 

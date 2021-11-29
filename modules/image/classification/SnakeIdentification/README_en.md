@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|image classification|
 |Network|ResNet50_vd_ssld|
-|Dataset|蛇种Dataset|
+|Dataset|Snake Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|84MB|
 |Latest update date|-|
@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - 蛇种识别（SnakeIdentification），该模型可准确识别蛇的种类，并精准判断蛇的毒性.该PaddleHub Module支持API预测及命令行预测.
+  - This module can be used to identify the kind of snake, and judge the toxicity.
 
 ## II.Installation
 
@@ -37,8 +37,8 @@
     ```
   - In case of any problems during installation, please refer to: [Windows_Quickstart]() | [Linux_Quickstart]() | [Mac_Quickstart]()
 
-- ### 3、在线体验
-  [AI Studio 快速体验](https://aistudio.baidu.com/aistudio/projectdetail/1646951)
+- ### 3、Online experience
+  [AI Studio](https://aistudio.baidu.com/aistudio/projectdetail/1646951)
 
 ## III.Module API Prediction
 
@@ -69,7 +69,7 @@
     ```
     - classification API.
     - **Parameters**
-      - images：list类型，待检测的图像.
+      - images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
 
     - **Return**
       - result(list[dict]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability

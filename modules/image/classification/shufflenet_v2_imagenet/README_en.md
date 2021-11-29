@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - ShuffleNet V2是由旷视科技在2018年提出的轻量级图像分类模型，该模型通过pointwise group convolution和channel shuffle两种方式，在保持精度的同时大大降低了模型的计算量.该PaddleHub Module结构为ShuffleNet V2，基于ImageNet-2012数据集训练，接受输入图片大小为224 x 224 x 3，支持直接通过命令行或者Python接口进行预测.
+  - ShuffleNet V2 is a light-weight model proposed by MEGVII in 2018. This model proposed pointwise group convolution and channel shuffle to keep accurary and reduce the amount of computation. This module is based on ShuffleNet V2, trained on ImageNet-2012, and can predict an image of 224*224*3.
 
 ## II.Installation
 

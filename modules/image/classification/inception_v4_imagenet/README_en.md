@@ -16,8 +16,7 @@
 
 
 - ### Module Introduction
-
-  - Inception 结构最初由 GoogLeNet 引入，因此 GoogLeNet 也被称为 Inception-v1，通过在 Inception-v1 的基础上引入Batch Normalization、分解、残差连接等技术，设计出了Inception-v4.
+  - Inception structure is first introduced in GoogLeNet, so GoogLeNet is named Inception-v1. Inception-v4 is an improvement on it, which takas advantage of sereral useful strategies such as batch normalization, residual learning. This module is based on Inception-v4, trained on ImageNet-2012, and can predict an image of size 224*224*3.
 
 ## II.Installation
 

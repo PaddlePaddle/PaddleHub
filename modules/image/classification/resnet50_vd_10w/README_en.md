@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|image classification|
 |Network|ResNet_vd|
-|Dataset|百度自建Dataset|
+|Dataset|Baidu Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|92MB|
 |Latest update date|-|
@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - ResNet系列模型是图像分类领域的重要模型之一，模型中提出的残差单元有效地解决了深度网络训练困难的问题，通过增加模型的深度提升了模型的准确率，ResNet-vd 其实就是 ResNet-D，是ResNet 原始结构的变种.该PaddleHub Module结构为ResNet_vd，使用百度自研的基于10万种类别、4千多万的有标签数据进行训练，接受输入图片大小为224 x 224 x 3，支持finetune.
+  - ResNet proposed a residual unit to solve the problem of training an extremely deep network, and improved the prediction accuracy of models. ResNet-vd is a variant of ResNet. This module is based on ResNet_vd, trained on Baidu dataset(consists of 100 thousand classes, 40 million pairs of data), and can predict an image of size 224*224*3.
 
 
 ## II.Installation

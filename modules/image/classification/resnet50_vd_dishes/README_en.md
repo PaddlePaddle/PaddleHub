@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|image classification|
 |Network|ResNet50_vd|
-|Dataset|百度自建菜品Dataset|
+|Dataset|Baidu Food Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|158MB|
 |Latest update date|-|
@@ -17,13 +17,13 @@
 
 - ### Module Introduction
 
-  - ResNet-vd是ResNet原始结构的变种，可用于图像分类和特征提取.该 PaddleHub Module 采用百度自建菜品数据集训练得到，支持8416种菜品的分类识别.
+  - ResNet proposed a residual unit to solve the problem of training an extremely deep network, and improved the prediction accuracy of models. ResNet-vd is a variant of ResNet. This module is based on ResNet-vd and can classify 8416 kinds of food.
 
 <p align="center">
 <img src="http://bj.bcebos.com/ibox-thumbnail98/77fa9b7003e4665867855b2b65216519?authorization=bce-auth-v1%2Ffbe74140929444858491fbf2b6bc0935%2F2020-04-08T11%3A05%3A10Z%2F1800%2F%2F1df0ecb4a52adefeae240c9e2189e8032560333e399b3187ef1a76e4ffa5f19f" width = "800"  hspace='10'/> <br />
 </p>
 
-  - 更多详情参考：[Bag of Tricks for Image Classification with Convolutional Neural Networks](https://arxiv.org/pdf/1812.01187.pdf)
+  - For more information, please refer to：[Bag of Tricks for Image Classification with Convolutional Neural Networks](https://arxiv.org/pdf/1812.01187.pdf)
 
 ## II.Installation
 

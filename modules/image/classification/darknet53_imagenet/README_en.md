@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - DarkNet 是由 Joseph Redmon 提出的图像分类模型，并应用于Yolov3 中作为 Backbone 来完成特征提取.该网络采用连续的 3*3 和 1*1 卷积进行连接，并像ResNet 一样有ShortCut连接.该 PaddleHub Module 基于 ImageNet-2012 数据集训练，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者 Python 接口进行预测.
+  - DarkNet is a classification model proposed by Joseph Redmon, which uses Yolov3 as backbone to extract features. This module is based on darknet53, trained on ImageNet-2012, and can predict an image of size 224*224*3.
 
 ## II.Installation
 

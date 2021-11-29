@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - Res2Net是2019年提出的一种全新的对ResNet的改进方案，该方案可以和现有其他优秀模块轻松整合，在不增加计算负载量的情况下，在ImageNet、CIFAR-100等数据集上的测试性能超过了ResNet.Res2Net结构简单，性能优越，进一步探索了CNN在更细粒度级别的多尺度表示能力. 该 PaddleHub Module 使用 ImageNet-2012数据集训练，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者 Python 接口进行预测.
+  - Res2Net is an improvement on ResNet, which can improve performance without increasing computation. This module is based on Res2Net, trained on ImageNet-2012, and can predict an image of size 224*224*3.
 
 
 ## II.Installation
@@ -45,7 +45,7 @@
     ```
   - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、预测Prediction Code Example
+- ### 2、Prediction Code Example
 
   - ```python
     import paddlehub as hub

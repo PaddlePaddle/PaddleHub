@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - DenseNet 是 CVPR 2017 最佳论文的模型，DenseNet 以前馈方式将每一层与其他层连接，从而 L 层网络就有 L(L+1)/2 个直接连接.对于每一层，其输入是之前的所有层的特征图，而自己的特征图作为之后所有层的输入.DenseNet 缓解了梯度消失问题，加强特征传播，促进了特征重用，并大幅减少了Parameters量.该PaddleHub Module结构为 DenseNet161，基于ImageNet-2012数据集训练，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者Python接口进行预测.
+  - DenseNet is the model in CVPR2017 best paper. Every layer outputs its result as input for the layer after it, and forms the dense connection topology. The dense connection ease the probblem of vanishing gradient and improve the information flow. This module is based on DenseNet161, trained on ImageNet-2012, and can predict an image of size 224*224*3.  
 
 ## II.Installation
 

@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - Xception 全称为 Extreme Inception，是 Google 于 2016年提出的 Inception V3 的改进模型.Xception 采用了深度可分离卷积(depthwise separable convolution) 来替换原来 Inception V3 中的卷积操作，整体的网络结构是带有残差连接的深度可分离卷积层的线性堆叠.该PaddleHub Module结构为Xception65，基于ImageNet-2012数据集训练，接受输入图片大小为224 x 224 x 3，支持直接通过命令行或者 Python 接口进行预测.
+  - Xception is a model proposed by Google in 2016, which is an improvement on Inception V3. This module is based on Xception65, trained on ImageNet-2012, and can predict an image of size 224*224*3.
 
 ## II.Installation
 

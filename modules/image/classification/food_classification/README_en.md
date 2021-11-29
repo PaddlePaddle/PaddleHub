@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|image classification|
 |Network|ResNet50_vd_ssld|
-|Dataset|美食Dataset|
+|Dataset|Food Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|91MB|
 |Latest update date|-|
@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - 美食分类（food_classification），该模型可识别苹果派，小排骨，烤面包，牛肉馅饼，牛肉鞑靼.该PaddleHub Module支持API预测及命令行预测.
+  - This module can be used for food classification.
 
 ## II.Installation
 
@@ -46,7 +46,7 @@
     ```
   - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、预测Prediction Code Example
+- ### 2、Prediction Code Example
 
   - ```python
     import paddlehub as hub
@@ -66,13 +66,13 @@
     ```
     - classification API.
     - **Parameters**
-      - images：list类型，待检测的图像.
+      - images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
 
     - **Return**
       - result(list[dict]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
-        - category_id (int): 类别的id；
-        - category（str）: 类别;
-        - score（float）: 准确率
+        - category_id (int): category id；
+        - category（str）: category name;
+        - score（float）: probability
 
 
 

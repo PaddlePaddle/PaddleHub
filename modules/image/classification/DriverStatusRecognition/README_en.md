@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|image classification|
 |Network|MobileNetV3_small_ssld|
-|Dataset|分心司机检测Dataset|
+|Dataset|Distractible Driver Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|6MB|
 |Latest update date|-|
@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - 驾驶员状态识别（DriverStatusRecognition），该模型可挖掘出人在疲劳状态下的表情特征，然后将这些定性的表情特征进行量化，提取出面部特征点及特征指标作为判断依据，再结合实验数据总结出基于这些Parameters的识别方法，最后输入获取到的状态数据进行识别和判断.该PaddleHub Module支持API预测及命令行预测.
+  - This module can be used for recognizing distractible drivers by analysing the expression on the face.
 
 ## II.Installation
 
@@ -37,8 +37,8 @@
     ```
   - In case of any problems during installation, please refer to: [Windows_Quickstart]() | [Linux_Quickstart]() | [Mac_Quickstart]()
 
-- ### 3、在线体验
-  [AI Studio 快速体验](https://aistudio.baidu.com/aistudio/projectdetail/1649513)
+- ### 3、Online experience
+  [AI Studio](https://aistudio.baidu.com/aistudio/projectdetail/1649513)
 
 ## III.Module API Prediction
 
@@ -69,7 +69,7 @@
     ```
     - classification API.
     - **Parameters**
-      - images：list类型，待检测的图像.
+      - images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
 
     - **Return**
       - result(list[dict]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability

@@ -16,8 +16,7 @@
 
 
 - ### Module Introduction
-
-  - NASNet是Google通过AutoML自动训练出来的图像分类模型.该PaddleHub Module基于ImageNet-2012数据集训练，接受输入图片大小为224 x 224 x 3，支持直接通过命令行或者Python接口进行预测.
+  - NASNet is proposed by Google, which is trained by AutoML. This module is based on NASNet, trained on ImageNet-2012, and can predict an image of size 224*224*3.
 
 ## II.Installation
 

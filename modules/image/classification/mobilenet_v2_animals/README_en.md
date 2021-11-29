@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|image classification|
 |Network|MobileNet_v2|
-|Dataset|百度自建动物Dataset|
+|Dataset|Baidu Animal Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|50MB|
 |Latest update date|-|
@@ -17,7 +17,9 @@
 
 - ### Module Introduction
 
-  - MobileNet V2 是一个轻量化的卷积神经网络，它在 MobileNet 的基础上，做了 Inverted Residuals 和 Linear bottlenecks 这两大改进.该 PaddleHub Module 是在百度自建动物数据集上训练得到的，可用于图像分类和特征提取，当前已支持7978种动物的分类识别.模型的详情可参考[论文](https://arxiv.org/pdf/1801.04381.pdf).
+  - MobileNet is a light-weight convolution network. This module is trained on Baidu animal dataset, and can classify 7978 kinds of animals.
+  - For more information, please refer to：[MobileNetV2: Inverted Residuals and Linear Bottlenecks](https://arxiv.org/pdf/1801.04381.pdf)
+
 
 
 

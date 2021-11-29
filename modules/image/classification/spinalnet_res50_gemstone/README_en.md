@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - 使用PaddleHub的SpinalNet预训练模型进行宝石识别或finetune并完成宝石的预测任务.
+  - This module is based on SpinalNet trained on gemstone dataset, and can be used to classify a gemstone.
 ## II.Installation
 
 - ### 1、Environmental Dependence  

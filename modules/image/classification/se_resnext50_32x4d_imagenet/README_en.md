@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - Squeeze-and-Excitation Networks是由Momenta在2017年提出的一种图像分类结构.该结构通过对特征通道间的相关性进行建模，把重要的特征进行强化来提升准确率.SE_ResNeXt基于ResNeXt模型添加了SE Block，并获得了2017 ILSVR竞赛的冠军.该PaddleHub Module结构为SE_ResNeXt50_32x4d，基于ImageNet-2012数据集训练，接受输入图片大小为224 x 224 x 3，支持直接通过命令行或者Python接口进行预测.
+  - Squeeze-and-Excitation Network is proposed by Momenta in 2017. This model learns the weight to strengthen important channels of features and improves classification accuracy, which is the champion of ILSVR 2017. This module is based on SE_ResNeXt50_32x4d, trained on ImageNet-2012, and can predict an image of size 224*224*3.
 
 ## II.Installation
 

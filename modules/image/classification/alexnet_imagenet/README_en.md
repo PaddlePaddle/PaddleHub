@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - AlexNet是图像分类中的经典模型.模型由Alex Krizhevsky于2012年提出，并在2012年ILSVRC比赛中夺得冠军.该PaddleHub Module结构为AlexNet，基于ImageNet-2012数据集训练，接受输入图片大小为224 x 224 x 3，支持直接通过命令行或者Python接口进行预测.
+  - AlexNet was a classification model proposed by Alex Krizhevsky in 2012, and gained the champion of ILSVRC 2012. This module is based on AlexNet, trained on ImageNet-2012, and can predict an image of size 224*224*3.
 
 ## II.Installation
 

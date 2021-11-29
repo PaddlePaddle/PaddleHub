@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - 海洋生物识别（marine_biometrics），该模型可准确识别鱼的种类.该PaddleHub Module支持API预测及命令行预测.
+  - This module can be used to classify marine biometrics.
 
 ## II.Installation
 
@@ -44,7 +44,7 @@
     ```
   - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、预测Prediction Code Example
+- ### 2、Prediction Code Example
 
   - ```python
     import paddlehub as hub
@@ -64,7 +64,7 @@
     ```
     - classification API.
     - **Parameters**
-      - images：list类型，待检测的图像.
+      - images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
 
     - **Return**
       - result(list[dict]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability

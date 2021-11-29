@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - MobileNet V2是Mark Sandler, Andrew Howard等人在2018年提出的一个图像分类模型，该系列模型（MobileNet）是为移动和嵌入式设备提出的高效模型，在模型Parameters较少的情况下仍然保持了较高的分类准确率.该PaddleHub Module基于ImageNet-2012数据集训练，接受输入图片大小为224 x 224 x 3，支持直接通过命令行或者Python接口进行预测.
+  - MobileNet V2 is an image classification model proposed by Mark Sandler, Andrew Howard et al. in 2018. This model is a light-weight model for mobile and embedded device, and can reach high accurary with a few parameters. This module is based on MobileNet V2, trained on ImageNet-2012, and can predict an image of size 224*224*3.
 
 ## II.Installation
 

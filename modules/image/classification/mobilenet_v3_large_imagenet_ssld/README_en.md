@@ -17,8 +17,7 @@
 
 - ### Module Introduction
 
-  - MobileNetV3是Google在2019年发布的新模型，作者通过结合NAS与NetAdapt进行搜索得到该网络结构，提供了Large和Small两个版本，分别适用于对资源不同要求的情况.对比于MobileNetV2，新的模型在速度和精度方面均有提升.该PaddleHubModule的模型结构为MobileNetV3 Large，基于ImageNet-2012数据集并采用PaddleClas提供的SSLD蒸馏方法训练得到，接受输入图片大小为224 x 224 x 3，支持finetune，也可以直接通过命令行或者Python接口进行预测.
-
+  - MobileNetV3 is an image classification model proposed by Google in 2019. The authors proposed to search the network architecture by combination of NAS and NetAdapt, and provide two versions of this model, i.e. Large and Small version. This module is based on MobileNetV3 Large, trained on ImageNet-2012 with SSLD distillation strategy, and can predict an image of size 224*224*3.
 
 ## II.Installation
 

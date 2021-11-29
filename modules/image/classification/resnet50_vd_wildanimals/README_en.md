@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|image classification|
 |Network|ResNet_vd|
-|Dataset|IFAW 自建野生动物Dataset|
+|Dataset|IFAW Wild Animal Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|92MB|
 |Latest update date|-|
@@ -17,7 +17,8 @@
 
 - ### Module Introduction
 
-  - ResNet-vd 其实就是 ResNet-D，是ResNet 原始结构的变种，可用于图像分类和特征提取.该 PaddleHub Module 采用百度自建野生动物数据集训练得到，支持'象牙制品','象牙', '大象', '虎皮', '老虎', '虎牙/虎爪/虎骨', '穿山甲甲片', '穿山甲', '穿山甲爪子', '其他' 这十个标签的识别.模型的详情可参考[论文](https://arxiv.org/pdf/1812.01187.pdf).
+  - ResNet proposed a residual unit to solve the problem of training an extremely deep network, and improved the prediction accuracy of models. ResNet-vd is a variant of ResNet. This module is based on ResNet_vd, trained on IFAW Wild Animal dataset, and can predict ten kinds of wild animal components.
+
 
 
 

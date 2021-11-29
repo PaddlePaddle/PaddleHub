@@ -17,7 +17,8 @@
 
 - ### Module Introduction
 
-  - ResNet系列模型是图像分类领域的重要模型之一，模型中提出的残差单元有效地解决了深度网络训练困难的问题，通过增加模型的深度提升了模型的准确率，ResNet-vd 其实就是 ResNet-D，是ResNet 原始结构的变种.该PaddleHub Module结构为ResNet_vd，基于ImageNet-2012数据集训练得到，接受输入图片大小为224 x 224 x 3，支持finetune，也可以直接通过命令行或者Python接口进行预测.
+  - ResNet proposed a residual unit to solve the problem of training an extremely deep network, and improved the prediction accuracy of models. ResNet-vd is a variant of ResNet. This module is based on ResNet_vd, trained on ImageNet-2012 dataset, and can predict an image of size 224*224*3.
+
 
 
 ## II.Installation

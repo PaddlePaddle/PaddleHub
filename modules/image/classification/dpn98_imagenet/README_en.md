@@ -17,7 +17,7 @@
 
 - ### Module Introduction
 
-  - DPN(Dual Path Networks) 是 ImageNet 2017 目标定位冠军的图像分类模型，融合了 ResNet 和 DenseNet 的核心思想.该PaddleHub Module结构为 DPN98，基于ImageNet-2012数据集训练，接受输入图片大小为 224 x 224 x 3，支持直接通过命令行或者Python接口进行预测.
+  - DPN(Dual Path Networks) is the champion of ILSVRC2017 in Object Localization Task. This module is based on DPN98, trained on ImageNet-2012, can predict an image of size 224*224*3.
 
 
 
