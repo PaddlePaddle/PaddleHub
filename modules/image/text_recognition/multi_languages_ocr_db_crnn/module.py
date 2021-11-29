@@ -6,7 +6,11 @@ import time
 
 import cv2
 import numpy as np
+from typing import List
 from PIL import Image, ImageDraw
+
+import paddle
+import paddle2onnx
 from paddleocr import PaddleOCR, draw_ocr
 from paddleocr.tools.infer.utility import base64_to_cv2
 from paddleocr.ppocr.utils.logging import get_logger
@@ -45,6 +49,9 @@ class MultiLangOCR:
                 rec=self.rec,
                 use_angle_cls=self.use_angle_cls,
                 enable_mkldnn=enable_mkldnn)
+            self.det_model_dir = self.engine.text_detector.args.det_model_dir
+            self.rec_model_dir = self.engine.text_detector.args.rec_model_dir
+            self.cls_model_dir = self.engine.text_detector.args.cls_model_dir
 
     def read_images(self, paths=[]):
         images = []
@@ -233,3 +240,52 @@ class MultiLangOCR:
         parser.add_argument(
             '--use_angle_cls', type=ast.literal_eval, default=False, help="whether text orientation classifier or not")
         return parser
+
+    def export_onnx_model(self, dirname: str, input_spec: List[paddle.static.InputSpec] = None, **kwargs):
+        '''
+        Export the model to ONNX format.
+
+        Args:
+            dirname(str): The directory to save the onnx model.
+            input_spec(list): Describes the input of the saved model's forward method, which can be described by
+                InputSpec or example Tensor. If None, all input variables of the original Layer's forward method
+                would be the inputs of the saved model. Default None.
+            **kwargs(dict|optional): Other export configuration options for compatibility, some may be removed in
+                the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
+                for more information.
+        '''
+        if isinstance(self, paddle.nn.Layer):
+            save_file = os.path.join(dirname, '{}'.format(self.name))
+            if not input_spec:
+                if hasattr(self, 'input_spec'):
+                    input_spec = self.input_spec
+                else:
+                    _type = self.type.lower()
+                    if _type.startswith('cv/image'):
+                        input_spec = [paddle.static.InputSpec(shape=[None, 3, None, None], dtype='float32')]
+                    else:
+                        raise RuntimeError(
+                            'Module {} lacks `input_spec`, please specify it when calling `export_onnx_model`.'.format(
+                                self.name))
+
+            paddle.onnx.export(self, save_file, input_spec=input_spec, **kwargs)
+            return
+
+        path_dict = {"det": self.det_model_dir, "rec": self.rec_model_dir, "cls": self.cls_model_dir}
+        for (key, path) in path_dict.items():
+            model_filename = 'inference.pdmodel'
+            params_filename = 'inference.pdiparams'
+            save_file = os.path.join(dirname, '{}_{}.onnx'.format(self.name, key))
+
+            place = paddle.CPUPlace()
+            exe = paddle.static.Executor(place)
+            program, inputs, outputs = paddle.fluid.io.load_inference_model(
+                dirname=path, model_filename=model_filename, params_filename=params_filename, executor=exe)
+
+            paddle2onnx.program2onnx(
+                program=program,
+                scope=paddle.static.global_scope(),
+                feed_var_names=inputs,
+                target_vars=outputs,
+                save_file=save_file,
+                **kwargs)
