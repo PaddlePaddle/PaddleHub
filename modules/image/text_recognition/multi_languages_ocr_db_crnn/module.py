@@ -241,7 +241,7 @@ class MultiLangOCR:
             '--use_angle_cls', type=ast.literal_eval, default=False, help="whether text orientation classifier or not")
         return parser
 
-    def export_onnx_model(self, dirname: str, input_spec: List[paddle.static.InputSpec] = None, **kwargs):
+    def export_onnx_model(self, dirname: str, input_spec: List[paddle.static.InputSpec] = None, opset_version=10, **kwargs):
         '''
         Export the model to ONNX format.
 
@@ -254,6 +254,8 @@ class MultiLangOCR:
                 the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
                 for more information.
         '''
+        if opset_version <= 9:
+            raise Exception("opset_version <= 9 is not surpported, please try with higher opset_version >=10.")
         if isinstance(self, paddle.nn.Layer):
             save_file = os.path.join(dirname, '{}'.format(self.name))
             if not input_spec:
@@ -287,5 +289,6 @@ class MultiLangOCR:
                 scope=paddle.static.global_scope(),
                 feed_var_names=inputs,
                 target_vars=outputs,
+                opset_version=opset_version,
                 save_file=save_file,
                 **kwargs)
