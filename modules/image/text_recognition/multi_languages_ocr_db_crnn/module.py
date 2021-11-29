@@ -25,8 +25,7 @@ from .utils import read_images, draw_boxes, get_image_ext, mkdir
     name="multi_languages_ocr_db_crnn",
     version="1.0.0",
     summary="ocr service",
-    author="paddle-dev",
-    author_email="paddle-dev@baidu.com",
+    author="PaddlePaddle",
     type="cv/text_recognition")
 class MultiLangOCR:
     def __init__(self, lang="ch", det=True, rec=True, use_angle_cls=False, enable_mkldnn=False):
