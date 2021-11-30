@@ -6,8 +6,7 @@ import time
 
 import cv2
 import numpy as np
-from typing import List
-from PIL import Image, ImageDraw
+from PIL import Image
 
 import paddle
 import paddle2onnx
@@ -211,52 +210,24 @@ class MultiLangOCR:
             '--use_angle_cls', type=ast.literal_eval, default=False, help="whether text orientation classifier or not")
         return parser
 
-    def export_onnx_model(self,
-                          dirname: str,
-                          input_spec: List[paddle.static.InputSpec] = None,
-                          input_shape_dict=None,
-                          opset_version=10,
-                          **kwargs):
+    def export_onnx_model(self, dirname: str, input_shape_dict=None, opset_version=10):
         '''
         Export the model to ONNX format.
 
         Args:
             dirname(str): The directory to save the onnx model.
-            input_spec(list): Describes the input of the saved model's forward method, which can be described by
-                InputSpec or example Tensor. If None, all input variables of the original Layer's forward method
-                would be the inputs of the saved model. Default None.
             input_shape_dict: dictionary ``{ input_name: input_value }, eg. {'x': [-1, 3, -1, -1]}``
-            **kwargs(dict|optional): Other export configuration options for compatibility, some may be removed in
-                the future. Don't use them If not necessary. Refer to https://github.com/PaddlePaddle/paddle2onnx
-                for more information.
+            opset_version(int): operator set
         '''
+        v0, v1, v2 = paddle2onnx.__version__.split('.')
+        if int(v1) < 9:
+            raise ImportError("paddle2onnx>=0.9.0 is required")
 
         if input_shape_dict is not None and not isinstance(input_shape_dict, dict):
             raise Exception("input_shape_dict should be dict, eg. {'x': [-1, 3, -1, -1]}.")
 
         if opset_version <= 9:
             raise Exception("opset_version <= 9 is not surpported, please try with higher opset_version >=10.")
-
-        v0, v1, v2 = paddle2onnx.__version__.split('.')
-        if int(v1) < 9:
-            raise ImportError("paddle2onnx>=0.9.0 is required")
-
-        if isinstance(self, paddle.nn.Layer):
-            save_file = os.path.join(dirname, '{}'.format(self.name))
-            if not input_spec:
-                if hasattr(self, 'input_spec'):
-                    input_spec = self.input_spec
-                else:
-                    _type = self.type.lower()
-                    if _type.startswith('cv/image'):
-                        input_spec = [paddle.static.InputSpec(shape=[None, 3, None, None], dtype='float32')]
-                    else:
-                        raise RuntimeError(
-                            'Module {} lacks `input_spec`, please specify it when calling `export_onnx_model`.'.format(
-                                self.name))
-
-            paddle.onnx.export(self, save_file, input_spec=input_spec, **kwargs)
-            return
 
         path_dict = {"det": self.det_model_dir, "rec": self.rec_model_dir, "cls": self.cls_model_dir}
         for (key, path) in path_dict.items():
