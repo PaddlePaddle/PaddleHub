@@ -91,13 +91,13 @@
     - **Return**
 
       - res (list\[dict\]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
-        - data (list): 检测结果，list的每一个元素为 dict，各字段为:
-          - confidence (float): 识别的置信度
+        - data (list): detection results, each element in the list is dict
+          - confidence (float): the confidence of the result
           - label (str): 标签
-          - left (int): 边界框的左上角x坐标
-          - top (int): 边界框的左上角y坐标
-          - right (int): 边界框的右下角x坐标
-          - bottom (int): 边界框的右下角y坐标
+          - left (int): the upper left corner x coordinate of the detection box
+          - top (int): the upper left corner y coordinate of the detection box
+          - right (int): the lower right corner x coordinate of the detection box
+          - bottom (int): the lower right corner y coordinate of the detection box
         - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
 
   - ```python
@@ -106,14 +106,14 @@
                              params_filename=None,
                              combined=True)
     ```
-    - 将模型保存到指定路径.
+    - Save model to specific path
 
     - **Parameters**
 
-      - dirname: 存在模型的目录名称； <br/>
-      - model\_filename: 模型文件名称，默认为\_\_model\_\_； <br/>
-      - params\_filename: Parameters文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)；<br/>
-      - combined: 是否将Parameters保存到统一的一个文件中.
+      - dirname: output dir for saving model
+      - model\_filename: filename for saving model
+      - params\_filename: filename for saving parameters
+      - combined: whether save parameters into one file
 
 
 ## IV.Server Deployment

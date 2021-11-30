@@ -73,10 +73,10 @@
                              combined=True)
     ```
     - **Parameters**
-      - dirname: 存在模型的目录名称；<br/>
+      - dirname: output dir for saving model
       - model_filename: 模型文件名称，默认为\_\_model\_\_; <br/>
       - params_filename: Parameters文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效); <br/>
-      - combined: 是否将Parameters保存到统一的一个文件中.
+      - combined: whether save parameters into one file
 
 
 

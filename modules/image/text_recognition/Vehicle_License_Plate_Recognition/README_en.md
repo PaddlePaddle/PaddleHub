@@ -64,7 +64,7 @@
 
     - **Parameters**
 
-      - images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;<br/>
+      - images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
 
 
     - **Return**

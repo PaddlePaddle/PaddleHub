@@ -23,7 +23,7 @@
 
 - ### Module Introduction
 
-  - PyramidBox是一种基于SSD的单阶段人脸检测器，它利用上下文信息解决困难人脸的检测问题.PyramidBox在六个尺度的特征图上进行不同层级的预测.该工作主要包括以下模块：LFPN、PyramidAnchors、CPM、Data-anchor-sampling.该PaddleHub Module的预训练数据集为WIDER FACE数据集，可支持预测.
+  - PyramidBox is a one-stage face detector based on SSD. It can redict results across six scale levels of feature maps. This module is based on PyramidBox, trained on WIDER FACE Dataset, and supports face detection.
 
 
 ## II.Installation
@@ -73,7 +73,7 @@
                        score_thresh=0.15)
     ```
 
-    - 检测输入图片中的所有人脸位置.
+    - Detect all faces in image
 
     - **Parameters**
 
@@ -82,20 +82,20 @@
       - use_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
       - output_dir (str): save path of images;
       - visualization (bool): Whether to save the results as picture files;
-      - score_thresh (float): 置信度的阈值.
+      - score_thresh (float): the confidence threshold
 
       **NOTE:** choose one parameter to provide data from paths and images
 
     - **Return**
 
-      - res (list\[dict\]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
-        - path (str): 原输入图片的路径
-        - data (list): 检测结果，list的每一个元素为 dict，各字段为:
-          - confidence (float): 识别的置信度
-          - left (int): 边界框的左上角x坐标
-          - top (int): 边界框的左上角y坐标
-          - right (int): 边界框的右下角x坐标
-          - bottom (int): 边界框的右下角y坐标
+      - res (list\[dict\]): results
+        - path (str): path for input image
+        - data (list): detection results, each element in the list is dict
+          - confidence (float): the confidence of the result
+          - left (int): the upper left corner x coordinate of the detection box
+          - top (int): the upper left corner y coordinate of the detection box
+          - right (int): the lower right corner x coordinate of the detection box
+          - bottom (int): the lower right corner y coordinate of the detection box
 
 
   - ```python
@@ -104,14 +104,14 @@
                              params_filename=None,
                              combined=True)
     ```
-    - 将模型保存到指定路径.
+    - Save model to specific path
 
     - **Parameters**
 
-      - dirname: 存在模型的目录名称； <br/>
-      - model\_filename: 模型文件名称，默认为\_\_model\_\_； <br/>
-      - params\_filename: Parameters文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)；<br/>
-      - combined: 是否将Parameters保存到统一的一个文件中.
+      - dirname: output dir for saving model
+      - model\_filename: filename for saving model
+      - params\_filename: filename for saving parameters
+      - combined: whether save parameters into one file
 
 
 ## IV.Server Deployment

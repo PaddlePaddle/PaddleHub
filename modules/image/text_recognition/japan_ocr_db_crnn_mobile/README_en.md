@@ -98,8 +98,8 @@
       - box_thresh (float): The confidence threshold for text box detection;
       - text_thresh (float): The confidence threshold for Japanese text recognition;
       - angle_classification_thresh(float): The confidence threshold for text angle classification
-      - visualization (bool): Whether to save the recognition results as picture files;
-      - output_dir (str): save path of images, ocr_result by default.
+      - visualization (bool): Whether to save the results as picture files;
+      - output_dir (str): save path of images;
     - **Return**
       - res (list[dict]): The list of recognition results, where each element is dict and each field is:
         - data (list[dict]): recognition results, each element in the list is dict and each field is:

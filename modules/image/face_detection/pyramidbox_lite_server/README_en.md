@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|face detection|
 |Network|PyramidBox|
-|Dataset|WIDER FACEDataset + 百度自采人脸Dataset|
+|Dataset|WIDER FACEDataset + Baidu Face Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|8MB|
 |Latest update date|2021-02-26|
@@ -22,7 +22,8 @@
 
 - ### Module Introduction
 
-  - PyramidBox-Lite是基于2018年百度发表于计算机视觉顶级会议ECCV 2018的论文PyramidBox而研发的轻量级模型，模型基于主干网络FaceBoxes，对于光照、口罩遮挡、表情变化、尺度变化等常见问题具有很强的鲁棒性.该PaddleHub Module基于WIDER FACE数据集和百度自采人脸数据集进行训练，支持预测，可用于人脸检测.
+  - PyramidBox-Lite is a light-weight model based  on PyramidBox proposed by Baidu in ECCV 2018. This model has solid robustness against interferences such as light and scale variation. This module is based on PyramidBox, trained on WIDER FACE Dataset and Baidu Face Dataset, and can be used for face detection.
+
 
 
 ## II.Installation
@@ -73,7 +74,7 @@
                        confs_threshold=0.6)
     ```
 
-    - 检测输入图片中的所有人脸位置.
+    - Detect all faces in image
 
     - **Parameters**
 
@@ -82,21 +83,21 @@
       - use_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
       - output_dir (str): save path of images;
       - visualization (bool): Whether to save the results as picture files;
-      - shrink (float): 用于设置图片的缩放比例，该值越大，则对于输入图片中的小尺寸人脸有更好的检测效果（模型计算成本越高），反之则对于大尺寸人脸有更好的检测效果；<br/>
-      - confs\_threshold (float): 置信度的阈值.
+      - shrink (float): the scale to resize image
+      - confs\_threshold (float): the confidence threshold
 
       **NOTE:** choose one parameter to provide data from paths and images
 
     - **Return**
 
-      - res (list\[dict\]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
-        - path (str): 原输入图片的路径
-        - data (list): 检测结果，list的每一个元素为 dict，各字段为:
-          - confidence (float): 识别的置信度
-          - left (int): 边界框的左上角x坐标
-          - top (int): 边界框的左上角y坐标
-          - right (int): 边界框的右下角x坐标
-          - bottom (int): 边界框的右下角y坐标
+      - res (list\[dict\]): results
+        - path (str): path for input image
+        - data (list): detection results, each element in the list is dict
+          - confidence (float): the confidence of the result
+          - left (int): the upper left corner x coordinate of the detection box
+          - top (int): the upper left corner y coordinate of the detection box
+          - right (int): the lower right corner x coordinate of the detection box
+          - bottom (int): the lower right corner y coordinate of the detection box
 
 
   - ```python
@@ -105,14 +106,14 @@
                              params_filename=None,
                              combined=True)
     ```
-    - 将模型保存到指定路径.
+    - Save model to specific path
 
     - **Parameters**
 
-      - dirname: 存在模型的目录名称； <br/>
-      - model\_filename: 模型文件名称，默认为\_\_model\_\_； <br/>
-      - params\_filename: Parameters文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)；<br/>
-      - combined: 是否将Parameters保存到统一的一个文件中.
+      - dirname: output dir for saving model
+      - model\_filename: filename for saving model
+      - params\_filename: filename for saving parameters
+      - combined: whether save parameters into one file
 
 
 ## IV.Server Deployment
