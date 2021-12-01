@@ -1,12 +1,12 @@
-# animegan_v2_paprika_74
+# stgan_bald
 
-|Module Name|animegan_v2_paprika_74|
+|Module Name|stgan_bald|
 | :--- | :---: |
 |Category|image generation|
-|Network|AnimeGAN|
-|Dataset|Paprika|
+|Network|STGAN|
+|Dataset|CelebA|
 |Fine-tuning supported or not|No|
-|Module Size|9.4MB|
+|Module Size|287MB|
 |Latest update date|2021-02-26|
 |Data indicators|-|
 
@@ -14,39 +14,27 @@
 ## I.Basic Information
 
 - ### Application Effect Display
-  - Sample results：
-    <p align="center">
-    <img src="https://ai-studio-static-online.cdn.bcebos.com/bd002c4bb6a7427daf26988770bb18648b7d8d2bfd6746bfb9a429db4867727f"  width = "450" height = "300" hspace='10'/>
-    <br />
-    Input Image
-    <br />
-    <img src="https://ai-studio-static-online.cdn.bcebos.com/6574669d87b24bab9627c6e33896528b4a0bf5af1cd84ca29655d68719f2d551"  width = "450" height = "300" hspace='10'/>
-    <br />
-    Output Image
-     <br />
-    </p>
-
+  - Please refer to this [link](https://aistudio.baidu.com/aistudio/projectdetail/1145381)
 
 - ### Module Introduction
 
-  - AnimeGAN V2 is a style transfer model, which can transfer a image style to paprika carton style. For more information, please refer to [AnimeGAN V2 Project](https://github.com/TachibanaYoshino/AnimeGANv2).
+  - This module is based on STGAN model, trained on CelebA dataset, and can be used to predict bald appearance after 1, 3 and 5 years.
 
 
 ## II.Installation
 
 - ### 1、Environmental Dependence  
 
-  - paddlepaddle >= 1.8.0  
+  - paddlepaddle >= 1.8.2  
 
   - paddlehub >= 1.8.0  | [How to install PaddleHub](../../../../docs/docs_en/get_start/installation.rst)
 
 - ### 2、Installation
 
   - ```shell
-    $ hub install animegan_v2_paprika_74
+    $ hub install stgan_bald
     ```
   - In case of any problems during installation, please refer to: [Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)
-
 ## III.Module API Prediction
 
 - ### 1、Prediction Code Example
@@ -55,47 +43,46 @@
     import paddlehub as hub
     import cv2
 
-    model = hub.Module(name="animegan_v2_paprika_74")
-    result = model.style_transfer(images=[cv2.imread('/PATH/TO/IMAGE')])
+    stgan_bald = hub.Module(name="stgan_bald")
+    result = stgan_bald.bald(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
-    # result = model.style_transfer(paths=['/PATH/TO/IMAGE'])
+    # result = stgan_bald.bald(paths=['/PATH/TO/IMAGE'])
     ```
 
 - ### 2、API
 
   - ```python
-    def style_transfer(images=None,
-                       paths=None,
-                       output_dir='output',
-                       visualization=False,
-                       min_size=32,
-                       max_size=1024)
+    def bald(images=None,
+             paths=None,
+             use_gpu=False,
+             visualization=False,
+             output_dir="bald_output")
     ```
 
-    - Style transfer API.
+    - Bald appearance generation API.
 
     - **Parameters**
-
       - images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
       - paths (list[str]): image path;
-      - output_dir (str): save path of images;
+      - use_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
       - visualization (bool): Whether to save the results as picture files;
-      - min\_size (int): min size of image shape，default is 32；
-      - max\_size (int): max size of image shape，default is 1024.
+      - output_dir (str): save path of images;
+
+      **NOTE:** choose one parameter to provide data from paths and images
 
     - **Return**
-      - res (list\[numpy.ndarray\]): result list，ndarray.shape is \[H, W, C\]
 
+      - res (list\[numpy.ndarray\]): result list，ndarray.shape 为 \[H, W, C\]
 
 ## IV.Server Deployment
 
-- PaddleHub Serving can deploy an online service of style transfer.
+- PaddleHub Serving can deploy an online service of bald appearance generation.
 
 - ### Step 1: Start PaddleHub Serving
 
   - Run the startup command：
   - ```shell
-    $ hub serving start -m animegan_v2_paprika_74
+    $ hub serving start -m stgan_bald
     ```
 
   - The servitization API is now deployed and the default port number is 8866.
@@ -111,20 +98,30 @@
     import json
     import cv2
     import base64
+    import numpy as np
 
 
     def cv2_to_base64(image):
       data = cv2.imencode('.jpg', image)[1]
       return base64.b64encode(data.tostring()).decode('utf8')
 
+    def base64_to_cv2(b64str):
+      data = base64.b64decode(b64str.encode('utf8'))
+      data = np.fromstring(data, np.uint8)
+      data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+      return data
+
     # Send an HTTP request
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/animegan_v2_paprika_74"
+    url = "http://127.0.0.1:8866/predict/stgan_bald"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
-    # print prediction results
-    print(r.json()["results"])
+    # save results
+    one_year =cv2.cvtColor(base64_to_cv2(r.json()["results"]['data_0']), cv2.COLOR_RGB2BGR)
+    three_year =cv2.cvtColor(base64_to_cv2(r.json()["results"]['data_1']), cv2.COLOR_RGB2BGR)
+    five_year =cv2.cvtColor(base64_to_cv2(r.json()["results"]['data_2']), cv2.COLOR_RGB2BGR)
+    cv2.imwrite("stgan_bald_server.png", one_year)
     ```
 
 
@@ -133,15 +130,6 @@
 * 1.0.0
 
   First release
-
-* 1.0.1
-
-  Adapt to paddlehub2.0
-
-* 1.0.2
-
-  Delete optional parameter batch_size
-
   - ```shell
-    $ hub install animegan_v2_paprika_74==1.0.2
+    $ hub install stgan_bald==1.0.0
     ```

@@ -25,7 +25,7 @@
 
   - paddlepaddle >= 2.0.0  
 
-  - paddlehub >= 2.0.0  | [How to install PaddleHub]()
+  - paddlehub >= 2.0.0  | [How to install PaddleHub](../../../../docs/docs_en/get_start/installation.rst)
 
   - paddlex >= 1.3.7
 
@@ -35,7 +35,7 @@
   - ```shell
     $ hub install DriverStatusRecognition
     ```
-  - In case of any problems during installation, please refer to: [Windows_Quickstart]() | [Linux_Quickstart]() | [Mac_Quickstart]()
+  - In case of any problems during installation, please refer to: [Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)
 
 - ### 3、Online experience
   [AI Studio](https://aistudio.baidu.com/aistudio/projectdetail/1649513)
