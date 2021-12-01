@@ -4,11 +4,11 @@
 |Category|Word Embedding|
 |Network|fasttext|
 |Dataset|crawl|
-|Fine-tuning supported or not|No|
-|Module size|1.19GB|
-|Vocab size|2,000,002|
-|Lastest update date|26 Feb, 2021|
-|Data indicators|-|
+|Fine-tuning supported|No|
+|Module Size|1.19GB|
+|Vocab Size|2,000,002|
+|Last update date|26 Feb, 2021|
+|Data Indicators|-|
 
 ## I. Basic Information
 
