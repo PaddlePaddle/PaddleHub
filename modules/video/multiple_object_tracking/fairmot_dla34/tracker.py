@@ -20,7 +20,6 @@ import numpy as np
 from ppdet.core.workspace import create
 from ppdet.utils.checkpoint import load_weight, load_pretrain_weight
 from ppdet.modeling.mot.utils import Detection, get_crops, scale_coords, clip_box
-from ppdet.modeling.mot.utils import Timer, load_det_results
 from ppdet.modeling.mot import visualization as mot_vis
 from ppdet.metrics import Metric, MOTMetric, KITTIMOTMetric
 import ppdet.utils.stats as stats
@@ -28,6 +27,7 @@ from ppdet.engine.callbacks import Callback, ComposeCallback
 from ppdet.utils.logger import setup_logger
 
 from .dataset import MOTVideoStream, MOTImageStream
+from .utils import Timer
 
 logger = setup_logger(__name__)
 
