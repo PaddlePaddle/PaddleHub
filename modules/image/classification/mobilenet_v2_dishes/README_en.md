@@ -50,7 +50,7 @@
     ```
   - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、预测Prediction Code Example
+- ### 2、Prediction Code Example
 
   - ```python
     import paddlehub as hub

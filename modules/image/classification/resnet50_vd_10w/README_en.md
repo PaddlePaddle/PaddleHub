@@ -38,7 +38,7 @@
 
 ## III.Module API Prediction
 
-- ### 1、预测Prediction Code Example
+- ### 1、Prediction Code Example
 
   - ```python
     import paddlehub as hub
