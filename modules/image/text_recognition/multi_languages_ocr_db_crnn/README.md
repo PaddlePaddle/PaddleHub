@@ -46,6 +46,8 @@
 
   - PaddleHub >= 2.0.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
+  - Paddle2Onnx >= 0.9.0   | [如何安装paddle2onnx](https://github.com/PaddlePaddle/Paddle2ONNX/blob/develop/README_zh.md)
+
   - shapely
 
   - pyclipper
