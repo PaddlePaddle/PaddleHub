@@ -1,0 +1,4 @@
+paddleocr>=2.0.1
+paddle2onnx>=0.9.0
+shapely
+pyclipper
