@@ -14,7 +14,7 @@
 
 - ### Module Introduction
 
-    - PaddleHub provides several open source pretrained word embedding model. These embedding models are distinguished according to the corpus, training methods and word embedding dimensions. For more informations, please refer to: [Summary of embedding models](https://github.com/PaddlePaddle/models/blob/release/2.0-beta/PaddleNLP/docs/embeddings.md)
+    - PaddleHub provides several open source pretrained word embedding models. These embedding models are distinguished by the corpus, training methods and word embedding dimensions. For more informations, please refer to: [Summary of embedding models](https://github.com/PaddlePaddle/models/blob/release/2.0-beta/PaddleNLP/docs/embeddings.md)
 
 ## II. Installation
 
