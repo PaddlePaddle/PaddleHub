@@ -22,7 +22,7 @@
 
 - ### Module Introduction
 
-  - YOLOv3是由Joseph Redmon和Ali Farhadi提出的单阶段检测器, 该检测器与达到同样精度的传统目标检测方法相比，推断速度能达到接近两倍. YOLOv3将输入图像划分格子，并对每个格子预测bounding box.YOLOv3的loss函数由三部分组成：Location误差，Confidence误差和分类误差.该PaddleHub Module预训练数据集为COCO2017，目前仅支持预测.
+  - YOLOv3 is a one-stage detector proposed by Joseph Redmon and Ali Farhadi, which can reach comparable accuracy but twice as fast as traditional methods. This module is based on YOLOv3, trained on COCO2017, and can be used for object detection.
 
 
 ## II.Installation
@@ -72,7 +72,7 @@
                          visualization=True)
     ```
 
-    - 预测API，检测输入图片中的所有目标的位置.
+    - Detection API, detect positions of all objects in image
 
     - **Parameters**
 
@@ -81,22 +81,22 @@
       - batch_size (int): the size of batch;
       - use_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
       - output_dir (str): save path of images;
-      - score\_thresh (float): 识别置信度的阈值；<br/>
+      - score\_thresh (float): confidence threshold；<br/>
       - visualization (bool): Whether to save the results as picture files;
 
       **NOTE:** choose one parameter to provide data from paths and images
 
     - **Return**
 
-      - res (list\[dict\]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
+      - res (list\[dict\]): results
         - data (list): detection results, each element in the list is dict
           - confidence (float): the confidence of the result
-          - label (str): 标签
+          - label (str): label
           - left (int): the upper left corner x coordinate of the detection box
           - top (int): the upper left corner y coordinate of the detection box
           - right (int): the lower right corner x coordinate of the detection box
           - bottom (int): the lower right corner y coordinate of the detection box
-        - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
+        - save\_path (str, optional): output path for saving results
 
   - ```python
     def save_inference_model(dirname,

@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|object detection|
 |Network|YOLOv3|
-|Dataset|百度自建大规模车辆Dataset|
+|Dataset|Baidu Vehicle Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|238MB|
 |Latest update date|2021-03-15|
@@ -22,7 +22,8 @@
 
 - ### Module Introduction
 
-  - 车辆检测是城市交通监控中非常重要并且具有挑战性的任务，该任务的难度在于对复杂场景中相对较小的车辆进行精准地定位和分类.该 PaddleHub Module 的网络为 YOLOv3, 其中 backbone 为 DarkNet53，采用百度自建大规模车辆数据集训练得到，支持car (汽车)、truck (卡车)、bus (公交车)、motorbike (摩托车)、tricycle (三轮车)等车型的识别.目前仅支持预测.
+  - YOLOv3 is a one-stage detector proposed by Joseph Redmon and Ali Farhadi, which can reach comparable accuracy but twice as fast as traditional methods. This module is based on YOLOv3, trained on Baidu Vehicle Dataset, and can be used for vehicle detection.
+
 
 
 ## II.Installation
@@ -72,7 +73,7 @@
                          visualization=True)
     ```
 
-    - 预测API，检测输入图片中的所有车辆的位置.
+    - Detection API, detect positions of all vehicles in image
 
     - **Parameters**
 
@@ -81,22 +82,22 @@
       - batch_size (int): the size of batch;
       - use_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
       - output_dir (str): save path of images;
-      - score\_thresh (float): 识别置信度的阈值；<br/>
+      - score\_thresh (float): confidence threshold；<br/>
       - visualization (bool): Whether to save the results as picture files;
 
       **NOTE:** choose one parameter to provide data from paths and images
 
     - **Return**
 
-      - res (list\[dict\]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
+      - res (list\[dict\]): results
         - data (list): detection results, each element in the list is dict
           - confidence (float): the confidence of the result
-          - label (str): 标签
+          - label (str): label
           - left (int): the upper left corner x coordinate of the detection box
           - top (int): the upper left corner y coordinate of the detection box
           - right (int): the lower right corner x coordinate of the detection box
           - bottom (int): the lower right corner y coordinate of the detection box
-        - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
+        - save\_path (str, optional): output path for saving results
 
   - ```python
     def save_inference_model(dirname,

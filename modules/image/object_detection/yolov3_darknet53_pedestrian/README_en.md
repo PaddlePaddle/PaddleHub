@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|object detection|
 |Network|YOLOv3|
-|Dataset|百度自建大规模行人Dataset|
+|Dataset|Baidu Pedestrian Dataset|
 |Fine-tuning supported or not|No|
 |Module Size|238MB|
 |Latest update date|2021-03-15|
@@ -22,7 +22,7 @@
 
 - ### Module Introduction
 
-  - 行人检测是计算机视觉技术中的目标检测问题，用于判断图像中是否存在行人并给予精确定位，定位结果用矩形框表示.行人检测技术有很强的使用价值，它可以与行人跟踪、行人重识别等技术结合，应用于汽车无人驾驶系统、智能视频监控、人体行为分析、客流统计系统、智能交通等领域.yolov3_darknet53_pedestrian Module的网络为YOLOv3, 其中backbone为DarkNet53, 采用百度自建大规模车辆数据集训练得到，目前仅支持预测.
+  - YOLOv3 is a one-stage detector proposed by Joseph Redmon and Ali Farhadi, which can reach comparable accuracy but twice as fast as traditional methods. This module is based on YOLOv3, trained on Baidu Pedestrian Dataset, and can be used for pedestrian detection.
 
 
 ## II.Installation
@@ -72,7 +72,7 @@
                          visualization=True)  
     ```
 
-    - 预测API，检测输入图片中的所有行人的位置.
+    - Detection API, detect positions of all pedestrian in image
 
     - **Parameters**
 
@@ -81,7 +81,7 @@
       - batch_size (int): the size of batch;
       - use_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
       - output_dir (str): save path of images;
-      - score\_thresh (float): 识别置信度的阈值；<br/>
+      - score\_thresh (float): confidence threshold；<br/>
       - visualization (bool): Whether to save the results as picture files;
 
       **NOTE:** choose one parameter to provide data from paths and images
@@ -89,15 +89,15 @@
 
     - **Return**
 
-      - res (list\[dict\]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
+      - res (list\[dict\]): results
         - data (list): detection results, each element in the list is dict
           - confidence (float): the confidence of the result
-          - label (str): 标签
+          - label (str): label
           - left (int): the upper left corner x coordinate of the detection box
           - top (int): the upper left corner y coordinate of the detection box
           - right (int): the lower right corner x coordinate of the detection box
           - bottom (int): the lower right corner y coordinate of the detection box
-        - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
+        - save\_path (str, optional): output path for saving results
 
   - ```python
     def save_inference_model(dirname,

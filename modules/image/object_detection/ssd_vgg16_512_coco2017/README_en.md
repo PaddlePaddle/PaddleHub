@@ -22,7 +22,8 @@
 
 - ### Module Introduction
 
-  - Single Shot MultiBox Detector (SSD) 是一种单阶段的目标检测器.与两阶段的检测方法不同，单阶段目标检测并不进行区域推荐，而是直接从特征图回归出目标的边界框和分类概率.SSD 运用了这种单阶段检测的思想，并且对其进行改进：在不同尺度的特征图上检测对应尺度的目标.该PaddleHub Module的基网络为VGG16模型，在Pascal数据集上预训练得到，目前仅支持预测.
+  - Single Shot MultiBox Detector (SSD) is a one-stage detector. Different from two-stage detector, SSD frames object detection as a re- gression problem to spatially separated bounding boxes and associated class probabilities. This module is based on VGG16, trained on COCO2017 dataset, and can be used for object detection.
+
 
 
 ## II.Installation
@@ -72,7 +73,7 @@
                          visualization=True)
     ```
 
-    - 预测API，检测输入图片中的所有目标的位置.
+    - Detection API, detect positions of all objects in image
 
     - **Parameters**
 
@@ -81,22 +82,22 @@
       - batch_size (int): the size of batch;
       - use_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
       - output_dir (str): save path of images;
-      - score\_thresh (float): 识别置信度的阈值；<br/>
+      - score\_thresh (float): confidence threshold；<br/>
       - visualization (bool): Whether to save the results as picture files;
 
       **NOTE:** choose one parameter to provide data from paths and images
 
     - **Return**
 
-      - res (list\[dict\]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
+      - res (list\[dict\]): results
         - data (list): detection results, each element in the list is dict
           - confidence (float): the confidence of the result
-          - label (str): 标签
+          - label (str): label
           - left (int): the upper left corner x coordinate of the detection box
           - top (int): the upper left corner y coordinate of the detection box
           - right (int): the lower right corner x coordinate of the detection box
           - bottom (int): the lower right corner y coordinate of the detection box
-        - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
+        - save\_path (str, optional): output path for saving results
 
   - ```python
     def save_inference_model(dirname,

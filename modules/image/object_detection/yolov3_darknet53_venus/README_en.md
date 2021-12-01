@@ -4,7 +4,7 @@
 | :--- | :---: |
 |Category|object detection|
 |Network|YOLOv3|
-|Dataset|百度自建Dataset|
+|Dataset|Baidu Detection Dataset|
 |Fine-tuning supported or not|Yes|
 |Module Size|501MB|
 |Latest update date|2021-02-26|
@@ -15,7 +15,7 @@
 
 - ### Module Introduction
 
-  - YOLOv3是由Joseph Redmon和Ali Farhadi提出的单阶段检测器, 该检测器与达到同样精度的传统目标检测方法相比，推断速度能达到接近两倍. YOLOv3将输入图像划分格子，并对每个格子预测bounding box.YOLOv3的loss函数由三部分组成：Location误差，Confidence误差和分类误差.该PaddleHub Module是由800+tag,170w图片，1000w+检测框训练的大规模通用检测模型，在8个数据集上MAP平均提升5.36%，iou=0.5的准确率提升4.53%.对比于其他通用检测模型，使用该Module进行finetune，可以更快收敛，达到较优效果.
+  - YOLOv3 is a one-stage detector proposed by Joseph Redmon and Ali Farhadi, which can reach comparable accuracy but twice as fast as traditional methods. This module is based on YOLOv3, trained on Baidu Vehicle Dataset which consists of 170w pictures and 1000w+ boxes, improve the accuracy on 8 test datasets for average 5.36%, and can be used for vehicle detection.
 
 
 ## II.Installation
@@ -43,20 +43,20 @@
                 get_prediction=False)
     ```
 
-    - 提取特征，用于迁移学习.
+    - Extract features, and do transfer learning
 
     - **Parameters**
 
-      - trainable(bool): Parameters是否可训练；<br/>
-      - pretrained (bool): 是否加载预训练模型；<br/>
-      - get\_prediction (bool): 是否执行预测.
+      - trainable(bool): whether parameters trainable or not
+      - pretrained (bool): whether load pretrained model or not
+      - get\_prediction (bool): whether perform prediction
 
     - **Return**
-      - inputs (dict): 模型的输入，keys 包括 'image', 'im\_size'，相应的取值为：
-        - image (Variable): 图像变量
-        - im\_size (Variable): 图片的尺寸
-      - outputs (dict): 模型的输出.如果 get\_prediction 为 False，输出 'head\_features'、'body\_features'，否则输出 'bbox\_out'
-      - context\_prog (Program): 用于迁移学习的 Program
+      - inputs (dict): inputs, a dict, include two keys: "image" and "im\_size"
+        - image (Variable): image variable
+        - im\_size (Variable): image size
+      - outputs (dict): model output
+      - program for transfer learning
 
   - ```python
     def object_detection(paths=None,
@@ -68,7 +68,7 @@
                          output_dir='detection_result')
     ```
 
-    - 预测API，检测输入图片中的所有目标的位置.
+    - Detection API, detect positions of all objects in image
 
     - **Parameters**
 
@@ -76,7 +76,7 @@
       - images (list\[numpy.ndarray\]): image data, ndarray.shape is in the format [H, W, C], BGR;
       - batch_size (int): the size of batch;
       - use_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
-      - score\_thresh (float): 识别置信度的阈值；<br/>
+      - score\_thresh (float): confidence threshold；<br/>
       - visualization (bool): Whether to save the results as picture files;
       - output_dir (str): save path of images;
 
@@ -85,12 +85,12 @@
       - res (list\[dict\]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
         - data (list): detection results, each element in the list is dict
           - confidence (float): the confidence of the result
-          - label (str): 标签
+          - label (str): label
           - left (int): the upper left corner x coordinate of the detection box
           - top (int): the upper left corner y coordinate of the detection box
           - right (int): the lower right corner x coordinate of the detection box
           - bottom (int): the lower right corner y coordinate of the detection box
-        - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
+        - save\_path (str, optional): output path for saving results
 
   - ```python
     def save_inference_model(dirname,

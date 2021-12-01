@@ -22,7 +22,7 @@
 
 - ### Module Introduction
 
-  - Faster_RCNN是两阶段目标检测器，对图像生成候选区域、提取特征、判别特征类别并修正候选框位置.Faster_RCNN整体网络可以分为4个部分，一是ResNet-50作为基础卷积层，二是区域生成网络，三是Rol Align，四是检测层.Faster_RCNN是在MS-COCO数据集上预训练的模型.目前仅支持预测.
+  - Faster_RCNN is a two-stage detector, it consists of feature extraction, proposal, classification and refinement processes. This module is trained on COCO2017 dataset, and can be used for object detection.
 
 
 ## II.Installation
@@ -73,7 +73,7 @@
                          visualization=True)
     ```
 
-    - 预测API，检测输入图片中的所有目标的位置.
+    - Detection API, detect positions of all objects in image
 
     - **Parameters**
 
@@ -82,22 +82,22 @@
       - batch_size (int): the size of batch;
       - use_gpu (bool): use GPU or not; **set the CUDA_VISIBLE_DEVICES environment variable first if you are using GPU**
       - output_dir (str): save path of images;
-      - score\_thresh (float): 识别置信度的阈值；<br/>
+      - score\_thresh (float): confidence threshold；<br/>
       - visualization (bool): Whether to save the results as picture files;
 
       **NOTE:** choose one parameter to provide data from paths and images
 
     - **Return**
 
-      - res (list\[dict\]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
+      - res (list\[dict\]): results
         - data (list): detection results, each element in the list is dict
           - confidence (float): the confidence of the result
-          - label (str): 标签
+          - label (str): label
           - left (int): the upper left corner x coordinate of the detection box
           - top (int): the upper left corner y coordinate of the detection box
           - right (int): the lower right corner x coordinate of the detection box
           - bottom (int): the lower right corner y coordinate of the detection box
-        - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
+        - save\_path (str, optional): output path for saving results
 
 
   - ```python
