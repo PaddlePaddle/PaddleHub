@@ -43,10 +43,10 @@ class MultiLangOCR:
             box_thresh(float): the threshold of the detected text box's confidence
             angle_classification_thresh(float): the threshold of the angle classification confidence
         """
+        self.lang = lang
         self.logger = get_logger()
         argc = len(sys.argv)
         if argc == 1 or argc > 1 and sys.argv[1] == 'serving':
-            self.lang = lang
             self.det = det
             self.rec = rec
             self.use_angle_cls = use_angle_cls
@@ -133,12 +133,13 @@ class MultiLangOCR:
         """
         parser = self.arg_parser()
         args = parser.parse_args(argvs)
-        self.lang = args.lang
+        if args.lang is not None:
+            self.lang = args.lang
         self.det = args.det
         self.rec = args.rec
         self.use_angle_cls = args.use_angle_cls
         self.engine = PaddleOCR(
-            lang=args.lang,
+            lang=self.lang,
             det=args.det,
             rec=args.rec,
             use_angle_cls=args.use_angle_cls,
@@ -162,7 +163,7 @@ class MultiLangOCR:
         parser.add_argument('--output_dir', type=str, default='ocr_result', help="The directory to save output images.")
         parser.add_argument(
             '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
-        parser.add_argument('--lang', type=str, default='ch', help="the selection of languages")
+        parser.add_argument('--lang', type=str, default=None, help="the selection of languages")
         parser.add_argument('--det', type=ast.literal_eval, default=True, help="whether use text detector or not")
         parser.add_argument('--rec', type=ast.literal_eval, default=True, help="whether use text recognizer or not")
         parser.add_argument(
