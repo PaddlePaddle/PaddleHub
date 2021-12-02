@@ -53,7 +53,7 @@
   - pyclipper
 
   - ```shell
-    $ pip3.6 install "paddleocr>=2.0.1" # 推荐使用2.0.1+版本
+    $ pip3.6 install "paddleocr==2.3.0.2"
     $ pip3.6 install shapely -i https://pypi.tuna.tsinghua.edu.cn/simple
     $ pip3.6 install pyclipper -i https://pypi.tuna.tsinghua.edu.cn/simple
     ```
