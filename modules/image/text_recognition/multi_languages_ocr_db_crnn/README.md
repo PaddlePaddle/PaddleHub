@@ -75,7 +75,7 @@
 
   - ```shell
     $ hub run multi_languages_ocr_db_crnn --input_path "/PATH/TO/IMAGE"
-    $ hub run multi_languages_ocr_db_crnn --input_path "/PATH/TO/IMAGE" --lang "ch"  --det True --rec True --use_angle_cls True
+    $ hub run multi_languages_ocr_db_crnn --input_path "/PATH/TO/IMAGE" --lang "ch"  --det True --rec True --use_angle_cls True  --box_thresh 0.7 --angle_classification_thresh 0.8 --visualization True
     ```
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
@@ -96,7 +96,14 @@
 - ### 3、API
 
   - ```python
-    def __init__(self, lang="ch", det=True, rec=True, use_angle_cls=False, enable_mkldnn=False)
+    def __init__(self,
+                 lang="ch",
+                 det=True, rec=True,
+                 use_angle_cls=False,
+                 enable_mkldnn=False,  
+                 use_gpu=False,
+                 box_thresh=0.6,
+                 angle_classification_thresh=0.9)
     ```
 
     - 构造MultiLangOCR对象
@@ -107,16 +114,16 @@
       - rec(bool): 是否开启文字识别。默认为True。
       - use_angle_cls(bool): 是否开启方向分类, 用于设置使用方向分类器识别180度旋转文字。默认为False。
       - enable_mkldnn(bool): 是否开启mkldnn加速CPU计算。该参数仅在CPU运行下设置有效。默认为False。
+      - use\_gpu (bool): 是否使用 GPU；**若使用GPU，请先设置CUDA_VISIBLE_DEVICES环境变量**
+      - box\_thresh (float): 检测文本框置信度的阈值；
+      - angle_classification_thresh(float): 文本方向分类置信度的阈值
 
 
   - ```python
     def recognize_text(images=[],
                        paths=[],
-                       use_gpu=False,
                        output_dir='ocr_result',
-                       visualization=False,
-                       box_thresh=0.6,
-                       angle_classification_thresh=0.9)
+                       visualization=False)
     ```
 
     - 预测API，检测输入图片中的所有文本的位置和识别文本结果。
@@ -125,11 +132,8 @@
 
       - paths (list\[str\]): 图片的路径；
       - images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
-      - use\_gpu (bool): 是否使用 GPU；**若使用GPU，请先设置CUDA_VISIBLE_DEVICES环境变量**
       - output\_dir (str): 图片的保存路径，默认设为 ocr\_result；
       - visualization (bool): 是否将识别结果保存为图片文件, 仅有检测开启时有效, 默认为False；
-      - box\_thresh (float): 检测文本框置信度的阈值；
-      - angle_classification_thresh(float): 文本方向分类置信度的阈值
 
     - **返回**
 
