@@ -5,12 +5,12 @@ from paddlehub.module.module import moduleinfo, runnable, serving
 
 
 @moduleinfo(
-    name="japan_ocr_db_crnn_mobile",
+    name="cyrillic_ocr_db_crnn_mobile",
     version="1.0.0",
     summary="ocr service",
     author="PaddlePaddle",
     type="cv/text_recognition")
-class JapanOCRDBCRNNMobile:
+class CyrillicOCRDBCRNNMobile:
     def __init__(self,
                  det=True,
                  rec=True,
@@ -33,7 +33,7 @@ class JapanOCRDBCRNNMobile:
         self.logger = get_logger()
         self.model = hub.Module(
             name="multi_languages_ocr_db_crnn",
-            lang="japan",
+            lang="cyrillic",
             det=det,
             rec=rec,
             use_angle_cls=use_angle_cls,

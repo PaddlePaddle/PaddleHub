@@ -33,7 +33,7 @@ class ArabicOCRDBCRNNMobile:
         self.logger = get_logger()
         self.model = hub.Module(
             name="multi_languages_ocr_db_crnn",
-            lang="ar",
+            lang="arabic",
             det=det,
             rec=rec,
             use_angle_cls=use_angle_cls,
