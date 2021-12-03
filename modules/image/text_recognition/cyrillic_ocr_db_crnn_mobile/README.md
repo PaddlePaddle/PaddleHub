@@ -14,7 +14,7 @@
 
 - ### 模型介绍
 
-  - cyrillic_ocr_db_crnn_mobile Module用于识别图片当中的斯拉夫文。其基于multi_languages_ocr_db_crnn检测得到的文本框，继续识别文本框中的斯拉夫文文字。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个识别斯拉夫文的轻量级OCR模型，支持直接预测。
+  - cyrillic_ocr_db_crnn_mobile Module用于识别图片当中的斯拉夫文，包括俄罗斯文、塞尔维亚文、白俄罗斯文、保加利亚文、乌克兰文、蒙古文、阿迪赫文、阿瓦尔文、达尔瓦文、因古什文、拉克文、莱兹甘文、塔巴萨兰文。其基于multi_languages_ocr_db_crnn检测得到的文本框，继续识别文本框中的斯拉夫文文字。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个识别斯拉夫文的轻量级OCR模型，支持直接预测。
 
   - 更多详情参考：
     - [Real-time Scene Text Detection with Differentiable Binarization](https://arxiv.org/pdf/1911.08947.pdf)
