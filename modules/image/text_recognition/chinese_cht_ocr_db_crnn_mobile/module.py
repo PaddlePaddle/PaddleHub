@@ -10,7 +10,7 @@ from paddlehub.module.module import moduleinfo, runnable, serving
     summary="ocr service",
     author="PaddlePaddle",
     type="cv/text_recognition")
-class ChineseTraOCRDBCRNN:
+class ChineseChtOCRDBCRNNMobile:
     def __init__(self,
                  det=True,
                  rec=True,

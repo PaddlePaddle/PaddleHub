@@ -1,6 +1,6 @@
-# french_ocr_db_crnn_mobile
+# chinese_cht_ocr_db_crnn_mobile
 
-|模型名称|french_ocr_db_crnn_mobile|
+|模型名称|chinese_cht_ocr_db_crnn_mobile|
 | :--- | :---: |
 |类别|图像-文字识别|
 |网络|Differentiable Binarization+CRNN|
@@ -14,7 +14,7 @@
 
 - ### 模型介绍
 
-  - french_ocr_db_crnn_mobile Module用于识别图片当中的法文。其基于multi_languages_ocr_db_crnn检测得到的文本框，继续识别文本框中的法文文字。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个识别法文的轻量级OCR模型，支持直接预测。
+  - chinese_cht_ocr_db_crnn_mobile Module用于识别图片当中的繁体中文。其基于multi_languages_ocr_db_crnn检测得到的文本框，继续识别文本框中的繁体中文文字。最终识别文字算法采用CRNN（Convolutional Recurrent Neural Network）即卷积递归神经网络。其是DCNN和RNN的组合，专门用于识别图像中的序列式对象。与CTC loss配合使用，进行文字识别，可以直接从文本词级或行级的标注中学习，不需要详细的字符级的标注。该Module是一个识别法文的轻量级OCR模型，支持直接预测。
 
   - 更多详情参考：
     - [Real-time Scene Text Detection with Differentiable Binarization](https://arxiv.org/pdf/1911.08947.pdf)
@@ -50,7 +50,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install french_ocr_db_crnn_mobile
+    $ hub install chinese_cht_ocr_db_crnn_mobile
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -62,8 +62,8 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run french_ocr_db_crnn_mobile --input_path "/PATH/TO/IMAGE"
-    $ hub run french_ocr_db_crnn_mobile --input_path "/PATH/TO/IMAGE" --det True --rec True --use_angle_cls True  --box_thresh 0.7 --angle_classification_thresh 0.8 --visualization True
+    $ hub run chinese_cht_ocr_db_crnn_mobile --input_path "/PATH/TO/IMAGE"
+    $ hub run chinese_cht_ocr_db_crnn_mobile --input_path "/PATH/TO/IMAGE" --det True --rec True --use_angle_cls True  --box_thresh 0.7 --angle_classification_thresh 0.8 --visualization True
     ```
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
@@ -73,7 +73,7 @@
     import paddlehub as hub
     import cv2
 
-    ocr = hub.Module(name="french_ocr_db_crnn_mobile", enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
+    ocr = hub.Module(name="chinese_cht_ocr_db_crnn_mobile", enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
     result = ocr.recognize_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
     # or
@@ -93,7 +93,7 @@
                  angle_classification_thresh=0.9)
     ```
 
-    - 构造FrechOCRDBCRNNMobile对象
+    - 构造ChineseChtOCRDBCRNNMobile对象
 
     - **参数**
       - det(bool): 是否开启文字检测。默认为True。
@@ -141,7 +141,7 @@
 
   - 运行启动命令：
   - ```shell
-    $ hub serving start -m french_ocr_db_crnn_mobile
+    $ hub serving start -m chinese_cht_ocr_db_crnn_mobile
     ```
 
   - 这样就完成了一个目标检测的服务化API的部署，默认端口号为8866。
@@ -165,7 +165,7 @@
     # 发送HTTP请求
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/french_ocr_db_crnn_mobile"
+    url = "http://127.0.0.1:8866/predict/chinese_cht_ocr_db_crnn_mobile"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果
