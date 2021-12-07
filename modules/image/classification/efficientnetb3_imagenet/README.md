@@ -45,7 +45,7 @@
     ```
   - 通过命令行方式实现分类模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、预测代码示例
+- ### 2、预测预测代码示例
 
   - ```python
     import paddlehub as hub
