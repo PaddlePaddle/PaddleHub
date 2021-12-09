@@ -247,3 +247,4 @@ print(results)
 * 非常感谢[zl1271](https://github.com/zl1271)修复了serving文档中的错别字
 * 非常感谢[AK391](https://github.com/AK391)在Hugging Face spaces中添加了UGATIT和deoldify模型的web demo
 * 非常感谢[itegel](https://github.com/itegel)修复了快速开始文档中的错别字
+* 非常感谢[AK391](https://github.com/AK391)在Hugging Face spaces中添加了Photo2Cartoon模型的web demo
