@@ -41,7 +41,8 @@ class StreamTracker(object):
         self.optimizer = None
 
         # build model
-        self.model = create(cfg.architecture)
+        with paddle.no_grad():
+            self.model = create(cfg.architecture)
 
         self.status = {}
         self.start_epoch = 0
@@ -159,13 +160,12 @@ class StreamTracker(object):
         yield
         results = []
         while True:
-            with paddle.no_grad():
-                try:
-                    results, nf = next(generator)
-                    yield results
-                except StopIteration as e:
-                    self.write_mot_results(result_filename, results, data_type)
-                    return
+            try:
+                results, nf = next(generator)
+                yield results
+            except StopIteration as e:
+                self.write_mot_results(result_filename, results, data_type)
+                return
 
     def videostream_predict(self,
                             video_stream,
@@ -175,7 +175,7 @@ class StreamTracker(object):
                             visualization=True,
                             draw_threshold=0.5):
         assert video_stream is not None, \
-            "--video_file or --image_dir should be set."
+            "--video_stream should be set."
 
         if not os.path.exists(output_dir): os.makedirs(output_dir)
         result_root = os.path.join(output_dir, 'mot_results')
@@ -215,9 +215,10 @@ class StreamTracker(object):
             img = cv2.imread(os.path.join(save_dir, '00000.jpg'))
             video_writer = cv2.VideoWriter(
                 output_video_path,
+                apiPreference=0,
                 fourcc=cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
                 fps=30,
-                frameSize=[img.shape[1], img.shape[0]])
+                frameSize=(img.shape[1], img.shape[0]))
             for i in range(len(imgnames)):
                 imgpath = os.path.join(save_dir, '{:05d}.jpg'.format(i))
                 img = cv2.imread(imgpath)
