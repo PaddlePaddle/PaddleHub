@@ -20,8 +20,6 @@ import collections
 
 from ppdet.core.workspace import create
 from ppdet.utils.checkpoint import load_weight, load_pretrain_weight
-from ppdet.modeling.mot.utils import Detection, get_crops, scale_coords, clip_box
-from ppdet.modeling.mot import visualization as mot_vis
 from ppdet.metrics import Metric, MOTMetric, KITTIMOTMetric
 import ppdet.utils.stats as stats
 from ppdet.engine.callbacks import Callback, ComposeCallback
@@ -29,6 +27,8 @@ from ppdet.utils.logger import setup_logger
 
 from .dataset import MOTVideoStream, MOTImageStream
 from .utils import Timer
+from .modeling.mot.utils import Detection, get_crops, scale_coords, clip_box
+from .modeling.mot import visualization as mot_vis
 
 logger = setup_logger(__name__)
 
@@ -72,12 +72,6 @@ class StreamTracker(object):
             timer.tic()
             pred_dets, pred_embs = self.model(data)
             online_targets = self.model.tracker.update(pred_dets, pred_embs)
-            ## ppdet2.2 online_targets is a list
-            if isinstance(online_targets, list):
-                pass
-            ## ppdet2.3 online_targets is a defaultdict
-            elif isinstance(online_targets, collections.defaultdict):
-                online_targets = list(online_targets.values())[0]
             online_tlwhs, online_ids = [], []
             online_scores = []
             for t in online_targets:
@@ -115,12 +109,6 @@ class StreamTracker(object):
                 timer.tic()
                 pred_dets, pred_embs = self.model(data)
                 online_targets = self.model.tracker.update(pred_dets, pred_embs)
-                ## ppdet2.2 online_targets is a list
-                if isinstance(online_targets, list):
-                    pass
-                ## ppdet2.3 online_targets is a defaultdict
-                elif isinstance(online_targets, collections.defaultdict):
-                    online_targets = list(online_targets.values())[0]
                 online_tlwhs, online_ids = [], []
                 online_scores = []
                 for t in online_targets:
