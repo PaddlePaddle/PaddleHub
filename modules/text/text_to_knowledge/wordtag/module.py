@@ -2,6 +2,7 @@
 import os
 import argparse
 
+import paddle
 import paddlehub as hub
 from paddlehub.module.module import serving, moduleinfo, runnable
 from paddlenlp import Taskflow
