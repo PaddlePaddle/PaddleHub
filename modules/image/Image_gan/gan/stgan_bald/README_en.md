@@ -25,8 +25,6 @@
 
 - ### 1、Environmental Dependence  
 
-  - paddlepaddle >= 1.8.2  
-
   - paddlehub >= 1.8.0  | [How to install PaddleHub](../../../../docs/docs_en/get_start/installation.rst)
 
 - ### 2、Installation

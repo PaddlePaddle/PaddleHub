@@ -23,8 +23,6 @@
 
 - ### 1、Environmental Dependence  
 
-  - paddlepaddle >= 2.0.0  
-
   - paddlehub >= 2.0.0  | [How to install PaddleHub](../../../../docs/docs_en/get_start/installation.rst)
 
   - paddlex >= 1.3.7

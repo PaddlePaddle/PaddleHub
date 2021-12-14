@@ -25,8 +25,6 @@
 
 - ### 1、环境依赖  
 
-  - paddlepaddle >= 1.8.2  
-
   - paddlehub >= 1.8.0  | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
