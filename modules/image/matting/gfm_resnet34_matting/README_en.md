@@ -17,8 +17,8 @@
 
   - Sample results:
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/35907364/145993777-9b69a85d-d31c-4743-8620-82b2a56ca1e7.jpg" /> 
-    <img src="https://user-images.githubusercontent.com/35907364/145993809-b0fb4bae-2c64-4868-99fc-500f19343442.png" /> 
+    <img src="https://user-images.githubusercontent.com/35907364/145993777-9b69a85d-d31c-4743-8620-82b2a56ca1e7.jpg" width = "480" height = "350" hspace='10'/> 
+    <img src="https://user-images.githubusercontent.com/35907364/145993809-b0fb4bae-2c64-4868-99fc-500f19343442.png" width = "480" height = "350" hspace='10'/> 
     </p>
 
 - ### Module Introduction
