@@ -200,5 +200,6 @@ class Pixel2Style2PixelPredictor:
             paddle.to_tensor(transformed_image[None, ...]), resize=False, return_latents=True)
         dst_img = (dst_img * 0.5 + 0.5)[0].numpy() * 255
         dst_img = dst_img.transpose((1, 2, 0))
+        dst_npy = latents[0].numpy()
 
-        return dst_img
+        return dst_img, dst_npy

@@ -81,7 +81,8 @@ class pixel2style2pixel:
                 os.makedirs(output_dir, exist_ok=True)
             for i, out in enumerate(results):
                 if out is not None:
-                    cv2.imwrite(os.path.join(output_dir, 'output_{}.png'.format(i)), out[:, :, ::-1])
+                    cv2.imwrite(os.path.join(output_dir, 'output_{}.png'.format(i)), out[0][:, :, ::-1])
+                    np.save(os.path.join(output_dir, 'output_{}.npy'.format(i)), out[1])
 
         return results
 
