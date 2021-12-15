@@ -1,9 +1,9 @@
-# ERNIE-CSC
+# ERNIE_CSC
 
-|模型名称|ERNIE-CSC|
+|模型名称|ERNIE_CSC|
 | :--- | :---: | 
 |类别|文本-文本纠错|
-|网络|ERNIE-CSC|
+|网络|ERNIE_CSC|
 |数据集|SIGHAN|
 |是否支持Fine-tuning|否|
 |模型大小|436MB|
@@ -39,7 +39,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install ernie-csc
+    $ hub install ernie_csc
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -49,17 +49,17 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run ernie-csc --input_text="遇到逆竟时，我们必须勇于面对，而且要愈挫愈勇，这样我们才能朝著成功之路前进。"
+    $ hub run ernie_csc --input_text="遇到逆竟时，我们必须勇于面对，而且要愈挫愈勇，这样我们才能朝著成功之路前进。"
     ```
-  - 通过命令行方式实现文本纠错ernie-csc模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
+  - 通过命令行方式实现文本纠错ernie_csc模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
 
-    # Load ernie-csc
-    module = hub.Module(name="ernie-csc")
+    # Load ernie_csc
+    module = hub.Module(name="ernie_csc")
 
     # String input
     results = module.predict("遇到逆竟时，我们必须勇于面对，而且要愈挫愈勇，这样我们才能朝著成功之路前进。")
@@ -114,7 +114,7 @@
 
   - 运行启动命令：
     ```shell
-    $ hub serving start -m ernie-csc
+    $ hub serving start -m ernie_csc
     ```
 
   - 这样就完成了服务化API的部署，默认端口号为8866。
@@ -135,8 +135,8 @@
     # 设置运行配置
     data = {"texts": text}
     
-    # 指定预测方法为ernie-csc并发送post请求，content-type类型应指定json方式
-    url = "http://127.0.0.1:8866/predict/ernie-csc"
+    # 指定预测方法为ernie_csc并发送post请求，content-type类型应指定json方式
+    url = "http://127.0.0.1:8866/predict/ernie_csc"
     headers = {"Content-Type": "application/json"}
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
     print(r.json())
@@ -161,5 +161,5 @@
   初始发布
 
   - ```shell
-    $ hub install ernie-csc==1.0.0
+    $ hub install ernie_csc==1.0.0
     ```
