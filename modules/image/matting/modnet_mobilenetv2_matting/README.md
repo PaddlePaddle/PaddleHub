@@ -17,8 +17,8 @@
 
   - 样例结果示例(左为原图，右为效果图)：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/35907364/144574288-28671577-8d5d-4b20-adb9-fe737015c841.jpg" /> 
-    <img src="https://user-images.githubusercontent.com/35907364/144574092-d0dd08f3-309b-4a7d-84d5-8b94604431a1.png" /> 
+    <img src="https://user-images.githubusercontent.com/35907364/144574288-28671577-8d5d-4b20-adb9-fe737015c841.jpg" width = "337" height = "505" hspace='10'/> 
+    <img src="https://user-images.githubusercontent.com/35907364/144574092-d0dd08f3-309b-4a7d-84d5-8b94604431a1.png" width = "337" height = "505" hspace='10'/> 
     </p>
 
 - ### 模型介绍
