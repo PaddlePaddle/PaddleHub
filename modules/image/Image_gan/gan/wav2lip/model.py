@@ -252,6 +252,7 @@ class Wav2LipPredictor:
                 out.write(f)
 
         out.release()
+        os.makedirs(output_dir, exist_ok=True)
         if visualization:
             command = 'ffmpeg -y -i {} -i {} -strict -2 -q:v 1 {}'.format(audio_seq, 'temp/result.avi',
                                                                           os.path.join(output_dir, 'result.avi'))
