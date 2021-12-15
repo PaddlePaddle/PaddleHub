@@ -137,7 +137,6 @@
         data = cv2.imdecode(data, cv2.IMREAD_COLOR)
         return data
 
-    # 发送HTTP请求
     org_im = cv2.imread('/PATH/TO/IMAGE')
     data = {'images':[cv2_to_base64(org_im)]}
     headers = {"Content-type": "application/json"}
