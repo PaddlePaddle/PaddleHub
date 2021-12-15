@@ -9,7 +9,7 @@ from paddlenlp import Taskflow
 
 
 @moduleinfo(
-    name="ernie_csc",
+    name="ernie-csc",
     version="1.0.0",
     summary="",
     author="baidu-nlp",
@@ -24,7 +24,7 @@ class Ernie_CSC(paddle.nn.Layer):
     @serving
     def predict(self, texts):
         """
-        The prediction interface for ernie_csc.
+        The prediction interface for ernie-csc.
 
         Args:
             texts(str or list[str]): the input texts to be predict.
