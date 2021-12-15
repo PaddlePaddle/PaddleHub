@@ -15,10 +15,11 @@
 
 import os
 import subprocess
+import sys
 from typing import IO
 
 from paddlehub.utils.utils import Version
-from paddlehub.utils.io import discard_oe, typein
+from paddlehub.utils.io import discard_oe
 
 
 def get_installed_packages() -> dict:
@@ -40,13 +41,14 @@ def check(package: str, version: str = '') -> bool:
     return pdict[package].match(version)
 
 
-def install(package: str, version: str = '', upgrade: bool = False, ostream: IO = None, estream: IO = None) -> bool:
+def install(package: str, version: str = '', upgrade: bool = False, ostream: IO = sys.stdout,
+            estream: IO = sys.stderr) -> bool:
     '''Install the python package.'''
     package = package.replace(' ', '')
     if version:
         package = '{}=={}'.format(package, version)
 
-    cmd = 'pip install "{}"'.format(package)
+    cmd = '{} -m pip install "{}"'.format(sys.executable, package)
 
     if upgrade:
         cmd += ' --upgrade'
@@ -59,9 +61,9 @@ def install(package: str, version: str = '', upgrade: bool = False, ostream: IO 
     return result == 0
 
 
-def install_from_file(file: str, ostream: IO = None, estream: IO = None) -> bool:
+def install_from_file(file: str, ostream: IO = sys.stdout, estream: IO = sys.stderr) -> bool:
     '''Install the python package.'''
-    cmd = 'pip install -r {}'.format(file)
+    cmd = '{} -m pip install -r {}'.format(sys.executable, file)
 
     result, content = subprocess.getstatusoutput(cmd)
     if result:
@@ -71,14 +73,13 @@ def install_from_file(file: str, ostream: IO = None, estream: IO = None) -> bool
     return result == 0
 
 
-def uninstall(package: str, ostream: IO = None, estream: IO = None) -> bool:
+def uninstall(package: str, ostream: IO = sys.stdout, estream: IO = sys.stderr) -> bool:
     '''Uninstall the python package.'''
-    with typein('y'):
-        # type in 'y' to confirm the uninstall operation
-        cmd = 'pip uninstall {}'.format(package)
-        result, content = subprocess.getstatusoutput(cmd)
-        if result:
-            estream.write(content)
-        else:
-            ostream.write(content)
+    # type in 'y' to confirm the uninstall operation
+    cmd = '{} -m pip uninstall {} -y'.format(sys.executable, package)
+    result, content = subprocess.getstatusoutput(cmd)
+    if result:
+        estream.write(content)
+    else:
+        ostream.write(content)
     return result == 0
