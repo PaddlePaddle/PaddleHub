@@ -8,7 +8,7 @@ matplotlib
 opencv-python
 packaging
 paddle2onnx >= 0.5.1
-paddlenlp >= 2.0.0rc5
+paddlenlp >= 2.0.0
 Pillow
 pyyaml
 pyzmq
