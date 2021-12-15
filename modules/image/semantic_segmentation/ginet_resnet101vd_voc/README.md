@@ -14,7 +14,7 @@
   
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/35907364/145925887-bf9e62d3-8c6d-43c2-8062-6cb6ba59ec0e.jpg"  hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/145925692-badb21d1-10e7-4a5d-82f5-1177d10a7681.png" hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/35907364/145925887-bf9e62d3-8c6d-43c2-8062-6cb6ba59ec0e.jpg" width = "420" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/145925692-badb21d1-10e7-4a5d-82f5-1177d10a7681.png" width = "420" height = "505" />
     </p>
 
 - ### 模型介绍
