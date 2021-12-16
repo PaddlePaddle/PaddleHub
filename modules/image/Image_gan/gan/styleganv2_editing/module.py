@@ -29,31 +29,32 @@ from .util import base64_to_cv2
 
 
 @moduleinfo(
-    name="styleganv2editing",
+    name="styleganv2_editing",
     type="CV/style_transfer",
     author="paddlepaddle",
     author_email="",
     summary="",
     version="1.0.0")
-class styleganv2editing:
+class styleganv2_editing:
     def __init__(self):
         self.pretrained_model = os.path.join(self.directory, "stylegan2-ffhq-config-f-directions.pdparams")
 
         self.network = StyleGANv2EditingPredictor(direction_path=self.pretrained_model, model_type='ffhq-config-f')
+        self.pixel2style2pixel_module = hub.Module(name='pixel2style2pixel')
 
-    def edit_transfer(self,
-                      images=None,
-                      paths=None,
-                      direction_name='age',
-                      direction_offset=0.0,
-                      output_dir='./editing_result/',
-                      use_gpu=False,
-                      visualization=True):
+    def generate(self,
+                 images=None,
+                 paths=None,
+                 direction_name='age',
+                 direction_offset=0.0,
+                 output_dir='./editing_result/',
+                 use_gpu=False,
+                 visualization=True):
         '''
 
 
-        images (list[numpy.ndarray]): data of image latents.
-        paths (list[str]): paths to image latents, npy file
+        images (list[numpy.ndarray]): data of images, shape of each is [H, W, C], color space must be BGR(read by cv2).
+        paths (list[str]): paths to image.
         direction_name(str): Attribute to be manipulated，For ffhq-conf-f, we have: age, eyes_open, eye_distance, eye_eyebrow_distance, eye_ratio, gender, lip_ratio, mouth_open, mouth_ratio, nose_mouth_distance, nose_ratio, nose_tip, pitch, roll, smile, yaw.
         direction_offset(float): Offset strength of the attribute.
         output_dir: the dir to save the results
@@ -70,13 +71,16 @@ class styleganv2editing:
 
         if images != None:
             for image in images:
-                out = self.network.run(image, direction_name, direction_offset)
+                image = image[:, :, ::-1]
+                _, latent = self.pixel2style2pixel_module.network.run(image)
+                out = self.network.run(latent, direction_name, direction_offset)
                 results.append(out)
 
         if paths != None:
             for path in paths:
-                image = np.load(path)
-                out = self.network.run(image, direction_name, direction_offset)
+                image = cv2.imread(path)[:, :, ::-1]
+                _, latent = self.pixel2style2pixel_module.network.run(image)
+                out = self.network.run(latent, direction_name, direction_offset)
                 results.append(out)
 
         if visualization == True:
@@ -107,7 +111,7 @@ class styleganv2editing:
         self.add_module_config_arg()
         self.add_module_input_arg()
         self.args = self.parser.parse_args(argvs)
-        results = self.edit_transfer(
+        results = self.generate(
             paths=[self.args.input_path],
             direction_name=self.args.direction_name,
             direction_offset=self.args.direction_offset,
@@ -122,7 +126,7 @@ class styleganv2editing:
         Run as a service.
         """
         images_decode = [base64_to_cv2(image) for image in images]
-        results = self.edit_transfer(images=images_decode, **kwargs)
+        results = self.generate(images=images_decode, **kwargs)
         tolist = [result.tolist() for result in results]
         return tolist
 

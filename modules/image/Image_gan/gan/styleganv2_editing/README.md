@@ -1,6 +1,6 @@
-# styleganv2editing
+# styleganv2_editing
 
-|模型名称|styleganv2editing|
+|模型名称|styleganv2_editing|
 | :--- | :---: |
 |类别|图像 - 图像生成|
 |网络|StyleGAN V2|
@@ -40,7 +40,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install styleganv2editing
+    $ hub install styleganv2_editing
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -51,7 +51,7 @@
 
   - ```shell
     # Read from a file
-    $ hub run styleganv2editing --input_path "/PATH/TO/IMAGE_Latent" --direction_name age --direction_offset 5
+    $ hub run styleganv2_editing --input_path "/PATH/TO/IMAGE" --direction_name age --direction_offset 5
     ```
   - 通过命令行方式实现人脸编辑模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
@@ -60,23 +60,23 @@
   - ```python
     import paddlehub as hub
 
-    module = hub.Module(name="styleganv2editing")
-    input_path = ["/PATH/TO/IMAGE_Latent"]
+    module = hub.Module(name="styleganv2_editing")
+    input_path = ["/PATH/TO/IMAGE"]
     # Read from a file
-    module.edit_transfer(paths=input_path, direction_name = 'age', direction_offset = 5, output_dir='./editing_result/', use_gpu=True)  
+    module.generate(paths=input_path, direction_name = 'age', direction_offset = 5, output_dir='./editing_result/', use_gpu=True)  
     ```
 
 - ### 3、API
 
   - ```python
-    edit_transfer(self, images=None, paths=None, direction_name = 'age', direction_offset = 0.0, output_dir='./editing_result/', use_gpu=False, visualization=True)
+    generate(self, images=None, paths=None, direction_name = 'age', direction_offset = 0.0, output_dir='./editing_result/', use_gpu=False, visualization=True)
     ```
     - 人脸编辑生成API。
 
     - **参数**
 
-      - images (list\[numpy.ndarray\]): 图片特征数据 <br/>
-      - paths (list\[str\]): 图片特征的路径, npy格式；<br/>
+      - images (list\[numpy.ndarray\]): 图片数据 <br/>
+      - paths (list\[str\]): 图片路径；<br/>
       - direction_name （str): 要编辑的属性名称，对于ffhq-conf-f有预先准备的这些属性: age、eyes_open、eye_distance、eye_eyebrow_distance、eye_ratio、gender、lip_ratio、mouth_open、mouth_ratio、nose_mouth_distance、nose_ratio、nose_tip、pitch、roll、smile、yaw <br/>
       - direction_offset (float): 属性的偏移强度 <br/>
       - output\_dir (str): 结果保存的路径； <br/>
@@ -92,7 +92,7 @@
 
   - 运行启动命令：
   - ```shell
-    $ hub serving start -m styleganv2editing
+    $ hub serving start -m styleganv2_editing
     ```
 
   - 这样就完成了一个人脸编辑的在线服务API的部署，默认端口号为8866。
@@ -115,9 +115,9 @@
       return base64.b64encode(data.tostring()).decode('utf8')
 
     # 发送HTTP请求
-    data = {'images':[cv2_to_base64(np.load("/PATH/TO/IMAGE_Latent"))]}
+    data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/styleganv2editing"
+    url = "http://127.0.0.1:8866/predict/styleganv2_editing"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果
@@ -130,5 +130,5 @@
   初始发布
 
   - ```shell
-    $ hub install styleganv2editing==1.0.0
+    $ hub install styleganv2_editing==1.0.0
     ```
