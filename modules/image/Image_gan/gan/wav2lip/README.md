@@ -16,7 +16,7 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src=""  width = "40%"  hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/146325775-f85e1ec5-1b30-488b-85b8-73a86e7cdd01.gif"  width = "40%"  hspace='10'/>
     <br />
 
 
@@ -29,7 +29,6 @@
 ## 二、安装
 
 - ### 1、环境依赖  
-  - ppgan
   - ffmpeg
   - libsndfile
 - ### 2、安装
@@ -46,7 +45,7 @@
 
   - ```shell
     # Read from a file
-    $ hub run wav2lip --face "/PATH/TO/Video" --audio "/PATH/TO/Audio"
+    $ hub run wav2lip --face "/PATH/TO/VIDEO or IMAGE" --audio "/PATH/TO/AUDIO"
     ```
   - 通过命令行方式人物唇形生成模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
@@ -56,8 +55,8 @@
     import paddlehub as hub
 
     module = hub.Module(name="wav2lip")
-    face_input_path = "/PATH/TO/Video"
-    audio_input_path = "/PATH/TO/Audio"
+    face_input_path = ""/PATH/TO/VIDEO or IMAGE""
+    audio_input_path = "/PATH/TO/AUDIO"
     module.wav2lip_transfer(face=input_path, audio=audio_input_path, output_dir='./transfer_result/', use_gpu=True)  
     ```
 
