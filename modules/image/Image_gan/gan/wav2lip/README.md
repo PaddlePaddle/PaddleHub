@@ -55,7 +55,7 @@
     import paddlehub as hub
 
     module = hub.Module(name="wav2lip")
-    face_input_path = ""/PATH/TO/VIDEO or IMAGE""
+    face_input_path = "/PATH/TO/VIDEO or IMAGE"
     audio_input_path = "/PATH/TO/AUDIO"
     module.wav2lip_transfer(face=input_path, audio=audio_input_path, output_dir='./transfer_result/', use_gpu=True)  
     ```
