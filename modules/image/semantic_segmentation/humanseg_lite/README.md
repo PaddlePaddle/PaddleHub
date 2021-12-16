@@ -48,7 +48,7 @@
     ```
     hub run humanseg_lite --input_path "/PATH/TO/IMAGE"
     ```
-- ### 2、代码示例
+- ### 2、预测代码示例
 
     - 图片分割及视频分割代码示例：
 
