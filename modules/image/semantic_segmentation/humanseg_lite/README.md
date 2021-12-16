@@ -72,7 +72,7 @@
     import numpy as np
     import paddlehub as hub
 
-    human_seg = hub.Module('humanseg_lite')
+    human_seg = hub.Module(name='humanseg_lite')
     cap_video = cv2.VideoCapture('\PATH\TO\VIDEO')
     fps = cap_video.get(cv2.CAP_PROP_FPS)
     save_path = 'humanseg_lite_video.avi'
