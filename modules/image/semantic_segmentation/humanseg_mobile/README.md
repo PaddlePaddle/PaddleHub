@@ -52,7 +52,7 @@
     ```
     hub run humanseg_mobile --input_path "/PATH/TO/IMAGE"
     ```
-- ### 2、代码示例
+- ### 2、预测代码示例
 
     - 图片分割及视频分割代码示例：
 
@@ -76,7 +76,7 @@
     import numpy as np
     import paddlehub as hub
 
-    human_seg = hub.Module('humanseg_mobile')
+    human_seg = hub.Module(name='humanseg_mobile')
     cap_video = cv2.VideoCapture('\PATH\TO\VIDEO')
     fps = cap_video.get(cv2.CAP_PROP_FPS)
     save_path = 'humanseg_mobile_video.avi'
