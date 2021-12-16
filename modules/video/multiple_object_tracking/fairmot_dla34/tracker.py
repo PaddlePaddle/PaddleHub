@@ -16,18 +16,19 @@ import cv2
 import glob
 import paddle
 import numpy as np
+import collections
 
 from ppdet.core.workspace import create
 from ppdet.utils.checkpoint import load_weight, load_pretrain_weight
-from ppdet.modeling.mot.utils import Detection, get_crops, scale_coords, clip_box
-from ppdet.modeling.mot.utils import Timer, load_det_results
-from ppdet.modeling.mot import visualization as mot_vis
 from ppdet.metrics import Metric, MOTMetric, KITTIMOTMetric
 import ppdet.utils.stats as stats
 from ppdet.engine.callbacks import Callback, ComposeCallback
 from ppdet.utils.logger import setup_logger
 
 from .dataset import MOTVideoStream, MOTImageStream
+from .utils import Timer
+from .modeling.mot.utils import Detection, get_crops, scale_coords, clip_box
+from .modeling.mot import visualization as mot_vis
 
 logger = setup_logger(__name__)
 
@@ -71,7 +72,6 @@ class StreamTracker(object):
             timer.tic()
             pred_dets, pred_embs = self.model(data)
             online_targets = self.model.tracker.update(pred_dets, pred_embs)
-
             online_tlwhs, online_ids = [], []
             online_scores = []
             for t in online_targets:
@@ -109,7 +109,6 @@ class StreamTracker(object):
                 timer.tic()
                 pred_dets, pred_embs = self.model(data)
                 online_targets = self.model.tracker.update(pred_dets, pred_embs)
-
                 online_tlwhs, online_ids = [], []
                 online_scores = []
                 for t in online_targets:
