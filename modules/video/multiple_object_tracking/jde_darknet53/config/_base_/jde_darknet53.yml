@@ -5,7 +5,7 @@ find_unused_parameters: True
 JDE:
   detector: YOLOv3
   reid: JDEEmbeddingHead
-  tracker: JDETracker
+  tracker: FrozenJDETracker
 
 YOLOv3:
   backbone: DarkNet
