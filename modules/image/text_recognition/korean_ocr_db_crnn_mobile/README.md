@@ -26,26 +26,9 @@
 
 - ### 1、环境依赖  
 
-  - PaddlePaddle >= 2.0.2  
+  - paddlepaddle >= 2.0.2  
 
-  - Python >= 3.6  
-
-  - PaddleOCR >= 2.0.1   | [如何安装PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.3/doc/doc_ch/quickstart.md#1)
-
-  - PaddleHub >= 2.0.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
-
-  - Paddle2Onnx >= 0.9.0   | [如何安装paddle2onnx](https://github.com/PaddlePaddle/Paddle2ONNX/blob/develop/README_zh.md)
-
-  - shapely
-
-  - pyclipper
-
-  - ```shell
-    $ pip3.6 install "paddleocr==2.3.0.2"
-    $ pip3.6 install shapely -i https://pypi.tuna.tsinghua.edu.cn/simple
-    $ pip3.6 install pyclipper -i https://pypi.tuna.tsinghua.edu.cn/simple
-    ```
-  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**  
+  - paddlehub >= 2.0.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
@@ -67,7 +50,7 @@
     ```
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、代码示例
+- ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
@@ -170,4 +153,17 @@
 
     # 打印预测结果
     print(r.json()["results"])
+    ```
+
+## 五、更新历史
+
+* 1.0.0
+
+  初始发布
+
+* 1.1.0
+
+  优化模型
+  - ```shell
+    $ hub install korean_ocr_db_crnn_mobile==1.1.0
     ```
