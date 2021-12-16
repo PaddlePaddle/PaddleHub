@@ -231,3 +231,4 @@ We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 * Many thanks to [zl1271](https://github.com/zl1271) for fixing serving docs typo
 * Many thanks to [AK391](https://github.com/AK391) for adding the webdemo of UGATIT and deoldify models in Hugging Face spaces
 * Many thanks to [itegel](https://github.com/itegel) for fixing quick start docs typo
+* Many thanks to [AK391](https://github.com/AK391) for adding the webdemo of Photo2Cartoon model in Hugging Face spaces
