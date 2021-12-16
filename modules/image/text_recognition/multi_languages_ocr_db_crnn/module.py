@@ -191,8 +191,7 @@ class MultiLangOCR:
         v0, v1, v2 = paddle2onnx.__version__.split('.')
         if int(v1) < 9:
             raise ImportError("paddle2onnx>=0.9.0 is required")
-        if input_shape_dict is None:
-            input_shape_dict = {'x': [-1, 3, -1, -1]}
+
         if input_shape_dict is not None and not isinstance(input_shape_dict, dict):
             raise Exception("input_shape_dict should be dict, eg. {'x': [-1, 3, -1, -1]}.")
 
