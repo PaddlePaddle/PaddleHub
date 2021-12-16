@@ -55,12 +55,12 @@
 ## 三、模型API预测
   - ### 1、预测代码示例
 
-   - ```python
-     import paddlehub as hub
+       - ```python
+         import paddlehub as hub
 
-     model = hub.Module(name='deoldify')
-     model.predict('/PATH/TO/IMAGE/OR/VIDEO')
-     ```
+         model = hub.Module(name='deoldify')
+         model.predict('/PATH/TO/IMAGE/OR/VIDEO')
+         ```
 
   - ### 2、API
 
