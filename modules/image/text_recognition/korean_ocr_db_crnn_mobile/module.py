@@ -6,7 +6,7 @@ from paddlehub.module.module import moduleinfo, runnable, serving
 
 @moduleinfo(
     name="korean_ocr_db_crnn_mobile",
-    version="1.0.0",
+    version="1.1.0",
     summary="ocr service",
     author="PaddlePaddle",
     type="cv/text_recognition")
