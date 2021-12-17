@@ -16,11 +16,11 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/146143714-25cac735-d132-4793-b568-4f9e606dd3a8.png"  width = "40%"  hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/146483720-fb0ea3c0-b259-4ad6-b176-966675b9b164.png"  width = "40%"  hspace='10'/>
     <br />
     输入图像
     <br />
-    <img src="https://user-images.githubusercontent.com/22424850/146143760-5055f332-83c2-4182-b742-fe267a7b3b72.png"  width = "40%"  hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/146483730-3104795e-4ee6-43de-b4dc-b7760d502b50.png"  width = "40%"  hspace='10'/>
     <br />
     输出图像(修改age)
      <br />
