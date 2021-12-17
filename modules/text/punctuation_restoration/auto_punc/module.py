@@ -26,16 +26,16 @@ from paddlenlp.data import Pad
 
 
 @moduleinfo(
-    name="ernie_punc",
+    name="auto_punc",
     version="1.0.0",
     summary="",
-    author="Baidu",
+    author="PaddlePaddle",
     author_email="",
     type="text/punctuation_restoration")
 class Ernie(paddle.nn.Layer):
     def __init__(self):
         super(Ernie, self).__init__()
-        res_dir = os.path.join(MODULE_HOME, 'ernie_punc')
+        res_dir = os.path.join(MODULE_HOME, 'auto_punc')
         punc_vocab_file = os.path.join(res_dir, 'assets', 'punc_vocab.txt')
         ckpt_dir = os.path.join(res_dir, 'assets', 'ckpt')
 

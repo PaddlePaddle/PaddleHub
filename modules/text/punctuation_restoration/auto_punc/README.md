@@ -1,6 +1,6 @@
-# ernie_punc
+# auto_punc
 
-|模型名称|ernie_punc|
+|模型名称|auto_punc|
 | :--- | :---: |
 |类别|文本-标点恢复|
 |网络|Ernie-1.0|
@@ -16,7 +16,7 @@
 
 Ernie是百度提出的基于知识增强的持续学习语义理解模型，该模型将大数据预训练与多源丰富知识相结合，通过持续学习技术，不断吸收海量文本数据中词汇、结构、语义等方面的知识，实现模型效果不断进化。
 
-ernie_punc采用了Ernie1.0预训练模型，在大规模的"悟道"中文文本数据集[WuDaoCorpora 2.0](https://resource.wudaoai.cn/home)上进行了标点恢复任务的训练，模型可直接用于预测，对输入的对中文文本自动添加7种标点符号：逗号（，）、句号（。）、感叹号（！）、问号（？）、顿号（、）、冒号（：）和分号（；）。
+auto_punc采用了Ernie1.0预训练模型，在大规模的"悟道"中文文本数据集[WuDaoCorpora 2.0](https://resource.wudaoai.cn/home)上进行了标点恢复任务的训练，模型可直接用于预测，对输入的对中文文本自动添加7种标点符号：逗号（，）、句号（。）、感叹号（！）、问号（？）、顿号（、）、冒号（：）和分号（；）。
 
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/ernie_network_1.png" hspace='10'/> <br />
@@ -42,7 +42,7 @@ ernie_punc采用了Ernie1.0预训练模型，在大规模的"悟道"中文文本
 - ### 2、安装
 
   - ```shell
-    $ hub install ernie_punc
+    $ hub install auto_punc
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -56,7 +56,7 @@ ernie_punc采用了Ernie1.0预训练模型，在大规模的"悟道"中文文本
     import paddlehub as hub
 
     model = hub.Module(
-        name='ernie_punc',
+        name='auto_punc',
         version='1.0.0')
 
     texts = [
@@ -96,7 +96,7 @@ ernie_punc采用了Ernie1.0预训练模型，在大规模的"悟道"中文文本
 - ### 第一步：启动PaddleHub Serving
 
   - ```shell
-    $ hub serving start -m ernie_punc
+    $ hub serving start -m auto_punc
     ```
 
   - 这样就完成了一个文本标点添加服务化API的部署，默认端口号为8866。
@@ -121,7 +121,7 @@ ernie_punc采用了Ernie1.0预训练模型，在大规模的"悟道"中文文本
     data = {"texts": texts}
 
     # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
-    url = "http://127.0.0.1:8866/predict/ernie_punc"
+    url = "http://127.0.0.1:8866/predict/auto_punc"
 
     # 指定post请求的headers为application/json方式
     headers = {"Content-Type": "application/json"}
@@ -137,5 +137,5 @@ ernie_punc采用了Ernie1.0预训练模型，在大规模的"悟道"中文文本
   初始发布
 
   ```shell
-  $ hub install ernie_punc
+  $ hub install auto_punc
   ```
