@@ -15,9 +15,10 @@
 import os
 
 import paddle
-from paddleaudio import load
+from paddleaudio import load, save_wav
 from paddlespeech.cli import ASRExecutor
 from paddlehub.module.module import moduleinfo, serving
+from paddlehub.utils.log import logger
 
 
 @moduleinfo(
@@ -36,12 +37,20 @@ class U2Conformer(paddle.nn.Layer):
 
     @staticmethod
     def check_audio(audio_file):
+        assert audio_file.endswith('.wav'), 'Input file must be a wave file `*.wav`.'
         sig, sample_rate = load(audio_file)
-        assert sample_rate == 16000, 'Excepting sample rate of input audio is 16000, but got {}'.format(sample_rate)
+        if sample_rate != 16000:
+            sig, _ = load(audio_file, 16000)
+            audio_file_16k = audio_file[:audio_file.rindex('.')] + '_16k.wav'
+            logger.info('Resampling to 16000 sample rate to new audio file: {}'.format(audio_file_16k))
+            save_wav(sig, 16000, audio_file_16k)
+            return audio_file_16k
+        else:
+            return audio_file
 
     @serving
     def speech_recognize(self, audio_file, device='cpu'):
         assert os.path.isfile(audio_file), 'File not exists: {}'.format(audio_file)
-        self.check_audio(audio_file)
+        audio_file = self.check_audio(audio_file)
         text = self.asr_executor(audio_file=audio_file, device=device, **self.asr_kw_args)
         return text

@@ -84,7 +84,7 @@ u2_conformer_wenetspeech在中文普通话开源语音数据集[WenetSpeech](htt
   - ```python
     def check_audio(audio_file)
     ```
-    - 检查输入音频格式和采样率是否满足为16000
+    - 检查输入音频格式和采样率是否满足为16000，如果不满足，则重新采样至16000并将新的音频文件保存至相同目录。
 
     - **参数**
 
