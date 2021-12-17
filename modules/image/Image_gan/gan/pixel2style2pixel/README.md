@@ -16,11 +16,11 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/145970144-3a5d4c36-6a68-4d81-8ece-4cb38b4a4996.jpg"  width = "40%"  hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/146486444-63637926-4e46-4299-8905-d93f529d9d54.jpg"  width = "40%"  hspace='10'/>
     <br />
     输入图像
     <br />
-    <img src="https://user-images.githubusercontent.com/22424850/145970065-a47fddf3-87dd-4747-b8a3-508938c66912.png"  width = "40%"  hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/146486413-0447dcc8-80ac-4b2c-8a7a-69347d60a2c4.png"  width = "40%"  hspace='10'/>
     <br />
     输出图像
      <br />
