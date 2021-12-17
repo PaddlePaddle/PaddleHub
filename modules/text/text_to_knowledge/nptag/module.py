@@ -12,7 +12,7 @@ from paddlenlp import Taskflow
     name="nptag",
     version="1.0.0",
     summary="",
-    author="baidu-nlp",
+    author="Baidu",
     author_email="",
     type="nlp/text_to_knowledge",
     meta=hub.NLPPredictionModule)
