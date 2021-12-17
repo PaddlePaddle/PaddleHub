@@ -3,7 +3,7 @@
 |模型名称|ERNIE-CSC|
 | :--- | :---: | 
 |类别|文本-文本纠错|
-|网络|ERNIE=CSC|
+|网络|ERNIE-CSC|
 |数据集|SIGHAN|
 |是否支持Fine-tuning|否|
 |模型大小|436MB|

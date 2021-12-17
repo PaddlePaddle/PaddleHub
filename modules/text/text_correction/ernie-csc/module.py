@@ -12,7 +12,7 @@ from paddlenlp import Taskflow
     name="ernie-csc",
     version="1.0.0",
     summary="",
-    author="baidu-nlp",
+    author="Baidu",
     author_email="",
     type="nlp/text_correction",
     meta=hub.NLPPredictionModule)
