@@ -299,7 +299,7 @@
 |module|网络|数据集|简介|
 |--|--|--|--|
 |[MiDaS_Large](image/depth_estimation/MiDaS_Large)|-|3D Movies, WSVD, ReDWeb, MegaDepth||
-|[MiDaS_Small](image/depth_estimation/MiDaS_Small)||||
+|[MiDaS_Small](image/depth_estimation/MiDaS_Small)|-|3D Movies, WSVD, ReDWeb, MegaDepth, etc.||
 
 ## 文本
   - ### 文本生成
@@ -525,7 +525,7 @@
 |module|网络|数据集|简介|
 |--|--|--|--|
 |[panns_cnn6](audio/audio_classification/PANNs/cnn6)|PANNs|Google Audioset|主要包含4个卷积层和2个全连接层，模型参数为4.5M。经过预训练后，可以用于提取音频的embbedding，维度是512|
-|[panns_cnn14](audio/audio_classification/PANNs/cnn14)|PANNs|Google Audioset主要包含12个卷积层和2个全连接层，模型参数为79.6M。经过预训练后，可以用于提取音频的embbedding，维度是2048|
+|[panns_cnn14](audio/audio_classification/PANNs/cnn14)|PANNs|Google Audioset|主要包含12个卷积层和2个全连接层，模型参数为79.6M。经过预训练后，可以用于提取音频的embbedding，维度是2048|
 |[panns_cnn10](audio/audio_classification/PANNs/cnn10)|PANNs|Google Audioset|主要包含8个卷积层和2个全连接层，模型参数为4.9M。经过预训练后，可以用于提取音频的embbedding，维度是512|
 
 ## 视频
