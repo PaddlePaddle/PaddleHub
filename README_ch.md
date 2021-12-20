@@ -4,7 +4,7 @@
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle">
 <p align="center">
 <div align="center">  
-  <h3> <a href=#QuickStart> 快速开始 </a> | <a href="https://paddlehub.readthedocs.io/zh_CN/release-v2.1//"> 教程文档 </a> | <a href="https://www.paddlepaddle.org.cn/hublist"> 模型搜索 </a> | <a href="https://www.paddlepaddle.org.cn/hub"> 演示Demo </a>
+  <h3> <a href=#QuickStart> 快速开始 </a> | <a href="https://paddlehub.readthedocs.io/zh_CN/release-v2.1//"> 教程文档 </a> | <a href="./modules"> 模型库 </a> | <a href="https://www.paddlepaddle.org.cn/hub"> 演示Demo </a>
   </h3>
 </div>
 
@@ -30,7 +30,7 @@
 
 ## 简介与特性
 - PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型
-- **【模型种类丰富】**: 涵盖CV、NLP、Audio、Video、工业应用主流五大品类的 300+ 预训练模型，全部开源下载，离线可运行
+- **【模型种类丰富】**: 涵盖CV、NLP、Audio、Video、工业应用主流五大品类的 **380+** 预训练模型，全部开源下载，离线可运行
 - **【超低使用门槛】**：无需深度学习背景、无需数据与训练过程，可快速使用AI模型
 - **【一键模型快速预测】**：通过一行命令行或者极简的Python API实现模型调用，可快速体验模型效果
 - **【一键模型转服务化】**：一行命令，搭建深度学习模型API服务化部署能力
@@ -47,9 +47,9 @@
 
 
 
-## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)**
+## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)[【模型库】](./modules)**
 
-### **图像类（161个）**
+### **[图像类（236个）](./modules#图像)**
 - 包括图像分类、人脸检测、口罩检测、车辆检测、人脸/人体/手部关键点检测、人像分割、80+语言文本识别、图像超分/上色/动漫化等
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_all.gif"  width = "530" height = "400" />
@@ -58,7 +58,7 @@
 - 感谢CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)、[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)、[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)、[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)、[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)、[Zhengxia Zou](https://github.com/jiupinjia/SkyAR)、[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) 提供相关预训练模型，训练能力开放，欢迎体验。
 
 
-### **文本类（129个）**
+### **[文本类（129个）](./modules#文本)**
 - 包括中文分词、词性标注与命名实体识别、句法分析、AI写诗/对联/情话/藏头诗、中文的评论情感分析、中文色情文本审核等
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "240" />
@@ -67,7 +67,7 @@
 - 感谢CopyRight@[ERNIE](https://github.com/PaddlePaddle/ERNIE)、[LAC](https://github.com/baidu/LAC)、[DDParser](https://github.com/baidu/DDParser)提供相关预训练模型，训练能力开放，欢迎体验。
 
 
-### **语音类（3个）**
+### **[语音类（15个）](./modules#语音)**
 - TTS语音合成算法，多种算法可选
 - 感谢CopyRight@[Parakeet](https://github.com/PaddlePaddle/Parakeet)提供预训练模型，训练能力开放，欢迎体验。
 - 输入：`Life was like a box of chocolates, you never know what you're gonna get.`
@@ -100,7 +100,7 @@
 </table>
 </div>
 
-### **视频类（8个）**
+### **[视频类（8个）](./modules#视频)**
 - 包含短视频分类，支持3000+标签种类，可输出TOP-K标签，多种算法可选。
 - 感谢CopyRight@[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo)提供预训练模型，训练能力开放，欢迎体验。
 - `举例：输入一段游泳的短视频，算法可以输出"游泳"结果`
