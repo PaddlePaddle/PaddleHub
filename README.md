@@ -4,7 +4,7 @@ English | [简体中文](README_ch.md)
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle">
 <p align="center">
 <div align="center">  
-  <h3> <a href=#QuickStart> QuickStart </a> | <a href="https://paddlehub.readthedocs.io/en/release-v2.1"> Tutorial </a> | <a href="https://www.paddlepaddle.org.cn/hublist"> Models List </a> | <a href="https://www.paddlepaddle.org.cn/hub"> Demos </a> </h3>
+  <h3> <a href=#QuickStart> QuickStart </a> | <a href="https://paddlehub.readthedocs.io/en/release-v2.1"> Tutorial </a> | <a href="./modules"> Models List </a> | <a href="https://www.paddlepaddle.org.cn/hub"> Demos </a> </h3>
 </div>
 
 ------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ English | [简体中文](README_ch.md)
 
 ## Introduction and Features
 - **PaddleHub** aims to provide developers with rich, high-quality, and directly usable pre-trained models.
-- **Abundant Pre-trained Models**: 300+ pre-trained models cover the 5 major categories, including Image, Text, Audio, Video, and Industrial application. All of them are free for download and offline usage.
+- **Abundant Pre-trained Models**: 380+ pre-trained models cover the 5 major categories, including Image, Text, Audio, Video, and Industrial application. All of them are free for download and offline usage.
 - **No Need for Deep Learning Background**: you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
 - **Quick Model Prediction**: model prediction can be realized through a few lines of scripts to quickly experience the model effect.
 - **Model As Service**: one-line command to build deep learning model API service deployment capabilities.
@@ -44,8 +44,8 @@ English | [简体中文](README_ch.md)
 
 
 
-## Visualization Demo [[More]](./docs/docs_en/visualization.md)
-### **Computer Vision (161 models)**
+## Visualization Demo [[More]](./docs/docs_en/visualization.md) [[ModelList]](./modules)
+### **[Computer Vision (236 models)](./modules#图像)**
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_all.gif"  width = "530" height = "400" />
 </div>
@@ -53,7 +53,7 @@ English | [简体中文](README_ch.md)
 - Many thanks to CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)、[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)、[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)、[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)、[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)、[Zhengxia Zou](https://github.com/jiupinjia/SkyAR)、[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) for the pre-trained models, you can try to train your models with them.
 
 
-### **Natural Language Processing (129 models)**
+### **[Natural Language Processing (129 models)](./modules#文本)**
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "240" />
 </div>
@@ -62,7 +62,7 @@ English | [简体中文](README_ch.md)
 
 
 
-### Speech (3 models)
+### [Speech (15 models)](./modules#语音)
 - TTS speech synthesis algorithm, multiple algorithms are available.
 - Many thanks to CopyRight@[Parakeet](https://github.com/PaddlePaddle/Parakeet) for the pre-trained models, you can try to train your models with Parakeet.
 - Input: `Life was like a box of chocolates, you never know what you're gonna get.`
@@ -95,7 +95,7 @@ English | [简体中文](README_ch.md)
 </table>
 </div>
 
-### Video (8 models)
+### [Video (8 models)](./modules#视频)
 - Short video classification trained via large-scale video datasets, supports 3000+ tag types prediction for short Form Videos.
 - Many thanks to CopyRight@[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo) for the pre-trained model, you can try to train your models with PaddleVideo.
 - `Example: Input a short video of swimming, the algorithm can output the result of "swimming"`
