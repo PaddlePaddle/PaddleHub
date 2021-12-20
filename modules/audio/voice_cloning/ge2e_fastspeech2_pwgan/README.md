@@ -1,13 +1,13 @@
-# lstm_tacotron2
+# ge2e_fastspeech2_pwgan
 
-|模型名称|lstm_tacotron2|
+|模型名称|ge2e_fastspeech2_pwgan|
 | :--- | :---: |
-|类别|语音-语音合成|
-|网络|LSTM、Tacotron2、WaveFlow|
+|类别|语音-声音克隆|
+|网络|FastSpeech2|
 |数据集|AISHELL-3|
 |是否支持Fine-tuning|否|
-|模型大小|327MB|
-|最新更新日期|2021-06-15|
+|模型大小|462MB|
+|最新更新日期|2021-12-17|
 |数据指标|-|
 
 ## 一、模型基本信息
@@ -20,29 +20,24 @@
 
 在预测时，选取一段新的目标音色作为Speaker Encoder的输入，并提取其说话人特征，最终实现输入为一段文本和一段目标音色，模型生成目标音色说出此段文本的语音片段。
 
-<p align="center">
-<img src="https://ai-studio-static-online.cdn.bcebos.com/982ab955b87244d3bae3b003aff8e28d9ec159ff0d6246a79757339076dfe7d4" hspace='10'/> <br/>
-</p>
+![](https://ai-studio-static-online.cdn.bcebos.com/982ab955b87244d3bae3b003aff8e28d9ec159ff0d6246a79757339076dfe7d4)
 
-`lstm_tacotron2`是一个支持中文的语音克隆模型，分别使用了LSTMSpeakerEncoder、Tacotron2和WaveFlow模型分别用于语音特征提取、目标音频特征合成和语音波形转换。
+`ge2e_fastspeech2_pwgan`是一个支持中文的语音克隆模型，分别使用了LSTMSpeakerEncoder、FastSpeech2和PWGan模型分别用于语音特征提取、目标音频特征合成和语音波形转换。
 
-更多详情请参考:
-- [Transfer Learning from Speaker Verification to Multispeaker Text-To-Speech Synthesis](https://arxiv.org/pdf/1806.04558.pdf)
-- [Parakeet](https://github.com/PaddlePaddle/Parakeet/tree/release/v0.3/parakeet/models)
-
+关于模型的详请可参考[PaddleSpeech](https://github.com/PaddlePaddle/PaddleSpeech)。
 
 ## 二、安装
 
 - ### 1、环境依赖
 
-  - paddlepaddle >= 2.0.0
+  - paddlepaddle >= 2.2.0
 
   - paddlehub >= 2.1.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
   - ```shell
-    $ hub install lstm_tacotron2
+    $ hub install ge2e_fastspeech2_pwgan
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -55,7 +50,7 @@
   - ```python
     import paddlehub as hub
 
-    model = hub.Module(name='lstm_tacotron2', output_dir='/data', speaker_audio='/data/man.wav')  # 指定目标音色音频文件
+    model = hub.Module(name='ge2e_fastspeech2_pwgan', output_dir='./', speaker_audio='/data/man.wav')  # 指定目标音色音频文件
     texts = [
         '语音的表现形式在未来将变得越来越重要$',
         '今天的天气怎么样$',  ]
@@ -66,20 +61,11 @@
         print(f'Text: {text}')
         print(f'Wav: {wav}')
     ```
-    ```
-    ==============================
-    Text: 语音的表现形式在未来将变得越来越重要$
-    Wav: /data/1.wav
-    ==============================
-    Text: 今天的天气怎么样$
-    Wav: /data/2.wav
-    ```
 
 - ### 2、API
-
   - ```python
     def __init__(speaker_audio: str = None,
-                output_dir: str = './')
+                 output_dir: str = './')
     ```
     - 初始化module，可配置模型的目标音色的音频文件和输出的路径。
 
@@ -105,13 +91,12 @@
       - `speaker_audio`(str): 必填，目标说话人语音音频文件(*.wav)的路径。
 
   - ```python
-    def generate(data: List[str], batch_size: int = 1, use_gpu: bool = False):
+    def generate(data: Union[str, List[str]], use_gpu: bool = False):
     ```
     - 根据输入文字，合成目标说话人的语音音频文件。
 
     - **参数**
-      - `data`(List[str]): 必填，目标音频的内容文本列表，目前只支持中文，不支持添加标点符号。
-      - `batch_size`(int): 可选，模型合成语音时的batch_size，默认为1。
+      - `data`(Union[str, List[str]]): 必填，目标音频的内容文本列表，目前只支持中文，不支持添加标点符号。
       - `use_gpu`(bool): 是否使用gpu执行计算，默认为False。
 
 
@@ -119,8 +104,8 @@
 
 * 1.0.0
 
-  初始发布
+  初始发布。
 
-```shell
-$ hub install lstm_tacotron2==1.0.0
-```
+  ```shell
+  $ hub install ge2e_fastspeech2_pwgan
+  ```
