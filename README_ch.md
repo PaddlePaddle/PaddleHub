@@ -49,7 +49,7 @@
 
 ## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)[【模型库】](./modules/README_ch.md)**
 
-### **[图像类（212个）](./modules#图像)**
+### **[图像类（212个）](./modules/README_ch.md#图像)**
 - 包括图像分类、人脸检测、口罩检测、车辆检测、人脸/人体/手部关键点检测、人像分割、80+语言文本识别、图像超分/上色/动漫化等
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_all.gif"  width = "530" height = "400" />
@@ -58,7 +58,7 @@
 - 感谢CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)、[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)、[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)、[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)、[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)、[Zhengxia Zou](https://github.com/jiupinjia/SkyAR)、[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) 提供相关预训练模型，训练能力开放，欢迎体验。
 
 
-### **[文本类（130个）](./modules#文本)**
+### **[文本类（130个）](./modules/README_ch.md#文本)**
 - 包括中文分词、词性标注与命名实体识别、句法分析、AI写诗/对联/情话/藏头诗、中文的评论情感分析、中文色情文本审核等
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "240" />
@@ -67,7 +67,7 @@
 - 感谢CopyRight@[ERNIE](https://github.com/PaddlePaddle/ERNIE)、[LAC](https://github.com/baidu/LAC)、[DDParser](https://github.com/baidu/DDParser)提供相关预训练模型，训练能力开放，欢迎体验。
 
 
-### **[语音类（15个）](./modules#语音)**
+### **[语音类（15个）](./modules/README_ch.md#语音)**
 - TTS语音合成算法，多种算法可选
 - 感谢CopyRight@[Parakeet](https://github.com/PaddlePaddle/Parakeet)提供预训练模型，训练能力开放，欢迎体验。
 - 输入：`Life was like a box of chocolates, you never know what you're gonna get.`
@@ -100,7 +100,7 @@
 </table>
 </div>
 
-### **[视频类（8个）](./modules#视频)**
+### **[视频类（8个）](./modules/README_ch.md#视频)**
 - 包含短视频分类，支持3000+标签种类，可输出TOP-K标签，多种算法可选。
 - 感谢CopyRight@[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo)提供预训练模型，训练能力开放，欢迎体验。
 - `举例：输入一段游泳的短视频，算法可以输出"游泳"结果`
