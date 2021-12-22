@@ -122,7 +122,7 @@
 ## 欢迎加入PaddleHub技术交流群
 - 在使用模型过程中有任何问题，可以加入官方微信群，获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
 <div align="center">
-<img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
+<img src="https://user-images.githubusercontent.com/23690325/147116815-d99c8b54-716f-4009-a6cd-87f2621d248f.jpg"  width = "200" height = "200" />
 </div>  
 扫码备注"Hub"加好友之后，再发送“Hub”，会自动邀请您入群。  
 
