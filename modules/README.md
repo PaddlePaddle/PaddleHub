@@ -500,9 +500,9 @@ English | [简体中文](README_ch.md)
 |--|--|--|--|
 |[deepspeech2_aishell](audio/asr/deepspeech2_aishell)|DeepSpeech2|AISHELL-1|中文语音识别|
 |[deepspeech2_librispeech](audio/asr/deepspeech2_librispeech)|DeepSpeech2|LibriSpeech|英文语音识别|
-|[u2_conformer_aishell](audio/asr/u2_conformer_aishell)|DeepSpeech2|AISHELL-1|中文语音识别|
+|[u2_conformer_aishell](audio/asr/u2_conformer_aishell)|Conformer|AISHELL-1|中文语音识别|
 |[u2_conformer_wenetspeech](audio/asr/u2_conformer_wenetspeech)|Conformer|WenetSpeech|中文语音识别|
-|[u2_conformer_librispeech](audio/asr/u2_conformer_librispeech)|DeepSpeech2|LibriSpeech|英文语音识别|
+|[u2_conformer_librispeech](audio/asr/u2_conformer_librispeech)|Conformer|LibriSpeech|英文语音识别|
 
 
   - ### Audio Classification

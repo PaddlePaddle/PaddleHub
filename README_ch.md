@@ -38,6 +38,7 @@
 - **【跨平台兼容性】**：可运行于Linux、Windows、MacOS等多种操作系统
 
 ## 近期更新
+- **2021.12.22**，发布v2.2.0版本。【1】新增100+高质量模型，涵盖对话、语音处理、语义分割、文字识别、文本处理、图像生成等多个领域，预训练模型总量达到[**【360+】**](https://www.paddlepaddle.org.cn/hublist)；【2】新增模型[检索列表](./modules/README_ch.md)，包含模型名称、网络、数据集和使用场景等信息，快速定位用户所需的模型；【3】模型文档排版优化，呈现数据集、指标、模型大小等更多实用信息。
 - **2021.05.12**，新增轻量级中文对话模型[plato-mini](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration)，可以配合使用wechaty实现微信闲聊机器人，[参考demo](https://github.com/KPatr1ck/paddlehub-wechaty-demo)
 - **2021.04.27**，发布v2.1.0版本。【1】新增基于VOC数据集的高精度语义分割模型2个，语音分类模型3个。【2】新增图像语义分割、文本语义匹配、语音分类等相关任务的Fine-Tune能力以及相关任务数据集;完善部署能力：【3】新增ONNX和PaddleInference等模型格式的导出功能。【4】新增[BentoML](https://github.com/bentoml/BentoML) 云原生服务化部署能力，可以支持统一的多框架模型管理和模型部署的工作流，[详细教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/demo/serving/bentoml/cloud-native-model-serving-with-bentoml.ipynb). 更多内容可以参考BentoML 最新 v0.12.1 [Releasenote](https://github.com/bentoml/BentoML/releases/tag/v0.12.1).（感谢@[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic)）的贡献与支持。【5】预训练模型总量达到[**【300】**](https://www.paddlepaddle.org.cn/hublist)个。
 - **2021.02.18**，发布v2.0.0版本，【1】模型开发调试更简单，finetune接口更加灵活易用。视觉类任务迁移学习能力全面升级，支持[图像分类](./demo/image_classification/README.md)、[图像着色](./demo/colorization/README.md)、[风格迁移](./demo/style_transfer/README.md)等多种任务；BERT、ERNIE、RoBERTa等Transformer类模型升级至动态图，支持[文本分类](./demo/text_classification/README.md)、[序列标注](./demo/sequence_labeling/README.md)的Fine-Tune能力；【2】优化服务化部署Serving能力，支持多卡预测、自动负载均衡，性能大幅度提升；【3】新增自动数据增强能力[Auto Augment](./demo/autoaug/README.md)，能高效地搜索适合数据集的数据增强策略组合。【4】新增[词向量模型](./modules/text/embedding)61个，其中包含中文模型51个，英文模型10个；新增[图像分割](./modules/thirdparty/image/semantic_segmentation)模型4个、[深度模型](./modules/thirdparty/image/depth_estimation)2个、[图像生成](./modules/thirdparty/image/Image_gan/style_transfer)模型7个、[文本生成](./modules/thirdparty/text/text_generation)模型3个。【5】预训练模型总量达到[**【274】**](https://www.paddlepaddle.org.cn/hublist) 个。
@@ -68,8 +69,36 @@
 
 
 ### **[语音类（15个）](./modules/README_ch.md#语音)**
+- ASR语音识别算法，多种算法可选
+- 语音识别效果如下:
+<div align="center">
+<table>
+    <thead>
+        <tr>
+            <th> Input Audio  </th>
+            <th width="550"> Recognition Result  </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align = "center">
+            <a href="https://paddlespeech.bj.bcebos.com/PaddleAudio/en.wav" rel="nofollow">
+                    <img align="center" src="./docs/images/audio_icon.png" width="200 style="max-width: 100%;"></a><br>
+            </td>
+            <td >I knocked at the door on the ancient side of the building.</td>
+            </tr>
+            <tr>
+            <td align = "center">
+            <a href="https://paddlespeech.bj.bcebos.com/PaddleAudio/zh.wav" rel="nofollow">
+                    <img align="center" src="./docs/images/audio_icon.png" width="200" style="max-width: 100%;"></a><br>
+            </td>
+            <td>我认为跑步最重要的就是给我带来了身体健康。</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
 - TTS语音合成算法，多种算法可选
-- 感谢CopyRight@[Parakeet](https://github.com/PaddlePaddle/Parakeet)提供预训练模型，训练能力开放，欢迎体验。
 - 输入：`Life was like a box of chocolates, you never know what you're gonna get.`
 - 合成效果如下:
 <div align="center">
@@ -99,6 +128,8 @@
     </tbody>
 </table>
 </div>
+
+- 感谢CopyRight@[PaddleSpeech](https://github.com/PaddlePaddle/PaddleSpeech)提供预训练模型，训练能力开放，欢迎体验。
 
 ### **[视频类（8个）](./modules/README_ch.md#视频)**
 - 包含短视频分类，支持3000+标签种类，可输出TOP-K标签，多种算法可选。

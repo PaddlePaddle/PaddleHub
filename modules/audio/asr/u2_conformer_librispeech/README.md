@@ -3,7 +3,7 @@
 |模型名称|u2_conformer_librispeech|
 | :--- | :---: |
 |类别|语音-语音识别|
-|网络|DeepSpeech2|
+|网络|Conformer|
 |数据集|LibriSpeech|
 |是否支持Fine-tuning|否|
 |模型大小|191MB|

@@ -36,6 +36,7 @@ English | [简体中文](README_ch.md)
 - **Cross-platform**: support Linux, Windows, MacOS and other operating systems.
 
 ### Recent updates
+- **2021.12.22**，The v2.2.0 version is released. [1]More than 100 new models released，including dialog, speech, segmentation, OCR, text processing, GANs, and many other categories. The total number of pre-trained models reaches [**【360】**](https://www.paddlepaddle.org.cn/hublist). [2]Add an [indexed file](./modules/README.md) including useful information of pretrained models supported by PaddleHub. [3]Refactor README of pretrained models.
 - **2021.05.12:** Add an open-domain dialogue system, i.e., [plato-mini](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration), to make it easy to build a chatbot in wechat with the help of the wechaty, [See Demo](https://github.com/KPatr1ck/paddlehub-wechaty-demo)
 - **2021.04.27:** The v2.1.0 version is released. [1] Add supports for five new models, including two high-precision semantic segmentation models based on VOC dataset and three voice classification models. [2] Enforce the transfer learning capabilities for image semantic segmentation, text semantic matching and voice classification on related datasets. [3] Add the export function APIs for two kinds of model formats, i.,e, ONNX and PaddleInference. [4] Add the support for [BentoML](https://github.com/bentoml/BentoML/), which is a cloud native framework for serving deployment. Users can easily serve pre-trained models from PaddleHub by following the [Tutorial notebooks](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/demo/serving/bentoml/cloud-native-model-serving-with-bentoml.ipynb). Also, see this announcement and [Release note](https://github.com/bentoml/BentoML/releases/tag/v0.12.1) from BentoML. (Many thanks to @[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic) for contributing this feature in PaddleHub). [5] The total number of pre-trained models reaches **【300】**.
 - **2021.02.18:** The v2.0.0 version is released, making model development and debugging easier, and the finetune task is more flexible and easy to use.The ability to transfer learning for visual tasks is fully upgraded, supporting various tasks such as image classification, image coloring, and style transfer; Transformer models such as BERT, ERNIE, and RoBERTa are upgraded to dynamic graphs, supporting Fine-Tune capabilities for text classification and sequence labeling; Optimize the Serving capability, support multi-card prediction, automatic load balancing, and greatly improve performance; the new automatic data enhancement capability Auto Augment can efficiently search for data enhancement strategy combinations suitable for data sets. 61 new word vector models were added, including 51 Chinese models and 10 English models; add 4 image segmentation models, 2 depth models, 7 image generation models, and 3 text generation models, the total number of pre-trained models reaches **【274】**.
@@ -63,8 +64,36 @@ English | [简体中文](README_ch.md)
 
 
 ### [Speech (15 models)](./modules#Audio)
+- ASR speech recognition algorithm, multiple algorithms are available.
+- The speech recognition effect is as follows:
+<div align="center">
+<table>
+    <thead>
+        <tr>
+            <th> Input Audio  </th>
+            <th width="550"> Recognition Result  </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align = "center">
+            <a href="https://paddlespeech.bj.bcebos.com/PaddleAudio/en.wav" rel="nofollow">
+                    <img align="center" src="./docs/images/audio_icon.png" width="200 style="max-width: 100%;"></a><br>
+            </td>
+            <td >I knocked at the door on the ancient side of the building.</td>
+            </tr>
+            <tr>
+            <td align = "center">
+            <a href="https://paddlespeech.bj.bcebos.com/PaddleAudio/zh.wav" rel="nofollow">
+                    <img align="center" src="./docs/images/audio_icon.png" width="200" style="max-width: 100%;"></a><br>
+            </td>
+            <td>我认为跑步最重要的就是给我带来了身体健康。</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
 - TTS speech synthesis algorithm, multiple algorithms are available.
-- Many thanks to CopyRight@[Parakeet](https://github.com/PaddlePaddle/Parakeet) for the pre-trained models, you can try to train your models with Parakeet.
 - Input: `Life was like a box of chocolates, you never know what you're gonna get.`
 - The synthesis effect is as follows:
 <div align="center">
@@ -94,6 +123,8 @@ English | [简体中文](README_ch.md)
     </tbody>
 </table>
 </div>
+
+- Many thanks to CopyRight@[PaddleSpeech](https://github.com/PaddlePaddle/PaddleSpeech) for the pre-trained models, you can try to train your models with PaddleSpeech.
 
 ### [Video (8 models)](./modules#Video)
 - Short video classification trained via large-scale video datasets, supports 3000+ tag types prediction for short Form Videos.
