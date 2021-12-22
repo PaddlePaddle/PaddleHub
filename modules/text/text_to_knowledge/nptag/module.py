@@ -9,25 +9,25 @@ from paddlenlp import Taskflow
 
 
 @moduleinfo(
-    name="wordtag",
+    name="nptag",
     version="1.0.0",
     summary="",
-    author="baidu-nlp",
+    author="Baidu",
     author_email="",
     type="nlp/text_to_knowledge",
     meta=hub.NLPPredictionModule)
-class WordTag(paddle.nn.Layer):
+class NPTag(paddle.nn.Layer):
     def __init__(self, 
                  batch_size=32, 
                  max_seq_length=128,
                  linking=True,
                  ):
-        self.wordtag = Taskflow("knowledge_mining", batch_size=batch_size, max_seq_length=max_seq_length, linking=linking)
+        self.nptag = Taskflow("knowledge_mining", model="nptag", batch_size=batch_size, max_seq_length=max_seq_length, linking=linking)
 
     @serving
     def predict(self, texts):
         """
-        The prediction interface for wordtag.
+        The prediction interface for nptag.
 
         Args:
             texts(str or list[str]): the input texts to be predict.
@@ -40,13 +40,13 @@ class WordTag(paddle.nn.Layer):
                         {
                             'item': str, segmented word.
                             'offset': int, the offset compared with the first character.
-                            'wordtag_label':str, Part-Of-Speech label.
+                            'nptag_label':str, Part-Of-Speech label.
                             'length': int, word length.
                             'termid': str, link result with encyclopedia knowledge tree.
                         }
                 }
-       """
-        return self.wordtag(texts)
+        """
+        return self.nptag(texts)
 
     @runnable
     def run_cmd(self, argvs):
