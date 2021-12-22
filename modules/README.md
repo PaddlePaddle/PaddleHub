@@ -1,18 +1,18 @@
 English | [简体中文](README_ch.md)
 
 # CONTENTS
-|[Image](#Image) (212)|[Text](#Text) (130)|[Audio](#Audio) (15)|[Video](#Video) (8)|[Industrial Application](#Industrial Application) (1)|
+|[Image](#Image) (212)|[Text](#Text) (130)|[Audio](#Audio) (15)|[Video](#Video) (8)|[Industrial Application](#Industrial-Application) (1)|
 |--|--|--|--|--|
-|[Image Classification](#Image Classification) (108)|[Text Generation](#Text Generation) (17)| [Voice Cloning](#Voice Cloning) (2)|[Video Classification](#Video Classification) (5)| [Meter Detection](#Meter Detection) (1)|
-|[Image Generation](#Image Generation) (26)|[Word Embedding](#Word Embedding) (62)|[Text to Speech](#Text to Speech) (5)|[Video Editing](#Video Editing) (1)|-|
-|[Keypoint Detection](#Keypoint Detection) (5)|[Machine Translation](#Machine Translation) (2)|[Automatic Speech Recognition](#Automatic Speech Recognition) (5)|[Multiple Object tracking](#Multiple Object tracking) (2)|-|
-|[Semantic Segmentation](#Semantic Segmentation) (25)|[Language Model](#Language Model) (30)|[Audio Classification](#Audio Classification) (3)| -|-|
-|[Face Detection](#Face Detection) (7)|[Sentiment Analysis](#Sentiment Analysis) (7)|-|-|-|
-|[Text Recognition](#Text Recognition) (17)|[Syntactic Analysis](#Syntactic Analysis) (1)|-|-|-|
-|[Image Editing](#Image Editing) (8)|[Simultaneous Translation](#Simultaneous Translation) (5)|-|-|-|
-|[Instance Segmentation](#Instance Segmentation) (1)|[Lexical Analysis](#Lexical Analysis) (2)|-|-|-|
-|[Object Detection](#Object Detection) (13)|[Punctuation Restoration](#Punctuation Restoration) (1)|-|-|-|
-|[Depth Estimation](#Depth Estimation) (2)|[Text Review](#Text Review) (3)|-|-|-|
+|[Image Classification](#Image-Classification) (108)|[Text Generation](#Text-Generation) (17)| [Voice Cloning](#Voice-Cloning) (2)|[Video Classification](#Video-Classification) (5)| [Meter Detection](#Meter-Detection) (1)|
+|[Image Generation](#Image-Generation) (26)|[Word Embedding](#Word-Embedding) (62)|[Text to Speech](#Text-to-Speech) (5)|[Video Editing](#Video-Editing) (1)|-|
+|[Keypoint Detection](#Keypoint-Detection) (5)|[Machine Translation](#Machine-Translation) (2)|[Automatic Speech Recognition](#Automatic-Speech-Recognition) (5)|[Multiple Object tracking](#Multiple-Object-tracking) (2)|-|
+|[Semantic Segmentation](#Semantic-Segmentation) (25)|[Language Model](#Language-Model) (30)|[Audio Classification](#Audio-Classification) (3)| -|-|
+|[Face Detection](#Face-Detection) (7)|[Sentiment Analysis](#Sentiment-Analysis) (7)|-|-|-|
+|[Text Recognition](#Text-Recognition) (17)|[Syntactic Analysis](#Syntactic-Analysis) (1)|-|-|-|
+|[Image Editing](#Image-Editing) (8)|[Simultaneous Translation](#Simultaneous-Translation) (5)|-|-|-|
+|[Instance Segmentation](#Instance-Segmentation) (1)|[Lexical Analysis](#Lexical-Analysis) (2)|-|-|-|
+|[Object Detection](#Object-Detection) (13)|[Punctuation Restoration](#Punctuation-Restoration) (1)|-|-|-|
+|[Depth Estimation](#Depth-Estimation) (2)|[Text Review](#Text-Review) (3)|-|-|-|
 
 ## Image
   - ### Image Classification
