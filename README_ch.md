@@ -4,7 +4,7 @@
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle">
 <p align="center">
 <div align="center">  
-  <h3> <a href=#QuickStart> 快速开始 </a> | <a href="https://paddlehub.readthedocs.io/zh_CN/release-v2.1//"> 教程文档 </a> | <a href="./modules"> 模型库 </a> | <a href="https://www.paddlepaddle.org.cn/hub"> 演示Demo </a>
+  <h3> <a href=#QuickStart> 快速开始 </a> | <a href="https://paddlehub.readthedocs.io/zh_CN/release-v2.1//"> 教程文档 </a> | <a href="./modules/README_ch.md"> 模型库 </a> | <a href="https://www.paddlepaddle.org.cn/hub"> 演示Demo </a>
   </h3>
 </div>
 
@@ -47,7 +47,7 @@
 
 
 
-## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)[【模型库】](./modules)**
+## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)[【模型库】](./modules/README_ch.md)**
 
 ### **[图像类（212个）](./modules#图像)**
 - 包括图像分类、人脸检测、口罩检测、车辆检测、人脸/人体/手部关键点检测、人像分割、80+语言文本识别、图像超分/上色/动漫化等
