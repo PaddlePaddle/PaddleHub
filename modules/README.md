@@ -1,7 +1,7 @@
 # 目录
-|[图像](#图像) （236个）|[文本](#文本) （130个）|[语音](#语音) （15个）|[视频](#视频) （8个）|[工业应用](#工业应用) （1个）|
+|[图像](#图像) （217个）|[文本](#文本) （130个）|[语音](#语音) （15个）|[视频](#视频) （8个）|[工业应用](#工业应用) （1个）|
 |--|--|--|--|--|
-|[图像分类](#图像分类) (130)|[文本生成](#文本生成) (17)| [声音克隆](#声音克隆) (2)|[视频分类](#视频分类) (5)| [表针识别](#表针识别) (1)|
+|[图像分类](#图像分类) (111)|[文本生成](#文本生成) (17)| [声音克隆](#声音克隆) (2)|[视频分类](#视频分类) (5)| [表针识别](#表针识别) (1)|
 |[图像生成](#图像生成) (26)|[词向量](#词向量) (62)|[语音合成](#语音合成) (5)|[视频修复](#视频修复) (1)|-|
 |[关键点检测](#关键点检测) (5)|[机器翻译](#机器翻译) (2)|[语音识别](#语音识别) (5)|[多目标追踪](#多目标追踪) (2)|-|
 |[图像分割](#图像分割) (26)|[语义模型](#语义模型) (30)|[声音分类](#声音分类) (3)| -|-|
@@ -42,32 +42,25 @@
 |[rexnet_2_0_imagenet](image/classification/rexnet_2_0_imagenet)|ReXNet|ImageNet-2012||
 |[SnakeIdentification](image/classification/SnakeIdentification)|ResNet50_vd_ssld|蛇种数据集||
 |[hrnet40_imagenet](image/classification/hrnet40_imagenet)|HRNet|ImageNet-2012||
-|[resnet34_vd_imagenet](image/classification/resnet34_vd_imagenet)||||
-|[resnet50_v2_imagenet](image/classification/resnet50_v2_imagenet)||||
 |[resnet_v2_34_imagenet](image/classification/resnet_v2_34_imagenet)|ResNet V2|ImageNet-2012||
-|[resnet152_imagenet](image/classification/resnet152_imagenet)||||
 |[mobilenet_v2_dishes](image/classification/mobilenet_v2_dishes)|MobileNet_v2|百度自建菜品数据集||
 |[resnext101_vd_32x4d_imagenet](image/classification/resnext101_vd_32x4d_imagenet)|ResNeXt|ImageNet-2012||
 |[repvgg_b2g4_imagenet](image/classification/repvgg_b2g4_imagenet)|RepVGG|ImageNet-2012||
 |[fix_resnext101_32x48d_wsl_imagenet](image/classification/fix_resnext101_32x48d_wsl_imagenet)|ResNeXt|ImageNet-2012||
 |[vgg13_imagenet](image/classification/vgg13_imagenet)|VGG|ImageNet-2012||
 |[se_resnext101_32x4d_imagenet](image/classification/se_resnext101_32x4d_imagenet)|SE_ResNeXt|ImageNet-2012||
-|[resnet34_imagenet](image/classification/resnet34_imagenet)||||
 |[hrnet30_imagenet](image/classification/hrnet30_imagenet)|HRNet|ImageNet-2012||
 |[ghostnet_x1_3_imagenet](image/classification/ghostnet_x1_3_imagenet)|GhostNet|ImageNet-2012||
-|[resnet152_vd_imagenet](image/classification/resnet152_vd_imagenet)||||
 |[dpn107_imagenet](image/classification/dpn107_imagenet)|DPN|ImageNet-2012||
 |[densenet161_imagenet](image/classification/densenet161_imagenet)|DenseNet|ImageNet-2012||
 |[vgg19_imagenet](image/classification/vgg19_imagenet)|vgg19_imagenet|ImageNet-2012||
 |[mobilenet_v2_imagenet](image/classification/mobilenet_v2_imagenet)|Mobilenet_v2|ImageNet-2012||
 |[resnet50_vd_10w](image/classification/resnet50_vd_10w)|ResNet_vd|百度自建数据集||
-|[resnet200_vd_imagenet](image/classification/resnet200_vd_imagenet)||||
 |[resnet_v2_101_imagenet](image/classification/resnet_v2_101_imagenet)|ResNet V2 101|ImageNet-2012||
 |[darknet53_imagenet](image/classification/darknet53_imagenet)|DarkNet|ImageNet-2012||
 |[se_resnext50_32x4d_imagenet](image/classification/se_resnext50_32x4d_imagenet)|SE_ResNeXt|ImageNet-2012||
 |[se_hrnet64_imagenet_ssld](image/classification/se_hrnet64_imagenet_ssld)|HRNet|ImageNet-2012||
 |[resnext101_32x16d_wsl](image/classification/resnext101_32x16d_wsl)|ResNeXt_wsl|ImageNet-2012||
-|[resnet101_imagenet](image/classification/resnet101_imagenet)||||
 |[hrnet18_imagenet](image/classification/hrnet18_imagenet)|HRNet|ImageNet-2012||
 |[spinalnet_res101_gemstone](image/classification/spinalnet_res101_gemstone)|resnet101|gemstone||
 |[densenet264_imagenet](image/classification/densenet264_imagenet)|DenseNet|ImageNet-2012||
@@ -86,12 +79,9 @@
 |[hrnet48_imagenet](image/classification/hrnet48_imagenet)|HRNet|ImageNet-2012||
 |[rexnet_3_0_imagenet](image/classification/rexnet_3_0_imagenet)|ReXNet|ImageNet-2012||
 |[shufflenet_v2_imagenet](image/classification/shufflenet_v2_imagenet)|ShuffleNet V2|ImageNet-2012||
-|[resnet50_vd_imagenet](image/classification/resnet50_vd_imagenet)||||
-|[resnet34_vd_imagenet_ssld](image/classification/resnet34_vd_imagenet_ssld)||||
 |[ghostnet_x0_5_imagenet](image/classification/ghostnet_x0_5_imagenet)|GhostNet|ImageNet-2012||
 |[inception_v4_imagenet](image/classification/inception_v4_imagenet)|Inception_V4|ImageNet-2012||
 |[resnext101_vd_64x4d_imagenet](image/classification/resnext101_vd_64x4d_imagenet)|ResNeXt_vd|ImageNet-2012||
-|[resnet34_v2_imagenet](image/classification/resnet34_v2_imagenet)||||
 |[densenet201_imagenet](image/classification/densenet201_imagenet)|DenseNet|ImageNet-2012||
 |[vgg16_imagenet](image/classification/vgg16_imagenet)|VGG|ImageNet-2012||
 |[mobilenet_v3_small_imagenet_ssld](image/classification/mobilenet_v3_small_imagenet_ssld)|Mobilenet_v3_Small|ImageNet-2012||
@@ -101,10 +91,8 @@
 |[efficientnetb3_imagenet](image/classification/efficientnetb3_imagenet)|EfficientNet|ImageNet-2012||
 |[efficientnetb2_imagenet](image/classification/efficientnetb2_imagenet)|EfficientNet|ImageNet-2012||
 |[repvgg_b1g4_imagenet](image/classification/repvgg_b1g4_imagenet)|RepVGG|ImageNet-2012||
-|[resnet50_imagenet](image/classification/resnet50_imagenet)||||
 |[resnext101_32x4d_imagenet](image/classification/resnext101_32x4d_imagenet)|ResNeXt|ImageNet-2012||
 |[resnext50_32x4d_imagenet](image/classification/resnext50_32x4d_imagenet)|ResNeXt|ImageNet-2012||
-|[resnet18_imagenet](image/classification/resnet18_imagenet)||||
 |[repvgg_a2_imagenet](image/classification/repvgg_a2_imagenet)|RepVGG|ImageNet-2012||
 |[resnext152_vd_64x4d_imagenet](image/classification/resnext152_vd_64x4d_imagenet)|ResNeXt_vd|ImageNet-2012||
 |[xception41_imagenet](image/classification/xception41_imagenet)|Xception|ImageNet-2012||
@@ -122,9 +110,7 @@
 |[resnext101_32x48d_wsl](image/classification/resnext101_32x48d_wsl)|ResNeXt_wsl|ImageNet-2012||
 |[resnet50_vd_wildanimals](image/classification/resnet50_vd_wildanimals)|ResNet_vd|IFAW 自建野生动物数据集||
 |[nasnet_imagenet](image/classification/nasnet_imagenet)|NASNet|ImageNet-2012||
-|[resnet101_vd_imagenet](image/classification/resnet101_vd_imagenet)||||
 |[se_resnet18_vd_imagenet](image/classification/se_resnet18_vd_imagenet)||||
-|[resnet101_vd_imagenet_ssld](image/classification/resnet101_vd_imagenet_ssld)||||
 |[spinalnet_res50_gemstone](image/classification/spinalnet_res50_gemstone)|resnet50|gemstone||
 |[resnext50_vd_64x4d_imagenet](image/classification/resnext50_vd_64x4d_imagenet)|ResNeXt_vd|ImageNet-2012||
 |[resnext101_32x32d_wsl](image/classification/resnext101_32x32d_wsl)|ResNeXt_wsl|ImageNet-2012||
@@ -176,8 +162,8 @@
 |[animegan_v2_shinkai_33](image/Image_gan/style_transfer/animegan_v2_shinkai_33)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚|
 |[animegan_v2_shinkai_53](image/Image_gan/style_transfer/animegan_v2_shinkai_53)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚|
 |[msgnet](image/Image_gan/style_transfer/msgnet)|msgnet|COCO2014|
-|stylegan_ffhq|StyleGAN|FFHQ|图像风格迁移|
 |[stylepro_artistic](image/Image_gan/style_transfer/stylepro_artistic)|StyleProNet|MS-COCO + WikiArt|艺术风格迁移|
+|stylegan_ffhq|StyleGAN|FFHQ|图像风格迁移|
 
   - ### 关键点检测
 
