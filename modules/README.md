@@ -1,5 +1,5 @@
 # 目录
-|[图像](#图像) （216个）|[文本](#文本) （130个）|[语音](#语音) （15个）|[视频](#视频) （8个）|[工业应用](#工业应用) （1个）|
+|[图像](#图像) （212个）|[文本](#文本) （130个）|[语音](#语音) （15个）|[视频](#视频) （8个）|[工业应用](#工业应用) （1个）|
 |--|--|--|--|--|
 |[图像分类](#图像分类) (111)|[文本生成](#文本生成) (17)| [声音克隆](#声音克隆) (2)|[视频分类](#视频分类) (5)| [表针识别](#表针识别) (1)|
 |[图像生成](#图像生成) (26)|[词向量](#词向量) (62)|[语音合成](#语音合成) (5)|[视频修复](#视频修复) (1)|-|
@@ -29,7 +29,6 @@
 |[food_classification](image/classification/food_classification)|ResNet50_vd_ssld|美食数据集||
 |[mobilenet_v3_large_imagenet_ssld](image/classification/mobilenet_v3_large_imagenet_ssld)|Mobilenet_v3_large|ImageNet-2012||
 |[resnext152_vd_32x4d_imagenet](image/classification/resnext152_vd_32x4d_imagenet)||||
-|[mobilenet_v1_imagenet_ssld](image/classification/mobilenet_v1_imagenet_ssld)||||
 |[ghostnet_x1_3_imagenet_ssld](image/classification/ghostnet_x1_3_imagenet_ssld)|GhostNet|ImageNet-2012||
 |[rexnet_1_5_imagenet](image/classification/rexnet_1_5_imagenet)|ReXNet|ImageNet-2012||
 |[resnext50_64x4d_imagenet](image/classification/resnext50_64x4d_imagenet)|ResNeXt|ImageNet-2012||
@@ -87,7 +86,6 @@
 |[mobilenet_v3_small_imagenet_ssld](image/classification/mobilenet_v3_small_imagenet_ssld)|Mobilenet_v3_Small|ImageNet-2012||
 |[hrnet18_imagenet_ssld](image/classification/hrnet18_imagenet_ssld)|HRNet|ImageNet-2012||
 |[resnext152_64x4d_imagenet](image/classification/resnext152_64x4d_imagenet)|ResNeXt|ImageNet-2012||
-|[inceptionv4_imagenet](image/classification/inceptionv4_imagenet)||||
 |[efficientnetb3_imagenet](image/classification/efficientnetb3_imagenet)|EfficientNet|ImageNet-2012||
 |[efficientnetb2_imagenet](image/classification/efficientnetb2_imagenet)|EfficientNet|ImageNet-2012||
 |[repvgg_b1g4_imagenet](image/classification/repvgg_b1g4_imagenet)|RepVGG|ImageNet-2012||
@@ -115,7 +113,6 @@
 |[resnext50_vd_64x4d_imagenet](image/classification/resnext50_vd_64x4d_imagenet)|ResNeXt_vd|ImageNet-2012||
 |[resnext101_32x32d_wsl](image/classification/resnext101_32x32d_wsl)|ResNeXt_wsl|ImageNet-2012||
 |[dpn131_imagenet](image/classification/dpn131_imagenet)|DPN|ImageNet-2012||
-|[mobilenet_v1_imagenet](image/classification/mobilenet_v1_imagenet)||||
 |[xception65_imagenet](image/classification/xception65_imagenet)|Xception|ImageNet-2012||
 |[repvgg_b3g4_imagenet](image/classification/repvgg_b3g4_imagenet)|RepVGG|ImageNet-2012||
 |[marine_biometrics](image/classification/marine_biometrics)|ResNet50_vd_ssld|Fish4Knowledge||
@@ -193,7 +190,6 @@
 |[U2Net](image/semantic_segmentation/U2Net)|U^2Net|-|图像前景背景分割|
 |[U2Netp](image/semantic_segmentation/U2Netp)|U^2Net|-|图像前景背景分割|
 |[Extract_Line_Draft](image/semantic_segmentation/Extract_Line_Draft)|UNet|Pixiv|线稿提取|
-|[WatermeterSegmentation](image/semantic_segmentation/WatermeterSegmentation)|DeepLabV3|水表的数字表盘分割数据集|水表的数字表盘分割|
 |[unet_cityscapes](image/semantic_segmentation/unet_cityscapes)|UNet|cityscapes|
 |[ocrnet_hrnetw18_cityscapes](image/semantic_segmentation/ocrnet_hrnetw18_cityscapes)|ocrnet_hrnetw18|cityscapes|
 |[hardnet_cityscapes](image/semantic_segmentation/hardnet_cityscapes)|hardnet|cityscapes|
@@ -540,9 +536,9 @@
 |[jde_darknet53](video/multiple_object_tracking/jde_darknet53)|YOLOv3|Caltech Pedestrian+CityPersons+CUHK-SYSU+PRW+ETHZ+MOT17|多目标跟踪-兼顾精度和速度|
 
 ## 工业应用
+
   - ### 表针识别
 
 |module|网络|数据集|简介|
 |--|--|--|--|
-|[meter_readings](image/industrial_application/meter_readings)|-|-|传统机械表针检测与自动读数|
-
+|[WatermeterSegmentation](image/semantic_segmentation/WatermeterSegmentation)|DeepLabV3|水表的数字表盘分割数据集|水表的数字表盘分割|
