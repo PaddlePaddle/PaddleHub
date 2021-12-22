@@ -1,7 +1,7 @@
 English | [简体中文](README_ch.md)
 
 # CONTENTS
-|[Image](#Image) （212）|[Text](#Text) （130）|[Audio](#Audio) （15）|[Video](#Video) （8）|[Industrial Application](#Industrial Application) （1）|
+|[Image](#Image) (212)|[Text](#Text) (130)|[Audio](#Audio) (15)|[Video](#Video) (8)|[Industrial Application](#Industrial Application) (1)|
 |--|--|--|--|--|
 |[Image Classification](#Image Classification) (108)|[Text Generation](#Text Generation) (17)| [Voice Cloning](#Voice Cloning) (2)|[Video Classification](#Video Classification) (5)| [Meter Detection](#Meter Detection) (1)|
 |[Image Generation](#Image Generation) (26)|[Word Embedding](#Word Embedding) (62)|[Text to Speech](#Text to Speech) (5)|[Video Editing](#Video Editing) (1)|-|
