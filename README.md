@@ -45,7 +45,7 @@ English | [简体中文](README_ch.md)
 
 
 ## Visualization Demo [[More]](./docs/docs_en/visualization.md) [[ModelList]](./modules)
-### **[Computer Vision (212 models)](./modules#图像)**
+### **[Computer Vision (212 models)](./modules#Image)**
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_all.gif"  width = "530" height = "400" />
 </div>
@@ -53,7 +53,7 @@ English | [简体中文](README_ch.md)
 - Many thanks to CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)、[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)、[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)、[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)、[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)、[Zhengxia Zou](https://github.com/jiupinjia/SkyAR)、[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) for the pre-trained models, you can try to train your models with them.
 
 
-### **[Natural Language Processing (130 models)](./modules#文本)**
+### **[Natural Language Processing (130 models)](./modules#Text)**
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "240" />
 </div>
@@ -62,7 +62,7 @@ English | [简体中文](README_ch.md)
 
 
 
-### [Speech (15 models)](./modules#语音)
+### [Speech (15 models)](./modules#Audio)
 - TTS speech synthesis algorithm, multiple algorithms are available.
 - Many thanks to CopyRight@[Parakeet](https://github.com/PaddlePaddle/Parakeet) for the pre-trained models, you can try to train your models with Parakeet.
 - Input: `Life was like a box of chocolates, you never know what you're gonna get.`
@@ -95,7 +95,7 @@ English | [简体中文](README_ch.md)
 </table>
 </div>
 
-### [Video (8 models)](./modules#视频)
+### [Video (8 models)](./modules#Video)
 - Short video classification trained via large-scale video datasets, supports 3000+ tag types prediction for short Form Videos.
 - Many thanks to CopyRight@[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo) for the pre-trained model, you can try to train your models with PaddleVideo.
 - `Example: Input a short video of swimming, the algorithm can output the result of "swimming"`
