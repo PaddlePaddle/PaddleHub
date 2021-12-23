@@ -75,22 +75,22 @@
 <table>
     <thead>
         <tr>
-            <th> Input Audio  </th>
-            <th width="550"> Recognition Result  </th>
+            <th width=250> Input Audio  </th>
+            <th width=550> Recognition Result  </th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td align = "center">
             <a href="https://paddlespeech.bj.bcebos.com/PaddleAudio/en.wav" rel="nofollow">
-                    <img align="center" src="./docs/images/audio_icon.png" width="200 style="max-width: 100%;"></a><br>
+                    <img align="center" src="./docs/imgs/Readme_Related/audio_icon.png" width=250 ></a><br>
             </td>
             <td >I knocked at the door on the ancient side of the building.</td>
             </tr>
             <tr>
             <td align = "center">
             <a href="https://paddlespeech.bj.bcebos.com/PaddleAudio/zh.wav" rel="nofollow">
-                    <img align="center" src="./docs/images/audio_icon.png" width="200" style="max-width: 100%;"></a><br>
+                    <img align="center" src="./docs/imgs/Readme_Related/audio_icon.png" width=250></a><br>
             </td>
             <td>我认为跑步最重要的就是给我带来了身体健康。</td>
         </tr>
