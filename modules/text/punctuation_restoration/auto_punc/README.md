@@ -7,7 +7,7 @@
 |数据集|WuDaoCorpora 2.0|
 |是否支持Fine-tuning|否|
 |模型大小|568MB|
-|最新更新日期|2021-11-16|
+|最新更新日期|2021-12-24|
 |数据指标|-|
 
 ## 一、模型基本信息
@@ -16,7 +16,15 @@
 
 Ernie是百度提出的基于知识增强的持续学习语义理解模型，该模型将大数据预训练与多源丰富知识相结合，通过持续学习技术，不断吸收海量文本数据中词汇、结构、语义等方面的知识，实现模型效果不断进化。
 
-auto_punc采用了Ernie1.0预训练模型，在大规模的"悟道"中文文本数据集[WuDaoCorpora 2.0](https://resource.wudaoai.cn/home)上进行了标点恢复任务的训练，模型可直接用于预测，对输入的对中文文本自动添加7种标点符号：逗号（，）、句号（。）、感叹号（！）、问号（？）、顿号（、）、冒号（：）和分号（；）。
+["悟道"文本数据集](https://ks3-cn-beijing.ksyun.com/resources/WuDaoCorpora/WuDaoCorpora__A_Super_Large_scale_Chinese_Corporafor_Pre_training_Language_Models.pdf)
+采用20多种规则从100TB原始网页数据中清洗得出最终数据集，注重隐私数据信息的去除，源头上避免GPT-3存在的隐私泄露风险；包含教育、科技等50+个行业数据标签，可以支持多领域预训练模型的训练。
+- 数据总量：3TB
+- 数据格式：json
+- 开源数量：200GB
+- 数据集下载：https://resource.wudaoai.cn/
+- 日期：2021年12月23日
+
+auto_punc采用了Ernie1.0预训练模型，在[WuDaoCorpora 2.0](https://resource.wudaoai.cn/home)的200G开源文本数据集上进行了标点恢复任务的训练，模型可直接用于预测，对输入的对中文文本自动添加7种标点符号：逗号（，）、句号（。）、感叹号（！）、问号（？）、顿号（、）、冒号（：）和分号（；）。
 
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/ernie_network_1.png" hspace='10'/> <br />
@@ -28,6 +36,7 @@ auto_punc采用了Ernie1.0预训练模型，在大规模的"悟道"中文文本�
 
 
 更多详情请参考
+- [WuDaoCorpora: A Super Large-scale Chinese Corpora for Pre-training Language Models](https://ks3-cn-beijing.ksyun.com/resources/WuDaoCorpora/WuDaoCorpora__A_Super_Large_scale_Chinese_Corporafor_Pre_training_Language_Models.pdf)
 - [ERNIE: Enhanced Representation through Knowledge Integration](https://arxiv.org/abs/1904.09223)
 
 
