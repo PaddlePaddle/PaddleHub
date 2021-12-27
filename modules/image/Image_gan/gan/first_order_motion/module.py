@@ -27,8 +27,9 @@ from skimage.transform import rescale, resize
 from .model import FirstOrderPredictor
 
 
-@moduleinfo(name="firstordermotion", type="CV/gan", author="paddlepaddle", author_email="", summary="", version="1.0.0")
-class firstordermotion:
+@moduleinfo(
+    name="first_order_motion", type="CV/gan", author="paddlepaddle", author_email="", summary="", version="1.0.0")
+class FirstOrderMotion:
     def __init__(self):
         self.pretrained_model = os.path.join(self.directory, "vox-cpk.pdparams")
         self.network = FirstOrderPredictor(weight_path=self.pretrained_model, face_enhancement=True)

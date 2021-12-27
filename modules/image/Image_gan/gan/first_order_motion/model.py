@@ -14,16 +14,15 @@
 
 import os
 import sys
-import cv2
 import math
+import pickle
 
 import yaml
-import pickle
 import imageio
 import numpy as np
 from tqdm import tqdm
 from scipy.spatial import ConvexHull
-
+import cv2
 import paddle
 from ppgan.utils.download import get_path_from_url
 from ppgan.utils.animate import normalize_kp
@@ -37,7 +36,7 @@ class FirstOrderPredictor:
                  weight_path=None,
                  config=None,
                  image_size=256,
-                 relative=False,
+                 relative=True,
                  adapt_scale=False,
                  find_best_frame=False,
                  best_frame=None,

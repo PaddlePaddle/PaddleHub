@@ -1,6 +1,6 @@
-# firstordermotion
+# first_order_motion
 
-|模型名称|firstordermotion|
+|模型名称|first_order_motion|
 | :--- | :---: |
 |类别|图像 - 图像生成|
 |网络|S3FD|
@@ -44,7 +44,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install firstordermotion
+    $ hub install first_order_motion
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -54,7 +54,7 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run firstordermotion --source_image "/PATH/TO/IMAGE" --driving_video "/PATH/TO/VIDEO"  --use_gpu
+    $ hub run first_order_motion --source_image "/PATH/TO/IMAGE" --driving_video "/PATH/TO/VIDEO"  --use_gpu
     ```
   - 通过命令行方式实现视频驱动生成模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
@@ -63,7 +63,7 @@
   - ```python
     import paddlehub as hub
 
-    module = hub.Module(name="firstordermotion")
+    module = hub.Module(name="first_order_motion")
     module.generate(source_image="/PATH/TO/IMAGE", driving_video="/PATH/TO/VIDEO", ratio=0.4, image_size=256, output_dir='./motion_driving_result/', filename='result.mp4', use_gpu=False)
     ```
 
@@ -91,5 +91,5 @@
   初始发布
 
   - ```shell
-    $ hub install firstordermotion==1.0.0
+    $ hub install first_order_motion==1.0.0
     ```
