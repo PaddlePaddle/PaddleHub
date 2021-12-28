@@ -139,14 +139,29 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
                 )
 
         results = []
+        feature_list = []
         for text in texts:
+            # feature.shape: [1, 512, 1]
+            # batch on the first dimension
             feature = self._convert_text_to_feature(text)
-            inputs = [self.array2tensor(ndarray) for ndarray in feature]
-            output = self.predictor.run(inputs)
-            probilities = np.array(output[0].data.float_data())
+            feature_list.append(feature)
+
+        feature_batch = [
+            np.concatenate([feature[0] for feature in feature_list], axis=0),
+            np.concatenate([feature[1] for feature in feature_list], axis=0),
+            np.concatenate([feature[2] for feature in feature_list], axis=0),
+            np.concatenate([feature[3] for feature in feature_list], axis=0),
+            np.concatenate([feature[4] for feature in feature_list], axis=0),
+        ]
+
+        inputs = [self.array2tensor(ndarray) for ndarray in feature_batch]
+        output = self.predictor.run(inputs)
+        probilities_list = np.array(output[0].data.float_data())
+        probilities_list = probilities_list.reshape((-1, 2))
+        for i, probilities in enumerate(probilities_list):
             label = self.label_map[np.argmax(probilities)]
             result = {
-                'text': text,
+                'text': texts[i],
                 'sentiment_label': label,
                 'positive_probs': probilities[1],
                 'negative_probs': probilities[0]
