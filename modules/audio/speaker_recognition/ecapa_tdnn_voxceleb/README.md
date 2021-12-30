@@ -58,8 +58,8 @@ ecapa_tdnn_voxceleb采用了[ECAPA-TDNN](https://arxiv.org/abs/2005.07143)的模
         version='1.0.0')
 
     # 通过下列链接可下载示例音频
-    # https://paddlehub.bj.bcebos.com/hub_dev/sv1.wav
-    # https://paddlehub.bj.bcebos.com/hub_dev/sv2.wav
+    # https://paddlehub.bj.bcebos.com/paddlehub_dev/sv1.wav
+    # https://paddlehub.bj.bcebos.com/paddlehub_dev/sv2.wav
 
     # Speaker Embedding
     embedding = model.speaker_embedding('sv1.wav')
@@ -73,6 +73,17 @@ ecapa_tdnn_voxceleb采用了[ECAPA-TDNN](https://arxiv.org/abs/2005.07143)的模
     ```
 
 - ### 2、API
+  - ```python
+    def __init__(
+        threshold: float,
+    )
+    ```
+    - 初始化声纹模型，确定判别阈值。
+
+    - **参数**
+
+      - `threshold`：设定模型判别声纹相似度的得分阈值，默认为 0.25。
+
   - ```python
     def speaker_embedding(
         wav: os.PathLike,
