@@ -80,6 +80,8 @@ train_dataset = hub.datasets.ChnSentiCorp(
     tokenizer=model.get_tokenizer(), max_seq_len=128, mode='train')
 dev_dataset = hub.datasets.ChnSentiCorp(
     tokenizer=model.get_tokenizer(), max_seq_len=128, mode='dev')
+test_dataset = hub.datasets.ChnSentiCorp(
+    tokenizer=model.get_tokenizer(), max_seq_len=128, mode='test')
 ```
 
 * `tokenizer`：表示该module所需用到的tokenizer，其将对输入文本完成切词，并转化成module运行所需模型输入格式。
@@ -95,7 +97,7 @@ dev_dataset = hub.datasets.ChnSentiCorp(
 
 ```python
 optimizer = paddle.optimizer.Adam(learning_rate=5e-5, parameters=model.parameters())
-trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls')
+trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls', use_gpu=True)
 
 trainer.train(train_dataset, epochs=3, batch_size=32, eval_dataset=dev_dataset)
 
