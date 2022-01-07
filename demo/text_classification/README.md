@@ -85,7 +85,7 @@ test_dataset = hub.datasets.ChnSentiCorp(
 ```
 
 * `tokenizer`：表示该module所需用到的tokenizer，其将对输入文本完成切词，并转化成module运行所需模型输入格式。
-* `mode`：选择数据模式，可选项有 `train`, `test`, `val`， 默认为`train`。
+* `mode`：选择数据模式，可选项有 `train`, `test`, `dev`， 默认为`train`。
 * `max_seq_len`：ERNIE/BERT模型使用的最大序列长度，若出现显存不足，请适当调低这一参数。
 
 预训练模型ERNIE对中文数据的处理是以字为单位，tokenizer作用为将原始输入文本转化成模型model可以接受的输入数据形式。 PaddleHub 2.0中的各种预训练模型已经内置了相应的tokenizer，可以通过`model.get_tokenizer`方法获取。
