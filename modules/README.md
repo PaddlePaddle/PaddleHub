@@ -477,7 +477,7 @@ English | [简体中文](README_ch.md)
 
 ## Audio
 
-  - ### Video cloning
+  - ### Voice cloning
 
 |module|Network|Dataset|Introduction|
 |--|--|--|--|
