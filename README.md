@@ -116,7 +116,7 @@ English | [简体中文](README_ch.md)
 
 If you have any questions during the use of the model, you can join the official WeChat group to get more efficient questions and answers, and fully communicate with developers from all walks of life. We look forward to your joining.
 <div align="center">
-<img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
+<img src="https://user-images.githubusercontent.com/23690325/147116815-d99c8b54-716f-4009-a6cd-87f2621d248f.jpg"  width = "200" height = "200" />
 </div>  
 please add WeChat above and send "Hub" to the robot, the robot will invite you to join the group automatically.
 
@@ -231,3 +231,4 @@ We welcome you to contribute code to PaddleHub, and thank you for your feedback.
 * Many thanks to [zl1271](https://github.com/zl1271) for fixing serving docs typo
 * Many thanks to [AK391](https://github.com/AK391) for adding the webdemo of UGATIT and deoldify models in Hugging Face spaces
 * Many thanks to [itegel](https://github.com/itegel) for fixing quick start docs typo
+* Many thanks to [AK391](https://github.com/AK391) for adding the webdemo of Photo2Cartoon model in Hugging Face spaces

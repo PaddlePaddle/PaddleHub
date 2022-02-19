@@ -30,7 +30,7 @@
 
 ## 简介与特性
 - PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型
-- **【模型种类丰富】**: 涵盖CV、NLP、Audio、Video、工业应用主流五大品类的 300+ 预训练模型，全部开源下载，离线可运行
+- **【模型种类丰富】**: 涵盖CV、NLP、Audio、Video、工业应用主流五大品类的 350+ 预训练模型，全部开源下载，离线可运行
 - **【超低使用门槛】**：无需深度学习背景、无需数据与训练过程，可快速使用AI模型
 - **【一键模型快速预测】**：通过一行命令行或者极简的Python API实现模型调用，可快速体验模型效果
 - **【一键模型转服务化】**：一行命令，搭建深度学习模型API服务化部署能力
@@ -122,7 +122,7 @@
 ## 欢迎加入PaddleHub技术交流群
 - 在使用模型过程中有任何问题，可以加入官方微信群，获得更高效的问题答疑，与各行各业开发者充分交流，期待您的加入。
 <div align="center">
-<img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
+<img src="https://user-images.githubusercontent.com/23690325/147116815-d99c8b54-716f-4009-a6cd-87f2621d248f.jpg"  width = "200" height = "200" />
 </div>  
 扫码备注"Hub"加好友之后，再发送“Hub”，会自动邀请您入群。  
 
@@ -247,3 +247,4 @@ print(results)
 * 非常感谢[zl1271](https://github.com/zl1271)修复了serving文档中的错别字
 * 非常感谢[AK391](https://github.com/AK391)在Hugging Face spaces中添加了UGATIT和deoldify模型的web demo
 * 非常感谢[itegel](https://github.com/itegel)修复了快速开始文档中的错别字
+* 非常感谢[AK391](https://github.com/AK391)在Hugging Face spaces中添加了Photo2Cartoon模型的web demo
