@@ -458,8 +458,8 @@ English | [简体中文](README_ch.md)
 
 |module|Network|Dataset|Introduction|
 |--|--|--|--|
-|[jieba_paddle](text/lexical_analysis/jieba_paddle)|BiGRU+CRF|百度自建数据集|百度自研联合的词法分析模型，能整体性地完成中文分词、词性标注、专名识别任务。在百度自建数据集上评测，LAC效果：Precision=88.0%，Recall=88.7%，F1-Score=88.4%。|
-|[lac](text/lexical_analysis/lac)|BiGRU+CRF|百度自建数据集|jieba使用Paddle搭建的切词网络（双向GRU）。同时支持jieba的传统切词方法，如精确模式、全模式、搜索引擎模式等切词模式。|
+|[jieba_paddle](text/lexical_analysis/jieba_paddle)|BiGRU+CRF|百度自建数据集|jieba使用Paddle搭建的切词网络（双向GRU）。同时支持jieba的传统切词方法，如精确模式、全模式、搜索引擎模式等切词模式。|
+|[lac](text/lexical_analysis/lac)|BiGRU+CRF|百度自建数据集|百度自研联合的词法分析模型，能整体性地完成中文分词、词性标注、专名识别任务。在百度自建数据集上评测，LAC效果：Precision=88.0%，Recall=88.7%，F1-Score=88.4%。|
 
   - ### Punctuation Restoration
 
