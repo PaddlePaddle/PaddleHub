@@ -135,12 +135,12 @@ English | [简体中文](README_ch.md)
 
   - ### Image Generation
 
-|module|Network|Dataset|Introduction|
-|--|--|--|--|
+|module|Network|Dataset|Introduction| Huggingface Spaces Demo|
+|--|--|--|--|--|
 |[pixel2style2pixel](image/Image_gan/gan/pixel2style2pixel/)|Pixel2Style2Pixel|-|人脸转正|
 |[stgan_bald](image/Image_gan/gan/stgan_bald/)|STGAN|CelebA|秃头生成器|
 |[styleganv2_editing](image/Image_gan/gan/styleganv2_editing)|StyleGAN V2|-|人脸编辑|
-|[wav2lip](image/Image_gan/gan/wav2lip)|wav2lip|LRS2|唇形生成|
+|[wav2lip](image/Image_gan/gan/wav2lip)|wav2lip|LRS2|唇形生成| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/wav2lip) |
 |[attgan_celeba](image/Image_gan/attgan_celeba/)|AttGAN|Celeba|人脸编辑|
 |[cyclegan_cityscapes](image/Image_gan/cyclegan_cityscapes)|CycleGAN|Cityscapes|实景图和语义分割结果互相转换|
 |[stargan_celeba](image/Image_gan/stargan_celeba)|StarGAN|Celeba|人脸编辑|
