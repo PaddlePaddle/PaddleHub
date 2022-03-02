@@ -282,7 +282,7 @@ English | [简体中文](README_ch.md)
 
 |module|Network|Dataset|Introduction|Huggingface Spaces Demo|
 |--|--|--|--|--|
-|[MiDaS_Large](image/depth_estimation/MiDaS_Large)|-|3D Movies, WSVD, ReDWeb, MegaDepth|| 
+|[MiDaS_Large](image/depth_estimation/MiDaS_Large)|-|3D Movies, WSVD, ReDWeb, MegaDepth|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/MiDaS_Large) |
 |[MiDaS_Small](image/depth_estimation/MiDaS_Small)|-|3D Movies, WSVD, ReDWeb, MegaDepth, etc.|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/MiDaS_Small) |
 
 ## Text
