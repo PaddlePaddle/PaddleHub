@@ -251,8 +251,8 @@ def word_to_ids(words, word2id_dict, word_replace_dict, oov_id=None):
 
 def parse_result(lines, crf_decode, id2label_dict, interventer=None):
     """Convert model's output tensor into string and tags """
-    offset_list = crf_decode.lod[0]
-    crf_decode = crf_decode.as_ndarray()
+    offset_list = crf_decode.lod()[0]
+    crf_decode = crf_decode.copy_to_cpu()
     batch_size = len(offset_list) - 1
     batch_out = []
     for sent_index in range(batch_size):

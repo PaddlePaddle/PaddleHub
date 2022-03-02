@@ -8,6 +8,17 @@
 $ hub run msgnet --input_path "/PATH/TO/ORIGIN/IMAGE" --style_path "/PATH/TO/STYLE/IMAGE"
 ```
 
+## 脚本预测
+
+```python
+import paddle
+import paddlehub as hub
+
+if __name__ == '__main__':
+    model = hub.Module(name='msgnet')
+    result = model.predict(origin=["venice-boat.jpg"], style="candy.jpg", visualization=True, save_path ='style_tranfer')
+```
+
 ## 如何开始Fine-tune
 
 在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用msgnet模型对[MiniCOCO](../../docs/reference/datasets.md#class-hubdatasetsMiniCOCO)等数据集进行Fine-tune。

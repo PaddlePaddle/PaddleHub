@@ -50,21 +50,15 @@ def draw_bounding_box_on_image(image_path, data_list, save_dir):
     image = Image.open(image_path)
     draw = ImageDraw.Draw(image)
     for data in data_list:
-        left, right, top, bottom = data['left'], data['right'], data[
-            'top'], data['bottom']
+        left, right, top, bottom = data['left'], data['right'], data['top'], data['bottom']
         # draw bbox
-        draw.line([(left, top), (left, bottom), (right, bottom), (right, top),
-                   (left, top)],
-                  width=2,
-                  fill='red')
+        draw.line([(left, top), (left, bottom), (right, bottom), (right, top), (left, top)], width=2, fill='red')
         # draw label
         if image.mode == 'RGB':
             text = data['label'] + ": %.2f%%" % (100 * data['confidence'])
             textsize_width, textsize_height = draw.textsize(text=text)
             draw.rectangle(
-                xy=(left, top - (textsize_height + 5),
-                    left + textsize_width + 10, top),
-                fill=(255, 255, 255))
+                xy=(left, top - (textsize_height + 5), left + textsize_width + 10, top), fill=(255, 255, 255))
             draw.text(xy=(left, top - 15), text=text, fill=(0, 0, 0))
 
     save_name = get_save_image_name(image, save_dir, image_path)
@@ -92,14 +86,7 @@ def load_label_info(file_path):
         return label_names
 
 
-def postprocess(paths,
-                images,
-                data_out,
-                score_thresh,
-                label_names,
-                output_dir,
-                handle_id,
-                visualization=True):
+def postprocess(paths, images, data_out, score_thresh, label_names, output_dir, handle_id, visualization=True):
     """
     postprocess the lod_tensor produced by fluid.Executor.run
 
@@ -107,8 +94,6 @@ def postprocess(paths,
         paths (list[str]): The paths of images.
         images (list(numpy.ndarray)): images data, shape of each is [H, W, C]
         data_out (lod_tensor): data output of predictor.
-        batch_size (int): batch size.
-        use_gpu (bool): Whether to use gpu.
         output_dir (str): The path to store output images.
         visualization (bool): Whether to save image or not.
         score_thresh (float): the low limit of bounding box.
@@ -126,9 +111,8 @@ def postprocess(paths,
                 confidence (float): The confidence of detection result.
             save_path (str): The path to save output images.
     """
-    lod_tensor = data_out[0]
-    lod = lod_tensor.lod[0]
-    results = lod_tensor.as_ndarray()
+    results = data_out.copy_to_cpu()
+    lod = data_out.lod()[0]
 
     check_dir(output_dir)
 
@@ -157,9 +141,7 @@ def postprocess(paths,
             org_img = org_img.astype(np.uint8)
             org_img = Image.fromarray(org_img[:, :, ::-1])
             if visualization:
-                org_img_path = get_save_image_name(
-                    org_img, output_dir, 'image_numpy_{}'.format(
-                        (handle_id + index)))
+                org_img_path = get_save_image_name(org_img, output_dir, 'image_numpy_{}'.format((handle_id + index)))
                 org_img.save(org_img_path)
         org_img_height = org_img.height
         org_img_width = org_img.width
@@ -175,13 +157,11 @@ def postprocess(paths,
             dt = {}
             dt['label'] = label_names[category_id]
             dt['confidence'] = float(confidence)
-            dt['left'], dt['top'], dt['right'], dt['bottom'] = clip_bbox(
-                bbox, org_img_width, org_img_height)
+            dt['left'], dt['top'], dt['right'], dt['bottom'] = clip_bbox(bbox, org_img_width, org_img_height)
             output_i['data'].append(dt)
 
         output.append(output_i)
         if visualization:
-            output_i['save_path'] = draw_bounding_box_on_image(
-                org_img_path, output_i['data'], output_dir)
+            output_i['save_path'] = draw_bounding_box_on_image(org_img_path, output_i['data'], output_dir)
 
     return output

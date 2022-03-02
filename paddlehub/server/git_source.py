@@ -21,12 +21,6 @@ import sys
 from collections import OrderedDict
 from typing import List
 
-# For some environments where git is not installed, we need to set this environment
-# variable to avoid errors.
-os.environ['GIT_PYTHON_REFRESH'] = 'quiet'
-import git
-from git import Repo
-
 from paddlehub.module.module import RunModule
 from paddlehub.env import SOURCES_HOME
 from paddlehub.utils import log, utils
@@ -42,6 +36,11 @@ class GitSource(object):
     '''
 
     def __init__(self, url: str, path: str = None):
+        # For some environments where git is not installed, we need to set this environment
+        # variable to avoid errors.
+        os.environ['GIT_PYTHON_REFRESH'] = 'quiet'
+        from git import Repo
+
         self.url = url
         self.path = os.path.join(SOURCES_HOME, utils.md5(url))
 
@@ -152,6 +151,8 @@ class GitSource(object):
         Args:
             url(str) : Url to check
         '''
+        import git
+
         try:
             git.cmd.Git().ls_remote(url)
             return True

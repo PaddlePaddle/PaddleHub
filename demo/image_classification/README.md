@@ -8,6 +8,18 @@
 $ hub run resnet50_vd_imagenet_ssld --input_path "/PATH/TO/IMAGE" --top_k 5
 ```
 
+## 脚本预测
+
+```python
+import paddle
+import paddlehub as hub
+
+if __name__ == '__main__':
+
+    model = hub.Module(name='resnet50_vd_imagenet_ssld',)
+    result = model.predict([PATH/TO/IMAGE])
+```
+
 ## 如何开始Fine-tune
 
 在完成安装PaddlePaddle与PaddleHub后，通过执行`python train.py`即可开始使用resnet50_vd_imagenet_ssld对[Flowers](../../docs/reference/datasets.md#class-hubdatasetsflowers)等数据集进行Fine-tune。

@@ -18,8 +18,8 @@ import time
 from collections import defaultdict
 from typing import Any, Callable, Generic, List
 
-import numpy as np
 import paddle
+import numpy as np
 from visualdl import LogWriter
 
 from paddlehub.utils.log import logger
@@ -82,6 +82,7 @@ class Trainer(object):
         if self.nranks > 1:
             paddle.distributed.init_parallel_env()
             self.model = paddle.DataParallel(self.model)
+
         self.compare_metrics = self._compare_metrics if not compare_metrics else compare_metrics
         self._load_checkpoint()
 
@@ -178,8 +179,14 @@ class Trainer(object):
             collate_fn(callable): function to generate mini-batch data by merging the sample list.
                 None for only stack each fields of sample in axis 0(same as :attr::`np.stack(..., axis=0)`). Default None
         '''
-        if eval_dataset is not None and not hasattr(self.model, 'validation_step'):
-            raise NotImplementedError('The specified finetuning model does not support evaluation.')
+        if eval_dataset is not None:
+            if isinstance(self.model, paddle.DataParallel):
+                model = self.model._layers
+            else:
+                model = self.model
+
+            if not hasattr(model, 'validation_step'):
+                raise NotImplementedError('The specified finetuning model does not support evaluation.')
 
         batch_sampler = paddle.io.DistributedBatchSampler(
             train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
@@ -294,24 +301,26 @@ class Trainer(object):
                 collate_fn=collate_fn)
 
             self.model.eval()
+            
             avg_loss = num_samples = 0
             sum_metrics = defaultdict(int)
             avg_metrics = defaultdict(int)
 
             with logger.processing('Evaluation on validation dataset'):
-                for batch_idx, batch in enumerate(loader):
-                    result = self.validation_step(batch, batch_idx)
+                with paddle.no_grad():
+                    for batch_idx, batch in enumerate(loader):
+                        result = self.validation_step(batch, batch_idx)
 
-                    loss = result.get('loss', None)
-                    metrics = result.get('metrics', {})
-                    bs = batch[0].shape[0]
-                    num_samples += bs
+                        loss = result.get('loss', None)
+                        metrics = result.get('metrics', {})
+                        bs = batch[0].shape[0]
+                        num_samples += bs
 
-                    if loss:
-                        avg_loss += loss.numpy()[0] * bs
+                        if loss:
+                            avg_loss += loss.numpy()[0] * bs
 
-                    for metric, value in metrics.items():
-                        sum_metrics[metric] += value * bs
+                        for metric, value in metrics.items():
+                            sum_metrics[metric] += value * bs
 
             # print avg metrics and loss
             print_msg = '[Evaluation result]'

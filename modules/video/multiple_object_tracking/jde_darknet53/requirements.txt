@@ -1,2 +1,4 @@
-paddledet >= 2.1.0
+cython
+paddledet >= 2.2.0
 opencv-python
+imageio

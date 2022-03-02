@@ -31,7 +31,7 @@
 
 - ### 1、环境依赖  
 
-  - paddledet >= 2.1.0
+  - paddledet >= 2.2.0
 
   - opencv-python
 
@@ -42,6 +42,7 @@
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+  - 在windows下安装，由于paddledet package会依赖cython-bbox以及pycocotools, 这两个包需要windows用户提前装好，可参考[cython-bbox安装](https://blog.csdn.net/qq_24739717/article/details/105588729)和[pycocotools安装](https://github.com/PaddlePaddle/PaddleX/blob/release/1.3/docs/install.md#pycocotools安装问题)
 
 
 ## 三、模型API预测
@@ -54,7 +55,7 @@
     ```
   - 通过命令行方式实现多目标追踪模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、代码示例
+- ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub

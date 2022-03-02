@@ -19,7 +19,6 @@ import cv2
 import paddle
 import PIL
 import numpy as np
-import matplotlib as plt
 import paddle.nn.functional as F
 from scipy.sparse import csr_matrix
 
@@ -107,6 +106,10 @@ def draw_boxes_on_image(image_path: str,
                         score_thresh: float = 0.5,
                         save_path: str = 'result'):
     """Draw boxes on images."""
+    # On windows, importing paddlenlp and matplotlib at the same time will cause python
+    # to fail to catch C++ exceptions. Delay matplotlib to avoid this problem.
+    import matplotlib as plt
+
     image = np.array(PIL.Image.open(image_path))
     plt.figure()
     _, ax = plt.subplots(1)

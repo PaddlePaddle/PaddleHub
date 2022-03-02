@@ -16,18 +16,19 @@ import cv2
 import glob
 import paddle
 import numpy as np
+import collections
 
-from ppdet.core.workspace import create
 from ppdet.utils.checkpoint import load_weight, load_pretrain_weight
-from ppdet.modeling.mot.utils import Detection, get_crops, scale_coords, clip_box
-from ppdet.modeling.mot.utils import Timer, load_det_results
-from ppdet.modeling.mot import visualization as mot_vis
 from ppdet.metrics import Metric, MOTMetric, KITTIMOTMetric
 import ppdet.utils.stats as stats
 from ppdet.engine.callbacks import Callback, ComposeCallback
+from ppdet.core.workspace import create
 from ppdet.utils.logger import setup_logger
 
 from .dataset import MOTVideoStream, MOTImageStream
+from .modeling.mot.utils import Detection, get_crops, scale_coords, clip_box
+from .modeling.mot import visualization as mot_vis
+from .utils import Timer
 
 logger = setup_logger(__name__)
 
@@ -70,7 +71,6 @@ class StreamTracker(object):
             timer.tic()
             pred_dets, pred_embs = self.model(data)
             online_targets = self.model.tracker.update(pred_dets, pred_embs)
-
             online_tlwhs, online_ids = [], []
             online_scores = []
             for t in online_targets:
@@ -109,7 +109,6 @@ class StreamTracker(object):
                 with paddle.no_grad():
                     pred_dets, pred_embs = self.model(data)
                 online_targets = self.model.tracker.update(pred_dets, pred_embs)
-
                 online_tlwhs, online_ids = [], []
                 online_scores = []
                 for t in online_targets:
@@ -160,13 +159,12 @@ class StreamTracker(object):
         yield
         results = []
         while True:
-            with paddle.no_grad():
-                try:
-                    results, nf = next(generator)
-                    yield results
-                except StopIteration as e:
-                    self.write_mot_results(result_filename, results, data_type)
-                    return
+            try:
+                results, nf = next(generator)
+                yield results
+            except StopIteration as e:
+                self.write_mot_results(result_filename, results, data_type)
+                return
 
     def videostream_predict(self,
                             video_stream,
@@ -176,7 +174,7 @@ class StreamTracker(object):
                             visualization=True,
                             draw_threshold=0.5):
         assert video_stream is not None, \
-            "--video_file or --image_dir should be set."
+            "--video_stream should be set."
 
         if not os.path.exists(output_dir): os.makedirs(output_dir)
         result_root = os.path.join(output_dir, 'mot_results')
@@ -214,7 +212,12 @@ class StreamTracker(object):
                 logger.info('No output images to save for video')
                 return
             img = cv2.imread(os.path.join(save_dir, '00000.jpg'))
-            video_writer = cv2.VideoWriter(output_video_path, fourcc=cv2.VideoWriter_fourcc('M','J','P','G'), fps=30, frameSize=[img.shape[1],img.shape[0]])
+            video_writer = cv2.VideoWriter(
+                output_video_path,
+                apiPreference=0,
+                fourcc=cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
+                fps=30,
+                frameSize=(img.shape[1], img.shape[0]))
             for i in range(len(imgnames)):
                 imgpath = os.path.join(save_dir, '{:05d}.jpg'.format(i))
                 img = cv2.imread(imgpath)

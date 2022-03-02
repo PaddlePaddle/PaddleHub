@@ -84,7 +84,7 @@ def save_inference_model(dirname,
 * params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
 * combined: 是否将参数保存到统一的一个文件中
 
-## 代码示例
+## 预测代码示例
 
 ```python
 import paddlehub as hub

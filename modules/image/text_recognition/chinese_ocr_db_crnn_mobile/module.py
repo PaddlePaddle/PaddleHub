@@ -21,7 +21,7 @@ from chinese_ocr_db_crnn_mobile.utils import base64_to_cv2, draw_ocr, get_image_
 
 @moduleinfo(
     name="chinese_ocr_db_crnn_mobile",
-    version="1.1.1",
+    version="1.1.2",
     summary="The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions \
         based on the differentiable_binarization_chn module. Then it classifies the text angle and recognizes the chinese texts. ",
     author="paddle-dev",
@@ -490,14 +490,3 @@ class ChineseOCRDBCRNN(hub.Module):
         Add the command input options
         """
         self.arg_input_group.add_argument('--input_path', type=str, default=None, help="diretory to image")
-
-
-if __name__ == '__main__':
-    ocr = ChineseOCRDBCRNN()
-    image_path = [
-        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/2.jpg', '/mnt/zhangxuefei/PaddleOCR/doc/imgs/12.jpg',
-        '/mnt/zhangxuefei/PaddleOCR/doc/imgs/test_image.jpg'
-    ]
-    res = ocr.recognize_text(paths=image_path, visualization=True)
-    ocr.save_inference_model('save')
-    print(res)

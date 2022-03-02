@@ -92,33 +92,34 @@ class ImageClassifierModule(RunModule, ImageServing):
             results(list[dict]) : The prediction result of each input image
         '''
         self.eval()
-        res = []
-        total_num = len(images)
-        loop_num = int(np.ceil(total_num / batch_size))
+        with paddle.no_grad():
+            res = []
+            total_num = len(images)
+            loop_num = int(np.ceil(total_num / batch_size))
 
-        for iter_id in range(loop_num):
-            batch_data = []
-            handle_id = iter_id * batch_size
-            for image_id in range(batch_size):
-                try:
-                    image = self.transforms(images[handle_id + image_id])
-                    batch_data.append(image)
-                except:
-                    pass
-            batch_image = np.array(batch_data, dtype='float32')
-            preds, feature = self(paddle.to_tensor(batch_image))
-            preds = F.softmax(preds, axis=1).numpy()
-            pred_idxs = np.argsort(preds)[:, ::-1][:, :top_k]
+            for iter_id in range(loop_num):
+                batch_data = []
+                handle_id = iter_id * batch_size
+                for image_id in range(batch_size):
+                    try:
+                        image = self.transforms(images[handle_id + image_id])
+                        batch_data.append(image)
+                    except:
+                        pass
+                batch_image = np.array(batch_data, dtype='float32')
+                preds, feature = self(paddle.to_tensor(batch_image))
+                preds = F.softmax(preds, axis=1).numpy()
+                pred_idxs = np.argsort(preds)[:, ::-1][:, :top_k]
 
-            for i, pred in enumerate(pred_idxs):
-                res_dict = {}
-                for k in pred:
-                    class_name = self.labels[int(k)]
-                    res_dict[class_name] = preds[i][k]
+                for i, pred in enumerate(pred_idxs):
+                    res_dict = {}
+                    for k in pred:
+                        class_name = self.labels[int(k)]
+                        res_dict[class_name] = preds[i][k]
 
-                res.append(res_dict)
+                    res.append(res_dict)
 
-        return res
+            return res
 
     @serving
     def serving_method(self, images: list, top_k: int, **kwargs):
@@ -223,54 +224,55 @@ class ImageColorizeModule(RunModule, ImageServing):
             res(list[dict]) : The prediction result of each input image
         '''
         self.eval()
-        lab2rgb = T.LAB2RGB()
-        res = []
-        total_num = len(images)
-        loop_num = int(np.ceil(total_num / batch_size))
-        for iter_id in range(loop_num):
-            batch_data = []
-            handle_id = iter_id * batch_size
-            for image_id in range(batch_size):
-                try:
-                    image = self.transforms(images[handle_id + image_id])
-                    batch_data.append(image)
-                except:
-                    pass
-            batch_data = np.array(batch_data)
-            im = self.preprocess(batch_data)
-            out_class, out_reg = self(im['A'], im['hint_B'], im['mask_B'])
+        with paddle.no_grad():
+            lab2rgb = T.LAB2RGB()
+            res = []
+            total_num = len(images)
+            loop_num = int(np.ceil(total_num / batch_size))
+            for iter_id in range(loop_num):
+                batch_data = []
+                handle_id = iter_id * batch_size
+                for image_id in range(batch_size):
+                    try:
+                        image = self.transforms(images[handle_id + image_id])
+                        batch_data.append(image)
+                    except:
+                        pass
+                batch_data = np.array(batch_data)
+                im = self.preprocess(batch_data)
+                out_class, out_reg = self(im['A'], im['hint_B'], im['mask_B'])
 
-            visual_ret = OrderedDict()
-            for i in range(im['A'].shape[0]):
-                gray = lab2rgb(np.concatenate((im['A'].numpy(), np.zeros(im['B'].shape)), axis=1))[i]
-                gray = np.clip(np.transpose(gray, (1, 2, 0)), 0, 1) * 255
-                visual_ret['gray'] = gray.astype(np.uint8)
-                hint = lab2rgb(np.concatenate((im['A'].numpy(), im['hint_B'].numpy()), axis=1))[i]
-                hint = np.clip(np.transpose(hint, (1, 2, 0)), 0, 1) * 255
-                visual_ret['hint'] = hint.astype(np.uint8)
-                real = lab2rgb(np.concatenate((im['A'].numpy(), im['B'].numpy()), axis=1))[i]
-                real = np.clip(np.transpose(real, (1, 2, 0)), 0, 1) * 255
-                visual_ret['real'] = real.astype(np.uint8)
-                fake = lab2rgb(np.concatenate((im['A'].numpy(), out_reg.numpy()), axis=1))[i]
-                fake = np.clip(np.transpose(fake, (1, 2, 0)), 0, 1) * 255
-                visual_ret['fake_reg'] = fake.astype(np.uint8)
+                visual_ret = OrderedDict()
+                for i in range(im['A'].shape[0]):
+                    gray = lab2rgb(np.concatenate((im['A'].numpy(), np.zeros(im['B'].shape)), axis=1))[i]
+                    gray = np.clip(np.transpose(gray, (1, 2, 0)), 0, 1) * 255
+                    visual_ret['gray'] = gray.astype(np.uint8)
+                    hint = lab2rgb(np.concatenate((im['A'].numpy(), im['hint_B'].numpy()), axis=1))[i]
+                    hint = np.clip(np.transpose(hint, (1, 2, 0)), 0, 1) * 255
+                    visual_ret['hint'] = hint.astype(np.uint8)
+                    real = lab2rgb(np.concatenate((im['A'].numpy(), im['B'].numpy()), axis=1))[i]
+                    real = np.clip(np.transpose(real, (1, 2, 0)), 0, 1) * 255
+                    visual_ret['real'] = real.astype(np.uint8)
+                    fake = lab2rgb(np.concatenate((im['A'].numpy(), out_reg.numpy()), axis=1))[i]
+                    fake = np.clip(np.transpose(fake, (1, 2, 0)), 0, 1) * 255
+                    visual_ret['fake_reg'] = fake.astype(np.uint8)
 
-                if visualization:
-                    if isinstance(images[handle_id + i], str):
-                        org_img = cv2.imread(images[handle_id + i]).astype('float32')
-                    else:
-                        org_img = images[handle_id + i]
-                    h, w, c = org_img.shape
-                    fake_name = "fake_" + str(time.time()) + ".png"
-                    if not os.path.exists(save_path):
-                        os.mkdir(save_path)
-                    fake_path = os.path.join(save_path, fake_name)
-                    visual_gray = Image.fromarray(visual_ret['fake_reg'])
-                    visual_gray = visual_gray.resize((w, h), Image.BILINEAR)
-                    visual_gray.save(fake_path)
+                    if visualization:
+                        if isinstance(images[handle_id + i], str):
+                            org_img = cv2.imread(images[handle_id + i]).astype('float32')
+                        else:
+                            org_img = images[handle_id + i]
+                        h, w, c = org_img.shape
+                        fake_name = "fake_" + str(time.time()) + ".png"
+                        if not os.path.exists(save_path):
+                            os.mkdir(save_path)
+                        fake_path = os.path.join(save_path, fake_name)
+                        visual_gray = Image.fromarray(visual_ret['fake_reg'])
+                        visual_gray = visual_gray.resize((w, h), Image.BILINEAR)
+                        visual_gray.save(fake_path)
 
-                res.append(visual_ret)
-        return res
+                    res.append(visual_ret)
+            return res
 
     @serving
     def serving_method(self, images: list, **kwargs):
@@ -393,60 +395,61 @@ class Yolov3Module(RunModule, ImageServing):
             labels(np.ndarray): Predict labels.
         '''
         self.eval()
-        boxes = []
-        scores = []
-        self.downsample = 32
-        im = self.transform(imgpath)
-        h, w, c = utils.img_shape(imgpath)
-        im_shape = paddle.to_tensor(np.array([[h, w]]).astype('int32'))
-        label_names = utils.get_label_infos(filelist)
-        img_data = paddle.to_tensor(np.array([im]).astype('float32'))
+        with paddle.no_grad():
+            boxes = []
+            scores = []
+            self.downsample = 32
+            im = self.transform(imgpath)
+            h, w, c = utils.img_shape(imgpath)
+            im_shape = paddle.to_tensor(np.array([[h, w]]).astype('int32'))
+            label_names = utils.get_label_infos(filelist)
+            img_data = paddle.to_tensor(np.array([im]).astype('float32'))
 
-        outputs = self(img_data)
+            outputs = self(img_data)
 
-        for i, out in enumerate(outputs):
-            anchor_mask = self.anchor_masks[i]
-            mask_anchors = []
-            for m in anchor_mask:
-                mask_anchors.append((self.anchors[2 * m]))
-                mask_anchors.append(self.anchors[2 * m + 1])
+            for i, out in enumerate(outputs):
+                anchor_mask = self.anchor_masks[i]
+                mask_anchors = []
+                for m in anchor_mask:
+                    mask_anchors.append((self.anchors[2 * m]))
+                    mask_anchors.append(self.anchors[2 * m + 1])
 
-            box, score = F.yolo_box(
-                x=out,
-                img_size=im_shape,
-                anchors=mask_anchors,
-                class_num=self.class_num,
-                conf_thresh=self.valid_thresh,
-                downsample_ratio=self.downsample,
-                name="yolo_box" + str(i))
+                box, score = F.yolo_box(
+                    x=out,
+                    img_size=im_shape,
+                    anchors=mask_anchors,
+                    class_num=self.class_num,
+                    conf_thresh=self.valid_thresh,
+                    downsample_ratio=self.downsample,
+                    name="yolo_box" + str(i))
 
-            boxes.append(box)
-            scores.append(paddle.transpose(score, perm=[0, 2, 1]))
-            self.downsample //= 2
+                boxes.append(box)
+                scores.append(paddle.transpose(score, perm=[0, 2, 1]))
+                self.downsample //= 2
 
-        yolo_boxes = paddle.concat(boxes, axis=1)
-        yolo_scores = paddle.concat(scores, axis=2)
+            yolo_boxes = paddle.concat(boxes, axis=1)
+            yolo_scores = paddle.concat(scores, axis=2)
 
-        pred = F.multiclass_nms(
-            bboxes=yolo_boxes,
-            scores=yolo_scores,
-            score_threshold=self.valid_thresh,
-            nms_top_k=self.nms_topk,
-            keep_top_k=self.nms_posk,
-            nms_threshold=self.nms_thresh,
-            background_label=-1)
+            pred = F.multiclass_nms(
+                bboxes=yolo_boxes,
+                scores=yolo_scores,
+                score_threshold=self.valid_thresh,
+                nms_top_k=self.nms_topk,
+                keep_top_k=self.nms_posk,
+                nms_threshold=self.nms_thresh,
+                background_label=-1)
 
-        bboxes = pred.numpy()
-        labels = bboxes[:, 0].astype('int32')
-        scores = bboxes[:, 1].astype('float32')
-        boxes = bboxes[:, 2:].astype('float32')
+            bboxes = pred.numpy()
+            labels = bboxes[:, 0].astype('int32')
+            scores = bboxes[:, 1].astype('float32')
+            boxes = bboxes[:, 2:].astype('float32')
 
-        if visualization:
-            if not os.path.exists(save_path):
-                os.mkdir(save_path)
-            utils.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5, save_path)
+            if visualization:
+                if not os.path.exists(save_path):
+                    os.mkdir(save_path)
+                utils.draw_boxes_on_image(imgpath, boxes, scores, labels, label_names, 0.5, save_path)
 
-        return boxes, scores, labels
+            return boxes, scores, labels
 
 
 class StyleTransferModule(RunModule, ImageServing):
@@ -521,37 +524,38 @@ class StyleTransferModule(RunModule, ImageServing):
             output(list[np.ndarray]) : The style transformed images with bgr mode.
         '''
         self.eval()
-        style = paddle.to_tensor(self.transform(style).astype('float32'))
-        style = style.unsqueeze(0)
+        with paddle.no_grad():
+            style = paddle.to_tensor(self.transform(style).astype('float32'))
+            style = style.unsqueeze(0)
 
-        res = []
-        total_num = len(origin)
-        loop_num = int(np.ceil(total_num / batch_size))
-        for iter_id in range(loop_num):
-            batch_data = []
-            handle_id = iter_id * batch_size
-            for image_id in range(batch_size):
-                try:
-                    image = self.transform(origin[handle_id + image_id])
-                    batch_data.append(image.astype('float32'))
-                except:
-                    pass
+            res = []
+            total_num = len(origin)
+            loop_num = int(np.ceil(total_num / batch_size))
+            for iter_id in range(loop_num):
+                batch_data = []
+                handle_id = iter_id * batch_size
+                for image_id in range(batch_size):
+                    try:
+                        image = self.transform(origin[handle_id + image_id])
+                        batch_data.append(image.astype('float32'))
+                    except:
+                        pass
 
-            batch_image = np.array(batch_data)
-            content = paddle.to_tensor(batch_image)
+                batch_image = np.array(batch_data)
+                content = paddle.to_tensor(batch_image)
 
-            self.setTarget(style)
-            output = self(content)
-            for num in range(batch_size):
-                out = paddle.clip(output[num].transpose((1, 2, 0)), 0, 255).numpy().astype(np.uint8)
-                res.append(out)
-                if visualization:
-                    style_name = "style_" + str(time.time()) + ".png"
-                    if not os.path.exists(save_path):
-                        os.mkdir(save_path)
-                    path = os.path.join(save_path, style_name)
-                    cv2.imwrite(path, out)
-        return res
+                self.setTarget(style)
+                output = self(content)
+                for num in range(batch_size):
+                    out = paddle.clip(output[num].transpose((1, 2, 0)), 0, 255).numpy().astype(np.uint8)
+                    res.append(out)
+                    if visualization:
+                        style_name = "style_" + str(time.time()) + ".png"
+                        if not os.path.exists(save_path):
+                            os.mkdir(save_path)
+                        path = os.path.join(save_path, style_name)
+                        cv2.imwrite(path, out)
+            return res
 
     @serving
     def serving_method(self, images: list, **kwargs):
@@ -655,47 +659,48 @@ class ImageSegmentationModule(ImageServing, RunModule):
             output(list[np.ndarray]) : The segmentation mask.
         '''
         self.eval()
-        result = []
+        with paddle.no_grad():
+            result = []
 
-        total_num = len(images)
-        loop_num = int(np.ceil(total_num / batch_size))
-        for iter_id in range(loop_num):
-            batch_data = []
-            handle_id = iter_id * batch_size
-            for image_id in range(batch_size):
-                try:
-                    image, _ = self.transform(images[handle_id + image_id])
-                    batch_data.append(image)
-                except:
-                    pass
-            batch_image = np.array(batch_data).astype('float32')
-            pred = self(paddle.to_tensor(batch_image))
-            pred = paddle.argmax(pred[0], axis=1, keepdim=True, dtype='int32')
+            total_num = len(images)
+            loop_num = int(np.ceil(total_num / batch_size))
+            for iter_id in range(loop_num):
+                batch_data = []
+                handle_id = iter_id * batch_size
+                for image_id in range(batch_size):
+                    try:
+                        image, _ = self.transform(images[handle_id + image_id])
+                        batch_data.append(image)
+                    except:
+                        pass
+                batch_image = np.array(batch_data).astype('float32')
+                pred = self(paddle.to_tensor(batch_image))
+                pred = paddle.argmax(pred[0], axis=1, keepdim=True, dtype='int32')
 
-            for num in range(pred.shape[0]):
-                if isinstance(images[handle_id + num], str):
-                    image = cv2.imread(images[handle_id + num])
-                else:
-                    image = images[handle_id + num]
-                h, w, c = image.shape
-                pred_final = utils.reverse_transform(pred[num:num + 1], (h, w), self.transforms.transforms)
-                pred_final = paddle.squeeze(pred_final)
-                pred_final = pred_final.numpy().astype('uint8')
+                for num in range(pred.shape[0]):
+                    if isinstance(images[handle_id + num], str):
+                        image = cv2.imread(images[handle_id + num])
+                    else:
+                        image = images[handle_id + num]
+                    h, w, c = image.shape
+                    pred_final = utils.reverse_transform(pred[num:num + 1], (h, w), self.transforms.transforms)
+                    pred_final = paddle.squeeze(pred_final)
+                    pred_final = pred_final.numpy().astype('uint8')
 
-                if visualization:
-                    added_image = utils.visualize(images[handle_id + num], pred_final, weight=0.6)
-                    pred_mask = utils.get_pseudo_color_map(pred_final)
-                    pred_image_path = os.path.join(save_path, 'image', str(time.time()) + ".png")
-                    pred_mask_path = os.path.join(save_path, 'mask', str(time.time()) + ".png")
-                    if not os.path.exists(os.path.dirname(pred_image_path)):
-                        os.makedirs(os.path.dirname(pred_image_path))
-                    if not os.path.exists(os.path.dirname(pred_mask_path)):
-                        os.makedirs(os.path.dirname(pred_mask_path))
-                    cv2.imwrite(pred_image_path, added_image)
-                    pred_mask.save(pred_mask_path)
+                    if visualization:
+                        added_image = utils.visualize(images[handle_id + num], pred_final, weight=0.6)
+                        pred_mask = utils.get_pseudo_color_map(pred_final)
+                        pred_image_path = os.path.join(save_path, 'image', str(time.time()) + ".png")
+                        pred_mask_path = os.path.join(save_path, 'mask', str(time.time()) + ".png")
+                        if not os.path.exists(os.path.dirname(pred_image_path)):
+                            os.makedirs(os.path.dirname(pred_image_path))
+                        if not os.path.exists(os.path.dirname(pred_mask_path)):
+                            os.makedirs(os.path.dirname(pred_mask_path))
+                        cv2.imwrite(pred_image_path, added_image)
+                        pred_mask.save(pred_mask_path)
 
-                result.append(pred_final)
-        return result
+                    result.append(pred_final)
+            return result
 
     @serving
     def serving_method(self, images: List[str], **kwargs):
