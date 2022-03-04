@@ -30,3 +30,9 @@
         -   --show-source
         -   --statistics
         files: \.py$
+
+-   repo: https://github.com/asottile/reorder_python_imports
+    rev: v2.4.0
+    hooks:
+      - id: reorder-python-imports
+        exclude: (?=third_party).*(\.py)$

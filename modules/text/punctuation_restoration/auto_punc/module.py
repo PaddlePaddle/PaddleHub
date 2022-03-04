@@ -29,7 +29,7 @@ from paddlenlp.data import Pad
     name="auto_punc",
     version="1.0.0",
     summary="",
-    author="PaddlePaddle",
+    author="KPatrick",
     author_email="",
     type="text/punctuation_restoration")
 class Ernie(paddle.nn.Layer):
