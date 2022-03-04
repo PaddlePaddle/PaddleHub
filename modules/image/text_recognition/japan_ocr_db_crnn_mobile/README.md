@@ -27,18 +27,9 @@
 
 - ### 1、环境依赖  
 
-  - paddlepaddle >= 1.8.0  
+  - paddlepaddle >= 2.0.2  
 
-  - paddlehub >= 1.8.0    | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
-
-  - shapely
-
-  - pyclipper
-
-  - ```shell
-    $ pip install shapely pyclipper
-    ```
-  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**  
+  - paddlehub >= 2.0.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
@@ -58,7 +49,7 @@
     ```
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、代码示例
+- ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
@@ -160,13 +151,15 @@
     print(r.json()["results"])
     ```
 
-
 ## 五、更新历史
 
 * 1.0.0
 
   初始发布
 
+* 1.1.0
+
+  优化模型
   - ```shell
-    $ hub install japan_ocr_db_crnn_mobile==1.0.0
+    $ hub install japan_ocr_db_crnn_mobile==1.1.0
     ```
