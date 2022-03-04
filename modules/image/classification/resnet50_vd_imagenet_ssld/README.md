@@ -50,7 +50,7 @@
     if __name__ == '__main__':
 
         model = hub.Module(name='resnet50_vd_imagenet_ssld')
-        result = model.predict(['flower.jpg'])
+        result = model.predict(['/PATH/TO/IMAGE'])
     ```
 - ### 3.如何开始Fine-tune
 
@@ -134,7 +134,7 @@
               if __name__ == '__main__':
 
                   model = hub.Module(name='resnet50_vd_imagenet_ssld', label_list=["roses", "tulips", "daisy", "sunflowers", "dandelion"], load_checkpoint='/PATH/TO/CHECKPOINT')
-                  result = model.predict(['flower.jpg'])
+                  result = model.predict(['/PATH/TO/IMAGE'])
               ```
 
 

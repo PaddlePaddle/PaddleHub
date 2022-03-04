@@ -51,7 +51,7 @@
   - ```
     $ hub run falsr_c --input_path "/PATH/TO/IMAGE"
     ```
-- ### 代码示例
+- ### 2、预测代码示例
 
   ```python
   import cv2
@@ -65,7 +65,7 @@
   sr_model.save_inference_model()
   ```
 
-- ### 2、API
+- ### 3、API
 
   - ```python
     def reconstruct(self,
