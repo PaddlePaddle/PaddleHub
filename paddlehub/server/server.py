@@ -159,7 +159,7 @@ class CacheUpdater(threading.Thread):
         if version:
             payload['version'] = version
         api_url = uri_path(hubconf.server, 'search')
-        cache_path = os.path.join("～")
+        cache_path = os.path.join("~")
         hub_name = cache_config.hub_name
         if os.path.exists(cache_path):
             extra = {"command": command, "mtime": os.stat(cache_path).st_mtime, "hub_name": hub_name}

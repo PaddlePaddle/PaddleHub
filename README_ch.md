@@ -4,7 +4,7 @@
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle">
 <p align="center">
 <div align="center">  
-  <h3> <a href=#QuickStart> 快速开始 </a> | <a href="https://paddlehub.readthedocs.io/zh_CN/release-v2.1//"> 教程文档 </a> | <a href="https://www.paddlepaddle.org.cn/hublist"> 模型搜索 </a> | <a href="https://www.paddlepaddle.org.cn/hub"> 演示Demo </a>
+  <h3> <a href=#QuickStart> 快速开始 </a> | <a href="https://paddlehub.readthedocs.io/zh_CN/release-v2.1//"> 教程文档 </a> | <a href="./modules/README_ch.md"> 模型库 </a> | <a href="https://www.paddlepaddle.org.cn/hub"> 演示Demo </a>
   </h3>
 </div>
 
@@ -30,7 +30,7 @@
 
 ## 简介与特性
 - PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型
-- **【模型种类丰富】**: 涵盖CV、NLP、Audio、Video、工业应用主流五大品类的 300+ 预训练模型，全部开源下载，离线可运行
+- **【模型种类丰富】**: 涵盖CV、NLP、Audio、Video、工业应用主流五大品类的 **360+** 预训练模型，全部开源下载，离线可运行
 - **【超低使用门槛】**：无需深度学习背景、无需数据与训练过程，可快速使用AI模型
 - **【一键模型快速预测】**：通过一行命令行或者极简的Python API实现模型调用，可快速体验模型效果
 - **【一键模型转服务化】**：一行命令，搭建深度学习模型API服务化部署能力
@@ -38,6 +38,7 @@
 - **【跨平台兼容性】**：可运行于Linux、Windows、MacOS等多种操作系统
 
 ## 近期更新
+- **2021.12.22**，发布v2.2.0版本。【1】新增100+高质量模型，涵盖对话、语音处理、语义分割、文字识别、文本处理、图像生成等多个领域，预训练模型总量达到[**【360+】**](https://www.paddlepaddle.org.cn/hublist)；【2】新增模型[检索列表](./modules/README_ch.md)，包含模型名称、网络、数据集和使用场景等信息，快速定位用户所需的模型；【3】模型文档排版优化，呈现数据集、指标、模型大小等更多实用信息。
 - **2021.05.12**，新增轻量级中文对话模型[plato-mini](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration)，可以配合使用wechaty实现微信闲聊机器人，[参考demo](https://github.com/KPatr1ck/paddlehub-wechaty-demo)
 - **2021.04.27**，发布v2.1.0版本。【1】新增基于VOC数据集的高精度语义分割模型2个，语音分类模型3个。【2】新增图像语义分割、文本语义匹配、语音分类等相关任务的Fine-Tune能力以及相关任务数据集;完善部署能力：【3】新增ONNX和PaddleInference等模型格式的导出功能。【4】新增[BentoML](https://github.com/bentoml/BentoML) 云原生服务化部署能力，可以支持统一的多框架模型管理和模型部署的工作流，[详细教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/demo/serving/bentoml/cloud-native-model-serving-with-bentoml.ipynb). 更多内容可以参考BentoML 最新 v0.12.1 [Releasenote](https://github.com/bentoml/BentoML/releases/tag/v0.12.1).（感谢@[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic)）的贡献与支持。【5】预训练模型总量达到[**【300】**](https://www.paddlepaddle.org.cn/hublist)个。
 - **2021.02.18**，发布v2.0.0版本，【1】模型开发调试更简单，finetune接口更加灵活易用。视觉类任务迁移学习能力全面升级，支持[图像分类](./demo/image_classification/README.md)、[图像着色](./demo/colorization/README.md)、[风格迁移](./demo/style_transfer/README.md)等多种任务；BERT、ERNIE、RoBERTa等Transformer类模型升级至动态图，支持[文本分类](./demo/text_classification/README.md)、[序列标注](./demo/sequence_labeling/README.md)的Fine-Tune能力；【2】优化服务化部署Serving能力，支持多卡预测、自动负载均衡，性能大幅度提升；【3】新增自动数据增强能力[Auto Augment](./demo/autoaug/README.md)，能高效地搜索适合数据集的数据增强策略组合。【4】新增[词向量模型](./modules/text/embedding)61个，其中包含中文模型51个，英文模型10个；新增[图像分割](./modules/thirdparty/image/semantic_segmentation)模型4个、[深度模型](./modules/thirdparty/image/depth_estimation)2个、[图像生成](./modules/thirdparty/image/Image_gan/style_transfer)模型7个、[文本生成](./modules/thirdparty/text/text_generation)模型3个。【5】预训练模型总量达到[**【274】**](https://www.paddlepaddle.org.cn/hublist) 个。
@@ -47,9 +48,9 @@
 
 
 
-## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)**
+## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)[【模型库】](./modules/README_ch.md)**
 
-### **图像类（161个）**
+### **[图像类（212个）](./modules/README_ch.md#图像)**
 - 包括图像分类、人脸检测、口罩检测、车辆检测、人脸/人体/手部关键点检测、人像分割、80+语言文本识别、图像超分/上色/动漫化等
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_all.gif"  width = "530" height = "400" />
@@ -58,7 +59,7 @@
 - 感谢CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)、[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)、[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)、[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)、[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)、[Zhengxia Zou](https://github.com/jiupinjia/SkyAR)、[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) 提供相关预训练模型，训练能力开放，欢迎体验。
 
 
-### **文本类（129个）**
+### **[文本类（130个）](./modules/README_ch.md#文本)**
 - 包括中文分词、词性标注与命名实体识别、句法分析、AI写诗/对联/情话/藏头诗、中文的评论情感分析、中文色情文本审核等
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "240" />
@@ -67,9 +68,37 @@
 - 感谢CopyRight@[ERNIE](https://github.com/PaddlePaddle/ERNIE)、[LAC](https://github.com/baidu/LAC)、[DDParser](https://github.com/baidu/DDParser)提供相关预训练模型，训练能力开放，欢迎体验。
 
 
-### **语音类（3个）**
+### **[语音类（15个）](./modules/README_ch.md#语音)**
+- ASR语音识别算法，多种算法可选
+- 语音识别效果如下:
+<div align="center">
+<table>
+    <thead>
+        <tr>
+            <th width=250> Input Audio  </th>
+            <th width=550> Recognition Result  </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align = "center">
+            <a href="https://paddlespeech.bj.bcebos.com/PaddleAudio/en.wav" rel="nofollow">
+                    <img align="center" src="./docs/imgs/Readme_Related/audio_icon.png" width=250 ></a><br>
+            </td>
+            <td >I knocked at the door on the ancient side of the building.</td>
+            </tr>
+            <tr>
+            <td align = "center">
+            <a href="https://paddlespeech.bj.bcebos.com/PaddleAudio/zh.wav" rel="nofollow">
+                    <img align="center" src="./docs/imgs/Readme_Related/audio_icon.png" width=250></a><br>
+            </td>
+            <td>我认为跑步最重要的就是给我带来了身体健康。</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
 - TTS语音合成算法，多种算法可选
-- 感谢CopyRight@[Parakeet](https://github.com/PaddlePaddle/Parakeet)提供预训练模型，训练能力开放，欢迎体验。
 - 输入：`Life was like a box of chocolates, you never know what you're gonna get.`
 - 合成效果如下:
 <div align="center">
@@ -100,7 +129,9 @@
 </table>
 </div>
 
-### **视频类（8个）**
+- 感谢CopyRight@[PaddleSpeech](https://github.com/PaddlePaddle/PaddleSpeech)提供预训练模型，训练能力开放，欢迎体验。
+
+### **[视频类（8个）](./modules/README_ch.md#视频)**
 - 包含短视频分类，支持3000+标签种类，可输出TOP-K标签，多种算法可选。
 - 感谢CopyRight@[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo)提供预训练模型，训练能力开放，欢迎体验。
 - `举例：输入一段游泳的短视频，算法可以输出"游泳"结果`
@@ -247,3 +278,4 @@ print(results)
 * 非常感谢[zl1271](https://github.com/zl1271)修复了serving文档中的错别字
 * 非常感谢[AK391](https://github.com/AK391)在Hugging Face spaces中添加了UGATIT和deoldify模型的web demo
 * 非常感谢[itegel](https://github.com/itegel)修复了快速开始文档中的错别字
+* 非常感谢[AK391](https://github.com/AK391)在Hugging Face spaces中添加了Photo2Cartoon模型的web demo
