@@ -21,7 +21,7 @@ def get_platform() -> str:
     return platform.platform()
 
 
-def is_windows() -> str:
+def is_windows() -> bool:
     return get_platform().lower().startswith("windows")
 
 
