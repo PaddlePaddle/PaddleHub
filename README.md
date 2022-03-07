@@ -22,6 +22,7 @@ English | [简体中文](README_ch.md)
     <a href="https://pypi.org/project/paddlehub/"><img src="https://img.shields.io/pypi/dm/paddlehub?color=9cf"></a>
     <a href="https://github.com/PaddlePaddle/PaddleHub/issues"><img src="https://img.shields.io/github/issues/PaddlePaddle/PaddleHub?color=9cc"></a>
     <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers"><img src="https://img.shields.io/github/stars/PaddlePaddle/PaddleHub?color=ccf"></a>
+    <a href="https://huggingface.co/PaddlePaddle"><img src="https://img.shields.io/badge/%F0%9F%A4%97-Hugging%20Face-blue"></a>
 </p>
 
 
@@ -36,6 +37,7 @@ English | [简体中文](README_ch.md)
 - **Cross-platform**: support Linux, Windows, MacOS and other operating systems.
 
 ### Recent updates
+- **2022.02.18:** Added Huggingface Org, add spaces and models to the org: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)
 - **2021.12.22**，The v2.2.0 version is released. [1]More than 100 new models released，including dialog, speech, segmentation, OCR, text processing, GANs, and many other categories. The total number of pre-trained models reaches [**【360】**](https://www.paddlepaddle.org.cn/hublist). [2]Add an [indexed file](./modules/README.md) including useful information of pretrained models supported by PaddleHub. [3]Refactor README of pretrained models.
 - **2021.05.12:** Add an open-domain dialogue system, i.e., [plato-mini](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration), to make it easy to build a chatbot in wechat with the help of the wechaty, [See Demo](https://github.com/KPatr1ck/paddlehub-wechaty-demo)
 - **2021.04.27:** The v2.1.0 version is released. [1] Add supports for five new models, including two high-precision semantic segmentation models based on VOC dataset and three voice classification models. [2] Enforce the transfer learning capabilities for image semantic segmentation, text semantic matching and voice classification on related datasets. [3] Add the export function APIs for two kinds of model formats, i.,e, ONNX and PaddleInference. [4] Add the support for [BentoML](https://github.com/bentoml/BentoML/), which is a cloud native framework for serving deployment. Users can easily serve pre-trained models from PaddleHub by following the [Tutorial notebooks](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/demo/serving/bentoml/cloud-native-model-serving-with-bentoml.ipynb). Also, see this announcement and [Release note](https://github.com/bentoml/BentoML/releases/tag/v0.12.1) from BentoML. (Many thanks to @[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic) for contributing this feature in PaddleHub). [5] The total number of pre-trained models reaches **【300】**.
