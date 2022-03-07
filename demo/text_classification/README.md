@@ -155,7 +155,6 @@ data = [
     ['作为老的四星酒店，房间依然很整洁，相当不错。机场接机服务很好，可以在车上办理入住手续，节省时间。'],
 ]
 label_map = {0: 'negative', 1: 'positive'}
-label_map_rev = {'negative':0, 'positive':1}
 
 model = hub.Module(
     name='ernie_tiny',
@@ -165,7 +164,7 @@ model = hub.Module(
     label_map=label_map)
 results, probs = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False, return_prob=True)
 for idx, text in enumerate(data):
-    print('Data: {} \t Lable: {} \t Prob: {}'.format(text[0], results[idx], probs[idx][label_map_rev[results[idx]]]))
+    print('Data: {} \t Lable: {} \t Prob: {}'.format(text[0], results[idx], probs[idx]))
 ```
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
