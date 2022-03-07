@@ -183,7 +183,7 @@ model = hub.Module(
     label_map=label_map,
 )
 
-results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)
+results = model.predict(data, max_seq_len=128, batch_size=1, use_gpu=True)
 for idx, text in enumerate(text_a):
     print(f'Data: {text} \t Lable: {", ".join(results[idx][1:len(text)+1])}')
 ```
