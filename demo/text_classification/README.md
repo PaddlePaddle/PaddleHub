@@ -162,9 +162,9 @@ model = hub.Module(
     task='seq-cls',
     load_checkpoint='./test_ernie_text_cls/best_model/model.pdparams',
     label_map=label_map)
-results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)
+results, probs = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False, return_prob=True)
 for idx, text in enumerate(data):
-    print('Data: {} \t Lable: {}'.format(text[0], results[idx]))
+    print('Data: {} \t Lable: {} \t Prob: {}'.format(text[0], results[idx], probs[idx]))
 ```
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
