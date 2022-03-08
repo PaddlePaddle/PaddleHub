@@ -11,17 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from PIL import Image, ImageOps
-import cv2
-import numpy as np
 import os
 
+import cv2
+import numpy as np
 import paddle
-
+from PIL import Image
+from PIL import ImageOps
 from ppgan.models.generators import SPADEGenerator
-from ppgan.utils.photopen import data_onehot_pro
 from ppgan.utils.filesystem import load
+from ppgan.utils.photopen import data_onehot_pro
 
 
 class PhotoPenPredictor:
