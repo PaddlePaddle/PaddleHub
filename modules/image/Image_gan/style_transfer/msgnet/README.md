@@ -50,13 +50,14 @@ $ hub run msgnet --input_path "/PATH/TO/ORIGIN/IMAGE" --style_path "/PATH/TO/STY
 
 - ### 2.预测代码示例
 
+
 ```python
 import paddle
 import paddlehub as hub
 
 if __name__ == '__main__':
     model = hub.Module(name='msgnet')
-    result = model.predict(origin=["venice-boat.jpg"], style="candy.jpg", visualization=True, save_path ='style_tranfer')
+    result = model.predict(origin=["/PATH/TO/ORIGIN/IMAGE"], style="/PATH/TO/STYLE/IMAGE", visualization=True, save_path ="/PATH/TO/SAVE/IMAGE")
 ```
 
 
@@ -86,7 +87,7 @@ if __name__ == '__main__':
                 - `transforms`: 数据预处理方式。
                 - `mode`: 选择数据模式，可选项有 `train`, `test`， 默认为`train`。
 
-                - 数据集的准备代码可以参考 [minicoco.py](../../paddlehub/datasets/flowers.py)。`hub.datasets.MiniCOCO()`会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录。
+                - 数据集的准备代码可以参考 [minicoco.py](../../paddlehub/datasets/minicoco.py)。`hub.datasets.MiniCOCO()`会自动从网络下载数据集并解压到用户目录下`$HOME/.paddlehub/dataset`目录。
 
         - Step3: 加载预训练模型
 
@@ -117,7 +118,7 @@ if __name__ == '__main__':
 
             if __name__ == '__main__':
                 model = hub.Module(name='msgnet', load_checkpoint="/PATH/TO/CHECKPOINT")
-                result = model.predict(origin=["venice-boat.jpg"], style="candy.jpg", visualization=True, save_path ='style_tranfer')
+                result = model.predict(origin=["/PATH/TO/ORIGIN/IMAGE"], style="/PATH/TO/STYLE/IMAGE", visualization=True, save_path ="/PATH/TO/SAVE/IMAGE")
             ```
 
             - 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
