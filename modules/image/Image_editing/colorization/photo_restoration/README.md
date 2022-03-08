@@ -51,17 +51,17 @@
 
 
 ## 三、模型API预测
-  - ### 1、代码示例
+  - ### 1、预测代码示例
 
-    ```python
-    import cv2
-    import paddlehub as hub
+    - ```python
+      import cv2
+      import paddlehub as hub
 
-    model = hub.Module(name='photo_restoration', visualization=True)
-    im = cv2.imread('/PATH/TO/IMAGE')
-    res = model.run_image(im)
+      model = hub.Module(name='photo_restoration', visualization=True)
+      im = cv2.imread('/PATH/TO/IMAGE')
+      res = model.run_image(im)
 
-    ```
+      ```
 - ### 2、API
 
 
