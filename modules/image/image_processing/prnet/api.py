@@ -1,10 +1,12 @@
-import numpy as np
 import os
-
-from skimage.io import imread, imsave
-from skimage.transform import estimate_transform, warp
 from time import time
+
+import numpy as np
 import paddle
+from skimage.io import imread
+from skimage.io import imsave
+from skimage.transform import estimate_transform
+from skimage.transform import warp
 
 from .predictor import PosPrediction
 

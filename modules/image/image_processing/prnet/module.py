@@ -11,23 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import os
 import argparse
 import copy
+import os
 
-import paddle
-import paddlehub as hub
-from paddlehub.module.module import moduleinfo, runnable, serving
-import numpy as np
 import cv2
+import numpy as np
+import paddle
 from skimage.io import imread
-from skimage.transform import rescale, resize
+from skimage.transform import rescale
+from skimage.transform import resize
 
-from .util import base64_to_cv2
-from .predictor import PosPrediction
-from .utils.render import render_texture
+import paddlehub as hub
 from .api import PRN
+from .predictor import PosPrediction
+from .util import base64_to_cv2
+from .utils.render import render_texture
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
 @moduleinfo(name="prnet", type="CV/", author="paddlepaddle", author_email="", summary="", version="1.0.0")
