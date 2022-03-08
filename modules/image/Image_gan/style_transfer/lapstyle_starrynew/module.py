@@ -11,21 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import os
 import argparse
 import copy
+import os
 
-import paddle
-import paddlehub as hub
-from paddlehub.module.module import moduleinfo, runnable, serving
-import numpy as np
 import cv2
+import numpy as np
+import paddle
 from skimage.io import imread
-from skimage.transform import rescale, resize
+from skimage.transform import rescale
+from skimage.transform import resize
 
+import paddlehub as hub
 from .model import LapStylePredictor
 from .util import base64_to_cv2
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
 @moduleinfo(
