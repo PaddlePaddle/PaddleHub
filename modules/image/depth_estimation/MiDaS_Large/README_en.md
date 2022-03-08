@@ -77,7 +77,7 @@
       **NOTE:** choose one parameter to provide data from paths and images
 
     - **Return**
-      - res (list\[numpy.ndarray\]): depth data，ndarray.shape 为 \[H, W\]
+      - res (list\[numpy.ndarray\]): depth data，ndarray.shape is  \[H, W\]
 
 
 ## IV.Release Note

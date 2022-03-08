@@ -84,7 +84,7 @@
       **NOTE:** choose one parameter to provide data from paths and images
 
     - **Return**
-      - res (list\[numpy.ndarray\]): result list，ndarray.shape 为 \[H, W, C\]
+      - res (list\[numpy.ndarray\]): result list，ndarray.shape is  \[H, W, C\]
 
 
 ## IV.Server Deployment
