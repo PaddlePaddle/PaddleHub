@@ -16,7 +16,7 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/142995574-6d8b6a01-a3fa-4b4a-8658-233acc9abe62.jpg"  width = "450" height = "300" hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/157190651-595b6964-97c5-4b0b-ac0a-c30c8520a972.png"  width = "450"  hspace='10'/>
     <br />
     输入原图像
     <br />
@@ -24,7 +24,7 @@
     <br />
     输入参考图像
     <br />
-    <img src="https://user-images.githubusercontent.com/22424850/142995812-07ad88f8-cec7-4585-ac9d-6bfd22a2e074.png"  width = "450" height = "300" hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/157205282-89c9ace9-5fec-4112-ace1-edaebbfc30f8.png"  width = "450"  hspace='10'/>
     <br />
     输出图像
      <br />

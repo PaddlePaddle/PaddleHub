@@ -126,10 +126,7 @@ class PRN:
         image = image / 255.
         cropped_image = warp(image, tform.inverse, output_shape=(self.resolution_inp, self.resolution_inp))
 
-        # run our net
-        #st = time()
         cropped_pos = self.net_forward(cropped_image)
-        #print 'net time:', time() - st
 
         # restore
         cropped_vertices = np.reshape(cropped_pos, [-1, 3]).T
