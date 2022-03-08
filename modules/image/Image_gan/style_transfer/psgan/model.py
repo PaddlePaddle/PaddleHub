@@ -11,23 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import argparse
 import os
 import sys
-import argparse
 from pathlib import Path
 
-from PIL import Image
 import numpy as np
-
 import paddle
 import paddle.vision.transforms as T
-from paddle.utils.download import get_weights_path_from_url
 import ppgan.faceutils as futils
-from ppgan.utils.options import parse_args
+from paddle.utils.download import get_weights_path_from_url
+from PIL import Image
+from ppgan.models.builder import build_model
 from ppgan.utils.config import get_config
 from ppgan.utils.filesystem import load
-from ppgan.models.builder import build_model
+from ppgan.utils.options import parse_args
 from ppgan.utils.preprocess import *
 
 

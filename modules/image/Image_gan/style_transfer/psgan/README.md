@@ -16,7 +16,7 @@
 - ### 应用效果展示
   - 样例结果示例：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/145003964-6d6572e0-3103-4898-a738-eb6c61c90be4.jpg"  width = "30%"  hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/157190651-595b6964-97c5-4b0b-ac0a-c30c8520a972.png"  width = "30%"  hspace='10'/>
     <br />
     输入内容图形
     <br />
@@ -24,7 +24,7 @@
     <br />
     输入妆容图形
     <br />
-    <img src="https://user-images.githubusercontent.com/22424850/145003965-288d56f9-49a2-43cb-8647-4a112a8e0dfb.png"  width = "30%"  hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/157190800-b1dd79d4-0eca-4b36-b091-6fcd2c00dcf6.png"  width = "30%"  hspace='10'/>
     <br />
     输出图像
      <br />
