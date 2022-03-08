@@ -11,19 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import os
+import urllib.request
+
 import cv2 as cv
 import numpy as np
-import urllib.request
-from PIL import Image
-
 import paddle
 import paddle.nn.functional as F
 from paddle.vision.transforms import functional
-
+from PIL import Image
+from ppgan.models.generators import DecoderNet
+from ppgan.models.generators import Encoder
+from ppgan.models.generators import RevisionNet
 from ppgan.utils.visual import tensor2img
-from ppgan.models.generators import DecoderNet, Encoder, RevisionNet
 
 
 def img(img):
