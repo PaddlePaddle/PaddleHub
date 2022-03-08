@@ -54,15 +54,15 @@
     def context(trainable=True, pretrained=True)
     ```
     - **Parameters**
-      - trainable (bool): 计算图的Parameters是否为可训练的；<br/>
-      - pretrained (bool): 是否加载默认的预训练模型.
+      - trainable (bool): whether parameters are trainable；<br/>
+      - pretrained (bool): whether load the pre-trained model.
 
     - **Return**
-      - inputs (dict): 计算图的输入，key 为 'image', value 为图片的张量；<br/>
-      - outputs (dict): 计算图的输出，key 为 'classification' 和 'feature_map'，其相应的值为：
-        - classification (paddle.fluid.framework.Variable): 分类结果，也就是全连接层的输出；
-        - feature\_map (paddle.fluid.framework.Variable): 特征匹配，全连接层前面的那个张量.
-      - context\_prog(fluid.Program): 计算图，用于迁移学习.
+      - inputs (dict): model inputs，key is 'image', value is the image tensor；<br/>
+      - outputs (dict): model outputs，key is 'classification' and 'feature_map'，values：
+        - classification (paddle.fluid.framework.Variable): classification result；
+        - feature\_map (paddle.fluid.framework.Variable): feature map extracted by model.
+      - context\_prog(fluid.Program): computation graph, used for transfer learning.
 
 
 
@@ -73,9 +73,9 @@
                              combined=True)
     ```
     - **Parameters**
-      - dirname: output dir for saving model
-      - model_filename: 模型文件名称，默认为\_\_model\_\_; <br/>
-      - params_filename: Parameters文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效); <br/>
+      - dirname: output dir for saving model; <br/>
+      - model_filename: filename of model, default is \_\_model\_\_; <br/>
+      - params_filename: filename of parameters，default is \_\_params\_\_(only effective when `combined` is True); <br/>
       - combined: whether save parameters into one file
 
 
