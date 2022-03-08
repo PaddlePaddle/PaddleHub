@@ -2,26 +2,24 @@
 
 |Module Name|resnet_v2_50_imagenet|
 | :--- | :---: |
-|Category|image classification|
+|Category |Image classification|
 |Network|ResNet V2|
 |Dataset|ImageNet-2012|
 |Fine-tuning supported or not|No|
 |Module Size|99MB|
-|Latest update date|-|
+|Latest update date|2021-02-26|
 |Data indicators|-|
 
 
-## I.Basic Information
+## I. Basic Information
 
+- ### Application Effect Display
 
+  - This module utilizes ResNet50 structure and it is trained on ImageNet-2012.
 
-- ### Module Introduction
+## II. Installation
 
-  - ResNet proposed a residual unit to solve the problem of training an extremely deep network, and improved the prediction accuracy of models. This module is based on ResNet50, trained on ImageNet-2012 dataset, and can predict an image of size 224*224*3.
-
-## II.Installation
-
-- ### 1、Environmental Dependence  
+- ### 1、Environmental Dependence
 
   - paddlepaddle >= 1.4.0  
 
@@ -33,9 +31,11 @@
   - ```shell
     $ hub install resnet_v2_50_imagenet
     ```
-  - In case of any problems during installation, please refer to: [Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)
+  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
+    | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
-## III.Module API Prediction
+
+## III. Module API Prediction
 
 - ### 1、Command line Prediction
 
@@ -61,25 +61,28 @@
   - ```python
     def classification(data)
     ```
-    - classification API.
-    - **Parameters**
-      - data (dict): key is "image", value is a list of image paths
+    - Prediction API for classification.
+
+    - **Parameter**
+      - data (dict): Key is 'image'，value is the list of image path.
 
     - **Return**
-      - result(list[dict]): classication results, each element in the list is dict, key is the label name, and value is the corresponding probability
+      - result (list[dict]): The list of classification results，key is the prediction label, value is the corresponding confidence.
 
 
 
 
 
-## IV.Release Note
+## IV. Release Note
 
-* 1.0.0
+- 1.0.0
 
   First release
 
-* 1.0.1
-  Fix the problem of encoding in python2
+- 1.0.1
+
+  Fix encoding problem in python2
+
   - ```shell
     $ hub install resnet_v2_50_imagenet==1.0.1
     ```

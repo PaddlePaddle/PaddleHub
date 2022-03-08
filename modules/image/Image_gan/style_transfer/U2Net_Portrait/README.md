@@ -57,9 +57,9 @@
     import cv2
 
     model = hub.Module(name="U2Net_Portrait")
-    result = model.Cartoon_GEN(images=[cv2.imread('/PATH/TO/IMAGE')])
+    result = model.Portrait_GEN(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
-    # result = model.Cartoon_GEN(paths=['/PATH/TO/IMAGE'])
+    # result = model.Portrait_GEN(paths=['/PATH/TO/IMAGE'])
     ```
 
 - ### 2、API
