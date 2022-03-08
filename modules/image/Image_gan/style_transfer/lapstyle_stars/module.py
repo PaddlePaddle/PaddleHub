@@ -52,12 +52,12 @@ class Lapstyle_stars:
         '''
         Transfer a image to stars style.
 
-        images (list[dict]): data of images, 每一个元素都为一个 dict，有关键字 content, style, 相应取值为：
-          - content (numpy.ndarray): 待转换的图片，shape 为 \[H, W, C\]，BGR格式；<br/>
-          - style (numpy.ndarray) : 风格图像，shape为 \[H, W, C\]，BGR格式；<br/>
-        paths (list[str]): paths to images, 每一个元素都为一个dict, 有关键字 content, style, 相应取值为：
-          - content (str): 待转换的图片的路径；<br/>
-          - style (str) : 风格图像的路径；<br/>
+        images (list[dict]): data of images, each element is a dict:
+          - content (numpy.ndarray): input image，shape is \[H, W, C\]，BGR format；<br/>
+          - style (numpy.ndarray) : style image，shape is \[H, W, C\]，BGR format；<br/>
+        paths (list[str]): paths to images, eacg element is a dict:
+          - content (str): path to input image；<br/>
+          - style (str) : path to style image；<br/>
 
         output_dir: the dir to save the results
         use_gpu: if True, use gpu to perform the computation, otherwise cpu.
