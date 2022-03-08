@@ -69,7 +69,7 @@ ELECTRA-Base, Chinese              | `hub.Module(name='chinese-electra-base')`
 ELECTRA-Small, Chinese             | `hub.Module(name='chinese-electra-small')`
 
 通过以上的一行代码，`model`初始化为一个适用于文本分类任务的模型，为ERNIE Tiny的预训练模型后拼接上一个全连接网络（Full Connected）。
-![](https://ai-studio-static-online.cdn.bcebos.com/f9e1bf9d56c6412d939960f2e3767c2f13b93eab30554d738b137ab2b98e328c)
+![](../../docs/imgs/Single_Sentence_Classsification.jpg)
 
 以上图片来自于：https://arxiv.org/pdf/1810.04805.pdf
 
