@@ -156,7 +156,7 @@ English | [简体中文](README_ch.md)
 |[animegan_v2_hayao_99](image/Image_gan/style_transfer/animegan_v2_hayao_99)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_99) |
 |[animegan_v2_paprika_54](image/Image_gan/style_transfer/animegan_v2_paprika_54)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_54) |
 |[animegan_v2_paprika_74](image/Image_gan/style_transfer/animegan_v2_paprika_74)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_74) |
-|[animegan_v2_paprika_97](image/Image_gan/style_transfer/animegan_v2_paprika_97)|AnimeGAN|Paprika|图像风格迁移-今敏|
+|[animegan_v2_paprika_97](image/Image_gan/style_transfer/animegan_v2_paprika_97)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_97) |
 |[animegan_v2_paprika_98](image/Image_gan/style_transfer/animegan_v2_paprika_98)|AnimeGAN|Paprika|图像风格迁移-今敏|
 |[animegan_v2_shinkai_33](image/Image_gan/style_transfer/animegan_v2_shinkai_33)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚|
 |[animegan_v2_shinkai_53](image/Image_gan/style_transfer/animegan_v2_shinkai_53)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚|
