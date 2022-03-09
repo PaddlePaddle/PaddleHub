@@ -160,7 +160,7 @@ English | [简体中文](README_ch.md)
 |[animegan_v2_paprika_98](image/Image_gan/style_transfer/animegan_v2_paprika_98)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_98) |
 |[animegan_v2_shinkai_33](image/Image_gan/style_transfer/animegan_v2_shinkai_33)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_shinkai_33) |
 |[animegan_v2_shinkai_53](image/Image_gan/style_transfer/animegan_v2_shinkai_53)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_shinkai_53) |
-|[msgnet](image/Image_gan/style_transfer/msgnet)|msgnet|COCO2014| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/msgnet) |
+|[msgnet](image/Image_gan/style_transfer/msgnet)|msgnet|COCO2014| |[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/msgnet) |
 |[stylepro_artistic](image/Image_gan/style_transfer/stylepro_artistic)|StyleProNet|MS-COCO + WikiArt|艺术风格迁移|
 |stylegan_ffhq|StyleGAN|FFHQ|图像风格迁移|
 
