@@ -138,7 +138,7 @@ English | [简体中文](README_ch.md)
 |module|Network|Dataset|Introduction| Huggingface Spaces Demo|
 |--|--|--|--|--|
 |[pixel2style2pixel](image/Image_gan/gan/pixel2style2pixel/)|Pixel2Style2Pixel|-|人脸转正|
-|[stgan_bald](image/Image_gan/gan/stgan_bald/)|STGAN|CelebA|秃头生成器|
+|[stgan_bald](image/Image_gan/gan/stgan_bald/)|STGAN|CelebA|秃头生成器| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/stgan_bald) |
 |[styleganv2_editing](image/Image_gan/gan/styleganv2_editing)|StyleGAN V2|-|人脸编辑|
 |[wav2lip](image/Image_gan/gan/wav2lip)|wav2lip|LRS2|唇形生成| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/wav2lip) |
 |[attgan_celeba](image/Image_gan/attgan_celeba/)|AttGAN|Celeba|人脸编辑|
