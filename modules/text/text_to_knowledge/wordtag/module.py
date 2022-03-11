@@ -2,6 +2,7 @@
 import os
 import argparse
 
+import paddle
 import paddlehub as hub
 from paddlehub.module.module import serving, moduleinfo, runnable
 from paddlenlp import Taskflow
@@ -13,8 +14,9 @@ from paddlenlp import Taskflow
     summary="",
     author="baidu-nlp",
     author_email="",
-    type="nlp/text_to_knowledge")
-class wordtag(hub.NLPPredictionModule):
+    type="nlp/text_to_knowledge",
+    meta=hub.NLPPredictionModule)
+class WordTag(paddle.nn.Layer):
     def __init__(self, 
                  batch_size=32, 
                  max_seq_length=128,
