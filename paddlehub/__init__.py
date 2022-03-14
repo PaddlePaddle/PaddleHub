@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = '2.1.0'
+__version__ = 'develop'
 
 import paddle
 from packaging.version import Version

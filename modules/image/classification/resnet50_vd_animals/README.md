@@ -44,7 +44,7 @@
       hub run resnet50_vd_animals --input_path "/PATH/TO/IMAGE"
       ```
 
-- ### 2、代码示例
+- ### 2、预测代码示例
 
     - ```python
       import paddlehub as hub
