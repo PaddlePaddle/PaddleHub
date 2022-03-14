@@ -11,23 +11,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import os
 import argparse
+import os
 
-import paddle
-import paddlehub as hub
-from paddlehub.module.module import moduleinfo, runnable, serving
-import numpy as np
 import cv2
+import numpy as np
+import paddle
 
+import paddlehub as hub
 from .enlighten_inference.pd_model.x2paddle_code import ONNXModel
 from .util import base64_to_cv2
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
-@moduleinfo(
-    name="enlightengan", type="CV/enlighten", author="paddlepaddle", author_email="", summary="", version="1.0.0")
+@moduleinfo(name="enlightengan",
+            type="CV/enlighten",
+            author="paddlepaddle",
+            author_email="",
+            summary="",
+            version="1.0.0")
 class EnlightenGAN:
+
     def __init__(self):
         self.pretrained_model = os.path.join(self.directory, "enlighten_inference/pd_model")
         self.model = ONNXModel()
@@ -35,11 +41,11 @@ class EnlightenGAN:
         self.model.set_dict(params, use_structured_name=True)
 
     def enlightening(self,
-                     images:list=None,
-                     paths:list=None,
-                     output_dir:str='./enlightening_result/',
-                     use_gpu:bool=False,
-                     visualization:bool=True):
+                     images: list = None,
+                     paths: list = None,
+                     output_dir: str = './enlightening_result/',
+                     use_gpu: bool = False,
+                     visualization: bool = True):
         '''
         enlighten images in the low-light scene.
 
@@ -95,11 +101,10 @@ class EnlightenGAN:
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the {} module.".format(self.name),
-            prog='hub run {}'.format(self.name),
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
+                                              prog='hub run {}'.format(self.name),
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -107,11 +112,10 @@ class EnlightenGAN:
         self.add_module_config_arg()
         self.add_module_input_arg()
         self.args = self.parser.parse_args(argvs)
-        results = self.enlightening(
-            paths=[self.args.input_path],
-            output_dir=self.args.output_dir,
-            use_gpu=self.args.use_gpu,
-            visualization=self.args.visualization)
+        results = self.enlightening(paths=[self.args.input_path],
+                                    output_dir=self.args.output_dir,
+                                    use_gpu=self.args.use_gpu,
+                                    visualization=self.args.visualization)
         return results
 
     @serving
@@ -130,8 +134,10 @@ class EnlightenGAN:
         """
         self.arg_config_group.add_argument('--use_gpu', action='store_true', help="use GPU or not")
 
-        self.arg_config_group.add_argument(
-            '--output_dir', type=str, default='enlightening_result', help='output directory for saving result.')
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='enlightening_result',
+                                           help='output directory for saving result.')
         self.arg_config_group.add_argument('--visualization', type=bool, default=False, help='save results or not.')
 
     def add_module_input_arg(self):
