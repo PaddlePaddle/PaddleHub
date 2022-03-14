@@ -72,6 +72,7 @@
 
 
 
+
 ## IV. Release Note
 
 - 1.0.0
@@ -81,7 +82,7 @@
 - 1.0.1
 
   Fix encoding problem in python2
-  
+
   - ```shell
     $ hub install resnet_v2_50_imagenet==1.0.1
     ```

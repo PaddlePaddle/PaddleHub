@@ -35,9 +35,9 @@
 
 ## II. Installation
 
-- ### 1、Environmental dependence    
+- ### 1、Environmental dependence  
 
-  - paddlepaddle >= 1.7.2    
+  - paddlepaddle >= 1.7.2  
 
   - paddlehub >= 1.6.0   | [How to install PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
@@ -48,7 +48,7 @@
   - ```shell
     $ pip install shapely pyclipper
     ```
-  - **This Module relies on the third-party libraries shapely and pyclipper. Please install shapely and pyclipper before using this Module.**					                                
+  - **This Module relies on the third-party libraries shapely and pyclipper. Please install shapely and pyclipper before using this Module.**  
 
 - ### 2、Installation
 
@@ -87,7 +87,7 @@
   - ```python
     __init__(text_detector_module=None, enable_mkldnn=False)
     ```
-    
+
     - Construct the ChineseOCRDBCRNN object
 
     - **Parameter**
@@ -192,7 +192,7 @@
 * 1.1.1
 
    Supports recognition of spaces in text.
-   
+
 * 1.1.2
 
    Fixed an issue where only 30 fields can be detected.
