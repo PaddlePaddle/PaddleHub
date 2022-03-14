@@ -23,7 +23,7 @@ English | [简体中文](README_ch.md)
 |[DriverStatusRecognition](image/classification/DriverStatusRecognition)|MobileNetV3_small_ssld|分心司机检测数据集||
 |[mobilenet_v2_animals](image/classification/mobilenet_v2_animals)|MobileNet_v2|百度自建动物数据集|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/mobilenet_v2_animals) |
 |[repvgg_a1_imagenet](image/classification/repvgg_a1_imagenet)|RepVGG|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/repvgg_a1_imagenet) |
-|[repvgg_a0_imagenet](image/classification/repvgg_a0_imagenet)|RepVGG|ImageNet-2012||
+|[repvgg_a0_imagenet](image/classification/repvgg_a0_imagenet)|RepVGG|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/repvgg_a0_imagenet) |
 |[resnext152_32x4d_imagenet](image/classification/resnext152_32x4d_imagenet)|ResNeXt|ImageNet-2012||
 |[resnet_v2_152_imagenet](image/classification/resnet_v2_152_imagenet)|ResNet V2|ImageNet-2012||
 |[resnet50_vd_animals](image/classification/resnet50_vd_animals)|ResNet50_vd|百度自建动物数据集||
