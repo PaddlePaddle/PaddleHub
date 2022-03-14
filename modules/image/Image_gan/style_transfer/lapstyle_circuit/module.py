@@ -44,11 +44,11 @@ class Lapstyle_circuit:
         self.network = LapStylePredictor(weight_path=self.pretrained_model)
 
     def style_transfer(self,
-                       images=None,
-                       paths=None,
-                       output_dir='./transfer_result/',
-                       use_gpu=False,
-                       visualization=True):
+                       images: list = None,
+                       paths: list = None,
+                       output_dir: str = './transfer_result/',
+                       use_gpu: bool = False,
+                       visualization: bool = True):
         '''
         Transfer a image to circuit style.
 
@@ -59,13 +59,10 @@ class Lapstyle_circuit:
           - content (str): path to input image；<br/>
           - style (str) : path to style image；<br/>
 
-        output_dir: the dir to save the results
-        use_gpu: if True, use gpu to perform the computation, otherwise cpu.
-        visualization: if True, save results in output_dir.
+         output_dir (str): the dir to save the results
+         use_gpu (bool): if True, use gpu to perform the computation, otherwise cpu.
+         visualization (bool): if True, save results in output_dir.
 
-        output_dir: the dir to save the results
-        use_gpu: if True, use gpu to perform the computation, otherwise cpu.
-        visualization: if True, save results in output_dir.
         '''
         results = []
         paddle.disable_static()
