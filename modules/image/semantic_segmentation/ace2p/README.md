@@ -57,10 +57,10 @@
   - ### 1、命令行预测
 
     ```shell
-    $ hub install ace2p==1.1.0
+    $ hub run ace2p --input_path "/PATH/TO/IMAGE"
     ```
 
-  - ### 2、代码示例
+  - ### 2、预测代码示例
 
     ```python
     import paddlehub as hub
@@ -70,49 +70,49 @@
     result = human_parser.segmentation(images=[cv2.imread('/PATH/TO/IMAGE')])
     ```
   
-    - ### 3、API
+  - ### 3、API
 
-      ```python
-      def segmentation(images=None,
-                      paths=None,
-                      batch_size=1,
-                      use_gpu=False,
-                      output_dir='ace2p_output',
-                      visualization=False):
-      ```
+    ```python
+    def segmentation(images=None,
+                    paths=None,
+                    batch_size=1,
+                    use_gpu=False,
+                    output_dir='ace2p_output',
+                    visualization=False):
+    ```
 
-      - 预测API，用于图像分割得到人体解析。
+    - 预测API，用于图像分割得到人体解析。
 
-      - **参数**
+    - **参数**
 
-        * images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
-        * paths (list\[str\]): 图片的路径；
-        * batch\_size (int): batch 的大小；
-        * use\_gpu (bool): 是否使用 GPU；
-        * output\_dir (str): 保存处理结果的文件目录；
-        * visualization (bool): 是否将识别结果保存为图片文件。
+      * images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
+      * paths (list\[str\]): 图片的路径；
+      * batch\_size (int): batch 的大小；
+      * use\_gpu (bool): 是否使用 GPU；
+      * output\_dir (str): 保存处理结果的文件目录；
+      * visualization (bool): 是否将识别结果保存为图片文件。
 
-      - **返回**
+    - **返回**
 
-        * res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，关键字有'path', 'data'，相应的取值为：
-            * path (str): 原输入图片的路径；
-            * data (numpy.ndarray): 图像分割得到的结果，shape 为`H * W`，元素的取值为0-19，表示每个像素的分类结果，映射顺序与下面的调色板相同。
+      * res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，关键字有'path', 'data'，相应的取值为：
+          * path (str): 原输入图片的路径；
+          * data (numpy.ndarray): 图像分割得到的结果，shape 为`H * W`，元素的取值为0-19，表示每个像素的分类结果，映射顺序与下面的调色板相同。
 
-      ```python
-      def save_inference_model(dirname,
-                              model_filename=None,
-                              params_filename=None,
-                              combined=True)
-      ```
+    ```python
+    def save_inference_model(dirname,
+                            model_filename=None,
+                            params_filename=None,
+                            combined=True)
+    ```
 
-      - 将模型保存到指定路径。
+    - 将模型保存到指定路径。
 
-      - **参数**
+    - **参数**
 
-        * dirname: 存在模型的目录名称
-        * model\_filename: 模型文件名称，默认为\_\_model\_\_
-        * params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
-        * combined: 是否将参数保存到统一的一个文件中。
+      * dirname: 存在模型的目录名称
+      * model\_filename: 模型文件名称，默认为\_\_model\_\_
+      * params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
+      * combined: 是否将参数保存到统一的一个文件中。
 
 
 ## 四、服务部署

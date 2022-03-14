@@ -2,9 +2,9 @@
 
 |模型名称|SkyAR|
 | :--- | :---: |
-|类别|图像-图像分割|
+|类别|视频-视频编辑|
 |网络|UNet|
-|数据集|UNet|
+|数据集|-|
 |是否支持Fine-tuning|否|
 |模型大小|206MB|
 |指标|-|
@@ -71,7 +71,7 @@
 
 ## 三、模型API预测
 
-- ### 1、代码示例
+- ### 1、预测代码示例
 
     ```python
     import paddlehub as hub
@@ -79,8 +79,8 @@
     model = hub.Module(name='SkyAR')
 
     model.MagicSky(
-        video_path=[path to input video path],
-        save_path=[path to save video path]
+        video_path="/PATH/TO/VIDEO",
+        save_path="/PATH/TO/SAVE/RESULT"
     )
     ```
 - ### 2、API
