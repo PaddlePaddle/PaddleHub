@@ -5,7 +5,7 @@ FairMOT:
   detector: CenterNet
   reid: FairMOTEmbeddingHead
   loss: FairMOTLoss
-  tracker: JDETracker
+  tracker: FrozenJDETracker
 
 CenterNet:
   backbone: DLA

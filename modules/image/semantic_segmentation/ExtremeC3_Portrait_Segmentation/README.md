@@ -44,7 +44,7 @@
 
 ## 三、模型API预测
 
-- ### 1、代码示例
+- ### 1、预测代码示例
 
     ```python
     import cv2
@@ -60,27 +60,27 @@
         visualization=False)
     ```
 
-  - ### 2、API
+- ### 2、API
 
-    ```python
-    def Segmentation(
-        images=None,
-        paths=None,
-        batch_size=1,
-        output_dir='output',
-        visualization=False):
-    ```
-    - 人像分割 API
+```python
+def Segmentation(
+    images=None,
+    paths=None,
+    batch_size=1,
+    output_dir='output',
+    visualization=False):
+```
+- 人像分割 API
 
-    - **参数**
-        * images (list[np.ndarray]) : 输入图像数据列表（BGR）
-        * paths (list[str]) : 输入图像路径列表
-        * batch_size (int) : 数据批大小
-        * output_dir (str) : 可视化图像输出目录
-        * visualization (bool) : 是否可视化
+- **参数**
+    * images (list[np.ndarray]) : 输入图像数据列表（BGR）
+    * paths (list[str]) : 输入图像路径列表
+    * batch_size (int) : 数据批大小
+    * output_dir (str) : 可视化图像输出目录
+    * visualization (bool) : 是否可视化
 
-    - **返回**
-        * results (list[dict{"mask":np.ndarray,"result":np.ndarray}]): 输出图像数据列表
+- **返回**
+    * results (list[dict{"mask":np.ndarray,"result":np.ndarray}]): 输出图像数据列表
 
 ## 四、更新历史
 
