@@ -17,13 +17,12 @@ English | [简体中文](README_ch.md)
 ## Image
   - ### Image Classification
 
-<details><summary>expand</summary><div>
 
-|module|Network|Dataset|Introduction|
-|--|--|--|--|
+|module|Network|Dataset|Introduction|Hugging Face Spaces|
+|--|--|--|--|--|
 |[DriverStatusRecognition](image/classification/DriverStatusRecognition)|MobileNetV3_small_ssld|分心司机检测数据集||
-|[mobilenet_v2_animals](image/classification/mobilenet_v2_animals)|MobileNet_v2|百度自建动物数据集||
-|[repvgg_a1_imagenet](image/classification/repvgg_a1_imagenet)|RepVGG|ImageNet-2012||
+|[mobilenet_v2_animals](image/classification/mobilenet_v2_animals)|MobileNet_v2|百度自建动物数据集|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/mobilenet_v2_animals) |
+|[repvgg_a1_imagenet](image/classification/repvgg_a1_imagenet)|RepVGG|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/repvgg_a1_imagenet) |
 |[repvgg_a0_imagenet](image/classification/repvgg_a0_imagenet)|RepVGG|ImageNet-2012||
 |[resnext152_32x4d_imagenet](image/classification/resnext152_32x4d_imagenet)|ResNeXt|ImageNet-2012||
 |[resnet_v2_152_imagenet](image/classification/resnet_v2_152_imagenet)|ResNet V2|ImageNet-2012||
@@ -130,7 +129,6 @@ English | [简体中文](README_ch.md)
 |[ghostnet_x1_0_imagenet](image/classification/ghostnet_x1_0_imagenet)|GhostNet|ImageNet-2012||
 |[hrnet48_imagenet_ssld](image/classification/hrnet48_imagenet_ssld)|HRNet|ImageNet-2012||
 
-</div></details>
 
 
   - ### Image Generation
