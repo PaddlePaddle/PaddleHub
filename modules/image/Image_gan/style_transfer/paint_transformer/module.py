@@ -52,20 +52,21 @@ class paint_transformer:
         self.meta_brushes = paddle.concat([brush_large_vertical, brush_large_horizontal], axis=0)
 
     def style_transfer(self,
-                       images=None,
-                       paths=None,
-                       output_dir='./transfer_result/',
-                       use_gpu=False,
-                       need_animation=False,
-                       visualization=True):
+                       images: list = None,
+                       paths: list = None,
+                       output_dir: str = './transfer_result/',
+                       use_gpu: bool = False,
+                       need_animation: bool = False,
+                       visualization: bool = True):
         '''
 
 
         images (list[numpy.ndarray]): data of images, shape of each is [H, W, C], color space must be BGR(read by cv2).
         paths (list[str]): paths to images
-        output_dir: the dir to save the results
-        use_gpu: if True, use gpu to perform the computation, otherwise cpu.
-        visualization: if True, save results in output_dir.
+        output_dir (str): the dir to save the results
+        use_gpu (bool): if True, use gpu to perform the computation, otherwise cpu.
+        need_animation (bool): if True, save every frame to show the process of painting.
+        visualization (bool): if True, save results in output_dir.
         '''
         results = []
         paddle.disable_static()
