@@ -148,7 +148,7 @@ English | [简体中文](README_ch.md)
 |[U2Net_Portrait](image/Image_gan/style_transfer/U2Net_Portrait)|U^2Net|-|人脸素描化|
 |[UGATIT_100w](image/Image_gan/style_transfer/UGATIT_100w)|U-GAT-IT|selfie2anime|人脸动漫化| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/UGATIT_100w) |
 |[UGATIT_83w](image/Image_gan/style_transfer/UGATIT_83w)|U-GAT-IT|selfie2anime|人脸动漫化| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/UGATIT_83w) |
-|[UGATIT_92w](image/Image_gan/style_transfer/UGATIT_92w)| U-GAT-IT|selfie2anime|人脸动漫化|
+|[UGATIT_92w](image/Image_gan/style_transfer/UGATIT_92w)| U-GAT-IT|selfie2anime|人脸动漫化| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/UGATIT_92w) |
 |[animegan_v1_hayao_60](image/Image_gan/style_transfer/animegan_v1_hayao_60)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v1_hayao_60) |
 |[animegan_v2_hayao_64](image/Image_gan/style_transfer/animegan_v2_hayao_64)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_64) |
 |[animegan_v2_hayao_99](image/Image_gan/style_transfer/animegan_v2_hayao_99)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_99) |
