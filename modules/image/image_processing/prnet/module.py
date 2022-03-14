@@ -39,25 +39,25 @@ class PRNet:
         self.network = PRN(is_dlib=True, prefix=self.directory)
 
     def face_swap(self,
-                  images=None,
-                  paths=None,
-                  mode=0,
-                  output_dir='./swapping_result/',
-                  use_gpu=False,
-                  visualization=True):
+                  images: list = None,
+                  paths: list = None,
+                  mode: int = 0,
+                  output_dir: str = './swapping_result/',
+                  use_gpu: bool = False,
+                  visualization: bool = True):
         '''
         Denoise a raw image in the low-light scene.
 
-        images (list[dict]): data of images, 每一个元素都为一个 dict，有关键字 source, ref, 相应取值为：
-          - source (numpy.ndarray): 待转换的图片，shape 为 \[H, W, C\]，BGR格式；<br/>
-          - ref (numpy.ndarray) : 参考图像，shape为 \[H, W, C\]，BGR格式；<br/>
-        paths (list[str]): paths to images, 每一个元素都为一个dict, 有关键字 source, ref, 相应取值为：
-          - source (str): 待转换的图片的路径；<br/>
-          - ref (str) : 参考图像的路径；<br/>
-        mode: option, 0 for change part of texture, 1 for change whole face
-        output_dir: the dir to save the results
-        use_gpu: if True, use gpu to perform the computation, otherwise cpu.
-        visualization: if True, save results in output_dir.
+        images (list[dict]): data of images, each element is a dict:
+          - source (numpy.ndarray): input image，shape is \[H, W, C\]，BGR format；<br/>
+          - ref (numpy.ndarray) : style image，shape is \[H, W, C\]，BGR format；<br/>
+        paths (list[dict]): paths to images, eacg element is a dict:
+          - source (str): path to input image；<br/>
+          - ref (str) : path to reference image；<br/>
+        mode (int): option, 0 for change part of texture, 1 for change whole face
+        output_dir (str): the dir to save the results
+        use_gpu (bool): if True, use gpu to perform the computation, otherwise cpu.
+        visualization (bool): if True, save results in output_dir.
         '''
         results = []
         paddle.disable_static()
