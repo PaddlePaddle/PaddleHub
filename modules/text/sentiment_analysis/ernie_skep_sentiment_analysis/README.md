@@ -65,7 +65,6 @@
     for result in results:
         print(result['text'])
         print(result['sentiment_label'])
-        print(result['sentiment_key'])
         print(result['positive_probs'])
         print(result['negative_probs'])
         
