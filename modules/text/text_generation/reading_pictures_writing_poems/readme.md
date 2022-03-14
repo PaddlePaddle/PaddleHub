@@ -63,13 +63,13 @@
 - ### 2、预测代码示例
 
   - ```python
-       import paddlehub as hub
-    
-       readingPicturesWritingPoems = hub.Module(name="reading_pictures_writing_poems")
-       results = readingPicturesWritingPoems.WritingPoem(image = "scenery.jpg", use_gpu=False)
-    
-       for result in results:
-           print(result)
+    import paddlehub as hub
+ 
+    readingPicturesWritingPoems = hub.Module(name="reading_pictures_writing_poems")
+    results = readingPicturesWritingPoems.WritingPoem(image = "scenery.jpg", use_gpu=False)
+ 
+    for result in results:
+        print(result)
     ```
   
 - ### 3、API

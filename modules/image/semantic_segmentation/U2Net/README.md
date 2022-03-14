@@ -43,7 +43,7 @@
       | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 三、模型API预测
-- ### 1、代码示例
+- ### 1、预测代码示例
 
     ```python
     import cv2
