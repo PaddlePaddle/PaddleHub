@@ -55,7 +55,7 @@ class Lapstyle_starrynew:
         images (list[dict]): data of images, each element is a dict:
           - content (numpy.ndarray): input image，shape is \[H, W, C\]，BGR format；<br/>
           - style (numpy.ndarray) : style image，shape is \[H, W, C\]，BGR format；<br/>
-        paths (list[str]): paths to images, eacg element is a dict:
+        paths (list[dict]): paths to images, eacg element is a dict:
           - content (str): path to input image；<br/>
           - style (str) : path to style image；<br/>
         output_dir (str): the dir to save the results
