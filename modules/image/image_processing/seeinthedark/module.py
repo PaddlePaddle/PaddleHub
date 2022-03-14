@@ -76,8 +76,12 @@ class LearningToSeeInDark:
 
             return self.gpuexec, self.gpuprog, self.gpuinputs, self.gpuoutputs
 
-    def denoising(self, images=None, paths=None, output_dir='./enlightening_result/', use_gpu=False,
-                  visualization=True):
+    def denoising(self,
+                  images: list = None,
+                  paths: list = None,
+                  output_dir: str = './enlightening_result/',
+                  use_gpu: bool = False,
+                  visualization: bool = True):
         '''
         Denoise a raw image in the low-light scene.
 
