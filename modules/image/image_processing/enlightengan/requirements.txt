@@ -1,2 +1,0 @@
-onnxruntime
-x2paddle

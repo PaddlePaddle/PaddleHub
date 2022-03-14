@@ -1,6 +1,5 @@
 import paddle
 import math
-from x2paddle.op_mapper.onnx2paddle import onnx_custom_layer as x2paddle_nn
 
 
 class ONNXModel(paddle.nn.Layer):

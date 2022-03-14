@@ -21,7 +21,6 @@ from paddlehub.module.module import moduleinfo, runnable, serving
 import numpy as np
 import cv2
 
-from .enlighten_inference import EnlightenOnnxModel
 from .enlighten_inference.pd_model.x2paddle_code import ONNXModel
 from .util import base64_to_cv2
 
@@ -36,19 +35,19 @@ class EnlightenGAN:
         self.model.set_dict(params, use_structured_name=True)
 
     def enlightening(self,
-                     images=None,
-                     paths=None,
-                     output_dir='./enlightening_result/',
-                     use_gpu=False,
-                     visualization=True):
+                     images:list=None,
+                     paths:list=None,
+                     output_dir:str='./enlightening_result/',
+                     use_gpu:bool=False,
+                     visualization:bool=True):
         '''
         enlighten images in the low-light scene.
 
         images (list[numpy.ndarray]): data of images, shape of each is [H, W, C], color space must be BGR(read by cv2).
         paths (list[str]): paths to images
-        output_dir: the dir to save the results
-        use_gpu: if True, use gpu to perform the computation, otherwise cpu.
-        visualization: if True, save results in output_dir.
+        output_dir (str): the dir to save the results
+        use_gpu (bool): if True, use gpu to perform the computation, otherwise cpu.
+        visualization (bool): if True, save results in output_dir.
         '''
         results = []
         paddle.disable_static()
