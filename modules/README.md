@@ -146,7 +146,7 @@ English | [简体中文](README_ch.md)
 |[ID_Photo_GEN](image/Image_gan/style_transfer/ID_Photo_GEN)|HRNet_W18|-|证件照生成|
 |[Photo2Cartoon](image/Image_gan/style_transfer/Photo2Cartoon)|U-GAT-IT|cartoon_data|人脸卡通化|[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/photo2cartoon) |
 |[U2Net_Portrait](image/Image_gan/style_transfer/U2Net_Portrait)|U^2Net|-|人脸素描化|
-|[UGATIT_100w](image/Image_gan/style_transfer/UGATIT_100w)|U-GAT-IT|selfie2anime|人脸动漫化|
+|[UGATIT_100w](image/Image_gan/style_transfer/UGATIT_100w)|U-GAT-IT|selfie2anime|人脸动漫化| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/UGATIT_100w) |
 |[UGATIT_83w](image/Image_gan/style_transfer/UGATIT_83w)|U-GAT-IT|selfie2anime|人脸动漫化|
 |[UGATIT_92w](image/Image_gan/style_transfer/UGATIT_92w)| U-GAT-IT|selfie2anime|人脸动漫化|
 |[animegan_v1_hayao_60](image/Image_gan/style_transfer/animegan_v1_hayao_60)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v1_hayao_60) |
