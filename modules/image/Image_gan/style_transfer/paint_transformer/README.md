@@ -1,6 +1,6 @@
-# painttransformer
+# paint_transformer
 
-|模型名称|painttransformer|
+|模型名称|paint_transformer|
 | :--- | :---: |
 |类别|图像 - 风格转换|
 |网络|Paint Transformer|
@@ -41,7 +41,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install painttransformer
+    $ hub install paint_transformer
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -52,7 +52,7 @@
 
   - ```shell
     # Read from a file
-    $ hub run painttransformer --input_path "/PATH/TO/IMAGE"
+    $ hub run paint_transformer --input_path "/PATH/TO/IMAGE"
     ```
   - 通过命令行方式实现风格转换模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
@@ -61,7 +61,7 @@
   - ```python
     import paddlehub as hub
 
-    module = hub.Module(name="painttransformer")
+    module = hub.Module(name="paint_transformer")
     input_path = ["/PATH/TO/IMAGE"]
     # Read from a file
     module.style_transfer(paths=input_path, output_dir='./transfer_result/', use_gpu=True)  
@@ -92,7 +92,7 @@
 
   - 运行启动命令：
   - ```shell
-    $ hub serving start -m painttransformer
+    $ hub serving start -m paint_transformer
     ```
 
   - 这样就完成了一个油画风格转换的在线服务API的部署，默认端口号为8866。
@@ -117,7 +117,7 @@
     # 发送HTTP请求
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/painttransformer"
+    url = "http://127.0.0.1:8866/predict/paint_transformer"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 打印预测结果
@@ -130,5 +130,5 @@
   初始发布
 
   - ```shell
-    $ hub install painttransformer==1.0.0
+    $ hub install paint_transformer==1.0.0
     ```

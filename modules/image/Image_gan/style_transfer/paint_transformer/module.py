@@ -31,13 +31,13 @@ from .util import base64_to_cv2
 
 
 @moduleinfo(
-    name="painttransformer",
+    name="paint_transformer",
     type="CV/style_transfer",
     author="paddlepaddle",
     author_email="",
     summary="",
     version="1.0.0")
-class painttransformer:
+class paint_transformer:
     def __init__(self):
         self.pretrained_model = os.path.join(self.directory, "paint_best.pdparams")
 
