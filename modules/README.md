@@ -17,19 +17,18 @@ English | [简体中文](README_ch.md)
 ## Image
   - ### Image Classification
 
-<details><summary>expand</summary><div>
 
-|module|Network|Dataset|Introduction|
-|--|--|--|--|
+|module|Network|Dataset|Introduction|Hugging Face Spaces|
+|--|--|--|--|--|
 |[DriverStatusRecognition](image/classification/DriverStatusRecognition)|MobileNetV3_small_ssld|分心司机检测数据集||
-|[mobilenet_v2_animals](image/classification/mobilenet_v2_animals)|MobileNet_v2|百度自建动物数据集||
-|[repvgg_a1_imagenet](image/classification/repvgg_a1_imagenet)|RepVGG|ImageNet-2012||
-|[repvgg_a0_imagenet](image/classification/repvgg_a0_imagenet)|RepVGG|ImageNet-2012||
-|[resnext152_32x4d_imagenet](image/classification/resnext152_32x4d_imagenet)|ResNeXt|ImageNet-2012||
-|[resnet_v2_152_imagenet](image/classification/resnet_v2_152_imagenet)|ResNet V2|ImageNet-2012||
-|[resnet50_vd_animals](image/classification/resnet50_vd_animals)|ResNet50_vd|百度自建动物数据集||
+|[mobilenet_v2_animals](image/classification/mobilenet_v2_animals)|MobileNet_v2|百度自建动物数据集|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/mobilenet_v2_animals) |
+|[repvgg_a1_imagenet](image/classification/repvgg_a1_imagenet)|RepVGG|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/repvgg_a1_imagenet) |
+|[repvgg_a0_imagenet](image/classification/repvgg_a0_imagenet)|RepVGG|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/repvgg_a0_imagenet) |
+|[resnext152_32x4d_imagenet](image/classification/resnext152_32x4d_imagenet)|ResNeXt|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/resnext152_32x4d_imagenet) |
+|[resnet_v2_152_imagenet](image/classification/resnet_v2_152_imagenet)|ResNet V2|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/resnet_v2_152_imagenet) |
+|[resnet50_vd_animals](image/classification/resnet50_vd_animals)|ResNet50_vd|百度自建动物数据集|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/resnet50_vd_animals) |
 |[food_classification](image/classification/food_classification)|ResNet50_vd_ssld|美食数据集||
-|[mobilenet_v3_large_imagenet_ssld](image/classification/mobilenet_v3_large_imagenet_ssld)|Mobilenet_v3_large|ImageNet-2012||
+|[mobilenet_v3_large_imagenet_ssld](image/classification/mobilenet_v3_large_imagenet_ssld)|Mobilenet_v3_large|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/mobilenet_v3_large_imagenet_ssld) |
 |[resnext152_vd_32x4d_imagenet](image/classification/resnext152_vd_32x4d_imagenet)||||
 |[ghostnet_x1_3_imagenet_ssld](image/classification/ghostnet_x1_3_imagenet_ssld)|GhostNet|ImageNet-2012||
 |[rexnet_1_5_imagenet](image/classification/rexnet_1_5_imagenet)|ReXNet|ImageNet-2012||
@@ -130,7 +129,6 @@ English | [简体中文](README_ch.md)
 |[ghostnet_x1_0_imagenet](image/classification/ghostnet_x1_0_imagenet)|GhostNet|ImageNet-2012||
 |[hrnet48_imagenet_ssld](image/classification/hrnet48_imagenet_ssld)|HRNet|ImageNet-2012||
 
-</div></details>
 
 
   - ### Image Generation
@@ -148,9 +146,9 @@ English | [简体中文](README_ch.md)
 |[ID_Photo_GEN](image/Image_gan/style_transfer/ID_Photo_GEN)|HRNet_W18|-|证件照生成|
 |[Photo2Cartoon](image/Image_gan/style_transfer/Photo2Cartoon)|U-GAT-IT|cartoon_data|人脸卡通化|[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/photo2cartoon) |
 |[U2Net_Portrait](image/Image_gan/style_transfer/U2Net_Portrait)|U^2Net|-|人脸素描化|
-|[UGATIT_100w](image/Image_gan/style_transfer/UGATIT_100w)|U-GAT-IT|selfie2anime|人脸动漫化|
-|[UGATIT_83w](image/Image_gan/style_transfer/UGATIT_83w)|U-GAT-IT|selfie2anime|人脸动漫化|
-|[UGATIT_92w](image/Image_gan/style_transfer/UGATIT_92w)| U-GAT-IT|selfie2anime|人脸动漫化|
+|[UGATIT_100w](image/Image_gan/style_transfer/UGATIT_100w)|U-GAT-IT|selfie2anime|人脸动漫化| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/UGATIT_100w) |
+|[UGATIT_83w](image/Image_gan/style_transfer/UGATIT_83w)|U-GAT-IT|selfie2anime|人脸动漫化| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/UGATIT_83w) |
+|[UGATIT_92w](image/Image_gan/style_transfer/UGATIT_92w)| U-GAT-IT|selfie2anime|人脸动漫化| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/UGATIT_92w) |
 |[animegan_v1_hayao_60](image/Image_gan/style_transfer/animegan_v1_hayao_60)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v1_hayao_60) |
 |[animegan_v2_hayao_64](image/Image_gan/style_transfer/animegan_v2_hayao_64)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_64) |
 |[animegan_v2_hayao_99](image/Image_gan/style_transfer/animegan_v2_hayao_99)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_99) |
