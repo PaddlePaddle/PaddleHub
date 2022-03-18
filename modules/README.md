@@ -37,7 +37,7 @@ English | [简体中文](README_ch.md)
 |[efficientnetb0_imagenet](image/classification/efficientnetb0_imagenet)|EfficientNet|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/efficientnetb0_imagenet) |
 |[efficientnetb1_imagenet](image/classification/efficientnetb1_imagenet)|EfficientNet|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/efficientnetb1_imagenet) |
 |[mobilenet_v2_imagenet_ssld](image/classification/mobilenet_v2_imagenet_ssld)|Mobilenet_v2|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/mobilenet_v2_imagenet_ssld) |
-|[resnet50_vd_dishes](image/classification/resnet50_vd_dishes)|ResNet50_vd|百度自建菜品数据集||
+|[resnet50_vd_dishes](image/classification/resnet50_vd_dishes)|ResNet50_vd|百度自建菜品数据集|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/resnet50_vd_dishes) |
 |[pnasnet_imagenet](image/classification/pnasnet_imagenet)|PNASNet|ImageNet-2012||
 |[rexnet_2_0_imagenet](image/classification/rexnet_2_0_imagenet)|ReXNet|ImageNet-2012||
 |[SnakeIdentification](image/classification/SnakeIdentification)|ResNet50_vd_ssld|蛇种数据集||
