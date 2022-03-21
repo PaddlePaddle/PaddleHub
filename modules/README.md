@@ -42,7 +42,7 @@ English | [简体中文](README_ch.md)
 |[rexnet_2_0_imagenet](image/classification/rexnet_2_0_imagenet)|ReXNet|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/rexnet_2_0_imagenet) |
 |[SnakeIdentification](image/classification/SnakeIdentification)|ResNet50_vd_ssld|蛇种数据集|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/SnakeIdentification) |
 |[hrnet40_imagenet](image/classification/hrnet40_imagenet)|HRNet|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/hrnet40_imagenet) |
-|[resnet_v2_34_imagenet](image/classification/resnet_v2_34_imagenet)|ResNet V2|ImageNet-2012||
+|[resnet_v2_34_imagenet](image/classification/resnet_v2_34_imagenet)|ResNet V2|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/resnet_v2_34_imagenet) |
 |[mobilenet_v2_dishes](image/classification/mobilenet_v2_dishes)|MobileNet_v2|百度自建菜品数据集||
 |[resnext101_vd_32x4d_imagenet](image/classification/resnext101_vd_32x4d_imagenet)|ResNeXt|ImageNet-2012||
 |[repvgg_b2g4_imagenet](image/classification/repvgg_b2g4_imagenet)|RepVGG|ImageNet-2012||
