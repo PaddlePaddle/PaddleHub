@@ -167,5 +167,5 @@
 
   Fix the problem of reading numpy
   - ```shell
-    $ hub install ernie_tiny==1.0.1
+    $ hub install ernie_tiny==1.1.0
     ```

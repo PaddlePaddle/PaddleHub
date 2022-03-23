@@ -122,5 +122,5 @@
   初始发布
 
   - ```shell
-    $ hub install ernie_tiny==1.0.0
+    $ hub install ernie_tiny==1.1.0
     ```
