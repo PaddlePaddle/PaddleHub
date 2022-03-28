@@ -48,7 +48,7 @@ English | [简体中文](README_ch.md)
 |[repvgg_b2g4_imagenet](image/classification/repvgg_b2g4_imagenet)|RepVGG|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/repvgg_b2g4_imagenet) |
 |[fix_resnext101_32x48d_wsl_imagenet](image/classification/fix_resnext101_32x48d_wsl_imagenet)|ResNeXt|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/fix_resnext101_32x48d_wsl_imagenet) |
 |[vgg13_imagenet](image/classification/vgg13_imagenet)|VGG|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/vgg13_imagenet) |
-|[se_resnext101_32x4d_imagenet](image/classification/se_resnext101_32x4d_imagenet)|SE_ResNeXt|ImageNet-2012||
+|[se_resnext101_32x4d_imagenet](image/classification/se_resnext101_32x4d_imagenet)|SE_ResNeXt|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/se_resnext101_32x4d_imagenet) |
 |[hrnet30_imagenet](image/classification/hrnet30_imagenet)|HRNet|ImageNet-2012||
 |[ghostnet_x1_3_imagenet](image/classification/ghostnet_x1_3_imagenet)|GhostNet|ImageNet-2012||
 |[dpn107_imagenet](image/classification/dpn107_imagenet)|DPN|ImageNet-2012||
