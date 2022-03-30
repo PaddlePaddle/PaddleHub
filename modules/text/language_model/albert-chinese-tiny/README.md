@@ -1,11 +1,11 @@
-# albert-base-v1
-|模型名称|albert-base-v1|
+# albert-chinese-tiny
+|模型名称|albert-chinese-tiny|
 | :--- | :---: |
 |类别|文本-语义模型|
-|网络|albert-base-v1|
+|网络|albert-chinese-tiny|
 |数据集|-|
 |是否支持Fine-tuning|是|
-|模型大小|90MB|
+|模型大小|40MB|
 |最新更新日期|2022-02-08|
 |数据指标|-|
 
@@ -32,7 +32,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install albert-base-v1
+    $ hub install albert-chinese-tiny
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -52,7 +52,7 @@ data = [
 label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
-    name='albert-base-v1',
+    name='albert-chinese-tiny',
     version='1.0.0',
     task='seq-cls',
     load_checkpoint='/path/to/parameters',
@@ -137,7 +137,7 @@ for idx, text in enumerate(data):
 - ### 第一步：启动PaddleHub Serving
 
   - ```shell
-    $ hub serving start -m albert-base-v1
+    $ hub serving start -m albert-chinese-tiny
     ```
 
   - 这样就完成了一个获取预训练词向量服务化API的部署，默认端口号为8866。
@@ -158,7 +158,7 @@ for idx, text in enumerate(data):
     # 对应本地部署，则为module.get_embedding(data=text)
     data = {"data": text}
     # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
-    url = "http://127.0.0.1:8866/predict/albert-base-v1"
+    url = "http://127.0.0.1:8866/predict/albert-chinese-tiny"
     # 指定post请求的headers为application/json方式
     headers = {"Content-Type": "application/json"}
 
