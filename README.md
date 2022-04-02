@@ -191,6 +191,14 @@ More model description, please refer [Models List](https://www.paddlepaddle.org.
 
 More API for transfer learning, please refer [Tutorial](https://paddlehub.readthedocs.io/en/release-v2.1/transfer_learning_index.html)
 
+### Contribute a Gradio Demo to PaddlePaddle Organization on Hugging Face
+
+* Create an account on Hugging Face: https://huggingface.co/join
+* See list of models left to add to PaddlePaddle organization, please refer [Model list](https://github.com/AK391/PaddleHub/tree/PaddlePaddle-release/v2.2/modules)
+* Add Gradio Demo under your username, see blog for setting up Gradio Demo on Hugging Face: https://huggingface.co/blog/gradio-spaces
+* request to join PaddlePaddle Organization: https://huggingface.co/PaddlePaddle
+* once approved transfer model from your username to PaddlePaddle organization
+
 <a name="License"></a>
 ## License
 The release of this project is certified by the <a href="./LICENSE">Apache 2.0 license</a>.
