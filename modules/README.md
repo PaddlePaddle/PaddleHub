@@ -52,7 +52,7 @@ English | [简体中文](README_ch.md)
 |[hrnet30_imagenet](image/classification/hrnet30_imagenet)|HRNet|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/hrnet30_imagenet) |
 |[ghostnet_x1_3_imagenet](image/classification/ghostnet_x1_3_imagenet)|GhostNet|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/ghostnet_x1_3_imagenet) |
 |[dpn107_imagenet](image/classification/dpn107_imagenet)|DPN|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/dpn107_imagenet) |
-|[densenet161_imagenet](image/classification/densenet161_imagenet)|DenseNet|ImageNet-2012||
+|[densenet161_imagenet](image/classification/densenet161_imagenet)|DenseNet|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/densenet161_imagenet) |
 |[vgg19_imagenet](image/classification/vgg19_imagenet)|vgg19_imagenet|ImageNet-2012||
 |[mobilenet_v2_imagenet](image/classification/mobilenet_v2_imagenet)|Mobilenet_v2|ImageNet-2012||
 |[resnet50_vd_10w](image/classification/resnet50_vd_10w)|ResNet_vd|百度自建数据集||
