@@ -11,15 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import os
-from typing import Callable, Union, List, Tuple
+from typing import Callable
+from typing import List
+from typing import Tuple
+from typing import Union
 
 import cv2
-import paddle
-import PIL
 import numpy as np
+import paddle
 import paddle.nn.functional as F
+import PIL.Image
 from scipy.sparse import csr_matrix
 
 
@@ -129,19 +131,18 @@ def draw_boxes_on_image(image_path: str,
         x1, y1, x2, y2 = box[0], box[1], box[2], box[3]
         rect = plt.Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, linewidth=2.0, edgecolor=colors[label])
         ax.add_patch(rect)
-        ax.text(
-            x1,
-            y1,
-            '{} {:.4f}'.format(label_names[label], score),
-            verticalalignment='bottom',
-            horizontalalignment='left',
-            bbox={
-                'facecolor': colors[label],
-                'alpha': 0.5,
-                'pad': 0
-            },
-            fontsize=8,
-            color='white')
+        ax.text(x1,
+                y1,
+                '{} {:.4f}'.format(label_names[label], score),
+                verticalalignment='bottom',
+                horizontalalignment='left',
+                bbox={
+                    'facecolor': colors[label],
+                    'alpha': 0.5,
+                    'pad': 0
+                },
+                fontsize=8,
+                color='white')
         print("\t {:15s} at {:25} score: {:.5f}".format(label_names[int(label)], str(list(map(int, list(box)))), score))
     image_name = image_name.replace('jpg', 'png')
     plt.axis('off')
