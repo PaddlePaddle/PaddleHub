@@ -135,33 +135,33 @@ English | [简体中文](README_ch.md)
 
   - ### Image Generation
 
-|module|Network|Dataset|Introduction|
-|--|--|--|--|
+|module|Network|Dataset|Introduction| Huggingface Spaces Demo|
+|--|--|--|--|--|
 |[pixel2style2pixel](image/Image_gan/gan/pixel2style2pixel/)|Pixel2Style2Pixel|-|人脸转正|
-|[stgan_bald](image/Image_gan/gan/stgan_bald/)|STGAN|CelebA|秃头生成器|
+|[stgan_bald](image/Image_gan/gan/stgan_bald/)|STGAN|CelebA|秃头生成器| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/stgan_bald) |
 |[styleganv2_editing](image/Image_gan/gan/styleganv2_editing)|StyleGAN V2|-|人脸编辑|
-|[wav2lip](image/Image_gan/gan/wav2lip)|wav2lip|LRS2|唇形生成|
+|[wav2lip](image/Image_gan/gan/wav2lip)|wav2lip|LRS2|唇形生成| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/wav2lip) |
 |[attgan_celeba](image/Image_gan/attgan_celeba/)|AttGAN|Celeba|人脸编辑|
 |[cyclegan_cityscapes](image/Image_gan/cyclegan_cityscapes)|CycleGAN|Cityscapes|实景图和语义分割结果互相转换|
 |[stargan_celeba](image/Image_gan/stargan_celeba)|StarGAN|Celeba|人脸编辑|
 |[stgan_celeba](image/Image_gan/stgan_celeba/)|STGAN|Celeba|人脸编辑|
 |[ID_Photo_GEN](image/Image_gan/style_transfer/ID_Photo_GEN)|HRNet_W18|-|证件照生成|
-|[Photo2Cartoon](image/Image_gan/style_transfer/Photo2Cartoon)|U-GAT-IT|cartoon_data|人脸卡通化|
+|[Photo2Cartoon](image/Image_gan/style_transfer/Photo2Cartoon)|U-GAT-IT|cartoon_data|人脸卡通化|[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/photo2cartoon) |
 |[U2Net_Portrait](image/Image_gan/style_transfer/U2Net_Portrait)|U^2Net|-|人脸素描化|
 |[UGATIT_100w](image/Image_gan/style_transfer/UGATIT_100w)|U-GAT-IT|selfie2anime|人脸动漫化|
 |[UGATIT_83w](image/Image_gan/style_transfer/UGATIT_83w)|U-GAT-IT|selfie2anime|人脸动漫化|
 |[UGATIT_92w](image/Image_gan/style_transfer/UGATIT_92w)| U-GAT-IT|selfie2anime|人脸动漫化|
-|[animegan_v1_hayao_60](image/Image_gan/style_transfer/animegan_v1_hayao_60)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏|
-|[animegan_v2_hayao_64](image/Image_gan/style_transfer/animegan_v2_hayao_64)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏|
-|[animegan_v2_hayao_99](image/Image_gan/style_transfer/animegan_v2_hayao_99)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏|
-|[animegan_v2_paprika_54](image/Image_gan/style_transfer/animegan_v2_paprika_54)|AnimeGAN|Paprika|图像风格迁移-今敏|
-|[animegan_v2_paprika_74](image/Image_gan/style_transfer/animegan_v2_paprika_74)|AnimeGAN|Paprika|图像风格迁移-今敏|
-|[animegan_v2_paprika_97](image/Image_gan/style_transfer/animegan_v2_paprika_97)|AnimeGAN|Paprika|图像风格迁移-今敏|
-|[animegan_v2_paprika_98](image/Image_gan/style_transfer/animegan_v2_paprika_98)|AnimeGAN|Paprika|图像风格迁移-今敏|
-|[animegan_v2_shinkai_33](image/Image_gan/style_transfer/animegan_v2_shinkai_33)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚|
-|[animegan_v2_shinkai_53](image/Image_gan/style_transfer/animegan_v2_shinkai_53)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚|
-|[msgnet](image/Image_gan/style_transfer/msgnet)|msgnet|COCO2014|
-|[stylepro_artistic](image/Image_gan/style_transfer/stylepro_artistic)|StyleProNet|MS-COCO + WikiArt|艺术风格迁移|
+|[animegan_v1_hayao_60](image/Image_gan/style_transfer/animegan_v1_hayao_60)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v1_hayao_60) |
+|[animegan_v2_hayao_64](image/Image_gan/style_transfer/animegan_v2_hayao_64)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_64) |
+|[animegan_v2_hayao_99](image/Image_gan/style_transfer/animegan_v2_hayao_99)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_99) |
+|[animegan_v2_paprika_54](image/Image_gan/style_transfer/animegan_v2_paprika_54)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_54) |
+|[animegan_v2_paprika_74](image/Image_gan/style_transfer/animegan_v2_paprika_74)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_74) |
+|[animegan_v2_paprika_97](image/Image_gan/style_transfer/animegan_v2_paprika_97)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_97) |
+|[animegan_v2_paprika_98](image/Image_gan/style_transfer/animegan_v2_paprika_98)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_98) |
+|[animegan_v2_shinkai_33](image/Image_gan/style_transfer/animegan_v2_shinkai_33)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_shinkai_33) |
+|[animegan_v2_shinkai_53](image/Image_gan/style_transfer/animegan_v2_shinkai_53)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_shinkai_53) |
+|[msgnet](image/Image_gan/style_transfer/msgnet)|msgnet|COCO2014| |[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/msgnet) |
+|[stylepro_artistic](image/Image_gan/style_transfer/stylepro_artistic)|StyleProNet|MS-COCO + WikiArt|艺术风格迁移| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/stylepro_artistic) |
 |stylegan_ffhq|StyleGAN|FFHQ|图像风格迁移|
 
   - ### Keypoint Detection
@@ -220,11 +220,11 @@ English | [简体中文](README_ch.md)
 
   - ### Text Recognition
 
-|module|Network|Dataset|Introduction|
-|--|--|--|--|
-|[chinese_ocr_db_crnn_mobile](image/text_recognition/chinese_ocr_db_crnn_mobile)|Differentiable Binarization+RCNN|icdar2015数据集|中文文字识别|[chinese_text_detection_db_mobile](image/text_recognition/chinese_text_detection_db_mobile)|Differentiable Binarization|icdar2015数据集|中文文本检测|
+|module|Network|Dataset|Introduction|Huggingface Spaces Demo|
+|--|--|--|--|--|
+|[chinese_ocr_db_crnn_mobile](image/text_recognition/chinese_ocr_db_crnn_mobile)|Differentiable Binarization+RCNN|icdar2015数据集|中文文字识别|[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/chinese_ocr_db_crnn_mobile) |[chinese_text_detection_db_mobile](image/text_recognition/chinese_text_detection_db_mobile)|Differentiable Binarization|icdar2015数据集|中文文本检测|
 |[chinese_text_detection_db_server](image/text_recognition/chinese_text_detection_db_server)|Differentiable Binarization|icdar2015数据集|中文文本检测|
-|[chinese_ocr_db_crnn_server](image/text_recognition/chinese_ocr_db_crnn_server)|Differentiable Binarization+RCNN|icdar2015数据集|中文文字识别|
+|[chinese_ocr_db_crnn_server](image/text_recognition/chinese_ocr_db_crnn_server)|Differentiable Binarization+RCNN|icdar2015数据集|中文文字识别|[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/chinese_ocr_db_crnn_server) |
 |[Vehicle_License_Plate_Recognition](image/text_recognition/Vehicle_License_Plate_Recognition)|-|CCPD|车牌识别|
 |[chinese_cht_ocr_db_crnn_mobile](image/text_recognition/chinese_cht_ocr_db_crnn_mobile)|Differentiable Binarization+CRNN|icdar2015数据集|繁体中文文字识别|
 |[japan_ocr_db_crnn_mobile](image/text_recognition/japan_ocr_db_crnn_mobile)|Differentiable Binarization+CRNN|icdar2015数据集|日文文字识别|
@@ -243,10 +243,10 @@ English | [简体中文](README_ch.md)
 
   - ### Image Editing
 
-|module|Network|Dataset|Introduction|
-|--|--|--|--|
+|module|Network|Dataset|Introduction|Huggingface Spaces Demo|
+|--|--|--|--|--|
 |[realsr](image/Image_editing/super_resolution/realsr)|LP-KPN|RealSR dataset|图像/视频超分-4倍|
-|[deoldify](image/Image_editing/colorization/deoldify)|GAN|ILSVRC 2012|黑白照片/视频着色|
+|[deoldify](image/Image_editing/colorization/deoldify)|GAN|ILSVRC 2012|黑白照片/视频着色|[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/deoldify) |
 |[photo_restoration](image/Image_editing/colorization/photo_restoration)|基于deoldify和realsr模型|-|老照片修复|
 |[user_guided_colorization](image/Image_editing/colorization/user_guided_colorization)|siggraph|ILSVRC 2012|图像着色|
 |[falsr_c](image/Image_editing/super_resolution/falsr_c)|falsr_c| DIV2k|轻量化超分-2倍|
@@ -280,10 +280,10 @@ English | [简体中文](README_ch.md)
 
   - ### Depth Estimation
 
-|module|Network|Dataset|Introduction|
-|--|--|--|--|
-|[MiDaS_Large](image/depth_estimation/MiDaS_Large)|-|3D Movies, WSVD, ReDWeb, MegaDepth||
-|[MiDaS_Small](image/depth_estimation/MiDaS_Small)|-|3D Movies, WSVD, ReDWeb, MegaDepth, etc.||
+|module|Network|Dataset|Introduction|Huggingface Spaces Demo|
+|--|--|--|--|--|
+|[MiDaS_Large](image/depth_estimation/MiDaS_Large)|-|3D Movies, WSVD, ReDWeb, MegaDepth|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/MiDaS_Large) |
+|[MiDaS_Small](image/depth_estimation/MiDaS_Small)|-|3D Movies, WSVD, ReDWeb, MegaDepth, etc.|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/MiDaS_Small) |
 
 ## Text
   - ### Text Generation
@@ -427,11 +427,11 @@ English | [简体中文](README_ch.md)
 
   - ### Sentiment Analysis
 
-|module|Network|Dataset|Introduction|
-|--|--|--|--|
+|module|Network|Dataset|Introduction|Huggingface Spaces Demo|
+|--|--|--|--|--|
 |[ernie_skep_sentiment_analysis](text/sentiment_analysis/ernie_skep_sentiment_analysis)|SKEP|百度自建数据集|句子级情感分析|
 |[emotion_detection_textcnn](text/sentiment_analysis/emotion_detection_textcnn)|TextCNN|百度自建数据集|对话情绪识别|
-|[senta_bilstm](text/sentiment_analysis/senta_bilstm)|BiLSTM|百度自建数据集|中文情感倾向分析|
+|[senta_bilstm](text/sentiment_analysis/senta_bilstm)|BiLSTM|百度自建数据集|中文情感倾向分析| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/senta_bilstm) 
 |[senta_bow](text/sentiment_analysis/senta_bow)|BOW|百度自建数据集|中文情感倾向分析|
 |[senta_gru](text/sentiment_analysis/senta_gru)|GRU|百度自建数据集|中文情感倾向分析|
 |[senta_lstm](text/sentiment_analysis/senta_lstm)|LSTM|百度自建数据集|中文情感倾向分析|
@@ -456,10 +456,10 @@ English | [简体中文](README_ch.md)
 
   - ### Lexical Analysis
 
-|module|Network|Dataset|Introduction|
-|--|--|--|--|
-|[jieba_paddle](text/lexical_analysis/jieba_paddle)|BiGRU+CRF|百度自建数据集|百度自研联合的词法分析模型，能整体性地完成中文分词、词性标注、专名识别任务。在百度自建数据集上评测，LAC效果：Precision=88.0%，Recall=88.7%，F1-Score=88.4%。|
-|[lac](text/lexical_analysis/lac)|BiGRU+CRF|百度自建数据集|jieba使用Paddle搭建的切词网络（双向GRU）。同时支持jieba的传统切词方法，如精确模式、全模式、搜索引擎模式等切词模式。|
+|module|Network|Dataset|Introduction|Huggingface Spaces Demo|
+|--|--|--|--|--|
+|[jieba_paddle](text/lexical_analysis/jieba_paddle)|BiGRU+CRF|百度自建数据集|jieba使用Paddle搭建的切词网络（双向GRU）。同时支持jieba的传统切词方法，如精确模式、全模式、搜索引擎模式等切词模式。|
+|[lac](text/lexical_analysis/lac)|BiGRU+CRF|百度自建数据集|百度自研联合的词法分析模型，能整体性地完成中文分词、词性标注、专名识别任务。在百度自建数据集上评测，LAC效果：Precision=88.0%，Recall=88.7%，F1-Score=88.4%。|[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/lac) 
 
   - ### Punctuation Restoration
 
@@ -477,7 +477,7 @@ English | [简体中文](README_ch.md)
 
 ## Audio
 
-  - ### Video cloning
+  - ### Voice cloning
 
 |module|Network|Dataset|Introduction|
 |--|--|--|--|

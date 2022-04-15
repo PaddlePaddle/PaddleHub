@@ -69,7 +69,8 @@ ELECTRA-Base, Chinese              | `hub.Module(name='chinese-electra-base')`
 ELECTRA-Small, Chinese             | `hub.Module(name='chinese-electra-small')`
 
 通过以上的一行代码，`model`初始化为一个适用于文本分类任务的模型，为ERNIE Tiny的预训练模型后拼接上一个全连接网络（Full Connected）。
-![](https://ai-studio-static-online.cdn.bcebos.com/f9e1bf9d56c6412d939960f2e3767c2f13b93eab30554d738b137ab2b98e328c)
+
+![](../../docs/imgs/Single_Sentence_Classsification.jpg)
 
 以上图片来自于：https://arxiv.org/pdf/1810.04805.pdf
 
@@ -80,10 +81,12 @@ train_dataset = hub.datasets.ChnSentiCorp(
     tokenizer=model.get_tokenizer(), max_seq_len=128, mode='train')
 dev_dataset = hub.datasets.ChnSentiCorp(
     tokenizer=model.get_tokenizer(), max_seq_len=128, mode='dev')
+test_dataset = hub.datasets.ChnSentiCorp(
+    tokenizer=model.get_tokenizer(), max_seq_len=128, mode='test')
 ```
 
 * `tokenizer`：表示该module所需用到的tokenizer，其将对输入文本完成切词，并转化成module运行所需模型输入格式。
-* `mode`：选择数据模式，可选项有 `train`, `test`, `val`， 默认为`train`。
+* `mode`：选择数据模式，可选项有 `train`, `test`, `dev`， 默认为`train`。
 * `max_seq_len`：ERNIE/BERT模型使用的最大序列长度，若出现显存不足，请适当调低这一参数。
 
 预训练模型ERNIE对中文数据的处理是以字为单位，tokenizer作用为将原始输入文本转化成模型model可以接受的输入数据形式。 PaddleHub 2.0中的各种预训练模型已经内置了相应的tokenizer，可以通过`model.get_tokenizer`方法获取。
@@ -95,7 +98,7 @@ dev_dataset = hub.datasets.ChnSentiCorp(
 
 ```python
 optimizer = paddle.optimizer.Adam(learning_rate=5e-5, parameters=model.parameters())
-trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls')
+trainer = hub.Trainer(model, optimizer, checkpoint_dir='test_ernie_text_cls', use_gpu=True)
 
 trainer.train(train_dataset, epochs=3, batch_size=32, eval_dataset=dev_dataset)
 
@@ -160,9 +163,9 @@ model = hub.Module(
     task='seq-cls',
     load_checkpoint='./test_ernie_text_cls/best_model/model.pdparams',
     label_map=label_map)
-results = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False)
+results, probs = model.predict(data, max_seq_len=50, batch_size=1, use_gpu=False, return_prob=True)
 for idx, text in enumerate(data):
-    print('Data: {} \t Lable: {}'.format(text[0], results[idx]))
+    print('Data: {} \t Lable: {} \t Prob: {}'.format(text[0], results[idx], probs[idx]))
 ```
 
 参数配置正确后，请执行脚本`python predict.py`， 加载模型具体可参见[加载](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0-rc/api/paddle/framework/io/load_cn.html#load)。
