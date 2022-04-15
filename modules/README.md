@@ -49,14 +49,14 @@ English | [简体中文](README_ch.md)
 |[fix_resnext101_32x48d_wsl_imagenet](image/classification/fix_resnext101_32x48d_wsl_imagenet)|ResNeXt|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/fix_resnext101_32x48d_wsl_imagenet) |
 |[vgg13_imagenet](image/classification/vgg13_imagenet)|VGG|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/vgg13_imagenet) |
 |[se_resnext101_32x4d_imagenet](image/classification/se_resnext101_32x4d_imagenet)|SE_ResNeXt|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/se_resnext101_32x4d_imagenet) |
-|[hrnet30_imagenet](image/classification/hrnet30_imagenet)|HRNet|ImageNet-2012||
-|[ghostnet_x1_3_imagenet](image/classification/ghostnet_x1_3_imagenet)|GhostNet|ImageNet-2012||
-|[dpn107_imagenet](image/classification/dpn107_imagenet)|DPN|ImageNet-2012||
-|[densenet161_imagenet](image/classification/densenet161_imagenet)|DenseNet|ImageNet-2012||
+|[hrnet30_imagenet](image/classification/hrnet30_imagenet)|HRNet|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/hrnet30_imagenet) |
+|[ghostnet_x1_3_imagenet](image/classification/ghostnet_x1_3_imagenet)|GhostNet|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/ghostnet_x1_3_imagenet) |
+|[dpn107_imagenet](image/classification/dpn107_imagenet)|DPN|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/dpn107_imagenet) |
+|[densenet161_imagenet](image/classification/densenet161_imagenet)|DenseNet|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/densenet161_imagenet) |
 |[vgg19_imagenet](image/classification/vgg19_imagenet)|vgg19_imagenet|ImageNet-2012||
-|[mobilenet_v2_imagenet](image/classification/mobilenet_v2_imagenet)|Mobilenet_v2|ImageNet-2012||
+|[mobilenet_v2_imagenet](image/classification/mobilenet_v2_imagenet)|Mobilenet_v2|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/mobilenet_v2_imagenet) |
 |[resnet50_vd_10w](image/classification/resnet50_vd_10w)|ResNet_vd|百度自建数据集||
-|[resnet_v2_101_imagenet](image/classification/resnet_v2_101_imagenet)|ResNet V2 101|ImageNet-2012||
+|[resnet_v2_101_imagenet](image/classification/resnet_v2_101_imagenet)|ResNet V2 101|ImageNet-2012|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/resnet_v2_101_imagenet) |
 |[darknet53_imagenet](image/classification/darknet53_imagenet)|DarkNet|ImageNet-2012||
 |[se_resnext50_32x4d_imagenet](image/classification/se_resnext50_32x4d_imagenet)|SE_ResNeXt|ImageNet-2012||
 |[se_hrnet64_imagenet_ssld](image/classification/se_hrnet64_imagenet_ssld)|HRNet|ImageNet-2012||
