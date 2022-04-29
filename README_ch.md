@@ -273,7 +273,7 @@ print(results)
 * 非常感谢[BurrowsWang](https://github.com/BurrowsWang)修复Markdown表格显示问题
 * 非常感谢[huqi](https://github.com/hu-qi)修复了readme中的错别字
 * 非常感谢[parano](https://github.com/parano)、[cqvu](https://github.com/cqvu)、[deehrlic](https://github.com/deehrlic)三位的贡献与支持
-* 非常感谢[paopjian](https://github.com/paopjian)修改了中文readme模型搜索指向的的网站地址错误[#1424](https://github.com/PaddlePaddle/PaddleHub/issues/1424)
+* 非常感谢[paopjian](https://github.com/paopjian)修改了中文readme模型搜索指向的网站地址错误[#1424](https://github.com/PaddlePaddle/PaddleHub/issues/1424)
 * 非常感谢[Wgm-Inspur](https://github.com/Wgm-Inspur)修复了readme中的代码示例问题，并优化了文本分类、序列标注demo中的RNN示例图
 * 非常感谢[zl1271](https://github.com/zl1271)修复了serving文档中的错别字
 * 非常感谢[AK391](https://github.com/AK391)在Hugging Face spaces中添加了UGATIT和deoldify模型的web demo

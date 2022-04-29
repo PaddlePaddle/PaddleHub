@@ -136,7 +136,7 @@ class BoWModel(nn.Layer):
                 ids = pad_sequence(ids, max_seq_len, pad_token_id)
             examples.append(ids)
 
-        # Seperates data into some batches.
+        # Separates data into some batches.
         one_batch = []
         for example in examples:
             one_batch.append(example)

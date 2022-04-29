@@ -25,7 +25,7 @@ from paddlehub.env import MODULE_HOME
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--wav", type=str, required=True, help="Audio file to infer.")
 parser.add_argument("--sr", type=int, default=32000, help="Sample rate of inference audio.")
-parser.add_argument("--model_type", type=str, default='panns_cnn14', help="Select model to to inference.")
+parser.add_argument("--model_type", type=str, default='panns_cnn14', help="Select model to inference.")
 parser.add_argument("--topk", type=int, default=10, help="Show top k results of audioset labels.")
 args = parser.parse_args()
 
