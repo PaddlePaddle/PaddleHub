@@ -97,7 +97,7 @@ class ColorizePreprocess:
 
     def __call__(self, data_lab):
         """
-        This method seperates the L channel and AB channel, obtain hint, mask and real_B_enc as the input for colorization task.
+        This method separates the L channel and AB channel, obtain hint, mask and real_B_enc as the input for colorization task.
 
         Args:
            img(np.ndarray|paddle.Tensor): LAB image.

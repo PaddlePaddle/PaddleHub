@@ -61,7 +61,7 @@ class JiebaPaddle(hub.Module):
             import jieba
         except ImportError:
             print(
-                'This module requires jieba tools. The running enviroment does not meet the requirments. Please install jieba packages.'
+                'This module requires jieba tools. The running environment does not meet the requirments. Please install jieba packages.'
             )
             exit()
 

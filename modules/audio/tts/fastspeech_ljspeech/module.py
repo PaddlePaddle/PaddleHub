@@ -228,7 +228,7 @@ class FastSpeech(hub.NLPPredictionModule):
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_input_group = self.parser.add_argument_group(
-            title="Ouput options", description="Ouput path. Optional.")
+            title="Output options", description="Output path. Optional.")
         self.arg_config_group = self.parser.add_argument_group(
             title="Config options", description="Run configuration for controlling module behavior, optional.")
 

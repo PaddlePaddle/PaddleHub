@@ -83,7 +83,7 @@
       - scale (float) : 缩放因子（与face_detection相关联)；<br/>
       - batch_size (int) : batch大小；<br/>
       - output\_dir (str): 图片的保存路径，默认设为 output；<br/>
-      - visualization (bool) : 是否将结果保存为图片文件；；<br/>
+      - visualization (bool) : 是否将结果保存为图片文件；<br/>
 
       **NOTE:** paths和images两个参数选择其一进行提供数据
 

@@ -157,7 +157,7 @@ class VoiceCloner(nn.Layer):
         for text in data:
             examples.append(self._convert_text_to_input(text))
 
-        # Seperates data into some batches.
+        # Separates data into some batches.
         one_batch = []
         for example in examples:
             one_batch.append(example)

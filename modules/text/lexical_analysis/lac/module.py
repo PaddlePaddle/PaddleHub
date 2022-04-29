@@ -190,10 +190,10 @@ class LAC(hub.Module):
 
     def set_user_dict(self, dict_path, sep=None):
         """
-        Set the costomized dictionary if you wanna exploit the self-defined dictionary
+        Set the customized dictionary if you wanna exploit the self-defined dictionary
 
         Args:
-             dict_path(str): The directory to the costomized dictionary.
+             dict_path(str): The directory to the customized dictionary.
              sep: The seperation token in phases. Default as ' ' or '\t'.
         """
         if not os.path.exists(dict_path):
@@ -203,7 +203,7 @@ class LAC(hub.Module):
 
     def del_user_dict(self):
         """
-        Delete the costomized dictionary if you don't wanna exploit the self-defined dictionary any longer
+        Delete the customized dictionary if you don't wanna exploit the self-defined dictionary any longer
         """
 
         if self.custom:
@@ -508,7 +508,7 @@ if __name__ == '__main__':
             print(result['word'])
             print(result['tag'])
 
-    # delete the costomized dictionary
+    # delete the customized dictionary
     lac.del_user_dict()
 
     results = lac.cut(text="春天的花开秋天的风以及冬天的落阳", use_gpu=False, batch_size=1, return_tag=False)
