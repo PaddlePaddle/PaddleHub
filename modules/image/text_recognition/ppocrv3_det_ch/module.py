@@ -34,14 +34,14 @@ def base64_to_cv2(b64str):
 
 
 @moduleinfo(
-    name="ppocrv3_det_ch",
+    name="ch_pp-ocrv3_det",
     version="1.0.0",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
-class ChineseTextDetectionDB(hub.Module):
+class ChPPOCRv3Det(hub.Module):
 
     def _initialize(self, enable_mkldnn=False):
         """
@@ -155,7 +155,8 @@ class ChineseTextDetectionDB(hub.Module):
                     use_gpu=False,
                     output_dir='detection_result',
                     visualization=False,
-                    box_thresh=0.5):
+                    box_thresh=0.5,
+                    det_db_unclip_ratio=1.5):
         """
         Get the text box in the predicted images.
         Args:
@@ -165,6 +166,7 @@ class ChineseTextDetectionDB(hub.Module):
             output_dir (str): The directory to store output images.
             visualization (bool): Whether to save image or not.
             box_thresh(float): the threshold of the detected text box's confidence
+            det_db_unclip_ratio(float): unclip ratio for post processing in DB detection.
         Returns:
             res (list): The result of text detection box and save path of images.
         """
@@ -195,7 +197,7 @@ class ChineseTextDetectionDB(hub.Module):
             'thresh': 0.3,
             'box_thresh': 0.6,
             'max_candidates': 1000,
-            'unclip_ratio': 1.5
+            'unclip_ratio': det_db_unclip_ratio
         })
 
         all_imgs = []
@@ -204,7 +206,6 @@ class ChineseTextDetectionDB(hub.Module):
         for original_image in predicted_data:
             ori_im = original_image.copy()
             im, ratio_list = preprocessor(original_image)
-            print('after preprocess int det, shape{}'.format(im.shape))
             res = {'save_path': ''}
             if im is None:
                 res['data'] = []
@@ -222,15 +223,10 @@ class ChineseTextDetectionDB(hub.Module):
                 outs_dict = {}
                 outs_dict['maps'] = outputs[0]
 
-                # data_out = self.output_tensors[0].copy_to_cpu()
-                print('Outputs[0] in det, shape: {}'.format(outputs[0].shape))
                 dt_boxes_list = postprocessor(outs_dict, [ratio_list])
                 dt_boxes = dt_boxes_list[0]
-                print('after postprocess int det, shape{}'.format(dt_boxes.shape))
                 boxes = self.filter_tag_det_res(dt_boxes_list[0], original_image.shape)
-                print('after fitler tag int det, shape{}'.format(boxes.shape))
                 res['data'] = boxes.astype(np.int).tolist()
-                print('boxes: {}'.format(boxes))
                 all_imgs.append(im)
                 all_ratios.append(ratio_list)
                 if visualization:
@@ -278,6 +274,7 @@ class ChineseTextDetectionDB(hub.Module):
         results = self.detect_text(paths=[args.input_path],
                                    use_gpu=args.use_gpu,
                                    output_dir=args.output_dir,
+                                   det_db_unclip_ratio=args.det_db_unclip_ratio,
                                    visualization=args.visualization)
         return results
 
@@ -297,6 +294,10 @@ class ChineseTextDetectionDB(hub.Module):
                                            type=ast.literal_eval,
                                            default=False,
                                            help="whether to save output as images.")
+        self.arg_config_group.add_argument('--det_db_unclip_ratio',
+                                           type=float,
+                                           default=1.5,
+                                           help="unclip ratio for post processing in DB detection.")
 
     def add_module_input_arg(self):
         """

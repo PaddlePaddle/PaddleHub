@@ -25,7 +25,6 @@ class DBProcessTest(object):
         self.resize_type = 0
         if 'test_image_shape' in params:
             self.image_shape = params['test_image_shape']
-            # print(self.image_shape)
             self.resize_type = 1
         if 'max_side_len' in params:
             self.max_side_len = params['max_side_len']
@@ -54,15 +53,14 @@ class DBProcessTest(object):
         resize_h = int(h * ratio)
         resize_w = int(w * ratio)
 
-        resize_h = int(round(resize_h / 32) * 32)
-        resize_w = int(round(resize_w / 32) * 32)
+        resize_h = max(int(round(resize_h / 32) * 32), 32)
+        resize_w = max(int(round(resize_w / 32) * 32), 32)
 
         try:
             if int(resize_w) <= 0 or int(resize_h) <= 0:
                 return None, (None, None)
             img = cv2.resize(img, (int(resize_w), int(resize_h)))
         except:
-            print(img.shape, resize_w, resize_h)
             sys.exit(0)
         ratio_h = resize_h / float(h)
         ratio_w = resize_w / float(w)
@@ -93,13 +91,14 @@ class DBProcessTest(object):
         return im
 
     def __call__(self, im):
+        src_h, src_w, _ = im.shape
         if self.resize_type == 0:
             im, (ratio_h, ratio_w) = self.resize_image_type0(im)
         else:
             im, (ratio_h, ratio_w) = self.resize_image_type1(im)
         im = self.normalize(im)
         im = im[np.newaxis, :]
-        return [im, (ratio_h, ratio_w)]
+        return [im, (src_h, src_w, ratio_h, ratio_w)]
 
 
 class DBPostProcess(object):
@@ -228,7 +227,7 @@ class DBPostProcess(object):
         cv2.fillPoly(mask, contour.reshape(1, -1, 2).astype(np.int32), 1)
         return cv2.mean(bitmap[ymin:ymax + 1, xmin:xmax + 1], mask)[0]
 
-    def __call__(self, outs_dict, ratio_list):
+    def __call__(self, outs_dict, shape_list):
         pred = outs_dict['maps']
 
         pred = pred[:, 0, :, :]
@@ -236,10 +235,10 @@ class DBPostProcess(object):
 
         boxes_batch = []
         for batch_index in range(pred.shape[0]):
-            height, width = pred.shape[-2:]
+            src_h, src_w, ratio_h, ratio_w = shape_list[batch_index]
 
             mask = segmentation[batch_index]
-            tmp_boxes, tmp_scores = self.boxes_from_bitmap(pred[batch_index], mask, width, height)
+            tmp_boxes, tmp_scores = self.boxes_from_bitmap(pred[batch_index], mask, src_w, src_h)
 
             boxes_batch.append(tmp_boxes)
         return boxes_batch

@@ -29,14 +29,14 @@ from paddlehub.module.module import serving
 
 
 @moduleinfo(
-    name="ppocrv3_rec_ch",
+    name="ch_pp-ocrv3",
     version="1.0.0",
     summary="The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions \
         based on the differentiable_binarization_chn module. Then it classifies the text angle and recognizes the chinese texts. ",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
-class ChineseOCRDBCRNN(hub.Module):
+class ChPPOCRv3(hub.Module):
 
     def _initialize(self, text_detector_module=None, enable_mkldnn=False):
         """
@@ -51,7 +51,7 @@ class ChineseOCRDBCRNN(hub.Module):
             'use_space_char': True
         }
         self.char_ops = CharacterOps(char_ops_params)
-        self.rec_image_shape = [3, 32, 320]
+        self.rec_image_shape = [3, 48, 320]
         self._text_detector_module = text_detector_module
         self.font_file = os.path.join(self.directory, 'assets', 'simfang.ttf')
         self.enable_mkldnn = enable_mkldnn
@@ -109,7 +109,7 @@ class ChineseOCRDBCRNN(hub.Module):
         text detect module
         """
         if not self._text_detector_module:
-            self._text_detector_module = hub.Module(name='ppocrv3_det_ch',
+            self._text_detector_module = hub.Module(name='ch_pp-ocrv3_det',
                                                     enable_mkldnn=self.enable_mkldnn,
                                                     version='1.0.0')
         return self._text_detector_module
@@ -152,7 +152,7 @@ class ChineseOCRDBCRNN(hub.Module):
     def resize_norm_img_rec(self, img, max_wh_ratio):
         imgC, imgH, imgW = self.rec_image_shape
         assert imgC == img.shape[2]
-        imgW = int((32 * max_wh_ratio))
+        imgW = int((imgH * max_wh_ratio))
         h, w = img.shape[:2]
         ratio = w / float(h)
         if math.ceil(imgH * ratio) > imgW:
@@ -199,7 +199,8 @@ class ChineseOCRDBCRNN(hub.Module):
                        visualization=False,
                        box_thresh=0.5,
                        text_thresh=0.5,
-                       angle_classification_thresh=0.9):
+                       angle_classification_thresh=0.9,
+                       det_db_unclip_ratio=1.5):
         """
         Get the chinese texts in the predicted images.
         Args:
@@ -212,7 +213,7 @@ class ChineseOCRDBCRNN(hub.Module):
             box_thresh(float): the threshold of the detected text box's confidence
             text_thresh(float): the threshold of the chinese text recognition confidence
             angle_classification_thresh(float): the threshold of the angle classification confidence
-
+            det_db_unclip_ratio(float): unclip ratio for post processing in DB detection.
         Returns:
             res (list): The result of chinese texts and save path of images.
         """
@@ -238,10 +239,10 @@ class ChineseOCRDBCRNN(hub.Module):
 
         detection_results = self.text_detector_module.detect_text(images=predicted_data,
                                                                   use_gpu=self.use_gpu,
-                                                                  box_thresh=box_thresh)
+                                                                  box_thresh=box_thresh,
+                                                                  det_db_unclip_ratio=det_db_unclip_ratio)
 
         boxes = [np.array(item['data']).astype(np.float32) for item in detection_results]
-        print("dt_boxes num : {}".format(len(boxes[0])))
         all_results = []
         for index, img_boxes in enumerate(boxes):
             original_image = predicted_data[index].copy()
@@ -255,7 +256,6 @@ class ChineseOCRDBCRNN(hub.Module):
                     tmp_box = copy.deepcopy(boxes[num_box])
                     img_crop = self.get_rotate_crop_image(original_image, tmp_box)
                     img_crop_list.append(img_crop)
-                    print('img_crop shape {}'.format(img_crop.shape))
                 img_crop_list, angle_list = self._classify_text(img_crop_list,
                                                                 angle_classification_thresh=angle_classification_thresh)
                 rec_results = self._recognize_text(img_crop_list)
@@ -371,7 +371,8 @@ class ChineseOCRDBCRNN(hub.Module):
         for beg_img_no in range(0, img_num, batch_num):
             end_img_no = min(img_num, beg_img_no + batch_num)
             norm_img_batch = []
-            max_wh_ratio = 0
+            imgC, imgH, imgW = self.rec_image_shape
+            max_wh_ratio = imgW / imgH
             for ino in range(beg_img_no, end_img_no):
                 h, w = img_list[indices[ino]].shape[0:2]
                 wh_ratio = w * 1.0 / h
@@ -400,10 +401,8 @@ class ChineseOCRDBCRNN(hub.Module):
                 preds = preds[-1]
             if isinstance(preds, paddle.Tensor):
                 preds = preds.numpy()
-            print('preds.shape: {}', preds.shape)
             preds_idx = preds.argmax(axis=2)
             preds_prob = preds.max(axis=2)
-            # print('preds_idx: {} \n preds_prob: {}'.format(preds_idx, preds_prob) )
             rec_result = self.char_ops.decode(preds_idx, preds_prob, is_remove_duplicate=True)
             for rno in range(len(rec_result)):
                 rec_res[indices[beg_img_no + rno]] = rec_result[rno]
@@ -431,6 +430,7 @@ class ChineseOCRDBCRNN(hub.Module):
         results = self.recognize_text(paths=[args.input_path],
                                       use_gpu=args.use_gpu,
                                       output_dir=args.output_dir,
+                                      det_db_unclip_ratio=args.det_db_unclip_ratio,
                                       visualization=args.visualization)
         return results
 
@@ -450,6 +450,10 @@ class ChineseOCRDBCRNN(hub.Module):
                                            type=ast.literal_eval,
                                            default=False,
                                            help="whether to save output as images.")
+        self.arg_config_group.add_argument('--det_db_unclip_ratio',
+                                           type=float,
+                                           default=1.5,
+                                           help="unclip ratio for post processing in DB detection.")
 
     def add_module_input_arg(self):
         """

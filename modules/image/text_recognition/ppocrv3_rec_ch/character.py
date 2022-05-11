@@ -59,6 +59,7 @@ class CharacterOps(object):
         self.character = dict_character
 
     def add_special_char(self, dict_character):
+        dict_character = ['blank'] + dict_character
         return dict_character
 
     def encode(self, text):
@@ -93,12 +94,6 @@ class CharacterOps(object):
                 selection[1:] = text_index[batch_idx][1:] != text_index[batch_idx][:-1]
             for ignored_token in ignored_tokens:
                 selection &= text_index[batch_idx] != ignored_token
-            # print(text_index)
-            # print(batch_idx)
-            # print(selection)
-            # for text_id in text_index[batch_idx][selection]:
-            #     print(text_id)
-            #     print(self.character[text_id])
             char_list = [self.character[text_id] for text_id in text_index[batch_idx][selection]]
             if text_prob is not None:
                 conf_list = text_prob[batch_idx][selection]
