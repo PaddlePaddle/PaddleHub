@@ -35,18 +35,9 @@
 
 - ### 1、环境依赖  
 
-  - paddlepaddle >= 1.7.2  
+  - paddlepaddle >= 2.2  
 
-  - paddlehub >= 1.6.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
-
-  - shapely
-
-  - pyclipper
-
-  - ```shell
-    $ pip install shapely pyclipper
-    ```
-  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**
+  - paddlehub >= 2.2   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
