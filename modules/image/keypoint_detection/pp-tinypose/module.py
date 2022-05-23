@@ -41,13 +41,13 @@ from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
 
 
-@moduleinfo(name="pp-tinypose",
-            type="CV/image_editing",
-            author="paddlepaddle",
-            author_email="",
-            summary="Openpose_body_estimation is a body pose estimation model based on Realtime Multi-Person 2D Pose \
-            Estimation using Part Affinity Fields.",
-            version="1.0.0")
+@moduleinfo(
+    name="pp-tinypose",
+    type="CV/keypoint_detection",
+    author="paddlepaddle",
+    author_email="",
+    summary="PP-TinyPose is a real-time keypoint detection model optimized by PaddleDetecion for mobile devices.",
+    version="1.0.0")
 class PP_TinyPose:
     """
     PP-TinyPose Model.
