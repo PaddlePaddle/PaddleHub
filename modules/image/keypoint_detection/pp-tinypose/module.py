@@ -51,9 +51,6 @@ from paddlehub.module.module import serving
 class PP_TinyPose:
     """
     PP-TinyPose Model.
-
-    Args:
-        load_checkpoint(str): Checkpoint save path, default is None.
     """
 
     def __init__(self):
