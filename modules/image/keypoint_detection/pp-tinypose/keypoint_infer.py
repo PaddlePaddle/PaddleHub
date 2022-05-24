@@ -91,7 +91,6 @@ class KeyPointDetector(Detector):
 
     def get_person_from_rect(self, image, results):
         # crop the person result from image
-        self.det_times.preprocess_time_s.start()
         valid_rects = results['boxes']
         rect_images = []
         new_rects = []
@@ -103,7 +102,6 @@ class KeyPointDetector(Detector):
             rect_images.append(rect_image)
             new_rects.append(new_rect)
             org_rects.append(org_rect)
-        self.det_times.preprocess_time_s.end()
         return rect_images, new_rects, org_rects
 
     def postprocess(self, inputs, result):
@@ -168,20 +166,12 @@ class KeyPointDetector(Detector):
             end_index = min((i + 1) * self.batch_size, len(image_list))
             batch_image_list = image_list[start_index:end_index]
             # preprocess
-            self.det_times.preprocess_time_s.start()
             inputs = self.preprocess(batch_image_list)
-            self.det_times.preprocess_time_s.end()
 
             # model prediction
-            self.det_times.inference_time_s.start()
             result = self.predict()
-            self.det_times.inference_time_s.end()
-
             # postprocess
-            self.det_times.postprocess_time_s.start()
             result = self.postprocess(inputs, result)
-            self.det_times.postprocess_time_s.end()
-            self.det_times.img_num += len(batch_image_list)
 
             if visual:
                 if not os.path.exists(self.output_dir):

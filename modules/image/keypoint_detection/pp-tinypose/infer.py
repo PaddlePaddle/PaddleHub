@@ -219,20 +219,14 @@ class Detector(object):
             end_index = min((i + 1) * self.batch_size, len(image_list))
             batch_image_list = image_list[start_index:end_index]
             # preprocess
-            self.det_times.preprocess_time_s.start()
             inputs = self.preprocess(batch_image_list)
-            self.det_times.preprocess_time_s.end()
 
             # model prediction
-            self.det_times.inference_time_s.start()
             result = self.predict()
-            self.det_times.inference_time_s.end()
 
             # postprocess
-            self.det_times.postprocess_time_s.start()
+
             result = self.postprocess(inputs, result)
-            self.det_times.postprocess_time_s.end()
-            self.det_times.img_num += len(batch_image_list)
 
             if visual:
                 visualize(batch_image_list,
