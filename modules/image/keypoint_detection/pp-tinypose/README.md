@@ -3,7 +3,7 @@
 |模型名称|pp-tinypose|
 | :--- | :---: |
 |类别|图像-关键点检测|
-|网络|PicoDet + HRNet|
+|网络|PicoDet + tinypose|
 |数据集|COCO + AI Challenger|
 |是否支持Fine-tuning|否|
 |模型大小|125M|
