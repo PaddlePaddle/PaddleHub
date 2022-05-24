@@ -23,7 +23,6 @@ import cv2
 import numpy as np
 import paddle
 import yaml
-from benchmark_utils import PaddleInferBenchmark
 from keypoint_preprocess import EvalAffine
 from keypoint_preprocess import expand_crop
 from keypoint_preprocess import TopDownEvalAffine
@@ -38,9 +37,6 @@ from preprocess import Permute
 from preprocess import preprocess
 from preprocess import Resize
 from preprocess import WarpAffine
-from utils import argsparser
-from utils import get_current_memory_mb
-from utils import Timer
 from visualize import visualize_box
 
 # Global dictionary
@@ -65,18 +61,6 @@ SUPPORT_MODELS = {
     'STGCN',
     'YOLOX',
 }
-
-
-def bench_log(detector, img_list, model_info, batch_size=1, name=None):
-    mems = {
-        'cpu_rss_mb': detector.cpu_mem / len(img_list),
-        'gpu_rss_mb': detector.gpu_mem / len(img_list),
-        'gpu_util': detector.gpu_util * 100 / len(img_list)
-    }
-    perf_info = detector.det_times.report(average=True)
-    data_info = {'batch_size': batch_size, 'shape': "dynamic_shape", 'data_num': perf_info['img_num']}
-    log = PaddleInferBenchmark(detector.config, model_info, data_info, perf_info, mems)
-    log(name)
 
 
 class Detector(object):
@@ -132,7 +116,6 @@ class Detector(object):
                                                      enable_mkldnn=enable_mkldnn,
                                                      enable_mkldnn_bfloat16=enable_mkldnn_bfloat16,
                                                      delete_shuffle_pass=delete_shuffle_pass)
-        self.det_times = Timer()
         self.cpu_mem, self.gpu_mem, self.gpu_util = 0, 0, 0
         self.batch_size = batch_size
         self.output_dir = output_dir
@@ -228,9 +211,6 @@ class Detector(object):
                 results[k] = np.concatenate(v)
         return results
 
-    def get_timer(self):
-        return self.det_times
-
     def predict_image(self, image_list, run_benchmark=False, repeats=1, visual=True, save_file=None):
         batch_loop_cnt = math.ceil(float(len(image_list)) / self.batch_size)
         results = []
@@ -238,53 +218,28 @@ class Detector(object):
             start_index = i * self.batch_size
             end_index = min((i + 1) * self.batch_size, len(image_list))
             batch_image_list = image_list[start_index:end_index]
-            if run_benchmark:
-                # preprocess
-                inputs = self.preprocess(batch_image_list)  # warmup
-                self.det_times.preprocess_time_s.start()
-                inputs = self.preprocess(batch_image_list)
-                self.det_times.preprocess_time_s.end()
+            # preprocess
+            self.det_times.preprocess_time_s.start()
+            inputs = self.preprocess(batch_image_list)
+            self.det_times.preprocess_time_s.end()
 
-                # model prediction
-                result = self.predict(repeats=50)  # warmup
-                self.det_times.inference_time_s.start()
-                result = self.predict(repeats=repeats)
-                self.det_times.inference_time_s.end(repeats=repeats)
+            # model prediction
+            self.det_times.inference_time_s.start()
+            result = self.predict()
+            self.det_times.inference_time_s.end()
 
-                # postprocess
-                result_warmup = self.postprocess(inputs, result)  # warmup
-                self.det_times.postprocess_time_s.start()
-                result = self.postprocess(inputs, result)
-                self.det_times.postprocess_time_s.end()
-                self.det_times.img_num += len(batch_image_list)
+            # postprocess
+            self.det_times.postprocess_time_s.start()
+            result = self.postprocess(inputs, result)
+            self.det_times.postprocess_time_s.end()
+            self.det_times.img_num += len(batch_image_list)
 
-                cm, gm, gu = get_current_memory_mb()
-                self.cpu_mem += cm
-                self.gpu_mem += gm
-                self.gpu_util += gu
-            else:
-                # preprocess
-                self.det_times.preprocess_time_s.start()
-                inputs = self.preprocess(batch_image_list)
-                self.det_times.preprocess_time_s.end()
-
-                # model prediction
-                self.det_times.inference_time_s.start()
-                result = self.predict()
-                self.det_times.inference_time_s.end()
-
-                # postprocess
-                self.det_times.postprocess_time_s.start()
-                result = self.postprocess(inputs, result)
-                self.det_times.postprocess_time_s.end()
-                self.det_times.img_num += len(batch_image_list)
-
-                if visual:
-                    visualize(batch_image_list,
-                              result,
-                              self.pred_config.labels,
-                              output_dir=self.output_dir,
-                              threshold=self.threshold)
+            if visual:
+                visualize(batch_image_list,
+                          result,
+                          self.pred_config.labels,
+                          output_dir=self.output_dir,
+                          threshold=self.threshold)
 
             results.append(result)
             if visual:
@@ -626,69 +581,3 @@ def visualize(image_list, result, labels, output_dir='output/', threshold=0.5):
         out_path = os.path.join(output_dir, img_name)
         im.save(out_path, quality=95)
         print("save result to: " + out_path)
-
-
-def print_arguments(args):
-    print('-----------  Running Arguments -----------')
-    for arg, value in sorted(vars(args).items()):
-        print('%s: %s' % (arg, value))
-    print('------------------------------------------')
-
-
-def main():
-    deploy_file = os.path.join(FLAGS.model_dir, 'infer_cfg.yml')
-    with open(deploy_file) as f:
-        yml_conf = yaml.safe_load(f)
-    arch = yml_conf['arch']
-    detector_func = 'Detector'
-    if arch == 'SOLOv2':
-        detector_func = 'DetectorSOLOv2'
-    elif arch == 'PicoDet':
-        detector_func = 'DetectorPicoDet'
-
-    detector = eval(detector_func)(FLAGS.model_dir,
-                                   device=FLAGS.device,
-                                   run_mode=FLAGS.run_mode,
-                                   batch_size=FLAGS.batch_size,
-                                   trt_min_shape=FLAGS.trt_min_shape,
-                                   trt_max_shape=FLAGS.trt_max_shape,
-                                   trt_opt_shape=FLAGS.trt_opt_shape,
-                                   trt_calib_mode=FLAGS.trt_calib_mode,
-                                   cpu_threads=FLAGS.cpu_threads,
-                                   enable_mkldnn=FLAGS.enable_mkldnn,
-                                   enable_mkldnn_bfloat16=FLAGS.enable_mkldnn_bfloat16,
-                                   threshold=FLAGS.threshold,
-                                   output_dir=FLAGS.output_dir)
-
-    # predict from video file or camera video stream
-    if FLAGS.video_file is not None or FLAGS.camera_id != -1:
-        detector.predict_video(FLAGS.video_file, FLAGS.camera_id)
-    else:
-        # predict from image
-        if FLAGS.image_dir is None and FLAGS.image_file is not None:
-            assert FLAGS.batch_size == 1, "batch_size should be 1, when image_file is not None"
-        img_list = get_test_images(FLAGS.image_dir, FLAGS.image_file)
-        save_file = os.path.join(FLAGS.output_dir, 'results.json') if FLAGS.save_results else None
-        detector.predict_image(img_list, FLAGS.run_benchmark, repeats=100, save_file=save_file)
-        if not FLAGS.run_benchmark:
-            detector.det_times.info(average=True)
-        else:
-            mode = FLAGS.run_mode
-            model_dir = FLAGS.model_dir
-            model_info = {'model_name': model_dir.strip('/').split('/')[-1], 'precision': mode.split('_')[-1]}
-            bench_log(detector, img_list, model_info, name='DET')
-
-
-if __name__ == '__main__':
-    paddle.enable_static()
-    parser = argsparser()
-    FLAGS = parser.parse_args()
-    print_arguments(FLAGS)
-    FLAGS.device = FLAGS.device.upper()
-    assert FLAGS.device in ['CPU', 'GPU', 'XPU'], "device should be CPU, GPU or XPU"
-    assert not FLAGS.use_gpu, "use_gpu has been deprecated, please use --device"
-
-    assert not (FLAGS.enable_mkldnn == False and FLAGS.enable_mkldnn_bfloat16
-                == True), 'To enable mkldnn bfloat, please turn on both enable_mkldnn and enable_mkldnn_bfloat16'
-
-    main()

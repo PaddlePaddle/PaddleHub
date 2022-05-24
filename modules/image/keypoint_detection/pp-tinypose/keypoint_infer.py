@@ -33,9 +33,7 @@ from keypoint_postprocess import HRNetPostProcess
 from visualize import visualize_pose
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from utils import argsparser, Timer, get_current_memory_mb
-from benchmark_utils import PaddleInferBenchmark
-from infer import Detector, get_test_images, print_arguments
+from infer import Detector
 
 # Global dictionary
 KEYPOINT_SUPPORT_MODELS = {'HigherHRNet': 'keypoint_bottomup', 'HRNet': 'keypoint_topdown'}
@@ -169,52 +167,26 @@ class KeyPointDetector(Detector):
             start_index = i * self.batch_size
             end_index = min((i + 1) * self.batch_size, len(image_list))
             batch_image_list = image_list[start_index:end_index]
-            if run_benchmark:
-                # preprocess
-                inputs = self.preprocess(batch_image_list)  # warmup
-                self.det_times.preprocess_time_s.start()
-                inputs = self.preprocess(batch_image_list)
-                self.det_times.preprocess_time_s.end()
+            # preprocess
+            self.det_times.preprocess_time_s.start()
+            inputs = self.preprocess(batch_image_list)
+            self.det_times.preprocess_time_s.end()
 
-                # model prediction
-                result_warmup = self.predict(repeats=repeats)  # warmup
-                self.det_times.inference_time_s.start()
-                result = self.predict(repeats=repeats)
-                self.det_times.inference_time_s.end(repeats=repeats)
+            # model prediction
+            self.det_times.inference_time_s.start()
+            result = self.predict()
+            self.det_times.inference_time_s.end()
 
-                # postprocess
-                result_warmup = self.postprocess(inputs, result)  # warmup
-                self.det_times.postprocess_time_s.start()
-                result = self.postprocess(inputs, result)
-                self.det_times.postprocess_time_s.end()
-                self.det_times.img_num += len(batch_image_list)
+            # postprocess
+            self.det_times.postprocess_time_s.start()
+            result = self.postprocess(inputs, result)
+            self.det_times.postprocess_time_s.end()
+            self.det_times.img_num += len(batch_image_list)
 
-                cm, gm, gu = get_current_memory_mb()
-                self.cpu_mem += cm
-                self.gpu_mem += gm
-                self.gpu_util += gu
-
-            else:
-                # preprocess
-                self.det_times.preprocess_time_s.start()
-                inputs = self.preprocess(batch_image_list)
-                self.det_times.preprocess_time_s.end()
-
-                # model prediction
-                self.det_times.inference_time_s.start()
-                result = self.predict()
-                self.det_times.inference_time_s.end()
-
-                # postprocess
-                self.det_times.postprocess_time_s.start()
-                result = self.postprocess(inputs, result)
-                self.det_times.postprocess_time_s.end()
-                self.det_times.img_num += len(batch_image_list)
-
-                if visual:
-                    if not os.path.exists(self.output_dir):
-                        os.makedirs(self.output_dir)
-                    visualize(batch_image_list, result, visual_thresh=self.threshold, save_dir=self.output_dir)
+            if visual:
+                if not os.path.exists(self.output_dir):
+                    os.makedirs(self.output_dir)
+                visualize(batch_image_list, result, visual_thresh=self.threshold, save_dir=self.output_dir)
 
             results.append(result)
             if visual:
@@ -328,54 +300,3 @@ def visualize(image_list, results, visual_thresh=0.6, save_dir='output'):
         score = scores[i:i + 1]
         im_results['keypoint'] = [skeleton, score]
         visualize_pose(image_file, im_results, visual_thresh=visual_thresh, save_dir=save_dir)
-
-
-def main():
-    detector = KeyPointDetector(FLAGS.model_dir,
-                                device=FLAGS.device,
-                                run_mode=FLAGS.run_mode,
-                                batch_size=FLAGS.batch_size,
-                                trt_min_shape=FLAGS.trt_min_shape,
-                                trt_max_shape=FLAGS.trt_max_shape,
-                                trt_opt_shape=FLAGS.trt_opt_shape,
-                                trt_calib_mode=FLAGS.trt_calib_mode,
-                                cpu_threads=FLAGS.cpu_threads,
-                                enable_mkldnn=FLAGS.enable_mkldnn,
-                                threshold=FLAGS.threshold,
-                                output_dir=FLAGS.output_dir,
-                                use_dark=FLAGS.use_dark)
-
-    # predict from video file or camera video stream
-    if FLAGS.video_file is not None or FLAGS.camera_id != -1:
-        detector.predict_video(FLAGS.video_file, FLAGS.camera_id)
-    else:
-        # predict from image
-        img_list = get_test_images(FLAGS.image_dir, FLAGS.image_file)
-        detector.predict_image(img_list, FLAGS.run_benchmark, repeats=10)
-        if not FLAGS.run_benchmark:
-            detector.det_times.info(average=True)
-        else:
-            mems = {
-                'cpu_rss_mb': detector.cpu_mem / len(img_list),
-                'gpu_rss_mb': detector.gpu_mem / len(img_list),
-                'gpu_util': detector.gpu_util * 100 / len(img_list)
-            }
-            perf_info = detector.det_times.report(average=True)
-            model_dir = FLAGS.model_dir
-            mode = FLAGS.run_mode
-            model_info = {'model_name': model_dir.strip('/').split('/')[-1], 'precision': mode.split('_')[-1]}
-            data_info = {'batch_size': 1, 'shape': "dynamic_shape", 'data_num': perf_info['img_num']}
-            det_log = PaddleInferBenchmark(detector.config, model_info, data_info, perf_info, mems)
-            det_log('KeyPoint')
-
-
-if __name__ == '__main__':
-    paddle.enable_static()
-    parser = argsparser()
-    FLAGS = parser.parse_args()
-    print_arguments(FLAGS)
-    FLAGS.device = FLAGS.device.upper()
-    assert FLAGS.device in ['CPU', 'GPU', 'XPU'], "device should be CPU, GPU or XPU"
-    assert not FLAGS.use_gpu, "use_gpu has been deprecated, please use --device"
-
-    main()

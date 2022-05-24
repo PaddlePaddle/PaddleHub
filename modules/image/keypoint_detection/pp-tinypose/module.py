@@ -23,19 +23,12 @@ import numpy as np
 import paddle
 import yaml
 from det_keypoint_unite_infer import predict_with_given_det
-from infer import bench_log
 from infer import Detector
-from infer import get_test_images
-from infer import PredictConfig
-from infer import print_arguments
 from keypoint_infer import KeyPointDetector
-from keypoint_infer import PredictConfig_KeyPoint
-from keypoint_postprocess import translate_to_ori_images
 from preprocess import base64_to_cv2
 from preprocess import decode_image
 from visualize import visualize_pose
 
-import paddlehub.vision.transforms as T
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
