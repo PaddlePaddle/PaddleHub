@@ -48,7 +48,7 @@ class PP_TinyPose:
 
     def __init__(self):
         self.det_model_dir = os.path.join(self.directory, 'model/picodet_s_320_coco_lcnet/')
-        self.keypoint_model_dir = os.path.join(self.directory, 'model/dark_hrnet_w32_256x192/')
+        self.keypoint_model_dir = os.path.join(self.directory, 'model/tinypose_256x192/')
         self.detector = Detector(self.det_model_dir)
         self.topdown_keypoint_detector = KeyPointDetector(self.keypoint_model_dir)
 

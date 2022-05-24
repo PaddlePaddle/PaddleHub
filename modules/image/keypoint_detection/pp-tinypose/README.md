@@ -20,7 +20,7 @@
     <br />
     输入图像
     <br />
-    <img src="https://user-images.githubusercontent.com/22424850/169768604-d23a1851-c18b-4f9f-a8ab-2c3f3080e393.jpg"   hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/170029768-3c60def2-7c87-4e8a-98bc-1bbc912204e7.jpg"   hspace='10'/>
     <br />
     输出图像
 
