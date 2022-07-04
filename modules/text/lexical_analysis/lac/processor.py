@@ -1,11 +1,13 @@
 # -*- coding:utf-8 -*-
 import io
-import numpy as np
 import os
+
+import numpy as np
 import six
 
 
 class Query(object):
+
     def __init__(self, lac_query):
         self.set_query(lac_query)
 
@@ -35,6 +37,7 @@ class Query(object):
 
 
 class Bound(object):
+
     def __init__(self, start_index=0, end_index=0, left_bound=0, right_bound=0, left_char_bound=0, right_char_bound=0):
         self.start_index = start_index  # 命中的词的起始位置，char级别
         self.end_index = end_index  # 命中的词的结束位置，char级别
@@ -45,6 +48,7 @@ class Bound(object):
 
 
 class Interventer(object):
+
     def __init__(self, ngram_dict_path, user_dict_path):
         self.ngram_dict_path = ngram_dict_path
         self.user_dict_path = user_dict_path

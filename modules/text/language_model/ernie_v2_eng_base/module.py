@@ -1,4 +1,4 @@
-# Copyright (c) 2022 PaddlePaddle Authors. All Rights Reserved.
+# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ from paddlehub.utils.log import logger
 
 @moduleinfo(
     name="ernie_v2_eng_base",
-    version="2.0.3",
+    version="2.0.2",
     summary=
     "Baidu's ERNIE 2.0, Enhanced Representation through kNowledge IntEgration, max_seq_len=512 when predtrained. The module is executed as paddle.dygraph.",
     author="paddlepaddle",
@@ -65,25 +65,26 @@ class ErnieV2(nn.Layer):
                 "current task name 'sequence_classification' was renamed to 'seq-cls', "
                 "'sequence_classification' has been deprecated and will be removed in the future.", )
         if task == 'seq-cls':
-            self.model = ErnieForSequenceClassification.from_pretrained(
-                pretrained_model_name_or_path='ernie-2.0-base-en', num_classes=self.num_classes, **kwargs)
+            self.model = ErnieForSequenceClassification.from_pretrained(pretrained_model_name_or_path='ernie-2.0-en',
+                                                                        num_classes=self.num_classes,
+                                                                        **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy()
         elif task == 'token-cls':
-            self.model = ErnieForTokenClassification.from_pretrained(pretrained_model_name_or_path='ernie-2.0-base-en',
+            self.model = ErnieForTokenClassification.from_pretrained(pretrained_model_name_or_path='ernie-2.0-en',
                                                                      num_classes=self.num_classes,
                                                                      **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = ChunkEvaluator(label_list=[self.label_map[i] for i in sorted(self.label_map.keys())],
                                          suffix=suffix)
         elif task == 'text-matching':
-            self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-2.0-base-en', **kwargs)
+            self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-2.0-en', **kwargs)
             self.dropout = paddle.nn.Dropout(0.1)
             self.classifier = paddle.nn.Linear(self.model.config['hidden_size'] * 3, 2)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy()
         elif task is None:
-            self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-2.0-base-en', **kwargs)
+            self.model = ErnieModel.from_pretrained(pretrained_model_name_or_path='ernie-2.0-en', **kwargs)
         else:
             raise RuntimeError("Unknown task {}, task should be one in {}".format(task, self._tasks_supported))
 
@@ -175,4 +176,4 @@ class ErnieV2(nn.Layer):
         """
         Gets the tokenizer that is customized for this module.
         """
-        return ErnieTokenizer.from_pretrained(pretrained_model_name_or_path='ernie-2.0-base-en', *args, **kwargs)
+        return ErnieTokenizer.from_pretrained(pretrained_model_name_or_path='ernie-2.0-en', *args, **kwargs)

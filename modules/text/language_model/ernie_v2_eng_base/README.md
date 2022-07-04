@@ -6,7 +6,7 @@
 |数据集|百度自建数据集|
 |是否支持Fine-tuning|是|
 |模型大小|1.3G|
-|最新更新日期|2021-06-28|
+|最新更新日期|2021-03-16|
 |数据指标|-|
 
 ## 一、模型基本信息
@@ -36,7 +36,7 @@ Ernie是百度提出的基于知识增强的持续学习语义理解模型，该
 - ### 2、安装
 
   - ```shell
-    $ hub install ernie_v2_eng_base
+    $ hub install ernie_tiny
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -57,7 +57,7 @@ label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
     name='ernie_v2_eng_base',
-    version='2.0.3',
+    version='2.0.2',
     task='seq-cls',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
@@ -194,11 +194,7 @@ for idx, text in enumerate(data):
 
 * 2.0.2
 
-  增加文本匹配任务`text-matching`
-
-* 2.0.3
-
-  模型底座名称调整
+  增加文本匹配任务`text-matching`  
   ```shell
-  $ hub install ernie_v2_eng_base==2.0.3
+  $ hub install ernie_v2_eng_base==2.0.2
   ```

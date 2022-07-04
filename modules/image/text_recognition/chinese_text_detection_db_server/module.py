@@ -5,19 +5,23 @@ from __future__ import print_function
 
 import argparse
 import ast
+import base64
 import math
 import os
 import time
 
-from paddle.fluid.core import AnalysisConfig, create_paddle_predictor, PaddleTensor
-from paddlehub.common.logger import logger
-from paddlehub.module.module import moduleinfo, runnable, serving
-from PIL import Image
-import base64
 import cv2
 import numpy as np
-import paddle.fluid as fluid
+import paddle
+from paddle.inference import Config
+from paddle.inference import create_predictor
+from PIL import Image
+
 import paddlehub as hub
+from paddlehub.common.logger import logger
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
 def base64_to_cv2(b64str):
@@ -29,13 +33,14 @@ def base64_to_cv2(b64str):
 
 @moduleinfo(
     name="chinese_text_detection_db_server",
-    version="1.0.2",
+    version="1.0.3",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
 class ChineseTextDetectionDBServer(hub.Module):
+
     def _initialize(self, enable_mkldnn=False):
         """
         initialize with the necessary elements
@@ -60,7 +65,7 @@ class ChineseTextDetectionDBServer(hub.Module):
         model_file_path = os.path.join(self.pretrained_model_path, 'model')
         params_file_path = os.path.join(self.pretrained_model_path, 'params')
 
-        config = AnalysisConfig(model_file_path, params_file_path)
+        config = Config(model_file_path, params_file_path)
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
             int(_places[0])
@@ -80,13 +85,13 @@ class ChineseTextDetectionDBServer(hub.Module):
         # use zero copy
         config.delete_pass("conv_transpose_eltwiseadd_bn_fuse_pass")
         config.switch_use_feed_fetch_ops(False)
-        self.predictor = create_paddle_predictor(config)
+        self.predictor = create_predictor(config)
         input_names = self.predictor.get_input_names()
-        self.input_tensor = self.predictor.get_input_tensor(input_names[0])
+        self.input_tensor = self.predictor.get_input_handle(input_names[0])
         output_names = self.predictor.get_output_names()
         self.output_tensors = []
         for output_name in output_names:
-            output_tensor = self.predictor.get_output_tensor(output_name)
+            output_tensor = self.predictor.get_output_handle(output_name)
             self.output_tensors.append(output_tensor)
 
     def read_images(self, paths=[]):
@@ -202,7 +207,7 @@ class ChineseTextDetectionDBServer(hub.Module):
                 im = im.copy()
                 starttime = time.time()
                 self.input_tensor.copy_from_cpu(im)
-                self.predictor.zero_copy_run()
+                self.predictor.run()
                 data_out = self.output_tensors[0].copy_to_cpu()
                 dt_boxes_list = postprocessor(data_out, [ratio_list])
                 boxes = self.filter_tag_det_res(dt_boxes_list[0], original_image.shape)
@@ -229,25 +234,23 @@ class ChineseTextDetectionDBServer(hub.Module):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
 
         model_file_path = os.path.join(self.pretrained_model_path, 'model')
         params_file_path = os.path.join(self.pretrained_model_path, 'params')
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.pretrained_model_path,
-            model_filename=model_file_path,
-            params_filename=params_file_path,
-            executor=exe)
+        program, feeded_var_names, target_vars = paddle.static.load_inference_model(dirname=self.pretrained_model_path,
+                                                                                    model_filename=model_file_path,
+                                                                                    params_filename=params_file_path,
+                                                                                    executor=exe)
 
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+        paddle.static.save_inference_model(dirname=dirname,
+                                           main_program=program,
+                                           executor=exe,
+                                           feeded_var_names=feeded_var_names,
+                                           target_vars=target_vars,
+                                           model_filename=model_filename,
+                                           params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -263,11 +266,10 @@ class ChineseTextDetectionDBServer(hub.Module):
         """
         Run as a command
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the %s module." % self.name,
-            prog='hub run %s' % self.name,
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the %s module." % self.name,
+                                              prog='hub run %s' % self.name,
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -277,20 +279,28 @@ class ChineseTextDetectionDBServer(hub.Module):
         self.add_module_input_arg()
 
         args = self.parser.parse_args(argvs)
-        results = self.detect_text(
-            paths=[args.input_path], use_gpu=args.use_gpu, output_dir=args.output_dir, visualization=args.visualization)
+        results = self.detect_text(paths=[args.input_path],
+                                   use_gpu=args.use_gpu,
+                                   output_dir=args.output_dir,
+                                   visualization=args.visualization)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
-        self.arg_config_group.add_argument(
-            '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not")
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='detection_result',
+                                           help="The directory to save output images.")
+        self.arg_config_group.add_argument('--visualization',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether to save output as images.")
 
     def add_module_input_arg(self):
         """

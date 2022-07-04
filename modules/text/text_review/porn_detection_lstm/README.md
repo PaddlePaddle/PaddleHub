@@ -21,7 +21,7 @@
 - ### 1、环境依赖
 
   - paddlepaddle >= 1.6.2
-  
+
   - paddlehub >= 1.6.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
@@ -39,44 +39,44 @@
   - ```shell
     $ hub run porn_detection_lstm --input_text "黄片下载"
     ```
-    
+
   - 或者
 
   - ```shell
     $ hub run porn_detection_lstm --input_file test.txt
     ```
-    
+
     - 其中test.txt存放待审查文本，每行仅放置一段待审核文本
-    
+
   - 通过命令行方式实现hub模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
-    
+
     porn_detection_lstm = hub.Module(name="porn_detection_lstm")
-    
+
     test_text = ["黄片下载", "打击黄牛党"]
-    
+
     results = porn_detection_lstm.detection(texts=test_text, use_gpu=True, batch_size=1)
-    
+
     for index, text in enumerate(test_text):
         results[index]["text"] = text
     for index, result in enumerate(results):
         print(results[index])
-    
+
     # 输出结果如下：
     # {'text': '黄片下载', 'porn_detection_label': 1, 'porn_detection_key': 'porn', 'porn_probs': 0.9879, 'not_porn_probs': 0.0121}
     # {'text': '打击黄牛党', 'porn_detection_label': 0, 'porn_detection_key': 'not_porn', 'porn_probs': 0.0004, 'not_porn_probs': 0.9996}
     ```
-  
+
 - ### 3、API
 
   - ```python
     def detection(texts=[], data={}, use_gpu=False, batch_size=1):
     ```
-  
+
     - porn_detection_lstm预测接口，鉴定输入句子是否为黄文
 
     - **参数**
@@ -84,36 +84,23 @@
       - data(dict): 预测数据，key必须为text，value是带预测数据。如果使用data参数，则不用传入texts参数，二选一即可。建议使用texts参数，data参数后续会废弃。
       - use_gpu(bool): 是否使用GPU预测
       - batch_size(int): 批处理大小
-      
+
     - **返回**
       - results(list): 鉴定结果
-  
-  - ```python
-    def context(trainable=False):
-    ```
-  
-    - 获取porn_detection_lstm的预训练program以及program的输入输出变量
-    - **参数**
-      - trainable(bool): trainable=True表示program中的参数在Fine-tune时需要微调，否则保持不变。
-    - **返回**
-  
-      - inputs(dict): program的输入变量
-      - outputs(dict): program的输出变量
-      - main_program(Program): 带有预训练参数的program
-  
+
   - ```python
     def get_labels():
     ```
     - 获取porn_detection_lstm的可识别的类别及其编号
-  
+
     - **返回**
       - labels(dict): porn_detection_lstm的类别及其对应编号(二分类，是/不是)
-  
+
   - ```python
     def get_vocab_path():
     ```
     - 获取预训练时使用的词汇表
-  
+
     - **返回**
       - vocab_path(str): 词汇表路径
 
@@ -139,20 +126,20 @@
   - ```python
     import requests
     import json
-    
+
     # 待预测数据
     text = ["黄片下载", "打击黄牛党"]
-    
+
     # 设置运行配置
     # 对应本地预测porn_detection_lstm.detection(texts=text, batch_size=1, use_gpu=True)
     data = {"texts": text, "batch_size": 1, "use_gpu":True}
-    
+
     # 指定预测方法为porn_detection_lstm并发送post请求，content-type类型应指定json方式
     # HOST_IP为服务器IP
     url = "http://HOST_IP:8866/predict/porn_detection_lstm"
     headers = {"Content-Type": "application/json"}
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
-    
+
     # 打印预测结果
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
     ```

@@ -12,30 +12,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import contextlib
 import copy
-from typing import Callable, List
+from typing import Callable
+from typing import List
 
 import paddle
+from paddle.framework import core
 
 from paddlehub.utils.utils import Version
 
 dtype_map = {
-    paddle.fluid.core.VarDesc.VarType.FP32: "float32",
-    paddle.fluid.core.VarDesc.VarType.FP64: "float64",
-    paddle.fluid.core.VarDesc.VarType.FP16: "float16",
-    paddle.fluid.core.VarDesc.VarType.INT32: "int32",
-    paddle.fluid.core.VarDesc.VarType.INT16: "int16",
-    paddle.fluid.core.VarDesc.VarType.INT64: "int64",
-    paddle.fluid.core.VarDesc.VarType.BOOL: "bool",
-    paddle.fluid.core.VarDesc.VarType.INT16: "int16",
-    paddle.fluid.core.VarDesc.VarType.UINT8: "uint8",
-    paddle.fluid.core.VarDesc.VarType.INT8: "int8",
+    core.VarDesc.VarType.FP32: "float32",
+    core.VarDesc.VarType.FP64: "float64",
+    core.VarDesc.VarType.FP16: "float16",
+    core.VarDesc.VarType.INT32: "int32",
+    core.VarDesc.VarType.INT16: "int16",
+    core.VarDesc.VarType.INT64: "int64",
+    core.VarDesc.VarType.BOOL: "bool",
+    core.VarDesc.VarType.INT16: "int16",
+    core.VarDesc.VarType.UINT8: "uint8",
+    core.VarDesc.VarType.INT8: "int8",
 }
 
 
-def convert_dtype_to_string(dtype: str) -> paddle.fluid.core.VarDesc.VarType:
+def convert_dtype_to_string(dtype: str) -> core.VarDesc.VarType:
     if dtype in dtype_map:
         return dtype_map[dtype]
     raise TypeError("dtype shoule in %s" % list(dtype_map.keys()))
