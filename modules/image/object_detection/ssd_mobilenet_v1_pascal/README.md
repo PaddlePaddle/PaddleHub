@@ -168,6 +168,10 @@
 
   修复numpy数据读取问题
 
+* 1.1.3
+
+  移除 fluid api
+
   - ```shell
-    $ hub install ssd_mobilenet_v1_pascal==1.1.2
+    $ hub install ssd_mobilenet_v1_pascal==1.1.3
     ```

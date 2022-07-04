@@ -163,8 +163,10 @@
 
   初始发布
 
-* 1.2.0
+* 1.2.1
+
+  移除 fluid api
 
   - ```shell
-    $ hub install pyramidbox_lite_mobile==1.2.0
+    $ hub install pyramidbox_lite_mobile==1.2.1
     ```

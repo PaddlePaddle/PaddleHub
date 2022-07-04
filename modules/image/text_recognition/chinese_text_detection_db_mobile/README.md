@@ -1,7 +1,7 @@
 # chinese_text_detection_db_mobile
 
 |模型名称|chinese_text_detection_db_mobile|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-文字识别|
 |网络|Differentiable Binarization|
 |数据集|icdar2015数据集|
@@ -33,9 +33,9 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.7.2    
+  - paddlepaddle >= 1.7.2  
 
   - paddlehub >= 1.6.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
@@ -46,7 +46,7 @@
   - ```shell
     $ pip install shapely pyclipper
     ```
-  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**			
+  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**
 
 - ### 2、安装
 
@@ -85,7 +85,7 @@
   - ```python
     __init__(enable_mkldnn=False)
     ```
-    
+
     - 构造ChineseTextDetectionDB对象
 
     - **参数**
@@ -100,7 +100,7 @@
                     box_thresh=0.5,
                     visualization=False)
     ```
-    
+
     - 预测API，检测输入图片中的所有中文文本的位置。
 
     - **参数**
@@ -181,7 +181,11 @@
 * 1.0.4
 
   使用超轻量级的三阶段模型（文本框检测-角度分类-文字识别）识别图片文字。
-  
+
+* 1.0.5
+
+  移除 fluid api
+
   - ```shell
-    $ hub install chinese_text_detection_db_mobile==1.0.4
+    $ hub install chinese_text_detection_db_mobile==1.0.5
     ```

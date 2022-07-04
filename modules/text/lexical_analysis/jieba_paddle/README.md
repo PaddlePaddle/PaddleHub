@@ -1,7 +1,7 @@
 # jieba_paddle
 
 |模型名称|jieba_paddle|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|文本-词法分析|
 |网络|BiGRU+CRF|
 |数据集|百度自建数据集|
@@ -27,7 +27,7 @@
 - ### 1、环境依赖  
 
   - paddlepaddle >= 1.8.0
-  
+
   - paddlehub >= 1.8.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
@@ -59,10 +59,10 @@
     import paddlehub as hub
 
     jieba = hub.Module(name="jieba_paddle")
-    
+
     results = jieba.cut("今天是个好日子", cut_all=False, HMM=True)
     print(results)
-    
+
     # ['今天', '是', '个', '好日子']
     ```
 
@@ -89,7 +89,7 @@
   - ```python
     def cut_for_search(sentence, HMM=True)
     ```
-    
+
     - jieba的搜索引擎模式切词，该方法适合用于搜索引擎构建倒排索引的分词，粒度比较细
 
     - **参数**
@@ -212,7 +212,12 @@
 
 * 1.0.0
 
-    初始发布
+  初始发布
+
+* 1.0.1
+
+  移除 fluid api
+
   - ```shell
-    $ hub install jieba_paddle==1.0.0
+    $ hub install jieba_paddle==1.0.1
     ```

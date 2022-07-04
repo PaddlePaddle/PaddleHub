@@ -208,7 +208,10 @@
 
   初始发布
 
-* 1.3.1
+* 1.3.2
+
+  移除 fluid api
+
   - ```shell
-    $ hub install pyramidbox_lite_server_mask==1.3.1
+    $ hub install pyramidbox_lite_server_mask==1.3.2
     ```

@@ -166,6 +166,10 @@
 
   Fix the problem of reading numpy
 
+* 1.0.3
+
+  Remove fluid api
+
   - ```shell
-    $ hub install yolov3_darknet53_vehicles==1.0.2
+    $ hub install yolov3_darknet53_vehicles==1.0.3
     ```

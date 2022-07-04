@@ -166,6 +166,11 @@
 * 1.2.0
 
   Fix the problem of reading numpy
+
+* 1.2.1
+
+  Remove fluid api
+
   - ```shell
-    $ hub install pyramidbox_lite_server==1.2.0
+    $ hub install pyramidbox_lite_server==1.2.1
     ```

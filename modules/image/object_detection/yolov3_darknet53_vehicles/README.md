@@ -166,6 +166,10 @@
 
   修复numpy数据读取问题
 
+* 1.0.3
+
+  移除 fluid api
+
   - ```shell
-    $ hub install yolov3_darknet53_vehicles==1.0.2
+    $ hub install yolov3_darknet53_vehicles==1.0.3
     ```

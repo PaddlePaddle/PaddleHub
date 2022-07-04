@@ -164,7 +164,10 @@
 
   初始发布
 
-* 1.1.2
+* 1.1.3
+
+  移除 fluid api
+
   - ```shell
-    $ hub install ultra_light_fast_generic_face_detector_1mb_640==1.1.2
+    $ hub install ultra_light_fast_generic_face_detector_1mb_640==1.1.3
     ```
