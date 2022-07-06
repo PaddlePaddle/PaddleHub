@@ -48,7 +48,7 @@
   - ```shell
     $ hub run face_landmark_localization --input_path "/PATH/TO/IMAGE"
     ```
-    
+
   - 通过命令行方式实现hub模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -56,17 +56,17 @@
   - ```python
     import paddlehub as hub
     import cv2
-    
+
     face_landmark = hub.Module(name="face_landmark_localization")
-    
+
     # Replace face detection module to speed up predictions but reduce performance
     # face_landmark.set_face_detector_module(hub.Module(name="ultra_light_fast_generic_face_detector_1mb_320"))
-    
+
     result = face_landmark.keypoint_detection(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
     # result = face_landmark.keypoint_detection(paths=['/PATH/TO/IMAGE'])
     ```
-  
+
 - ### 3、API
 
   - ```python
@@ -125,7 +125,7 @@
                              params_filename=None,
                              combined=False):
     ```
-    
+
     - 将模型保存到指定路径，由于人脸关键点检测模型由人脸检测+关键点检测两个模型组成，因此保存后会存在两个子目录，其中`face_landmark`为人脸关键点模型，`detector`为人脸检测模型。
     - **参数**
       - dirname: 存在模型的目录名称
@@ -158,17 +158,17 @@
     import cv2
     import base64
     import paddlehub as hub
-    
+
     def cv2_to_base64(image):
         data = cv2.imencode('.jpg', image)[1]
         return base64.b64encode(data.tostring()).decode('utf8')
-    
+
     # 发送HTTP请求
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
     url = "http://127.0.0.1:8866/predict/face_landmark_localization"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
-    
+
     # 打印预测结果
     print(r.json()["results"])
     ```
@@ -178,12 +178,15 @@
 * 1.0.0
 
   初始发布
-  
+
 * 1.0.1
 
 * 1.0.2
 
-  * ```shell
-    $ hub install face_landmark_localization==1.0.2
-    ```
+* 1.0.3
 
+  移除 fluid api
+
+  * ```shell
+    $ hub install face_landmark_localization==1.0.3
+    ```

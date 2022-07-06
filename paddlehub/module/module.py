@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import ast
 import builtins
 import codecs
@@ -20,18 +19,25 @@ import inspect
 import os
 import re
 import sys
-from typing import Callable, Generic, List, Optional, Union
+from typing import Callable
+from typing import Generic
+from typing import List
+from typing import Optional
+from typing import Union
 
 import paddle
 import paddle2onnx
 from easydict import EasyDict
 
-from paddlehub.utils import parser, log, utils
 from paddlehub.compat import paddle_utils
 from paddlehub.compat.module.module_v1 import ModuleV1
+from paddlehub.utils import log
+from paddlehub.utils import parser
+from paddlehub.utils import utils
 
 
 class InvalidHubModule(Exception):
+
     def __init__(self, directory: str):
         self.directory = directory
 
@@ -194,12 +200,11 @@ class RunModule(object):
             for key, _sub_module in self.sub_modules().items():
                 try:
                     sub_dirname = os.path.normpath(os.path.join(dirname, key))
-                    _sub_module.save_inference_model(
-                        sub_dirname,
-                        include_sub_modules=include_sub_modules,
-                        model_filename=model_filename,
-                        params_filename=params_filename,
-                        combined=combined)
+                    _sub_module.save_inference_model(sub_dirname,
+                                                     include_sub_modules=include_sub_modules,
+                                                     model_filename=model_filename,
+                                                     params_filename=params_filename,
+                                                     combined=combined)
                 except:
                     utils.record_exception('Failed to save sub module {}'.format(_sub_module.name))
 
@@ -249,21 +254,20 @@ class RunModule(object):
         if os.path.exists(os.path.join(self._pretrained_model_path, '__params__')):
             _params_filename = '__params__'
 
-        program, feeded_var_names, target_vars = paddle.fluid.io.load_inference_model(
+        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
             dirname=self._pretrained_model_path,
             executor=exe,
             model_filename=_model_filename,
             params_filename=_params_filename,
         )
 
-        paddle.fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+        paddle.static.save_inference_model(dirname=dirname,
+                                           main_program=program,
+                                           executor=exe,
+                                           feeded_var_names=feeded_var_names,
+                                           target_vars=target_vars,
+                                           model_filename=model_filename,
+                                           params_filename=params_filename)
 
         log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
 
@@ -333,19 +337,17 @@ class RunModule(object):
 
         save_file = os.path.join(dirname, '{}.onnx'.format(self.name))
 
-        program, inputs, outputs = paddle.fluid.io.load_inference_model(
-            dirname=self._pretrained_model_path,
-            model_filename=model_filename,
-            params_filename=params_filename,
-            executor=exe)
+        program, inputs, outputs = paddle.static.load_inference_model(dirname=self._pretrained_model_path,
+                                                                      model_filename=model_filename,
+                                                                      params_filename=params_filename,
+                                                                      executor=exe)
 
-        paddle2onnx.program2onnx(
-            program=program,
-            scope=paddle.static.global_scope(),
-            feed_var_names=inputs,
-            target_vars=outputs,
-            save_file=save_file,
-            **kwargs)
+        paddle2onnx.program2onnx(program=program,
+                                 scope=paddle.static.global_scope(),
+                                 feed_var_names=inputs,
+                                 target_vars=outputs,
+                                 save_file=save_file,
+                                 **kwargs)
 
 
 class Module(object):
@@ -385,14 +387,13 @@ class Module(object):
             from paddlehub.server.server import CacheUpdater
             # This branch come from hub.Module(name='xxx') or hub.Module(directory='xxx')
             if name:
-                module = cls.init_with_name(
-                    name=name,
-                    version=version,
-                    source=source,
-                    update=update,
-                    branch=branch,
-                    ignore_env_mismatch=ignore_env_mismatch,
-                    **kwargs)
+                module = cls.init_with_name(name=name,
+                                            version=version,
+                                            source=source,
+                                            update=update,
+                                            branch=branch,
+                                            ignore_env_mismatch=ignore_env_mismatch,
+                                            **kwargs)
                 CacheUpdater("update_cache", module=name, version=version).start()
             elif directory:
                 module = cls.init_with_directory(directory=directory, **kwargs)
@@ -484,13 +485,12 @@ class Module(object):
         manager = LocalModuleManager()
         user_module_cls = manager.search(name, source=source, branch=branch)
         if not user_module_cls or not user_module_cls.version.match(version):
-            user_module_cls = manager.install(
-                name=name,
-                version=version,
-                source=source,
-                update=update,
-                branch=branch,
-                ignore_env_mismatch=ignore_env_mismatch)
+            user_module_cls = manager.install(name=name,
+                                              version=version,
+                                              source=source,
+                                              update=update,
+                                              branch=branch,
+                                              ignore_env_mismatch=ignore_env_mismatch)
 
         directory = manager._get_normalized_path(user_module_cls.name)
 

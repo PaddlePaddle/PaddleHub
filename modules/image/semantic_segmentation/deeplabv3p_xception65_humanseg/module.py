@@ -2,28 +2,33 @@
 from __future__ import absolute_import
 from __future__ import division
 
+import argparse
 import ast
 import os
-import argparse
 
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
-from paddlehub.module.module import moduleinfo, runnable, serving
-
-from deeplabv3p_xception65_humanseg.processor import postprocess, base64_to_cv2, cv2_to_base64
+import paddle
 from deeplabv3p_xception65_humanseg.data_feed import reader
+from deeplabv3p_xception65_humanseg.processor import base64_to_cv2
+from deeplabv3p_xception65_humanseg.processor import cv2_to_base64
+from deeplabv3p_xception65_humanseg.processor import postprocess
+from paddle.inference import Config
+from paddle.inference import create_predictor
+
+import paddlehub as hub
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
-@moduleinfo(
-    name="deeplabv3p_xception65_humanseg",
-    type="CV/semantic_segmentation",
-    author="baidu-vis",
-    author_email="",
-    summary="DeepLabv3+ is a semantic segmentation model.",
-    version="1.1.1")
+@moduleinfo(name="deeplabv3p_xception65_humanseg",
+            type="CV/semantic_segmentation",
+            author="baidu-vis",
+            author_email="",
+            summary="DeepLabv3+ is a semantic segmentation model.",
+            version="1.1.2")
 class DeeplabV3pXception65HumanSeg(hub.Module):
+
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(self.directory, "deeplabv3p_xception65_humanseg_model")
         self._set_config()
@@ -32,10 +37,10 @@ class DeeplabV3pXception65HumanSeg(hub.Module):
         """
         predictor config setting
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        cpu_config = Config(self.default_pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -44,10 +49,10 @@ class DeeplabV3pXception65HumanSeg(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+            gpu_config = Config(self.default_pretrained_model_path)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            self.gpu_predictor = create_predictor(gpu_config)
 
     def segmentation(self,
                      images=None,
@@ -107,18 +112,25 @@ class DeeplabV3pXception65HumanSeg(hub.Module):
                     pass
             # feed batch image
             batch_image = np.array([data['image'] for data in batch_data])
-            batch_image = PaddleTensor(batch_image.copy())
-            output = self.gpu_predictor.run([batch_image]) if use_gpu else self.cpu_predictor.run([batch_image])
-            output = np.expand_dims(output[0].as_ndarray(), axis=1)
+
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(batch_image)
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+            output_data = output_handle.copy_to_cpu()
+            output = np.expand_dims(output_data, axis=1)
             # postprocess one by one
             for i in range(len(batch_data)):
-                out = postprocess(
-                    data_out=output[i],
-                    org_im=batch_data[i]['org_im'],
-                    org_im_shape=batch_data[i]['org_im_shape'],
-                    org_im_path=batch_data[i]['org_im_path'],
-                    output_dir=output_dir,
-                    visualization=visualization)
+                out = postprocess(data_out=output[i],
+                                  org_im=batch_data[i]['org_im'],
+                                  org_im_shape=batch_data[i]['org_im_shape'],
+                                  org_im_path=batch_data[i]['org_im_path'],
+                                  output_dir=output_dir,
+                                  visualization=visualization)
                 res.append(out)
         return res
 
@@ -126,20 +138,19 @@ class DeeplabV3pXception65HumanSeg(hub.Module):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+        place = paddle.CPUPlace()
+        exe = paddle.Executor(place)
 
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
             dirname=self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+        paddle.static.save_inference_model(dirname=dirname,
+                                           main_program=program,
+                                           executor=exe,
+                                           feeded_var_names=feeded_var_names,
+                                           target_vars=target_vars,
+                                           model_filename=model_filename,
+                                           params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -156,11 +167,10 @@ class DeeplabV3pXception65HumanSeg(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the {} module.".format(self.name),
-            prog='hub run {}'.format(self.name),
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
+                                              prog='hub run {}'.format(self.name),
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -168,24 +178,29 @@ class DeeplabV3pXception65HumanSeg(hub.Module):
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.segmentation(
-            paths=[args.input_path],
-            batch_size=args.batch_size,
-            use_gpu=args.use_gpu,
-            output_dir=args.output_dir,
-            visualization=args.visualization)
+        results = self.segmentation(paths=[args.input_path],
+                                    batch_size=args.batch_size,
+                                    use_gpu=args.use_gpu,
+                                    output_dir=args.output_dir,
+                                    visualization=args.visualization)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
-        self.arg_config_group.add_argument(
-            '--output_dir', type=str, default='humanseg_output', help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not")
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='humanseg_output',
+                                           help="The directory to save output images.")
+        self.arg_config_group.add_argument('--visualization',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether to save output as images.")
         self.arg_config_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
 
     def add_module_input_arg(self):

@@ -2,18 +2,22 @@
 from __future__ import absolute_import
 from __future__ import division
 
-import ast
 import argparse
+import ast
 import os
 
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
-from paddlehub.module.module import moduleinfo, runnable, serving
-
+import paddle
+from paddle.inference import Config
+from paddle.inference import create_predictor
 from pyramidbox_lite_mobile_mask.data_feed import reader
-from pyramidbox_lite_mobile_mask.processor import postprocess, base64_to_cv2
+from pyramidbox_lite_mobile_mask.processor import base64_to_cv2
+from pyramidbox_lite_mobile_mask.processor import postprocess
+
+import paddlehub as hub
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
 @moduleinfo(
@@ -23,8 +27,9 @@ from pyramidbox_lite_mobile_mask.processor import postprocess, base64_to_cv2
     author_email="",
     summary=
     "Pyramidbox-Lite-Mobile-Mask is a high-performance face detection model used to detect whether people wear masks.",
-    version="1.3.0")
+    version="1.3.1")
 class PyramidBoxLiteMobileMask(hub.Module):
+
     def _initialize(self, face_detector_module=None):
         """
         Args:
@@ -42,10 +47,10 @@ class PyramidBoxLiteMobileMask(hub.Module):
         """
         predictor config setting
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        cpu_config = Config(self.default_pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -54,10 +59,10 @@ class PyramidBoxLiteMobileMask(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+            gpu_config = Config(self.default_pretrained_model_path)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            self.gpu_predictor = create_predictor(gpu_config)
 
     def set_face_detector_module(self, face_detector_module):
         """
@@ -146,12 +151,18 @@ class PyramidBoxLiteMobileMask(hub.Module):
                     pass
 
             image_arr = np.squeeze(np.array(batch_data), axis=1)
-            image_tensor = PaddleTensor(image_arr.copy())
-            data_out = self.gpu_predictor.run([image_tensor]) if use_gpu else self.cpu_predictor.run([image_tensor])
-            # len(data_out) == 1
-            # data_out[0].as_ndarray().shape == (-1, 2)
-            data_out = data_out[0].as_ndarray()
-            predict_out = np.concatenate((predict_out, data_out))
+
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(image_arr)
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+            output_data = output_handle.copy_to_cpu()
+
+            predict_out = np.concatenate((predict_out, output_data))
 
         predict_out = predict_out[1:]
         # postprocess one by one
@@ -160,13 +171,12 @@ class PyramidBoxLiteMobileMask(hub.Module):
             detect_faces_list = [handled['face'] for handled in all_element[i]['preprocessed']]
             interval_left = sum(element_image_num[0:i])
             interval_right = interval_left + element_image_num[i]
-            out = postprocess(
-                confidence_out=predict_out[interval_left:interval_right],
-                org_im=all_element[i]['org_im'],
-                org_im_path=all_element[i]['org_im_path'],
-                detected_faces=detect_faces_list,
-                output_dir=output_dir,
-                visualization=visualization)
+            out = postprocess(confidence_out=predict_out[interval_left:interval_right],
+                              org_im=all_element[i]['org_im'],
+                              org_im_path=all_element[i]['org_im_path'],
+                              detected_faces=detect_faces_list,
+                              output_dir=output_dir,
+                              visualization=visualization)
             res.append(out)
         return res
 
@@ -183,20 +193,19 @@ class PyramidBoxLiteMobileMask(hub.Module):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+        place = paddle.CPUPlace()
+        exe = paddle.Executor(place)
 
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
             dirname=self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+        paddle.static.save_inference_model(dirname=dirname,
+                                           main_program=program,
+                                           executor=exe,
+                                           feeded_var_names=feeded_var_names,
+                                           target_vars=target_vars,
+                                           model_filename=model_filename,
+                                           params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
@@ -212,36 +221,40 @@ class PyramidBoxLiteMobileMask(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the {} module.".format(self.name),
-            prog='hub run {}'.format(self.name),
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
+                                              prog='hub run {}'.format(self.name),
+                                              usage='%(prog)s',
+                                              add_help=True)
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
             title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.face_detection(
-            paths=[args.input_path],
-            use_gpu=args.use_gpu,
-            output_dir=args.output_dir,
-            visualization=args.visualization,
-            shrink=args.shrink,
-            confs_threshold=args.confs_threshold)
+        results = self.face_detection(paths=[args.input_path],
+                                      use_gpu=args.use_gpu,
+                                      output_dir=args.output_dir,
+                                      visualization=args.visualization,
+                                      shrink=args.shrink,
+                                      confs_threshold=args.confs_threshold)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
-        self.arg_config_group.add_argument(
-            '--output_dir', type=str, default='detection_result', help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not")
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='detection_result',
+                                           help="The directory to save output images.")
+        self.arg_config_group.add_argument('--visualization',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether to save output as images.")
 
     def add_module_input_arg(self):
         """
@@ -253,5 +266,7 @@ class PyramidBoxLiteMobileMask(hub.Module):
             type=ast.literal_eval,
             default=0.5,
             help="resize the image to `shrink * original_shape` before feeding into network.")
-        self.arg_input_group.add_argument(
-            '--confs_threshold', type=ast.literal_eval, default=0.6, help="confidence threshold.")
+        self.arg_input_group.add_argument('--confs_threshold',
+                                          type=ast.literal_eval,
+                                          default=0.6,
+                                          help="confidence threshold.")

@@ -1,7 +1,7 @@
 # senta_bow
 
 |模型名称|senta_bow|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|文本-情感分析|
 |网络|BOW|
 |数据集|百度自建数据集|
@@ -25,7 +25,7 @@
 - ### 1、环境依赖  
 
   - paddlepaddle >= 1.8.0
-  
+
   - paddlehub >= 1.8.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
@@ -52,9 +52,9 @@
     ```  
     - test.txt 存放待预测文本， 如：
       > 这家餐厅很好吃
- 
+
       > 这部电影真的很差劲
-  
+
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -73,12 +73,12 @@
         print(result['sentiment_key'])
         print(result['positive_probs'])
         print(result['negative_probs'])
-    
+
     # 这家餐厅很好吃 1 positive 0.9782 0.0218
     # 这部电影真的很差劲 0 negative 0.0124 0.9876
     ```
 
-    
+
 - ### 3、API
 
   - ```python
@@ -175,7 +175,7 @@
 * 1.0.0
 
   初始发布
-  
+
 * 1.0.1
 
   词汇表升级
@@ -187,7 +187,11 @@
 * 1.2.0
 
   模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
-  
+
+* 1.2.1
+
+  移除 fluid api
+
   - ```shell
-    $ hub install senta_bow==1.2.0
+    $ hub install senta_bow==1.2.1
     ```

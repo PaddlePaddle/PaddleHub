@@ -167,6 +167,10 @@
 
   Fix the problem of reading numpy
 
+* 1.1.3
+
+  Remove fluid api
+
   - ```shell
-    $ hub install ssd_mobilenet_v1_pascal==1.1.2
+    $ hub install ssd_mobilenet_v1_pascal==1.1.3
     ```
