@@ -162,8 +162,7 @@ class Electra(nn.Layer):
                 return probs, loss, {'acc': acc}
             return probs
         else:
-            sequence_output, pooled_output = result
-            return sequence_output, pooled_output
+            return result
 
     @staticmethod
     def get_tokenizer(*args, **kwargs):
