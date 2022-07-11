@@ -28,7 +28,7 @@ from paddlehub.utils.log import logger
 
 @moduleinfo(
     name="electra-small",
-    version="1.0.1",
+    version="1.0.2",
     summary="electra-small, 12-layer, 256-hidden, 4-heads, 14M parameters. The module is executed as paddle.dygraph.",
     author="paddlepaddle",
     author_email="",

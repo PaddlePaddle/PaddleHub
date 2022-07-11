@@ -28,7 +28,7 @@ from paddlehub.utils.log import logger
 
 @moduleinfo(
     name="chinese-electra-base",
-    version="2.0.1",
+    version="2.0.2",
     summary=
     "chinese-electra-base, 12-layer, 768-hidden, 12-heads, 102M parameters. The module is executed as paddle.dygraph.",
     author="ymcui",

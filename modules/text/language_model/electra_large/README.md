@@ -30,7 +30,7 @@
 - ### 2、安装
 
   - ```shell
-    $ hub install electra-large==1.0.1
+    $ hub install electra-large==1.0.2
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -172,3 +172,7 @@ for idx, text in enumerate(data):
 * 1.0.1
 
   增加文本匹配任务`text-matching`
+
+* 1.0.2
+
+  修复词嵌入模型预测的问题
