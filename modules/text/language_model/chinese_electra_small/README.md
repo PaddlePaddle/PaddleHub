@@ -145,22 +145,22 @@ for idx, text in enumerate(data):
   - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
   - ```python
-  import requests
-  import json
+    import requests
+    import json
 
-  # 指定用于获取embedding的文本[[text_1], [text_2], ... ]}
-  text = [["今天是个好日子"], ["天气预报说今天要下雨"]]
-  # 以key的方式指定text传入预测方法的时的参数，此例中为"data"
-  # 对应本地部署，则为module.get_embedding(data=text)
-  data = {"data": text}
-  # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
-  url = "http://127.0.0.1:8866/predict/chinese-electra-small"
-  # 指定post请求的headers为application/json方式
-  headers = {"Content-Type": "application/json"}
+    # 指定用于获取embedding的文本[[text_1], [text_2], ... ]}
+    text = [["今天是个好日子"], ["天气预报说今天要下雨"]]
+    # 以key的方式指定text传入预测方法的时的参数，此例中为"data"
+    # 对应本地部署，则为module.get_embedding(data=text)
+    data = {"data": text}
+    # 发送post请求，content-type类型应指定json方式，url中的ip地址需改为对应机器的ip
+    url = "http://127.0.0.1:8866/predict/chinese-electra-small"
+    # 指定post请求的headers为application/json方式
+    headers = {"Content-Type": "application/json"}
 
-  r = requests.post(url=url, headers=headers, data=json.dumps(data))
-  print(r.json())
-  ```
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+    print(r.json())
+    ```
 
 ## 五、更新历史
 
