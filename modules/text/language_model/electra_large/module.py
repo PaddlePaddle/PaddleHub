@@ -28,7 +28,7 @@ from paddlehub.utils.log import logger
 
 @moduleinfo(
     name="electra-large",
-    version="1.0.1",
+    version="1.0.2",
     summary="electra-large, 24-layer, 1024-hidden, 16-heads, 335M parameters. The module is executed as paddle.dygraph.",
     author="paddlepaddle",
     author_email="",
@@ -162,8 +162,7 @@ class Electra(nn.Layer):
                 return probs, loss, {'acc': acc}
             return probs
         else:
-            sequence_output, pooled_output = result
-            return sequence_output, pooled_output
+            return result
 
     @staticmethod
     def get_tokenizer(*args, **kwargs):
