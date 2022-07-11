@@ -2,22 +2,23 @@
 from __future__ import absolute_import
 from __future__ import division
 
-import ast
 import argparse
+import ast
 import os
 
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
+import paddle
 from paddle.inference import Config
 from paddle.inference import create_predictor
-
-from paddlehub.module.module import moduleinfo, runnable, serving
-from paddlehub.common.paddle_helper import add_vars_prefix
-
-from resnet50_vd_animals.processor import postprocess, base64_to_cv2
 from resnet50_vd_animals.data_feed import reader
-from resnet50_vd_animals.resnet_vd import ResNet50_vd
+from resnet50_vd_animals.processor import base64_to_cv2
+from resnet50_vd_animals.processor import postprocess
+
+import paddlehub as hub
+from paddlehub.common.paddle_helper import add_vars_prefix
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
 @moduleinfo(
@@ -26,8 +27,9 @@ from resnet50_vd_animals.resnet_vd import ResNet50_vd
     author="baidu-vis",
     author_email="",
     summary="ResNet50vd is a image classfication model, this module is trained with Baidu's self-built animals dataset.",
-    version="1.0.0")
+    version="1.0.1")
 class ResNet50vdAnimals(hub.Module):
+
     def _initialize(self):
         self.default_pretrained_model_path = os.path.join(self.directory, "model")
         label_file = os.path.join(self.directory, "label_list.txt")
@@ -96,54 +98,6 @@ class ResNet50vdAnimals(hub.Module):
             xpu_config.disable_glog_info()
             xpu_config.enable_xpu(100)
             self.xpu_predictor = create_predictor(xpu_config)
-
-    def context(self, trainable=True, pretrained=True):
-        """context for transfer learning.
-
-        Args:
-            trainable (bool): Set parameters in program to be trainable.
-            pretrained (bool) : Whether to load pretrained model.
-
-        Returns:
-            inputs (dict): key is 'image', corresponding vaule is image tensor.
-            outputs (dict): key is :
-                'classification', corresponding value is the result of classification.
-                'feature_map', corresponding value is the result of the layer before the fully connected layer.
-            context_prog (fluid.Program): program for transfer learning.
-        """
-        context_prog = fluid.Program()
-        startup_prog = fluid.Program()
-        with fluid.program_guard(context_prog, startup_prog):
-            with fluid.unique_name.guard():
-                image = fluid.layers.data(name="image", shape=[3, 224, 224], dtype="float32")
-                resnet_vd = ResNet50_vd()
-                output, feature_map = resnet_vd.net(input=image, class_dim=len(self.label_list))
-
-                name_prefix = '@HUB_{}@'.format(self.name)
-                inputs = {'image': name_prefix + image.name}
-                outputs = {'classification': name_prefix + output.name, 'feature_map': name_prefix + feature_map.name}
-                add_vars_prefix(context_prog, name_prefix)
-                add_vars_prefix(startup_prog, name_prefix)
-                global_vars = context_prog.global_block().vars
-                inputs = {key: global_vars[value] for key, value in inputs.items()}
-                outputs = {key: global_vars[value] for key, value in outputs.items()}
-
-                place = fluid.CPUPlace()
-                exe = fluid.Executor(place)
-                # pretrained
-                if pretrained:
-
-                    def _if_exist(var):
-                        b = os.path.exists(os.path.join(self.default_pretrained_model_path, var.name))
-                        return b
-
-                    fluid.io.load_vars(exe, self.default_pretrained_model_path, context_prog, predicate=_if_exist)
-                else:
-                    exe.run(startup_prog)
-                # trainable
-                for param in context_prog.global_block().iter_parameters():
-                    param.trainable = trainable
-        return inputs, outputs, context_prog
 
     def classification(self, images=None, paths=None, batch_size=1, use_gpu=False, top_k=1, use_device=None):
         """
@@ -215,19 +169,19 @@ class ResNet50vdAnimals(hub.Module):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+        place = paddle.CPUPlace()
+        exe = paddle.Executor(place)
 
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
             dirname=self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(dirname=dirname,
-                                      main_program=program,
-                                      executor=exe,
-                                      feeded_var_names=feeded_var_names,
-                                      target_vars=target_vars,
-                                      model_filename=model_filename,
-                                      params_filename=params_filename)
+        paddle.static.save_inference_model(dirname=dirname,
+                                           main_program=program,
+                                           executor=exe,
+                                           feeded_var_names=feeded_var_names,
+                                           target_vars=target_vars,
+                                           model_filename=model_filename,
+                                           params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):

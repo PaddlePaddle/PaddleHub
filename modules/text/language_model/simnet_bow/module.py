@@ -8,35 +8,39 @@ import ast
 import json
 import math
 import os
-import six
 
 import numpy as np
-import paddle.fluid as fluid
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+import six
+from paddle.inference import Config
+from paddle.inference import create_predictor
+from simnet_bow.processor import load_vocab
+from simnet_bow.processor import postprocess
+from simnet_bow.processor import preprocess
+
 import paddlehub as hub
-from paddlehub.common.paddle_helper import add_vars_prefix, get_variable_info
+from paddlehub.common.paddle_helper import add_vars_prefix
+from paddlehub.common.paddle_helper import get_variable_info
 from paddlehub.common.utils import sys_stdin_encoding
 from paddlehub.io.parser import txt_parser
-from paddlehub.module.module import serving
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
-
-from simnet_bow.processor import load_vocab, preprocess, postprocess
+from paddlehub.module.module import serving
 
 
 class DataFormatError(Exception):
+
     def __init__(self, *args):
         self.args = args
 
 
-@moduleinfo(
-    name="simnet_bow",
-    version="1.2.0",
-    summary="Baidu's open-source similarity network model based on bow_pairwise.",
-    author="baidu-nlp",
-    author_email="",
-    type="nlp/sentiment_analysis")
+@moduleinfo(name="simnet_bow",
+            version="1.2.1",
+            summary="Baidu's open-source similarity network model based on bow_pairwise.",
+            author="baidu-nlp",
+            author_email="",
+            type="nlp/sentiment_analysis")
 class SimnetBow(hub.Module):
+
     def _initialize(self):
         """
         initialize with the necessary elements
@@ -62,11 +66,11 @@ class SimnetBow(hub.Module):
         """
         predictor config setting
         """
-        cpu_config = AnalysisConfig(self.pretrained_model_path)
+        cpu_config = Config(self.pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         cpu_config.switch_ir_optim(False)
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -75,125 +79,18 @@ class SimnetBow(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.pretrained_model_path)
+            gpu_config = Config(self.pretrained_model_path)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            self.gpu_predictor = create_predictor(gpu_config)
 
-    def context(self, trainable=False, max_seq_len=128, num_slots=1):
-        """
-        Get the input ,output and program of the pretrained simnet_bow
-
-        Args:
-             trainable(bool): whether fine-tune the pretrained parameters of simnet_bow or not。
-             max_seq_len (int): It will limit the total sequence returned so that it has a maximum length.
-             num_slots(int): It's number of data inputted to the model, selectted as following options:
-
-                 - 1(default): There's only one data to be feeded in the model, e.g. the module is used for sentence classification task.
-                 - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
-                 - 3: There are three data to be feeded in the model, e.g. the module is used for text matching task (pair-wise).
-
-        Returns:
-             inputs(dict): the input variables of simnet_bow (words)
-             outputs(dict): the output variables of input words (word embeddings) and sequence lenght of the first input_text
-             main_program(Program): the main_program of simnet_bow with pretrained prameters
-        """
-        assert num_slots >= 1 and num_slots <= 3, "num_slots must be 1, 2, or 3, but the input is %d" % num_slots
-        main_program = fluid.Program()
-        startup_program = fluid.Program()
-        with fluid.program_guard(main_program, startup_program):
-            text_1 = fluid.layers.data(name="text", shape=[-1, max_seq_len, 1], dtype="int64", lod_level=0)
-            seq_len = fluid.layers.data(name="seq_len", shape=[1], dtype='int64', lod_level=0)
-            seq_len_used = fluid.layers.squeeze(seq_len, axes=[1])
-
-            # Add embedding layer.
-            w_param_attrs = fluid.ParamAttr(
-                name="emb", initializer=fluid.initializer.TruncatedNormal(scale=0.02), trainable=trainable)
-            dict_dim = 500002
-            emb_1 = fluid.layers.embedding(
-                input=text_1,
-                size=[dict_dim, 128],
-                is_sparse=True,
-                padding_idx=dict_dim - 1,
-                dtype='float32',
-                param_attr=w_param_attrs)
-            emb_1_name = emb_1.name
-            data_list = [text_1]
-            emb_name_list = [emb_1_name]
-
-            if num_slots > 1:
-                text_2 = fluid.data(name='text_2', shape=[-1, max_seq_len], dtype='int64', lod_level=0)
-                emb_2 = fluid.embedding(
-                    input=text_2,
-                    size=[dict_dim, 128],
-                    is_sparse=True,
-                    padding_idx=dict_dim - 1,
-                    dtype='float32',
-                    param_attr=w_param_attrs)
-                emb_2_name = emb_2.name
-                data_list.append(text_2)
-                emb_name_list.append(emb_2_name)
-
-            if num_slots > 2:
-                text_3 = fluid.data(name='text_3', shape=[-1, max_seq_len], dtype='int64', lod_level=0)
-                emb_3 = fluid.embedding(
-                    input=text_3,
-                    size=[dict_dim, 128],
-                    is_sparse=True,
-                    padding_idx=dict_dim - 1,
-                    dtype='float32',
-                    param_attr=w_param_attrs)
-                emb_3_name = emb_3.name
-                data_list.append(text_3)
-                emb_name_list.append(emb_3_name)
-
-            variable_names = filter(lambda v: v not in ['text', 'text_2', 'text_3', "seq_len"],
-                                    list(main_program.global_block().vars.keys()))
-            prefix_name = "@HUB_{}@".format(self.name)
-            add_vars_prefix(program=main_program, prefix=prefix_name, vars=variable_names)
-
-            for param in main_program.global_block().iter_parameters():
-                param.trainable = trainable
-
-            place = fluid.CPUPlace()
-            exe = fluid.Executor(place)
-
-            # Load the senta_lstm pretrained model.
-            def if_exist(var):
-                return os.path.exists(os.path.join(self.pretrained_model_path, var.name))
-
-            fluid.io.load_vars(exe, self.pretrained_model_path, predicate=if_exist)
-
-            inputs = {'seq_len': seq_len}
-            outputs = {}
-            for index, data in enumerate(data_list):
-                if index == 0:
-                    inputs['text'] = data
-                    outputs['emb'] = main_program.global_block().vars[prefix_name + emb_name_list[0]]
-                else:
-                    inputs['text_%s' % (index + 1)] = data
-                    outputs['emb_%s' % (index + 1)] = main_program.global_block().vars[prefix_name +
-                                                                                       emb_name_list[index]]
-            return inputs, outputs, main_program
-
-    def texts2tensor(self, texts):
-        """
-        Tranform the texts(dict) to PaddleTensor
-        Args:
-             texts(list): texts
-        Returns:
-             tensor(PaddleTensor): tensor with texts data
-        """
+    def _texts_process(self, texts):
         lod = [0]
         data = []
         for i, text in enumerate(texts):
             data += text['processed']
             lod.append(len(text['processed']) + lod[i])
-        tensor = PaddleTensor(np.array(data).astype('int64'))
-        tensor.name = "words"
-        tensor.lod = [lod]
-        tensor.shape = [lod[-1], 1]
-        return tensor
+        return np.array(data).astype('int64'), [lod], [lod[-1], 1]
 
     def to_unicode(self, texts):
         """
@@ -282,14 +179,28 @@ class SimnetBow(hub.Module):
             start_idx = start_idx + batch_size
             processed_results = preprocess(self.word_seg_module, self.vocab, batch_data, use_gpu, batch_size)
 
-            tensor_words_1 = self.texts2tensor(processed_results["text_1"])
-            tensor_words_2 = self.texts2tensor(processed_results["text_2"])
+            data_1, lod_1, shape_1 = self._texts_process(processed_results["text_1"])
+            data_2, lod_2, shape_2 = self._texts_process(processed_results["text_2"])
 
-            if use_gpu:
-                batch_out = self.gpu_predictor.run([tensor_words_1, tensor_words_2])
-            else:
-                batch_out = self.cpu_predictor.run([tensor_words_1, tensor_words_2])
-            batch_result = postprocess(batch_out[1], processed_results)
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(data_1)
+            input_handle.set_lod(lod_1)
+            input_handle.reshape(shape_1)
+
+            input_handle = predictor.get_input_handle(input_names[1])
+            input_handle.copy_from_cpu(data_2)
+            input_handle.set_lod(lod_2)
+            input_handle.reshape(shape_2)
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[1])
+            batch_out = output_handle.copy_to_cpu()
+
+            batch_result = postprocess(batch_out, processed_results)
             results += batch_result
         return results
 
@@ -298,8 +209,10 @@ class SimnetBow(hub.Module):
         """
         Run as a command
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the simnet_bow module.", prog='hub run simnet_bow', usage='%(prog)s', add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the simnet_bow module.",
+                                              prog='hub run simnet_bow',
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -324,8 +237,10 @@ class SimnetBow(hub.Module):
         """
         Add the command config options
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU for prediction")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU for prediction")
 
         self.arg_config_group.add_argument('--batch_size', type=int, default=1, help="batch size for prediction")
 

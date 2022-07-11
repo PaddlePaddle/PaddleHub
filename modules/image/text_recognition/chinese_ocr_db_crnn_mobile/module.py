@@ -6,28 +6,35 @@ import math
 import os
 import time
 
-from paddle.fluid.core import AnalysisConfig, create_paddle_predictor, PaddleTensor
-from paddlehub.common.logger import logger
-from paddlehub.module.module import moduleinfo, runnable, serving
-from PIL import Image
 import cv2
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-
+import paddle
 from chinese_ocr_db_crnn_mobile.character import CharacterOps
-from chinese_ocr_db_crnn_mobile.utils import base64_to_cv2, draw_ocr, get_image_ext, sorted_boxes
+from chinese_ocr_db_crnn_mobile.utils import base64_to_cv2
+from chinese_ocr_db_crnn_mobile.utils import draw_ocr
+from chinese_ocr_db_crnn_mobile.utils import get_image_ext
+from chinese_ocr_db_crnn_mobile.utils import sorted_boxes
+from paddle.inference import Config
+from paddle.inference import create_predictor
+from PIL import Image
+
+import paddlehub as hub
+from paddlehub.common.logger import logger
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
 @moduleinfo(
     name="chinese_ocr_db_crnn_mobile",
-    version="1.1.2",
+    version="1.1.3",
     summary="The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions \
         based on the differentiable_binarization_chn module. Then it classifies the text angle and recognizes the chinese texts. ",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
 class ChineseOCRDBCRNN(hub.Module):
+
     def _initialize(self, text_detector_module=None, enable_mkldnn=False):
         """
         initialize with the necessary elements
@@ -60,7 +67,7 @@ class ChineseOCRDBCRNN(hub.Module):
         model_file_path = os.path.join(pretrained_model_path, 'model')
         params_file_path = os.path.join(pretrained_model_path, 'params')
 
-        config = AnalysisConfig(model_file_path, params_file_path)
+        config = Config(model_file_path, params_file_path)
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
             int(_places[0])
@@ -81,14 +88,14 @@ class ChineseOCRDBCRNN(hub.Module):
         config.delete_pass("conv_transpose_eltwiseadd_bn_fuse_pass")
         config.switch_use_feed_fetch_ops(False)
 
-        predictor = create_paddle_predictor(config)
+        predictor = create_predictor(config)
 
         input_names = predictor.get_input_names()
-        input_tensor = predictor.get_input_tensor(input_names[0])
+        input_tensor = predictor.get_input_handle(input_names[0])
         output_names = predictor.get_output_names()
         output_tensors = []
         for output_name in output_names:
-            output_tensor = predictor.get_output_tensor(output_name)
+            output_tensor = predictor.get_output_handle(output_name)
             output_tensors.append(output_tensor)
 
         return predictor, input_tensor, output_tensors
@@ -99,8 +106,9 @@ class ChineseOCRDBCRNN(hub.Module):
         text detect module
         """
         if not self._text_detector_module:
-            self._text_detector_module = hub.Module(
-                name='chinese_text_detection_db_mobile', enable_mkldnn=self.enable_mkldnn, version='1.0.4')
+            self._text_detector_module = hub.Module(name='chinese_text_detection_db_mobile',
+                                                    enable_mkldnn=self.enable_mkldnn,
+                                                    version='1.0.4')
         return self._text_detector_module
 
     def read_images(self, paths=[]):
@@ -129,8 +137,10 @@ class ChineseOCRDBCRNN(hub.Module):
         img_crop_height = int(max(np.linalg.norm(points[0] - points[3]), np.linalg.norm(points[1] - points[2])))
         pts_std = np.float32([[0, 0], [img_crop_width, 0], [img_crop_width, img_crop_height], [0, img_crop_height]])
         M = cv2.getPerspectiveTransform(points, pts_std)
-        dst_img = cv2.warpPerspective(
-            img, M, (img_crop_width, img_crop_height), borderMode=cv2.BORDER_REPLICATE, flags=cv2.INTER_CUBIC)
+        dst_img = cv2.warpPerspective(img,
+                                      M, (img_crop_width, img_crop_height),
+                                      borderMode=cv2.BORDER_REPLICATE,
+                                      flags=cv2.INTER_CUBIC)
         dst_img_height, dst_img_width = dst_img.shape[0:2]
         if dst_img_height * 1.0 / dst_img_width >= 1.5:
             dst_img = np.rot90(dst_img)
@@ -223,8 +233,9 @@ class ChineseOCRDBCRNN(hub.Module):
 
         assert predicted_data != [], "There is not any image to be predicted. Please check the input data."
 
-        detection_results = self.text_detector_module.detect_text(
-            images=predicted_data, use_gpu=self.use_gpu, box_thresh=box_thresh)
+        detection_results = self.text_detector_module.detect_text(images=predicted_data,
+                                                                  use_gpu=self.use_gpu,
+                                                                  box_thresh=box_thresh)
 
         boxes = [np.array(item['data']).astype(np.float32) for item in detection_results]
         all_results = []
@@ -240,8 +251,8 @@ class ChineseOCRDBCRNN(hub.Module):
                     tmp_box = copy.deepcopy(boxes[num_box])
                     img_crop = self.get_rotate_crop_image(original_image, tmp_box)
                     img_crop_list.append(img_crop)
-                img_crop_list, angle_list = self._classify_text(
-                    img_crop_list, angle_classification_thresh=angle_classification_thresh)
+                img_crop_list, angle_list = self._classify_text(img_crop_list,
+                                                                angle_classification_thresh=angle_classification_thresh)
                 rec_results = self._recognize_text(img_crop_list)
 
                 # if the recognized text confidence score is lower than text_thresh, then drop it
@@ -273,18 +284,23 @@ class ChineseOCRDBCRNN(hub.Module):
         return results
 
     def save_result_image(
-            self,
-            original_image,
-            detection_boxes,
-            rec_results,
-            output_dir='ocr_result',
-            text_thresh=0.5,
+        self,
+        original_image,
+        detection_boxes,
+        rec_results,
+        output_dir='ocr_result',
+        text_thresh=0.5,
     ):
         image = Image.fromarray(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
         txts = [item[0] for item in rec_results]
         scores = [item[1] for item in rec_results]
-        draw_img = draw_ocr(
-            image, detection_boxes, txts, scores, font_file=self.font_file, draw_txt=True, drop_score=text_thresh)
+        draw_img = draw_ocr(image,
+                            detection_boxes,
+                            txts,
+                            scores,
+                            font_file=self.font_file,
+                            draw_txt=True,
+                            drop_score=text_thresh)
 
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -322,7 +338,7 @@ class ChineseOCRDBCRNN(hub.Module):
             norm_img_batch = norm_img_batch.copy()
 
             self.cls_input_tensor.copy_from_cpu(norm_img_batch)
-            self.cls_predictor.zero_copy_run()
+            self.cls_predictor.run()
 
             prob_out = self.cls_output_tensors[0].copy_to_cpu()
             label_out = self.cls_output_tensors[1].copy_to_cpu()
@@ -366,7 +382,7 @@ class ChineseOCRDBCRNN(hub.Module):
             norm_img_batch = norm_img_batch.copy()
 
             self.rec_input_tensor.copy_from_cpu(norm_img_batch)
-            self.rec_predictor.zero_copy_run()
+            self.rec_predictor.run()
 
             rec_idx_batch = self.rec_output_tensors[0].copy_to_cpu()
             rec_idx_lod = self.rec_output_tensors[0].lod()[0]
@@ -407,60 +423,57 @@ class ChineseOCRDBCRNN(hub.Module):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+        place = paddle.CPUPlace()
+        exe = paddle.Executor(place)
 
         model_file_path = os.path.join(self.rec_pretrained_model_path, 'model')
         params_file_path = os.path.join(self.rec_pretrained_model_path, 'params')
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
             dirname=self.rec_pretrained_model_path,
             model_filename=model_file_path,
             params_filename=params_file_path,
             executor=exe)
 
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+        paddle.static.save_inference_model(dirname=dirname,
+                                           main_program=program,
+                                           executor=exe,
+                                           feeded_var_names=feeded_var_names,
+                                           target_vars=target_vars,
+                                           model_filename=model_filename,
+                                           params_filename=params_filename)
 
     def _save_classifier_model(self, dirname, model_filename=None, params_filename=None, combined=True):
         if combined:
             model_filename = "__model__" if not model_filename else model_filename
             params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+        place = paddle.CPUPlace()
+        exe = paddle.Executor(place)
 
         model_file_path = os.path.join(self.cls_pretrained_model_path, 'model')
         params_file_path = os.path.join(self.cls_pretrained_model_path, 'params')
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
+        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
             dirname=self.cls_pretrained_model_path,
             model_filename=model_file_path,
             params_filename=params_file_path,
             executor=exe)
 
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+        paddle.static.save_inference_model(dirname=dirname,
+                                           main_program=program,
+                                           executor=exe,
+                                           feeded_var_names=feeded_var_names,
+                                           target_vars=target_vars,
+                                           model_filename=model_filename,
+                                           params_filename=params_filename)
 
     @runnable
     def run_cmd(self, argvs):
         """
         Run as a command
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the %s module." % self.name,
-            prog='hub run %s' % self.name,
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the %s module." % self.name,
+                                              prog='hub run %s' % self.name,
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -470,20 +483,28 @@ class ChineseOCRDBCRNN(hub.Module):
         self.add_module_input_arg()
 
         args = self.parser.parse_args(argvs)
-        results = self.recognize_text(
-            paths=[args.input_path], use_gpu=args.use_gpu, output_dir=args.output_dir, visualization=args.visualization)
+        results = self.recognize_text(paths=[args.input_path],
+                                      use_gpu=args.use_gpu,
+                                      output_dir=args.output_dir,
+                                      visualization=args.visualization)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
-        self.arg_config_group.add_argument(
-            '--output_dir', type=str, default='ocr_result', help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not")
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='ocr_result',
+                                           help="The directory to save output images.")
+        self.arg_config_group.add_argument('--visualization',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether to save output as images.")
 
     def add_module_input_arg(self):
         """

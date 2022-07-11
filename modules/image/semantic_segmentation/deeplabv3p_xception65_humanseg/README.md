@@ -1,7 +1,7 @@
-# deeplabv3p_xception65_humanseg 
+# deeplabv3p_xception65_humanseg
 
 |模型名称|deeplabv3p_xception65_humanseg|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-图像分割|
 |网络|deeplabv3p|
 |数据集|百度自建数据集|
@@ -18,7 +18,7 @@
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130913256-41056b21-1c3d-4ee2-b481-969c94754609.png" width = "337" height = "505" hspace='10'/>
     </p>
-    
+
 - ### 模型介绍
 
   - DeepLabv3+使用百度自建数据集进行训练，可用于人像分割，支持任意大小的图片输入。
@@ -41,7 +41,7 @@
     - ```shell
       $ hub install deeplabv3p_xception65_humanseg
       ```
-      
+
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
       | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
@@ -176,4 +176,8 @@
 
 * 1.1.2
 
-   修复cudnn为8.0.4显存泄露问题
+   移除 fluid api
+
+  - ```shell
+    $ hub install deeplabv3p_xception65_humanseg==1.1.2
+    ```

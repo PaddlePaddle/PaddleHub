@@ -50,7 +50,7 @@
     ```
   - 通过命令行方式实现人脸检测模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、代码示例
+- ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
@@ -164,7 +164,10 @@
 
   初始发布
 
-* 1.1.2
+* 1.1.3
+
+  移除 fluid api
+
   - ```shell
-    $ hub install ultra_light_fast_generic_face_detector_1mb_640==1.1.2
+    $ hub install ultra_light_fast_generic_face_detector_1mb_640==1.1.3
     ```

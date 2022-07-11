@@ -50,7 +50,7 @@
     ```
   - 通过命令行方式实现人脸检测模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、代码示例
+- ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
@@ -208,7 +208,10 @@
 
   初始发布
 
-* 1.3.0
+* 1.3.1
+
+  移除 fluid api
+
   - ```shell
-    $ hub install pyramidbox_lite_mobile_mask==1.3.0
+    $ hub install pyramidbox_lite_mobile_mask==1.3.1
     ```

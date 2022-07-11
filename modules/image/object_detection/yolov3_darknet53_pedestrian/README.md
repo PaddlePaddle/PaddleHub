@@ -49,7 +49,7 @@
     $ hub run yolov3_darknet53_pedestrian --input_path "/PATH/TO/IMAGE"
     ```
   - 通过命令行方式实现行人检测模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
-- ### 2、代码示例
+- ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
@@ -167,6 +167,10 @@
 
    修复numpy数据读取问题
 
+* 1.0.3
+
+   移除 fluid api
+
   - ```shell
-    $ hub install yolov3_darknet53_pedestrian==1.0.2
+    $ hub install yolov3_darknet53_pedestrian==1.0.3
     ```
