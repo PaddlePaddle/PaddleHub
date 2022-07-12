@@ -128,34 +128,35 @@
 
   - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-    - ```python
-      import requests
-      import json
-      import cv2
-      import base64
-      import numpy as np
+  - ```python
+    import requests
+    import json
+    import cv2
+    import base64
+    import numpy as np
 
 
-      def cv2_to_base64(image):
-          data = cv2.imencode('.jpg', image)[1]
-          return base64.b64encode(data.tostring()).decode('utf8')
+    def cv2_to_base64(image):
+        data = cv2.imencode('.jpg', image)[1]
+        return base64.b64encode(data.tostring()).decode('utf8')
 
 
-      def base64_to_cv2(b64str):
-          data = base64.b64decode(b64str.encode('utf8'))
-          data = np.fromstring(data, np.uint8)
-          data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-          return data
+    def base64_to_cv2(b64str):
+        data = base64.b64decode(b64str.encode('utf8'))
+        data = np.fromstring(data, np.uint8)
+        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+        return data
 
-      # Send an HTTP request
-      data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
-      headers = {"Content-type": "application/json"}
-      url = "http://127.0.0.1:8866/predict/deeplabv3p_xception65_humanseg"
-      r = requests.post(url=url, headers=headers,
-      mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2GRAY)
-      rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
-      cv2.imwrite("segment_human_server.png", rgba)
-      ```
+    org_im = cv2.imread("/PATH/TO/IMAGE")
+    # Send an HTTP request
+    data = {'images':[cv2_to_base64(org_im)]}
+    headers = {"Content-type": "application/json"}
+    url = "http://127.0.0.1:8866/predict/deeplabv3p_xception65_humanseg"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+    mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2GRAY)
+    rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
+    cv2.imwrite("segment_human_server.png", rgba)
+    ```
 ## V. Release Note
 
 - 1.0.0

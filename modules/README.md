@@ -382,8 +382,8 @@ English | [简体中文](README_ch.md)
 
 |module|Network|Dataset|Introduction|
 |--|--|--|--|
-|[transformer_zh-en](text/machine_translation/transformer/transformer_zh-en)|Transformer|CWMT2021|中文译英文|
-|[transformer_en-de](text/machine_translation/transformer/transformer_en-de)|Transformer|WMT14 EN-DE|英文译德文|
+|[transformer_zh-en](text/machine_translation/transformer/zh-en)|Transformer|CWMT2021|中文译英文|
+|[transformer_en-de](text/machine_translation/transformer/en-de)|Transformer|WMT14 EN-DE|英文译德文|
 
   - ### Language Model
 
