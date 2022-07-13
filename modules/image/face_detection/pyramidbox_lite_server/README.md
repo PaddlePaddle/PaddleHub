@@ -166,6 +166,11 @@
 * 1.2.0
 
   修复numpy数据读取问题
+
+* 1.2.1
+
+  移除 fluid api
+
   - ```shell
-    $ hub install pyramidbox_lite_server==1.2.0
+    $ hub install pyramidbox_lite_server==1.2.1
     ```

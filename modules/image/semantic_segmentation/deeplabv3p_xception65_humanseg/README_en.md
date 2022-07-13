@@ -1,7 +1,7 @@
-# deeplabv3p_xception65_humanseg 
+# deeplabv3p_xception65_humanseg
 
 |Module Name |deeplabv3p_xception65_humanseg|
-| :--- | :---: | 
+| :--- | :---: |
 |Category|Image segmentation|
 |Network|deeplabv3p|
 |Dataset|Baidu self-built dataset|
@@ -10,7 +10,7 @@
 |Data indicators |-|
 |Latest update date|2021-02-26|
 
-## I. Basic Information 
+## I. Basic Information
 
 - ### Application Effect Display
 
@@ -18,7 +18,7 @@
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130913256-41056b21-1c3d-4ee2-b481-969c94754609.png" width = "337" height = "505" hspace='10'/>
     </p>
-    
+
 - ### Module Introduction
 
   - DeepLabv3+ model is trained by Baidu self-built dataset, which can be used for portrait segmentation.
@@ -89,9 +89,9 @@
 
       - **Return**
 
-          * res (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
+          * res (list\[dict\]): The list of recognition results, where each element is dict and each field is:
               * save\_path (str, optional): Save path of the result.
-              * data (numpy.ndarray): The result of portrait segmentation. 
+              * data (numpy.ndarray): The result of portrait segmentation.
 
     - ```python
       def save_inference_model(dirname,
@@ -172,4 +172,8 @@
 
 * 1.1.2
 
-    Fix memory leakage problem of on cudnn 8.0.4
+   Remove fluid api
+
+  - ```shell
+    $ hub install deeplabv3p_xception65_humanseg==1.1.2
+    ```
