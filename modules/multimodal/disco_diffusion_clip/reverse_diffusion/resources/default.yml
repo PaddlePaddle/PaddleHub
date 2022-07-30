@@ -1,14 +1,8 @@
 text_prompts:
   - A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation.
-  # - yellow color scheme
-  # - 妙蛙种子和杰尼龟在太阳系内打架，月球都颤抖了
-  # - 穿着航天服的狗在探索宇宙
-  # - 海面上一个独特的灯塔，光线穿透海面点量鱼群
-  # - 宇航员在太空
-  # - 龟兔赛跑
 
 init_image:
-# width_height: [ 1280, 768 ]
+
 width_height: [ 1280, 768]
 
 skip_steps: 10
@@ -29,7 +23,7 @@ diffusion_sampling_mode: ddim
 
 perlin_init: False
 perlin_mode: mixed
-seed: 445467575 #444720153
+seed: 445467575
 eta: 0.8
 clamp_grad: True
 clamp_max: 0.05
@@ -48,9 +42,6 @@ n_batches: 1
 batch_size: 1
 batch_name: ''
 clip_models:
-  # - ViT-B/32
-  # - ViT-B/16
-  # - ViT-B-16
   - VIT
   - RN50
   - RN101
