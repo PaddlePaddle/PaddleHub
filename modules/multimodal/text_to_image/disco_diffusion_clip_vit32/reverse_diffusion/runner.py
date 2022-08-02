@@ -164,10 +164,7 @@ def do_run(args, models) -> 'DocumentArray':
 
                 x_in_grad += (paddle.grad(losses.sum() * args.clip_guidance_scale, x_in)[0])
         tv_losses = tv_loss(x_in)
-        if secondary_model:
-            range_losses = range_loss(out)
-        else:
-            range_losses = range_loss(out['pred_xstart'])
+        range_losses = range_loss(x_in)
         sat_losses = paddle.abs(x_in - x_in.clip(min=-1, max=1)).mean()
         loss = (tv_losses.sum() * args.tv_scale + range_losses.sum() * args.range_scale +
                 sat_losses.sum() * args.sat_scale)
@@ -207,7 +204,7 @@ def do_run(args, models) -> 'DocumentArray':
         cur_t = diffusion.num_timesteps - skip_steps - 1
 
         if args.perlin_init:
-            init = regen_perlin(args.perlin_mode, args.side_y, side_x, args.batch_size)
+            init = regen_perlin(args.perlin_mode, side_y, side_x, args.batch_size)
 
         if args.diffusion_sampling_mode == 'ddim':
             samples = sample_fn(

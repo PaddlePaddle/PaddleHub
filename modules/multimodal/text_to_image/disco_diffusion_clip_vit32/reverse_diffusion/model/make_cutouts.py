@@ -1,10 +1,11 @@
 import math
 
-import discoart.model.transforms as T
 import paddle
 import paddle.nn as nn
 from paddle.nn import functional as F
 from resize_right import resize
+
+from . import transforms as T
 
 skip_augs = False  # @param{type: 'boolean'}
 

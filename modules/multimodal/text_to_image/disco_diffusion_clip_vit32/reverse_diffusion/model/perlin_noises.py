@@ -70,4 +70,4 @@ def regen_perlin(perlin_mode, side_y, side_x, batch_size):
 
     init = (TF.to_tensor(init).add(TF.to_tensor(init2)).divide(paddle.to_tensor(2.0)).unsqueeze(0) * 2 - 1)
     del init2
-    return init.expand(batch_size, -1, -1, -1)
+    return init.expand([batch_size, -1, -1, -1])

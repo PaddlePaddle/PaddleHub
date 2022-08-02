@@ -1,3 +1,4 @@
+import os
 from typing import List
 from typing import Union
 
@@ -15,12 +16,12 @@ from .simple_tokenizer import SimpleTokenizer
 
 __all__ = ['transform', 'tokenize', 'build_model']
 
-MODEL_NAMES = ['RN50', 'RN101', 'VIT']
+MODEL_NAMES = ['RN50', 'RN101', 'VIT32']
 
 URL = {
-    'RN50': 'https://bj.bcebos.com/paddleaudio/examples/clip/RN50.pdparams',
-    'RN101': 'https://bj.bcebos.com/paddleaudio/examples/clip/RN101.pdparams',
-    'VIT': 'https://bj.bcebos.com/paddleaudio/examples/clip/ViT-B-32.pdparam'
+    'RN50': os.path.join(os.path.dirname(__file__), 'pre_trained', 'RN50.pdparams'),
+    'RN101': os.path.join(os.path.dirname(__file__), 'pre_trained', 'RN101.pdparams'),
+    'VIT32': os.path.join(os.path.dirname(__file__), 'pre_trained', 'ViT-B-32.pdparams')
 }
 
 MEAN, STD = (0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)
@@ -66,11 +67,11 @@ def tokenize(texts: Union[str, List[str]], context_length: int = 77):
     return result
 
 
-def build_model(name='RN50'):
+def build_model(name='VIT32'):
     assert name in MODEL_NAMES, f"model name must be one of {MODEL_NAMES}"
-    name2model = {'RN101': build_rn101_model, 'VIT': build_vit_model, 'RN50': build_rn50_model}
+    name2model = {'RN101': build_rn101_model, 'VIT32': build_vit_model, 'RN50': build_rn50_model}
     model = name2model[name]()
-    weight = download.get_weights_path_from_url(URL[name])
+    weight = URL[name]
     sd = paddle.load(weight)
     model.load_dict(sd)
     model.eval()

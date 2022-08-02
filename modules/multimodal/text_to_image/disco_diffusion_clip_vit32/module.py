@@ -21,19 +21,19 @@ from typing import Optional
 
 sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'resize_right'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'clip.paddle'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'clip'))
 
 import resize_right
 import clip
 import paddle
 import paddlehub as hub
-from reverse_diffusion import create
+from .reverse_diffusion import create
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
 
 
-@moduleinfo(name="disco_diffusion_clip",
+@moduleinfo(name="disco_diffusion_clip_vit32",
             version="1.0.0",
             type="MultiModal/image_generation",
             summary="",
@@ -77,9 +77,8 @@ class DiscoDiffusionClip:
             n_batches: Optional[int] = 4,
             batch_size: Optional[int] = 1,
             batch_name: Optional[str] = '',
-            clip_models: Optional[list] = ['VIT', 'RN101', 'RN50'],
             use_gpu: Optional[bool] = True,
-            output_dir: Optional[str] = 'discoart_output'):
+            output_dir: Optional[str] = 'disco_diffusion_clip_vit32_out'):
         """
         Create Disco Diffusion artworks and save the result into a DocumentArray.
 
@@ -110,7 +109,6 @@ class DiscoDiffusionClip:
         :param display_rate: During a diffusion run, you can monitor the progress of each image being created with this variable.  If display_rate is set to 50, DD will show you the in-progress image every 50 timesteps. Setting this to a lower value, like 5 or 10, is a good way to get an early peek at where your image is heading. If you don’t like the progression, just interrupt execution, change some settings, and re-run.  If you are planning a long, unmonitored batch, it’s better to set display_rate equal to steps, because displaying interim images does slow Colab down slightly.
         :param n_batches: This variable sets the number of still images you want DD to create.  If you are using an animation mode (see below for details) DD will ignore n_batches and create a single set of animated frames based on the animation settings.
         :param batch_name: The name of the batch, the batch id will be named as "discoart-[batch_name]-seed". To avoid your artworks be overridden by other users, please use a unique name.
-        :param clip_models: CLIP Model selectors. 'VIT', 'RN101', 'RN50'.These various CLIP models are available for you to use during image generation.  Models have different styles or ‘flavors,’ so look around.  You can mix in multiple models as well for different results.  However, keep in mind that some models are extremely memory-hungry, and turning on additional models will take additional memory and may cause a crash.
         :param use_gpu: whether to use gpu or not.
         :return: a DocumentArray object that has `n_batches` Documents
         """
@@ -160,7 +158,7 @@ class DiscoDiffusionClip:
                       n_batches=n_batches,
                       batch_size=batch_size,
                       batch_name=batch_name,
-                      clip_models=clip_models,
+                      clip_models=['VIT32'],
                       output_dir=output_dir)
 
     @serving
@@ -219,7 +217,6 @@ class DiscoDiffusionClip:
                                       n_batches=args.n_batches,
                                       batch_size=args.batch_size,
                                       batch_name=args.batch_name,
-                                      clip_models=args.clip_models,
                                       output_dir=args.output_dir)
         return results
 
@@ -381,7 +378,7 @@ class DiscoDiffusionClip:
                                            help="whether use GPU or not")
         self.arg_config_group.add_argument('--output_dir',
                                            type=str,
-                                           default='discoart_output',
+                                           default='disco_diffusion_clip_vit32_out',
                                            help='Output directory.')
 
     def add_module_input_arg(self):
@@ -424,11 +421,4 @@ class DiscoDiffusionClip:
             default='',
             help=
             'The name of the batch, the batch id will be named as "discoart-[batch_name]-seed". To avoid your artworks be overridden by other users, please use a unique name.'
-        )
-        self.arg_input_group.add_argument(
-            '--clip_models',
-            type=ast.literal_eval,
-            default=['VIT', 'RN50', 'RN101'],
-            help=
-            "CLIP Model selectors. 'VIT', 'RN101', 'RN50'.These various CLIP models are available for you to use during image generation.  Models have different styles or ‘flavors,’ so look around.  You can mix in multiple models as well for different results.  However, keep in mind that some models are extremely memory-hungry, and turning on additional models will take additional memory and may cause a crash."
         )
