@@ -138,5 +138,5 @@ disco_diffusion_clip_vitb32 是一个文图生成模型，可以通过输入一�
   初始发布
 
   ```shell
-  $ hub install disco_diffusion_clip_vit32 == 1.0.0
+  $ hub install disco_diffusion_clip_vitb32 == 1.0.0
   ```
