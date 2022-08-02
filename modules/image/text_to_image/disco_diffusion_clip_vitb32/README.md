@@ -38,7 +38,7 @@ disco_diffusion_clip_vitb32 是一个文图生成模型，可以通过输入一�
 
   - paddlepaddle >= 2.0.0
 
-  - paddlehub >= 2.0.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+  - paddlehub >= 2.2.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
