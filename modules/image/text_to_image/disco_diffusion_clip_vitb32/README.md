@@ -43,7 +43,7 @@ disco_diffusion_clip_vitb32 是一个文图生成模型，可以通过输入一�
 - ### 2、安装
 
   - ```shell
-    $ hub install disco_diffusion_clip_vit32
+    $ hub install disco_diffusion_clip_vitb32
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -54,7 +54,7 @@ disco_diffusion_clip_vitb32 是一个文图生成模型，可以通过输入一�
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run disco_diffusion_clip_vitb32 --text_prompts "A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation." --output_dir disco_diffusion_clip_vit32_out
+    $ hub run disco_diffusion_clip_vitb32 --text_prompts "A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation." --output_dir disco_diffusion_clip_vitb32_out
     ```
 
 - ### 2、预测代码示例
@@ -101,7 +101,7 @@ disco_diffusion_clip_vitb32 是一个文图生成模型，可以通过输入一�
             n_batches: Optional[int] = 4,
             batch_name: Optional[str] = '',
             use_gpu: Optional[bool] = True,
-            output_dir: Optional[str] = 'disco_diffusion_clip_vit32_out'):
+            output_dir: Optional[str] = 'disco_diffusion_clip_vitb32_out'):
     ```
 
     - 文图生成API，生成文本描述内容的图像。
@@ -125,7 +125,7 @@ disco_diffusion_clip_vitb32 是一个文图生成模型，可以通过输入一�
       - n_batches(Optional[int]):  指定最终所生成的图像的数量。例如为2，则会生成两张不同的符合输入文本语义的图像。
       - batch_name(Optional[str]): 给定batch的名字, 该名称会构建为"reverse_diffusion-[batch_name]-seed"，作为本地生成图像的名称的前缀，并且所生成的图像默认还会上传到DocumentArray的"云剪切板"，所使用的名字也为这个。
       - use_gpu(Optional[bool]): 是否使用gpu, 默认为True。
-      - output_dir(Optional[str]): 保存输出图像的目录，默认为"disco_diffusion_clip_vit32_out"。
+      - output_dir(Optional[str]): 保存输出图像的目录，默认为"disco_diffusion_clip_vitb32_out"。
 
 
     - **返回**
