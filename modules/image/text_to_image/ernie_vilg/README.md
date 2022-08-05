@@ -58,7 +58,7 @@
 
     module = hub.Module(name="ernie_vilg")
     text_prompts = ["宁静的小镇"]
-    images = module.generate_image(text_prompts=text_prompts, output_dir='./ernie_vilg_out/')  
+    images = module.generate_image(text_prompts=text_prompts, style='油画', output_dir='./ernie_vilg_out/')  
     ```
 
 - ### 3、API
