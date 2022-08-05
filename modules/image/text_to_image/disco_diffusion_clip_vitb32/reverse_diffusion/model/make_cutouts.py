@@ -1,3 +1,7 @@
+'''
+This code is rewritten by Paddle based on Jina-ai/discoart.
+https://github.com/jina-ai/discoart/blob/main/discoart/nn/make_cutouts.py
+'''
 import math
 
 import paddle

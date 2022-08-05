@@ -1,3 +1,6 @@
+'''
+https://github.com/jina-ai/discoart/blob/main/discoart/__init__.py
+'''
 import os
 import warnings
 
@@ -151,24 +154,3 @@ def create(**kwargs) -> 'DocumentArray':
         return do_run(_args, (model, diffusion, clip_models, secondary_model))
     except KeyboardInterrupt:
         pass
-    finally:
-        from rich import print
-        from rich.markdown import Markdown
-
-        md = Markdown(f'''
-Results are stored in a [DocumentArray](https://docarray.jina.ai/fundamentals/documentarray/).
-
-You can pull it from any machine:
-
-```python
-# pip install docarray[common]
-from docarray import DocumentArray
-
-da = DocumentArray.pull('{_args.name_docarray}')
-```
-
-More usage such as plotting, post-analysis can be found in the [README](https://github.com/jina-ai/discoart).
-        ''')
-        print(md)
-        gc.collect()
-        paddle.device.cuda.empty_cache()

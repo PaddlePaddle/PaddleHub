@@ -1,3 +1,7 @@
+'''
+This code is rewritten by Paddle based on
+https://github.com/pytorch/vision/blob/main/torchvision/transforms/transforms.py
+'''
 import math
 import numbers
 import warnings

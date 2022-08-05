@@ -1,5 +1,6 @@
 """
-Various utilities for neural networks.
+Various utilities for neural networks implemented by Paddle. This code is rewritten based on:
+https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/nn.py
 """
 import math
 

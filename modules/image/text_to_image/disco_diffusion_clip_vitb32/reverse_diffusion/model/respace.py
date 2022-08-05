@@ -1,3 +1,7 @@
+'''
+This code is rewritten by Paddle based on
+https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/respace.py
+'''
 import numpy as np
 import paddle
 

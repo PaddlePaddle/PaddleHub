@@ -1,5 +1,6 @@
 """
-This code is rewrited based on Pytorch version of of Ho et al's diffusion models:
+Diffusion model implemented by Paddle.
+This code is rewritten based on Pytorch version of of Ho et al's diffusion models:
 https://github.com/hojonathanho/diffusion/blob/1e0dceb3b3495bbe19116a5e1b3596cd0706c543/diffusion_tf/diffusion_utils_2.py
 """
 import enum

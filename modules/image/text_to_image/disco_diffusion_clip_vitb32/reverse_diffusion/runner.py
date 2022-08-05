@@ -1,3 +1,7 @@
+'''
+This code is rewritten by Paddle based on Jina-ai/discoart.
+https://github.com/jina-ai/discoart/blob/main/discoart/runner.py
+'''
 import gc
 import os
 import random

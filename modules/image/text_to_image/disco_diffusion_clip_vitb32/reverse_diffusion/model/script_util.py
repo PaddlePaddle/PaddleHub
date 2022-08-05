@@ -1,3 +1,7 @@
+'''
+This code is based on
+https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/script_util.py
+'''
 import argparse
 import inspect
 

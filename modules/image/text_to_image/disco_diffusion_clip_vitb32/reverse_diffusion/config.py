@@ -1,3 +1,6 @@
+'''
+https://github.com/jina-ai/discoart/blob/main/discoart/config.py
+'''
 import copy
 import random
 import warnings

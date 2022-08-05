@@ -1,3 +1,8 @@
+'''
+Perlin noise implementation by Paddle.
+This code is rewritten based on:
+https://github.com/jina-ai/discoart/blob/main/discoart/nn/perlin_noises.py
+'''
 import numpy as np
 import paddle
 import paddle.vision.transforms as TF

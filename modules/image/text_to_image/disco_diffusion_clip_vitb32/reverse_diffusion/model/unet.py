@@ -1,3 +1,7 @@
+'''
+This code is rewritten by Paddle based on
+https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/unet.py
+'''
 import math
 from abc import abstractmethod
 

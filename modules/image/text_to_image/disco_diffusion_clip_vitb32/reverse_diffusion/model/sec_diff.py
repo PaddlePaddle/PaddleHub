@@ -1,3 +1,7 @@
+'''
+This code is rewritten by Paddle based on
+https://github.com/jina-ai/discoart/blob/main/discoart/nn/sec_diff.py
+'''
 import math
 from dataclasses import dataclass
 from functools import partial
