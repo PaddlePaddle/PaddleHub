@@ -90,17 +90,9 @@ disco_diffusion_clip_vitb32 是一个文图生成模型，可以通过输入一�
             skip_steps: Optional[int] = 10,
             steps: Optional[int] = 250,
             init_scale: Optional[int] = 1000,
-            clip_guidance_scale: Optional[int] = 5000,
-            tv_scale: Optional[int] = 0,
-            range_scale: Optional[int] = 150,
-            sat_scale: Optional[int] = 0,
             perlin_init: Optional[bool] = False,
             perlin_mode: Optional[str] = 'mixed',
             seed: Optional[int] = None,
-            display_rate: Optional[int] = 10,
-            n_batches: Optional[int] = 4,
-            batch_name: Optional[str] = '',
-            use_gpu: Optional[bool] = True,
             output_dir: Optional[str] = 'disco_diffusion_clip_vitb32_out'):
     ```
 
@@ -108,23 +100,15 @@ disco_diffusion_clip_vitb32 是一个文图生成模型，可以通过输入一�
 
     - **参数**
 
-      - text_prompts(Optional[List[str]]): 输入的语句，描述想要生成的图像的内容。
+      - text_prompts(Optional[List[str]]): 输入的语句，描述想要生成的图像的内容。通常的构造方式为 "一段描述性的文字内容" + "指定艺术家的名字"。
       - init_image(Optional[str]): 初始图像的路径，通常可以不需要指定初始图像，默认的初始图像为高斯噪声。
       - width_height(Optional[List[int]]): 指定最终输出图像的宽高，宽和高都需要是64的倍数，生成的图像越大，所需要的计算时间越长。
       - skip_steps(Optional[int]): 跳过的迭代次数，通常在迭代初期图像变化较快，到了迭代后期迭代变化较小，可以选择跳过末尾一定次数的迭代结束，比如如果指定了初始图像，随着迭代越靠后，越可能偏离初始图像的特征，为了让生成的图像尽可能多的保持初始图像的特征，就可以指定该参数。
       - steps(Optional[int]): 生成图像的完整迭代次数。
       - init_scale(Optional[int]): 控制生成和初始图像相似的相似度，该值在指定初始图像时候起作用，值越大，越贴近初始图像。
-      - clip_guidance_scale(Optional[int]): 文本引导权重，控制生成图像和文本语义的相似度，值越大，越相似。
-      - tv_scale(Optional[int]): 平滑度参数，设置为0为关闭。 值越高，越平滑。
-      - range_scale(Optional[int]): 对比度参数，设置为0为关闭。 值越高，对比度越低。
-      - sat_scale(Optional[int]): 饱和度参数，设置为0为关闭，值越高，饱和度越低。
-      - perlin_init(Optional[bool]): 是否使用perlin噪声作为初始输入，默认为False。
+      - perlin_init(Optional[bool]): 是否使用perlin噪声作为初始输入，默认为False。使用perlin噪声作为初始图像对于纹理有比较好的生成效果。
       - perlin_mode(Optional[str]):  perlin噪声的模式，可选值为"colored", "gray"或者"mix"。
       - seed(Optional[int]): 随机种子，由于输入默认是随机高斯噪声，设置不同的随机种子会由不同的初始输入，从而最终生成不同的结果，可以设置该参数来获得不同的输出图像。
-      - display_rate(Optional[int]): 展示并保存中间结果的间隔。例如为10，则迭代10次保存并展示一次中间结果。
-      - n_batches(Optional[int]):  指定最终所生成的图像的数量。例如为2，则会生成两张不同的符合输入文本语义的图像。
-      - batch_name(Optional[str]): 给定batch的名字, 该名称会构建为"reverse_diffusion-[batch_name]-seed"，作为本地生成图像的名称的前缀，并且所生成的图像默认还会上传到DocumentArray的"云剪切板"，所使用的名字也为这个。
-      - use_gpu(Optional[bool]): 是否使用gpu, 默认为True。
       - output_dir(Optional[str]): 保存输出图像的目录，默认为"disco_diffusion_clip_vitb32_out"。
 
 
