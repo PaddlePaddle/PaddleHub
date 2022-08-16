@@ -2,7 +2,7 @@
 
 |模型名称|disco_diffusion_ernievil_base|
 | :--- | :---: |
-|类别|多模态-文图生成|
+|类别|图像-文图生成|
 |网络|dd+ERNIE-ViL|
 |数据集|-|
 |是否支持Fine-tuning|否|
