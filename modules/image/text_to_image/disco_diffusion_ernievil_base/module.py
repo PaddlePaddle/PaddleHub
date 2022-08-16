@@ -130,13 +130,13 @@ class DiscoDiffusionClip:
             if style is not None:
                 text_prompts += "，{}".format(style)
             if artist is not None:
-                text_prompts += "，{}，trending on artstation".format(artist)
+                text_prompts += "，由{}所作".format(artist)
         elif isinstance(text_prompts, list):
             text_prompts[0] = text_prompts[0].rstrip(',.，。')
             if style is not None:
                 text_prompts[0] += "，{}".format(style)
             if artist is not None:
-                text_prompts[0] += "，{}，trending on artstation".format(artist)
+                text_prompts[0] += "，由{}所作".format(artist)
 
         return create(text_prompts=text_prompts,
                       init_image=init_image,
