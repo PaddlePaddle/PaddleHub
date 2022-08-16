@@ -14,16 +14,16 @@
 
 ### 应用效果展示
 
-   - 输入文本 "小桥流水人家"
+   - 输入文本 "在宁静的风景中画一幅美丽的建筑画，由Arthur Adams在artstation上所作"
 
    - 输出图像
    <p align="center">
-     <img src="https://user-images.githubusercontent.com/22424850/183022413-7906d427-a7dc-40a1-af2c-53e571b89a09.png"  width = "80%" hspace='10'/>
+     <img src="https://user-images.githubusercontent.com/22424850/184838000-566f0548-f0f5-4df6-a4af-16bb70220137.png"  width = "80%" hspace='10'/>
    <br />
 
    - 生成过程
    <p align="center">
-     <img src="https://user-images.githubusercontent.com/22424850/183022471-8625a79d-ede9-48dc-bd91-5338842655f5.gif"  width = "80%" hspace='10'/>
+     <img src="https://user-images.githubusercontent.com/22424850/184837520-f30f21e1-5310-4925-a8d2-946337795010.gif"  width = "80%" hspace='10'/>
    <br />
 
 ### 模型介绍
