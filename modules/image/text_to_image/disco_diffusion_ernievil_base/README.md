@@ -3,7 +3,7 @@
 |模型名称|disco_diffusion_ernievil_base|
 | :--- | :---: |
 |类别|多模态-文图生成|
-|网络|dd+ernievil ViTB16|
+|网络|dd+ERNIE-ViL|
 |数据集|-|
 |是否支持Fine-tuning|否|
 |模型大小|2.9GB|
@@ -86,7 +86,7 @@ disco_diffusion_ernievil_base 是一个文图生成模型，可以通过输入�
             artist: Optional[str] = None,
             width_height: Optional[List[int]] = [1280, 768],
             seed: Optional[int] = None,
-            output_dir: Optional[str] = 'disco_diffusion_clip_vit32_out'):
+            output_dir: Optional[str] = 'disco_diffusion_ernievil_base_out'):
     ```
 
     - 文图生成API，生成文本描述内容的图像。
