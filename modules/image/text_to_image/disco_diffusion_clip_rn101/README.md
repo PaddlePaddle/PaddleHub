@@ -18,12 +18,12 @@
 
   - 输出图像
   <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/182298446-7feb530b-62cc-4e3f-a693-249ec8383daa.png"  width = "80%" hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/184836003-96d82c9e-b43e-4eb5-a237-bb22972d1848.png"  width = "80%" hspace='10'/>
   <br />
 
   - 生成过程
   <p align="center">
-    <img src="https://user-images.githubusercontent.com/22424850/182298453-9a8a8336-66e6-4adb-a46f-7a0fa211b467.gif"  width = "80%" hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/22424850/184836085-beef3562-f89d-405e-ae04-2d3cd8499df8.gif"  width = "80%" hspace='10'/>
   <br />
 
 ### 模型介绍
@@ -92,7 +92,7 @@ disco_diffusion_clip_rn101 是一个文图生成模型，可以通过输入一�
 
     - **参数**
 
-      - text_prompts(str): 输入的语句，描述想要生成的图像的内容。通常比较有效的构造方式为 "一段描述性的文字内容" + "指定艺术家的名字"，如"a beautiful painting of Chinese architecture, by krenz, sunny, super wide angle, artstation."。
+      - text_prompts(str): 输入的语句，描述想要生成的图像的内容。通常比较有效的构造方式为 "一段描述性的文字内容" + "指定艺术家的名字"，如"a beautiful painting of Chinese architecture, by krenz, sunny, super wide angle, artstation."。prompt的构造可以参考[网站](https://docs.google.com/document/d/1XUT2G9LmkZataHFzmuOtRXnuWBfhvXDAo8DkS--8tec/edit#)。
       - style(Optional[str]): 指定绘画的风格，如'watercolor','Chinese painting'等。当不指定时，风格完全由您所填写的prompt决定。
       - artist(Optional[str]): 指定特定的艺术家，如Greg Rutkowsk、krenz，将会生成所指定艺术家的绘画风格。当不指定时，风格完全由您所填写的prompt决定。各种艺术家的风格可以参考[网站](https://weirdwonderfulai.art/resources/disco-diffusion-70-plus-artist-studies/)。
       - seed(Optional[int]): 随机种子，由于输入默认是随机高斯噪声，设置不同的随机种子会由不同的初始输入，从而最终生成不同的结果，可以设置该参数来获得不同的输出图像。
