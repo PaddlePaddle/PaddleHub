@@ -37,6 +37,7 @@ class ErnieVilG:
 
         :param text_prompts: Phrase, sentence, or string of words and phrases describing what the image should look like.
         :param style: Image stype, currently supported 油画、水彩、粉笔画、卡通、儿童画、蜡笔画
+        :param topk: Top k images to save.
         :output_dir: Output directory
         """
         if not os.path.exists(output_dir):
