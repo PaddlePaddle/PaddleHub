@@ -67,6 +67,7 @@
     def generate_image(
               text_prompts:str,
               style: Optional[str] = "油画",
+              topk: Optional[int] = 10,
               output_dir: Optional[str] = 'ernievilg_output')
     ```
 
