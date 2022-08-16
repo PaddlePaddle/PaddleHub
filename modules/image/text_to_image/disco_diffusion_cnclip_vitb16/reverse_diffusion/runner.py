@@ -7,7 +7,7 @@ import os
 import random
 from threading import Thread
 
-import cn_clip.clip as clip
+import disco_diffusion_cnclip_vitb16.cn_clip.clip as clip
 import numpy as np
 import paddle
 import paddle.vision.transforms as T
@@ -166,7 +166,7 @@ def do_run(args, models) -> 'DocumentArray':
                 losses = dists.multiply(model_stat['weights']).sum(2).mean(0)
                 loss_values.append(losses.sum().item())  # log loss, probably shouldn't do per cutn_batch
 
-                x_in_grad += (paddle.grad(losses.sum() * args.clip_guidance_scale, x_in)[0])
+                x_in_grad += (paddle.grad(losses.sum() * args.clip_guidance_scale, x_in)[0] / args.cutn_batches)
         tv_losses = tv_loss(x_in)
         range_losses = range_loss(x_in)
         sat_losses = paddle.abs(x_in - x_in.clip(min=-1, max=1)).mean()

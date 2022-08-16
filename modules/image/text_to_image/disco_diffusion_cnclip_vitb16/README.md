@@ -54,7 +54,7 @@ disco_diffusion_cnclip_vitb16 是一个文图生成模型，可以通过输入�
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run disco_diffusion_cnclip_vitb16 --text_prompts "小桥流水人家，风格如徐悲鸿所作。" --output_dir disco_diffusion_cnclip_vitb16_out
+    $ hub run disco_diffusion_cnclip_vitb16 --text_prompts "孤舟蓑笠翁，独钓寒江雪。风格如齐白石所作。" --output_dir disco_diffusion_cnclip_vitb16_out
     ```
 
 - ### 2、预测代码示例
@@ -63,11 +63,11 @@ disco_diffusion_cnclip_vitb16 是一个文图生成模型，可以通过输入�
     import paddlehub as hub
 
     module = hub.Module(name="disco_diffusion_cnclip_vitb16")
-    text_prompts = ["小桥流水人家，风格如徐悲鸿所作。"]
+    text_prompts = ["孤舟蓑笠翁，独钓寒江雪。"]
     # 生成图像, 默认会在disco_diffusion_cnclip_vitb16_out目录保存图像
     # 返回的da是一个DocumentArray对象，保存了所有的结果，包括最终结果和迭代过程的中间结果
     # 可以通过操作DocumentArray对象对生成的图像做后处理，保存或者分析
-    da = module.generate_image(text_prompts=text_prompts, output_dir='./disco_diffusion_cnclip_vitb16_out/')  
+    da = module.generate_image(text_prompts=text_prompts, artist='齐白石', output_dir='./disco_diffusion_cnclip_vitb16_out/')  
     # 手动将最终生成的图像保存到指定路径
     da[0].save_uri_to_file('disco_diffusion_cnclip_vitb16_out-result.png')
     # 展示所有的中间结果
@@ -80,33 +80,21 @@ disco_diffusion_cnclip_vitb16 是一个文图生成模型，可以通过输入�
 
   - ```python
     def generate_image(
-            text_prompts:
-                Optional[List[str]] = [
-                    '小桥流水人家，风格如徐悲鸿所作。',
-                ],
-            init_image: Optional[str] = None,
+            text_prompts,
+            style: Optional[str] = None,
+            artist: Optional[str] = None,
             width_height: Optional[List[int]] = [1280, 768],
-            skip_steps: Optional[int] = 10,
-            steps: Optional[int] = 250,
-            init_scale: Optional[int] = 1000,
-            perlin_init: Optional[bool] = False,
-            perlin_mode: Optional[str] = 'mixed',
             seed: Optional[int] = None,
-            output_dir: Optional[str] = 'disco_diffusion_clip_vit32_out'):
+            output_dir: Optional[str] = 'disco_diffusion_cnclip_vitb16_out'):
     ```
 
     - 文图生成API，生成文本描述内容的图像。
 
     - **参数**
 
-      - text_prompts(Optional[List[str]]): 输入的语句，描述想要生成的图像的内容。通常的构造方式为 "一段描述性的文字内容" + "指定艺术家的名字"，如"宁静的风景中一栋美丽的建筑，风格如徐悲鸿所作"。
-      - init_image(Optional[str]): 初始图像的路径，通常可以不需要指定初始图像，默认的初始图像为高斯噪声。
-      - width_height(Optional[List[int]]): 指定最终输出图像的宽高，宽和高都需要是64的倍数，生成的图像越大，所需要的计算时间越长。
-      - skip_steps(Optional[int]): 跳过的迭代次数，通常在迭代初期图像变化较快，到了迭代后期迭代变化较小，可以选择跳过末尾一定次数的迭代结束，比如如果指定了初始图像，随着迭代越靠后，越可能偏离初始图像的特征，为了让生成的图像尽可能多的保持初始图像的特征，就可以指定该参数。
-      - steps(Optional[int]): 生成图像的完整迭代次数。
-      - init_scale(Optional[int]): 控制生成和初始图像相似的相似度，该值在指定初始图像时候起作用，值越大，越贴近初始图像。
-      - perlin_init(Optional[bool]): 是否使用perlin噪声作为初始输入，默认为False。使用perlin噪声作为初始图像对于纹理有比较好的生成效果。
-      - perlin_mode(Optional[str]):  perlin噪声的模式，可选值为"colored", "gray"或者"mix"。
+      - text_prompts(str): 输入的语句，描述想要生成的图像的内容。通常比较有效的构造方式为 "一段描述性的文字内容" + "指定艺术家的名字"，如"孤舟蓑笠翁，独钓寒江雪。风格如齐白石所作"。
+      - style(Optional[str]): 指定绘画的风格，如水墨画、油画、水彩画等。当不指定时，风格完全由您所填写的prompt决定。
+      - artist(Optional[str]): 指定特定的艺术家，如齐白石、Greg Rutkowsk，将会生成所指定艺术家的绘画风格。当不指定时，风格完全由您所填写的prompt决定。各种艺术家的风格可以参考[网站](https://weirdwonderfulai.art/resources/disco-diffusion-70-plus-artist-studies/)。
       - seed(Optional[int]): 随机种子，由于输入默认是随机高斯噪声，设置不同的随机种子会由不同的初始输入，从而最终生成不同的结果，可以设置该参数来获得不同的输出图像。
       - output_dir(Optional[str]): 保存输出图像的目录，默认为"disco_diffusion_cnclip_vitb16_out"。
 

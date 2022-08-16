@@ -33,8 +33,8 @@ logger = _get_logger()
 
 def load_clip_models(enabled: List[str], clip_models: Dict[str, Any] = {}):
 
-    import cn_clip
-    from cn_clip.clip.utils import create_model
+    import disco_diffusion_cnclip_vitb16.cn_clip as cn_clip
+    from disco_diffusion_cnclip_vitb16.cn_clip.clip.utils import create_model
 
     # load enabled models
     for k in enabled:

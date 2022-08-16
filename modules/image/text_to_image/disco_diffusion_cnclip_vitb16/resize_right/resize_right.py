@@ -3,7 +3,7 @@ from fractions import Fraction
 from math import ceil
 from typing import Tuple
 
-import interp_methods
+import disco_diffusion_cnclip_vitb16.resize_right.interp_methods as interp_methods
 
 
 class NoneClass:

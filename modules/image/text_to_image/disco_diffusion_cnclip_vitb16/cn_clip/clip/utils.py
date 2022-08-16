@@ -6,8 +6,8 @@ from typing import List
 from typing import Union
 
 import paddle
-from cn_clip.clip import _tokenizer
-from cn_clip.clip.model import CLIP
+from disco_diffusion_cnclip_vitb16.cn_clip.clip import _tokenizer
+from disco_diffusion_cnclip_vitb16.cn_clip.clip.model import CLIP
 from tqdm import tqdm
 
 __all__ = ["tokenize", "create_model", "available_models"]

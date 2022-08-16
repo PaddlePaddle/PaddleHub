@@ -5,9 +5,9 @@ from typing import Union
 import numpy as np
 import paddle
 import paddle.nn.functional as F
-from cn_clip.clip import _tokenizer
-from cn_clip.clip.configuration_bert import BertConfig
-from cn_clip.clip.modeling_bert import BertModel
+from disco_diffusion_cnclip_vitb16.cn_clip.clip import _tokenizer
+from disco_diffusion_cnclip_vitb16.cn_clip.clip.configuration_bert import BertConfig
+from disco_diffusion_cnclip_vitb16.cn_clip.clip.modeling_bert import BertModel
 from paddle import nn
 from paddle.nn import MultiHeadAttention
 
@@ -169,21 +169,13 @@ class CLIP(nn.Layer):
     ):
         super().__init__()
 
-        if isinstance(vision_layers, (tuple, list)):
-            vision_heads = vision_width * 32 // 64
-            self.visual = ModifiedResNet(layers=vision_layers,
-                                         output_dim=embed_dim,
-                                         heads=vision_heads,
-                                         input_resolution=image_resolution,
-                                         width=vision_width)
-        else:
-            vision_heads = vision_width // 64
-            self.visual = VisualTransformer(input_resolution=image_resolution,
-                                            patch_size=vision_patch_size,
-                                            width=vision_width,
-                                            layers=vision_layers,
-                                            heads=vision_heads,
-                                            output_dim=embed_dim)
+        vision_heads = vision_width // 64
+        self.visual = VisualTransformer(input_resolution=image_resolution,
+                                        patch_size=vision_patch_size,
+                                        width=vision_width,
+                                        layers=vision_layers,
+                                        heads=vision_heads,
+                                        output_dim=embed_dim)
 
         self.bert_config = BertConfig(
             vocab_size_or_config_json_file=vocab_size,
