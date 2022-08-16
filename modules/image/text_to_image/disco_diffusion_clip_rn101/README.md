@@ -3,7 +3,7 @@
 |模型名称|disco_diffusion_clip_rn101|
 | :--- | :---: |
 |类别|图像-文图生成|
-|网络|dd+clip RN101|
+|网络|dd+clip ResNet101|
 |数据集|-|
 |是否支持Fine-tuning|否|
 |模型大小|2.9GB|
@@ -28,9 +28,9 @@
 
 ### 模型介绍
 
-disco_diffusion_clip_rn101 是一个文图生成模型，可以通过输入一段文字来生成符合该句子语义的图像。该模型由两部分组成，一部分是扩散模型，是一种生成模型，可以从噪声输入中重建出原始图像。另一部分是多模态预训练模型（CLIP), 可以将文本和图像表示在同一个特征空间，相近语义的文本和图像在该特征空间里距离会更相近。在该文图生成模型中，扩散模型负责从初始噪声或者指定初始图像中来生成目标图像，CLIP负责引导生成图像的语义和输入的文本的语义尽可能接近，随着扩散模型在CLIP的引导下不断的迭代生成新图像，最终能够生成文本所描述内容的图像。该模块中使用的CLIP模型结构为RN101。
+disco_diffusion_clip_rn101 是一个文图生成模型，可以通过输入一段文字来生成符合该句子语义的图像。该模型由两部分组成，一部分是扩散模型，是一种生成模型，可以从噪声输入中重建出原始图像。另一部分是多模态预训练模型（CLIP）, 可以将文本和图像表示在同一个特征空间，相近语义的文本和图像在该特征空间里距离会更相近。在该文图生成模型中，扩散模型负责从初始噪声或者指定初始图像中来生成目标图像，CLIP负责引导生成图像的语义和输入的文本的语义尽可能接近，随着扩散模型在CLIP的引导下不断的迭代生成新图像，最终能够生成文本所描述内容的图像。该模块中使用的CLIP模型结构为ResNet101。
 
-更多详情请参考论文：[Diffusion Models Beat GANs on Image Synthesis](https://arxiv.org/abs/2105.05233) [Learning Transferable Visual Models From Natural Language Supervision](https://arxiv.org/abs/2103.00020)
+更多详情请参考论文：[Diffusion Models Beat GANs on Image Synthesis](https://arxiv.org/abs/2105.05233) 以及 [Learning Transferable Visual Models From Natural Language Supervision](https://arxiv.org/abs/2103.00020)
 
 ## 二、安装
 
