@@ -136,7 +136,7 @@ class DiscoDiffusionClip:
             if style is not None:
                 text_prompts[0] += ",{}".format(style)
             if artist is not None:
-                text_prompts[0] += ",{}，trending on artstation".format(artist)
+                text_prompts[0] += ",{},trending on artstation".format(artist)
 
         return create(text_prompts=text_prompts,
                       init_image=init_image,
