@@ -2,8 +2,8 @@
 
 |模型名称|ernie_vilg|
 | :--- | :---: |
-|类别|多模态-文图生成|
-|网络|-|
+|类别|图像-文图生成|
+|网络|ERNIE-ViLG|
 |数据集|-|
 |是否支持Fine-tuning|否|
 |模型大小|-|
@@ -58,16 +58,14 @@
 
     module = hub.Module(name="ernie_vilg")
     text_prompts = ["宁静的小镇"]
-    images = module.generate_image(text_prompts=text_prompts, style='油画', output_dir='./ernie_vilg_out/')  
+    images = module.generate_image(text_prompts=text_prompts, output_dir='./ernie_vilg_out/')  
     ```
 
 - ### 3、API
 
   - ```python
     def generate_image(
-              text_prompts: Optional[List[str]] = [
-                  "宁静的乡村"
-              ],
+              text_prompts:str,
               style: Optional[str] = "油画",
               output_dir: Optional[str] = 'ernievilg_output')
     ```
@@ -76,13 +74,14 @@
 
     - **参数**
 
-      - text_prompts(Optional[List[str]]): 输入的语句，描述想要生成的图像的内容。
-      - style(Optional[str]): 生成图像的风格，当前支持 油画、水彩画、中国画。
+      - text_prompts(str): 输入的语句，描述想要生成的图像的内容。
+      - style(Optional[str]): 生成图像的风格，当前支持'油画','水彩','粉笔画','卡通','儿童画','蜡笔画'。
+      - topk(Optional[int]): 保存前多少张图，最多保存10张。
       - output_dir(Optional[str]): 保存输出图像的目录，默认为"ernievilg_output"。
 
 
     - **返回**
-      - images(List(PIL.Image)): 返回生成的所有图像列表，PIL的Image格式，每个prompt生成10张图像。
+      - images(List(PIL.Image)): 返回生成的所有图像列表，PIL的Image格式。
 
 ## 四、更新历史
 
