@@ -42,8 +42,6 @@ class DiscoDiffusionClip:
                        text_prompts: [str],
                        style: Optional[str] = None,
                        artist: Optional[str] = None,
-                       style: Optional[str] = None,
-                       artist: Optional[str] = None,
                        init_image: Optional[str] = None,
                        width_height: Optional[List[int]] = [1280, 768],
                        skip_steps: Optional[int] = 0,
