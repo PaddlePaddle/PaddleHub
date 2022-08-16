@@ -31,6 +31,8 @@ class ErnieVilG:
                        text_prompts,
                        style: Optional[str] = "油画",
                        topk: Optional[int] = 10,
+                       ak: Optional[str] = None,
+                       sk: Optional[str] = None,
                        output_dir: Optional[str] = 'ernievilg_output'):
         """
         Create image by text prompts using ErnieVilG model.
@@ -38,12 +40,16 @@ class ErnieVilG:
         :param text_prompts: Phrase, sentence, or string of words and phrases describing what the image should look like.
         :param style: Image stype, currently supported 油画、水彩、粉笔画、卡通、儿童画、蜡笔画
         :param topk: Top k images to save.
+        :param ak: ak for applying token to request wenxin api.
+        :param sk: sk for applying token to request wenxin api.
         :output_dir: Output directory
         """
         if not os.path.exists(output_dir):
             os.makedirs(output_dir, exist_ok=True)
-        ak = 'G26BfAOLpGIRBN5XrOV2eyPA25CE01lE'
-        sk = 'txLZOWIjEqXYMU3lSm05ViW4p9DWGOWs'
+        if ak == None:
+            ak = 'G26BfAOLpGIRBN5XrOV2eyPA25CE01lE'
+        if sk == None:
+            sk = 'txLZOWIjEqXYMU3lSm05ViW4p9DWGOWs'
         token_host = 'https://wenxin.baidu.com/younger/portal/api/oauth/token'
         response = requests.get(token_host,
                                 params={
@@ -165,6 +171,8 @@ class ErnieVilG:
         results = self.generate_image(text_prompts=args.text_prompts,
                                       style=args.style,
                                       topk=args.topk,
+                                      ak=args.ak,
+                                      sk=args.sk,
                                       output_dir=args.output_dir)
         return results
 
@@ -179,4 +187,6 @@ class ErnieVilG:
                                           choices=['油画', '水彩', '粉笔画', '卡通', '儿童画', '蜡笔画'],
                                           help="绘画风格")
         self.arg_input_group.add_argument('--topk', type=int, default=10, help="选取保存前多少张图，最多10张")
+        self.arg_input_group.add_argument('--ak', type=str, default=None, help="申请文心api使用token的ak")
+        self.arg_input_group.add_argument('--sk', type=str, default=None, help="申请文心api使用token的sk")
         self.arg_input_group.add_argument('--output_dir', type=str, default='ernievilg_output')
