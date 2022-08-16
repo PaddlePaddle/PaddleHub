@@ -2,7 +2,7 @@
 
 |模型名称|disco_diffusion_clip_vitb32|
 | :--- | :---: |
-|类别|多模态-文图生成|
+|类别|图像-文图生成|
 |网络|dd+clip ViTB32|
 |数据集|-|
 |是否支持Fine-tuning|否|
