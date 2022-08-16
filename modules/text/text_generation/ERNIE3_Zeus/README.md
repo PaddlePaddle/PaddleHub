@@ -1,42 +1,101 @@
-## 概述
-ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。
+# ERNIE3_Zeus
 
-其除了对无标注数据和知识图谱的学习之外，还通过持续学习对百余种不同形式的任务数据学习。
+|模型名称|ERNIE3_Zeus|
+| :--- | :---: |
+|类别|文本-文本生成|
+|网络|-|
+|数据集|-|
+|是否支持Fine-tuning|否|
+|模型大小|-|
+|最新更新日期|2022-08-16|
+|数据指标|-|
 
-实现了任务知识增强，显著提升了模型的零样本/小样本学习能力。
+## 一、模型基本信息
+### 应用效果展示
+* 作文创作：
+    * 作文标题：可为与有为 
+    
+    * 题目内容：当今社会竞争加剧，每人身上压力倍增，于是乎，“躺平”成了话语，“佛系”成了主义。仰望星空的眼神逐渐空洞，低头专注的仅仅是尺寸之间，这些“万事不可为”之信念确乎不该是我们青年一辈所应有所该有。请谨记，相信“可为”才能实现梦想，坚持“有为”才能书写华章。
 
-更多详情参考 [文心大模型官网](https://wenxin.baidu.com/wenxin) 及 [ERNIE 3.0 Zeus 项目主页](https://wenxin.baidu.com/wenxin/modelbasedetail/ernie3_zeus)。
+    * 作文：当今社会竞争加剧，每人身上压力倍增，于是乎，“躺平”成为话语，“佛系”成为主义。仰望星空的眼神逐渐空洞，低头专注的仅仅是尺寸之间，这些“万事不可为”之信念确乎不该是我们青年一辈所应有所该有。请谨记，相信“可为”才能实现梦想，坚持“有为”才能书写华章。相信“可为”才能实现梦想——“可为”才能成就梦想。古往今来，人类的梦想从没有停止变换过。
 
-## 安装
-```bash
-$ hub install ERNIE3_Zeus
-```
+* 文案创作：
+    * 产品：护手霜
 
-## 使用申请
-请前往 [文心旸谷社区](https://wenxin.baidu.com/younger/apiDetail?id=20006) 申请使用本模型所需的 API key 和 Secret Key。
+    * 文案：这款护手霜质地非常的轻薄水润，涂开后能很快滋润皮肤，不油腻，很滋润，还不会长脂肪颗粒，不会有粘黏感，用过后很干爽，还不会有黏腻感。
 
-## API 列表
+### 模型介绍
+* ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。
 
-|功能|名称|
-|:-:|:-:|
-|自定义生成|custom_generation|
-|作文创作|article_creation|
-|文案创作|copywriting_creation|
-|摘要生成|text_summarization|
-|问题生成|question_generation|
-|古诗创作|poetry_creation|
-|对联续写|couplet_continuation|
-|自由问答|answer_generation|
-|小说续写|article_continuation|
-|情感分析|sentiment_classification|
-|信息抽取|information_extraction|
-|同义改写|synonymous_rewriting|
-|文本匹配|semantic_matching|
-|文本纠错|text_correction|
-|完形填空|text_cloze|
-|Text2SQL|text2SQL|
+* 其除了对无标注数据和知识图谱的学习之外，还通过持续学习对百余种不同形式的任务数据学习。
 
-## API
+* 实现了任务知识增强，显著提升了模型的零样本/小样本学习能力。
+
+* 更多详情参考 [文心大模型官网](https://wenxin.baidu.com/wenxin) 及 [ERNIE 3.0 Zeus 项目主页](https://wenxin.baidu.com/wenxin/modelbasedetail/ernie3_zeus)。
+
+## 二、安装
+### 1、环境依赖
+* paddlepaddle >= 2.0.0
+
+* paddlehub >= 2.2.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+
+### 2、安装
+  - ```shell
+    $ hub install ERNIE3_Zeus
+    ```
+
+* 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+
+### 3. 使用申请
+* 请前往 [文心旸谷社区](https://wenxin.baidu.com/moduleApi/key) 申请使用本模型所需的 API key 和 Secret Key。
+
+
+## 三、模型 API 预测
+### 1. 命令行预测
+
+- ```bash
+  # 作文创作
+  $ hub run ERNIE3_Zeus \
+        --task article_creation \
+        --api_key [api_key] \
+        --secret_key [secret_key] \
+        --text '可为与有为' '当今社会竞争加剧，每人身上压力倍增，于是乎，“躺平”成了话语，“佛系”成了主义。仰望星空的眼神逐渐空洞，低头专注的仅仅是尺寸之间，这些“万事不可为”之信念确乎不该是我们青年一辈所应有所该有。请谨记，相信“可为”才能实现梦想，坚持“有为”才能书写华章。'
+    ```
+
+        当今社会竞争加剧，每人身上压力倍增，于是乎，“躺平”成为话语，“佛系”成为主义。仰望星空的眼神逐渐空洞，低头专注的仅仅是尺寸之间，这些“万事不可为”之信念确乎不该是我们青年一辈所应有所该有。请谨记，相信“可为”才能实现梦想，坚持“有为”才能书写华章。相信“可为”才能实现梦想——“可为”才能成就梦想。古往今来，人类的梦想从没有停止变换过。
+
+- **参数**
+    * --task(str): API 名称如 “copywriting_creation”、“article_creation” 等。
+    * --text(List[str]): 输入文本可根据 API 需要速入一段或两段文本，以空格做切分。
+    * 其他参数与自定义文本生成 API 相同。
+
+### 2. 预测代码示例
+- ```python
+    import paddlehub as hub
+
+    # 加载模型
+    ERNIE3_Zeus = hub.Module(name='ERNIE3_Zeus')
+
+    # 设置 api_key / secret_key
+    api_key = [api_key]
+    secret_key = [secret_key]
+    
+    # 作文创作
+    title = '可为与有为'
+    context = '当今社会竞争加剧，每人身上压力倍增，于是乎，“躺平”成了话语，“佛系”成了主义。仰望星空的眼神逐渐空洞，低头专注的仅仅是尺寸之间，这些“万事不可为”之信念确乎不该是我们青年一辈所应有所该有。请谨记，相信“可为”才能实现梦想，坚持“有为”才能书写华章。'
+    article = ERNIE3_Zeus.article_creation(
+        api_key=api_key,
+        secret_key=secret_key,
+        text=[title, context]
+    )
+
+    print(article)
+    ```
+    当今社会竞争加剧，每人身上压力倍增，于是乎，“躺平”成为话语，“佛系”成为主义。仰望星空的眼神逐渐空洞，低头专注的仅仅是尺寸之间，这些“万事不可为”之信念确乎不该是我们青年一辈所应有所该有。请谨记，相信“可为”才能实现梦想，坚持“有为”才能书写华章。相信“可为”才能实现梦想——“可为”才能成就梦想。古往今来，人类的梦想从没有停止变换过。
+
+
+### 3. API
 ```python
 def custom_generation(
     api_key: str, 
@@ -359,60 +418,11 @@ Text2SQL API
 **返回**
 * text(str): 生成的 SQL 语句。
 
-## 代码示例
-```python
-import paddlehub as hub
+## 四、更新历史
+* 1.0.0 
 
-ERNIE3_Zeus = hub.Module(name='ERNIE3_Zeus')
+  初始发布
 
-api_key = [api_key]
-secret_key = [secret_key]
-
-article = ERNIE3_Zeus.article_creation(
-    api_key=api_key,
-    secret_key=secret_key,
-    text=['可为与有为', '当今社会竞争加剧，每人身上压力倍增，于是乎，“躺平”成了话语，“佛系”成了主义。仰望星空的眼神逐渐空洞，低头专注的仅仅是尺寸之间，这些“万事不可为”之信念确乎不该是我们青年一辈所应有所该有。请谨记，相信“可为”才能实现梦想，坚持“有为”才能书写华章。']
-)
-
-copywriting = ERNIE3_Zeus.copywriting_creation(
-    api_key=api_key,
-    secret_key=secret_key,
-    text='护手霜'
-)
-
-print(article)
-print(copywriting)
-```
-    当今社会竞争加剧，每人身上压力倍增，于是乎，“躺平”成为话语，“佛系”成为主义。仰望星空的眼神逐渐空洞，低头专注的仅仅是尺寸之间，这些“万事不可为”之信念确乎不该是我们青年一辈所应有所该有。请谨记，相信“可为”才能实现梦想，坚持“有为”才能书写华章。相信“可为”才能实现梦想——“可为”才能成就梦想。古往今来，人类的梦想从没有停止变换过。
-
-    这款护手霜质地非常的轻薄水润，涂开后能很快滋润皮肤，不油腻，很滋润，还不会长脂肪颗粒，不会有粘黏感，用过后很干爽，还不会有黏腻感。
-
-## 命令行使用
-```bash
-# 作文创作
-$ hub run ERNIE3_Zeus \
-    --task article_creation \
-    --api_key [api_key] \
-    --secret_key [secret_key] \
-    --text '可为与有为' '当今社会竞争加剧，每人身上压力倍增，于是乎，“躺平”成了话语，“佛系”成了主义。仰望星空的眼神逐渐空洞，低头专注的仅仅是尺寸之间，这些“万事不可为”之信念确乎不该是我们青年一辈所应有所该有。请谨记，相信“可为”才能实现梦想，坚持“有为”才能书写华章。'
-```
-
-    当今社会竞争加剧，每人身上压力倍增，于是乎，“躺平”成为话语，“佛系”成为主义。仰望星空的眼神逐渐空洞，低头专注的仅仅是尺寸之间，这些“万事不可为”之信念确乎不该是我们青年一辈所应有所该有。请谨记，相信“可为”才能实现梦想，坚持“有为”才能书写华章。相信“可为”才能实现梦想——“可为”才能成就梦想。古往今来，人类的梦想从没有停止变换过。
-
-```bash
-# 文案创作
-$ hub run ERNIE3_Zeus \
-    --task copywriting_creation \
-    --api_key [api_key] \
-    --secret_key [secret_key] \
-    --text '护手霜'
-```
-    这款护手霜质地非常的轻薄水润，涂开后能很快滋润皮肤，不油腻，很滋润，还不会长脂肪颗粒，不会有粘黏感，用过后很干爽，还不会有黏腻感。
-
-**参数**
-* --task(str): API 名称如 “copywriting_creation”、“article_creation” 等。
-* --text(List[str]): 输入文本可根据 API 需要速入一段或两段文本，以空格做切分。
-* 其他参数与自定义文本生成 API 相同。
-
-## 依赖
-paddlehub >= 2.2.0
+  ```shell
+  $ hub install ERNIE3_Zeus == 1.0.0
+  ```
