@@ -96,6 +96,7 @@ disco_diffusion_ernievil_base 是一个文图生成模型，可以通过输入�
       - text_prompts(str): 输入的语句，描述想要生成的图像的内容。通常比较有效的构造方式为 "一段描述性的文字内容" + "指定艺术家的名字"，如"孤舟蓑笠翁，独钓寒江雪。风格如齐白石所作"。
       - style(Optional[str]): 指定绘画的风格，如水墨画、油画、水彩画等。当不指定时，风格完全由您所填写的prompt决定。
       - artist(Optional[str]): 指定特定的艺术家，如齐白石、Greg Rutkowsk，将会生成所指定艺术家的绘画风格。当不指定时，风格完全由您所填写的prompt决定。各种艺术家的风格可以参考[网站](https://weirdwonderfulai.art/resources/disco-diffusion-70-plus-artist-studies/)。
+      - width_height(Optional[List[int]]): 指定最终输出图像的宽高，宽和高都需要是64的倍数，生成的图像越大，所需要的计算时间越长。
       - seed(Optional[int]): 随机种子，由于输入默认是随机高斯噪声，设置不同的随机种子会由不同的初始输入，从而最终生成不同的结果，可以设置该参数来获得不同的输出图像。
       - output_dir(Optional[str]): 保存输出图像的目录，默认为"disco_diffusion_ernievil_base_out"。
 
