@@ -67,8 +67,8 @@ class ErnieVilG:
             raise RuntimeError("Request access token error.")
 
         token = res['data']
-        create_url = 'https://wenxin.baidu.com/younger/portal/api/rest/1.0/ernievilg/v1/txt2img'
-        get_url = 'https://wenxin.baidu.com/younger/portal/api/rest/1.0/ernievilg/v1/getImg'
+        create_url = 'https://wenxin.baidu.com/younger/portal/api/rest/1.0/ernievilg/v1/txt2img?from=paddlehub'
+        get_url = 'https://wenxin.baidu.com/younger/portal/api/rest/1.0/ernievilg/v1/getImg?from=paddlehub'
         if isinstance(text_prompts, str):
             text_prompts = [text_prompts]
         taskids = []
