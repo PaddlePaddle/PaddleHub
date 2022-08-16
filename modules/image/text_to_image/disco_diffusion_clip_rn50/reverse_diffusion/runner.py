@@ -7,7 +7,7 @@ import os
 import random
 from threading import Thread
 
-import disco_diffusion_clip_rn101.clip.clip as clip
+import disco_diffusion_clip_rn50.clip.clip as clip
 import numpy as np
 import paddle
 import paddle.vision.transforms as T
