@@ -1,12 +1,12 @@
+from email.policy import default
 import json
 import argparse
-from typing import List
 
 import requests
 from paddlehub.module.module import moduleinfo, runnable
 
 
-def get_access_token(api_key: str, secret_key: str) -> str:
+def get_access_token(api_key: str = '', secret_key: str = '') -> str:
     '''
     Get Access Token
 
@@ -27,7 +27,11 @@ def get_access_token(api_key: str, secret_key: str) -> str:
         'client_secret': secret_key if secret_key != '' else 'txLZOWIjEqXYMU3lSm05ViW4p9DWGOWs'
     }
 
-    results = json.loads(requests.post(url, datas, headers=headers).text)
+    responses = requests.post(url, datas, headers=headers)
+
+    assert responses.status_code == 200, f"Network Error {responses.status_code}."
+
+    results = json.loads(responses.text)
 
     assert results['msg'] == 'success', f"Error message: '{results['msg']}'. Please check the api_key and secret_key."
 
@@ -43,262 +47,283 @@ def get_access_token(api_key: str, secret_key: str) -> str:
     version='1.0.0'
 )
 class ERNIE3Zeus:
-    @staticmethod
-    def custom_generation(text: str, seq_len: int = 256, task_prompt: str = '', dataset_prompt: str = '', topk: int = 10,
-                          temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                          is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
+    def __init__(self, api_key: str = '', secret_key: str = '') -> None:
+        self.access_token = get_access_token(api_key, secret_key)
+
+    def custom_generation(self,
+                          text: str,
+                          min_dec_len: int = 1,
+                          seq_len: int = 128,
+                          topp: float = 1.0,
+                          penalty_score: float = 1.0,
+                          stop_token: str = '',
+                          task_prompt: str = '',
+                          penalty_text: str = '',
+                          choice_text: str = '',
+                          is_unidirectional: bool = False,
+                          min_dec_penalty_text: str = '',
+                          logits_bias: int = -10000,
+                          mask_type: str = 'word') -> str:
         '''
         ERNIE 3.0 Zeus 自定义接口
 
         Params:
-            text(srt): 输入内容, 长度不超过 1000。
-            seq_len(int): 输出内容最大长度, 长度不超过 1000。
-            task_prompt(str): 任务类型的模板。
-            dataset_prompt(str): 数据集类型的模板。
-            topk(int): topk采样, 取值 > 1, 默认为 10。每步的生成的结果从 topk 的概率值分布中采样。其中 topk = 1 表示贪婪采样, 每次生成结果固定。
-            temperature(float): 温度系数, 取值 > 0.0, 默认为 1.0。更大的温度系数表示模型生成的多样性更强。
-            penalty_score(float): 重复惩罚。取值 >= 1.0, 默认为 1.0。通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。
-            penalty_text(str): 惩罚文本, 默认为空。模型无法生成该字符串中的 token。通过设置该值, 可以减少某些冗余与异常字符的生成。
-            choice_text(str): 候选文本, 默认为空。模型只能生成该字符串中的 token 的组合。通过设置该值, 可以对某些抽取式任务进行定向调优。
-            stop_token(str): 提前结束符, 默认为空。预测结果解析时使用的结束字符, 碰到对应字符则直接截断并返回。可以通过设置该值, 过滤掉 few-shot 等场景下模型重复的 cases。
-            is_unidirectional(bool): 单双向控制开关, 取值 0 或者 1, 默认为 0。0 表示模型为双向生成, 1 表示模型为单向生成。建议续写与 few-shot 等通用场景建议采用单向生成方式, 而完型填空等任务相关场景建议采用双向生成方式。
-            min_dec_len(int): 最小生成长度, 取值 >= 1, 默认为 1。开启后会屏蔽掉 END 结束符号, 让模型生成至指定的最小长度。
-            min_dec_penalty_text(str): 默认为空, 与最小生成长度搭配使用, 可以在 min_dec_len 步前不让模型生成该字符串中的 tokens。
             api_key(str): API Key。
             secret_key(str): Secret Key。
+            text(srt): 模型的输入文本, 为 prompt 形式的输入。注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512。
+            min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围。
+            seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+            topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。
+            penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。
+            stop_token(str): 预测结果解析时使用的结束字符串, 碰到对应字符串则直接截断并返回。可以通过设置该值, 过滤掉 few-shot 等场景下模型重复的 cases。
+            task_prompt(str): 指定预置的任务模板, 效果更好。
+                              PARAGRAPH: 引导模型生成一段文章; SENT: 引导模型生成一句话; ENTITY: 引导模型生成词组; 
+                              Summarization: 摘要; MT: 翻译; Text2Annotation: 抽取; Correction: 纠错; 
+                              QA_MRC: 阅读理解; Dialogue: 对话; QA_Closed_book: 闭卷问答; QA_Multi_Choice: 多选问答; 
+                              QuestionGeneration: 问题生成; Paraphrasing: 复述; NLI: 文本蕴含识别; SemanticMatching: 匹配; 
+                              Text2SQL: 文本描述转SQL; TextClassification: 文本分类; SentimentClassification: 情感分析; 
+                              zuowen: 写作文; adtext: 写文案; couplet: 对对联; novel: 写小说; cloze: 文本补全; Misc: 其它任务。
+            penalty_text(str): 模型会惩罚该字符串中的 token。通过设置该值, 可以减少某些冗余与异常字符的生成。
+            choice_text(str): 模型只能生成该字符串中的 token 的组合。通过设置该值, 可以对某些抽取式任务进行定向调优。
+            is_unidirectional(bool): False 表示模型为双向生成, True 表示模型为单向生成。建议续写与 few-shot 等通用场景建议采用单向生成方式, 而完型填空等任务相关场景建议采用双向生成方式。
+            min_dec_penalty_text(str): 与最小生成长度搭配使用, 可以在 min_dec_len 步前不让模型生成该字符串中的 tokens。
+            logits_bias(int): 配合 penalty_text 使用, 对给定的 penalty_text 中的 token 增加一个 logits_bias, 可以通过设置该值屏蔽某些 token 生成的概率。
+            mask_type(str): 设置该值可以控制模型生成粒度。可选参数为 word, sentence, paragraph。
 
         Return: 
             text(str): 生成的文本
         '''
-        access_token = get_access_token(api_key, secret_key)
-
-        url = 'https://wenxin.baidu.com/younger/portal/api/rest/1.0/ernie/3.0/zeus'
+        url = 'https://wenxin.baidu.com/moduleApi/portal/api/rest/1.0/ernie/3.0.28/zeus?from=paddlehub'
+        access_token = self.access_token
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         datas = {
             'access_token': access_token,
             'text': text,
+            'min_dec_len': min_dec_len,
             'seq_len': seq_len,
-            'task_prompt': task_prompt,
-            'dataset_prompt': dataset_prompt,
-            'topk': topk,
-            'temperature': temperature,
+            'topp': topp,
             'penalty_score': penalty_score,
+            'stop_token': stop_token,
+            'task_prompt': task_prompt,
             'penalty_text': penalty_text,
             'choice_text': choice_text,
-            'stop_token': stop_token,
             'is_unidirectional': int(is_unidirectional),
-            'min_dec_len': min_dec_len,
-            'min_dec_penalty_text': min_dec_penalty_text
+            'min_dec_penalty_text': min_dec_penalty_text,
+            'logits_bias': logits_bias,
+            'mask_type': mask_type,
         }
 
         info = datas.copy()
         info.pop('access_token')
-        print(json.dumps(info, ensure_ascii=False, indent=4))
 
-        results = json.loads(requests.post(url, datas, headers=headers).text)
+        responses = requests.post(url, datas, headers=headers)
+
+        assert responses.status_code == 200, f"Network Error {responses.status_code}."
+
+        results = json.loads(responses.text)
 
         assert results['code'] == 0, f"Error message: '{results['msg']}'."
 
         return results['data']['result']
 
-    def article_creation(self, text: List[str], seq_len: int = 256, task_prompt: str = '', dataset_prompt: str = 'zuowen', topk: int = 10,
-                         temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                         is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
+    def text_generation(self,
+                        text: str,
+                        min_dec_len: int = 4,
+                        seq_len: int = 512,
+                        topp: float = 0.9,
+                        penalty_score: float = 1.2,
+                        stop_token: str = '',
+                        task_prompt: str = 'PARAGRAPH',
+                        penalty_text: str = '[{[gEND]',
+                        choice_text: str = '',
+                        is_unidirectional: bool = True,
+                        min_dec_penalty_text: str = '。？：！[<S>]',
+                        logits_bias: int = -10,
+                        mask_type: str = 'paragraph') -> str:
         '''
-        ERNIE 3.0 Zeus 作文创作
+        文本生成
         '''
-        assert len(text) == 2, 'text num should be equal to 2.'
-        text = f'作文题目：{text[0]} 题目内容：{text[1]} 作文内容：'
         return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
+            text,  min_dec_len, seq_len, topp, penalty_score,
+            stop_token, task_prompt, penalty_text, choice_text,
+            is_unidirectional, min_dec_penalty_text, logits_bias,
+            mask_type
         )
 
-    def copywriting_creation(self, text: str, seq_len: int = 256, task_prompt: str = '', dataset_prompt: str = '', topk: int = 10,
-                             temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                             is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
+    def text_summarization(self,
+                           text: str,
+                           min_dec_len: int = 4,
+                           seq_len: int = 512,
+                           topp: float = 0.0,
+                           penalty_score: float = 1.0,
+                           stop_token: str = '',
+                           task_prompt: str = 'Summarization',
+                           penalty_text: str = '',
+                           choice_text: str = '',
+                           is_unidirectional: bool = False,
+                           min_dec_penalty_text: str = '',
+                           logits_bias: int = -10000,
+                           mask_type: str = 'word') -> str:
         '''
-        ERNIE 3.0 Zeus 文案创作
+        摘要生成
         '''
-        text = f'产品：{text} 文案：'
+        text = "文章：{} 摘要：".format(text)
         return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
+            text,  min_dec_len, seq_len, topp, penalty_score,
+            stop_token, task_prompt, penalty_text, choice_text,
+            is_unidirectional, min_dec_penalty_text, logits_bias,
+            mask_type
         )
 
-    def text_summarization(self, text: str, seq_len: int = 256, task_prompt: str = 'Summarization', dataset_prompt: str = '', topk: int = 10,
-                           temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                           is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
+    def copywriting_generation(self,
+                               text: str,
+                               min_dec_len: int = 32,
+                               seq_len: int = 512,
+                               topp: float = 0.9,
+                               penalty_score: float = 1.2,
+                               stop_token: str = '',
+                               task_prompt: str = 'adtext',
+                               penalty_text: str = '',
+                               choice_text: str = '',
+                               is_unidirectional: bool = False,
+                               min_dec_penalty_text: str = '',
+                               logits_bias: int = -10000,
+                               mask_type: str = 'word') -> str:
         '''
-        ERNIE 3.0 Zeus 摘要生成
+        文案生成
         '''
-        text = f'请给下面这段话写一句摘要："{text}"'
+        text = "标题：{} 文案：".format(text)
         return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
+            text,  min_dec_len, seq_len, topp, penalty_score,
+            stop_token, task_prompt, penalty_text, choice_text,
+            is_unidirectional, min_dec_penalty_text, logits_bias,
+            mask_type
         )
 
-    def question_generation(self, text: str, seq_len: int = 256, task_prompt: str = 'QuestionGeneration', dataset_prompt: str = '', topk: int = 10,
-                            temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                            is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
+    def noval_continuation(self,
+                           text: str,
+                           min_dec_len: int = 2,
+                           seq_len: int = 512,
+                           topp: float = 0.9,
+                           penalty_score: float = 1.2,
+                           stop_token: str = '',
+                           task_prompt: str = 'gPARAGRAPH',
+                           penalty_text: str = '',
+                           choice_text: str = '',
+                           is_unidirectional: bool = True,
+                           min_dec_penalty_text: str = '。？：！[<S>]',
+                           logits_bias: int = -5,
+                           mask_type: str = 'paragraph') -> str:
         '''
-        ERNIE 3.0 Zeus 问题生成
+        小说续写
         '''
-        text = f'文本：{text} 提问：'
+        text = "上文：{} 下文：".format(text)
         return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
+            text,  min_dec_len, seq_len, topp, penalty_score,
+            stop_token, task_prompt, penalty_text, choice_text,
+            is_unidirectional, min_dec_penalty_text, logits_bias,
+            mask_type
         )
 
-    def poetry_creation(self, text: str, seq_len: int = 256, task_prompt: str = '', dataset_prompt: str = 'poetry', topk: int = 10,
-                        temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                        is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
+    def answer_generation(self,
+                          text: str,
+                          min_dec_len: int = 2,
+                          seq_len: int = 512,
+                          topp: float = 0.9,
+                          penalty_score: float = 1.2,
+                          stop_token: str = '',
+                          task_prompt: str = 'qa',
+                          penalty_text: str = '[gEND]',
+                          choice_text: str = '',
+                          is_unidirectional: bool = True,
+                          min_dec_penalty_text: str = '。？：！[<S>]',
+                          logits_bias: int = -5,
+                          mask_type: str = 'paragraph') -> str:
         '''
-        ERNIE 3.0 Zeus 古诗创作
+        自由问答
         '''
-        assert len(text) == 2, 'text num should be equal to 2.'
-        text = f'古诗题目：{text[0]} 内容：{text[1]}'
+        text = "问题：{} 回答：".format(text)
         return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
+            text,  min_dec_len, seq_len, topp, penalty_score,
+            stop_token, task_prompt, penalty_text, choice_text,
+            is_unidirectional, min_dec_penalty_text, logits_bias,
+            mask_type
         )
 
-    def couplet_continuation(self, text: str, seq_len: int = 256, task_prompt: str = '', dataset_prompt: str = 'couplet', topk: int = 10,
-                             temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                             is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
+    def couplet_continuation(self,
+                             text: str,
+                             min_dec_len: int = 2,
+                             seq_len: int = 512,
+                             topp: float = 0.9,
+                             penalty_score: float = 1.0,
+                             stop_token: str = '',
+                             task_prompt: str = 'couplet',
+                             penalty_text: str = '',
+                             choice_text: str = '',
+                             is_unidirectional: bool = False,
+                             min_dec_penalty_text: str = '',
+                             logits_bias: int = -10000,
+                             mask_type: str = 'word') -> str:
         '''
-        ERNIE 3.0 Zeus 对联续写
+        对联续写
         '''
-        text = f'上联:{text} 下联:'
+        text = "上联：{} 下联：".format(text)
         return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
+            text,  min_dec_len, seq_len, topp, penalty_score,
+            stop_token, task_prompt, penalty_text, choice_text,
+            is_unidirectional, min_dec_penalty_text, logits_bias,
+            mask_type
         )
 
-    def answer_generation(self, text: str, seq_len: int = 256, task_prompt: str = '', dataset_prompt: str = '', topk: int = 10,
-                          temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                          is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
+    def composition_generation(self,
+                               text: str,
+                               min_dec_len: int = 128,
+                               seq_len: int = 512,
+                               topp: float = 0.9,
+                               penalty_score: float = 1.2,
+                               stop_token: str = '',
+                               task_prompt: str = 'zuowen',
+                               penalty_text: str = '',
+                               choice_text: str = '',
+                               is_unidirectional: bool = False,
+                               min_dec_penalty_text: str = '',
+                               logits_bias: int = -10000,
+                               mask_type: str = 'word') -> str:
         '''
-        ERNIE 3.0 Zeus 自由问答
+        作文创作
         '''
-        text = f'问题：{text} 回答：'
+        text = "作文题目：{} 正文：".format(text)
         return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
+            text,  min_dec_len, seq_len, topp, penalty_score,
+            stop_token, task_prompt, penalty_text, choice_text,
+            is_unidirectional, min_dec_penalty_text, logits_bias,
+            mask_type
         )
 
-    def article_continuation(self, text: str, seq_len: int = 256, task_prompt: str = '', dataset_prompt: str = '', topk: int = 10,
-                             temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                             is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
+    def text_cloze(self,
+                   text: str,
+                   min_dec_len: int = 1,
+                   seq_len: int = 512,
+                   topp: float = 0.9,
+                   penalty_score: float = 1.0,
+                   stop_token: str = '',
+                   task_prompt: str = 'cloze',
+                   penalty_text: str = '',
+                   choice_text: str = '',
+                   is_unidirectional: bool = False,
+                   min_dec_penalty_text: str = '',
+                   logits_bias: int = -10000,
+                   mask_type: str = 'word') -> str:
         '''
-        ERNIE 3.0 Zeus 小说续写
-        '''
-        text = f'上文：{text} 下文：'
-        return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
-        )
-
-    def sentiment_classification(self, text: str, seq_len: int = 256, task_prompt: str = 'SentimentClassification', dataset_prompt: str = '', topk: int = 10,
-                                 temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                                 is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
-        '''
-        ERNIE 3.0 Zeus 情感分析
-        '''
-        text = f'下面这个评价是正面还是负面的？"{text}"'
-        return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
-        )
-
-    def information_extraction(self, text: List[str], seq_len: int = 256, task_prompt: str = 'QA_MRC', dataset_prompt: str = '', topk: int = 10,
-                               temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                               is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
-        '''
-        ERNIE 3.0 Zeus 信息抽取
-        '''
-        assert len(text) == 2, 'text num should be equal to 2.'
-        text = f'"{text[0]}"，问："{text[1]}"，答：'
-        return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
-        )
-
-    def synonymous_rewriting(self, text: str, seq_len: int = 256, task_prompt: str = 'Paraphrasing', dataset_prompt: str = '', topk: int = 10,
-                             temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                             is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
-        '''
-        ERNIE 3.0 Zeus 同义改写
-        '''
-        text = f'"{text}"的另一种说法是：'
-        return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
-        )
-
-    def semantic_matching(self, text: List[str], seq_len: int = 256, task_prompt: str = 'SemanticMatching', dataset_prompt: str = '', topk: int = 10,
-                          temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                          is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
-        '''
-        ERNIE 3.0 Zeus 文本匹配
-        '''
-        assert len(text) == 2, 'text num should be equal to 2.'
-        text = f'如果说"{text[0]}"可不可以认为"{text[1]}"？ '
-        return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
-        )
-
-    def text_correction(self, text: str, seq_len: int = 256, task_prompt: str = 'Correction', dataset_prompt: str = '', topk: int = 10,
-                        temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                        is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
-        '''
-        ERNIE 3.0 Zeus 文本纠错
-        '''
-        text = f'改正下面文本中的错误：“{text}”'
-        return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
-        )
-
-    def text_cloze(self, text: str, seq_len: int = 256, task_prompt: str = '', dataset_prompt: str = '', topk: int = 10,
-                   temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                   is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
-        '''
-        ERNIE 3.0 Zeus 完形填空
+        完形填空
         '''
         return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
-        )
-
-    def text2SQL(self, text: str, seq_len: int = 256, task_prompt: str = 'Text2SQL', dataset_prompt: str = '', topk: int = 10,
-                 temperature: float = 1.0, penalty_score: float = 1.0, penalty_text: str = '',  choice_text: str = '', stop_token: str = '',
-                 is_unidirectional: bool = False, min_dec_len: int = 1, min_dec_penalty_text: str = '', api_key: str = '', secret_key: str = '') -> str:
-        '''
-        ERNIE 3.0 Zeus 文本转 SQL 语句
-        '''
-        text = f'问题：{text}。 把这个问题转化成SQL语句：'
-        return self.custom_generation(
-            text, seq_len, task_prompt, dataset_prompt, topk,
-            temperature, penalty_score, penalty_text,  choice_text, stop_token,
-            is_unidirectional, min_dec_len, min_dec_penalty_text, api_key, secret_key
+            text,  min_dec_len, seq_len, topp, penalty_score,
+            stop_token, task_prompt, penalty_text, choice_text,
+            is_unidirectional, min_dec_penalty_text, logits_bias,
+            mask_type
         )
 
     @runnable
@@ -309,31 +334,101 @@ class ERNIE3Zeus:
             usage='%(prog)s',
             add_help=True)
 
-        parser.add_argument('--task', type=str, default='custom_generation')
-        parser.add_argument('--text', type=str, required=True, nargs='+')
-        parser.add_argument('--seq_len', type=int, default=256)
-        parser.add_argument('--task_prompt', type=str, default='')
-        parser.add_argument('--dataset_prompt', type=str, default='')
-        parser.add_argument('--topk', type=int, default=10)
-        parser.add_argument('--temperature', type=float, default=1.0)
+        parser.add_argument('--text', type=str, required=True)
+        parser.add_argument('--min_dec_len', type=int, default=1)
+        parser.add_argument('--seq_len', type=int, default=128)
+        parser.add_argument('--topp', type=float, default=1.0)
         parser.add_argument('--penalty_score', type=float, default=1.0)
+        parser.add_argument('--stop_token', type=str, default='')
+        parser.add_argument('--task_prompt', type=str, default='')
         parser.add_argument('--penalty_text', type=str, default='')
         parser.add_argument('--choice_text', type=str, default='')
-        parser.add_argument('--stop_token', type=str, default='')
         parser.add_argument('--is_unidirectional', type=bool, default=False)
-        parser.add_argument('--min_dec_len', type=int, default=1)
         parser.add_argument('--min_dec_penalty_text', type=str, default='')
+        parser.add_argument('--logits_bias', type=int, default=-10000)
+        parser.add_argument('--mask_type', type=str, default='word')
         parser.add_argument('--api_key', type=str, default='')
         parser.add_argument('--secret_key', type=str, default='')
+        parser.add_argument('--task', type=str, default='custom_generation')
+
+        default_kwargs = {
+            'min_dec_len': 1,
+            'seq_len': 128,
+            'topp': 1.0,
+            'penalty_score': 1.0,
+            'stop_token': '',
+            'task_prompt': '',
+            'penalty_text': '',
+            'choice_text': '',
+            'is_unidirectional': False,
+            'min_dec_penalty_text': '',
+            'logits_bias': -10000,
+            'mask_type': 'word'
+        }
 
         args = parser.parse_args(argvs)
 
         func = getattr(self, args.task)
+        
+        if (args.api_key != '') and (args.secret_key != ''):
+            self.access_token = get_access_token(args.api_key, args.secret_key)
 
         kwargs = vars(args)
         kwargs.pop('task')
+        kwargs.pop('api_key')
+        kwargs.pop('secret_key')
 
-        if len(kwargs['text']) == 1:
-            kwargs['text'] = kwargs['text'][0]
+        for k in default_kwargs.keys():
+            if kwargs[k] == default_kwargs[k]:
+                kwargs.pop(k)
 
         return func(**kwargs)
+
+
+if __name__ == '__main__':
+    ernie3_zeus = ERNIE3Zeus()
+
+    result = ernie3_zeus.custom_generation(
+        '你好，'
+    )
+    print(result)
+
+    result = ernie3_zeus.text_generation(
+        '给宠物猫起一些可爱的名字。名字：'
+    )
+    print(result)
+
+    result = ernie3_zeus.text_summarization(
+        '在芬兰、瑞典提交“入约”申请近一个月来，北约成员国内部尚未对此达成一致意见。与此同时，俄罗斯方面也多次对北约“第六轮扩张”发出警告。据北约官网显示，北约秘书长斯托尔滕贝格将于本月12日至13日出访瑞典和芬兰，并将分别与两国领导人进行会晤。'
+    )
+    print(result)
+
+    result = ernie3_zeus.copywriting_generation(
+        '芍药香氛的沐浴乳'
+    )
+    print(result)
+
+    result = ernie3_zeus.noval_continuation(
+        '昆仑山可以说是天下龙脉的根源，所有的山脉都可以看作是昆仑的分支。这些分出来的枝枝杈杈，都可以看作是一条条独立的龙脉。'
+    )
+    print(result)
+
+    result = ernie3_zeus.answer_generation(
+        '交朋友的原则是什么？'
+    )
+    print(result)
+
+    result = ernie3_zeus.couplet_continuation(
+        '五湖四海皆春色'
+    )
+    print(result)
+
+    result = ernie3_zeus.composition_generation(
+        '诚以养德，信以修身'
+    )
+    print(result)
+
+    result = ernie3_zeus.text_cloze(
+        '她有着一双[MASK]的眼眸。'
+    )
+    print(result)
