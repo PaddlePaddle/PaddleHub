@@ -32,8 +32,8 @@ logger = _get_logger()
 
 def load_clip_models(enabled: List[str], clip_models: Dict[str, Any] = {}):
 
-    import clip
-    from clip import build_model, tokenize, transform
+    import disco_diffusion_clip_rn50.clip.clip as clip
+    from disco_diffusion_clip_rn50.clip.clip import build_model, tokenize, transform
 
     # load enabled models
     for k in enabled:
