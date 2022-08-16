@@ -1,4 +1,3 @@
-from email.policy import default
 import json
 import argparse
 
@@ -6,13 +5,13 @@ import requests
 from paddlehub.module.module import moduleinfo, runnable
 
 
-def get_access_token(api_key: str = '', secret_key: str = '') -> str:
+def get_access_token(ak: str = '', sk: str = '') -> str:
     '''
     Get Access Token
 
     Params:
-        api_key(str): API Key
-        secret_key(str): Secret Key
+        ak(str): API Key
+        sk(str): Secret Key
 
     Return:
         access_token(str): Access Token
@@ -23,8 +22,8 @@ def get_access_token(api_key: str = '', secret_key: str = '') -> str:
     }
     datas = {
         'grant_type': 'client_credentials',
-        'client_id': api_key if api_key != '' else 'G26BfAOLpGIRBN5XrOV2eyPA25CE01lE',
-        'client_secret': secret_key if secret_key != '' else 'txLZOWIjEqXYMU3lSm05ViW4p9DWGOWs'
+        'client_id': ak if ak != '' else 'G26BfAOLpGIRBN5XrOV2eyPA25CE01lE',
+        'client_secret': sk if sk != '' else 'txLZOWIjEqXYMU3lSm05ViW4p9DWGOWs'
     }
 
     responses = requests.post(url, datas, headers=headers)
@@ -33,7 +32,7 @@ def get_access_token(api_key: str = '', secret_key: str = '') -> str:
 
     results = json.loads(responses.text)
 
-    assert results['msg'] == 'success', f"Error message: '{results['msg']}'. Please check the api_key and secret_key."
+    assert results['msg'] == 'success', f"Error message: '{results['msg']}'. Please check the ak and sk."
 
     return results['data']
 
@@ -47,8 +46,8 @@ def get_access_token(api_key: str = '', secret_key: str = '') -> str:
     version='1.0.0'
 )
 class ERNIE3Zeus:
-    def __init__(self, api_key: str = '', secret_key: str = '') -> None:
-        self.access_token = get_access_token(api_key, secret_key)
+    def __init__(self, ak: str = '', sk: str = '') -> None:
+        self.access_token = get_access_token(ak, sk)
 
     def custom_generation(self,
                           text: str,
@@ -68,13 +67,11 @@ class ERNIE3Zeus:
         ERNIE 3.0 Zeus 自定义接口
 
         Params:
-            api_key(str): API Key。
-            secret_key(str): Secret Key。
-            text(srt): 模型的输入文本, 为 prompt 形式的输入。注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512。
-            min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围。
-            seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
-            topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。
-            penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。
+            text(srt): 模型的输入文本, 为 prompt 形式的输入。文本长度 [1, 1000]。注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512。
+            min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围 [1, seq_len]。
+            seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围 [1, 1000]。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+            topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。取值范围 [0.0, 1.0]。
+            penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
             stop_token(str): 预测结果解析时使用的结束字符串, 碰到对应字符串则直接截断并返回。可以通过设置该值, 过滤掉 few-shot 等场景下模型重复的 cases。
             task_prompt(str): 指定预置的任务模板, 效果更好。
                               PARAGRAPH: 引导模型生成一段文章; SENT: 引导模型生成一句话; ENTITY: 引导模型生成词组; 
@@ -133,23 +130,24 @@ class ERNIE3Zeus:
                         min_dec_len: int = 4,
                         seq_len: int = 512,
                         topp: float = 0.9,
-                        penalty_score: float = 1.2,
-                        stop_token: str = '',
-                        task_prompt: str = 'PARAGRAPH',
-                        penalty_text: str = '[{[gEND]',
-                        choice_text: str = '',
-                        is_unidirectional: bool = True,
-                        min_dec_penalty_text: str = '。？：！[<S>]',
-                        logits_bias: int = -10,
-                        mask_type: str = 'paragraph') -> str:
+                        penalty_score: float = 1.2) -> str:
         '''
         文本生成
         '''
         return self.custom_generation(
-            text,  min_dec_len, seq_len, topp, penalty_score,
-            stop_token, task_prompt, penalty_text, choice_text,
-            is_unidirectional, min_dec_penalty_text, logits_bias,
-            mask_type
+            text,
+            min_dec_len,
+            seq_len,
+            topp,
+            penalty_score,
+            stop_token='',
+            task_prompt='PARAGRAPH',
+            penalty_text='[{[gEND]',
+            choice_text='',
+            is_unidirectional=True,
+            min_dec_penalty_text='。？：！[<S>]',
+            logits_bias=-10,
+            mask_type='paragraph'
         )
 
     def text_summarization(self,
@@ -157,24 +155,25 @@ class ERNIE3Zeus:
                            min_dec_len: int = 4,
                            seq_len: int = 512,
                            topp: float = 0.0,
-                           penalty_score: float = 1.0,
-                           stop_token: str = '',
-                           task_prompt: str = 'Summarization',
-                           penalty_text: str = '',
-                           choice_text: str = '',
-                           is_unidirectional: bool = False,
-                           min_dec_penalty_text: str = '',
-                           logits_bias: int = -10000,
-                           mask_type: str = 'word') -> str:
+                           penalty_score: float = 1.0) -> str:
         '''
         摘要生成
         '''
         text = "文章：{} 摘要：".format(text)
         return self.custom_generation(
-            text,  min_dec_len, seq_len, topp, penalty_score,
-            stop_token, task_prompt, penalty_text, choice_text,
-            is_unidirectional, min_dec_penalty_text, logits_bias,
-            mask_type
+            text,
+            min_dec_len,
+            seq_len,
+            topp,
+            penalty_score,
+            stop_token='',
+            task_prompt='Summarization',
+            penalty_text='',
+            choice_text='',
+            is_unidirectional=False,
+            min_dec_penalty_text='',
+            logits_bias=-10000,
+            mask_type='word'
         )
 
     def copywriting_generation(self,
@@ -182,24 +181,25 @@ class ERNIE3Zeus:
                                min_dec_len: int = 32,
                                seq_len: int = 512,
                                topp: float = 0.9,
-                               penalty_score: float = 1.2,
-                               stop_token: str = '',
-                               task_prompt: str = 'adtext',
-                               penalty_text: str = '',
-                               choice_text: str = '',
-                               is_unidirectional: bool = False,
-                               min_dec_penalty_text: str = '',
-                               logits_bias: int = -10000,
-                               mask_type: str = 'word') -> str:
+                               penalty_score: float = 1.2) -> str:
         '''
         文案生成
         '''
         text = "标题：{} 文案：".format(text)
         return self.custom_generation(
-            text,  min_dec_len, seq_len, topp, penalty_score,
-            stop_token, task_prompt, penalty_text, choice_text,
-            is_unidirectional, min_dec_penalty_text, logits_bias,
-            mask_type
+            text,
+            min_dec_len,
+            seq_len,
+            topp,
+            penalty_score,
+            stop_token='',
+            task_prompt='adtext',
+            penalty_text='',
+            choice_text='',
+            is_unidirectional=False,
+            min_dec_penalty_text='',
+            logits_bias=-10000,
+            mask_type='word'
         )
 
     def noval_continuation(self,
@@ -207,24 +207,25 @@ class ERNIE3Zeus:
                            min_dec_len: int = 2,
                            seq_len: int = 512,
                            topp: float = 0.9,
-                           penalty_score: float = 1.2,
-                           stop_token: str = '',
-                           task_prompt: str = 'gPARAGRAPH',
-                           penalty_text: str = '',
-                           choice_text: str = '',
-                           is_unidirectional: bool = True,
-                           min_dec_penalty_text: str = '。？：！[<S>]',
-                           logits_bias: int = -5,
-                           mask_type: str = 'paragraph') -> str:
+                           penalty_score: float = 1.2) -> str:
         '''
         小说续写
         '''
         text = "上文：{} 下文：".format(text)
         return self.custom_generation(
-            text,  min_dec_len, seq_len, topp, penalty_score,
-            stop_token, task_prompt, penalty_text, choice_text,
-            is_unidirectional, min_dec_penalty_text, logits_bias,
-            mask_type
+            text,
+            min_dec_len,
+            seq_len,
+            topp,
+            penalty_score,
+            stop_token='',
+            task_prompt='gPARAGRAPH',
+            penalty_text='',
+            choice_text='',
+            is_unidirectional=True,
+            min_dec_penalty_text='。？：！[<S>]',
+            logits_bias=-5,
+            mask_type='paragraph'
         )
 
     def answer_generation(self,
@@ -232,24 +233,25 @@ class ERNIE3Zeus:
                           min_dec_len: int = 2,
                           seq_len: int = 512,
                           topp: float = 0.9,
-                          penalty_score: float = 1.2,
-                          stop_token: str = '',
-                          task_prompt: str = 'qa',
-                          penalty_text: str = '[gEND]',
-                          choice_text: str = '',
-                          is_unidirectional: bool = True,
-                          min_dec_penalty_text: str = '。？：！[<S>]',
-                          logits_bias: int = -5,
-                          mask_type: str = 'paragraph') -> str:
+                          penalty_score: float = 1.2) -> str:
         '''
         自由问答
         '''
         text = "问题：{} 回答：".format(text)
         return self.custom_generation(
-            text,  min_dec_len, seq_len, topp, penalty_score,
-            stop_token, task_prompt, penalty_text, choice_text,
-            is_unidirectional, min_dec_penalty_text, logits_bias,
-            mask_type
+            text,
+            min_dec_len,
+            seq_len,
+            topp,
+            penalty_score,
+            stop_token='',
+            task_prompt='qa',
+            penalty_text='[gEND]',
+            choice_text='',
+            is_unidirectional=True,
+            min_dec_penalty_text='。？：！[<S>]',
+            logits_bias=-5,
+            mask_type='paragraph'
         )
 
     def couplet_continuation(self,
@@ -257,24 +259,25 @@ class ERNIE3Zeus:
                              min_dec_len: int = 2,
                              seq_len: int = 512,
                              topp: float = 0.9,
-                             penalty_score: float = 1.0,
-                             stop_token: str = '',
-                             task_prompt: str = 'couplet',
-                             penalty_text: str = '',
-                             choice_text: str = '',
-                             is_unidirectional: bool = False,
-                             min_dec_penalty_text: str = '',
-                             logits_bias: int = -10000,
-                             mask_type: str = 'word') -> str:
+                             penalty_score: float = 1.0) -> str:
         '''
         对联续写
         '''
         text = "上联：{} 下联：".format(text)
         return self.custom_generation(
-            text,  min_dec_len, seq_len, topp, penalty_score,
-            stop_token, task_prompt, penalty_text, choice_text,
-            is_unidirectional, min_dec_penalty_text, logits_bias,
-            mask_type
+            text,
+            min_dec_len,
+            seq_len,
+            topp,
+            penalty_score,
+            stop_token='',
+            task_prompt='couplet',
+            penalty_text='',
+            choice_text='',
+            is_unidirectional=False,
+            min_dec_penalty_text='',
+            logits_bias=-10000,
+            mask_type='word'
         )
 
     def composition_generation(self,
@@ -282,24 +285,25 @@ class ERNIE3Zeus:
                                min_dec_len: int = 128,
                                seq_len: int = 512,
                                topp: float = 0.9,
-                               penalty_score: float = 1.2,
-                               stop_token: str = '',
-                               task_prompt: str = 'zuowen',
-                               penalty_text: str = '',
-                               choice_text: str = '',
-                               is_unidirectional: bool = False,
-                               min_dec_penalty_text: str = '',
-                               logits_bias: int = -10000,
-                               mask_type: str = 'word') -> str:
+                               penalty_score: float = 1.2) -> str:
         '''
         作文创作
         '''
         text = "作文题目：{} 正文：".format(text)
         return self.custom_generation(
-            text,  min_dec_len, seq_len, topp, penalty_score,
-            stop_token, task_prompt, penalty_text, choice_text,
-            is_unidirectional, min_dec_penalty_text, logits_bias,
-            mask_type
+            text,
+            min_dec_len,
+            seq_len,
+            topp,
+            penalty_score,
+            stop_token='',
+            task_prompt='zuowen',
+            penalty_text='',
+            choice_text='',
+            is_unidirectional=False,
+            min_dec_penalty_text='',
+            logits_bias=-10000,
+            mask_type='word'
         )
 
     def text_cloze(self,
@@ -307,23 +311,24 @@ class ERNIE3Zeus:
                    min_dec_len: int = 1,
                    seq_len: int = 512,
                    topp: float = 0.9,
-                   penalty_score: float = 1.0,
-                   stop_token: str = '',
-                   task_prompt: str = 'cloze',
-                   penalty_text: str = '',
-                   choice_text: str = '',
-                   is_unidirectional: bool = False,
-                   min_dec_penalty_text: str = '',
-                   logits_bias: int = -10000,
-                   mask_type: str = 'word') -> str:
+                   penalty_score: float = 1.0) -> str:
         '''
         完形填空
         '''
         return self.custom_generation(
-            text,  min_dec_len, seq_len, topp, penalty_score,
-            stop_token, task_prompt, penalty_text, choice_text,
-            is_unidirectional, min_dec_penalty_text, logits_bias,
-            mask_type
+            text,
+            min_dec_len,
+            seq_len,
+            topp,
+            penalty_score,
+            stop_token='',
+            task_prompt='cloze',
+            penalty_text='',
+            choice_text='',
+            is_unidirectional=False,
+            min_dec_penalty_text='',
+            logits_bias=-10000,
+            mask_type='word'
         )
 
     @runnable
@@ -347,8 +352,8 @@ class ERNIE3Zeus:
         parser.add_argument('--min_dec_penalty_text', type=str, default='')
         parser.add_argument('--logits_bias', type=int, default=-10000)
         parser.add_argument('--mask_type', type=str, default='word')
-        parser.add_argument('--api_key', type=str, default='')
-        parser.add_argument('--secret_key', type=str, default='')
+        parser.add_argument('--ak', type=str, default='')
+        parser.add_argument('--sk', type=str, default='')
         parser.add_argument('--task', type=str, default='custom_generation')
 
         default_kwargs = {
@@ -369,14 +374,23 @@ class ERNIE3Zeus:
         args = parser.parse_args(argvs)
 
         func = getattr(self, args.task)
-        
-        if (args.api_key != '') and (args.secret_key != ''):
-            self.access_token = get_access_token(args.api_key, args.secret_key)
+
+        if (args.ak != '') and (args.sk != ''):
+            self.access_token = get_access_token(args.ak, args.sk)
 
         kwargs = vars(args)
+        if kwargs['task'] not in ['custom_generation']:
+            kwargs.pop('stop_token')
+            kwargs.pop('task_prompt')
+            kwargs.pop('penalty_text')
+            kwargs.pop('choice_text')
+            kwargs.pop('is_unidirectional')
+            kwargs.pop('min_dec_penalty_text')
+            kwargs.pop('logits_bias')
+            kwargs.pop('mask_type')
         kwargs.pop('task')
-        kwargs.pop('api_key')
-        kwargs.pop('secret_key')
+        kwargs.pop('ak')
+        kwargs.pop('sk')
 
         for k in default_kwargs.keys():
             if kwargs[k] == default_kwargs[k]:
@@ -388,47 +402,47 @@ class ERNIE3Zeus:
 if __name__ == '__main__':
     ernie3_zeus = ERNIE3Zeus()
 
-    result = ernie3_zeus.custom_generation(
-        '你好，'
-    )
-    print(result)
+    # result = ernie3_zeus.custom_generation(
+    #     '你好，'
+    # )
+    # print(result)
 
-    result = ernie3_zeus.text_generation(
-        '给宠物猫起一些可爱的名字。名字：'
-    )
-    print(result)
+    # result = ernie3_zeus.text_generation(
+    #     '给宠物猫起一些可爱的名字。名字：'
+    # )
+    # print(result)
 
-    result = ernie3_zeus.text_summarization(
-        '在芬兰、瑞典提交“入约”申请近一个月来，北约成员国内部尚未对此达成一致意见。与此同时，俄罗斯方面也多次对北约“第六轮扩张”发出警告。据北约官网显示，北约秘书长斯托尔滕贝格将于本月12日至13日出访瑞典和芬兰，并将分别与两国领导人进行会晤。'
-    )
-    print(result)
+    # result = ernie3_zeus.text_summarization(
+    #     '在芬兰、瑞典提交“入约”申请近一个月来，北约成员国内部尚未对此达成一致意见。与此同时，俄罗斯方面也多次对北约“第六轮扩张”发出警告。据北约官网显示，北约秘书长斯托尔滕贝格将于本月12日至13日出访瑞典和芬兰，并将分别与两国领导人进行会晤。'
+    # )
+    # print(result)
 
-    result = ernie3_zeus.copywriting_generation(
-        '芍药香氛的沐浴乳'
-    )
-    print(result)
+    # result = ernie3_zeus.copywriting_generation(
+    #     '芍药香氛的沐浴乳'
+    # )
+    # print(result)
 
-    result = ernie3_zeus.noval_continuation(
-        '昆仑山可以说是天下龙脉的根源，所有的山脉都可以看作是昆仑的分支。这些分出来的枝枝杈杈，都可以看作是一条条独立的龙脉。'
-    )
-    print(result)
+    # result = ernie3_zeus.noval_continuation(
+    #     '昆仑山可以说是天下龙脉的根源，所有的山脉都可以看作是昆仑的分支。这些分出来的枝枝杈杈，都可以看作是一条条独立的龙脉。'
+    # )
+    # print(result)
 
-    result = ernie3_zeus.answer_generation(
-        '交朋友的原则是什么？'
-    )
-    print(result)
+    # result = ernie3_zeus.answer_generation(
+    #     '交朋友的原则是什么？'
+    # )
+    # print(result)
 
-    result = ernie3_zeus.couplet_continuation(
-        '五湖四海皆春色'
-    )
-    print(result)
+    # result = ernie3_zeus.couplet_continuation(
+    #     '五湖四海皆春色'
+    # )
+    # print(result)
 
     result = ernie3_zeus.composition_generation(
         '诚以养德，信以修身'
     )
     print(result)
 
-    result = ernie3_zeus.text_cloze(
-        '她有着一双[MASK]的眼眸。'
-    )
-    print(result)
+    # result = ernie3_zeus.text_cloze(
+    #     '她有着一双[MASK]的眼眸。'
+    # )
+    # print(result)
