@@ -118,7 +118,6 @@ class DiscoDiffusionClip:
                 raise RuntimeError(
                     "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
                 )
-                paddle.device.set_device("cpu")
         else:
             paddle.device.set_device("cpu")
         paddle.disable_static()
