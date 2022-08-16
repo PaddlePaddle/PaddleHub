@@ -5,13 +5,13 @@ from typing import Union
 
 import numpy as np
 import paddle
-from ernievil2.transformers.clip_vision_transformer import ViT_base_patch16_224
-from ernievil2.transformers.clip_vision_transformer import ViT_base_patch32_224
-from ernievil2.transformers.clip_vision_transformer import ViT_large_patch14_224
-from ernievil2.transformers.efficientnet import EfficientNetB5
-from ernievil2.transformers.ernie2 import ErnieModel
-from ernievil2.transformers.multimodal import MultiModalModel
-from ernievil2.utils.tokenizer import FullTokenizer
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.transformers.clip_vision_transformer import ViT_base_patch16_224
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.transformers.clip_vision_transformer import ViT_base_patch32_224
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.transformers.clip_vision_transformer import ViT_large_patch14_224
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.transformers.efficientnet import EfficientNetB5
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.transformers.ernie2 import ErnieModel
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.transformers.multimodal import MultiModalModel
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.utils.tokenizer import FullTokenizer
 
 __all__ = ['tokenize', 'build_model']
 

@@ -16,7 +16,7 @@ import numpy as np
 import paddle as P
 from paddle import nn
 from paddle.nn import functional as F
-from ernievil2.transformers.file_utils import _fetch_from_remote, add_docstring
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.transformers.file_utils import _fetch_from_remote, add_docstring
 
 log = logging.getLogger(__name__)
 

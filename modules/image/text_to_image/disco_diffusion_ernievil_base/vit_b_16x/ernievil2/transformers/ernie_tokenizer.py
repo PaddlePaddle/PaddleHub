@@ -20,7 +20,7 @@ else:
 from tqdm import tqdm
 import numpy as np
 
-from ernievil2.transformers.file_utils import _fetch_from_remote
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.transformers.file_utils import _fetch_from_remote
 import io
 
 open = partial(io.open, encoding='utf8')

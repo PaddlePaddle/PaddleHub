@@ -33,8 +33,8 @@ logger = _get_logger()
 
 def load_clip_models(enabled: List[str], clip_models: Dict[str, Any] = {}):
 
-    import ernievil2
-    from ernievil2.utils.utils import build_model
+    import disco_diffusion_ernievil_base.vit_b_16x.ernievil2 as ernievil2
+    from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.utils.utils import build_model
 
     # load enabled models
     for k in enabled:

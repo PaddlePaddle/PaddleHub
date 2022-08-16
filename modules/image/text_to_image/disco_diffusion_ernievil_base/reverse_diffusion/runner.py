@@ -11,9 +11,9 @@ import numpy as np
 import paddle
 import paddle.vision.transforms as T
 import paddle_lpips as lpips
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.utils.utils import tokenize
 from docarray import Document
 from docarray import DocumentArray
-from ernievil2.utils.utils import tokenize
 from IPython import display
 from ipywidgets import Output
 from PIL import Image
@@ -166,7 +166,7 @@ def do_run(args, models) -> 'DocumentArray':
                 losses = dists.multiply(model_stat['weights']).sum(2).mean(0)
                 loss_values.append(losses.sum().item())  # log loss, probably shouldn't do per cutn_batch
 
-                x_in_grad += (paddle.grad(losses.sum() * args.clip_guidance_scale, x_in)[0])
+                x_in_grad += ((paddle.grad(losses.sum() * args.clip_guidance_scale, x_in)[0]) / args.cutn_batches)
         tv_losses = tv_loss(x_in)
         range_losses = range_loss(x_in)
         sat_losses = paddle.abs(x_in - x_in.clip(min=-1, max=1)).mean()

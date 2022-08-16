@@ -19,41 +19,38 @@ from functools import partial
 from typing import List
 from typing import Optional
 
-sys.path.insert(0, os.path.dirname(__file__))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'resize_right'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'vit_b_16x'))
-
-import resize_right
-import ernievil2
 import paddle
+from disco_diffusion_ernievil_base import resize_right
+from disco_diffusion_ernievil_base.reverse_diffusion import create
+from disco_diffusion_ernievil_base.vit_b_16x import ernievil2
+
 import paddlehub as hub
-from .reverse_diffusion import create
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
 
 
-@moduleinfo(name="disco_diffusion_ernievil_vitb16",
+@moduleinfo(name="disco_diffusion_ernievil_base",
             version="1.0.0",
-            type="MultiModal/image_generation",
+            type="image/text_to_image",
             summary="",
             author="paddlepaddle",
             author_email="paddle-dev@baidu.com")
 class DiscoDiffusionClip:
 
     def generate_image(self,
-                       text_prompts: Optional[List[str]] = [
-                           '小桥流水人家',
-                       ],
+                       text_prompts,
+                       style: Optional[str] = None,
+                       artist: Optional[str] = None,
                        init_image: Optional[str] = None,
                        width_height: Optional[List[int]] = [1280, 768],
-                       skip_steps: Optional[int] = 10,
+                       skip_steps: Optional[int] = 0,
                        steps: Optional[int] = 250,
                        cut_ic_pow: Optional[int] = 1,
                        init_scale: Optional[int] = 1000,
                        clip_guidance_scale: Optional[int] = 5000,
                        tv_scale: Optional[int] = 0,
-                       range_scale: Optional[int] = 150,
+                       range_scale: Optional[int] = 0,
                        sat_scale: Optional[int] = 0,
                        cutn_batches: Optional[int] = 4,
                        diffusion_sampling_mode: Optional[str] = 'ddim',
@@ -71,16 +68,19 @@ class DiscoDiffusionClip:
                        cut_innercut: Optional[str] = '[4]*400+[12]*600',
                        cut_icgray_p: Optional[str] = '[0.2]*400+[0]*600',
                        display_rate: Optional[int] = 10,
-                       n_batches: Optional[int] = 4,
+                       n_batches: Optional[int] = 1,
                        batch_size: Optional[int] = 1,
                        batch_name: Optional[str] = '',
                        use_gpu: Optional[bool] = True,
-                       output_dir: Optional[str] = 'disco_diffusion_ernievil_vitb16_out'):
+                       output_dir: Optional[str] = 'disco_diffusion_ernievil_base_out'):
         """
         Create Disco Diffusion artworks and save the result into a DocumentArray.
 
         :param text_prompts: Phrase, sentence, or string of words and phrases describing what the image should look like.  The words will be analyzed by the AI and will guide the diffusion process toward the image(s) you describe. These can include commas and weights to adjust the relative importance of each element.  E.g. "A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation."Notice that this prompt loosely follows a structure: [subject], [prepositional details], [setting], [meta modifiers and artist]; this is a good starting point for your experiments. Developing text prompts takes practice and experience, and is not the subject of this guide.  If you are a beginner to writing text prompts, a good place to start is on a simple AI art app like Night Cafe, starry ai or WOMBO prior to using DD, to get a feel for how text gets translated into images by GAN tools.  These other apps use different technologies, but many of the same principles apply.
+
         :param init_image: Recall that in the image sequence above, the first image shown is just noise.  If an init_image is provided, diffusion will replace the noise with the init_image as its starting state.  To use an init_image, upload the image to the Colab instance or your Google Drive, and enter the full image path here. If using an init_image, you may need to increase skip_steps to ~ 50% of total steps to retain the character of the init. See skip_steps above for further discussion.
+        :param style: Image style, such as oil paintings, if specified, style will be used to construct prompts.
+        :param artist: Artist style, if specified, style will be used to construct prompts.
         :param width_height: Desired final image size, in pixels. You can have a square, wide, or tall image, but each edge length should be set to a multiple of 64px, and a minimum of 512px on the default CLIP model setting.  If you forget to use multiples of 64px in your dimensions, DD will adjust the dimensions of your image to make it so.
         :param skip_steps: Consider the chart shown here.  Noise scheduling (denoise strength) starts very high and progressively gets lower and lower as diffusion steps progress. The noise levels in the first few steps are very high, so images change dramatically in early steps.As DD moves along the curve, noise levels (and thus the amount an image changes per step) declines, and image coherence from one step to the next increases.The first few steps of denoising are often so dramatic that some steps (maybe 10-15% of total) can be skipped without affecting the final image. You can experiment with this as a way to cut render times.If you skip too many steps, however, the remaining noise may not be high enough to generate new content, and thus may not have ‘time left’ to finish an image satisfactorily.Also, depending on your other settings, you may need to skip steps to prevent CLIP from overshooting your goal, resulting in ‘blown out’ colors (hyper saturated, solid white, or solid black regions) or otherwise poor image quality.  Consider that the denoising process is at its strongest in the early steps, so skipping steps can sometimes mitigate other problems.Lastly, if using an init_image, you will need to skip ~50% of the diffusion steps to retain the shapes in the original init image. However, if you’re using an init_image, you can also adjust skip_steps up or down for creative reasons.  With low skip_steps you can get a result "inspired by" the init_image which will retain the colors and rough layout and shapes but look quite different. With high skip_steps you can preserve most of the init_image contents and just do fine tuning of the texture.
         :param steps: When creating an image, the denoising curve is subdivided into steps for processing. Each step (or iteration) involves the AI looking at subsets of the image called ‘cuts’ and calculating the ‘direction’ the image should be guided to be more like the prompt. Then it adjusts the image with the help of the diffusion denoiser, and moves to the next step.Increasing steps will provide more opportunities for the AI to adjust the image, and each adjustment will be smaller, and thus will yield a more precise, detailed image.  Increasing steps comes at the expense of longer render times.  Also, while increasing steps should generally increase image quality, there is a diminishing return on additional steps beyond 250 - 500 steps.  However, some intricate images can take 1000, 2000, or more steps.  It is really up to the user.  Just know that the render time is directly related to the number of steps, and many other parameters have a major impact on image quality, without costing additional time.
@@ -124,6 +124,20 @@ class DiscoDiffusionClip:
         paddle.disable_static()
         if not os.path.exists(output_dir):
             os.makedirs(output_dir, exist_ok=True)
+
+        if isinstance(text_prompts, str):
+            text_prompts = text_prompts.rstrip(',.，。')
+            if style is not None:
+                text_prompts += "，{}".format(style)
+            if artist is not None:
+                text_prompts += "，{}，trending on artstation".format(artist)
+        elif isinstance(text_prompts, list):
+            text_prompts[0] = text_prompts[0].rstrip(',.，。')
+            if style is not None:
+                text_prompts[0] += "，{}".format(style)
+            if artist is not None:
+                text_prompts[0] += "，{}，trending on artstation".format(artist)
+
         return create(text_prompts=text_prompts,
                       init_image=init_image,
                       width_height=width_height,
@@ -184,6 +198,8 @@ class DiscoDiffusionClip:
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
         results = self.generate_image(text_prompts=args.text_prompts,
+                                      style=args.style,
+                                      artist=args.artist,
                                       init_image=args.init_image,
                                       width_height=args.width_height,
                                       skip_steps=args.skip_steps,
@@ -223,7 +239,7 @@ class DiscoDiffusionClip:
         self.arg_input_group.add_argument(
             '--skip_steps',
             type=int,
-            default=10,
+            default=0,
             help=
             'Consider the chart shown here.  Noise scheduling (denoise strength) starts very high and progressively gets lower and lower as diffusion steps progress. The noise levels in the first few steps are very high, so images change dramatically in early steps.As DD moves along the curve, noise levels (and thus the amount an image changes per step) declines, and image coherence from one step to the next increases.The first few steps of denoising are often so dramatic that some steps (maybe 10-15%% of total) can be skipped without affecting the final image. You can experiment with this as a way to cut render times.If you skip too many steps, however, the remaining noise may not be high enough to generate new content, and thus may not have ‘time left’ to finish an image satisfactorily.Also, depending on your other settings, you may need to skip steps to prevent CLIP from overshooting your goal, resulting in ‘blown out’ colors (hyper saturated, solid white, or solid black regions) or otherwise poor image quality.  Consider that the denoising process is at its strongest in the early steps, so skipping steps can sometimes mitigate other problems.Lastly, if using an init_image, you will need to skip ~50%% of the diffusion steps to retain the shapes in the original init image. However, if you’re using an init_image, you can also adjust skip_steps up or down for creative reasons.  With low skip_steps you can get a result "inspired by" the init_image which will retain the colors and rough layout and shapes but look quite different. With high skip_steps you can preserve most of the init_image contents and just do fine tuning of the texture'
         )
@@ -265,7 +281,7 @@ class DiscoDiffusionClip:
         self.arg_input_group.add_argument(
             '--range_scale',
             type=int,
-            default=150,
+            default=0,
             help=
             "Optional, set to zero to turn off.  Used for adjustment of color contrast.  Lower range_scale will increase contrast. Very low numbers create a reduced color palette, resulting in more vibrant or poster-like images. Higher range_scale will reduce contrast, for more muted images."
         )
@@ -370,18 +386,27 @@ class DiscoDiffusionClip:
         )
         self.arg_config_group.add_argument('--use_gpu',
                                            type=ast.literal_eval,
-                                           default=False,
+                                           default=True,
                                            help="whether use GPU or not")
         self.arg_config_group.add_argument('--output_dir',
                                            type=str,
-                                           default='disco_diffusion_ernievil_vitb16_out',
+                                           default='disco_diffusion_ernievil_base_out',
                                            help='Output directory.')
 
     def add_module_input_arg(self):
         """
         Add the command input options.
         """
-        self.arg_input_group.add_argument('--text_prompts', type=str, default='小桥流水人家')
+        self.arg_input_group.add_argument('--text_prompts', type=str)
+        self.arg_input_group.add_argument(
+            '--style',
+            type=str,
+            default=None,
+            help='Image style, such as oil paintings, if specified, style will be used to construct prompts.')
+        self.arg_input_group.add_argument('--artist',
+                                          type=str,
+                                          default=None,
+                                          help='Artist style, if specified, style will be used to construct prompts.')
         self.arg_input_group.add_argument(
             '--init_image',
             type=str,
@@ -399,7 +424,7 @@ class DiscoDiffusionClip:
         self.arg_input_group.add_argument(
             '--n_batches',
             type=int,
-            default=4,
+            default=1,
             help=
             "This variable sets the number of still images you want DD to create.  If you are using an animation mode (see below for details) DD will ignore n_batches and create a single set of animated frames based on the animation settings."
         )

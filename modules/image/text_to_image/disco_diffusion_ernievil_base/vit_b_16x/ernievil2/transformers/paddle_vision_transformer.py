@@ -18,7 +18,7 @@ import copy
 
 import paddle
 import paddle.nn as nn
-from ernievil2.transformers.droppath import DropPath
+from disco_diffusion_ernievil_base.vit_b_16x.ernievil2.transformers.droppath import DropPath
 
 
 class Identity(nn.Layer):

@@ -6,8 +6,8 @@ import math
 
 import paddle
 import paddle.nn as nn
+from disco_diffusion_ernievil_base.resize_right.resize_right import resize
 from paddle.nn import functional as F
-from resize_right import resize
 
 from . import transforms as T
 
