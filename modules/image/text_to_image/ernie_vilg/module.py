@@ -149,12 +149,11 @@ class ErnieVilG:
                     raise RuntimeError("API服务内部错误，可能引起原因有请求超时、模型推理错误等")
                 elif res['code'] == 100 or res['code'] == 110 or res['code'] == 111:
                     token = self._apply_token(ak, sk)
-                    res = requests.post(create_url,
+                    res = requests.post(get_url,
                                         headers={'Content-Type': 'application/x-www-form-urlencoded'},
                                         data={
                                             'access_token': token,
-                                            "text": text_prompt,
-                                            "style": style
+                                            'taskId': {taskid}
                                         })
                     res = res.json()
                     if res['code'] != 0:
