@@ -48,14 +48,15 @@
 
 - ```bash
   $ hub run ernie_zeus_couplet_continuation \
-        --task couplet_continuation \
         --text '天增岁月人增寿' 
     ```
 
 - **参数**
-    * --task(str): 任务名称：couplet_continuation
-    * --text(str): 对联上联。
-    * 其他参数请参考后续 API 章节。
+    * --text(str): 根据不同的任务输入所需的文本。
+    * --min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围 [1, seq_len]。
+    * --seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围 [1, 1000]。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+    * --topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。取值范围 [0.0, 1.0]。
+    * --penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
 
 ### 2. 预测代码示例
 - ```python
