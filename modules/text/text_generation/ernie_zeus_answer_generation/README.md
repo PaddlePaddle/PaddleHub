@@ -48,14 +48,15 @@
 
 - ```bash
   $ hub run ernie_zeus_answer_generation \
-        --task answer_generation \
         --text '杜鹃花怎么养？。' 
     ```
 
 - **参数**
-    * --task(str): 任务名称：answer_generation
     * --text(str): 问题内容。
-    * 其他参数请参考后续 API 章节。
+    * --min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围 [1, seq_len]。
+    * --seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围 [1, 1000]。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+    * --topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。取值范围 [0.0, 1.0]。
+    * --penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
 
 ### 2. 预测代码示例
 - ```python
@@ -73,18 +74,6 @@
     ```
 
 ### 3. API
-```python
-def __init__(
-    api_key: str = '', 
-    secret_key: str = ''
-) -> None
-```
-初始化 API 
-
-**参数**
-* api_key(str): API Key。（可选）
-* secret_key(str): Secret Key。（可选）
-
 ```python
 def answer_generation(
     text: str,
