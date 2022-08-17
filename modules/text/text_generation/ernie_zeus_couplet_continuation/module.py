@@ -13,7 +13,7 @@ from paddlehub.module.module import moduleinfo, runnable
     version='1.0.0'
 )
 class ERNIEZeus:
-    def __init__(self, ak: str = '', sk: str = '') -> None:
+    def __init__(self) -> None:
         self.ernie_zeus = hub.Module(name='ernie_zeus')
 
     def couplet_continuation(self,
