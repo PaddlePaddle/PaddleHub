@@ -25,21 +25,12 @@ class ERNIEZeus:
         '''
         摘要生成
         '''
-        text = "文章：{} 摘要：".format(text)
-        return self.ernie_zeus.custom_generation(
+        return self.ernie_zeus.text_summarization(
             text,
             min_dec_len,
             seq_len,
             topp,
-            penalty_score,
-            stop_token='',
-            task_prompt='Summarization',
-            penalty_text='',
-            choice_text='',
-            is_unidirectional=False,
-            min_dec_penalty_text='',
-            logits_bias=-10000,
-            mask_type='word'
+            penalty_score
         )
 
     @runnable
@@ -50,6 +41,7 @@ class ERNIEZeus:
             usage='%(prog)s',
             add_help=True)
 
+        parser.add_argument('--text', type=str, required=True)
         parser.add_argument('--min_dec_len', type=int, default=1)
         parser.add_argument('--seq_len', type=int, default=128)
         parser.add_argument('--topp', type=float, default=1.0)
