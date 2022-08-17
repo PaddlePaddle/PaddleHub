@@ -75,18 +75,6 @@
 
 ### 3. API
 ```python
-def __init__(
-    api_key: str = '', 
-    secret_key: str = ''
-) -> None
-```
-初始化 API 
-
-**参数**
-* api_key(str): API Key。（可选）
-* secret_key(str): Secret Key。（可选）
-
-```python
 def noval_continuation(
     text: str,
     min_dec_len: int = 2,
