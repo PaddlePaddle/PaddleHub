@@ -88,10 +88,10 @@ def __init__(
 ```python
 def composition_generation(
     text: str,
-    min_dec_len: int = 2,
+    min_dec_len: int = 128,
     seq_len: int = 512,
     topp: float = 0.9,
-    penalty_score: float = 1.0
+    penalty_score: float = 1.2
 ) -> str
 ```
 作文创作 API
