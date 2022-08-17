@@ -53,33 +53,38 @@
 ### 1. 命令行预测
 
 - ```bash
-  # 作文创作
+  # 使用自定义生成 API 实现作文创作
   $ hub run ernie_zeus \
-        --task composition_generation \
-        --text '诚以养德，信以修身' 
+        --text '诚以养德，信以修身' \
+        --min_dec_len 128 \
+        --seq_len 512 \
+        --topp 0.9 \
+        --penalty_score 1.2 \
+        --task_prompt zuowen
     ```
-
 - **参数**
-    * --task(str): API 名称如 “composition_generation”、“copywriting_generation“ 等
     * --text(str): 根据不同的任务输入所需的文本。
-    * 其他参数与自定义文本生成 API 相同。
-    * 具体细节请参考后续 API 章节。
+    * 其他参数请参考后续 API 章节。
 
 ### 2. 预测代码示例
 - ```python
     import paddlehub as hub
 
     # 加载模型
-    ernie_zeus = hub.Module(name='ernie_zeus')
+    model = hub.Module(name='ernie_zeus')
 
     # 作文创作
-    composition = ernie_zeus.composition_generation(
-        text='诚以养德，信以修身' 
+    result = model.custom_generation(
+        text='诚以养德，信以修身',
+        min_dec_len=128,
+        seq_len=512,
+        topp=0.9,
+        penalty_score=1.2,
+        task_prompt='zuowen'
     )
 
-    print(composition)
+    print(result)
     ```
-
 
 ### 3. API
 ```python
@@ -138,119 +143,6 @@ def custom_generation(
 
 **返回**
 * text(str): 生成的文本。
-
-
-```python
-def text_summarization(
-    text: str,
-    **kwargs
-) -> str
-```
-文本摘要 API
-
-**参数**
-* text(str): 文本段落。
-* 其他参数与“自定义文本生成 API”保持一致
-
-**返回**
-* text(str): 段落摘要。
-
-
-```python
-def copywriting_generation(
-    text: str,
-    **kwargs
-) -> str
-```
-文案生成 API
-
-**参数**
-* text(str): 产品描述。
-* 其他参数与“自定义文本生成 API”保持一致
-
-**返回**
-* text(str): 产品文案。
-
-
-```python
-def noval_continuation(
-    text: str,
-    **kwargs
-) -> str
-```
-小说续写 API
-
-**参数**
-* text(str): 小说上文。
-* 其他参数与“自定义文本生成 API”保持一致
-
-**返回**
-* text(str): 小说下文。
-
-
-```python
-def answer_generation(
-    text: str,
-    **kwargs
-) -> str
-```
-自由问答 API
-
-**参数**
-* text(str): 问题。
-* 其他参数与“自定义文本生成 API”保持一致
-
-**返回**
-* text(str): 答案。
-
-
-```python
-def couplet_continuation(
-    text: str,
-    **kwargs
-) -> str
-```
-对联续写 API
-
-**参数**
-* text(str): 上联。
-* 其他参数与“自定义文本生成 API”保持一致
-
-**返回**
-* text(str): 下联。
-
-
-```python
-def composition_generation(
-    text: str,
-    **kwargs
-) -> str
-```
-作文生成 API
-
-**参数**
-* text(str): 作文题目。
-* 其他参数与“自定义文本生成 API”保持一致
-
-**返回**
-* text(str): 作文内容。
-
-
-```python
-def text_cloze(
-    text: str,
-    **kwargs
-) -> str
-```
-完形填空 API
-
-**参数**
-* text(str): 文字段落。使用 [MASK] 标记待补全文字。
-* 其他参数与“自定义文本生成 API”保持一致
-
-**返回**
-* text(str): 补全后的文字段落
-
 
 ## 四、更新历史
 * 1.0.0 
