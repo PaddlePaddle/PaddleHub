@@ -112,9 +112,6 @@ class ERNIE3Zeus:
             'mask_type': mask_type,
         }
 
-        info = datas.copy()
-        info.pop('access_token')
-
         responses = requests.post(url, datas, headers=headers)
 
         assert responses.status_code == 200, f"Network Error {responses.status_code}."
