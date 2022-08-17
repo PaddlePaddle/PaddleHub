@@ -65,8 +65,9 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
       - --text(str): 根据不同的任务输入所需的文本。
       - 其他参数请参考后续 API 章节。
 
-### 2. 预测代码示例
-- ```python
+- ### 2. 预测代码示例
+
+  - ```python
     import paddlehub as hub
 
     # 加载模型
