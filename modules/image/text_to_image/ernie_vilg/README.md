@@ -64,12 +64,19 @@
 - ### 3、API
 
   - ```python
+    def __init__(ak: Optional[str]=None, sk: Optional[str]=None)
+    ```
+    - 初始化模块，可自定义用于申请访问文心API的ak和sk。
+
+    - **参数**
+      - ak:(Optional[str]): 用于申请文心api使用token的ak，可不填。
+      - sk:(Optional[str]): 用于申请文心api使用token的sk，可不填。
+
+  - ```python
     def generate_image(
               text_prompts:str,
               style: Optional[str] = "油画",
               topk: Optional[int] = 10,
-              ak: Optional[str] = None,
-              sk: Optional[str] = None,
               output_dir: Optional[str] = 'ernievilg_output')
     ```
 
@@ -80,8 +87,6 @@
       - text_prompts(str): 输入的语句，描述想要生成的图像的内容。
       - style(Optional[str]): 生成图像的风格，当前支持'油画','水彩','粉笔画','卡通','儿童画','蜡笔画'。
       - topk(Optional[int]): 保存前多少张图，最多保存10张。
-      - ak:(Optional[str]): 用于申请文心api使用token的ak，可不填。
-      - sk:(Optional[str]): 用于申请文心api使用token的sk，可不填。
       - output_dir(Optional[str]): 保存输出图像的目录，默认为"ernievilg_output"。
 
 
