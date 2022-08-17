@@ -38,14 +38,14 @@ def get_access_token(ak: str = '', sk: str = '') -> str:
 
 
 @moduleinfo(
-    name='ERNIE3_Zeus',
+    name='ernie_zeus',
     type='nlp/text_generation',
     author='paddlepaddle',
     author_email='',
-    summary='ERNIE3_Zeus',
+    summary='ernie_zeus',
     version='1.0.0'
 )
-class ERNIE3Zeus:
+class ERNIEZeus:
     def __init__(self, ak: str = '', sk: str = '') -> None:
         self.access_token = get_access_token(ak, sk)
 
@@ -397,7 +397,7 @@ class ERNIE3Zeus:
 
 
 if __name__ == '__main__':
-    ernie3_zeus = ERNIE3Zeus()
+    ernie3_zeus = ERNIEZeus()
 
     result = ernie3_zeus.custom_generation(
         '你好，'
