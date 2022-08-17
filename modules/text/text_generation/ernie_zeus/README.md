@@ -1,6 +1,6 @@
-# ERNIE3_Zeus
+# ernie_zeus
 
-|模型名称|ERNIE3_Zeus|
+|模型名称|ernie_zeus|
 | :--- | :---: |
 |类别|文本-文本生成|
 |网络|-|
@@ -39,7 +39,7 @@
 
 ### 2、安装
   - ```shell
-    $ hub install ERNIE3_Zeus
+    $ hub install ernie_zeus
     ```
 
 * 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
@@ -54,7 +54,7 @@
 
 - ```bash
   # 作文创作
-  $ hub run ERNIE3_Zeus \
+  $ hub run ernie_zeus \
         --task composition_generation \
         --text '诚以养德，信以修身' 
     ```
@@ -70,10 +70,10 @@
     import paddlehub as hub
 
     # 加载模型
-    ERNIE3_Zeus = hub.Module(name='ERNIE3_Zeus')
+    ernie_zeus = hub.Module(name='ernie_zeus')
 
     # 作文创作
-    composition = ERNIE3_Zeus.composition_generation(
+    composition = ernie_zeus.composition_generation(
         text='诚以养德，信以修身' 
     )
 
@@ -258,5 +258,5 @@ def text_cloze(
   初始发布
 
   ```shell
-  $ hub install ERNIE3_Zeus == 1.0.0
+  $ hub install ernie_zeus == 1.0.0
   ```
