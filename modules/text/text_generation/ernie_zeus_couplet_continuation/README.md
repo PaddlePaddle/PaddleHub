@@ -54,7 +54,7 @@
 
 - **参数**
     * --task(str): 任务名称：couplet_continuation
-    * --text(str): 根据不同的任务输入所需的文本。
+    * --text(str): 对联上联。
     * 其他参数请参考后续 API 章节。
 
 ### 2. 预测代码示例
