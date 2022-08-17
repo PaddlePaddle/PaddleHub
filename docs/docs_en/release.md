@@ -3,11 +3,11 @@
 ## `v2.3.0`
 
 ### [1、Support text-to-image domain model]
-  - Add five text-to-image domain models based on disco diffusion, in which three models are for English and two for Chinese.
+  - Add five text-to-image domain models based on disco diffusion, in which three models are for English and two for Chinese. Especially, Chinese text-to-image model [disco_diffusion_ernievil_base](https://aistudio.baidu.com/aistudio/projectdetail/4437821) is based on Baidu **ERNIE-ViL**，welcome to experience.
 
-### 【2、Support Baidu wenxin large-scale pre-trained model】
-  - Add api call for ERNIE-ViLG model, which supports text-to-image task。
-  - Add api call for ERNIE3.0 Zeus model, which supports applications such as writing essays, summarization, couplets, question answering, writing novels and completing text.
+### 【2、Support wenxin api call for ERNIE large-scale pre-trained model】
+  - Add api call for **ERNIE-ViLG** model, which supports text-to-image task。
+  - Add api call for **ERNIE 3.0 Zeus** model, which supports applications such as writing essays, summarization, couplets, question answering, writing novels and completing text.
 
 ## `v2.1.0`
 
