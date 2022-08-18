@@ -199,7 +199,7 @@ class ERNIEZeus:
             mask_type='word'
         )
 
-    def noval_continuation(self,
+    def novel_continuation(self,
                            text: str,
                            min_dec_len: int = 2,
                            seq_len: int = 512,
@@ -419,7 +419,7 @@ if __name__ == '__main__':
     )
     print(result)
 
-    result = ernie_zeus.noval_continuation(
+    result = ernie_zeus.novel_continuation(
         '昆仑山可以说是天下龙脉的根源，所有的山脉都可以看作是昆仑的分支。这些分出来的枝枝杈杈，都可以看作是一条条独立的龙脉。'
     )
     print(result)
