@@ -5,18 +5,18 @@ from paddlehub.module.module import moduleinfo, runnable
 
 
 @moduleinfo(
-    name='ernie_zeus_noval_continuation',
+    name='ernie_zeus_novel_continuation',
     type='nlp/text_generation',
     author='paddlepaddle',
     author_email='',
-    summary='ernie_zeus_noval_continuation',
+    summary='ernie_zeus_novel_continuation',
     version='1.0.0'
 )
 class ERNIEZeus:
     def __init__(self) -> None:
         self.ernie_zeus = hub.Module(name='ernie_zeus')
 
-    def noval_continuation(self,
+    def novel_continuation(self,
                            text: str,
                            min_dec_len: int = 2,
                            seq_len: int = 512,
@@ -25,7 +25,7 @@ class ERNIEZeus:
         '''
         小说续写
         '''
-        return self.ernie_zeus.noval_continuation(
+        return self.ernie_zeus.novel_continuation(
             text,
             min_dec_len,
             seq_len,
@@ -62,13 +62,13 @@ class ERNIEZeus:
             if kwargs[k] == default_kwargs[k]:
                 kwargs.pop(k)
 
-        return self.noval_continuation(**kwargs)
+        return self.novel_continuation(**kwargs)
 
 
 if __name__ == '__main__':
     ernie_zeus = ERNIEZeus()
 
-    result = ernie_zeus.noval_continuation(
+    result = ernie_zeus.novel_continuation(
         '昆仑山可以说是天下龙脉的根源，所有的山脉都可以看作是昆仑的分支。这些分出来的枝枝杈杈，都可以看作是一条条独立的龙脉。'
     )
     print(result)

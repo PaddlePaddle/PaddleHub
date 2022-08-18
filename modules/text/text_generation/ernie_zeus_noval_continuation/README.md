@@ -1,6 +1,6 @@
-# ernie_zeus_noval_continuation
+# ernie_zeus_novel_continuation
 
-|模型名称|ernie_zeus_noval_continuation|
+|模型名称|ernie_zeus_novel_continuation|
 | :--- | :---: |
 |类别|文本-文本生成|
 |网络|-|
@@ -29,7 +29,7 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
 
 - ### 2、安装
   - ```shell
-    $ hub install ernie_zeus_noval_continuation
+    $ hub install ernie_zeus_novel_continuation
     ```
 
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
@@ -43,7 +43,7 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
 - ### 1. 命令行预测
 
   - ```bash
-    $ hub run ernie_zeus_noval_continuation \
+    $ hub run ernie_zeus_novel_continuation \
             --text '昆仑山可以说是天下龙脉的根源，所有的山脉都可以看作是昆仑的分支。这些分出来的枝枝杈杈，都可以看作是一条条独立的龙脉。' 
     ```
 
@@ -59,10 +59,10 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
     import paddlehub as hub
 
     # 加载模型
-    model = hub.Module(name='ernie_zeus_noval_continuation')
+    model = hub.Module(name='ernie_zeus_novel_continuation')
 
     # 小说续写
-    result = model.noval_continuation(
+    result = model.novel_continuation(
         text='昆仑山可以说是天下龙脉的根源，所有的山脉都可以看作是昆仑的分支。这些分出来的枝枝杈杈，都可以看作是一条条独立的龙脉。' 
     )
 
@@ -71,7 +71,7 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
 
 - ### 3. API
   - ```python
-    def noval_continuation(
+    def novel_continuation(
         text: str,
         min_dec_len: int = 2,
         seq_len: int = 512,
@@ -97,5 +97,5 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
   初始发布
 
   ```shell
-  $ hub install ernie_zeus_noval_continuation == 1.0.0
+  $ hub install ernie_zeus_novel_continuation == 1.0.0
   ```
