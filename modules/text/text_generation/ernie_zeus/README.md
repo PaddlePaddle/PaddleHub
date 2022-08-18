@@ -51,17 +51,14 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
 - ### 1. 命令行预测
 
   - ```bash
-    # 使用自定义生成 API 实现作文创作
+    # 作文创作
     $ hub run ernie_zeus \
-            --text '诚以养德，信以修身' \
-            --min_dec_len 128 \
-            --seq_len 512 \
-            --topp 0.9 \
-            --penalty_score 1.2 \
-            --task_prompt zuowen
+        --task composition_generation \
+        --text '诚以养德，信以修身' 
     ```
 
     - **参数**
+      - --task(str): 指定任务名称，与 API 名称保持一直
       - --text(str): 根据不同的任务输入所需的文本。
       - 其他参数请参考后续 API 章节。
 
@@ -74,13 +71,8 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
     model = hub.Module(name='ernie_zeus')
 
     # 作文创作
-    result = model.custom_generation(
-        text='诚以养德，信以修身',
-        min_dec_len=128,
-        seq_len=512,
-        topp=0.9,
-        penalty_score=1.2,
-        task_prompt='zuowen'
+    result = model.composition_generation(
+        text='诚以养德，信以修身'
     )
 
     print(result)
@@ -146,6 +138,154 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
     - **返回**
       - text(str): 生成的文本。
 
+  - ```python
+     def text_cloze(
+         text: str,
+         min_dec_len: int = 1,
+         seq_len: int = 512,
+         topp: float = 0.9,
+         penalty_score: float = 1.0
+     ) -> str
+     ```
+
+     - 完形填空 API
+
+     - **参数**
+       - text(str): 文字段落。使用 [MASK] 标记待补全文字。
+       - min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围 [1, seq_len]。
+       - seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围 [1, 1000]。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+       - topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。取值范围 [0.0, 1.0]。
+       - penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
+
+     - **返回**
+       - text(str): 补全词语
+
+  - ```python
+     def composition_generation(
+         text: str,
+         min_dec_len: int = 128,
+         seq_len: int = 512,
+         topp: float = 0.9,
+         penalty_score: float = 1.2
+     ) -> str
+     ```
+     - 作文创作 API
+
+     - **参数**
+       - text(str): 作文题目。
+       - min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围 [1, seq_len]。
+       - seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围 [1, 1000]。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+       - topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。取值范围 [0.0, 1.0]。
+       - penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
+
+     - **返回**
+       - text(str): 作文内容。
+
+  - ```python
+     def answer_generation(
+         text: str,
+         min_dec_len: int = 2,
+         seq_len: int = 512,
+         topp: float = 0.9,
+         penalty_score: float = 1.2
+     ) -> str
+     ```
+     - 自由问答 API
+
+     - **参数**
+       - text(str): 问题内容。
+       - min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围 [1, seq_len]。
+       - seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围 [1, 1000]。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+       - topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。取值范围 [0.0, 1.0]。
+       - penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
+
+     - **返回**
+       - text(str): 问题答案。
+
+
+   - ```python
+     def couplet_continuation(
+         text: str,
+         min_dec_len: int = 2,
+         seq_len: int = 512,
+         topp: float = 0.9,
+         penalty_score: float = 1.0
+     ) -> str
+     ```
+     - 对联续写 API
+
+     - **参数**
+       - text(str): 对联上联。
+       - min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围 [1, seq_len]。
+       - seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围 [1, 1000]。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+       - topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。取值范围 [0.0, 1.0]。
+       - penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
+
+     - **返回**
+       - text(str): 对联下联。
+
+   - ```python
+     def copywriting_generation(
+         text: str,
+         min_dec_len: int = 32,
+         seq_len: int = 512,
+         topp: float = 0.9,
+         penalty_score: float = 1.2
+     ) -> str
+     ```
+     - 文案创作 API
+
+     - **参数**
+       - text(str): 产品描述。
+       - min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围 [1, seq_len]。
+       - seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围 [1, 1000]。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+       - topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。取值范围 [0.0, 1.0]。
+       - penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
+
+     - **返回**
+       - text(str): 产品文案。
+
+  - ```python
+     def novel_continuation(
+         text: str,
+         min_dec_len: int = 2,
+         seq_len: int = 512,
+         topp: float = 0.9,
+         penalty_score: float = 1.2
+     ) -> str
+     ```
+     - 小说续写 API
+
+     - **参数**
+       - text(str): 小说上文。
+       - min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围 [1, seq_len]。
+       - seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围 [1, 1000]。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+       - topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。取值范围 [0.0, 1.0]。
+       - penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
+
+     - **返回**
+       - text(str): 小说下文。
+
+  - ```python
+     def text_summarization(
+         text: str,
+         min_dec_len: int = 4,
+         seq_len: int = 512,
+         topp: float = 0.0,
+         penalty_score: float = 1.0
+     ) -> str
+     ```
+     - 文本摘要 API
+
+     - **参数**
+       - text(str): 文本段落。
+       - min_dec_len(int): 输出结果的最小长度, 避免因模型生成 END 或者遇到用户指定的 stop_token 而生成长度过短的情况,与 seq_len 结合使用来设置生成文本的长度范围 [1, seq_len]。
+       - seq_len(int): 输出结果的最大长度, 因模型生成 END 或者遇到用户指定的 stop_token, 实际返回结果可能会小于这个长度, 与 min_dec_len 结合使用来控制生成文本的长度范围 [1, 1000]。(注: ERNIE 3.0-1.5B 模型取值范围 ≤ 512)
+       - topp(float): 影响输出文本的多样性, 取值越大, 生成文本的多样性越强。取值范围 [0.0, 1.0]。
+       - penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
+
+     - **返回**
+       - text(str): 段落摘要。
 ## 四、更新历史
 
 * 1.0.0 
