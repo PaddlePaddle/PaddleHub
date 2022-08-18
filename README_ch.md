@@ -30,7 +30,7 @@
 
 ## 简介与特性
 - PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型
-- **【模型种类丰富】**: 涵盖CV、NLP、Audio、Video、工业应用主流五大品类的 **360+** 预训练模型，全部开源下载，离线可运行
+- **【模型种类丰富】**: 涵盖大模型、CV、NLP、Audio、Video、工业应用主流五大品类的 **360+** 预训练模型，全部开源下载，离线可运行
 - **【超低使用门槛】**：无需深度学习背景、无需数据与训练过程，可快速使用AI模型
 - **【一键模型快速预测】**：通过一行命令行或者极简的Python API实现模型调用，可快速体验模型效果
 - **【一键模型转服务化】**：一行命令，搭建深度学习模型API服务化部署能力
@@ -38,10 +38,23 @@
 - **【跨平台兼容性】**：可运行于Linux、Windows、MacOS等多种操作系统
 
 ## 近期更新
-- **2021.12.22**，发布v2.2.0版本。【1】新增100+高质量模型，涵盖对话、语音处理、语义分割、文字识别、文本处理、图像生成等多个领域，预训练模型总量达到[**【360+】**](https://www.paddlepaddle.org.cn/hublist)；【2】新增模型[检索列表](./modules/README_ch.md)，包含模型名称、网络、数据集和使用场景等信息，快速定位用户所需的模型；【3】模型文档排版优化，呈现数据集、指标、模型大小等更多实用信息。
-- **2021.05.12**，新增轻量级中文对话模型[plato-mini](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration)，可以配合使用wechaty实现微信闲聊机器人，[参考demo](https://github.com/KPatr1ck/paddlehub-wechaty-demo)
-- **2021.04.27**，发布v2.1.0版本。【1】新增基于VOC数据集的高精度语义分割模型2个，语音分类模型3个。【2】新增图像语义分割、文本语义匹配、语音分类等相关任务的Fine-Tune能力以及相关任务数据集;完善部署能力：【3】新增ONNX和PaddleInference等模型格式的导出功能。【4】新增[BentoML](https://github.com/bentoml/BentoML) 云原生服务化部署能力，可以支持统一的多框架模型管理和模型部署的工作流，[详细教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/demo/serving/bentoml/cloud-native-model-serving-with-bentoml.ipynb). 更多内容可以参考BentoML 最新 v0.12.1 [Releasenote](https://github.com/bentoml/BentoML/releases/tag/v0.12.1).（感谢@[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic)）的贡献与支持。【5】预训练模型总量达到[**【300】**](https://www.paddlepaddle.org.cn/hublist)个。
-- **2021.02.18**，发布v2.0.0版本，【1】模型开发调试更简单，finetune接口更加灵活易用。视觉类任务迁移学习能力全面升级，支持[图像分类](./demo/image_classification/README.md)、[图像着色](./demo/colorization/README.md)、[风格迁移](./demo/style_transfer/README.md)等多种任务；BERT、ERNIE、RoBERTa等Transformer类模型升级至动态图，支持[文本分类](./demo/text_classification/README.md)、[序列标注](./demo/sequence_labeling/README.md)的Fine-Tune能力；【2】优化服务化部署Serving能力，支持多卡预测、自动负载均衡，性能大幅度提升；【3】新增自动数据增强能力[Auto Augment](./demo/autoaug/README.md)，能高效地搜索适合数据集的数据增强策略组合。【4】新增[词向量模型](./modules/text/embedding)61个，其中包含中文模型51个，英文模型10个；新增[图像分割](./modules/thirdparty/image/semantic_segmentation)模型4个、[深度模型](./modules/thirdparty/image/depth_estimation)2个、[图像生成](./modules/thirdparty/image/Image_gan/style_transfer)模型7个、[文本生成](./modules/thirdparty/text/text_generation)模型3个。【5】预训练模型总量达到[**【274】**](https://www.paddlepaddle.org.cn/hublist) 个。
+- **🔥2022.08.19** 发布v2.3.0版本新增[文心大模型](https://wenxin.baidu.com/)能力。
+   - 新增基于disco diffusion技术的文图生成dd系列模型5个，其中英文模型[体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4438270)，中文模型[体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4437821)。
+   - 支持对文心大模型API的调用, 包括文图生成模型ERNIE-ViLG, 以及支持写作文、写文案、写摘要、对对联、自由问答、写小说、补全文本等多个应用的语言模型ERNIE3.0Zeus[体验Demo](https://aistudio.baidu.com/studio/project/partial/verify/4434069/ba82a7c1e54648cf8e017647bb9b6701)。
+- **🔥2021.12.22**，发布v2.2.0版本新增[预训练模型库官网](https://www.paddlepaddle.org.cn/hublist)。
+   - 新增100+高质量模型，涵盖对话、语音处理、语义分割、文字识别、文本处理、图像生成等多个领域，预训练模型总量达到【360+】；
+   - 新增模型[检索列表](./modules/README_ch.md)，包含模型名称、网络、数据集和使用场景等信息，快速定位用户所需的模型；
+   - 模型文档排版优化，呈现数据集、指标、模型大小等更多实用信息。
+- **2021.05.12**，
+   - 新增轻量级中文对话模型[plato-mini](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration)，可以配合使用wechaty实现微信闲聊机器人，[参考demo](https://github.com/KPatr1ck/paddlehub-wechaty-demo)
+- **2021.04.27**，发布v2.1.0版本。
+   - 模型文档排版优化，呈现数据集、指标、模型大小等更多实用信息。
+   - 新增基于VOC数据集的高精度语义分割模型2个，语音分类模型3个。
+   - 新增图像语义分割、文本语义匹配、语音分类等相关任务的Fine-Tune能力以及相关任务数据集。
+   - 完善部署能力：新增ONNX和PaddleInference等模型格式的导出功能。
+   - 新增[BentoML](https://github.com/bentoml/BentoML) 云原生服务化部署能力，可以支持统一的多框架模型管理和模型部署的工作流，[详细教程](https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/demo/serving/bentoml/cloud-native-model-serving-with-bentoml.ipynb). 更多内容可以参考BentoML 最新 v0.12.1 [Releasenote](https://github.com/bentoml/BentoML/releases/tag/v0.12.1).（感谢@[parano](https://github.com/parano) @[cqvu](https://github.com/cqvu) @[deehrlic](https://github.com/deehrlic)）的贡献与支持。
+   - 预训练模型总量达到[**【300】**](https://www.paddlepaddle.org.cn/hublist)个。
+
 - [More](./docs/docs_ch/release.md)
 
 
@@ -49,6 +62,13 @@
 
 
 ## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)[【模型库】](./modules/README_ch.md)**
+
+### **[大模型](https://www.paddlepaddle.org.cn/hubdetail?name=disco_diffusion_clip_vitb32&en_category=TextToImage)**
+- 包含大模型ERNIE-ViLG、ERNIE3.0Zeus, 提供支持文图生成、写作文、写文案、写摘要、对对联、自由问答、写小说、补全文本等多个应用。
+<div align="center">
+<img src="./docs/imgs/Readme_Related/Image_all.gif"  width = "530" height = "400" />
+</div>
+
 
 ### **[图像类（212个）](./modules/README_ch.md#图像)**
 - 包括图像分类、人脸检测、口罩检测、车辆检测、人脸/人体/手部关键点检测、人像分割、80+语言文本识别、图像超分/上色/动漫化等
