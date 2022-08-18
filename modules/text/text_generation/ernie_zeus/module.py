@@ -353,21 +353,6 @@ class ERNIEZeus:
         parser.add_argument('--sk', type=str, default='')
         parser.add_argument('--task', type=str, default='custom_generation')
 
-        default_kwargs = {
-            'min_dec_len': 1,
-            'seq_len': 128,
-            'topp': 1.0,
-            'penalty_score': 1.0,
-            'stop_token': '',
-            'task_prompt': '',
-            'penalty_text': '',
-            'choice_text': '',
-            'is_unidirectional': False,
-            'min_dec_penalty_text': '',
-            'logits_bias': -10000,
-            'mask_type': 'word'
-        }
-
         args = parser.parse_args(argvs)
 
         func = getattr(self, args.task)
@@ -385,6 +370,27 @@ class ERNIEZeus:
             kwargs.pop('min_dec_penalty_text')
             kwargs.pop('logits_bias')
             kwargs.pop('mask_type')
+            default_kwargs = {
+                'min_dec_len': 1,
+                'seq_len': 128,
+                'topp': 1.0,
+                'penalty_score': 1.0
+            }
+        else:
+            default_kwargs = {
+                'min_dec_len': 1,
+                'seq_len': 128,
+                'topp': 1.0,
+                'penalty_score': 1.0,
+                'stop_token': '',
+                'task_prompt': '',
+                'penalty_text': '',
+                'choice_text': '',
+                'is_unidirectional': False,
+                'min_dec_penalty_text': '',
+                'logits_bias': -10000,
+                'mask_type': 'word'
+            }
         kwargs.pop('task')
         kwargs.pop('ak')
         kwargs.pop('sk')
