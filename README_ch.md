@@ -38,15 +38,15 @@
 - **【跨平台兼容性】**：可运行于Linux、Windows、MacOS等多种操作系统
 
 ## 近期更新
-- **🔥2022.08.19:** 发布v2.3.0版本新增[文心大模型](https://wenxin.baidu.com/)和dd系列文图生成模型。
+- **🔥2022.08.19:** 发布v2.3.0版本新增[文心大模型](https://wenxin.baidu.com/)和disco diffusion(dd)系列文图生成模型。
    - 支持对[文心大模型API](https://wenxin.baidu.com/moduleApi)的调用, 包括 文图生成模型**ERNIE-ViLG**([体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4445016)), 以及支持写作文、写文案、写摘要、对对联、自由问答、写小说、补全文本等多个应用的语言模型**ERNIE 3.0 Zeus**([体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4445054))。
    - 新增基于disco diffusion技术的文图生成dd系列模型5个，其中英文模型([体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4444984))3个，中文模型2个。欢迎点击链接在aistudio上进行体验基于**ERNIE-ViL**开发的中文文图生成模型disco_diffusion_ernievil_base([体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4444998))。
+- **2022.02.18:** 加入Huggingface，创建了PaddlePaddle的空间并上传了模型: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)。
+
 - **🔥2021.12.22**，发布v2.2.0版本新增[预训练模型库官网](https://www.paddlepaddle.org.cn/hublist)。
    - 新增100+高质量模型，涵盖对话、语音处理、语义分割、文字识别、文本处理、图像生成等多个领域，预训练模型总量达到【360+】；
    - 新增模型[检索列表](./modules/README_ch.md)，包含模型名称、网络、数据集和使用场景等信息，快速定位用户所需的模型；
    - 模型文档排版优化，呈现数据集、指标、模型大小等更多实用信息。
-- **2021.05.12**，
-   - 新增轻量级中文对话模型[plato-mini](https://www.paddlepaddle.org.cn/hubdetail?name=plato-mini&en_category=TextGeneration)，可以配合使用wechaty实现微信闲聊机器人，[参考demo](https://github.com/KPatr1ck/paddlehub-wechaty-demo)
 
 
 - [More](./docs/docs_ch/release.md)
@@ -55,7 +55,7 @@
 
 ## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)[【模型库】](./modules/README_ch.md)**
 
-### **[大模型](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)**
+### **[文心大模型](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)**
 - 包含大模型ERNIE-ViL、ERNIE 3.0 Zeus, 支持文图生成、写作文、写文案、写摘要、对对联、自由问答、写小说、补全文本等多个应用。
 <div align="center">
 <img src="https://user-images.githubusercontent.com/22424850/185588578-e2d1216b-e797-458d-bc6b-0ccb8e1bd1b9.png"  width = "80%"  />
