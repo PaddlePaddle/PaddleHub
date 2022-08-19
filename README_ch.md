@@ -58,7 +58,7 @@
 ### **[大模型](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)**
 - 包含大模型ERNIE-ViL、ERNIE 3.0 Zeus, 支持文图生成、写作文、写文案、写摘要、对对联、自由问答、写小说、补全文本等多个应用。
 <div align="center">
-<img src="https://user-images.githubusercontent.com/22424850/185588578-e2d1216b-e797-458d-bc6b-0ccb8e1bd1b9.png"  width = "530" height = "400" />
+<img src="https://user-images.githubusercontent.com/22424850/185588578-e2d1216b-e797-458d-bc6b-0ccb8e1bd1b9.png"  width = "0.8"  />
 </div>
 
 
