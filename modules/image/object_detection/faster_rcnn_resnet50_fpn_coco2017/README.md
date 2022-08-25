@@ -167,6 +167,11 @@
 * 1.0.1
 
   修复numpy数据读取问题
+
+* 1.0.2
+
+  移除 fluid api
+
   - ```shell
-    $ hub install faster_rcnn_resnet50_fpn_coco2017==1.0.1
+    $ hub install faster_rcnn_resnet50_fpn_coco2017==1.0.2
     ```
