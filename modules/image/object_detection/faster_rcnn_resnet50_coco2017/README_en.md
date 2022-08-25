@@ -168,6 +168,11 @@
 * 1.1.1
 
   Fix the problem of reading numpy
+
+* 1.1.2
+
+  Remove fluid api
+
   - ```shell
-    $ hub install faster_rcnn_resnet50_coco2017==1.1.1
+    $ hub install ssd_mobilenet_v1_pascal==1.1.2
     ```
