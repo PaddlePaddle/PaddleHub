@@ -174,5 +174,5 @@
   Remove fluid api
 
   - ```shell
-    $ hub install ssd_mobilenet_v1_pascal==1.1.2
+    $ hub install faster_rcnn_resnet50_coco2017==1.1.2
     ```
