@@ -8,6 +8,8 @@ from functools import partial
 
 import numpy as np
 import paddle
+import paddle.jit
+import paddle.static
 import yaml
 from paddle.inference import Config
 from paddle.inference import create_predictor
@@ -16,30 +18,29 @@ from ssd_mobilenet_v1_pascal.processor import base64_to_cv2
 from ssd_mobilenet_v1_pascal.processor import load_label_info
 from ssd_mobilenet_v1_pascal.processor import postprocess
 
-import paddlehub as hub
-from paddlehub.common.paddle_helper import add_vars_prefix
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
 
 
 @moduleinfo(name="ssd_mobilenet_v1_pascal",
-            version="1.1.3",
+            version="1.1.4",
             type="cv/object_detection",
             summary="SSD with backbone MobileNet_V1, trained with dataset Pasecal VOC.",
             author="paddlepaddle",
             author_email="paddle-dev@baidu.com")
-class SSDMobileNetv1(hub.Module):
-
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "ssd_mobilenet_v1_model")
+class SSDMobileNetv1:
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(self.directory, "ssd_mobilenet_v1_model", "model")
         self.label_names = load_label_info(os.path.join(self.directory, "label_file.txt"))
         self.model_config = None
         self._set_config()
 
     def _set_config(self):
         # predictor config setting.
-        cpu_config = Config(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         cpu_config.switch_ir_optim(False)
@@ -136,23 +137,19 @@ class SSDMobileNetv1(hub.Module):
             res.extend(output)
         return res
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
-
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
-                                           executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
+    def save_inference_model(self,
+                             path):
+        if not paddle.in_dynamic_mode():
+            is_static = True
+            paddle.disable_static()
+        model = paddle.jit.load(self.default_pretrained_model_path)
+        input_specs = [
+            paddle.static.InputSpec(name='image', shape=[-1, 3, 300, 300])
+        ]
+        model = paddle.jit.to_static(model, input_specs)
+        paddle.jit.save(model, path)
+        if is_static:
+            paddle.enable_static()
 
     @serving
     def serving_method(self, images, **kwargs):
