@@ -16,7 +16,7 @@ class TestHubModule(unittest.TestCase):
         assert response.status_code == 200, 'Network Error.'
         with open('tests/test.jpg', 'wb') as f:
             f.write(response.content)
-        cls.module = hub.Module(name="yolov3_resnet34_coco2017")
+        cls.module = hub.Module(name="yolov3_resnet50_vd_coco2017")
 
     def test_object_detection1(self):
         results = self.module.object_detection(
