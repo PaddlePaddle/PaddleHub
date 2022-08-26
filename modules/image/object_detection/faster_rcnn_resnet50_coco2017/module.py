@@ -79,7 +79,6 @@ class FasterRCNNResNet50:
     def object_detection(self,
                          paths=None,
                          images=None,
-                         data=None,
                          use_gpu=False,
                          batch_size=1,
                          output_dir='detection_result',
@@ -116,8 +115,6 @@ class FasterRCNNResNet50:
                     "Attempt to use GPU for prediction, but environment variable CUDA_VISIBLE_DEVICES was not set correctly."
                 )
         paths = paths if paths else list()
-        if data and 'image' in data:
-            paths += data['image']
 
         all_images = list()
         for yield_return in test_reader(paths, images):
