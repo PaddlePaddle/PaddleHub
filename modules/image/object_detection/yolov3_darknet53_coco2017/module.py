@@ -19,7 +19,7 @@ from yolov3_darknet53_coco2017.data_feed import reader
 
 @moduleinfo(
     name="yolov3_darknet53_coco2017",
-    version="1.1.1",
+    version="1.1.2",
     type="CV/object_detection",
     summary="Baidu's YOLOv3 model for object detection, with backbone DarkNet53, trained with dataset coco2017.",
     author="paddlepaddle",
