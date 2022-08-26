@@ -7,41 +7,43 @@ import os
 from functools import partial
 
 import yaml
+import paddle
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+import paddle.static
+from paddle.inference import Config, create_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
-from paddlehub.common.paddle_helper import add_vars_prefix
 
-from ssd_vgg16_512_coco2017.vgg import VGG
-from ssd_vgg16_512_coco2017.processor import load_label_info, postprocess, base64_to_cv2
-from ssd_vgg16_512_coco2017.data_feed import reader
+from .processor import load_label_info, postprocess, base64_to_cv2
+from .data_feed import reader
 
 
 @moduleinfo(
     name="ssd_vgg16_512_coco2017",
-    version="1.0.2",
+    version="1.0.3",
     type="cv/object_detection",
     summary="SSD with backbone VGG16, trained with dataset COCO.",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com")
-class SSDVGG16_512(hub.Module):
-    def _initialize(self):
+class SSDVGG16_512:
+    def __init__(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "ssd_vgg16_512_model")
+            self.directory, "ssd_vgg16_512_model", "model")
         self.label_names = load_label_info(
             os.path.join(self.directory, "label_file.txt"))
         self.model_config = None
         self._set_config()
 
     def _set_config(self):
-        # predictor config setting.
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        """
+        predictor config setting.
+        """
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         cpu_config.switch_ir_optim(False)
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -50,10 +52,10 @@ class SSDVGG16_512(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+            gpu_config = Config(self.default_pretrained_model_path)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            self.gpu_predictor = create_predictor(gpu_config)
 
         # model config setting.
         if not self.model_config:
@@ -62,107 +64,6 @@ class SSDVGG16_512(hub.Module):
 
         self.multi_box_head_config = self.model_config['MultiBoxHead']
         self.output_decoder_config = self.model_config['SSDOutputDecoder']
-
-    def context(self, trainable=True, pretrained=True, get_prediction=False):
-        """
-        Distill the Head Features, so as to perform transfer learning.
-
-        Args:
-            trainable (bool): whether to set parameters trainable.
-            pretrained (bool): whether to load default pretrained model.
-            get_prediction (bool): whether to get prediction.
-
-        Returns:
-             inputs(dict): the input variables.
-             outputs(dict): the output variables.
-             context_prog (Program): the program to execute transfer learning.
-        """
-        context_prog = fluid.Program()
-        startup_program = fluid.Program()
-        with fluid.program_guard(context_prog, startup_program):
-            with fluid.unique_name.guard():
-                # image
-                image = fluid.layers.data(
-                    name='image', shape=[3, 512, 512], dtype='float32')
-                # backbone
-                backbone = VGG(
-                    depth=16,
-                    with_extra_blocks=True,
-                    normalizations=[20., -1, -1, -1, -1, -1, -1],
-                    extra_block_filters=[[256, 512, 1, 2,
-                                          3], [128, 256, 1, 2, 3],
-                                         [128, 256, 1, 2,
-                                          3], [128, 256, 1, 2, 3],
-                                         [128, 256, 1, 1, 4]])
-                # body_feats
-                body_feats = backbone(image)
-                # im_size
-                im_size = fluid.layers.data(
-                    name='im_size', shape=[2], dtype='int32')
-                # var_prefix
-                var_prefix = '@HUB_{}@'.format(self.name)
-                # names of inputs
-                inputs = {
-                    'image': var_prefix + image.name,
-                    'im_size': var_prefix + im_size.name
-                }
-                # names of outputs
-                if get_prediction:
-                    locs, confs, box, box_var = fluid.layers.multi_box_head(
-                        inputs=body_feats,
-                        image=image,
-                        num_classes=81,
-                        **self.multi_box_head_config)
-                    pred = fluid.layers.detection_output(
-                        loc=locs,
-                        scores=confs,
-                        prior_box=box,
-                        prior_box_var=box_var,
-                        **self.output_decoder_config)
-                    outputs = {'bbox_out': [var_prefix + pred.name]}
-                else:
-                    outputs = {
-                        'body_features':
-                        [var_prefix + var.name for var in body_feats]
-                    }
-
-                # add_vars_prefix
-                add_vars_prefix(context_prog, var_prefix)
-                add_vars_prefix(fluid.default_startup_program(), var_prefix)
-                # inputs
-                inputs = {
-                    key: context_prog.global_block().vars[value]
-                    for key, value in inputs.items()
-                }
-                outputs = {
-                    out_key: [
-                        context_prog.global_block().vars[varname]
-                        for varname in out_value
-                    ]
-                    for out_key, out_value in outputs.items()
-                }
-                # trainable
-                for param in context_prog.global_block().iter_parameters():
-                    param.trainable = trainable
-
-                place = fluid.CPUPlace()
-                exe = fluid.Executor(place)
-                # pretrained
-                if pretrained:
-
-                    def _if_exist(var):
-                        return os.path.exists(
-                            os.path.join(self.default_pretrained_model_path,
-                                         var.name))
-
-                    fluid.io.load_vars(
-                        exe,
-                        self.default_pretrained_model_path,
-                        predicate=_if_exist)
-                else:
-                    exe.run(startup_program)
-
-                return inputs, outputs, context_prog
 
     def object_detection(self,
                          paths=None,
@@ -205,50 +106,44 @@ class SSDVGG16_512(hub.Module):
 
         paths = paths if paths else list()
         data_reader = partial(reader, paths, images)
-        batch_reader = fluid.io.batch(data_reader, batch_size=batch_size)
+        batch_reader = paddle.batch(data_reader, batch_size=batch_size)
         res = []
         for iter_id, feed_data in enumerate(batch_reader()):
             feed_data = np.array(feed_data)
-            image_tensor = PaddleTensor(np.array(list(feed_data[:, 0])).copy())
-            if use_gpu:
-                data_out = self.gpu_predictor.run([image_tensor])
-            else:
-                data_out = self.cpu_predictor.run([image_tensor])
 
-            output = postprocess(
-                paths=paths,
-                images=images,
-                data_out=data_out,
-                score_thresh=score_thresh,
-                label_names=self.label_names,
-                output_dir=output_dir,
-                handle_id=iter_id * batch_size,
-                visualization=visualization)
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(np.array(list(feed_data[:, 0])))
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+
+            output = postprocess(paths=paths,
+                                 images=images,
+                                 data_out=output_handle,
+                                 score_thresh=score_thresh,
+                                 label_names=self.label_names,
+                                 output_dir=output_dir,
+                                 handle_id=iter_id * batch_size,
+                                 visualization=visualization)
             res.extend(output)
         return res
 
     def save_inference_model(self,
-                             dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
-
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+                             path):
+        if not paddle.in_dynamic_mode():
+            is_static = True
+            paddle.disable_static()
+        model = paddle.jit.load(self.default_pretrained_model_path)
+        input_specs = [
+            paddle.static.InputSpec(name='image', shape=[-1, 3, 512, 512])
+        ]
+        model = paddle.jit.to_static(model, input_specs)
+        paddle.jit.save(model, path)
+        if is_static:
+            paddle.enable_static()
 
     @serving
     def serving_method(self, images, **kwargs):
