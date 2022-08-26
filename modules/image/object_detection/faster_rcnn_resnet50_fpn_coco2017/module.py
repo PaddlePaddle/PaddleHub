@@ -79,7 +79,6 @@ class FasterRCNNResNet50RPN:
     def object_detection(self,
                          paths=None,
                          images=None,
-                         data=None,
                          use_gpu=False,
                          batch_size=1,
                          output_dir='detection_result',
@@ -117,8 +116,6 @@ class FasterRCNNResNet50RPN:
                 )
 
         paths = paths if paths else list()
-        if data and 'image' in data:
-            paths += data['image']
 
         all_images = list()
         for yield_data in test_reader(paths, images):

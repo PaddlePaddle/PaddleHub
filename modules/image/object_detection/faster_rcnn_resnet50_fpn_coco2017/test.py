@@ -78,16 +78,16 @@ class TestHubModule(unittest.TestCase):
 
     def test_object_detection4(self):
         self.assertRaises(
-            cv2.error,
+            AssertionError,
             self.module.object_detection,
-            images=['no.jpg']
+            paths=['no.jpg']
         )
 
     def test_object_detection5(self):
         self.assertRaises(
             cv2.error,
             self.module.object_detection,
-            images='test.jpg'
+            images=['test.jpg']
         )
 
     def test_save_inference_model(self):
