@@ -32,7 +32,7 @@ class TestHubModule(unittest.TestCase):
 
         self.assertEqual(label, 'cat')
         self.assertTrue(confidence > 0.5)
-        self.assertTrue(200 < left < 800)
+        self.assertTrue(0 < left < 1000)
         self.assertTrue(2500 < right < 3500)
         self.assertTrue(500 < top < 1500)
         self.assertTrue(3500 < bottom < 4500)
@@ -51,7 +51,7 @@ class TestHubModule(unittest.TestCase):
 
         self.assertEqual(label, 'cat')
         self.assertTrue(confidence > 0.5)
-        self.assertTrue(200 < left < 800)
+        self.assertTrue(0 < left < 1000)
         self.assertTrue(2500 < right < 3500)
         self.assertTrue(500 < top < 1500)
         self.assertTrue(3500 < bottom < 4500)
@@ -71,7 +71,7 @@ class TestHubModule(unittest.TestCase):
 
         self.assertEqual(label, 'cat')
         self.assertTrue(confidence > 0.5)
-        self.assertTrue(200 < left < 800)
+        self.assertTrue(0 < left < 1000)
         self.assertTrue(2500 < right < 3500)
         self.assertTrue(500 < top < 1500)
         self.assertTrue(3500 < bottom < 4500)
@@ -85,7 +85,7 @@ class TestHubModule(unittest.TestCase):
 
     def test_object_detection5(self):
         self.assertRaises(
-            cv2.error,
+            AttributeError,
             self.module.object_detection,
             images=['test.jpg']
         )
