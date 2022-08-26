@@ -101,19 +101,13 @@
 
 
   - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
+    def save_inference_model(path)
     ```
     - Save model to specific path
 
     - **Parameters**
 
-      - dirname: output dir for saving model
-      - model\_filename: filename for saving model
-      - params\_filename: filename for saving parameters
-      - combined: whether save parameters into one file
+      - path: model save path
 
 
 ## IV.Server Deployment
@@ -166,6 +160,11 @@
 * 1.0.1
 
   Fix the problem of reading numpy
+
+* 1.0.2
+
+  Remove fluid api
+
   - ```shell
-    $ hub install faster_rcnn_resnet50_fpn_coco2017==1.0.1
+    $ hub install faster_rcnn_resnet50_fpn_coco2017==1.0.2
     ```

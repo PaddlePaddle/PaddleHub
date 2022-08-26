@@ -12,7 +12,6 @@ __all__ = [
     'postprocess',
 ]
 
-
 def base64_to_cv2(b64str):
     data = base64.b64decode(b64str.encode('utf8'))
     data = np.fromstring(data, np.uint8)
@@ -107,7 +106,7 @@ def postprocess(paths,
                 handle_id,
                 visualization=True):
     """
-    postprocess the lod_tensor produced by fluid.Executor.run
+    postprocess the lod_tensor produced by Executor.run
 
     Args:
         paths (list[str]): the path of images.
@@ -130,9 +129,8 @@ def postprocess(paths,
                 confidence (float): The confidence of detection result.
             save_path (str): The path to save output images.
     """
-    lod_tensor = data_out[0]
-    lod = lod_tensor.lod[0]
-    results = lod_tensor.as_ndarray()
+    lod = data_out.lod()[0]
+    results = data_out.copy_to_cpu()
 
     check_dir(output_dir)
 
