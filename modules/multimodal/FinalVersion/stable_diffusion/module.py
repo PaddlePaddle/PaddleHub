@@ -354,7 +354,7 @@ class StableDiffusion:
         self.arg_input_group.add_argument(
             '--width_height',
             type=ast.literal_eval,
-            default=[1280, 768],
+            default=[512, 512],
             help=
             "Desired final image size, in pixels. You can have a square, wide, or tall image, but each edge length should be set to a multiple of 64px, and a minimum of 512px on the default CLIP model setting.  If you forget to use multiples of 64px in your dimensions, DD will adjust the dimensions of your image to make it so."
         )
