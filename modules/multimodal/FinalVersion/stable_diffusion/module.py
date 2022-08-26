@@ -82,16 +82,16 @@ class StableDiffusion:
                                          cross_attention_dim=768,
                                          attention_head_dim=8)
 
-        vae_path = os.path.join(self.directory, 'pre_trained', 'stable-diffusion-v1-4-vae.pdparams')
         unet_path = os.path.join(self.directory, 'pre_trained', 'stable-diffusion-v1-4-unet.pdparams')
+        vae_path = os.path.join(self.directory, 'pre_trained', 'stable-diffusion-v1-4-vae.pdparams')
         self.unet.set_dict(paddle.load(unet_path))
         self.vae.set_dict(paddle.load(vae_path))
         for parameter in self.unet.parameters():
             parameter.stop_gradient = True
-        self.vae.eval()
+        self.unet.eval()
         for parameter in self.vae.parameters():
             parameter.stop_gradient = True
-        self.unet.eval()
+        self.vae.eval()
 
         self.text_encoder = build_model()
         for parameter in self.text_encoder.parameters():
@@ -106,7 +106,7 @@ class StableDiffusion:
                        text_prompts,
                        style: Optional[str] = None,
                        artist: Optional[str] = None,
-                       width_height: Optional[List[int]] = [1280, 768],
+                       width_height: Optional[List[int]] = [512, 512],
                        batch_size: Optional[int] = 1,
                        num_inference_steps=50,
                        guidance_scale=7.5,
