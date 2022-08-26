@@ -16,7 +16,7 @@ class TestHubModule(unittest.TestCase):
         assert response.status_code == 200, 'Network Error.'
         with open('tests/test.jpg', 'wb') as f:
             f.write(response.content)
-        cls.module = hub.Module(name="faster_rcnn_resnet50_coco2017")
+        cls.module = hub.Module(name="ssd_vgg16_512_coco2017")
 
     def test_object_detection1(self):
         results = self.module.object_detection(
@@ -78,16 +78,16 @@ class TestHubModule(unittest.TestCase):
 
     def test_object_detection4(self):
         self.assertRaises(
-            cv2.error,
+            AssertionError,
             self.module.object_detection,
-            images=['no.jpg']
+            paths=['no.jpg']
         )
 
     def test_object_detection5(self):
         self.assertRaises(
             cv2.error,
             self.module.object_detection,
-            images='test.jpg'
+            images=['test.jpg']
         )
 
     def test_save_inference_model(self):
