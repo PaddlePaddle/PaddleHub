@@ -6,44 +6,43 @@ import argparse
 import os
 from functools import partial
 
+import paddle
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+import paddle.static
+from paddle.inference import Config, create_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
-from paddlehub.common.paddle_helper import add_vars_prefix
 
-from yolov3_resnet50_vd_coco2017.resnet import ResNet
-from yolov3_resnet50_vd_coco2017.processor import load_label_info, postprocess, base64_to_cv2
-from yolov3_resnet50_vd_coco2017.data_feed import reader
-from yolov3_resnet50_vd_coco2017.yolo_head import MultiClassNMS, YOLOv3Head
+from .processor import load_label_info, postprocess, base64_to_cv2
+from .data_feed import reader
 
 
 @moduleinfo(
     name="yolov3_resnet50_vd_coco2017",
-    version="1.0.2",
+    version="1.0.3",
     type="CV/object_detection",
     summary=
     "Baidu's YOLOv3 model for object detection with backbone ResNet50, trained with dataset coco2017.",
     author="paddlepaddle",
     author_email="paddle-dev@baidu.com")
-class YOLOv3ResNet50Coco2017(hub.Module):
-    def _initialize(self):
+class YOLOv3ResNet50Coco2017:
+    def __init__(self):
         self.default_pretrained_model_path = os.path.join(
-            self.directory, "yolov3_resnet50_model")
+            self.directory, "yolov3_resnet50_model", "model")
         self.label_names = load_label_info(
             os.path.join(self.directory, "label_file.txt"))
         self._set_config()
-
+ 
     def _set_config(self):
         """
         predictor config setting.
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         cpu_config.switch_ir_optim(False)
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -52,110 +51,10 @@ class YOLOv3ResNet50Coco2017(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+            gpu_config = Config(self.default_pretrained_model_path)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
-
-    def context(self, trainable=True, pretrained=True, get_prediction=False):
-        """
-        Distill the Head Features, so as to perform transfer learning.
-
-        Args:
-            trainable (bool): whether to set parameters trainable.
-            pretrained (bool): whether to load default pretrained model.
-            get_prediction (bool): whether to get prediction.
-
-        Returns:
-             inputs(dict): the input variables.
-             outputs(dict): the output variables.
-             context_prog (Program): the program to execute transfer learning.
-        """
-        context_prog = fluid.Program()
-        startup_program = fluid.Program()
-        with fluid.program_guard(context_prog, startup_program):
-            with fluid.unique_name.guard():
-                # image
-                image = fluid.layers.data(
-                    name='image', shape=[3, 608, 608], dtype='float32')
-                # backbone
-                backbone = ResNet(
-                    norm_type='sync_bn',
-                    freeze_at=0,
-                    freeze_norm=False,
-                    norm_decay=0.,
-                    dcn_v2_stages=[5],
-                    depth=50,
-                    variant='d',
-                    feature_maps=[3, 4, 5])
-                # body_feats
-                body_feats = backbone(image)
-                # im_size
-                im_size = fluid.layers.data(
-                    name='im_size', shape=[2], dtype='int32')
-                # yolo_head
-                yolo_head = YOLOv3Head(num_classes=80)
-                # head_features
-                head_features, body_features = yolo_head._get_outputs(
-                    body_feats, is_train=trainable)
-
-                place = fluid.CPUPlace()
-                exe = fluid.Executor(place)
-                exe.run(fluid.default_startup_program())
-
-                # var_prefix
-                var_prefix = '@HUB_{}@'.format(self.name)
-                # name of inputs
-                inputs = {
-                    'image': var_prefix + image.name,
-                    'im_size': var_prefix + im_size.name
-                }
-                # name of outputs
-                if get_prediction:
-                    bbox_out = yolo_head.get_prediction(head_features, im_size)
-                    outputs = {'bbox_out': [var_prefix + bbox_out.name]}
-                else:
-                    outputs = {
-                        'head_features':
-                        [var_prefix + var.name for var in head_features],
-                        'body_features':
-                        [var_prefix + var.name for var in body_features]
-                    }
-                # add_vars_prefix
-                add_vars_prefix(context_prog, var_prefix)
-                add_vars_prefix(fluid.default_startup_program(), var_prefix)
-                # inputs
-                inputs = {
-                    key: context_prog.global_block().vars[value]
-                    for key, value in inputs.items()
-                }
-                # outputs
-                outputs = {
-                    key: [
-                        context_prog.global_block().vars[varname]
-                        for varname in value
-                    ]
-                    for key, value in outputs.items()
-                }
-                # trainable
-                for param in context_prog.global_block().iter_parameters():
-                    param.trainable = trainable
-                # pretrained
-                if pretrained:
-
-                    def _if_exist(var):
-                        return os.path.exists(
-                            os.path.join(self.default_pretrained_model_path,
-                                         var.name))
-
-                    fluid.io.load_vars(
-                        exe,
-                        self.default_pretrained_model_path,
-                        predicate=_if_exist)
-                else:
-                    exe.run(startup_program)
-
-                return inputs, outputs, context_prog
+            self.gpu_predictor = create_predictor(gpu_config)
 
     def object_detection(self,
                          paths=None,
@@ -198,53 +97,47 @@ class YOLOv3ResNet50Coco2017(hub.Module):
 
         paths = paths if paths else list()
         data_reader = partial(reader, paths, images)
-        batch_reader = fluid.io.batch(data_reader, batch_size=batch_size)
+        batch_reader = paddle.batch(data_reader, batch_size=batch_size)
         res = []
         for iter_id, feed_data in enumerate(batch_reader()):
             feed_data = np.array(feed_data)
-            image_tensor = PaddleTensor(np.array(list(feed_data[:, 0])))
-            im_size_tensor = PaddleTensor(np.array(list(feed_data[:, 1])))
-            if use_gpu:
-                data_out = self.gpu_predictor.run(
-                    [image_tensor, im_size_tensor])
-            else:
-                data_out = self.cpu_predictor.run(
-                    [image_tensor, im_size_tensor])
 
-            output = postprocess(
-                paths=paths,
-                images=images,
-                data_out=data_out,
-                score_thresh=score_thresh,
-                label_names=self.label_names,
-                output_dir=output_dir,
-                handle_id=iter_id * batch_size,
-                visualization=visualization)
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(np.array(list(feed_data[:, 0])))
+            input_handle = predictor.get_input_handle(input_names[1])
+            input_handle.copy_from_cpu(np.array(list(feed_data[:, 1])))
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+
+            output = postprocess(paths=paths,
+                                 images=images,
+                                 data_out=output_handle,
+                                 score_thresh=score_thresh,
+                                 label_names=self.label_names,
+                                 output_dir=output_dir,
+                                 handle_id=iter_id * batch_size,
+                                 visualization=visualization)
             res.extend(output)
         return res
 
     def save_inference_model(self,
-                             dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
-
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+                             path):
+        if not paddle.in_dynamic_mode():
+            is_static = True
+            paddle.disable_static()
+        model = paddle.jit.load(self.default_pretrained_model_path)
+        input_specs = [
+            paddle.static.InputSpec(name='image', shape=[-1, 3, 608, 608]),
+            paddle.static.InputSpec(name='im_size', shape=[-1, 2])
+        ]
+        model = paddle.jit.to_static(model, input_specs)
+        paddle.jit.save(model, path)
+        if is_static:
+            paddle.enable_static()
 
     @serving
     def serving_method(self, images, **kwargs):
