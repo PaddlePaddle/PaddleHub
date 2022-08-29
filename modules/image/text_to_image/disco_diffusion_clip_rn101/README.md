@@ -136,7 +136,6 @@ disco_diffusion_clip_rn101 是一个文图生成模型，可以通过输入一�
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # 获取返回结果
-    r.json()["results"]
     da = DocumentArray.from_base64(r.json()["results"])
     # 手动将最终生成的图像保存到指定路径
     da[0].save_uri_to_file('disco_diffusion_clip_rn101_out-result.png')
