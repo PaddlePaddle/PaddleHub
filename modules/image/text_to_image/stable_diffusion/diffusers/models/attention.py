@@ -270,7 +270,7 @@ class CrossAttention(nn.Layer):
         k = self.reshape_heads_to_batch_dim(k)
         v = self.reshape_heads_to_batch_dim(v)
 
-        sim = paddle.einsum("b i d, b j d -> b i j", q, k) * self.scale
+        sim = paddle.einsum("b i d, b j d -> b i j", q * self.scale, k)
 
         if exists(mask):
             mask = mask.reshape([batch_size, -1])
