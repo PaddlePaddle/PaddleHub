@@ -13,8 +13,8 @@ import paddle.static
 from paddle.inference import Config, create_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
 
-from yolov3_darknet53_coco2017.processor import load_label_info, postprocess, base64_to_cv2
-from yolov3_darknet53_coco2017.data_feed import reader
+from .processor import load_label_info, postprocess, base64_to_cv2
+from .data_feed import reader
 
 
 @moduleinfo(
@@ -49,7 +49,7 @@ class YOLOv3DarkNet53Coco2017:
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
