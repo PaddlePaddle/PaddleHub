@@ -13,10 +13,10 @@ import paddle.static
 import yaml
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from ssd_mobilenet_v1_pascal.data_feed import reader
-from ssd_mobilenet_v1_pascal.processor import base64_to_cv2
-from ssd_mobilenet_v1_pascal.processor import load_label_info
-from ssd_mobilenet_v1_pascal.processor import postprocess
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import load_label_info
+from .processor import postprocess
 
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
@@ -53,7 +53,7 @@ class SSDMobileNetv1:
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
