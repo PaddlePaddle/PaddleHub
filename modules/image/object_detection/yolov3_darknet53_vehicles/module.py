@@ -12,10 +12,10 @@ import paddle.jit
 import paddle.static
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from yolov3_darknet53_vehicles.data_feed import reader
-from yolov3_darknet53_vehicles.processor import base64_to_cv2
-from yolov3_darknet53_vehicles.processor import load_label_info
-from yolov3_darknet53_vehicles.processor import postprocess
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import load_label_info
+from .processor import postprocess
 
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
@@ -61,7 +61,7 @@ class YOLOv3DarkNet53Vehicles:
         npu_id = self._get_device_id("FLAGS_selected_npus")
         if npu_id != -1:
             # use npu
-            npu_config = Config(self.default_pretrained_model_path)
+            npu_config = Config(model, params)
             npu_config.disable_glog_info()
             npu_config.enable_npu(device_id=npu_id)
             self.npu_predictor = create_predictor(npu_config)
@@ -70,7 +70,7 @@ class YOLOv3DarkNet53Vehicles:
         gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
         if gpu_id != -1:
             # use gpu
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=gpu_id)
             self.gpu_predictor = create_predictor(gpu_config)
@@ -79,7 +79,7 @@ class YOLOv3DarkNet53Vehicles:
         xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
         if xpu_id != -1:
             # use xpu
-            xpu_config = Config(self.default_pretrained_model_path)
+            xpu_config = Config(model, params)
             xpu_config.disable_glog_info()
             xpu_config.enable_xpu(100)
             self.xpu_predictor = create_predictor(xpu_config)
