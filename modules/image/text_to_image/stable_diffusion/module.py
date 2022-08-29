@@ -326,6 +326,11 @@ class StableDiffusion:
                                            default=True,
                                            help="whether use GPU or not")
 
+        self.arg_config_group.add_argument('--enable_fp16',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use float16 or not")
+
         self.arg_config_group.add_argument('--output_dir',
                                            type=str,
                                            default='stable_diffusion_out',
