@@ -6,15 +6,15 @@ import ast
 import os
 import argparse
 
+import paddle
+import paddle.jit
+import paddle.static
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+from paddle.inference import Config, create_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
 
-from human_pose_estimation_resnet50_mpii.processor import base64_to_cv2, postprocess
-from human_pose_estimation_resnet50_mpii.data_feed import reader
-from human_pose_estimation_resnet50_mpii.pose_resnet import ResNet
+from .processor import base64_to_cv2, postprocess
+from .data_feed import reader
 
 
 @moduleinfo(
@@ -24,20 +24,22 @@ from human_pose_estimation_resnet50_mpii.pose_resnet import ResNet
     author_email="paddle-dev@baidu.comi",
     summary=
     "Paddle implementation for the paper `Simple baselines for human pose estimation and tracking`, trained with the MPII dataset.",
-    version="1.1.1")
-class HumanPoseEstimation(hub.Module):
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "pose-resnet50-mpii-384x384")
+    version="1.1.2")
+class HumanPoseEstimation:
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(self.directory, "pose-resnet50-mpii-384x384", "model")
         self._set_config()
 
     def _set_config(self):
         """
         predictor config setting
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -46,10 +48,10 @@ class HumanPoseEstimation(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            self.gpu_predictor = create_predictor(gpu_config)
 
     def keypoint_detection(self,
                            images=None,
@@ -80,7 +82,6 @@ class HumanPoseEstimation(hub.Module):
 
         total_num = len(all_data)
         loop_num = int(np.ceil(total_num / batch_size))
-
         res = list()
         for iter_id in range(loop_num):
             batch_data = list()
@@ -92,9 +93,14 @@ class HumanPoseEstimation(hub.Module):
                     pass
             # feed batch image
             batch_image = np.array([data['image'] for data in batch_data])
-            batch_image = PaddleTensor(batch_image.copy())
-            output = self.gpu_predictor.run([batch_image]) if use_gpu else self.cpu_predictor.run([batch_image])
-            output = np.expand_dims(output[0].as_ndarray(), axis=1)
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(batch_image)
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+            output = np.expand_dims(output_handle.copy_to_cpu(), axis=1)
             # postprocess one by one
             for i in range(len(batch_data)):
                 out = postprocess(
@@ -107,24 +113,19 @@ class HumanPoseEstimation(hub.Module):
                 res.append(out)
         return res
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
-
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+    def save_inference_model(self,
+                             path):
+        if not paddle.in_dynamic_mode():
+            is_static = True
+            paddle.disable_static()
+        model = paddle.jit.load(self.default_pretrained_model_path)
+        input_specs = [
+            paddle.static.InputSpec(name='image', shape=[-1, 3, 384, 384])
+        ]
+        model = paddle.jit.to_static(model, input_specs)
+        paddle.jit.save(model, path)
+        if is_static:
+            paddle.enable_static()
 
     @serving
     def serving_method(self, images, **kwargs):

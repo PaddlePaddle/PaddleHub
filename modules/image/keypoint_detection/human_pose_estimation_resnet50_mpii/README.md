@@ -89,20 +89,14 @@
         - data (OrderedDict): 人体骨骼关键点的坐标。
     
   - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True):
+    def save_inference_model(path):
     ```
   
     - 将模型保存到指定路径。
   
     - **参数**
   
-      - dirname: 存在模型的目录名称
-      - model_filename: 模型文件名称，默认为__model__
-      - params_filename: 参数文件名称，默认为__params__(仅当combined为True时生效)
-      - combined: 是否将参数保存到统一的一个文件中
+      - path: 模型保存路径
 
 
 ## 四、服务部署
@@ -155,6 +149,10 @@
 
 * 1.1.1
 
+* 1.1.2
+
+   移除 fluid api
+
   * ```shell
-    $ hub install human_pose_estimation_resnet50_mpii==1.1.1
+    $ hub install human_pose_estimation_resnet50_mpii==1.1.2
     ```
