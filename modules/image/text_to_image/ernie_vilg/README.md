@@ -67,15 +67,6 @@
 - ### 3、API
 
   - ```python
-    def __init__(ak: Optional[str]=None, sk: Optional[str]=None)
-    ```
-    - 初始化模块，可自定义用于申请访问文心API的ak和sk。
-
-    - **参数**
-      - ak:(Optional[str]): 用于申请文心api使用token的ak，可不填。
-      - sk:(Optional[str]): 用于申请文心api使用token的sk，可不填。
-
-  - ```python
     def generate_image(
               text_prompts:str,
               style: Optional[str] = "油画",
