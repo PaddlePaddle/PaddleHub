@@ -15,7 +15,6 @@
 import os
 import time
 import copy
-import base64
 import argparse
 from typing import Union
 from collections import OrderedDict
@@ -26,7 +25,7 @@ import paddle.nn as nn
 import numpy as np
 from paddlehub.module.module import moduleinfo, runnable, serving
 import paddlehub.vision.transforms as T
-import openpose_body_estimation.processor as P
+from . import processor as P
 
 
 @moduleinfo(
@@ -36,7 +35,7 @@ import openpose_body_estimation.processor as P
     author_email="",
     summary="Openpose_body_estimation is a body pose estimation model based on Realtime Multi-Person 2D Pose \
             Estimation using Part Affinity Fields.",
-    version="1.0.0")
+    version="1.0.1")
 class BodyPoseModel(nn.Layer):
     """
     BodyposeModel
