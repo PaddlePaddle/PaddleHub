@@ -93,7 +93,46 @@
     - **返回**
       - images(List(PIL.Image)): 返回生成的所有图像列表，PIL的Image格式。
 
-## 四、更新历史
+## 四、服务部署
+
+- PaddleHub Serving可以部署一个在线文图生成服务。
+
+- ### 第一步：启动PaddleHub Serving
+
+  - 运行启动命令：
+  - ```shell
+    $ hub serving start -m ernie_vilg
+    ```
+
+  - 这样就完成了一个文图生成的在线服务API的部署，默认端口号为8866。
+
+  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
+
+- ### 第二步：发送预测请求
+
+  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果。
+
+  - ```python
+    import requests
+    import json
+    import cv2
+    import base64
+    from io import BytesIO
+    from PIL import Image
+
+    # 发送HTTP请求
+    data = {'text_prompts': '巨大的白色城堡'}
+    headers = {"Content-type": "application/json"}
+    url = "http://127.0.0.1:8866/predict/ernie_vilg"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+    # 获取返回结果
+    for i, result in enumerate(r.json()["results"]):
+      image = Image.open(BytesIO(base64.b64decode(result)))
+      image.save('result_{}.png'.format(i))
+
+
+## 五、更新历史
 
 * 1.0.0
 

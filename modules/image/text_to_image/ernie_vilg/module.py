@@ -1,5 +1,6 @@
 import argparse
 import ast
+import base64
 import os
 import re
 import sys
@@ -213,6 +214,20 @@ class ErnieVilG:
                                       topk=args.topk,
                                       output_dir=args.output_dir)
         return results
+
+    @serving
+    def serving_method(self, text_prompts, **kwargs):
+        """
+        Run as a service.
+        """
+        results_base64encoded = []
+        results = self.generate_image(text_prompts=text_prompts, **kwargs)
+        for result in results:
+            buffered = BytesIO()
+            result.save(buffered, format="png")
+            img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            results_base64encoded.append(img_str)
+        return results_base64encoded
 
     def add_module_input_arg(self):
         """
