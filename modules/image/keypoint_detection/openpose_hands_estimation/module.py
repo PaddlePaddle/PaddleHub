@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-import base64
 import copy
 import time
 import argparse
@@ -26,11 +25,11 @@ import numpy as np
 import paddle.nn as nn
 import paddlehub as hub
 from skimage.measure import label
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 from paddlehub.module.module import moduleinfo, runnable, serving
 import paddlehub.vision.transforms as T
 
-import openpose_hands_estimation.processor as P
+from . import processor as P
 
 
 @moduleinfo(
@@ -40,7 +39,7 @@ import openpose_hands_estimation.processor as P
     author_email="",
     summary="Openpose_hands_estimation is a hand pose estimation model based on Hand Keypoint Detection in \
             Single Images using Multiview Bootstrapping.",
-    version="1.0.0")
+    version="1.0.1")
 class HandPoseModel(nn.Layer):
     """
     HandposeModel
