@@ -73,7 +73,7 @@ disco_diffusion_clip_rn50 是一个文图生成模型，可以通过输入一段
     # 展示所有的中间结果
     da[0].chunks.plot_image_sprites(skip_empty=True, show_index=True, keep_aspect_ratio=True)
     # 将整个生成过程保存为一个动态图gif
-    da[0].chunks.save_gif('disco_diffusion_clip_rn50_out-result.gif', show_index=True, inline_display=True, size_ratio=0.5)
+    da[0].chunks.save_gif('disco_diffusion_clip_rn50_out-result.gif')
     ```
 
 - ### 3、API
