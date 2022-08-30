@@ -791,11 +791,3 @@ Prompt 的主体可以是千奇百怪、各种各样的。这里我挑了几个�
 DALL-E 2 的 Prompt 技巧资料：https://docs.google.com/document/d/11WlzjBT0xRpQhP9tFMtxzd0q6ANIdHPUBkMV-YB043U/edit
 
 DiscoDiffusion Prompt 技巧资料：https://docs.google.com/document/d/1l8s7uS2dGqjztYSjPpzlmXLjl5PM3IGkRWI3IiCuK7g/edit
-
-
-
-## 关注我
-
-
-
-![contact](https://raw.githubusercontent.com/OleNet/YouPromptMe/gh-pages/you-prompt-me/images/contact.jpg)
