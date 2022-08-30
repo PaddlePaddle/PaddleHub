@@ -73,7 +73,7 @@ disco_diffusion_clip_rn50 是一个文图生成模型，可以通过输入一段
     # 展示所有的中间结果
     da[0].chunks.plot_image_sprites(skip_empty=True, show_index=True, keep_aspect_ratio=True)
     # 将整个生成过程保存为一个动态图gif
-    da[0].chunks.save_gif('disco_diffusion_clip_rn50_out-result.gif', show_index=True, inline_display=True, size_ratio=0.5)
+    da[0].chunks.save_gif('disco_diffusion_clip_rn50_out-result.gif')
     ```
 
 - ### 3、API
@@ -103,7 +103,46 @@ disco_diffusion_clip_rn50 是一个文图生成模型，可以通过输入一段
     - **返回**
       - ra(DocumentArray): DocumentArray对象， 包含`n_batches`个Documents，其中每个Document都保存了迭代过程的所有中间结果。详细可参考[DocumentArray使用文档](https://docarray.jina.ai/fundamentals/documentarray/index.html)。
 
-## 四、更新历史
+## 四、服务部署
+
+- PaddleHub Serving可以部署一个在线文图生成服务。
+
+- ### 第一步：启动PaddleHub Serving
+
+  - 运行启动命令：
+  - ```shell
+    $ hub serving start -m disco_diffusion_clip_rn50
+    ```
+
+  - 这样就完成了一个文图生成的在线服务API的部署，默认端口号为8866。
+
+  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
+
+- ### 第二步：发送预测请求
+
+  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果，返回的预测结果在反序列化后即是上述接口声明中说明的DocumentArray类型，返回后对结果的操作方式和使用generate_image接口完全相同。
+
+  - ```python
+    import requests
+    import json
+    import cv2
+    import base64
+    from docarray import DocumentArray
+
+    # 发送HTTP请求
+    data = {'text_prompts': 'in the morning light,Overlooking TOKYO city by greg rutkowski and thomas kinkade,Trending on artstation.'}
+    headers = {"Content-type": "application/json"}
+    url = "http://127.0.0.1:8866/predict/disco_diffusion_clip_rn50"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+    # 获取返回结果
+    da = DocumentArray.from_base64(r.json()["results"])
+    # 手动将最终生成的图像保存到指定路径
+    da[0].save_uri_to_file('disco_diffusion_clip_rn50_out-result.png')
+    # 将生成过程保存为一个动态图gif
+    da[0].chunks.save_gif('disco_diffusion_clip_rn50_out-result.gif')
+
+## 五、更新历史
 
 * 1.0.0
 
