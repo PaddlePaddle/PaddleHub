@@ -8,13 +8,13 @@ import os
 
 import numpy as np
 import paddle
+import paddle.static
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from ultra_light_fast_generic_face_detector_1mb_640.data_feed import reader
-from ultra_light_fast_generic_face_detector_1mb_640.processor import base64_to_cv2
-from ultra_light_fast_generic_face_detector_1mb_640.processor import postprocess
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import postprocess
 
-import paddlehub as hub
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
@@ -27,19 +27,21 @@ from paddlehub.module.module import serving
     author_email="paddle-dev@baidu.com",
     summary=
     "Ultra-Light-Fast-Generic-Face-Detector-1MB is a high-performance object detection model release on https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB.",
-    version="1.1.3")
-class FaceDetector640(hub.Module):
+    version="1.1.4")
+class FaceDetector640:
 
-    def _initialize(self):
+    def __init__(self):
         self.default_pretrained_model_path = os.path.join(self.directory,
-                                                          "ultra_light_fast_generic_face_detector_1mb_640")
+                                                          "ultra_light_fast_generic_face_detector_1mb_640", "model")
         self._set_config()
 
     def _set_config(self):
         """
         predictor config setting
         """
-        cpu_config = Config(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_predictor(cpu_config)
@@ -51,28 +53,28 @@ class FaceDetector640(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
+    def save_inference_model(self, path):
         place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
+        exe = paddle.static.Executor(place)
 
         program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
+            self.default_pretrained_model_path, executor=exe)
 
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
-                                           executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
+        paddle.static.save_inference_model(
+            path,
+            [paddle.static.data(name=feeded_var_names[0], shape=(1, 3, 480, 640))],
+            [
+                paddle.static.data(name='save_infer_model/scale_0', shape=(1, 17640, 2)),
+                paddle.static.data(name='save_infer_model/scale_1', shape=(1, 17640, 4)),
+            ],
+            executor=exe,
+            program=program
+        )
 
     def face_detection(self,
                        images=None,
