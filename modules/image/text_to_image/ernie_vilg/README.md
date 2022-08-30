@@ -1,4 +1,7 @@
-# ernie_vilg
+  <p align="center">
+    <img src="https://user-images.githubusercontent.com/22424850/187387422-f6c9ccab-7fda-416e-a24d-7d6084c46f67.jpg"  width = "80%" hspace='10'/>
+
+# PaddleHub ERNIE-ViLG
 
 |模型名称|ernie_vilg|
 | :--- | :---: |
