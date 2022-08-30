@@ -51,7 +51,7 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run ernie_vilg --text_prompts "宁静的小镇" --output_dir ernie_vilg_out
+    $ hub run ernie_vilg --text_prompts "宁静的小镇" --style "油画" --output_dir ernie_vilg_out
     ```
 
 - ### 2、预测代码示例
@@ -61,7 +61,7 @@
 
     module = hub.Module(name="ernie_vilg")
     text_prompts = ["宁静的小镇"]
-    images = module.generate_image(text_prompts=text_prompts, output_dir='./ernie_vilg_out/')  
+    images = module.generate_image(text_prompts=text_prompts, style='油画', output_dir='./ernie_vilg_out/')  
     ```
 
 - ### 3、API
@@ -79,7 +79,7 @@
     - **参数**
 
       - text_prompts(str): 输入的语句，描述想要生成的图像的内容。
-      - style(Optional[str]): 生成图像的风格，当前支持'油画','水彩','粉笔画','卡通','儿童画','蜡笔画'。
+      - style(Optional[str]): 生成图像的风格，当前支持'油画','水彩','粉笔画','卡通','儿童画','蜡笔画','探索无限'。
       - topk(Optional[int]): 保存前多少张图，最多保存10张。
       - output_dir(Optional[str]): 保存输出图像的目录，默认为"ernievilg_output"。
 

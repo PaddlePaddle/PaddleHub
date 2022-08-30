@@ -72,7 +72,7 @@ class ErnieVilG:
         Create image by text prompts using ErnieVilG model.
 
         :param text_prompts: Phrase, sentence, or string of words and phrases describing what the image should look like.
-        :param style: Image stype, currently supported 油画、水彩、粉笔画、卡通、儿童画、蜡笔画
+        :param style: Image stype, currently supported 油画、水彩、粉笔画、卡通、儿童画、蜡笔画、探索无限。
         :param topk: Top k images to save.
         :param visualization: Whether to save images or not.
         :output_dir: Output directory
@@ -241,7 +241,7 @@ class ErnieVilG:
         self.arg_input_group.add_argument('--style',
                                           type=str,
                                           default='油画',
-                                          choices=['油画', '水彩', '粉笔画', '卡通', '儿童画', '蜡笔画'],
+                                          choices=['油画', '水彩', '粉笔画', '卡通', '儿童画', '蜡笔画', '探索无限'],
                                           help="绘画风格")
         self.arg_input_group.add_argument('--topk', type=int, default=10, help="选取保存前多少张图，最多10张")
         self.arg_input_group.add_argument('--ak', type=str, default=None, help="申请文心api使用token的ak")
