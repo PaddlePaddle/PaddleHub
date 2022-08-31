@@ -3,6 +3,17 @@
 
 # PaddleHub ERNIE-ViLG
 
+# 目录
+1. [模型基本信息](#一模型基本信息)
+2. [安装](#二安装)
+3. [模型API预测](#三模型api预测)
+4. [Prompt 指南](#四-prompt-指南)
+5. [服务部署](#五服务部署)
+6. [更新历史](#六更新历史)
+
+
+## 一、模型基本信息
+
 |模型名称|ernie_vilg|
 | :--- | :---: |
 |类别|图像-文图生成|
@@ -12,8 +23,6 @@
 |模型大小|-|
 |最新更新日期|2022-08-02|
 |数据指标|-|
-
-## 一、模型基本信息
 
 ### 应用效果展示
 
@@ -87,59 +96,8 @@
     - **返回**
       - images(List(PIL.Image)): 返回生成的所有图像列表，PIL的Image格式。
 
-## 四、服务部署
 
-- PaddleHub Serving可以部署一个在线文图生成服务。
-
-- ### 第一步：启动PaddleHub Serving
-
-  - 运行启动命令：
-  - ```shell
-    $ hub serving start -m ernie_vilg
-    ```
-
-  - 这样就完成了一个文图生成的在线服务API的部署，默认端口号为8866。
-
-  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
-
-- ### 第二步：发送预测请求
-
-  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果。
-
-  - ```python
-    import requests
-    import json
-    import cv2
-    import base64
-    from io import BytesIO
-    from PIL import Image
-
-    # 发送HTTP请求
-    data = {'text_prompts': '巨大的白色城堡'}
-    headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/ernie_vilg"
-    r = requests.post(url=url, headers=headers, data=json.dumps(data))
-
-    # 获取返回结果
-    for i, result in enumerate(r.json()["results"]):
-      image = Image.open(BytesIO(base64.b64decode(result)))
-      image.save('result_{}.png'.format(i))
-
-
-## 五、更新历史
-
-* 1.0.0
-
-  初始发布
-
-  ```shell
-  $ hub install ernie_vilg == 1.0.0
-  ```
-
-
-
-
-## 六、 Prompt 指南
+## 四、 Prompt 指南
 
 
 
@@ -785,3 +743,52 @@ Prompt 的主体可以是千奇百怪、各种各样的。这里我挑了几个�
 DALL-E 2 的 Prompt 技巧资料：https://docs.google.com/document/d/11WlzjBT0xRpQhP9tFMtxzd0q6ANIdHPUBkMV-YB043U/edit
 
 DiscoDiffusion Prompt 技巧资料：https://docs.google.com/document/d/1l8s7uS2dGqjztYSjPpzlmXLjl5PM3IGkRWI3IiCuK7g/edit
+
+## 五、服务部署
+
+- PaddleHub Serving可以部署一个在线文图生成服务。
+
+- ### 第一步：启动PaddleHub Serving
+
+  - 运行启动命令：
+  - ```shell
+    $ hub serving start -m ernie_vilg
+    ```
+
+  - 这样就完成了一个文图生成的在线服务API的部署，默认端口号为8866。
+
+  - **NOTE:** 如使用GPU预测，则需要在启动服务之前，请设置CUDA\_VISIBLE\_DEVICES环境变量，否则不用设置。
+
+- ### 第二步：发送预测请求
+
+  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果。
+
+  - ```python
+    import requests
+    import json
+    import cv2
+    import base64
+    from io import BytesIO
+    from PIL import Image
+
+    # 发送HTTP请求
+    data = {'text_prompts': '巨大的白色城堡'}
+    headers = {"Content-type": "application/json"}
+    url = "http://127.0.0.1:8866/predict/ernie_vilg"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+    # 获取返回结果
+    for i, result in enumerate(r.json()["results"]):
+      image = Image.open(BytesIO(base64.b64decode(result)))
+      image.save('result_{}.png'.format(i))
+
+
+## 六、更新历史
+
+* 1.0.0
+
+  初始发布
+
+  ```shell
+  $ hub install ernie_vilg == 1.0.0
+  ```

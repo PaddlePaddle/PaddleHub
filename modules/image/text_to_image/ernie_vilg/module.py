@@ -65,7 +65,7 @@ class ErnieVilG:
     def generate_image(self,
                        text_prompts,
                        style: Optional[str] = "油画",
-                       topk: Optional[int] = 10,
+                       topk: Optional[int] = 6,
                        visualization: Optional[bool] = True,
                        output_dir: Optional[str] = 'ernievilg_output'):
         """
@@ -119,8 +119,11 @@ class ErnieVilG:
                 if res['code'] != 0:
                     print("Token失效重新请求后依然发生错误，请检查输入的参数")
                     raise RuntimeError("Token失效重新请求后依然发生错误，请检查输入的参数")
-
-            taskids.append(res['data']["taskId"])
+            if res['msg'] == 'success':
+                taskids.append(res['data']["taskId"])
+            else:
+                print(res['msg'])
+                raise RuntimeError(res['msg'])
 
         start_time = time.time()
         process_bar = tqdm(total=100, unit='%')
@@ -163,13 +166,17 @@ class ErnieVilG:
                     if res['code'] != 0:
                         print("Token失效重新请求后依然发生错误，请检查输入的参数")
                         raise RuntimeError("Token失效重新请求后依然发生错误，请检查输入的参数")
-                if res['data']['status'] == 1:
-                    has_done.append(res['data']['taskId'])
-                results[res['data']['text']] = {
-                    'imgUrls': res['data']['imgUrls'],
-                    'waiting': res['data']['waiting'],
-                    'taskId': res['data']['taskId']
-                }
+                if res['msg'] == 'success':
+                    if res['data']['status'] == 1:
+                        has_done.append(res['data']['taskId'])
+                    results[res['data']['text']] = {
+                        'imgUrls': res['data']['imgUrls'],
+                        'waiting': res['data']['waiting'],
+                        'taskId': res['data']['taskId']
+                    }
+                else:
+                    print(res['msg'])
+                    raise RuntimeError(res['msg'])
                 total_time = int(re.match('[0-9]+', str(res['data']['waiting'])).group(0)) * 60
             end_time = time.time()
             progress_rate = int(((end_time - start_time) / total_time * 100)) if total_time != 0 else 100
@@ -187,7 +194,14 @@ class ErnieVilG:
         result_images = []
         for text, data in results.items():
             for idx, imgdata in enumerate(data['imgUrls']):
-                image = Image.open(BytesIO(requests.get(imgdata['image']).content))
+                try:
+                    image = Image.open(BytesIO(requests.get(imgdata['image']).content))
+                except Exception as e:
+                    print('Download generated images error, retry one time')
+                    try:
+                        image = Image.open(BytesIO(requests.get(imgdata['image']).content))
+                    except Exception:
+                        raise RuntimeError('Download generated images failed.')
                 if visualization:
                     image.save(os.path.join(output_dir, '{}_{}.png'.format(text, idx)))
                 result_images.append(image)
@@ -243,7 +257,7 @@ class ErnieVilG:
                                           default='油画',
                                           choices=['油画', '水彩', '粉笔画', '卡通', '儿童画', '蜡笔画', '探索无限'],
                                           help="绘画风格")
-        self.arg_input_group.add_argument('--topk', type=int, default=10, help="选取保存前多少张图，最多10张")
+        self.arg_input_group.add_argument('--topk', type=int, default=6, help="选取保存前多少张图，最多10张")
         self.arg_input_group.add_argument('--ak', type=str, default=None, help="申请文心api使用token的ak")
         self.arg_input_group.add_argument('--sk', type=str, default=None, help="申请文心api使用token的sk")
         self.arg_input_group.add_argument('--visualization', type=bool, default=True, help="是否保存生成的图片")
