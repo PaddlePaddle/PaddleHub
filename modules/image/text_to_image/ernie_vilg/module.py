@@ -1,5 +1,6 @@
 import argparse
 import ast
+import base64
 import os
 import re
 import sys
@@ -65,13 +66,15 @@ class ErnieVilG:
                        text_prompts,
                        style: Optional[str] = "油画",
                        topk: Optional[int] = 10,
+                       visualization: Optional[bool] = True,
                        output_dir: Optional[str] = 'ernievilg_output'):
         """
         Create image by text prompts using ErnieVilG model.
 
         :param text_prompts: Phrase, sentence, or string of words and phrases describing what the image should look like.
-        :param style: Image stype, currently supported 油画、水彩、粉笔画、卡通、儿童画、蜡笔画
+        :param style: Image stype, currently supported 油画、水彩、粉笔画、卡通、儿童画、蜡笔画、探索无限。
         :param topk: Top k images to save.
+        :param visualization: Whether to save images or not.
         :output_dir: Output directory
         """
         if not os.path.exists(output_dir):
@@ -116,8 +119,11 @@ class ErnieVilG:
                 if res['code'] != 0:
                     print("Token失效重新请求后依然发生错误，请检查输入的参数")
                     raise RuntimeError("Token失效重新请求后依然发生错误，请检查输入的参数")
-
-            taskids.append(res['data']["taskId"])
+            if res['msg'] == 'success':
+                taskids.append(res['data']["taskId"])
+            else:
+                print(res['msg'])
+                raise RuntimeError(res['msg'])
 
         start_time = time.time()
         process_bar = tqdm(total=100, unit='%')
@@ -160,13 +166,17 @@ class ErnieVilG:
                     if res['code'] != 0:
                         print("Token失效重新请求后依然发生错误，请检查输入的参数")
                         raise RuntimeError("Token失效重新请求后依然发生错误，请检查输入的参数")
-                if res['data']['status'] == 1:
-                    has_done.append(res['data']['taskId'])
-                results[res['data']['text']] = {
-                    'imgUrls': res['data']['imgUrls'],
-                    'waiting': res['data']['waiting'],
-                    'taskId': res['data']['taskId']
-                }
+                if res['msg'] == 'success':
+                    if res['data']['status'] == 1:
+                        has_done.append(res['data']['taskId'])
+                    results[res['data']['text']] = {
+                        'imgUrls': res['data']['imgUrls'],
+                        'waiting': res['data']['waiting'],
+                        'taskId': res['data']['taskId']
+                    }
+                else:
+                    print(res['msg'])
+                    raise RuntimeError(res['msg'])
                 total_time = int(re.match('[0-9]+', str(res['data']['waiting'])).group(0)) * 60
             end_time = time.time()
             progress_rate = int(((end_time - start_time) / total_time * 100)) if total_time != 0 else 100
@@ -185,7 +195,8 @@ class ErnieVilG:
         for text, data in results.items():
             for idx, imgdata in enumerate(data['imgUrls']):
                 image = Image.open(BytesIO(requests.get(imgdata['image']).content))
-                image.save(os.path.join(output_dir, '{}_{}.png'.format(text, idx)))
+                if visualization:
+                    image.save(os.path.join(output_dir, '{}_{}.png'.format(text, idx)))
                 result_images.append(image)
                 if idx + 1 >= topk:
                     break
@@ -211,8 +222,23 @@ class ErnieVilG:
         results = self.generate_image(text_prompts=args.text_prompts,
                                       style=args.style,
                                       topk=args.topk,
+                                      visualization=args.visualization,
                                       output_dir=args.output_dir)
         return results
+
+    @serving
+    def serving_method(self, text_prompts, **kwargs):
+        """
+        Run as a service.
+        """
+        results_base64encoded = []
+        results = self.generate_image(text_prompts=text_prompts, **kwargs)
+        for result in results:
+            buffered = BytesIO()
+            result.save(buffered, format="png")
+            img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            results_base64encoded.append(img_str)
+        return results_base64encoded
 
     def add_module_input_arg(self):
         """
@@ -222,9 +248,10 @@ class ErnieVilG:
         self.arg_input_group.add_argument('--style',
                                           type=str,
                                           default='油画',
-                                          choices=['油画', '水彩', '粉笔画', '卡通', '儿童画', '蜡笔画'],
+                                          choices=['油画', '水彩', '粉笔画', '卡通', '儿童画', '蜡笔画', '探索无限'],
                                           help="绘画风格")
         self.arg_input_group.add_argument('--topk', type=int, default=10, help="选取保存前多少张图，最多10张")
         self.arg_input_group.add_argument('--ak', type=str, default=None, help="申请文心api使用token的ak")
         self.arg_input_group.add_argument('--sk', type=str, default=None, help="申请文心api使用token的sk")
+        self.arg_input_group.add_argument('--visualization', type=bool, default=True, help="是否保存生成的图片")
         self.arg_input_group.add_argument('--output_dir', type=str, default='ernievilg_output')
