@@ -14,6 +14,7 @@
 from __future__ import division
 
 import os
+import math
 
 import cv2
 import numpy as np
@@ -22,7 +23,6 @@ from PIL import ImageDraw
 from PIL import ImageFile
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-import math
 
 
 def visualize_box(im, results, labels, threshold=0.5):

@@ -11,29 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import glob
 import math
 import os
-import sys
-import time
-from functools import reduce
 
 import cv2
 import numpy as np
-import paddle
 import yaml
-from PIL import Image
-# add deploy path of PadleDetection to sys.path
-parent_path = os.path.abspath(os.path.join(__file__, *(['..'])))
-sys.path.insert(0, parent_path)
 
-from preprocess import preprocess, NormalizeImage, Permute
-from keypoint_preprocess import EvalAffine, TopDownEvalAffine, expand_crop
-from keypoint_postprocess import HRNetPostProcess
-from visualize import visualize_pose
-from paddle.inference import Config
-from paddle.inference import create_predictor
-from infer import Detector
+from .keypoint_preprocess import expand_crop
+from .keypoint_postprocess import HRNetPostProcess
+from .visualize import visualize_pose
+from .infer import Detector
 
 # Global dictionary
 KEYPOINT_SUPPORT_MODELS = {'HigherHRNet': 'keypoint_bottomup', 'HRNet': 'keypoint_topdown'}

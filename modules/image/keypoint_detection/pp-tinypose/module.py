@@ -13,21 +13,19 @@
 # limitations under the License.
 import argparse
 import json
-import math
 import os
 import time
 from typing import Union
 
 import cv2
 import numpy as np
-import paddle
-import yaml
-from det_keypoint_unite_infer import predict_with_given_det
-from infer import Detector
-from keypoint_infer import KeyPointDetector
-from preprocess import base64_to_cv2
-from preprocess import decode_image
-from visualize import visualize_pose
+
+from .det_keypoint_unite_infer import predict_with_given_det
+from .infer import Detector
+from .keypoint_infer import KeyPointDetector
+from .preprocess import base64_to_cv2
+from .preprocess import decode_image
+from .visualize import visualize_pose
 
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
@@ -74,12 +72,14 @@ class PP_TinyPose:
         results = self.detector.filter_box(results, 0.5)
         if results['boxes_num'] > 0:
             keypoint_res = predict_with_given_det(image, results, self.topdown_keypoint_detector, 1, False)
-            save_name = img if isinstance(img, str) else (str(time.time()) + '.png')
+            save_name = img if isinstance(img, str) else os.path.join(save_path, (str(time.time()) + '.png'))
             store_res.append(
                 [save_name, keypoint_res['bbox'], [keypoint_res['keypoint'][0], keypoint_res['keypoint'][1]]])
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
             if self.visualization:
+                if isinstance(img, np.ndarray):
+                    cv2.imwrite(save_name, img)
                 visualize_pose(save_name, keypoint_res, visual_thresh=0.5, save_dir=save_path)
         return store_res
 

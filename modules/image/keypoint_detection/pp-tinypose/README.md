@@ -131,6 +131,10 @@
 
   初始发布
 
+* 1.0.1
+
+  修复使用 ndarray 输入时无法保存可视化图片的问题
+
   - ```shell
-    $ hub install pp-tinypose==1.0.0
+    $ hub install pp-tinypose==1.0.1
     ```
