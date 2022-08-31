@@ -65,7 +65,7 @@ class ErnieVilG:
     def generate_image(self,
                        text_prompts,
                        style: Optional[str] = "油画",
-                       topk: Optional[int] = 10,
+                       topk: Optional[int] = 6,
                        visualization: Optional[bool] = True,
                        output_dir: Optional[str] = 'ernievilg_output'):
         """
@@ -194,7 +194,14 @@ class ErnieVilG:
         result_images = []
         for text, data in results.items():
             for idx, imgdata in enumerate(data['imgUrls']):
-                image = Image.open(BytesIO(requests.get(imgdata['image']).content))
+                try:
+                    image = Image.open(BytesIO(requests.get(imgdata['image']).content))
+                except Exception as e:
+                    print('Download generated images error, retry one time')
+                    try:
+                        image = Image.open(BytesIO(requests.get(imgdata['image']).content))
+                    except Exception:
+                        raise RuntimeError('Download generated images failed.')
                 if visualization:
                     image.save(os.path.join(output_dir, '{}_{}.png'.format(text, idx)))
                 result_images.append(image)
@@ -250,7 +257,7 @@ class ErnieVilG:
                                           default='油画',
                                           choices=['油画', '水彩', '粉笔画', '卡通', '儿童画', '蜡笔画', '探索无限'],
                                           help="绘画风格")
-        self.arg_input_group.add_argument('--topk', type=int, default=10, help="选取保存前多少张图，最多10张")
+        self.arg_input_group.add_argument('--topk', type=int, default=6, help="选取保存前多少张图，最多10张")
         self.arg_input_group.add_argument('--ak', type=str, default=None, help="申请文心api使用token的ak")
         self.arg_input_group.add_argument('--sk', type=str, default=None, help="申请文心api使用token的sk")
         self.arg_input_group.add_argument('--visualization', type=bool, default=True, help="是否保存生成的图片")
