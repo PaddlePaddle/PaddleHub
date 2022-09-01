@@ -7,13 +7,14 @@ import argparse
 import os
 
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+import paddle
+import paddle.jit
+import paddle.static
+from paddle.inference import Config, create_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
 
-from pyramidbox_face_detection.data_feed import reader
-from pyramidbox_face_detection.processor import postprocess, base64_to_cv2
+from .data_feed import reader
+from .processor import postprocess, base64_to_cv2
 
 
 @moduleinfo(
@@ -22,20 +23,22 @@ from pyramidbox_face_detection.processor import postprocess, base64_to_cv2
     author="baidu-vis",
     author_email="",
     summary="Baidu's PyramidBox model for face detection.",
-    version="1.1.0")
-class PyramidBoxFaceDetection(hub.Module):
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_face_detection_widerface")
+    version="1.1.1")
+class PyramidBoxFaceDetection:
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_face_detection_widerface", "model")
         self._set_config()
 
     def _set_config(self):
         """
         predictor config setting
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -44,10 +47,10 @@ class PyramidBoxFaceDetection(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            self.gpu_predictor = create_predictor(gpu_config)
 
     def face_detection(self,
                        images=None,
@@ -95,11 +98,17 @@ class PyramidBoxFaceDetection(hub.Module):
         # process one by one
         for element in reader(images, paths):
             image = np.expand_dims(element['image'], axis=0).astype('float32')
-            image_tensor = PaddleTensor(image.copy())
-            data_out = self.gpu_predictor.run([image_tensor]) if use_gpu else self.cpu_predictor.run([image_tensor])
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(image)
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+            output = np.expand_dims(output_handle.copy_to_cpu(), axis=1)
             # print(len(data_out))  # 1
             out = postprocess(
-                data_out=data_out[0].as_ndarray(),
+                data_out=output_handle.copy_to_cpu(),
                 org_im=element['org_im'],
                 org_im_path=element['org_im_path'],
                 org_im_width=element['org_im_width'],
@@ -110,24 +119,19 @@ class PyramidBoxFaceDetection(hub.Module):
             res.append(out)
         return res
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+    def save_inference_model(self, path):
+        if not paddle.in_dynamic_mode():
+            is_static = True
+            paddle.disable_static()
+        model = paddle.jit.load(self.default_pretrained_model_path)
+        input_specs = [
+            paddle.static.InputSpec(name='image', shape=[-1, 3, 1024, 1024])
+        ]
+        model = paddle.jit.to_static(model, input_specs)
 
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+        paddle.jit.save(model, path)
+        if is_static:
+            paddle.enable_static()
 
     @serving
     def serving_method(self, images, **kwargs):
