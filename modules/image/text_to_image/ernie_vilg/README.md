@@ -100,6 +100,14 @@
 ## 四、 Prompt 指南
 
 
+(在 GitHub 阅读 README 的用户可以访问 www.youpromptme.cn 获得更好的阅读体验)
+
+(图片比较多，完全加载页面可能需要 3min)
+
+作者：佳祥 (LCL-Brew)
+
+原文地址： https://github.com/OleNet/YouPromptMe/tree/gh-pages/you-prompt-me
+
 
 这是一份如何调整 Prompt 得到更漂亮的图片的经验性文档。我们的结果和经验都来源于[文心 ERNIE-ViLG Demo](https://wenxin.baidu.com/moduleApi/ernieVilg) 和[社区的资料](#related-work)。
 
