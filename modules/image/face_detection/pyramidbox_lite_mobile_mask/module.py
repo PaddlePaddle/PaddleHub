@@ -10,9 +10,9 @@ import numpy as np
 import paddle
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from pyramidbox_lite_mobile_mask.data_feed import reader
-from pyramidbox_lite_mobile_mask.processor import base64_to_cv2
-from pyramidbox_lite_mobile_mask.processor import postprocess
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import postprocess
 
 import paddlehub as hub
 from paddlehub.module.module import moduleinfo
@@ -27,15 +27,14 @@ from paddlehub.module.module import serving
     author_email="",
     summary=
     "Pyramidbox-Lite-Mobile-Mask is a high-performance face detection model used to detect whether people wear masks.",
-    version="1.3.1")
-class PyramidBoxLiteMobileMask(hub.Module):
-
-    def _initialize(self, face_detector_module=None):
+    version="1.3.2")
+class PyramidBoxLiteMobileMask:
+    def __init__(self, face_detector_module=None):
         """
         Args:
             face_detector_module (class): module to detect face.
         """
-        self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_lite_mobile_mask_model")
+        self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_lite_mobile_mask_model", "model")
         if face_detector_module is None:
             self.face_detector = hub.Module(name='pyramidbox_lite_mobile')
         else:
@@ -47,7 +46,9 @@ class PyramidBoxLiteMobileMask(hub.Module):
         """
         predictor config setting
         """
-        cpu_config = Config(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_predictor(cpu_config)
@@ -59,7 +60,7 @@ class PyramidBoxLiteMobileMask(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
@@ -180,32 +181,28 @@ class PyramidBoxLiteMobileMask(hub.Module):
             res.append(out)
         return res
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        classifier_dir = os.path.join(dirname, 'mask_detector')
-        detector_dir = os.path.join(dirname, 'pyramidbox_lite')
-        self._save_classifier_model(classifier_dir, model_filename, params_filename, combined)
-        self._save_detector_model(detector_dir, model_filename, params_filename, combined)
+    def save_inference_model(self, path):
+        classifier_path = path + '_mask_detector'
+        detector_path = path + '_pyramidbox_lite'
+        self._save_classifier_model(classifier_path)
+        self._save_detector_model(detector_path)
 
-    def _save_detector_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        self.face_detector.save_inference_model(dirname, model_filename, params_filename, combined)
+    def _save_detector_model(self, path):
+        self.face_detector.save_inference_model(path)
 
-    def _save_classifier_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
+    def _save_classifier_model(self, path):
+        if not paddle.in_dynamic_mode():
+            is_static = True
+            paddle.disable_static()
+        model = paddle.jit.load(self.default_pretrained_model_path)
+        input_specs = [
+            paddle.static.InputSpec(name='image', shape=[-1, 3, 128, 128])
+        ]
+        model = paddle.jit.to_static(model, input_specs)
 
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
-                                           executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
+        paddle.jit.save(model, path)
+        if is_static:
+            paddle.enable_static()
 
     @serving
     def serving_method(self, images, **kwargs):
