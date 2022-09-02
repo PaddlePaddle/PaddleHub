@@ -63,6 +63,10 @@
 
       - `result`(str): 翻译后的目标语言句子。
 
+  源语言和目标语言都采用ISO 639-1语言编码标准来表示，常用的语言编码如下, 更多语言表示可以参考[文档](https://fanyi-api.baidu.com/doc/21)。
+    <p align="center">
+    <img src="https://user-images.githubusercontent.com/22424850/188076725-c2ac6831-1f9d-416a-bf9a-8f3671d6de36.png"  width = "80%" hspace='10'/>
+
 ## 四、服务部署
 
 - 通过启动PaddleHub Serving，可以加载模型部署在线翻译服务。

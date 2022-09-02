@@ -1,12 +1,8 @@
 import argparse
-import ast
-import base64
 import json
 import os
 import random
-import sys
 from hashlib import md5
-from typing import List
 from typing import Optional
 
 import requests
@@ -31,8 +27,8 @@ class BaiduTranslate:
 
     def __init__(self, appid=None, appkey=None):
         """
-      :param ak: ak for applying token to request wenxin api.
-      :param sk: sk for applying token to request wenxin api.
+      :param appid: appid for requesting Baidu translation service.
+      :param appkey: appkey for requesting Baidu translation service.
       """
         # Set your own appid/appkey.
         if appid == None:
