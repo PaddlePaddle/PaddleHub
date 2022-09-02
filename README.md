@@ -4,9 +4,8 @@ English | [简体中文](README_ch.md)
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle" width="400" />
 <p align="center">
 <div align="center">  
-  <h3> <a href=#QuickStart> QuickStart </a> | <a href="./modules"> Models List </a> | <a href=#demos> Demos </a> </h3>
+  <h3> <a href=#QuickStart> Quick Start </a> | <a href="./modules"> Model List </a> | <a href=#demos> Demos </a> </h3>
 </div>
-
 ------------------------------------------------------------------------------------------
 
 <p align="center">
@@ -22,14 +21,14 @@ English | [简体中文](README_ch.md)
 
 ## ⭐Features
 - **📦400+ AI Models**: Rich, high-quality AI models, including CV, NLP, Speech, Video and Cross-Modal. 
-- **🧒Easy to Use**: 3 lines of code to predict the 400+ AI models.
-- **💁Model As Service**: Easy to build a service with only one line of command.
+- **🧒Easy to Use**: 3 lines of code to predict 400+ AI models.
+- **💁Model As Service**: Easy to serve model with only one line of command.
 - **💻Cross-platform**: Support Linux, Windows and MacOS.
 
 ### 💥Recent Updates
 - **🔥2022.08.19:** The v2.3.0 version is released 🎉
-  -  supports [**ERNIE_ViLG**](./modules/image/text_to_image/ernie_vilg)([Hugging Face Space Demo](https://huggingface.co/spaces/PaddlePaddle/ERNIE-ViLG))
-  -  supports [**Disco Diffusion(DD)**](./modules/image/text_to_image/disco_diffusion_clip_vitb32) and [**Stable Diffusion(SD)**](./modules/image/text_to_image/stable_diffusion)
+  -  Supports [**ERNIE-ViLG**](./modules/image/text_to_image/ernie_vilg)([HuggingFace Space Demo](https://huggingface.co/spaces/PaddlePaddle/ERNIE-ViLG))
+  -  Supports [**Disco Diffusion (DD)**](./modules/image/text_to_image/disco_diffusion_clip_vitb32) and [**Stable Diffusion (SD)**](./modules/image/text_to_image/stable_diffusion)
 
 - **2022.02.18:** Release models to HuggingFace [PaddlePaddle Space](https://huggingface.co/PaddlePaddle)
 
@@ -40,7 +39,7 @@ English | [简体中文](README_ch.md)
 ## 🌈Visualization Demo
 
 #### 🏜️ [Text-to-Image Models](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)
-- Include ERNIE-ViL, ERNIE 3.0 Zeus, supports applications such as text-to-image, writing essays, summarization, couplets, question answering, writing novels and completing text.
+- Include ERNIE-ViLG, ERNIE-ViL, ERNIE 3.0 Zeus, supports applications such as text-to-image, writing essays, summarization, couplets, question answering, writing novels and completing text.
 <div align="center">
 <img src="https://user-images.githubusercontent.com/22424850/185588578-e2d1216b-e797-458d-bc6b-0ccb8e1bd1b9.png"  width = "80%"  />
 </div>
