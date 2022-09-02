@@ -4,7 +4,7 @@ English | [简体中文](README_ch.md)
  <img src="./docs/imgs/paddlehub_logo.jpg" align="middle">
 <p align="center">
 <div align="center">  
-  <h3> <a href=#QuickStart> QuickStart </a> | <a href="https://paddlehub.readthedocs.io/en/release-v2.1"> Tutorial </a> | <a href="./modules"> Models List </a> | <a href="https://www.paddlepaddle.org.cn/hub"> Demos </a> </h3>
+  <h3> <a href=#QuickStart> QuickStart </a> | <a href="./modules"> Models List </a> | <a href=#demos> Demos </a> </h3>
 </div>
 
 ------------------------------------------------------------------------------------------
@@ -35,6 +35,8 @@ English | [简体中文](README_ch.md)
 
 - [**More**](./docs/docs_en/release.md)
 
+
+<a name="demos"></a>
 ## 🌈Visualization Demo
 
 #### 🏜️ [Text-to-Image Models](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)
@@ -62,8 +64,6 @@ English | [简体中文](README_ch.md)
 
 
 #### 🎧 [Speech Models](./modules#Audio)
-- ASR speech recognition algorithm, multiple algorithms are available.
-- The speech recognition effect is as follows:
 <div align="center">
 <table>
     <thead>
@@ -90,31 +90,19 @@ English | [简体中文](README_ch.md)
     </tbody>
 </table>
 </div>
-
-- TTS speech synthesis algorithm, multiple algorithms are available.
-- Input: `Life was like a box of chocolates, you never know what you're gonna get.`
-- The synthesis effect is as follows:
 <div align="center">
 <table>
     <thead>
     </thead>
     <tbody>
         <tr>
-            <th>deepvoice3 </th>
-            <th>fastspeech </th>
-            <th>transformer</th>
+            <th>Input Text </th>
+            <th>Output Audio </th>
         </tr>
         <tr>
-            <th>
-            <a href="https://paddlehub.bj.bcebos.com/resources/deepvoice3_ljspeech-0.wav">
-            <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
-            </th>
+            <th>Life was like a box of chocolates, you never know what you're gonna get.</th>
             <th>
             <a href="https://paddlehub.bj.bcebos.com/resources/fastspeech_ljspeech-0.wav">
-            <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
-            </th>
-            <th>
-            <a href="https://paddlehub.bj.bcebos.com/resources/transformer_tts_ljspeech-0.wav">
             <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
             </th>
         </tr>
@@ -124,16 +112,9 @@ English | [简体中文](README_ch.md)
 
 - Many thanks to CopyRight@[PaddleSpeech](https://github.com/PaddlePaddle/PaddleSpeech) for the pre-trained models, you can try to train your models with PaddleSpeech.
 
-#### 📽️ [Video Models](./modules#Video)
-- Short video classification trained via large-scale video datasets, supports 3000+ tag types prediction for short Form Videos.
-- Many thanks to CopyRight@[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo) for the pre-trained model, you can try to train your models with PaddleVideo.
-- `Example: Input a short video of swimming, the algorithm can output the result of "swimming"`
-<div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "400" height = "400" />
-</div>
 
-### ⭐ Thanks for Your Star ⭐
-- All the above pre-trained models are all **open source and free**, and the number of models is continuously updated. Welcome **⭐Star⭐** to pay attention.
+### ⭐ Thanks for Your Star 
+- All the above pre-trained models are all **open source and free**, and the number of models is continuously updated. Welcome **Star** to pay attention.
 <div align="center">
 <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers">
     <img src="./docs/imgs/Readme_Related/star_en.png"  width = "411" height = "100" /></a>  
@@ -146,7 +127,8 @@ English | [简体中文](README_ch.md)
 - If you have any questions during the use of the model, you can join the official WeChat group to get more efficient questions and answers, and fully communicate with developers from all walks of life. We look forward to your joining.
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
-</div>  
+</div> 
+
 - please add WeChat above and send "Hub" to the robot, the robot will invite you to join the group automatically.
 
 <a name="QuickStart"></a>
@@ -183,9 +165,7 @@ print(results)
 !hub serving start -m lac
 ```
 
-- 📣More model description, please refer [Models List](https://www.paddlepaddle.org.cn/hublist)
-
-- 📣More API for transfer learning, please refer [Tutorial](https://paddlehub.readthedocs.io/en/release-v2.1/transfer_learning_index.html)
+- 📣More model description, please refer [Models List](./modules)
 
 <a name="License"></a>
 ## 📚License
