@@ -1,7 +1,7 @@
 English | [简体中文](README_ch.md)
 
 <p align="center">
- <img src="./docs/imgs/paddlehub_logo.jpg" align="middle">
+ <img src="./docs/imgs/paddlehub_logo.jpg" align="middle" width="400" />
 <p align="center">
 <div align="center">  
   <h3> <a href=#QuickStart> QuickStart </a> | <a href="./modules"> Models List </a> | <a href=#demos> Demos </a> </h3>
@@ -22,18 +22,18 @@ English | [简体中文](README_ch.md)
 
 ## ⭐Features
 - **📦400+ AI Models**: Rich, high-quality AI models, including CV, NLP, Speech, Video and Cross-Modal. 
-- **🧒Easy to Use**: 3 lines of code to predict the 400+ AI models
+- **🧒Easy to Use**: 3 lines of code to predict the 400+ AI models.
 - **💁Model As Service**: Easy to build a service with only one line of command.
-- **💻Cross-platform**: Support Linux, Windows and MacOS
+- **💻Cross-platform**: Support Linux, Windows and MacOS.
 
 ### 💥Recent Updates
-- **🔥2022.08.19:** The v2.3.0 version is released
+- **🔥2022.08.19:** The v2.3.0 version is released 🎉
   -  supports [**ERNIE_ViLG**](./modules/image/text_to_image/ernie_vilg)([Hugging Face Space Demo](https://huggingface.co/spaces/PaddlePaddle/ERNIE-ViLG))
   -  supports [**Disco Diffusion(DD)**](./modules/image/text_to_image/disco_diffusion_clip_vitb32) and [**Stable Diffusion(SD)**](./modules/image/text_to_image/stable_diffusion)
 
-- **2022.02.18:** Release models to the HuggingFace PaddlePaddle Space: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)
+- **2022.02.18:** Release models to HuggingFace [PaddlePaddle Space](https://huggingface.co/PaddlePaddle)
 
-- [**More**](./docs/docs_en/release.md)
+- For more previous release please refer to [**PaddleHub Release Note**](./docs/docs_en/release.md)
 
 
 <a name="demos"></a>
@@ -51,7 +51,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 
-- Many thanks to CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)、[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)、[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)、[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)、[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)、[Zhengxia Zou](https://github.com/jiupinjia/SkyAR)、[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) for the pre-trained models, you can try to train your models with them.
+- Many thanks to CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR), [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)、[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN), [AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)、[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)、[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg), [Zhengxia Zou](https://github.com/jiupinjia/SkyAR)、[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) for the pre-trained models, you can try to train your models with them.
 
 
 #### 🎤 [Natural Language Processing Models](./modules#Text)
