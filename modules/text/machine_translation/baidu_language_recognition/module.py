@@ -81,7 +81,7 @@ class BaiduLanguageRecognition:
         if args.appid is not None and args.appkey is not None:
             self.appid = args.appid
             self.appkey = args.appkey
-        result = self.translate(args.query)
+        result = self.recognize(args.query)
         return result
 
     @serving
@@ -89,7 +89,7 @@ class BaiduLanguageRecognition:
         """
         Run as a service.
         """
-        return self.translate(query)
+        return self.recognize(query)
 
     def add_module_input_arg(self):
         """
