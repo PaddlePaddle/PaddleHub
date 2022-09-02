@@ -27,7 +27,7 @@ English | [简体中文](README_ch.md)
 
 
 
-## Introduction and Features
+## ⭐Introduction
 - **PaddleHub** aims to provide developers with rich, high-quality, and directly usable pre-trained models.
 - **Abundant Pre-trained Models**: 360+ pre-trained models cover the 6 major categories, including Wenxin large models, Image, Text, Audio, Video, and Industrial application. All of them are free for download and offline usage.
 - **No Need for Deep Learning Background**: you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
@@ -36,28 +36,28 @@ English | [简体中文](README_ch.md)
 - **Easy-to-use Transfer Learning**: few lines of codes to complete the transfer-learning task such as image classification and text classification based on high quality pre-trained models.
 - **Cross-platform**: support Linux, Windows, MacOS and other operating systems.
 
-### Recent updates
+### 💥Recent Updates
 - **🔥2022.08.19:** The v2.3.0 version is released, supports Wenxin large models and five text-to-image models based on disco diffusion(dd).
   - Support [Wenxin large models API](https://wenxin.baidu.com/moduleApi) for Baidu ERNIE large-scale pre-trained model, including [**ERNIE-ViLG** model](https://aistudio.baidu.com/aistudio/projectdetail/4445016), which supports text-to-image task, and [**ERNIE 3.0 Zeus**](https://aistudio.baidu.com/aistudio/projectdetail/4445054) model, which supports applications such as writing essays, summarization, couplets, question answering, writing novels and completing text.
   - Add five text-to-image domain models based on disco diffusion(dd), three for [English](https://aistudio.baidu.com/aistudio/projectdetail/4444984) and two for Chinese. Welcome to enjoy our **ERNIE-ViL**-based Chinese text-to-image module [disco_diffusion_ernievil_base](https://aistudio.baidu.com/aistudio/projectdetail/4444998) in aistudio.
 - **2022.02.18:** Added Huggingface Org, add spaces and models to the org: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)
-- **🔥2021.12.22**，The v2.2.0 version is released. [1]More than 100 new models released，including dialog, speech, segmentation, OCR, text processing, GANs, and many other categories. The total number of pre-trained models reaches [**【360】**](https://www.paddlepaddle.org.cn/hublist). [2]Add an [indexed file](./modules/README.md) including useful information of pretrained models supported by PaddleHub. [3]Refactor README of pretrained models.
+- **2021.12.22**，The v2.2.0 version is released. [1]More than 100 new models released，including dialog, speech, segmentation, OCR, text processing, GANs, and many other categories. The total number of pre-trained models reaches [**【360】**](https://www.paddlepaddle.org.cn/hublist). [2]Add an [indexed file](./modules/README.md) including useful information of pretrained models supported by PaddleHub. [3]Refactor README of pretrained models.
 
 - [【more】](./docs/docs_en/release.md)
 
 
 
 
-## Visualization Demo [[More]](./docs/docs_en/visualization.md) [[ModelList]](./modules)
+## 🌈Visualization Demo
 
 
-### **[Wenxin large models](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)**
+#### 🏜️ [Text-to-Image Models](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)
 - Include ERNIE-ViL、ERNIE 3.0 Zeus, supports applications such as text-to-image, writing essays, summarization, couplets, question answering, writing novels and completing text.
 <div align="center">
 <img src="https://user-images.githubusercontent.com/22424850/185588578-e2d1216b-e797-458d-bc6b-0ccb8e1bd1b9.png"  width = "80%"  />
 </div>
 
-### **[Computer Vision (212 models)](./modules#Image)**
+#### 👓 [Computer Vision Models](./modules#Image)
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Image_all.gif"  width = "530" height = "400" />
 </div>
@@ -66,7 +66,7 @@ English | [简体中文](README_ch.md)
 - Many thanks to CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)、[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)、[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)、[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)、[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)、[Zhengxia Zou](https://github.com/jiupinjia/SkyAR)、[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) for the pre-trained models, you can try to train your models with them.
 
 
-### **[Natural Language Processing (130 models)](./modules#Text)**
+#### 🎤 [Natural Language Processing Models](./modules#Text)
 <div align="center">
 <img src="./docs/imgs/Readme_Related/Text_all.gif"  width = "640" height = "240" />
 </div>
@@ -75,7 +75,7 @@ English | [简体中文](README_ch.md)
 
 
 
-### [Speech (15 models)](./modules#Audio)
+#### 🎧 [Speech Models](./modules#Audio)
 - ASR speech recognition algorithm, multiple algorithms are available.
 - The speech recognition effect is as follows:
 <div align="center">
@@ -138,7 +138,7 @@ English | [简体中文](README_ch.md)
 
 - Many thanks to CopyRight@[PaddleSpeech](https://github.com/PaddlePaddle/PaddleSpeech) for the pre-trained models, you can try to train your models with PaddleSpeech.
 
-### [Video (8 models)](./modules#Video)
+#### 📽️ [Video Models](./modules#Video)
 - Short video classification trained via large-scale video datasets, supports 3000+ tag types prediction for short Form Videos.
 - Many thanks to CopyRight@[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo) for the pre-trained model, you can try to train your models with PaddleVideo.
 - `Example: Input a short video of swimming, the algorithm can output the result of "swimming"`
@@ -146,8 +146,8 @@ English | [简体中文](README_ch.md)
 <img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "400" height = "400" />
 </div>
 
-## ===**Key Points**===
-- All the above pre-trained models are all open source and free, and the number of models is continuously updated. Welcome **⭐Star⭐** to pay attention.
+### ⭐ Thanks for Your Star ⭐
+- All the above pre-trained models are all **open source and free**, and the number of models is continuously updated. Welcome **⭐Star⭐** to pay attention.
 <div align="center">
 <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers">
     <img src="./docs/imgs/Readme_Related/star_en.png"  width = "411" height = "100" /></a>  
@@ -155,18 +155,18 @@ English | [简体中文](README_ch.md)
 
 <a name="Welcome_joinus"></a>
 
-## Welcome to join PaddleHub technical group
+## 🍻Welcome to join PaddleHub technical group
 
-If you have any questions during the use of the model, you can join the official WeChat group to get more efficient questions and answers, and fully communicate with developers from all walks of life. We look forward to your joining.
+- If you have any questions during the use of the model, you can join the official WeChat group to get more efficient questions and answers, and fully communicate with developers from all walks of life. We look forward to your joining.
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
 </div>  
-please add WeChat above and send "Hub" to the robot, the robot will invite you to join the group automatically.
+- please add WeChat above and send "Hub" to the robot, the robot will invite you to join the group automatically.
 
 <a name="QuickStart"></a>
-## QuickStart
+## ✈️QuickStart
 
-### The installation of required components.
+#### 🚁The installation of required components.
 ```python
 # install paddlepaddle with gpu
 # !pip install --upgrade paddlepaddle-gpu
@@ -178,7 +178,7 @@ please add WeChat above and send "Hub" to the robot, the robot will invite you t
 !pip install --upgrade paddlehub
 ```
 
-### The simplest cases of Chinese word segmentation.
+#### 🛫The simplest cases of Chinese word segmentation.
 
 ```python
 import paddlehub as hub
@@ -190,23 +190,23 @@ results = lac.cut(text=test_text, use_gpu=False, batch_size=1, return_tag=True)
 print(results)
 #{'word': ['今天', '是', '个', '好天气', '。'], 'tag': ['TIME', 'v', 'q', 'n', 'w']}
 ```
-### The simplest command of deploying lac service.
+#### 🛰️The simplest command of deploying lac service.
 </div>
 
 ```python
 !hub serving start -m lac
 ```
 
-More model description, please refer [Models List](https://www.paddlepaddle.org.cn/hublist)
+- 📣More model description, please refer [Models List](https://www.paddlepaddle.org.cn/hublist)
 
-More API for transfer learning, please refer [Tutorial](https://paddlehub.readthedocs.io/en/release-v2.1/transfer_learning_index.html)
+- 📣More API for transfer learning, please refer [Tutorial](https://paddlehub.readthedocs.io/en/release-v2.1/transfer_learning_index.html)
 
 <a name="License"></a>
-## License
+## 📚License
 The release of this project is certified by the <a href="./LICENSE">Apache 2.0 license</a>.
 
 <a name="Contribution"></a>
-## Contribution
+## 👨‍👨‍👧‍👦Contribution
 
 <p align="center">
     <a href="https://github.com/nepeplwu"><img src="https://avatars.githubusercontent.com/u/45024560?v=4" width=75 height=75></a>
