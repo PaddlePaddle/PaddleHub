@@ -1,6 +1,4 @@
 import argparse
-import json
-import os
 import random
 from hashlib import md5
 from typing import Optional
@@ -68,9 +66,7 @@ class BaiduTranslate:
             raise RuntimeError(error_msg)
         if 'error_code' in result:
             raise RuntimeError(result['error_msg'])
-        else:
-            return result['trans_result'][0]['dst']
-        return
+        return result['trans_result'][0]['dst']
 
     @runnable
     def run_cmd(self, argvs):
