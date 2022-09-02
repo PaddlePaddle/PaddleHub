@@ -11,35 +11,23 @@ English | [简体中文](README_ch.md)
 
 <p align="center">
     <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
-    <a href="https://github.com/PaddlePaddle/PaddleHub/releases"><img src="https://img.shields.io/github/v/release/PaddlePaddle/PaddleHub?color=ffa"></a>
     <a href=""><img src="https://img.shields.io/badge/python-3.6.2+-aff.svg"></a>
     <a href=""><img src="https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg"></a>
     <a href=""><img src="https://img.shields.io/pypi/format/paddlehub?color=c77"></a>
-</p>
-<p align="center">
-    <a href="https://github.com/PaddlePaddle/PaddleHub/graphs/contributors"><img src="https://img.shields.io/github/contributors/PaddlePaddle/PaddleHub?color=9ea"></a>
-    <a href="https://github.com/PaddlePaddle/PaddleHub/commits"><img src="https://img.shields.io/github/commit-activity/m/PaddlePaddle/PaddleHub?color=3af"></a>
     <a href="https://pypi.org/project/paddlehub/"><img src="https://img.shields.io/pypi/dm/paddlehub?color=9cf"></a>
-    <a href="https://github.com/PaddlePaddle/PaddleHub/issues"><img src="https://img.shields.io/github/issues/PaddlePaddle/PaddleHub?color=9cc"></a>
     <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers"><img src="https://img.shields.io/github/stars/PaddlePaddle/PaddleHub?color=ccf"></a>
     <a href="https://huggingface.co/PaddlePaddle"><img src="https://img.shields.io/badge/%F0%9F%A4%97-Hugging%20Face-blue"></a>
 </p>
 
 
-
-## ⭐Introduction
-- **PaddleHub** aims to provide developers with rich, high-quality, and directly usable pre-trained models.
-- **Abundant Pre-trained Models**: 360+ pre-trained models cover the 6 major categories, including Wenxin large models, Image, Text, Audio, Video, and Industrial application. All of them are free for download and offline usage.
-- **No Need for Deep Learning Background**: you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
-- **Quick Model Prediction**: model prediction can be realized through a few lines of scripts to quickly experience the model effect.
-- **Model As Service**: one-line command to build deep learning model API service deployment capabilities.
-- **Easy-to-use Transfer Learning**: few lines of codes to complete the transfer-learning task such as image classification and text classification based on high quality pre-trained models.
-- **Cross-platform**: support Linux, Windows, MacOS and other operating systems.
+## ⭐Features
+- **400+ AI Models**: rich, high-quality AI models, including CV, NLP, and Speech. 
+- **Easy to Use**: 3 lines of code to predict the 400+ AI models
+- **Model As Service**: easy to build a service with only one line of command.
+- **Cross-platform**: support Linux, Windows, MacOS
 
 ### 💥Recent Updates
-- **🔥2022.08.19:** The v2.3.0 version is released, supports Wenxin large models and five text-to-image models based on disco diffusion(dd).
-  - Support [Wenxin large models API](https://wenxin.baidu.com/moduleApi) for Baidu ERNIE large-scale pre-trained model, including [**ERNIE-ViLG** model](https://aistudio.baidu.com/aistudio/projectdetail/4445016), which supports text-to-image task, and [**ERNIE 3.0 Zeus**](https://aistudio.baidu.com/aistudio/projectdetail/4445054) model, which supports applications such as writing essays, summarization, couplets, question answering, writing novels and completing text.
-  - Add five text-to-image domain models based on disco diffusion(dd), three for [English](https://aistudio.baidu.com/aistudio/projectdetail/4444984) and two for Chinese. Welcome to enjoy our **ERNIE-ViL**-based Chinese text-to-image module [disco_diffusion_ernievil_base](https://aistudio.baidu.com/aistudio/projectdetail/4444998) in aistudio.
+- **🔥2022.08.19:** The v2.3.0 version is released, supports [**ERNIE_ViLG**](./modules/image/text_to_image/ernie_vilg)、[**Disco Diffusion(DD)**](./modules/image/text_to_image/disco_diffusion_clip_vitb32) and [**Stable Diffusion(SD)**](./modules/image/text_to_image/stable_diffusion)
 - **2022.02.18:** Added Huggingface Org, add spaces and models to the org: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)
 - **2021.12.22**，The v2.2.0 version is released. [1]More than 100 new models released，including dialog, speech, segmentation, OCR, text processing, GANs, and many other categories. The total number of pre-trained models reaches [**【360】**](https://www.paddlepaddle.org.cn/hublist). [2]Add an [indexed file](./modules/README.md) including useful information of pretrained models supported by PaddleHub. [3]Refactor README of pretrained models.
 
