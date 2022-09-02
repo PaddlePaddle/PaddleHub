@@ -1,58 +1,46 @@
 English | [简体中文](README_ch.md)
 
 <p align="center">
- <img src="./docs/imgs/paddlehub_logo.jpg" align="middle">
+ <img src="./docs/imgs/paddlehub_logo.jpg" align="middle" width="400" />
 <p align="center">
 <div align="center">  
-  <h3> <a href=#QuickStart> QuickStart </a> | <a href="https://paddlehub.readthedocs.io/en/release-v2.1"> Tutorial </a> | <a href="./modules"> Models List </a> | <a href="https://www.paddlepaddle.org.cn/hub"> Demos </a> </h3>
+  <h3> <a href=#QuickStart> QuickStart </a> | <a href="./modules"> Models List </a> | <a href=#demos> Demos </a> </h3>
 </div>
 
 ------------------------------------------------------------------------------------------
 
 <p align="center">
     <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-dfd.svg"></a>
-    <a href="https://github.com/PaddlePaddle/PaddleHub/releases"><img src="https://img.shields.io/github/v/release/PaddlePaddle/PaddleHub?color=ffa"></a>
     <a href=""><img src="https://img.shields.io/badge/python-3.6.2+-aff.svg"></a>
     <a href=""><img src="https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg"></a>
     <a href=""><img src="https://img.shields.io/pypi/format/paddlehub?color=c77"></a>
-</p>
-<p align="center">
-    <a href="https://github.com/PaddlePaddle/PaddleHub/graphs/contributors"><img src="https://img.shields.io/github/contributors/PaddlePaddle/PaddleHub?color=9ea"></a>
-    <a href="https://github.com/PaddlePaddle/PaddleHub/commits"><img src="https://img.shields.io/github/commit-activity/m/PaddlePaddle/PaddleHub?color=3af"></a>
     <a href="https://pypi.org/project/paddlehub/"><img src="https://img.shields.io/pypi/dm/paddlehub?color=9cf"></a>
-    <a href="https://github.com/PaddlePaddle/PaddleHub/issues"><img src="https://img.shields.io/github/issues/PaddlePaddle/PaddleHub?color=9cc"></a>
     <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers"><img src="https://img.shields.io/github/stars/PaddlePaddle/PaddleHub?color=ccf"></a>
     <a href="https://huggingface.co/PaddlePaddle"><img src="https://img.shields.io/badge/%F0%9F%A4%97-Hugging%20Face-blue"></a>
 </p>
 
 
-
-## ⭐Introduction
-- **PaddleHub** aims to provide developers with rich, high-quality, and directly usable pre-trained models.
-- **Abundant Pre-trained Models**: 360+ pre-trained models cover the 6 major categories, including Wenxin large models, Image, Text, Audio, Video, and Industrial application. All of them are free for download and offline usage.
-- **No Need for Deep Learning Background**: you can use AI models quickly and enjoy the dividends of the artificial intelligence era.
-- **Quick Model Prediction**: model prediction can be realized through a few lines of scripts to quickly experience the model effect.
-- **Model As Service**: one-line command to build deep learning model API service deployment capabilities.
-- **Easy-to-use Transfer Learning**: few lines of codes to complete the transfer-learning task such as image classification and text classification based on high quality pre-trained models.
-- **Cross-platform**: support Linux, Windows, MacOS and other operating systems.
+## ⭐Features
+- **📦400+ AI Models**: Rich, high-quality AI models, including CV, NLP, Speech, Video and Cross-Modal. 
+- **🧒Easy to Use**: 3 lines of code to predict the 400+ AI models.
+- **💁Model As Service**: Easy to build a service with only one line of command.
+- **💻Cross-platform**: Support Linux, Windows and MacOS.
 
 ### 💥Recent Updates
-- **🔥2022.08.19:** The v2.3.0 version is released, supports Wenxin large models and five text-to-image models based on disco diffusion(dd).
-  - Support [Wenxin large models API](https://wenxin.baidu.com/moduleApi) for Baidu ERNIE large-scale pre-trained model, including [**ERNIE-ViLG** model](https://aistudio.baidu.com/aistudio/projectdetail/4445016), which supports text-to-image task, and [**ERNIE 3.0 Zeus**](https://aistudio.baidu.com/aistudio/projectdetail/4445054) model, which supports applications such as writing essays, summarization, couplets, question answering, writing novels and completing text.
-  - Add five text-to-image domain models based on disco diffusion(dd), three for [English](https://aistudio.baidu.com/aistudio/projectdetail/4444984) and two for Chinese. Welcome to enjoy our **ERNIE-ViL**-based Chinese text-to-image module [disco_diffusion_ernievil_base](https://aistudio.baidu.com/aistudio/projectdetail/4444998) in aistudio.
-- **2022.02.18:** Added Huggingface Org, add spaces and models to the org: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)
-- **2021.12.22**，The v2.2.0 version is released. [1]More than 100 new models released，including dialog, speech, segmentation, OCR, text processing, GANs, and many other categories. The total number of pre-trained models reaches [**【360】**](https://www.paddlepaddle.org.cn/hublist). [2]Add an [indexed file](./modules/README.md) including useful information of pretrained models supported by PaddleHub. [3]Refactor README of pretrained models.
+- **🔥2022.08.19:** The v2.3.0 version is released 🎉
+  -  supports [**ERNIE_ViLG**](./modules/image/text_to_image/ernie_vilg)([Hugging Face Space Demo](https://huggingface.co/spaces/PaddlePaddle/ERNIE-ViLG))
+  -  supports [**Disco Diffusion(DD)**](./modules/image/text_to_image/disco_diffusion_clip_vitb32) and [**Stable Diffusion(SD)**](./modules/image/text_to_image/stable_diffusion)
 
-- [【more】](./docs/docs_en/release.md)
+- **2022.02.18:** Release models to HuggingFace [PaddlePaddle Space](https://huggingface.co/PaddlePaddle)
 
-
+- For more previous release please refer to [**PaddleHub Release Note**](./docs/docs_en/release.md)
 
 
+<a name="demos"></a>
 ## 🌈Visualization Demo
 
-
 #### 🏜️ [Text-to-Image Models](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)
-- Include ERNIE-ViL、ERNIE 3.0 Zeus, supports applications such as text-to-image, writing essays, summarization, couplets, question answering, writing novels and completing text.
+- Include ERNIE-ViL, ERNIE 3.0 Zeus, supports applications such as text-to-image, writing essays, summarization, couplets, question answering, writing novels and completing text.
 <div align="center">
 <img src="https://user-images.githubusercontent.com/22424850/185588578-e2d1216b-e797-458d-bc6b-0ccb8e1bd1b9.png"  width = "80%"  />
 </div>
@@ -63,7 +51,7 @@ English | [简体中文](README_ch.md)
 </div>
 
 
-- Many thanks to CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)、[PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)、[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN)、[AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)、[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)、[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)、[Zhengxia Zou](https://github.com/jiupinjia/SkyAR)、[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) for the pre-trained models, you can try to train your models with them.
+- Many thanks to CopyRight@[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR), [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)、[PaddleGAN](https://github.com/PaddlePaddle/PaddleGAN), [AnimeGAN](https://github.com/TachibanaYoshino/AnimeGANv2)、[openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)、[PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg), [Zhengxia Zou](https://github.com/jiupinjia/SkyAR)、[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) for the pre-trained models, you can try to train your models with them.
 
 
 #### 🎤 [Natural Language Processing Models](./modules#Text)
@@ -76,8 +64,6 @@ English | [简体中文](README_ch.md)
 
 
 #### 🎧 [Speech Models](./modules#Audio)
-- ASR speech recognition algorithm, multiple algorithms are available.
-- The speech recognition effect is as follows:
 <div align="center">
 <table>
     <thead>
@@ -104,31 +90,19 @@ English | [简体中文](README_ch.md)
     </tbody>
 </table>
 </div>
-
-- TTS speech synthesis algorithm, multiple algorithms are available.
-- Input: `Life was like a box of chocolates, you never know what you're gonna get.`
-- The synthesis effect is as follows:
 <div align="center">
 <table>
     <thead>
     </thead>
     <tbody>
         <tr>
-            <th>deepvoice3 </th>
-            <th>fastspeech </th>
-            <th>transformer</th>
+            <th>Input Text </th>
+            <th>Output Audio </th>
         </tr>
         <tr>
-            <th>
-            <a href="https://paddlehub.bj.bcebos.com/resources/deepvoice3_ljspeech-0.wav">
-            <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
-            </th>
+            <th>Life was like a box of chocolates, you never know what you're gonna get.</th>
             <th>
             <a href="https://paddlehub.bj.bcebos.com/resources/fastspeech_ljspeech-0.wav">
-            <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
-            </th>
-            <th>
-            <a href="https://paddlehub.bj.bcebos.com/resources/transformer_tts_ljspeech-0.wav">
             <img src="./docs/imgs/Readme_Related/audio_icon.png" width=250 /></a><br>
             </th>
         </tr>
@@ -138,16 +112,9 @@ English | [简体中文](README_ch.md)
 
 - Many thanks to CopyRight@[PaddleSpeech](https://github.com/PaddlePaddle/PaddleSpeech) for the pre-trained models, you can try to train your models with PaddleSpeech.
 
-#### 📽️ [Video Models](./modules#Video)
-- Short video classification trained via large-scale video datasets, supports 3000+ tag types prediction for short Form Videos.
-- Many thanks to CopyRight@[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo) for the pre-trained model, you can try to train your models with PaddleVideo.
-- `Example: Input a short video of swimming, the algorithm can output the result of "swimming"`
-<div align="center">
-<img src="./docs/imgs/Readme_Related/Text_Video.gif"  width = "400" height = "400" />
-</div>
 
-### ⭐ Thanks for Your Star ⭐
-- All the above pre-trained models are all **open source and free**, and the number of models is continuously updated. Welcome **⭐Star⭐** to pay attention.
+### ⭐ Thanks for Your Star 
+- All the above pre-trained models are all **open source and free**, and the number of models is continuously updated. Welcome **Star** to pay attention.
 <div align="center">
 <a href="https://github.com/PaddlePaddle/PaddleHub/stargazers">
     <img src="./docs/imgs/Readme_Related/star_en.png"  width = "411" height = "100" /></a>  
@@ -160,7 +127,8 @@ English | [简体中文](README_ch.md)
 - If you have any questions during the use of the model, you can join the official WeChat group to get more efficient questions and answers, and fully communicate with developers from all walks of life. We look forward to your joining.
 <div align="center">
 <img src="./docs/imgs/joinus.PNG"  width = "200" height = "200" />
-</div>  
+</div> 
+
 - please add WeChat above and send "Hub" to the robot, the robot will invite you to join the group automatically.
 
 <a name="QuickStart"></a>
@@ -197,9 +165,7 @@ print(results)
 !hub serving start -m lac
 ```
 
-- 📣More model description, please refer [Models List](https://www.paddlepaddle.org.cn/hublist)
-
-- 📣More API for transfer learning, please refer [Tutorial](https://paddlehub.readthedocs.io/en/release-v2.1/transfer_learning_index.html)
+- 📣More model description, please refer [Models List](./modules)
 
 <a name="License"></a>
 ## 📚License
