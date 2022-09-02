@@ -21,29 +21,24 @@ English | [简体中文](README_ch.md)
 
 
 ## ⭐Features
-- **400+ AI Models**: rich, high-quality AI models, including CV, NLP, and Speech. 
-- **Easy to Use**: 3 lines of code to predict the 400+ AI models
-- **Model As Service**: easy to build a service with only one line of command.
-- **Cross-platform**: support Linux, Windows, MacOS
+- **📦400+ AI Models**: Rich, high-quality AI models, including CV, NLP, Speech, Video and Cross-Modal. 
+- **🧒Easy to Use**: 3 lines of code to predict the 400+ AI models
+- **💁Model As Service**: Easy to build a service with only one line of command.
+- **💻Cross-platform**: Support Linux, Windows and MacOS
 
 ### 💥Recent Updates
 - **🔥2022.08.19:** The v2.3.0 version is released
   -  supports [**ERNIE_ViLG**](./modules/image/text_to_image/ernie_vilg)([Hugging Face Space Demo](https://huggingface.co/spaces/PaddlePaddle/ERNIE-ViLG))
   -  supports [**Disco Diffusion(DD)**](./modules/image/text_to_image/disco_diffusion_clip_vitb32) and [**Stable Diffusion(SD)**](./modules/image/text_to_image/stable_diffusion)
 
-- **2022.02.18:** Added Huggingface Org, add spaces and models to the org: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)
-- **2021.12.22**，The v2.2.0 version is released. [1]More than 100 new models released，including dialog, speech, segmentation, OCR, text processing, GANs, and many other categories. The total number of pre-trained models reaches [**【360】**](https://www.paddlepaddle.org.cn/hublist). [2]Add an [indexed file](./modules/README.md) including useful information of pretrained models supported by PaddleHub. [3]Refactor README of pretrained models.
+- **2022.02.18:** Release models to the HuggingFace PaddlePaddle Space: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)
 
-- [【more】](./docs/docs_en/release.md)
-
-
-
+- [**More**](./docs/docs_en/release.md)
 
 ## 🌈Visualization Demo
 
-
 #### 🏜️ [Text-to-Image Models](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)
-- Include ERNIE-ViL、ERNIE 3.0 Zeus, supports applications such as text-to-image, writing essays, summarization, couplets, question answering, writing novels and completing text.
+- Include ERNIE-ViL, ERNIE 3.0 Zeus, supports applications such as text-to-image, writing essays, summarization, couplets, question answering, writing novels and completing text.
 <div align="center">
 <img src="https://user-images.githubusercontent.com/22424850/185588578-e2d1216b-e797-458d-bc6b-0ccb8e1bd1b9.png"  width = "80%"  />
 </div>
