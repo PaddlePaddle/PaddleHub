@@ -27,7 +27,10 @@ English | [简体中文](README_ch.md)
 - **Cross-platform**: support Linux, Windows, MacOS
 
 ### 💥Recent Updates
-- **🔥2022.08.19:** The v2.3.0 version is released, supports [**ERNIE_ViLG**](./modules/image/text_to_image/ernie_vilg)、[**Disco Diffusion(DD)**](./modules/image/text_to_image/disco_diffusion_clip_vitb32) and [**Stable Diffusion(SD)**](./modules/image/text_to_image/stable_diffusion)
+- **🔥2022.08.19:** The v2.3.0 version is released
+  -  supports [**ERNIE_ViLG**](./modules/image/text_to_image/ernie_vilg)([Hugging Face Space Demo](https://huggingface.co/spaces/PaddlePaddle/ERNIE-ViLG))
+  -  supports [**Disco Diffusion(DD)**](./modules/image/text_to_image/disco_diffusion_clip_vitb32) and [**Stable Diffusion(SD)**](./modules/image/text_to_image/stable_diffusion)
+
 - **2022.02.18:** Added Huggingface Org, add spaces and models to the org: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)
 - **2021.12.22**，The v2.2.0 version is released. [1]More than 100 new models released，including dialog, speech, segmentation, OCR, text processing, GANs, and many other categories. The total number of pre-trained models reaches [**【360】**](https://www.paddlepaddle.org.cn/hublist). [2]Add an [indexed file](./modules/README.md) including useful information of pretrained models supported by PaddleHub. [3]Refactor README of pretrained models.
 
