@@ -68,12 +68,11 @@
 - ### 3、API
 
   - ```python
-    def reconstruct(self,
-                   images=None,
-                   paths=None,
-                   use_gpu=False,
-                   visualization=False,
-                   output_dir="dcscn_output")
+    def reconstruct(images=None,
+                    paths=None,
+                    use_gpu=False,
+                    visualization=False,
+                    output_dir="dcscn_output")
     ```
 
     - 预测API，用于图像超分辨率。
@@ -93,21 +92,14 @@
         * data (numpy.ndarray): 超分辨后图像。
 
   - ```python
-    def save_inference_model(self,
-                            dirname='dcscn_save_model',
-                            model_filename=None,
-                            params_filename=None,
-                            combined=False)
+    def save_inference_model(path)
     ```
 
     - 将模型保存到指定路径。
 
     - **参数**
 
-      * dirname: 存在模型的目录名称
-      * model\_filename: 模型文件名称，默认为\_\_model\_\_
-      * params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
-      * combined: 是否将参数保存到统一的一个文件中
+      * path: 模型保存路径
 
 
 
@@ -171,3 +163,12 @@
 * 1.0.0
 
   初始发布
+
+
+* 1.0.1
+
+  移除 fluid API
+
+  ```shell
+  $ hub install dcscn == 1.0.1
+  ```
