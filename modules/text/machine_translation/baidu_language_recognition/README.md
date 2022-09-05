@@ -39,7 +39,7 @@
     import paddlehub as hub
 
     module = hub.Module(name='baidu_language_recognition')
-    result = module.translate("I like panda")
+    result = module.recognize("I like panda")
     print(result)
     ```
 
