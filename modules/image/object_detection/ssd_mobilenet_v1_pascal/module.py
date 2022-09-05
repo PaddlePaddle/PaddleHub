@@ -142,6 +142,8 @@ class SSDMobileNetv1:
         if not paddle.in_dynamic_mode():
             is_static = True
             paddle.disable_static()
+        else:
+            is_static = False
         model = paddle.jit.load(self.default_pretrained_model_path)
         input_specs = [
             paddle.static.InputSpec(name='image', shape=[-1, 3, 300, 300])
