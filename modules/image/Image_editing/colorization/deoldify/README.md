@@ -170,3 +170,9 @@
 * 1.0.1
 
   适配paddlehub2.0版本
+
+* 1.0.2
+
+  ```shell
+  $ hub install deoldify == 1.0.2
+  ```

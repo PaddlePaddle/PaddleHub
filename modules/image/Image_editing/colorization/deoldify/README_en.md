@@ -169,3 +169,9 @@
 - 1.0.1
 
   Adapt to paddlehub2.0
+
+* 1.0.2
+
+  ```shell
+  $ hub install deoldify == 1.0.2
+  ```
