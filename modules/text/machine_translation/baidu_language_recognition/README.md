@@ -49,7 +49,7 @@
     def recognize(query: str)
     ```
 
-    - 翻译API，输入源语言的文本句子，解码后输出翻译后的目标语言的文本句子。
+    - 语种识别API，输入文本句子，输出识别后的语种编码。
 
     - **参数**
 
@@ -65,7 +65,7 @@
 
 ## 四、服务部署
 
-- 通过启动PaddleHub Serving，可以加载模型部署在线翻译服务。
+- 通过启动PaddleHub Serving，可以加载模型部署在线语种识别服务。
 
 - ### 第一步：启动PaddleHub Serving
 
@@ -75,7 +75,7 @@
     $ hub serving start -m baidu_language_recognition
     ```
 
-  - 通过以上命令可完成一个翻译API的部署，默认端口号为8866。
+  - 通过以上命令可完成一个语种识别API的部署，默认端口号为8866。
 
 
 - ## 第二步：发送预测请求
