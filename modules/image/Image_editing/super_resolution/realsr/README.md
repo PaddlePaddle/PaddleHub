@@ -174,3 +174,9 @@
 
   适配paddlehub2.0版本
 
+
+* 1.0.2
+
+  ```shell
+  $ hub install realsr == 1.0.2
+  ```
