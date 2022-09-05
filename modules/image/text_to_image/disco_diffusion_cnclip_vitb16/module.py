@@ -173,10 +173,7 @@ class DiscoDiffusionClip:
         """
         Run as a service.
         """
-        results = []
-        for text_prompt in text_prompts:
-            result = self.generate_image(text_prompts=text_prompt, **kwargs)[0].to_base64()
-            results.append(result)
+        results = self.generate_image(text_prompts=text_prompts, **kwargs).to_base64()
         return results
 
     @runnable
