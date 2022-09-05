@@ -34,7 +34,7 @@ from .processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
     author="paddlepaddle",
     author_email="",
     summary="falsr_c is a super resolution model.",
-    version="1.0.0")
+    version="1.0.1")
 class Falsr_C:
     def __init__(self):
         self.default_pretrained_model_path = os.path.join(self.directory, "falsr_c_model", "model")
