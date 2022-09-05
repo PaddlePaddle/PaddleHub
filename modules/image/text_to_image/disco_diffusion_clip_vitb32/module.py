@@ -19,12 +19,12 @@ from functools import partial
 from typing import List
 from typing import Optional
 
+import paddle
+
 import disco_diffusion_clip_vitb32.clip as clip
 import disco_diffusion_clip_vitb32.resize_right as resize_right
-import paddle
-from disco_diffusion_clip_vitb32.reverse_diffusion import create
-
 import paddlehub as hub
+from disco_diffusion_clip_vitb32.reverse_diffusion import create
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
@@ -174,10 +174,7 @@ class DiscoDiffusionClip:
         """
         Run as a service.
         """
-        results = []
-        for text_prompt in text_prompts:
-            result = self.generate_image(text_prompts=text_prompt, **kwargs)[0].to_base64()
-            results.append(result)
+        results = self.generate_image(text_prompts=text_prompts, **kwargs).to_base64()
         return results
 
     @runnable
