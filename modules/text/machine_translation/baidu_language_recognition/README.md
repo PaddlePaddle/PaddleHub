@@ -1,7 +1,7 @@
 # baidu_language_recognition
 |模型名称|baidu_language_recognition|
 | :--- | :---: |
-|类别|文本-机器翻译|
+|类别|文本-语种识别|
 |网络|-|
 |数据集|-|
 |是否支持Fine-tuning|否|
