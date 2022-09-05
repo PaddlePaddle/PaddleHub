@@ -18,13 +18,14 @@ import os
 import argparse
 
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+import paddle
+import paddle.jit
+import paddle.static
+from paddle.inference import Config, create_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
 
-from falsr_c.data_feed import reader
-from falsr_c.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
+from .data_feed import reader
+from .processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
 
 
 @moduleinfo(
@@ -34,20 +35,21 @@ from falsr_c.processor import postprocess, base64_to_cv2, cv2_to_base64, check_d
     author_email="",
     summary="falsr_c is a super resolution model.",
     version="1.0.0")
-class Falsr_C(hub.Module):
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "falsr_c_model")
+class Falsr_C:
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(self.directory, "falsr_c_model", "model")
         self._set_config()
 
     def _set_config(self):
         """
         predictor config setting
         """
-        self.model_file_path = self.default_pretrained_model_path
-        cpu_config = AnalysisConfig(self.model_file_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -56,10 +58,10 @@ class Falsr_C(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.model_file_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            self.gpu_predictor = create_predictor(gpu_config)
 
     def reconstruct(self, images=None, paths=None, use_gpu=False, visualization=False, output_dir="falsr_c_output"):
         """
@@ -96,11 +98,18 @@ class Falsr_C(hub.Module):
         for i in range(total_num):
             image_y = np.array([all_data[i]['img_y']])
             image_scale_pbpr = np.array([all_data[i]['img_scale_pbpr']])
-            image_y = PaddleTensor(image_y.copy())
-            image_scale_pbpr = PaddleTensor(image_scale_pbpr.copy())
-            output = self.gpu_predictor.run([image_y, image_scale_pbpr]) if use_gpu else self.cpu_predictor.run(
-                [image_y, image_scale_pbpr])
-            output = np.expand_dims(output[0].as_ndarray(), axis=1)
+
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(image_y.copy())
+            input_handle = predictor.get_input_handle(input_names[1])
+            input_handle.copy_from_cpu(image_scale_pbpr.copy())
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+            output = np.expand_dims(output_handle.copy_to_cpu(), axis=1)
             out = postprocess(
                 data_out=output,
                 org_im=all_data[i]['org_im'],
@@ -112,27 +121,22 @@ class Falsr_C(hub.Module):
         return res
 
     def save_inference_model(self,
-                             dirname='falsr_c_save_model',
-                             model_filename=None,
-                             params_filename=None,
-                             combined=False):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+                             path):
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
 
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
+        program, feeded_var_names, target_vars = paddle.static.io.load_inference_model(
+            self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feeded_var_names]
+        paddle.static.io.save_inference_model(
+            path,
+            feed_vars=feed_vars,
+            fetch_vars=target_vars,
             executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+            program=program
+        )
 
     @serving
     def serving_method(self, images, **kwargs):
