@@ -171,10 +171,7 @@
 
 
     -  ```python
-       def save_inference_model(dirname='humanseg_lite_model',
-                                model_filename=None,
-                                params_filename=None,
-                                combined=True)
+       def save_inference_model(path)
        ```
 
 
@@ -182,10 +179,7 @@
 
         - **Parameters**
 
-            * dirname: Save path.
-            * model\_filename: model file name，defalt is \_\_model\_\_
-            * params\_filename: parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
-            * combined: Whether to save the parameters to a unified file.
+            * path: Model save path.
 
 
 
@@ -243,13 +237,22 @@
 
 - 1.0.0
 
-  First release
+    First release
 
 - 1.1.0
     
     Added video portrait segmentation interface
 
     Added video stream portrait segmentation interface
+
 * 1.1.1
 
-   Fix memory leakage problem of on cudnn 8.0.4
+    Fix memory leakage problem of on cudnn 8.0.4
+
+* 1.1.2
+
+    Remove Fluid API
+
+    ```shell
+    $ hub install humanseg_lite == 1.1.2
+    ```
