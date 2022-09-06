@@ -149,3 +149,7 @@
 
   Adapt to paddlehub2.0
 
+  * ```shell
+    $ hub install photo_restoration==1.0.1
+    ```
+

@@ -18,19 +18,18 @@ import time
 import cv2
 import paddle.nn as nn
 import paddlehub as hub
-from paddlehub.module.module import moduleinfo, serving, Module
+from paddlehub.module.module import moduleinfo, serving
 
-import photo_restoration.utils as U
+from . import utils as U
 
 
-@moduleinfo(
-    name="photo_restoration",
-    type="CV/image_editing",
-    author="paddlepaddle",
-    author_email="",
-    summary="photo_restoration is a photo restoration model based on deoldify and realsr.",
-    version="1.0.0")
-class PhotoRestoreModel(Module):
+@moduleinfo(name="photo_restoration",
+            type="CV/image_editing",
+            author="paddlepaddle",
+            author_email="",
+            summary="photo_restoration is a photo restoration model based on deoldify and realsr.",
+            version="1.0.1")
+class PhotoRestoreModel(nn.Layer):
     """
     PhotoRestoreModel
 
@@ -39,8 +38,8 @@ class PhotoRestoreModel(Module):
         visualization (bool): Whether to save the estimation result. Default is True.
     """
 
-    def _initialize(self, visualization: bool = False):
-        #super(PhotoRestoreModel, self).__init__()
+    def __init__(self, visualization: bool = False):
+        super(PhotoRestoreModel, self).__init__()
         self.deoldify = hub.Module(name='deoldify')
         self.realsr = hub.Module(name='realsr')
         self.visualization = visualization
