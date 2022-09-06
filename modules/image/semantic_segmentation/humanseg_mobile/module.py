@@ -19,14 +19,15 @@ import argparse
 
 import cv2
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+import paddle
+import paddle.jit
+import paddle.static
+from paddle.inference import Config, create_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
 
-from humanseg_mobile.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
-from humanseg_mobile.data_feed import reader, preprocess_v
-from humanseg_mobile.optimal import postprocess_v, threshold_mask
+from .processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
+from .data_feed import reader, preprocess_v
+from .optimal import postprocess_v, threshold_mask
 
 
 @moduleinfo(
@@ -35,22 +36,23 @@ from humanseg_mobile.optimal import postprocess_v, threshold_mask
     author="paddlepaddle",
     author_email="",
     summary="HRNet_w18_samll_v1 is a semantic segmentation model.",
-    version="1.1.0")
-class HRNetw18samllv1humanseg(hub.Module):
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "humanseg_mobile_inference")
+    version="1.1.2")
+class HRNetw18samllv1humanseg:
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(
+            self.directory, "humanseg_mobile_inference", "model")
         self._set_config()
 
     def _set_config(self):
         """
         predictor config setting
         """
-        self.model_file_path = os.path.join(self.default_pretrained_model_path, '__model__')
-        self.params_file_path = os.path.join(self.default_pretrained_model_path, '__params__')
-        cpu_config = AnalysisConfig(self.model_file_path, self.params_file_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
             int(_places[0])
@@ -58,10 +60,14 @@ class HRNetw18samllv1humanseg(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.model_file_path, self.params_file_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            
+            if paddle.get_cudnn_version() == 8004:
+                gpu_config.delete_pass('conv_elementwise_add_act_fuse_pass')
+                gpu_config.delete_pass('conv_elementwise_add2_act_fuse_pass')
+            self.gpu_predictor = create_predictor(gpu_config)
 
     def segment(self,
                 images=None,
@@ -112,9 +118,16 @@ class HRNetw18samllv1humanseg(hub.Module):
                     pass
             # feed batch image
             batch_image = np.array([data['image'] for data in batch_data])
-            batch_image = PaddleTensor(batch_image.copy())
-            output = self.gpu_predictor.run([batch_image]) if use_gpu else self.cpu_predictor.run([batch_image])
-            output = output[1].as_ndarray()
+
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(batch_image.copy())
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[1])
+            output = output_handle.copy_to_cpu()
+
             output = np.expand_dims(output[:, 1, :, :], axis=1)
             # postprocess one by one
             for i in range(len(batch_data)):
@@ -152,9 +165,16 @@ class HRNetw18samllv1humanseg(hub.Module):
         height = int(frame_org.shape[1])
         disflow = cv2.DISOpticalFlow_create(cv2.DISOPTICAL_FLOW_PRESET_ULTRAFAST)
         frame = preprocess_v(frame_org, resize_w, resize_h)
-        image = PaddleTensor(np.array([frame.copy()]))
-        output = self.gpu_predictor.run([image]) if use_gpu else self.cpu_predictor.run([image])
-        score_map = output[1].as_ndarray()
+
+        predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+        input_names = predictor.get_input_names()
+        input_handle = predictor.get_input_handle(input_names[0])
+        input_handle.copy_from_cpu(frame.copy()[None, ...])
+        predictor.run()
+        output_names = predictor.get_output_names()
+        output_handle = predictor.get_output_handle(output_names[1])
+        score_map = output_handle.copy_to_cpu()
+
         frame = np.transpose(frame, axes=[1, 2, 0])
         score_map = np.transpose(np.squeeze(score_map, 0), axes=[1, 2, 0])
         cur_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -217,9 +237,16 @@ class HRNetw18samllv1humanseg(hub.Module):
                 ret, frame_org = cap_video.read()
                 if ret:
                     frame = preprocess_v(frame_org, resize_w, resize_h)
-                    image = PaddleTensor(np.array([frame.copy()]))
-                    output = self.gpu_predictor.run([image]) if use_gpu else self.cpu_predictor.run([image])
-                    score_map = output[1].as_ndarray()
+
+                    predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+                    input_names = predictor.get_input_names()
+                    input_handle = predictor.get_input_handle(input_names[0])
+                    input_handle.copy_from_cpu(frame.copy()[None, ...])
+                    predictor.run()
+                    output_names = predictor.get_output_names()
+                    output_handle = predictor.get_output_handle(output_names[1])
+                    score_map = output_handle.copy_to_cpu()
+
                     frame = np.transpose(frame, axes=[1, 2, 0])
                     score_map = np.transpose(np.squeeze(score_map, 0), axes=[1, 2, 0])
                     cur_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -244,9 +271,16 @@ class HRNetw18samllv1humanseg(hub.Module):
                 ret, frame_org = cap_video.read()
                 if ret:
                     frame = preprocess_v(frame_org, resize_w, resize_h)
-                    image = PaddleTensor(np.array([frame.copy()]))
-                    output = self.gpu_predictor.run([image]) if use_gpu else self.cpu_predictor.run([image])
-                    score_map = output[1].as_ndarray()
+
+                    predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+                    input_names = predictor.get_input_names()
+                    input_handle = predictor.get_input_handle(input_names[0])
+                    input_handle.copy_from_cpu(frame.copy()[None, ...])
+                    predictor.run()
+                    output_names = predictor.get_output_names()
+                    output_handle = predictor.get_output_handle(output_names[1])
+                    score_map = output_handle.copy_to_cpu()
+
                     frame = np.transpose(frame, axes=[1, 2, 0])
                     score_map = np.transpose(np.squeeze(score_map, 0), axes=[1, 2, 0])
                     cur_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -269,28 +303,22 @@ class HRNetw18samllv1humanseg(hub.Module):
             cap_video.release()
 
     def save_inference_model(self,
-                             dirname='humanseg_mobile_model',
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.default_pretrained_model_path,
-            model_filename=model_filename,
-            params_filename=params_filename,
-            executor=exe)
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
+                             path):
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
+
+        program, feeded_var_names, target_vars = paddle.static.io.load_inference_model(
+            self.default_pretrained_model_path, executor=exe)
+
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feeded_var_names]
+        paddle.static.io.save_inference_model(
+            path,
+            feed_vars=feed_vars,
+            fetch_vars=target_vars,
             executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+            program=program
+        )
 
     @serving
     def serving_method(self, images, **kwargs):
