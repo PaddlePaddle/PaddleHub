@@ -6,7 +6,7 @@ from collections import OrderedDict
 import cv2
 import numpy as np
 
-from ace2p.processor import get_direction, get_3rd_point, get_affine_transform
+from .processor import get_affine_transform
 
 __all__ = ['reader']
 

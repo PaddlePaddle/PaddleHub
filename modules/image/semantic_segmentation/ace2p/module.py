@@ -7,13 +7,14 @@ import argparse
 import os
 
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
+import paddle
+import paddle.jit
+import paddle.static
+from paddle.inference import Config, create_predictor
 from paddlehub.module.module import moduleinfo, runnable, serving
 
-from ace2p.processor import get_palette, postprocess, base64_to_cv2, cv2_to_base64
-from ace2p.data_feed import reader
+from .processor import get_palette, postprocess, base64_to_cv2, cv2_to_base64
+from .data_feed import reader
 
 
 @moduleinfo(
@@ -22,10 +23,11 @@ from ace2p.data_feed import reader
     author="baidu-idl",
     author_email="",
     summary="ACE2P is an image segmentation model for human parsing solution.",
-    version="1.1.0")
-class ACE2P(hub.Module):
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "ace2p_human_parsing")
+    version="1.1.1")
+class ACE2P:
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(
+            self.directory, "ace2p_human_parsing", "model")
         # label list
         label_list_file = os.path.join(self.directory, 'label_list.txt')
         with open(label_list_file, "r") as file:
@@ -39,10 +41,12 @@ class ACE2P(hub.Module):
         """
         predictor config setting
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -51,10 +55,10 @@ class ACE2P(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            self.gpu_predictor = create_predictor(gpu_config)
 
     def segmentation(self,
                      images=None,
@@ -114,12 +118,19 @@ class ACE2P(hub.Module):
                     pass
             # feed batch image
             batch_image = np.array([data['image'] for data in batch_data])
-            batch_image = PaddleTensor(batch_image.astype('float32'))
-            data_out = self.gpu_predictor.run([batch_image]) if use_gpu else self.cpu_predictor.run([batch_image])
+
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(batch_image.astype('float32'))
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+    
             # postprocess one by one
             for i in range(len(batch_data)):
                 out = postprocess(
-                    data_out=data_out[0].as_ndarray()[i],
+                    data_out=output_handle.copy_to_cpu()[i],
                     org_im=batch_data[i]['org_im'],
                     org_im_path=batch_data[i]['org_im_path'],
                     image_info=batch_data[i]['image_info'],
@@ -129,24 +140,23 @@ class ACE2P(hub.Module):
                 res.append(out)
         return res
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
+    def save_inference_model(self,
+                             path):
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
 
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
+        program, feeded_var_names, target_vars = paddle.static.io.load_inference_model(
+            self.default_pretrained_model_path, executor=exe)
 
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feeded_var_names]
+        paddle.static.io.save_inference_model(
+            path,
+            feed_vars=feed_vars,
+            fetch_vars=target_vars,
             executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+            program=program
+        )
 
     @serving
     def serving_method(self, images, **kwargs):
