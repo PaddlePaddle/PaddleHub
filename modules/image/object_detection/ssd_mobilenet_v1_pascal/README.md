@@ -166,10 +166,10 @@
 
   移除 fluid api
 
-* 1.1.4
+* 1.2.0
 
   修复推理模型无法导出的问题
 
   - ```shell
-    $ hub install ssd_mobilenet_v1_pascal==1.1.4
+    $ hub install ssd_mobilenet_v1_pascal==1.2.0
     ```

@@ -165,10 +165,10 @@
 
   Remove fluid api
 
-* 1.1.4
+* 1.2.0
 
   Fix bug of save_inference_model
 
   - ```shell
-    $ hub install ssd_mobilenet_v1_pascal==1.1.3
+    $ hub install ssd_mobilenet_v1_pascal==1.2.0
     ```
