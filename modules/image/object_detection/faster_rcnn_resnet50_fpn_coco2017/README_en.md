@@ -161,10 +161,10 @@
 
   Fix the problem of reading numpy
 
-* 1.0.2
+* 1.1.0
 
   Remove fluid api
 
   - ```shell
-    $ hub install faster_rcnn_resnet50_fpn_coco2017==1.0.2
+    $ hub install faster_rcnn_resnet50_fpn_coco2017==1.1.0
     ```
