@@ -160,10 +160,10 @@
 
   Fix the problem of reading numpy
 
-* 1.0.3
+* 1.1.0
 
   Remove fluid api
 
   - ```shell
-    $ hub install yolov3_mobilenet_v1_coco2017==1.0.3
+    $ hub install yolov3_mobilenet_v1_coco2017==1.1.0
     ```
