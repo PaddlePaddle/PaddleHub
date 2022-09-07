@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 import cv2
@@ -17,6 +18,12 @@ class TestHubModule(unittest.TestCase):
         with open('tests/test.jpg', 'wb') as f:
             f.write(response.content)
         cls.module = hub.Module(name="yolov3_resnet50_vd_coco2017")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree('tests')
+        shutil.rmtree('inference')
+        shutil.rmtree('detection_result')
 
     def test_object_detection1(self):
         results = self.module.object_detection(
@@ -95,7 +102,6 @@ class TestHubModule(unittest.TestCase):
 
         self.assertTrue(os.path.exists('./inference/model.pdmodel'))
         self.assertTrue(os.path.exists('./inference/model.pdiparams'))
-        self.assertTrue(os.path.exists('./inference/model.pdiparams.info'))
 
 
 if __name__ == "__main__":
