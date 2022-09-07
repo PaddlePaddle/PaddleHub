@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 import cv2
@@ -20,6 +21,12 @@ class TestHubModule(unittest.TestCase):
         with open('tests/test.jpg', 'wb') as f:
             f.write(response.content)
         cls.module = hub.Module(name="ultra_light_fast_generic_face_detector_1mb_320")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree('tests')
+        shutil.rmtree('inference')
+        shutil.rmtree('face_detector_320_predict_output')
 
     def test_face_detection1(self):
         results = self.module.face_detection(

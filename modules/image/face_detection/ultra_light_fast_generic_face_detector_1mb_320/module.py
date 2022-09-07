@@ -26,7 +26,7 @@ from paddlehub.module.module import serving
     author_email="paddle-dev@baidu.com",
     summary=
     "Ultra-Light-Fast-Generic-Face-Detector-1MB is a high-performance object detection model release on https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB.",
-    version="1.1.4")
+    version="1.2.0")
 class FaceDetector320:
     def __init__(self):
         self.default_pretrained_model_path = os.path.join(self.directory,
@@ -59,17 +59,13 @@ class FaceDetector320:
     def save_inference_model(self, path):
         place = paddle.CPUPlace()
         exe = paddle.static.Executor(place)
-
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            self.default_pretrained_model_path, executor=exe)
-
+        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feed_target_names]
         paddle.static.save_inference_model(
             path,
-            [paddle.static.data(name=feeded_var_names[0], shape=(1, 3, 240, 320))],
-            [
-                paddle.static.data(name='save_infer_model/scale_0', shape=(1, 4420, 2)),
-                paddle.static.data(name='save_infer_model/scale_1', shape=(1, 4420, 4)),
-            ],
+            feed_vars=feed_vars,
+            fetch_vars=fetch_targets,
             executor=exe,
             program=program
         )

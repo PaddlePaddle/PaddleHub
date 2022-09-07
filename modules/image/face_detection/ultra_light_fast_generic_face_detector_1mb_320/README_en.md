@@ -161,10 +161,10 @@
 
   Remove fluid api
 
-* 1.1.4
+* 1.2.0
 
   Fix a bug of save_inference_model
 
   - ```shell
-    $ hub install ultra_light_fast_generic_face_detector_1mb_320==1.1.4
+    $ hub install ultra_light_fast_generic_face_detector_1mb_320==1.2.0
     ```
