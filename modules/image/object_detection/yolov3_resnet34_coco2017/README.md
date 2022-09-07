@@ -160,10 +160,10 @@
 
   修复numpy数据读取问题
 
-* 1.0.3
+* 1.1.0
 
   移除 fluid api
 
   - ```shell
-    $ hub install yolov3_resnet34_coco2017==1.0.3
+    $ hub install yolov3_resnet34_coco2017==1.1.0
     ```
