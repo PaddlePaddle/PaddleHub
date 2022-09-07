@@ -10,7 +10,6 @@ from math import ceil
 
 import paddle
 import numpy as np
-import paddle.jit
 import paddle.static
 from paddlehub.module.module import moduleinfo, runnable, serving
 from paddle.inference import Config, create_predictor
@@ -21,7 +20,7 @@ from .data_feed import test_reader, padding_minibatch
 
 @moduleinfo(
     name="faster_rcnn_resnet50_coco2017",
-    version="1.1.2",
+    version="1.2.0",
     type="cv/object_detection",
     summary=
     "Baidu's Faster R-CNN model for object detection with backbone ResNet50, trained with dataset COCO2017",
@@ -59,23 +58,19 @@ class FasterRCNNResNet50:
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
 
-    def save_inference_model(self,
-                             path):
-        if not paddle.in_dynamic_mode():
-            is_static = True
-            paddle.disable_static()
-        else:
-            is_static = False
-        model = paddle.jit.load(self.default_pretrained_model_path)
-        input_specs = [
-            paddle.static.InputSpec(name='image', shape=[-1, 3, 800, 1333]),
-            paddle.static.InputSpec(name='im_info', shape=[-1, 3]),
-            paddle.static.InputSpec(name='im_shape', shape=[-1, 3])
-        ]
-        model = paddle.jit.to_static(model, input_specs)
-        paddle.jit.save(model, path)
-        if is_static:
-            paddle.enable_static()
+    def save_inference_model(self, path):
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
+        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feed_target_names]
+        paddle.static.save_inference_model(
+            path,
+            feed_vars=feed_vars,
+            fetch_vars=fetch_targets,
+            executor=exe,
+            program=program
+        )
 
     def object_detection(self,
                          paths=None,
