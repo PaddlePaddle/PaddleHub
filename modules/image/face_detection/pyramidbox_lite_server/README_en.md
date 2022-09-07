@@ -165,10 +165,10 @@
 
   Remove fluid api
 
-* 1.2.2
+* 1.3.0
 
   Fix a bug of save_inference_model
 
   - ```shell
-    $ hub install pyramidbox_lite_server==1.2.2
+    $ hub install pyramidbox_lite_server==1.3.0
     ```
