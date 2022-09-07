@@ -158,9 +158,9 @@
 * 1.1.1
   Fix the problem of reading numpy
 
-* 1.1.2
+* 1.2.0
   Remove fluid api
 
   - ```shell
-    $ hub install yolov3_darknet53_coco2017==1.1.2
+    $ hub install yolov3_darknet53_coco2017==1.2.0
     ```

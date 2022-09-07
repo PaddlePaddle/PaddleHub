@@ -159,9 +159,9 @@
 * 1.1.1
   修复numpy数据读取问题
 
-* 1.1.2
+* 1.2.0
   移除 fluid api
 
   - ```shell
-    $ hub install yolov3_darknet53_coco2017==1.1.2
+    $ hub install yolov3_darknet53_coco2017==1.2.0
     ```
