@@ -164,10 +164,10 @@
 
   移除 fluid api
 
-* 1.2.2
+* 1.3.0
 
   修复无法导出推理模型的问题
 
   - ```shell
-    $ hub install pyramidbox_lite_mobile==1.2.2
+    $ hub install pyramidbox_lite_mobile==1.3.0
     ```
