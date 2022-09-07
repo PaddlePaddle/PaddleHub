@@ -19,7 +19,7 @@ from .data_feed import reader
 
 @moduleinfo(
     name="ssd_vgg16_300_coco2017",
-    version="1.0.3",
+    version="1.1.0",
     type="cv/object_detection",
     summary="SSD with backbone VGG16, trained with dataset COCO.",
     author="paddlepaddle",
@@ -122,21 +122,19 @@ class SSDVGG16:
             res.extend(output)
         return res
 
-    def save_inference_model(self,
-                             path):
-        if not paddle.in_dynamic_mode():
-            is_static = True
-            paddle.disable_static()
-        else:
-            is_static = False
-        model = paddle.jit.load(self.default_pretrained_model_path)
-        input_specs = [
-            paddle.static.InputSpec(name='image', shape=[-1, 3, 300, 300])
-        ]
-        model = paddle.jit.to_static(model, input_specs)
-        paddle.jit.save(model, path)
-        if is_static:
-            paddle.enable_static()
+    def save_inference_model(self, path):
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
+        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feed_target_names]
+        paddle.static.save_inference_model(
+            path,
+            feed_vars=feed_vars,
+            fetch_vars=fetch_targets,
+            executor=exe,
+            program=program
+        )
 
     @serving
     def serving_method(self, images, **kwargs):
