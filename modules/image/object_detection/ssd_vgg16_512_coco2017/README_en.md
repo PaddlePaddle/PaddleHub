@@ -160,10 +160,10 @@
 
   Fix the problem of reading numpy
 
-* 1.0.3
+* 1.1.0
 
    移除 fluid api
 
   - ```shell
-    $ hub install ssd_vgg16_512_coco2017==1.0.3
+    $ hub install ssd_vgg16_512_coco2017==1.1.0
     ```
