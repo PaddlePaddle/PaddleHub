@@ -206,10 +206,10 @@
 
   移除 fluid api
 
-* 1.3.2
+* 1.4.0
 
   修复无法导出模型的问题
 
   - ```shell
-    $ hub install pyramidbox_lite_mobile_mask==1.3.2
+    $ hub install pyramidbox_lite_mobile_mask==1.4.0
     ```

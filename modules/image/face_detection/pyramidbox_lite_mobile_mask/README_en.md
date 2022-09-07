@@ -181,10 +181,10 @@
 
   Remove fluid api
 
-* 1.3.2
+* 1.4.0
 
   Fix a bug of save_inference_model
 
   - ```shell
-    $ hub install pyramidbox_lite_mobile_mask==1.3.2
+    $ hub install pyramidbox_lite_mobile_mask==1.4.0
     ```
