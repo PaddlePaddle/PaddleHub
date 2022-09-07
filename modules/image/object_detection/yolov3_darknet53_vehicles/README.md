@@ -164,10 +164,10 @@
 
   移除 fluid api
 
-* 1.0.4
+* 1.1.0
 
    修复推理模型无法导出的问题
 
   - ```shell
-    $ hub install yolov3_darknet53_vehicles==1.0.4
+    $ hub install yolov3_darknet53_vehicles==1.1.0
     ```
