@@ -206,10 +206,10 @@
 
   移除 fluid api
 
-* 1.3.3
+* 1.4.0
 
   修复无法导出推理模型的问题
 
   - ```shell
-    $ hub install pyramidbox_lite_server_mask==1.3.3
+    $ hub install pyramidbox_lite_server_mask==1.4.0
     ```

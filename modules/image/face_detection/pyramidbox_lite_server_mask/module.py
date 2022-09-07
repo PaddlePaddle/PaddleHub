@@ -27,7 +27,7 @@ from paddlehub.module.module import serving
     author_email="",
     summary=
     "PyramidBox-Lite-Server-Mask is a high-performance face detection model used to detect whether people wear masks.",
-    version="1.3.3")
+    version="1.4.0")
 class PyramidBoxLiteServerMask:
     def __init__(self, face_detector_module=None):
         """
@@ -190,20 +190,18 @@ class PyramidBoxLiteServerMask:
         self.face_detector.save_inference_model(path)
 
     def _save_classifier_model(self, path):
-        if not paddle.in_dynamic_mode():
-            is_static = True
-            paddle.disable_static()
-        else:
-            is_static = False
-        model = paddle.jit.load(self.default_pretrained_model_path)
-        input_specs = [
-            paddle.static.InputSpec(name='image', shape=[-1, 3, 128, 128])
-        ]
-        model = paddle.jit.to_static(model, input_specs)
-
-        paddle.jit.save(model, path)
-        if is_static:
-            paddle.enable_static()
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
+        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feed_target_names]
+        paddle.static.save_inference_model(
+            path,
+            feed_vars=feed_vars,
+            fetch_vars=fetch_targets,
+            executor=exe,
+            program=program
+        )
 
     @serving
     def serving_method(self, images, **kwargs):
