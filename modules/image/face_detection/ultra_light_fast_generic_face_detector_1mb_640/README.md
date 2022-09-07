@@ -162,11 +162,11 @@
 
   移除 fluid api
 
-* 1.1.4 
+* 1.2.0
   
   修复无法导出推理模型的问题
 
   - ```shell
-    $ hub install ultra_light_fast_generic_face_detector_1mb_640==1.1.4
+    $ hub install ultra_light_fast_generic_face_detector_1mb_640==1.2.0
     ```
 
