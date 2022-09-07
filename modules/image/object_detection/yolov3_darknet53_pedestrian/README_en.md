@@ -164,10 +164,10 @@
 
    Remove fluid api
 
-* 1.0.4
+* 1.1.0
 
    Fix bug of save_inference_model
 
   - ```shell
-    $ hub install yolov3_darknet53_pedestrian==1.0.4
+    $ hub install yolov3_darknet53_pedestrian==1.1.0
     ```
