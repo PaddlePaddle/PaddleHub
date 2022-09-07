@@ -159,10 +159,10 @@
 
   Fix the problem of reading numpy
 
-* 1.1.1
+* 1.2.0
 
   Fix a bug of save_inference_model
 
   - ```shell
-    $ hub install pyramidbox_face_detection==1.1.1
+    $ hub install pyramidbox_face_detection==1.2.0
     ```

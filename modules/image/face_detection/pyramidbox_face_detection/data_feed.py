@@ -17,7 +17,7 @@ def preprocess(image):
     image_shape = [3, image.size[1], image.size[0]]
     if shrink != 1:
         h, w = int(image_shape[1] * shrink), int(image_shape[2] * shrink)
-        image = image.resize((w, h), Image.Resampling.LANCZOS)
+        image = image.resize((w, h), Image.ANTIALIAS)
         image_shape = [3, h, w]
 
     img = np.array(image)

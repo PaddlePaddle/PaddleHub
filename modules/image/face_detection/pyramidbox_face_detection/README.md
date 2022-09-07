@@ -160,10 +160,10 @@
 
   修复numpy数据读取问题
 
-* 1.1.1 
+* 1.2.0
 
   修复无法导出推理模型的问题
 
   - ```shell
-    $ hub install pyramidbox_face_detection==1.1.1
+    $ hub install pyramidbox_face_detection==1.2.0
     ```
