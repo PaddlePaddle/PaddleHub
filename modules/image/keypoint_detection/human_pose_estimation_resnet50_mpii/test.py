@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 import cv2
@@ -20,6 +21,12 @@ class TestHubModule(unittest.TestCase):
         with open('tests/test.jpg', 'wb') as f:
             f.write(response.content)
         cls.module = hub.Module(name="human_pose_estimation_resnet50_mpii")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree('tests')
+        shutil.rmtree('inference')
+        shutil.rmtree('output_pose')
 
     def test_keypoint_detection1(self):
         results = self.module.keypoint_detection(
@@ -70,7 +77,6 @@ class TestHubModule(unittest.TestCase):
 
         self.assertTrue(os.path.exists('./inference/model.pdmodel'))
         self.assertTrue(os.path.exists('./inference/model.pdiparams'))
-        self.assertTrue(os.path.exists('./inference/model.pdiparams.info'))
 
 
 if __name__ == "__main__":

@@ -149,10 +149,10 @@
 
 * 1.1.1
 
-* 1.1.2
+* 1.2.0
 
    移除 fluid api
 
   * ```shell
-    $ hub install human_pose_estimation_resnet50_mpii==1.1.2
+    $ hub install human_pose_estimation_resnet50_mpii==1.2.0
     ```
