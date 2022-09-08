@@ -29,7 +29,7 @@ from paddlehub.module.module import serving
     author_email="paddle-dev@baidu.com",
     summary=
     "Face_Landmark_Localization can be used to locate face landmark. This Module is trained through the MPII Human Pose dataset.",
-    version="1.0.4")
+    version="1.1.0")
 class FaceLandmarkLocalization:
     def __init__(self, face_detector_module=None):
         """
@@ -79,22 +79,20 @@ class FaceLandmarkLocalization:
         return self.face_detector
 
     def save_inference_model(self, path):
-        if not paddle.in_dynamic_mode():
-            is_static = True
-            paddle.disable_static()
-        else:
-            is_static = False
-        model = paddle.jit.load(self.default_pretrained_model_path)
-        input_specs = [
-            paddle.static.InputSpec(name='image', shape=[-1, 1, 60, 60])
-        ]
-        model = paddle.jit.to_static(model, input_specs)
-
+        place = paddle.CPUPlace()
+        exe = paddle.static.Executor(place)
+        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feed_target_names]
         face_landmark_path = path + '_landmark'
         detector_path = path + '_detector'
-        paddle.jit.save(model, face_landmark_path)
-        if is_static:
-            paddle.enable_static()
+        paddle.static.save_inference_model(
+            face_landmark_path,
+            feed_vars=feed_vars,
+            fetch_vars=fetch_targets,
+            executor=exe,
+            program=program
+        )
         self.face_detector.save_inference_model(detector_path)
 
     def keypoint_detection(self,

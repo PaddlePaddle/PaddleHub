@@ -182,10 +182,10 @@
 
   移除 fluid api
 
-* 1.0.4
+* 1.1.0
 
   修复无法导出推理模型的问题
 
   * ```shell
-    $ hub install face_landmark_localization==1.0.4
+    $ hub install face_landmark_localization==1.1.0
     ```
