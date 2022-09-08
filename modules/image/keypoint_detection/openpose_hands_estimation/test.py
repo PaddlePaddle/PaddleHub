@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 import cv2
@@ -20,6 +21,13 @@ class TestHubModule(unittest.TestCase):
         with open('tests/test.jpg', 'wb') as f:
             f.write(response.content)
         cls.module = hub.Module(name="openpose_hands_estimation")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree('tests')
+        shutil.rmtree('inference')
+        shutil.rmtree('openpose_body')
+        shutil.rmtree('openpose_hand')
 
     def test_predict1(self):
         results = self.module.predict(

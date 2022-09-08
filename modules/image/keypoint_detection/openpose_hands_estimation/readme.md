@@ -154,10 +154,10 @@
 
   初始发布
 
-* 1.0.1
+* 1.1.0
 
   * ```shell
-    $ hub install hand_pose_localization==1.0.1
+    $ hub install hand_pose_localization==1.1.0
     ```
 
     

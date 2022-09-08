@@ -39,7 +39,7 @@ from . import processor as P
     author_email="",
     summary="Openpose_hands_estimation is a hand pose estimation model based on Hand Keypoint Detection in \
             Single Images using Multiview Bootstrapping.",
-    version="1.0.1")
+    version="1.1.0")
 class HandPoseModel(nn.Layer):
     """
     HandposeModel
