@@ -33,7 +33,7 @@ from .base_module import build_model
             author="paddlepaddle",
             author_email="",
             summary="Deoldify is a colorizaton model",
-            version="1.0.2")
+            version="1.1.0")
 class DeOldifyPredictor(nn.Layer):
     def __init__(self, render_factor: int = 32, output_path: int = 'output', load_checkpoint: str = None):
         super(DeOldifyPredictor, self).__init__()
