@@ -35,7 +35,7 @@ from . import processor as P
     author_email="",
     summary="Openpose_body_estimation is a body pose estimation model based on Realtime Multi-Person 2D Pose \
             Estimation using Part Affinity Fields.",
-    version="1.0.1")
+    version="1.1.0")
 class BodyPoseModel(nn.Layer):
     """
     BodyposeModel
