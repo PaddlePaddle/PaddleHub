@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 import cv2
@@ -12,7 +13,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 class TestHubModule(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        img_url = 'https://unsplash.com/photos/8UAUuP97RlY/download?ixid=MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjYxODQxMzI1&force=true'
+        img_url = 'https://unsplash.com/photos/8UAUuP97RlY/download?ixid=MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjYxODQxMzI1&force=true&w=640'
         if not os.path.exists('tests'):
             os.makedirs('tests')
         response = requests.get(img_url)
@@ -20,6 +21,11 @@ class TestHubModule(unittest.TestCase):
         with open('tests/test.jpg', 'wb') as f:
             f.write(response.content)
         cls.module = hub.Module(name="hand_pose_localization")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree('tests')
+        shutil.rmtree('output')
 
     def test_keypoint_detection1(self):
         results = self.module.keypoint_detection(

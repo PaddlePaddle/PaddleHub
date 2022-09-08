@@ -130,10 +130,10 @@
 
   适配paddlehub 2.0
 
-* 1.0.2
+* 1.1.0
 
   * ```shell
-    $ hub install hand_pose_localization==1.0.2
+    $ hub install hand_pose_localization==1.1.0
     ```
 
     

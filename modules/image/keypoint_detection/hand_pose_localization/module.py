@@ -14,7 +14,7 @@ from .processor import base64_to_cv2, Processor
     author="jm12138",  # 作者名称
     author_email="jm12138@qq.com",  # 作者邮箱
     summary="hand_pose_localization",  # 模型介绍
-    version="1.0.2"  # 版本号
+    version="1.1.0"  # 版本号
 )
 class Hand_Pose_Localization:
     # 初始化函数
