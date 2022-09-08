@@ -38,7 +38,7 @@ from paddlehub.module.module import serving
     author="paddlepaddle",
     author_email="",
     summary="PP-TinyPose is a real-time keypoint detection model optimized by PaddleDetecion for mobile devices.",
-    version="1.0.1")
+    version="1.1.0")
 class PP_TinyPose:
     """
     PP-TinyPose Model.

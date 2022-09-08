@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 import cv2
@@ -20,6 +21,11 @@ class TestHubModule(unittest.TestCase):
         with open('tests/test.jpg', 'wb') as f:
             f.write(response.content)
         cls.module = hub.Module(name="pp-tinypose")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree('tests')
+        shutil.rmtree('pp_tinypose_output')
 
     def test_predict1(self):
         results = self.module.predict(
