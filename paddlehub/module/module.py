@@ -26,6 +26,8 @@ from typing import Optional
 from typing import Union
 
 import paddle
+import paddle.jit
+import paddle.static
 import paddle2onnx
 from easydict import EasyDict
 
@@ -255,19 +257,19 @@ class RunModule(object):
             _params_filename = '__params__'
 
         program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self._pretrained_model_path,
+            self._pretrained_model_path,
             executor=exe,
             model_filename=_model_filename,
             params_filename=_params_filename,
         )
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feeded_var_names]
 
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
+        paddle.static.save_inference_model(dirname,
+                                           feed_vars=feed_vars,
+                                           fetch_vars=target_vars,
                                            executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
+                                           program=program)
 
         log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
 
