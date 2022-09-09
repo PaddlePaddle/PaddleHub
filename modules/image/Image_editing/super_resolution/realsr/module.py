@@ -32,7 +32,7 @@ from . import utils as U
             author="paddlepaddle",
             author_email="",
             summary="realsr is a super resolution model",
-            version="1.0.2")
+            version="1.1.0")
 class RealSRPredictor(nn.Layer):
     def __init__(self, output='output', weight_path=None, load_checkpoint: str = None):
         super(RealSRPredictor, self).__init__()

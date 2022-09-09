@@ -172,8 +172,8 @@
 
   Support paddlehub2.0
 
-* 1.0.2
+* 1.1.0
 
   ```shell
-  $ hub install realsr == 1.0.2
+  $ hub install realsr == 1.1.0
   ```
