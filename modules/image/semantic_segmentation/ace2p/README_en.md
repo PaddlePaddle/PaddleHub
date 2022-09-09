@@ -177,10 +177,10 @@
 
   Adapt to paddlehub2.0
 
-* 1.1.1
+* 1.2.0
 
   Remove Fluid API
 
   ```shell
-  $ hub install ace2p == 1.1.1
+  $ hub install ace2p == 1.2.0
   ```

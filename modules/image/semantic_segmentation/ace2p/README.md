@@ -171,10 +171,10 @@
 
   适配paddlehub2.0版本
 
-* 1.1.1
+* 1.2.0
 
   移除 Fluid API
 
   ```shell
-  $ hub install ace2p == 1.1.1
+  $ hub install ace2p == 1.2.0
   ```
