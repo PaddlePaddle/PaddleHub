@@ -268,7 +268,10 @@ class RunModule(object):
         global_block = program.global_block()
         feed_vars = [global_block.var(item) for item in feeded_var_names]
 
-        paddle.static.save_inference_model(dirname,
+        path_prefix = dirname
+        if os.path.isdir(dirname):
+            path_prefix = os.path.join(dirname, 'model')
+        paddle.static.save_inference_model(path_prefix,
                                            feed_vars=feed_vars,
                                            fetch_vars=target_vars,
                                            executor=exe,
