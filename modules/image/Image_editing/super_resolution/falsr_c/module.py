@@ -34,7 +34,7 @@ from .processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
     author="paddlepaddle",
     author_email="",
     summary="falsr_c is a super resolution model.",
-    version="1.0.1")
+    version="1.1.0")
 class Falsr_C:
     def __init__(self):
         self.default_pretrained_model_path = os.path.join(self.directory, "falsr_c_model", "model")
@@ -120,20 +120,16 @@ class Falsr_C:
             res.append(out)
         return res
 
-    def save_inference_model(self,
-                             path):
+    def save_inference_model(self, path):
         place = paddle.CPUPlace()
         exe = paddle.static.Executor(place)
-
-        program, feeded_var_names, target_vars = paddle.static.io.load_inference_model(
-            self.default_pretrained_model_path, executor=exe)
-
+        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
         global_block = program.global_block()
-        feed_vars = [global_block.var(item) for item in feeded_var_names]
-        paddle.static.io.save_inference_model(
+        feed_vars = [global_block.var(item) for item in feed_target_names]
+        paddle.static.save_inference_model(
             path,
             feed_vars=feed_vars,
-            fetch_vars=target_vars,
+            fetch_vars=fetch_targets,
             executor=exe,
             program=program
         )
