@@ -231,7 +231,8 @@ class RunModule(object):
         if not self._pretrained_model_path:
             raise RuntimeError('Module {} does not support exporting models in Paddle Inference format.'.format(
                 self.name))
-        elif not os.path.exists(self._pretrained_model_path):
+        elif not os.path.exists(
+                self._pretrained_model_path) and not os.path.exists(self._pretrained_model_path + '.pdmodel'):
             log.logger.warning('The model path of Module {} does not exist.'.format(self.name))
             return
 
@@ -253,21 +254,25 @@ class RunModule(object):
 
         if os.path.exists(os.path.join(self._pretrained_model_path, '__params__')):
             _params_filename = '__params__'
+        if _model_filename is not None and _params_filename is not None:
+            program, feeded_var_names, target_vars = paddle.static.load_inference_model(
+                self._pretrained_model_path,
+                executor=exe,
+                model_filename=_model_filename,
+                params_filename=_params_filename,
+            )
+        else:
+            program, feeded_var_names, target_vars = paddle.static.load_inference_model(self._pretrained_model_path,
+                                                                                        executor=exe)
 
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self._pretrained_model_path,
-            executor=exe,
-            model_filename=_model_filename,
-            params_filename=_params_filename,
-        )
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feeded_var_names]
 
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
+        paddle.static.save_inference_model(dirname,
+                                           feed_vars=feed_vars,
+                                           fetch_vars=target_vars,
                                            executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
+                                           program=program)
 
         log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
 
@@ -555,7 +560,9 @@ def moduleinfo(name: str,
                 _bases.append(_b)
             _bases.append(_meta)
             _bases = tuple(_bases)
-            wrap_cls = builtins.type(cls.__name__, _bases, dict(cls.__dict__))
+            attr_dict = dict(cls.__dict__)
+            attr_dict.pop('__dict__')
+            wrap_cls = builtins.type(cls.__name__, _bases, attr_dict)
 
         wrap_cls.name = name
         wrap_cls.version = utils.Version(version)
