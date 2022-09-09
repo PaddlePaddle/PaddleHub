@@ -236,10 +236,6 @@ class RunModule(object):
             log.logger.warning('The model path of Module {} does not exist.'.format(self.name))
             return
 
-        model_filename = '__model__' if not model_filename else model_filename
-        if combined:
-            params_filename = '__params__' if not params_filename else params_filename
-
         place = paddle.CPUPlace()
         exe = paddle.static.Executor(place)
 
