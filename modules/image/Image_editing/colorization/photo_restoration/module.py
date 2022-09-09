@@ -28,7 +28,7 @@ from . import utils as U
             author="paddlepaddle",
             author_email="",
             summary="photo_restoration is a photo restoration model based on deoldify and realsr.",
-            version="1.0.1")
+            version="1.1.0")
 class PhotoRestoreModel(nn.Layer):
     """
     PhotoRestoreModel
