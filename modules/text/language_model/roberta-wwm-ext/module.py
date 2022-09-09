@@ -11,17 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict
-import os
 import math
+import os
+from typing import Dict
 
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
-
-from paddlenlp.transformers.roberta.modeling import RobertaForSequenceClassification, RobertaForTokenClassification, RobertaModel
-from paddlenlp.transformers.roberta.tokenizer import RobertaTokenizer
 from paddlenlp.metrics import ChunkEvaluator
+from paddlenlp.transformers import AutoModel
+from paddlenlp.transformers import AutoModelForSequenceClassification
+from paddlenlp.transformers import AutoModelForTokenClassification
+from paddlenlp.transformers import AutoTokenizer
+
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.nlp_module import TransformerModule
 from paddlehub.utils.log import logger
@@ -29,7 +31,7 @@ from paddlehub.utils.log import logger
 
 @moduleinfo(
     name="roberta-wwm-ext",
-    version="2.0.2",
+    version="2.0.3",
     summary=
     "chinese-roberta-wwm-ext, 12-layer, 768-hidden, 12-heads, 110M parameters.  The module is executed as paddle.dygraph.",
     author="ymcui",
@@ -43,13 +45,13 @@ class Roberta(nn.Layer):
     """
 
     def __init__(
-            self,
-            task: str = None,
-            load_checkpoint: str = None,
-            label_map: Dict = None,
-            num_classes: int = 2,
-            suffix: bool = False,
-            **kwargs,
+        self,
+        task: str = None,
+        load_checkpoint: str = None,
+        label_map: Dict = None,
+        num_classes: int = 2,
+        suffix: bool = False,
+        **kwargs,
     ):
         super(Roberta, self).__init__()
         if label_map:
@@ -64,23 +66,24 @@ class Roberta(nn.Layer):
                 "current task name 'sequence_classification' was renamed to 'seq-cls', "
                 "'sequence_classification' has been deprecated and will be removed in the future.", )
         if task == 'seq-cls':
-            self.model = RobertaForSequenceClassification.from_pretrained(
-                pretrained_model_name_or_path='roberta-wwm-ext', num_classes=self.num_classes, **kwargs)
+            self.model = AutoModelForSequenceClassification.from_pretrained(
+                pretrained_model_name_or_path='hfl/roberta-wwm-ext', num_classes=self.num_classes, **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy()
         elif task == 'token-cls':
-            self.model = RobertaForTokenClassification.from_pretrained(
-                pretrained_model_name_or_path='roberta-wwm-ext', num_classes=self.num_classes, **kwargs)
+            self.model = AutoModelForTokenClassification.from_pretrained(
+                pretrained_model_name_or_path='hfl/roberta-wwm-ext', num_classes=self.num_classes, **kwargs)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
-            self.metric = ChunkEvaluator(label_list=[self.label_map[i] for i in sorted(self.label_map.keys())], suffix=suffix)
+            self.metric = ChunkEvaluator(label_list=[self.label_map[i] for i in sorted(self.label_map.keys())],
+                                         suffix=suffix)
         elif task == 'text-matching':
-            self.model = RobertaModel.from_pretrained(pretrained_model_name_or_path='roberta-wwm-ext', **kwargs)
+            self.model = AutoModel.from_pretrained(pretrained_model_name_or_path='hfl/roberta-wwm-ext', **kwargs)
             self.dropout = paddle.nn.Dropout(0.1)
             self.classifier = paddle.nn.Linear(self.model.config['hidden_size'] * 3, 2)
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.metric = paddle.metric.Accuracy()
         elif task is None:
-            self.model = RobertaModel.from_pretrained(pretrained_model_name_or_path='roberta-wwm-ext', **kwargs)
+            self.model = AutoModel.from_pretrained(pretrained_model_name_or_path='hfl/roberta-wwm-ext', **kwargs)
         else:
             raise RuntimeError("Unknown task {}, task should be one in {}".format(task, self._tasks_supported))
 
@@ -172,4 +175,4 @@ class Roberta(nn.Layer):
         """
         Gets the tokenizer that is customized for this module.
         """
-        return RobertaTokenizer.from_pretrained(pretrained_model_name_or_path='roberta-wwm-ext', *args, **kwargs)
+        return AutoTokenizer.from_pretrained(pretrained_model_name_or_path='hfl/roberta-wwm-ext', *args, **kwargs)
