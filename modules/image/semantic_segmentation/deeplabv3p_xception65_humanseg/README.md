@@ -70,11 +70,11 @@
 
     ```python
     def segmentation(images=None,
-                    paths=None,
-                    batch_size=1,
-                    use_gpu=False,
-                    visualization=False,
-                    output_dir='humanseg_output')
+                     paths=None,
+                     batch_size=1,
+                     use_gpu=False,
+                     visualization=False,
+                     output_dir='humanseg_output')
     ```
 
     - 预测API，用于人像分割。
@@ -95,20 +95,14 @@
       * data (numpy.ndarray): 人像分割结果，仅包含Alpha通道，取值为0-255 (0为全透明，255为不透明)，也即取值越大的像素点越可能为人体，取值越小的像素点越可能为背景。
 
     ```python
-    def save_inference_model(dirname,
-                            model_filename=None,
-                            params_filename=None,
-                            combined=True)
+    def save_inference_model(path)
     ```
 
     - 将模型保存到指定路径。
 
     - **参数**
 
-      * dirname: 存在模型的目录名称
-      * model\_filename: 模型文件名称，默认为\_\_model\_\_
-      * params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
-      * combined: 是否将参数保存到统一的一个文件中
+      * path: 模型保存路径
 
 
 ## 四、服务部署
@@ -175,10 +169,10 @@
 
    修复预测后处理图像数据超过[0,255]范围
 
-* 1.1.2
+* 1.2.0
 
    移除 fluid api
 
   - ```shell
-    $ hub install deeplabv3p_xception65_humanseg==1.1.2
+    $ hub install deeplabv3p_xception65_humanseg==1.2.0
     ```

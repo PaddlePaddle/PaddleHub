@@ -8,14 +8,13 @@ import os
 
 import numpy as np
 import paddle
-from deeplabv3p_xception65_humanseg.data_feed import reader
-from deeplabv3p_xception65_humanseg.processor import base64_to_cv2
-from deeplabv3p_xception65_humanseg.processor import cv2_to_base64
-from deeplabv3p_xception65_humanseg.processor import postprocess
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import cv2_to_base64
+from .processor import postprocess
 from paddle.inference import Config
 from paddle.inference import create_predictor
 
-import paddlehub as hub
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
@@ -26,18 +25,20 @@ from paddlehub.module.module import serving
             author="baidu-vis",
             author_email="",
             summary="DeepLabv3+ is a semantic segmentation model.",
-            version="1.1.2")
-class DeeplabV3pXception65HumanSeg(hub.Module):
+            version="1.2.0")
+class DeeplabV3pXception65HumanSeg:
 
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "deeplabv3p_xception65_humanseg_model")
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(self.directory, "deeplabv3p_xception65_humanseg_model", "model")
         self._set_config()
 
     def _set_config(self):
         """
         predictor config setting
         """
-        cpu_config = Config(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_predictor(cpu_config)
@@ -49,7 +50,7 @@ class DeeplabV3pXception65HumanSeg(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
@@ -134,23 +135,19 @@ class DeeplabV3pXception65HumanSeg(hub.Module):
                 res.append(out)
         return res
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
+    def save_inference_model(self, path):
         place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
-
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
-                                           executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
+        exe = paddle.static.Executor(place)
+        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feed_target_names]
+        paddle.static.save_inference_model(
+            path,
+            feed_vars=feed_vars,
+            fetch_vars=fetch_targets,
+            executor=exe,
+            program=program
+    )
 
     @serving
     def serving_method(self, images, **kwargs):
