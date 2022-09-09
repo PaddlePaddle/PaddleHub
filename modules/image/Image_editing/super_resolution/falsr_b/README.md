@@ -159,11 +159,11 @@
   初始发布
 
 
-* 1.0.1
+* 1.1.0
 
   移除 fluid API
 
   ```shell
-  $ hub install falsr_b == 1.0.1
+  $ hub install falsr_b == 1.1.0
   ```
 
