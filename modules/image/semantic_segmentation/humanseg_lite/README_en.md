@@ -249,10 +249,10 @@
 
     Fix memory leakage problem of on cudnn 8.0.4
 
-* 1.1.2
+* 1.2.0
 
     Remove Fluid API
 
     ```shell
-    $ hub install humanseg_lite == 1.1.2
+    $ hub install humanseg_lite == 1.2.0
     ```

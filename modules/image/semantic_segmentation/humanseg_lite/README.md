@@ -245,10 +245,10 @@
 
    修复cudnn为8.0.4显存泄露问题
 
-* 1.1.2
+* 1.2.0
 
     移除 Fluid API
 
     ```shell
-    $ hub install humanseg_lite == 1.1.2
+    $ hub install humanseg_lite == 1.2.0
     ```

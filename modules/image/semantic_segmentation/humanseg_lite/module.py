@@ -36,7 +36,7 @@ from .optimal import postprocess_v, threshold_mask
     author="paddlepaddle",
     author_email="",
     summary="humanseg_lite is a semantic segmentation model.",
-    version="1.1.2")
+    version="1.2.0")
 class ShufflenetHumanSeg:
     def __init__(self):
         self.default_pretrained_model_path = os.path.join(self.directory, "humanseg_lite_inference", "model")
@@ -312,23 +312,19 @@ class ShufflenetHumanSeg:
                     break
             cap_video.release()
 
-    def save_inference_model(self,
-                             path):
+    def save_inference_model(self, path):
         place = paddle.CPUPlace()
         exe = paddle.static.Executor(place)
-
-        program, feeded_var_names, target_vars = paddle.static.io.load_inference_model(
-            self.default_pretrained_model_path, executor=exe)
-
+        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
         global_block = program.global_block()
-        feed_vars = [global_block.var(item) for item in feeded_var_names]
-        paddle.static.io.save_inference_model(
+        feed_vars = [global_block.var(item) for item in feed_target_names]
+        paddle.static.save_inference_model(
             path,
             feed_vars=feed_vars,
-            fetch_vars=target_vars,
+            fetch_vars=fetch_targets,
             executor=exe,
             program=program
-        )
+    )
 
     @serving
     def serving_method(self, images, **kwargs):

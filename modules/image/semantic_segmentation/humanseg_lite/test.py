@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 import cv2
@@ -28,6 +29,13 @@ class TestHubModule(unittest.TestCase):
             video.write(img)
         video.release()
         cls.module = hub.Module(name="humanseg_lite")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree('tests')
+        shutil.rmtree('inference')
+        shutil.rmtree('humanseg_lite_output')
+        shutil.rmtree('humanseg_lite_video_result')
 
     def test_segment1(self):
         results = self.module.segment(
