@@ -161,12 +161,12 @@
 
   First release
 
-- 1.0.1
+- 1.1.0
 
   Remove Fluid API
 
 
   ```shell
-  $ hub install falsr_a == 1.0.1
+  $ hub install falsr_a == 1.1.0
   ```
 
