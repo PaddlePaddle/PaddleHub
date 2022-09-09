@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 import cv2
@@ -28,6 +29,13 @@ class TestHubModule(unittest.TestCase):
             video.write(img)
         video.release()
         cls.module = hub.Module(name="humanseg_mobile")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree('tests')
+        shutil.rmtree('inference')
+        shutil.rmtree('humanseg_mobile_output')
+        shutil.rmtree('humanseg_mobile_video_result')
 
     def test_segment1(self):
         results = self.module.segment(
@@ -122,8 +130,7 @@ class TestHubModule(unittest.TestCase):
     def test_video_segment1(self):
         self.module.video_segment(
             video_path="tests/test.avi",
-            use_gpu=False,
-            save_dir='humanseg_lite_video_result'
+            use_gpu=False
         )
 
     def test_save_inference_model(self):
