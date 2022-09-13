@@ -133,11 +133,11 @@ class TestHubModule(unittest.TestCase):
     def test_save_inference_model(self):
         self.module.save_inference_model('./inference/model')
 
-        self.assertTrue(os.path.exists('./inference/model_mask_detector.pdmodel'))
-        self.assertTrue(os.path.exists('./inference/model_mask_detector.pdiparams'))
+        self.assertTrue(os.path.exists('./inference/model/face_detector.pdmodel'))
+        self.assertTrue(os.path.exists('./inference/model/face_detector.pdiparams'))
 
-        self.assertTrue(os.path.exists('./inference/model_pyramidbox_lite.pdmodel'))
-        self.assertTrue(os.path.exists('./inference/model_pyramidbox_lite.pdiparams'))
+        self.assertTrue(os.path.exists('./inference/model/model.pdmodel'))
+        self.assertTrue(os.path.exists('./inference/model/model.pdiparams'))
 
 
 if __name__ == "__main__":

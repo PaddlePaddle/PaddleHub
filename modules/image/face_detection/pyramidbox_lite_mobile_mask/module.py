@@ -181,29 +181,6 @@ class PyramidBoxLiteMobileMask:
             res.append(out)
         return res
 
-    def save_inference_model(self, path):
-        classifier_path = path + '_mask_detector'
-        detector_path = path + '_pyramidbox_lite'
-        self._save_classifier_model(classifier_path)
-        self._save_detector_model(detector_path)
-
-    def _save_detector_model(self, path):
-        self.face_detector.save_inference_model(path)
-
-    def _save_classifier_model(self, path):
-        place = paddle.CPUPlace()
-        exe = paddle.static.Executor(place)
-        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
-        global_block = program.global_block()
-        feed_vars = [global_block.var(item) for item in feed_target_names]
-        paddle.static.save_inference_model(
-            path,
-            feed_vars=feed_vars,
-            fetch_vars=fetch_targets,
-            executor=exe,
-            program=program
-        )
-
     @serving
     def serving_method(self, images, **kwargs):
         """
