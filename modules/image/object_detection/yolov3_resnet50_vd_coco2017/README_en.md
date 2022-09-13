@@ -99,13 +99,13 @@
         - save\_path (str, optional): output path for saving results
 
   - ```python
-    def save_inference_model(path)
+    def save_inference_model(dirname)
     ```
     - Save model to specific path
 
     - **Parameters**
 
-      - path: save model path
+      - dirname: save model path
 
 
 ## IV.Server Deployment
