@@ -78,23 +78,6 @@ class FaceLandmarkLocalization:
     def get_face_detector_module(self):
         return self.face_detector
 
-    def save_inference_model(self, path):
-        place = paddle.CPUPlace()
-        exe = paddle.static.Executor(place)
-        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
-        global_block = program.global_block()
-        feed_vars = [global_block.var(item) for item in feed_target_names]
-        face_landmark_path = path + '_landmark'
-        detector_path = path + '_detector'
-        paddle.static.save_inference_model(
-            face_landmark_path,
-            feed_vars=feed_vars,
-            fetch_vars=fetch_targets,
-            executor=exe,
-            program=program
-        )
-        self.face_detector.save_inference_model(detector_path)
-
     def keypoint_detection(self,
                            images=None,
                            paths=None,
