@@ -56,20 +56,6 @@ class FaceDetector320:
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
 
-    def save_inference_model(self, path):
-        place = paddle.CPUPlace()
-        exe = paddle.static.Executor(place)
-        program, feed_target_names, fetch_targets = paddle.static.load_inference_model(self.default_pretrained_model_path, exe)
-        global_block = program.global_block()
-        feed_vars = [global_block.var(item) for item in feed_target_names]
-        paddle.static.save_inference_model(
-            path,
-            feed_vars=feed_vars,
-            fetch_vars=fetch_targets,
-            executor=exe,
-            program=program
-        )
-
     def face_detection(self,
                        images=None,
                        paths=None,
