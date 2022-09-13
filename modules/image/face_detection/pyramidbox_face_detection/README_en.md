@@ -99,13 +99,13 @@
 
 
   - ```python
-    def save_inference_model(path)
+    def save_inference_model(dirname)
     ```
     - Save model to specific path
 
     - **Parameters**
 
-      - path: model save path
+      - dirname: model save path
 
 
 ## IV.Server Deployment
