@@ -122,8 +122,6 @@
   - ```python
     def save_inference_model(dirname):
     ```
-
-    - 将模型保存到指定路径，由于人脸关键点检测模型由人脸检测+关键点检测两个模型组成，因此保存后会存在两个推理模型，其中`landmark`为人脸关键点模型，`detector`为人脸检测模型。
     
     - **参数**
       - dirname: 模型保存路径
