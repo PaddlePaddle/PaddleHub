@@ -101,7 +101,7 @@
 
 
   - ```python
-    def save_inference_model(path,
+    def save_inference_model(dirname,
                              model_filename=None,
                              params_filename=None,
                              combined=True)
@@ -110,7 +110,7 @@
 
     - **参数**
 
-      - path: 模型保存路径 <br/>
+      - dirname: 模型保存路径 <br/>
 
 
 ## 四、服务部署
