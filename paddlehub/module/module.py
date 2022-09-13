@@ -37,7 +37,6 @@ from paddlehub.utils import utils
 
 
 class InvalidHubModule(Exception):
-
     def __init__(self, directory: str):
         self.directory = directory
 
@@ -200,11 +199,12 @@ class RunModule(object):
             for key, _sub_module in self.sub_modules().items():
                 try:
                     sub_dirname = os.path.normpath(os.path.join(dirname, key))
-                    _sub_module.save_inference_model(sub_dirname,
-                                                     include_sub_modules=include_sub_modules,
-                                                     model_filename=model_filename,
-                                                     params_filename=params_filename,
-                                                     combined=combined)
+                    _sub_module.save_inference_model(
+                        sub_dirname,
+                        include_sub_modules=include_sub_modules,
+                        model_filename=model_filename,
+                        params_filename=params_filename,
+                        combined=combined)
                 except:
                     utils.record_exception('Failed to save sub module {}'.format(_sub_module.name))
 
@@ -258,8 +258,8 @@ class RunModule(object):
                 params_filename=_params_filename,
             )
         else:
-            program, feeded_var_names, target_vars = paddle.static.load_inference_model(self._pretrained_model_path,
-                                                                                        executor=exe)
+            program, feeded_var_names, target_vars = paddle.static.load_inference_model(
+                self._pretrained_model_path, executor=exe)
 
         global_block = program.global_block()
         feed_vars = [global_block.var(item) for item in feeded_var_names]
@@ -267,11 +267,8 @@ class RunModule(object):
         path_prefix = dirname
         if os.path.isdir(dirname):
             path_prefix = os.path.join(dirname, 'model')
-        paddle.static.save_inference_model(path_prefix,
-                                           feed_vars=feed_vars,
-                                           fetch_vars=target_vars,
-                                           executor=exe,
-                                           program=program)
+        paddle.static.save_inference_model(
+            path_prefix, feed_vars=feed_vars, fetch_vars=target_vars, executor=exe, program=program)
 
         log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
 
@@ -341,17 +338,19 @@ class RunModule(object):
 
         save_file = os.path.join(dirname, '{}.onnx'.format(self.name))
 
-        program, inputs, outputs = paddle.static.load_inference_model(dirname=self._pretrained_model_path,
-                                                                      model_filename=model_filename,
-                                                                      params_filename=params_filename,
-                                                                      executor=exe)
+        program, inputs, outputs = paddle.static.load_inference_model(
+            dirname=self._pretrained_model_path,
+            model_filename=model_filename,
+            params_filename=params_filename,
+            executor=exe)
 
-        paddle2onnx.program2onnx(program=program,
-                                 scope=paddle.static.global_scope(),
-                                 feed_var_names=inputs,
-                                 target_vars=outputs,
-                                 save_file=save_file,
-                                 **kwargs)
+        paddle2onnx.program2onnx(
+            program=program,
+            scope=paddle.static.global_scope(),
+            feed_var_names=inputs,
+            target_vars=outputs,
+            save_file=save_file,
+            **kwargs)
 
 
 class Module(object):
@@ -391,13 +390,14 @@ class Module(object):
             from paddlehub.server.server import CacheUpdater
             # This branch come from hub.Module(name='xxx') or hub.Module(directory='xxx')
             if name:
-                module = cls.init_with_name(name=name,
-                                            version=version,
-                                            source=source,
-                                            update=update,
-                                            branch=branch,
-                                            ignore_env_mismatch=ignore_env_mismatch,
-                                            **kwargs)
+                module = cls.init_with_name(
+                    name=name,
+                    version=version,
+                    source=source,
+                    update=update,
+                    branch=branch,
+                    ignore_env_mismatch=ignore_env_mismatch,
+                    **kwargs)
                 CacheUpdater("update_cache", module=name, version=version).start()
             elif directory:
                 module = cls.init_with_directory(directory=directory, **kwargs)
@@ -489,12 +489,13 @@ class Module(object):
         manager = LocalModuleManager()
         user_module_cls = manager.search(name, source=source, branch=branch)
         if not user_module_cls or not user_module_cls.version.match(version):
-            user_module_cls = manager.install(name=name,
-                                              version=version,
-                                              source=source,
-                                              update=update,
-                                              branch=branch,
-                                              ignore_env_mismatch=ignore_env_mismatch)
+            user_module_cls = manager.install(
+                name=name,
+                version=version,
+                source=source,
+                update=update,
+                branch=branch,
+                ignore_env_mismatch=ignore_env_mismatch)
 
         directory = manager._get_normalized_path(user_module_cls.name)
 
@@ -560,7 +561,7 @@ def moduleinfo(name: str,
             _bases.append(_meta)
             _bases = tuple(_bases)
             attr_dict = dict(cls.__dict__)
-            attr_dict.pop('__dict__')
+            attr_dict.pop('__dict__', None)
             wrap_cls = builtins.type(cls.__name__, _bases, attr_dict)
 
         wrap_cls.name = name
