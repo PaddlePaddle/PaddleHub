@@ -134,6 +134,10 @@
 
   初始发布
 
+* 1.1.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install mobilenet_v2_dishes==1.0.0
+    $ hub install mobilenet_v2_dishes==1.1.0
     ```
