@@ -13,17 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ast
 import os
-import argparse
 import copy
+import paddle
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
-from paddlehub.module.module import moduleinfo, runnable, serving
-from stgan_bald.data_feed import reader
-from stgan_bald.processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
+from paddle.inference import Config, create_predictor
+from paddlehub.module.module import moduleinfo, serving
+from .data_feed import reader
+from .processor import postprocess, base64_to_cv2, cv2_to_base64
 
 
 def check_attribute_conflict(label_batch):
@@ -45,40 +42,43 @@ def check_attribute_conflict(label_batch):
 
 @moduleinfo(
     name="stgan_bald",
-    version="1.0.0",
+    version="1.1.0",
     summary="Baldness generator",
     author="Arrow, 七年期限，Mr.郑先生_",
     author_email="1084667371@qq.com，2733821739@qq.com",
     type="image/gan")
-class StganBald(hub.Module):
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "module")
+class StganBald:
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(
+            self.directory, "module", "model")
         self._set_config()
 
     def _set_config(self):
         """
         predictor config setting
         """
-        self.model_file_path = os.path.join(self.default_pretrained_model_path, '__model__')
-        self.params_file_path = os.path.join(self.default_pretrained_model_path, '__params__')
-        cpu_config = AnalysisConfig(self.model_file_path, self.params_file_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
             int(_places[0])
             use_gpu = True
-            self.place = fluid.CUDAPlace(0)
+            self.place = paddle.CUDAPlace(0)
         except:
             use_gpu = False
-            self.place = fluid.CPUPlace()
+            self.place = paddle.CPUPlace()
+
         if use_gpu:
-            gpu_config = AnalysisConfig(self.model_file_path, self.params_file_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
-            gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            gpu_config.enable_use_gpu(
+                memory_pool_init_size_mb=1000, device_id=0)
+            self.gpu_predictor = create_predictor(gpu_config)
 
     def bald(self,
              images=None,
@@ -135,19 +135,29 @@ class StganBald(hub.Module):
                     label_trg_tmp = copy.deepcopy(target_label_np)
                     new_i = 0
                     label_trg_tmp[0][new_i] = 1.0 - label_trg_tmp[0][new_i]
-                    label_trg_tmp = check_attribute_conflict(label_trg_tmp)
+                    label_trg_tmp = check_attribute_conflict(
+                        label_trg_tmp)
                     change_num = j * 0.02 + 0.3
-                    label_org_tmp = list(map(lambda x: ((x * 2) - 1) * change_num, org_label_np))
-                    label_trg_tmp = list(map(lambda x: ((x * 2) - 1) * change_num, label_trg_tmp))
+                    label_org_tmp = list(
+                        map(lambda x: ((x * 2) - 1) * change_num, org_label_np))
+                    label_trg_tmp = list(
+                        map(lambda x: ((x * 2) - 1) * change_num, label_trg_tmp))
 
-                    image = PaddleTensor(image_np.copy())
-                    org_label = PaddleTensor(np.array(label_org_tmp).astype('float32'))
-                    target_label = PaddleTensor(np.array(label_trg_tmp).astype('float32'))
-
-                    output = self.gpu_predictor.run([
-                        image, target_label, org_label
-                    ]) if use_gpu else self.cpu_predictor.run([image, org_label, target_label])
-                    outputs.append(output)
+                    predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+                    input_names = predictor.get_input_names()
+                    input_handle = predictor.get_input_handle(input_names[0])
+                    input_handle.copy_from_cpu(image_np.copy())
+                    input_handle = predictor.get_input_handle(input_names[1])
+                    input_handle.copy_from_cpu(
+                        np.array(label_org_tmp).astype('float32'))
+                    input_handle = predictor.get_input_handle(input_names[2])
+                    input_handle.copy_from_cpu(
+                        np.array(label_trg_tmp).astype('float32'))
+                    predictor.run()
+                    output_names = predictor.get_output_names()
+                    output_handle = predictor.get_output_handle(
+                        output_names[0])
+                    outputs.append(output_handle)
 
             out = postprocess(
                 data_out=outputs,
