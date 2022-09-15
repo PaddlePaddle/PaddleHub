@@ -92,14 +92,14 @@
         * data (numpy.ndarray): 超分辨后图像。
 
   - ```python
-    def save_inference_model(path)
+    def save_inference_model(dirname)
     ```
 
     - 将模型保存到指定路径。
 
     - **参数**
 
-      * path: 模型保存路径
+      * dirname: 模型保存路径
 
 
 
