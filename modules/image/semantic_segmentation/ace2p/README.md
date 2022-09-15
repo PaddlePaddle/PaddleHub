@@ -99,14 +99,14 @@
           * data (numpy.ndarray): 图像分割得到的结果，shape 为`H * W`，元素的取值为0-19，表示每个像素的分类结果，映射顺序与下面的调色板相同。
 
     ```python
-    def save_inference_model(path)
+    def save_inference_model(dirname)
     ```
 
     - 将模型保存到指定路径。
 
     - **参数**
 
-      * path: 模型保存路径
+      * dirname: 模型保存路径
 
 
 ## 四、服务部署

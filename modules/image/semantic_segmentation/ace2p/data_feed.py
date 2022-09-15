@@ -45,7 +45,7 @@ def preprocess(org_im, scale, rotation):
 
     img_mean = np.array([0.406, 0.456, 0.485]).reshape((1, 1, 3))
     img_std = np.array([0.225, 0.224, 0.229]).reshape((1, 1, 3))
-    image = image.astype(np.float)
+    image = image.astype(np.float32)
     image = (image / 255.0 - img_mean) / img_std
     image = image.transpose(2, 0, 1).astype(np.float32)
 
