@@ -170,7 +170,7 @@
 
 
     ```python
-    def save_inference_model(path)
+    def save_inference_model(dirname)
     ```
 
 
@@ -178,7 +178,7 @@
 
     - **Parameters**
 
-      * path: Model save path.
+      * dirname: Model save path.
 
 
 
