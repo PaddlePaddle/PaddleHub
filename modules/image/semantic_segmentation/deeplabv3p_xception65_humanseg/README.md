@@ -95,14 +95,14 @@
       * data (numpy.ndarray): 人像分割结果，仅包含Alpha通道，取值为0-255 (0为全透明，255为不透明)，也即取值越大的像素点越可能为人体，取值越小的像素点越可能为背景。
 
     ```python
-    def save_inference_model(path)
+    def save_inference_model(dirname)
     ```
 
     - 将模型保存到指定路径。
 
     - **参数**
 
-      * path: 模型保存路径
+      * dirname: 模型保存路径
 
 
 ## 四、服务部署
