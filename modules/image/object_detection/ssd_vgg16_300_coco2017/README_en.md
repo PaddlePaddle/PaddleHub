@@ -1,6 +1,6 @@
-# ssd_vgg16_512_coco2017
+# ssd_vgg16_300_coco2017
 
-|Module Name|ssd_vgg16_512_coco2017|
+|Module Name|ssd_vgg16_300_coco2017|
 | :--- | :---: |
 |Category|object detection|
 |Network|SSD|
@@ -37,7 +37,7 @@
 - ### 2、Installation
 
   - ```shell
-    $ hub install ssd_vgg16_512_coco2017
+    $ hub install ssd_vgg16_300_coco2017
     ```
   - In case of any problems during installation, please refer to: [Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)
 
@@ -46,7 +46,7 @@
 - ### 1、Command line Prediction
 
   - ```shell
-    $ hub run ssd_vgg16_512_coco2017 --input_path "/PATH/TO/IMAGE"
+    $ hub run ssd_vgg16_300_coco2017 --input_path "/PATH/TO/IMAGE"
     ```
   - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 - ### 2、Prediction Code Example
@@ -55,7 +55,7 @@
     import paddlehub as hub
     import cv2
 
-    object_detector = hub.Module(name="ssd_vgg16_512_coco2017")
+    object_detector = hub.Module(name="ssd_vgg16_300_coco2017")
     result = object_detector.object_detection(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
     # result = object_detector.object_detection((paths=['/PATH/TO/IMAGE'])
@@ -117,7 +117,7 @@
 
   - Run the startup command：
   - ```shell
-    $ hub serving start -m ssd_vgg16_512_coco2017
+    $ hub serving start -m ssd_vgg16_300_coco2017
     ```
 
   - The servitization API is now deployed and the default port number is 8866.
@@ -142,7 +142,7 @@
     # Send an HTTP request
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/ssd_vgg16_512_coco2017"
+    url = "http://127.0.0.1:8866/predict/ssd_vgg16_300_coco2017"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # print prediction results
@@ -162,8 +162,8 @@
 
 * 1.1.0
 
-   移除 fluid api
+  Remove fluid api
 
   - ```shell
-    $ hub install ssd_vgg16_512_coco2017==1.1.0
+    $ hub install ssd_vgg16_300_coco2017==1.1.0
     ```
