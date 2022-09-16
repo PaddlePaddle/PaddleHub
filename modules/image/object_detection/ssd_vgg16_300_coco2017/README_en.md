@@ -1,12 +1,12 @@
-# faster_rcnn_resnet50_fpn_coco2017
+# ssd_vgg16_300_coco2017
 
-|Module Name|faster_rcnn_resnet50_fpn_coco2017|
+|Module Name|ssd_vgg16_300_coco2017|
 | :--- | :---: |
 |Category|object detection|
-|Network|faster_rcnn|
+|Network|SSD|
 |Dataset|COCO2017|
 |Fine-tuning supported or not|No|
-|Module Size|161MB|
+|Module Size|139MB|
 |Latest update date|2021-03-15|
 |Data indicators|-|
 
@@ -16,13 +16,14 @@
 - ### Application Effect Display
   - Sample results：
      <p align="center">
-     <img src="https://user-images.githubusercontent.com/22424850/131504887-d024c7e5-fc09-4d6b-92b8-4d0c965949d0.jpg"   width='50%' hspace='10'/>
+     <img src="https://user-images.githubusercontent.com/22424850/131506781-b4ecb77b-5ab1-4795-88da-5f547f7f7f9c.jpg"   width='50%' hspace='10'/>
      <br />
      </p>
 
 - ### Module Introduction
 
-  - Faster_RCNN is a two-stage detector, it consists of feature extraction, proposal, classification and refinement processes. This module is trained on COCO2017 dataset, and can be used for object detection.
+  - Single Shot MultiBox Detector (SSD) is a one-stage detector. Different from two-stage detector, SSD frames object detection as a re- gression problem to spatially separated bounding boxes and associated class probabilities. This module is based on VGG16, trained on COCO2017 dataset, and can be used for object detection.
+
 
 
 ## II.Installation
@@ -36,7 +37,7 @@
 - ### 2、Installation
 
   - ```shell
-    $ hub install faster_rcnn_resnet50_fpn_coco2017
+    $ hub install ssd_vgg16_300_coco2017
     ```
   - In case of any problems during installation, please refer to: [Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)
 
@@ -45,17 +46,16 @@
 - ### 1、Command line Prediction
 
   - ```shell
-    $ hub run faster_rcnn_resnet50_fpn_coco2017 --input_path "/PATH/TO/IMAGE"
+    $ hub run ssd_vgg16_300_coco2017 --input_path "/PATH/TO/IMAGE"
     ```
   - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
-
 - ### 2、Prediction Code Example
 
   - ```python
     import paddlehub as hub
     import cv2
 
-    object_detector = hub.Module(name="faster_rcnn_resnet50_fpn_coco2017")
+    object_detector = hub.Module(name="ssd_vgg16_300_coco2017")
     result = object_detector.object_detection(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
     # result = object_detector.object_detection((paths=['/PATH/TO/IMAGE'])
@@ -99,7 +99,6 @@
           - bottom (int): the lower right corner y coordinate of the detection box
         - save\_path (str, optional): output path for saving results
 
-
   - ```python
     def save_inference_model(dirname)
     ```
@@ -118,7 +117,7 @@
 
   - Run the startup command：
   - ```shell
-    $ hub serving start -m faster_rcnn_resnet50_fpn_coco2017
+    $ hub serving start -m ssd_vgg16_300_coco2017
     ```
 
   - The servitization API is now deployed and the default port number is 8866.
@@ -143,7 +142,7 @@
     # Send an HTTP request
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
-    url = "http://127.0.0.1:8866/predict/faster_rcnn_resnet50_fpn_coco2017"
+    url = "http://127.0.0.1:8866/predict/ssd_vgg16_300_coco2017"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
 
     # print prediction results
@@ -155,9 +154,9 @@
 
 * 1.0.0
 
-  First release
+  First release  
 
-* 1.0.1
+* 1.0.2
 
   Fix the problem of reading numpy
 
@@ -166,5 +165,5 @@
   Remove fluid api
 
   - ```shell
-    $ hub install faster_rcnn_resnet50_fpn_coco2017==1.1.0
+    $ hub install ssd_vgg16_300_coco2017==1.1.0
     ```
