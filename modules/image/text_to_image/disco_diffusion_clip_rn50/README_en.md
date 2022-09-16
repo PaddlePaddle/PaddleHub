@@ -34,29 +34,29 @@ For more details, please refer to [Diffusion Models Beat GANs on Image Synthesis
 
 ## II.Installation
 
-- ### 1、Environmental Dependence
+- ### 1.Environmental Dependence
 
   - paddlepaddle >= 2.0.0
 
-  - paddlehub >= 2.2.0    | [How to install PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+  - paddlehub >= 2.2.0    | [How to install PaddleHub](../../../../docs/docs_en/get_start/installation.rst)
 
-- ### 2、Installation
+- ### 2.Installation
 
   - ```shell
     $ hub install disco_diffusion_clip_rn50
     ```
-  - In case of any problems during installation, please refer to: [Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)
 
 
 ## III.Module API Prediction  
 
-- ### 1、Command line Prediction
+- ### 1.Command line Prediction
 
   - ```shell
     $ hub run disco_diffusion_clip_rn50 --text_prompts "A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation." --output_dir disco_diffusion_clip_rn50_out
     ```
 
-- ### 2、Prediction Code Example
+- ### 2.Prediction Code Example
 
   - ```python
     import paddlehub as hub
@@ -75,7 +75,7 @@ For more details, please refer to [Diffusion Models Beat GANs on Image Synthesis
     da[0].chunks.save_gif('disco_diffusion_clip_rn50_out-result.gif')
     ```
 
-- ### 3、API
+- ### 3.API
 
   - ```python
     def generate_image(

@@ -34,29 +34,29 @@ For more details, please refer to [Diffusion Models Beat GANs on Image Synthesis
 
 ## II.Installation
 
-- ### 1、Environmental Dependence
+- ### 1.Environmental Dependence
 
   - paddlepaddle >= 2.0.0
 
-  - paddlehub >= 2.2.0    | [How to install PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+  - paddlehub >= 2.2.0    | [How to install PaddleHub](../../../../docs/docs_en/get_start/installation.rst)
 
-- ### 2、Installation
+- ### 2.Installation
 
   - ```shell
     $ hub install disco_diffusion_cnclip_vitb16
     ```
-  - In case of any problems during installation, please refer to: [Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)
 
 
 ## III.Module API Prediction  
 
-- ### 1、Command line Prediction
+- ### 1.Command line Prediction
 
   - ```shell
     $ hub run disco_diffusion_cnclip_vitb16 --text_prompts "孤舟蓑笠翁，独钓寒江雪。风格如齐白石所作。" --output_dir disco_diffusion_cnclip_vitb16_out
     ```
 
-- ### 2、Prediction Code Example
+- ### 2.Prediction Code Example
 
   - ```python
     import paddlehub as hub
@@ -75,7 +75,7 @@ For more details, please refer to [Diffusion Models Beat GANs on Image Synthesis
     da[0].chunks.save_gif('disco_diffusion_cnclip_vitb16_out-result.gif')
     ```
 
-- ### 3、API
+- ### 3.API
 
   - ```python
     def generate_image(

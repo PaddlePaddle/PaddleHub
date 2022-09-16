@@ -34,29 +34,29 @@ For more details, please refer to [Diffusion Models Beat GANs on Image Synthesis
 
 ## II.Installation
 
-- ### 1、Environmental Dependence
+- ### 1.Environmental Dependence
 
   - paddlepaddle >= 2.0.0
 
-  - paddlehub >= 2.2.0    | [How to install PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+  - paddlehub >= 2.2.0    | [How to install PaddleHub](../../../../docs/docs_en/get_start/installation.rst)
 
-- ### 2、Installation
+- ### 2.Installation
 
   - ```shell
     $ hub install disco_diffusion_clip_rn101
     ```
-  - In case of any problems during installation, please refer to: [Windows_Quickstart](../../../../docs/docs_ch/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_ch/get_start/mac_quickstart.md)
+  - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md) | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)
 
 
 ## III.Module API Prediction  
 
-- ### 1、Command line Prediction
+- ### 1.Command line Prediction
 
   - ```shell
     $ hub run disco_diffusion_clip_rn101 --text_prompts "A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation." --output_dir disco_diffusion_clip_rn101_out
     ```
 
-- ### 2、Prediction Code Example
+- ### 2.Prediction Code Example
 
   - ```python
     import paddlehub as hub
@@ -75,7 +75,7 @@ For more details, please refer to [Diffusion Models Beat GANs on Image Synthesis
     da[0].chunks.save_gif('disco_diffusion_clip_rn101_out-result.gif')
     ```
 
-- ### 3、API
+- ### 3.API
 
   - ```python
     def generate_image(
@@ -93,7 +93,7 @@ For more details, please refer to [Diffusion Models Beat GANs on Image Synthesis
 
       - text_prompts(str): Prompt, used to describe your image content. You can construct a prompt conforms to the format "content" + "artist/style", such as "a beautiful painting of Chinese architecture, by krenz, sunny, super wide angle, artstation.". For more details, you can refer to [website](https://docs.google.com/document/d/1XUT2G9LmkZataHFzmuOtRXnuWBfhvXDAo8DkS--8tec/edit#).
       - style(Optional[str]): Image style, such as "watercolor" and "Chinese painting". If not provided, style is totally up to your prompt.
-      - artist(Optional[str]): Artist name, such as Greg Rutkowsk、krenz, image style is as whose works you choose. If not provided, style is totally up to your [prompt](https://weirdwonderfulai.art/resources/disco-diffusion-70-plus-artist-studies/).
+      - artist(Optional[str]): Artist name, such as Greg Rutkowsk, krenz, image style is as whose works you choose. If not provided, style is totally up to your [prompt](https://weirdwonderfulai.art/resources/disco-diffusion-70-plus-artist-studies/).
       - width_height(Optional[List[int]]): The width and height of output images, should be better multiples of 64. The larger size is, the longger computation time is.
       - seed(Optional[int]): Random seed, different seeds result in different output images.
       - output_dir(Optional[str]): Output directory, default is "disco_diffusion_clip_rn101_out".
