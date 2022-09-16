@@ -1,5 +1,5 @@
 ```shell
-$ hub install rtb3==2.0.1
+$ hub install rtb3==2.0.2
 ```
 <p align="center">
 <img src="https://bj.bcebos.com/paddlehub/paddlehub-img/bert_network.png"  hspace='10'/> <br />
@@ -85,7 +85,7 @@ label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
     name='rtb3',
-    version='2.0.1',
+    version='2.0.2',
     task='seq-cls',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
@@ -163,3 +163,7 @@ paddlehub >= 2.0.0
 * 2.0.1
 
   增加文本匹配任务`text-matching`
+
+* 2.0.2
+
+  更新预训练模型调用方法

@@ -59,7 +59,7 @@
     object_detector = hub.Module(name="faster_rcnn_resnet50_coco2017")
     result = object_detector.object_detection(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
-    # result = object_detector.object_detection((paths=['/PATH/TO/IMAGE'])
+    # result = object_detector.object_detection(paths=['/PATH/TO/IMAGE'])
     ```
 
 - ### 3、API
