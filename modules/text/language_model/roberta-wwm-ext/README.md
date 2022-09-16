@@ -1,6 +1,6 @@
 # roberta-wwm-ext
 |模型名称|roberta-wwm-ext|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|文本-语义模型|
 |网络|roberta-wwm-ext|
 |数据集|百度自建数据集|
@@ -51,7 +51,7 @@ label_map = {0: 'negative', 1: 'positive'}
 
 model = hub.Module(
     name='roberta-wwm-ext',
-    version='2.0.2',
+    version='2.0.3',
     task='seq-cls',
     load_checkpoint='/path/to/parameters',
     label_map=label_map)
@@ -181,6 +181,10 @@ for idx, text in enumerate(data):
 * 2.0.2
 
   增加文本匹配任务`text-matching`
+
+* 2.0.3
+
+  更新预训练模型调用方法
   ```shell
-  $ hub install roberta-wwm-ext==2.0.2
+  $ hub install roberta-wwm-ext==2.0.3
   ```
