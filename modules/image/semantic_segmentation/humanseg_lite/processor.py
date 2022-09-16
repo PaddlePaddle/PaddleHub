@@ -50,7 +50,6 @@ def postprocess(data_out, org_im, org_im_shape, org_im_path, output_dir, visuali
             result['data'] = logit
         else:
             result['data'] = logit
-        print("result['data'] shape", result['data'].shape)
     return result
 
 
