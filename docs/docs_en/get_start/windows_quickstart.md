@@ -27,7 +27,7 @@
   - ```shell
     # On the command line, enter the following command to create a file named paddle_env Env environment
     # This is for accelerated download, use Tsinghua Source
-    conda create --name paddle_env python=3.8 --channel https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/  # 这是一行命令
+    conda create --name paddle_env python=3.8 --channel https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/  # a shell command
     ```
 
   - This command will create an executable environment named paddle_env with Python version 3.8. It will take a while depending on the network status
@@ -73,7 +73,7 @@
     pip install paddlehub -i https://mirror.baidu.com/pypi/simple
     ```
 
-  - Introduction document of paddlehub: https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/README_ch.md
+  - Introduction document of paddlehub: https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.3/README_ch.md
 
 ## Step 4: Install the paddlehub and download the model
 

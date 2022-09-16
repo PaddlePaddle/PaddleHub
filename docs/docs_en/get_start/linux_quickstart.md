@@ -126,7 +126,7 @@
     pip install paddlehub -i https://mirror.baidu.com/pypi/simple
     ```
 
-  - Introduction document of paddlehub: https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.1/README_ch.md
+  - Introduction document of paddlehub: https://github.com/PaddlePaddle/PaddleHub/blob/release/v2.3/README_ch.md
   
   - When installing the paddlehub, other dependent libraries will be installed automatically, which may take a while
 
