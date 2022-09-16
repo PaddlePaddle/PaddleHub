@@ -4,12 +4,9 @@ from __future__ import print_function
 from __future__ import division
 
 import os
-from collections import OrderedDict
 
 import cv2
 import numpy as np
-from PIL import Image, ImageEnhance
-from paddle import fluid
 
 __all__ = ['test_reader']
 
