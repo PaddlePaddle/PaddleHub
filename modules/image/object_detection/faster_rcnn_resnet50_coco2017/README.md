@@ -102,19 +102,13 @@
 
 
   - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
+    def save_inference_model(dirname)
     ```
     - 将模型保存到指定路径。
 
     - **参数**
 
-      - dirname: 存在模型的目录名称； <br/>
-      - model\_filename: 模型文件名称，默认为\_\_model\_\_； <br/>
-      - params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)；<br/>
-      - combined: 是否将参数保存到统一的一个文件中。
+      - dirname: 模型保存路径 <br/>
 
 
 ## 四、服务部署
@@ -167,6 +161,11 @@
 * 1.1.1
 
   修复numpy数据读取问题
+
+* 1.2.0
+
+  移除 fluid api
+
   - ```shell
-    $ hub install faster_rcnn_resnet50_coco2017==1.1.1
+    $ hub install faster_rcnn_resnet50_coco2017==1.2.0
     ```

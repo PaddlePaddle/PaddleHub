@@ -172,10 +172,7 @@
 
 
     ```python
-    def save_inference_model(dirname='humanseg_mobile_model',
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
+    def save_inference_model(dirname)
     ```
 
 
@@ -183,10 +180,7 @@
 
     - **Parameters**
 
-      * dirname: Save path.
-      * model\_filename: Model file name，defalt is \_\_model\_\_
-      * params\_filename: Parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
-      * combined: Whether to save the parameters to a unified file.
+      * dirname: Model save path.
 
 
 
@@ -244,13 +238,23 @@
 
 - 1.0.0
 
-  First release
+    First release
 
 - 1.1.0
     
     Added video portrait split interface
 
     Added video stream portrait segmentation interface
+
 * 1.1.1
 
-   Fix the video memory leakage problem of on cudnn 8.0.4
+    Fix the video memory leakage problem of on cudnn 8.0.4
+
+* 1.2.0
+
+    Remove Fluid API
+
+    ```shell
+    $ hub install humanseg_mobile == 1.2.0
+    ```
+

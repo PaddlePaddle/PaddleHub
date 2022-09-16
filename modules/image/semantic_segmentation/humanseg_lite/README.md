@@ -170,19 +170,13 @@
 
 
     ```python
-    def save_inference_model(dirname='humanseg_lite_model',
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
+    def save_inference_model(dirname)
     ```
 
     -  将模型保存到指定路径。
 
     - **参数**
-        * dirname: 存在模型的目录名称
-        * model\_filename: 模型文件名称，默认为\_\_model\_\_
-        * params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
-        * combined: 是否将参数保存到统一的一个文件中
+        * dirname: 模型保存路径
 
 ## 四、服务部署
 
@@ -240,11 +234,21 @@
 * 1.0.0
 
     初始发布
+
 * 1.1.0
     
     新增视频人像分割接口
 
     新增视频流人像分割接口
+
 * 1.1.1
 
    修复cudnn为8.0.4显存泄露问题
+
+* 1.2.0
+
+    移除 Fluid API
+
+    ```shell
+    $ hub install humanseg_lite == 1.2.0
+    ```

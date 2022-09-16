@@ -107,20 +107,13 @@
 
 
   - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
+    def save_inference_model(dirname)
     ```
     - Save model to specific path
 
     - **Parameters**
 
-      - dirname: output dir for saving model
-      - model\_filename: filename for saving model
-      - params\_filename: filename for saving parameters
-      - combined: whether save parameters into one file
-
+      - dirname: model save path
 
 ## IV.Server Deployment
 
@@ -188,6 +181,10 @@
 
   Remove fluid api
 
+* 1.4.0
+
+  Fix a bug of save_inference_model
+
   - ```shell
-    $ hub install pyramidbox_lite_mobile_mask==1.3.1
+    $ hub install pyramidbox_lite_mobile_mask==1.4.0
     ```

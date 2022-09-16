@@ -89,7 +89,7 @@ def load_label_info(file_path):
 
 def postprocess(paths, images, data_out, score_thresh, label_names, output_dir, handle_id, visualization=True):
     """
-    postprocess the lod_tensor produced by fluid.Executor.run
+    postprocess the lod_tensor produced by Executor.run
 
     Args:
         paths (list[str]): The paths of images.
