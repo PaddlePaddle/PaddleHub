@@ -20,7 +20,7 @@ from paddle.nn import Conv2D, Conv2DTranspose
 from paddlehub.module.module import moduleinfo
 import paddlehub.vision.transforms as T
 from paddlehub.module.cv_module import ImageColorizeModule
-from user_guided_colorization.data_feed import ColorizePreprocess
+from .data_feed import ColorizePreprocess
 
 
 @moduleinfo(
