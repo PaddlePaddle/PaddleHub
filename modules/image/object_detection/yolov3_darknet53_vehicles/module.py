@@ -8,30 +8,29 @@ from functools import partial
 
 import numpy as np
 import paddle
+import paddle.jit
+import paddle.static
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from yolov3_darknet53_vehicles.data_feed import reader
-from yolov3_darknet53_vehicles.processor import base64_to_cv2
-from yolov3_darknet53_vehicles.processor import load_label_info
-from yolov3_darknet53_vehicles.processor import postprocess
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import load_label_info
+from .processor import postprocess
 
-import paddlehub as hub
-from paddlehub.common.paddle_helper import add_vars_prefix
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
 
 
 @moduleinfo(name="yolov3_darknet53_vehicles",
-            version="1.0.3",
+            version="1.1.0",
             type="CV/object_detection",
             summary="Baidu's YOLOv3 model for vehicles detection, with backbone DarkNet53.",
             author="paddlepaddle",
             author_email="paddle-dev@baidu.com")
-class YOLOv3DarkNet53Vehicles(hub.Module):
-
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "yolov3_darknet53_vehicles_model")
+class YOLOv3DarkNet53Vehicles:
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(self.directory, "yolov3_darknet53_vehicles_model", "model")
         self.label_names = load_label_info(os.path.join(self.directory, "label_file.txt"))
         self._set_config()
 
@@ -49,7 +48,9 @@ class YOLOv3DarkNet53Vehicles(hub.Module):
         """
 
         # create default cpu predictor
-        cpu_config = Config(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_predictor(cpu_config)
@@ -60,7 +61,7 @@ class YOLOv3DarkNet53Vehicles(hub.Module):
         npu_id = self._get_device_id("FLAGS_selected_npus")
         if npu_id != -1:
             # use npu
-            npu_config = Config(self.default_pretrained_model_path)
+            npu_config = Config(model, params)
             npu_config.disable_glog_info()
             npu_config.enable_npu(device_id=npu_id)
             self.npu_predictor = create_predictor(npu_config)
@@ -69,7 +70,7 @@ class YOLOv3DarkNet53Vehicles(hub.Module):
         gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
         if gpu_id != -1:
             # use gpu
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=gpu_id)
             self.gpu_predictor = create_predictor(gpu_config)
@@ -78,7 +79,7 @@ class YOLOv3DarkNet53Vehicles(hub.Module):
         xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
         if xpu_id != -1:
             # use xpu
-            xpu_config = Config(self.default_pretrained_model_path)
+            xpu_config = Config(model, params)
             xpu_config.disable_glog_info()
             xpu_config.enable_xpu(100)
             self.xpu_predictor = create_predictor(xpu_config)
@@ -168,24 +169,6 @@ class YOLOv3DarkNet53Vehicles(hub.Module):
                                  visualization=visualization)
             res.extend(output)
         return res
-
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
-
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
-                                           executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):

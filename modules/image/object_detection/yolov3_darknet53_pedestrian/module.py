@@ -8,30 +8,29 @@ from functools import partial
 
 import numpy as np
 import paddle
+import paddle.jit
+import paddle.static
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from yolov3_darknet53_pedestrian.data_feed import reader
-from yolov3_darknet53_pedestrian.processor import base64_to_cv2
-from yolov3_darknet53_pedestrian.processor import load_label_info
-from yolov3_darknet53_pedestrian.processor import postprocess
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import load_label_info
+from .processor import postprocess
 
-import paddlehub as hub
-from paddlehub.common.paddle_helper import add_vars_prefix
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
 
 
 @moduleinfo(name="yolov3_darknet53_pedestrian",
-            version="1.0.3",
+            version="1.1.0",
             type="CV/object_detection",
             summary="Baidu's YOLOv3 model for pedestrian detection, with backbone DarkNet53.",
             author="paddlepaddle",
             author_email="paddle-dev@baidu.com")
-class YOLOv3DarkNet53Pedestrian(hub.Module):
-
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "yolov3_darknet53_pedestrian_model")
+class YOLOv3DarkNet53Pedestrian:
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(self.directory, "yolov3_darknet53_pedestrian_model", "model")
         self.label_names = load_label_info(os.path.join(self.directory, "label_file.txt"))
         self._set_config()
 
@@ -39,7 +38,9 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
         """
         predictor config setting.
         """
-        cpu_config = Config(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         cpu_config.switch_ir_optim(False)
@@ -52,7 +53,7 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
@@ -124,24 +125,6 @@ class YOLOv3DarkNet53Pedestrian(hub.Module):
                                  visualization=visualization)
             res.extend(output)
         return res
-
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
-
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
-                                           executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
