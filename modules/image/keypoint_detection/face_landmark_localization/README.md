@@ -120,18 +120,11 @@
       - 当前模型使用的人脸检测模型。
 
   - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=False):
+    def save_inference_model(dirname):
     ```
-
-    - 将模型保存到指定路径，由于人脸关键点检测模型由人脸检测+关键点检测两个模型组成，因此保存后会存在两个子目录，其中`face_landmark`为人脸关键点模型，`detector`为人脸检测模型。
+    
     - **参数**
-      - dirname: 存在模型的目录名称
-      - model_filename: 模型文件名称，默认为\__model__
-      - params_filename: 参数文件名称，默认为\__params__(仅当combined为True时生效)
-      - combined: 是否将参数保存到统一的一个文件中
+      - dirname: 模型保存路径
 
 ## 四、服务部署
 
@@ -187,6 +180,10 @@
 
   移除 fluid api
 
+* 1.1.0
+
+  修复无法导出推理模型的问题
+
   * ```shell
-    $ hub install face_landmark_localization==1.0.3
+    $ hub install face_landmark_localization==1.1.0
     ```

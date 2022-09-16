@@ -88,7 +88,7 @@ def load_label_info(file_path):
 
 def postprocess(paths, images, data_out, score_thresh, label_names, output_dir, handle_id, visualization=True):
     """
-    postprocess the lod_tensor produced by fluid.Executor.run
+    postprocess the lod_tensor produced by Executor.run
 
     Args:
         paths (list[str]): The paths of images.
@@ -113,9 +113,8 @@ def postprocess(paths, images, data_out, score_thresh, label_names, output_dir, 
                 confidence (float): The confidence of detection result.
             save_path (str): The path to save output images.
     """
-    lod_tensor = data_out[0]
-    lod = lod_tensor.lod[0]
-    results = lod_tensor.as_ndarray()
+    lod = data_out.lod()[0]
+    results = data_out.copy_to_cpu()
 
     check_dir(output_dir)
 

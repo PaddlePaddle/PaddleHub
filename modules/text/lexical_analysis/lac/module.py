@@ -6,25 +6,20 @@ from __future__ import print_function
 import argparse
 import ast
 import io
-import json
 import math
 import os
 
 import numpy as np
-import paddle
 import six
-from lac.custom import Customization
-from lac.processor import load_kv_dict
-from lac.processor import parse_result
-from lac.processor import word_to_ids
+from .custom import Customization
+from .processor import load_kv_dict
+from .processor import parse_result
+from .processor import word_to_ids
 from paddle.inference import Config
 from paddle.inference import create_predictor
 
-import paddlehub as hub
-from paddlehub.common.logger import logger
-from paddlehub.common.paddle_helper import add_vars_prefix
-from paddlehub.common.utils import sys_stdin_encoding
-from paddlehub.io.parser import txt_parser
+from paddlehub.utils.utils import sys_stdin_encoding
+from paddlehub.utils.parser import txt_parser
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
@@ -38,19 +33,18 @@ class DataFormatError(Exception):
 
 @moduleinfo(
     name="lac",
-    version="2.2.1",
+    version="2.3.0",
     summary=
     "Baidu's open-source lexical analysis tool for Chinese, including word segmentation, part-of-speech tagging & named entity recognition",
     author="baidu-nlp",
     author_email="paddle-dev@baidu.com",
     type="nlp/lexical_analysis")
-class LAC(hub.Module):
-
-    def _initialize(self, user_dict=None):
+class LAC:
+    def __init__(self, user_dict=None):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "infer_model")
+        self.default_pretrained_model_path = os.path.join(self.directory, "infer_model", "model")
         self.word2id_dict = load_kv_dict(os.path.join(self.directory, "assets/word.dic"), reverse=True, value_func=int)
         self.id2word_dict = load_kv_dict(os.path.join(self.directory, "assets/word.dic"))
         self.label2id_dict = load_kv_dict(os.path.join(self.directory, "assets/tag.dic"), reverse=True, value_func=int)
@@ -72,7 +66,9 @@ class LAC(hub.Module):
         """
         predictor config setting
         """
-        cpu_config = Config(self.pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_predictor(cpu_config)
@@ -84,7 +80,7 @@ class LAC(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = Config(self.pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)

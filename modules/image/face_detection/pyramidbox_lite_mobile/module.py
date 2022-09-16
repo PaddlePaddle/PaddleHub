@@ -10,11 +10,10 @@ import numpy as np
 import paddle
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from pyramidbox_lite_mobile.data_feed import reader
-from pyramidbox_lite_mobile.processor import base64_to_cv2
-from pyramidbox_lite_mobile.processor import postprocess
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import postprocess
 
-import paddlehub as hub
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
@@ -25,11 +24,10 @@ from paddlehub.module.module import serving
             author="baidu-vis",
             author_email="",
             summary="PyramidBox-Lite-Mobile is a high-performance face detection model.",
-            version="1.2.1")
-class PyramidBoxLiteMobile(hub.Module):
-
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_lite_mobile_face_detection")
+            version="1.3.0")
+class PyramidBoxLiteMobile:
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_lite_mobile_face_detection", "model")
         self._set_config()
         self.processor = self
 
@@ -37,7 +35,9 @@ class PyramidBoxLiteMobile(hub.Module):
         """
         predictor config setting
         """
-        cpu_config = Config(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_predictor(cpu_config)
@@ -49,7 +49,7 @@ class PyramidBoxLiteMobile(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
@@ -124,26 +124,6 @@ class PyramidBoxLiteMobile(hub.Module):
                               confs_threshold=confs_threshold)
             res.append(out)
         return res
-
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
-
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        var = program.global_block().vars['detection_output_0.tmp_1']
-
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
-                                           executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):

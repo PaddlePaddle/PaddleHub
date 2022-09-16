@@ -99,19 +99,13 @@
         - save\_path (str, optional): output path for saving results
 
   - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
+    def save_inference_model(dirname)
     ```
     - Save model to specific path
 
     - **Parameters**
 
-      - dirname: output dir for saving model
-      - model\_filename: filename for saving model
-      - params\_filename: filename for saving parameters
-      - combined: whether save parameters into one file
+      - dirname: model save path
 
 
 ## IV.Server Deployment
@@ -164,6 +158,9 @@
 * 1.1.1
   Fix the problem of reading numpy
 
+* 1.2.0
+  Remove fluid api
+
   - ```shell
-    $ hub install yolov3_darknet53_coco2017==1.1.1
+    $ hub install yolov3_darknet53_coco2017==1.2.0
     ```
