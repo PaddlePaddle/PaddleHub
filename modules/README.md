@@ -21,14 +21,14 @@ English | [简体中文](README_ch.md)
 
 |module|Network|Dataset|Introduction|
 |--|--|--|--|
-|[DriverStatusRecognition](image/classification/DriverStatusRecognition)|MobileNetV3_small_ssld|分心司机检测数据集||
-|[mobilenet_v2_animals](image/classification/mobilenet_v2_animals)|MobileNet_v2|百度自建动物数据集||
+|[DriverStatusRecognition](image/classification/DriverStatusRecognition)|MobileNetV3_small_ssld|Drivers||
+|[mobilenet_v2_animals](image/classification/mobilenet_v2_animals)|MobileNet_v2|Animals||
 |[repvgg_a1_imagenet](image/classification/repvgg_a1_imagenet)|RepVGG|ImageNet-2012||
 |[repvgg_a0_imagenet](image/classification/repvgg_a0_imagenet)|RepVGG|ImageNet-2012||
 |[resnext152_32x4d_imagenet](image/classification/resnext152_32x4d_imagenet)|ResNeXt|ImageNet-2012||
 |[resnet_v2_152_imagenet](image/classification/resnet_v2_152_imagenet)|ResNet V2|ImageNet-2012||
-|[resnet50_vd_animals](image/classification/resnet50_vd_animals)|ResNet50_vd|百度自建动物数据集||
-|[food_classification](image/classification/food_classification)|ResNet50_vd_ssld|美食数据集||
+|[resnet50_vd_animals](image/classification/resnet50_vd_animals)|ResNet50_vd|Animals||
+|[food_classification](image/classification/food_classification)|ResNet50_vd_ssld|dishes||
 |[mobilenet_v3_large_imagenet_ssld](image/classification/mobilenet_v3_large_imagenet_ssld)|Mobilenet_v3_large|ImageNet-2012||
 |[resnext152_vd_32x4d_imagenet](image/classification/resnext152_vd_32x4d_imagenet)||||
 |[ghostnet_x1_3_imagenet_ssld](image/classification/ghostnet_x1_3_imagenet_ssld)|GhostNet|ImageNet-2012||
@@ -38,13 +38,13 @@ English | [简体中文](README_ch.md)
 |[efficientnetb0_imagenet](image/classification/efficientnetb0_imagenet)|EfficientNet|ImageNet-2012||
 |[efficientnetb1_imagenet](image/classification/efficientnetb1_imagenet)|EfficientNet|ImageNet-2012||
 |[mobilenet_v2_imagenet_ssld](image/classification/mobilenet_v2_imagenet_ssld)|Mobilenet_v2|ImageNet-2012||
-|[resnet50_vd_dishes](image/classification/resnet50_vd_dishes)|ResNet50_vd|百度自建菜品数据集||
+|[resnet50_vd_dishes](image/classification/resnet50_vd_dishes)|ResNet50_vd|dishes||
 |[pnasnet_imagenet](image/classification/pnasnet_imagenet)|PNASNet|ImageNet-2012||
 |[rexnet_2_0_imagenet](image/classification/rexnet_2_0_imagenet)|ReXNet|ImageNet-2012||
-|[SnakeIdentification](image/classification/SnakeIdentification)|ResNet50_vd_ssld|蛇种数据集||
+|[SnakeIdentification](image/classification/SnakeIdentification)|ResNet50_vd_ssld|snakes||
 |[hrnet40_imagenet](image/classification/hrnet40_imagenet)|HRNet|ImageNet-2012||
 |[resnet_v2_34_imagenet](image/classification/resnet_v2_34_imagenet)|ResNet V2|ImageNet-2012||
-|[mobilenet_v2_dishes](image/classification/mobilenet_v2_dishes)|MobileNet_v2|百度自建菜品数据集||
+|[mobilenet_v2_dishes](image/classification/mobilenet_v2_dishes)|MobileNet_v2|dishes||
 |[resnext101_vd_32x4d_imagenet](image/classification/resnext101_vd_32x4d_imagenet)|ResNeXt|ImageNet-2012||
 |[repvgg_b2g4_imagenet](image/classification/repvgg_b2g4_imagenet)|RepVGG|ImageNet-2012||
 |[fix_resnext101_32x48d_wsl_imagenet](image/classification/fix_resnext101_32x48d_wsl_imagenet)|ResNeXt|ImageNet-2012||
@@ -56,7 +56,7 @@ English | [简体中文](README_ch.md)
 |[densenet161_imagenet](image/classification/densenet161_imagenet)|DenseNet|ImageNet-2012||
 |[vgg19_imagenet](image/classification/vgg19_imagenet)|vgg19_imagenet|ImageNet-2012||
 |[mobilenet_v2_imagenet](image/classification/mobilenet_v2_imagenet)|Mobilenet_v2|ImageNet-2012||
-|[resnet50_vd_10w](image/classification/resnet50_vd_10w)|ResNet_vd|百度自建数据集||
+|[resnet50_vd_10w](image/classification/resnet50_vd_10w)|ResNet_vd|private||
 |[resnet_v2_101_imagenet](image/classification/resnet_v2_101_imagenet)|ResNet V2 101|ImageNet-2012||
 |[darknet53_imagenet](image/classification/darknet53_imagenet)|DarkNet|ImageNet-2012||
 |[se_resnext50_32x4d_imagenet](image/classification/se_resnext50_32x4d_imagenet)|SE_ResNeXt|ImageNet-2012||
@@ -108,7 +108,7 @@ English | [简体中文](README_ch.md)
 |[efficientnetb5_imagenet](image/classification/efficientnetb5_imagenet)|EfficientNet|ImageNet-2012||
 |[repvgg_b1g2_imagenet](image/classification/repvgg_b1g2_imagenet)|RepVGG|ImageNet-2012||
 |[resnext101_32x48d_wsl](image/classification/resnext101_32x48d_wsl)|ResNeXt_wsl|ImageNet-2012||
-|[resnet50_vd_wildanimals](image/classification/resnet50_vd_wildanimals)|ResNet_vd|IFAW 自建野生动物数据集||
+|[resnet50_vd_wildanimals](image/classification/resnet50_vd_wildanimals)|ResNet_vd|IFAW wild animals||
 |[nasnet_imagenet](image/classification/nasnet_imagenet)|NASNet|ImageNet-2012||
 |[se_resnet18_vd_imagenet](image/classification/se_resnet18_vd_imagenet)||||
 |[spinalnet_res50_gemstone](image/classification/spinalnet_res50_gemstone)|resnet50|gemstone||
@@ -137,61 +137,61 @@ English | [简体中文](README_ch.md)
 
 |module|Network|Dataset|Introduction| Huggingface Spaces Demo|
 |--|--|--|--|--|
-|[pixel2style2pixel](image/Image_gan/gan/pixel2style2pixel/)|Pixel2Style2Pixel|-|人脸转正|
-|[stgan_bald](image/Image_gan/gan/stgan_bald/)|STGAN|CelebA|秃头生成器| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/stgan_bald) |
-|[styleganv2_editing](image/Image_gan/gan/styleganv2_editing)|StyleGAN V2|-|人脸编辑|
-|[wav2lip](image/Image_gan/gan/wav2lip)|wav2lip|LRS2|唇形生成| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/wav2lip) |
-|[attgan_celeba](image/Image_gan/attgan_celeba/)|AttGAN|Celeba|人脸编辑|
-|[cyclegan_cityscapes](image/Image_gan/cyclegan_cityscapes)|CycleGAN|Cityscapes|实景图和语义分割结果互相转换|
-|[stargan_celeba](image/Image_gan/stargan_celeba)|StarGAN|Celeba|人脸编辑|
-|[stgan_celeba](image/Image_gan/stgan_celeba/)|STGAN|Celeba|人脸编辑|
-|[ID_Photo_GEN](image/Image_gan/style_transfer/ID_Photo_GEN)|HRNet_W18|-|证件照生成|
-|[Photo2Cartoon](image/Image_gan/style_transfer/Photo2Cartoon)|U-GAT-IT|cartoon_data|人脸卡通化|[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/photo2cartoon) |
-|[U2Net_Portrait](image/Image_gan/style_transfer/U2Net_Portrait)|U^2Net|-|人脸素描化|
-|[UGATIT_100w](image/Image_gan/style_transfer/UGATIT_100w)|U-GAT-IT|selfie2anime|人脸动漫化|
-|[UGATIT_83w](image/Image_gan/style_transfer/UGATIT_83w)|U-GAT-IT|selfie2anime|人脸动漫化|
-|[UGATIT_92w](image/Image_gan/style_transfer/UGATIT_92w)| U-GAT-IT|selfie2anime|人脸动漫化|
-|[animegan_v1_hayao_60](image/Image_gan/style_transfer/animegan_v1_hayao_60)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v1_hayao_60) |
-|[animegan_v2_hayao_64](image/Image_gan/style_transfer/animegan_v2_hayao_64)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_64) |
-|[animegan_v2_hayao_99](image/Image_gan/style_transfer/animegan_v2_hayao_99)|AnimeGAN|The Wind Rises|图像风格迁移-宫崎骏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_99) |
-|[animegan_v2_paprika_54](image/Image_gan/style_transfer/animegan_v2_paprika_54)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_54) |
-|[animegan_v2_paprika_74](image/Image_gan/style_transfer/animegan_v2_paprika_74)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_74) |
-|[animegan_v2_paprika_97](image/Image_gan/style_transfer/animegan_v2_paprika_97)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_97) |
-|[animegan_v2_paprika_98](image/Image_gan/style_transfer/animegan_v2_paprika_98)|AnimeGAN|Paprika|图像风格迁移-今敏| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_98) |
-|[animegan_v2_shinkai_33](image/Image_gan/style_transfer/animegan_v2_shinkai_33)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_shinkai_33) |
-|[animegan_v2_shinkai_53](image/Image_gan/style_transfer/animegan_v2_shinkai_53)|AnimeGAN|Your Name, Weathering with you|图像风格迁移-新海诚| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_shinkai_53) |
+|[pixel2style2pixel](image/Image_gan/gan/pixel2style2pixel/)|Pixel2Style2Pixel|-|human face|
+|[stgan_bald](image/Image_gan/gan/stgan_bald/)|STGAN|CelebA|stgan_bald| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/stgan_bald) |
+|[styleganv2_editing](image/Image_gan/gan/styleganv2_editing)|StyleGAN V2|-|human face editing|
+|[wav2lip](image/Image_gan/gan/wav2lip)|wav2lip|LRS2|wav2lip| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/wav2lip) |
+|[attgan_celeba](image/Image_gan/attgan_celeba/)|AttGAN|Celeba|human face editing|
+|[cyclegan_cityscapes](image/Image_gan/cyclegan_cityscapes)|CycleGAN|Cityscapes|cyclegan_cityscapes|
+|[stargan_celeba](image/Image_gan/stargan_celeba)|StarGAN|Celeba|human face editing|
+|[stgan_celeba](image/Image_gan/stgan_celeba/)|STGAN|Celeba|human face editing|
+|[ID_Photo_GEN](image/Image_gan/style_transfer/ID_Photo_GEN)|HRNet_W18|-|ID_Photo_GEN|
+|[Photo2Cartoon](image/Image_gan/style_transfer/Photo2Cartoon)|U-GAT-IT|cartoon_data|cartoon|[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/photo2cartoon) |
+|[U2Net_Portrait](image/Image_gan/style_transfer/U2Net_Portrait)|U^2Net|-|Portrait|
+|[UGATIT_100w](image/Image_gan/style_transfer/UGATIT_100w)|U-GAT-IT|selfie2anime|selfie2anime|
+|[UGATIT_83w](image/Image_gan/style_transfer/UGATIT_83w)|U-GAT-IT|selfie2anime|selfie2anime|
+|[UGATIT_92w](image/Image_gan/style_transfer/UGATIT_92w)| U-GAT-IT|selfie2anime|selfie2anime|
+|[animegan_v1_hayao_60](image/Image_gan/style_transfer/animegan_v1_hayao_60)|AnimeGAN|The Wind Rises|animegan_v1_hayao| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v1_hayao_60) |
+|[animegan_v2_hayao_64](image/Image_gan/style_transfer/animegan_v2_hayao_64)|AnimeGAN|The Wind Rises|animegan_v1_hayao| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_64) |
+|[animegan_v2_hayao_99](image/Image_gan/style_transfer/animegan_v2_hayao_99)|AnimeGAN|The Wind Rises|animegan_v1_hayao| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_hayao_99) |
+|[animegan_v2_paprika_54](image/Image_gan/style_transfer/animegan_v2_paprika_54)|AnimeGAN|Paprika|animegan_v2_paprika| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_54) |
+|[animegan_v2_paprika_74](image/Image_gan/style_transfer/animegan_v2_paprika_74)|AnimeGAN|Paprika|animegan_v2_paprika| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_74) |
+|[animegan_v2_paprika_97](image/Image_gan/style_transfer/animegan_v2_paprika_97)|AnimeGAN|Paprika|animegan_v2_paprika| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_97) |
+|[animegan_v2_paprika_98](image/Image_gan/style_transfer/animegan_v2_paprika_98)|AnimeGAN|Paprika|animegan_v2_paprika| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_paprika_98) |
+|[animegan_v2_shinkai_33](image/Image_gan/style_transfer/animegan_v2_shinkai_33)|AnimeGAN|Your Name, Weathering with you|animegan_v2_shinkai| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_shinkai_33) |
+|[animegan_v2_shinkai_53](image/Image_gan/style_transfer/animegan_v2_shinkai_53)|AnimeGAN|Your Name, Weathering with you|animegan_v2_shinkai| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/animegan_v2_shinkai_53) |
 |[msgnet](image/Image_gan/style_transfer/msgnet)|msgnet|COCO2014| |[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/msgnet) |
-|[stylepro_artistic](image/Image_gan/style_transfer/stylepro_artistic)|StyleProNet|MS-COCO + WikiArt|艺术风格迁移| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/stylepro_artistic) |
-|stylegan_ffhq|StyleGAN|FFHQ|图像风格迁移|
+|[stylepro_artistic](image/Image_gan/style_transfer/stylepro_artistic)|StyleProNet|MS-COCO + WikiArt|stylepro_artistic| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/stylepro_artistic) |
+|stylegan_ffhq|StyleGAN|FFHQ|stylepro_artistic|
 
   - ### Keypoint Detection
 
 |module|Network|Dataset|Introduction|
 |--|--|--|--|
-|[face_landmark_localization](image/keypoint_detection/face_landmark_localization)|Face_Landmark|AFW/AFLW|人脸关键点检测|
-|[hand_pose_localization](image/keypoint_detection/hand_pose_localization)|-|MPII, NZSL|手部关键点检测|
-|[openpose_body_estimation](image/keypoint_detection/openpose_body_estimation)|two-branch multi-stage CNN|MPII, COCO 2016|肢体关键点检测|
-|[human_pose_estimation_resnet50_mpii](image/keypoint_detection/human_pose_estimation_resnet50_mpii)|Pose_Resnet50|MPII|人体骨骼关键点检测
-|[openpose_hands_estimation](image/keypoint_detection/openpose_hands_estimation)|-|MPII, NZSL|手部关键点检测|
+|[face_landmark_localization](image/keypoint_detection/face_landmark_localization)|Face_Landmark|AFW/AFLW|Face_Landmark|
+|[hand_pose_localization](image/keypoint_detection/hand_pose_localization)|-|MPII, NZSL|hand_pose_localization|
+|[openpose_body_estimation](image/keypoint_detection/openpose_body_estimation)|two-branch multi-stage CNN|MPII, COCO 2016|openpose_body_estimation|
+|[human_pose_estimation_resnet50_mpii](image/keypoint_detection/human_pose_estimation_resnet50_mpii)|Pose_Resnet50|MPII|human_pose_estimation
+|[openpose_hands_estimation](image/keypoint_detection/openpose_hands_estimation)|-|MPII, NZSL|openpose_hands_estimation|
 
   - ### Semantic Segmentation
 
 |module|Network|Dataset|Introduction|
 |--|--|--|--|
-|[deeplabv3p_xception65_humanseg](image/semantic_segmentation/deeplabv3p_xception65_humanseg)|deeplabv3p|百度自建数据集|人像分割|
-|[humanseg_server](image/semantic_segmentation/humanseg_server)|deeplabv3p|百度自建数据集|人像分割|
-|[humanseg_mobile](image/semantic_segmentation/humanseg_mobile)|hrnet|百度自建数据集|人像分割-移动端前置摄像头|
-|[humanseg_lite](image/semantic_segmentation/umanseg_lite)|shufflenet|百度自建数据集|轻量级人像分割-移动端实时|
-|[ExtremeC3_Portrait_Segmentation](image/semantic_segmentation/ExtremeC3_Portrait_Segmentation)|ExtremeC3|EG1800, Baidu fashion dataset|轻量化人像分割|
-|[SINet_Portrait_Segmentation](image/semantic_segmentation/SINet_Portrait_Segmentation)|SINet|EG1800, Baidu fashion dataset|轻量化人像分割|
-|[FCN_HRNet_W18_Face_Seg](image/semantic_segmentation/FCN_HRNet_W18_Face_Seg)|FCN_HRNet_W18|-|人像分割|
-|[ace2p](image/semantic_segmentation/ace2p)|ACE2P|LIP|人体解析|
-|[Pneumonia_CT_LKM_PP](image/semantic_segmentation/Pneumonia_CT_LKM_PP)|U-NET+|连心医疗授权脱敏数据集|肺炎CT影像分析|
-|[Pneumonia_CT_LKM_PP_lung](image/semantic_segmentation/Pneumonia_CT_LKM_PP_lung)|U-NET+|连心医疗授权脱敏数据集|肺炎CT影像分析|
+|[deeplabv3p_xception65_humanseg](image/semantic_segmentation/deeplabv3p_xception65_humanseg)|deeplabv3p|-|humanseg|
+|[humanseg_server](image/semantic_segmentation/humanseg_server)|deeplabv3p|-|humanseg|
+|[humanseg_mobile](image/semantic_segmentation/humanseg_mobile)|hrnet|-|humanseg|
+|[humanseg_lite](image/semantic_segmentation/umanseg_lite)|shufflenet|-|humanseg|
+|[ExtremeC3_Portrait_Segmentation](image/semantic_segmentation/ExtremeC3_Portrait_Segmentation)|ExtremeC3|EG1800, Baidu fashion dataset|humanseg|
+|[SINet_Portrait_Segmentation](image/semantic_segmentation/SINet_Portrait_Segmentation)|SINet|EG1800, Baidu fashion dataset|humanseg|
+|[FCN_HRNet_W18_Face_Seg](image/semantic_segmentation/FCN_HRNet_W18_Face_Seg)|FCN_HRNet_W18|-|humanseg|
+|[ace2p](image/semantic_segmentation/ace2p)|ACE2P|LIP|ACE2P|
+|[Pneumonia_CT_LKM_PP](image/semantic_segmentation/Pneumonia_CT_LKM_PP)|U-NET+|-|Pneumonia_CT|
+|[Pneumonia_CT_LKM_PP_lung](image/semantic_segmentation/Pneumonia_CT_LKM_PP_lung)|U-NET+|-|Pneumonia_CT|
 |[ocrnet_hrnetw18_voc](image/semantic_segmentation/ocrnet_hrnetw18_voc)|ocrnet, hrnet|PascalVoc2012|
-|[U2Net](image/semantic_segmentation/U2Net)|U^2Net|-|图像前景背景分割|
-|[U2Netp](image/semantic_segmentation/U2Netp)|U^2Net|-|图像前景背景分割|
-|[Extract_Line_Draft](image/semantic_segmentation/Extract_Line_Draft)|UNet|Pixiv|线稿提取|
+|[U2Net](image/semantic_segmentation/U2Net)|U^2Net|-|U2Net|
+|[U2Netp](image/semantic_segmentation/U2Netp)|U^2Net|-|U2Net|
+|[Extract_Line_Draft](image/semantic_segmentation/Extract_Line_Draft)|UNet|Pixiv|Extract_Line_Draft|
 |[unet_cityscapes](image/semantic_segmentation/unet_cityscapes)|UNet|cityscapes|
 |[ocrnet_hrnetw18_cityscapes](image/semantic_segmentation/ocrnet_hrnetw18_cityscapes)|ocrnet_hrnetw18|cityscapes|
 |[hardnet_cityscapes](image/semantic_segmentation/hardnet_cityscapes)|hardnet|cityscapes|
@@ -210,13 +210,13 @@ English | [简体中文](README_ch.md)
 
 |module|Network|Dataset|Introduction|
 |--|--|--|--|
-|[pyramidbox_lite_mobile](image/face_detection/pyramidbox_lite_mobile)|PyramidBox|WIDER FACE数据集 + 百度自采人脸数据集|轻量级人脸检测-移动端|
-|[pyramidbox_lite_mobile_mask](image/face_detection/pyramidbox_lite_mobile_mask)|PyramidBox|WIDER FACE数据集 + 百度自采人脸数据集|轻量级人脸口罩检测-移动端|
-|[pyramidbox_lite_server_mask](image/face_detection/pyramidbox_lite_server_mask)|PyramidBox|WIDER FACE数据集 + 百度自采人脸数据集|轻量级人脸口罩检测|
-|[ultra_light_fast_generic_face_detector_1mb_640](image/face_detection/ultra_light_fast_generic_face_detector_1mb_640)|Ultra-Light-Fast-Generic-Face-Detector-1MB|WIDER FACE数据集|轻量级通用人脸检测-低算力设备|
-|[ultra_light_fast_generic_face_detector_1mb_320](image/face_detection/ultra_light_fast_generic_face_detector_1mb_320)|Ultra-Light-Fast-Generic-Face-Detector-1MB|WIDER FACE数据集|轻量级通用人脸检测-低算力设备|
-|[pyramidbox_lite_server](image/face_detection/pyramidbox_lite_server)|PyramidBox|WIDER FACE数据集 + 百度自采人脸数据集|轻量级人脸检测|
-|[pyramidbox_face_detection](image/face_detection/pyramidbox_face_detection)|PyramidBox|WIDER FACE数据集|人脸检测|
+|[pyramidbox_lite_mobile](image/face_detection/pyramidbox_lite_mobile)|PyramidBox|WIDER FACE|face_detection|
+|[pyramidbox_lite_mobile_mask](image/face_detection/pyramidbox_lite_mobile_mask)|PyramidBox|WIDER FACE|face_detection|
+|[pyramidbox_lite_server_mask](image/face_detection/pyramidbox_lite_server_mask)|PyramidBox|WIDER FACE|face_detection|
+|[ultra_light_fast_generic_face_detector_1mb_640](image/face_detection/ultra_light_fast_generic_face_detector_1mb_640)|Ultra-Light-Fast-Generic-Face-Detector-1MB|WIDER FACE|face_detection|
+|[ultra_light_fast_generic_face_detector_1mb_320](image/face_detection/ultra_light_fast_generic_face_detector_1mb_320)|Ultra-Light-Fast-Generic-Face-Detector-1MB|WIDER FACE|face_detection|
+|[pyramidbox_lite_server](image/face_detection/pyramidbox_lite_server)|PyramidBox|WIDER FACE|face_detection|
+|[pyramidbox_face_detection](image/face_detection/pyramidbox_face_detection)|PyramidBox|WIDER FACE|face_detection|
 
   - ### Text Recognition
 

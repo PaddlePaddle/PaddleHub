@@ -100,19 +100,13 @@
         - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
 
   - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
+    def save_inference_model(dirname)
     ```
     - 将模型保存到指定路径。
 
     - **参数**
 
-      - dirname: 存在模型的目录名称； <br/>
-      - model\_filename: 模型文件名称，默认为\_\_model\_\_； <br/>
-      - params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)；<br/>
-      - combined: 是否将参数保存到统一的一个文件中。
+      - dirname: 模型保存路径 <br/>
 
 
 ## 四、服务部署
@@ -170,6 +164,10 @@
 
   移除 fluid api
 
+* 1.1.0
+
+   修复推理模型无法导出的问题
+
   - ```shell
-    $ hub install yolov3_darknet53_vehicles==1.0.3
+    $ hub install yolov3_darknet53_vehicles==1.1.0
     ```

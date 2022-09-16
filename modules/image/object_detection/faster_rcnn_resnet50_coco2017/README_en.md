@@ -60,7 +60,7 @@
     object_detector = hub.Module(name="faster_rcnn_resnet50_coco2017")
     result = object_detector.object_detection(images=[cv2.imread('/PATH/TO/IMAGE')])
     # or
-    # result = object_detector.object_detection((paths=['/PATH/TO/IMAGE'])
+    # result = object_detector.object_detection(paths=['/PATH/TO/IMAGE'])
     ```
 
 - ### 3、API
@@ -103,19 +103,13 @@
 
 
   - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
+    def save_inference_model(dirname)
     ```
     - Save model to specific path
 
     - **Parameters**
 
-      - dirname: output dir for saving model
-      - model\_filename: filename for saving model
-      - params\_filename: filename for saving parameters
-      - combined: whether save parameters into one file
+      - dirname: model save path
 
 
 ## IV.Server Deployment
@@ -168,6 +162,11 @@
 * 1.1.1
 
   Fix the problem of reading numpy
+
+* 1.2.0
+
+  Remove fluid api
+
   - ```shell
-    $ hub install faster_rcnn_resnet50_coco2017==1.1.1
+    $ hub install faster_rcnn_resnet50_coco2017==1.2.0
     ```

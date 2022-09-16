@@ -201,4 +201,8 @@
 
   初始发布
 
+  - ```shell
+    $ hub install user_guided_colorization==1.0.0
+    ```
+
 
