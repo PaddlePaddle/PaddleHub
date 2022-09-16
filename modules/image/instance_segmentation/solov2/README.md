@@ -149,7 +149,7 @@
 
 * 1.1.0
 
-  视频 PaddlePaddle 2.2.0+
+  适配 PaddlePaddle 2.2.0+
 
   * ```shell
     $ hub install hand_pose_localization==1.1.0
