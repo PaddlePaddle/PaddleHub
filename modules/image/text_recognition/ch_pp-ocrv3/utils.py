@@ -69,7 +69,7 @@ def text_visual(texts, scores, font_file, img_h=400, img_w=600, threshold=0.):
         assert len(texts) == len(scores), "The number of txts and corresponding scores must match"
 
     def create_blank_img():
-        blank_img = np.ones(shape=[img_h, img_w], dtype=np.int8) * 255
+        blank_img = np.ones(shape=[img_h, img_w], dtype=np.uint8) * 255
         blank_img[:, img_w - 1:] = 0
         blank_img = Image.fromarray(blank_img).convert("RGB")
         draw_txt = ImageDraw.Draw(blank_img)
