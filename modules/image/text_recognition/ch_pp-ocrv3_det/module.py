@@ -19,21 +19,15 @@ from __future__ import print_function
 import argparse
 import ast
 import base64
-import math
 import os
 import time
 
 import cv2
 import numpy as np
-import paddle.fluid as fluid
 import paddle.inference as paddle_infer
-from paddle.fluid.core import AnalysisConfig
-from paddle.fluid.core import create_paddle_predictor
-from paddle.fluid.core import PaddleTensor
 from PIL import Image
 
-import paddlehub as hub
-from paddlehub.common.logger import logger
+from paddlehub.utils.utils import logger
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
@@ -48,15 +42,14 @@ def base64_to_cv2(b64str):
 
 @moduleinfo(
     name="ch_pp-ocrv3_det",
-    version="1.0.0",
+    version="1.1.0",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
-class ChPPOCRv3Det(hub.Module):
-
-    def _initialize(self, enable_mkldnn=False):
+class ChPPOCRv3Det:
+    def __init__(self, enable_mkldnn=False):
         """
         initialize with the necessary elements
         """
@@ -239,7 +232,7 @@ class ChPPOCRv3Det(hub.Module):
                 dt_boxes_list = postprocessor(outs_dict, [ratio_list])
                 dt_boxes = dt_boxes_list[0]
                 boxes = self.filter_tag_det_res(dt_boxes_list[0], original_image.shape)
-                res['data'] = boxes.astype(np.int).tolist()
+                res['data'] = boxes.astype(np.int64).tolist()
                 all_imgs.append(im)
                 all_ratios.append(ratio_list)
                 if visualization:

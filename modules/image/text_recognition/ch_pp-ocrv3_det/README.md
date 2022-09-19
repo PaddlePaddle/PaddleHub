@@ -158,6 +158,10 @@
 
   初始发布
 
+* 1.1.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install ch_pp-ocrv3_det==1.0.0
+    $ hub install ch_pp-ocrv3_det==1.1.0
     ```
