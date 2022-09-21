@@ -1,0 +1,4 @@
+paddleclas
+paddlenlp
+ftfy
+regex
