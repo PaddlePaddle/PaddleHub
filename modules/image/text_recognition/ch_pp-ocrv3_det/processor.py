@@ -124,9 +124,9 @@ class DBPostProcess(object):
         self.box_thresh = params['box_thresh']
         self.max_candidates = params['max_candidates']
         self.unclip_ratio = params['unclip_ratio']
+        self.score_mode = params['det_db_score_mode']
         self.min_size = 3
         self.dilation_kernel = None
-        self.score_mode = 'fast'
 
     def boxes_from_bitmap(self, pred, _bitmap, dest_width, dest_height):
         '''
