@@ -1,5 +1,4 @@
 # lseg
-
 |模型名称|lseg|
 | :--- | :---: | 
 |类别|图像-图像分割|
@@ -8,7 +7,7 @@
 |是否支持Fine-tuning|否|
 |模型大小|1.63GB|
 |指标|-|
-|最新更新日期|2021-02-26|
+|最新更新日期|2022-09-22|
 
 
 ## 一、模型基本信息
@@ -157,7 +156,13 @@
     }
     ```
 
-## 五、更新历史
+## 五、参考资料
+
+* 论文：[Language-driven Semantic Segmentation](https://arxiv.org/abs/2201.03546)
+
+* 官方实现：[isl-org/lang-seg](https://github.com/isl-org/lang-seg)
+
+## 六、更新历史
 
 * 1.0.0
 
