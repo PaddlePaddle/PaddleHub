@@ -1,4 +1,4 @@
-paddleclas
-paddlenlp
+paddleclas>=2.4.0
+paddlenlp>=2.4.0
 ftfy
 regex
