@@ -19,12 +19,12 @@ from . import models
 
 def cv2_to_base64(image):
     data = cv2.imencode('.jpg', image)[1]
-    return base64.b64encode(data.tostring()).decode('utf8')
+    return base64.b64encode(data.tobytes()).decode('utf8')
 
 
 def base64_to_cv2(b64str):
     data = base64.b64decode(b64str.encode('utf8'))
-    data = np.fromstring(data, np.uint8)
+    data = np.frombuffer(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
     return data
 
@@ -112,7 +112,7 @@ class LSeg(models.LSeg):
         class_num = len(labels)
 
         labels_ = list(set(labels))
-        labels_.sort(key = labels.index)
+        labels_.sort(key=labels.index)
         labels = labels_
 
         input_labels = []
@@ -124,7 +124,7 @@ class LSeg(models.LSeg):
             input_labels.append(label)
 
         input_labels_ = list(set(input_labels))
-        input_labels_.sort(key = input_labels.index)
+        input_labels_.sort(key=input_labels.index)
         input_labels = input_labels_
 
         if len(input_labels) < class_num:
