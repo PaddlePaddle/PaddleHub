@@ -146,8 +146,8 @@ class LSeg(models.LSeg):
 
         classes_seg = {}
         for i, label in enumerate(labels):
-            mask = (gray_seg == i).astype('uint8')
-            classes_seg[label] = cv2.bitwise_and(image, image, mask=mask)
+            mask = ((gray_seg == i).astype('uint8') * 255)[..., None]
+            classes_seg[label] = np.concatenate([image, mask], 2)
 
         if visualization:
             save_dir = os.path.join(output_dir, str(int(time.time())))
