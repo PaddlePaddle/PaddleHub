@@ -51,9 +51,9 @@
 
     ```shell
     $ hub run lseg \
-        --image "/PATH/TO/IMAGE" \
-        --labels "Category 1" "Category 2" ... "Category n" \
-        --output_dir "/PATH/TO/OUTPUT" 
+        --input_path "/PATH/TO/IMAGE" \
+        --labels "Category 1" "Category 2" "Category n" \
+        --output_dir "lseg_output" 
     ```
 
   - ### 2、预测代码示例
@@ -65,8 +65,9 @@
     module = hub.Module(name="lseg")
     result = module.segment(
         image=cv2.imread('/PATH/TO/IMAGE'),
-        labels=["Category 1", "Category 2", ..., "Category n"],
-        visualization=True
+        labels=["Category 1", "Category 2", "Category n"],
+        visualization=True,
+        output_dir='lseg_output'
     )
     ```
   

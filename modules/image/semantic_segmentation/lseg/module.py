@@ -109,6 +109,8 @@ class LSeg(models.LSeg):
         else:
             raise Exception("labels should be a str or list.")
 
+        labels = list(set(labels))
+
         input_labels = []
         for label in labels:
             from_lang = self.language_recognition.recognize(query=label)
@@ -116,6 +118,7 @@ class LSeg(models.LSeg):
                 label = self.translate.translate(
                     query=label, from_lang=from_lang, to_lang='en')
             input_labels.append(label)
+        input_labels = list(set(input_labels))
 
         h, w = image.shape[:2]
         image = image[
@@ -140,12 +143,12 @@ class LSeg(models.LSeg):
         mix_seg = cv2.addWeighted(image, 0.5, color_seg, 0.5, 0.0)
 
         classes_seg = {}
-        for i, label in enumerate(labels):
+        for i, label in enumerate(input_labels):
             mask = (gray_seg == i).astype('uint8')
             classes_seg[label] = cv2.bitwise_and(image, image, mask=mask)
 
         if visualization:
-            save_dir = os.path.join(output_dir, str(time.time()))
+            save_dir = os.path.join(output_dir, str(int(time.time())))
             if not os.path.isdir(save_dir):
                 os.makedirs(save_dir)
             for label, dst in classes_seg.items():
@@ -169,14 +172,14 @@ class LSeg(models.LSeg):
             usage='%(prog)s',
             add_help=True)
         self.parser.add_argument(
-            '--image', type=str, help="path to image.")
+            '--input_path', type=str, help="path to image.")
         self.parser.add_argument(
             '--labels', type=str, nargs='+', help="segmentation labels.")
         self.parser.add_argument(
             '--output_dir', type=str, default='lseg_output', help="The directory to save output images.")
         args = self.parser.parse_args(argvs)
         self.segment(
-            image=args.image,
+            image=args.input_path,
             labels=args.labels,
             visualization=True,
             output_dir=args.output_dir)
