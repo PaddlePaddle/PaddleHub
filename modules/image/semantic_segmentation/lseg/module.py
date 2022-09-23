@@ -154,7 +154,7 @@ class LSeg(models.LSeg):
             if not os.path.isdir(save_dir):
                 os.makedirs(save_dir)
             for label, dst in classes_seg.items():
-                cv2.imwrite(os.path.join(save_dir, '%s.jpg' % label), dst)
+                cv2.imwrite(os.path.join(save_dir, '%s.png' % label), dst)
 
         return {'gray': gray_seg, 'color': color_seg, 'mix': mix_seg, 'classes': classes_seg}
 
