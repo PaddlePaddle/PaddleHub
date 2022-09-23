@@ -116,13 +116,19 @@ class LSeg(models.LSeg):
                 label = self.translate.translate(query=label, from_lang=from_lang, to_lang='en')
             input_labels.append(label)
 
+        labels_dict = {k: v for k, v in zip(input_labels, labels)}
+
         input_labels_ = list(set(input_labels))
         input_labels_.sort(key=input_labels.index)
         input_labels = input_labels_
 
-        if len(input_labels) < class_num:
+        labels = []
+        for input_label in input_labels:
+            labels.append(labels_dict[input_label])
+
+        if len(labels) < class_num:
             print('remove the same labels...')
-            print('new labels: ', input_labels)
+            print('new labels: ', labels)
 
         h, w = image.shape[:2]
         image = image[:-(h % 32) if h % 32 else None, :-(w % 32) if w % 32 else None]
@@ -139,7 +145,7 @@ class LSeg(models.LSeg):
         mix_seg = cv2.addWeighted(image, 0.5, color_seg, 0.5, 0.0)
 
         classes_seg = {}
-        for i, label in enumerate(input_labels):
+        for i, label in enumerate(labels):
             mask = (gray_seg == i).astype('uint8')
             classes_seg[label] = cv2.bitwise_and(image, image, mask=mask)
 
