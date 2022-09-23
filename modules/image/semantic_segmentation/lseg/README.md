@@ -1,4 +1,5 @@
 # lseg
+
 |模型名称|lseg|
 | :--- | :---: | 
 |类别|图像-图像分割|
@@ -75,29 +76,29 @@
 
     ```python
     def segment(
-        image: Union[str, np.ndarray],
+        image: Union[str, numpy.ndarray],
         labels: Union[str, List[str]],
         visualization: bool = False,
         output_dir: str = 'lseg_output'
-    ) -> Dict[str, Union[np.ndarray, Dict[str, np.ndarray]]]
+    ) -> Dict[str, Union[numpy.ndarray, Dict[str, numpy.ndarray]]]
     ```
 
     - 语义分割 API
 
     - **参数**
 
-      * image (Union[str, np.ndarray]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
-      * labels (Union[str, List[str]]): 类别文本标签；
+      * image (Union\[str, numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
+      * labels (Union\[str, List\[str\]\]): 类别文本标签；
       * visualization (bool): 是否将识别结果保存为图片文件；
       * output\_dir (str): 保存处理结果的文件目录。
 
     - **返回**
 
-      * res (Dict[str, Union[np.ndarray, Dict[str, np.ndarray]]]): 识别结果的字典，字典中包含如下元素：
+      * res (Dict\[str, Union\[numpy.ndarray, Dict\[str, numpy.ndarray\]\]\]): 识别结果的字典，字典中包含如下元素：
         * gray (numpy.ndarray): 灰度分割结果；
         * color (numpy.ndarray): 伪彩色图分割结果；
         * mix (numpy.ndarray): 叠加原图和伪彩色图的分割结果；
-        * calsses (Dict[str, np.ndarray]): 各个类别标签的分割抠图结果。
+        * calsses (Dict\[str, numpy.ndarray\]): 各个类别标签的分割抠图结果。
 
 ## 四、服务部署
 
