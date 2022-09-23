@@ -97,19 +97,23 @@ class LSeg(models.LSeg):
 
         if isinstance(labels, str):
             labels = [labels, 'other']
-            print(
-                '"other" category label is automatically added because the length of labels is equal to 1')
+            print('"other" category label is automatically added because the length of labels is equal to 1')
+            print('new labels: ', labels)
         elif isinstance(labels, list):
             if len(labels) == 1:
                 labels.append('other')
-                print(
-                    '"other" category label is automatically added because the length of labels is equal to 1')
+                print('"other" category label is automatically added because the length of labels is equal to 1')
+                print('new labels: ', labels)
             elif len(labels) == 0:
                 raise Exception("labels should not be empty.")
         else:
             raise Exception("labels should be a str or list.")
 
-        labels = list(set(labels))
+        class_num = len(labels)
+
+        labels_ = list(set(labels))
+        labels_.sort(key = labels.index)
+        labels = labels_
 
         input_labels = []
         for label in labels:
@@ -118,7 +122,14 @@ class LSeg(models.LSeg):
                 label = self.translate.translate(
                     query=label, from_lang=from_lang, to_lang='en')
             input_labels.append(label)
-        input_labels = list(set(input_labels))
+
+        input_labels_ = list(set(input_labels))
+        input_labels_.sort(key = input_labels.index)
+        input_labels = input_labels_
+
+        if len(input_labels) < class_num:
+            print('remove the same labels...')
+            print('new labels: ', input_labels)
 
         h, w = image.shape[:2]
         image = image[
