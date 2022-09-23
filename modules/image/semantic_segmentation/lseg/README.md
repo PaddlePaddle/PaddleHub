@@ -98,7 +98,7 @@
         * gray (numpy.ndarray): 灰度分割结果 (GRAY)；
         * color (numpy.ndarray): 伪彩色图分割结果 (BGR)；
         * mix (numpy.ndarray): 叠加原图和伪彩色图的分割结果 (BGR)；
-        * calsses (Dict\[str, numpy.ndarray\]): 各个类别标签的分割抠图结果 (BGRA)。
+        * classes (Dict\[str, numpy.ndarray\]): 各个类别标签的分割抠图结果 (BGRA)。
 
 ## 四、服务部署
 
