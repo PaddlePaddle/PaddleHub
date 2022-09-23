@@ -1,7 +1,7 @@
 # lseg
 
 |模型名称|lseg|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-图像分割|
 |网络|LSeg|
 |数据集|-|
@@ -54,7 +54,7 @@
     $ hub run lseg \
         --input_path "/PATH/TO/IMAGE" \
         --labels "Category 1" "Category 2" "Category n" \
-        --output_dir "lseg_output" 
+        --output_dir "lseg_output"
     ```
 
   - ### 2、预测代码示例
@@ -71,7 +71,7 @@
         output_dir='lseg_output'
     )
     ```
-  
+
   - ### 3、API
 
     ```python
@@ -107,7 +107,7 @@
 - ### 第一步：启动PaddleHub Serving
 
   - 运行启动命令：
-  
+
     ```shell
      $ hub serving start -m lseg
     ```

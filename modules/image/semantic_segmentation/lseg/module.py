@@ -1,20 +1,22 @@
+import argparse
+import base64
 import os
 import time
-import base64
-from typing import List, Dict, Union
+from typing import Dict
+from typing import List
+from typing import Union
 
 import cv2
-import argparse
 import numpy as np
-
 import paddle
 import paddle.vision.transforms as transforms
-import paddlehub as hub
-
-from paddlehub.module.module import moduleinfo, runnable, serving
 from paddlenlp.transformers.clip.tokenizer import CLIPTokenizer
 
+import paddlehub as hub
 from . import models
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
 def cv2_to_base64(image):
@@ -38,27 +40,20 @@ def base64_to_cv2(b64str):
     summary="Language-driven Semantic Segmentation.",
 )
 class LSeg(models.LSeg):
+
     def __init__(self):
         super(LSeg, self).__init__()
-        self.default_pretrained_model_path = os.path.join(
-            self.directory, 'ckpts', 'LSeg.pdparams')
+        self.default_pretrained_model_path = os.path.join(self.directory, 'ckpts', 'LSeg.pdparams')
         state_dict = paddle.load(self.default_pretrained_model_path)
         self.set_state_dict(state_dict)
         self.eval()
-        self.transforms = transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    [0.5, 0.5, 0.5],
-                    [0.5, 0.5, 0.5]
-                ),
-            ]
-        )
-        self.tokenizer = CLIPTokenizer.from_pretrained(
-            'openai/clip-vit-base-patch32')
+        self.transforms = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+        ])
+        self.tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch32')
 
-        self.language_recognition = hub.Module(
-            name='baidu_language_recognition')
+        self.language_recognition = hub.Module(name='baidu_language_recognition')
         self.translate = hub.Module(name='baidu_translate')
 
     @staticmethod
@@ -86,8 +81,7 @@ class LSeg(models.LSeg):
                 image: Union[str, np.ndarray],
                 labels: Union[str, List[str]],
                 visualization: bool = False,
-                output_dir: str = 'lseg_output'
-                ) -> Dict[str, Union[np.ndarray, Dict[str, np.ndarray]]]:
+                output_dir: str = 'lseg_output') -> Dict[str, Union[np.ndarray, Dict[str, np.ndarray]]]:
         if isinstance(image, str):
             image = cv2.imread(image)
         elif isinstance(image, np.ndarray):
@@ -119,8 +113,7 @@ class LSeg(models.LSeg):
         for label in labels:
             from_lang = self.language_recognition.recognize(query=label)
             if from_lang != 'en':
-                label = self.translate.translate(
-                    query=label, from_lang=from_lang, to_lang='en')
+                label = self.translate.translate(query=label, from_lang=from_lang, to_lang='en')
             input_labels.append(label)
 
         input_labels_ = list(set(input_labels))
@@ -132,17 +125,9 @@ class LSeg(models.LSeg):
             print('new labels: ', input_labels)
 
         h, w = image.shape[:2]
-        image = image[
-            :-(h % 32) if h % 32 else None,
-            :-(w % 32) if w % 32 else None
-        ]
-        images = self.transforms(cv2.cvtColor(
-            image, cv2.COLOR_BGR2RGB)).unsqueeze(0)
-        texts = self.tokenizer(
-            input_labels,
-            padding=True,
-            return_tensors="pd"
-        )['input_ids']
+        image = image[:-(h % 32) if h % 32 else None, :-(w % 32) if w % 32 else None]
+        images = self.transforms(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)).unsqueeze(0)
+        texts = self.tokenizer(input_labels, padding=True, return_tensors="pd")['input_ids']
 
         with paddle.no_grad():
             results = self.forward(images, texts)
@@ -165,35 +150,25 @@ class LSeg(models.LSeg):
             for label, dst in classes_seg.items():
                 cv2.imwrite(os.path.join(save_dir, '%s.jpg' % label), dst)
 
-        return {
-            'gray': gray_seg,
-            'color': color_seg,
-            'mix': mix_seg,
-            'classes': classes_seg
-        }
+        return {'gray': gray_seg, 'color': color_seg, 'mix': mix_seg, 'classes': classes_seg}
 
     @runnable
     def run_cmd(self, argvs):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the {} module.".format(self.name),
-            prog='hub run {}'.format(self.name),
-            usage='%(prog)s',
-            add_help=True)
-        self.parser.add_argument(
-            '--input_path', type=str, help="path to image.")
-        self.parser.add_argument(
-            '--labels', type=str, nargs='+', help="segmentation labels.")
-        self.parser.add_argument(
-            '--output_dir', type=str, default='lseg_output', help="The directory to save output images.")
+        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
+                                              prog='hub run {}'.format(self.name),
+                                              usage='%(prog)s',
+                                              add_help=True)
+        self.parser.add_argument('--input_path', type=str, help="path to image.")
+        self.parser.add_argument('--labels', type=str, nargs='+', help="segmentation labels.")
+        self.parser.add_argument('--output_dir',
+                                 type=str,
+                                 default='lseg_output',
+                                 help="The directory to save output images.")
         args = self.parser.parse_args(argvs)
-        self.segment(
-            image=args.input_path,
-            labels=args.labels,
-            visualization=True,
-            output_dir=args.output_dir)
+        self.segment(image=args.input_path, labels=args.labels, visualization=True, output_dir=args.output_dir)
         return 'segmentation results are saved in %s' % args.output_dir
 
     @serving
@@ -202,16 +177,12 @@ class LSeg(models.LSeg):
         Run as a service.
         """
         image = base64_to_cv2(image)
-        results = self.segment(
-            image=image,
-            **kwargs
-        )
+        results = self.segment(image=image, **kwargs)
 
         return {
             'gray': cv2_to_base64(results['gray']),
             'color': cv2_to_base64(results['color']),
             'mix': cv2_to_base64(results['mix']),
-            'classes': {
-                k: cv2_to_base64(v) for k, v in results['classes'].items()
-            }
+            'classes': {k: cv2_to_base64(v)
+                        for k, v in results['classes'].items()}
         }
