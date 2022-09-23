@@ -1,7 +1,6 @@
+import numpy as np
 import paddle
 import paddle.nn as nn
-
-import numpy as np
 
 
 class Interpolate(nn.Layer):
@@ -52,13 +51,9 @@ class ResidualConvUnit(nn.Layer):
         """
         super().__init__()
 
-        self.conv1 = nn.Conv2D(
-            features, features, kernel_size=3, stride=1, padding=1
-        )
+        self.conv1 = nn.Conv2D(features, features, kernel_size=3, stride=1, padding=1)
 
-        self.conv2 = nn.Conv2D(
-            features, features, kernel_size=3, stride=1, padding=1
-        )
+        self.conv2 = nn.Conv2D(features, features, kernel_size=3, stride=1, padding=1)
 
         self.relu = nn.ReLU(inplace=True)
 
@@ -106,9 +101,7 @@ class FeatureFusionBlock(nn.Layer):
 
         output = self.resConfUnit2(output)
 
-        output = nn.functional.interpolate(
-            output, scale_factor=2, mode="bilinear", align_corners=True
-        )
+        output = nn.functional.interpolate(output, scale_factor=2, mode="bilinear", align_corners=True)
 
         return output
 
@@ -184,13 +177,13 @@ class FeatureFusionBlock_custom(nn.Layer):
     """Feature fusion block."""
 
     def __init__(
-        self,
-        features,
-        activation=nn.ReLU(),
-        deconv=False,
-        bn=False,
-        expand=False,
-        align_corners=True,
+            self,
+            features,
+            activation=nn.ReLU(),
+            deconv=False,
+            bn=False,
+            expand=False,
+            align_corners=True,
     ):
         """Init.
 
@@ -236,9 +229,7 @@ class FeatureFusionBlock_custom(nn.Layer):
 
         output = self.resConfUnit2(output)
 
-        output = nn.functional.interpolate(
-            output, scale_factor=2, mode="bilinear", align_corners=self.align_corners
-        )
+        output = nn.functional.interpolate(output, scale_factor=2, mode="bilinear", align_corners=self.align_corners)
 
         output = self.out_conv(output)
 
@@ -246,6 +237,7 @@ class FeatureFusionBlock_custom(nn.Layer):
 
 
 class Scratch(nn.Layer):
+
     def __init__(self, in_channels=[256, 512, 1024, 1024], out_channels=256):
         super().__init__()
         self.out_c = 512
@@ -287,24 +279,14 @@ class Scratch(nn.Layer):
             groups=1,
         )
 
-        self.refinenet1 = FeatureFusionBlock_custom(
-            out_channels, bn=True
-        )
-        self.refinenet2 = FeatureFusionBlock_custom(
-            out_channels, bn=True
-        )
-        self.refinenet3 = FeatureFusionBlock_custom(
-            out_channels, bn=True
-        )
-        self.refinenet4 = FeatureFusionBlock_custom(
-            out_channels, bn=True
-        )
+        self.refinenet1 = FeatureFusionBlock_custom(out_channels, bn=True)
+        self.refinenet2 = FeatureFusionBlock_custom(out_channels, bn=True)
+        self.refinenet3 = FeatureFusionBlock_custom(out_channels, bn=True)
+        self.refinenet4 = FeatureFusionBlock_custom(out_channels, bn=True)
 
         self.head1 = nn.Conv2D(out_channels, self.out_c, kernel_size=1)
 
-        self.output_conv = nn.Sequential(
-            Interpolate(scale_factor=2, mode="bilinear", align_corners=True)
-        )
+        self.output_conv = nn.Sequential(Interpolate(scale_factor=2, mode="bilinear", align_corners=True))
 
     def forward(self, layer_1, layer_2, layer_3, layer_4, text_features):
 
@@ -321,8 +303,7 @@ class Scratch(nn.Layer):
         image_features = self.head1(path_1)
 
         imshape = image_features.shape
-        image_features = image_features.transpose(
-            (0, 2, 3, 1)).reshape((-1, self.out_c))
+        image_features = image_features.transpose((0, 2, 3, 1)).reshape((-1, self.out_c))
 
         # normalized features
         image_features = image_features / image_features.norm(axis=-1, keepdim=True)
@@ -330,8 +311,7 @@ class Scratch(nn.Layer):
 
         logits_per_image = self.logit_scale * image_features @ text_features.t()
 
-        out = logits_per_image.reshape(
-            (imshape[0], imshape[2], imshape[3], -1)).transpose((0, 3, 1, 2))
+        out = logits_per_image.reshape((imshape[0], imshape[2], imshape[3], -1)).transpose((0, 3, 1, 2))
 
         out = self.output_conv(out)
 

@@ -1,11 +1,12 @@
 import paddle.nn as nn
 
-from .vit import ViT
 from .clip import CLIPText
 from .scratch import Scratch
+from .vit import ViT
 
 
 class LSeg(nn.Layer):
+
     def __init__(self):
         super().__init__()
         self.clip = CLIPText()
