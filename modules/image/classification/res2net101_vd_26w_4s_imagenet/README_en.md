@@ -128,6 +128,10 @@
 
   First release
 
+* 1.1.0
+
+  Remove Fluid API
+
   - ```shell
-    $ hub install res2net101_vd_26w_4s_imagenet==1.0.0
+    $ hub install res2net101_vd_26w_4s_imagenet==1.1.0
     ```
