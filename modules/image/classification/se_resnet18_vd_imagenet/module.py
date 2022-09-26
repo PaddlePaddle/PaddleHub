@@ -25,7 +25,7 @@ from paddlehub.module.module import serving
             version="1.1.0")
 class SEResNet18vdImageNet:
 
-    def _initialize(self):
+    def __init__(self):
         self.default_pretrained_model_path = os.path.join(self.directory, "se_resnet18_vd_imagenet_model", "model")
         label_file = os.path.join(self.directory, "label_list.txt")
         with open(label_file, 'r', encoding='utf-8') as file:
