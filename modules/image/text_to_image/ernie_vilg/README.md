@@ -21,7 +21,7 @@
 |数据集|-|
 |是否支持Fine-tuning|否|
 |模型大小|-|
-|最新更新日期|2022-08-02|
+|最新更新日期|2022-09-27|
 |数据指标|-|
 
 ### 应用效果展示
@@ -76,11 +76,12 @@
 - ### 3、API
 
   - ```python
-    def generate_image(
-              text_prompts:str,
-              style: Optional[str] = "油画",
-              topk: Optional[int] = 6,
-              output_dir: Optional[str] = 'ernievilg_output')
+    def generate_image(self,
+                 text_prompts,
+                 style: Optional[str] = "油画",
+                 resolution: Optional[str] = "1024*1024",
+                 topk: Optional[int] = 6,
+                 output_dir: Optional[str] = 'ernievilg_output'):
     ```
 
     - 文图生成API，生成文本描述内容的图像。
@@ -88,7 +89,8 @@
     - **参数**
 
       - text_prompts(str): 输入的语句，描述想要生成的图像的内容。
-      - style(Optional[str]): 生成图像的风格，当前支持'油画','水彩','粉笔画','卡通','儿童画','蜡笔画','探索无限'。
+      - style(Optional[str]): 生成图像的风格，当前支持'古风','油画','水彩','卡通','二次元','浮世绘','蒸汽波艺术','low poly', 像素风格','概念艺术','未来主义','赛博朋克','写实风格','洛丽塔风格','巴洛克风格','超现实主义','探索无限'。
+      - resolution(Optional[str]): 生成图像的分辨率，当前支持 '1024\*1024', '1024\*1536', '1536\*1024'，默认为'1024\*1024'。
       - topk(Optional[int]): 保存前多少张图，最多保存6张。
       - output_dir(Optional[str]): 保存输出图像的目录，默认为"ernievilg_output"。
 
