@@ -65,14 +65,16 @@ class ErnieVilG:
     def generate_image(self,
                        text_prompts,
                        style: Optional[str] = "油画",
+                       resolution: Optional[str] = "1024*1024",
                        topk: Optional[int] = 6,
                        visualization: Optional[bool] = True,
                        output_dir: Optional[str] = 'ernievilg_output'):
         """
         Create image by text prompts using ErnieVilG model.
-
         :param text_prompts: Phrase, sentence, or string of words and phrases describing what the image should look like.
-        :param style: Image stype, currently supported 油画、水彩、粉笔画、卡通、儿童画、蜡笔画、探索无限。
+        :param style: Image stype, currently supported 古风、油画、水彩、卡通、二次元、浮世绘、蒸汽波艺术、
+        low poly、像素风格、概念艺术、未来主义、赛博朋克、写实风格、洛丽塔风格、巴洛克风格、超现实主义、探索无限。
+        :param style: Resolution of images, currently supported "1024*1024", "1024*1536", "1536*1024".
         :param topk: Top k images to save.
         :param visualization: Whether to save images or not.
         :output_dir: Output directory
@@ -91,7 +93,8 @@ class ErnieVilG:
                                 data={
                                     'access_token': token,
                                     "text": text_prompt,
-                                    "style": style
+                                    "style": style,
+                                    "resolution": resolution
                                 })
             res = res.json()
             if res['code'] == 4001:
@@ -113,7 +116,8 @@ class ErnieVilG:
                                     data={
                                         'access_token': token,
                                         "text": text_prompt,
-                                        "style": style
+                                        "style": style,
+                                        "resolution": resolution
                                     })
                 res = res.json()
                 if res['code'] != 0:
@@ -255,7 +259,9 @@ class ErnieVilG:
         self.arg_input_group.add_argument('--style',
                                           type=str,
                                           default='油画',
-                                          choices=['油画', '水彩', '粉笔画', '卡通', '儿童画', '蜡笔画', '探索无限'],
+                                          choices=['古风','油画','水彩','卡通','二次元','浮世绘','蒸汽波艺术','low poly',
+                                                    '像素风格','概念艺术','未来主义','赛博朋克','写实风格','洛丽塔风格',
+                                                    '巴洛克风格','超现实主义','探索无限'],
                                           help="绘画风格")
         self.arg_input_group.add_argument('--topk', type=int, default=6, help="选取保存前多少张图，最多10张")
         self.arg_input_group.add_argument('--ak', type=str, default=None, help="申请文心api使用token的ak")
