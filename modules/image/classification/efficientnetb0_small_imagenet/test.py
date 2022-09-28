@@ -31,7 +31,6 @@ class TestHubModule(unittest.TestCase):
     def test_classification1(self):
         results = self.module.classification(paths=['tests/test.jpg'])
         data = results[0]
-        print(results)
         self.assertTrue('Pembroke' in data)
         self.assertTrue(data['Pembroke'] > 0.5)
 
