@@ -135,8 +135,7 @@
     # 发送HTTP请求
     org_im = cv2.imread('/PATH/TO/IMAGE')
     data = {
-        'image': cv2_to_base64(org_im),
-        'labels': ["Category 1", "Category 2", "Category n"]
+        'image': cv2_to_base64(org_im)
     }
     headers = {"Content-type": "application/json"}
     url = "http://127.0.0.1:8866/predict/fbcnn_color"
