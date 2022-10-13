@@ -9,10 +9,10 @@ import os
 import numpy as np
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from resnet50_vd_wildanimals.data_feed import reader
-from resnet50_vd_wildanimals.processor import base64_to_cv2
-from resnet50_vd_wildanimals.processor import postprocess
 
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import postprocess
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
