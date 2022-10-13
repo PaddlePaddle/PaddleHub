@@ -4,9 +4,8 @@ from __future__ import division
 from __future__ import print_function
 
 import base64
-import cv2
-import os
 
+import cv2
 import numpy as np
 
 
@@ -18,7 +17,6 @@ def base64_to_cv2(b64str):
 
 
 def softmax(x):
-    orig_shape = x.shape
     if len(x.shape) > 1:
         tmp = np.max(x, axis=1)
         x -= tmp.reshape((x.shape[0], 1))
