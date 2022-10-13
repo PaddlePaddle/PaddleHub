@@ -17,6 +17,7 @@ import base64
 import inspect
 import os
 import random
+import re
 import sys
 from functools import partial
 from io import BytesIO
@@ -143,13 +144,20 @@ class StableDiffusionImg2Img:
             paddle.seed(seed)
 
         if use_gpu:
-            try:
-                _places = os.environ.get("CUDA_VISIBLE_DEVICES", None)
-                if _places:
-                    paddle.device.set_device("gpu:{}".format(0))
-            except:
+            _cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", None)
+            config_device = False
+            target_device = ['gpu', 'xpu', 'npu', 'mlu', 'gpu:\d+', 'xpu:\d+', 'npu:\d+', 'mlu:\d+', 'ipu']
+            if isinstance(_cuda_visible_devices, str):
+                for reg_str in target_device:
+                    if re.match(f'^{reg_str}$', _cuda_visible_devices):
+                        paddle.device.set_device(_cuda_visible_devices)
+                        config_device = True
+
+            if not config_device:
                 raise RuntimeError(
-                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                    f"Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. "
+                    f"  If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                    f"  Examples/regex: {target_device}"
                 )
         else:
             paddle.device.set_device("cpu")
