@@ -126,9 +126,9 @@
 
 ## V.Release Note
 
-* 1.0.0
+* 1.1.0
 
   First release
   - ```shell
-    $ hub install resnet50_vd_wildanimals==1.0.0
+    $ hub install resnet50_vd_wildanimals==1.1.0
     ```

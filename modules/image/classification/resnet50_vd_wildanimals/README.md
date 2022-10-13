@@ -126,9 +126,9 @@
 
 ## 五、更新历史
 
-* 1.0.0
+* 1.1.0
 
   初始发布
   - ```shell
-    $ hub install resnet50_vd_wildanimals==1.0.0
+    $ hub install resnet50_vd_wildanimals==1.1.0
     ```
