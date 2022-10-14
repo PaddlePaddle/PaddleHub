@@ -99,20 +99,14 @@
           * data (numpy.ndarray): 图像分割得到的结果，shape 为`H * W`，元素的取值为0-19，表示每个像素的分类结果，映射顺序与下面的调色板相同。
 
     ```python
-    def save_inference_model(dirname,
-                            model_filename=None,
-                            params_filename=None,
-                            combined=True)
+    def save_inference_model(dirname)
     ```
 
     - 将模型保存到指定路径。
 
     - **参数**
 
-      * dirname: 存在模型的目录名称
-      * model\_filename: 模型文件名称，默认为\_\_model\_\_
-      * params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
-      * combined: 是否将参数保存到统一的一个文件中。
+      * dirname: 模型保存路径
 
 
 ## 四、服务部署
@@ -176,3 +170,11 @@
 * 1.1.0
 
   适配paddlehub2.0版本
+
+* 1.2.0
+
+  移除 Fluid API
+
+  ```shell
+  $ hub install ace2p == 1.2.0
+  ```
