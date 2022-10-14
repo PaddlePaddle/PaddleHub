@@ -30,7 +30,7 @@ def base64_to_cv2(b64str):
 @moduleinfo(
     name='fbcnn_gray',
     version='1.0.0',
-    type="CV/gan",
+    type="CV/image_editing",
     author="",
     author_email="",
     summary="Flexible JPEG Artifacts Removal.",
