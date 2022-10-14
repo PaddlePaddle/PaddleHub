@@ -132,6 +132,11 @@
 * 1.1.0
 
   提升预测性能以及易用性
+
+* 1.2.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install efficientnetb7_imagenet==1.1.0
+    $ hub install efficientnetb7_imagenet==1.2.0
     ```
