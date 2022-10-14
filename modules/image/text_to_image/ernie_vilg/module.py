@@ -64,7 +64,7 @@ class ErnieVilG:
 
     def generate_image(self,
                        text_prompts,
-                       style: Optional[str] = "油画",
+                       style: Optional[str] = "探索无限",
                        resolution: Optional[str] = "1024*1024",
                        topk: Optional[int] = 6,
                        visualization: Optional[bool] = True,
@@ -269,7 +269,7 @@ class ErnieVilG:
         self.arg_input_group.add_argument('--text_prompts', type=str)
         self.arg_input_group.add_argument('--style',
                                           type=str,
-                                          default='油画',
+                                          default='探索无限',
                                           choices=[
                                               '古风', '油画', '水彩', '卡通', '二次元', '浮世绘', '蒸汽波艺术', 'low poly', '像素风格', '概念艺术',
                                               '未来主义', '赛博朋克', '写实风格', '洛丽塔风格', '巴洛克风格', '超现实主义', '探索无限'
