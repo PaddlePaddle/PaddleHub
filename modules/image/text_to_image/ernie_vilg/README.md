@@ -78,7 +78,7 @@
   - ```python
     def generate_image(
               text_prompts:str,
-              style: Optional[str] = "油画",
+              style: Optional[str] = "探索无限",
               resolution: Optional[str] = "1024*1024",
               topk: Optional[int] = 6,
               output_dir: Optional[str] = 'ernievilg_output')
