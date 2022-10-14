@@ -3,7 +3,7 @@
 |模型名称|swinir_m_real_sr_x2|
 | :--- | :---: |
 |类别|图像-图像编辑|
-|网络|FBCNN|
+|网络|SwinIR|
 |数据集|DIV2K / Flickr2K|
 |是否支持Fine-tuning|否|
 |模型大小|66.8MB|
