@@ -66,7 +66,7 @@ class FBCNNColor(nn.Layer):
         if isinstance(image, str):
             _, file_name = os.path.split(image)
             save_name, _ = os.path.splitext(file_name)
-            save_name = save_name + str(int(time.time())) + '.jpg'
+            save_name = save_name + '_' + str(int(time.time())) + '.jpg'
             image = cv2.imdecode(np.fromfile(image, dtype=np.uint8), cv2.IMREAD_COLOR)
         elif isinstance(image, np.ndarray):
             save_name = str(int(time.time())) + '.jpg'
