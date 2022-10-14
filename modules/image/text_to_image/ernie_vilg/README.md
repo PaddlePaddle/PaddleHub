@@ -21,7 +21,7 @@
 |数据集|-|
 |是否支持Fine-tuning|否|
 |模型大小|-|
-|最新更新日期|2022-08-02|
+|最新更新日期|2022-10-14|
 |数据指标|-|
 
 ### 应用效果展示
@@ -78,7 +78,8 @@
   - ```python
     def generate_image(
               text_prompts:str,
-              style: Optional[str] = "油画",
+              style: Optional[str] = "探索无限",
+              resolution: Optional[str] = "1024*1024",
               topk: Optional[int] = 6,
               output_dir: Optional[str] = 'ernievilg_output')
     ```
@@ -88,7 +89,9 @@
     - **参数**
 
       - text_prompts(str): 输入的语句，描述想要生成的图像的内容。
-      - style(Optional[str]): 生成图像的风格，当前支持'油画','水彩','粉笔画','卡通','儿童画','蜡笔画','探索无限'。
+      - style(Optional[str]): 生成图像的风格，当前支持 古风、油画、水彩、卡通、二次元、浮世绘、蒸汽波艺术、
+        low poly、像素风格、概念艺术、未来主义、赛博朋克、写实风格、洛丽塔风格、巴洛克风格、超现实主义、探索无限。
+      - resolution(Optional[str]): 生成图像的分辨率，当前支持 '1024\*1024', '1024\*1536', '1536\*1024'，默认为'1024\*1024'。
       - topk(Optional[int]): 保存前多少张图，最多保存6张。
       - output_dir(Optional[str]): 保存输出图像的目录，默认为"ernievilg_output"。
 
@@ -99,14 +102,6 @@
 
 ## 四、 Prompt 指南
 
-
-(在 GitHub 阅读 README 的用户可以访问 www.youpromptme.cn 获得更好的阅读体验)
-
-(图片比较多，完全加载页面可能需要 3min)
-
-作者：佳祥 (LCL-Brew)
-
-原文地址： https://github.com/OleNet/YouPromptMe/tree/gh-pages/you-prompt-me
 
 
 这是一份如何调整 Prompt 得到更漂亮的图片的经验性文档。我们的结果和经验都来源于[文心 ERNIE-ViLG Demo](https://wenxin.baidu.com/moduleApi/ernieVilg) 和[社区的资料](#related-work)。
@@ -797,6 +792,9 @@ DiscoDiffusion Prompt 技巧资料：https://docs.google.com/document/d/1l8s7uS2
 
   初始发布
 
+* 1.1.0
+
+  增加分辨率参数以及所支持的风格
   ```shell
-  $ hub install ernie_vilg == 1.0.0
+  $ hub install ernie_vilg == 1.1.0
   ```
