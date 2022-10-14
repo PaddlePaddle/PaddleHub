@@ -131,6 +131,10 @@
 
   初始发布
 
+* 1.1.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install efficientnetb0_small_imagenet==1.0.0
+    $ hub install efficientnetb0_small_imagenet==1.1.0
     ```
