@@ -64,7 +64,7 @@
     import cv2
 
     module = hub.Module(name="swinir_m_real_sr_x2")
-    result = module.artifacts_removal(
+    result = module.real_sr(
         image=cv2.imread('/PATH/TO/IMAGE'),
         visualization=True,
         output_dir='swinir_m_real_sr_x2_output'
@@ -74,7 +74,7 @@
   - ### 3、API
 
     ```python
-    def artifacts_removal(
+    def real_sr(
         image: Union[str, numpy.ndarray],
         visualization: bool = True,
         output_dir: str = "swinir_m_real_sr_x2_output"
