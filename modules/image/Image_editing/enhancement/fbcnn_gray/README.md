@@ -65,7 +65,7 @@
 
     module = hub.Module(name="fbcnn_gray")
     result = module.artifacts_removal(
-        image=cv2.imread('/PATH/TO/IMAGE'),
+        image=cv2.imread('/PATH/TO/IMAGE', cv2.IMREAD_GRAYSCALE),
         quality_factor=None,
         visualization=True,
         output_dir='fbcnn_gray_output'
