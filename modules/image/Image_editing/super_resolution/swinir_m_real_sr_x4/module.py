@@ -116,7 +116,7 @@ class SwinIRMRealSR(nn.Layer):
                                  help="The directory to save output images.")
         args = self.parser.parse_args(argvs)
         self.real_sr(image=args.input_path, visualization=True, output_dir=args.output_dir)
-        return 'Artifacts removal results are saved in %s' % args.output_dir
+        return 'Results are saved in %s' % args.output_dir
 
     @serving
     def serving_method(self, image, **kwargs):
