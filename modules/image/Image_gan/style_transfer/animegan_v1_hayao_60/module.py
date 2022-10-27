@@ -3,8 +3,8 @@ import os
 from paddlehub import Module
 from paddlehub.module.module import moduleinfo, serving
 
-from animegan_v1_hayao_60.model import Model
-from animegan_v1_hayao_60.processor import base64_to_cv2, cv2_to_base64, Processor
+from .model import InferenceModel
+from .processor import base64_to_cv2, cv2_to_base64, Processor
 
 
 @moduleinfo(
@@ -13,16 +13,18 @@ from animegan_v1_hayao_60.processor import base64_to_cv2, cv2_to_base64, Process
     author="jm12138",  # 作者名称
     author_email="jm12138@qq.com",  # 作者邮箱
     summary="animegan_v1_hayao_60",  # 模型介绍
-    version="1.0.2"  # 版本号
+    version="1.1.0"  # 版本号
 )
-class Animegan_V1_Hayao_60(Module):
+class Animegan_V1_Hayao_60:
     # 初始化函数
-    def __init__(self, name=None, use_gpu=False):
+    def __init__(self, use_gpu=False, use_mkldnn=False):
         # 设置模型路径
-        self.model_path = os.path.join(self.directory, "animegan_v1_hayao_60")
+        self.model_path = os.path.join(self.directory, "animegan_v1_hayao_60", "model")
 
         # 加载模型
-        self.model = Model(modelpath=self.model_path, use_gpu=use_gpu, use_mkldnn=False, combined=False)
+        self.model = InferenceModel(modelpath=self.model_path, use_gpu=use_gpu, use_mkldnn=use_mkldnn)
+
+        self.model.eval()
 
     # 关键点检测函数
     def style_transfer(self,
@@ -37,7 +39,10 @@ class Animegan_V1_Hayao_60(Module):
             images=images, paths=paths, batch_size=1, output_dir=output_dir, min_size=min_size, max_size=max_size)
 
         # 模型预测
-        outputs = self.model.predict(processor.input_datas)
+        outputs = []
+        for input_data in processor.input_datas:
+            output = self.model(input_data)
+            outputs.append(output)
 
         # 结果后处理
         results = processor.postprocess(outputs, visualization)
