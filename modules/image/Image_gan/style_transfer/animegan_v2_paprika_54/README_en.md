@@ -142,10 +142,10 @@
 
   First release.
 
-* 1.0.1
+* 1.1.0
 
-  Support paddlehub2.0.
+  Remove Fluid API
 
-* 1.0.2
-
-  Delete batch_size.
+  - ```shell
+    $ hub install animegan_v2_paprika_54==1.1.0
+    ```
