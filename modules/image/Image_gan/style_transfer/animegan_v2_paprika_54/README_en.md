@@ -11,7 +11,7 @@
 |Data indicators|-|
 
 
-## I. Basic Information 
+## I. Basic Information
 
 - ### Application Effect Display
 
