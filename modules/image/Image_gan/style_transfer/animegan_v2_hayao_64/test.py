@@ -25,7 +25,7 @@ class TestHubModule(unittest.TestCase):
         img = cv2.imread('tests/test.jpg')
         img = cv2.resize(img, (0, 0), fx=0.25, fy=0.25)
         cv2.imwrite('tests/test.jpg', img)
-        cls.module = hub.Module(name="animegan_v1_hayao_60")
+        cls.module = hub.Module(name="animegan_v2_hayao_64")
 
     @classmethod
     def tearDownClass(cls) -> None:
