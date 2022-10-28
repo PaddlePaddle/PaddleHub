@@ -1,6 +1,5 @@
 import os
 
-from paddlehub import Module
 from paddlehub.module.module import moduleinfo, serving
 
 from .model import InferenceModel
