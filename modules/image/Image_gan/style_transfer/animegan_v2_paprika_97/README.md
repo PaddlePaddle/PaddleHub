@@ -138,10 +138,10 @@
 
   初始发布
 
-* 1.0.1
+* 1.1.0
 
-  适配paddlehub2.0
+  移除 Fluid API
 
-* 1.0.2
-
-  删除batch_size选项
+  - ```shell
+    $ hub install animegan_v2_paprika_97==1.1.0
+    ```
