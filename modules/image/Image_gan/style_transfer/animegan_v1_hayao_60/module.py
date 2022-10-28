@@ -1,9 +1,11 @@
 import os
 
-from paddlehub.module.module import moduleinfo, serving
-
 from .model import InferenceModel
-from .processor import base64_to_cv2, cv2_to_base64, Processor
+from .processor import base64_to_cv2
+from .processor import cv2_to_base64
+from .processor import Processor
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import serving
 
 
 @moduleinfo(
@@ -34,8 +36,12 @@ class Animegan_V1_Hayao_60:
                        min_size=32,
                        max_size=1024):
         # 加载数据处理器
-        processor = Processor(
-            images=images, paths=paths, batch_size=1, output_dir=output_dir, min_size=min_size, max_size=max_size)
+        processor = Processor(images=images,
+                              paths=paths,
+                              batch_size=1,
+                              output_dir=output_dir,
+                              min_size=min_size,
+                              max_size=max_size)
 
         # 模型预测
         outputs = []

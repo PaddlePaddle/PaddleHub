@@ -1,19 +1,15 @@
 import os
-import numpy as np
 
-from paddle.inference import create_predictor, Config
+import numpy as np
+from paddle.inference import Config
+from paddle.inference import create_predictor
 
 __all__ = ['InferenceModel']
 
 
 class InferenceModel:
     # 初始化函数
-    def __init__(self,
-                 modelpath,
-                 use_gpu=False,
-                 gpu_id=0,
-                 use_mkldnn=False,
-                 cpu_threads=1):
+    def __init__(self, modelpath, use_gpu=False, gpu_id=0, use_mkldnn=False, cpu_threads=1):
         '''
         init the inference model
         modelpath: inference model path
@@ -26,14 +22,10 @@ class InferenceModel:
     # 打印函数
     def __repr__(self):
         '''
-        get the numbers and name of inputs and outputs 
+        get the numbers and name of inputs and outputs
         '''
         return 'input_num: %d\ninput_names: %s\noutput_num: %d\noutput_names: %s' % (
-            self.input_num,
-            str(self.input_names),
-            self.output_num,
-            str(self.output_names)
-        )
+            self.input_num, str(self.input_names), self.output_num, str(self.output_names))
 
     # 类调用函数
     def __call__(self, *input_datas, batch_size=1):
@@ -56,7 +48,8 @@ class InferenceModel:
                 int(os.environ.get('CUDA_VISIBLE_DEVICES'))
             except Exception:
                 print(
-                    '''Error! Unable to use GPU. Please set the environment variables "CUDA_VISIBLE_DEVICES=GPU_id" to use GPU. Now switch to CPU to continue...''')
+                    '''Error! Unable to use GPU. Please set the environment variables "CUDA_VISIBLE_DEVICES=GPU_id" to use GPU. Now switch to CPU to continue...'''
+                )
                 use_gpu = False
 
         if os.path.isdir(modelpath):
@@ -74,8 +67,8 @@ class InferenceModel:
                 # __model__ + others
                 config = Config(modelpath)
             else:
-                raise Exception(
-                    "Error! Can\'t find the model in: %s. Please check your model path." % os.path.abspath(modelpath))
+                raise Exception("Error! Can\'t find the model in: %s. Please check your model path." %
+                                os.path.abspath(modelpath))
         elif os.path.exists(modelpath + ".pdmodel"):
             # *.pdmodel + *.pdiparams
             model = modelpath + ".pdmodel"
@@ -84,8 +77,8 @@ class InferenceModel:
         elif isinstance(modelpath, Config):
             config = modelpath
         else:
-            raise Exception(
-                "Error! Can\'t find the model in: %s. Please check your model path." % os.path.abspath(modelpath))
+            raise Exception("Error! Can\'t find the model in: %s. Please check your model path." %
+                            os.path.abspath(modelpath))
 
         # 设置参数
         if use_gpu:
@@ -120,14 +113,12 @@ class InferenceModel:
         # 获取输入
         self.input_handles = []
         for input_name in self.input_names:
-            self.input_handles.append(
-                self.predictor.get_input_handle(input_name))
+            self.input_handles.append(self.predictor.get_input_handle(input_name))
 
         # 获取输出
         self.output_handles = []
         for output_name in self.output_names:
-            self.output_handles.append(
-                self.predictor.get_output_handle(output_name))
+            self.output_handles.append(self.predictor.get_output_handle(output_name))
 
     # 前向计算函数
     def forward(self, *input_datas, batch_size=1):
@@ -140,8 +131,7 @@ class InferenceModel:
         datas_num = input_datas[0].shape[0]
         split_num = datas_num // batch_size + \
                     1 if datas_num % batch_size != 0 else datas_num // batch_size
-        input_datas = [np.array_split(input_data, split_num)
-                       for input_data in input_datas]
+        input_datas = [np.array_split(input_data, split_num) for input_data in input_datas]
 
         # 遍历输入数据进行预测
         outputs = {}
