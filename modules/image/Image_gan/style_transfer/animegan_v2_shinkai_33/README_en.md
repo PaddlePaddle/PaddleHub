@@ -137,14 +137,10 @@
 
   First release
 
-* 1.0.1
+* 1.1.0
 
-  Adapt to paddlehub2.0
-
-* 1.0.2
-
-  Delete optional parameter batch_size
+  Remove Fluid API
 
   - ```shell
-    $ hub install animegan_v2_shinkai_33==1.0.2
+    $ hub install animegan_v2_shinkai_33==1.1.0
     ```
