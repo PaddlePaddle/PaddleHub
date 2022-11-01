@@ -205,7 +205,7 @@ class ChPPOCRv3:
                        use_gpu=False,
                        output_dir='ocr_result',
                        visualization=False,
-                       box_thresh=0.5,
+                       box_thresh=0.6,
                        text_thresh=0.5,
                        angle_classification_thresh=0.9,
                        det_db_unclip_ratio=1.5):
