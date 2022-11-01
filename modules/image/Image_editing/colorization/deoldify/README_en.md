@@ -58,7 +58,9 @@
       import paddlehub as hub
 
       model = hub.Module(name='deoldify')
-      model.predict('/PATH/TO/IMAGE/OR/VIDEO')
+      model.predict('/PATH/TO/IMAGE')
+
+      # model.predict('/PATH/TO/VIDEO')
       ```
 
   - ### 2、API
@@ -171,6 +173,8 @@
   Adapt to paddlehub2.0
 
 * 1.1.0
+
+  Update code format
 
   ```shell
   $ hub install deoldify == 1.1.0
