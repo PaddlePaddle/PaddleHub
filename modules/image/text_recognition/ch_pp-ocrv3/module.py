@@ -208,7 +208,8 @@ class ChPPOCRv3:
                        box_thresh=0.6,
                        text_thresh=0.5,
                        angle_classification_thresh=0.9,
-                       det_db_unclip_ratio=1.5):
+                       det_db_unclip_ratio=1.5,
+                       det_db_score_mode="fast"):
         """
         Get the chinese texts in the predicted images.
         Args:
@@ -222,6 +223,7 @@ class ChPPOCRv3:
             text_thresh(float): the threshold of the chinese text recognition confidence
             angle_classification_thresh(float): the threshold of the angle classification confidence
             det_db_unclip_ratio(float): unclip ratio for post processing in DB detection.
+            det_db_score_mode(str): method to calc the final det score, one of fast(using box) and slow(using poly).
         Returns:
             res (list): The result of chinese texts and save path of images.
         """
@@ -248,7 +250,8 @@ class ChPPOCRv3:
         detection_results = self.text_detector_module.detect_text(images=predicted_data,
                                                                   use_gpu=self.use_gpu,
                                                                   box_thresh=box_thresh,
-                                                                  det_db_unclip_ratio=det_db_unclip_ratio)
+                                                                  det_db_unclip_ratio=det_db_unclip_ratio,
+                                                                  det_db_score_mode=det_db_score_mode)
 
         boxes = [np.array(item['data']).astype(np.float32) for item in detection_results]
         all_results = []
@@ -439,6 +442,7 @@ class ChPPOCRv3:
                                       use_gpu=args.use_gpu,
                                       output_dir=args.output_dir,
                                       det_db_unclip_ratio=args.det_db_unclip_ratio,
+                                      det_db_score_mode=args.det_db_score_mode,
                                       visualization=args.visualization)
         return results
 
@@ -462,6 +466,11 @@ class ChPPOCRv3:
                                            type=float,
                                            default=1.5,
                                            help="unclip ratio for post processing in DB detection.")
+        self.arg_config_group.add_argument(
+            '--det_db_score_mode',
+            type=str,
+            default="fast",
+            help="method to calc the final det score, one of fast(using box) and slow(using poly).")
 
     def add_module_input_arg(self):
         """

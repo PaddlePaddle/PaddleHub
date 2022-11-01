@@ -87,14 +87,15 @@
 
   - ```python
     def recognize_text(images=[],
-                        paths=[],
-                        use_gpu=False,
-                        output_dir='ocr_result',
-                        visualization=False,
-                        box_thresh=0.6,
-                        text_thresh=0.5,
-                        angle_classification_thresh=0.9,
-                        det_db_unclip_ratio=1.5)
+                       paths=[],
+                       use_gpu=False,
+                       output_dir='ocr_result',
+                       visualization=False,
+                       box_thresh=0.6,
+                       text_thresh=0.5,
+                       angle_classification_thresh=0.9,
+                       det_db_unclip_ratio=1.5,
+                       det_db_score_mode="fast"):
     ```
 
     - 预测API，检测输入图片中的所有中文文本的位置。
@@ -110,6 +111,8 @@
       - visualization (bool): 是否将识别结果保存为图片文件；
       - output\_dir (str): 图片的保存路径，默认设为 ocr\_result；
       - det\_db\_unclip\_ratio: 设置检测框的大小；
+      - det\_db\_score\_mode: 设置检测得分计算方式，“fast” / “slow”
+
     - **返回**
 
       - res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
