@@ -3,8 +3,8 @@ import base64
 
 import cv2
 import numpy as np
+from paddle.inference import Config, create_predictor, PrecisionType
 from PIL import Image, ImageDraw
-import paddle.fluid as fluid
 
 
 def create_inputs(im, im_info):
@@ -19,11 +19,14 @@ def create_inputs(im, im_info):
     inputs['image'] = im
     origin_shape = list(im_info['origin_shape'])
     resize_shape = list(im_info['resize_shape'])
-    pad_shape = list(im_info['pad_shape']) if im_info['pad_shape'] is not None else list(im_info['resize_shape'])
+    pad_shape = list(im_info['pad_shape']) if im_info[
+                                                  'pad_shape'] is not None else list(im_info['resize_shape'])
     scale_x, scale_y = im_info['scale']
     scale = scale_x
     im_info = np.array([resize_shape + [scale]]).astype('float32')
     inputs['im_info'] = im_info
+    inputs['scale_factor'] = np.array([scale_x, scale_x]).astype('float32').reshape(-1, 2)
+    inputs['im_shape'] = np.array(resize_shape).astype('float32').reshape(-1, 2)
     return inputs
 
 
@@ -42,28 +45,38 @@ def visualize_box_mask(im, results, labels=None, mask_resolution=14, threshold=0
         im (PIL.Image.Image): visualized image
     """
     if not labels:
-        labels = [
-            'background', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat',
-            'traffic light', 'fire', 'hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse',
-            'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie',
-            'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove',
-            'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
-            'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair',
-            'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard',
-            'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
-            'teddy bear', 'hair drier', 'toothbrush'
-        ]
+        labels = ['background', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
+                  'train', 'truck', 'boat', 'traffic light', 'fire', 'hydrant', 'stop sign', 'parking meter',
+                  'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe',
+                  'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
+                  'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle',
+                  'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange',
+                  'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed',
+                  'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave',
+                  'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
+                  'hair drier', 'toothbrush']
     if isinstance(im, str):
         im = Image.open(im).convert('RGB')
     else:
         im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
         im = Image.fromarray(im)
     if 'masks' in results and 'boxes' in results:
-        im = draw_mask(im, results['boxes'], results['masks'], labels, resolution=mask_resolution)
+        im = draw_mask(
+            im,
+            results['boxes'],
+            results['masks'],
+            labels,
+            resolution=mask_resolution)
     if 'boxes' in results:
         im = draw_box(im, results['boxes'], labels)
     if 'segm' in results:
-        im = draw_segm(im, results['segm'], results['label'], results['score'], labels, threshold=threshold)
+        im = draw_segm(
+            im,
+            results['segm'],
+            results['label'],
+            results['score'],
+            labels,
+            threshold=threshold)
     return im
 
 
@@ -152,7 +165,8 @@ def draw_mask(im, np_boxes, np_masks, labels, resolution=14, threshold=0.5):
         y0 = min(max(ymin, 0), im_h)
         y1 = min(max(ymax + 1, 0), im_h)
         im_mask = np.zeros((im_h, im_w), dtype=np.uint8)
-        im_mask[y0:y1, x0:x1] = resized_mask[(y0 - ymin):(y1 - ymin), (x0 - xmin):(x1 - xmin)]
+        im_mask[y0:y1, x0:x1] = resized_mask[(y0 - ymin):(y1 - ymin), (
+                                                                              x0 - xmin):(x1 - xmin)]
         if clsid not in clsid2color:
             clsid2color[clsid] = color_list[clsid]
         color_mask = clsid2color[clsid]
@@ -190,19 +204,28 @@ def draw_box(im, np_boxes, labels):
         color = tuple(clsid2color[clsid])
 
         # draw bbox
-        draw.line([(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin), (xmin, ymin)],
-                  width=draw_thickness,
-                  fill=color)
+        draw.line(
+            [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin),
+             (xmin, ymin)],
+            width=draw_thickness,
+            fill=color)
 
         # draw label
         text = "{} {:.4f}".format(labels[clsid], score)
         tw, th = draw.textsize(text)
-        draw.rectangle([(xmin + 1, ymin - th), (xmin + tw + 1, ymin)], fill=color)
+        draw.rectangle(
+            [(xmin + 1, ymin - th), (xmin + tw + 1, ymin)], fill=color)
         draw.text((xmin + 1, ymin - th), text, fill=(255, 255, 255))
     return im
 
 
-def draw_segm(im, np_segms, np_label, np_score, labels, threshold=0.5, alpha=0.7):
+def draw_segm(im,
+              np_segms,
+              np_label,
+              np_score,
+              labels,
+              threshold=0.5,
+              alpha=0.7):
     """
     Draw segmentation on image.
     """
@@ -231,17 +254,28 @@ def draw_segm(im, np_segms, np_label, np_score, labels, threshold=0.5, alpha=0.7
         sum_y = np.sum(mask, axis=1)
         y = np.where(sum_y > 0.5)[0]
         x0, x1, y0, y1 = x[0], x[-1], y[0], y[-1]
-        cv2.rectangle(im, (x0, y0), (x1, y1), tuple(color_mask.astype('int32').tolist()), 1)
+        cv2.rectangle(im, (x0, y0), (x1, y1),
+                      tuple(color_mask.astype('int32').tolist()), 1)
         bbox_text = '%s %.2f' % (labels[clsid], score)
         t_size = cv2.getTextSize(bbox_text, 0, 0.3, thickness=1)[0]
-        cv2.rectangle(im, (x0, y0), (x0 + t_size[0], y0 - t_size[1] - 3), tuple(color_mask.astype('int32').tolist()),
-                      -1)
-        cv2.putText(im, bbox_text, (x0, y0 - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 0), 1, lineType=cv2.LINE_AA)
-
+        cv2.rectangle(im, (x0, y0), (x0 + t_size[0], y0 - t_size[1] - 3),
+                      tuple(color_mask.astype('int32').tolist()), -1)
+        cv2.putText(
+            im,
+            bbox_text, (x0, y0 - 2),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.3, (0, 0, 0),
+            1,
+            lineType=cv2.LINE_AA)
+    
     return Image.fromarray(im.astype('uint8'))
 
 
-def load_predictor(model_dir, run_mode='fluid', batch_size=1, use_gpu=False, min_subgraph_size=3):
+def load_predictor(model_dir,
+                   run_mode='paddle',
+                   batch_size=1,
+                   use_gpu=False,
+                   min_subgraph_size=3):
     """set AnalysisConfig, generate AnalysisPredictor
     Args:
         model_dir (str): root path of __model__ and __params__
@@ -251,17 +285,19 @@ def load_predictor(model_dir, run_mode='fluid', batch_size=1, use_gpu=False, min
     Raises:
         ValueError: predict by TensorRT need use_gpu == True.
     """
-    if not use_gpu and not run_mode == 'fluid':
-        raise ValueError("Predict by TensorRT mode: {}, expect use_gpu==True, but use_gpu == {}".format(
-            run_mode, use_gpu))
+    if not use_gpu and not run_mode == 'paddle':
+        raise ValueError(
+            "Predict by TensorRT mode: {}, expect use_gpu==True, but use_gpu == {}"
+                .format(run_mode, use_gpu))
     if run_mode == 'trt_int8':
-        raise ValueError("TensorRT int8 mode is not supported now, " "please use trt_fp32 or trt_fp16 instead.")
+        raise ValueError("TensorRT int8 mode is not supported now, "
+                         "please use trt_fp32 or trt_fp16 instead.")
     precision_map = {
-        'trt_int8': fluid.core.AnalysisConfig.Precision.Int8,
-        'trt_fp32': fluid.core.AnalysisConfig.Precision.Float32,
-        'trt_fp16': fluid.core.AnalysisConfig.Precision.Half
+        'trt_int8': PrecisionType.Int8,
+        'trt_fp32': PrecisionType.Float32,
+        'trt_fp16': PrecisionType.Half
     }
-    config = fluid.core.AnalysisConfig(os.path.join(model_dir, '__model__'), os.path.join(model_dir, '__params__'))
+    config = Config(model_dir+'.pdmodel', model_dir+'.pdiparams')
     if use_gpu:
         # initial GPU memory(M), device ID
         config.enable_use_gpu(100, 0)
@@ -285,7 +321,7 @@ def load_predictor(model_dir, run_mode='fluid', batch_size=1, use_gpu=False, min
     config.enable_memory_optim()
     # disable feed, fetch OP, needed by zero_copy_run
     config.switch_use_feed_fetch_ops(False)
-    predictor = fluid.core.create_paddle_predictor(config)
+    predictor = create_predictor(config)
     return predictor
 
 

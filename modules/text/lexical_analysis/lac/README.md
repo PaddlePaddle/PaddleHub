@@ -283,10 +283,10 @@
 
   升级自定义词典功能，支持增加不属于lac默认提供的词性
 
-* 2.2.1
+* 2.3.0
 
   移除 fluid api
 
   - ```shell
-    $ hub install lac==2.2.1
+    $ hub install lac==2.3.0
     ```

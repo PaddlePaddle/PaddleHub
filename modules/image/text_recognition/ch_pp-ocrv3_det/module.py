@@ -168,8 +168,9 @@ class ChPPOCRv3Det(hub.Module):
                     use_gpu=False,
                     output_dir='detection_result',
                     visualization=False,
-                    box_thresh=0.5,
-                    det_db_unclip_ratio=1.5):
+                    box_thresh=0.6,
+                    det_db_unclip_ratio=1.5,
+                    det_db_score_mode="fast"):
         """
         Get the text box in the predicted images.
         Args:
@@ -180,6 +181,7 @@ class ChPPOCRv3Det(hub.Module):
             visualization (bool): Whether to save image or not.
             box_thresh(float): the threshold of the detected text box's confidence
             det_db_unclip_ratio(float): unclip ratio for post processing in DB detection.
+            det_db_score_mode(str): method to calc the final det score, one of fast(using box) and slow(using poly).
         Returns:
             res (list): The result of text detection box and save path of images.
         """
@@ -206,12 +208,14 @@ class ChPPOCRv3Det(hub.Module):
         assert predicted_data != [], "There is not any image to be predicted. Please check the input data."
 
         preprocessor = DBProcessTest(params={'max_side_len': 960})
-        postprocessor = DBPostProcess(params={
-            'thresh': 0.3,
-            'box_thresh': 0.6,
-            'max_candidates': 1000,
-            'unclip_ratio': det_db_unclip_ratio
-        })
+        postprocessor = DBPostProcess(
+            params={
+                'thresh': 0.3,
+                'box_thresh': 0.6,
+                'max_candidates': 1000,
+                'unclip_ratio': det_db_unclip_ratio,
+                'det_db_score_mode': det_db_score_mode,
+            })
 
         all_imgs = []
         all_ratios = []
@@ -288,6 +292,7 @@ class ChPPOCRv3Det(hub.Module):
                                    use_gpu=args.use_gpu,
                                    output_dir=args.output_dir,
                                    det_db_unclip_ratio=args.det_db_unclip_ratio,
+                                   det_db_score_mode=args.det_db_score_mode,
                                    visualization=args.visualization)
         return results
 
@@ -311,6 +316,11 @@ class ChPPOCRv3Det(hub.Module):
                                            type=float,
                                            default=1.5,
                                            help="unclip ratio for post processing in DB detection.")
+        self.arg_config_group.add_argument(
+            '--det_db_score_mode',
+            type=str,
+            default="str",
+            help="method to calc the final det score, one of fast(using box) and slow(using poly).")
 
     def add_module_input_arg(self):
         """

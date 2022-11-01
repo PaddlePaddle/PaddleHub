@@ -130,6 +130,11 @@
 * 1.0.0
 
   First release
+
+* 1.1.0
+
+  Remove Fluid API
+
   - ```shell
-    $ hub install mobilenet_v2_animals==1.0.0
+    $ hub install mobilenet_v2_animals==1.1.0
     ```

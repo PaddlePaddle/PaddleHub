@@ -5,12 +5,10 @@ from __future__ import division
 
 import os
 import random
-from collections import OrderedDict
 
 import cv2
 import numpy as np
 from PIL import Image
-from paddle import fluid
 
 __all__ = ['reader']
 

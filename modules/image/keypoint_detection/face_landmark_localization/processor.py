@@ -6,7 +6,6 @@ from __future__ import print_function
 import base64
 import os
 import time
-from collections import OrderedDict
 
 import cv2
 import numpy as np
