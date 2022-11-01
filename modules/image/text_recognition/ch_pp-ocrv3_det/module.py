@@ -161,7 +161,7 @@ class ChPPOCRv3Det:
                     use_gpu=False,
                     output_dir='detection_result',
                     visualization=False,
-                    box_thresh=0.5,
+                    box_thresh=0.6,
                     det_db_unclip_ratio=1.5,
                     det_db_score_mode="fast"):
         """

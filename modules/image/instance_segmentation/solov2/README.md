@@ -78,7 +78,7 @@
       - res (dict): 识别结果，关键字有 'segm', 'label', 'score'对应的取值为：
         - segm (np.ndarray): 实例分割结果,取值为0或1。0表示背景，1为实例；
         - label (list): 实例分割结果类别id；
-        - score (list):实例分割结果类别得分；s
+        - score (list):实例分割结果类别得分；
 
 
 ## 四、服务部署
@@ -147,8 +147,10 @@
 
   初始发布
 
-  * ```shell
-    $ hub install hand_pose_localization==1.0.0
-    ```
+* 1.1.0
 
-    
+  适配 PaddlePaddle 2.2.0+
+
+  * ```shell
+    $ hub install hand_pose_localization==1.1.0
+    ```

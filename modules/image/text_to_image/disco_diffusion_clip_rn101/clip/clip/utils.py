@@ -62,7 +62,7 @@ def tokenize(texts: Union[str, List[str]], context_length: int = 77):
     for i, tokens in enumerate(all_tokens):
         if len(tokens) > context_length:
             raise RuntimeError(f"Input {texts[i]} is too long for context length {context_length}")
-        result[i, :len(tokens)] = paddle.Tensor(np.array(tokens))
+        result[i, :len(tokens)] = paddle.to_tensor(np.array(tokens), dtype='int64')
 
     return result
 

@@ -128,6 +128,11 @@
 * 1.0.0
 
   First release
+
+* 1.1.0
+
+  Remove Fluid API
+
   - ```shell
-    $ hub install stgan_bald==1.0.0
+    $ hub install stgan_bald==1.1.0
     ```
