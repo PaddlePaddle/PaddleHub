@@ -105,7 +105,7 @@
       - visualization (bool): 是否将识别结果保存为图片文件；
       - output\_dir (str): 图片的保存路径，默认设为 detection\_result；
       - det\_db\_unclip\_ratio: 设置检测框的大小；
-      - det\_db\_score\_mode: 设置检测得分计算方式
+      - det\_db\_score\_mode: 设置检测得分计算方式，“fast” / “slow”
 
     - **返回**
 

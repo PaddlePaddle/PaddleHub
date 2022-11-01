@@ -312,7 +312,7 @@ class ChPPOCRv3Det:
         self.arg_config_group.add_argument(
             '--det_db_score_mode',
             type=str,
-            default="str",
+            default="fast",
             help="method to calc the final det score, one of fast(using box) and slow(using poly).")
 
     def add_module_input_arg(self):
