@@ -204,7 +204,7 @@ class ChPPOCRv3Det:
         postprocessor = DBPostProcess(
             params={
                 'thresh': 0.3,
-                'box_thresh': 0.6,
+                'box_thresh': box_thresh,
                 'max_candidates': 1000,
                 'unclip_ratio': det_db_unclip_ratio,
                 'det_db_score_mode': det_db_score_mode,
