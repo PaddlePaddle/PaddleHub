@@ -3,7 +3,6 @@ import os
 import time
 from collections import OrderedDict
 
-import cv2
 import numpy as np
 from PIL import Image
 
@@ -63,7 +62,8 @@ def reader(images=None, paths=None):
     if paths:
         for im_path in paths:
             each = OrderedDict()
-            assert os.path.isfile(im_path), "The {} isn't a valid file path.".format(im_path)
+            assert os.path.isfile(
+                im_path), "The {} isn't a valid file path.".format(im_path)
             each['org_im_path'] = im_path
             each['org_im'] = Image.open(im_path)
             each['org_im_width'], each['org_im_height'] = each['org_im'].size
@@ -73,7 +73,8 @@ def reader(images=None, paths=None):
         for im in images:
             each = OrderedDict()
             each['org_im'] = Image.fromarray(im[:, :, ::-1])
-            each['org_im_path'] = 'ndarray_time={}'.format(round(time.time(), 6) * 1e6)
+            each['org_im_path'] = 'ndarray_time={}'.format(
+                round(time.time(), 6) * 1e6)
             each['org_im_width'], each['org_im_height'] = each['org_im'].size
             component.append(each)
 

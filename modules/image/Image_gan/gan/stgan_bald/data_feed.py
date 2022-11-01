@@ -3,10 +3,8 @@ import os
 import time
 from collections import OrderedDict
 
-from PIL import Image, ImageOps
-import numpy as np
-from PIL import Image
 import cv2
+import numpy as np
 
 __all__ = ['reader']
 
@@ -26,27 +24,33 @@ def reader(images=None, paths=None, org_labels=None, target_labels=None):
     if paths:
         for i, im_path in enumerate(paths):
             each = OrderedDict()
-            assert os.path.isfile(im_path), "The {} isn't a valid file path.".format(im_path)
+            assert os.path.isfile(
+                im_path), "The {} isn't a valid file path.".format(im_path)
             im = cv2.imread(im_path)
             each['org_im'] = im
             each['org_im_path'] = im_path
             each['org_label'] = np.array(org_labels[i]).astype('float32')
             if not target_labels:
-                each['target_label'] = np.array(org_labels[i]).astype('float32')
+                each['target_label'] = np.array(
+                    org_labels[i]).astype('float32')
             else:
-                each['target_label'] = np.array(target_labels[i]).astype('float32')
+                each['target_label'] = np.array(
+                    target_labels[i]).astype('float32')
             component.append(each)
     if images is not None:
         assert type(images) is list, "images should be a list."
         for i, im in enumerate(images):
             each = OrderedDict()
             each['org_im'] = im
-            each['org_im_path'] = 'ndarray_time={}'.format(round(time.time(), 6) * 1e6)
+            each['org_im_path'] = 'ndarray_time={}'.format(
+                round(time.time(), 6) * 1e6)
             each['org_label'] = np.array(org_labels[i]).astype('float32')
             if not target_labels:
-                each['target_label'] = np.array(org_labels[i]).astype('float32')
+                each['target_label'] = np.array(
+                    org_labels[i]).astype('float32')
             else:
-                each['target_label'] = np.array(target_labels[i]).astype('float32')
+                each['target_label'] = np.array(
+                    target_labels[i]).astype('float32')
             component.append(each)
 
     for element in component:

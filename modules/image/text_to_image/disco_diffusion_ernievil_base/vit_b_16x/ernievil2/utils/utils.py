@@ -49,7 +49,7 @@ def tokenize(texts: Union[str, List[str]], context_length: int = 64):
 
     for i, tokens in enumerate(all_tokens):
         assert len(tokens) <= context_length
-        result[i, :len(tokens)] = paddle.to_tensor(tokens)
+        result[i, :len(tokens)] = paddle.to_tensor(tokens, dtype='int64')
 
     return result
 

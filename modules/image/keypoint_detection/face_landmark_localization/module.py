@@ -5,15 +5,14 @@ from __future__ import division
 import argparse
 import ast
 import os
-import time
-from collections import OrderedDict
 
-import cv2
 import numpy as np
 import paddle
-from face_landmark_localization.data_feed import reader
-from face_landmark_localization.processor import base64_to_cv2
-from face_landmark_localization.processor import postprocess
+import paddle.jit
+import paddle.static
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import postprocess
 from paddle.inference import Config
 from paddle.inference import create_predictor
 
@@ -30,15 +29,14 @@ from paddlehub.module.module import serving
     author_email="paddle-dev@baidu.com",
     summary=
     "Face_Landmark_Localization can be used to locate face landmark. This Module is trained through the MPII Human Pose dataset.",
-    version="1.0.3")
-class FaceLandmarkLocalization(hub.Module):
-
-    def _initialize(self, face_detector_module=None):
+    version="1.1.0")
+class FaceLandmarkLocalization:
+    def __init__(self, face_detector_module=None):
         """
         Args:
             face_detector_module (class): module to detect face.
         """
-        self.default_pretrained_model_path = os.path.join(self.directory, "face_landmark_localization")
+        self.default_pretrained_model_path = os.path.join(self.directory, "face_landmark_localization", "model")
         if face_detector_module is None:
             self.face_detector = hub.Module(name="ultra_light_fast_generic_face_detector_1mb_640")
         else:
@@ -49,7 +47,9 @@ class FaceLandmarkLocalization(hub.Module):
         """
         predictor config setting
         """
-        cpu_config = Config(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_predictor(cpu_config)
@@ -61,7 +61,7 @@ class FaceLandmarkLocalization(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
@@ -77,30 +77,6 @@ class FaceLandmarkLocalization(hub.Module):
 
     def get_face_detector_module(self):
         return self.face_detector
-
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
-
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-        face_landmark_dir = os.path.join(dirname, "face_landmark")
-        detector_dir = os.path.join(dirname, "detector")
-
-        paddle.static.save_inference_model(dirname=face_landmark_dir,
-                                           main_program=program,
-                                           executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
-        self.face_detector.save_inference_model(dirname=detector_dir,
-                                                model_filename=model_filename,
-                                                params_filename=params_filename,
-                                                combined=combined)
 
     def keypoint_detection(self,
                            images=None,

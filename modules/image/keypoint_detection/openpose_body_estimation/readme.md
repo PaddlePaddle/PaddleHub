@@ -153,8 +153,10 @@
 * 1.0.0
 
   初始发布
-  
+
+* 1.1.0
+
   * ```shell
-    $ hub install openpose_body_estimation==1.0.0
+    $ hub install openpose_body_estimation==1.1.0
     ```
 

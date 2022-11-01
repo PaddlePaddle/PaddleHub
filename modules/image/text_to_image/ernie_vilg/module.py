@@ -21,7 +21,7 @@ from paddlehub.module.module import serving
 
 
 @moduleinfo(name="ernie_vilg",
-            version="1.0.0",
+            version="1.1.0",
             type="image/text_to_image",
             summary="",
             author="baidu-nlp",
@@ -64,7 +64,8 @@ class ErnieVilG:
 
     def generate_image(self,
                        text_prompts,
-                       style: Optional[str] = "油画",
+                       style: Optional[str] = "探索无限",
+                       resolution: Optional[str] = "1024*1024",
                        topk: Optional[int] = 6,
                        visualization: Optional[bool] = True,
                        output_dir: Optional[str] = 'ernievilg_output'):
@@ -72,7 +73,9 @@ class ErnieVilG:
         Create image by text prompts using ErnieVilG model.
 
         :param text_prompts: Phrase, sentence, or string of words and phrases describing what the image should look like.
-        :param style: Image stype, currently supported 油画、水彩、粉笔画、卡通、儿童画、蜡笔画、探索无限。
+        :param style: Image stype, currently supported 古风、油画、水彩、卡通、二次元、浮世绘、蒸汽波艺术、
+        low poly、像素风格、概念艺术、未来主义、赛博朋克、写实风格、洛丽塔风格、巴洛克风格、超现实主义、探索无限。
+        :param resolution: Resolution of images, currently supported "1024*1024", "1024*1536", "1536*1024".
         :param topk: Top k images to save.
         :param visualization: Whether to save images or not.
         :output_dir: Output directory
@@ -91,7 +94,8 @@ class ErnieVilG:
                                 data={
                                     'access_token': token,
                                     "text": text_prompt,
-                                    "style": style
+                                    "style": style,
+                                    "resolution": resolution
                                 })
             res = res.json()
             if res['code'] == 4001:
@@ -113,7 +117,8 @@ class ErnieVilG:
                                     data={
                                         'access_token': token,
                                         "text": text_prompt,
-                                        "style": style
+                                        "style": style,
+                                        "resolution": resolution
                                     })
                 res = res.json()
                 if res['code'] != 0:
@@ -128,11 +133,31 @@ class ErnieVilG:
         start_time = time.time()
         process_bar = tqdm(total=100, unit='%')
         results = {}
-        first_iter = True
+        total_time = 60 * len(taskids)
         while True:
+            end_time = time.time()
+            duration = end_time - start_time
+            progress_rate = int((duration) / total_time * 100)
+            if not taskids:
+                progress_rate = 100
+            if progress_rate > process_bar.n:
+                if progress_rate >= 100:
+                    if not taskids:
+                        increase_rate = 100 - process_bar.n
+                    else:
+                        increase_rate = 0
+                else:
+                    increase_rate = progress_rate - process_bar.n
+            else:
+                increase_rate = 0
+            process_bar.update(increase_rate)
+            if duration < 30:
+                time.sleep(5)
+                continue
+            else:
+                time.sleep(6)
             if not taskids:
                 break
-            total_time = 0
             has_done = []
             for taskid in taskids:
                 res = requests.post(get_url,
@@ -177,17 +202,6 @@ class ErnieVilG:
                 else:
                     print(res['msg'])
                     raise RuntimeError(res['msg'])
-                total_time = int(re.match('[0-9]+', str(res['data']['waiting'])).group(0)) * 60
-            end_time = time.time()
-            progress_rate = int(((end_time - start_time) / total_time * 100)) if total_time != 0 else 100
-            if progress_rate > process_bar.n:
-                increase_rate = progress_rate - process_bar.n
-                if progress_rate >= 100:
-                    increase_rate = 100 - process_bar.n
-            else:
-                increase_rate = 0
-            process_bar.update(increase_rate)
-            time.sleep(5)
             for taskid in has_done:
                 taskids.remove(taskid)
         print('Saving Images...')
@@ -228,6 +242,7 @@ class ErnieVilG:
             self.token = self._apply_token(self.ak, self.sk)
         results = self.generate_image(text_prompts=args.text_prompts,
                                       style=args.style,
+                                      resolution=args.resolution,
                                       topk=args.topk,
                                       visualization=args.visualization,
                                       output_dir=args.output_dir)
@@ -254,9 +269,17 @@ class ErnieVilG:
         self.arg_input_group.add_argument('--text_prompts', type=str)
         self.arg_input_group.add_argument('--style',
                                           type=str,
-                                          default='油画',
-                                          choices=['油画', '水彩', '粉笔画', '卡通', '儿童画', '蜡笔画', '探索无限'],
+                                          default='探索无限',
+                                          choices=[
+                                              '古风', '油画', '水彩', '卡通', '二次元', '浮世绘', '蒸汽波艺术', 'low poly', '像素风格', '概念艺术',
+                                              '未来主义', '赛博朋克', '写实风格', '洛丽塔风格', '巴洛克风格', '超现实主义', '探索无限'
+                                          ],
                                           help="绘画风格")
+        self.arg_input_group.add_argument('--resolution',
+                                          type=str,
+                                          default='1024*1024',
+                                          choices=['1024*1024', '1024*1536', '1536*1024'],
+                                          help="图像分辨率")
         self.arg_input_group.add_argument('--topk', type=int, default=6, help="选取保存前多少张图，最多10张")
         self.arg_input_group.add_argument('--ak', type=str, default=None, help="申请文心api使用token的ak")
         self.arg_input_group.add_argument('--sk', type=str, default=None, help="申请文心api使用token的sk")
