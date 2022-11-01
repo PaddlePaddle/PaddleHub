@@ -12,22 +12,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import contextlib
 import inspect
 import os
 from functools import partial
-from typing import Any, Callable, Generator, Generic, Iterator, List, Union
+from typing import Any
+from typing import Callable
+from typing import Generator
+from typing import Generic
+from typing import Iterator
+from typing import List
+from typing import Union
 
-import paddle
 import numpy as np
+import paddle
+from paddle.framework import core
 from visualdl import LogWriter
 
 from paddlehub.compat import paddle_utils
+from paddlehub.compat.task.checkpoint import load_checkpoint
 from paddlehub.compat.task.config import RunConfig
 from paddlehub.compat.task.hook import TaskHooks
-from paddlehub.compat.task.task_utils import RunEnv, RunState
-from paddlehub.compat.task.checkpoint import load_checkpoint
+from paddlehub.compat.task.task_utils import RunEnv
+from paddlehub.compat.task.task_utils import RunState
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import generate_tempdir
 
@@ -66,8 +73,8 @@ class BaseTask(object):
         else:
             self._base_main_program = paddle_utils.clone_program(main_program, for_test=False)
         if startup_program is None:
-            self._base_startup_program = paddle_utils.clone_program(
-                paddle.static.default_startup_program(), for_test=False)
+            self._base_startup_program = paddle_utils.clone_program(paddle.static.default_startup_program(),
+                                                                    for_test=False)
         else:
             self._base_startup_program = paddle_utils.clone_program(startup_program, for_test=False)
         self.is_checkpoint_loaded = False
@@ -168,7 +175,7 @@ class BaseTask(object):
 
         self.env.startup_program = paddle.static.Program()
         with paddle.static.program_guard(self.env.main_program, self._base_startup_program):
-            with paddle.fluid.unique_name.guard(self.env.UNG):
+            with paddle.utils.unique_name.guard(self.env.UNG):
                 self.env.outputs = self._build_net()
                 if self.is_train_phase or self.is_test_phase:
                     self.env.labels = self._add_label()
@@ -181,11 +188,12 @@ class BaseTask(object):
 
         if self.is_train_phase:
             with paddle.static.program_guard(self.env.main_program, self._base_startup_program):
-                with paddle.fluid.unique_name.guard(self.env.UNG):
+                with paddle.utils.unique_name.guard(self.env.UNG):
                     if self._compatible_mode:
                         # This branch is compatible code for usage deprecated in paddlehub v1.8.
-                        self._base_data_reader.data_generator(
-                            batch_size=self.config.batch_size, phase='train', shuffle=True)
+                        self._base_data_reader.data_generator(batch_size=self.config.batch_size,
+                                                              phase='train',
+                                                              shuffle=True)
                         num_train_examples = self._base_data_reader.num_examples['train']
                         try:
                             # nlp_reader
@@ -300,7 +308,9 @@ class BaseTask(object):
 
     @property
     def generator(self) -> Generator:
+
         def data_generator(records):
+
             def wrapper():
                 for record in records:
                     values = []
@@ -311,8 +321,10 @@ class BaseTask(object):
             return wrapper
 
         if self._compatible_mode:
-            self.env.generator = self._base_data_reader.data_generator(
-                batch_size=self.config.batch_size, phase=self.phase, data=self._predict_data, return_list=True)
+            self.env.generator = self._base_data_reader.data_generator(batch_size=self.config.batch_size,
+                                                                       phase=self.phase,
+                                                                       data=self._predict_data,
+                                                                       return_list=True)
         else:
             if self.is_predict_phase:
                 records = self._predict_data
@@ -360,7 +372,7 @@ class BaseTask(object):
         return self.env.metrics
 
     @property
-    def unique_name_generator(self) -> paddle.fluid.unique_name.UniqueNameGenerator:
+    def unique_name_generator(self):
         return self.env.UNG
 
     @property
@@ -504,16 +516,16 @@ class BaseTask(object):
         '''
         eval_scores, eval_loss, run_speed = self._calculate_metrics(run_states)
         if 'train' in self._envs:
-            self.vdl_writer.add_scalar(
-                tag='Loss_{}'.format(self.phase), value=eval_loss, step=self._envs['train'].current_step)
+            self.vdl_writer.add_scalar(tag='Loss_{}'.format(self.phase),
+                                       value=eval_loss,
+                                       step=self._envs['train'].current_step)
 
         log_scores = ''
         for metric in eval_scores:
             if 'train' in self._envs:
-                self.vdl_writer.add_scalar(
-                    tag='{}_{}'.format(metric, self.phase),
-                    value=eval_scores[metric],
-                    step=self._envs['train'].current_step)
+                self.vdl_writer.add_scalar(tag='{}_{}'.format(metric, self.phase),
+                                           value=eval_scores[metric],
+                                           step=self._envs['train'].current_step)
 
             log_scores += '{}={:.5f} '.format(metric, eval_scores[metric])
         logger.eval('[{} dataset evaluation result] loss={:.5f} {}[step/sec: {:.2f}]'.format(
@@ -540,12 +552,14 @@ class BaseTask(object):
             run_states (object): the results in train phase
         '''
         scores, avg_loss, run_speed = self._calculate_metrics(run_states)
-        self.vdl_writer.add_scalar(
-            tag='Loss_{}'.format(self.phase), value=avg_loss, step=self._envs['train'].current_step)
+        self.vdl_writer.add_scalar(tag='Loss_{}'.format(self.phase),
+                                   value=avg_loss,
+                                   step=self._envs['train'].current_step)
         log_scores = ''
         for metric in scores:
-            self.vdl_writer.add_scalar(
-                tag='{}_{}'.format(metric, self.phase), value=scores[metric], step=self._envs['train'].current_step)
+            self.vdl_writer.add_scalar(tag='{}_{}'.format(metric, self.phase),
+                                       value=scores[metric],
+                                       step=self._envs['train'].current_step)
             log_scores += '{}={:.5f} '.format(metric, scores[metric])
         logger.train('step {} / {}: loss={:.5f} {}[step/sec: {:.2f}]'.format(self.current_step, self.max_train_steps,
                                                                              avg_loss, log_scores, run_speed))
@@ -569,7 +583,7 @@ class BaseTask(object):
         raise NotImplementedError
 
     def _add_metrics(self):
-        # Some metrics like acc, auc can be calculated by fluid.layers
+        # Some metrics like acc, auc
         # The others can be calculated in _calculate_metrics function
         raise NotImplementedError
 
@@ -590,6 +604,7 @@ class BaseTask(object):
         return is_load_successful
 
     def load_parameters(self, dirname):
+
         def if_exist(var):
             path = os.path.join(dirname, var.name)
             return os.path.exists(path)
@@ -598,14 +613,13 @@ class BaseTask(object):
 
     def save_inference_model(self, dirname: str, model_filename: str = None, params_filename: str = None):
         with self.phase_guard('predict'):
-            paddle.static.save_inference_model(
-                dirname=dirname,
-                executor=self.exe,
-                main_program=self.main_program,
-                feeded_var_names=self.feed_list,
-                target_vars=self.fetch_var_list,
-                model_filename=model_filename,
-                params_filename=params_filename)
+            paddle.static.save_inference_model(dirname=dirname,
+                                               executor=self.exe,
+                                               main_program=self.main_program,
+                                               feeded_var_names=self.feed_list,
+                                               target_vars=self.fetch_var_list,
+                                               model_filename=model_filename,
+                                               params_filename=params_filename)
 
     def finetune_and_eval(self) -> List[RunState]:
         return self.finetune(do_eval=True)
@@ -673,7 +687,7 @@ class BaseTask(object):
             self._eval_end_event(run_states)
             return run_states
 
-    def _create_predictor(self) -> paddle.fluid.core.PaddlePredictor:
+    def _create_predictor(self) -> core.PaddlePredictor:
         '''
         create high-performance predictor for predict.
         Returns:
@@ -681,7 +695,7 @@ class BaseTask(object):
         '''
         with generate_tempdir() as _dir:
             self.save_inference_model(dirname=_dir)
-            predictor_config = paddle.fluid.core.AnalysisConfig(_dir)
+            predictor_config = core.AnalysisConfig(_dir)
             predictor_config.disable_glog_info()
 
             if self.config.use_cuda:
@@ -690,7 +704,7 @@ class BaseTask(object):
             else:
                 predictor_config.disable_gpu()
             predictor_config.enable_memory_optim()
-            return paddle.fluid.core.create_paddle_predictor(predictor_config)
+            return core.create_paddle_predictor(predictor_config)
 
     def _run_with_predictor(self) -> List[RunState]:
         '''
@@ -723,7 +737,7 @@ class BaseTask(object):
             tensor_batch = [[] for i in range(len(self.feed_list))]
             for i in range(len(processed_batch)):
                 processed_batch[i] = np.array(processed_batch[i]).reshape(feed_var_shape[i]).astype(feed_var_type[i])
-                tensor_batch[i] = paddle.fluid.core.PaddleTensor(processed_batch[i])
+                tensor_batch[i] = core.PaddleTensor(processed_batch[i])
 
             fetch_result = self._predictor.run(tensor_batch)
             for index, result in enumerate(fetch_result):
@@ -737,12 +751,12 @@ class BaseTask(object):
         return global_run_states
 
     def predict(
-            self,
-            data: List[Any] = None,
-            label_list: List[Any] = None,
-            load_best_model: bool = True,
-            return_result: bool = True,
-            accelerate_mode: bool = True,
+        self,
+        data: List[Any] = None,
+        label_list: List[Any] = None,
+        load_best_model: bool = True,
+        return_result: bool = True,
+        accelerate_mode: bool = True,
     ) -> List[RunState]:
         '''
         make prediction for the input data.
@@ -802,14 +816,20 @@ class BaseTask(object):
             RunState: the running result of specific phase
         '''
         with paddle.static.program_guard(self.main_program, self.startup_program):
-            data_loader = paddle.io.DataLoader.from_generator(
-                feed_list=self.feed_var_list, capacity=64, use_double_buffer=True, iterable=True)
+            data_loader = paddle.io.DataLoader.from_generator(feed_list=self.feed_var_list,
+                                                              capacity=64,
+                                                              use_double_buffer=True,
+                                                              iterable=True)
             if self.is_predict_phase:
-                data_reader = data_loader.set_sample_generator(
-                    self.generator, places=self.places, batch_size=self.config.batch_size, drop_last=False)
+                data_reader = data_loader.set_sample_generator(self.generator,
+                                                               places=self.places,
+                                                               batch_size=self.config.batch_size,
+                                                               drop_last=False)
             else:
-                data_reader = data_loader.set_sample_generator(
-                    self.generator, places=self.places, batch_size=self.config.batch_size, drop_last=True)
+                data_reader = data_loader.set_sample_generator(self.generator,
+                                                               places=self.places,
+                                                               batch_size=self.config.batch_size,
+                                                               drop_last=True)
 
             global_run_states = []
             period_run_states = []
@@ -822,8 +842,10 @@ class BaseTask(object):
                 tmp = np.array(batch[0][tmp_name])
                 num_batch_examples = tmp.shape[0]
 
-                fetch_result = self.exe.run(
-                    self.main_program_to_be_run, feed=batch, fetch_list=self.fetch_list, return_numpy=self.return_numpy)
+                fetch_result = self.exe.run(self.main_program_to_be_run,
+                                            feed=batch,
+                                            fetch_list=self.fetch_list,
+                                            return_numpy=self.return_numpy)
                 if not self.return_numpy:
                     fetch_result = [np.array(x) for x in fetch_result]
 

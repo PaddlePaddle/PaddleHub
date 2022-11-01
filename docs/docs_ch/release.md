@@ -1,5 +1,15 @@
 # 更新历史
 
+## `v2.3.0`
+
+### 【1、支持文图生成新场景】
+  - 新增基于disco diffusion技术的文图生成dd系列模型5个，其中英文模型3个，中文模型2个，其中中文文图生成模型[disco_diffusion_ernievil_base](https://aistudio.baidu.com/aistudio/projectdetail/4444998)基于百度自研多模态模型**ERNIE-ViL**开发，欢迎体验。
+
+### 【2、支持文心大模型API调用】
+  - 新增对文心大模型[**ERNIE-ViLG**](https://aistudio.baidu.com/aistudio/projectdetail/4445016)的API调用，支持文图生成任务。
+  - 新增对文心大模型[**ERNIE 3.0 Zeus**](https://aistudio.baidu.com/aistudio/projectdetail/4445054)的API调用，支持写作文、写文案、写摘要、对对联、自由问答、写小说、补全文本等多个应用。
+
+
 ## `v2.1.0`
 
 ### 【1、版本迭代】

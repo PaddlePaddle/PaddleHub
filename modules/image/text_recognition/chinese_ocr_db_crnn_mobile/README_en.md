@@ -197,6 +197,10 @@
 
    Fixed an issue where only 30 fields can be detected.
 
+* 1.1.3
+
+   Remove fluid api
+
   - ```shell
-    $ hub install chinese_ocr_db_crnn_mobile==1.1.2
+    $ hub install chinese_ocr_db_crnn_mobile==1.1.3
     ```

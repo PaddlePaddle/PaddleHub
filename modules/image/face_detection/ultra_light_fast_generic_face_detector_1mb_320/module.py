@@ -2,18 +2,21 @@
 from __future__ import absolute_import
 from __future__ import division
 
-import ast
 import argparse
+import ast
 import os
 
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
-from paddlehub.module.module import moduleinfo, runnable, serving
+import paddle
+from paddle.inference import Config
+from paddle.inference import create_predictor
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import postprocess
 
-from ultra_light_fast_generic_face_detector_1mb_320.processor import postprocess, base64_to_cv2
-from ultra_light_fast_generic_face_detector_1mb_320.data_feed import reader
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
 @moduleinfo(
@@ -23,21 +26,23 @@ from ultra_light_fast_generic_face_detector_1mb_320.data_feed import reader
     author_email="paddle-dev@baidu.com",
     summary=
     "Ultra-Light-Fast-Generic-Face-Detector-1MB is a high-performance object detection model release on https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB.",
-    version="1.1.2")
-class FaceDetector320(hub.Module):
-    def _initialize(self):
+    version="1.2.0")
+class FaceDetector320:
+    def __init__(self):
         self.default_pretrained_model_path = os.path.join(self.directory,
-                                                          "ultra_light_fast_generic_face_detector_1mb_320")
+                                                          "ultra_light_fast_generic_face_detector_1mb_320", "model")
         self._set_config()
 
     def _set_config(self):
         """
         predictor config setting
         """
-        cpu_config = AnalysisConfig(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -46,29 +51,10 @@ class FaceDetector320(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
-
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = fluid.CPUPlace()
-        exe = fluid.Executor(place)
-
-        program, feeded_var_names, target_vars = fluid.io.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+            self.gpu_predictor = create_predictor(gpu_config)
 
     def face_detection(self,
                        images=None,
@@ -129,24 +115,31 @@ class FaceDetector320(hub.Module):
                 except:
                     pass
             # feed batch image
-            batch_image = np.array([data['image'] for data in batch_data])
-            batch_image = PaddleTensor(batch_image.astype('float32'))
-            data_out = self.gpu_predictor.run([batch_image]) if use_gpu else self.cpu_predictor.run([batch_image])
-            confidences = data_out[0].as_ndarray()
-            boxes = data_out[1].as_ndarray()
+            batch_image = np.array([data['image'] for data in batch_data]).astype('float32')
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(batch_image)
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+            confidences = output_handle.copy_to_cpu()
+
+            output_handle = predictor.get_output_handle(output_names[1])
+            boxes = output_handle.copy_to_cpu()
 
             # postprocess one by one
             for i in range(len(batch_data)):
-                out = postprocess(
-                    confidences=confidences[i],
-                    boxes=boxes[i],
-                    orig_im=batch_data[i]['orig_im'],
-                    orig_im_shape=batch_data[i]['orig_im_shape'],
-                    orig_im_path=batch_data[i]['orig_im_path'],
-                    output_dir=output_dir,
-                    visualization=visualization,
-                    confs_threshold=confs_threshold,
-                    iou_threshold=iou_threshold)
+                out = postprocess(confidences=confidences[i],
+                                  boxes=boxes[i],
+                                  orig_im=batch_data[i]['orig_im'],
+                                  orig_im_shape=batch_data[i]['orig_im_shape'],
+                                  orig_im_path=batch_data[i]['orig_im_path'],
+                                  output_dir=output_dir,
+                                  visualization=visualization,
+                                  confs_threshold=confs_threshold,
+                                  iou_threshold=iou_threshold)
                 res.append(out)
         return res
 
@@ -164,38 +157,39 @@ class FaceDetector320(hub.Module):
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the {} module.".format(self.name),
-            prog='hub run {}'.format(self.name),
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
+                                              prog='hub run {}'.format(self.name),
+                                              usage='%(prog)s',
+                                              add_help=True)
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
             title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.face_detection(
-            paths=[args.input_path],
-            batch_size=args.batch_size,
-            use_gpu=args.use_gpu,
-            output_dir=args.output_dir,
-            visualization=args.visualization)
+        results = self.face_detection(paths=[args.input_path],
+                                      batch_size=args.batch_size,
+                                      use_gpu=args.use_gpu,
+                                      output_dir=args.output_dir,
+                                      visualization=args.visualization)
         return results
 
     def add_module_config_arg(self):
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
-        self.arg_config_group.add_argument(
-            '--output_dir',
-            type=str,
-            default='face_detector_320_predict_output',
-            help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not")
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='face_detector_320_predict_output',
+                                           help="The directory to save output images.")
+        self.arg_config_group.add_argument('--visualization',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether to save output as images.")
         self.arg_config_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
 
     def add_module_input_arg(self):

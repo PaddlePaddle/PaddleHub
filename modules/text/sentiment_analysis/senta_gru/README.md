@@ -1,7 +1,7 @@
 # senta_gru
 
 |模型名称|senta_gru|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|文本-情感分析|
 |网络|GRU|
 |数据集|百度自建数据集|
@@ -25,7 +25,7 @@
 - ### 1、环境依赖  
 
   - paddlepaddle >= 1.8.0
-  
+
   - paddlehub >= 1.8.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
@@ -51,9 +51,9 @@
     ```
     - test.txt 存放待预测文本， 如：
       > 这家餐厅很好吃
- 
+
       > 这部电影真的很差劲
-      
+
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -75,7 +75,7 @@
     # 这家餐厅很好吃 1 positive 0.9607 0.0393
     # 这部电影真的很差劲 0 negative 0.0187 0.9813
     ```
-    
+
 - ### 3、API
 
   - ```python
@@ -94,7 +94,7 @@
 
       - results(list): 情感分类结果
 
- 
+
   - ```python
     def get_labels()
     ```
@@ -147,7 +147,7 @@
 
     # 待预测数据
     text = ["这家餐厅很好吃", "这部电影真的很差劲"]
-    
+
     # 设置运行配置
     # 对应本地预测senta_gru.sentiment_classify(texts=text, batch_size=1, use_gpu=True)
     data = {"texts": text, "batch_size": 1, "use_gpu":True}
@@ -157,7 +157,7 @@
     url = "http://HOST_IP:8866/predict/senta_gru"
     headers = {"Content-Type": "application/json"}
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
-    
+
     # 打印预测结果
     print(json.dumps(r.json(), indent=4, ensure_ascii=False))
     ```
@@ -181,7 +181,11 @@
 * 1.2.0
 
   模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
-  
+
+* 1.2.1
+
+  移除 fluid api
+
   - ```shell
-    $ hub install senta_gru==1.2.0
+    $ hub install senta_gru==1.2.1
     ```

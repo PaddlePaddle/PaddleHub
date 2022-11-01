@@ -171,6 +171,10 @@
 
   增加更多预训练数据，更新预训练参数
 
+* 1.0.3
+
+  移除 fluid api
+  
   - ```shell
-    $ hub install chinese_text_detection_db_server==1.0.2
+    $ hub install chinese_text_detection_db_server==1.0.3
     ```

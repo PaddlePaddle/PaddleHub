@@ -5,12 +5,11 @@ from __future__ import print_function
 
 import os
 import time
-from collections import OrderedDict
 
 import base64
 import cv2
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import ImageDraw
 
 __all__ = ['base64_to_cv2', 'postprocess']
 

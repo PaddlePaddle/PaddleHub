@@ -1,7 +1,7 @@
-# deeplabv3p_xception65_humanseg 
+# deeplabv3p_xception65_humanseg
 
 |模型名称|deeplabv3p_xception65_humanseg|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-图像分割|
 |网络|deeplabv3p|
 |数据集|百度自建数据集|
@@ -18,7 +18,7 @@
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130913256-41056b21-1c3d-4ee2-b481-969c94754609.png" width = "337" height = "505" hspace='10'/>
     </p>
-    
+
 - ### 模型介绍
 
   - DeepLabv3+使用百度自建数据集进行训练，可用于人像分割，支持任意大小的图片输入。
@@ -41,7 +41,7 @@
     - ```shell
       $ hub install deeplabv3p_xception65_humanseg
       ```
-      
+
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
       | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
@@ -70,11 +70,11 @@
 
     ```python
     def segmentation(images=None,
-                    paths=None,
-                    batch_size=1,
-                    use_gpu=False,
-                    visualization=False,
-                    output_dir='humanseg_output')
+                     paths=None,
+                     batch_size=1,
+                     use_gpu=False,
+                     visualization=False,
+                     output_dir='humanseg_output')
     ```
 
     - 预测API，用于人像分割。
@@ -95,20 +95,14 @@
       * data (numpy.ndarray): 人像分割结果，仅包含Alpha通道，取值为0-255 (0为全透明，255为不透明)，也即取值越大的像素点越可能为人体，取值越小的像素点越可能为背景。
 
     ```python
-    def save_inference_model(dirname,
-                            model_filename=None,
-                            params_filename=None,
-                            combined=True)
+    def save_inference_model(dirname)
     ```
 
     - 将模型保存到指定路径。
 
     - **参数**
 
-      * dirname: 存在模型的目录名称
-      * model\_filename: 模型文件名称，默认为\_\_model\_\_
-      * params\_filename: 参数文件名称，默认为\_\_params\_\_(仅当`combined`为True时生效)
-      * combined: 是否将参数保存到统一的一个文件中
+      * dirname: 模型保存路径
 
 
 ## 四、服务部署
@@ -131,34 +125,35 @@
 
   - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果
 
-      ```python
-      import requests
-      import json
-      import cv2
-      import base64
-      import numpy as np
-
-
-      def cv2_to_base64(image):
-          data = cv2.imencode('.jpg', image)[1]
-          return base64.b64encode(data.tostring()).decode('utf8')
-
-
-      def base64_to_cv2(b64str):
-          data = base64.b64decode(b64str.encode('utf8'))
-          data = np.fromstring(data, np.uint8)
-          data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-          return data
-
-      # 发送HTTP请求
-      data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
-      headers = {"Content-type": "application/json"}
-      url = "http://127.0.0.1:8866/predict/deeplabv3p_xception65_humanseg"
-      r = requests.post(url=url, headers=headers, # 保存图片
-      mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2GRAY)
-      rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
-      cv2.imwrite("segment_human_server.png", rgba)
-      ```
+  - ```python
+    import requests
+    import json
+    import cv2
+    import base64
+    import numpy as np
+  
+  
+    def cv2_to_base64(image):
+        data = cv2.imencode('.jpg', image)[1]
+        return base64.b64encode(data.tostring()).decode('utf8')
+  
+  
+    def base64_to_cv2(b64str):
+        data = base64.b64decode(b64str.encode('utf8'))
+        data = np.fromstring(data, np.uint8)
+        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+        return data
+  
+    org_im = cv2.imread("/PATH/TO/IMAGE")
+    # 发送HTTP请求
+    data = {'images':[cv2_to_base64(org_im)]}
+    headers = {"Content-type": "application/json"}
+    url = "http://127.0.0.1:8866/predict/deeplabv3p_xception65_humanseg"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))# 保存图片
+    mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2GRAY)
+    rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
+    cv2.imwrite("segment_human_server.png", rgba)
+    ```
 
 ## 五、更新历史
 
@@ -174,6 +169,10 @@
 
    修复预测后处理图像数据超过[0,255]范围
 
-* 1.1.2
+* 1.2.0
 
-   修复cudnn为8.0.4显存泄露问题
+   移除 fluid api
+
+  - ```shell
+    $ hub install deeplabv3p_xception65_humanseg==1.2.0
+    ```

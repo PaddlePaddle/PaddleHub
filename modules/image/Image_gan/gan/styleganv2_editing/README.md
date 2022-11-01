@@ -63,13 +63,13 @@
     module = hub.Module(name="styleganv2_editing")
     input_path = ["/PATH/TO/IMAGE"]
     # Read from a file
-    module.generate(paths=input_path, direction_name = 'age', direction_offset = 5, output_dir='./editing_result/', use_gpu=True)  
+    module.generate(paths=input_path, direction_name='age', direction_offset=5, output_dir='./editing_result/', use_gpu=True)  
     ```
 
 - ### 3、API
 
   - ```python
-    generate(self, images=None, paths=None, direction_name = 'age', direction_offset = 0.0, output_dir='./editing_result/', use_gpu=False, visualization=True)
+    generate(self, images=None, paths=None, direction_name='age', direction_offset=0.0, output_dir='./editing_result/', use_gpu=False, visualization=True)
     ```
     - 人脸编辑生成API。
 

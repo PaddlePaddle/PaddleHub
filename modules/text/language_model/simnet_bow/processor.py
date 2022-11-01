@@ -46,12 +46,11 @@ def preprocess(lac, word_dict, data_dict, use_gpu=False, batch_size=1):
     return result
 
 
-def postprocess(predict_out, data_info):
+def postprocess(pred, data_info):
     """
     Convert model's output tensor to pornography label
     """
     result = []
-    pred = predict_out.as_ndarray()
     for index in range(len(data_info[text_a_key])):
         result_i = {}
         result_i[text_a_key] = data_info[text_a_key][index]['origin']

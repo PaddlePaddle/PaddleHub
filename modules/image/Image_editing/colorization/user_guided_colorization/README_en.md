@@ -203,3 +203,8 @@
 * 1.0.0
 
   First release
+
+
+  - ```shell
+    $ hub install user_guided_colorization==1.0.0
+    ```

@@ -25,9 +25,9 @@
 
 - ### 1、环境依赖
 
-  - paddlepaddle >= 2.2.0
+  - paddlepaddle >= 2.0.0
 
-  - paddlehub >= 2.2.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
+  - paddlehub >= 2.0.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
