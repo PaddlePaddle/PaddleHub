@@ -60,7 +60,9 @@
       import paddlehub as hub
 
       model = hub.Module(name='realsr')
-      model.predict('/PATH/TO/IMAGE/OR/VIDEO')
+      model.predict('/PATH/TO/IMAGE')
+
+      # model.predict('/PATH/TO/VIDEO')
       ```
   - ### 2、API
 
@@ -173,6 +175,8 @@
   Support paddlehub2.0
 
 * 1.1.0
+
+  Update code format
 
   ```shell
   $ hub install realsr == 1.1.0
