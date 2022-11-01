@@ -1,6 +1,6 @@
 # senta_lstm
 |模型名称|senta_lstm|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|文本-情感分析|
 |网络|LSTM|
 |数据集|百度自建数据集|
@@ -22,7 +22,7 @@
 - ### 1、环境依赖  
 
   - paddlepaddle >= 1.8.0
-  
+
   - paddlehub >= 1.8.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
@@ -48,9 +48,9 @@
     ```
     - test.txt 存放待预测文本， 如：
       > 这家餐厅很好吃
- 
+
       > 这部电影真的很差劲
-  
+
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -60,17 +60,17 @@
 
     senta = hub.Module(name="senta_lstm")
     test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
-    results = senta.sentiment_classify(texts=test_text, 
+    results = senta.sentiment_classify(texts=test_text,
                                        use_gpu=False,
                                        batch_size=1)
-        
+
     for result in results:
         print(result['text'])
         print(result['sentiment_label'])
         print(result['sentiment_key'])
         print(result['positive_probs'])
         print(result['negative_probs'])
-    
+
     # 这家餐厅很好吃 1 positive 0.9285 0.0715
     # 这部电影真的很差劲 0 negative 0.0187 0.9813
     ```
@@ -80,7 +80,7 @@
   - ```python
     sentiment_classify(texts=[], data={}, use_gpu=False, batch_size=1)
     ```
-    
+
     - senta_lstm预测接口，预测输入句子的情感分类(二分类，积极/消极）
 
     - **参数**
@@ -107,7 +107,7 @@
   - ```python
     get_vocab_path()
     ```
-    
+
     - 获取预训练时使用的词汇表
 
     - **返回**
@@ -171,15 +171,19 @@
 * 1.0.1
 
   词汇表升级
-  
+
 * 1.1.0
 
   大幅提升预测性能
-  
+
 * 1.2.0
 
   模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
-  
+
+* 1.2.1
+
+  移除 fluid api
+
   - ```shell
-    $ hub install senta_lstm==1.2.0
+    $ hub install senta_lstm==1.2.1
     ```

@@ -1,7 +1,7 @@
 # chinese_ocr_db_crnn_mobile
 
 |模型名称|chinese_ocr_db_crnn_mobile|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-文字识别|
 |网络|Differentiable Binarization+RCNN|
 |数据集|icdar2015数据集|
@@ -35,9 +35,9 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.7.2    
+  - paddlepaddle >= 1.7.2  
 
   - paddlehub >= 1.6.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
@@ -48,7 +48,7 @@
   - ```shell
     $ pip install shapely pyclipper
     ```
-  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**					                                
+  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**  
 
 - ### 2、安装
 
@@ -87,7 +87,7 @@
   - ```python
     __init__(text_detector_module=None, enable_mkldnn=False)
     ```
-    
+
     - 构造ChineseOCRDBCRNN对象
 
     - **参数**
@@ -191,11 +191,15 @@
 * 1.1.1
 
    支持文本中空格识别。
-   
+
 * 1.1.2
 
    修复只能检出30字段问题。
 
+* 1.1.3
+
+   移除 fluid api
+
   - ```shell
-    $ hub install chinese_ocr_db_crnn_mobile==1.1.2
+    $ hub install chinese_ocr_db_crnn_mobile==1.1.3
     ```

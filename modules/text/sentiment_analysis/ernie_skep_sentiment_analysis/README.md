@@ -1,6 +1,6 @@
 # ernie_skep_sentiment_analysis
 |模型名称|ernie_skep_sentiment_analysis|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|文本-情感分析|
 |网络|SKEP|
 |数据集|百度自建数据集|
@@ -29,13 +29,13 @@
 - ### 1、环境依赖  
 
   - paddlepaddle >= 1.8.0
-  
+
   - paddlehub >= 1.7.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
 
   - ```shell
-    $ hub install ernie_skep_sentiment_analysis==1.0.0
+    $ hub install ernie_skep_sentiment_analysis
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
@@ -49,7 +49,7 @@
   - ```shell
     $ hub run ernie_skep_sentiment_analysis --input_text='虽然小明很努力，但是他还是没有考100分'
     ```
-    
+
 - ### 2、预测代码示例
 
   - ```python
@@ -61,13 +61,13 @@
     # Predict sentiment label
     test_texts = ['你不是不聪明，而是不认真', '虽然小明很努力，但是他还是没有考100分']
     results = module.predict_sentiment(test_texts, use_gpu=False)
-    
+
     for result in results:
         print(result['text'])
         print(result['sentiment_label'])
         print(result['positive_probs'])
         print(result['negative_probs'])
-        
+
     # 你不是不聪明，而是不认真 negative 0.10738129168748856 0.8926186561584473
     # 虽然小明很努力，但是他还是没有考100分 negative 0.05391530692577362 0.94608473777771
     ```
@@ -137,7 +137,7 @@
     headers = {"Content-type": "application/json"}
     url = "http://127.0.0.1:8866/predict/ernie_skep_sentiment_analysis"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
-    
+
     # 打印预测结果
     print(r.json()["results"])
     ```
@@ -147,7 +147,11 @@
 * 1.0.0
 
   初始发布
-  
+
+* 1.0.1
+
+  移除 fluid api
+
   - ```shell
-    $ hub install ernie_skep_sentiment_analysis==1.0.0
+    $ hub install ernie_skep_sentiment_analysis==1.0.1
     ```

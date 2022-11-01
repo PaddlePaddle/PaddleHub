@@ -12,32 +12,38 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import argparse
 import ast
 import os
 import re
-import six
-from typing import Any, List, Text, Tuple
+from typing import Any
+from typing import List
+from typing import Text
+from typing import Tuple
 
-import paddle
 import numpy as np
+import paddle
+import six
+from paddle.framework import core
 
 from paddlehub.compat import paddle_utils
-from paddlehub.compat.task.transformer_emb_task import TransformerEmbeddingTask
 from paddlehub.compat.task.config import RunConfig
 from paddlehub.compat.task.reader import ClassifyReader
-from paddlehub.module.module import runnable, RunModule
+from paddlehub.compat.task.transformer_emb_task import TransformerEmbeddingTask
+from paddlehub.module.module import RunModule
+from paddlehub.module.module import runnable
 from paddlehub.utils.parser import txt_parser
 from paddlehub.utils.utils import sys_stdin_encoding
 
 
 class DataFormatError(Exception):
+
     def __init__(self, *args):
         self.args = args
 
 
 class NLPBaseModule(RunModule):
+
     def get_vocab_path(self):
         '''
         Get the path to the vocabulary whih was used to pretrain
@@ -48,12 +54,13 @@ class NLPBaseModule(RunModule):
 
 
 class NLPPredictionModule(NLPBaseModule):
+
     def _set_config(self):
         '''predictor config setting'''
-        cpu_config = paddle.fluid.core.AnalysisConfig(self.pretrained_model_path)
+        cpu_config = core.AnalysisConfig(self.pretrained_model_path)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = paddle.fluid.core.create_paddle_predictor(cpu_config)
+        self.cpu_predictor = core.create_paddle_predictor(cpu_config)
 
         try:
             _places = os.environ['CUDA_VISIBLE_DEVICES']
@@ -62,10 +69,10 @@ class NLPPredictionModule(NLPBaseModule):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = paddle.fluid.core.AnalysisConfig(self.pretrained_model_path)
+            gpu_config = core.AnalysisConfig(self.pretrained_model_path)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
-            self.gpu_predictor = paddle.fluid.core.create_paddle_predictor(gpu_config)
+            self.gpu_predictor = core.create_paddle_predictor(gpu_config)
 
     def texts2tensor(self, texts: List[dict]) -> paddle.Tensor:
         '''
@@ -81,7 +88,7 @@ class NLPPredictionModule(NLPBaseModule):
         for i, text in enumerate(texts):
             data += text['processed']
             lod.append(len(text['processed']) + lod[i])
-        tensor = paddle.fluid.core.PaddleTensor(np.array(data).astype('int64'))
+        tensor = core.PaddleTensor(np.array(data).astype('int64'))
         tensor.name = 'words'
         tensor.lod = [lod]
         tensor.shape = [lod[-1], 1]
@@ -108,11 +115,10 @@ class NLPPredictionModule(NLPBaseModule):
     @runnable
     def run_cmd(self, argvs: List[Any]):
         '''Run as a command'''
-        self.parser = argparse.ArgumentParser(
-            description='Run the %s module.' % self.name,
-            prog='hub run %s' % self.name,
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description='Run the %s module.' % self.name,
+                                              prog='hub run %s' % self.name,
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title='Input options', description='Input data. Required')
         self.arg_config_group = self.parser.add_argument_group(
@@ -135,8 +141,10 @@ class NLPPredictionModule(NLPBaseModule):
 
     def add_module_config_arg(self):
         '''Add the command config options'''
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help='whether use GPU for prediction')
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help='whether use GPU for prediction')
 
         self.arg_config_group.add_argument('--batch_size', type=int, default=1, help='batch size for prediction')
 
@@ -172,8 +180,11 @@ class TransformerModule(NLPBaseModule):
                  **kwargs):
         if not directory:
             return
-        super(TransformerModule, self).__init__(
-            name=name, directory=directory, module_dir=module_dir, version=version, **kwargs)
+        super(TransformerModule, self).__init__(name=name,
+                                                directory=directory,
+                                                module_dir=module_dir,
+                                                version=version,
+                                                **kwargs)
 
         self.max_seq_len = max_seq_len
 
@@ -186,21 +197,20 @@ class TransformerModule(NLPBaseModule):
                 return False
             return os.path.exists(os.path.join(pretraining_params_path, var.name))
 
-        paddle.static.load(
-            executor=exe,
-            model_path=pretraining_params_path,
-            program=main_program,
-            var_list=main_program.all_parameters())
+        paddle.static.load(executor=exe,
+                           model_path=pretraining_params_path,
+                           program=main_program,
+                           var_list=main_program.all_parameters())
 
     def param_prefix(self) -> str:
         return '@HUB_%s@' % self.name
 
     @paddle_utils.run_in_static_mode
     def context(
-            self,
-            max_seq_len: int = None,
-            trainable: bool = True,
-            num_slots: int = 1,
+        self,
+        max_seq_len: int = None,
+        trainable: bool = True,
+        num_slots: int = 1,
     ) -> Tuple[dict, dict, paddle.static.Program]:
         '''
         get inputs, outputs and program from pre-trained module
@@ -225,42 +235,64 @@ class TransformerModule(NLPBaseModule):
         module_program = paddle.static.Program()
         startup_program = paddle.static.Program()
         with paddle.static.program_guard(module_program, startup_program):
-            with paddle.fluid.unique_name.guard():
+            with paddle.utils.unique_name.guar.guard():
                 input_ids = paddle.static.data(name='input_ids', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                position_ids = paddle.static.data(
-                    name='position_ids', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                segment_ids = paddle.static.data(
-                    name='segment_ids', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                input_mask = paddle.static.data(
-                    name='input_mask', shape=[-1, max_seq_len, 1], dtype='float32', lod_level=0)
+                position_ids = paddle.static.data(name='position_ids',
+                                                  shape=[-1, max_seq_len, 1],
+                                                  dtype='int64',
+                                                  lod_level=0)
+                segment_ids = paddle.static.data(name='segment_ids',
+                                                 shape=[-1, max_seq_len, 1],
+                                                 dtype='int64',
+                                                 lod_level=0)
+                input_mask = paddle.static.data(name='input_mask',
+                                                shape=[-1, max_seq_len, 1],
+                                                dtype='float32',
+                                                lod_level=0)
                 pooled_output, sequence_output = self.net(input_ids, position_ids, segment_ids, input_mask)
 
                 data_list = [(input_ids, position_ids, segment_ids, input_mask)]
                 output_name_list = [(pooled_output.name, sequence_output.name)]
 
                 if num_slots > 1:
-                    input_ids_2 = paddle.static.data(
-                        name='input_ids_2', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    position_ids_2 = paddle.static.data(
-                        name='position_ids_2', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    segment_ids_2 = paddle.static.data(
-                        name='segment_ids_2', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    input_mask_2 = paddle.static.data(
-                        name='input_mask_2', shape=[-1, max_seq_len, 1], dtype='float32', lod_level=0)
+                    input_ids_2 = paddle.static.data(name='input_ids_2',
+                                                     shape=[-1, max_seq_len, 1],
+                                                     dtype='int64',
+                                                     lod_level=0)
+                    position_ids_2 = paddle.static.data(name='position_ids_2',
+                                                        shape=[-1, max_seq_len, 1],
+                                                        dtype='int64',
+                                                        lod_level=0)
+                    segment_ids_2 = paddle.static.data(name='segment_ids_2',
+                                                       shape=[-1, max_seq_len, 1],
+                                                       dtype='int64',
+                                                       lod_level=0)
+                    input_mask_2 = paddle.static.data(name='input_mask_2',
+                                                      shape=[-1, max_seq_len, 1],
+                                                      dtype='float32',
+                                                      lod_level=0)
                     pooled_output_2, sequence_output_2 = self.net(input_ids_2, position_ids_2, segment_ids_2,
                                                                   input_mask_2)
                     data_list.append((input_ids_2, position_ids_2, segment_ids_2, input_mask_2))
                     output_name_list.append((pooled_output_2.name, sequence_output_2.name))
 
                 if num_slots > 2:
-                    input_ids_3 = paddle.static.data(
-                        name='input_ids_3', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    position_ids_3 = paddle.static.data(
-                        name='position_ids_3', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    segment_ids_3 = paddle.static.data(
-                        name='segment_ids_3', shape=[-1, max_seq_len, 1], dtype='int64', lod_level=0)
-                    input_mask_3 = paddle.static.data(
-                        name='input_mask_3', shape=[-1, max_seq_len, 1], dtype='float32', lod_level=0)
+                    input_ids_3 = paddle.static.data(name='input_ids_3',
+                                                     shape=[-1, max_seq_len, 1],
+                                                     dtype='int64',
+                                                     lod_level=0)
+                    position_ids_3 = paddle.static.data(name='position_ids_3',
+                                                        shape=[-1, max_seq_len, 1],
+                                                        dtype='int64',
+                                                        lod_level=0)
+                    segment_ids_3 = paddle.static.data(name='segment_ids_3',
+                                                       shape=[-1, max_seq_len, 1],
+                                                       dtype='int64',
+                                                       lod_level=0)
+                    input_mask_3 = paddle.static.data(name='input_mask_3',
+                                                      shape=[-1, max_seq_len, 1],
+                                                      dtype='float32',
+                                                      lod_level=0)
                     pooled_output_3, sequence_output_3 = self.net(input_ids_3, position_ids_3, segment_ids_3,
                                                                   input_mask_3)
                     data_list.append((input_ids_3, position_ids_3, segment_ids_3, input_mask_3))
@@ -305,10 +337,12 @@ class TransformerModule(NLPBaseModule):
                 inputs['position_ids_%s' % (index + 1)] = data[1]
                 inputs['segment_ids_%s' % (index + 1)] = data[2]
                 inputs['input_mask_%s' % (index + 1)] = data[3]
-                outputs['pooled_output_%s' % (index + 1)] = module_program.global_block().vars[
-                    self.param_prefix() + output_name_list[index][0]]
-                outputs['sequence_output_%s' % (index + 1)] = module_program.global_block().vars[
-                    self.param_prefix() + output_name_list[index][1]]
+                outputs['pooled_output_%s' %
+                        (index + 1)] = module_program.global_block().vars[self.param_prefix() +
+                                                                          output_name_list[index][0]]
+                outputs['sequence_output_%s' %
+                        (index + 1)] = module_program.global_block().vars[self.param_prefix() +
+                                                                          output_name_list[index][1]]
 
         return inputs, outputs, module_program
 

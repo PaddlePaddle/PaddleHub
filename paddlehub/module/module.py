@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import ast
 import builtins
 import codecs
@@ -20,15 +19,21 @@ import inspect
 import os
 import re
 import sys
-from typing import Callable, Generic, List, Optional, Union
+from typing import Callable
+from typing import Generic
+from typing import List
+from typing import Optional
+from typing import Union
 
 import paddle
 import paddle2onnx
 from easydict import EasyDict
 
-from paddlehub.utils import parser, log, utils
 from paddlehub.compat import paddle_utils
 from paddlehub.compat.module.module_v1 import ModuleV1
+from paddlehub.utils import log
+from paddlehub.utils import parser
+from paddlehub.utils import utils
 
 
 class InvalidHubModule(Exception):
@@ -226,13 +231,10 @@ class RunModule(object):
         if not self._pretrained_model_path:
             raise RuntimeError('Module {} does not support exporting models in Paddle Inference format.'.format(
                 self.name))
-        elif not os.path.exists(self._pretrained_model_path):
+        elif not os.path.exists(
+                self._pretrained_model_path) and not os.path.exists(self._pretrained_model_path + '.pdmodel'):
             log.logger.warning('The model path of Module {} does not exist.'.format(self.name))
             return
-
-        model_filename = '__model__' if not model_filename else model_filename
-        if combined:
-            params_filename = '__params__' if not params_filename else params_filename
 
         place = paddle.CPUPlace()
         exe = paddle.static.Executor(place)
@@ -248,22 +250,25 @@ class RunModule(object):
 
         if os.path.exists(os.path.join(self._pretrained_model_path, '__params__')):
             _params_filename = '__params__'
+        if _model_filename is not None and _params_filename is not None:
+            program, feeded_var_names, target_vars = paddle.static.load_inference_model(
+                self._pretrained_model_path,
+                executor=exe,
+                model_filename=_model_filename,
+                params_filename=_params_filename,
+            )
+        else:
+            program, feeded_var_names, target_vars = paddle.static.load_inference_model(
+                self._pretrained_model_path, executor=exe)
 
-        program, feeded_var_names, target_vars = paddle.fluid.io.load_inference_model(
-            dirname=self._pretrained_model_path,
-            executor=exe,
-            model_filename=_model_filename,
-            params_filename=_params_filename,
-        )
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feeded_var_names]
 
-        paddle.fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=feeded_var_names,
-            target_vars=target_vars,
-            model_filename=model_filename,
-            params_filename=params_filename)
+        path_prefix = dirname
+        if os.path.isdir(dirname):
+            path_prefix = os.path.join(dirname, 'model')
+        paddle.static.save_inference_model(
+            path_prefix, feed_vars=feed_vars, fetch_vars=target_vars, executor=exe, program=program)
 
         log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
 
@@ -333,7 +338,7 @@ class RunModule(object):
 
         save_file = os.path.join(dirname, '{}.onnx'.format(self.name))
 
-        program, inputs, outputs = paddle.fluid.io.load_inference_model(
+        program, inputs, outputs = paddle.static.load_inference_model(
             dirname=self._pretrained_model_path,
             model_filename=model_filename,
             params_filename=params_filename,
@@ -555,7 +560,9 @@ def moduleinfo(name: str,
                 _bases.append(_b)
             _bases.append(_meta)
             _bases = tuple(_bases)
-            wrap_cls = builtins.type(cls.__name__, _bases, dict(cls.__dict__))
+            attr_dict = dict(cls.__dict__)
+            attr_dict.pop('__dict__', None)
+            wrap_cls = builtins.type(cls.__name__, _bases, attr_dict)
 
         wrap_cls.name = name
         wrap_cls.version = utils.Version(version)

@@ -1,7 +1,7 @@
 # resnet50_vd_animals
 
 |模型名称|resnet50_vd_animals|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-图像分类|
 |网络|ResNet50_vd|
 |数据集|百度自建动物数据集|
@@ -31,13 +31,13 @@
 - ### 2、安装
 
     - ```shell
-      $ hub install resnet50_vd_animals==1.0.0
+      $ hub install resnet50_vd_animals
       ```
     - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
       | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 三、模型API预测
-  
+
 - ### 1、命令行预测
 
     - ```
@@ -167,3 +167,11 @@
 * 1.0.0
 
   初始发布
+
+* 1.0.1
+
+  移除 fluid api
+
+  - ```shell
+    $ hub install resnet50_vd_animals==1.0.1
+    ```

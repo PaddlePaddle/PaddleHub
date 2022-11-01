@@ -6,48 +6,45 @@ from __future__ import print_function
 import argparse
 import ast
 import io
-import json
 import math
 import os
-import six
 
 import numpy as np
-import paddle.fluid as fluid
-
+import six
+from .custom import Customization
+from .processor import load_kv_dict
+from .processor import parse_result
+from .processor import word_to_ids
 from paddle.inference import Config
 from paddle.inference import create_predictor
 
-import paddlehub as hub
-from paddlehub.common.logger import logger
-from paddlehub.common.paddle_helper import add_vars_prefix
-from paddlehub.common.utils import sys_stdin_encoding
-from paddlehub.io.parser import txt_parser
-from paddlehub.module.module import moduleinfo, runnable, serving
-
-from lac.network import lex_net
-from lac.processor import load_kv_dict, word_to_ids, parse_result
-from lac.custom import Customization
+from paddlehub.utils.utils import sys_stdin_encoding
+from paddlehub.utils.parser import txt_parser
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
 class DataFormatError(Exception):
+
     def __init__(self, *args):
         self.args = args
 
 
 @moduleinfo(
     name="lac",
-    version="2.2.0",
+    version="2.3.0",
     summary=
     "Baidu's open-source lexical analysis tool for Chinese, including word segmentation, part-of-speech tagging & named entity recognition",
     author="baidu-nlp",
     author_email="paddle-dev@baidu.com",
     type="nlp/lexical_analysis")
-class LAC(hub.Module):
-    def _initialize(self, user_dict=None):
+class LAC:
+    def __init__(self, user_dict=None):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, "infer_model")
+        self.default_pretrained_model_path = os.path.join(self.directory, "infer_model", "model")
         self.word2id_dict = load_kv_dict(os.path.join(self.directory, "assets/word.dic"), reverse=True, value_func=int)
         self.id2word_dict = load_kv_dict(os.path.join(self.directory, "assets/word.dic"))
         self.label2id_dict = load_kv_dict(os.path.join(self.directory, "assets/tag.dic"), reverse=True, value_func=int)
@@ -65,128 +62,28 @@ class LAC(hub.Module):
 
         self._set_config()
 
-    def _get_device_id(self, places):
-        try:
-            places = os.environ[places]
-            id = int(places)
-        except:
-            id = -1
-        return id
-
     def _set_config(self):
         """
         predictor config setting
         """
-
-        # create default cpu predictor
-        cpu_config = Config(self.pretrained_model_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_predictor(cpu_config)
 
-        # create predictors using various types of devices
-
-        # npu
-        npu_id = self._get_device_id("FLAGS_selected_npus")
-        if npu_id != -1:
-            # use npu
-            npu_config = Config(self.pretrained_model_path)
-            npu_config.disable_glog_info()
-            npu_config.enable_npu(device_id=npu_id)
-            self.npu_predictor = create_predictor(npu_config)
-
-        # gpu
-        gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
-        if gpu_id != -1:
-            # use gpu
-            gpu_config = Config(self.pretrained_model_path)
+        try:
+            _places = os.environ["CUDA_VISIBLE_DEVICES"]
+            int(_places[0])
+            use_gpu = True
+        except:
+            use_gpu = False
+        if use_gpu:
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
-            gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=gpu_id)
+            gpu_config.enable_use_gpu(memory_pool_init_size_mb=500, device_id=0)
             self.gpu_predictor = create_predictor(gpu_config)
-
-        # xpu
-        xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
-        if xpu_id != -1:
-            # use xpu
-            xpu_config = Config(self.pretrained_model_path)
-            xpu_config.disable_glog_info()
-            xpu_config.enable_xpu(100)
-            self.xpu_predictor = create_predictor(xpu_config)
-
-    def _internal_predict(self, predictor, texts):
-        """
-        Tranform the texts(list) to Tensor and then do "real predict"
-        Args:
-             texts(list): texts
-        Returns:
-             result(PaddleInferTensor): predict output
-        """
-
-        # texts to data and lod
-        lod = [0]
-        data = []
-        for i, text in enumerate(texts):
-            text_inds = word_to_ids(text, self.word2id_dict, self.word_replace_dict, oov_id=self.oov_id)
-            data += text_inds
-            lod.append(len(text_inds) + lod[i])
-
-        # get predictor tensor
-        input_names = predictor.get_input_names()
-        input_tensor = predictor.get_input_handle(input_names[0])
-
-        # set data, shape and lod
-        input_tensor.copy_from_cpu(np.array(data).astype('int64'))
-        input_tensor.reshape([lod[-1], 1])
-        input_tensor.set_lod([lod])
-
-        # real predict
-        predictor.run()
-        output_names = predictor.get_output_names()
-        output_handle = predictor.get_output_handle(output_names[0])
-
-        return output_handle
-
-    def context(self, trainable=False):
-        """
-        Get the input ,output and program of the pretrained lac
-
-        Args:
-             trainable(bool): whether fine-tune the pretrained parameters of lac or not
-
-        Returns:
-             inputs(dict): the input variables of lac (words)
-             outputs(dict): the output variables of lac (the word segmentation results)
-             main_program(Program): the main_program of lac with pretrained prameters
-        """
-        main_program = fluid.Program()
-        startup_program = fluid.Program()
-        with fluid.program_guard(main_program, startup_program):
-            with fluid.unique_name.guard():
-                crf_decode, word, fc = lex_net(self.word_dict_len, self.label_dict_len)
-                word_name = word.name
-                pred_name = crf_decode.name
-                fc_name = fc.name
-
-                prefix_name = "@HUB_{}@".format(self.name)
-                add_vars_prefix(program=main_program, prefix=prefix_name)
-                for param in main_program.global_block().iter_parameters():
-                    param.trainable = trainable
-
-                place = fluid.CPUPlace()
-                exe = fluid.Executor(place)
-
-                # load the lac pretrained model
-                def if_exist(var):
-                    return os.path.exists(os.path.join(self.pretrained_model_path, var.name))
-
-                fluid.io.load_vars(exe, self.pretrained_model_path, predicate=if_exist)
-
-                inputs = {"words": main_program.global_block().vars[prefix_name + word_name]}
-                outputs = {
-                    "predicted": main_program.global_block().vars[prefix_name + pred_name],
-                    "sentence_feature": main_program.global_block().vars[prefix_name + fc_name]
-                }
-                return inputs, outputs, main_program
 
     def set_user_dict(self, dict_path, sep=None):
         """
@@ -230,6 +127,22 @@ class LAC(hub.Module):
             texts = unicode_texts
         return texts
 
+    def preprocess(self, texts):
+        """
+        Tranform the texts(list) to PaddleTensor
+        Args:
+             texts(list): texts
+        Returns:
+             np.array, list, list
+        """
+        lod = [0]
+        data = []
+        for i, text in enumerate(texts):
+            text_inds = word_to_ids(text, self.word2id_dict, self.word_replace_dict, oov_id=self.oov_id)
+            data += text_inds
+            lod.append(len(text_inds) + lod[i])
+        return np.array(data).astype('int64'), [lod], [lod[-1], 1]
+
     def _get_index(self, data_list, item=""):
         """
         find all indexes of item in data_list
@@ -241,7 +154,7 @@ class LAC(hub.Module):
         return res
 
     @serving
-    def cut(self, text, use_gpu=False, batch_size=1, return_tag=True, use_device=None):
+    def cut(self, text, use_gpu=False, batch_size=1, return_tag=True):
         """
         The main function that segments an entire text that contains
         Chinese characters into separated words.
@@ -250,32 +163,20 @@ class LAC(hub.Module):
             use_gpu(bool): whether use gpu to predict or not
             batch_size(int): the program deals once with one batch
             return_tag: Whether to get tag or not.
-            use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
             results(dict or list): The word segmentation result of the input text, whose key is 'word', if text is a list.
                 If text is a str, the word segmentation result (list) is obtained.
 
         """
-
-        # real predictor to use
-        if use_device is not None:
-            if use_device == "cpu":
-                predictor = self.cpu_predictor
-            elif use_device == "xpu":
-                predictor = self.xpu_predictor
-            elif use_device == "npu":
-                predictor = self.npu_predictor
-            elif use_device == "gpu":
-                predictor = self.gpu_predictor
-            else:
-                raise Exception("Unsupported device: " + use_device)
-        else:
-            # use_device is not set, therefore follow use_gpu
-            if use_gpu:
-                predictor = self.gpu_predictor
-            else:
-                predictor = self.cpu_predictor
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         if isinstance(text, list) and len(text) != 0:
 
@@ -295,8 +196,20 @@ class LAC(hub.Module):
                     batch_data = predicted_data[start_idx:]
 
                 start_idx = start_idx + batch_size
-                batch_out = self._internal_predict(predictor, batch_data)
-                batch_result = parse_result(batch_data, batch_out, self.id2label_dict, interventer=self.custom)
+                data, lod, shape = self.preprocess(batch_data)
+
+                predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+                input_names = predictor.get_input_names()
+                input_handle = predictor.get_input_handle(input_names[0])
+                input_handle.copy_from_cpu(data)
+                input_handle.set_lod(lod)
+                input_handle.reshape(shape)
+
+                predictor.run()
+                output_names = predictor.get_output_names()
+                output_handle = predictor.get_output_handle(output_names[0])
+
+                batch_result = parse_result(batch_data, output_handle, self.id2label_dict, interventer=self.custom)
                 results += batch_result
 
             for index in empty_str_indexes:
@@ -309,8 +222,20 @@ class LAC(hub.Module):
 
             return results
         elif isinstance(text, str) and text != "":
-            batch_out = self._internal_predict(predictor, [text])
-            batch_result = parse_result([text], batch_out, self.id2label_dict, interventer=self.custom)
+            data, lod, shape = self.preprocess([text])
+
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(data)
+            input_handle.set_lod(lod)
+            input_handle.reshape(shape)
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+
+            batch_result = parse_result([text], output_handle, self.id2label_dict, interventer=self.custom)
 
             return batch_result[0]['word']
         elif text == "":
@@ -318,7 +243,7 @@ class LAC(hub.Module):
         else:
             raise TypeError("The input data is inconsistent with expectations.")
 
-    def lexical_analysis(self, texts=[], data={}, use_gpu=False, batch_size=1, return_tag=True, use_device=None):
+    def lexical_analysis(self, texts=[], data={}, use_gpu=False, batch_size=1, return_tag=True):
         """
         Get the word segmentation results with the texts as input
 
@@ -328,30 +253,19 @@ class LAC(hub.Module):
              use_gpu(bool): whether use gpu to predict or not
              batch_size(int): the program deals once with one batch
              return_tag: Whether to get tag or not.
-             use_device (str): use cpu, gpu, xpu or npu, overwrites use_gpu flag.
 
         Returns:
              results(list): the word segmentation results
         """
 
-        # real predictor to use
-        if use_device is not None:
-            if use_device == "cpu":
-                predictor = self.cpu_predictor
-            elif use_device == "xpu":
-                predictor = self.xpu_predictor
-            elif use_device == "npu":
-                predictor = self.npu_predictor
-            elif use_device == "gpu":
-                predictor = self.gpu_predictor
-            else:
-                raise Exception("Unsupported device: " + use_device)
-        else:
-            # use_device is not set, therefore follow use_gpu
-            if use_gpu:
-                predictor = self.gpu_predictor
-            else:
-                predictor = self.cpu_predictor
+        if use_gpu:
+            try:
+                _places = os.environ["CUDA_VISIBLE_DEVICES"]
+                int(_places[0])
+            except:
+                raise RuntimeError(
+                    "Environment Variable CUDA_VISIBLE_DEVICES is not set correctly. If you wanna use gpu, please set CUDA_VISIBLE_DEVICES as cuda_device_id."
+                )
 
         if texts != [] and isinstance(texts, list) and data == {}:
             predicted_data = texts
@@ -376,8 +290,20 @@ class LAC(hub.Module):
                 batch_data = predicted_data[start_idx:]
 
             start_idx = start_idx + batch_size
-            batch_out = self._internal_predict(predictor, batch_data)
-            batch_result = parse_result(batch_data, batch_out, self.id2label_dict, interventer=self.custom)
+            data, lod, shape = self.preprocess(batch_data)
+
+            predictor = self.gpu_predictor if use_gpu else self.cpu_predictor
+            input_names = predictor.get_input_names()
+            input_handle = predictor.get_input_handle(input_names[0])
+            input_handle.copy_from_cpu(data)
+            input_handle.set_lod(lod)
+            input_handle.reshape(shape)
+
+            predictor.run()
+            output_names = predictor.get_output_names()
+            output_handle = predictor.get_output_handle(output_names[0])
+
+            batch_result = parse_result(batch_data, output_handle, self.id2label_dict, interventer=self.custom)
             results += batch_result
 
         for index in empty_str_indexes:
@@ -421,8 +347,7 @@ class LAC(hub.Module):
         results = self.lexical_analysis(texts=input_data,
                                         use_gpu=args.use_gpu,
                                         batch_size=args.batch_size,
-                                        return_tag=args.return_tag,
-                                        use_device=args.use_device)
+                                        return_tag=args.return_tag)
 
         return results
 
@@ -458,9 +383,6 @@ class LAC(hub.Module):
                                            type=ast.literal_eval,
                                            default=True,
                                            help="whether return tags of results or not")
-        self.arg_config_group.add_argument('--use_device',
-                                           choices=["cpu", "gpu", "xpu", "npu"],
-                                           help="use cpu, gpu, xpu or npu. overwrites use_gpu flag.")
 
     def add_module_input_arg(self):
         """
@@ -489,30 +411,3 @@ class LAC(hub.Module):
             raise DataFormatError
 
         return input_data
-
-
-if __name__ == '__main__':
-    lac = LAC(user_dict="user.dict")
-    # or use the fuction user_dict to set
-    # lac.set_user_dict("user.dict")
-
-    test_text = ["今天是个好日子", "天气预报说今天要下雨", "", "下一班地铁马上就要到了", "", "调料份量不能多，也不能少，味道才能正好", "", "", "春天的花开秋天的风以及冬天的落阳"]
-
-    # execute predict and print the result
-    results = lac.cut(text=test_text, use_gpu=True, batch_size=7, return_tag=True)
-    for result in results:
-        if six.PY2:
-            print(json.dumps(result['word'], encoding="utf8", ensure_ascii=False))
-            print(json.dumps(result['tag'], encoding="utf8", ensure_ascii=False))
-        else:
-            print(result['word'])
-            print(result['tag'])
-
-    # delete the customized dictionary
-    lac.del_user_dict()
-
-    results = lac.cut(text="春天的花开秋天的风以及冬天的落阳", use_gpu=False, batch_size=1, return_tag=False)
-    print(results)
-
-    # get the tags that was exploited as pretraining lac
-    print(lac.get_tags())

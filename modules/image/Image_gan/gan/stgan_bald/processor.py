@@ -1,11 +1,10 @@
 # -*- coding:utf-8 -*-
 import os
-import time
 import base64
 
 import cv2
-from PIL import Image
 import numpy as np
+from PIL import Image
 
 __all__ = ['cv2_to_base64', 'base64_to_cv2', 'postprocess']
 
@@ -22,7 +21,12 @@ def base64_to_cv2(b64str):
     return data
 
 
-def postprocess(data_out, org_im, org_im_path, output_dir, visualization, thresh=120):
+def postprocess(data_out,
+                org_im,
+                org_im_path,
+                output_dir,
+                visualization,
+                thresh=120):
     """
     Postprocess output of network. one image at a time.
 
@@ -41,7 +45,7 @@ def postprocess(data_out, org_im, org_im_path, output_dir, visualization, thresh
     result = dict()
     for i, img in enumerate(data_out):
 
-        img = np.squeeze(img[0].as_ndarray(), 0).transpose((1, 2, 0))
+        img = np.squeeze(img.copy_to_cpu(), 0).transpose((1, 2, 0))
         img = ((img + 1) * 127.5).astype(np.uint8)
         img = cv2.resize(img, (256, 341), cv2.INTER_CUBIC)
         fake_image = Image.fromarray(img)
@@ -76,6 +80,7 @@ def get_save_image_name(org_im_path, output_dir, num):
     # save image path
     save_im_path = os.path.join(output_dir, im_prefix + ext)
     if os.path.exists(save_im_path):
-        save_im_path = os.path.join(output_dir, im_prefix + str(num) + ext)
+        save_im_path = os.path.join(
+            output_dir, im_prefix + str(num) + ext)
 
     return save_im_path

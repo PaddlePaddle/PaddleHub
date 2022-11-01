@@ -1,7 +1,7 @@
-# deeplabv3p_xception65_humanseg 
+# deeplabv3p_xception65_humanseg
 
 |Module Name |deeplabv3p_xception65_humanseg|
-| :--- | :---: | 
+| :--- | :---: |
 |Category|Image segmentation|
 |Network|deeplabv3p|
 |Dataset|Baidu self-built dataset|
@@ -10,7 +10,7 @@
 |Data indicators |-|
 |Latest update date|2021-02-26|
 
-## I. Basic Information 
+## I. Basic Information
 
 - ### Application Effect Display
 
@@ -18,7 +18,7 @@
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130913256-41056b21-1c3d-4ee2-b481-969c94754609.png" width = "337" height = "505" hspace='10'/>
     </p>
-    
+
 - ### Module Introduction
 
   - DeepLabv3+ model is trained by Baidu self-built dataset, which can be used for portrait segmentation.
@@ -70,11 +70,11 @@
 
     - ```python
       def segmentation(images=None,
-                      paths=None,
-                      batch_size=1,
-                      use_gpu=False,
-                      visualization=False,
-                      output_dir='humanseg_output')
+                       paths=None,
+                       batch_size=1,
+                       use_gpu=False,
+                       visualization=False,
+                       output_dir='humanseg_output')
       ```
 
       - Prediction API, generating segmentation result.
@@ -89,24 +89,18 @@
 
       - **Return**
 
-          * res (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
+          * res (list\[dict\]): The list of recognition results, where each element is dict and each field is:
               * save\_path (str, optional): Save path of the result.
-              * data (numpy.ndarray): The result of portrait segmentation. 
+              * data (numpy.ndarray): The result of portrait segmentation.
 
     - ```python
-      def save_inference_model(dirname,
-                              model_filename=None,
-                              params_filename=None,
-                              combined=True)
+      def save_inference_model(dirname)
       ```
 
       - Save the model to the specified path.
 
       - **Parameters**
-        * dirname: Save path.
-        * model\_filename: Model file name，defalt is \_\_model\_\_
-        * params\_filename: Parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
-        * combined: Whether to save the parameters to a unified file.
+        * dirname: Model save path.
 
 
 ## IV. Server Deployment
@@ -128,34 +122,35 @@
 
   - With a configured server, use the following lines of code to send the prediction request and obtain the result
 
-    - ```python
-      import requests
-      import json
-      import cv2
-      import base64
-      import numpy as np
+  - ```python
+    import requests
+    import json
+    import cv2
+    import base64
+    import numpy as np
 
 
-      def cv2_to_base64(image):
-          data = cv2.imencode('.jpg', image)[1]
-          return base64.b64encode(data.tostring()).decode('utf8')
+    def cv2_to_base64(image):
+        data = cv2.imencode('.jpg', image)[1]
+        return base64.b64encode(data.tostring()).decode('utf8')
 
 
-      def base64_to_cv2(b64str):
-          data = base64.b64decode(b64str.encode('utf8'))
-          data = np.fromstring(data, np.uint8)
-          data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-          return data
+    def base64_to_cv2(b64str):
+        data = base64.b64decode(b64str.encode('utf8'))
+        data = np.fromstring(data, np.uint8)
+        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+        return data
 
-      # Send an HTTP request
-      data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
-      headers = {"Content-type": "application/json"}
-      url = "http://127.0.0.1:8866/predict/deeplabv3p_xception65_humanseg"
-      r = requests.post(url=url, headers=headers,
-      mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2GRAY)
-      rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
-      cv2.imwrite("segment_human_server.png", rgba)
-      ```
+    org_im = cv2.imread("/PATH/TO/IMAGE")
+    # Send an HTTP request
+    data = {'images':[cv2_to_base64(org_im)]}
+    headers = {"Content-type": "application/json"}
+    url = "http://127.0.0.1:8866/predict/deeplabv3p_xception65_humanseg"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+    mask =cv2.cvtColor(base64_to_cv2(r.json()["results"][0]['data']), cv2.COLOR_BGR2GRAY)
+    rgba = np.concatenate((org_im, np.expand_dims(mask, axis=2)), axis=2)
+    cv2.imwrite("segment_human_server.png", rgba)
+    ```
 ## V. Release Note
 
 - 1.0.0
@@ -170,6 +165,10 @@
 
    Fix the bug of image value out of range
 
-* 1.1.2
+* 1.2.0
 
-    Fix memory leakage problem of on cudnn 8.0.4
+   Remove fluid api
+
+  - ```shell
+    $ hub install deeplabv3p_xception65_humanseg==1.2.0
+    ```
