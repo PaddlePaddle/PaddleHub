@@ -70,11 +70,11 @@
 
     - ```python
       def segmentation(images=None,
-                      paths=None,
-                      batch_size=1,
-                      use_gpu=False,
-                      visualization=False,
-                      output_dir='humanseg_output')
+                       paths=None,
+                       batch_size=1,
+                       use_gpu=False,
+                       visualization=False,
+                       output_dir='humanseg_output')
       ```
 
       - Prediction API, generating segmentation result.
@@ -94,19 +94,13 @@
               * data (numpy.ndarray): The result of portrait segmentation.
 
     - ```python
-      def save_inference_model(dirname,
-                              model_filename=None,
-                              params_filename=None,
-                              combined=True)
+      def save_inference_model(dirname)
       ```
 
       - Save the model to the specified path.
 
       - **Parameters**
-        * dirname: Save path.
-        * model\_filename: Model file name，defalt is \_\_model\_\_
-        * params\_filename: Parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
-        * combined: Whether to save the parameters to a unified file.
+        * dirname: Model save path.
 
 
 ## IV. Server Deployment
@@ -171,10 +165,10 @@
 
    Fix the bug of image value out of range
 
-* 1.1.2
+* 1.2.0
 
    Remove fluid api
 
   - ```shell
-    $ hub install deeplabv3p_xception65_humanseg==1.1.2
+    $ hub install deeplabv3p_xception65_humanseg==1.2.0
     ```

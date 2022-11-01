@@ -130,6 +130,11 @@
 * 1.1.0
 
   Improve the prediction performance and users' experience
+
+* 1.2.0
+
+  Remove Fluid API
+
   - ```shell
-    $ hub install efficientnetb2_imagenet==1.1.0
+    $ hub install efficientnetb2_imagenet==1.2.0
     ```
