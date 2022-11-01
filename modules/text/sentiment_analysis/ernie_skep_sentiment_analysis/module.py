@@ -20,19 +20,22 @@ import argparse
 import ast
 import os
 
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
-from paddlehub import TransformerModule
-from paddlehub.module.module import moduleinfo, runnable, serving
-from paddlehub.reader.tokenization import convert_to_unicode, FullTokenizer
-from paddlehub.reader.batching import pad_batch_data
 import numpy as np
+from ernie_skep_sentiment_analysis.model.ernie import ErnieConfig
+from paddle.framework import core
 
-from ernie_skep_sentiment_analysis.model.ernie import ErnieModel, ErnieConfig
+from paddlehub import TransformerModule
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
+from paddlehub.reader.batching import pad_batch_data
+from paddlehub.reader.tokenization import convert_to_unicode
+from paddlehub.reader.tokenization import FullTokenizer
 
 
 @moduleinfo(
     name="ernie_skep_sentiment_analysis",
-    version="1.0.0",
+    version="1.0.1",
     summary=
     "SKEP: Sentiment Knowledge Enhanced Pre-training for Sentiment Analysis. Ernie_skep_sentiment_analysis module is initialize with enie_1.0_chn_large when pretraining. This module is finetuned on ChnSentiCorp dataset to do sentiment claasification. It can do sentiment analysis prediction directly, label as positive or negative.",
     author="baidu-nlp",
@@ -69,7 +72,7 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
         model_file_path = os.path.join(self.infer_model_path, 'model')
         params_file_path = os.path.join(self.infer_model_path, 'params')
 
-        config = AnalysisConfig(model_file_path, params_file_path)
+        config = core.AnalysisConfig(model_file_path, params_file_path)
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
             int(_places[0])
@@ -84,38 +87,13 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
 
         config.disable_glog_info()
 
-        self.predictor = create_paddle_predictor(config)
-
-    def net(self, input_ids, position_ids, segment_ids, input_mask):
-        """
-        create neural network.
-        Args:
-            input_ids (tensor): the word ids.
-            position_ids (tensor): the position ids.
-            segment_ids (tensor): the segment ids.
-            input_mask (tensor): the padding mask.
-
-        Returns:
-            pooled_output (tensor):  sentence-level output for classification task.
-            sequence_output (tensor): token-level output for sequence task.
-        """
-        ernie = ErnieModel(
-            src_ids=input_ids,
-            position_ids=position_ids,
-            sentence_ids=segment_ids,
-            input_mask=input_mask,
-            config=self.ernie_config,
-            use_fp16=False)
-
-        pooled_output = ernie.get_pooled_output()
-        sequence_output = ernie.get_sequence_output()
-        return pooled_output, sequence_output
+        self.predictor = core.create_paddle_predictor(config)
 
     def array2tensor(self, arr_data):
         """
         convert numpy array to PaddleTensor
         """
-        tensor_data = PaddleTensor(arr_data)
+        tensor_data = core.PaddleTensor(arr_data)
         return tensor_data
 
     @serving
@@ -212,11 +190,10 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
         """
         Run as a command
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the %s module." % self.name,
-            prog='hub run %s' % self.name,
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the %s module." % self.name,
+                                              prog='hub run %s' % self.name,
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -233,8 +210,10 @@ class ErnieSkepSentimentAnalysis(TransformerModule):
         """
         Add the command config options
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not")
 
     def add_module_input_arg(self):
         """

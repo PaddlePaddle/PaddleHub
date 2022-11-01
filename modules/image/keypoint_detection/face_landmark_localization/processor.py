@@ -6,7 +6,6 @@ from __future__ import print_function
 import base64
 import os
 import time
-from collections import OrderedDict
 
 import cv2
 import numpy as np
@@ -37,7 +36,7 @@ def get_image_ext(image):
 
 def postprocess(res, output_dir, visualization):
     """
-    postprocess ouput of network, one face at a time.
+    postprocess output of network, one face at a time.
     """
     output = []
     _cur_id = -1

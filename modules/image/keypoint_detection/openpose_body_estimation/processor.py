@@ -1,11 +1,10 @@
-import os
 import base64
 import math
 from typing import Callable
 
 import cv2
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 
 
 class PadDownRight:

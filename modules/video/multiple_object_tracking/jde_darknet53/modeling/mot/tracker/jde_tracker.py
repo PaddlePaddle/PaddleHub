@@ -97,7 +97,7 @@ class FrozenJDETracker(object):
 
         Return:
             output_stracks (list): The list contains information regarding the
-                online_tracklets for the recieved image tensor.
+                online_tracklets for the received image tensor.
         """
         self.frame_id += 1
         activated_starcks = []

@@ -101,19 +101,13 @@
 
 
   - ```python
-    def save_inference_model(dirname,
-                             model_filename=None,
-                             params_filename=None,
-                             combined=True)
+    def save_inference_model(dirname)
     ```
     - Save model to specific path
 
     - **Parameters**
 
-      - dirname: output dir for saving model
-      - model\_filename: filename for saving model
-      - params\_filename: filename for saving parameters
-      - combined: whether save parameters into one file
+      - dirname: model save path
 
 
 ## IV.Server Deployment
@@ -163,7 +157,14 @@
 
   First release
 
-* 1.1.2
+* 1.1.3
+
+  Remove fluid api
+
+* 1.2.0
+
+  Fix a bug of save_inference_model
+
   - ```shell
-    $ hub install ultra_light_fast_generic_face_detector_1mb_320==1.1.2
+    $ hub install ultra_light_fast_generic_face_detector_1mb_320==1.2.0
     ```

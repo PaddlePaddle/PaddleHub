@@ -24,7 +24,7 @@ from paddlehub.datasets import ESC50
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("--wav", type=str, required=True, help="Audio file to infer.")
 parser.add_argument("--sr", type=int, default=44100, help="Sample rate of inference audio.")
-parser.add_argument("--model_type", type=str, default='panns_cnn14', help="Select model to to inference.")
+parser.add_argument("--model_type", type=str, default='panns_cnn14', help="Select model to inference.")
 parser.add_argument("--topk", type=int, default=1, help="Show top k results of prediction labels.")
 parser.add_argument(
     "--checkpoint", type=str, default='./checkpoint/best_model/model.pdparams', help="Checkpoint of model.")

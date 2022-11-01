@@ -141,7 +141,7 @@ class PretrainedModel(nn.Layer):
     - `pretrained_init_configuration` (dict): The dict has pretrained model names
       as keys, and the values are also dict preserving corresponding configuration
       for model initialization.
-    - `base_model_prefix` (str): represents the the attribute associated to the
+    - `base_model_prefix` (str): represents the attribute associated to the
       base model in derived classes of the same architecture adding layers on
       top of the base model.
     """
@@ -477,7 +477,7 @@ class TransformerModule(RunModule, TextServing):
                 example.extend((input_ids, token_type_ids))
             examples.append(example)
 
-        # Seperates data into some batches.
+        # Separates data into some batches.
         one_batch = []
         for example in examples:
             one_batch.append(example)
@@ -607,10 +607,14 @@ class TransformerModule(RunModule, TextServing):
                     # token labels
                     labels = [[self.label_map[i] for i in token_ids] for token_ids in batch_ids]
                 elif self.task == None:
-                    sequence_output, pooled_output = self(input_ids, segment_ids)
-                    results.append(
-                        [pooled_output.squeeze(0).numpy().tolist(),
-                         sequence_output.squeeze(0).numpy().tolist()])
+                    output = self(input_ids, segment_ids)
+                    if len(output) == 1:
+                        results.append(output.squeeze(0).numpy().tolist())
+                    else:
+                        sequence_output, pooled_output = output
+                        results.append(
+                            [pooled_output.squeeze(0).numpy().tolist(),
+                             sequence_output.squeeze(0).numpy().tolist()])
             if self.task:
                 # save probs only when return prob
                 if return_prob:

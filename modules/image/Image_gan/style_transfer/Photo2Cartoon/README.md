@@ -75,7 +75,7 @@
       - paths (list\[str\]): 输入图像路径；<br/>
       - output\_dir (str): 图片的保存路径，默认设为 output；<br/>
       - batch_size (int) : batch大小；<br/>  
-      - visualization (bool) : 是否将结果保存为图片文件；；<br/>
+      - visualization (bool) : 是否将结果保存为图片文件；<br/>
       - use_gpu (bool) : 是否使用 GPU 进行推理。
 
       **NOTE:** paths和images两个参数选择其一进行提供数据

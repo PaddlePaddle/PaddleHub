@@ -24,7 +24,7 @@
 - ### 1、Environmental dependence
 
   - paddlepaddle >= 1.8.0
-  
+
   - paddlehub >= 1.8.0    | [How to install PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、Installation
@@ -47,16 +47,16 @@
     or
   - ```shell
     $ hub run senta_bilstm --input_file test.txt
-    ```    
+    ```  
     - test.txt stores the text to be predicted, for example:
-    
+
       > 这家餐厅很好吃
- 
+
       > 这部电影真的很差劲
-      
+
     - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command line instruction](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
-    
-    
+
+
 - ### 2、Prediction Code Example
 
   - ```python
@@ -64,17 +64,17 @@
 
     senta = hub.Module(name="senta_bilstm")
     test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
-    results = senta.sentiment_classify(texts=test_text, 
+    results = senta.sentiment_classify(texts=test_text,
                                        use_gpu=False,
                                        batch_size=1)
-        
+
     for result in results:
         print(result['text'])
         print(result['sentiment_label'])
         print(result['sentiment_key'])
         print(result['positive_probs'])
         print(result['negative_probs'])
-    
+
     # 这家餐厅很好吃 1 positive 0.9407 0.0593
     # 这部电影真的很差劲 0 negative 0.02 0.98
     ```
@@ -84,7 +84,7 @@
   - ```python
     def sentiment_classify(texts=[], data={}, use_gpu=False, batch_size=1)
     ```
-    
+
     - senta_bilstm predicting interfaces, predicting sentiment classification of input sentences (dichotomies, positive/negative)
 
     - **Parameter**
@@ -173,7 +173,7 @@
 * 1.0.0
 
   First release
-  
+
 * 1.0.1
 
   Vocabulary upgrade
@@ -182,9 +182,10 @@
 
   Significantly improve predictive performance
 
-* 1.2.0
+* 1.2.1
 
-  Model upgrade, support transfer learning for text classification, text matching and other tasks
+  Remove fluid api
+
   - ```shell
-    $ hub install senta_bilstm==1.2.0
+    $ hub install senta_bilstm==1.2.1
     ```

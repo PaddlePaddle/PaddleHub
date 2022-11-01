@@ -109,7 +109,7 @@ class TaskHooks(object):
 
     def exist(self, hook_type: str, name: str) -> bool:
         '''
-        check if the the handler function of spectific event is existing.
+        check if the handler function of spectific event is existing.
         Args:
             hook_type (str): the spectific event name
             name (str): the handler function name

@@ -1,6 +1,6 @@
 # senta_bilstm
 |模型名称|senta_bilstm|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|文本-情感分析|
 |网络|BiLSTM|
 |数据集|百度自建数据集|
@@ -22,7 +22,7 @@
 - ### 1、环境依赖  
 
   - paddlepaddle >= 1.8.0
-  
+
   - paddlehub >= 1.8.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
@@ -45,12 +45,12 @@
     或者
   - ```shell
     $ hub run senta_bilstm --input_file test.txt
-    ```    
+    ```  
     - test.txt 存放待预测文本， 如：
       > 这家餐厅很好吃
- 
+
       > 这部电影真的很差劲
-      
+
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -60,17 +60,17 @@
 
     senta = hub.Module(name="senta_bilstm")
     test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
-    results = senta.sentiment_classify(texts=test_text, 
+    results = senta.sentiment_classify(texts=test_text,
                                        use_gpu=False,
                                        batch_size=1)
-        
+
     for result in results:
         print(result['text'])
         print(result['sentiment_label'])
         print(result['sentiment_key'])
         print(result['positive_probs'])
         print(result['negative_probs'])
-    
+
     # 这家餐厅很好吃 1 positive 0.9407 0.0593
     # 这部电影真的很差劲 0 negative 0.02 0.98
     ```
@@ -80,7 +80,7 @@
   - ```python
     def sentiment_classify(texts=[], data={}, use_gpu=False, batch_size=1)
     ```
-    
+
     - senta_bilstm预测接口，预测输入句子的情感分类(二分类，积极/消极）
 
     - **参数**
@@ -170,7 +170,7 @@
 * 1.0.0
 
   初始发布
-  
+
 * 1.0.1
 
   词汇表升级
@@ -182,6 +182,11 @@
 * 1.2.0
 
   模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
+
+* 1.2.1
+
+  移除 fluid api
+
   - ```shell
-    $ hub install senta_bilstm==1.2.0
+    $ hub install senta_bilstm==1.2.1
     ```

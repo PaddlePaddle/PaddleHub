@@ -6,25 +6,26 @@ from __future__ import print_function
 import json
 import math
 import os
-import six
 
-import paddle.fluid as fluid
+import six
+from senta_gru.processor import load_vocab
+from senta_gru.processor import postprocess
+from senta_gru.processor import preprocess
+
 import paddlehub as hub
 from paddlehub.common.paddle_helper import add_vars_prefix
-from paddlehub.module.module import moduleinfo, serving
-
-from senta_gru.net import gru_net
-from senta_gru.processor import load_vocab, preprocess, postprocess
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import serving
 
 
-@moduleinfo(
-    name="senta_gru",
-    version="1.2.0",
-    summary="Baidu's open-source Sentiment Classification System.",
-    author="baidu-nlp",
-    author_email="",
-    type="nlp/sentiment_analysis")
+@moduleinfo(name="senta_gru",
+            version="1.2.1",
+            summary="Baidu's open-source Sentiment Classification System.",
+            author="baidu-nlp",
+            author_email="",
+            type="nlp/sentiment_analysis")
 class SentaGRU(hub.NLPPredictionModule):
+
     def _initialize(self, user_dict=None):
         """
         initialize with the necessary elements
@@ -46,104 +47,6 @@ class SentaGRU(hub.NLPPredictionModule):
         if not self._word_seg_module:
             self._word_seg_module = hub.Module(name="lac")
         return self._word_seg_module
-
-    def context(self, trainable=False, max_seq_len=128, num_data=1):
-        """
-        Get the input ,output and program of the pretrained senta_gru
-
-        Args:
-             trainable(bool): Whether fine-tune the pretrained parameters of senta_gru or not.
-             max_seq_len (int): It will limit the total sequence returned so that it has a maximum length.
-             num_data(int): It's number of data inputted to the model, selectted as following options:
-
-                 - 1(default): There's only one data to be feeded in the model, e.g. the module is used for text classification task.
-                 - 2: There are two data to be feeded in the model, e.g. the module is used for text matching task (point-wise).
-                 - 3: There are three data to be feeded in the model, e.g. the module is used for text matching task (pair-wise).
-
-        Returns:
-             inputs(dict): the input variables of senta_gru (words)
-             outputs(dict): the output variables of input words (word embeddings and label probilities);
-                 the sentence embedding and sequence length of the first input text.
-             main_program(Program): the main_program of Senta with pretrained prameters
-        """
-        assert num_data >= 1 and num_data <= 3, "num_data(%d) must be 1, 2, or 3" % num_data
-        main_program = fluid.Program()
-        startup_program = fluid.Program()
-        with fluid.program_guard(main_program, startup_program):
-            text_1 = fluid.layers.data(name="text", shape=[-1, max_seq_len, 1], dtype="int64", lod_level=0)
-            seq_len = fluid.layers.data(name="seq_len", shape=[1], dtype='int64', lod_level=0)
-            seq_len_used = fluid.layers.squeeze(seq_len, axes=[1])
-
-            # Add embedding layer.
-            w_param_attrs = fluid.ParamAttr(
-                name="embedding_0.w_0", initializer=fluid.initializer.TruncatedNormal(scale=0.02), trainable=trainable)
-            dict_dim = 1256607
-            emb_1 = fluid.layers.embedding(
-                input=text_1, size=[dict_dim, 128], padding_idx=dict_dim - 1, dtype='float32', param_attr=w_param_attrs)
-            emb_1_name = emb_1.name
-            data_list = [text_1]
-            emb_name_list = [emb_1_name]
-
-            # Add lstm layer.
-            pred, fc = gru_net(emb_1, seq_len_used)
-            pred_name = pred.name
-            fc_name = fc.name
-
-            if num_data > 1:
-                text_2 = fluid.data(name='text_2', shape=[-1, max_seq_len], dtype='int64', lod_level=0)
-                emb_2 = fluid.embedding(
-                    input=text_2,
-                    size=[dict_dim, 128],
-                    padding_idx=dict_dim - 1,
-                    dtype='float32',
-                    param_attr=w_param_attrs)
-                emb_2_name = emb_2.name
-                data_list.append(text_2)
-                emb_name_list.append(emb_2_name)
-
-            if num_data > 2:
-                text_3 = fluid.data(name='text_3', shape=[-1, max_seq_len], dtype='int64', lod_level=0)
-                emb_3 = fluid.embedding(
-                    input=text_3,
-                    size=[dict_dim, 128],
-                    padding_idx=dict_dim - 1,
-                    dtype='float32',
-                    param_attr=w_param_attrs)
-                emb_3_name = emb_3.name
-                data_list.append(text_3)
-                emb_name_list.append(emb_3_name)
-
-            variable_names = filter(lambda v: v not in ['text', 'text_2', 'text_3', "seq_len"],
-                                    list(main_program.global_block().vars.keys()))
-            prefix_name = "@HUB_{}@".format(self.name)
-            add_vars_prefix(program=main_program, prefix=prefix_name, vars=variable_names)
-
-            for param in main_program.global_block().iter_parameters():
-                param.trainable = trainable
-
-            place = fluid.CPUPlace()
-            exe = fluid.Executor(place)
-
-            # Load the senta_lstm pretrained model.
-            def if_exist(var):
-                return os.path.exists(os.path.join(self.pretrained_model_path, var.name))
-
-            fluid.io.load_vars(exe, self.pretrained_model_path, predicate=if_exist)
-
-            inputs = {'seq_len': seq_len}
-            outputs = {
-                "class_probs": main_program.global_block().vars[prefix_name + pred_name],
-                "sentence_feature": main_program.global_block().vars[prefix_name + fc_name]
-            }
-            for index, data in enumerate(data_list):
-                if index == 0:
-                    inputs['text'] = data
-                    outputs['emb'] = main_program.global_block().vars[prefix_name + emb_name_list[0]]
-                else:
-                    inputs['text_%s' % (index + 1)] = data
-                    outputs['emb_%s' % (index + 1)] = main_program.global_block().vars[prefix_name +
-                                                                                       emb_name_list[index]]
-            return inputs, outputs, main_program
 
     @serving
     def sentiment_classify(self, texts=[], data={}, use_gpu=False, batch_size=1):
@@ -205,25 +108,3 @@ class SentaGRU(hub.NLPPredictionModule):
         """
         self.labels = {"positive": 1, "negative": 0}
         return self.labels
-
-
-if __name__ == "__main__":
-    senta = SentaGRU()
-    inputs, outputs, main_program = senta.context(num_slots=3)
-    # Data to be predicted
-    test_text = ["这家餐厅很好吃", "这部电影真的很差劲"]
-
-    # execute predict and print the result
-    input_dict = {"text": test_text}
-    results = senta.sentiment_classify(data=input_dict)
-    for index, result in enumerate(results):
-        if six.PY2:
-            print(json.dumps(results[index], encoding="utf8", ensure_ascii=False))
-        else:
-            print(results[index])
-    results = senta.sentiment_classify(texts=test_text)
-    for index, result in enumerate(results):
-        if six.PY2:
-            print(json.dumps(results[index], encoding="utf8", ensure_ascii=False))
-        else:
-            print(results[index])

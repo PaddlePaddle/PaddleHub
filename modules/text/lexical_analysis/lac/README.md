@@ -1,7 +1,7 @@
 # lac
 
 |模型名称|lac|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|文本-词法分析|
 |网络|BiGRU+CRF|
 |数据集|百度自建数据集|
@@ -17,7 +17,7 @@
 - ### 模型介绍
 
   - Lexical Analysis of Chinese，简称 LAC，是一个联合的词法分析模型，能整体性地完成中文分词、词性标注、专名识别任务。在百度自建数据集上评测，LAC效果：Precision=88.0%，Recall=88.7%，F1-Score=88.4%。该PaddleHub Module支持预测。
-  
+
 <p align="center">
 <img src="https://user-images.githubusercontent.com/76040149/130606395-60691079-d33f-4d74-a980-b4d9e3bc663e.png"   height = "300" hspace='10'/> <br />
 </p>
@@ -32,15 +32,15 @@
 - ### 1、环境依赖  
 
   - paddlepaddle >= 1.6.2
-  
+
   - paddlehub >= 1.6.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
-  
-  - 若使用词典干预功能，额外依赖第三方库 pyahocorasick 
- 
+
+  - 若使用词典干预功能，额外依赖第三方库 pyahocorasick
+
   - ```shell
     $ pip install pyahocorasick
     ```
-    
+
 - ### 2、安装
 
   - ```shell
@@ -63,23 +63,23 @@
   - ```shell
     $ hub run lac --input_file test.txt --user_dict user.dict
     ```
-    
+
     - test.txt 存放待分词文本， 如：
       - ```shell
-        今天是个好日子   
-        今天天气晴朗 
-        ``` 
+        今天是个好日子  
+        今天天气晴朗
+        ```
     - user.dict 为用户自定义词典，可以不指定，当指定自定义词典时，可以干预默认分词结果。如：
       - ```shell
         春天/SEASON
         花/n 开/v
         秋天的风
         落 阳  
-        ``` 
+        ```
       - 词典文件每行表示一个定制化的item，由一个单词或多个连续的单词组成，每个单词后使用'/'表示标签，如果没有'/'标签则会使用模型默认的标签。每个item单词数越多，干预效果会越精准。
 
     - Note：该PaddleHub Module使用词典干预功能时，依赖于第三方库pyahocorasick，请自行安装
- 
+
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -95,7 +95,7 @@
     for result in results:
         print(result['word'])
         print(result['tag'])
-        
+
     # ['今天', '是', '个', '好日子']
     # ['TIME', 'v', 'q', 'n']
     # ['天气预报', '说', '今天', '要', '下雨']
@@ -103,9 +103,9 @@
     # ['下', '一班', '地铁', '马上', '就要', '到', '了']
     # ['f', 'm', 'n', 'd', 'v', 'v', 'xc']
     ```
-    
-    
-    
+
+
+
 - ### 3、API
 
   - ```python
@@ -135,7 +135,7 @@
   - ```python
     def lexical_analysis(texts=[], data={}, use_gpu=False, batch_size=1, user_dict=None, return_tag=True)
     ```
-    
+
     - **该接口将会在未来版本被废弃，如有需要，请使用cut接口预测**
 
     - lac预测接口，预测输入句子的分词结果
@@ -282,6 +282,11 @@
 * 2.2.0
 
   升级自定义词典功能，支持增加不属于lac默认提供的词性
+
+* 2.3.0
+
+  移除 fluid api
+
   - ```shell
-    $ hub install lac==2.2.0
+    $ hub install lac==2.3.0
     ```

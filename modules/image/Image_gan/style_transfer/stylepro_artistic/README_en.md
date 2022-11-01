@@ -179,8 +179,10 @@
 
   First release
 
-* 1.0.1
+* 1.0.3
+
+  Remove fluid api
 
   - ```shell
-    $ hub install stylepro_artistic==1.0.1
+    $ hub install stylepro_artistic==1.0.3
     ```

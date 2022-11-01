@@ -1,7 +1,7 @@
 # chinese_text_detection_db_server
 
 |模型名称|chinese_text_detection_db_server|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-文字识别|
 |网络|Differentiable Binarization|
 |数据集|icdar2015数据集|
@@ -33,9 +33,9 @@
 
 ## 二、安装
 
-- ### 1、环境依赖     
+- ### 1、环境依赖  
 
-  - paddlepaddle >= 1.7.2    
+  - paddlepaddle >= 1.7.2  
 
   - paddlehub >= 1.6.0   | [如何安装paddlehub](../../../../docs/docs_ch/get_start/installation.rst)
 
@@ -46,7 +46,7 @@
   - ```shell
     $ pip install shapely pyclipper
     ```
-  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**			
+  - **该Module依赖于第三方库shapely和pyclipper，使用该Module之前，请先安装shapely和pyclipper。**
 
 - ### 2、安装
 
@@ -100,7 +100,7 @@
                     visualization=False)
     ```
     - 预测API，检测输入图片中的所有中文文本的位置。
-    
+
     - **参数**
 
       - paths (list\[str\]): 图片的路径；
@@ -145,7 +145,7 @@
     def cv2_to_base64(image):
         data = cv2.imencode('.jpg', image)[1]
         return base64.b64encode(data.tostring()).decode('utf8')
-    
+
     # 发送HTTP请求
     data = {'images':[cv2_to_base64(cv2.imread("/PATH/TO/IMAGE"))]}
     headers = {"Content-type": "application/json"}
@@ -170,7 +170,11 @@
 * 1.0.2
 
   增加更多预训练数据，更新预训练参数
-  
+
+* 1.0.3
+
+  移除 fluid api
+
   - ```shell
-    $ hub install chinese_text_detection_db_server==1.0.2
+    $ hub install chinese_text_detection_db_server==1.0.3
     ```

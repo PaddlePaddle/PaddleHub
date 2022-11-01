@@ -39,7 +39,7 @@ class AudioClassifierModule(RunModule):
             else:
                 examples.append(waveform)
 
-        # Seperates data into some batches.
+        # Separates data into some batches.
         one_batch = []
         for example in examples:
             one_batch.append(example)

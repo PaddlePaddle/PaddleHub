@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import functools
 import os
-from typing import Tuple, List
+from typing import List
+from typing import Tuple
 
 import paddle
 import paddle2onnx
@@ -23,7 +23,8 @@ from easydict import EasyDict
 
 from paddlehub.compat import paddle_utils
 from paddlehub.compat.module import module_v1_utils
-from paddlehub.utils import utils, log
+from paddlehub.utils import log
+from paddlehub.utils import utils
 
 
 class ModuleV1(object):
@@ -85,16 +86,15 @@ class ModuleV1(object):
 
             # Since the pre-trained model saved by the old version of Paddle cannot restore the corresponding
             # parameters, we need to restore them manually.
-            global_block.create_parameter(
-                name=name,
-                shape=var.shape,
-                dtype=var.dtype,
-                type=var.type,
-                lod_level=var.lod_level,
-                error_clip=var.error_clip,
-                stop_gradient=var.stop_gradient,
-                is_data=var.is_data,
-                **attrs)
+            global_block.create_parameter(name=name,
+                                          shape=var.shape,
+                                          dtype=var.dtype,
+                                          type=var.type,
+                                          lod_level=var.lod_level,
+                                          error_clip=var.error_clip,
+                                          stop_gradient=var.stop_gradient,
+                                          is_data=var.is_data,
+                                          **attrs)
 
         log.logger.info('{} pretrained paramaters loaded by PaddleHub'.format(num_param_loaded))
 
@@ -112,7 +112,7 @@ class ModuleV1(object):
     def _load_model(self):
         model_path = os.path.join(self.directory, 'model')
         exe = paddle.static.Executor(paddle.CPUPlace())
-        self.program, _, _ = paddle.fluid.io.load_inference_model(model_path, executor=exe)
+        self.program, _, _ = paddle.static.load_inference_model(model_path, executor=exe)
 
         # Clear the callstack since it may leak the privacy of the creator.
         for block in self.program.blocks:
@@ -122,7 +122,10 @@ class ModuleV1(object):
                 op._set_attr('op_callstack', [''])
 
     @paddle_utils.run_in_static_mode
-    def context(self, signature: str = None, for_test: bool = False, trainable: bool = True,
+    def context(self,
+                signature: str = None,
+                for_test: bool = False,
+                trainable: bool = True,
                 max_seq_len: int = 128) -> Tuple[dict, dict, paddle.static.Program]:
         '''Get module context information, including graph structure and graph input and output variables.'''
         program = self.program.clone(for_test=for_test)
@@ -171,6 +174,7 @@ class ModuleV1(object):
         '''Call the specified signature function for prediction.'''
 
         def _get_reader_and_feeder(data_format, data, place):
+
             def _reader(process_data):
                 for item in zip(*process_data):
                     yield item
@@ -284,14 +288,13 @@ class ModuleV1(object):
         exe = paddle.static.Executor(place)
 
         feed_dict, fetch_dict, program = self.context(for_test=True, trainable=False)
-        paddle.fluid.io.save_inference_model(
-            dirname=dirname,
-            main_program=program,
-            executor=exe,
-            feeded_var_names=[var.name for var in list(feed_dict.values())],
-            target_vars=list(fetch_dict.values()),
-            model_filename=model_filename,
-            params_filename=params_filename)
+        paddle.static.save_inference_model(dirname=dirname,
+                                           main_program=program,
+                                           executor=exe,
+                                           feeded_var_names=[var.name for var in list(feed_dict.values())],
+                                           target_vars=list(fetch_dict.values()),
+                                           model_filename=model_filename,
+                                           params_filename=params_filename)
 
         log.logger.info('Paddle Inference model saved in {}.'.format(dirname))
 
@@ -315,13 +318,12 @@ class ModuleV1(object):
             outputs = [program.global_block().vars[key] for key in outputs]
 
         save_file = os.path.join(dirname, '{}.onnx'.format(self.name))
-        paddle2onnx.program2onnx(
-            program=program,
-            scope=paddle.static.global_scope(),
-            feed_var_names=inputs,
-            target_vars=outputs,
-            save_file=save_file,
-            **kwargs)
+        paddle2onnx.program2onnx(program=program,
+                                 scope=paddle.static.global_scope(),
+                                 feed_var_names=inputs,
+                                 target_vars=outputs,
+                                 save_file=save_file,
+                                 **kwargs)
 
     def sub_modules(self, recursive: bool = True):
         '''

@@ -6,21 +6,22 @@ from __future__ import print_function
 import logging
 import os
 
-import paddle.fluid as fluid
 import paddlehub as hub
 from paddlehub.common.logger import logger
-from paddlehub.module.module import moduleinfo, serving
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import serving
 
 
 @moduleinfo(
     name="jieba_paddle",
-    version="1.0.0",
+    version="1.0.1",
     summary=
     "jieba_paddle is a chineses tokenizer using BiGRU base on the PaddlePaddle deeplearning framework. More information please refer to https://github.com/fxsjy/jieba.",
     author="baidu-paddle",
     author_email="paddle-dev@gmail.com",
     type="nlp/lexical_analysis")
 class JiebaPaddle(hub.Module):
+
     def _initialize(self):
         pass
 
@@ -61,7 +62,7 @@ class JiebaPaddle(hub.Module):
             import jieba
         except ImportError:
             print(
-                'This module requires jieba tools. The running enviroment does not meet the requirments. Please install jieba packages.'
+                'This module requires jieba tools. The running environment does not meet the requirments. Please install jieba packages.'
             )
             exit()
 
@@ -119,8 +120,11 @@ class JiebaPaddle(hub.Module):
         import jieba
         import jieba.analyse
         jieba.setLogLevel(logging.ERROR)
-        res = jieba.analyse.extract_tags(
-            sentence, topK=topK, withWeight=withWeight, allowPOS=allowPOS, withFlag=withFlag)
+        res = jieba.analyse.extract_tags(sentence,
+                                         topK=topK,
+                                         withWeight=withWeight,
+                                         allowPOS=allowPOS,
+                                         withFlag=withFlag)
         return res
 
     def textrank(self, sentence, topK=20, withWeight=False, allowPOS=('ns', 'n', 'vn', 'v'), withFlag=False):
@@ -143,24 +147,3 @@ class JiebaPaddle(hub.Module):
         jieba.setLogLevel(logging.ERROR)
         res = jieba.analyse.textrank(sentence, topK=topK, withWeight=withWeight, allowPOS=allowPOS, withFlag=withFlag)
         return res
-
-
-if __name__ == "__main__":
-    jb_pd = JiebaPaddle()
-    res = jb_pd.cut(
-        sentence="我来到北京清华大学",
-        use_paddle=True,
-    )
-    print(res)
-    res = jb_pd.cut(sentence="我来到北京清华大学", use_paddle=False, cut_all=True)
-    print(res)
-    res = jb_pd.cut(sentence="我来到北京清华大学", use_paddle=False, cut_all=False)
-    print(res)
-    res = jb_pd.cut_for_search(sentence="我来到北京清华大学")
-    print(res)
-    res = jb_pd.extract_tags(sentence="我来到北京清华大学")
-    print(res)
-    res = jb_pd.extract_tags(sentence="我来到北京清华大学", withWeight=True)
-    print(res)
-    res = jb_pd.textrank(sentence="我来到北京清华大学", withWeight=True)
-    print(res)

@@ -36,7 +36,7 @@ class Registry(object):
 
     def register(self, obj=None, name=None):
         """
-        Register the given object under the the name `obj.__name__`.
+        Register the given object under the name `obj.__name__`.
         Can be used as either a decorator or not. See docstring of this class for usage.
         """
         if obj is None:
