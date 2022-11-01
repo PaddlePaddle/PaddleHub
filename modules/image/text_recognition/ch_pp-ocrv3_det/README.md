@@ -88,7 +88,7 @@
                     images=[],
                     use_gpu=False,
                     output_dir='detection_result',
-                    box_thresh=0.5,
+                    box_thresh=0.6,
                     visualization=False,
                     det_db_unclip_ratio=1.5)
     ```
