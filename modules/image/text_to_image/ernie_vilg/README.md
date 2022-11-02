@@ -389,6 +389,11 @@ DiscoDiffusion Prompt 技巧资料：https://docs.google.com/document/d/1l8s7uS2
 * 1.1.0
 
   增加分辨率参数以及所支持的风格
+
+* 1.2.0
+
+  移除分辨率参数
+
   ```shell
-  $ hub install ernie_vilg == 1.1.0
+  $ hub install ernie_vilg == 1.2.0
   ```
