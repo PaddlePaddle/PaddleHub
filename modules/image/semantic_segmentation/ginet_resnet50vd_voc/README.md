@@ -1,7 +1,7 @@
 # ginet_resnet50vd_voc
 
 |模型名称|ginet_resnet50vd_voc|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-图像分割|
 |网络|ginet_resnet50vd|
 |数据集|PascalVOC2012|
@@ -11,7 +11,7 @@
 |最新更新日期|2021-12-14|
 
 ## 一、模型基本信息
-  
+
   - 样例结果示例：
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/145925887-bf9e62d3-8c6d-43c2-8062-6cb6ba59ec0e.jpg"  width = "420" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/145925692-badb21d1-10e7-4a5d-82f5-1177d10a7681.png" width = "420" height = "505" hspace='10'/>
@@ -37,7 +37,7 @@
       ```
 
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
-    | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)   
+    | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)  
 
 
 ## 三、模型API预测
@@ -104,7 +104,7 @@
               trainer = Trainer(model, optimizer, checkpoint_dir='test_ckpt_img_seg', use_gpu=True)
               trainer.train(train_reader, epochs=10, batch_size=4, log_interval=10, save_interval=4)
               ```
-             
+
 
     - 模型预测
 
