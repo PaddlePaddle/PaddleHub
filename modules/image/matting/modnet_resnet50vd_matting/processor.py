@@ -11,17 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import random
 import base64
-from typing import Callable, Union, List, Tuple
+from typing import Callable
+from typing import List
+from typing import Tuple
+from typing import Union
 
 import cv2
 import numpy as np
 import paddle
 import paddle.nn.functional as F
 from paddleseg.transforms import functional
-from PIL import Image
 
 
 class Compose:
@@ -61,6 +61,7 @@ class LoadImages:
     Args:
         to_rgb (bool, optional): If converting image to RGB color space. Default: True.
     """
+
     def __init__(self, to_rgb: bool = True):
         self.to_rgb = to_rgb
 
@@ -95,7 +96,7 @@ class ResizeByShort:
         short_size (int): The target size of short side.
     """
 
-    def __init__(self, short_size: int =512):
+    def __init__(self, short_size: int = 512):
         self.short_size = short_size
 
     def __call__(self, data: dict) -> dict:
@@ -140,14 +141,13 @@ class Normalize:
         ValueError: When mean/std is not list or any value in std is 0.
     """
 
-    def __init__(self, mean: Union[List[float], Tuple[float]] = (0.5, 0.5, 0.5), std: Union[List[float], Tuple[float]] = (0.5, 0.5, 0.5)):
+    def __init__(self,
+                 mean: Union[List[float], Tuple[float]] = (0.5, 0.5, 0.5),
+                 std: Union[List[float], Tuple[float]] = (0.5, 0.5, 0.5)):
         self.mean = mean
         self.std = std
-        if not (isinstance(self.mean, (list, tuple))
-                and isinstance(self.std, (list, tuple))):
-            raise ValueError(
-                "{}: input type is invalid. It should be list or tuple".format(
-                    self))
+        if not (isinstance(self.mean, (list, tuple)) and isinstance(self.std, (list, tuple))):
+            raise ValueError("{}: input type is invalid. It should be list or tuple".format(self))
         from functools import reduce
         if reduce(lambda x, y: x * y, self.std) == 0:
             raise ValueError('{}: std is invalid!'.format(self))
@@ -176,6 +176,7 @@ def reverse_transform(alpha: paddle.Tensor, trans_info: List[str]):
         else:
             raise Exception("Unexpected info '{}' in im_info".format(item[0]))
     return alpha
+
 
 def save_alpha_pred(alpha: np.ndarray, trimap: np.ndarray = None):
     """
