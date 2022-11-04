@@ -65,13 +65,13 @@ class ReadingPicturesWritingPoems:
         FirstPoetry = ["{:.5}，{:.5}。".format(ChuJu, DuiJu)]  # 古诗词的上阕
         results = self.module_poem.generate(texts=FirstPoetry, use_gpu=use_gpu, beam_width=5)
         SecondPoetry = ["{:.12}".format(results[0][0])]
-        Poetrys = []
-        Poetrys.append(FirstPoetry)
-        Poetrys.append(SecondPoetry)
+        poetry = []
+        poetry.append(FirstPoetry)
+        poetry.append(SecondPoetry)
         print("根据图片生成的古诗词：")
-        print("{}".format(Poetrys[0][0]))
-        print("{}".format(Poetrys[1][0]))
-        results = [{'image': image, 'poetry': "{}".format(Poetrys[0][0] + Poetrys[1][0])}]
+        print("{}".format(poetry[0][0]))
+        print("{}".format(poetry[1][0]))
+        results = [{'image': image, 'poetry': "{}".format(poetry[0][0] + poetry[1][0])}]
 
         return results
 
