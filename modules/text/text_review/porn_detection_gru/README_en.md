@@ -22,7 +22,7 @@
 - ### 1、Environmental dependence
 
   - paddlepaddle >= 1.6.2
-  
+
   - paddlehub >= 1.6.0    | [How to install PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、Installation
@@ -42,45 +42,45 @@
   - ```shell
     $ hub run porn_detection_gru --input_text "黄片下载"
     ```
-    
+
   - or
 
   - ```shell
     $ hub run porn_detection_gru --input_file test.txt
     ```
-    
+
     - test.txt stores the text to be reviewed. Each line contains only one text
-    
+
   - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command line instruction](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、Prediction Code Example
 
   - ```python
     import paddlehub as hub
-    
+
     porn_detection_gru = hub.Module(name="porn_detection_gru")
-    
+
     test_text = ["黄片下载", "打击黄牛党"]
-    
+
     results = porn_detection_gru.detection(texts=test_text, use_gpu=True, batch_size=1)   # If you do not use GPU, please set use_gpu=False
-    
+
     for index, text in enumerate(test_text):
         results[index]["text"] = text
     for index, result in enumerate(results):
         print(results[index])
-    
+
     # The output：
     # {'text': '黄片下载', 'porn_detection_label': 1, 'porn_detection_key': 'porn', 'porn_probs': 0.9324, 'not_porn_probs': 0.0676}
     # {'text': '打击黄牛党', 'porn_detection_label': 0, 'porn_detection_key': 'not_porn', 'porn_probs': 0.0004, 'not_porn_probs': 0.9996}
     ```
 
-  
+
 - ### 3、API
 
   - ```python
     def detection(texts=[], data={}, use_gpu=False, batch_size=1)
     ```
-  
+
     - prediction api of porn_detection_gru，to identify whether input sentences contain pornography
 
     - **Parameter**
@@ -144,7 +144,7 @@
   - ```python
     import requests
     import json
-    
+
     # data to be predicted
     text = ["黄片下载", "打击黄牛党"]
 
@@ -177,7 +177,11 @@
 
   Improves prediction performance and simplifies interface usage
 
+* 1.2.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install porn_detection_gru==1.1.0
+    $ hub install porn_detection_gru==1.2.0
     ```
-    
+

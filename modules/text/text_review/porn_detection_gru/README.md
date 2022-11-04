@@ -22,7 +22,7 @@
 - ### 1、环境依赖
 
   - paddlepaddle >= 1.6.2
-  
+
   - paddlehub >= 1.6.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
@@ -42,45 +42,45 @@
   - ```shell
     $ hub run porn_detection_gru --input_text "黄片下载"
     ```
-    
+
   - 或者
 
   - ```shell
     $ hub run porn_detection_gru --input_file test.txt
     ```
-    
+
     - 其中test.txt存放待审查文本，每行仅放置一段待审核文本
-    
+
   - 通过命令行方式实现hub模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
-    
+
     porn_detection_gru = hub.Module(name="porn_detection_gru")
-    
+
     test_text = ["黄片下载", "打击黄牛党"]
-    
+
     results = porn_detection_gru.detection(texts=test_text, use_gpu=True, batch_size=1)   # 如不使用GPU，请修改为use_gpu=False
-    
+
     for index, text in enumerate(test_text):
         results[index]["text"] = text
     for index, result in enumerate(results):
         print(results[index])
-    
+
     # 输出结果如下：
     # {'text': '黄片下载', 'porn_detection_label': 1, 'porn_detection_key': 'porn', 'porn_probs': 0.9324, 'not_porn_probs': 0.0676}
     # {'text': '打击黄牛党', 'porn_detection_label': 0, 'porn_detection_key': 'not_porn', 'porn_probs': 0.0004, 'not_porn_probs': 0.9996}
     ```
 
-  
+
 - ### 3、API
 
   - ```python
     def detection(texts=[], data={}, use_gpu=False, batch_size=1)
     ```
-  
+
     - porn_detection_gru预测接口，鉴定输入句子是否包含色情文案
 
     - **参数**
@@ -146,7 +146,7 @@
   - ```python
     import requests
     import json
-    
+
     # 待预测数据
     text = ["黄片下载", "打击黄牛党"]
 
@@ -179,7 +179,11 @@
 
   大幅提升预测性能，同时简化接口使用
 
+* 1.2.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install porn_detection_gru==1.1.0
+    $ hub install porn_detection_gru==1.2.0
     ```
-    
+
