@@ -12,20 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import os
 import glob
+import os
 
 import cv2
+import numpy as np
 import paddle
 import paddle.nn as nn
-import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
 from . import utils as U
-from paddlehub.module.module import moduleinfo, serving
 from .base_module import build_model
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import serving
 
 
 @moduleinfo(name="deoldify",
@@ -35,6 +35,7 @@ from .base_module import build_model
             summary="Deoldify is a colorizaton model",
             version="1.1.0")
 class DeOldifyPredictor(nn.Layer):
+
     def __init__(self, render_factor: int = 32, output_path: int = 'output', load_checkpoint: str = None):
         super(DeOldifyPredictor, self).__init__()
         self.model = build_model()
@@ -78,7 +79,6 @@ class DeOldifyPredictor(nn.Layer):
 
         return (img * 255).clip(0, 255).astype('uint8')
 
-    
     def post_process(self, raw_color, orig):
         color_np = np.asarray(raw_color)
         orig_np = np.asarray(orig)
@@ -105,7 +105,7 @@ class DeOldifyPredictor(nn.Layer):
         pred_img = Image.fromarray(pred_img)
         pred_img = pred_img.resize(ori_img.size, resample=Image.BILINEAR)
         pred_img = self.post_process(pred_img, ori_img)
-        pred_img =cv2.cvtColor(pred_img, cv2.COLOR_RGB2BGR)
+        pred_img = cv2.cvtColor(pred_img, cv2.COLOR_RGB2BGR)
         return pred_img
 
     def run_video(self, video):
@@ -135,20 +135,19 @@ class DeOldifyPredictor(nn.Layer):
 
         frame_pattern_combined = os.path.join(pred_frame_path, '%08d.png')
 
-        vid_out_path = os.path.join(output_path,
-                                    '{}_deoldify_out.mp4'.format(base_name))
+        vid_out_path = os.path.join(output_path, '{}_deoldify_out.mp4'.format(base_name))
         U.frames2video(frame_pattern_combined, vid_out_path, str(int(fps)))
         print('Save video result at {}.'.format(vid_out_path))
 
         return frame_pattern_combined, vid_out_path
 
     def predict(self, input):
-        
+
         if not U.is_image(input):
             return self.run_video(input)
         else:
             pred_img = self.run_image(input)
-            
+
             if self.output:
                 base_name = os.path.splitext(os.path.basename(input))[0]
                 out_path = os.path.join(self.output, base_name + '.png')

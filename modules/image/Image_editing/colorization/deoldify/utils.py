@@ -1,6 +1,6 @@
+import base64
 import os
 import sys
-import base64
 
 import cv2
 import numpy as np
@@ -37,10 +37,8 @@ class Hook():
     def hook_fn(self, module, input, output):
         "Applies `hook_func` to `module`, `input`, `output`."
         if self.detach:
-            input = (o.detach()
-                     for o in input) if is_listy(input) else input.detach()
-            output = (o.detach()
-                      for o in output) if is_listy(output) else output.detach()
+            input = (o.detach() for o in input) if is_listy(input) else input.detach()
+            output = (o.detach() for o in output) if is_listy(output) else output.detach()
         self.stored = self.hook_func(module, input, output)
 
     def remove(self):
@@ -93,8 +91,7 @@ class Hooks():
 
 
 def _hook_inner(m, i, o):
-    return o if isinstance(
-        o, paddle.fluid.framework.Variable) else o if is_listy(o) else list(o)
+    return o if isinstance(o, paddle.Tensor) else o if is_listy(o) else list(o)
 
 
 def hook_output(module, detach=True, grad=False):
@@ -126,16 +123,10 @@ def dummy_batch(size=(64, 64), ch_in=3):
     return paddle.to_tensor(arr)
 
 
-
 class _SpectralNorm(nn.SpectralNorm):
-    def __init__(self,
-                 weight_shape,
-                 dim=0,
-                 power_iters=1,
-                 eps=1e-12,
-                 dtype='float32'):
-        super(_SpectralNorm, self).__init__(weight_shape, dim, power_iters, eps,
-                                            dtype)
+
+    def __init__(self, weight_shape, dim=0, power_iters=1, eps=1e-12, dtype='float32'):
+        super(_SpectralNorm, self).__init__(weight_shape, dim, power_iters, eps, dtype)
 
     def forward(self, weight):
         inputs = {'Weight': weight, 'U': self.weight_u, 'V': self.weight_v}
@@ -156,18 +147,17 @@ class _SpectralNorm(nn.SpectralNorm):
 
 
 class Spectralnorm(paddle.nn.Layer):
+
     def __init__(self, layer, dim=0, power_iters=1, eps=1e-12, dtype='float32'):
         super(Spectralnorm, self).__init__()
-        self.spectral_norm = _SpectralNorm(layer.weight.shape, dim, power_iters,
-                                           eps, dtype)
+        self.spectral_norm = _SpectralNorm(layer.weight.shape, dim, power_iters, eps, dtype)
         self.dim = dim
         self.power_iters = power_iters
         self.eps = eps
         self.layer = layer
         weight = layer._parameters['weight']
         del layer._parameters['weight']
-        self.weight_orig = self.create_parameter(weight.shape,
-                                                 dtype=weight.dtype)
+        self.weight_orig = self.create_parameter(weight.shape, dtype=weight.dtype)
         self.weight_orig.set_value(weight)
 
     def forward(self, x):
@@ -178,6 +168,7 @@ class Spectralnorm(paddle.nn.Layer):
 
 
 def video2frames(video_path, outpath, **kargs):
+
     def _dict2str(kargs):
         cmd_str = ''
         for k, v in kargs.items():
@@ -208,9 +199,7 @@ def video2frames(video_path, outpath, **kargs):
 
 def frames2video(frame_path, video_path, r):
     ffmpeg = ['ffmpeg ', ' -y -loglevel ', ' error ']
-    cmd = ffmpeg + [
-        ' -r ', r, ' -f ', ' image2 ', ' -i ', frame_path, ' -pix_fmt ', ' yuv420p ', video_path
-    ]
+    cmd = ffmpeg + [' -r ', r, ' -f ', ' image2 ', ' -i ', frame_path, ' -pix_fmt ', ' yuv420p ', video_path]
     cmd = ''.join(cmd)
 
     if os.system(cmd) != 0:
