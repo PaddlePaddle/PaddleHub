@@ -1,7 +1,7 @@
 # modnet_resnet50vd_matting
 
 |Module Name|modnet_resnet50vd_matting|
-| :--- | :---: | 
+| :--- | :---: |
 |Category|Image Matting|
 |Network|modnet_resnet50vd|
 |Dataset|Baidu self-built dataset|
@@ -17,8 +17,8 @@
 
   - Sample results:
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/35907364/144574288-28671577-8d5d-4b20-adb9-fe737015c841.jpg" width = "337" height = "505" hspace='10'/> 
-    <img src="https://user-images.githubusercontent.com/35907364/144779164-47146d3a-58c9-4a38-b968-3530aa9a0137.png" width = "337" height = "505" hspace='10'/> 
+    <img src="https://user-images.githubusercontent.com/35907364/144574288-28671577-8d5d-4b20-adb9-fe737015c841.jpg" width = "337" height = "505" hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/35907364/144779164-47146d3a-58c9-4a38-b968-3530aa9a0137.png" width = "337" height = "505" hspace='10'/>
     </p>
 
 - ### Module Introduction
@@ -26,9 +26,9 @@
   - Mating is the technique of extracting foreground from an image by calculating its color and transparency. It is widely used in the film industry to replace background, image composition, and visual effects. Each pixel in the image will have a value that represents its foreground transparency, called Alpha. The set of all Alpha values in an image is called Alpha Matte. The part of the image covered by the mask can be extracted to complete foreground separation.
 
 
-  
+
   - For more information, please refer to: [modnet_resnet50vd_matting](https://github.com/PaddlePaddle/PaddleSeg/tree/release/2.3/contrib/Matting)
-  
+
 
 ## II. Installation
 
@@ -46,11 +46,11 @@
     - ```shell
       $ hub install modnet_resnet50vd_matting
       ```
-      
+
     - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
     | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
-    
+
 ## III. Module API Prediction
 
 - ### 1、Command line Prediction
@@ -58,7 +58,7 @@
   - ```shell
     $ hub run modnet_resnet50vd_matting --input_path "/PATH/TO/IMAGE"
     ```
-    
+
   - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
 
 
@@ -76,10 +76,10 @@
 - ### 3、API
 
     - ```python
-        def predict(self, 
-                    image_list, 
-                    trimap_list, 
-                    visualization, 
+        def predict(self,
+                    image_list,
+                    trimap_list,
+                    visualization,
                     save_path):
       ```
 
@@ -96,7 +96,7 @@
 
             - result (list(numpy.ndarray))：The list of model results.
 
- 
+
 ## IV. Server Deployment
 
 - PaddleHub Serving can deploy an online service of matting.
