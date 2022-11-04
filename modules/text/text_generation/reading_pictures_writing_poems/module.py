@@ -71,7 +71,7 @@ class ReadingPicturesWritingPoems:
         print("根据图片生成的古诗词：")
         print("{}".format(Poetrys[0][0]))
         print("{}".format(Poetrys[1][0]))
-        results = [{'image': image, 'Poetrys': "{}".format(Poetrys[0][0] + Poetrys[1][0])}]
+        results = [{'image': image, 'poetry': "{}".format(Poetrys[0][0] + Poetrys[1][0])}]
 
         return results
 

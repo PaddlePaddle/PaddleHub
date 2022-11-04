@@ -83,7 +83,9 @@
          - image(str): 待检测的图片路径
          - use_gpu (bool): 是否使用 GPU
      - **返回**
-         - results (list[dict](https://www.paddlepaddle.org.cn/hubdetail?name=reading_pictures_writing_poems&en_category=TextGeneration)): 识别结果的列表，列表中每一个元素为 dict，关键字有 image，Poetrys， 其中： image字段为原输入图片的路径，Poetrys字段为输出的古诗词
+         - results (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，关键字有 image, poetry
+           - image: 为原输入图片的路径
+           - poetry: 字段为输出的古诗词
 
 ## 四、服务部署
 
