@@ -1,7 +1,8 @@
-import os
-import cv2
-import time
 import base64
+import os
+import time
+
+import cv2
 import numpy as np
 
 __all__ = ['base64_to_cv2', 'cv2_to_base64', 'Processor']
