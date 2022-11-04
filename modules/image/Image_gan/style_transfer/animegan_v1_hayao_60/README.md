@@ -138,14 +138,10 @@
 
   初始发布
 
-* 1.0.1
+* 1.1.0
 
-  适配paddlehub2.0
-
-* 1.0.2
-
-  删除batch_size选项
+  移除 Fluid API
 
   - ```shell
-    $ hub install animegan_v1_hayao_60==1.0.2
+    $ hub install animegan_v1_hayao_60==1.1.0
     ```
