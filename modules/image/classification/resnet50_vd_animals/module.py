@@ -7,15 +7,12 @@ import ast
 import os
 
 import numpy as np
-import paddle
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from resnet50_vd_animals.data_feed import reader
-from resnet50_vd_animals.processor import base64_to_cv2
-from resnet50_vd_animals.processor import postprocess
 
-import paddlehub as hub
-from paddlehub.common.paddle_helper import add_vars_prefix
+from .data_feed import reader
+from .processor import base64_to_cv2
+from .processor import postprocess
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
@@ -28,10 +25,10 @@ from paddlehub.module.module import serving
     author_email="",
     summary="ResNet50vd is a image classfication model, this module is trained with Baidu's self-built animals dataset.",
     version="1.0.1")
-class ResNet50vdAnimals(hub.Module):
+class ResNet50vdAnimals:
 
-    def _initialize(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "model")
+    def __init__(self):
+        self.default_pretrained_model_path = os.path.join(self.directory, "model", "model")
         label_file = os.path.join(self.directory, "label_list.txt")
         with open(label_file, 'r', encoding='utf-8') as file:
             self.label_list = file.read().split("\n")[:-1]
@@ -65,7 +62,9 @@ class ResNet50vdAnimals(hub.Module):
         """
 
         # create default cpu predictor
-        cpu_config = Config(self.default_pretrained_model_path)
+        model = self.default_pretrained_model_path + '.pdmodel'
+        params = self.default_pretrained_model_path + '.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_predictor(cpu_config)
@@ -76,7 +75,7 @@ class ResNet50vdAnimals(hub.Module):
         npu_id = self._get_device_id("FLAGS_selected_npus")
         if npu_id != -1:
             # use npu
-            npu_config = Config(self.default_pretrained_model_path)
+            npu_config = Config(model, params)
             npu_config.disable_glog_info()
             npu_config.enable_npu(device_id=npu_id)
             self.npu_predictor = create_predictor(npu_config)
@@ -85,7 +84,7 @@ class ResNet50vdAnimals(hub.Module):
         gpu_id = self._get_device_id("CUDA_VISIBLE_DEVICES")
         if gpu_id != -1:
             # use gpu
-            gpu_config = Config(self.default_pretrained_model_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=gpu_id)
             self.gpu_predictor = create_predictor(gpu_config)
@@ -94,7 +93,7 @@ class ResNet50vdAnimals(hub.Module):
         xpu_id = self._get_device_id("XPU_VISIBLE_DEVICES")
         if xpu_id != -1:
             # use xpu
-            xpu_config = Config(self.default_pretrained_model_path)
+            xpu_config = Config(model, params)
             xpu_config.disable_glog_info()
             xpu_config.enable_xpu(100)
             self.xpu_predictor = create_predictor(xpu_config)
@@ -164,24 +163,6 @@ class ResNet50vdAnimals(hub.Module):
             out = postprocess(data_out=predictor_output, label_list=self.label_list, top_k=top_k)
             res += out
         return res
-
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
-
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.default_pretrained_model_path, executor=exe)
-
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
-                                           executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):

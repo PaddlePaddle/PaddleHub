@@ -171,10 +171,10 @@
 
   First release
 
-* 1.0.1
+* 1.1.0
 
-  Remove fluid api
+  Remove Fluid API
 
   - ```shell
-    $ hub install resnet50_vd_animals==1.0.1
+    $ hub install resnet50_vd_animals==1.1.0
     ```

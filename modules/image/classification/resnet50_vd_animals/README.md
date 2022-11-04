@@ -168,10 +168,10 @@
 
   初始发布
 
-* 1.0.1
+* 1.1.0
 
-  移除 fluid api
+  移除 Fluid API
 
   - ```shell
-    $ hub install resnet50_vd_animals==1.0.1
+    $ hub install resnet50_vd_animals==1.1.0
     ```
