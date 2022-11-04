@@ -129,6 +129,11 @@
 * 1.0.0
 
   First release
+
+* 1.1.0
+
+  Remove Fluid API
+
   - ```shell
-    $ hub install fix_resnext101_32x48d_wsl_imagenet==1.0.0
+    $ hub install fix_resnext101_32x48d_wsl_imagenet==1.1.0
     ```
