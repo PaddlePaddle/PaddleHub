@@ -156,10 +156,10 @@
 
   大幅提升预测性能，同时简化接口使用
 
-* 1.1.1
+* 1.2.0
 
-  移除 fluid api
+  移除 Fluid API
 
   - ```shell
-    $ hub install porn_detection_lstm==1.1.1
+    $ hub install porn_detection_lstm==1.2.0
     ```
