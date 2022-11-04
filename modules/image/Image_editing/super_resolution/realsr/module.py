@@ -21,22 +21,21 @@ import numpy as np
 from PIL import Image
 import paddle
 import paddle.nn as nn
-from paddlehub.module.module import moduleinfo, serving, Module
+from paddlehub.module.module import moduleinfo, serving
 
-from realsr.rrdb import RRDBNet
-import realsr.utils as U
+from .rrdb import RRDBNet
+from . import utils as U
 
 
-@moduleinfo(
-    name="realsr",
-    type="CV/image_editing",
-    author="paddlepaddle",
-    author_email="",
-    summary="realsr is a super resolution model",
-    version="1.0.0")
-class RealSRPredictor(Module):
-    def _initialize(self, output='output', weight_path=None, load_checkpoint: str = None):
-        #super(RealSRPredictor, self).__init__()
+@moduleinfo(name="realsr",
+            type="CV/image_editing",
+            author="paddlepaddle",
+            author_email="",
+            summary="realsr is a super resolution model",
+            version="1.1.0")
+class RealSRPredictor(nn.Layer):
+    def __init__(self, output='output', weight_path=None, load_checkpoint: str = None):
+        super(RealSRPredictor, self).__init__()
         self.input = input
         self.output = os.path.join(output, 'RealSR')
         self.model = RRDBNet(3, 3, 64, 23)
@@ -48,6 +47,8 @@ class RealSRPredictor(Module):
 
         else:
             checkpoint = os.path.join(self.directory, 'DF2K_JPEG.pdparams')
+            if not os.path.exists(checkpoint):
+                os.system('wget https://paddlegan.bj.bcebos.com/applications/DF2K_JPEG.pdparams -O ' + checkpoint)
             state_dict = paddle.load(checkpoint)
             self.model.load_dict(state_dict)
             print("load pretrained checkpoint success")
@@ -66,17 +67,17 @@ class RealSRPredictor(Module):
         if isinstance(img, str):
             ori_img = Image.open(img).convert('RGB')
         elif isinstance(img, np.ndarray):
-            # ori_img = Image.fromarray(img).convert('RGB')
             ori_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
         elif isinstance(img, Image.Image):
             ori_img = img
 
         img = self.norm(ori_img)
-        x = paddle.to_tensor(img[np.newaxis, ...])
-        out = self.model(x)
+        
+        with paddle.no_grad():
+            x = paddle.to_tensor(img[np.newaxis, ...])
+            out = self.model(x)
 
         pred_img = self.denorm(out.numpy()[0])
-        # pred_img = Image.fromarray(pred_img)
         pred_img = cv2.cvtColor(pred_img, cv2.COLOR_RGB2BGR)
 
         return pred_img
@@ -108,7 +109,8 @@ class RealSRPredictor(Module):
 
         frame_pattern_combined = os.path.join(pred_frame_path, '%08d.png')
 
-        vid_out_path = os.path.join(output_path, '{}_realsr_out.mp4'.format(base_name))
+        vid_out_path = os.path.join(output_path,
+                                    '{}_realsr_out.mp4'.format(base_name))
         U.frames2video(frame_pattern_combined, vid_out_path, str(int(fps)))
         print("save result at {}".format(vid_out_path))
 
