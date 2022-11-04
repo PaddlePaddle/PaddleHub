@@ -20,11 +20,8 @@ import sys
 
 import cv2
 import numpy as np
-import paddle
 import pyclipper
-from PIL import Image
 from PIL import ImageDraw
-from PIL import ImageFont
 from shapely.geometry import Polygon
 
 
@@ -168,9 +165,9 @@ class DBPostProcess(object):
 
             box[:, 0] = np.clip(np.round(box[:, 0] / width * dest_width), 0, dest_width)
             box[:, 1] = np.clip(np.round(box[:, 1] / height * dest_height), 0, dest_height)
-            boxes.append(box.astype(np.int16))
+            boxes.append(box.astype(np.int64))
             scores.append(score)
-        return np.array(boxes, dtype=np.int16), scores
+        return np.array(boxes, dtype=np.int64), scores
 
     def unclip(self, box):
         unclip_ratio = self.unclip_ratio
@@ -208,15 +205,15 @@ class DBPostProcess(object):
         '''
         h, w = bitmap.shape[:2]
         box = _box.copy()
-        xmin = np.clip(np.floor(box[:, 0].min()).astype(np.int), 0, w - 1)
-        xmax = np.clip(np.ceil(box[:, 0].max()).astype(np.int), 0, w - 1)
-        ymin = np.clip(np.floor(box[:, 1].min()).astype(np.int), 0, h - 1)
-        ymax = np.clip(np.ceil(box[:, 1].max()).astype(np.int), 0, h - 1)
+        xmin = np.clip(np.floor(box[:, 0].min()).astype(np.int64), 0, w - 1)
+        xmax = np.clip(np.ceil(box[:, 0].max()).astype(np.int64), 0, w - 1)
+        ymin = np.clip(np.floor(box[:, 1].min()).astype(np.int64), 0, h - 1)
+        ymax = np.clip(np.ceil(box[:, 1].max()).astype(np.int64), 0, h - 1)
 
         mask = np.zeros((ymax - ymin + 1, xmax - xmin + 1), dtype=np.uint8)
         box[:, 0] = box[:, 0] - xmin
         box[:, 1] = box[:, 1] - ymin
-        cv2.fillPoly(mask, box.reshape(1, -1, 2).astype(np.int32), 1)
+        cv2.fillPoly(mask, box.reshape(1, -1, 2).astype(np.int64), 1)
         return cv2.mean(bitmap[ymin:ymax + 1, xmin:xmax + 1], mask)[0]
 
     def box_score_slow(self, bitmap, contour):
@@ -237,7 +234,7 @@ class DBPostProcess(object):
         contour[:, 0] = contour[:, 0] - xmin
         contour[:, 1] = contour[:, 1] - ymin
 
-        cv2.fillPoly(mask, contour.reshape(1, -1, 2).astype(np.int32), 1)
+        cv2.fillPoly(mask, contour.reshape(1, -1, 2).astype(np.int64), 1)
         return cv2.mean(bitmap[ymin:ymax + 1, xmin:xmax + 1], mask)[0]
 
     def __call__(self, outs_dict, shape_list):
