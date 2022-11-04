@@ -1,7 +1,7 @@
 # emotion_detection_textcnn
 
 |模型名称|emotion_detection_textcnn|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|文本-情感分析|
 |网络|TextCNN|
 |数据集|百度自建数据集|
@@ -25,7 +25,7 @@
 - ### 1、环境依赖  
 
   - paddlepaddle >= 1.8.0
-  
+
   - paddlehub >= 1.8.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
@@ -51,12 +51,12 @@
   - ```shell
     $ hub run emotion_detection_textcnn --input_file test.txt
     ```
-    
+
     - test.txt 存放待预测文本， 如：
       > 这家餐厅很好吃
- 
+
       > 这部电影真的很差劲
-      
+
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -75,12 +75,12 @@
         print(result['positive_probs'])
         print(result['neutral_probs'])
         print(result['negative_probs'])
-        
+
     # 今天天气真好 2 positive 0.9267 0.0714 0.0019
     # 湿纸巾是干垃圾 1 neutral 0.0062 0.9896 0.0042
     # 别来吵我 0 negative 0.0732 0.1477 0.7791
     ```
-       
+
 - ### 3、API
 
   - ```python
@@ -184,7 +184,11 @@
 * 1.2.0
 
   模型升级，支持用于文本分类，文本匹配等各种任务迁移学习
-  
+
+* 1.3.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install emotion_detection_textcnn==1.2.0
+    $ hub install emotion_detection_textcnn==1.3.0
     ```
