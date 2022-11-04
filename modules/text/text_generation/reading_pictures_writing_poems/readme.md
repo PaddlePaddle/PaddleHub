@@ -17,7 +17,7 @@
 <p align="center">
 <img src="https://user-images.githubusercontent.com/76040149/133189274-ff86801f-017f-460e-adb0-1d381d74aff6.jpg" width="300">
 </p>
-  
+
   - 输入以上图片生成的古诗是：
 
      - 蕾蕾海河海，岳峰岳麓蔓。
@@ -45,17 +45,17 @@
   - ```shell
     $ hub install reading_pictures_writing_poems
     ```
-    
+
     - 本模型还需要用到xception71_imagenet, ernie_gen_couplet, ernie_gen_poetry这3个模型
     - 若您未安装这3个模型，代码运行时会自动帮您下载
-    
+
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
    | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 三、模型API预测
 
 - ### 1、命令行预测
-    
+
   - ```shell
     $ hub run reading_pictures_writing_poems --input_image "scenery.jpg"
     ```
@@ -64,14 +64,14 @@
 
   - ```python
     import paddlehub as hub
- 
+
     readingPicturesWritingPoems = hub.Module(name="reading_pictures_writing_poems")
     results = readingPicturesWritingPoems.WritingPoem(image = "scenery.jpg", use_gpu=False)
- 
+
     for result in results:
         print(result)
     ```
-  
+
 - ### 3、API
 
   - ```python
@@ -95,3 +95,11 @@
 * 1.0.0
 
   初始发布
+
+* 1.1.0
+
+  移除 Fluid API，更换分类模型
+
+  - ```shell
+    $ hub install porn_detection_lstm==1.1.0
+    ```
