@@ -71,12 +71,11 @@
 - ### 3、API
 
   - ```python
-    def reconstruct(self,
-                   images=None,
-                   paths=None,
-                   use_gpu=False,
-                   visualization=False,
-                   output_dir="falsr_a_output")
+    def reconstruct(images=None,
+                    paths=None,
+                    use_gpu=False,
+                    visualization=False,
+                    output_dir="falsr_a_output")
     ```
 
     - Prediction API.
@@ -95,21 +94,14 @@
         * data (numpy.ndarray): result of super resolution.
 
   - ```python
-    def save_inference_model(self,
-                            dirname='falsr_a_save_model',
-                            model_filename=None,
-                            params_filename=None,
-                            combined=False)
+    def save_inference_model(dirname)
     ```
 
     - Save the model to the specified path.
 
     - **Parameters**
 
-      * dirname: Save path.
-      * model\_filename: model file name，defalt is \_\_model\_\_
-      * params\_filename: parameter file name，defalt is \_\_params\_\_(Only takes effect when `combined` is True)
-      * combined: Whether to save the parameters to a unified file.
+      * dirname: Model save path.
 
 
 
@@ -169,5 +161,12 @@
 
   First release
 
+- 1.1.0
 
+  Remove Fluid API
+
+
+  ```shell
+  $ hub install falsr_a == 1.1.0
+  ```
 
