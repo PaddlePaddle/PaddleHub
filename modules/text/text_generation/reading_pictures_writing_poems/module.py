@@ -44,7 +44,6 @@ class ReadingPicturesWritingPoems:
 
     def WritingPoem(self, image, use_gpu=False):
         results_image = self.module_image.classification(paths=[image])
-        print(results_image)
         PictureClassification = list(results_image[0].keys())[0]
         translator = Translator(to_lang="chinese")
         PictureClassification_ch = translator.translate("{}".format(PictureClassification))
