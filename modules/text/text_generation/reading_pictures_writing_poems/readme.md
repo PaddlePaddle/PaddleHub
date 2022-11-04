@@ -57,7 +57,7 @@
 - ### 1、命令行预测
 
   - ```shell
-    $ hub run reading_pictures_writing_poems --input_image "scenery.jpg"
+    $ hub run reading_pictures_writing_poems --input_image "/PATH/TO/IMAGE"
     ```
 
 - ### 2、预测代码示例
@@ -66,7 +66,7 @@
     import paddlehub as hub
 
     readingPicturesWritingPoems = hub.Module(name="reading_pictures_writing_poems")
-    results = readingPicturesWritingPoems.WritingPoem(image = "scenery.jpg", use_gpu=False)
+    results = readingPicturesWritingPoems.WritingPoem(image="/PATH/TO/IMAGE", use_gpu=False)
 
     for result in results:
         print(result)
