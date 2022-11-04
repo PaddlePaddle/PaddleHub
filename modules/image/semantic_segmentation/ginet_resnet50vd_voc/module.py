@@ -11,31 +11,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import os
-from typing import Union, List, Tuple
+from typing import List
+from typing import Tuple
+from typing import Union
 
-import paddle
-from paddle import nn
-import paddle.nn.functional as F
 import numpy as np
-from paddlehub.module.module import moduleinfo
-import paddlehub.vision.segmentation_transforms as T
-from paddlehub.module.cv_module import ImageSegmentationModule
-from paddleseg.utils import utils
+import paddle
+import paddle.nn.functional as F
+from ginet_resnet50vd_voc.resnet import ResNet50_vd
+from paddle import nn
 from paddleseg.models import layers
 
-from ginet_resnet50vd_voc.resnet import ResNet50_vd
+import paddlehub.vision.segmentation_transforms as T
+from paddlehub.module.cv_module import ImageSegmentationModule
+from paddlehub.module.module import moduleinfo
 
 
-@moduleinfo(
-    name="ginet_resnet50vd_voc",
-    type="CV/semantic_segmentation",
-    author="paddlepaddle",
-    author_email="",
-    summary="GINetResnet50 is a segmentation model.",
-    version="1.0.0",
-    meta=ImageSegmentationModule)
+@moduleinfo(name="ginet_resnet50vd_voc",
+            type="CV/semantic_segmentation",
+            author="paddlepaddle",
+            author_email="",
+            summary="GINetResnet50 is a segmentation model.",
+            version="1.0.0",
+            meta=ImageSegmentationModule)
 class GINetResNet50(nn.Layer):
     """
     The GINetResNet50 implementation based on PaddlePaddle.
@@ -55,8 +54,8 @@ class GINetResNet50(nn.Layer):
 
     def __init__(self,
                  num_classes: int = 21,
-                 backbone_indices: Tuple[int]=(0, 1, 2, 3),
-                 enable_auxiliary_loss:bool = True,
+                 backbone_indices: Tuple[int] = (0, 1, 2, 3),
+                 enable_auxiliary_loss: bool = True,
                  align_corners: bool = True,
                  jpu: bool = True,
                  pretrained: str = None):
@@ -74,8 +73,7 @@ class GINetResNet50(nn.Layer):
         self.head = GIHead(in_channels=2048, nclass=num_classes)
 
         if self.aux:
-            self.auxlayer = layers.AuxLayer(
-                1024, 1024 // 4, num_classes, bias_attr=False)
+            self.auxlayer = layers.AuxLayer(1024, 1024 // 4, num_classes, bias_attr=False)
 
         if pretrained is not None:
             model_dict = paddle.load(pretrained)
@@ -113,12 +111,7 @@ class GINetResNet50(nn.Layer):
 
             logit_list.append(auxout)
 
-        return [
-            F.interpolate(
-                logit, (h, w),
-                mode='bilinear',
-                align_corners=self.align_corners) for logit in logit_list
-        ]
+        return [F.interpolate(logit, (h, w), mode='bilinear', align_corners=self.align_corners) for logit in logit_list]
 
 
 class GIHead(nn.Layer):
@@ -129,30 +122,16 @@ class GIHead(nn.Layer):
         self.nclass = nclass
         inter_channels = in_channels // 4
         self.inp = paddle.zeros(shape=(nclass, 300), dtype='float32')
-        self.inp = paddle.create_parameter(
-            shape=self.inp.shape,
-            dtype=str(self.inp.numpy().dtype),
-            default_initializer=paddle.nn.initializer.Assign(self.inp))
+        self.inp = paddle.create_parameter(shape=self.inp.shape,
+                                           dtype=str(self.inp.numpy().dtype),
+                                           default_initializer=paddle.nn.initializer.Assign(self.inp))
 
-        self.fc1 = nn.Sequential(
-            nn.Linear(300, 128), nn.BatchNorm1D(128), nn.ReLU())
-        self.fc2 = nn.Sequential(
-            nn.Linear(128, 256), nn.BatchNorm1D(256), nn.ReLU())
-        self.conv5 = layers.ConvBNReLU(
-            in_channels,
-            inter_channels,
-            3,
-            padding=1,
-            bias_attr=False,
-            stride=1)
+        self.fc1 = nn.Sequential(nn.Linear(300, 128), nn.BatchNorm1D(128), nn.ReLU())
+        self.fc2 = nn.Sequential(nn.Linear(128, 256), nn.BatchNorm1D(256), nn.ReLU())
+        self.conv5 = layers.ConvBNReLU(in_channels, inter_channels, 3, padding=1, bias_attr=False, stride=1)
 
-        self.gloru = GlobalReasonUnit(
-            in_channels=inter_channels,
-            num_state=256,
-            num_node=84,
-            nclass=nclass)
-        self.conv6 = nn.Sequential(
-            nn.Dropout(0.1), nn.Conv2D(inter_channels, nclass, 1))
+        self.gloru = GlobalReasonUnit(in_channels=inter_channels, num_state=256, num_node=84, nclass=nclass)
+        self.conv6 = nn.Sequential(nn.Dropout(0.1), nn.Conv2D(inter_channels, nclass, 1))
 
     def forward(self, x: paddle.Tensor) -> List[paddle.Tensor]:
         B, C, H, W = x.shape
@@ -178,13 +157,10 @@ class GlobalReasonUnit(nn.Layer):
     def __init__(self, in_channels: int, num_state: int = 256, num_node: int = 84, nclass: int = 59):
         super().__init__()
         self.num_state = num_state
-        self.conv_theta = nn.Conv2D(
-            in_channels, num_node, kernel_size=1, stride=1, padding=0)
-        self.conv_phi = nn.Conv2D(
-            in_channels, num_state, kernel_size=1, stride=1, padding=0)
+        self.conv_theta = nn.Conv2D(in_channels, num_node, kernel_size=1, stride=1, padding=0)
+        self.conv_phi = nn.Conv2D(in_channels, num_state, kernel_size=1, stride=1, padding=0)
         self.graph = GraphLayer(num_state, num_node, nclass)
-        self.extend_dim = nn.Conv2D(
-            num_state, in_channels, kernel_size=1, bias_attr=False)
+        self.extend_dim = nn.Conv2D(num_state, in_channels, kernel_size=1, bias_attr=False)
 
         self.bn = layers.SyncBatchNorm(in_channels)
 
@@ -199,8 +175,7 @@ class GlobalReasonUnit(nn.Layer):
                            .transpose((0, 2, 1))
 
         V = paddle.bmm(B, x_reduce).transpose((0, 2, 1))
-        V = paddle.divide(
-            V, paddle.to_tensor([sizex[2] * sizex[3]], dtype='float32'))
+        V = paddle.divide(V, paddle.to_tensor([sizex[2] * sizex[3]], dtype='float32'))
 
         class_node, new_V = self.graph(inp, V)
         D = B.reshape((sizeB[0], -1, sizeB[2] * sizeB[3])).transpose((0, 2, 1))
@@ -215,6 +190,7 @@ class GlobalReasonUnit(nn.Layer):
 
 
 class GraphLayer(nn.Layer):
+
     def __init__(self, num_state: int, num_node: int, num_class: int):
         super().__init__()
         self.vis_gcn = GCN(num_state, num_node)
@@ -222,14 +198,12 @@ class GraphLayer(nn.Layer):
         self.transfer = GraphTransfer(num_state)
         self.gamma_vis = paddle.zeros([num_node])
         self.gamma_word = paddle.zeros([num_class])
-        self.gamma_vis = paddle.create_parameter(
-            shape=self.gamma_vis.shape,
-            dtype=str(self.gamma_vis.numpy().dtype),
-            default_initializer=paddle.nn.initializer.Assign(self.gamma_vis))
-        self.gamma_word = paddle.create_parameter(
-            shape=self.gamma_word.shape,
-            dtype=str(self.gamma_word.numpy().dtype),
-            default_initializer=paddle.nn.initializer.Assign(self.gamma_word))
+        self.gamma_vis = paddle.create_parameter(shape=self.gamma_vis.shape,
+                                                 dtype=str(self.gamma_vis.numpy().dtype),
+                                                 default_initializer=paddle.nn.initializer.Assign(self.gamma_vis))
+        self.gamma_word = paddle.create_parameter(shape=self.gamma_word.shape,
+                                                  dtype=str(self.gamma_word.numpy().dtype),
+                                                  default_initializer=paddle.nn.initializer.Assign(self.gamma_word))
 
     def forward(self, inp: paddle.Tensor, vis_node: paddle.Tensor) -> List[paddle.Tensor]:
         inp = self.word_gcn(inp)
@@ -242,6 +216,7 @@ class GraphLayer(nn.Layer):
 
 
 class GCN(nn.Layer):
+
     def __init__(self, num_state: int = 128, num_node: int = 64, bias: bool = False):
         super().__init__()
         self.conv1 = nn.Conv1D(
@@ -253,14 +228,7 @@ class GCN(nn.Layer):
             groups=1,
         )
         self.relu = nn.ReLU()
-        self.conv2 = nn.Conv1D(
-            num_state,
-            num_state,
-            kernel_size=1,
-            padding=0,
-            stride=1,
-            groups=1,
-            bias_attr=bias)
+        self.conv2 = nn.Conv1D(num_state, num_state, kernel_size=1, padding=0, stride=1, groups=1, bias_attr=bias)
 
     def forward(self, x: paddle.Tensor) -> paddle.Tensor:
         h = self.conv1(x.transpose((0, 2, 1))).transpose((0, 2, 1))
@@ -276,14 +244,10 @@ class GraphTransfer(nn.Layer):
     def __init__(self, in_dim: int):
         super().__init__()
         self.channle_in = in_dim
-        self.query_conv = nn.Conv1D(
-            in_channels=in_dim, out_channels=in_dim // 2, kernel_size=1)
-        self.key_conv = nn.Conv1D(
-            in_channels=in_dim, out_channels=in_dim // 2, kernel_size=1)
-        self.value_conv_vis = nn.Conv1D(
-            in_channels=in_dim, out_channels=in_dim, kernel_size=1)
-        self.value_conv_word = nn.Conv1D(
-            in_channels=in_dim, out_channels=in_dim, kernel_size=1)
+        self.query_conv = nn.Conv1D(in_channels=in_dim, out_channels=in_dim // 2, kernel_size=1)
+        self.key_conv = nn.Conv1D(in_channels=in_dim, out_channels=in_dim // 2, kernel_size=1)
+        self.value_conv_vis = nn.Conv1D(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
+        self.value_conv_word = nn.Conv1D(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
         self.softmax_vis = nn.Softmax(axis=-1)
         self.softmax_word = nn.Softmax(axis=-2)
 
@@ -299,10 +263,8 @@ class GraphTransfer(nn.Layer):
         attention_vis = self.softmax_vis(energy).transpose((0, 2, 1))
         attention_word = self.softmax_word(energy)
 
-        proj_value_vis = self.value_conv_vis(vis_node).reshape((m_batchsize, -1,
-                                                                Nn))
-        proj_value_word = self.value_conv_word(word).reshape((m_batchsize, -1,
-                                                              Nc))
+        proj_value_vis = self.value_conv_vis(vis_node).reshape((m_batchsize, -1, Nn))
+        proj_value_word = self.value_conv_word(word).reshape((m_batchsize, -1, Nc))
 
         class_out = paddle.bmm(proj_value_vis, attention_vis)
         node_out = paddle.bmm(proj_value_word, attention_word)
