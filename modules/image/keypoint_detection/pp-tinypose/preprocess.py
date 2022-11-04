@@ -15,7 +15,8 @@ import base64
 
 import cv2
 import numpy as np
-from keypoint_preprocess import get_affine_transform
+
+from .keypoint_preprocess import get_affine_transform
 
 
 def decode_image(im_file, im_info):

@@ -15,29 +15,27 @@ import glob
 import json
 import math
 import os
-import sys
-from functools import reduce
 from pathlib import Path
 
 import cv2
 import numpy as np
-import paddle
 import yaml
-from keypoint_preprocess import EvalAffine
-from keypoint_preprocess import expand_crop
-from keypoint_preprocess import TopDownEvalAffine
 from paddle.inference import Config
 from paddle.inference import create_predictor
-from preprocess import decode_image
-from preprocess import LetterBoxResize
-from preprocess import NormalizeImage
-from preprocess import Pad
-from preprocess import PadStride
-from preprocess import Permute
-from preprocess import preprocess
-from preprocess import Resize
-from preprocess import WarpAffine
-from visualize import visualize_box
+
+from .preprocess import decode_image
+from .preprocess import LetterBoxResize
+from .preprocess import NormalizeImage
+from .preprocess import Pad
+from .preprocess import PadStride
+from .preprocess import Permute
+from .preprocess import preprocess
+from .preprocess import Resize
+from .preprocess import WarpAffine
+from .keypoint_preprocess import EvalAffine
+from .keypoint_preprocess import expand_crop
+from .keypoint_preprocess import TopDownEvalAffine
+from .visualize import visualize_box
 
 # Global dictionary
 SUPPORT_MODELS = {
