@@ -1,34 +1,24 @@
-# -*- coding:utf-8 -*-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import json
 import math
 import os
 
-import paddle
-import six
-from porn_detection_lstm.processor import load_vocab
-from porn_detection_lstm.processor import postprocess
-from porn_detection_lstm.processor import preprocess
-
 import paddlehub as hub
-from paddlehub.common.paddle_helper import get_variable_info
+from .processor import load_vocab
+from .processor import postprocess
+from .processor import preprocess
+from paddlehub.compat.task import tokenization
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import serving
-from paddlehub.reader import tokenization
 
 
 @moduleinfo(name="porn_detection_lstm",
-            version="1.1.1",
+            version="1.2.0",
             summary="Baidu's open-source Porn Detection Model.",
             author="baidu-nlp",
             author_email="",
             type="nlp/sentiment_analysis")
 class PornDetectionLSTM(hub.NLPPredictionModule):
 
-    def _initialize(self):
+    def __init__(self):
         """
         initialize with the necessary elements
         """
