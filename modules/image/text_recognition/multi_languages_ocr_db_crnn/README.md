@@ -218,6 +218,11 @@
 * 1.0.0
 
   初始发布
+
+* 1.1.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install multi_languages_ocr_db_crnn==1.0.0
+    $ hub install multi_languages_ocr_db_crnn==1.1.0
     ```

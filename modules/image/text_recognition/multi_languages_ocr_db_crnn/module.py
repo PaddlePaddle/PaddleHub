@@ -1,12 +1,11 @@
 import argparse
-import sys
 import os
 import ast
 
 import paddle
+import paddle.static
 import paddle2onnx
 import paddle2onnx as p2o
-import paddle.fluid as fluid
 from paddleocr import PaddleOCR
 from paddleocr.ppocr.utils.logging import get_logger
 from paddleocr.tools.infer.utility import base64_to_cv2
@@ -17,7 +16,7 @@ from .utils import read_images, save_result_image, mkdir
 
 @moduleinfo(
     name="multi_languages_ocr_db_crnn",
-    version="1.0.0",
+    version="1.1.0",
     summary="ocr service",
     author="PaddlePaddle",
     type="cv/text_recognition")
@@ -45,23 +44,21 @@ class MultiLangOCR:
         """
         self.lang = lang
         self.logger = get_logger()
-        argc = len(sys.argv)
-        if argc == 1 or argc > 1 and sys.argv[1] == 'serving':
-            self.det = det
-            self.rec = rec
-            self.use_angle_cls = use_angle_cls
-            self.engine = PaddleOCR(
-                lang=lang,
-                det=det,
-                rec=rec,
-                use_angle_cls=use_angle_cls,
-                enable_mkldnn=enable_mkldnn,
-                use_gpu=use_gpu,
-                det_db_box_thresh=box_thresh,
-                cls_thresh=angle_classification_thresh)
-            self.det_model_dir = self.engine.text_detector.args.det_model_dir
-            self.rec_model_dir = self.engine.text_detector.args.rec_model_dir
-            self.cls_model_dir = self.engine.text_detector.args.cls_model_dir
+        self.det = det
+        self.rec = rec
+        self.use_angle_cls = use_angle_cls
+        self.engine = PaddleOCR(
+            lang=lang,
+            det=det,
+            rec=rec,
+            use_angle_cls=use_angle_cls,
+            enable_mkldnn=enable_mkldnn,
+            use_gpu=use_gpu,
+            det_db_box_thresh=box_thresh,
+            cls_thresh=angle_classification_thresh)
+        self.det_model_dir = self.engine.text_detector.args.det_model_dir
+        self.rec_model_dir = self.engine.text_detector.args.rec_model_dir
+        self.cls_model_dir = self.engine.text_detector.args.cls_model_dir
 
     def recognize_text(self, images=[], paths=[], output_dir='ocr_result', visualization=False):
         """
@@ -189,7 +186,7 @@ class MultiLangOCR:
             opset_version(int): operator set
         '''
         v0, v1, v2 = paddle2onnx.__version__.split('.')
-        if int(v1) < 9:
+        if int(v0) == 0 and int(v1) < 9:
             raise ImportError("paddle2onnx>=0.9.0 is required")
 
         if input_shape_dict is not None and not isinstance(input_shape_dict, dict):
@@ -200,19 +197,11 @@ class MultiLangOCR:
 
         path_dict = {"det": self.det_model_dir, "rec": self.rec_model_dir, "cls": self.cls_model_dir}
         for (key, path) in path_dict.items():
-            model_filename = 'inference.pdmodel'
-            params_filename = 'inference.pdiparams'
             save_file = os.path.join(dirname, '{}_{}.onnx'.format(self.name, key))
 
-            # convert model save with 'paddle.fluid.io.save_inference_model'
-            if hasattr(paddle, 'enable_static'):
-                paddle.enable_static()
-            exe = fluid.Executor(fluid.CPUPlace())
-            if model_filename is None and params_filename is None:
-                [program, feed_var_names, fetch_vars] = fluid.io.load_inference_model(path, exe)
-            else:
-                [program, feed_var_names, fetch_vars] = fluid.io.load_inference_model(
-                    path, exe, model_filename=model_filename, params_filename=params_filename)
+            exe = paddle.static.Executor(paddle.CPUPlace())
+            [program, feed_var_names, fetch_vars] = paddle.static.load_inference_model(
+                    os.path.join(path, 'inference'), exe)
 
             onnx_proto = p2o.run_convert(program, input_shape_dict=input_shape_dict, opset_version=opset_version)
             mkdir(save_file)
