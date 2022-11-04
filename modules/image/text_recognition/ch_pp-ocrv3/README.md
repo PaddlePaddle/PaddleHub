@@ -58,7 +58,7 @@
     ```
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、代码示例
+- ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
@@ -87,14 +87,15 @@
 
   - ```python
     def recognize_text(images=[],
-                        paths=[],
-                        use_gpu=False,
-                        output_dir='ocr_result',
-                        visualization=False,
-                        box_thresh=0.5,
-                        text_thresh=0.5,
-                        angle_classification_thresh=0.9,
-                        det_db_unclip_ratio=1.5)
+                       paths=[],
+                       use_gpu=False,
+                       output_dir='ocr_result',
+                       visualization=False,
+                       box_thresh=0.6,
+                       text_thresh=0.5,
+                       angle_classification_thresh=0.9,
+                       det_db_unclip_ratio=1.5,
+                       det_db_score_mode="fast"):
     ```
 
     - 预测API，检测输入图片中的所有中文文本的位置。
@@ -110,6 +111,8 @@
       - visualization (bool): 是否将识别结果保存为图片文件；
       - output\_dir (str): 图片的保存路径，默认设为 ocr\_result；
       - det\_db\_unclip\_ratio: 设置检测框的大小；
+      - det\_db\_score\_mode: 设置检测得分计算方式，“fast” / “slow”
+
     - **返回**
 
       - res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
@@ -166,6 +169,10 @@
 
   初始发布
 
+* 1.1.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install ch_pp-ocrv3==1.0.0
+    $ hub install ch_pp-ocrv3==1.1.0
     ```
