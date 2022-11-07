@@ -112,7 +112,11 @@
 * 1.0.0
 
   初始发布
+  
+* 1.1.0
+
+  移除 Fluid API
 
   - ```shell
-    $ hub install plato2_en_base==1.0.0
+    $ hub install plato2_en_base==1.1.0
     ```
