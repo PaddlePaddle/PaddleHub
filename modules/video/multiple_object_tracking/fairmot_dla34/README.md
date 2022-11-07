@@ -117,6 +117,10 @@
 
   初始发布
 
+* 1.1.0
+
+  移除fluid api
+
   - ```shell
-    $ hub install fairmot_dla34==1.0.0
+    $ hub install fairmot_dla34==1.1.0
     ```
