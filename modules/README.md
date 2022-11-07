@@ -286,6 +286,14 @@ English | [简体中文](README_ch.md)
 |[MiDaS_Large](image/depth_estimation/MiDaS_Large)|-|3D Movies, WSVD, ReDWeb, MegaDepth|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/MiDaS_Large) |
 |[MiDaS_Small](image/depth_estimation/MiDaS_Small)|-|3D Movies, WSVD, ReDWeb, MegaDepth, etc.|| [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/MiDaS_Small) |
 
+- ### Text_to_Image
+
+|module|Network|Dataset|Introduction|Huggingface Spaces Demo|
+|--|--|--|--|--|
+|[disco_diffusion_clip_rn101](image/text_to_image/disco_diffusion_clip_rn101)|-|Open domain multi round dataset|text_to_image|
+|[ernie_vilg](image/text_to_image/ernie_vilg)|-|Open domain multi round dataset|text_to_image|[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/PaddlePaddle/ERNIE-ViLG) |
+|[stable_diffusion_img2img](image/text_to_image/stable_diffusion_img2img)|-|Open domain multi round dataset|img2img|
+
 ## Text
   - ### Text Generation
 
