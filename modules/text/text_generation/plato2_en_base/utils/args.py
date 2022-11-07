@@ -15,9 +15,6 @@
 
 import argparse
 import json
-import sys
-
-import paddle.fluid as fluid
 
 
 def str2bool(v):
