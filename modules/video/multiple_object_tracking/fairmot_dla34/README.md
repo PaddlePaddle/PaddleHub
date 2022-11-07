@@ -124,7 +124,3 @@
   - ```shell
     $ hub install fairmot_dla34==1.1.0
     ```
-
-  - ```shell
-    $ hub install fairmot_dla34==1.0.0
-    ```
