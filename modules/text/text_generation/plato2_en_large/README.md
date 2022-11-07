@@ -113,6 +113,10 @@
 
   初始发布
 
+* 1.1.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install plato==1.0.0
+    $ hub install plato==1.1.0
     ```
