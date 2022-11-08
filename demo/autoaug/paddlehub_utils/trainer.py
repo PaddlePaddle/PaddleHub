@@ -9,17 +9,19 @@
 Authors: lvhaijun01@baidu.com
 Date:     2020-11-24 20:46
 """
-
-from paddlehub.finetune.trainer import Trainer
 import os
 from collections import defaultdict
+
 import paddle
 from paddle.distributed import ParallelEnv
+
+from paddlehub.finetune.trainer import Trainer
 from paddlehub.utils.log import logger
 from paddlehub.utils.utils import Timer
 
 
 class CustomTrainer(Trainer):
+
     def __init__(self, **kwargs) -> None:
         super(CustomTrainer, self).__init__(**kwargs)
 
@@ -39,10 +41,15 @@ class CustomTrainer(Trainer):
         place = paddle.CUDAPlace(ParallelEnv().dev_id) if use_gpu else paddle.CPUPlace()
         paddle.disable_static(place)
 
-        batch_sampler = paddle.io.DistributedBatchSampler(
-            train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
-        loader = paddle.io.DataLoader(
-            train_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
+        batch_sampler = paddle.io.DistributedBatchSampler(train_dataset,
+                                                          batch_size=batch_size,
+                                                          shuffle=True,
+                                                          drop_last=False)
+        loader = paddle.io.DataLoader(train_dataset,
+                                      batch_sampler=batch_sampler,
+                                      places=place,
+                                      num_workers=num_workers,
+                                      return_list=True)
         return batch_sampler, loader
 
     def train_one_epoch(self, loader: paddle.io.DataLoader, timer: Timer, current_epoch: int, epochs: int,
@@ -57,9 +64,9 @@ class CustomTrainer(Trainer):
             self.optimizer_zero_grad(current_epoch, batch_idx, self.optimizer)
 
             # calculate metrics and loss
-            avg_loss += loss.numpy()[0]
+            avg_loss += float(loss)
             for metric, value in metrics.items():
-                avg_metrics[metric] += value.numpy()[0]
+                avg_metrics[metric] += float(value)
 
             timer.count()
 
@@ -127,8 +134,9 @@ class CustomTrainer(Trainer):
                             self.log_writer.add_scalar(tag='EVAL/loss', step=timer.current_step, value=eval_loss)
 
                         for metric, value in eval_metrics.items():
-                            self.log_writer.add_scalar(
-                                tag='EVAL/{}'.format(metric), step=timer.current_step, value=value)
+                            self.log_writer.add_scalar(tag='EVAL/{}'.format(metric),
+                                                       step=timer.current_step,
+                                                       value=value)
 
                     if not self.best_metrics or self.compare_metrics(self.best_metrics, eval_metrics):
                         self.best_metrics = eval_metrics
@@ -147,11 +155,16 @@ class CustomTrainer(Trainer):
         place = paddle.CUDAPlace(ParallelEnv().dev_id) if use_gpu else paddle.CPUPlace()
         paddle.disable_static(place)
 
-        batch_sampler = paddle.io.DistributedBatchSampler(
-            eval_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
+        batch_sampler = paddle.io.DistributedBatchSampler(eval_dataset,
+                                                          batch_size=batch_size,
+                                                          shuffle=False,
+                                                          drop_last=False)
 
-        loader = paddle.io.DataLoader(
-            eval_dataset, batch_sampler=batch_sampler, places=place, num_workers=num_workers, return_list=True)
+        loader = paddle.io.DataLoader(eval_dataset,
+                                      batch_sampler=batch_sampler,
+                                      places=place,
+                                      num_workers=num_workers,
+                                      return_list=True)
         return loader
 
     def evaluate_process(self, loader: paddle.io.DataLoader) -> dict:
@@ -168,10 +181,10 @@ class CustomTrainer(Trainer):
             num_samples += bs
 
             if loss:
-                avg_loss += loss.numpy()[0] * bs
+                avg_loss += float(loss) * bs
 
             for metric, value in metrics.items():
-                sum_metrics[metric] += value.numpy()[0] * bs
+                sum_metrics[metric] += float(value) * bs
 
         # print avg metrics and loss
         print_msg = '[Evaluation result]'
