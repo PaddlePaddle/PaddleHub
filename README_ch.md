@@ -30,22 +30,23 @@
 
 ## 简介与特性
 - PaddleHub旨在为开发者提供丰富的、高质量的、直接可用的预训练模型
-- **【模型种类丰富】**: 涵盖大模型、CV、NLP、Audio、Video、工业应用主流六大品类的 **360+** 预训练模型，全部开源下载，离线可运行
+- **【模型种类丰富】**: 涵盖大模型、CV、NLP、Audio、Video、工业应用主流六大品类的 **400+** 预训练模型，全部开源下载，离线可运行
 - **【超低使用门槛】**：无需深度学习背景、无需数据与训练过程，可快速使用AI模型
 - **【一键模型快速预测】**：通过一行命令行或者极简的Python API实现模型调用，可快速体验模型效果
 - **【一键模型转服务化】**：一行命令，搭建深度学习模型API服务化部署能力
 - **【跨平台兼容性】**：可运行于Linux、Windows、MacOS等多种操作系统
 
 ## 近期更新
-- **🔥2022.08.19:** 发布v2.3.0版本新增[文心大模型](https://wenxin.baidu.com/)和disco diffusion(dd)系列文图生成模型。
-   - 支持对[文心大模型API](https://wenxin.baidu.com/moduleApi)的调用, 包括 文图生成模型**ERNIE-ViLG**([体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4445016)), 以及支持写作文、写文案、写摘要、对对联、自由问答、写小说、补全文本等多个应用的语言模型**ERNIE 3.0 Zeus**([体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4445054))。
-   - 新增基于disco diffusion技术的文图生成dd系列模型5个，其中英文模型([体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4444984))3个，中文模型2个。欢迎点击链接在aistudio上进行体验基于**ERNIE-ViL**开发的中文文图生成模型disco_diffusion_ernievil_base([体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4444998))。
-- **2022.02.18:** 加入Huggingface，创建了PaddlePaddle的空间并上传了模型: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)。
+- **🔥2022.10.20:** 发布v2.3.1版本新增Stable_Diffusion系列模型和超分模型
+    - 支持[文生图](https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/stable_diffusion)、[图生图](https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/stable_diffusion_img2img)、[图修复](https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/stable_diffusion_inpainting)、[二次元专属waifu](https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/stable_diffusion_waifu)等4个模型。
+    - 基于 [SwinIR-L](https://www.paddlepaddle.org.cn/hubdetail?name=swinir_l_real_sr_x4&en_category=ImageEditing) 的 4 倍现实图像超分辨率模型
+- **🔥2022.08.19:** 发布v2.3.0版本新增[文心大模型](https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/ernie_vilg)和[disco diffusion(dd)](https://www.paddlepaddle.org.cn/hubdetail?name=disco_diffusion_ernievil_base&en_category=TextToImage)系列文图生成模型。
+   - 支持对[文心大模型API](https://wenxin.baidu.com/moduleApi)的调用, 包括 文图生成模型ERNIE-ViLG, 以及支持写作文、写文案、写摘要、对对联、自由问答、写小说、补全文本等多个应用的语言模型ERNIE 3.0 Zeus
+   - 新增基于disco diffusion技术的文图生成dd系列模型([免费GPU体验Demo](https://aistudio.baidu.com/aistudio/projectdetail/4462918))。
+- **2022.02.18:** 加入Huggingface，创建了PaddlePaddle的可视化空间并上传了模型: [PaddlePaddle Huggingface](https://huggingface.co/PaddlePaddle)。
 
-- **🔥2021.12.22**，发布v2.2.0版本新增[预训练模型库官网](https://www.paddlepaddle.org.cn/hublist)。
-   - 新增100+高质量模型，涵盖对话、语音处理、语义分割、文字识别、文本处理、图像生成等多个领域，预训练模型总量达到【360+】；
-   - 新增模型[检索列表](./modules/README_ch.md)，包含模型名称、网络、数据集和使用场景等信息，快速定位用户所需的模型；
-   - 模型文档排版优化，呈现数据集、指标、模型大小等更多实用信息。
+- **🔥2021.12.22**，发布v2.2.0版本新增[预训练模型库官网](https://www.paddlepaddle.org.cn/hublist)，新增100+高质量模型，涵盖对话、语音处理、语义分割、文字识别、文本处理、图像生成等多个领域，预训练模型总量达到【360+】；
+  
 
 
 - [More](./docs/docs_ch/release.md)
@@ -54,11 +55,33 @@
 
 ## **精品模型效果展示[【更多】](./docs/docs_ch/visualization.md)[【模型库】](./modules/README_ch.md)**
 
-### **[文心大模型](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)**
-- 包含大模型ERNIE-ViL、ERNIE 3.0 Zeus, 支持文图生成、写作文、写文案、写摘要、对对联、自由问答、写小说、补全文本等多个应用。
+### **[大模型（10个）](./modules/README_ch.md#图像)**
 <div align="center">
-<img src="https://user-images.githubusercontent.com/22424850/185588578-e2d1216b-e797-458d-bc6b-0ccb8e1bd1b9.png"  width = "80%"  />
+<table>
+    <tr>
+        <td><img src="https://user-images.githubusercontent.com/59186797/200235049-fefa7642-6c4c-4f93-bd84-3b36a8a80595.gif"  width = "100%"></td>
+        <td><img src="https://user-images.githubusercontent.com/59186797/200244625-77310db8-c9b2-4293-8fe9-c9aae27ee462.gif" width = "90%"></td>
+        <td><img src="https://user-images.githubusercontent.com/59186797/200245387-daaf576d-8224-4937-82b8-27e31ee2df16.gif" width = "100%"></td>
+    <tr>
+    <tr>
+        <td align="center"><a href="https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/ernie_vilg">文心大模型</a></td>
+        <td align="center"><a href="https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/stable_diffusion">Stable_Diffusion系列模型</a></td>
+        <td align="center"><a href="https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/disco_diffusion_ernievil_base">Disco Diffusion系列模型</a></td>
+        
+<tr>
+
+<tr>
+        <td align="center">支持文图生成、写作文、写文案、写摘要、对对联、自由问答、写小说、补全文本等多个应用。</td>
+        <td align="center">支持文生图、图生图、图修复、二次元专属waifu等功能</td>
+        <td align="center">支持中英输入</td>
+        
+<tr>
+
+</table>
 </div>
+
+
+
 
 
 ### **[图像类（212个）](./modules/README_ch.md#图像)**

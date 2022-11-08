@@ -39,11 +39,37 @@ English | [简体中文](README_ch.md)
 <a name="demos"></a>
 ## 🌈Visualization Demo
 
-#### 🏜️ [Text-to-Image Models](https://www.paddlepaddle.org.cn/hubdetail?name=ernie_vilg&en_category=TextToImage)
-- Include ERNIE-ViLG, ERNIE-ViL, ERNIE 3.0 Zeus, supports applications such as text-to-image, writing essays, summarization, couplets, question answering, writing novels and completing text.
+
+
+
+
+#### 🏜️ [Text-to-Image Models](https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image)
 <div align="center">
-<img src="https://user-images.githubusercontent.com/22424850/185588578-e2d1216b-e797-458d-bc6b-0ccb8e1bd1b9.png"  width = "80%"  />
+<table>
+    <tr>
+        <td><img src="https://user-images.githubusercontent.com/59186797/200235049-fefa7642-6c4c-4f93-bd84-3b36a8a80595.gif"  width = "100%"></td>
+        <td><img src="https://user-images.githubusercontent.com/59186797/200244625-77310db8-c9b2-4293-8fe9-c9aae27ee462.gif" width = "80%"></td>
+        <td><img src="https://user-images.githubusercontent.com/59186797/200245387-daaf576d-8224-4937-82b8-27e31ee2df16.gif" width = "100%"></td>
+    <tr>
+    <tr>
+        <td align="center"><a href="https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/ernie_vilg">Wenxin Big Moels</a></td>
+        <td align="center"><a href="https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/stable_diffusion">Stable_Diffusion series</a></td>
+        <td align="center"><a href="https://github.com/PaddlePaddle/PaddleHub/tree/develop/modules/image/text_to_image/disco_diffusion_ernievil_base">Disco Diffusion series</a></td>
+        
+<tr>
+
+<tr>
+        <td align="center">Include ERNIE-ViLG, ERNIE-ViL, ERNIE 3.0 Zeus, supports applications such as text-to-image, writing essays, summarization, couplets, question answering, writing novels and completing text。</td>
+        <td align="center">Supports functions such as text_to_image, image_to_image, inpainting, ACGN external service, etc.</td>
+        <td align="center">Support Chinese and English input</td>
+        
+<tr>
+
+</table>
 </div>
+
+
+
 
 #### 👓 [Computer Vision Models](./modules#Image)
 <div align="center">
