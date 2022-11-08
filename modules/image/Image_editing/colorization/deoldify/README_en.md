@@ -1,7 +1,7 @@
 # deoldify
 
 | Module Name |deoldify|
-| :--- | :---: | 
+| :--- | :---: |
 |Category|Image editing|
 |Network |NoGAN|
 |Dataset|ILSVRC 2012|
@@ -11,10 +11,10 @@
 |Latest update date |2021-04-13|
 
 
-## I. Basic Information 
+## I. Basic Information
 
 - ### Application Effect Display
-  
+
   - Sample results:
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130886749-668dfa38-42ed-4a09-8d4a-b18af0475375.jpg" width = "450" height = "300" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130886685-76221736-839a-46a2-8415-e5e0dd3b345e.png" width = "450" height = "300" hspace='10'/>
@@ -45,7 +45,7 @@
     - ```shell
       $ hub install deoldify
       ```
-      
+
     - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
     | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
@@ -58,7 +58,9 @@
       import paddlehub as hub
 
       model = hub.Module(name='deoldify')
-      model.predict('/PATH/TO/IMAGE/OR/VIDEO')
+      model.predict('/PATH/TO/IMAGE')
+
+      # model.predict('/PATH/TO/VIDEO')
       ```
 
   - ### 2、API
@@ -169,3 +171,11 @@
 - 1.0.1
 
   Adapt to paddlehub2.0
+
+* 1.1.0
+
+  Remove Fluid API
+
+  ```shell
+  $ hub install deoldify == 1.1.0
+  ```

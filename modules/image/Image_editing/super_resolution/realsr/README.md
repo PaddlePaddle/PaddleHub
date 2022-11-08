@@ -63,7 +63,9 @@
     import paddlehub as hub
 
     model = hub.Module(name='realsr')
-    model.predict('/PATH/TO/IMAGE/OR/VIDEO')
+    model.predict('/PATH/TO/IMAGE')
+    
+    # model.predict('/PATH/TO/VIDEO')
     ```
   - ### 2、API
 
@@ -174,3 +176,10 @@
 
   适配paddlehub2.0版本
 
+* 1.1.0
+
+  更新代码格式
+
+  ```shell
+  $ hub install realsr == 1.1.0
+  ```

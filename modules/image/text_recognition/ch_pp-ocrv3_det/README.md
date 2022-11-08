@@ -84,26 +84,29 @@
 
 
   - ```python
-    def detect_text(paths=[],
-                    images=[],
+    def detect_text(images=[],
+                    paths=[],
                     use_gpu=False,
                     output_dir='detection_result',
-                    box_thresh=0.5,
                     visualization=False,
-                    det_db_unclip_ratio=1.5)
+                    box_thresh=0.6,
+                    det_db_unclip_ratio=1.5,
+                    det_db_score_mode="fast")
     ```
 
     - 预测API，检测输入图片中的所有中文文本的位置。
 
     - **参数**
 
-      - paths (list\[str\]): 图片的路径；
       - images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式；
+      - paths (list\[str\]): 图片的路径；
       - use\_gpu (bool): 是否使用 GPU；**若使用GPU，请先设置CUDA_VISIBLE_DEVICES环境变量**
       - box\_thresh (float): 检测文本框置信度的阈值；
       - visualization (bool): 是否将识别结果保存为图片文件；
       - output\_dir (str): 图片的保存路径，默认设为 detection\_result；
       - det\_db\_unclip\_ratio: 设置检测框的大小；
+      - det\_db\_score\_mode: 设置检测得分计算方式，“fast” / “slow”
+
     - **返回**
 
       - res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为：
@@ -158,6 +161,10 @@
 
   初始发布
 
+* 1.1.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install ch_pp-ocrv3_det==1.0.0
+    $ hub install ch_pp-ocrv3_det==1.1.0
     ```

@@ -1,7 +1,7 @@
 # ginet_resnet50vd_voc
 
 |Module Name|ginet_resnet50vd_voc|
-| :--- | :---: | 
+| :--- | :---: |
 |Category|Image Segmentation|
 |Network|ginet_resnet50vd|
 |Dataset|PascalVOC2012|
@@ -10,8 +10,8 @@
 |Data indicators|-|
 |Latest update date|2021-12-14|
 
-## I. Basic Information 
-  
+## I. Basic Information
+
 - ### Application Effect Display
     - Sample results:
     <p align="center">
@@ -108,7 +108,7 @@
               trainer = Trainer(model, optimizer, checkpoint_dir='test_ckpt_img_seg', use_gpu=True)
               trainer.train(train_reader, epochs=10, batch_size=4, log_interval=10, save_interval=4)
               ```
-             
+
 
     -  Model prediction
 

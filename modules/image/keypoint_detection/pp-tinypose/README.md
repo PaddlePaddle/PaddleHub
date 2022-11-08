@@ -59,7 +59,7 @@
     ```
   - 通过命令行方式实现关键点检测模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、代码示例
+- ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
@@ -131,6 +131,10 @@
 
   初始发布
 
+* 1.1.0
+
+  修复使用 ndarray 输入时无法保存可视化图片的问题
+
   - ```shell
-    $ hub install pp-tinypose==1.0.0
+    $ hub install pp-tinypose==1.1.0
     ```

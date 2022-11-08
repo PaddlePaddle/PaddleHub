@@ -30,8 +30,9 @@ class Registry(object):
         self._obj_map = {}
 
     def _do_register(self, name, obj):
-        assert (name not in self._obj_map), "An object named '{}' was already registered in '{}' registry!".format(
-            name, self._name)
+        assert (
+            name not in self._obj_map
+        ), "An object named '{}' was already registered in '{}' registry!".format(name, self._name)
         self._obj_map[name] = obj
 
     def register(self, obj=None, name=None):
@@ -84,7 +85,6 @@ class ResidualDenseBlock_5C(nn.Layer):
 
 class RRDB(nn.Layer):
     '''Residual in Residual Dense Block'''
-
     def __init__(self, nf, gc=32):
         super(RRDB, self).__init__()
         self.RDB1 = ResidualDenseBlock_5C(nf, gc)
@@ -104,9 +104,7 @@ def make_layer(block, n_layers):
         layers.append(block())
     return nn.Sequential(*layers)
 
-
 GENERATORS = Registry("GENERATOR")
-
 
 @GENERATORS.register()
 class RRDBNet(nn.Layer):
@@ -130,8 +128,10 @@ class RRDBNet(nn.Layer):
         trunk = self.trunk_conv(self.RRDB_trunk(fea))
         fea = fea + trunk
 
-        fea = self.lrelu(self.upconv1(F.interpolate(fea, scale_factor=2, mode='nearest')))
-        fea = self.lrelu(self.upconv2(F.interpolate(fea, scale_factor=2, mode='nearest')))
+        fea = self.lrelu(
+            self.upconv1(F.interpolate(fea, scale_factor=2, mode='nearest')))
+        fea = self.lrelu(
+            self.upconv2(F.interpolate(fea, scale_factor=2, mode='nearest')))
         out = self.conv_last(self.lrelu(self.HRconv(fea)))
 
         return out

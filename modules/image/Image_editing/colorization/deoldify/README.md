@@ -1,7 +1,7 @@
 # deoldify
 
 |模型名称|deoldify|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-图像编辑|
 |网络|NoGAN|
 |数据集|ILSVRC 2012|
@@ -14,7 +14,7 @@
 ## 一、模型基本信息
 
 - ### 应用效果展示
-  
+
   - 样例结果示例(左为原图，右为效果图)：
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130886749-668dfa38-42ed-4a09-8d4a-b18af0475375.jpg" width = "450" height = "300" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130886685-76221736-839a-46a2-8415-e5e0dd3b345e.png" width = "450" height = "300" hspace='10'/>
@@ -45,7 +45,7 @@
     - ```shell
       $ hub install deoldify
       ```
-      
+
     - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
       | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
@@ -59,7 +59,9 @@
          import paddlehub as hub
 
          model = hub.Module(name='deoldify')
-         model.predict('/PATH/TO/IMAGE/OR/VIDEO')
+         model.predict('/PATH/TO/IMAGE')
+
+         # model.predict('/PATH/TO/VIDEO')
          ```
 
   - ### 2、API
@@ -170,3 +172,11 @@
 * 1.0.1
 
   适配paddlehub2.0版本
+
+* 1.1.0
+
+  移除 Fluid API
+
+  ```shell
+  $ hub install deoldify == 1.1.0
+  ```

@@ -1,10 +1,10 @@
-import paddle
 import numpy as np
+import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
 from paddle.vision.models import resnet101
 
-import deoldify.utils as U
+from . import utils as U
 
 
 class SequentialEx(nn.Layer):
@@ -39,6 +39,7 @@ class SequentialEx(nn.Layer):
 
 
 class Deoldify(SequentialEx):
+
     def __init__(self,
                  encoder,
                  n_classes,
@@ -76,17 +77,16 @@ class Deoldify(SequentialEx):
 
             n_out = nf if not_final else nf // 2
 
-            unet_block = UnetBlockWide(
-                up_in_c,
-                x_in_c,
-                n_out,
-                self.sfs[i],
-                final_div=not_final,
-                blur=blur,
-                self_attention=sa,
-                norm_type=norm_type,
-                extra_bn=extra_bn,
-                **kwargs)
+            unet_block = UnetBlockWide(up_in_c,
+                                       x_in_c,
+                                       n_out,
+                                       self.sfs[i],
+                                       final_div=not_final,
+                                       blur=blur,
+                                       self_attention=sa,
+                                       norm_type=norm_type,
+                                       extra_bn=extra_bn,
+                                       **kwargs)
             unet_block.eval()
             layers.append(unet_block)
             x = unet_block(x)
@@ -288,7 +288,7 @@ class CustomPixelShuffle_ICNR(nn.Layer):
         self.shuf = PixelShuffle(scale)
 
         self.pad = ReplicationPad2d([1, 0, 1, 0])
-        self.blur = paddle.nn.AvgPool2D(2, stride=1)
+        self.blur = nn.AvgPool2D(2, stride=1)
         self.relu = nn.LeakyReLU(leaky) if leaky is not None else nn.ReLU()  # relu(True, leaky=leaky)
 
     def forward(self, x):
@@ -315,9 +315,8 @@ def res_block(nf, dense: bool = False, norm_type='Batch', bottle: bool = False, 
     norm2 = norm_type
     if not dense and (norm_type == 'Batch'): norm2 = 'BatchZero'
     nf_inner = nf // 2 if bottle else nf
-    return SequentialEx(
-        conv_layer(nf, nf_inner, norm_type=norm_type, **conv_kwargs),
-        conv_layer(nf_inner, nf, norm_type=norm2, **conv_kwargs), MergeLayer(dense))
+    return SequentialEx(conv_layer(nf, nf_inner, norm_type=norm_type, **conv_kwargs),
+                        conv_layer(nf_inner, nf, norm_type=norm2, **conv_kwargs), MergeLayer(dense))
 
 
 class SigmoidRange(nn.Layer):
@@ -337,6 +336,7 @@ def sigmoid_range(x, low, high):
 
 
 class PixelShuffle(nn.Layer):
+
     def __init__(self, upscale_factor):
         super(PixelShuffle, self).__init__()
         self.upscale_factor = upscale_factor
@@ -346,6 +346,7 @@ class PixelShuffle(nn.Layer):
 
 
 class ReplicationPad2d(nn.Layer):
+
     def __init__(self, size):
         super(ReplicationPad2d, self).__init__()
         self.size = size

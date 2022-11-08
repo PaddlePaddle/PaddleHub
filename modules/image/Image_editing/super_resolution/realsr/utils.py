@@ -38,7 +38,9 @@ def video2frames(video_path, outpath, **kargs):
 
 def frames2video(frame_path, video_path, r):
     ffmpeg = ['ffmpeg ', ' -y -loglevel ', ' error ']
-    cmd = ffmpeg + [' -r ', r, ' -f ', ' image2 ', ' -i ', frame_path, ' -pix_fmt ', ' yuv420p ', video_path]
+    cmd = ffmpeg + [
+        ' -r ', r, ' -f ', ' image2 ', ' -i ', frame_path, ' -pix_fmt ', ' yuv420p ', video_path
+    ]
     cmd = ''.join(cmd)
 
     if os.system(cmd) != 0:
@@ -54,7 +56,7 @@ def is_image(input):
         return True
     except:
         return False
-
+    
 
 def cv2_to_base64(image):
     data = cv2.imencode('.jpg', image)[1]

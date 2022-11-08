@@ -11,21 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import json
-import math
-import os
-
-import cv2
 import numpy as np
-import paddle
-import yaml
-from infer import Detector
-from infer import PredictConfig
-from keypoint_infer import KeyPointDetector
-from keypoint_infer import PredictConfig_KeyPoint
-from keypoint_postprocess import translate_to_ori_images
-from preprocess import decode_image
-from visualize import visualize_pose
+
+from .keypoint_postprocess import translate_to_ori_images
 
 KEYPOINT_SUPPORT_MODELS = {'HigherHRNet': 'keypoint_bottomup', 'HRNet': 'keypoint_topdown'}
 

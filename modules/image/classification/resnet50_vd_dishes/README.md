@@ -135,6 +135,10 @@
 
   初始发布
 
+* 1.1.0
+
+  移除 Fluid API
+
   - ```shell
-    $ hub install resnet50_vd_dishes==1.0.0
+    $ hub install resnet50_vd_dishes==1.1.0
     ```

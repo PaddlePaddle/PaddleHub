@@ -12,32 +12,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import os
 import glob
+import os
 
 import cv2
+import numpy as np
 import paddle
 import paddle.nn as nn
-import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-import deoldify.utils as U
-from paddlehub.module.module import moduleinfo, serving, Module
-from deoldify.base_module import build_model
+from . import utils as U
+from .base_module import build_model
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import serving
 
 
-@moduleinfo(
-    name="deoldify",
-    type="CV/image_editing",
-    author="paddlepaddle",
-    author_email="",
-    summary="Deoldify is a colorizaton model",
-    version="1.0.0")
-class DeOldifyPredictor(Module):
-    def _initialize(self, render_factor: int = 32, output_path: int = 'result', load_checkpoint: str = None):
-        #super(DeOldifyPredictor, self).__init__()
+@moduleinfo(name="deoldify",
+            type="CV/image_editing",
+            author="paddlepaddle",
+            author_email="",
+            summary="Deoldify is a colorizaton model",
+            version="1.1.0")
+class DeOldifyPredictor(nn.Layer):
+
+    def __init__(self, render_factor: int = 32, output_path: int = 'output', load_checkpoint: str = None):
+        super(DeOldifyPredictor, self).__init__()
         self.model = build_model()
         self.render_factor = render_factor
         self.output = os.path.join(output_path, 'DeOldify')
@@ -50,6 +50,8 @@ class DeOldifyPredictor(Module):
 
         else:
             checkpoint = os.path.join(self.directory, 'DeOldify_stable.pdparams')
+            if not os.path.exists(checkpoint):
+                os.system('wget https://paddlegan.bj.bcebos.com/applications/DeOldify_stable.pdparams -O ' + checkpoint)
             state_dict = paddle.load(checkpoint)
             self.model.load_dict(state_dict)
             print("load pretrained checkpoint success")
@@ -140,8 +142,6 @@ class DeOldifyPredictor(Module):
         return frame_pattern_combined, vid_out_path
 
     def predict(self, input):
-        if not os.path.exists(self.output):
-            os.makedirs(self.output)
 
         if not U.is_image(input):
             return self.run_video(input)

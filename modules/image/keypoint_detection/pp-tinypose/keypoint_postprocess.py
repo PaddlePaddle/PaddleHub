@@ -12,16 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import math
-from collections import abc
-from collections import defaultdict
 
 import cv2
 import numpy as np
-import paddle
-import paddle.nn as nn
-from keypoint_preprocess import get_affine_mat_kernel
-from keypoint_preprocess import get_affine_transform
-from scipy.optimize import linear_sum_assignment
+
+from .keypoint_preprocess import get_affine_transform
 
 
 class HRNetPostProcess(object):

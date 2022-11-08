@@ -120,6 +120,10 @@
 
   初始发布
 
+* 1.1.0
+
+  移除fluid api
+
   - ```shell
-    $ hub install jde_darknet53==1.0.0
+    $ hub install jde_darknet53==1.1.0
     ```

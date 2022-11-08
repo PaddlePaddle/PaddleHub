@@ -37,7 +37,7 @@ from humanseg_server.optimal import postprocess_v, threshold_mask
     author="baidu-vis",
     author_email="",
     summary="DeepLabv3+ is a semantic segmentation model.",
-    version="1.2.0")
+    version="1.3.0")
 class DeeplabV3pXception65HumanSeg:
     def __init__(self):
         self.default_pretrained_model_path = os.path.join(self.directory, "humanseg_server_inference", "model")

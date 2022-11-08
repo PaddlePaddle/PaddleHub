@@ -1,7 +1,6 @@
 _BASE_: [
   '_base_/mot.yml',
   '_base_/runtime.yml',
-  '_base_/optimizer_30e.yml',
   '_base_/jde_darknet53.yml',
   '_base_/jde_reader_1088x608.yml',
 ]

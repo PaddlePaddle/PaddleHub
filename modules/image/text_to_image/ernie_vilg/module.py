@@ -1,27 +1,21 @@
 import argparse
-import ast
 import base64
 import os
-import re
-import sys
 import time
-from functools import partial
 from io import BytesIO
-from typing import List
 from typing import Optional
 
 import requests
 from PIL import Image
 from tqdm.auto import tqdm
 
-import paddlehub as hub
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
 
 
 @moduleinfo(name="ernie_vilg",
-            version="1.1.0",
+            version="1.2.0",
             type="image/text_to_image",
             summary="",
             author="baidu-nlp",
@@ -65,7 +59,6 @@ class ErnieVilG:
     def generate_image(self,
                        text_prompts,
                        style: Optional[str] = "探索无限",
-                       resolution: Optional[str] = "1024*1024",
                        topk: Optional[int] = 6,
                        visualization: Optional[bool] = True,
                        output_dir: Optional[str] = 'ernievilg_output'):
@@ -75,7 +68,6 @@ class ErnieVilG:
         :param text_prompts: Phrase, sentence, or string of words and phrases describing what the image should look like.
         :param style: Image stype, currently supported 古风、油画、水彩、卡通、二次元、浮世绘、蒸汽波艺术、
         low poly、像素风格、概念艺术、未来主义、赛博朋克、写实风格、洛丽塔风格、巴洛克风格、超现实主义、探索无限。
-        :param resolution: Resolution of images, currently supported "1024*1024", "1024*1536", "1536*1024".
         :param topk: Top k images to save.
         :param visualization: Whether to save images or not.
         :output_dir: Output directory
@@ -94,8 +86,7 @@ class ErnieVilG:
                                 data={
                                     'access_token': token,
                                     "text": text_prompt,
-                                    "style": style,
-                                    "resolution": resolution
+                                    "style": style
                                 })
             res = res.json()
             if res['code'] == 4001:
@@ -117,8 +108,7 @@ class ErnieVilG:
                                     data={
                                         'access_token': token,
                                         "text": text_prompt,
-                                        "style": style,
-                                        "resolution": resolution
+                                        "style": style
                                     })
                 res = res.json()
                 if res['code'] != 0:
@@ -242,7 +232,6 @@ class ErnieVilG:
             self.token = self._apply_token(self.ak, self.sk)
         results = self.generate_image(text_prompts=args.text_prompts,
                                       style=args.style,
-                                      resolution=args.resolution,
                                       topk=args.topk,
                                       visualization=args.visualization,
                                       output_dir=args.output_dir)
@@ -275,11 +264,6 @@ class ErnieVilG:
                                               '未来主义', '赛博朋克', '写实风格', '洛丽塔风格', '巴洛克风格', '超现实主义', '探索无限'
                                           ],
                                           help="绘画风格")
-        self.arg_input_group.add_argument('--resolution',
-                                          type=str,
-                                          default='1024*1024',
-                                          choices=['1024*1024', '1024*1536', '1536*1024'],
-                                          help="图像分辨率")
         self.arg_input_group.add_argument('--topk', type=int, default=6, help="选取保存前多少张图，最多10张")
         self.arg_input_group.add_argument('--ak', type=str, default=None, help="申请文心api使用token的ak")
         self.arg_input_group.add_argument('--sk', type=str, default=None, help="申请文心api使用token的sk")

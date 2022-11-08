@@ -46,7 +46,7 @@
     $ hub install animegan_v2_hayao_99
     ```
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
- | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)w
+ | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
 ## 三、模型API预测
 
@@ -138,14 +138,10 @@
 
   初始发布
 
-* 1.0.1
+* 1.1.0
 
-  适配paddlehub2.0
-
-* 1.0.2
-
-  删除batch_size选项
+  移除 Fluid API
 
   - ```shell
-    $ hub install animegan_v2_hayao_99==1.0.2
+    $ hub install animegan_v2_hayao_99==1.1.0
     ```
