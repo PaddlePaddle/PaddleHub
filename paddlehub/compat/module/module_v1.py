@@ -17,7 +17,7 @@ import os
 from typing import List
 from typing import Tuple
 
-import paddle
+import paddle.io
 import paddle2onnx
 from easydict import EasyDict
 
@@ -179,15 +179,18 @@ class ModuleV1(object):
                 for item in zip(*process_data):
                     yield item
 
+            nonlocal feed_dict
             process_data = []
             feed_name_list = []
+            feed_list = []
             for key in data_format:
                 process_data.append([value['processed'] for value in data[key]])
                 feed_name_list.append(data_format[key]['feed_key'])
-            feeder = paddle.fluid.DataFeeder(feed_list=feed_name_list, place=place)
-            return functools.partial(_reader, process_data=process_data), feeder
+                feed_list.append(feed_dict[key])
+            loader = paddle.io.DataLoader.from_generator(feed_list=feed_list, capacity=1)
+            return functools.partial(_reader, process_data=process_data), loader
 
-        _, fetch_dict, program = self.context(signature=sign_name, for_test=True)
+        feed_dict, fetch_dict, program = self.context(signature=sign_name, for_test=True)
         fetch_list = list([value for key, value in fetch_dict.items()])
         with paddle.static.program_guard(program):
             result = []
@@ -197,10 +200,11 @@ class ModuleV1(object):
             exe = paddle.static.Executor(place=place)
             data = self.processor.preprocess(sign_name=sign_name, data_dict=data)
             data_format = self.processor.data_format(sign_name=sign_name)
-            reader, feeder = _get_reader_and_feeder(data_format, data, place)
+            reader, loader = _get_reader_and_feeder(data_format, data, place)
             reader = paddle.batch(reader, batch_size=batch_size)
-            for batch in reader():
-                data_out = exe.run(feed=feeder.feed(batch), fetch_list=fetch_list, return_numpy=False)
+            loader.set_sample_list_generator(reader, places=place)
+            for batch in loader():
+                data_out = exe.run(feed=batch, fetch_list=fetch_list, return_numpy=False)
                 sub_data = {key: value[index:index + len(batch)] for key, value in data.items()}
                 result += self.processor.postprocess(sign_name, data_out, sub_data, **kwargs)
                 index += len(batch)
