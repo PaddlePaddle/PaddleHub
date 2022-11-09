@@ -62,7 +62,7 @@ class RunEnv(object):
         self.labels = None
         self.metrics = None
         self.is_inititalized = False
-        self.UNG = copy.deepcopy(paddle.utils.unique_name.generator)
+        self.UNG = paddle.utils.unique_name.generate
 
     def __setattr__(self, key: str, value: Any):
         self.__dict__[key] = value
