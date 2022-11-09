@@ -31,12 +31,13 @@ from paddlehub.compat.task.metrics import compute_bleu
 
 class AttentionDecoderCell(RNNCellBase):
 
-    def __init__(self, num_layers, input_size, hidden_size, dropout_prob=0.):
+    def __init__(self, num_layers, input_size, hidden_size, dropout_prob=0., init_scale=0.1):
         super(AttentionDecoderCell, self).__init__()
         self.num_layers = num_layers
         self.hidden_size = hidden_size
         self.dropout_prob = dropout_prob
         self.lstm_cells = []
+        self.init_scale = init_scale
         for i in range(num_layers):
             self.lstm_cells.append(
                 LSTMCell(input_size=input_size + hidden_size if i == 0 else hidden_size, hidden_size=hidden_size))
@@ -60,7 +61,7 @@ class AttentionDecoderCell(RNNCellBase):
 
         return weight_memory
 
-    def call(self, step_input, states, enc_output, enc_padding_mask=None):
+    def forward(self, step_input, states, enc_output, enc_padding_mask=None):
         lstm_states, input_feed = states
         new_lstm_states = []
         step_input = paddle.concat([step_input, input_feed], 1)
@@ -147,7 +148,7 @@ class TextGenerationTask(BaseTask):
 
     def _build_net(self):
         self.seq_len = paddle.static.data(name='seq_len', shape=[1], dtype='int64', lod_level=0)
-        self.seq_len_used = paddle.squeeze(self.seq_len, axes=[1])
+        self.seq_len_used = paddle.squeeze(self.seq_len)
         src_mask = nn.functional.sequence_mask(self.seq_len_used, maxlen=self.max_seq_len, dtype='float32')
         enc_padding_mask = (src_mask - 1.0)
 
@@ -181,8 +182,8 @@ class TextGenerationTask(BaseTask):
             rnn = nn.RNN(dec_cell, is_reverse=False, time_major=False)
             dec_output, _ = rnn(inputs=tar_emb,
                                 initial_states=dec_initial_states,
-                                encoder_output=self.token_feature,
-                                encoder_padding_mask=enc_padding_mask)
+                                enc_output=self.token_feature,
+                                enc_padding_mask=enc_padding_mask)
             self.logits = paddle.static.nn.fc(dec_output,
                                               size=tar_vocab_size,
                                               num_flatten_dims=len(dec_output.shape) - 1,
@@ -207,8 +208,8 @@ class TextGenerationTask(BaseTask):
             self.ret_infers, _ = dynamic_decode(beam_search_decoder,
                                                 inits=dec_initial_states,
                                                 max_step_num=self.beam_max_step_num,
-                                                encoder_output=enc_output,
-                                                encoder_padding_mask=enc_padding_mask)
+                                                enc_output=enc_output,
+                                                enc_padding_mask=enc_padding_mask)
             return self.ret_infers
 
     def _postprocessing(self, run_states):
@@ -231,7 +232,7 @@ class TextGenerationTask(BaseTask):
 
     def _add_loss(self):
         loss = nn.functional.cross_entropy(input=self.outputs[0], label=self.labels[0], soft_label=False)
-        loss = paddle.unsqueeze(loss, axes=[2])
+        loss = paddle.unsqueeze(loss, axis=[2])
         max_tar_seq_len = paddle.shape(self.dec_input)[1]
         tar_sequence_length = self.seq_len_used - paddle.ones_like(self.seq_len_used)
         tar_mask = nn.functional.sequence_mask(tar_sequence_length, maxlen=max_tar_seq_len, dtype='float32')
