@@ -183,8 +183,6 @@ class ModuleV1(object):
             process_data = []
             feed_name_list = []
             feed_list = []
-            print(feed_dict)
-            print(data_format)
             for key in data_format:
                 process_data.append([value['processed'] for value in data[key]])
                 feed_name_list.append(data_format[key]['feed_key'])
