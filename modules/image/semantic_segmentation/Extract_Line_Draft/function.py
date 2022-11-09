@@ -4,9 +4,9 @@ from scipy import ndimage
 
 
 def get_normal_map(img):
-    img = img.astype(np.float)
+    img = img.astype(np.float32)
     img = img / 255.0
-    img = -img + 1
+    img = - img + 1
     img[img < 0] = 0
     img[img > 1] = 1
     return img
@@ -14,7 +14,7 @@ def get_normal_map(img):
 
 def get_gray_map(img):
     gray = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2GRAY)
-    highPass = gray.astype(np.float)
+    highPass = gray.astype(np.float32)
     highPass = highPass / 255.0
     highPass = 1 - highPass
     highPass = highPass[None]
@@ -25,7 +25,7 @@ def get_light_map(img):
     gray = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (0, 0), 3)
     highPass = gray.astype(int) - blur.astype(int)
-    highPass = highPass.astype(np.float)
+    highPass = highPass.astype(np.float32)
     highPass = highPass / 128.0
     highPass = highPass[None]
     return highPass.transpose((1, 2, 0))
@@ -38,7 +38,7 @@ def get_light_map_single(img):
     blur = cv2.GaussianBlur(gray, (0, 0), 3)
     gray = gray.reshape((gray.shape[0], gray.shape[1]))
     highPass = gray.astype(int) - blur.astype(int)
-    highPass = highPass.astype(np.float)
+    highPass = highPass.astype(np.float32)
     highPass = highPass / 128.0
     return highPass
 
@@ -49,7 +49,7 @@ def get_light_map_drawer(img):
     highPass = gray.astype(int) - blur.astype(int) + 255
     highPass[highPass < 0] = 0
     highPass[highPass > 255] = 255
-    highPass = highPass.astype(np.float)
+    highPass = highPass.astype(np.float32)
     highPass = highPass / 255.0
     highPass = 1 - highPass
     highPass = highPass[None]
@@ -58,7 +58,7 @@ def get_light_map_drawer(img):
 
 def get_light_map_drawer2(img):
     ret = img.copy()
-    ret = ret.astype(np.float)
+    ret = ret.astype(np.float32)
     ret[:, :, 0] = get_light_map_drawer3(img[:, :, 0])
     ret[:, :, 1] = get_light_map_drawer3(img[:, :, 1])
     ret[:, :, 2] = get_light_map_drawer3(img[:, :, 2])
@@ -72,7 +72,7 @@ def get_light_map_drawer3(img):
     highPass = gray.astype(int) - blur.astype(int) + 255
     highPass[highPass < 0] = 0
     highPass[highPass > 255] = 255
-    highPass = highPass.astype(np.float)
+    highPass = highPass.astype(np.float32)
     highPass = highPass / 255.0
     highPass = 1 - highPass
     return highPass
@@ -91,7 +91,7 @@ def superlize_pic(img):
 
 def mask_pic(img, mask):
     mask_mat = mask
-    mask_mat = mask_mat.astype(np.float)
+    mask_mat = mask_mat.astype(np.float32)
     mask_mat = cv2.GaussianBlur(mask_mat, (0, 0), 1)
     mask_mat = mask_mat / np.max(mask_mat)
     mask_mat = mask_mat * 255
@@ -106,14 +106,14 @@ def mask_pic(img, mask):
 
 
 def resize_img_512(img):
-    zeros = np.zeros((512, 512, img.shape[2]), dtype=np.float)
+    zeros = np.zeros((512, 512, img.shape[2]), dtype=np.float32)
     zeros[:img.shape[0], :img.shape[1]] = img
     return zeros
 
 
 def resize_img_512_3d(img):
-    zeros = np.zeros((1, 3, 512, 512), dtype=np.float)
-    zeros[0, 0:img.shape[0], 0:img.shape[1], 0:img.shape[2]] = img
+    zeros = np.zeros((1, 3, 512, 512), dtype=np.float32)
+    zeros[0, 0: img.shape[0], 0: img.shape[1], 0: img.shape[2]] = img
     return zeros.transpose((1, 2, 3, 0))
 
 
@@ -122,8 +122,8 @@ def denoise_mat(img, i):
 
 
 def show_active_img_and_save_denoise(img, path):
-    mat = img.astype(np.float)
-    mat = -mat + 1
+    mat = img.astype(np.float32)
+    mat = - mat + 1
     mat = mat * 255.0
     mat[mat < 0] = 0
     mat[mat > 255] = 255
@@ -134,8 +134,8 @@ def show_active_img_and_save_denoise(img, path):
 
 
 def show_active_img(name, img):
-    mat = img.astype(np.float)
-    mat = -mat + 1
+    mat = img.astype(np.float32)
+    mat = - mat + 1
     mat = mat * 255.0
     mat[mat < 0] = 0
     mat[mat > 255] = 255
@@ -145,8 +145,8 @@ def show_active_img(name, img):
 
 
 def get_active_img(img):
-    mat = img.astype(np.float)
-    mat = -mat + 1
+    mat = img.astype(np.float32)
+    mat = - mat + 1
     mat = mat * 255.0
     mat[mat < 0] = 0
     mat[mat > 255] = 255
@@ -155,9 +155,9 @@ def get_active_img(img):
 
 
 def get_active_img_fil(img):
-    mat = img.astype(np.float)
+    mat = img.astype(np.float32)
     mat[mat < 0.18] = 0
-    mat = -mat + 1
+    mat = - mat + 1
     mat = mat * 255.0
     mat[mat < 0] = 0
     mat[mat > 255] = 255
@@ -166,7 +166,7 @@ def get_active_img_fil(img):
 
 
 def show_double_active_img(name, img):
-    mat = img.astype(np.float)
+    mat = img.astype(np.float32)
     mat = mat * 128.0
     mat = mat + 127.0
     mat[mat < 0] = 0
