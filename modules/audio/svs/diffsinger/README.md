@@ -21,6 +21,7 @@
       </p>
 
   - 样例结果示例：
+
     |文本|音频|
     |:-:|:-:|
     |让 梦 恒 久 比 天 长|<audio controls="controls"><source src="https://diffsinger.github.io/audio/singing_demo/diffsinger-base/000000007.wav" autoplay=""></audio>|
@@ -135,7 +136,7 @@
 
     - **返回**
 
-      * res (Dict[str, Union[List[List[int]], int]]): 歌声合成结果，一个字典，包容如下内容；
+      * res (Dict\[str, Union\[List\[List\[int\]\], int\]\]): 歌声合成结果，一个字典，包容如下内容；
 
         * wavs: 歌声音频数据
         * sample_rate: 音频采样率
