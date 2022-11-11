@@ -71,7 +71,7 @@ train
             Number of subprocess to load data, default is 0.
 
         * eval_dataset(paddle.io.Dataset)
-            The validation dataset, deafult is None. If set, the Trainer will execute evaluate function every `save_interval` epochs.
+            The validation dataset, default is None. If set, the Trainer will execute evaluate function every `save_interval` epochs.
         
         * log_interval(int)
             Log the train infomation every `log_interval` steps.
