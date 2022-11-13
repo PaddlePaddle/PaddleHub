@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import base64
 import contextlib
 import hashlib
@@ -25,7 +24,8 @@ import tempfile
 import time
 import traceback
 import types
-from typing import Generator, List
+from typing import Generator
+from typing import List
 from urllib.parse import urlparse
 
 import cv2
@@ -410,14 +410,13 @@ def extract_melspectrogram(y,
         logger.error('Failed to import librosa. Please check that librosa and numba are correctly installed.')
         raise
 
-    s = librosa.stft(
-        y,
-        n_fft=window_size,
-        hop_length=hop_size,
-        win_length=window_size,
-        window=window,
-        center=center,
-        pad_mode=pad_mode)
+    s = librosa.stft(y,
+                     n_fft=window_size,
+                     hop_length=hop_size,
+                     win_length=window_size,
+                     window=window,
+                     center=center,
+                     pad_mode=pad_mode)
 
     power = np.abs(s)**2
     melW = librosa.filters.mel(sr=sample_rate, n_fft=window_size, n_mels=mel_bins, fmin=fmin, fmax=fmax)
@@ -425,3 +424,23 @@ def extract_melspectrogram(y,
     db = librosa.power_to_db(mel, ref=ref, amin=amin, top_db=None)
     db = db.transpose()
     return db
+
+
+def convert_version(version: str) -> List:
+    '''
+    Convert version string in modules dataset such as [1.5.4, 2.0.0] to >=1.5.4 and <=2.0.0
+    '''
+    result = []
+    # from [1.5.4, 2.0.0] -> 1.5.4,2.0.0
+    version = version.replace(' ', '')[1:-1]
+    version = version.split(',')
+    # Although -1.0.0 represents no least version limited,
+    # we should also consider when users write another minus number
+    if not version[0].startswith('-'):
+        result.append('>={}'.format(version[0]))
+
+    if len(version) > 1:
+        if version[1] != '99.0.0':
+            result.append('<={}'.format(version[1]))
+
+    return result
