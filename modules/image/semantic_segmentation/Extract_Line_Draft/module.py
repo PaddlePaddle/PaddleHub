@@ -1,34 +1,30 @@
 import argparse
 import ast
 import os
-import math
-import six
-import time
+import cv2
 from pathlib import Path
 
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
-from paddlehub.module.module import runnable, serving, moduleinfo
-from paddlehub.io.parser import txt_parser
+from paddle.inference import Config, create_predictor
+from paddlehub.module.module import runnable, moduleinfo
 import numpy as np
-import paddle.fluid as fluid
-import paddlehub as hub
-from Extract_Line_Draft.function import *
+from .function import get_light_map_single, normalize_pic, resize_img_512_3d, show_active_img_and_save_denoise
 
 
 @moduleinfo(
     name="Extract_Line_Draft",
-    version="1.0.0",
+    version="1.1.0",
     type="cv/segmentation",
     summary="Import the color picture and generate the line draft of the picture",
     author="彭兆帅，郑博培",
     author_email="1084667371@qq.com，2733821739@qq.com")
-class ExtractLineDraft(hub.Module):
-    def _initialize(self):
+class ExtractLineDraft:
+    def __init__(self):
         """
         Initialize with the necessary elements
         """
         # 加载模型路径
-        self.default_pretrained_model_path = os.path.join(self.directory, "assets", "infer_model")
+        self.default_pretrained_model_path = os.path.join(
+            self.directory, "assets", "infer_model", "model")
         self._set_config()
 
     def _set_config(self):
@@ -36,7 +32,9 @@ class ExtractLineDraft(hub.Module):
         predictor config setting
         """
         self.model_file_path = self.default_pretrained_model_path
-        cpu_config = AnalysisConfig(self.model_file_path)
+        model = self.default_pretrained_model_path+'.pdmodel'
+        params = self.default_pretrained_model_path+'.pdiparams'
+        cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.switch_ir_optim(True)
         cpu_config.enable_memory_optim()
@@ -44,7 +42,7 @@ class ExtractLineDraft(hub.Module):
         cpu_config.switch_specify_input_names(True)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
-        self.cpu_predictor = create_paddle_predictor(cpu_config)
+        self.cpu_predictor = create_predictor(cpu_config)
 
         try:
             _places = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -53,7 +51,7 @@ class ExtractLineDraft(hub.Module):
         except:
             use_gpu = False
         if use_gpu:
-            gpu_config = AnalysisConfig(self.model_file_path)
+            gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.switch_ir_optim(True)
             gpu_config.enable_memory_optim()
@@ -61,7 +59,7 @@ class ExtractLineDraft(hub.Module):
             gpu_config.switch_specify_input_names(True)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(100, 0)
-            self.gpu_predictor = create_paddle_predictor(gpu_config)
+            self.gpu_predictor = create_predictor(gpu_config)
 
     # 模型预测函数
     def predict(self, input_datas):
@@ -69,9 +67,9 @@ class ExtractLineDraft(hub.Module):
         # 遍历输入数据进行预测
         for input_data in input_datas:
             inputs = input_data.copy()
-            self.input_tensor.copy_from_cpu(inputs)
-            self.predictor.zero_copy_run()
-            output = self.output_tensor.copy_to_cpu()
+            self.input_handle.copy_from_cpu(inputs)
+            self.predictor.run()
+            output = self.output_handle.copy_to_cpu()
             outputs.append(output)
 
         # 预测结果合并
@@ -85,7 +83,7 @@ class ExtractLineDraft(hub.Module):
         Get the input and program of the infer model
 
         Args:
-             image (list(numpy.ndarray)): images data, shape of each is [H, W, C], the color space is BGR.
+             image (str): image path
              use_gpu(bool): Weather to use gpu
         """
         if use_gpu:
@@ -103,16 +101,18 @@ class ExtractLineDraft(hub.Module):
         new_width = 0
         new_height = 0
         if (width > height):
-            from_mat = cv2.resize(from_mat, (512, int(512 / width * height)), interpolation=cv2.INTER_AREA)
+            from_mat = cv2.resize(
+                from_mat, (512, int(512 / width * height)), interpolation=cv2.INTER_AREA)
             new_width = 512
             new_height = int(512 / width * height)
         else:
-            from_mat = cv2.resize(from_mat, (int(512 / height * width), 512), interpolation=cv2.INTER_AREA)
+            from_mat = cv2.resize(
+                from_mat, (int(512 / height * width), 512), interpolation=cv2.INTER_AREA)
             new_width = int(512 / height * width)
             new_height = 512
 
         from_mat = from_mat.transpose((2, 0, 1))
-        light_map = np.zeros(from_mat.shape, dtype=np.float)
+        light_map = np.zeros(from_mat.shape, dtype=np.float32)
         for channel in range(3):
             light_map[channel] = get_light_map_single(from_mat[channel])
         light_map = normalize_pic(light_map)
@@ -127,9 +127,12 @@ class ExtractLineDraft(hub.Module):
 
         self.input_names = self.predictor.get_input_names()
         self.output_names = self.predictor.get_output_names()
-        self.input_tensor = self.predictor.get_input_tensor(self.input_names[0])
-        self.output_tensor = self.predictor.get_output_tensor(self.output_names[0])
-        line_mat = self.predict(np.expand_dims(light_map, axis=0).astype('float32'))
+        self.input_handle = self.predictor.get_input_handle(
+            self.input_names[0])
+        self.output_handle = self.predictor.get_output_handle(
+            self.output_names[0])
+        line_mat = self.predict(np.expand_dims(
+            light_map, axis=0).astype('float32'))
         # 去除 batch 维度 (512, 512, 3)
         line_mat = line_mat.transpose((3, 1, 2, 0))[0]
         # 裁剪 (512, 384, 3)
@@ -137,10 +140,12 @@ class ExtractLineDraft(hub.Module):
         line_mat = np.amax(line_mat, 2)
         # 保存图片
         if Path('./output/').exists():
-            show_active_img_and_save_denoise(line_mat, './output/' + 'output.png')
+            show_active_img_and_save_denoise(
+                line_mat, './output/' + 'output.png')
         else:
             os.makedirs('./output/')
-            show_active_img_and_save_denoise(line_mat, './output/' + 'output.png')
+            show_active_img_and_save_denoise(
+                line_mat, './output/' + 'output.png')
         print('图片已经完成')
 
     @runnable
@@ -154,9 +159,11 @@ class ExtractLineDraft(hub.Module):
             usage='%(prog)s',
             add_help=True)
 
-        self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
+        self.arg_input_group = self.parser.add_argument_group(
+            title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
-            title="Config options", description="Run configuration for controlling module behavior, not required.")
+            title="Config options",
+            description="Run configuration for controlling module behavior, not required.")
 
         self.add_module_input_arg()
 
@@ -175,8 +182,16 @@ class ExtractLineDraft(hub.Module):
         """
         Add the command input options
         """
-        self.arg_input_group.add_argument('--image', type=str, default=None, help="file contain input data")
-        self.arg_input_group.add_argument('--use_gpu', type=ast.literal_eval, default=None, help="weather to use gpu")
+        self.arg_input_group.add_argument(
+            '--image',
+            type=str,
+            default=None,
+            help="file contain input data")
+        self.arg_input_group.add_argument(
+            '--use_gpu',
+            type=ast.literal_eval,
+            default=None,
+            help="weather to use gpu")
 
     def check_input_data(self, args):
         input_data = []

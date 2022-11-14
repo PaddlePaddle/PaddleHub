@@ -11,15 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import os
 import pickle
 import time
 from collections import defaultdict
-from typing import Any, Callable, Generic, List
+from typing import Any
+from typing import Callable
+from typing import Generic
+from typing import List
 
-import paddle
 import numpy as np
+import paddle
 from visualdl import LogWriter
 
 from paddlehub.utils.log import logger
@@ -188,15 +190,16 @@ class Trainer(object):
             if not hasattr(model, 'validation_step'):
                 raise NotImplementedError('The specified finetuning model does not support evaluation.')
 
-        batch_sampler = paddle.io.DistributedBatchSampler(
-            train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
-        loader = paddle.io.DataLoader(
-            train_dataset,
-            batch_sampler=batch_sampler,
-            num_workers=num_workers,
-            return_list=True,
-            use_buffer_reader=True,
-            collate_fn=collate_fn)
+        batch_sampler = paddle.io.DistributedBatchSampler(train_dataset,
+                                                          batch_size=batch_size,
+                                                          shuffle=True,
+                                                          drop_last=False)
+        loader = paddle.io.DataLoader(train_dataset,
+                                      batch_sampler=batch_sampler,
+                                      num_workers=num_workers,
+                                      return_list=True,
+                                      use_buffer_reader=True,
+                                      collate_fn=collate_fn)
 
         steps_per_epoch = len(batch_sampler)
         timer = Timer(steps_per_epoch * epochs)
@@ -214,7 +217,7 @@ class Trainer(object):
                 self.optimizer_zero_grad(self.current_epoch, batch_idx, self.optimizer)
 
                 # calculate metrics and loss
-                avg_loss += loss.numpy()[0]
+                avg_loss += float(loss)
                 for metric, value in metrics.items():
                     if isinstance(value, paddle.Tensor):
                         value = value.numpy()
@@ -235,8 +238,9 @@ class Trainer(object):
                     for metric, value in avg_metrics.items():
                         value /= log_interval
                         if self.use_vdl:
-                            self.log_writer.add_scalar(
-                                tag='TRAIN/{}'.format(metric), step=timer.current_step, value=value)
+                            self.log_writer.add_scalar(tag='TRAIN/{}'.format(metric),
+                                                       step=timer.current_step,
+                                                       value=value)
                         if isinstance(value, np.ndarray):
                             value = value.item()
                         print_msg += ' {}={:.4f}'.format(metric, value)
@@ -258,8 +262,9 @@ class Trainer(object):
                                 self.log_writer.add_scalar(tag='EVAL/loss', step=timer.current_step, value=eval_loss)
 
                             for metric, value in eval_metrics.items():
-                                self.log_writer.add_scalar(
-                                    tag='EVAL/{}'.format(metric), step=timer.current_step, value=value)
+                                self.log_writer.add_scalar(tag='EVAL/{}'.format(metric),
+                                                           step=timer.current_step,
+                                                           value=value)
 
                         if not self.best_metrics or self.compare_metrics(self.best_metrics, eval_metrics):
                             self.best_metrics = eval_metrics
@@ -293,15 +298,14 @@ class Trainer(object):
         if self.local_rank == 0:
             batch_sampler = paddle.io.BatchSampler(eval_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
 
-            loader = paddle.io.DataLoader(
-                eval_dataset,
-                batch_sampler=batch_sampler,
-                num_workers=num_workers,
-                return_list=True,
-                collate_fn=collate_fn)
+            loader = paddle.io.DataLoader(eval_dataset,
+                                          batch_sampler=batch_sampler,
+                                          num_workers=num_workers,
+                                          return_list=True,
+                                          collate_fn=collate_fn)
 
             self.model.eval()
-            
+
             avg_loss = num_samples = 0
             sum_metrics = defaultdict(int)
             avg_metrics = defaultdict(int)
@@ -317,7 +321,7 @@ class Trainer(object):
                         num_samples += bs
 
                         if loss:
-                            avg_loss += loss.numpy()[0] * bs
+                            avg_loss += float(loss) * bs
 
                         for metric, value in metrics.items():
                             sum_metrics[metric] += value * bs

@@ -12,12 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import copy
 import time
 from typing import Any
 
-import paddle
+import paddle.utils.unique_name
 
 
 class RunState(object):
@@ -63,7 +62,7 @@ class RunEnv(object):
         self.labels = None
         self.metrics = None
         self.is_inititalized = False
-        self.UNG = copy.deepcopy(paddle.fluid.unique_name.generator)
+        self.UNG = paddle.utils.unique_name.generate
 
     def __setattr__(self, key: str, value: Any):
         self.__dict__[key] = value
