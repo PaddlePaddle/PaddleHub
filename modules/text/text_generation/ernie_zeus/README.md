@@ -70,7 +70,7 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
   - ```python
     import paddlehub as hub
 
-    # 请设置 '--ak' 和 '--sk' 参数
+    # 请设置 'ak' 和 'sk' 参数
     # 或者设置 'WENXIN_AK' 和 'WENXIN_SK' 环境变量
     # 更多细节参考下方 API 说明
     model = hub.Module(name='ernie_zeus')
