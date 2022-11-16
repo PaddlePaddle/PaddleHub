@@ -68,6 +68,9 @@
   - ```python
     import paddlehub as hub
 
+    # 初始化时请设置文心 API AK 和 SK 参数
+    # 或者设置 ‘WENXIN_AK’ 和 ‘WENXIN_SK’ 环境变量
+    # 更多细节参考下方 API 说明
     module = hub.Module(name="ernie_vilg")
     text_prompts = ["宁静的小镇"]
     images = module.generate_image(text_prompts=text_prompts, style='油画', output_dir='./ernie_vilg_out/')  
@@ -76,11 +79,26 @@
 - ### 3、API
 
   - ```python
+    def __init__(
+      ak: Optional[str] = None, 
+      sk: Optional[str] = None
+    )
+    ```
+
+    - 初始化 API。
+
+    - **参数**
+
+      - ak(Optional[str]): 文心 API AK，默认为 None，即从环境变量 ‘WENXIN_AK’ 中获取；
+      - sk(Optional[str]): 文心 API SK，默认为 None，即从环境变量 ‘WENXIN_SK’ 中获取。
+
+  - ```python
     def generate_image(
-              text_prompts:str,
-              style: Optional[str] = "探索无限",
-              topk: Optional[int] = 6,
-              output_dir: Optional[str] = 'ernievilg_output')
+      text_prompts:str,
+      style: Optional[str] = "探索无限",
+      topk: Optional[int] = 6,
+      output_dir: Optional[str] = 'ernievilg_output'
+    )
     ```
 
     - 文图生成API，生成文本描述内容的图像。
@@ -390,7 +408,7 @@ DiscoDiffusion Prompt 技巧资料：https://docs.google.com/document/d/1l8s7uS2
 
 * 1.2.0
 
-  移除分辨率参数
+  移除分辨率参数，移除默认 AK 和 SK
 
   ```shell
   $ hub install ernie_vilg == 1.2.0

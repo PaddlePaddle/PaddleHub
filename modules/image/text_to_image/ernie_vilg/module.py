@@ -27,12 +27,13 @@ class ErnieVilG:
       :param ak: ak for applying token to request wenxin api.
       :param sk: sk for applying token to request wenxin api.
       """
-        if ak is None or sk is None:
-            self.ak = 'G26BfAOLpGIRBN5XrOV2eyPA25CE01lE'
-            self.sk = 'txLZOWIjEqXYMU3lSm05ViW4p9DWGOWs'
-        else:
-            self.ak = ak
-            self.sk = sk
+        self.ak = ak if ak else os.getenv('WENXIN_AK')
+        self.sk = sk if sk else os.getenv('WENXIN_SK')
+
+        assert self.ak and self.sk, RuntimeError(
+            'Please go to the wenxin official website to apply for AK and SK and set the parameters “ak” and “sk” correctly, or set the environment variables “WENXIN_AK” and “WENXIN_SK”.'
+        )
+
         self.token_host = 'https://wenxin.baidu.com/younger/portal/api/oauth/token'
         self.token = self._apply_token(self.ak, self.sk)
 
