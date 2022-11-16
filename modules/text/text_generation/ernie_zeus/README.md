@@ -52,6 +52,9 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
 
   - ```bash
     # 作文创作
+    # 请设置 '--ak' 和 '--sk' 参数
+    # 或者设置 'WENXIN_AK' 和 'WENXIN_SK' 环境变量
+    # 更多细节参考下方 API 说明
     $ hub run ernie_zeus \
         --task composition_generation \
         --text '诚以养德，信以修身'
@@ -67,8 +70,8 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
   - ```python
     import paddlehub as hub
 
-    # 初始化时请设置文心 API AK 和 SK 参数
-    # 或者设置 ‘WENXIN_AK’ 和 ‘WENXIN_SK’ 环境变量
+    # 请设置 '--ak' 和 '--sk' 参数
+    # 或者设置 'WENXIN_AK' 和 'WENXIN_SK' 环境变量
     # 更多细节参考下方 API 说明
     model = hub.Module(name='ernie_zeus')
 
@@ -92,8 +95,8 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
 
     - **参数**
 
-      - sk(Optional[str]): 文心 API AK，默认为 None，即从环境变量 ‘WENXIN_AK’ 中获取；
-      - ak(Optional[str]): 文心 API SK，默认为 None，即从环境变量 ‘WENXIN_SK’ 中获取。
+      - sk(Optional[str]): 文心 API AK，默认为 None，即从环境变量 'WENXIN_AK' 中获取；
+      - ak(Optional[str]): 文心 API SK，默认为 None，即从环境变量 'WENXIN_SK' 中获取。
 
   - ```python
     def custom_generation(
