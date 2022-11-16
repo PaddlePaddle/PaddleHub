@@ -78,6 +78,9 @@ class ServerSource(object):
         params['paddle_version'] = paddle.__version__.split('-')[0]
 
         result = self.request(path='search', params=params)
+        paddle_version = params[
+            'paddle_version'] if params['paddle_version'] != '0.0.0' else '999.0.0'  # develop version
+        hub_version = params['hub_version'] if params['hub_version'] != 'develop' else '999.0.0'  # develop version
         if result['status'] == 0 and len(result['data']) > 0:
             results = []
             for module_info in result['data']:
@@ -85,12 +88,12 @@ class ServerSource(object):
                 if module_info['paddle_version']:
                     paddle_version_intervals = convert_version(module_info['paddle_version'])
                     for module_paddle_version in paddle_version_intervals:
-                        if not Version(params['paddle_version']).match(module_paddle_version):
+                        if not Version(paddle_version).match(module_paddle_version):
                             should_skip = True
                 if module_info['hub_version']:
                     hub_version_intervals = convert_version(module_info['hub_version'])
                     for module_hub_version in hub_version_intervals:
-                        if not Version(params['hub_version']).match(module_hub_version):
+                        if not Version(hub_version).match(module_hub_version):
                             should_skip = True
                 if should_skip:
                     continue
