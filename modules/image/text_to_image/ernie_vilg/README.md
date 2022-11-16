@@ -54,12 +54,17 @@
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
+- ### 3. 使用申请（可选）
+  - 请前往 [文心旸谷社区](https://wenxin.baidu.com/moduleApi/key) 申请使用本模型所需的 API key 和 Secret Key。
 
 ## 三、模型API预测  
 
 - ### 1、命令行预测
 
   - ```shell
+    # 请设置 '--ak' 和 '--sk' 参数
+    # 或者设置 'WENXIN_AK' 和 'WENXIN_SK' 环境变量
+    # 更多细节参考下方 API 说明
     $ hub run ernie_vilg --text_prompts "宁静的小镇" --style "油画" --output_dir ernie_vilg_out
     ```
 
@@ -68,8 +73,8 @@
   - ```python
     import paddlehub as hub
 
-    # 初始化时请设置文心 API AK 和 SK 参数
-    # 或者设置 ‘WENXIN_AK’ 和 ‘WENXIN_SK’ 环境变量
+    # 请设置 'ak' 和 'sk' 参数
+    # 或者设置 'WENXIN_AK' 和 'WENXIN_SK' 环境变量
     # 更多细节参考下方 API 说明
     module = hub.Module(name="ernie_vilg")
     text_prompts = ["宁静的小镇"]
@@ -80,7 +85,7 @@
 
   - ```python
     def __init__(
-      ak: Optional[str] = None, 
+      ak: Optional[str] = None,
       sk: Optional[str] = None
     )
     ```
@@ -89,8 +94,8 @@
 
     - **参数**
 
-      - ak(Optional[str]): 文心 API AK，默认为 None，即从环境变量 ‘WENXIN_AK’ 中获取；
-      - sk(Optional[str]): 文心 API SK，默认为 None，即从环境变量 ‘WENXIN_SK’ 中获取。
+      - ak(Optional[str]): 文心 API AK，默认为 None，即从环境变量 'WENXIN_AK' 中获取；
+      - sk(Optional[str]): 文心 API SK，默认为 None，即从环境变量 'WENXIN_SK' 中获取。
 
   - ```python
     def generate_image(
