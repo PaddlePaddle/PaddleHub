@@ -52,9 +52,12 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
 
   - ```bash
     # 作文创作
+    # 请设置 '--ak' 和 '--sk' 参数
+    # 或者设置 'WENXIN_AK' 和 'WENXIN_SK' 环境变量
+    # 更多细节参考下方 API 说明
     $ hub run ernie_zeus \
         --task composition_generation \
-        --text '诚以养德，信以修身' 
+        --text '诚以养德，信以修身'
     ```
 
     - **参数**
@@ -67,7 +70,9 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
   - ```python
     import paddlehub as hub
 
-    # 加载模型
+    # 请设置 'ak' 和 'sk' 参数
+    # 或者设置 'WENXIN_AK' 和 'WENXIN_SK' 环境变量
+    # 更多细节参考下方 API 说明
     model = hub.Module(name='ernie_zeus')
 
     # 作文创作
@@ -81,17 +86,17 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
 - ### 3. API
   - ```python
     def __init__(
-        api_key: str = '', 
-        secret_key: str = ''
+        ak: Optional[str] = None,
+        sk: Optional[str] = None
     ) -> None
     ```
-    
+
     - 初始化 API
 
     - **参数**
 
-      - api_key(str): API Key。（可选）
-      - secret_key(str): Secret Key。（可选）
+      - sk(Optional[str]): 文心 API AK，默认为 None，即从环境变量 'WENXIN_AK' 中获取；
+      - ak(Optional[str]): 文心 API SK，默认为 None，即从环境变量 'WENXIN_SK' 中获取。
 
   - ```python
     def custom_generation(
@@ -107,9 +112,7 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
         is_unidirectional: bool = False,
         min_dec_penalty_text: str = '',
         logits_bias: int = -10000,
-        mask_type: str = 'word',
-        api_key: str = '',
-        secret_key: str = ''
+        mask_type: str = 'word'
     ) -> str
     ```
     - 自定义文本生成 API
@@ -122,11 +125,11 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
       - penalty_score(float): 通过对已生成的 token 增加惩罚, 减少重复生成的现象。值越大表示惩罚越大。取值范围 [1.0, 2.0]。
       - stop_token(str): 预测结果解析时使用的结束字符串, 碰到对应字符串则直接截断并返回。可以通过设置该值, 过滤掉 few-shot 等场景下模型重复的 cases。
       - task_prompt(str): 指定预置的任务模板, 效果更好。
-        PARAGRAPH: 引导模型生成一段文章; SENT: 引导模型生成一句话; ENTITY: 引导模型生成词组; 
-        Summarization: 摘要; MT: 翻译; Text2Annotation: 抽取; Correction: 纠错; 
-        QA_MRC: 阅读理解; Dialogue: 对话; QA_Closed_book: 闭卷问答; QA_Multi_Choice: 多选问答; 
-        QuestionGeneration: 问题生成; Paraphrasing: 复述; NLI: 文本蕴含识别; SemanticMatching: 匹配; 
-        Text2SQL: 文本描述转SQL; TextClassification: 文本分类; SentimentClassification: 情感分析; 
+        PARAGRAPH: 引导模型生成一段文章; SENT: 引导模型生成一句话; ENTITY: 引导模型生成词组;
+        Summarization: 摘要; MT: 翻译; Text2Annotation: 抽取; Correction: 纠错;
+        QA_MRC: 阅读理解; Dialogue: 对话; QA_Closed_book: 闭卷问答; QA_Multi_Choice: 多选问答;
+        QuestionGeneration: 问题生成; Paraphrasing: 复述; NLI: 文本蕴含识别; SemanticMatching: 匹配;
+        Text2SQL: 文本描述转SQL; TextClassification: 文本分类; SentimentClassification: 情感分析;
         zuowen: 写作文; adtext: 写文案; couplet: 对对联; novel: 写小说; cloze: 文本补全; Misc: 其它任务。
       - penalty_text(str): 模型会惩罚该字符串中的 token。通过设置该值, 可以减少某些冗余与异常字符的生成。
       - choice_text(str): 模型只能生成该字符串中的 token 的组合。通过设置该值, 可以对某些抽取式任务进行定向调优。
@@ -288,10 +291,14 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
        - text(str): 段落摘要。
 ## 四、更新历史
 
-* 1.0.0 
+* 1.0.0
 
   初始发布
 
+* 1.1.0
+
+  移除默认 AK 和 SK
+
   ```shell
-  $ hub install ernie_zeus == 1.0.0
+  $ hub install ernie_zeus == 1.1.0
   ```
