@@ -27,19 +27,17 @@ class ErnieVilG:
       :param ak: ak for applying token to request wenxin api.
       :param sk: sk for applying token to request wenxin api.
       """
-        if ak is None or sk is None:
-            self.ak = 'G26BfAOLpGIRBN5XrOV2eyPA25CE01lE'
-            self.sk = 'txLZOWIjEqXYMU3lSm05ViW4p9DWGOWs'
-        else:
-            self.ak = ak
-            self.sk = sk
+        self.ak = ak
+        self.sk = sk
         self.token_host = 'https://wenxin.baidu.com/younger/portal/api/oauth/token'
         self.token = self._apply_token(self.ak, self.sk)
 
     def _apply_token(self, ak, sk):
-        if ak is None or sk is None:
-            ak = self.ak
-            sk = self.sk
+        ak = ak if ak else os.getenv('WENXIN_AK')
+        sk = sk if sk else os.getenv('WENXIN_SK')
+        assert ak and sk, RuntimeError(
+            'Please go to the wenxin official website to apply for AK and SK and set the parameters “ak” and “sk” correctly, or set the environment variables “WENXIN_AK” and “WENXIN_SK”.'
+        )
         response = requests.get(self.token_host,
                                 params={
                                     'grant_type': 'client_credentials',
@@ -145,7 +143,7 @@ class ErnieVilG:
                 time.sleep(5)
                 continue
             else:
-                time.sleep(6)
+                time.sleep(10)
             if not taskids:
                 break
             has_done = []
@@ -226,10 +224,9 @@ class ErnieVilG:
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        if args.ak is not None and args.sk is not None:
-            self.ak = args.ak
-            self.sk = args.sk
-            self.token = self._apply_token(self.ak, self.sk)
+        self.ak = args.ak
+        self.sk = args.sk
+        self.token = self._apply_token(self.ak, self.sk)
         results = self.generate_image(text_prompts=args.text_prompts,
                                       style=args.style,
                                       topk=args.topk,

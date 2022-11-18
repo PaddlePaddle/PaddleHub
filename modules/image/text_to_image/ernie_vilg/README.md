@@ -54,12 +54,17 @@
   - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
  | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
+- ### 3. 使用申请（可选）
+  - 请前往 [文心旸谷社区](https://wenxin.baidu.com/moduleApi/key) 申请使用本模型所需的 API key 和 Secret Key。
 
 ## 三、模型API预测  
 
 - ### 1、命令行预测
 
   - ```shell
+    # 请设置 '--ak' 和 '--sk' 参数
+    # 或者设置 'WENXIN_AK' 和 'WENXIN_SK' 环境变量
+    # 更多细节参考下方 API 说明
     $ hub run ernie_vilg --text_prompts "宁静的小镇" --style "油画" --output_dir ernie_vilg_out
     ```
 
@@ -68,6 +73,9 @@
   - ```python
     import paddlehub as hub
 
+    # 请设置 'ak' 和 'sk' 参数
+    # 或者设置 'WENXIN_AK' 和 'WENXIN_SK' 环境变量
+    # 更多细节参考下方 API 说明
     module = hub.Module(name="ernie_vilg")
     text_prompts = ["宁静的小镇"]
     images = module.generate_image(text_prompts=text_prompts, style='油画', output_dir='./ernie_vilg_out/')  
@@ -76,11 +84,26 @@
 - ### 3、API
 
   - ```python
+    def __init__(
+      ak: Optional[str] = None,
+      sk: Optional[str] = None
+    )
+    ```
+
+    - 初始化 API。
+
+    - **参数**
+
+      - ak(Optional[str]): 文心 API AK，默认为 None，即从环境变量 'WENXIN_AK' 中获取；
+      - sk(Optional[str]): 文心 API SK，默认为 None，即从环境变量 'WENXIN_SK' 中获取。
+
+  - ```python
     def generate_image(
-              text_prompts:str,
-              style: Optional[str] = "探索无限",
-              topk: Optional[int] = 6,
-              output_dir: Optional[str] = 'ernievilg_output')
+      text_prompts:str,
+      style: Optional[str] = "探索无限",
+      topk: Optional[int] = 6,
+      output_dir: Optional[str] = 'ernievilg_output'
+    )
     ```
 
     - 文图生成API，生成文本描述内容的图像。
@@ -390,7 +413,7 @@ DiscoDiffusion Prompt 技巧资料：https://docs.google.com/document/d/1l8s7uS2
 
 * 1.2.0
 
-  移除分辨率参数
+  移除分辨率参数，移除默认 AK 和 SK
 
   ```shell
   $ hub install ernie_vilg == 1.2.0
