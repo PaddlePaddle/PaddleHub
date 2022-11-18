@@ -74,10 +74,18 @@ class ServerSource(object):
 
         # Delay module loading to improve command line speed
         import paddle
-        params['hub_version'] = paddlehub.__version__.split('-')[0]
-        params['paddle_version'] = paddle.__version__.split('-')[0]
+
+        paddle_version = paddle.__version__.split('-')[0]
+        hub_version = paddlehub.__version__.split('-')[0]
+        if paddle_version == '0.0.0':  # develop version
+            paddle_version = '66.0.0'
+        if hub_version == 'develop':  # develop version
+            hub_version = '66.0.0'
+        params['hub_version'] = hub_version
+        params['paddle_version'] = paddle_version
 
         result = self.request(path='search', params=params)
+
         if result['status'] == 0 and len(result['data']) > 0:
             results = []
             for module_info in result['data']:
@@ -85,12 +93,12 @@ class ServerSource(object):
                 if module_info['paddle_version']:
                     paddle_version_intervals = convert_version(module_info['paddle_version'])
                     for module_paddle_version in paddle_version_intervals:
-                        if not Version(params['paddle_version']).match(module_paddle_version):
+                        if not Version(paddle_version).match(module_paddle_version):
                             should_skip = True
                 if module_info['hub_version']:
                     hub_version_intervals = convert_version(module_info['hub_version'])
                     for module_hub_version in hub_version_intervals:
-                        if not Version(params['hub_version']).match(module_hub_version):
+                        if not Version(hub_version).match(module_hub_version):
                             should_skip = True
                 if should_skip:
                     continue
