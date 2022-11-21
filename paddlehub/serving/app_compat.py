@@ -16,6 +16,7 @@
 import traceback
 import time
 from threading import Lock
+import socket
 
 from flask import Flask, request
 
@@ -76,13 +77,18 @@ def create_gradio_app(module_info:dict):
                 serving_method = getattr(module_info["module"], 'create_gradio_app')
             except Exception:
                 raise RuntimeError('Module {} is not supported for gradio app.'.format(module_name))
-            # to add: port number
+            def get_free_tcp_port():
+                tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                tcp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+                tcp.bind(('localhost', 0))
+                addr, port = tcp.getsockname()
+                tcp.close()
+                return port
+            port = get_free_tcp_port()
             app = serving_method()
-            app.launch(server_port=port)
-    
+            threading.Thread(target=app.launch, kwargs={'server_port':port}).start()
+            _gradio_apps[module_name] = app
     return port
-
-
 
 
 def predict_v2(module_info: dict, input: dict):
@@ -188,8 +194,11 @@ def create_app(init_flag: bool = False, configs: dict = None):
 
         results = predict_v2(module_info, inputs)
         return results
+    
+    
 
     return app_instance
+
 
 
 def config_with_file(configs: dict):
