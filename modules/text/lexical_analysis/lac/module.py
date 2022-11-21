@@ -11,18 +11,18 @@ import os
 
 import numpy as np
 import six
+from paddle.inference import Config
+from paddle.inference import create_predictor
+
 from .custom import Customization
 from .processor import load_kv_dict
 from .processor import parse_result
 from .processor import word_to_ids
-from paddle.inference import Config
-from paddle.inference import create_predictor
-
-from paddlehub.utils.utils import sys_stdin_encoding
-from paddlehub.utils.parser import txt_parser
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
+from paddlehub.utils.parser import txt_parser
+from paddlehub.utils.utils import sys_stdin_encoding
 
 
 class DataFormatError(Exception):
@@ -40,6 +40,7 @@ class DataFormatError(Exception):
     author_email="paddle-dev@baidu.com",
     type="nlp/lexical_analysis")
 class LAC:
+
     def __init__(self, user_dict=None):
         """
         initialize with the necessary elements
@@ -66,8 +67,8 @@ class LAC:
         """
         predictor config setting
         """
-        model = self.default_pretrained_model_path+'.pdmodel'
-        params = self.default_pretrained_model_path+'.pdiparams'
+        model = self.default_pretrained_model_path + '.pdmodel'
+        params = self.default_pretrained_model_path + '.pdiparams'
         cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
@@ -152,19 +153,6 @@ class LAC:
             if data == item:
                 res.append(index)
         return res
-    
-    def create_gradio_app(self):
-        import gradio as gr
-        def inference(text):
-            results = jieba_paddle.cut(sentence=text)
-            return results
-        
-        title="jieba_paddle"
-        description="jieba_paddle is a word segmentation model based on paddlepaddle deep learning framework."
-
-        examples=[['今天是个好日子']]
-        app = gr.Interface(inference,"text",[gr.outputs.Textbox(label="words")],title=title,description=description,examples=examples)
-        return app
 
     @serving
     def cut(self, text, use_gpu=False, batch_size=1, return_tag=True):
