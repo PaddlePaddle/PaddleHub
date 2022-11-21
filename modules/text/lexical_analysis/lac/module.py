@@ -152,6 +152,19 @@ class LAC:
             if data == item:
                 res.append(index)
         return res
+    
+    def create_gradio_app(self):
+        import gradio as gr
+        def inference(text):
+            results = jieba_paddle.cut(sentence=text)
+            return results
+        
+        title="jieba_paddle"
+        description="jieba_paddle is a word segmentation model based on paddlepaddle deep learning framework."
+
+        examples=[['今天是个好日子']]
+        app = gr.Interface(inference,"text",[gr.outputs.Textbox(label="words")],title=title,description=description,examples=examples)
+        return app
 
     @serving
     def cut(self, text, use_gpu=False, batch_size=1, return_tag=True):

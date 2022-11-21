@@ -15,6 +15,7 @@
 
 import traceback
 import time
+from threading import Lock
 
 from flask import Flask, request
 
@@ -25,6 +26,8 @@ from paddlehub.utils import utils, log
 
 filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
 
+_gradio_apps = {} # Used to store all launched gradio apps
+_lock = Lock() # Used to prevent parallel requests to launch a server twice
 
 def package_result(status: str, msg: str, data: dict):
     '''
@@ -53,6 +56,33 @@ def package_result(status: str, msg: str, data: dict):
             package_result(status='000', msg='', data=data)
     '''
     return {"status": status, "msg": msg, "results": data}
+
+def create_gradio_app(module_info:dict):
+    '''
+    Create a gradio app and launch a server for users. 
+    Args:
+        module_info(dict): Module info include module name, method name and
+                            other info.
+    Return:
+        int: port number, if server has been successful.
+
+    Exception:
+        Raise a exception if server can not been launched.
+    '''
+    module_name = module_info['module_name']
+    with _lock:
+        if module_name not in _gradio_apps:
+            try:
+                serving_method = getattr(module_info["module"], 'create_gradio_app')
+            except Exception:
+                raise RuntimeError('Module {} is not supported for gradio app.'.format(module_name))
+            # to add: port number
+            app = serving_method()
+            app.launch(server_port=port)
+    
+    return port
+
+
 
 
 def predict_v2(module_info: dict, input: dict):
