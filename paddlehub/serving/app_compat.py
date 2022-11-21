@@ -12,23 +12,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import traceback
-import time
-from threading import Lock
 import socket
+import threading
+import time
+import traceback
+from threading import Lock
 
-from flask import Flask, request
+import requests
+from flask import Flask
+from flask import redirect
+from flask import request
+from flask import Response
 
 from paddlehub.serving.model_service.base_model_service import cv_module_info
 from paddlehub.serving.model_service.base_model_service import nlp_module_info
 from paddlehub.serving.model_service.base_model_service import v2_module_info
-from paddlehub.utils import utils, log
+from paddlehub.utils import log
+from paddlehub.utils import utils
 
 filename = 'HubServing-%s.log' % time.strftime("%Y_%m_%d", time.localtime())
 
-_gradio_apps = {} # Used to store all launched gradio apps
-_lock = Lock() # Used to prevent parallel requests to launch a server twice
+_gradio_apps = {}  # Used to store all launched gradio apps
+_lock = Lock()  # Used to prevent parallel requests to launch a server twice
+
 
 def package_result(status: str, msg: str, data: dict):
     '''
@@ -58,9 +64,10 @@ def package_result(status: str, msg: str, data: dict):
     '''
     return {"status": status, "msg": msg, "results": data}
 
-def create_gradio_app(module_info:dict):
+
+def create_gradio_app(module_info: dict):
     '''
-    Create a gradio app and launch a server for users. 
+    Create a gradio app and launch a server for users.
     Args:
         module_info(dict): Module info include module name, method name and
                             other info.
@@ -71,12 +78,14 @@ def create_gradio_app(module_info:dict):
         Raise a exception if server can not been launched.
     '''
     module_name = module_info['module_name']
+    port = None
     with _lock:
         if module_name not in _gradio_apps:
             try:
                 serving_method = getattr(module_info["module"], 'create_gradio_app')
             except Exception:
                 raise RuntimeError('Module {} is not supported for gradio app.'.format(module_name))
+
             def get_free_tcp_port():
                 tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 tcp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
@@ -84,10 +93,23 @@ def create_gradio_app(module_info:dict):
                 addr, port = tcp.getsockname()
                 tcp.close()
                 return port
+
             port = get_free_tcp_port()
             app = serving_method()
-            threading.Thread(target=app.launch, kwargs={'server_port':port}).start()
-            _gradio_apps[module_name] = app
+            thread = threading.Thread(target=app.launch, kwargs={'server_port': port})
+            thread.start()
+
+            def check_alive():
+                nonlocal port
+                while True:
+                    try:
+                        requests.get('http://localhost:{}/'.format(port))
+                        break
+                    except Exception:
+                        time.sleep(1)
+
+            check_alive()
+            _gradio_apps[module_name] = port
     return port
 
 
@@ -194,11 +216,49 @@ def create_app(init_flag: bool = False, configs: dict = None):
 
         results = predict_v2(module_info, inputs)
         return results
-    
-    
+
+    @app_instance.route('/gradio/<module_name>', methods=["GET", "POST"])
+    def gradio_app(module_name: str):
+        if module_name in v2_module_info.modules:
+            module_info = v2_module_info.get_module_info(module_name)
+            module_info['module_name'] = module_name
+        else:
+            msg = "Module {} is not supported for gradio app.".format(module_name)
+            return package_result("111", msg, "")
+        create_gradio_app(module_info)
+        return redirect("/gradio/{}/app".format(module_name), code=302)
+
+    @app_instance.route("/gradio/<module_name>/<path:path>", methods=["GET", "POST"])
+    def request_gradio_app(module_name: str, path: str):
+        '''
+        Gradio app server url interface. We route urls for gradio app to gradio server.
+
+        Args:
+            module_name(str): Module name for gradio app.
+            path(str): All resource path from gradio server.
+
+        Returns:
+            Any thing from gradio server.
+        '''
+        port = _gradio_apps[module_name]
+        if path == 'app':
+            proxy_url = request.url.replace(request.host_url + 'gradio/{}/app'.format(module_name),
+                                            'http://localhost:{}/'.format(port))
+        else:
+            proxy_url = request.url.replace(request.host_url + 'gradio/{}/'.format(module_name),
+                                            'http://localhost:{}/'.format(port))
+        resp = requests.request(method=request.method,
+                                url=proxy_url,
+                                headers={key: value
+                                         for (key, value) in request.headers if key != 'Host'},
+                                data=request.get_data(),
+                                cookies=request.cookies,
+                                allow_redirects=False)
+        headers = [(name, value) for (name, value) in resp.raw.headers.items()]
+        response = Response(resp.content, resp.status_code, headers)
+        return response
 
     return app_instance
-
 
 
 def config_with_file(configs: dict):

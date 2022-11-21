@@ -54,6 +54,24 @@ class JiebaPaddle(hub.Module):
 
         return seg_list
 
+    def create_gradio_app(self):
+        import gradio as gr
+
+        def inference(text):
+            results = self.cut(sentence=text)
+            return results
+
+        title = "jieba_paddle"
+        description = "jieba_paddle is a word segmentation model based on paddlepaddle deep learning framework."
+
+        examples = [['今天是个好日子']]
+        app = gr.Interface(inference,
+                           "text", [gr.outputs.Textbox(label="words")],
+                           title=title,
+                           description=description,
+                           examples=examples)
+        return app
+
     def check_dependency(self):
         """
         Check jieba tool dependency.
