@@ -65,8 +65,6 @@
         res = human_seg.segment(images=[im],visualization=True)
         print(res[0]['data'])
         human_seg.video_segment('/PATH/TO/VIDEO')
-        human_seg.save_inference_model('/PATH/TO/SAVE/MODEL')
-
         ```
     - Video prediction example:
 

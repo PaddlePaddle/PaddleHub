@@ -62,7 +62,6 @@
   #visualization=True可以用于查看超分图片效果，可设置为False提升运行速度。
   res = sr_model.reconstruct(images=[im], visualization=True)
   print(res[0]['data'])
-  sr_model.save_inference_model()
   ```
 
 - ### 3、API
