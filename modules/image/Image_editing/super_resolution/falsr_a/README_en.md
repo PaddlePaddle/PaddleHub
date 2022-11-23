@@ -65,7 +65,6 @@
     im = cv2.imread('/PATH/TO/IMAGE').astype('float32')
     res = sr_model.reconstruct(images=[im], visualization=True)
     print(res[0]['data'])
-    sr_model.save_inference_model()
     ```
 
 - ### 3、API
