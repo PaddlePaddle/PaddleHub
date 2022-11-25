@@ -131,6 +131,9 @@
       image = Image.open(BytesIO(base64.b64decode(result)))
       image.save('result_{}.png'.format(i))
 
+- ### gradio app 支持
+  从paddlehub 2.3.1开始支持使用链接 http://127.0.0.1:8866/gradio/ernie_vilg 在浏览器中访问ernie_vilg的gradio app。
+
 
 ## 五、更新历史
 
@@ -138,6 +141,17 @@
 
   初始发布
 
+* 1.1.0
+
+  增加分辨率参数以及所支持的风格
+
+* 1.2.0
+
+  移除分辨率参数，移除默认 AK 和 SK
+
+* 1.3.0
+  新增对gradio app的支持
+
   ```shell
-  $ hub install ernie_vilg == 1.0.0
+  $ hub install ernie_vilg == 1.3.0
   ```
