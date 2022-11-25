@@ -14,7 +14,7 @@ from paddlehub.module.module import serving
 
 @moduleinfo(
     name="jieba_paddle",
-    version="1.0.1",
+    version="1.1.0",
     summary=
     "jieba_paddle is a chineses tokenizer using BiGRU base on the PaddlePaddle deeplearning framework. More information please refer to https://github.com/fxsjy/jieba.",
     author="baidu-paddle",

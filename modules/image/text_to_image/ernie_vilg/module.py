@@ -17,7 +17,7 @@ from paddlehub.module.module import serving
 
 
 @moduleinfo(name="ernie_vilg",
-            version="1.2.0",
+            version="1.3.0",
             type="image/text_to_image",
             summary="",
             author="baidu-nlp",
