@@ -14,7 +14,7 @@ from paddlehub.module.module import serving
 
 @moduleinfo(
     name="jieba_paddle",
-    version="1.0.1",
+    version="1.1.0",
     summary=
     "jieba_paddle is a chineses tokenizer using BiGRU base on the PaddlePaddle deeplearning framework. More information please refer to https://github.com/fxsjy/jieba.",
     author="baidu-paddle",
@@ -53,6 +53,24 @@ class JiebaPaddle(hub.Module):
             seg_list = res.strip(" ").split(" ")
 
         return seg_list
+
+    def create_gradio_app(self):
+        import gradio as gr
+
+        def inference(text):
+            results = self.cut(sentence=text)
+            return results
+
+        title = "jieba_paddle"
+        description = "jieba_paddle is a word segmentation model based on paddlepaddle deep learning framework."
+
+        examples = [['今天是个好日子']]
+        app = gr.Interface(inference,
+                           "text", [gr.outputs.Textbox(label="words")],
+                           title=title,
+                           description=description,
+                           examples=examples)
+        return app
 
     def check_dependency(self):
         """

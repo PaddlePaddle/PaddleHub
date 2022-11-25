@@ -207,6 +207,10 @@
 
   - 关于PaddleHub Serving更多信息参考：[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
 
+- ## gradio app 支持
+  从paddlehub 2.3.1开始支持使用链接 http://127.0.0.1:8866/gradio/jieba_paddle 在浏览器中访问jieba_paddle的gradio app。
+
+
 
 ## 五、更新历史
 
@@ -218,6 +222,9 @@
 
   移除 fluid api
 
+* 1.1.0
+  新增对gradio app的支持
+
   - ```shell
-    $ hub install jieba_paddle==1.0.1
+    $ hub install jieba_paddle==1.1.0
     ```
