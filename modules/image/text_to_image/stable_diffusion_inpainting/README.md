@@ -78,7 +78,7 @@ Stable Diffusion是一种潜在扩散模型(Latent Diffusion)， 属于生成类
     # 返回的da是一个DocumentArray对象，保存了所有的结果，包括最终结果和迭代过程的中间结果
     # 可以通过操作DocumentArray对象对生成的图像做后处理，保存或者分析
     # 您可以设置batch_size一次生成多张
-    da = module.generate_image(text_prompts=text_prompts, batch_size=2, output_dir='./stable_diffusion_inpainting_out/')  
+    da = module.generate_image(text_prompts=text_prompts, init_image='/PATH/TO/IMAGE', mask_image='/PATH/TO/IMAGE', batch_size=2, output_dir='./stable_diffusion_inpainting_out/')  
     # 展示所有的中间结果
     da[0].chunks[-1].chunks.plot_image_sprites(skip_empty=True, show_index=True, keep_aspect_ratio=True)
     # 将整个生成过程保存为一个动态图gif
