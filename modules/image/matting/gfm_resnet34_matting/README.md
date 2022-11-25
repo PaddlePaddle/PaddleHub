@@ -1,7 +1,7 @@
 # gfm_resnet34_matting
 
 |模型名称|gfm_resnet34_matting|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-抠图|
 |网络|gfm_resnet34|
 |数据集|AM-2k|
@@ -17,8 +17,8 @@
 
   - 样例结果示例(左为原图，右为效果图)：
     <p align="center">
-    <img src="https://user-images.githubusercontent.com/35907364/145993777-9b69a85d-d31c-4743-8620-82b2a56ca1e7.jpg" width = "480" height = "350" hspace='10'/> 
-    <img src="https://user-images.githubusercontent.com/35907364/145993809-b0fb4bae-2c64-4868-99fc-500f19343442.png" width = "480" height = "350" hspace='10'/> 
+    <img src="https://user-images.githubusercontent.com/35907364/145993777-9b69a85d-d31c-4743-8620-82b2a56ca1e7.jpg" width = "480" height = "350" hspace='10'/>
+    <img src="https://user-images.githubusercontent.com/35907364/145993809-b0fb4bae-2c64-4868-99fc-500f19343442.png" width = "480" height = "350" hspace='10'/>
     </p>
 
 - ### 模型介绍
@@ -26,9 +26,9 @@
   - Matting（精细化分割/影像去背/抠图）是指借由计算前景的颜色和透明度，将前景从影像中撷取出来的技术，可用于替换背景、影像合成、视觉特效，在电影工业中被广泛地使用。影像中的每个像素会有代表其前景透明度的值，称作阿法值（Alpha），一张影像中所有阿法值的集合称作阿法遮罩（Alpha Matte），将影像被遮罩所涵盖的部分取出即可完成前景的分离。gfm_resnet34_matting可生成抠图结果。
 
 
-  
+
   - 更多详情请参考：[gfm_resnet34_matting](https://github.com/JizhiziLi/GFM)
-  
+
 
 ## 二、安装
 
@@ -46,11 +46,11 @@
     - ```shell
       $ hub install gfm_resnet34_matting
       ```
-      
+
     - 如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
       | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
-    
+
 ## 三、模型API预测
 
 - ### 1、命令行预测
@@ -58,7 +58,7 @@
   - ```shell
     $ hub run gfm_resnet34_matting --input_path "/PATH/TO/IMAGE"
     ```
-    
+
   - 通过命令行方式实现hub模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
 - ### 2、预测代码示例
@@ -68,15 +68,15 @@
       import cv2
 
       model = hub.Module(name="gfm_resnet34_matting")
-      result = model.predict(["/PATH/TO/IMAGE"])
+      result = model.predict([cv2.imread("/PATH/TO/IMAGE")])
       print(result)
       ```
 - ### 3、API
 
     - ```python
-        def predict(self, 
-                    image_list, 
-                    visualization, 
+        def predict(self,
+                    image_list,
+                    visualization,
                     save_path):
       ```
 
@@ -92,7 +92,7 @@
 
             - result (list(numpy.ndarray))：模型分割结果：
 
- 
+
 ## 四、服务部署
 
 - PaddleHub Serving可以部署动物matting在线服务。
@@ -150,4 +150,3 @@
 * 1.0.0
 
   初始发布
-
