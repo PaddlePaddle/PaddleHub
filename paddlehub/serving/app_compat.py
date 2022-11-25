@@ -16,6 +16,7 @@ import socket
 import threading
 import time
 import traceback
+from multiprocessing import Process
 from threading import Lock
 
 import requests
@@ -96,8 +97,8 @@ def create_gradio_app(module_info: dict):
 
             port = get_free_tcp_port()
             app = serving_method()
-            thread = threading.Thread(target=app.launch, kwargs={'server_port': port})
-            thread.start()
+            process = Process(target=app.launch, kwargs={'server_port': port})
+            process.start()
 
             def check_alive():
                 nonlocal port

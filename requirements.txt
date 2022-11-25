@@ -17,3 +17,4 @@ tqdm
 visualdl >= 2.0.0
 # gunicorn not support windows
 gunicorn >= 19.10.0; sys_platform != "win32"
+gradio
