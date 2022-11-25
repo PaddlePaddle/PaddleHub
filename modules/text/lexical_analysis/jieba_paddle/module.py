@@ -22,6 +22,7 @@ from paddlehub.module.module import serving
     type="nlp/lexical_analysis")
 class JiebaPaddle(hub.Module):
 
+
     def _initialize(self):
         pass
 
@@ -43,6 +44,7 @@ class JiebaPaddle(hub.Module):
         import jieba
         jieba.setLogLevel(logging.ERROR)
         jieba._compat.setLogLevel(logging.ERROR)
+
 
         if use_paddle:
             jieba.enable_paddle()
