@@ -13,21 +13,18 @@ import os
 import numpy as np
 import paddle
 import six
-from lac.custom import Customization
-from lac.processor import load_kv_dict
-from lac.processor import parse_result
-from lac.processor import word_to_ids
 from paddle.inference import Config
 from paddle.inference import create_predictor
 
-import paddlehub as hub
-from paddlehub.common.logger import logger
-from paddlehub.common.paddle_helper import add_vars_prefix
-from paddlehub.common.utils import sys_stdin_encoding
-from paddlehub.io.parser import txt_parser
+from .custom import Customization
+from .processor import load_kv_dict
+from .processor import parse_result
+from .processor import word_to_ids
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
+from paddlehub.utils.parser import txt_parser
+from paddlehub.utils.utils import sys_stdin_encoding
 
 
 class DataFormatError(Exception):
@@ -44,9 +41,9 @@ class DataFormatError(Exception):
     author="baidu-nlp",
     author_email="paddle-dev@baidu.com",
     type="nlp/lexical_analysis")
-class LAC(hub.Module):
+class LAC:
 
-    def _initialize(self, user_dict=None):
+    def __init__(self, user_dict=None):
         """
         initialize with the necessary elements
         """
@@ -72,7 +69,10 @@ class LAC(hub.Module):
         """
         predictor config setting
         """
-        cpu_config = Config(self.pretrained_model_path)
+        model = self.default_pretrained_model_path + '.pdmodel'
+        params = self.default_pretrained_model_path + '.pdiparams'
+        cpu_config = Config(model, params)
+
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
         self.cpu_predictor = create_predictor(cpu_config)
