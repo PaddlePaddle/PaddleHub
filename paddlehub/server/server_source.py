@@ -12,16 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import json
-import requests
 from typing import List
+
+import requests
 
 import paddlehub
 from paddlehub.utils import platform
+from paddlehub.utils.utils import convert_version
+from paddlehub.utils.utils import Version
 
 
 class ServerConnectionError(Exception):
+
     def __init__(self, url: str):
         self.url = url
 
@@ -71,31 +74,41 @@ class ServerSource(object):
 
         # Delay module loading to improve command line speed
         import paddle
-        params['hub_version'] = paddlehub.__version__.split('-')[0]
-        params['paddle_version'] = paddle.__version__.split('-')[0]
+
+        paddle_version = paddle.__version__.split('-')[0]
+        hub_version = paddlehub.__version__.split('-')[0]
+        if paddle_version == '0.0.0':  # develop version
+            paddle_version = '66.0.0'
+        if hub_version == 'develop':  # develop version
+            hub_version = '66.0.0'
+        params['hub_version'] = hub_version
+        params['paddle_version'] = paddle_version
 
         result = self.request(path='search', params=params)
+
         if result['status'] == 0 and len(result['data']) > 0:
-            return result['data']
+            results = []
+            for module_info in result['data']:
+                should_skip = False
+                if module_info['paddle_version']:
+                    paddle_version_intervals = convert_version(module_info['paddle_version'])
+                    for module_paddle_version in paddle_version_intervals:
+                        if not Version(paddle_version).match(module_paddle_version):
+                            should_skip = True
+                if module_info['hub_version']:
+                    hub_version_intervals = convert_version(module_info['hub_version'])
+                    for module_hub_version in hub_version_intervals:
+                        if not Version(hub_version).match(module_hub_version):
+                            should_skip = True
+                if should_skip:
+                    continue
+                results.append(module_info)
+            if results:
+                return results
         return None
 
     def get_module_compat_info(self, name: str) -> dict:
         '''Get the version compatibility information of the model.'''
-
-        def _convert_version(version: str) -> List:
-            result = []
-            # from [1.5.4, 2.0.0] -> 1.5.4,2.0.0
-            version = version.replace(' ', '')[1:-1]
-            version = version.split(',')
-            if version[0] != '-1.0.0':
-                result.append('>={}'.format(version[0]))
-
-            if len(version) > 1:
-                if version[1] != '99.0.0':
-                    result.append('<={}'.format(version[1]))
-
-            return result
-
         params = {'name': name}
         result = self.request(path='info', params=params)
         if result['status'] == 0 and len(result['data']) > 0:
@@ -103,8 +116,8 @@ class ServerSource(object):
             for _info in result['data']['info']:
                 infos[_info['version']] = {
                     'url': _info['url'],
-                    'paddle_version': _convert_version(_info['paddle_version']),
-                    'hub_version': _convert_version(_info['hub_version'])
+                    'paddle_version': convert_version(_info['paddle_version']),
+                    'hub_version': convert_version(_info['hub_version'])
                 }
             return infos
 
