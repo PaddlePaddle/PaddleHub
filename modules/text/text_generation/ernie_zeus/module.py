@@ -385,9 +385,6 @@ class ERNIEZeus:
     def create_gradio_app(self):
         import gradio as gr
 
-        import multiprocessing
-        multiprocessing.set_start_method('fork')
-
         def inference(task: str,
                       text: str,
                       min_dec_len: int = 2,
