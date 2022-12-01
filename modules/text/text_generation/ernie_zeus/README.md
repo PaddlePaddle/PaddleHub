@@ -289,7 +289,44 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
 
      - **返回**
        - text(str): 段落摘要。
-## 四、更新历史
+
+
+## 四、服务部署
+
+- PaddleHub Serving可以部署一个在线文本生成服务。
+
+- ### 第一步：启动PaddleHub Serving
+
+  - 运行启动命令：
+  - ```shell
+    $ hub serving start -m ernie_zeus
+    ```
+
+  - 这样就完成了一个文本生成的在线服务API的部署，默认端口号为8866。
+
+- ### 第二步：发送预测请求
+
+  - 配置好服务端，以下数行代码即可实现发送预测请求，获取预测结果。
+
+  - ```python
+    import requests
+    import json
+
+    # 发送HTTP请求
+    # 参数参考自定义文本生成接口
+    data = {'text': '巨大的白色城堡'}
+    headers = {"Content-type": "application/json"}
+    url = "http://127.0.0.1:8866/predict/ernie_zeus"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+
+    # 获取返回结果
+    print(r.json()["results"])
+
+- ### gradio app 支持
+  从paddlehub 2.3.1开始支持使用链接 http://127.0.0.1:8866/gradio/ernie_zeus 在浏览器中访问ernie_zeus的gradio app。
+
+
+## 五、更新历史
 
 * 1.0.0
 
@@ -298,6 +335,10 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
 * 1.1.0
 
   移除默认 AK 和 SK
+
+* 1.2.0
+
+  添加 Serving 和 Gradio APP
 
   ```shell
   $ hub install ernie_zeus == 1.1.0
