@@ -12,9 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import Any
 from collections import defaultdict
+from typing import Any
 
 
 def _CommandDict():
@@ -64,6 +63,13 @@ def execute():
          status(int) : Result of the command execution. 0 for a success and 1 for a failure.
     '''
     import sys
+    import multiprocessing
+    try:
+        multiprocessing.set_start_method(
+            'fork'
+        )  # In paddlehub, functions like gradio app need multiprocess supported, and 'fork' is our prefered start method.
+    except Exception:
+        pass  # If can not set 'fork', maintain the default start method
     com = _commands
     for idx, _argv in enumerate(['hub'] + sys.argv[1:]):
         if _argv not in com:
