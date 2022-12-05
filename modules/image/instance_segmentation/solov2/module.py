@@ -11,18 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import base64
 import os
 import time
-import base64
 from functools import reduce
 from typing import Union
 
 import numpy as np
-from paddlehub.module.module import moduleinfo, serving
-
-import solov2.processor as P
 import solov2.data_feed as D
+import solov2.processor as P
+
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import serving
 
 
 class Detector:
@@ -33,19 +33,18 @@ class Detector:
         threshold (float): threshold to reserve the result for output.
     """
 
-    def __init__(self,
-                 min_subgraph_size: int = 60,
-                 use_gpu=False):
+    def __init__(self, min_subgraph_size: int = 60, use_gpu=False):
 
         self.default_pretrained_model_path = os.path.join(self.directory, 'solov2_r50_fpn_1x', 'model')
-        self.predictor = D.load_predictor(
-            self.default_pretrained_model_path,
-            min_subgraph_size=min_subgraph_size,
-            use_gpu=use_gpu)
-        self.compose = [P.Resize(max_size=1333),
-                        P.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                        P.Permute(),
-                        P.PadStride(stride=32)]
+        self.predictor = D.load_predictor(self.default_pretrained_model_path,
+                                          min_subgraph_size=min_subgraph_size,
+                                          use_gpu=use_gpu)
+        self.compose = [
+            P.Resize(max_size=1333),
+            P.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            P.Permute(),
+            P.PadStride(stride=32)
+        ]
 
     def transform(self, im: Union[str, np.ndarray]):
         im, im_info = P.preprocess(im, self.compose)
@@ -60,17 +59,14 @@ class Detector:
         for box in np_boxes:
             print('class_id:{:d}, confidence:{:.4f},'
                   'left_top:[{:.2f},{:.2f}],'
-                  ' right_bottom:[{:.2f},{:.2f}]'.format(
-                int(box[0]), box[1], box[2], box[3], box[4], box[5]))
+                  ' right_bottom:[{:.2f},{:.2f}]'.format(int(box[0]), box[1], box[2], box[3], box[4], box[5]))
         results['boxes'] = np_boxes
         if np_masks is not None:
             np_masks = np_masks[expect_boxes, :, :, :]
             results['masks'] = np_masks
         return results
 
-    def predict(self,
-                image: Union[str, np.ndarray],
-                threshold: float = 0.5):
+    def predict(self, image: Union[str, np.ndarray], threshold: float = 0.5):
         '''
         Args:
             image (str/np.ndarray): path of image/ np.ndarray read by cv2
@@ -103,24 +99,21 @@ class Detector:
         return results
 
 
-@moduleinfo(
-    name="solov2",
-    type="CV/instance_segmentation",
-    author="paddlepaddle",
-    author_email="",
-    summary="solov2 is a detection model, this module is trained with COCO dataset.",
-    version="1.1.0")
+@moduleinfo(name="solov2",
+            type="CV/instance_segmentation",
+            author="paddlepaddle",
+            author_email="",
+            summary="solov2 is a detection model, this module is trained with COCO dataset.",
+            version="1.2.0")
 class DetectorSOLOv2(Detector):
     """
     Args:
         use_gpu (bool): whether use gpu
         threshold (float): threshold to reserve the result for output.
     """
-    def __init__(self,
-                 use_gpu: bool = False):
-        super(DetectorSOLOv2, self).__init__(
-            use_gpu=use_gpu)
 
+    def __init__(self, use_gpu: bool = False):
+        super(DetectorSOLOv2, self).__init__(use_gpu=use_gpu)
 
     def predict(self,
                 image: Union[str, np.ndarray],
@@ -133,7 +126,7 @@ class DetectorSOLOv2(Detector):
             threshold (float): threshold of predicted box' score
             visualization (bool): Whether to save visualization result.
             save_dir (str): save path.
-        
+
         '''
 
         inputs, im_info = self.transform(image)
@@ -146,14 +139,11 @@ class DetectorSOLOv2(Detector):
 
         self.predictor.run()
         output_names = self.predictor.get_output_names()
-        np_label = self.predictor.get_output_handle(output_names[
-                                                        1]).copy_to_cpu()
-        np_score = self.predictor.get_output_handle(output_names[
-                                                        2]).copy_to_cpu()
-        np_segms = self.predictor.get_output_handle(output_names[
-                                                        3]).copy_to_cpu()
+        np_label = self.predictor.get_output_handle(output_names[1]).copy_to_cpu()
+        np_score = self.predictor.get_output_handle(output_names[2]).copy_to_cpu()
+        np_segms = self.predictor.get_output_handle(output_names[3]).copy_to_cpu()
         output = dict(segm=np_segms, label=np_label, score=np_score)
-        
+
         if visualization:
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
@@ -175,3 +165,23 @@ class DetectorSOLOv2(Detector):
         final['label'] = base64.b64encode(results['label']).decode('utf8')
         final['score'] = base64.b64encode(results['score']).decode('utf8')
         return final
+
+    def create_gradio_app(self):
+        import gradio as gr
+        import tempfile
+        from PIL import Image
+
+        def inference(img, threshold):
+            with tempfile.TemporaryDirectory() as tempdir_name:
+                self.predict(image=img.name, threshold=threshold, visualization=True, save_dir=tempdir_name)
+                result_names = os.listdir(tempdir_name)
+                return Image.open(os.path.join(tempdir_name, result_names[0]))
+
+        interface = gr.Interface(inference,
+                                 inputs=[gr.inputs.Image(type="file"),
+                                         gr.Slider(0.0, 1.0, value=0.5)],
+                                 outputs=gr.Image(label='segmentation'),
+                                 title='SOLOv2',
+                                 allow_flagging='never')
+
+        return interface
