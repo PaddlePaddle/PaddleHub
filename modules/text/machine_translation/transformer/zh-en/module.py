@@ -11,24 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import os
 from typing import List
 
 import paddle
 import paddle.nn as nn
-from paddlehub.env import MODULE_HOME
-from paddlehub.module.module import moduleinfo, serving
-import paddlenlp
-from paddlenlp.data import Pad, Vocab
-from paddlenlp.transformers import InferTransformerModel, position_encoding_init
+from paddlenlp.data import Pad
+from paddlenlp.data import Vocab
+from paddlenlp.transformers import InferTransformerModel
+from paddlenlp.transformers import position_encoding_init
+from transformer_zh_en.utils import MTTokenizer
+from transformer_zh_en.utils import post_process_seq
 
-from transformer_zh_en.utils import MTTokenizer, post_process_seq
+from paddlehub.env import MODULE_HOME
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import serving
 
 
 @moduleinfo(
     name="transformer_zh-en",
-    version="1.0.1",
+    version="1.1.0",
     summary="",
     author="PaddlePaddle",
     author_email="",
@@ -57,7 +59,7 @@ class MTTransformer(nn.Layer):
         # Dropout rate
         'dropout': 0,
         # Number of sub-layers to be stacked in the encoder and decoder.
-        "num_encoder_layers": 6, 
+        "num_encoder_layers": 6,
         "num_decoder_layers": 6
     }
 
@@ -85,31 +87,29 @@ class MTTransformer(nn.Layer):
 
         self.max_length = max_length
         self.beam_size = beam_size
-        self.tokenizer = MTTokenizer(
-            bpe_codes_file=bpe_codes_file, lang_src=self.lang_config['source'], lang_trg=self.lang_config['target'])
-        self.src_vocab = Vocab.load_vocabulary(
-            filepath=src_vocab_file,
-            unk_token=self.vocab_config['unk_token'],
-            bos_token=self.vocab_config['bos_token'],
-            eos_token=self.vocab_config['eos_token'])
-        self.trg_vocab = Vocab.load_vocabulary(
-            filepath=trg_vocab_file,
-            unk_token=self.vocab_config['unk_token'],
-            bos_token=self.vocab_config['bos_token'],
-            eos_token=self.vocab_config['eos_token'])
+        self.tokenizer = MTTokenizer(bpe_codes_file=bpe_codes_file,
+                                     lang_src=self.lang_config['source'],
+                                     lang_trg=self.lang_config['target'])
+        self.src_vocab = Vocab.load_vocabulary(filepath=src_vocab_file,
+                                               unk_token=self.vocab_config['unk_token'],
+                                               bos_token=self.vocab_config['bos_token'],
+                                               eos_token=self.vocab_config['eos_token'])
+        self.trg_vocab = Vocab.load_vocabulary(filepath=trg_vocab_file,
+                                               unk_token=self.vocab_config['unk_token'],
+                                               bos_token=self.vocab_config['bos_token'],
+                                               eos_token=self.vocab_config['eos_token'])
         self.src_vocab_size = (len(self.src_vocab) + self.vocab_config['pad_factor'] - 1) \
             // self.vocab_config['pad_factor'] * self.vocab_config['pad_factor']
         self.trg_vocab_size = (len(self.trg_vocab) + self.vocab_config['pad_factor'] - 1) \
             // self.vocab_config['pad_factor'] * self.vocab_config['pad_factor']
-        self.transformer = InferTransformerModel(
-            src_vocab_size=self.src_vocab_size,
-            trg_vocab_size=self.trg_vocab_size,
-            bos_id=self.vocab_config['bos_id'],
-            eos_id=self.vocab_config['eos_id'],
-            max_length=self.max_length + 1,
-            max_out_len=max_out_len,
-            beam_size=self.beam_size,
-            **self.model_config)
+        self.transformer = InferTransformerModel(src_vocab_size=self.src_vocab_size,
+                                                 trg_vocab_size=self.trg_vocab_size,
+                                                 bos_id=self.vocab_config['bos_id'],
+                                                 eos_id=self.vocab_config['eos_id'],
+                                                 max_length=self.max_length + 1,
+                                                 max_out_len=max_out_len,
+                                                 beam_size=self.beam_size,
+                                                 **self.model_config)
 
         state_dict = paddle.load(checkpoint)
 
@@ -184,3 +184,20 @@ class MTTransformer(nn.Layer):
                     results.append(trg_sample_text)
 
         return results
+
+    def create_gradio_app(self):
+        import gradio as gr
+
+        def inference(text):
+            results = self.predict(data=[text])
+            return results[0]
+
+        examples = [['今天是个好日子']]
+
+        interface = gr.Interface(inference,
+                                 "text", [gr.outputs.Textbox(label="Translation")],
+                                 title="transformer_zh-en",
+                                 examples=examples,
+                                 allow_flagging='never')
+
+        return interface
