@@ -167,18 +167,20 @@ class DetectorSOLOv2(Detector):
         return final
 
     def create_gradio_app(self):
-        import gradio as gr
+        import os
         import tempfile
+        import gradio as gr
+
         from PIL import Image
 
         def inference(img, threshold):
             with tempfile.TemporaryDirectory() as tempdir_name:
-                self.predict(image=img.name, threshold=threshold, visualization=True, save_dir=tempdir_name)
+                self.predict(image=img, threshold=threshold, visualization=True, save_dir=tempdir_name)
                 result_names = os.listdir(tempdir_name)
                 return Image.open(os.path.join(tempdir_name, result_names[0]))
 
         interface = gr.Interface(inference,
-                                 inputs=[gr.inputs.Image(type="file"),
+                                 inputs=[gr.inputs.Image(type="filepath"),
                                          gr.Slider(0.0, 1.0, value=0.5)],
                                  outputs=gr.Image(label='segmentation'),
                                  title='SOLOv2',
