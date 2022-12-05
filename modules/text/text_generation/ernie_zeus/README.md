@@ -341,5 +341,5 @@ ERNIE 3.0 Zeus 是 ERNIE 3.0 系列模型的最新升级。其除了对无标注
   添加 Serving 和 Gradio APP
 
   ```shell
-  $ hub install ernie_zeus == 1.1.0
+  $ hub install ernie_zeus == 1.2.0
   ```
