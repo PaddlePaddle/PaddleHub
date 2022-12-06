@@ -171,7 +171,7 @@
     ```
 
 - ### Gradio App 支持
-  从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/chinese_ocr_db_crnn_mobile chinese_ocr_db_crnn_mobile 的 Gradio App。
+  从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/chinese_ocr_db_crnn_mobile 在浏览器中访问 chinese_ocr_db_crnn_mobile 的 Gradio App。
 
 ## 五、更新历史
 
