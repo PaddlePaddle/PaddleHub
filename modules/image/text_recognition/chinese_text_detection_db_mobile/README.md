@@ -186,6 +186,10 @@
 
   移除 fluid api
 
+* 1.1.0
+
+  适配 PaddleHub 2.x 版本
+
   - ```shell
-    $ hub install chinese_text_detection_db_mobile==1.0.5
+    $ hub install chinese_text_detection_db_mobile==1.1.0
     ```

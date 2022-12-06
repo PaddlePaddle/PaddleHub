@@ -1,4 +1,3 @@
-# -*- coding:utf-8 -*-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -6,46 +5,57 @@ from __future__ import print_function
 import argparse
 import ast
 import base64
-import math
 import os
 import time
+from io import BytesIO
 
 import cv2
 import numpy as np
-import paddle
 from paddle.inference import Config
 from paddle.inference import create_predictor
 from PIL import Image
 
-import paddlehub as hub
-from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
+from paddlehub.utils.log import logger
 
 
 def base64_to_cv2(b64str):
     data = base64.b64decode(b64str.encode('utf8'))
     data = np.fromstring(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    if data is None:
+        buf = BytesIO()
+        image_decode = base64.b64decode(b64str.encode('utf8'))
+        image = BytesIO(image_decode)
+        im = Image.open(image)
+        rgb = im.convert('RGB')
+        rgb.save(buf, 'jpeg')
+        buf.seek(0)
+        image_bytes = buf.read()
+        data_base64 = str(base64.b64encode(image_bytes), encoding="utf-8")
+        image_decode = base64.b64decode(data_base64)
+        img_array = np.frombuffer(image_decode, np.uint8)
+        data = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
     return data
 
 
 @moduleinfo(
     name="chinese_text_detection_db_mobile",
-    version="1.0.5",
+    version="1.1.0",
     summary=
     "The module aims to detect chinese text position in the image, which is based on differentiable_binarization algorithm.",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
-class ChineseTextDetectionDB(hub.Module):
+class ChineseTextDetectionDB:
 
-    def _initialize(self, enable_mkldnn=False):
+    def __init__(self, enable_mkldnn=False):
         """
         initialize with the necessary elements
         """
-        self.pretrained_model_path = os.path.join(self.directory, 'inference_model')
+        self.pretrained_model_path = os.path.join(self.directory, 'inference_model', 'model')
         self.enable_mkldnn = enable_mkldnn
 
         self._set_config()
@@ -62,8 +72,8 @@ class ChineseTextDetectionDB(hub.Module):
         """
         predictor config setting
         """
-        model_file_path = os.path.join(self.pretrained_model_path, 'model')
-        params_file_path = os.path.join(self.pretrained_model_path, 'params')
+        model_file_path = self.pretrained_model_path + '.pdmodel'
+        params_file_path = self.pretrained_model_path + '.pdiparams'
 
         config = Config(model_file_path, params_file_path)
         try:
@@ -205,7 +215,7 @@ class ChineseTextDetectionDB(hub.Module):
         preprocessor = DBProcessTest(params={'max_side_len': 960})
         postprocessor = DBPostProcess(params={
             'thresh': 0.3,
-            'box_thresh': 0.5,
+            'box_thresh': box_thresh,
             'max_candidates': 1000,
             'unclip_ratio': 1.6
         })
@@ -237,7 +247,7 @@ class ChineseTextDetectionDB(hub.Module):
                 dt_boxes_list = postprocessor(outs_dict, [ratio_list])
                 dt_boxes = dt_boxes_list[0]
                 boxes = self.filter_tag_det_res(dt_boxes_list[0], original_image.shape)
-                res['data'] = boxes.astype(np.int).tolist()
+                res['data'] = boxes.astype(np.int64).tolist()
 
                 all_imgs.append(im)
                 all_ratios.append(ratio_list)
@@ -255,28 +265,6 @@ class ChineseTextDetectionDB(hub.Module):
             all_results.append(res)
 
         return all_results
-
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
-        place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
-
-        model_file_path = os.path.join(self.pretrained_model_path, 'model')
-        params_file_path = os.path.join(self.pretrained_model_path, 'params')
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(dirname=self.pretrained_model_path,
-                                                                                    model_filename=model_file_path,
-                                                                                    params_filename=params_file_path,
-                                                                                    executor=exe)
-
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
-                                           executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
 
     @serving
     def serving_method(self, images, **kwargs):
