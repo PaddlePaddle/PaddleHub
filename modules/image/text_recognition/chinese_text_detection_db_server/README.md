@@ -73,7 +73,7 @@
     import paddlehub as hub
     import cv2
 
-    text_detector = hub.Module(name="chinese_text_detection_db_server"), enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
+    text_detector = hub.Module(name="chinese_text_detection_db_server", enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
     result = text_detector.detect_text(images=[cv2.imread('/PATH/TO/IMAGE')])
 
     # or
