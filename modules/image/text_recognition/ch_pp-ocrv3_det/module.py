@@ -28,10 +28,10 @@ import numpy as np
 import paddle.inference as paddle_infer
 from PIL import Image
 
-from paddlehub.utils.utils import logger
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
+from paddlehub.utils.utils import logger
 
 
 def base64_to_cv2(b64str):
@@ -53,6 +53,7 @@ def base64_to_cv2(b64str):
         data = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
     return data
 
+
 @moduleinfo(
     name="ch_pp-ocrv3_det",
     version="1.1.0",
@@ -62,6 +63,7 @@ def base64_to_cv2(b64str):
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
 class ChPPOCRv3Det:
+
     def __init__(self, enable_mkldnn=False):
         """
         initialize with the necessary elements
