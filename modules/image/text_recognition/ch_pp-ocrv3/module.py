@@ -31,21 +31,22 @@ from .utils import base64_to_cv2
 from .utils import draw_ocr
 from .utils import get_image_ext
 from .utils import sorted_boxes
-from paddlehub.utils.utils import logger
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
+from paddlehub.utils.utils import logger
 
 
 @moduleinfo(
     name="ch_pp-ocrv3",
-    version="1.1.0",
+    version="1.2.0",
     summary="The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions \
         based on the differentiable_binarization_chn module. Then it classifies the text angle and recognizes the chinese texts. ",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
 class ChPPOCRv3:
+
     def __init__(self, text_detector_module=None, enable_mkldnn=False):
         """
         initialize with the necessary elements
@@ -477,3 +478,25 @@ class ChPPOCRv3:
         Add the command input options
         """
         self.arg_input_group.add_argument('--input_path', type=str, default=None, help="diretory to image")
+
+    def create_gradio_app(self):
+        import gradio as gr
+
+        def inference(image, use_gpu=False, box_thresh=0.5, text_thresh=0.5, angle_classification_thresh=0.9):
+            return self.recognize_text(paths=[image],
+                                       use_gpu=use_gpu,
+                                       output_dir=None,
+                                       visualization=False,
+                                       box_thresh=box_thresh,
+                                       text_thresh=text_thresh,
+                                       angle_classification_thresh=angle_classification_thresh)
+
+        return gr.Interface(inference, [
+            gr.Image(type='filepath'),
+            gr.Checkbox(),
+            gr.Slider(0, 1.0, 0.5, step=0.01),
+            gr.Slider(0, 1.0, 0.5, step=0.01),
+            gr.Slider(0, 1.0, 0.5, step=0.01)
+        ], [gr.JSON(label='results')],
+                            title='ch_pp-ocrv3',
+                            allow_flagging=False)

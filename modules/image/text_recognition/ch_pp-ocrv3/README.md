@@ -163,6 +163,9 @@
     print(r.json()["results"])
     ```
 
+- ### Gradio App 支持
+  从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/ch_pp-ocrv3 在浏览器中访问 ch_pp-ocrv3 的 Gradio App。
+
 ## 五、更新历史
 
 * 1.0.0
@@ -173,6 +176,10 @@
 
   移除 Fluid API
 
+* 1.2.0
+
+  添加 Gradio APP 支持
+
   - ```shell
-    $ hub install ch_pp-ocrv3==1.1.0
+    $ hub install ch_pp-ocrv3==1.2.0
     ```

@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import base64
 import math
+from io import BytesIO
 
 import cv2
 import numpy as np
@@ -189,4 +190,17 @@ def base64_to_cv2(b64str):
     data = base64.b64decode(b64str.encode('utf8'))
     data = np.fromstring(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    if data is None:
+        buf = BytesIO()
+        image_decode = base64.b64decode(b64str.encode('utf8'))
+        image = BytesIO(image_decode)
+        im = Image.open(image)
+        rgb = im.convert('RGB')
+        rgb.save(buf, 'jpeg')
+        buf.seek(0)
+        image_bytes = buf.read()
+        data_base64 = str(base64.b64encode(image_bytes), encoding="utf-8")
+        image_decode = base64.b64decode(data_base64)
+        img_array = np.frombuffer(image_decode, np.uint8)
+        data = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
     return data
