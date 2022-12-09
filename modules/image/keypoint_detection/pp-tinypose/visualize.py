@@ -14,6 +14,7 @@
 from __future__ import division
 
 import os
+import time
 
 import cv2
 import numpy as np
@@ -152,7 +153,7 @@ def visualize_pose(imgfile,
     cmap = matplotlib.cm.get_cmap('hsv')
     plt.figure()
 
-    img = cv2.imread(imgfile) if type(imgfile) == str else imgfile
+    img = cv2.imread(imgfile) if isinstance(imgfile, str) else imgfile
 
     color_set = results['colors'] if 'colors' in results else None
 
@@ -202,7 +203,12 @@ def visualize_pose(imgfile,
             canvas = cv2.addWeighted(canvas, 0.4, cur_canvas, 0.6, 0)
     if returnimg:
         return canvas
-    save_name = os.path.join(save_dir, os.path.splitext(os.path.basename(imgfile))[0] + '_vis.jpg')
+    if isinstance(imgfile, str):
+        save_name = os.path.join(save_dir, os.path.splitext(
+            os.path.basename(imgfile))[0] + '_vis.jpg')
+    else:
+        save_name = os.path.join(
+            save_dir, "numpy_" + str(time.time()) + "_vis.jpg")
     plt.imsave(save_name, canvas[:, :, ::-1])
     print("keypoint visualize image saved to: " + save_name)
     plt.close()

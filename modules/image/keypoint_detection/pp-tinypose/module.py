@@ -74,7 +74,7 @@ class PP_TinyPose:
         results = self.detector.filter_box(results, 0.5)
         if results['boxes_num'] > 0:
             keypoint_res = predict_with_given_det(image, results, self.topdown_keypoint_detector, 1, False)
-            save_name = img if isinstance(img, str) else (str(time.time()) + '.png')
+            save_name = img if isinstance(img, str) else img
             store_res.append(
                 [save_name, keypoint_res['bbox'], [keypoint_res['keypoint'][0], keypoint_res['keypoint'][1]]])
             if not os.path.exists(save_path):
