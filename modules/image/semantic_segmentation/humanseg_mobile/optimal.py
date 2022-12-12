@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 import numpy as np
 
 
@@ -33,8 +32,8 @@ def human_seg_tracking(pre_gray, cur_gray, prev_cfd, dl_weights, disflow):
     # 超出边界不跟踪
     not_track = (cur_x < 0) + (cur_x >= w) + (cur_y < 0) + (cur_y >= h)
     flow_bw[~not_track] = flow_bw[cur_y[~not_track], cur_x[~not_track]]
-    not_track += (
-        np.square(flow_fw[:, :, 0] + flow_bw[:, :, 0]) + np.square(flow_fw[:, :, 1] + flow_bw[:, :, 1])) >= check_thres
+    not_track += (np.square(flow_fw[:, :, 0] + flow_bw[:, :, 0]) +
+                  np.square(flow_fw[:, :, 1] + flow_bw[:, :, 1])) >= check_thres
     track_cfd[cur_y[~not_track], cur_x[~not_track]] = prev_cfd[~not_track]
 
     is_track[cur_y[~not_track], cur_x[~not_track]] = 1

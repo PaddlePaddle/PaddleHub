@@ -12,43 +12,49 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
 import ast
 import os
 import os.path as osp
-import argparse
 
 import cv2
 import numpy as np
-import paddle
 import paddle.jit
 import paddle.static
-from paddle.inference import Config, create_predictor
-from paddlehub.module.module import moduleinfo, runnable, serving
+from paddle.inference import Config
+from paddle.inference import create_predictor
 
-from .processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
-from .data_feed import reader, preprocess_v
-from .optimal import postprocess_v, threshold_mask
+from .data_feed import preprocess_v
+from .data_feed import reader
+from .optimal import postprocess_v
+from .optimal import threshold_mask
+from .processor import base64_to_cv2
+from .processor import check_dir
+from .processor import cv2_to_base64
+from .processor import postprocess
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
-@moduleinfo(
-    name="humanseg_mobile",
-    type="CV/semantic_segmentation",
-    author="paddlepaddle",
-    author_email="",
-    summary="HRNet_w18_samll_v1 is a semantic segmentation model.",
-    version="1.2.0")
+@moduleinfo(name="humanseg_mobile",
+            type="CV/semantic_segmentation",
+            author="paddlepaddle",
+            author_email="",
+            summary="HRNet_w18_samll_v1 is a semantic segmentation model.",
+            version="1.3.0")
 class HRNetw18samllv1humanseg:
+
     def __init__(self):
-        self.default_pretrained_model_path = os.path.join(
-            self.directory, "humanseg_mobile_inference", "model")
+        self.default_pretrained_model_path = os.path.join(self.directory, "humanseg_mobile_inference", "model")
         self._set_config()
 
     def _set_config(self):
         """
         predictor config setting
         """
-        model = self.default_pretrained_model_path+'.pdmodel'
-        params = self.default_pretrained_model_path+'.pdiparams'
+        model = self.default_pretrained_model_path + '.pdmodel'
+        params = self.default_pretrained_model_path + '.pdiparams'
         cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
@@ -63,7 +69,7 @@ class HRNetw18samllv1humanseg:
             gpu_config = Config(model, params)
             gpu_config.disable_glog_info()
             gpu_config.enable_use_gpu(memory_pool_init_size_mb=1000, device_id=0)
-            
+
             if paddle.get_cudnn_version() == 8004:
                 gpu_config.delete_pass('conv_elementwise_add_act_fuse_pass')
                 gpu_config.delete_pass('conv_elementwise_add2_act_fuse_pass')
@@ -131,13 +137,12 @@ class HRNetw18samllv1humanseg:
             output = np.expand_dims(output[:, 1, :, :], axis=1)
             # postprocess one by one
             for i in range(len(batch_data)):
-                out = postprocess(
-                    data_out=output[i],
-                    org_im=batch_data[i]['org_im'],
-                    org_im_shape=batch_data[i]['org_im_shape'],
-                    org_im_path=batch_data[i]['org_im_path'],
-                    output_dir=output_dir,
-                    visualization=visualization)
+                out = postprocess(data_out=output[i],
+                                  org_im=batch_data[i]['org_im'],
+                                  org_im_shape=batch_data[i]['org_im_shape'],
+                                  org_im_path=batch_data[i]['org_im_path'],
+                                  output_dir=output_dir,
+                                  visualization=visualization)
                 res.append(out)
         return res
 
@@ -317,23 +322,21 @@ class HRNetw18samllv1humanseg:
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the {} module.".format(self.name),
-            prog='hub run {}'.format(self.name),
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
+                                              prog='hub run {}'.format(self.name),
+                                              usage='%(prog)s',
+                                              add_help=True)
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
             title="Config options", description="Run configuration for controlling module behavior, not required.")
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.segment(
-            paths=[args.input_path],
-            batch_size=args.batch_size,
-            use_gpu=args.use_gpu,
-            output_dir=args.output_dir,
-            visualization=args.visualization)
+        results = self.segment(paths=[args.input_path],
+                               batch_size=args.batch_size,
+                               use_gpu=args.use_gpu,
+                               output_dir=args.output_dir,
+                               visualization=args.visualization)
         if args.save_dir is not None:
             check_dir(args.save_dir)
             self.save_inference_model(args.save_dir)
@@ -344,14 +347,22 @@ class HRNetw18samllv1humanseg:
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
-        self.arg_config_group.add_argument(
-            '--output_dir', type=str, default='humanseg_mobile_output', help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--save_dir', type=str, default='humanseg_mobile_model', help="The directory to save model.")
-        self.arg_config_group.add_argument(
-            '--visualization', type=ast.literal_eval, default=False, help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not")
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='humanseg_mobile_output',
+                                           help="The directory to save output images.")
+        self.arg_config_group.add_argument('--save_dir',
+                                           type=str,
+                                           default='humanseg_mobile_model',
+                                           help="The directory to save model.")
+        self.arg_config_group.add_argument('--visualization',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether to save output as images.")
         self.arg_config_group.add_argument('--batch_size', type=ast.literal_eval, default=1, help="batch size.")
 
     def add_module_input_arg(self):
@@ -360,31 +371,20 @@ class HRNetw18samllv1humanseg:
         """
         self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
 
+    def create_gradio_app(self):
+        import gradio as gr
+        import tempfile
+        import os
+        from PIL import Image
 
-if __name__ == "__main__":
-    m = HRNetw18samllv1humanseg()
-    img = cv2.imread('photo.jpg')
-    #res = m.segment(images=[img], visualization=True)
-    #print(res[0]['data'])
-    #m.video_segment('')
-    cap_video = cv2.VideoCapture('video_test.mp4')
-    fps = cap_video.get(cv2.CAP_PROP_FPS)
-    save_path = 'result_frame.avi'
-    width = int(cap_video.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap_video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    cap_out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, (width, height))
-    prev_gray = None
-    prev_cfd = None
-    while cap_video.isOpened():
-        ret, frame_org = cap_video.read()
-        if ret:
-            [img_matting, prev_gray, prev_cfd] = m.video_stream_segment(
-                frame_org=frame_org, frame_id=cap_video.get(1), prev_gray=prev_gray, prev_cfd=prev_cfd)
-            img_matting = np.repeat(img_matting[:, :, np.newaxis], 3, axis=2)
-            bg_im = np.ones_like(img_matting) * 255
-            comb = (img_matting * frame_org + (1 - img_matting) * bg_im).astype(np.uint8)
-            cap_out.write(comb)
-        else:
-            break
-    cap_video.release()
-    cap_out.release()
+        def inference(image, use_gpu=False):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                self.segment(paths=[image], use_gpu=use_gpu, visualization=True, output_dir=temp_dir)
+                return Image.open(os.path.join(temp_dir, os.listdir(temp_dir)[0]))
+
+        interface = gr.Interface(
+            inference,
+            [gr.inputs.Image(type="filepath"), gr.Checkbox(label='use_gpu')],
+            gr.outputs.Image(type="ndarray"),
+            title='humanseg_mobile')
+        return interface

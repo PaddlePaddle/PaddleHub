@@ -1,7 +1,7 @@
 # humanseg_mobile
 
 |模型名称|humanseg_mobile|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-图像分割|
 |网络|hrnet|
 |数据集|百度自建数据集|
@@ -16,12 +16,12 @@
 
 - ### 应用效果展示
 
-  
+
   - 样例结果示例：
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130914325-3795e241-b611-46a1-aa70-ffc47326c86a.png" width = "337" height = "505" hspace='10'/>
     </p>
-    
+
 - ### 模型介绍
 
     - HumanSeg-mobile采用了HRNet_w18_small_v1的网络结构，模型大小只有5.8M， 适用于移动端或服务端CPU的前置摄像头场景。
@@ -41,7 +41,7 @@
     - ```shell
       $ hub install humanseg_mobile
       ```
-      
+
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
       | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
@@ -230,6 +230,9 @@
     cv2.imwrite("segment_human_mobile.png", rgba)
     ```
 
+- ### Gradio APP 支持
+
+    从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/humanseg_mobile 在浏览器中访问 humanseg_mobile 的 Gradio APP。
 
 ## 五、更新历史
 
@@ -238,19 +241,23 @@
     初始发布
 
 * 1.1.0
-    
+
     新增视频人像分割接口
 
     新增视频流人像分割接口
 
 * 1.1.1
 
-   修复cudnn为8.0.4显存泄露问题
+    修复cudnn为8.0.4显存泄露问题
 
 * 1.2.0
 
     移除 Fluid API
 
+* 1.3.0
+
+    添加 Gradio APP 支持
+
     ```shell
-    $ hub install humanseg_mobile == 1.2.0
+    $ hub install humanseg_mobile == 1.3.0
     ```
