@@ -179,6 +179,11 @@
     # 打印预测结果
     print(r.json()["results"])
     ```
+
+- ### gradio app 支持
+
+  从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/pyramidbox_lite_mobile_mask 在浏览器中访问 pyramidbox_lite_mobile_mask 的 Gradio APP。
+
 ## 五、Paddle Lite部署
 - ### 通过python执行以下代码，保存模型
   - ```python
@@ -209,6 +214,10 @@
 
   修复无法导出模型的问题
 
+* 1.5.0
+
+  添加 Gradio APP 的支持
+
   - ```shell
-    $ hub install pyramidbox_lite_mobile_mask==1.4.0
+    $ hub install pyramidbox_lite_mobile_mask==1.5.0
     ```

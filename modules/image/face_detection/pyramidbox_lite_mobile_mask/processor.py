@@ -3,13 +3,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import base64
 import os
 import time
 
-import base64
 import cv2
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image
+from PIL import ImageDraw
 
 __all__ = ['base64_to_cv2', 'postprocess']
 
@@ -86,9 +87,9 @@ def draw_bounding_box_on_image(save_im_path, output_data):
             box_fill = (255)
             text_fill = (0)
 
-        draw.rectangle(
-            xy=(bbox['left'], bbox['top'] - (textsize_height + 5), bbox['left'] + textsize_width + 10, bbox['top'] - 3),
-            fill=box_fill)
+        draw.rectangle(xy=(bbox['left'], bbox['top'] - (textsize_height + 5), bbox['left'] + textsize_width + 10,
+                           bbox['top'] - 3),
+                       fill=box_fill)
         draw.text(xy=(bbox['left'], bbox['top'] - 15), text=text, fill=text_fill)
     image.save(save_im_path)
 
