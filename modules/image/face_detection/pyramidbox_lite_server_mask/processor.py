@@ -3,13 +3,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import base64
 import os
 import time
 
-import base64
 import cv2
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image
+from PIL import ImageDraw
 
 __all__ = ['base64_to_cv2', 'postprocess']
 
@@ -56,8 +57,7 @@ def get_save_image_name(org_im, org_im_path, output_dir):
     # save image path
     save_im_path = os.path.join(output_dir, im_prefix + ext)
     if os.path.exists(save_im_path):
-        save_im_path = os.path.join(
-            output_dir, im_prefix + 'time={}'.format(int(time.time())) + ext)
+        save_im_path = os.path.join(output_dir, im_prefix + 'time={}'.format(int(time.time())) + ext)
 
     return save_im_path
 
@@ -68,19 +68,13 @@ def draw_bounding_box_on_image(save_im_path, output_data):
     for bbox in output_data:
         # draw bouding box
         if bbox['label'] == "MASK":
-            draw.line([(bbox['left'], bbox['top']),
-                       (bbox['left'], bbox['bottom']),
-                       (bbox['right'], bbox['bottom']),
-                       (bbox['right'], bbox['top']),
-                       (bbox['left'], bbox['top'])],
+            draw.line([(bbox['left'], bbox['top']), (bbox['left'], bbox['bottom']), (bbox['right'], bbox['bottom']),
+                       (bbox['right'], bbox['top']), (bbox['left'], bbox['top'])],
                       width=2,
                       fill='green')
         else:
-            draw.line([(bbox['left'], bbox['top']),
-                       (bbox['left'], bbox['bottom']),
-                       (bbox['right'], bbox['bottom']),
-                       (bbox['right'], bbox['top']),
-                       (bbox['left'], bbox['top'])],
+            draw.line([(bbox['left'], bbox['top']), (bbox['left'], bbox['bottom']), (bbox['right'], bbox['bottom']),
+                       (bbox['right'], bbox['top']), (bbox['left'], bbox['top'])],
                       width=2,
                       fill='red')
         # draw label
@@ -93,17 +87,14 @@ def draw_bounding_box_on_image(save_im_path, output_data):
             box_fill = (255)
             text_fill = (0)
 
-        draw.rectangle(
-            xy=(bbox['left'], bbox['top'] - (textsize_height + 5),
-                bbox['left'] + textsize_width + 10, bbox['top'] - 3),
-            fill=box_fill)
-        draw.text(
-            xy=(bbox['left'], bbox['top'] - 15), text=text, fill=text_fill)
+        draw.rectangle(xy=(bbox['left'], bbox['top'] - (textsize_height + 5), bbox['left'] + textsize_width + 10,
+                           bbox['top'] - 3),
+                       fill=box_fill)
+        draw.text(xy=(bbox['left'], bbox['top'] - 15), text=text, fill=text_fill)
     image.save(save_im_path)
 
 
-def postprocess(confidence_out, org_im, org_im_path, detected_faces, output_dir,
-                visualization):
+def postprocess(confidence_out, org_im, org_im_path, detected_faces, output_dir, visualization):
     """
     Postprocess output of network. one element at a time.
 
