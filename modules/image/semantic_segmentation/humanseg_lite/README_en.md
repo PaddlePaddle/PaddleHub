@@ -1,7 +1,7 @@
 # humanseg_lite
 
 |Module Name |humanseg_lite|
-| :--- | :---: | 
+| :--- | :---: |
 |Category |Image segmentation|
 |Network|shufflenet|
 |Dataset|Baidu self-built dataset|
@@ -10,10 +10,10 @@
 |Data indicators|-|
 |Latest update date|2021-02-26|
 
-## I. Basic Information 
+## I. Basic Information
 
 - ### Application Effect Display
-  
+
   - Sample results:
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130916087-7d537ad9-bbc8-4bce-9382-8eb132b35532.png" width = "337" height = "505" hspace='10'/>
@@ -39,7 +39,7 @@
     - ```shell
       $ hub install humanseg_lite
       ```
-      
+
     - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
     | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
@@ -49,7 +49,7 @@
 
     - ```
       hub run humanseg_lite --input_path "/PATH/TO/IMAGE"
-        
+
       ```
 
     - If you want to call the Hub module through the command line, please refer to: [PaddleHub Command Line Instruction](../../../../docs/docs_en/tutorial/cmd_usage.rst)
@@ -122,9 +122,9 @@
 
         - **Return**
 
-            * res (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
+            * res (list\[dict\]): The list of recognition results, where each element is dict and each field is:
                 * save\_path (str, optional): Save path of the result.
-                * data (numpy.ndarray): The result of portrait segmentation. 
+                * data (numpy.ndarray): The result of portrait segmentation.
 
     - ```python
       def video_stream_segment(self,
@@ -230,6 +230,8 @@
             cv2.imwrite("segment_human_lite.png", rgba)
             ```
 
+- ### Gradio APP support
+   Starting with PaddleHub 2.3.1, the Gradio APP for humanseg_lite is supported to be accessed in the browser using the link http://127.0.0.1:8866/gradio/humanseg_lite.
 
 ## V. Release Note
 
@@ -238,7 +240,7 @@
     First release
 
 - 1.1.0
-    
+
     Added video portrait segmentation interface
 
     Added video stream portrait segmentation interface
@@ -251,6 +253,10 @@
 
     Remove Fluid API
 
+* 1.3.0
+
+    Add Gradio APP support.
+
     ```shell
-    $ hub install humanseg_lite == 1.2.0
+    $ hub install humanseg_lite == 1.3.0
     ```
