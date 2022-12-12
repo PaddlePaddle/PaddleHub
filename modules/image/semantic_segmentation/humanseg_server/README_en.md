@@ -1,7 +1,7 @@
 # humanseg_server
 
 |Module Name |humanseg_server|
-| :--- | :---: | 
+| :--- | :---: |
 |Category |Image segmentation|
 |Network|hrnet|
 |Dataset|Baidu self-built dataset|
@@ -10,10 +10,10 @@
 |Data indicators|-|
 |Latest update date|2021-02-26|
 
-## I. Basic Information 
+## I. Basic Information
 
 - ### Application Effect Display
-  
+
   - Sample results:
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130915531-bd4b2294-47e4-47e1-b9d3-3c1fa8b90f8f.png" width = "337" height = "505" hspace='10'/>
@@ -39,7 +39,7 @@
     - ```shell
       $ hub install humanseg_server
       ```
-      
+
     - In case of any problems during installation, please refer to:[Windows_Quickstart](../../../../docs/docs_en/get_start/windows_quickstart.md)
     | [Linux_Quickstart](../../../../docs/docs_en/get_start/linux_quickstart.md) | [Mac_Quickstart](../../../../docs/docs_en/get_start/mac_quickstart.md)  
 
@@ -120,9 +120,9 @@
 
     - **Return**
 
-        * res (list\[dict\]): The list of recognition results, where each element is dict and each field is: 
+        * res (list\[dict\]): The list of recognition results, where each element is dict and each field is:
             * save\_path (str, optional): Save path of the result.
-            * data (numpy.ndarray): The result of portrait segmentation. 
+            * data (numpy.ndarray): The result of portrait segmentation.
 
     ```python
     def video_stream_segment(self,
@@ -229,6 +229,8 @@
         cv2.imwrite("segment_human_server.png", rgba)
         ```
 
+- ### Gradio APP support
+   Starting with PaddleHub 2.3.1, the Gradio APP for humanseg_server is supported to be accessed in the browser using the link http://127.0.0.1:8866/gradio/humanseg_server.
 
 ## V. Release Note
 
@@ -237,20 +239,23 @@
     First release
 
 - 1.1.0
-    
+
     Added video portrait segmentation interface
 
     Added video stream portrait segmentation interface
-    
+
 * 1.1.1
 
     Fix memory leakage problem of on cudnn 8.0.4
 
-* 1.2.0
+* 1.3.0
 
     Remove Fluid API
 
-    ```shell
-    $ hub install humanseg_server == 1.2.0
-    ```
+* 1.4.0
 
+    Add Gradio APP support.
+
+    ```shell
+    $ hub install humanseg_server == 1.4.0
+    ```

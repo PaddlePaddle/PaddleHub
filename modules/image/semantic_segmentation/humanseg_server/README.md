@@ -1,7 +1,7 @@
 # humanseg_server
 
 |模型名称|humanseg_server|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-图像分割|
 |网络|hrnet|
 |数据集|百度自建数据集|
@@ -15,7 +15,7 @@
 ## 一、模型基本信息
 
 - ### 应用效果展示
-  
+
   - 样例结果示例：
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/130913092-312a5f37-842e-4fd0-8db4-5f853fd8419f.jpg" width = "337" height = "505" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130915531-bd4b2294-47e4-47e1-b9d3-3c1fa8b90f8f.png" width = "337" height = "505" hspace='10'/>
@@ -40,7 +40,7 @@
     - ```shell
       $ hub install humanseg_server
       ```
-      
+
     -  如您安装时遇到问题，可参考：[零基础windows安装](../../../../docs/docs_ch/get_start/windows_quickstart.md)
       | [零基础Linux安装](../../../../docs/docs_ch/get_start/linux_quickstart.md) | [零基础MacOS安装](../../../../docs/docs_ch/get_start/mac_quickstart.md)
 
@@ -229,6 +229,9 @@
         cv2.imwrite("segment_human_server.png", rgba)
         ```
 
+- ### Gradio APP 支持
+
+    从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/humanseg_server 在浏览器中访问 humanseg_server 的 Gradio APP。
 
 ## 五、更新历史
 
@@ -237,7 +240,7 @@
     初始发布
 
 * 1.1.0
-    
+
     提升预测性能
 
 * 1.1.1
@@ -258,6 +261,10 @@
 
     移除 Fluid API
 
+* 1.4.0
+
+    添加 Gradio APP 支持
+
     ```shell
-    $ hub install humanseg_server == 1.3.0
+    $ hub install humanseg_server == 1.4.0
     ```
