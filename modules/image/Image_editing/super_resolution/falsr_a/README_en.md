@@ -1,7 +1,7 @@
 # falsr_a
 
 |Module Name|falsr_a|
-| :--- | :---: | 
+| :--- | :---: |
 |Category |Image editing|
 |Network |falsr_a|
 |Dataset|DIV2k|
@@ -11,10 +11,10 @@
 |Latest update date|2021-02-26|
 
 
-## I. Basic Information 
+## I. Basic Information
 
 - ### Application Effect Display
-  
+
   - Sample results:
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/133558583-0b7049db-ed1f-4a16-8676-f2141fcb3dee.png" width = "450" height = "300" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130899031-a6f8c58a-5cb7-4105-b990-8cca5ae15368.png" width = "450" height = "300" hspace='10'/>
@@ -88,7 +88,7 @@
       * output\_dir (str): save path of images, "dcscn_output" by default.
 
     - **Return**
-      * res (list\[dict\]): The list of model results, where each element is dict and each field is: 
+      * res (list\[dict\]): The list of model results, where each element is dict and each field is:
         * save\_path (str, optional): Save path of the result, save_path is '' if no image is saved.
         * data (numpy.ndarray): result of super resolution.
 
@@ -153,19 +153,23 @@
         print("save image as falsr_a_X2.png")
         ```
 
+- ### Gradio APP support
+  Starting with PaddleHub 2.3.1, the Gradio APP for falsr_a is supported to be accessed in the browser using the link http://127.0.0.1:8866/gradio/falsr_a.
 
 ## V. Release Note
 
-- 1.0.0
+* 1.0.0
 
   First release
 
-- 1.1.0
+* 1.1.0
 
   Remove Fluid API
 
+* 1.2.0
+
+  Add Gradio APP support.
 
   ```shell
-  $ hub install falsr_a == 1.1.0
+  $ hub install falsr_a == 1.2.0
   ```
-

@@ -2,7 +2,7 @@
 
 
 |模型名称|falsr_a|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|图像-图像编辑|
 |网络|falsr_a|
 |数据集|DIV2k|
@@ -15,7 +15,7 @@
 ## 一、模型基本信息
 
 - ### 应用效果展示
-  
+
   - 样例结果示例(左为原图，右为效果图)：
     <p align="center">
     <img src="https://user-images.githubusercontent.com/35907364/133558583-0b7049db-ed1f-4a16-8676-f2141fcb3dee.png" width = "450" height = "300" hspace='10'/> <img src="https://user-images.githubusercontent.com/35907364/130899031-a6f8c58a-5cb7-4105-b990-8cca5ae15368.png" width = "450" height = "300" hspace='10'/>
@@ -149,19 +149,23 @@
         print("save image as falsr_a_X2.png")
         ```
 
+- ### Gradio APP 支持
+  从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/falsr_a 在浏览器中访问 falsr_a 的 Gradio APP。
 
 ## 五、更新历史
-
 
 * 1.0.0
 
   初始发布
 
-
 * 1.1.0
 
   移除 fluid API
 
+* 1.2.0
+
+  添加 Gradio APP 支持
+
   ```shell
-  $ hub install falsr_a == 1.1.0
+  $ hub install falsr_a == 1.2.0
   ```
