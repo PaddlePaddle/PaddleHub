@@ -125,6 +125,9 @@
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
     ```
 
+- ### Gradio APP 支持
+  从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/pp-tinypose 在浏览器中访问 pp-tinypose 的 Gradio APP。
+
 ## 五、更新历史
 
 * 1.0.0
@@ -135,6 +138,10 @@
 
   修复使用 ndarray 输入时无法保存可视化图片的问题
 
+* 1.2.0
+
+  添加 Gradio APP 支持
+
   - ```shell
-    $ hub install pp-tinypose==1.1.0
+    $ hub install pp-tinypose==1.2.0
     ```

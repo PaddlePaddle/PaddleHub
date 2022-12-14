@@ -4,13 +4,14 @@ import unittest
 
 import cv2
 import requests
-import paddlehub as hub
 
+import paddlehub as hub
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
 class TestHubModule(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
         img_url = 'https://ai-studio-static-online.cdn.bcebos.com/7799a8ccc5f6471b9d56fb6eff94f82a08b70ca2c7594d3f99877e366c0a2619'
@@ -28,42 +29,26 @@ class TestHubModule(unittest.TestCase):
         shutil.rmtree('pp_tinypose_output')
 
     def test_predict1(self):
-        results = self.module.predict(
-            img='tests/test.jpg',
-            visualization=False
-        )
+        results = self.module.predict(img='tests/test.jpg', visualization=False)
         kps = results[0][1]
         self.assertIsInstance(kps, list)
 
     def test_predict2(self):
-        results = self.module.predict(
-            img=cv2.imread('tests/test.jpg'),
-            visualization=False
-        )
+        results = self.module.predict(img=cv2.imread('tests/test.jpg'), visualization=False)
         kps = results[0][1]
         self.assertIsInstance(kps, list)
 
     def test_predict3(self):
-        results = self.module.predict(
-            img=cv2.imread('tests/test.jpg'),
-            visualization=True
-        )
+        results = self.module.predict(img=cv2.imread('tests/test.jpg'), visualization=True)
         kps = results[0][1]
         self.assertIsInstance(kps, list)
 
     def test_predict4(self):
-        self.assertRaises(
-            FileNotFoundError,
-            self.module.predict,
-            img='no.jpg'
-        )
+        self.assertRaises(FileNotFoundError, self.module.predict, img='no.jpg')
 
     def test_predict5(self):
-        self.assertRaises(
-            cv2.error,
-            self.module.predict,
-            img=['test.jpg']
-        )
+        self.assertRaises(TypeError, self.module.predict, img=['test.jpg'])
+
 
 if __name__ == "__main__":
-    unittest.main() 
+    unittest.main()
