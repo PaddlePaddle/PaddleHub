@@ -245,7 +245,8 @@
 
   - 关于PaddleHub Serving更多信息参考：[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
 
-
+- ### Gradio APP 支持
+  从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/lac 在浏览器中访问 lac 的 Gradio APP。
 
 ## 五、更新历史
 
@@ -287,6 +288,10 @@
 
   移除 fluid api
 
+* 2.4.0
+
+  添加 Gradio APP 支持
+
   - ```shell
-    $ hub install lac==2.3.0
+    $ hub install lac==2.4.0
     ```
