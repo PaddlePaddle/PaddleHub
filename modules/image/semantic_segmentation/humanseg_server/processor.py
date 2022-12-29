@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
+import base64
 import os
 import time
 
-import base64
 import cv2
 import numpy as np
 
