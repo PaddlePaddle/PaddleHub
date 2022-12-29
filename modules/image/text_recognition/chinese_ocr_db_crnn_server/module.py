@@ -1,4 +1,3 @@
-# -*- coding:utf-8 -*-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -23,23 +22,23 @@ from paddle.inference import create_predictor
 from PIL import Image
 
 import paddlehub as hub
-from paddlehub.common.logger import logger
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
+from paddlehub.utils.log import logger
 
 
 @moduleinfo(
     name="chinese_ocr_db_crnn_server",
-    version="1.1.3",
+    version="1.2.0",
     summary=
     "The module can recognize the chinese texts in an image. Firstly, it will detect the text box positions based on the differentiable_binarization_chn module. Then it recognizes the chinese texts. ",
     author="paddle-dev",
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
-class ChineseOCRDBCRNNServer(hub.Module):
+class ChineseOCRDBCRNNServer:
 
-    def _initialize(self, text_detector_module=None, enable_mkldnn=False):
+    def __init__(self, text_detector_module=None, enable_mkldnn=False):
         """
         initialize with the necessary elements
         """
@@ -57,8 +56,8 @@ class ChineseOCRDBCRNNServer(hub.Module):
         self.font_file = os.path.join(self.directory, 'assets', 'simfang.ttf')
         self.enable_mkldnn = enable_mkldnn
 
-        self.rec_pretrained_model_path = os.path.join(self.directory, 'inference_model', 'character_rec')
-        self.cls_pretrained_model_path = os.path.join(self.directory, 'inference_model', 'angle_cls')
+        self.rec_pretrained_model_path = os.path.join(self.directory, 'inference_model', 'character_rec', 'model')
+        self.cls_pretrained_model_path = os.path.join(self.directory, 'inference_model', 'angle_cls', 'model')
         self.rec_predictor, self.rec_input_tensor, self.rec_output_tensors = self._set_config(
             self.rec_pretrained_model_path)
         self.cls_predictor, self.cls_input_tensor, self.cls_output_tensors = self._set_config(
@@ -68,8 +67,8 @@ class ChineseOCRDBCRNNServer(hub.Module):
         """
         predictor config path
         """
-        model_file_path = os.path.join(pretrained_model_path, 'model')
-        params_file_path = os.path.join(pretrained_model_path, 'params')
+        model_file_path = pretrained_model_path + '.pdmodel'
+        params_file_path = pretrained_model_path + '.pdiparams'
 
         config = Config(model_file_path, params_file_path)
         try:
@@ -111,8 +110,7 @@ class ChineseOCRDBCRNNServer(hub.Module):
         """
         if not self._text_detector_module:
             self._text_detector_module = hub.Module(name='chinese_text_detection_db_server',
-                                                    enable_mkldnn=self.enable_mkldnn,
-                                                    version='1.0.2')
+                                                    enable_mkldnn=self.enable_mkldnn)
         return self._text_detector_module
 
     def read_images(self, paths=[]):
@@ -267,7 +265,7 @@ class ChineseOCRDBCRNNServer(hub.Module):
                         rec_res_final.append({
                             'text': text,
                             'confidence': float(score),
-                            'text_box_position': boxes[index].astype(np.int).tolist()
+                            'text_box_position': boxes[index].astype(np.int64).tolist()
                         })
                 result['data'] = rec_res_final
 
@@ -411,63 +409,46 @@ class ChineseOCRDBCRNNServer(hub.Module):
 
         return rec_res
 
-    def save_inference_model(self, dirname, model_filename=None, params_filename=None, combined=True):
+    def save_inference_model(self, dirname):
         detector_dir = os.path.join(dirname, 'text_detector')
         classifier_dir = os.path.join(dirname, 'angle_classifier')
         recognizer_dir = os.path.join(dirname, 'text_recognizer')
-        self._save_detector_model(detector_dir, model_filename, params_filename, combined)
-        self._save_classifier_model(classifier_dir, model_filename, params_filename, combined)
-        self._save_recognizer_model(recognizer_dir, model_filename, params_filename, combined)
+
+        self._save_detector_model(detector_dir)
+        self._save_classifier_model(classifier_dir)
+        self._save_recognizer_model(recognizer_dir)
         logger.info("The inference model has been saved in the path {}".format(os.path.realpath(dirname)))
 
-    def _save_detector_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        self.text_detector_module.save_inference_model(dirname, model_filename, params_filename, combined)
+    def _save_detector_model(self, dirname):
+        self.text_detector_module.save_inference_model(dirname)
 
-    def _save_recognizer_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
+    def _save_recognizer_model(self, dirname):
         place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
+        exe = paddle.static.Executor(place)
 
-        model_file_path = os.path.join(self.rec_pretrained_model_path, 'model')
-        params_file_path = os.path.join(self.rec_pretrained_model_path, 'params')
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.rec_pretrained_model_path,
-            model_filename=model_file_path,
-            params_filename=params_file_path,
-            executor=exe)
-
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
+        program, feeded_var_names, target_vars = paddle.static.load_inference_model(self.rec_pretrained_model_path,
+                                                                                    executor=exe)
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feeded_var_names]
+        paddle.static.save_inference_model(dirname,
+                                           feed_vars=feed_vars,
+                                           fetch_vars=target_vars,
                                            executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
+                                           program=program)
 
-    def _save_classifier_model(self, dirname, model_filename=None, params_filename=None, combined=True):
-        if combined:
-            model_filename = "__model__" if not model_filename else model_filename
-            params_filename = "__params__" if not params_filename else params_filename
+    def _save_classifier_model(self, dirname):
         place = paddle.CPUPlace()
-        exe = paddle.Executor(place)
+        exe = paddle.static.Executor(place)
 
-        model_file_path = os.path.join(self.cls_pretrained_model_path, 'model')
-        params_file_path = os.path.join(self.cls_pretrained_model_path, 'params')
-        program, feeded_var_names, target_vars = paddle.static.load_inference_model(
-            dirname=self.cls_pretrained_model_path,
-            model_filename=model_file_path,
-            params_filename=params_file_path,
-            executor=exe)
-
-        paddle.static.save_inference_model(dirname=dirname,
-                                           main_program=program,
+        program, feeded_var_names, target_vars = paddle.static.load_inference_model(self.cls_pretrained_model_path,
+                                                                                    executor=exe)
+        global_block = program.global_block()
+        feed_vars = [global_block.var(item) for item in feeded_var_names]
+        paddle.static.save_inference_model(dirname,
+                                           feed_vars=feed_vars,
+                                           fetch_vars=target_vars,
                                            executor=exe,
-                                           feeded_var_names=feeded_var_names,
-                                           target_vars=target_vars,
-                                           model_filename=model_filename,
-                                           params_filename=params_filename)
+                                           program=program)
 
     @runnable
     def run_cmd(self, argvs):
@@ -515,3 +496,25 @@ class ChineseOCRDBCRNNServer(hub.Module):
         Add the command input options
         """
         self.arg_input_group.add_argument('--input_path', type=str, default=None, help="diretory to image")
+
+    def create_gradio_app(self):
+        import gradio as gr
+
+        def inference(image, use_gpu=False, box_thresh=0.5, text_thresh=0.5, angle_classification_thresh=0.9):
+            return self.recognize_text(paths=[image],
+                                       use_gpu=use_gpu,
+                                       output_dir=None,
+                                       visualization=False,
+                                       box_thresh=box_thresh,
+                                       text_thresh=text_thresh,
+                                       angle_classification_thresh=angle_classification_thresh)
+
+        return gr.Interface(inference, [
+            gr.Image(type='filepath'),
+            gr.Checkbox(),
+            gr.Slider(0, 1.0, 0.5, step=0.01),
+            gr.Slider(0, 1.0, 0.5, step=0.01),
+            gr.Slider(0, 1.0, 0.5, step=0.01)
+        ], [gr.JSON(label='results')],
+                            title='chinese_ocr_db_crnn_server',
+                            allow_flagging=False)
