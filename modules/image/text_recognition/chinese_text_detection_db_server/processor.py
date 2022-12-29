@@ -1,18 +1,18 @@
-# -*- coding:utf-8 -*-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import sys
 
-from PIL import Image, ImageDraw, ImageFont
-from shapely.geometry import Polygon
 import cv2
 import numpy as np
 import pyclipper
+from PIL import ImageDraw
+from shapely.geometry import Polygon
 
 
 class DBPreProcess(object):
+
     def __init__(self, max_side_len=960):
         self.max_side_len = max_side_len
 
@@ -103,7 +103,7 @@ class DBPostProcess(object):
             contours, _ = outs[0], outs[1]
 
         num_contours = min(len(contours), self.max_candidates)
-        boxes = np.zeros((num_contours, 4, 2), dtype=np.int16)
+        boxes = np.zeros((num_contours, 4, 2), dtype=np.int64)
         scores = np.zeros((num_contours, ), dtype=np.float32)
 
         for index in range(num_contours):
@@ -127,7 +127,7 @@ class DBPostProcess(object):
 
             box[:, 0] = np.clip(np.round(box[:, 0] / width * dest_width), 0, dest_width)
             box[:, 1] = np.clip(np.round(box[:, 1] / height * dest_height), 0, dest_height)
-            boxes[index, :, :] = box.astype(np.int16)
+            boxes[index, :, :] = box.astype(np.int64)
             scores[index] = score
         return boxes, scores
 
@@ -163,15 +163,15 @@ class DBPostProcess(object):
     def box_score_fast(self, bitmap, _box):
         h, w = bitmap.shape[:2]
         box = _box.copy()
-        xmin = np.clip(np.floor(box[:, 0].min()).astype(np.int), 0, w - 1)
-        xmax = np.clip(np.ceil(box[:, 0].max()).astype(np.int), 0, w - 1)
-        ymin = np.clip(np.floor(box[:, 1].min()).astype(np.int), 0, h - 1)
-        ymax = np.clip(np.ceil(box[:, 1].max()).astype(np.int), 0, h - 1)
+        xmin = np.clip(np.floor(box[:, 0].min()).astype(np.int64), 0, w - 1)
+        xmax = np.clip(np.ceil(box[:, 0].max()).astype(np.int64), 0, w - 1)
+        ymin = np.clip(np.floor(box[:, 1].min()).astype(np.int64), 0, h - 1)
+        ymax = np.clip(np.ceil(box[:, 1].max()).astype(np.int64), 0, h - 1)
 
         mask = np.zeros((ymax - ymin + 1, xmax - xmin + 1), dtype=np.uint8)
         box[:, 0] = box[:, 0] - xmin
         box[:, 1] = box[:, 1] - ymin
-        cv2.fillPoly(mask, box.reshape(1, -1, 2).astype(np.int32), 1)
+        cv2.fillPoly(mask, box.reshape(1, -1, 2).astype(np.int64), 1)
         return cv2.mean(bitmap[ymin:ymax + 1, xmin:xmax + 1], mask)[0]
 
     def __call__(self, predictions, ratio_list):
