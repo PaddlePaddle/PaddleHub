@@ -21,22 +21,36 @@ import ast
 import base64
 import os
 import time
+from io import BytesIO
 
 import cv2
 import numpy as np
 import paddle.inference as paddle_infer
 from PIL import Image
 
-from paddlehub.utils.utils import logger
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
+from paddlehub.utils.utils import logger
 
 
 def base64_to_cv2(b64str):
     data = base64.b64decode(b64str.encode('utf8'))
     data = np.fromstring(data, np.uint8)
     data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    if data is None:
+        buf = BytesIO()
+        image_decode = base64.b64decode(b64str.encode('utf8'))
+        image = BytesIO(image_decode)
+        im = Image.open(image)
+        rgb = im.convert('RGB')
+        rgb.save(buf, 'jpeg')
+        buf.seek(0)
+        image_bytes = buf.read()
+        data_base64 = str(base64.b64encode(image_bytes), encoding="utf-8")
+        image_decode = base64.b64decode(data_base64)
+        img_array = np.frombuffer(image_decode, np.uint8)
+        data = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
     return data
 
 
@@ -49,6 +63,7 @@ def base64_to_cv2(b64str):
     author_email="paddle-dev@baidu.com",
     type="cv/text_recognition")
 class ChPPOCRv3Det:
+
     def __init__(self, enable_mkldnn=False):
         """
         initialize with the necessary elements
