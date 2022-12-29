@@ -6,6 +6,7 @@ import requests
 
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
 def get_access_token(ak: str = None, sk: str = None) -> str:
@@ -46,12 +47,13 @@ def get_access_token(ak: str = None, sk: str = None) -> str:
             author='paddlepaddle',
             author_email='',
             summary='ernie_zeus',
-            version='1.1.0')
+            version='1.2.0')
 class ERNIEZeus:
 
     def __init__(self, ak: str = None, sk: str = None) -> None:
         self.access_token = get_access_token(ak, sk)
 
+    @serving
     def custom_generation(self,
                           text: str,
                           min_dec_len: int = 1,
@@ -379,3 +381,61 @@ class ERNIEZeus:
                 kwargs.pop(k)
 
         return func(**kwargs)
+
+    def create_gradio_app(self):
+        import gradio as gr
+
+        def inference(task: str,
+                      text: str,
+                      min_dec_len: int = 2,
+                      seq_len: int = 512,
+                      topp: float = 0.9,
+                      penalty_score: float = 1.0):
+
+            func = getattr(self, task)
+            try:
+                result = func(text, min_dec_len, seq_len, topp, penalty_score)
+                return result
+            except Exception as error:
+                return str(error)
+
+        examples = [
+            [
+                'text_summarization',
+                '外媒7月18日报道，阿联酋政府当日证实该国将建设首个核电站，以应对不断上涨的用电需求。分析称阿联酋作为世界第三大石油出口国，更愿意将该能源用于出口，而非发电。首座核反应堆预计在2017年运行。cntv李婉然编译报道',
+                4, 512, 0.3, 1.0
+            ],
+            ['copywriting_generation', '芍药香氛的沐浴乳', 8, 512, 0.9, 1.2],
+            ['novel_continuation', '昆仑山可以说是天下龙脉的根源，所有的山脉都可以看作是昆仑的分支。这些分出来的枝枝杈杈，都可以看作是一条条独立的龙脉。', 2, 512, 0.9, 1.2],
+            ['answer_generation', '做生意的基本原则是什么？', 2, 512, 0.5, 1.2],
+            ['couplet_continuation', '天增岁月人增寿', 2, 512, 1.0, 1.0],
+            ['composition_generation', '拔河比赛', 128, 512, 0.9, 1.2],
+            ['text_cloze', '她有着一双[MASK]的眼眸。', 1, 512, 0.3, 1.2],
+        ]
+
+        text = gr.Textbox(
+            label="input_text",
+            placeholder="Please enter Chinese text.",
+        )
+        task = gr.Dropdown(label="task",
+                           choices=[
+                               'text_summarization', 'copywriting_generation', 'novel_continuation',
+                               'answer_generation', 'couplet_continuation', 'composition_generation', 'text_cloze'
+                           ],
+                           value='text_summarization')
+
+        min_dec_len = gr.Slider(minimum=1, maximum=511, value=1, label="min_dec_len", step=1, interactive=True)
+        seq_len = gr.Slider(minimum=2, maximum=512, value=128, label="seq_len", step=1, interactive=True)
+        topp = gr.Slider(minimum=0.0, maximum=1.0, value=1.0, label="topp", step=0.01, interactive=True)
+        penalty_score = gr.Slider(minimum=1.0,
+                                  maximum=2.0,
+                                  value=1.0,
+                                  label="penalty_score",
+                                  step=0.01,
+                                  interactive=True)
+        text_gen = gr.Text(label="generated_text")
+        interface = gr.Interface(inference, [task, text, min_dec_len, seq_len, topp, penalty_score], [text_gen],
+                                 examples=examples,
+                                 allow_flagging='never',
+                                 title='ERNIE-Zeus')
+        return interface
