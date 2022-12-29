@@ -161,6 +161,8 @@
         cv2.imwrite('/PATH/TO/SAVE/IMAGE', img)
         ```
 
+- ### Gradio APP support
+  Starting with PaddleHub 2.3.1, the Gradio APP for deoldify is supported to be accessed in the browser using the link http://127.0.0.1:8866/gradio/deoldify.
 
 ## V. Release Note
 
@@ -176,6 +178,10 @@
 
   Remove Fluid API
 
+* 1.2.0
+
+  Add Gradio APP support
+
   ```shell
-  $ hub install deoldify == 1.1.0
+  $ hub install deoldify == 1.2.0
   ```
