@@ -155,6 +155,10 @@
     # print prediction results
     print(r.json()["results"])
     ```
+
+- ### Gradio APP support
+  Starting with PaddleHub 2.3.1, the Gradio APP for pyramidbox_lite_server_mask is supported to be accessed in the browser using the link http://127.0.0.1:8866/gradio/pyramidbox_lite_server_mask.
+
 ## V.Paddle Lite Deployment
 - ### Save model demo
   - ```python
@@ -187,6 +191,10 @@
 
   Fix a bug of save_inference_model
 
+* 1.5.0
+
+  Add Gradio APP support.
+
   - ```shell
-    $ hub install pyramidbox_lite_server_mask==1.4.0
+    $ hub install pyramidbox_lite_server_mask==1.5.0
     ```
