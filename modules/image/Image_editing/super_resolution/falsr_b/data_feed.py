@@ -1,11 +1,9 @@
-# -*- coding:utf-8 -*-
 import os
 import time
 from collections import OrderedDict
 
 import cv2
 import numpy as np
-
 
 __all__ = ['reader']
 
