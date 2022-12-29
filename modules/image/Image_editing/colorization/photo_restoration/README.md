@@ -143,6 +143,10 @@
 
   初始发布
 
-* 1.0.1
+* 1.1.0
 
   适配paddlehub2.0版本
+
+  * ```shell
+    $ hub install photo_restoration==1.1.0
+    ```
