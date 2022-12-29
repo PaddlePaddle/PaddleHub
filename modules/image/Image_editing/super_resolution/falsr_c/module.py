@@ -12,30 +12,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import argparse
 import ast
 import os
-import argparse
 
 import numpy as np
-import paddle
-import paddle.jit
-import paddle.static
-from paddle.inference import Config, create_predictor
-from paddlehub.module.module import moduleinfo, runnable, serving
+from paddle.inference import Config
+from paddle.inference import create_predictor
 
 from .data_feed import reader
-from .processor import postprocess, base64_to_cv2, cv2_to_base64, check_dir
+from .processor import base64_to_cv2
+from .processor import check_dir
+from .processor import cv2_to_base64
+from .processor import postprocess
+from paddlehub.module.module import moduleinfo
+from paddlehub.module.module import runnable
+from paddlehub.module.module import serving
 
 
-@moduleinfo(
-    name="falsr_c",
-    type="CV/image_editing",
-    author="paddlepaddle",
-    author_email="",
-    summary="falsr_c is a super resolution model.",
-    version="1.1.0")
+@moduleinfo(name="falsr_c",
+            type="CV/image_editing",
+            author="paddlepaddle",
+            author_email="",
+            summary="falsr_c is a super resolution model.",
+            version="1.2.0")
 class Falsr_C:
+
     def __init__(self):
         self.default_pretrained_model_path = os.path.join(self.directory, "falsr_c_model", "model")
         self._set_config()
@@ -44,8 +46,8 @@ class Falsr_C:
         """
         predictor config setting
         """
-        model = self.default_pretrained_model_path+'.pdmodel'
-        params = self.default_pretrained_model_path+'.pdiparams'
+        model = self.default_pretrained_model_path + '.pdmodel'
+        params = self.default_pretrained_model_path + '.pdiparams'
         cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
@@ -110,13 +112,12 @@ class Falsr_C:
             output_names = predictor.get_output_names()
             output_handle = predictor.get_output_handle(output_names[0])
             output = np.expand_dims(output_handle.copy_to_cpu(), axis=1)
-            out = postprocess(
-                data_out=output,
-                org_im=all_data[i]['org_im'],
-                org_im_shape=all_data[i]['org_im_shape'],
-                org_im_path=all_data[i]['org_im_path'],
-                output_dir=output_dir,
-                visualization=visualization)
+            out = postprocess(data_out=output,
+                              org_im=all_data[i]['org_im'],
+                              org_im_shape=all_data[i]['org_im_shape'],
+                              org_im_path=all_data[i]['org_im_path'],
+                              output_dir=output_dir,
+                              visualization=visualization)
             res.append(out)
         return res
 
@@ -135,11 +136,10 @@ class Falsr_C:
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(
-            description="Run the {} module.".format(self.name),
-            prog='hub run {}'.format(self.name),
-            usage='%(prog)s',
-            add_help=True)
+        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
+                                              prog='hub run {}'.format(self.name),
+                                              usage='%(prog)s',
+                                              add_help=True)
 
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.arg_config_group = self.parser.add_argument_group(
@@ -147,8 +147,10 @@ class Falsr_C:
         self.add_module_config_arg()
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
-        results = self.reconstruct(
-            paths=[args.input_path], use_gpu=args.use_gpu, output_dir=args.output_dir, visualization=args.visualization)
+        results = self.reconstruct(paths=[args.input_path],
+                                   use_gpu=args.use_gpu,
+                                   output_dir=args.output_dir,
+                                   visualization=args.visualization)
         if args.save_dir is not None:
             check_dir(args.save_dir)
             self.save_inference_model(args.save_dir)
@@ -159,14 +161,22 @@ class Falsr_C:
         """
         Add the command config options.
         """
-        self.arg_config_group.add_argument(
-            '--use_gpu', type=ast.literal_eval, default=False, help="whether use GPU or not")
-        self.arg_config_group.add_argument(
-            '--output_dir', type=str, default='falsr_c_output', help="The directory to save output images.")
-        self.arg_config_group.add_argument(
-            '--save_dir', type=str, default='falsr_c_save_model', help="The directory to save model.")
-        self.arg_config_group.add_argument(
-            '--visualization', type=ast.literal_eval, default=True, help="whether to save output as images.")
+        self.arg_config_group.add_argument('--use_gpu',
+                                           type=ast.literal_eval,
+                                           default=False,
+                                           help="whether use GPU or not")
+        self.arg_config_group.add_argument('--output_dir',
+                                           type=str,
+                                           default='falsr_c_output',
+                                           help="The directory to save output images.")
+        self.arg_config_group.add_argument('--save_dir',
+                                           type=str,
+                                           default='falsr_c_save_model',
+                                           help="The directory to save model.")
+        self.arg_config_group.add_argument('--visualization',
+                                           type=ast.literal_eval,
+                                           default=True,
+                                           help="whether to save output as images.")
 
     def add_module_input_arg(self):
         """
@@ -174,11 +184,20 @@ class Falsr_C:
         """
         self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
 
+    def create_gradio_app(self):
+        import gradio as gr
+        import tempfile
+        import os
+        from PIL import Image
 
-if __name__ == "__main__":
-    module = Falsr_C()
-    #module.reconstruct(paths=["BSD100_001.png","BSD100_002.png", "Set5_003.png"])
-    import cv2
-    img = cv2.imread("BSD100_001.png").astype('float32')
-    res = module.reconstruct(images=[img])
-    module.save_inference_model()
+        def inference(image, use_gpu=False):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                self.reconstruct(paths=[image], use_gpu=use_gpu, visualization=True, output_dir=temp_dir)
+                return Image.open(os.path.join(temp_dir, os.listdir(temp_dir)[0]))
+
+        interface = gr.Interface(
+            inference,
+            [gr.inputs.Image(type="filepath"), gr.Checkbox(label='use_gpu')],
+            gr.outputs.Image(type="ndarray"),
+            title='falsr_c')
+        return interface
