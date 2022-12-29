@@ -150,6 +150,8 @@
     print(r.json()["results"])
     ```
 
+- ### Gradio APP support
+  Starting with PaddleHub 2.3.1, the Gradio APP for pyramidbox_lite_server is supported to be accessed in the browser using the link http://127.0.0.1:8866/gradio/pyramidbox_lite_server.
 
 ## V.Release Note
 
@@ -169,6 +171,10 @@
 
   Fix a bug of save_inference_model
 
+* 1.4.0
+
+  Add Gradio APP support.
+
   - ```shell
-    $ hub install pyramidbox_lite_server==1.3.0
+    $ hub install pyramidbox_lite_server==1.4.0
     ```
