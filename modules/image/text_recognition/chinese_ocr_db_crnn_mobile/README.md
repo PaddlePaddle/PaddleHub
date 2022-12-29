@@ -69,7 +69,7 @@
     ```
   - 通过命令行方式实现文字识别模型的调用，更多请见 [PaddleHub命令行指令](../../../../docs/docs_ch/tutorial/cmd_usage.rst)
 
-- ### 2、代码示例
+- ### 2、预测代码示例
 
   - ```python
     import paddlehub as hub
@@ -170,6 +170,9 @@
     print(r.json()["results"])
     ```
 
+- ### Gradio App 支持
+  从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/chinese_ocr_db_crnn_mobile 在浏览器中访问 chinese_ocr_db_crnn_mobile 的 Gradio App。
+
 ## 五、更新历史
 
 * 1.0.0
@@ -190,16 +193,20 @@
 
 * 1.1.1
 
-   支持文本中空格识别。
+  支持文本中空格识别。
 
 * 1.1.2
 
-   修复只能检出30字段问题。
+  修复只能检出30字段问题。
 
 * 1.1.3
 
-   移除 fluid api
+  移除 fluid api
+
+* 1.2.0
+
+  适配 PaddleHub 2.x 添加 Gradio APP
 
   - ```shell
-    $ hub install chinese_ocr_db_crnn_mobile==1.1.3
+    $ hub install chinese_ocr_db_crnn_mobile==1.2.0
     ```

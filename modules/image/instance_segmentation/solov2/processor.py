@@ -11,10 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from PIL import Image
 import cv2
 import numpy as np
+from PIL import Image
 
 
 def decode_image(im_file, im_info):
@@ -78,20 +77,13 @@ class Resize(object):
         im_channel = im.shape[2]
         im_scale_x, im_scale_y = self.generate_scale(im)
         if self.use_cv2:
-            im = cv2.resize(
-                im,
-                None,
-                None,
-                fx=im_scale_x,
-                fy=im_scale_y,
-                interpolation=self.interp)
+            im = cv2.resize(im, None, None, fx=im_scale_x, fy=im_scale_y, interpolation=self.interp)
         else:
             resize_w = int(im_scale_x * float(im.shape[1]))
             resize_h = int(im_scale_y * float(im.shape[0]))
             if self.max_size != 0:
-                raise TypeError(
-                    'If you set max_size to cap the maximum size of image,'
-                    'please set use_cv2 to True to resize the image.')
+                raise TypeError('If you set max_size to cap the maximum size of image,'
+                                'please set use_cv2 to True to resize the image.')
             im = im.astype('uint8')
             im = Image.fromarray(im)
             im = im.resize((int(resize_w), int(resize_h)), self.interp)
@@ -99,8 +91,7 @@ class Resize(object):
 
         # padding im when image_shape fixed by infer_cfg.yml
         if self.max_size != 0 and self.image_shape is not None:
-            padding_im = np.zeros(
-                (self.max_size, self.max_size, im_channel), dtype=np.float32)
+            padding_im = np.zeros((self.max_size, self.max_size, im_channel), dtype=np.float32)
             im_h, im_w = im.shape[:2]
             padding_im[:im_h, :im_w, :] = im
             im = padding_im

@@ -1,4 +1,3 @@
-# coding=utf-8
 from __future__ import absolute_import
 from __future__ import division
 
@@ -7,13 +6,12 @@ import ast
 import os
 
 import numpy as np
-import paddle
 from paddle.inference import Config
 from paddle.inference import create_predictor
+
 from .data_feed import reader
 from .processor import base64_to_cv2
 from .processor import postprocess
-
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
@@ -24,10 +22,12 @@ from paddlehub.module.module import serving
             author="baidu-vis",
             author_email="",
             summary="PyramidBox-Lite-Server is a high-performance face detection model.",
-            version="1.3.0")
+            version="1.4.0")
 class PyramidBoxLiteServer:
+
     def __init__(self):
-        self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_lite_server_face_detection", "model")
+        self.default_pretrained_model_path = os.path.join(self.directory, "pyramidbox_lite_server_face_detection",
+                                                          "model")
         self._set_config()
         self.processor = self
 
@@ -35,8 +35,8 @@ class PyramidBoxLiteServer:
         """
         predictor config setting
         """
-        model = self.default_pretrained_model_path+'.pdmodel'
-        params = self.default_pretrained_model_path+'.pdiparams'
+        model = self.default_pretrained_model_path + '.pdmodel'
+        params = self.default_pretrained_model_path + '.pdiparams'
         cpu_config = Config(model, params)
         cpu_config.disable_glog_info()
         cpu_config.disable_gpu()
@@ -188,3 +188,28 @@ class PyramidBoxLiteServer:
                                           type=ast.literal_eval,
                                           default=0.6,
                                           help="confidence threshold.")
+
+    def create_gradio_app(self):
+        import gradio as gr
+        import tempfile
+        import os
+        from PIL import Image
+
+        def inference(image, shrink, confs_threshold):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                self.face_detection(paths=[image],
+                                    use_gpu=False,
+                                    visualization=True,
+                                    output_dir=temp_dir,
+                                    shrink=shrink,
+                                    confs_threshold=confs_threshold)
+                return Image.open(os.path.join(temp_dir, os.listdir(temp_dir)[0]))
+
+        interface = gr.Interface(inference, [
+            gr.inputs.Image(type="filepath"),
+            gr.Slider(0.0, 1.0, 0.5, step=0.01),
+            gr.Slider(0.0, 1.0, 0.6, step=0.01)
+        ],
+                                 gr.outputs.Image(type="ndarray"),
+                                 title='pyramidbox_lite_server')
+        return interface

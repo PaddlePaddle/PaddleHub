@@ -171,6 +171,9 @@
     print(r.json()["results"])
     ```
 
+- ### Gradio APP support
+   Starting with PaddleHub 2.3.1, the Gradio APP for chinese_ocr_db_crnn_mobile is supported to be accessed in the browser using the link http://127.0.0.1:8866/gradio/chinese_ocr_db_crnn_mobile.
+
 ## V. Release Note
 
 * 1.0.0
@@ -191,15 +194,19 @@
 
 * 1.1.1
 
-   Supports recognition of spaces in text.
+  Supports recognition of spaces in text.
 
 * 1.1.2
 
-   Fixed an issue where only 30 fields can be detected.
+  Fixed an issue where only 30 fields can be detected.
 
 * 1.1.3
 
-   Remove fluid api
+  Remove fluid api
+
+* 1.2.0
+
+  Support PaddleHub 2.x version. Add Gradio APP support.
 
   - ```shell
     $ hub install chinese_ocr_db_crnn_mobile==1.1.3

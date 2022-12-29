@@ -1,6 +1,6 @@
 # transformer_zh-en
 |模型名称|transformer_zh-en|
-| :--- | :---: | 
+| :--- | :---: |
 |类别|文本-机器翻译|
 |网络|Transformer|
 |数据集|CWMT2021|
@@ -24,7 +24,7 @@
 - ### 1、环境依赖  
 
   - paddlepaddle >= 2.1.0
-  
+
   - paddlehub >= 2.1.0    | [如何安装PaddleHub](../../../../docs/docs_ch/get_start/installation.rst)
 
 - ### 2、安装
@@ -55,7 +55,7 @@
         print('-'*30)
         print(f'src: {st}')
         for i in range(n_best):
-            print(f'trg[{i+1}]: {trg_texts[idx*n_best+i]}')    
+            print(f'trg[{i+1}]: {trg_texts[idx*n_best+i]}')  
     ```
 
 - ### 2、API
@@ -132,6 +132,9 @@
 
   - 关于PaddleHub Serving更多信息参考：[服务部署](../../../../docs/docs_ch/tutorial/serving.md)
 
+- ### Gradio APP 支持
+  从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/transformer_zh-en 在浏览器中访问 transformer_zh-en 的 Gradio APP。
+
 ## 五、更新历史
 
 * 1.0.0
@@ -141,6 +144,11 @@
 * 1.0.1
 
   修复模型初始化的兼容性问题
+
+* 1.1.0
+
+  添加 Gradio APP 支持
+
   - ```shell
-    $ hub install transformer_zh-en==1.0.1
+    $ hub install transformer_zh-en==1.1.0
     ```

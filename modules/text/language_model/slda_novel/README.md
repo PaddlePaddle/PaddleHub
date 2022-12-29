@@ -44,7 +44,7 @@
 ``` python
 import paddlehub as hub
 
-slda_novel = hub.Module("slda_novel")
+slda_novel = hub.Module(name="slda_novel")
 
 topic_dist = slda_novel.infer_doc_topic_distribution("妈妈告诉女儿，今天爸爸过生日，放学后要早点回家一起庆祝")
 # [{'topic id': 222, 'distribution': 0.5}, {'topic id': 362, 'distribution': 0.5}]

@@ -11,29 +11,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import codecs
 import logging
 import re
 from typing import List
 
-import codecs
 import jieba
 
 jieba.setLogLevel(logging.INFO)
 
-from sacremoses import MosesTokenizer, MosesDetokenizer
+from sacremoses import MosesDetokenizer
 from subword_nmt.apply_bpe import BPE
 
 
 class MTTokenizer(object):
+
     def __init__(self, bpe_codes_file: str, lang_src: str = 'zh', lang_trg: str = 'en', separator='@@'):
         self.moses_detokenizer = MosesDetokenizer(lang=lang_trg)
-        self.bpe_tokenizer = BPE(
-            codes=codecs.open(bpe_codes_file, encoding='utf-8'),
-            merges=-1,
-            separator=separator,
-            vocab=None,
-            glossaries=None)
+        self.bpe_tokenizer = BPE(codes=codecs.open(bpe_codes_file, encoding='utf-8'),
+                                 merges=-1,
+                                 separator=separator,
+                                 vocab=None,
+                                 glossaries=None)
 
     def tokenize(self, text: str):
         """

@@ -14,14 +14,10 @@
 """Tokenization classes."""
 
 import collections
-import json
 import sentencepiece as spm
-import six
 import unicodedata
 
-from plato2_en_large.utils.args import str2bool
-
-SPIECE_UNDERLINE = u"▁".encode("utf-8")
+from .args import str2bool
 
 
 def clean_text(text):
@@ -79,15 +75,18 @@ def encode_ids(spm_model, text, sample=False):
 
 def convert_to_unicode(text):
     """Converts `text` to Unicode (if it's not already), assuming utf-8 input."""
-    if isinstance(text, six.binary_type):
+    if isinstance(text, str):
+        return text
+    elif isinstance(text, bytes):
         return text.decode("utf-8", "ignore")
-    return text
+    else:
+        raise ValueError("Unsupported string type: %s" % (type(text)))
 
 
 def load_vocab(vocab_file):
     """Loads a vocabulary file into a dictionary."""
     vocab = collections.OrderedDict()
-    fin = open(vocab_file)
+    fin = open(vocab_file, 'r', encoding="UTF-8")
     for num, line in enumerate(fin):
         items = convert_to_unicode(line.rstrip()).split("\t")
         if len(items) > 2:

@@ -3,15 +3,16 @@ import shutil
 import unittest
 
 import cv2
-import requests
 import numpy as np
-import paddlehub as hub
+import requests
 
+import paddlehub as hub
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
 class TestHubModule(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
         img_url = 'https://ai-studio-static-online.cdn.bcebos.com/7799a8ccc5f6471b9d56fb6eff94f82a08b70ca2c7594d3f99877e366c0a2619'
@@ -30,10 +31,7 @@ class TestHubModule(unittest.TestCase):
         shutil.rmtree('solov2_result')
 
     def test_predict1(self):
-        results = self.module.predict(
-            image='tests/test.jpg',
-            visualization=False
-        )
+        results = self.module.predict(image='tests/test.jpg', visualization=False)
         segm = results['segm']
         label = results['label']
         score = results['score']
@@ -42,10 +40,7 @@ class TestHubModule(unittest.TestCase):
         self.assertIsInstance(score, np.ndarray)
 
     def test_predict2(self):
-        results = self.module.predict(
-            image=cv2.imread('tests/test.jpg'),
-            visualization=False
-        )
+        results = self.module.predict(image=cv2.imread('tests/test.jpg'), visualization=False)
         segm = results['segm']
         label = results['label']
         score = results['score']
@@ -54,10 +49,7 @@ class TestHubModule(unittest.TestCase):
         self.assertIsInstance(score, np.ndarray)
 
     def test_predict3(self):
-        results = self.module.predict(
-            image=cv2.imread('tests/test.jpg'),
-            visualization=True
-        )
+        results = self.module.predict(image=cv2.imread('tests/test.jpg'), visualization=True)
         segm = results['segm']
         label = results['label']
         score = results['score']
@@ -67,10 +59,7 @@ class TestHubModule(unittest.TestCase):
 
     def test_predict4(self):
         module = hub.Module(name="solov2", use_gpu=True)
-        results = module.predict(
-            image=cv2.imread('tests/test.jpg'),
-            visualization=True
-        )
+        results = module.predict(image=cv2.imread('tests/test.jpg'), visualization=True)
         segm = results['segm']
         label = results['label']
         score = results['score']
@@ -79,11 +68,7 @@ class TestHubModule(unittest.TestCase):
         self.assertIsInstance(score, np.ndarray)
 
     def test_predict5(self):
-        self.assertRaises(
-            FileNotFoundError,
-            self.module.predict,
-            image='no.jpg'
-        )
+        self.assertRaises(FileNotFoundError, self.module.predict, image='no.jpg')
 
     def test_save_inference_model(self):
         self.module.save_inference_model('./inference/model')

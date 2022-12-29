@@ -59,39 +59,6 @@
       - outputs (dict): 模型的输出。如果 get\_prediction 为 False，输出 'head\_features'、'body\_features'，否则输出 'bbox\_out'
       - context\_prog (Program): 用于迁移学习的 Program
 
-  - ```python
-    def object_detection(paths=None,
-                         images=None,
-                         batch_size=1,
-                         use_gpu=False,
-                         score_thresh=0.5,
-                         visualization=True,
-                         output_dir='detection_result')
-    ```
-
-    - 预测API，检测输入图片中的所有目标的位置。
-
-    - **参数**
-
-      - paths (list\[str\]): 图片的路径； <br/>
-      - images (list\[numpy.ndarray\]): 图片数据，ndarray.shape 为 \[H, W, C\]，BGR格式； <br/>
-      - batch\_size (int): batch 的大小；<br/>
-      - use\_gpu (bool): 是否使用 GPU；<br/>
-      - score\_thresh (float): 识别置信度的阈值；<br/>
-      - visualization (bool): 是否将识别结果保存为图片文件；<br/>
-      - output\_dir (str): 图片的保存路径，默认设为 detection\_result。
-
-    - **返回**
-
-      - res (list\[dict\]): 识别结果的列表，列表中每一个元素为 dict，各字段为:
-        - data (list): 检测结果，list的每一个元素为 dict，各字段为:
-          - confidence (float): 识别的置信度
-          - label (str): 标签
-          - left (int): 边界框的左上角x坐标
-          - top (int): 边界框的左上角y坐标
-          - right (int): 边界框的右下角x坐标
-          - bottom (int): 边界框的右下角y坐标
-        - save\_path (str, optional): 识别结果的保存路径 (仅当visualization=True时存在)
 
   - ```python
     def save_inference_model(dirname,

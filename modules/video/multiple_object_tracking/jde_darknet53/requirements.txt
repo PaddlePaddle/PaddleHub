@@ -1,5 +1,5 @@
 cython
-paddledet >= 2.2.0
+paddledet == 2.2.0
 opencv-python
 imageio
 pillow==7.1.2

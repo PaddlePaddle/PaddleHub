@@ -33,7 +33,7 @@ from paddlehub.module.module import serving
             author="paddlepaddle",
             author_email="",
             summary="Deoldify is a colorizaton model",
-            version="1.1.0")
+            version="1.2.0")
 class DeOldifyPredictor(nn.Layer):
 
     def __init__(self, render_factor: int = 32, output_path: int = 'output', load_checkpoint: str = None):
@@ -163,3 +163,18 @@ class DeOldifyPredictor(nn.Layer):
         results = self.run_image(img=images_decode)
         results = U.cv2_to_base64(results)
         return results
+
+    def create_gradio_app(self):
+        import gradio as gr
+
+        def inference(image):
+            img, _ = self.predict(image.name)
+            return img
+
+        title = "DeOldify"
+        interface = gr.Interface(inference,
+                                 inputs=gr.inputs.Image(type="file"),
+                                 outputs=gr.outputs.Image(type="numpy"),
+                                 title=title,
+                                 allow_flagging='never')
+        return interface

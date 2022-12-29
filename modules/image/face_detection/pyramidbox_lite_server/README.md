@@ -150,6 +150,10 @@
     print(r.json()["results"])
     ```
 
+- ### gradio app 支持
+
+  从 PaddleHub 2.3.1 开始支持使用链接 http://127.0.0.1:8866/gradio/pyramidbox_lite_server 在浏览器中访问 pyramidbox_lite_server 的 Gradio APP。
+
 
 ## 五、更新历史
 
@@ -169,6 +173,10 @@
 
   修复无法导出推理模型的问题
 
+* 1.4.0
+
+  添加 Gradio APP 支持
+
   - ```shell
-    $ hub install pyramidbox_lite_server==1.3.0
+    $ hub install pyramidbox_lite_server==1.4.0
     ```
