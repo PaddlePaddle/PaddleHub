@@ -1,8 +1,6 @@
-# -*- coding: UTF-8 -*-
 """
 该模块实现用户自定义词典的功能
 """
-
 from io import open
 
 from .ahocorasick import Ahocorasick

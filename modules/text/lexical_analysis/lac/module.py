@@ -1,4 +1,3 @@
-# -*- coding:utf-8 -*-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -33,7 +32,7 @@ class DataFormatError(Exception):
 
 @moduleinfo(
     name="lac",
-    version="2.3.0",
+    version="2.4.0",
     summary=
     "Baidu's open-source lexical analysis tool for Chinese, including word segmentation, part-of-speech tagging & named entity recognition",
     author="baidu-nlp",
@@ -412,3 +411,11 @@ class LAC:
             raise DataFormatError
 
         return input_data
+
+    def create_gradio_app(self):
+        import gradio as gr
+        return gr.Interface(self.cut,
+                            gr.Text(label='text'),
+                            gr.JSON(label='results'),
+                            title='lac',
+                            allow_flagging='never')
