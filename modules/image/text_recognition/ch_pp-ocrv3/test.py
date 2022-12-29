@@ -4,13 +4,14 @@ import unittest
 
 import cv2
 import requests
-import paddlehub as hub
 
+import paddlehub as hub
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
 class TestHubModule(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
         img_url = 'https://unsplash.com/photos/KTzZVDjUsXw/download?ixid=MnwxMjA3fDB8MXxzZWFyY2h8MzM3fHx0ZXh0fGVufDB8fHx8MTY2MzUxMTExMQ&force=true&w=640'
@@ -34,13 +35,13 @@ class TestHubModule(unittest.TestCase):
             use_gpu=False,
             visualization=False,
         )
-        self.assertEqual(results[0]['data'], [
-        {
-            'text': 'GIVE.', 'confidence': 0.9509806632995605, 
+        self.assertEqual(results[0]['data'], [{
+            'text': 'GIVE.',
+            'confidence': 0.9509768486022949,
             'text_box_position': [[283, 162], [352, 162], [352, 202], [283, 202]]
-        }, 
-        {
-            'text': 'THANKS', 'confidence': 0.9943129420280457, 
+        }, {
+            'text': 'THANKS',
+            'confidence': 0.9943074584007263,
             'text_box_position': [[261, 202], [376, 202], [376, 239], [261, 239]]
         }])
 
@@ -50,13 +51,13 @@ class TestHubModule(unittest.TestCase):
             use_gpu=False,
             visualization=False,
         )
-        self.assertEqual(results[0]['data'], [
-        {
-            'text': 'GIVE.', 'confidence': 0.9509806632995605, 
+        self.assertEqual(results[0]['data'], [{
+            'text': 'GIVE.',
+            'confidence': 0.9509768486022949,
             'text_box_position': [[283, 162], [352, 162], [352, 202], [283, 202]]
-        }, 
-        {
-            'text': 'THANKS', 'confidence': 0.9943129420280457, 
+        }, {
+            'text': 'THANKS',
+            'confidence': 0.9943074584007263,
             'text_box_position': [[261, 202], [376, 202], [376, 239], [261, 239]]
         }])
 
@@ -66,13 +67,13 @@ class TestHubModule(unittest.TestCase):
             use_gpu=True,
             visualization=False,
         )
-        self.assertEqual(results[0]['data'], [
-        {
-            'text': 'GIVE.', 'confidence': 0.9509806632995605, 
+        self.assertEqual(results[0]['data'], [{
+            'text': 'GIVE.',
+            'confidence': 0.9509768486022949,
             'text_box_position': [[283, 162], [352, 162], [352, 202], [283, 202]]
-        }, 
-        {
-            'text': 'THANKS', 'confidence': 0.9943129420280457, 
+        }, {
+            'text': 'THANKS',
+            'confidence': 0.9943074584007263,
             'text_box_position': [[261, 202], [376, 202], [376, 239], [261, 239]]
         }])
 
@@ -82,29 +83,21 @@ class TestHubModule(unittest.TestCase):
             use_gpu=False,
             visualization=True,
         )
-        self.assertEqual(results[0]['data'], [
-        {
-            'text': 'GIVE.', 'confidence': 0.9509806632995605, 
+        self.assertEqual(results[0]['data'], [{
+            'text': 'GIVE.',
+            'confidence': 0.9509768486022949,
             'text_box_position': [[283, 162], [352, 162], [352, 202], [283, 202]]
-        }, 
-        {
-            'text': 'THANKS', 'confidence': 0.9943129420280457, 
+        }, {
+            'text': 'THANKS',
+            'confidence': 0.9943074584007263,
             'text_box_position': [[261, 202], [376, 202], [376, 239], [261, 239]]
         }])
 
     def test_recognize_text5(self):
-        self.assertRaises(
-            AttributeError,
-            self.module.recognize_text,
-            images=['tests/test.jpg']
-        )
+        self.assertRaises(AttributeError, self.module.recognize_text, images=['tests/test.jpg'])
 
     def test_recognize_text6(self):
-        self.assertRaises(
-            AssertionError,
-            self.module.recognize_text,
-            paths=['no.jpg']
-        )
+        self.assertRaises(AssertionError, self.module.recognize_text, paths=['no.jpg'])
 
     def test_save_inference_model(self):
         self.module.save_inference_model('./inference/model')
