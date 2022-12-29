@@ -13,8 +13,8 @@
 # limitations under the License.
 from __future__ import division
 
-import os
 import math
+import os
 
 import cv2
 import numpy as np

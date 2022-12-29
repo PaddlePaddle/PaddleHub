@@ -18,10 +18,10 @@ import cv2
 import numpy as np
 import yaml
 
-from .keypoint_preprocess import expand_crop
-from .keypoint_postprocess import HRNetPostProcess
-from .visualize import visualize_pose
 from .infer import Detector
+from .keypoint_postprocess import HRNetPostProcess
+from .keypoint_preprocess import expand_crop
+from .visualize import visualize_pose
 
 # Global dictionary
 KEYPOINT_SUPPORT_MODELS = {'HigherHRNet': 'keypoint_bottomup', 'HRNet': 'keypoint_topdown'}

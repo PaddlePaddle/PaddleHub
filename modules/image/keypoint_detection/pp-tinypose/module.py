@@ -26,7 +26,6 @@ from .keypoint_infer import KeyPointDetector
 from .preprocess import base64_to_cv2
 from .preprocess import decode_image
 from .visualize import visualize_pose
-
 from paddlehub.module.module import moduleinfo
 from paddlehub.module.module import runnable
 from paddlehub.module.module import serving
@@ -38,7 +37,7 @@ from paddlehub.module.module import serving
     author="paddlepaddle",
     author_email="",
     summary="PP-TinyPose is a real-time keypoint detection model optimized by PaddleDetecion for mobile devices.",
-    version="1.1.0")
+    version="1.2.0")
 class PP_TinyPose:
     """
     PP-TinyPose Model.
@@ -136,3 +135,21 @@ class PP_TinyPose:
         Add the command input options.
         """
         self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
+
+    def create_gradio_app(self):
+        import gradio as gr
+        import tempfile
+        import os
+        from PIL import Image
+
+        def inference(image, use_gpu=False):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                self.predict(img=image, use_gpu=use_gpu, visualization=True, save_path=temp_dir)
+                return Image.open(os.path.join(temp_dir, os.listdir(temp_dir)[0]))
+
+        interface = gr.Interface(
+            inference,
+            [gr.inputs.Image(type="filepath"), gr.Checkbox(label='use_gpu')],
+            gr.outputs.Image(type="ndarray"),
+            title='pp-tinypose')
+        return interface

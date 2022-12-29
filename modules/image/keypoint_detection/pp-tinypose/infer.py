@@ -23,6 +23,9 @@ import yaml
 from paddle.inference import Config
 from paddle.inference import create_predictor
 
+from .keypoint_preprocess import EvalAffine
+from .keypoint_preprocess import expand_crop
+from .keypoint_preprocess import TopDownEvalAffine
 from .preprocess import decode_image
 from .preprocess import LetterBoxResize
 from .preprocess import NormalizeImage
@@ -32,9 +35,6 @@ from .preprocess import Permute
 from .preprocess import preprocess
 from .preprocess import Resize
 from .preprocess import WarpAffine
-from .keypoint_preprocess import EvalAffine
-from .keypoint_preprocess import expand_crop
-from .keypoint_preprocess import TopDownEvalAffine
 from .visualize import visualize_box
 
 # Global dictionary
