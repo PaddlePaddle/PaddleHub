@@ -18,7 +18,7 @@ def make_md5(s, encoding='utf-8'):
 
 @moduleinfo(
     name="baidu_language_recognition",
-    version="1.0.0",
+    version="1.1.0",
     type="text/machine_translation",
     summary="",
     author="baidu-nlp",
