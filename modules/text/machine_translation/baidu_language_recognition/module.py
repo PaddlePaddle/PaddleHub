@@ -1,4 +1,5 @@
 import argparse
+import os
 import random
 from hashlib import md5
 from typing import Optional
@@ -15,14 +16,14 @@ def make_md5(s, encoding='utf-8'):
     return md5(s.encode(encoding)).hexdigest()
 
 
-@moduleinfo(name="baidu_language_recognition",
-            version="1.0.0",
-            type="text/machine_translation",
-            summary="",
-            author="baidu-nlp",
-            author_email="paddle-dev@baidu.com")
+@moduleinfo(
+    name="baidu_language_recognition",
+    version="1.1.0",
+    type="text/machine_translation",
+    summary="",
+    author="baidu-nlp",
+    author_email="paddle-dev@baidu.com")
 class BaiduLanguageRecognition:
-
     def __init__(self, appid=None, appkey=None):
         """
       :param appid: appid for requesting Baidu translation service.
@@ -30,13 +31,15 @@ class BaiduLanguageRecognition:
       """
         # Set your own appid/appkey.
         if appid == None:
-            self.appid = '20201015000580007'
+            self.appid = os.getenv('BT_APPID')
         else:
             self.appid = appid
         if appkey is None:
-            self.appkey = 'IFJB6jBORFuMmVGDRud1'
+            self.appkey = os.getenv('BT_APPKEY')
         else:
             self.appkey = appkey
+        if self.appid is None and self.appkey is None:
+            raise RuntimeError("Please set appid and appkey.")
         self.url = 'https://fanyi-api.baidu.com/api/trans/vip/language'
 
     def recognize(self, query: str):
@@ -71,10 +74,11 @@ class BaiduLanguageRecognition:
         """
         Run as a command.
         """
-        self.parser = argparse.ArgumentParser(description="Run the {} module.".format(self.name),
-                                              prog='hub run {}'.format(self.name),
-                                              usage='%(prog)s',
-                                              add_help=True)
+        self.parser = argparse.ArgumentParser(
+            description="Run the {} module.".format(self.name),
+            prog='hub run {}'.format(self.name),
+            usage='%(prog)s',
+            add_help=True)
         self.arg_input_group = self.parser.add_argument_group(title="Input options", description="Input data. Required")
         self.add_module_input_arg()
         args = self.parser.parse_args(argvs)
