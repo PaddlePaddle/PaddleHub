@@ -287,10 +287,10 @@ class PPModule(nn.Layer):
             is even, e.g. 1024x512, otherwise it is True, e.g. 769x769.
     """
 
-    def __init__(self, 
-                 in_channels: int, 
-                 out_channels: int, 
-                 bin_sizes: Tuple[int], 
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 bin_sizes: Tuple[int],
                  dim_reduction: bool,
                  align_corners: bool):
         super().__init__()

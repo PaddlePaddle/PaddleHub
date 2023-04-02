@@ -17,8 +17,8 @@ from paddlenlp import Taskflow
     type="nlp/text_to_knowledge",
     meta=hub.NLPPredictionModule)
 class WordTag(paddle.nn.Layer):
-    def __init__(self, 
-                 batch_size=32, 
+    def __init__(self,
+                 batch_size=32,
                  max_seq_length=128,
                  linking=True,
                  ):

@@ -17,7 +17,7 @@ from paddlenlp import Taskflow
     type="nlp/text_correction",
     meta=hub.NLPPredictionModule)
 class Ernie_CSC(paddle.nn.Layer):
-    def __init__(self, 
+    def __init__(self,
                  batch_size=32):
         self.corrector = Taskflow("text_correction", batch_size=batch_size)
 

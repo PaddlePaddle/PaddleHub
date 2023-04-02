@@ -33,11 +33,11 @@ import dim_vgg16_matting.processor as P
 
 
 @moduleinfo(
-    name="dim_vgg16_matting", 
-    type="CV/matting", 
+    name="dim_vgg16_matting",
+    type="CV/matting",
     author="paddlepaddle",
-    summary="dim_vgg16_matting is a matting model",  
-    version="1.0.0"  
+    summary="dim_vgg16_matting is a matting model",
+    version="1.0.0"
 )
 class DIMVGG16(nn.Layer):
     """
@@ -102,7 +102,7 @@ class DIMVGG16(nn.Layer):
             data['trimap'] = paddle.to_tensor(data['trimap'])
             data['trimap'] = data['trimap'].unsqueeze((0, 1))
 
-        return data  
+        return data
     
     def forward(self, inputs: paddle.Tensor) -> paddle.Tensor:
         input_shape = paddle.shape(inputs['img'])[-2:]
@@ -216,7 +216,7 @@ class DIMVGG16(nn.Layer):
         Add the command input options.
         """
         self.arg_input_group.add_argument('--input_path', type=str, help="path to image.")
-        self.arg_input_group.add_argument('--trimap_path', type=str, help="path to trimap.")                
+        self.arg_input_group.add_argument('--trimap_path', type=str, help="path to trimap.")
                    
     
 class Up(nn.Layer):

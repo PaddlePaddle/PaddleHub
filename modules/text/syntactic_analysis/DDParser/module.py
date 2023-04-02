@@ -17,15 +17,15 @@ from paddlenlp import Taskflow
 class ddparser(hub.NLPPredictionModule):
     def __init__(self,
                  tree=True,
-                 prob=False, 
+                 prob=False,
                  use_pos=False,
                  batch_size=1,
                  return_visual=False,
                  ):
         self.ddp = Taskflow(
             "dependency_parsing",
-            tree=tree, 
-            prob=prob, 
+            tree=tree,
+            prob=prob,
             use_pos=use_pos,
             batch_size=batch_size,
             return_visual=return_visual)

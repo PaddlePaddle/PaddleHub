@@ -70,7 +70,7 @@ class ResNet101_vd(nn.Layer):
                  multi_grid: tuple = (1, 2, 4)):
         super(ResNet101_vd, self).__init__()
         depth = [3, 4, 23, 3]
-        num_channels = [64, 256, 512, 1024] 
+        num_channels = [64, 256, 512, 1024]
         num_filters = [64, 128, 256, 512]
         self.feat_channels = [c * 4 for c in num_filters]
         dilation_dict = {2: 2, 3: 4}

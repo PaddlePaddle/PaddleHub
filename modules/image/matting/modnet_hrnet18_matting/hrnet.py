@@ -215,10 +215,10 @@ class Layer1(nn.Layer):
 
 
 class TransitionLayer(nn.Layer):
-    def __init__(self, 
-                 in_channels: int, 
-                 out_channels: int, 
-                 name: str = None, 
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 name: str = None,
                  padding_same: bool = True):
         super(TransitionLayer, self).__init__()
 
@@ -370,7 +370,7 @@ class BottleneckBlock(nn.Layer):
 class BasicBlock(nn.Layer):
     def __init__(self,
                  num_channels: int,
-                 num_filters: int, 
+                 num_filters: int,
                  stride: int = 1,
                  has_se: bool = False,
                  downsample: bool = False,

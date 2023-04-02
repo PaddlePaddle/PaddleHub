@@ -54,7 +54,7 @@ class ResizeByShort:
 
 def gen_trimap_from_segmap_e2e(segmap):
 	trimap = np.argmax(segmap, axis=1)[0]
-	trimap = trimap.astype(np.int64)	
+	trimap = trimap.astype(np.int64)
 	trimap[trimap==1]=128
 	trimap[trimap==2]=255
 	return trimap.astype(np.uint8)

@@ -35,11 +35,11 @@ class TestHubModule(unittest.TestCase):
         )
         self.assertEqual(results[0]['data'], [
         {
-            'text': 'GIVE.', 'confidence': 0.9509806632995605, 
+            'text': 'GIVE.', 'confidence': 0.9509806632995605,
             'text_box_position': [[283, 162], [352, 162], [352, 202], [283, 202]]
-        }, 
+        },
         {
-            'text': 'THANKS', 'confidence': 0.9943129420280457, 
+            'text': 'THANKS', 'confidence': 0.9943129420280457,
             'text_box_position': [[261, 202], [376, 202], [376, 239], [261, 239]]
         }])
 
@@ -50,11 +50,11 @@ class TestHubModule(unittest.TestCase):
         )
         self.assertEqual(results[0]['data'], [
         {
-            'text': 'GIVE.', 'confidence': 0.9509806632995605, 
+            'text': 'GIVE.', 'confidence': 0.9509806632995605,
             'text_box_position': [[283, 162], [352, 162], [352, 202], [283, 202]]
-        }, 
+        },
         {
-            'text': 'THANKS', 'confidence': 0.9943129420280457, 
+            'text': 'THANKS', 'confidence': 0.9943129420280457,
             'text_box_position': [[261, 202], [376, 202], [376, 239], [261, 239]]
         }])
 
@@ -65,11 +65,11 @@ class TestHubModule(unittest.TestCase):
         )
         self.assertEqual(results[0]['data'], [
         {
-            'text': 'GIVE.', 'confidence': 0.9509806632995605, 
+            'text': 'GIVE.', 'confidence': 0.9509806632995605,
             'text_box_position': [[283, 162], [352, 162], [352, 202], [283, 202]]
-        }, 
+        },
         {
-            'text': 'THANKS', 'confidence': 0.9943129420280457, 
+            'text': 'THANKS', 'confidence': 0.9943129420280457,
             'text_box_position': [[261, 202], [376, 202], [376, 239], [261, 239]]
         }])
 

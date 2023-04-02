@@ -32,11 +32,11 @@ import modnet_hrnet18_matting.processor as P
 
 
 @moduleinfo(
-    name="modnet_hrnet18_matting", 
-    type="CV/matting", 
+    name="modnet_hrnet18_matting",
+    type="CV/matting",
     author="paddlepaddle",
-    summary="modnet_hrnet18_matting is a matting model",  
-    version="1.0.0"  
+    summary="modnet_hrnet18_matting is a matting model",
+    version="1.0.0"
 )
 class MODNetHRNet18(nn.Layer):
     """
@@ -87,7 +87,7 @@ class MODNetHRNet18(nn.Layer):
             data['trimap'] = paddle.to_tensor(data['trimap'])
             data['trimap'] = data['trimap'].unsqueeze((0, 1))
 
-        return data  
+        return data
     
     def forward(self, inputs: dict) -> paddle.Tensor:
         x = inputs['img']

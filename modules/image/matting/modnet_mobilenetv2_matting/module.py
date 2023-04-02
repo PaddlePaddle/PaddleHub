@@ -32,11 +32,11 @@ import modnet_mobilenetv2_matting.processor as P
 
 
 @moduleinfo(
-    name="modnet_mobilenetv2_matting", 
-    type="CV", 
+    name="modnet_mobilenetv2_matting",
+    type="CV",
     author="paddlepaddle",
-    summary="modnet_mobilenetv2_matting is a matting model",  
-    version="1.0.0"  
+    summary="modnet_mobilenetv2_matting is a matting model",
+    version="1.0.0"
 )
 class MODNetMobilenetV2(nn.Layer):
     """
@@ -88,7 +88,7 @@ class MODNetMobilenetV2(nn.Layer):
             data['trimap'] = paddle.to_tensor(data['trimap'])
             data['trimap'] = data['trimap'].unsqueeze((0, 1))
 
-        return data  
+        return data
     
     def forward(self, inputs: dict):
         x = inputs['img']

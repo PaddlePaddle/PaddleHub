@@ -57,7 +57,7 @@ class MTTransformer(nn.Layer):
         # Dropout rate
         'dropout': 0,
         # Number of sub-layers to be stacked in the encoder and decoder.
-        "num_encoder_layers": 6, 
+        "num_encoder_layers": 6,
         "num_decoder_layers": 6
     }
 

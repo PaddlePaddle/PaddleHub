@@ -113,10 +113,10 @@ class ISAHead(nn.Layer):
         enable_auxiliary_loss (bool, optional): A bool value indicates whether adding auxiliary loss. Default: True.
     """
 
-    def __init__(self, 
-                 num_classes: int, 
-                 in_channels: Tuple[int], 
-                 isa_channels: int, 
+    def __init__(self,
+                 num_classes: int,
+                 in_channels: Tuple[int],
+                 isa_channels: int,
                  down_factor: Tuple[int],
                  enable_auxiliary_loss: bool):
         super(ISAHead, self).__init__()

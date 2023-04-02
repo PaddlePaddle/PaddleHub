@@ -56,10 +56,10 @@ class STACLTokenizer:
         return bpe_str.split(), ids
 
 
-def post_process_seq(seq, 
-                     bos_idx=0, 
-                     eos_idx=1, 
-                     output_bos=False, 
+def post_process_seq(seq,
+                     bos_idx=0,
+                     eos_idx=1,
+                     output_bos=False,
                      output_eos=False):
     """
     Post-process the decoded sequence.
@@ -76,13 +76,13 @@ def post_process_seq(seq,
     return seq
 
 
-def predict(tokenized_src, 
-              decoder_max_length, 
-              is_last, 
-              cache, 
-              bos_id, 
+def predict(tokenized_src,
+              decoder_max_length,
+              is_last,
+              cache,
+              bos_id,
               result,
-              tokenizer, 
+              tokenizer,
               transformer,
               n_best=1,
               max_out_len=256,

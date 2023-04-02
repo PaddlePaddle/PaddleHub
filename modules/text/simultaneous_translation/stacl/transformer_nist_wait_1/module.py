@@ -50,7 +50,7 @@ class STTransformer():
         "d_model": 512,
     }
 
-    def __init__(self, 
+    def __init__(self,
                  max_length=256,
                  max_out_len=256,
                  ):
@@ -112,14 +112,14 @@ class STTransformer():
             if bpe_str[i] in ['。', '？', '！']:
                 is_last = True
             result, cache, bos_id = predict(
-                user_input_tokenized, 
+                user_input_tokenized,
                 decoder_max_length,
-                is_last, 
-                cache, 
-                bos_id, 
+                is_last,
+                cache,
+                bos_id,
                 result,
-                self.tokenizer, 
+                self.tokenizer,
                 self.transformer,
                 max_out_len=self.max_out_len)
-            i += 1    
+            i += 1
         return " ".join(result)
