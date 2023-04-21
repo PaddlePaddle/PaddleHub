@@ -220,7 +220,7 @@ $ hub serving start bert_service -m ernie -p 8866
 $ hub serving start bert_service -m bert_chinese_L-12_H-768_A-12 -p 8867
 ```
 
-Q : 启动时显示"Check out http://yq01-gpu-255-129-12-00.epc.baidu.com:8887 in web
+Q : 启动时显示"Check out http://${ip}:8887 in web
  browser."，这个页面有什么作用。  
 A : 这是`BRPC`的内置服务，主要用于查看请求数、资源占用等信息，可对server端性能有大致了解，具体信息可查看[BRPC内置服务](https://github.com/apache/incubator-brpc/tree/master/docs/cn)。
 
