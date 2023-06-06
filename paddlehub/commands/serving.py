@@ -176,7 +176,7 @@ class ServingCommand:
                 log.logger.error("Port %s is occupied, please change it." % port)
                 return False
             self.preinstall_modules()
-            options = {"bind": "0.0.0.0:%s" % port, "workers": self.args.workers}
+            options = {"bind": "0.0.0.0:%s" % port, "workers": self.args.workers, "timeout": self.args.timeout}
             self.dump_pid_file()
             StandaloneApplication(app.create_app(init_flag=False, configs=self.modules_info), options).run()
         else:
@@ -282,6 +282,8 @@ class ServingCommand:
         str += "\tUse gpu for predicting if specifies the parameter.\n"
         str += "--gpu\n"
         str += "\tSpecify the GPU devices to use.\n"
+        str += "--timeout/-t\n"
+        str += "\tSet timeout time with multiprocess.\n"
         print(str)
 
     def parse_args(self):
@@ -301,8 +303,10 @@ class ServingCommand:
                 self.args.use_gpu = self.args_config.get('use_gpu', False)
                 if self.args.use_multiprocess:
                     self.args.workers = self.args_config.get('workers', number_of_workers())
+                    self.args.timeout = self.args_config.get('timeout', 300)
                 else:
                     self.args.workers = self.args_config.get('workers', None)
+                    self.args.timeout = self.args_config.get('timeout', None)
             else:
                 raise RuntimeError("{} not exists.".format(self.args.config))
                 exit(1)
@@ -339,6 +343,8 @@ class ServingCommand:
         self.parser.add_argument("--use_singleprocess", action="store_true", default=False)
         self.parser.add_argument("--modules_info", "-mi", default={}, type=json.loads)
         self.parser.add_argument("--workers", "-w", nargs="?", default=number_of_workers())
+        self.parser.add_argument("--timeout", "-t", nargs="?", default=300)
+
         try:
             self.args = self.parser.parse_args()
         except:
