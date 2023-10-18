@@ -208,8 +208,8 @@
 </div>
 
 ```python
-!pip install --upgrade paddlepaddle -i https://mirror.baidu.com/pypi/simple
-!pip install --upgrade paddlehub -i https://mirror.baidu.com/pypi/simple
+pip install --upgrade paddlepaddle -i https://mirror.baidu.com/pypi/simple
+pip install --upgrade paddlehub -i https://mirror.baidu.com/pypi/simple
 ```
 
 ### 极简中文分词案例  
